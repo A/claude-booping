@@ -64,17 +64,16 @@ Prefix by sprint type:
 
 One branch per sprint. Project-specific prefix overrides (e.g. `hotfix/`) may live in `_booping/skill_develop.md`. Never run worker agents against `main` or `master`.
 
-## Phase 2.6: SP → agent seniority
+## Phase 2.6: SP → agent
 
-Before delegating, resolve seniority from the task's SP:
+Before delegating, resolve the agent from the task's SP:
 
-| Task SP | Agent seniority |
-|---------|-----------------|
-| 1–2     | middle (briefing flag: `seniority: middle`) |
-| 3–4     | senior (briefing flag: `seniority: senior`) |
+| Task SP | Agent |
+|---------|-------|
+| 1       | `booping-developer-junior` (haiku) |
+| 2–3     | `booping-developer-middle` (sonnet) |
+| 4       | `booping-developer-senior` (opus, reasoning high) |
 | 5       | **refuse** — kick back to `/groom` for re-decomposition |
-
-Encode the seniority in the briefing header passed to `booping-be-dev` / `booping-fe-dev`. Workers must read this flag and adjust care level (senior tasks get design-first thought; middle tasks stay mechanical). If/when dedicated `*-middle` / `*-senior` agents are added, route by sub-agent type instead of by briefing flag.
 
 ## Phase 3: Confirm scope
 
@@ -109,9 +108,8 @@ For each milestone:
 
 1. `TaskCreate` one task per plan task.
 2. Delegate to the appropriate worker via the `Agent` tool:
-   - `booping-be-dev` — Python/Django/Rust backend
-   - `booping-fe-dev` — React/TypeScript/Leptos frontend
-   - `booping-techlead` — coordination when a milestone spans both
+   - `booping-developer-junior` | `booping-developer-middle` | `booping-developer-senior` — pick by SP tier per Phase 2.6 table
+   - `booping-techlead` — when a milestone spans multiple concerns and needs coordination
 
    **Always delegate.** Even for a 1-line config change. The main context should never see the edited file contents.
 
@@ -119,8 +117,7 @@ For each milestone:
 
    ```
    project_root: ~/Claude/{project}
-   agent_extension: ~/Claude/{project}/_booping/agent_<agent-name>.md
-   seniority: middle | senior
+   agent_extension: ~/Claude/{project}/_booping/agent_booping-developer.md
 
    Applicable lessons:
    - lessons/<id>_<title>.md
@@ -131,7 +128,7 @@ For each milestone:
    Files you may touch: ...
    ```
 
-   Filter `Applicable lessons:` by the worker's domain set (`code,tech,all` for be-dev/fe-dev/reviewer). Narrow further by task relevance — a Django-migration lesson doesn't go to a frontend-only task.
+   Filter `Applicable lessons:` by the worker's domain set (`code,tech,all` for developer agents/reviewer). Narrow further by task relevance.
 
 4. When the agent reports completion, verify:
    - Run the milestone's `Verify` command

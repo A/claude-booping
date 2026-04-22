@@ -59,8 +59,9 @@ Workers — invoked from `/develop` per task:
 
 | Agent | Role |
 |-------|------|
-| `booping-be-dev` | Backend (Python/Django/DRF/Rust/Axum/migrations/Temporal) |
-| `booping-fe-dev` | Frontend (React/TypeScript/Leptos) |
+| `booping-developer-junior` | Developer worker — 1 SP tasks (haiku) |
+| `booping-developer-middle` | Developer worker — 2-3 SP tasks (sonnet) |
+| `booping-developer-senior` | Developer worker — 4 SP tasks (opus); 5 SP refuses |
 | `booping-reviewer` | Milestone-diff review before merge |
 
 ## Artifacts tree

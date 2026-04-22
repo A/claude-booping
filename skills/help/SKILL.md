@@ -57,8 +57,9 @@ Orchestrators (always delegated to from skills):
 
 Workers (called from `/develop`):
 
-- `booping-be-dev` — backend (Python/Django/DRF/Rust/Axum/migrations/Temporal)
-- `booping-fe-dev` — frontend (React/TypeScript/Leptos)
+- `booping-developer-junior` — developer tasks, 1 SP (haiku)
+- `booping-developer-middle` — developer tasks, 2-3 SP (sonnet)
+- `booping-developer-senior` — developer tasks, 4 SP (opus); 5 SP refuses
 - `booping-reviewer` — milestone diff review
 
 ## Layout
@@ -84,7 +85,7 @@ Workers (called from `/develop`):
 /groom   ──► plans/20260421-foo.md
                 │
                 ▼
-/develop ──► spawns booping-be-dev / booping-fe-dev per task
+/develop ──► spawns booping-developer-{junior,middle,senior} per task
              spawns booping-reviewer per milestone
              updates sprints.md + plan progress
                 │

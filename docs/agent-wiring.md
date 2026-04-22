@@ -34,8 +34,9 @@ When the orchestrator spawns a sub-agent, it filters the in-context lesson set a
 | `booping-techlead` | `tech`, `code`, `all` |
 | `booping-product-manager` | `product`, `all` |
 | `booping-qa-lead` | `qa`, `all` |
-| `booping-be-dev` | `code`, `tech`, `all` |
-| `booping-fe-dev` | `code`, `tech`, `all` |
+| `booping-developer-junior` | `code`, `tech`, `all` |
+| `booping-developer-middle` | `code`, `tech`, `all` |
+| `booping-developer-senior` | `code`, `tech`, `all` |
 | `booping-reviewer` | `code`, `tech`, `all` |
 
 Within the filtered set, the orchestrator further narrows by relevance to the specific task before citing paths — a lesson about Django migrations doesn't go into a frontend-only task's briefing even if it's `tech`.
@@ -61,6 +62,8 @@ Files you may touch: ...
 - `project_root` — the resolved project vault path. The agent uses this to locate its own extension.
 - `agent_extension` — the exact path the agent should read (if it exists). Computed by the orchestrator using the agent's own name.
 - `Applicable lessons` — pre-filtered by the domain map above and task-relevance. Paths relative to `project_root`.
+
+> **Developer-agent exception:** All three developer agents (`booping-developer-junior`, `booping-developer-middle`, `booping-developer-senior`) share a single extension at `~/Claude/{project}/_booping/agent_booping-developer.md` (not per-tier). The orchestrator passes this single path as `agent_extension` regardless of which tier is briefed.
 
 ## Agent startup
 

@@ -40,10 +40,11 @@ Four orchestrators:
 - **booping-product-manager** — requirements & web research. Validates the "why" and widens the solution space.
 - **booping-qa-lead** — testing strategy, QA plan, regression risk.
 
-Three workers (invoked by `/develop`):
+Four workers (invoked by `/develop`):
 
-- **booping-be-dev** — Python/Django/Rust backend tasks.
-- **booping-fe-dev** — React/TypeScript/Leptos frontend tasks.
+- **booping-developer-junior** — developer tasks, 1 SP (haiku).
+- **booping-developer-middle** — developer tasks, 2-3 SP (sonnet).
+- **booping-developer-senior** — developer tasks, 4 SP (opus); 5 SP refuses.
 - **booping-reviewer** — code review pre-merge.
 
 ## Project scoping
