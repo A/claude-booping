@@ -49,20 +49,20 @@ Output:
 
 Verify: did the business goal land?
 
-- Read the backlog's business goal and DoD
+- Read the plan's business goal and DoD
 - Read what was actually shipped (via the diff summary the teamlead provides)
-- Judge: SUCCESS / FAIL / PARTIAL, and why
+- Judge: `goal: success | partial | fail`, and why
 
 Output:
 
 ```markdown
-## Business goal status: {{SUCCESS | PARTIAL | FAIL}}
+## Business goal status: {{success | partial | fail}}
 
 ## Evidence
 - Shipped: ...
 - Missing: ...
 
-## If PARTIAL / FAIL
+## If partial / fail
 - Root product cause: ...
 - Should we re-scope a follow-up? ...
 ```

@@ -47,7 +47,7 @@ Output format:
 ## In `/retro`
 
 - Read `git log` and `git diff` for the sprint branch
-- Compare each Decision in the backlog file against what the code now looks like
+- Compare each Decision in the plan file against what the code now looks like
 - Flag implementation gaps, shortcuts, introduced tech debt
 - Distinguish "deliberately deferred" (look for TODO / backlog reference) from "forgotten"
 

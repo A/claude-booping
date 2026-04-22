@@ -26,8 +26,8 @@ booping — per-project grooming/implementation/retro/lessons with mandatory sub
 First time in a repo:    /install
 Start a discussion:      /chat
 Spec new work:           /groom <topic>
-Execute a backlog item:  /develop ~/Claude/<project>/backlog/YYYYMMDD-*.md
-After a sprint ships:    /retro ~/Claude/<project>/backlog/YYYYMMDD-*.md
+Execute a plan:          /develop ~/Claude/<project>/plans/YYYYMMDD-*.md
+After a sprint ships:    /retro ~/Claude/<project>/plans/YYYYMMDD-*.md
 Extract lessons:         /learn ~/Claude/<project>/retrospectives/YYYYMMDD-*.md
 ```
 
@@ -41,9 +41,9 @@ Artifacts live at `~/Claude/{project}/`. The only writer of `sprints.md` is `/de
 | `/help` | This. | — |
 | `/install` | Scaffold a new booping project and/or attach the current repo. | `~/Claude/{project}/*`, `~/Claude/.booping/projects.json`, optional `.booping-project` |
 | `/chat` | Read-only discussion over project artifacts. | — |
-| `/groom` | Deep-research a feature/bug/refactor into `backlog/YYYYMMDD-*.md`. | `backlog/`, `metrics/lesson-hits.md` |
-| `/develop` | Execute a groomed item milestone-by-milestone; always delegates to sub-agents. | `sprints.md`, backlog progress marks, `metrics/lesson-hits.md` |
-| `/retro` | Review what shipped, gather feedback, produce retrospective. | `retrospectives/`, `sprints.md` (Goal Status only) |
+| `/groom` | Deep-research a feature/bug/refactor into `plans/YYYYMMDD-*.md`. | `plans/`, `metrics/lesson-hits.md` |
+| `/develop` | Execute a groomed plan milestone-by-milestone; always delegates to sub-agents. | `sprints.md`, plan progress marks, `metrics/lesson-hits.md` |
+| `/retro` | Review what shipped, gather feedback, produce retrospective. | `retrospectives/`, `sprints.md` (`goal` field only) |
 | `/learn` | Extract lessons and fold them into `_booping/` extensions. | `lessons/`, `_booping/skill_*.md`, `_booping/agent_*.md` |
 
 ## Agents
@@ -67,8 +67,7 @@ Workers (called from `/develop`):
 ~/Claude/
 ├── .booping/projects.json       # CWD → project mapping
 └── {project}/
-    ├── backlog/                 # /groom output
-    ├── plans/                   # (optional) legacy plans
+    ├── plans/                   # /groom output
     ├── retrospectives/          # /retro output
     ├── lessons/                 # /learn output
     ├── metrics/
@@ -82,12 +81,12 @@ Workers (called from `/develop`):
 ## Workflow
 
 ```
-/groom   ──► backlog/20260421-foo.md
+/groom   ──► plans/20260421-foo.md
                 │
                 ▼
 /develop ──► spawns booping-be-dev / booping-fe-dev per task
              spawns booping-reviewer per milestone
-             updates sprints.md + backlog progress
+             updates sprints.md + plan progress
                 │
                 ▼
 /retro   ──► booping-techlead / -product-manager / -qa-lead in parallel
@@ -102,7 +101,7 @@ Workers (called from `/develop`):
 
 - **Always delegate.** The skill orchestrator never edits application code directly. Even 1-SP tasks go to a worker agent.
 - **Lessons are load-bearing.** `/groom` and `/develop` read every file in `lessons/` before acting.
-- **`sprints.md` is owned by `/develop`.** `/groom` never touches it; `/retro` only writes the `Goal Status` column.
+- **`sprints.md` is owned by `/develop`.** `/groom` never touches it; `/retro` only writes the `goal` field.
 - **Per-project isolation.** Never read or write outside the current `~/Claude/{project}/` tree.
 
 ## See also

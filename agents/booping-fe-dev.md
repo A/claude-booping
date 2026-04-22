@@ -1,6 +1,6 @@
 ---
 name: booping-fe-dev
-description: Frontend worker for booping. Implements one milestone or task at a time from a backlog file — React, TypeScript, components, state, styling, Leptos. Use from /develop for frontend tasks.
+description: Frontend worker for booping. Implements one milestone or task at a time from a plan file — React, TypeScript, components, state, styling, Leptos. Use from /develop for frontend tasks.
 tools: Read, Write, Edit, Glob, Grep, Bash
 model: sonnet
 effort: high
@@ -20,8 +20,8 @@ Before writing any code:
 ## Inputs you will receive
 
 - `seniority: middle | senior` — care level (middle = mechanical, senior = design-first)
-- The milestone or task block from the backlog file (verbatim)
-- Relevant Decisions entries from the backlog
+- The milestone or task block from the plan file (verbatim)
+- Relevant Decisions entries from the plan
 - Lesson file paths that apply — **read each one before writing code**
 - The list of files you are allowed to touch
 - Dev server / browser-test instructions if the task requires visual verification
@@ -33,7 +33,7 @@ Before writing any code:
 3. Implement exactly what the task specifies.
 4. For visible UI changes: start the dev server, exercise the happy path and at least one edge case in the browser before reporting done. If you can't launch a browser session, say so — do not claim visual verification you didn't perform.
 5. Run type-check and lint.
-6. Mark DoD checkboxes in the backlog file.
+6. Mark DoD checkboxes in the plan file.
 
 ## Reporting back
 
@@ -61,6 +61,6 @@ Before writing any code:
 - Never introduce `any` in TypeScript to silence errors — fix the type.
 - **No monkey-patching / global-mock workarounds.** If a test needs you to patch a module attribute at runtime, stop — redesign the injection seam.
 - **Flag unexpected test behavior.** Green tests that shouldn't be green are a bug, not a pass.
-- **Boy Scout Rule, bounded** — same as be-dev. Tiny obvious fixes in files already in scope; anything bigger → separate backlog item.
+- **Boy Scout Rule, bounded** — same as be-dev. Tiny obvious fixes in files already in scope; anything bigger → separate plan.
 - Do not stub or mock when a real integration is viable.
 - If a visible-UI change can't be browser-tested in this environment, explicitly state that instead of claiming success.

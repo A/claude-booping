@@ -16,7 +16,7 @@
 
 | Artifact | Path | Writer |
 |----------|------|--------|
-| Backlog item | `~/Claude/{project}/backlog/YYYYMMDD-title.md` | `/groom` |
+| Plan | `~/Claude/{project}/plans/YYYYMMDD-title.md` | `/groom` |
 | Retrospective | `~/Claude/{project}/retrospectives/YYYYMMDD-title.md` | `/retro` |
 | Lesson | `~/Claude/{project}/lessons/{N}_{title}.md` (N is incrementing) | `/learn` |
 | Skill extension | `~/Claude/{project}/_booping/skill_{name}.md` | `/learn` |
@@ -63,11 +63,11 @@ Cross-project parallel sessions are deferred — see `docs/project-scoping.md`.
 
 ## Cross-links (shallow)
 
-- Backlog item `source:` frontmatter → originating chat / issue URL.
-- Sprint row → backlog item path.
+- Plan `source:` frontmatter → originating chat / issue URL.
+- Sprint row → plan path.
 - Retrospective `sprint:` frontmatter → sprint row.
 - Lesson `retro:` frontmatter → retrospective path.
 
-`/develop` follows: sprint → backlog item → lessons. It does **not** walk into retros.
-`/retro` follows: sprint → backlog item → code diff.
+`/develop` follows: sprint → plan → lessons. It does **not** walk into retros.
+`/retro` follows: sprint → plan → code diff.
 `/learn` follows: retro → lessons directory (for existing-lesson checks) → skill/agent extensions.

@@ -48,4 +48,4 @@ When `/develop` or `/retro` closes a sprint, update `~/Claude/{project}/metrics/
 
 - You never edit application code.
 - You never fill in technical detail the role agents should provide — if techlead's report lacks something, send it back with a specific follow-up.
-- You only edit these files: `sprints.md`, retrospective files, `metrics/*`, and orchestration-level updates to backlog files (status transitions).
+- You only edit these files: `sprints.md`, retrospective files, `metrics/*`, and orchestration-level updates to plan files (status transitions).

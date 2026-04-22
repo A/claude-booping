@@ -19,7 +19,7 @@ Before reviewing:
 
 ## Inputs
 
-- Milestone block from the backlog (what was supposed to be done)
+- Milestone block from the plan (what was supposed to be done)
 - Diff range (git commits or a branch range)
 - Lesson file paths that applied to this milestone
 

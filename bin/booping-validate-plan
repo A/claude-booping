@@ -5,15 +5,15 @@
 #     "google-genai>=0.3.0",
 # ]
 # ///
-"""Cross-validate a booping backlog item with Gemini, grading it against
+"""Cross-validate a booping plan with Gemini, grading it against
 the project's lessons as a strict rubric.
 
 Installed on PATH automatically when the booping plugin is enabled.
 
 Usage:
-    booping-validate-plan <backlog-file-path>
+    booping-validate-plan <plan-file-path>
 
-Backlog file must live at ~/Claude/{project}/backlog/*.md — the script
+Plan file must live at ~/Claude/{project}/plans/*.md — the script
 derives the project from the path and loads that project's lessons.
 """
 
@@ -27,7 +27,7 @@ CLAUDE_ROOT = Path.home() / "Claude"
 
 
 def resolve_lessons_dir(plan_path: Path) -> Path | None:
-    """Find ~/Claude/{project}/lessons/ given a backlog file inside that project."""
+    """Find ~/Claude/{project}/lessons/ given a plan file inside that project."""
     try:
         rel = plan_path.resolve().relative_to(CLAUDE_ROOT.resolve())
     except ValueError:
@@ -164,7 +164,7 @@ def validate_plan(plan_file: Path) -> int:
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print("Usage: booping-validate-plan <backlog-file-path>", file=sys.stderr)
+        print("Usage: booping-validate-plan <plan-file-path>", file=sys.stderr)
         sys.exit(EXIT_ERROR)
 
     plan_path = Path(sys.argv[1]).expanduser()

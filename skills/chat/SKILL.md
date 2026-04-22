@@ -1,6 +1,6 @@
 ---
 name: chat
-description: Context-aware discussion over backlog, plans, retros, and lessons without writing files unless explicitly asked. Use for reviewing backlog items, discussing open specs, or exploring prior retros/lessons for the current project.
+description: Context-aware discussion over plans, retros, and lessons without writing files unless explicitly asked. Use for reviewing plans, discussing open specs, or exploring prior retros/lessons for the current project.
 argument-hint: [topic or artifact reference]
 user-invocable: true
 allowed-tools:
@@ -33,12 +33,12 @@ Always read (in parallel) before the first assistant message:
 - `~/Claude/{project}/sprints.md` — active sprints
 - `~/Claude/{project}/_booping/skill_chat.md` — project-local behavior overrides (if exists)
 
-If `$ARGUMENTS` references an artifact (`backlog/...`, `retrospectives/...`, `lessons/...`), read it too.
+If `$ARGUMENTS` references an artifact (`plans/...`, `retrospectives/...`, `lessons/...`), read it too.
 
 ## Behavior
 
 - Respond based on the artifacts you have read. If the user refers to something not yet loaded, read it before answering.
-- When the user asks for exploration ("what's in the backlog?", "which lessons touch testing?"), use Glob/Grep inside the project directory only.
+- When the user asks for exploration ("what's in the plans?", "which lessons touch testing?"), use Glob/Grep inside the project directory only.
 - Do **not** write or edit files in `/chat`. If the conversation produces actionable changes, offer to hand off: "Run `/groom` to spec this" or "Run `/learn` on retro X to capture this as a lesson."
 - Delegate heavy reading or cross-referencing to sub-agents when the request spans more than ~3 artifacts, keeping the main context tight.
 
