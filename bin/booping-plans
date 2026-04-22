@@ -1,12 +1,98 @@
 #!/usr/bin/env -S uv run --script
 # /// script
 # requires-python = ">=3.11"
-# dependencies = [
-#   "ruamel.yaml>=0.18",
-# ]
+# dependencies = ["pyyaml>=6.0"]
 # ///
+"""booping-plans: list plans in a project, with filtering and sorting.
+
+Plans live as markdown files with YAML frontmatter under
+~/Claude/{project_name}/plans/. This tool reads frontmatter, filters by
+status, sorts by a frontmatter field, and prints a tab-separated table.
+
+Project resolution:
+  --project NAME     → ~/Claude/NAME/plans/
+  Otherwise reads `project_name:` from a `.booping` file in cwd.
+
+Examples:
+  booping-plans
+  booping-plans --status backlog
+  booping-plans --status ready-for-dev --sort planned
+  booping-plans --columns title,status,sp,planned --status in-progress
+"""
+import argparse
 import sys
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from booping_plans import main
-sys.exit(main(sys.argv[1:]))
+
+import yaml
+
+DEFAULT_COLUMNS = ["status", "sp", "title", "created", "planned", "completed", "retro"]
+
+
+def parse_frontmatter(path):
+    text = path.read_text(encoding="utf-8")
+    if not text.startswith("---"):
+        return {}
+    end = text.find("\n---", 3)
+    if end == -1:
+        return {}
+    return yaml.safe_load(text[3:end + 1]) or {}
+
+
+def resolve_project(arg_project):
+    if arg_project:
+        return Path("~/Claude").expanduser() / arg_project
+    marker = Path.cwd() / ".booping"
+    if marker.exists():
+        for line in marker.read_text().splitlines():
+            if line.startswith("project_name:"):
+                return Path("~/Claude").expanduser() / line.split(":", 1)[1].strip()
+    sys.stderr.write("error: pass --project or run inside a repo with a .booping marker\n")
+    sys.exit(2)
+
+
+def main():
+    ap = argparse.ArgumentParser(
+        prog="booping-plans",
+        description=__doc__,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    ap.add_argument("--project", help="project name under ~/Claude/")
+    ap.add_argument("--status", help="filter by status (e.g. backlog, ready-for-dev)")
+    ap.add_argument("--sort", default="created", help="frontmatter field to sort by (default: created)")
+    ap.add_argument("--asc", action="store_true", help="sort ascending (default: descending)")
+    ap.add_argument(
+        "--columns",
+        default=",".join(DEFAULT_COLUMNS),
+        help=f"comma-separated columns (default: {','.join(DEFAULT_COLUMNS)})",
+    )
+    args = ap.parse_args()
+
+    plans_dir = resolve_project(args.project) / "plans"
+    if not plans_dir.is_dir():
+        sys.stderr.write(f"error: no plans directory at {plans_dir}\n")
+        sys.exit(2)
+
+    plans = []
+    for p in sorted(plans_dir.glob("*.md")):
+        fm = parse_frontmatter(p)
+        fm["_path"] = f"plans/{p.name}"
+        plans.append(fm)
+
+    if args.status:
+        plans = [p for p in plans if str(p.get("status", "")) == args.status]
+
+    with_value = [p for p in plans if p.get(args.sort) is not None]
+    without_value = [p for p in plans if p.get(args.sort) is None]
+    with_value.sort(key=lambda p: str(p.get(args.sort)), reverse=not args.asc)
+    plans = with_value + without_value
+
+    columns = [c.strip() for c in args.columns.split(",") if c.strip()]
+    print("\t".join(columns + ["path"]))
+    for p in plans:
+        row = ["" if p.get(c) is None else str(p.get(c)) for c in columns]
+        row.append(p["_path"])
+        print("\t".join(row))
+
+
+if __name__ == "__main__":
+    main()

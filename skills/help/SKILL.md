@@ -6,6 +6,7 @@ user-invocable: true
 allowed-tools:
   - Read
   - Bash(ls *)
+effort: xhigh
 ---
 
 # booping — /help

@@ -1,16 +1,7 @@
----
-title: {{Descriptive Title}}
-type: feature | bug | refactoring
-status: in-spec                  # placeholder for a groomed plan being finalized; alternatives: backlog (draft), ready-for-dev (accepted). See docs/plan-schema.md for the 9-state lifecycle.
-sp: {{total}}
-source: {{URL / ad-hoc / conversation ref}}
-created: YYYY-MM-DD              # immutable; date this file was first written
-planned: null                    # auto-filled by `booping-plans set status=ready-for-dev`; may equal `created` or be later
-started: null
-completed: null
-retro: null
-goal: null                       # success | partial | fail — set by /retro
-business_goal: ""                # features only; user-visible outcome
+# Plan template
+
+The frontmatter for a plan file lives in [template_plan_frontmatter.md](template_plan_frontmatter.md). Copy it verbatim at the top of a new plan, then fill the body sections below.
+
 ---
 
 # {{Title}}
@@ -21,7 +12,7 @@ Why this work now. 2-4 sentences. Link to prior retros/lessons if they motivate 
 
 ## Business goal
 
-*(features only)* The user-facing outcome. Distinct from the sprint title — phrase this as the problem the user has today and what changes for them after.
+*(features and refactorings)* The user-visible (feature) or internal-visible (refactoring) outcome. Distinct from the sprint title — phrase it as the problem today and what changes after.
 
 ## Definition of Done
 

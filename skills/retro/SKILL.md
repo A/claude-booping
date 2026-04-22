@@ -19,6 +19,7 @@ allowed-tools:
   - Agent
   - AskUserQuestion
   - WebSearch
+effort: xhigh
 ---
 
 # booping — /retro

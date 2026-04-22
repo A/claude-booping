@@ -19,171 +19,88 @@ allowed-tools:
   - AskUserQuestion
   - WebSearch
   - WebFetch
-effort: max
+effort: xhigh
 ---
 
 # booping — /groom
 
 Produce a plan that a fresh agent can execute with only the plan file as context.
 
-## Project resolution
+This skill is **wide-domain** — it must work across very different projects (backends, frontends, content sites, CLIs). Project-specific concerns (frameworks, stack patterns, SOLID enforcement, lint/test commands, etc.) live in lessons, `CLAUDE.md`, and `_booping/skill_groom.md`. Do **not** bake them into this skill.
 
-Follow [docs/project-scoping.md](../../docs/project-scoping.md). After resolving, read `~/Claude/{project}/_booping/skill_groom.md` if present — those are project-local rules that override defaults. Also read all files in `~/Claude/{project}/lessons/` so the spec respects known constraints.
+## Preflight
 
-## Task classification
+- Read and resolve project based on [project resolution principle](../../docs/partial_project_resolution.md).
+- Read [plan statuses](../../docs/partial_plan_statuses.md).
+- Classify the task per [task classification](../../docs/partial_task_classification.md) — ask the user or infer with confirmation.
+  Read detailed guidance when you understand which task type user is planning.
+- Read [research agents](../../docs/partial_research_agents.md) — delegate research to researchers to keep this skill's context clean.
+- Read [sprint planning](../../docs/partial_sprint_planning.md) — full estimation framework: scale, totals, sizing thresholds, defensive buffer.
+- Read extra instructions for grooming skill from `~/Claude/{project_name}/_booping/skill_groom.md` if present.
+- Read all lessons in `~/Claude/{project_name}/lessons/`.
+- Read [plan transitions for /groom](../../docs/partial_plan_transitions_groom.md) for the valid transitions and how to apply them.
 
-Ask the user (or infer with confirmation) which type:
+## High-level workflow
 
-- **feature** — new capability, needs business goal + design + milestones + DoD
-- **bug** — triage, reproduction, root-cause hypothesis, minimal fix plan, regression test
-- **refactoring** — current-vs-target design, migration steps, no behavior change DoD
+1. Save the user request.
+2. Build the plan (Phase 1 understand → Phase 2 design → Phase 3 write).
+3. The plan is born in `status: backlog`.
+4. Validate the plan.
+5. Show plan to user, gather feedback, iterate.
+6. On **explicit** user confirmation: transition to `ready-for-dev`. If user shelves the work: transition to `cancelled`. Otherwise stays in `backlog` for further iteration.
 
-## Orchestration
-
-The orchestrator (this skill) does **not** read the codebase or write code itself. Delegate to sub-agents:
-
-| Agent | Role |
-|-------|------|
-| `booping-techlead` | Read codebase, identify existing patterns, map blast radius, flag tech risk |
-| `booping-product-manager` | Validate / challenge requirements, web-research alternatives, define business goal |
-| `booping-qa-lead` | Propose testing strategy, regression concerns, QA plan |
-| `booping-teamlead` | Coordinate the above, collate findings, draft the plan file |
-
-For a **feature** run all four in this order:
-1. `booping-product-manager` — confirm the problem and desired outcome
-2. `booping-techlead` — codebase investigation (can run in parallel with PM once the problem is clear)
-3. `booping-qa-lead` — testing strategy based on techlead's plan
-4. `booping-teamlead` — synthesize into the plan document
-
-For a **bug** skip PM unless the bug has product-impact ambiguity.
-For a **refactoring** skip PM; put techlead in the lead role.
-
-### Briefing template
-
-Every `Agent()` call uses the canonical briefing header — see [docs/agent-wiring.md](../../docs/agent-wiring.md) for the full spec and the per-agent domain filter. In short:
-
-```
-project_root: ~/Claude/{project}
-agent_extension: ~/Claude/{project}/_booping/agent_<agent-name>.md
-
-Applicable lessons:
-- lessons/<id>_<title>.md
-- ...
-
-Task / goal: ...
-```
-
-Filter the `Applicable lessons:` list by the agent's domain set (`tech,code,all` for techlead; `product,all` for PM; `qa,all` for qa-lead) before writing the briefing. Do **not** hand a techlead's SOLID lesson to the product manager.
-
-## Output
-
-Write to `~/Claude/{project}/plans/YYYYMMDD-{kebab-title}.md` using [template.md](template.md). The filename uses today's date and the lowercase-kebab form of the plan title.
-
-Initial frontmatter at write time must include `status: backlog` — the grooming agents have not yet run:
-
-```yaml
 ---
-title: ...
-type: feature | bug | refactoring
-status: backlog
-sp: null                    # filled after SP elicitation
-source: <chat topic, issue URL, or 'ad-hoc'>
-created: YYYY-MM-DD
-planned: null
-started: null
-completed: null
-retro: null
-goal: null
-business_goal: null         # features only; filled after business-goal elicitation
----
-```
 
-**After writing the file**, immediately run:
+## Phase 0 — Save the user request
 
-```bash
-booping-plans set --project=<P> plans/YYYYMMDD-{kebab-title}.md status=in-spec
-```
+Write the request to `~/Claude/{project_name}/requests/{YYYYMMDD}-{kebab-title}.md` using the [user request template](../../docs/template_user_request.md). The body is a compact summary of what the user asked for. If the user re-scopes during planning, update this file so it reflects the agreed intent. The `plan:` field is filled in Phase 3 once the plan file exists.
 
-Full 9-state lifecycle + transition table: [docs/plan-schema.md](../../docs/plan-schema.md).
+## Phase 1 — Understand
 
-This marks the plan as actively being spec'd by the grooming agents (techlead, PM, QA).
+Before drafting anything, build the picture:
 
-**CLI fallback:**
+- **Ask upfront**: *"What new components, dependencies, APIs, or workflow changes will this likely require?"* Use the answer to scope research. Project-specific framings (e.g. registries / builders / harnesses for codebases that have those) live in `_booping/skill_groom.md` and stack on top of this generic question.
+- **Map the blast radius**: which files, modules, integrations, and external surfaces will change. Delegate the codebase read to a researcher (default `booping-researcher-middle`).
+- **Check for prior art**: existing patterns to reuse. Researcher returns paths + brief descriptions, not full file dumps.
+- **Re-read constraints**: the relevant `CLAUDE.md` sections, project extensions, and applicable lessons.
+- **Verify external references**: any package version, image tag, API endpoint, CLI flag, or config option named in the plan must be verified against current docs. Delegate to a researcher with web access. Never assume — always verify.
 
-- If `booping-plans set --project=<P> ... <key>=<value>` exits non-zero: hand-edit the plan frontmatter to match the intended transition. Then print `booping-plans set failed (exit N): <stderr>` verbatim to chat.
-- If `booping-plans sync-sprints --project=<P>` exits non-zero: do NOT hand-edit `sprints.md`. Print `booping-plans sync-sprints failed (exit N): <stderr>` verbatim.
+## Phase 2 — Design
 
-After writing, run [quality-checklist.md](quality-checklist.md) against the file. Fix any violations before presenting.
+Present design decisions to the user **before** writing the plan file:
 
-## Estimation (SP scale)
+- Architecture: how the change fits in; integration points.
+- Pattern choices and rejected alternatives.
+- Data / API / config surface changes.
+- Open trade-offs you can't decide alone.
 
-Use this scale verbatim. Present per-milestone and per-task estimates, then ask the user for adjustment before finalizing.
+Wait for user feedback. Iterate on the design until aligned. Only then write the plan.
 
-| SP | Meaning |
-|----|---------|
-| 1  | Simple text/config change, no risk |
-| 2  | Simple task, predictable, no risk |
-| 3  | Medium task, minor risks but predictable overall |
-| 4  | Complex task, medium risk, may need small research but clear enough |
-| 5  | Research task — developer needs to clarify and decompose further before proceeding |
+## Phase 3 — Write the plan
 
-A task estimated **5 SP must be re-decomposed** before `status: ready-for-dev`. Do not hand a 5-SP task to `/develop`. Project-local calibration (sprint-size thresholds, buffer factors) lives in `_booping/skill_groom.md`.
+Write to `~/Claude/{project_name}/plans/{YYYYMMDD}-{kebab-title}.md` using the [plan template](../../docs/template_plan.md).
 
-## Business goal elicitation (features)
+- Initial frontmatter sets `status: backlog` and `source: requests/{YYYYMMDD}-{kebab-title}.md`.
 
-Before finalizing a **feature** plan, explicitly ask the user:
+**After the plan file exists**, set the request file's `plan:` field to `plans/{YYYYMMDD}-{kebab-title}.md`. This closes the cross-reference: plan → request via `source:`, request → plan via `plan:`.
 
-> "What business goal does this sprint contribute to?"
+Each milestone must:
 
-This is distinct from the sprint title — it names the user-visible outcome (e.g. "Working events system", "Faster digest pipeline"). Capture the answer in `business_goal:` frontmatter and in the plan's **Business goal** section. `/develop` will copy it into `sprints.md`, and `/retro` will judge the sprint against it. No business goal → no `status: ready-for-dev`.
+- Be executable in a fresh session with only the plan file as context.
+- List exact files to touch, per task.
+- Carry a verifiable DoD with checkboxes.
+- Reference applicable lessons by ID — never duplicate lesson content into the plan.
 
-## Cross-validation (Gemini)
-
-After the quality checklist passes, run the Gemini validator to surface execution risks and rule violations the orchestrator may have missed. Mandatory for features and refactorings, optional for single-file bugs.
-
-```bash
-booping-validate-plan ~/Claude/{project}/plans/YYYYMMDD-{kebab-title}.md
-```
-
-`booping-validate-plan` is shipped in the plugin's `bin/` and auto-added to PATH while the plugin is enabled. It derives the project from the plans path, loads `~/Claude/{project}/lessons/` as the rubric, and handles its own API-key check.
-
-**Security:** never inspect the environment for `GEMINI_API_KEY` (no `env | grep`, no `printenv`, no reading `.env` files). The token stays out of the conversation context. Call the validator blind and let it report its own readiness.
-
-Handle the validator by **exit code**, not output parsing:
-
-| Exit code | Meaning | Action |
-|-----------|---------|--------|
-| `0` | Validation ran | Present the full stdout to the user verbatim under a "Gemini cross-validation" heading. Then address each **CRITICAL EXECUTION RISK** and **RULE VIOLATION** before finalizing the plan. **ARCHITECTURAL BLIND SPOTS** may be deferred with explicit user acceptance — record the deferral in the Risk register. |
-| `2` | Skipped (no `GEMINI_API_KEY`) | Report to the user: "Gemini cross-validation skipped — `GEMINI_API_KEY` not set." Continue grooming. Optionally fall back to the `double-check` skill if installed. |
-| `1` | Error (bad input, API failure) | Report the stderr message to the user. Continue grooming but flag that cross-validation did not complete. |
-
-The validator's output **belongs to the user** — do not silently summarize or internalize it. Paste it in the chat as-is (fenced block is fine) so the user sees exactly what Gemini flagged.
-
-## Acceptance
-
-When the user accepts estimates and the quality checklist is clean:
-
-```bash
-booping-plans set --project=<P> plans/YYYYMMDD-{kebab-title}.md status=ready-for-dev
-booping-plans sync-sprints --project=<P>
-```
-
-The `set` call auto-fills `planned` with today's date. `sync-sprints` regenerates `sprints.md` to include the newly accepted plan.
-
-**CLI fallback:**
-
-- If `booping-plans set --project=<P> ... <key>=<value>` exits non-zero: hand-edit the plan frontmatter to match the intended transition. Then print `booping-plans set failed (exit N): <stderr>` verbatim to chat.
-- If `booping-plans sync-sprints --project=<P>` exits non-zero: do NOT hand-edit `sprints.md`. Print `booping-plans sync-sprints failed (exit N): <stderr>` verbatim.
+Apply the [sprint planning](../../docs/partial_sprint_planning.md) framework to estimate, total, and size the sprint. If the threshold check suggests splitting, follow [Split into sibling sprints](#split-into-sibling-sprints).
 
 ### Split into sibling sprints
 
-When the user's request maps to multiple sprints (e.g. a single feature request decomposes into a core sprint + a follow-up polish sprint), `/groom` produces one fully-spec'd primary plan and lightweight stubs for the others.
+When a request maps to multiple sprints, write one fully-spec'd primary plan + lightweight stubs for the others.
 
-**For each sibling stub:**
+For each stub:
 
-1. Derive the stub filename: `plans/{YYYYMMDD}-{kebab-stub-title}.md` (same date + kebab convention as the primary plan).
-
-2. Write the stub file via the Write tool with the following frontmatter and a Context-only body (≤200 words describing what the stub is about, why it was split off, and what is NOT in its scope):
+1. Filename: `plans/{YYYYMMDD}-{kebab-stub-title}.md` (same date convention).
+2. Write via the Write tool with a Context-only body (≤200 words: what the stub is about, why it was split off, what is NOT in scope) and frontmatter:
 
 ```yaml
 ---
@@ -195,51 +112,55 @@ created: YYYY-MM-DD
 ---
 ```
 
-   No `sp`, no `planned` — stubs are parked drafts, not committed work.
+No `sp`, no `planned` — stubs are parked drafts, not committed work.
 
-3. Immediately after writing each stub, run:
+## Phase 4 — Validate
 
-```bash
-booping-plans set --project=<P> plans/{stub-filename}.md status=backlog
-```
+Run the quality checklist before showing the plan to the user. Run cross-validation too unless its own rules say to skip (e.g. single-file bugs).
 
-   This is an idempotent validation pass — `backlog` is already set, so the status does not change. The purpose is to confirm that the CLI accepts the frontmatter shape. If the CLI exits non-zero, the stub has a frontmatter error; fix it before proceeding.
+### Quality checklist
 
-**After all stubs are written**, run exactly one sync covering the primary plan + all stubs:
+Run [quality checklist](../../docs/partial_quality_checklist.md). Fix every violation before showing the plan.
 
-```bash
-booping-plans sync-sprints --project=<P>
-```
+### Cross-validation (Gemini)
 
-**CLI fallback:**
+See [cross-validation](../../docs/partial_cross_validation.md).
 
-- If `booping-plans set --project=<P> ... <key>=<value>` exits non-zero: hand-edit the plan frontmatter to match the intended transition. Then print `booping-plans set failed (exit N): <stderr>` verbatim to chat.
-- If `booping-plans sync-sprints --project=<P>` exits non-zero: do NOT hand-edit `sprints.md`. Print `booping-plans sync-sprints failed (exit N): <stderr>` verbatim.
+## Phase 5 — Present to user
 
-## Commit
+Show:
 
-After the user accepts the plan and estimates, commit the artifact to the project vault:
+1. Brief approach summary.
+2. Milestone overview.
+3. SP per milestone and total.
+4. Final plan file path.
+5. Ask: *"Ready for development, or want changes?"*
+
+Iterate on plan edits until the user explicitly confirms.
+
+## Phase 6 — Acceptance
+
+On **explicit** user confirmation, apply the appropriate transition per [plan transitions for /groom](../../docs/partial_plan_transitions_groom.md). Then commit all artifacts written during this groom run:
 
 ```bash
 cd ~/Claude/{project}
-git add plans/YYYYMMDD-{kebab-title}.md metrics/lesson-hits.md sprints.md  # sprints.md is the regenerated rollup
+git add requests/{YYYYMMDD}-{kebab-title}.md plans/{YYYYMMDD}-*.md
 git commit -m "plans: {kebab-title}"
 ```
 
-One commit per groom run. If `metrics/lesson-hits.md` was updated in the same run, include it. If sibling stubs were written, include their files in the same commit.
+The `plans/{YYYYMMDD}-*.md` glob picks up the primary plan plus any sibling stubs written in the same run. One commit per groom run.
 
 ## What groom does NOT do
 
-- Does **not** hand-edit `sprints.md`. State transitions flow through `booping-plans set` + `sync-sprints`.
-- Does **not** start implementation — even the tempting 1-SP items.
-- Does **not** duplicate content from lessons into the plan file. Reference lesson IDs instead: `Applies lesson: 0007_no-mocked-db`.
-
-## Lesson hit tracking
-
-After the plan file is written, for each lesson referenced, append a row to `~/Claude/{project}/metrics/lesson-hits.md` with today's date and the plan file path.
+- Does **not** start implementation — even tempting 1-SP items.
+- Does **not** duplicate lesson content. Reference by ID: `Applies lesson: 0007_no-mocked-db`.
+- Does **not** bake project-specific patterns, framework rules, or stack details into this skill. Those live in `_booping/skill_groom.md`, lessons, and `CLAUDE.md`.
 
 ## Hard rules
 
-- The orchestrator never edits files outside `~/Claude/{project}/plans/` and `~/Claude/{project}/metrics/`.
+- The orchestrator never edits files outside `~/Claude/{project}/requests/` and `~/Claude/{project}/plans/`.
 - Every task in a milestone lists exact files and a DoD with checkboxes.
 - No "TBD", "handle edge cases", "TODO", or task spanning unrelated concerns.
+- Each milestone executable in a fresh session with only the plan as context.
+- External references (versions, tags, endpoints) must be verified against current docs — never assume.
+- User confirmation for `ready-for-dev` must be **explicit**. "Looks good" is enough; silence is not.

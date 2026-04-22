@@ -1,0 +1,70 @@
+# booping plugin — project guide
+
+Claude Code plugin that grooms and executes plans across user projects. Plans live under `~/Claude/{project}/` (the per-project vault); skills, agents, and templates live in this repo.
+
+## Status (April 2026)
+
+Mid-refactor. Current and trustworthy:
+
+- `skills/groom/SKILL.md`
+- `agents/booping-researcher-{senior,middle,junior}.md`
+- `bin/booping-plans` (read-only; ~80 lines)
+- Everything in `docs/` (`partial_*.md`, `template_*.md`, `plan-schema.md` modulo CLI references)
+
+Stale and **not refactored to the new contract** — treat as broken until updated:
+
+- `skills/{develop,retro,learn,install,chat,help}/`
+- `agents/booping-{teamlead,techlead,product-manager,qa-lead,reviewer,developer-junior,developer-middle,developer-senior}.md`
+- `bin/booping-init`, `skills/install/template-claude-md.md`
+- `docs/plan-schema.md` references the old `booping-plans set` / `sync-sprints` CLI in places
+
+## Layout
+
+- `agents/` — sub-agent definitions.
+- `bin/` — standalone uv inline scripts.
+- `docs/` — partials (`partial_*.md`) and templates (`template_*.md`) that skills include by reference.
+- `skills/` — skill definitions. `groom/` is the canonical pattern.
+
+## Doc conventions
+
+- `docs/partial_*.md` — reusable fragments. Skills reference them from their Preflight section so the operating context loads up front. Keep depth in partials; keep skills lean.
+- `docs/template_*.md` — copy-into-place templates. `template_plan_frontmatter.md` is the frontmatter spec; other skills can reference it without dragging the body template along.
+
+## Skill design
+
+- **Wide-domain**: skills must work across stacks (Django, Rust, Hugo, etc.). Project-specific concerns live in `~/Claude/{project}/_booping/skill_<name>.md`, `lessons/`, and the project's own `CLAUDE.md` — never in the skill here.
+- **Phases over flat sections**: Preflight → High-level workflow → Phase 0..N. Preflight loads partials and project context.
+- **Research delegation**: when a skill needs to read code or do web research, delegate to `booping-researcher-{senior,middle,junior}` to protect the skill's context. Researcher returns a summary, not raw dumps.
+
+## Plan lifecycle
+
+- 9 statuses (see `docs/partial_plan_statuses.md`). Plans are born in `backlog`.
+- Status transitions are **manual frontmatter edits**, not CLI mutations. Each skill documents its allowed transitions in `docs/partial_plan_transitions_<skill>.md` (e.g. `partial_plan_transitions_groom.md`).
+- After a transition, verify with `booping-plans --status <new-status>`.
+- `booping-plans` is read-only — list/filter/sort. There is no `sprints.md` rollup.
+
+## Project vault layout (`~/Claude/{project}/`)
+
+- `requests/{YYYYMMDD}-{kebab-title}.md` — saved user request. Cross-referenced from the plan via `source:`; references the plan back via `plan:`.
+- `plans/{YYYYMMDD}-{kebab-title}.md` — plan files; frontmatter per `docs/template_plan_frontmatter.md`. Sibling stubs use `source: split-from:plans/...`.
+- `lessons/` — accumulated lessons; loaded by skills' Preflight.
+- `_booping/skill_<name>.md` — project-local extensions to wide-domain skills.
+- `CLAUDE.md` — project conventions; loaded by skills.
+
+## CLI
+
+- `booping-plans` — list plans, filter by status, sort by any frontmatter field. Tab-separated output for piping. Single-file uv inline script.
+- `booping-validate-plan <plan-path>` — Gemini cross-validation. Handles its own API-key check; never inspect `GEMINI_API_KEY` from agent context.
+- No tests. (User-set policy.)
+
+## Editing conventions
+
+- Prefer extracting to a partial over inlining when prose grows past a paragraph or two.
+- No comments that restate code. Only WHY for non-obvious bits.
+- No tests in `bin/`.
+- Conventional commits with scope: `feat(booping): ...`, `fix(install): ...`, etc.
+- The plugin code itself stays stack-agnostic — no Python/Django/JS specifics inside skills.
+
+## When refactoring stale skills
+
+Use `skills/groom/SKILL.md` as the reference shape. The same partials apply (`partial_project_resolution`, `partial_plan_statuses`, `partial_research_agents`, `partial_sprint_planning`, `partial_quality_checklist`, `partial_cross_validation`). Each refactored skill needs its own `partial_plan_transitions_<skill>.md` listing the status transitions it owns.

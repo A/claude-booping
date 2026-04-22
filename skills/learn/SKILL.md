@@ -14,6 +14,7 @@ allowed-tools:
   - Bash(git commit *)
   - Agent
   - AskUserQuestion
+effort: xhigh
 ---
 
 # booping — /learn

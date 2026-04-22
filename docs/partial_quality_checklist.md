@@ -1,24 +1,17 @@
-# Groom quality checklist
+# Plan quality checklist
 
-Run this after writing the plan file. Every item must be satisfiable by reading the file alone.
-
-For status-name and transition-rule questions, see `docs/plan-schema.md`.
+Run after writing the plan file. Every item must be satisfiable by reading the file alone.
 
 ## Frontmatter
 
-- [ ] `type` is one of `feature`, `bug`, `refactoring`
-- [ ] `status` is one of the 9 enum values: `backlog`, `in-spec`, `ready-for-dev`, `in-progress`, `awaiting-retro`, `awaiting-learning`, `done`, `fail`, `cancelled` — not `groomed`
-- [ ] `created` is today's date in `YYYY-MM-DD`
-- [ ] `sp` equals the sum of per-task SP in milestones
-- [ ] `source` is set (link or `ad-hoc`)
-- [ ] `planned` is set when status is `ready-for-dev`, `in-progress`, `awaiting-retro`, `awaiting-learning`, `done`, or `fail`
-- [ ] `business_goal` is set (non-empty) for `type: feature` plans
-- [ ] `goal` is absent (null) for any status before `awaiting-learning`; expected present once status reaches `awaiting-learning` or `done`
+- [ ] Frontmatter matches [template_plan_frontmatter.md](template_plan_frontmatter.md) — every required field present and shaped correctly.
+- [ ] `sp` equals the sum of per-task SP across milestones.
+- [ ] `business_goal` is set (non-empty) for `feature` and `refactoring` plans.
 
 ## Content
 
 - [ ] Context explains the "why now", not just the "what"
-- [ ] For features: business goal is phrased as user-visible outcome, not engineering output
+- [ ] For features and refactorings: business goal is phrased as the user/internal-visible outcome, not engineering output
 - [ ] Definition of Done bullets are testable (verifiable by running a command or reading an output)
 - [ ] Decisions table lists real alternatives — no empty "Alternative considered" rows
 - [ ] Lessons applied section lists lesson file paths, not paraphrased rules
@@ -65,4 +58,3 @@ For status-name and transition-rule questions, see `docs/plan-schema.md`.
 ## Project-local extensions
 
 - [ ] If `~/Claude/{project}/_booping/skill_groom.md` exists, its checklist items were applied on top of this one
-- [ ] Plan file lives under `plans/` (not the old `backlog` directory)

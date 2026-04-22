@@ -14,6 +14,7 @@ allowed-tools:
   - Bash(git diff *)
   - AskUserQuestion
   - Agent
+effort: xhigh
 ---
 
 # booping — /chat
