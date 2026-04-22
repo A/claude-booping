@@ -1,7 +1,7 @@
 ---
 name: retro
-description: Generate a sprint retrospective by reviewing session logs, gathering user feedback, and comparing plan vs built. Use after /develop reports a sprint DONE, or when the user explicitly asks to retro a backlog item.
-argument-hint: [backlog file path]
+description: Generate a sprint retrospective by reviewing session logs, gathering user feedback, and comparing plan vs built. Use after /develop reports a sprint DONE, or when the user explicitly asks to retro a plan.
+argument-hint: [plan file path]
 user-invocable: true
 allowed-tools:
   - Read
@@ -15,6 +15,7 @@ allowed-tools:
   - Bash(git add *)
   - Bash(git commit *)
   - Bash(ls *)
+  - Bash(booping-plans *)
   - Agent
   - AskUserQuestion
   - WebSearch
@@ -30,13 +31,13 @@ Follow [docs/project-scoping.md](../../docs/project-scoping.md). After resolving
 
 ## Arguments
 
-`$ARGUMENTS` — backlog file path for the sprint being reviewed. If omitted, ask; default to the most recent `DONE` sprint in `sprints.md`.
+`$ARGUMENTS` — plan file path for the sprint being reviewed. If omitted, ask; default to the most recent `awaiting-retro` plan (find it via `booping-plans list --project=<P> --status=awaiting-retro`).
 
 ## Phase 1: Session research
 
 Delegate to `booping-teamlead`:
 
-> Search session logs for references to `backlog/<file>` or the sprint's topic. Summarize what the user asked about, what blocked them, and any tinkering / detours. Return a structured summary — do not copy raw logs.
+> Search session logs for references to `plans/<file>` or the sprint's topic. Summarize what the user asked about, what blocked them, and any tinkering / detours. Return a structured summary — do not copy raw logs.
 
 The teamlead reads session data from wherever it's stored on this machine (typically `~/.claude/projects/`) and returns a concise findings report.
 
@@ -44,7 +45,7 @@ The teamlead reads session data from wherever it's stored on this machine (typic
 
 In a single message, spawn three agents in parallel using the canonical briefing header — see [docs/agent-wiring.md](../../docs/agent-wiring.md):
 
-- `booping-techlead` — domains `tech,code,all`. Compare the code diff against the backlog's Decisions. Flag execution gaps, shortcuts taken, and tech debt introduced.
+- `booping-techlead` — domains `tech,code,all`. Compare the code diff against the plan's Decisions. Flag execution gaps, shortcuts taken, and tech debt introduced.
 - `booping-product-manager` — domains `product,all`. Verify the business goal was met. If not, why: deprioritized, discovered infeasible, partial?
 - `booping-qa-lead` — domains `qa,all`. Verify testing strategy was executed. Any missing regression coverage, skipped test cases, or shortcuts?
 
@@ -73,9 +74,7 @@ Capture the answers in the retrospective's **CLAUDE.md impact** section (new; se
 
 ```markdown
 ---
-backlog: backlog/YYYYMMDD-title.md
-sprint_status: DONE | FAIL
-business_goal_status: SUCCESS | FAIL | PARTIAL
+plan: plans/YYYYMMDD-title.md
 date: YYYY-MM-DD
 ---
 
@@ -113,6 +112,8 @@ date: YYYY-MM-DD
 - (or) None required.
 ```
 
+The `plan:` field holds the project-relative path to the plan file (e.g. `plans/20260422-plans-as-data-refactor.md`).
+
 ## Phase 4.5: Self-review
 
 Before saving, the teamlead runs this checklist against the draft. Any `no` → fix before Phase 5.
@@ -125,17 +126,31 @@ Before saving, the teamlead runs this checklist against the draft. Any `no` → 
 - [ ] No blame language — decisions and processes, not people
 - [ ] Lessons review section is present and cross-references existing lesson file paths
 - [ ] CLAUDE.md impact section is present — either concrete stale sections or explicit "None required"
-- [ ] `sprint_status` and `business_goal_status` in frontmatter match the action-item / root-cause narrative
+- [ ] `goal` field passed to `booping-plans set` matches the action-item / root-cause narrative (success | partial | fail)
 
 ## Phase 5: Save & commit
 
 1. Write to `~/Claude/{project}/retrospectives/YYYYMMDD-{kebab-title}.md`.
-2. Update `~/Claude/{project}/sprints.md` — set `Goal Status` based on PM findings. Do not touch the `Status` column.
+2. Transition the plan to `awaiting-learning` via the CLI:
+
+       booping-plans set --project=<P> plans/YYYYMMDD-title.md \
+           status=awaiting-learning \
+           retro=retrospectives/YYYYMMDD-title.md \
+           goal=<success|partial|fail>
+       booping-plans sync-sprints --project=<P>
+
+   The `goal` value reflects the PM's verdict on the business goal — see [docs/plan-schema.md](../../docs/plan-schema.md) for the enum definition.
+
+   **CLI fallback:**
+
+   - If `booping-plans set --project=<P> ... <key>=<value>` exits non-zero: hand-edit the plan frontmatter to match the intended transition (flip `status:`, fill `retro:`, fill `goal:`). Then print `booping-plans set failed (exit N): <stderr>` verbatim to chat.
+   - If `booping-plans sync-sprints --project=<P>` exits non-zero: do NOT hand-edit `sprints.md`. Print `booping-plans sync-sprints failed (exit N): <stderr>` verbatim.
+
 3. Commit:
 
    ```bash
    cd ~/Claude/{project}
-   git add retrospectives/YYYYMMDD-{kebab-title}.md sprints.md
+   git add retrospectives/YYYYMMDD-{kebab-title}.md plans/YYYYMMDD-{kebab-title}.md sprints.md  # sprints.md is the regenerated rollup
    git commit -m "retro: {kebab-sprint-title}"
    ```
 
@@ -155,5 +170,5 @@ Before saving, the teamlead runs this checklist against the draft. Any `no` → 
 - The orchestrator never writes the retro body itself — the teamlead agent does, based on the other agents' reports.
 - Never inflate "What went well" to balance criticism.
 - Never use blame language. Focus on decisions and processes.
-- Do not write to `sprints.md` except the `Goal Status` column — don't touch sprint status (`/develop` owns that).
+- Do not hand-edit `sprints.md`. State flows through `booping-plans set` + `sync-sprints`; see the CLI fallback block for the recovery path on non-zero exit.
 - **Never edit a CLAUDE.md here.** Analyze impact only; `/learn` writes with user confirmation.

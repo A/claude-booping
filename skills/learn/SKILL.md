@@ -118,11 +118,23 @@ If the retro marked "None required" but the phase 1-3 classification surfaced a 
 
 Initialize `lesson-hits.md` rows for newly created lessons (hits=0, last_applied=never).
 
+## Phase 5.5: Transition plan to `done`
+
+Read the retrospective frontmatter's `plan:` field (a project-relative path like `plans/YYYYMMDD-title.md`). Transition that plan to terminal success:
+
+    booping-plans set --project=<P> <plan-path> status=done
+    booping-plans sync-sprints --project=<P>
+
+**CLI fallback:**
+
+- If `booping-plans set --project=<P> <plan-path> status=done` exits non-zero: hand-edit the plan frontmatter to set `status: done` and ensure `completed` is populated (use today's ISO date if absent). Then print `booping-plans set failed (exit N): <stderr>` verbatim to chat.
+- If `booping-plans sync-sprints --project=<P>` exits non-zero: do NOT hand-edit `sprints.md`. Print `booping-plans sync-sprints failed (exit N): <stderr>` verbatim.
+
 ## Phase 6: Commit
 
 ```bash
 cd ~/Claude/{project}
-git add lessons/ _booping/ CLAUDE.md metrics/lesson-hits.md
+git add lessons/ _booping/ CLAUDE.md metrics/lesson-hits.md sprints.md plans/  # sprints.md is the regenerated rollup
 git commit -m "lessons: {retro-kebab-title}"
 ```
 
