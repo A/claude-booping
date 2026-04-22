@@ -72,7 +72,7 @@ Read artifacts referenced in `$ARGUMENTS` or named during conversation before an
 
 Answer questions, explore the vault (Glob/Grep inside `~/Claude/{project_name}/`), and make small edits that fit within the current session. When the user refers to something not yet loaded, read it before answering.
 
-Delegate heavy cross-referencing or code research to a researcher to keep the main context clean.
+You may delegate research to a `booping-researcher-{senior,middle,junior}` agent when you need a summary from files, code, web searches, or docs — see [research agents](../../docs/partial_research_agents.md) for tier selection.
 
 ## Phase 3 Hand-offs
 
