@@ -1,6 +1,6 @@
 ---
 name: booping-be-dev
-description: Backend worker for booping. Implements one milestone or task at a time from a plan file — Python/Django/DRF/Rust/Axum/migrations/Celery/Temporal. Use from /develop for backend tasks.
+description: Backend worker for booping. Implements one milestone or task at a time from a plan file. Use from /develop for backend tasks. Project-specific stack details live in `~/Claude/{project}/_booping/agent_booping-be-dev.md`.
 tools: Read, Write, Edit, Glob, Grep, Bash
 model: sonnet
 effort: high

@@ -1,6 +1,6 @@
 ---
 name: booping-fe-dev
-description: Frontend worker for booping. Implements one milestone or task at a time from a plan file — React, TypeScript, components, state, styling, Leptos. Use from /develop for frontend tasks.
+description: Frontend worker for booping. Implements one milestone or task at a time from a plan file. Use from /develop for frontend tasks. Project-specific stack details live in `~/Claude/{project}/_booping/agent_booping-fe-dev.md`.
 tools: Read, Write, Edit, Glob, Grep, Bash
 model: sonnet
 effort: high
