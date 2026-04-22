@@ -1,0 +1,96 @@
+#!/usr/bin/env bash
+# Initialize a new booping project at ~/Claude/{project-name}.
+# Installed on PATH automatically when the booping plugin is enabled.
+# Usage: booping-init <project-name> [cwd-to-attach]
+
+set -euo pipefail
+
+if [ $# -lt 1 ]; then
+    echo "Usage: $0 <project-name> [cwd-to-attach]" >&2
+    exit 1
+fi
+
+PROJECT="$1"
+ATTACH_CWD="${2:-$(pwd)}"
+ROOT="$HOME/Claude/$PROJECT"
+
+if [ -d "$ROOT" ]; then
+    echo "Project already exists: $ROOT" >&2
+    exit 1
+fi
+
+mkdir -p "$ROOT"/{backlog,plans,retrospectives,lessons,metrics,_booping}
+
+# Sprint registry (header only)
+cat > "$ROOT/sprints.md" <<'EOF'
+# Sprints
+
+| Goal | Backlog | SP | Status | Business Goal | Goal Status |
+|------|---------|----|--------|---------------|-------------|
+EOF
+
+# Metrics stubs
+cat > "$ROOT/metrics/lesson-hits.md" <<'EOF'
+# Lesson hits
+
+| Lesson | Title | Hits | Last applied |
+|--------|-------|------|--------------|
+EOF
+
+cat > "$ROOT/metrics/sp-rollup.md" <<'EOF'
+# Story point rollup
+
+| Sprint | SP | Completed |
+|--------|----|-----------|
+
+## Monthly totals
+
+| Month | SP |
+|-------|----|
+EOF
+
+# Project CLAUDE.md starter
+cat > "$ROOT/CLAUDE.md" <<EOF
+# $PROJECT
+
+Booping project. Artifacts live under \`~/Claude/$PROJECT/\`.
+
+## Layout
+- \`backlog/\` — groomed specs (\`/groom\`)
+- \`retrospectives/\` — sprint retros (\`/retro\`)
+- \`lessons/\` — extracted rules (\`/learn\`)
+- \`_booping/\` — project-local skill/agent extensions (read before each run)
+- \`metrics/\` — lesson hits, SP rollup
+- \`sprints.md\` — written only by \`/develop\`
+EOF
+
+# Register in projects.json
+mkdir -p "$HOME/Claude/.booping"
+PROJECTS_JSON="$HOME/Claude/.booping/projects.json"
+
+if [ ! -f "$PROJECTS_JSON" ]; then
+    echo '{"projects": {}, "paths": []}' > "$PROJECTS_JSON"
+fi
+
+python3 - "$PROJECTS_JSON" "$PROJECT" "$ATTACH_CWD" <<'PY'
+import json, sys, os
+path, project, cwd = sys.argv[1], sys.argv[2], os.path.abspath(sys.argv[3])
+with open(path) as f:
+    data = json.load(f)
+data.setdefault("projects", {})[project] = {"root": f"~/Claude/{project}"}
+paths = data.setdefault("paths", [])
+if not any(p.get("cwd") == cwd for p in paths):
+    paths.append({"cwd": cwd, "project": project})
+with open(path, "w") as f:
+    json.dump(data, f, indent=2)
+    f.write("\n")
+PY
+
+# Write a marker file in the attached CWD (optional)
+if [ -d "$ATTACH_CWD" ] && [ ! -f "$ATTACH_CWD/.booping-project" ]; then
+    echo "$PROJECT" > "$ATTACH_CWD/.booping-project"
+    echo "Wrote marker: $ATTACH_CWD/.booping-project"
+fi
+
+echo "Initialized: $ROOT"
+echo "Registered:  $PROJECTS_JSON"

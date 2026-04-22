@@ -1,0 +1,10 @@
+{
+  "name": "booping",
+  "version": "0.1.0",
+  "description": "Per-project grooming, implementation, retrospective, and lessons workflow with mandatory sub-agent delegation",
+  "author": {
+    "name": "Anton"
+  },
+  "license": "MIT",
+  "keywords": ["booping", "scrum", "agile", "grooming", "retrospective", "sub-agents"]
+}

@@ -1,0 +1,13 @@
+{
+  "name": "booping-local",
+  "owner": {
+    "name": "Anton"
+  },
+  "plugins": [
+    {
+      "name": "booping",
+      "source": "./",
+      "description": "Per-project grooming, implementation, retrospective, and lessons workflow with mandatory sub-agent delegation"
+    }
+  ]
+}
