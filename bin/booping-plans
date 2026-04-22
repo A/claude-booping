@@ -1,0 +1,12 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.11"
+# dependencies = [
+#   "ruamel.yaml>=0.18",
+# ]
+# ///
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from booping_plans import main
+sys.exit(main(sys.argv[1:]))
