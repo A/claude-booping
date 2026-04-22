@@ -23,7 +23,7 @@ Turn retrospective findings into durable behavior changes.
 
 ## Project resolution
 
-Follow [docs/project-scoping.md](../../docs/project-scoping.md). After resolving, read `~/Claude/{project}/_booping/skill_learn.md` if present.
+Follow [docs/partial_project_resolution.md](../../docs/partial_project_resolution.md). After resolving, read `~/Claude/{project}/_booping/skill_learn.md` if present.
 
 ## Arguments
 
@@ -123,13 +123,7 @@ Initialize `lesson-hits.md` rows for newly created lessons (hits=0, last_applied
 
 Read the retrospective frontmatter's `plan:` field (a project-relative path like `plans/YYYYMMDD-title.md`). Transition that plan to terminal success. Full 9-state lifecycle + transition table: [docs/plan-schema.md](../../docs/plan-schema.md).
 
-    booping-plans set --project=<P> <plan-path> status=done
-    booping-plans sync-sprints --project=<P>
-
-**CLI fallback:**
-
-- If `booping-plans set --project=<P> <plan-path> status=done` exits non-zero: hand-edit the plan frontmatter to set `status: done` and ensure `completed` is populated (use today's ISO date if absent). Then print `booping-plans set failed (exit N): <stderr>` verbatim to chat.
-- If `booping-plans sync-sprints --project=<P>` exits non-zero: do NOT hand-edit `sprints.md`. Print `booping-plans sync-sprints failed (exit N): <stderr>` verbatim.
+    # Manual frontmatter edit per docs/partial_plan_transitions_learn.md
 
 ## Phase 6: Commit
 
