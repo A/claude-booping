@@ -8,10 +8,12 @@ allowed-tools:
   - Write
   - Edit
   - Glob
-  - Bash(ls *)
-  - Bash(mkdir *)
-  - Bash(cp *)
-  - Bash(cat *)
+  - Bash(ls ~/Claude/*)
+  - Bash(ls ~/Claude)
+  - Bash(ls -1 ~/Claude/*)
+  - Bash(ls -1 ~/Claude)
+  - Bash(ls -la ~/Claude/*)
+  - Bash(ls -la ~/Claude)
   - Bash(booping-init:*)
   - AskUserQuestion
 ---
@@ -20,13 +22,21 @@ allowed-tools:
 
 Bootstrap the current repo as a booping project. The skill performs the scaffolding — no script-running required from the user.
 
+## Tool discipline
+
+This skill does its detection with native tools, not shell pipes — no `grep`, no `cat`, no `|`. Specifically:
+
+- Listing `~/Claude/`: use a plain `ls ~/Claude/` (no flags beyond `-1` / `-la`, no pipes). Filter out dotfiles in your own reasoning after reading the output.
+- Reading JSON / markers: use the `Read` tool, not `cat`.
+- Finding a `.booping-project` marker in CWD or ancestors: use `Glob` (e.g. `.booping-project`, `*/.booping-project`) or `Read` directly on the expected path. Don't shell out for this.
+
 ## Phase 1: Detect state
 
 In parallel:
 
-1. `ls ~/Claude/` — list existing booping projects (directories only, excluding dotfiles).
-2. Check for a `.booping-project` marker in CWD or ancestors.
-3. Read `~/Claude/.booping/projects.json` if present.
+1. `ls ~/Claude/` — list existing booping projects. Ignore entries starting with `.` when summarizing.
+2. Check for a `.booping-project` marker in CWD or ancestors — use `Read` on `<cwd>/.booping-project` (and one or two parent paths if relevant) or `Glob`. If `Read` returns "file does not exist", treat that as "no marker".
+3. Read `~/Claude/.booping/projects.json` if present via the `Read` tool. If it doesn't exist, treat as empty.
 
 Summarize the detected state in one paragraph before asking anything. Example: "I see you already have projects `aurora-api`, `aurora-frontend`. CWD `/home/you/Dev/new-thing` has no marker."
 
@@ -56,7 +66,7 @@ If `$ARGUMENTS` supplies a project name, default to `new` with that name (still 
 ## Phase 4: Verify
 
 1. `ls ~/Claude/{name}/` — print the tree so the user can see what exists.
-2. `cat ~/Claude/.booping/projects.json` — show the registered mapping.
+2. Show the registered mapping by reading `~/Claude/.booping/projects.json` via the `Read` tool.
 3. Report what to do next: "Run `/chat` to start a discussion or `/groom <topic>` to spec a new piece of work."
 
 ## Hard rules
