@@ -22,6 +22,8 @@ Use this scale verbatim:
 
 A task estimated **5 SP must be re-decomposed** before `status: ready-for-dev`. Do not hand a 5-SP task to `/develop`.
 
+For the SP→agent mapping used by /develop, see [developer tiers](partial_developer_tiers.md).
+
 ## Estimation flow
 
 1. Estimate per task using the 1–5 scale.
