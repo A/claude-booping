@@ -120,7 +120,7 @@ Initialize `lesson-hits.md` rows for newly created lessons (hits=0, last_applied
 
 ## Phase 5.5: Transition plan to `done`
 
-Read the retrospective frontmatter's `plan:` field (a project-relative path like `plans/YYYYMMDD-title.md`). Transition that plan to terminal success:
+Read the retrospective frontmatter's `plan:` field (a project-relative path like `plans/YYYYMMDD-title.md`). Transition that plan to terminal success. Full 9-state lifecycle + transition table: [docs/plan-schema.md](../../docs/plan-schema.md).
 
     booping-plans set --project=<P> <plan-path> status=done
     booping-plans sync-sprints --project=<P>

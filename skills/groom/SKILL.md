@@ -104,6 +104,8 @@ business_goal: null         # features only; filled after business-goal elicitat
 booping-plans set --project=<P> plans/YYYYMMDD-{kebab-title}.md status=in-spec
 ```
 
+Full 9-state lifecycle + transition table: [docs/plan-schema.md](../../docs/plan-schema.md).
+
 This marks the plan as actively being spec'd by the grooming agents (techlead, PM, QA).
 
 **CLI fallback:**

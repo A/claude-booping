@@ -53,3 +53,5 @@ If `$ARGUMENTS` references an artifact (`plans/...`, `retrospectives/...`, `less
 
 - Never touch files outside `~/Claude/{project}/` in this skill.
 - Never update `sprints.md` — that's `/develop`'s responsibility only.
+
+For the status enum and lifecycle definitions, see [docs/plan-schema.md](../../docs/plan-schema.md).
