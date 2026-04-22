@@ -1,13 +1,19 @@
 # Groom quality checklist
 
-Run this after writing the backlog file. Every item must be satisfiable by reading the file alone.
+Run this after writing the plan file. Every item must be satisfiable by reading the file alone.
+
+For status-name and transition-rule questions, see `docs/plan-schema.md`.
 
 ## Frontmatter
 
 - [ ] `type` is one of `feature`, `bug`, `refactoring`
+- [ ] `status` is one of the 9 enum values: `backlog`, `in-spec`, `ready-for-dev`, `in-progress`, `awaiting-retro`, `awaiting-learning`, `done`, `fail`, `cancelled` — not `groomed`
 - [ ] `created` is today's date in `YYYY-MM-DD`
 - [ ] `sp` equals the sum of per-task SP in milestones
 - [ ] `source` is set (link or `ad-hoc`)
+- [ ] `planned` is set when status is `ready-for-dev`, `in-progress`, `awaiting-retro`, `awaiting-learning`, `done`, or `fail`
+- [ ] `business_goal` is set (non-empty) for `type: feature` plans
+- [ ] `goal` is absent (null) for any status before `awaiting-learning`; expected present once status reaches `awaiting-learning` or `done`
 
 ## Content
 
@@ -27,7 +33,7 @@ Run this after writing the backlog file. Every item must be satisfiable by readi
 - [ ] No "handle edge cases", "add error handling", "clean up" as standalone tasks
 - [ ] No "either X or Y" unresolved — pick one, justify in Decisions
 - [ ] No task spanning multiple concerns (model + API + frontend in one row)
-- [ ] No milestone that requires reading more than the backlog file to execute
+- [ ] No milestone that requires reading more than the plan file to execute
 
 ## External references validated
 
@@ -59,3 +65,4 @@ Run this after writing the backlog file. Every item must be satisfiable by readi
 ## Project-local extensions
 
 - [ ] If `~/Claude/{project}/_booping/skill_groom.md` exists, its checklist items were applied on top of this one
+- [ ] Plan file lives under `plans/` (not the old `backlog` directory)

@@ -1,10 +1,16 @@
 ---
-type: feature | bug | refactoring
 title: {{Descriptive Title}}
-created: YYYY-MM-DD
-source: {{URL / ad-hoc / conversation ref}}
-status: groomed
+type: feature | bug | refactoring
+status: in-spec                  # placeholder for a groomed plan being finalized; alternatives: backlog (draft), ready-for-dev (accepted). See docs/plan-schema.md for the 9-state lifecycle.
 sp: {{total}}
+source: {{URL / ad-hoc / conversation ref}}
+created: YYYY-MM-DD              # immutable; date this file was first written
+planned: null                    # auto-filled by `booping-plans set status=ready-for-dev`; may equal `created` or be later
+started: null
+completed: null
+retro: null
+goal: null                       # success | partial | fail — set by /retro
+business_goal: ""                # features only; user-visible outcome
 ---
 
 # {{Title}}
@@ -90,3 +96,7 @@ just lint
 ## Out of scope
 
 Explicit list of things intentionally not done in this sprint. Prevents scope creep.
+
+## CLAUDE.md impact
+
+Either name the specific `CLAUDE.md` sections/bullets to update (with an owning task) or state "No CLAUDE.md changes required" with a one-line justification.
