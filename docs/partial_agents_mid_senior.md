@@ -21,11 +21,14 @@ Every task runs inside an `Agent()` call — even a 1-line change. Batching cons
 
 ## How to invoke agents
 
-The skill owns all reads and writes against the project vault (`~/Claude/{project}/`). The agent's job is to edit code in the attached repo and report back. The skill:
+The skill owns all reads and writes against the project vault (`~/Claude/{project}/`). The agent's job is to edit code in the attached repo and report back. The skill flips DoD checkboxes in the plan file after the agent reports done and Verify passes, and appends to `metrics/lesson-hits.md` at the end of the sprint.
 
-- Translates relevant lessons into plain-prose guidance inside the briefing (do NOT pass a raw `Applicable lessons:` path list — the agent will not read the lessons directory).
-- Flips DoD checkboxes in the plan file after the agent reports done and Verify passes.
-- Appends to `metrics/lesson-hits.md` at the end of the sprint.
+Lesson context reaches agents through two baked-in channels, not per-briefing routing:
+
+- **Plan** — `/groom` folded applicable lessons into DoD items and Verify commands at grooming time. The skill pastes those fields into the briefing verbatim.
+- **Shared extension** — `/learn` writes project-wide developer rules into `~/Claude/{project}/_booping/agent_booping-developer.md`. Each agent reads it at Startup.
+
+The skill does not filter or inline lessons per-briefing. If a lesson isn't already in the plan or the extension, it won't reach the agent.
 
 ### Briefing template
 
@@ -37,9 +40,8 @@ agent_extension: ~/Claude/{project}/_booping/agent_booping-developer.md
 Task / goal: <what to change and why>
 Decisions that apply: <plan decisions relevant here>
 Files you may touch: <explicit list; anything outside is out of scope>
-Guidance: <one or two bullets per applicable lesson, phrased as a rule — no lesson paths>
+DoD: <checklist from the plan, verbatim>
 Verify: <exact test/lint commands the agent must run before reporting done>
 ```
 
-- `agent_extension` — both `booping-developer-middle` and `booping-developer-senior` share the same extension file. The path above is verbatim; the agent reads it (or skips silently if the file does not exist).
-- `Guidance` replaces the old `Applicable lessons:` list. The skill performs the relevance filter and inlines the rule directly, so the agent never crosses into `~/Claude/{project}/lessons/`.
+Both `booping-developer-middle` and `booping-developer-senior` share the same `agent_extension` file. The path is verbatim; the agent reads it or skips silently if absent.

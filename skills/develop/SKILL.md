@@ -30,6 +30,7 @@ This skill is **wide-domain** — it must work across very different projects. P
 - Read [research agents](../../docs/partial_agents_researcher_tiers.md) — delegate heavy reading to researchers to keep context clean.
 - Read [plan transitions for /develop](../../docs/partial_plan_transitions_develop.md) — the only transitions this skill owns.
 - Read [agent delegator](../../docs/partial_agent_delegator.md) — the active delegation strategy, including the SP→agent mapping, batching rules, and briefing template.
+- Read [project quality checks](../../docs/partial_project_quality_checks.md) — how to detect and run the project's own lint / typecheck / test tooling during the sprint.
 - Read lessons per [read lessons](../../docs/partial_read_lessons.md).
 - Read `~/Claude/{project_name}/_booping/skill_develop.md` — project-local overrides, if present.
 - Read the attached repo's `CLAUDE.md` — project conventions for the code under development.
@@ -49,6 +50,8 @@ Resolve the plan path from `$ARGUMENTS`; if missing, ask and list recent plans w
 Read the plan file, the vault `CLAUDE.md`, and the repo `CLAUDE.md`. (Lessons are already loaded in Preflight per [read lessons](../../docs/partial_read_lessons.md).) Spot-check 2–3 key files named in the plan to detect codebase drift; delegate to `booping-researcher-middle` when the set is large (see the research-agents partial).
 
 **Validate entry status**: the plan's `status:` must be `ready-for-dev` or `backlog`. Any other status means `/develop` has no claim — stop and report clearly.
+
+Classify the project's quality tooling per [project quality checks](../../docs/partial_project_quality_checks.md): which tools are hook-enforced (let them run naturally at commit time) and which are configured-but-manual (the skill will run them per milestone).
 
 If any lesson conflicts with a decision in the plan, stop and flag it to the user before proceeding.
 
@@ -75,18 +78,17 @@ Create the sprint branch per [branch naming](../../docs/partial_branch_naming.md
 For each milestone:
 
 1. `TaskCreate` one task per plan task.
-2. Group and delegate per the active strategy in [agent delegator](../../docs/partial_agent_delegator.md); use the briefing template from that partial. Always delegate — even a 1-line change. For each briefing, filter the loaded lessons for relevance and inline them under `Guidance:` as plain-prose rules. Do not pass raw lesson paths — agents do not read the lessons directory.
+2. Group and delegate per the active strategy in [agent delegator](../../docs/partial_agent_delegator.md); use the briefing template from that partial. Always delegate — even a 1-line change.
 3. When the worker reports done:
    - Run the milestone's `Verify` command.
+   - Run the configured-but-manual quality commands identified in Phase 0 (see [project quality checks](../../docs/partial_project_quality_checks.md)).
    - Flip each completed task's DoD checkboxes in the plan: `- [ ]` → `- [x]`.
    - Flip each task row in the milestone's status table: `pending` → `done`.
-4. Spawn `booping-reviewer` on the milestone's diff. Apply **lesson 0003 per-item triage** (S0/S1 fix-now; S2+ defer to Risk register; cap defers at three before promoting to a follow-up stub plan).
+4. Delegate a milestone-diff review to a researcher per [research agents](../../docs/partial_agents_researcher_tiers.md). Ask it to read the diff on the sprint branch and return a bulleted summary covering: plan adherence, scope creep, and regression risk. The orchestrator decides what to action; project-specific triage rules, if any, live in `_booping/skill_develop.md`.
 5. Flip the milestone status to `done`, then commit in the attached repo: `<prefix>(<scope>): M<n> <summary>`.
 6. Report milestone completion to the user with a one-paragraph summary (what shipped, reviewer verdict, any deferred items) before starting the next milestone.
 
-Task-level parallelism: tasks within a milestone are sequential by default. If the plan marks tasks as independent AND the delegation strategy does not batch them, dispatch them in parallel `Agent` calls in the same message.
-
-Parallel milestones (marked independent in the plan) may run concurrently.
+Parallelism: dispatch tasks (within a milestone or across milestones) in parallel `Agent` calls in the same message only when their briefings touch disjoint files/components. The skill judges disjointness from the plan's file lists — no plan marker required. Sequential otherwise. Parallel agents share the sprint branch; never use `isolation: "worktree"` (see Hard rules).
 
 ## Phase 4 Finalize
 
