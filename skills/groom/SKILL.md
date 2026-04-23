@@ -34,7 +34,7 @@ This skill is **wide-domain** — it must work across very different projects (b
 - Read [plan statuses](../../docs/partial_plan_statuses.md).
 - Classify the task per [task classification](../../docs/partial_task_classification.md) — ask the user or infer with confirmation.
   Read detailed guidance when you understand which task type user is planning.
-- Read [research agents](../../docs/partial_agents_strategy_senior_middle_junior.md) — delegate research to researchers to keep this skill's context clean.
+- Read [research agents](../../docs/partial_agents_researchers_delegator.md) — delegate research to researchers to keep this skill's context clean.
 - Read [sprint planning](../../docs/partial_sprint_planning.md) — full estimation framework: scale, totals, sizing thresholds, defensive buffer.
 - Read extra instructions for grooming skill from `~/Claude/{project_name}/_booping/skill_groom.md` if present.
 - Read lessons per [read lessons](../../docs/partial_read_lessons.md).

@@ -51,7 +51,7 @@ Artifacts live at `~/Claude/{project}/`. The only writer of `sprints.md` is `/de
 
 Researchers (delegated to from skills for read-heavy work):
 
-- `booping-researcher-{junior,middle,senior}` — codebase research, session-log search, tech feedback; tier is selected by the skill per `docs/partial_agents_strategy_senior_middle_junior.md`.
+- `booping-researcher-{junior,middle,senior}` — codebase research, session-log search, tech feedback; tier is selected by the skill per `docs/partial_agents_researchers_delegator.md`.
 
 Workers (called from `/develop`):
 

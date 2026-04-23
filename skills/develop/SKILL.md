@@ -27,7 +27,7 @@ This skill is **wide-domain** — it must work across very different projects. P
 
 - Read and resolve project based on [project resolution principle](../../docs/partial_project_resolution.md).
 - Read [plan statuses](../../docs/partial_plan_statuses.md).
-- Read [research agents](../../docs/partial_agents_strategy_senior_middle_junior.md) — delegate heavy reading to researchers to keep context clean.
+- Read [research agents](../../docs/partial_agents_researchers_delegator.md) — delegate heavy reading to researchers to keep context clean.
 - Read [plan transitions for /develop](../../docs/partial_plan_transitions_develop.md) — the only transitions this skill owns.
 - Read [agent delegator](../../docs/partial_agent_developers_delegator.md) — the active delegation strategy, including the SP→agent mapping, batching rules, and briefing template.
 - Read [project quality checks](../../docs/partial_development_quality_checks.md) — how to detect and run the project's own lint / typecheck / test tooling during the sprint.
@@ -84,7 +84,7 @@ For each milestone:
    - Run the configured-but-manual quality commands identified in Phase 0 (see [project quality checks](../../docs/partial_development_quality_checks.md)).
    - Flip each completed task's DoD checkboxes in the plan: `- [ ]` → `- [x]`.
    - Flip each task row in the milestone's status table: `pending` → `done`.
-4. Delegate a milestone-diff review to a researcher per [research agents](../../docs/partial_agents_strategy_senior_middle_junior.md). Ask it to read the diff on the sprint branch and return a bulleted summary covering: plan adherence, scope creep, and regression risk. The orchestrator decides what to action; project-specific triage rules, if any, live in `_booping/skill_develop.md`.
+4. Delegate a milestone-diff review to a researcher per [research agents](../../docs/partial_agents_researchers_delegator.md). Ask it to read the diff on the sprint branch and return a bulleted summary covering: plan adherence, scope creep, and regression risk. The orchestrator decides what to action; project-specific triage rules, if any, live in `_booping/skill_develop.md`.
 5. Flip the milestone status to `done`, then commit in the attached repo: `<prefix>(<scope>): M<n> <summary>`.
 6. Report milestone completion to the user with a one-paragraph summary (what shipped, reviewer verdict, any deferred items) before starting the next milestone.
 
