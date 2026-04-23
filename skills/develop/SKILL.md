@@ -29,7 +29,7 @@ This skill is **wide-domain** — it must work across very different projects. P
 - Read [plan statuses](../../docs/partial_plan_statuses.md).
 - Read [research agents](../../docs/partial_agents_researcher_tiers.md) — delegate heavy reading to researchers to keep context clean.
 - Read [plan transitions for /develop](../../docs/partial_plan_transitions_develop.md) — the only transitions this skill owns.
-- Read [developer tiers](../../docs/partial_agents_developer_tiers.md) — SP→agent mapping for delegating tasks.
+- Read [agent delegation](../../docs/partial_develop_agent_delegation.md) — the active SP→agent mapping and batching rules for this skill.
 - Read all lessons in `~/Claude/{project_name}/lessons/`.
 - Read `~/Claude/{project_name}/_booping/skill_develop.md` — project-local overrides, if present.
 - Read the attached repo's `CLAUDE.md` — project conventions for the code under development.
@@ -72,15 +72,19 @@ Create the sprint branch per [branch naming](../../docs/partial_branch_naming.md
 - Picked up from `ready-for-dev`: set `status: in-progress`, `started: <today>`.
 - Picked up from `backlog`: set `status: in-progress`, `planned: <today>`, `started: <today>` in the same edit.
 
-For each milestone, the orchestrator loop:
+For each milestone:
 
 1. `TaskCreate` one task per plan task.
-2. Resolve SP → worker agent via [../../docs/partial_agents_developer_tiers.md](../../docs/partial_agents_developer_tiers.md). Do NOT inline an SP table.
-3. Delegate via `Agent()`. Always delegate — even for a 1-line change. Brief each agent using the header documented in [docs/agent-wiring.md](../../docs/agent-wiring.md); do NOT re-embed the template here.
-4. Filter `Applicable lessons:` by the worker's domain set (`code`, `tech`, `all` for developer agents).
-5. When the worker reports done, run the milestone's `Verify` command; read DoD checkboxes; update milestone status in the plan.
-6. Spawn `booping-reviewer` on the milestone's diff. Apply **lesson 0003 per-item triage** (S0/S1 fix-now; S2+ defer to Risk register; cap defers at three before promoting to a follow-up stub plan).
-7. Commit in the attached repo: `<prefix>(<scope>): M<n> <summary>`.
+2. Group and delegate per [agent delegation](../../docs/partial_develop_agent_delegation.md). Always delegate — even a 1-line change. Brief each agent using the header documented in [docs/agent-wiring.md](../../docs/agent-wiring.md); do NOT re-embed the template here. Filter `Applicable lessons:` by the worker's domain set (`code`, `tech`, `all` for developer agents).
+3. When the worker reports done:
+   - Run the milestone's `Verify` command.
+   - Flip each completed task's DoD checkboxes in the plan: `- [ ]` → `- [x]`.
+   - Flip each task row in the milestone's status table: `pending` → `done`.
+4. Spawn `booping-reviewer` on the milestone's diff. Apply **lesson 0003 per-item triage** (S0/S1 fix-now; S2+ defer to Risk register; cap defers at three before promoting to a follow-up stub plan).
+5. Flip the milestone status to `done`, then commit in the attached repo: `<prefix>(<scope>): M<n> <summary>`.
+6. Report milestone completion to the user with a one-paragraph summary (what shipped, reviewer verdict, any deferred items) before starting the next milestone.
+
+Task-level parallelism: tasks within a milestone are sequential by default. If the plan marks tasks as independent AND the delegation strategy does not batch them, dispatch them in parallel `Agent` calls in the same message.
 
 Parallel milestones (marked independent in the plan) may run concurrently.
 

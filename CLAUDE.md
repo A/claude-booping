@@ -69,4 +69,4 @@ Stale and **not refactored to the new contract** — treat as broken until updat
 
 Use `skills/groom/SKILL.md` as the reference shape. The same partials apply (`partial_project_resolution`, `partial_plan_statuses`, `partial_agents_researcher_tiers`, `partial_sprint_planning`, `partial_quality_checklist`, `partial_cross_validation`). Each refactored skill needs its own `partial_plan_transitions_<skill>.md` listing the status transitions it owns.
 
-Partials that describe an agent family (who to spawn, tier selection) are named `partial_agents_<role>.md` — e.g. `partial_agents_developer_tiers.md`, `partial_agents_researcher_tiers.md`.
+Partials that describe an agent family (who to spawn, tier selection) are named `partial_agents_<role-or-strategy>.md` — e.g. `partial_agents_mid_senior.md` (a delegation strategy), `partial_agents_researcher_tiers.md` (a tier catalogue).

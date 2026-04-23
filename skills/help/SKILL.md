@@ -58,9 +58,9 @@ Orchestrators (always delegated to from skills):
 
 Workers (called from `/develop`):
 
-- `booping-developer-junior` — developer tasks, 1 SP (haiku)
-- `booping-developer-middle` — developer tasks, 2-3 SP (sonnet)
-- `booping-developer-senior` — developer tasks, 4 SP (opus); 5 SP refuses
+- `booping-developer-middle` — 1–2 SP tasks; may be batched up to ~10 SP (opus, high reasoning)
+- `booping-developer-senior` — 3–4 SP tasks, one per briefing (opus, high reasoning)
+- 5 SP: refuse — re-decompose via `/groom`. `booping-developer-junior` exists but is inactive under the current delegation strategy.
 - `booping-reviewer` — milestone diff review
 
 ## Layout

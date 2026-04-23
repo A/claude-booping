@@ -20,7 +20,7 @@ Before writing any code:
 
 ## Tier calibration
 
-Your tier handles 4-SP tasks — design judgment required. Read adjacent code, sketch the change before typing, think about edge cases the plan didn't enumerate. If you find a simpler approach than the plan, stop and report — don't silently change the plan.
+Your tier handles 3–4 SP tasks, one per briefing (no batching) — design judgment required. Read adjacent code, sketch the change before typing, think about edge cases the plan didn't enumerate. If you find a simpler approach than the plan, stop and report — don't silently change the plan.
 
 ## Workflow
 
