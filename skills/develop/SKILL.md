@@ -29,7 +29,7 @@ This skill is **wide-domain** — it must work across very different projects. P
 - Read [plan statuses](../../docs/partial_plan_statuses.md).
 - Read [research agents](../../docs/partial_agents_researcher_tiers.md) — delegate heavy reading to researchers to keep context clean.
 - Read [plan transitions for /develop](../../docs/partial_plan_transitions_develop.md) — the only transitions this skill owns.
-- Read [agent delegation](../../docs/partial_develop_agent_delegation.md) — the active SP→agent mapping and batching rules for this skill.
+- Read [agent delegator](../../docs/partial_agent_delegator.md) — the active delegation strategy, including the SP→agent mapping, batching rules, and briefing template.
 - Read lessons per [read lessons](../../docs/partial_read_lessons.md).
 - Read `~/Claude/{project_name}/_booping/skill_develop.md` — project-local overrides, if present.
 - Read the attached repo's `CLAUDE.md` — project conventions for the code under development.
@@ -75,7 +75,7 @@ Create the sprint branch per [branch naming](../../docs/partial_branch_naming.md
 For each milestone:
 
 1. `TaskCreate` one task per plan task.
-2. Group and delegate per [agent delegation](../../docs/partial_develop_agent_delegation.md). Always delegate — even a 1-line change. Brief each agent using the header documented in [docs/agent-wiring.md](../../docs/agent-wiring.md); do NOT re-embed the template here. Include under `Applicable lessons:` only the lessons relevant to the specific task.
+2. Group and delegate per the active strategy in [agent delegator](../../docs/partial_agent_delegator.md); use the briefing template from that partial. Always delegate — even a 1-line change. For each briefing, filter the loaded lessons for relevance and inline them under `Guidance:` as plain-prose rules. Do not pass raw lesson paths — agents do not read the lessons directory.
 3. When the worker reports done:
    - Run the milestone's `Verify` command.
    - Flip each completed task's DoD checkboxes in the plan: `- [ ]` → `- [x]`.

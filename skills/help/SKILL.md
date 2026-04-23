@@ -58,7 +58,7 @@ Orchestrators (always delegated to from skills):
 
 Workers (called from `/develop`):
 
-- Developer agents live in `agents/booping-developer-{junior,middle,senior}.md`. The active SP→agent mapping is the strategy selected by [`docs/partial_develop_agent_delegation.md`](../../docs/partial_develop_agent_delegation.md) — read it to see which tiers are active and what the batching rules are.
+- Developer agents live in `agents/booping-developer-{junior,middle,senior}.md`. The active SP→agent mapping is the strategy selected by [`docs/partial_agent_delegator.md`](../../docs/partial_agent_delegator.md) — read it to see which tiers are active and what the batching rules are.
 - `booping-reviewer` — milestone diff review
 
 ## Layout

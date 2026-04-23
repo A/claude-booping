@@ -22,7 +22,7 @@ Use this scale verbatim:
 
 A task estimated **5 SP must be re-decomposed** before `status: ready-for-dev`. Do not hand a 5-SP task to `/develop`.
 
-For the SP→agent mapping used by /develop, see [agent delegation](partial_develop_agent_delegation.md).
+For the SP→agent mapping used by /develop, see [agent delegator](partial_agent_delegator.md).
 
 ## Estimation flow
 
