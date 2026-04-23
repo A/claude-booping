@@ -46,23 +46,21 @@ After installing, `cd` into a repo and run `/install` to scaffold `~/Claude/{pro
 
 ## Sub-agents
 
-Orchestrators — spawned by skills, never write application code:
+Researcher agents — invoked by skills for research, code reading, and analysis:
 
 | Agent | Role |
 |-------|------|
-| `booping-teamlead` | User-facing coordination, writes `sprints.md` and retrospective documents, tracks metrics |
-| `booping-techlead` | Codebase research, blast radius mapping, tech-debt feedback |
-| `booping-product-manager` | Validates requirements, web-research for alternatives, judges business-goal delivery |
-| `booping-qa-lead` | Test strategy, regression risk, coverage review |
+| `booping-researcher-junior` | Junior-tier research context (haiku) |
+| `booping-researcher-middle` | Mid-tier research context (sonnet); default for most queries |
+| `booping-researcher-senior` | Senior-tier research context (opus); high-complexity code review |
 
-Workers — invoked from `/develop` per task:
+Developer agents — invoked from `/develop` per task:
 
 | Agent | Role |
 |-------|------|
 | `booping-developer-junior` | Developer worker — 1 SP tasks (haiku) |
 | `booping-developer-middle` | Developer worker — 2-3 SP tasks (sonnet) |
 | `booping-developer-senior` | Developer worker — 4 SP tasks (opus); 5 SP refuses |
-| `booping-reviewer` | Milestone-diff review before merge |
 
 ## Artifacts tree
 

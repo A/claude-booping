@@ -23,7 +23,7 @@
 | Agent extension | `~/Claude/{project}/_booping/agent_{name}.md` | `/learn` |
 | Sprint log | `~/Claude/{project}/sprints.md` | **`/develop` only** |
 | Metrics — lesson hits | `~/Claude/{project}/metrics/lesson-hits.md` | `/develop` (increments) |
-| Metrics — SP rollup | `~/Claude/{project}/metrics/sp-rollup.md` | `booping-teamlead` |
+| Metrics — SP rollup | `~/Claude/{project}/metrics/sp-rollup.md` | `/develop` |
 
 ## Non-goals
 
@@ -33,19 +33,17 @@
 
 ## Agents
 
-Four orchestrators:
+Researcher agents (invoked by skills for artefact reading, session-log search, web research):
 
-- **booping-teamlead** — user-facing. Searches session logs, summarizes, writes `sprints.md`, produces the final retrospective document.
-- **booping-techlead** — tech research & feedback. Reads the codebase, identifies patterns, challenges designs.
-- **booping-product-manager** — requirements & web research. Validates the "why" and widens the solution space.
-- **booping-qa-lead** — testing strategy, QA plan, regression risk.
+- **booping-researcher-junior** — junior-tier context (haiku).
+- **booping-researcher-middle** — mid-tier context (sonnet); the default for most queries.
+- **booping-researcher-senior** — senior-tier context (opus); high-complexity code review and analysis.
 
-Four workers (invoked by `/develop`):
+Developer agents (invoked by `/develop` per task):
 
 - **booping-developer-junior** — developer tasks, 1 SP (haiku).
 - **booping-developer-middle** — developer tasks, 2-3 SP (sonnet).
 - **booping-developer-senior** — developer tasks, 4 SP (opus); 5 SP refuses.
-- **booping-reviewer** — code review pre-merge.
 
 ## Project scoping
 
@@ -60,7 +58,7 @@ Cross-project parallel sessions are deferred — see `docs/project-scoping.md`.
 ## Metrics
 
 - `lesson-hits.md` — table of `(lesson_id, title, hits, last_applied_sprint)`. `/develop` and `/groom` append a hit when a lesson is referenced.
-- `sp-rollup.md` — per-sprint and rolling monthly story-point totals, maintained by `booping-teamlead` on sprint close.
+- `sp-rollup.md` — per-sprint and rolling monthly story-point totals, maintained by `/develop` on sprint close.
 
 ## Cross-links (shallow)
 
