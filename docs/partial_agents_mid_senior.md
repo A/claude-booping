@@ -39,7 +39,7 @@ agent_extension: ~/Claude/{project}/_booping/agent_booping-developer.md
 
 Task / goal: <what to change and why>
 Decisions that apply: <plan decisions relevant here>
-Files you may touch: <explicit list; anything outside is out of scope>
+Related files: <files relevant to this task; read the ones you'll touch. If something outside this list needs to change, stop and report.>
 DoD: <checklist from the plan, verbatim>
 Verify: <exact test/lint commands the agent must run before reporting done>
 ```
