@@ -104,4 +104,3 @@ Workers (called from `/develop`):
 - `README.md` — higher-level overview and install instructions
 - `PRD.md` — design rationale
 - `docs/partial_project_resolution.md` — how project resolution works
-- [docs/plan-schema.md](../../docs/plan-schema.md) — status enum and full lifecycle transition table

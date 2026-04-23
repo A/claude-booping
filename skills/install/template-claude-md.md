@@ -24,7 +24,7 @@ Attached repo: `{{repo path}}`.
 
 ## Plan lifecycle
 
-See `docs/plan-schema.md` for the full 9-state status lifecycle and plan frontmatter schema.
+See `docs/partial_plan_statuses.md` for the full 9-state status lifecycle.
 
 ## Project-specific notes
 
