@@ -6,7 +6,7 @@ Claude Code plugin that grooms and executes plans across user projects. Plans li
 
 Mid-refactor. Current and trustworthy:
 
-- `skills/groom/SKILL.md`, `skills/chat/SKILL.md`, `skills/develop/SKILL.md`
+- `skills/groom/SKILL.md`, `skills/chat/SKILL.md`, `skills/develop/SKILL.md`, `skills/retro/SKILL.md`
 - `agents/booping-researcher-{senior,middle,junior}.md`
 - `agents/booping-developer-{junior,middle,senior}.md` — refactored to the new contract: skill-owned vault, shared `_booping/agent_booping-developer.md` extension, briefing-based invocation.
 - `bin/booping-plans` (read-only; ~80 lines)
@@ -14,11 +14,10 @@ Mid-refactor. Current and trustworthy:
 
 Stale and **not refactored to the new contract** — treat as broken until updated:
 
-- `skills/{retro,learn,install,help}/`
-- `agents/booping-{teamlead,techlead,product-manager,qa-lead,reviewer}.md` — `booping-reviewer` is no longer called by `/develop` (the skill delegates milestone-diff review to a researcher); it still exists but is effectively dormant.
+- `skills/{learn,install,help}/`
+- (deleted) Five agents deleted in the 2026-04 `/retro` refactor — no agent remains dormant.
 - `bin/booping-init`, `skills/install/template-claude-md.md`
 - `docs/plan-schema.md` references the old `booping-plans set` / `sync-sprints` CLI in places
-- `docs/agent-wiring.md` — superseded by `partial_agent_delegator.md` + `partial_agents_mid_senior.md`; remove when the last skill that still links it (`/retro`) is refactored.
 
 ## Layout
 
