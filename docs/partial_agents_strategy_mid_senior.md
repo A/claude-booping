@@ -21,7 +21,7 @@ Every task runs inside an `Agent()` call — even a 1-line change. Batching cons
 
 ## How to invoke agents
 
-The skill owns all reads and writes against the project vault (`~/Claude/{project}/`). The agent's job is to edit code in the attached repo and report back. The skill flips DoD checkboxes in the plan file after the agent reports done and Verify passes, and appends to `metrics/lesson-hits.md` at the end of the sprint.
+The skill owns all reads and writes against the project vault (`~/Claude/{project}/`). The agent's job is to edit code in the attached repo and report back. The skill flips DoD checkboxes in the plan file after the agent reports done and Verify passes.
 
 Lesson context reaches agents through two baked-in channels, not per-briefing routing:
 

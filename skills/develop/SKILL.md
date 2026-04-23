@@ -96,12 +96,11 @@ Parallelism: dispatch tasks (within a milestone or across milestones) in paralle
 1. Run the plan's Final Verification commands.
 2. Confirm every DoD checkbox is `[x]` and every milestone status is `done`.
 3. Apply the `in-progress → awaiting-retro` transition per [../../docs/partial_plan_transitions_develop.md](../../docs/partial_plan_transitions_develop.md): set `status: awaiting-retro`, `completed: <today>`. Run `booping-plans --status awaiting-retro` to confirm.
-4. Append one row per lesson consulted to `~/Claude/{project_name}/metrics/lesson-hits.md` (lesson path + plan path + today's date).
-5. Commit the vault updates:
+4. Commit the vault updates:
 
 ```bash
 cd ~/Claude/{project_name}
-git add plans/<plan-filename>.md metrics/lesson-hits.md sprints.md
+git add plans/<plan-filename>.md sprints.md
 git commit -m "develop: <kebab-sprint-title> awaiting-retro"
 ```
 
@@ -116,7 +115,7 @@ A sprint may span multiple repos; one branch per repo under the same sprint titl
 
 ## Hard rules
 
-- **Always delegate.** The orchestrator writes nothing except the plan file (progress marks + frontmatter) and `metrics/lesson-hits.md`. Any other file touched in the main context is a bug.
+- **Always delegate.** The orchestrator writes nothing except the plan file (progress marks + frontmatter). Any other file touched in the main context is a bug.
 - **No worktree isolation.** Never invoke `Agent` with `isolation: "worktree"`. Agents work directly in the attached repo on the sprint branch.
 - **No scope additions.** If a worker suggests "while I'm here, I'd also…", reject and ask the user.
 - **Lessons are load-bearing.** If mid-task you notice a lesson would be violated, stop the agent and re-plan.
