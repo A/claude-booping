@@ -29,7 +29,7 @@ Start a discussion:      /chat
 Spec new work:           /groom <topic>
 Execute a plan:          /develop ~/Claude/<project>/plans/YYYYMMDD-*.md
 After a sprint ships:    /retro ~/Claude/<project>/plans/YYYYMMDD-*.md
-Extract lessons:         /learn ~/Claude/<project>/retrospectives/YYYYMMDD-*.md
+Extract lessons:         /learn [~/Claude/<project>/retrospectives/YYYYMMDD-*.md]
 ```
 
 Current project resolution: marker file (`.booping-project`) → `~/Claude/.booping/projects.json` → ask.
@@ -45,21 +45,17 @@ Artifacts live at `~/Claude/{project}/`. The only writer of `sprints.md` is `/de
 | `/groom` | Deep-research a feature/bug/refactor into `plans/YYYYMMDD-*.md`. | `plans/`, `metrics/lesson-hits.md` |
 | `/develop` | Execute a groomed plan milestone-by-milestone; always delegates to sub-agents. | `sprints.md`, plan progress marks, `metrics/lesson-hits.md` |
 | `/retro` | Review what shipped, gather feedback, produce retrospective. | `retrospectives/`, `sprints.md` (`goal` field only) |
-| `/learn` | Extract lessons and fold them into `_booping/` extensions. | `lessons/`, `_booping/skill_*.md`, `_booping/agent_*.md` |
+| `/learn` | Extract lessons from a retrospective (defaults to most recent). Presents a unified review table; user accepts/rejects/adds in one pass. Writes accepted lessons to `lessons/` and project-local extensions to `_booping/`. Plugin-side edits (debug-mode only). Transitions `awaiting-learning → done`. | `lessons/`, `_booping/skill_*.md`, `_booping/agent_*.md` |
 
 ## Agents
 
-Orchestrators (always delegated to from skills):
+Researchers (delegated to from skills for read-heavy work):
 
-- `booping-teamlead` — user-facing coordination, sprint/metrics writes, draft retrospectives
-- `booping-techlead` — codebase research, tech feedback, blast radius
-- `booping-product-manager` — requirements validation, business-goal judgement
-- `booping-qa-lead` — testing strategy, regression risk
+- `booping-researcher-{junior,middle,senior}` — codebase research, session-log search, tech feedback; tier is selected by the skill per `docs/partial_agents_researcher_tiers.md`.
 
 Workers (called from `/develop`):
 
-- Developer agents live in `agents/booping-developer-{junior,middle,senior}.md`. The active SP→agent mapping is the strategy selected by [`docs/partial_agent_delegator.md`](../../docs/partial_agent_delegator.md) — read it to see which tiers are active and what the batching rules are.
-- `booping-reviewer` — milestone diff review
+- Developer agents live in `agents/booping-developer-{middle,senior}.md`. The active SP→agent mapping is the strategy selected by [`docs/partial_agent_delegator.md`](../../docs/partial_agent_delegator.md) — read it to see which tiers are active and what the batching rules are.
 
 ## Layout
 
@@ -84,17 +80,19 @@ Workers (called from `/develop`):
 /groom   ──► plans/20260421-foo.md
                 │
                 ▼
-/develop ──► spawns booping-developer-{junior,middle,senior} per task
-             spawns booping-reviewer per milestone
+/develop ──► spawns booping-developer-{middle,senior} per task
+             milestone diff review per partial_agent_delegator
              updates sprints.md + plan progress
                 │
                 ▼
-/retro   ──► booping-techlead / -product-manager / -qa-lead in parallel
-             booping-teamlead synthesizes → retrospectives/*.md
+/retro   ──► booping-researcher-middle for session-log search
+             orchestrator synthesizes → retrospectives/*.md
                 │
                 ▼
-/learn   ──► lessons/{N}_*.md
-             optional _booping/skill_*.md, _booping/agent_*.md updates
+/learn   ──► unified review table (accept/reject/add)
+             lessons/{N}_*.md + _booping/skill_*.md, _booping/agent_*.md
+             plugin-side edits (debug-mode only)
+             plan transitions awaiting-learning → done
 ```
 
 ## Hard rules (cross-cutting)
