@@ -37,7 +37,7 @@ Stale and **not refactored to the new contract** — treat as broken until updat
 - **Phases over flat sections**: Preflight → High-level workflow → Phase 0..N. Preflight loads partials and project context.
 - **Research delegation**: when a skill needs to read code or do web research, delegate to `booping-researcher-{senior,middle,junior}` to protect the skill's context. Researcher returns a summary, not raw dumps.
 - **Agent wiring**: skills own all reads/writes against `~/Claude/{project}/`. Agents touch only code in the attached repo and never scan the vault. Briefings carry task / decisions / files / DoD / Verify — no lesson paths. Lesson context reaches agents via two baked-in channels: DoD + Verify pasted from the plan (folded in by `/groom`) and the shared extension `~/Claude/{project}/_booping/agent_booping-developer.md` (folded in by `/learn`).
-- **Per-project quality checks**: `/develop` classifies the attached repo's quality tooling (lint, typecheck, tests) into hook-enforced (runs on commit) vs configured-but-manual (skill runs per milestone) per `docs/partial_project_quality_checks.md`. Plan-authored `Verify` commands target milestone DoD; project quality commands run alongside them.
+- **Per-project quality checks**: `/develop` classifies the attached repo's quality tooling (lint, typecheck, tests) into hook-enforced (runs on commit) vs configured-but-manual (skill runs per milestone) per `docs/partial_development_quality_checks.md`. Plan-authored `Verify` commands target milestone DoD; project quality commands run alongside them.
 
 ## Plan lifecycle
 
@@ -75,12 +75,12 @@ Use `skills/groom/SKILL.md` as the reference shape. Common partials worth reusin
 - `partial_project_resolution` — resolve project, read vault CLAUDE.md.
 - `partial_plan_statuses` — lifecycle vocabulary.
 - `partial_read_lessons` — uniform lesson-load + summary step.
-- `partial_agents_researcher_tiers` — tier catalogue when the skill delegates reading.
-- `partial_agent_delegator` + `partial_agents_mid_senior` — when the skill spawns worker agents for code edits.
-- `partial_sprint_planning`, `partial_quality_checklist` — grooming-time plan hygiene.
+- `partial_agents_strategy_senior_middle_junior` — tier catalogue when the skill delegates reading.
+- `partial_agent_developers_delegator` + `partial_agents_strategy_mid_senior` — when the skill spawns worker agents for code edits.
+- `partial_sprint_planning`, `partial_plan_quality_checklist` — grooming-time plan hygiene.
 - `partial_cross_validation` — optional second-model review on high-risk plans.
-- `partial_project_quality_checks` — runtime lint/typecheck/test policy (for `/develop`-like skills).
+- `partial_development_quality_checks` — runtime lint/typecheck/test policy (for `/develop`-like skills).
 
 Each refactored skill needs its own `partial_plan_transitions_<skill>.md` listing the status transitions it owns.
 
-Partials that describe an agent family (who to spawn, tier selection, briefing mechanics) are named `partial_agents_<role-or-strategy>.md` — e.g. `partial_agents_mid_senior.md` (a delegation strategy; carries the briefing template), `partial_agents_researcher_tiers.md` (a tier catalogue). The entry point `partial_agent_delegator.md` is a short catalogue of available strategies.
+Partials that describe an agent family (who to spawn, tier selection, briefing mechanics) are named `partial_agents_<role-or-strategy>.md` — e.g. `partial_agents_strategy_mid_senior.md` (a delegation strategy; carries the briefing template), `partial_agents_strategy_senior_middle_junior.md` (a tier catalogue). The entry point `partial_agent_developers_delegator.md` is a short catalogue of available strategies.

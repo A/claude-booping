@@ -27,10 +27,10 @@ This skill is **wide-domain** — it must work across very different projects. P
 
 - Read and resolve project based on [project resolution principle](../../docs/partial_project_resolution.md).
 - Read [plan statuses](../../docs/partial_plan_statuses.md).
-- Read [research agents](../../docs/partial_agents_researcher_tiers.md) — delegate heavy reading to researchers to keep context clean.
+- Read [research agents](../../docs/partial_agents_strategy_senior_middle_junior.md) — delegate heavy reading to researchers to keep context clean.
 - Read [plan transitions for /develop](../../docs/partial_plan_transitions_develop.md) — the only transitions this skill owns.
-- Read [agent delegator](../../docs/partial_agent_delegator.md) — the active delegation strategy, including the SP→agent mapping, batching rules, and briefing template.
-- Read [project quality checks](../../docs/partial_project_quality_checks.md) — how to detect and run the project's own lint / typecheck / test tooling during the sprint.
+- Read [agent delegator](../../docs/partial_agent_developers_delegator.md) — the active delegation strategy, including the SP→agent mapping, batching rules, and briefing template.
+- Read [project quality checks](../../docs/partial_development_quality_checks.md) — how to detect and run the project's own lint / typecheck / test tooling during the sprint.
 - Read lessons per [read lessons](../../docs/partial_read_lessons.md).
 - Read `~/Claude/{project_name}/_booping/skill_develop.md` — project-local overrides, if present.
 - Read the attached repo's `CLAUDE.md` — project conventions for the code under development.
@@ -51,7 +51,7 @@ Read the plan file, the vault `CLAUDE.md`, and the repo `CLAUDE.md`. (Lessons ar
 
 **Validate entry status**: the plan's `status:` must be `ready-for-dev` or `backlog`. Any other status means `/develop` has no claim — stop and report clearly.
 
-Classify the project's quality tooling per [project quality checks](../../docs/partial_project_quality_checks.md): which tools are hook-enforced (let them run naturally at commit time) and which are configured-but-manual (the skill will run them per milestone).
+Classify the project's quality tooling per [project quality checks](../../docs/partial_development_quality_checks.md): which tools are hook-enforced (let them run naturally at commit time) and which are configured-but-manual (the skill will run them per milestone).
 
 If any lesson conflicts with a decision in the plan, stop and flag it to the user before proceeding.
 
@@ -78,13 +78,13 @@ Create the sprint branch per [branch naming](../../docs/partial_branch_naming.md
 For each milestone:
 
 1. `TaskCreate` one task per plan task.
-2. Group and delegate per the active strategy in [agent delegator](../../docs/partial_agent_delegator.md); use the briefing template from that partial. Always delegate — even a 1-line change.
+2. Group and delegate per the active strategy in [agent delegator](../../docs/partial_agent_developers_delegator.md); use the briefing template from that partial. Always delegate — even a 1-line change.
 3. When the worker reports done:
    - Run the milestone's `Verify` command.
-   - Run the configured-but-manual quality commands identified in Phase 0 (see [project quality checks](../../docs/partial_project_quality_checks.md)).
+   - Run the configured-but-manual quality commands identified in Phase 0 (see [project quality checks](../../docs/partial_development_quality_checks.md)).
    - Flip each completed task's DoD checkboxes in the plan: `- [ ]` → `- [x]`.
    - Flip each task row in the milestone's status table: `pending` → `done`.
-4. Delegate a milestone-diff review to a researcher per [research agents](../../docs/partial_agents_researcher_tiers.md). Ask it to read the diff on the sprint branch and return a bulleted summary covering: plan adherence, scope creep, and regression risk. The orchestrator decides what to action; project-specific triage rules, if any, live in `_booping/skill_develop.md`.
+4. Delegate a milestone-diff review to a researcher per [research agents](../../docs/partial_agents_strategy_senior_middle_junior.md). Ask it to read the diff on the sprint branch and return a bulleted summary covering: plan adherence, scope creep, and regression risk. The orchestrator decides what to action; project-specific triage rules, if any, live in `_booping/skill_develop.md`.
 5. Flip the milestone status to `done`, then commit in the attached repo: `<prefix>(<scope>): M<n> <summary>`.
 6. Report milestone completion to the user with a one-paragraph summary (what shipped, reviewer verdict, any deferred items) before starting the next milestone.
 

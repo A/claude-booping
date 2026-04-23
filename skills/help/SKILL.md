@@ -51,11 +51,11 @@ Artifacts live at `~/Claude/{project}/`. The only writer of `sprints.md` is `/de
 
 Researchers (delegated to from skills for read-heavy work):
 
-- `booping-researcher-{junior,middle,senior}` — codebase research, session-log search, tech feedback; tier is selected by the skill per `docs/partial_agents_researcher_tiers.md`.
+- `booping-researcher-{junior,middle,senior}` — codebase research, session-log search, tech feedback; tier is selected by the skill per `docs/partial_agents_strategy_senior_middle_junior.md`.
 
 Workers (called from `/develop`):
 
-- Developer agents live in `agents/booping-developer-{middle,senior}.md`. The active SP→agent mapping is the strategy selected by [`docs/partial_agent_delegator.md`](../../docs/partial_agent_delegator.md) — read it to see which tiers are active and what the batching rules are.
+- Developer agents live in `agents/booping-developer-{middle,senior}.md`. The active SP→agent mapping is the strategy selected by [`docs/partial_agent_developers_delegator.md`](../../docs/partial_agent_developers_delegator.md) — read it to see which tiers are active and what the batching rules are.
 
 ## Layout
 
@@ -81,7 +81,7 @@ Workers (called from `/develop`):
                 │
                 ▼
 /develop ──► spawns booping-developer-{middle,senior} per task
-             milestone diff review per partial_agent_delegator
+             milestone diff review per partial_agent_developers_delegator
              updates sprints.md + plan progress
                 │
                 ▼
