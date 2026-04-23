@@ -25,6 +25,8 @@ effort: xhigh
 
 Produce a retrospective grounded in session logs, code diff, and user feedback — not vibes.
 
+The retrospective artifact is the sole output. If the retro surfaces work that belongs in `lessons/` or `_booping/skill_*.md`, the skill records the implication in the retro body and instructs the user to run `/learn` — it does not do that work itself.
+
 This skill is **wide-domain** — it must work across very different projects. Project-specific concerns live in `_booping/skill_retro.md`, lessons, and the vault `CLAUDE.md`.
 
 ## Preflight
@@ -34,18 +36,19 @@ This skill is **wide-domain** — it must work across very different projects. P
 - Read [research agents](../../docs/partial_agents_researcher_tiers.md) — researcher-middle is the sole delegation target here.
 - Read [plan transitions for /retro](../../docs/partial_plan_transitions_retro.md).
 - Read lessons per [read lessons](../../docs/partial_read_lessons.md).
-- Read [retrospective template](../../docs/template_retrospective.md) — section spec for Phase 3.
-- Read `~/Claude/{project_name}/lessons/` — full lesson set, loaded here for the Phase 3 cross-check.
+- Read [retrospective template](../../docs/template_retrospective.md) — section spec for Phase 4.
+- Read `~/Claude/{project_name}/lessons/` — full lesson set, loaded here for the Phase 4 cross-check.
 - Read `~/Claude/{project_name}/_booping/skill_retro.md` if present — project-local overrides and extra instructions.
 - Read the attached repo's `CLAUDE.md` — project conventions.
 
 ## High-level workflow
 
 1. Intake — resolve `$ARGUMENTS` to 0/1/N plan paths; delegate session-log search.
-2. Sprint analysis — read plan(s) + diff + session summary inline.
-3. User feedback — targeted `AskUserQuestion` derived from Phase 1 findings.
-4. Synthesize — draft using `template_retrospective.md`; run lesson cross-check.
-5. Save & transition — write retrospective; apply transitions per `partial_plan_transitions_retro.md`; commit.
+2. Initial user feedback — open-ended `AskUserQuestion` before orchestrator analysis.
+3. Sprint analysis — read plan(s) + diff + session summary inline, informed by Phase 1 answers.
+4. Follow-up feedback — targeted `AskUserQuestion` on gaps Phase 1 did not cover.
+5. Synthesize — draft using `template_retrospective.md`; run lesson cross-check.
+6. Save & transition — write retrospective; apply transitions per `partial_plan_transitions_retro.md`; commit.
 
 ---
 
@@ -63,7 +66,15 @@ Read each plan in full. Compute the combined git diff range (union of each plan'
 
 Delegate session-log search to `booping-researcher-middle`. Brief: search `~/.claude/projects/` for references to each plan file and sprint topic; return a structured summary of user questions, blockers, and detours. Do not copy raw logs.
 
-## Phase 1 Sprint analysis
+## Phase 1 Initial user feedback
+
+Once plan(s) are selected and read, ask the user for open feedback on the sprint(s) via `AskUserQuestion` — before orchestrator analysis runs. The goal is to capture the user's raw experience (what felt right, what felt wrong, what surprised them) before any findings from the orchestrator can bias the framing.
+
+For a single-plan retro, one open-ended prompt. For a multi-plan retro, one prompt per plan (or one combined prompt if the plans are tightly related). This is the only place in the skill where open-ended prompts are correct — Phase 3 is targeted.
+
+Hold the user's answers in context for Phases 2 and 4. May run in parallel with the session-log researcher from Phase 0.
+
+## Phase 2 Sprint analysis
 
 The orchestrator performs sprint analysis **inline** — no sub-agent delegation. For each plan, extract:
 
@@ -72,23 +83,25 @@ The orchestrator performs sprint analysis **inline** — no sub-agent delegation
 - Test coverage delivered vs. planned.
 - Per-plan business-goal verdict: `success | partial | fail`.
 
-Hold the extracted facts in context for Phases 2–3.
+Incorporate the user's Phase 1 answers into the analysis — a finding that contradicts user feedback gets a second pass.
 
-## Phase 2 User feedback
+Hold the extracted facts in context for Phases 3–4.
 
-Use `AskUserQuestion` with targeted prompts derived from Phase 1 findings — cite each finding, never ask open-ended "how did it go?". For multi-plan retros, include at least one prompt confirming each plan's goal verdict if Phase 1 left any ambiguous.
+## Phase 3 Follow-up feedback
 
-## Phase 3 Synthesize
+Use `AskUserQuestion` with targeted prompts narrowed to gaps Phase 1 left open — cite each finding, do not repeat the open-ended ask from Phase 1. For multi-plan retros, include at least one prompt confirming each plan's goal verdict if Phase 2 left any ambiguous.
+
+## Phase 4 Synthesize
 
 Draft the retrospective using `../../docs/template_retrospective.md` as the section spec. Do not inline the template's body structure — follow its sections as written.
 
 **Lesson cross-check**: For each problem identified in "What went wrong", scan the lesson set loaded at Preflight (from `~/Claude/{project_name}/lessons/`) and any extra instructions in `_booping/skill_retro.md`. No additional load — use only what's in context. Where a loaded rule should have prevented or caught a problem, add an entry under the template's `### Ignored / unapplied lessons` subsection citing the lesson path, the rule, and what happened instead.
 
-Do not generate new candidate lessons — that is `/learn`'s responsibility.
+When the synthesis surfaces something that ought to become a new lesson, or a change to an existing `lessons/` or `_booping/skill_*.md` file, record the implication in the retro body and flag `/learn` as the follow-up skill. Do not write or edit those files from within `/retro`.
 
-Run the template's inline self-review checklist before Phase 4. Any `no` → fix before proceeding.
+Run the template's inline self-review checklist before Phase 5. Any `no` → fix before proceeding.
 
-## Phase 4 Save & transition
+## Phase 5 Save & transition
 
 Write the retrospective to `~/Claude/{project_name}/retrospectives/YYYYMMDD-{kebab-title}.md`.
 
@@ -113,7 +126,7 @@ git commit -m "retro: {kebab-sprint-title}"
 
 ## What retro does NOT do
 
-- Does **not** extract lessons — that is `/learn`'s responsibility.
+- Does **not** edit `lessons/` or `_booping/skill_*.md`. Implications from retro findings are recorded in the retro body with a `/learn` follow-up; the write belongs to `/learn`.
 - Does **not** generate candidate new lessons.
 - Does **not** write a stale-`CLAUDE.md` impact analysis section.
 - Does **not** edit any `CLAUDE.md`.
@@ -122,6 +135,8 @@ git commit -m "retro: {kebab-sprint-title}"
 
 ## Hard rules
 
+- **Single output**: the retrospective artifact plus the plan-frontmatter transitions per `partial_plan_transitions_retro.md`. Nothing else written, nothing else edited.
+- **Lessons and extensions are out of scope**: updating `lessons/` or `_booping/skill_*.md` as a consequence of retro findings is forbidden. Surface the implication in the retro body and instruct the user to run `/learn`.
 - **Orchestrator owns the retrospective write** — never route the synthesis or write through an agent.
 - **Retrospective body is project-specific** — no cross-project generalization, no candidate lessons.
 - **No blame language** — retrospective content targets decisions and processes, not people.
