@@ -2,7 +2,7 @@ Every skill loads the lesson set up front so the active rules are live in contex
 
 ## Read all lessons
 
-Enumerate `~/Claude/{project_name}/lessons/` and read every file in full (frontmatter + body). Don't sample; don't skip. If a `scope:` field exists, a skill may choose to skip lessons whose scope excludes it — otherwise load everything.
+Enumerate `~/Claude/{project_name}/lessons/` and read every file in full (frontmatter + body). Don't sample; don't skip. Load everything — there is no scope filter; lessons are shared across all skills.
 
 ## Log to the user
 
