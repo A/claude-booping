@@ -27,9 +27,9 @@ This skill is **wide-domain** — it must work across very different projects. P
 
 - Read and resolve project based on [project resolution principle](../../docs/partial_project_resolution.md).
 - Read [plan statuses](../../docs/partial_plan_statuses.md).
-- Read [research agents](../../docs/partial_research_agents.md) — delegate heavy reading to researchers to keep context clean.
+- Read [research agents](../../docs/partial_agents_researcher_tiers.md) — delegate heavy reading to researchers to keep context clean.
 - Read [plan transitions for /develop](../../docs/partial_plan_transitions_develop.md) — the only transitions this skill owns.
-- Read [developer tiers](../../docs/partial_developer_tiers.md) — SP→agent mapping for delegating tasks.
+- Read [developer tiers](../../docs/partial_agents_developer_tiers.md) — SP→agent mapping for delegating tasks.
 - Read all lessons in `~/Claude/{project_name}/lessons/`.
 - Read `~/Claude/{project_name}/_booping/skill_develop.md` — project-local overrides, if present.
 - Read the attached repo's `CLAUDE.md` — project conventions for the code under development.
@@ -89,7 +89,7 @@ One branch per sprint. Project-specific prefix overrides may live in `_booping/s
 For each milestone, the orchestrator loop:
 
 1. `TaskCreate` one task per plan task.
-2. Resolve SP → worker agent via [../../docs/partial_developer_tiers.md](../../docs/partial_developer_tiers.md). Do NOT inline an SP table.
+2. Resolve SP → worker agent via [../../docs/partial_agents_developer_tiers.md](../../docs/partial_agents_developer_tiers.md). Do NOT inline an SP table.
 3. Delegate via `Agent()`. Always delegate — even for a 1-line change. Brief each agent using the header documented in [docs/agent-wiring.md](../../docs/agent-wiring.md); do NOT re-embed the template here.
 4. Filter `Applicable lessons:` by the worker's domain set (`code`, `tech`, `all` for developer agents).
 5. When the worker reports done, run the milestone's `Verify` command; read DoD checkboxes; update milestone status in the plan.
