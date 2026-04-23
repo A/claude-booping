@@ -1,19 +1,8 @@
-This partial activates plugin-edit mode for `/learn` when a debug flag is present alongside the calling SKILL.md.
+Activation body for `/learn`'s plugin-edit mode. This partial is loaded only when `docs/partial_debug_delegator.md`'s guard recorded `debug_active=true`. The delegator owns the guard; this file owns the behaviour.
 
-## Guard
+## Learning-target matrix extension
 
-Run the mechanical check before doing anything else:
-
-```bash
-test -f <skill-dir>/.debug_enabled
-```
-
-- Exit code **1** (file absent): do nothing further. The activation block below is dead context for this run.
-- Exit code **0** (file present): record `debug_active=true` and continue into the activation block.
-
-## Activation block
-
-`debug_active=true` extends the learning-target matrix defined in `docs/partial_learn_targets.md` with three additional types. Do not redefine the matrix header — add rows only:
+Extend the learning-target matrix defined in `docs/partial_learn_targets.md` with three additional types. Do not redefine the matrix header — add rows only:
 
 | Type | Holds | Picked when |
 |------|-------|-------------|
@@ -21,12 +10,14 @@ test -f <skill-dir>/.debug_enabled
 | `plugin-agent` | An agent definition inside the plugin repo (`agents/<name>.md`) | The accepted learning changes how an agent is defined or prompted across all projects |
 | `plugin-partial` | A shared partial or template inside the plugin repo (`docs/partial_*.md`, `docs/template_*.md`) | The accepted learning changes a reusable fragment that multiple skills reference |
 
-**Commit boundary.** After writing all plugin-* targets in a single run, commit them together:
+## Commit boundary
+
+After writing all plugin-* targets in a single run, commit them together from the plugin repo root:
 
 ```bash
 cd <plugin-repo-root> && git add <changed files> && git commit -m "<conventional commit message>"
 ```
 
-Derive `<plugin-repo-root>` from `<skill-dir>`: a skill lives at `skills/<name>/`, so the repo root is two levels up (`dirname` of `dirname` of `<skill-dir>`). Do not hardcode any path.
+Derive `<plugin-repo-root>` from `<skill-dir>` (which the delegator already resolved): a skill lives at `skills/<name>/`, so the repo root is two levels up. Do not hardcode any path.
 
 Plugin-* rows follow the same decomposition rule as base types: if one accepted learning would span two plugin targets, split it into two rows.

@@ -30,7 +30,7 @@ This skill is **wide-domain** — it must work across very different projects. P
 - Read [plan statuses](../../docs/partial_plan_statuses.md).
 - Read [plan transitions for /learn](../../docs/partial_plan_transitions_learn.md) — the only transition this skill owns.
 - Read [learning targets](../../docs/partial_learn_targets.md) — the Type / Holds / Picked-when matrix this skill routes every candidate through.
-- Read [partial_debug_learn](../../docs/partial_debug_learn.md) — runs its own activation check and may extend the type vocabulary defined in `partial_learn_targets`.
+- Read [partial_debug_delegator](../../docs/partial_debug_delegator.md) — cheap gate that runs the mechanical check and, only when active, loads `partial_debug_learn` to extend the type vocabulary defined in `partial_learn_targets`.
 - Read [review-table template](../../docs/template_learn_review_table.md) — format for Phase 2's user-facing table.
 - Read lessons per [read lessons](../../docs/partial_read_lessons.md).
 - Read `~/Claude/{project_name}/_booping/skill_learn.md` — project-local overrides, if present.
