@@ -10,14 +10,13 @@ Mid-refactor. Current and trustworthy:
 - `agents/booping-researcher-{senior,middle,junior}.md`
 - `agents/booping-developer-{junior,middle,senior}.md` — refactored to the new contract: skill-owned vault, shared `_booping/agent_booping-developer.md` extension, briefing-based invocation.
 - `bin/booping-plans` (read-only; ~80 lines)
-- Everything in `docs/` (`partial_*.md`, `template_*.md`, `plan-schema.md` modulo CLI references)
+- Everything in `docs/` (`partial_*.md`, `template_*.md`)
 
 Stale and **not refactored to the new contract** — treat as broken until updated:
 
 - `skills/{install,help}/`
 - (deleted) Five agents deleted in the 2026-04 `/retro` refactor — no agent remains dormant.
 - `bin/booping-init`, `skills/install/template-claude-md.md`
-- `docs/plan-schema.md` references the old `booping-plans set` / `sync-sprints` CLI in places
 
 ## Layout
 
@@ -75,7 +74,7 @@ Use `skills/groom/SKILL.md` as the reference shape. Common partials worth reusin
 - `partial_project_resolution` — resolve project, read vault CLAUDE.md.
 - `partial_plan_statuses` — lifecycle vocabulary.
 - `partial_read_lessons` — uniform lesson-load + summary step.
-- `partial_agents_strategy_senior_middle_junior` — tier catalogue when the skill delegates reading.
+- `partial_agents_researchers_delegator` — tier catalogue when the skill delegates reading.
 - `partial_agent_developers_delegator` + `partial_agents_strategy_mid_senior` — when the skill spawns worker agents for code edits.
 - `partial_sprint_planning`, `partial_plan_quality_checklist` — grooming-time plan hygiene.
 - `partial_cross_validation` — optional second-model review on high-risk plans.
@@ -83,4 +82,4 @@ Use `skills/groom/SKILL.md` as the reference shape. Common partials worth reusin
 
 Each refactored skill needs its own `partial_plan_transitions_<skill>.md` listing the status transitions it owns.
 
-Partials that describe an agent family (who to spawn, tier selection, briefing mechanics) are named `partial_agents_<role-or-strategy>.md` — e.g. `partial_agents_strategy_mid_senior.md` (a delegation strategy; carries the briefing template), `partial_agents_strategy_senior_middle_junior.md` (a tier catalogue). The entry point `partial_agent_developers_delegator.md` is a short catalogue of available strategies.
+Agent families follow a two-layer convention: a delegator partial (`partial_<domain>_delegator.md`) is the entry-point catalogue listing available strategies; each strategy partial (`partial_agents_strategy_<name>.md`) carries the tier roster, SP→agent mapping, and briefing template. Current examples: `partial_agent_developers_delegator.md` → `partial_agents_strategy_mid_senior.md` for code tasks; `partial_agents_researchers_delegator.md` → `partial_agents_strategy_senior_middle_junior.md` for research. Project-specific extra instructions reach skills and agents via the generic `partial_extra_instructions.md` guide — the caller names a file path (e.g. `_booping/skill_develop.md`) and the guide defines the "silent-skip if absent, merge into operating context" semantics.
