@@ -1,5 +1,7 @@
 Mandatory for features and refactorings; optional for single-file bugs.
 
+Run `booping-validate-plan` **once per plan** during grooming, after addressing the user's initial feedback on the draft. Do not re-run on every iteration. Cross-validation is an advisory review, not a CI gate — re-running burns tokens without proportional value. If the user makes substantive scope changes after the first validation, re-running is acceptable; iterative wording tweaks are not grounds to re-run.
+
 ```bash
 booping-validate-plan ~/Claude/{project}/plans/YYYYMMDD-{kebab-title}.md
 ```
