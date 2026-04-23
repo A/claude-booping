@@ -64,21 +64,7 @@ Ask: "Ready to start, or adjust?" Wait for explicit confirmation.
 
 ## Phase 2 Branch
 
-In the **attached repo** (not the vault), create a sprint branch before any worker writes code:
-
-```bash
-cd <repo-path>
-git checkout -b <prefix>/<kebab-sprint-title>
-```
-
-| Plan `type` | Branch prefix |
-|-------------|---------------|
-| feature     | `feat/`       |
-| bug         | `fix/`        |
-| refactoring | `refactor/`   |
-| other       | `chore/`      |
-
-One branch per sprint. Project-specific prefix overrides may live in `_booping/skill_develop.md`. Never run worker agents against `main` or `master`.
+Create the sprint branch per [branch naming](../../docs/partial_branch_naming.md) before spawning any worker.
 
 ## Phase 3 Execute
 
