@@ -32,7 +32,7 @@ After a sprint ships:    /retro ~/Claude/<project>/plans/YYYYMMDD-*.md
 Extract lessons:         /learn [~/Claude/<project>/retrospectives/YYYYMMDD-*.md]
 ```
 
-Current project resolution: marker file (`.booping-project`) → `~/Claude/.booping/projects.json` → ask.
+Current project resolution: marker file (`.booping-project`) → ask.
 Artifacts live at `~/Claude/{project}/`. The only writer of `sprints.md` is `/develop`.
 
 ## Skills
@@ -40,7 +40,7 @@ Artifacts live at `~/Claude/{project}/`. The only writer of `sprints.md` is `/de
 | Slash | Purpose | Writes |
 |-------|---------|--------|
 | `/help` | This. | — |
-| `/install` | Scaffold a new booping project and/or attach the current repo. | `~/Claude/{project}/*`, `~/Claude/.booping/projects.json`, optional `.booping-project` |
+| `/install` | Scaffold a new booping project and/or attach the current repo. | `~/Claude/{project}/*`, optional `.booping-project` |
 | `/chat` | Read-only discussion over project artifacts. | — |
 | `/groom` | Deep-research a feature/bug/refactor into `plans/YYYYMMDD-*.md`. | `plans/` |
 | `/develop` | Execute a groomed plan milestone-by-milestone; always delegates to sub-agents. | `sprints.md`, plan progress marks |
@@ -61,7 +61,6 @@ Workers (called from `/develop`):
 
 ```
 ~/Claude/
-├── .booping/projects.json       # CWD → project mapping
 └── {project}/
     ├── plans/                   # /groom output
     ├── retrospectives/          # /retro output

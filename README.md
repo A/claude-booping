@@ -66,8 +66,6 @@ Developer agents — invoked from `/develop` per task:
 
 ```
 ~/Claude/
-├── .booping/
-│   └── projects.json              # CWD → project mapping
 └── {project}/
     ├── CLAUDE.md                   # project instructions
     ├── sprints.md                  # sprint registry — written ONLY by /develop
