@@ -11,7 +11,6 @@ Attached repo: `{{repo path}}`.
 - `retrospectives/` — sprint retros (`/retro` writes here)
 - `lessons/` — extracted rules, always read before `/groom` and `/develop`
 - `notes/` — research, user stories, decision logs
-- `metrics/` — `lesson-hits.md`, `sp-rollup.md`
 - `_booping/` — project-local skill/agent extensions (read at the start of every skill run in this project)
 - `sprints.md` — regenerated wholesale by `booping-plans sync-sprints`; do not hand-edit
 
@@ -25,7 +24,7 @@ Attached repo: `{{repo path}}`.
 
 ## Plan lifecycle
 
-See `docs/plan-schema.md` for the full 9-state status lifecycle and plan frontmatter schema.
+See `docs/partial_plan_statuses.md` for the full 9-state status lifecycle.
 
 ## Project-specific notes
 

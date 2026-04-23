@@ -33,12 +33,12 @@ This skill is **wide-domain** — it must work across very different projects. P
 
 - Read and resolve project based on [project resolution principle](../../docs/partial_project_resolution.md).
 - Read [plan statuses](../../docs/partial_plan_statuses.md).
-- Read [research agents](../../docs/partial_agents_researcher_tiers.md) — researcher-middle is the sole delegation target here.
+- Read [research agents](../../docs/partial_agents_researchers_delegator.md) — researcher-middle is the sole delegation target here.
 - Read [plan transitions for /retro](../../docs/partial_plan_transitions_retro.md).
 - Read lessons per [read lessons](../../docs/partial_read_lessons.md).
 - Read [retrospective template](../../docs/template_retrospective.md) — section spec for Phase 4.
 - Read `~/Claude/{project_name}/lessons/` — full lesson set, loaded here for the Phase 4 cross-check.
-- Read `~/Claude/{project_name}/_booping/skill_retro.md` if present — project-local overrides and extra instructions.
+- Read `~/Claude/{project_name}/_booping/skill_retro.md` per [extra instructions](../../docs/partial_extra_instructions.md) — silent-skip if absent.
 - Read the attached repo's `CLAUDE.md` — project conventions.
 
 ## High-level workflow

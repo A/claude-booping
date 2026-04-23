@@ -42,8 +42,8 @@ Artifacts live at `~/Claude/{project}/`. The only writer of `sprints.md` is `/de
 | `/help` | This. | — |
 | `/install` | Scaffold a new booping project and/or attach the current repo. | `~/Claude/{project}/*`, `~/Claude/.booping/projects.json`, optional `.booping-project` |
 | `/chat` | Read-only discussion over project artifacts. | — |
-| `/groom` | Deep-research a feature/bug/refactor into `plans/YYYYMMDD-*.md`. | `plans/`, `metrics/lesson-hits.md` |
-| `/develop` | Execute a groomed plan milestone-by-milestone; always delegates to sub-agents. | `sprints.md`, plan progress marks, `metrics/lesson-hits.md` |
+| `/groom` | Deep-research a feature/bug/refactor into `plans/YYYYMMDD-*.md`. | `plans/` |
+| `/develop` | Execute a groomed plan milestone-by-milestone; always delegates to sub-agents. | `sprints.md`, plan progress marks |
 | `/retro` | Review what shipped, gather feedback, produce retrospective. | `retrospectives/`, `sprints.md` (`goal` field only) |
 | `/learn` | Extract lessons from a retrospective (defaults to most recent). Presents a unified review table; user accepts/rejects/adds in one pass. Writes accepted lessons to `lessons/` and project-local extensions to `_booping/`. Plugin-side edits (debug-mode only). Transitions `awaiting-learning → done`. | `lessons/`, `_booping/skill_*.md`, `_booping/agent_*.md` |
 
@@ -51,11 +51,11 @@ Artifacts live at `~/Claude/{project}/`. The only writer of `sprints.md` is `/de
 
 Researchers (delegated to from skills for read-heavy work):
 
-- `booping-researcher-{junior,middle,senior}` — codebase research, session-log search, tech feedback; tier is selected by the skill per `docs/partial_agents_researcher_tiers.md`.
+- `booping-researcher-{junior,middle,senior}` — codebase research, session-log search, tech feedback; tier is selected by the skill per `docs/partial_agents_researchers_delegator.md`.
 
 Workers (called from `/develop`):
 
-- Developer agents live in `agents/booping-developer-{middle,senior}.md`. The active SP→agent mapping is the strategy selected by [`docs/partial_agent_delegator.md`](../../docs/partial_agent_delegator.md) — read it to see which tiers are active and what the batching rules are.
+- Developer agents live in `agents/booping-developer-{middle,senior}.md`. The active SP→agent mapping is the strategy selected by [`docs/partial_agent_developers_delegator.md`](../../docs/partial_agent_developers_delegator.md) — read it to see which tiers are active and what the batching rules are.
 
 ## Layout
 
@@ -66,9 +66,6 @@ Workers (called from `/develop`):
     ├── plans/                   # /groom output
     ├── retrospectives/          # /retro output
     ├── lessons/                 # /learn output
-    ├── metrics/
-    │   ├── lesson-hits.md
-    │   └── sp-rollup.md
     ├── _booping/                # project-local skill/agent extensions
     ├── CLAUDE.md
     └── sprints.md               # /develop only
@@ -81,7 +78,7 @@ Workers (called from `/develop`):
                 │
                 ▼
 /develop ──► spawns booping-developer-{middle,senior} per task
-             milestone diff review per partial_agent_delegator
+             milestone diff review per partial_agent_developers_delegator
              updates sprints.md + plan progress
                 │
                 ▼
@@ -107,4 +104,3 @@ Workers (called from `/develop`):
 - `README.md` — higher-level overview and install instructions
 - `PRD.md` — design rationale
 - `docs/partial_project_resolution.md` — how project resolution works
-- [docs/plan-schema.md](../../docs/plan-schema.md) — status enum and full lifecycle transition table

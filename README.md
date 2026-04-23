@@ -76,9 +76,6 @@ Developer agents — invoked from `/develop` per task:
     ├── retrospectives/             # /retro output
     ├── lessons/                    # /learn output: {N}_{title}.md
     ├── notes/                      # freeform research, user stories
-    ├── metrics/
-    │   ├── lesson-hits.md          # how often each lesson was applied
-    │   └── sp-rollup.md            # story points per sprint + monthly totals
     └── _booping/                   # project-local skill/agent extensions
         ├── skill_{name}.md         # read at the start of every invocation
         └── agent_{name}.md

@@ -34,9 +34,9 @@ This skill is **wide-domain** — it must work across very different projects (b
 - Read [plan statuses](../../docs/partial_plan_statuses.md).
 - Classify the task per [task classification](../../docs/partial_task_classification.md) — ask the user or infer with confirmation.
   Read detailed guidance when you understand which task type user is planning.
-- Read [research agents](../../docs/partial_agents_researcher_tiers.md) — delegate research to researchers to keep this skill's context clean.
+- Read [research agents](../../docs/partial_agents_researchers_delegator.md) — delegate research to researchers to keep this skill's context clean.
 - Read [sprint planning](../../docs/partial_sprint_planning.md) — full estimation framework: scale, totals, sizing thresholds, defensive buffer.
-- Read extra instructions for grooming skill from `~/Claude/{project_name}/_booping/skill_groom.md` if present.
+- Read `~/Claude/{project_name}/_booping/skill_groom.md` per [extra instructions](../../docs/partial_extra_instructions.md) — silent-skip if absent.
 - Read lessons per [read lessons](../../docs/partial_read_lessons.md).
 - Read [plan transitions for /groom](../../docs/partial_plan_transitions_groom.md) for the valid transitions and how to apply them.
 
@@ -120,7 +120,7 @@ Run the quality checklist before showing the plan to the user. Run cross-validat
 
 ### Quality checklist
 
-Run [quality checklist](../../docs/partial_quality_checklist.md). Fix every violation before showing the plan.
+Run [quality checklist](../../docs/partial_plan_quality_checklist.md). Fix every violation before showing the plan.
 
 ### Cross-validation (Gemini)
 

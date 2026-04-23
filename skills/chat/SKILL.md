@@ -30,10 +30,10 @@ This skill is **wide-domain** — it must work across very different projects. P
 
 - Read and resolve project based on [project resolution principle](../../docs/partial_project_resolution.md).
 - Read [plan statuses](../../docs/partial_plan_statuses.md).
-- Read [research agents](../../docs/partial_agents_researcher_tiers.md) — delegate heavy reading to researchers to keep context clean.
+- Read [research agents](../../docs/partial_agents_researchers_delegator.md) — delegate heavy reading to researchers to keep context clean.
 - Read `~/Claude/{project_name}/CLAUDE.md` — vault and project conventions.
 - Read lessons per [read lessons](../../docs/partial_read_lessons.md).
-- Read `~/Claude/{project_name}/_booping/skill_chat.md` if present — project-local overrides.
+- Read `~/Claude/{project_name}/_booping/skill_chat.md` per [extra instructions](../../docs/partial_extra_instructions.md) — silent-skip if absent.
 
 ## High-level workflow
 
@@ -72,7 +72,7 @@ Read artifacts referenced in `$ARGUMENTS` or named during conversation before an
 
 Answer questions, explore the vault (Glob/Grep inside `~/Claude/{project_name}/`), and make small edits that fit within the current session. When the user refers to something not yet loaded, read it before answering.
 
-You may delegate research to a `booping-researcher-{senior,middle,junior}` agent when you need a summary from files, code, web searches, or docs — see [research agents](../../docs/partial_agents_researcher_tiers.md) for tier selection.
+You may delegate research to a `booping-researcher-{senior,middle,junior}` agent when you need a summary from files, code, web searches, or docs — see [research agents](../../docs/partial_agents_researchers_delegator.md) for tier selection.
 
 ## Phase 3 Hand-offs
 
