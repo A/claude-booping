@@ -1,6 +1,6 @@
 How a booping skill picks worker agents and groups tasks into briefings.
 
-Each briefing includes a `Contract:` block — the concatenation of `partial_agents_developer_rules.md`, `partial_agents_developer_workflow.md`, and `partial_extra_instructions.md` — prepended by the skill at runtime. Agents receive the full operating contract in the briefing and do not scan the plugin tree.
+Each briefing carries only the task envelope (task/DoD/Verify). Agents load their full operating contract — rules, workflow, and extra instructions — from their own Preflight section; the skill does not prepend a contract block or inject an extra-instructions path.
 
 ## Strategies
 

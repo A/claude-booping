@@ -33,7 +33,7 @@ This skill is **wide-domain** — it must work across very different projects. P
 - Read [research agents](../../docs/partial_agents_researchers_delegator.md) — delegate heavy reading to researchers to keep context clean.
 - Read `~/Claude/{project_name}/CLAUDE.md` — vault and project conventions.
 - Read lessons per [read lessons](../../docs/partial_read_lessons.md).
-- Read `~/Claude/{project_name}/_booping/skill_chat.md` per [extra instructions](../../docs/partial_extra_instructions.md) — silent-skip if absent.
+- Read from `~/Claude/{project}/_booping/skill_chat.md`. Silently skip, if file doesn't exist.
 
 ## High-level workflow
 

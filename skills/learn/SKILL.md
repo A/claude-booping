@@ -33,7 +33,7 @@ This skill is **wide-domain** — it must work across very different projects. P
 - Read [partial_debug_delegator](../../docs/partial_debug_delegator.md) — cheap gate that runs the mechanical check and, only when active, loads `partial_debug_learn` to extend the type vocabulary defined in `partial_learn_targets`.
 - Read [review-table template](../../docs/template_learn_review_table.md) — format for Phase 2's user-facing table.
 - Read lessons per [read lessons](../../docs/partial_read_lessons.md).
-- Read `~/Claude/{project_name}/_booping/skill_learn.md` per [extra instructions](../../docs/partial_extra_instructions.md) — silent-skip if absent.
+- Read from `~/Claude/{project}/_booping/skill_learn.md`. Silently skip, if file doesn't exist.
 - Read the attached repo's `CLAUDE.md` — project conventions.
 
 ## High-level workflow
