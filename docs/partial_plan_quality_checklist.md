@@ -1,18 +1,17 @@
-# Groom quality checklist
+# Plan quality checklist
 
-Run this after writing the backlog file. Every item must be satisfiable by reading the file alone.
+Run after writing the plan file. Every item must be satisfiable by reading the file alone.
 
 ## Frontmatter
 
-- [ ] `type` is one of `feature`, `bug`, `refactoring`
-- [ ] `created` is today's date in `YYYY-MM-DD`
-- [ ] `sp` equals the sum of per-task SP in milestones
-- [ ] `source` is set (link or `ad-hoc`)
+- [ ] Frontmatter matches [template_plan_frontmatter.md](template_plan_frontmatter.md) — every required field present and shaped correctly.
+- [ ] `sp` equals the sum of per-task SP across milestones.
+- [ ] `business_goal` is set (non-empty) for `feature` and `refactoring` plans.
 
 ## Content
 
 - [ ] Context explains the "why now", not just the "what"
-- [ ] For features: business goal is phrased as user-visible outcome, not engineering output
+- [ ] For features and refactorings: business goal is phrased as the user/internal-visible outcome, not engineering output
 - [ ] Definition of Done bullets are testable (verifiable by running a command or reading an output)
 - [ ] Decisions table lists real alternatives — no empty "Alternative considered" rows
 - [ ] Lessons applied section lists lesson file paths, not paraphrased rules
@@ -27,7 +26,7 @@ Run this after writing the backlog file. Every item must be satisfiable by readi
 - [ ] No "handle edge cases", "add error handling", "clean up" as standalone tasks
 - [ ] No "either X or Y" unresolved — pick one, justify in Decisions
 - [ ] No task spanning multiple concerns (model + API + frontend in one row)
-- [ ] No milestone that requires reading more than the backlog file to execute
+- [ ] No milestone that requires reading more than the plan file to execute
 
 ## External references validated
 

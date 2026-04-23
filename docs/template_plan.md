@@ -1,10 +1,7 @@
----
-type: feature | bug | refactoring
-title: {{Descriptive Title}}
-created: YYYY-MM-DD
-source: {{URL / ad-hoc / conversation ref}}
-status: groomed
-sp: {{total}}
+# Plan template
+
+The frontmatter for a plan file lives in [template_plan_frontmatter.md](template_plan_frontmatter.md). Copy it verbatim at the top of a new plan, then fill the body sections below.
+
 ---
 
 # {{Title}}
@@ -15,7 +12,7 @@ Why this work now. 2-4 sentences. Link to prior retros/lessons if they motivate 
 
 ## Business goal
 
-*(features only)* The user-facing outcome. Distinct from the sprint title — phrase this as the problem the user has today and what changes for them after.
+*(features and refactorings)* The user-visible (feature) or internal-visible (refactoring) outcome. Distinct from the sprint title — phrase it as the problem today and what changes after.
 
 ## Definition of Done
 
@@ -90,3 +87,7 @@ just lint
 ## Out of scope
 
 Explicit list of things intentionally not done in this sprint. Prevents scope creep.
+
+## CLAUDE.md impact
+
+Either name the specific `CLAUDE.md` sections/bullets to update (with an owning task) or state "No CLAUDE.md changes required" with a one-line justification.

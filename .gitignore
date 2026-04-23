@@ -1,3 +1,6 @@
+.coverage
 __pycache__/
 *.pyc
 .DS_Store
+.booping
+.debug_enabled

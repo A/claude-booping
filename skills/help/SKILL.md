@@ -6,6 +6,7 @@ user-invocable: true
 allowed-tools:
   - Read
   - Bash(ls *)
+effort: xhigh
 ---
 
 # booping — /help
@@ -26,9 +27,9 @@ booping — per-project grooming/implementation/retro/lessons with mandatory sub
 First time in a repo:    /install
 Start a discussion:      /chat
 Spec new work:           /groom <topic>
-Execute a backlog item:  /develop ~/Claude/<project>/backlog/YYYYMMDD-*.md
-After a sprint ships:    /retro ~/Claude/<project>/backlog/YYYYMMDD-*.md
-Extract lessons:         /learn ~/Claude/<project>/retrospectives/YYYYMMDD-*.md
+Execute a plan:          /develop ~/Claude/<project>/plans/YYYYMMDD-*.md
+After a sprint ships:    /retro ~/Claude/<project>/plans/YYYYMMDD-*.md
+Extract lessons:         /learn [~/Claude/<project>/retrospectives/YYYYMMDD-*.md]
 ```
 
 Current project resolution: marker file (`.booping-project`) → `~/Claude/.booping/projects.json` → ask.
@@ -41,25 +42,20 @@ Artifacts live at `~/Claude/{project}/`. The only writer of `sprints.md` is `/de
 | `/help` | This. | — |
 | `/install` | Scaffold a new booping project and/or attach the current repo. | `~/Claude/{project}/*`, `~/Claude/.booping/projects.json`, optional `.booping-project` |
 | `/chat` | Read-only discussion over project artifacts. | — |
-| `/groom` | Deep-research a feature/bug/refactor into `backlog/YYYYMMDD-*.md`. | `backlog/`, `metrics/lesson-hits.md` |
-| `/develop` | Execute a groomed item milestone-by-milestone; always delegates to sub-agents. | `sprints.md`, backlog progress marks, `metrics/lesson-hits.md` |
-| `/retro` | Review what shipped, gather feedback, produce retrospective. | `retrospectives/`, `sprints.md` (Goal Status only) |
-| `/learn` | Extract lessons and fold them into `_booping/` extensions. | `lessons/`, `_booping/skill_*.md`, `_booping/agent_*.md` |
+| `/groom` | Deep-research a feature/bug/refactor into `plans/YYYYMMDD-*.md`. | `plans/` |
+| `/develop` | Execute a groomed plan milestone-by-milestone; always delegates to sub-agents. | `sprints.md`, plan progress marks |
+| `/retro` | Review what shipped, gather feedback, produce retrospective. | `retrospectives/`, `sprints.md` (`goal` field only) |
+| `/learn` | Extract lessons from a retrospective (defaults to most recent). Presents a unified review table; user accepts/rejects/adds in one pass. Writes accepted lessons to `lessons/` and project-local extensions to `_booping/`. Plugin-side edits (debug-mode only). Transitions `awaiting-learning → done`. | `lessons/`, `_booping/skill_*.md`, `_booping/agent_*.md` |
 
 ## Agents
 
-Orchestrators (always delegated to from skills):
+Researchers (delegated to from skills for read-heavy work):
 
-- `booping-teamlead` — user-facing coordination, sprint/metrics writes, draft retrospectives
-- `booping-techlead` — codebase research, tech feedback, blast radius
-- `booping-product-manager` — requirements validation, business-goal judgement
-- `booping-qa-lead` — testing strategy, regression risk
+- `booping-researcher-{junior,middle,senior}` — codebase research, session-log search, tech feedback; tier is selected by the skill per `docs/partial_agents_researchers_delegator.md`.
 
 Workers (called from `/develop`):
 
-- `booping-be-dev` — backend (Python/Django/DRF/Rust/Axum/migrations/Temporal)
-- `booping-fe-dev` — frontend (React/TypeScript/Leptos)
-- `booping-reviewer` — milestone diff review
+- Developer agents live in `agents/booping-developer-{middle,senior}.md`. The active SP→agent mapping is the strategy selected by [`docs/partial_agent_developers_delegator.md`](../../docs/partial_agent_developers_delegator.md) — read it to see which tiers are active and what the batching rules are.
 
 ## Layout
 
@@ -67,13 +63,9 @@ Workers (called from `/develop`):
 ~/Claude/
 ├── .booping/projects.json       # CWD → project mapping
 └── {project}/
-    ├── backlog/                 # /groom output
-    ├── plans/                   # (optional) legacy plans
+    ├── plans/                   # /groom output
     ├── retrospectives/          # /retro output
     ├── lessons/                 # /learn output
-    ├── metrics/
-    │   ├── lesson-hits.md
-    │   └── sp-rollup.md
     ├── _booping/                # project-local skill/agent extensions
     ├── CLAUDE.md
     └── sprints.md               # /develop only
@@ -82,31 +74,33 @@ Workers (called from `/develop`):
 ## Workflow
 
 ```
-/groom   ──► backlog/20260421-foo.md
+/groom   ──► plans/20260421-foo.md
                 │
                 ▼
-/develop ──► spawns booping-be-dev / booping-fe-dev per task
-             spawns booping-reviewer per milestone
-             updates sprints.md + backlog progress
+/develop ──► spawns booping-developer-{middle,senior} per task
+             milestone diff review per partial_agent_developers_delegator
+             updates sprints.md + plan progress
                 │
                 ▼
-/retro   ──► booping-techlead / -product-manager / -qa-lead in parallel
-             booping-teamlead synthesizes → retrospectives/*.md
+/retro   ──► booping-researcher-middle for session-log search
+             orchestrator synthesizes → retrospectives/*.md
                 │
                 ▼
-/learn   ──► lessons/{N}_*.md
-             optional _booping/skill_*.md, _booping/agent_*.md updates
+/learn   ──► unified review table (accept/reject/add)
+             lessons/{N}_*.md + _booping/skill_*.md, _booping/agent_*.md
+             plugin-side edits (debug-mode only)
+             plan transitions awaiting-learning → done
 ```
 
 ## Hard rules (cross-cutting)
 
 - **Always delegate.** The skill orchestrator never edits application code directly. Even 1-SP tasks go to a worker agent.
 - **Lessons are load-bearing.** `/groom` and `/develop` read every file in `lessons/` before acting.
-- **`sprints.md` is owned by `/develop`.** `/groom` never touches it; `/retro` only writes the `Goal Status` column.
+- **`sprints.md` is regenerated by `/chat`** via `booping-plans --format=md`; no other skill hand-edits it. Plan status transitions are manual frontmatter edits owned by each skill (see `docs/partial_plan_transitions_<skill>.md`).
 - **Per-project isolation.** Never read or write outside the current `~/Claude/{project}/` tree.
 
 ## See also
 
 - `README.md` — higher-level overview and install instructions
 - `PRD.md` — design rationale
-- `docs/project-scoping.md` — how project resolution works
+- `docs/partial_project_resolution.md` — how project resolution works
