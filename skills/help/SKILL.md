@@ -58,9 +58,7 @@ Orchestrators (always delegated to from skills):
 
 Workers (called from `/develop`):
 
-- `booping-developer-middle` — 1–2 SP tasks; may be batched up to ~10 SP (opus, high reasoning)
-- `booping-developer-senior` — 3–4 SP tasks, one per briefing (opus, high reasoning)
-- 5 SP: refuse — re-decompose via `/groom`. `booping-developer-junior` exists but is inactive under the current delegation strategy.
+- Developer agents live in `agents/booping-developer-{junior,middle,senior}.md`. The active SP→agent mapping is the strategy selected by [`docs/partial_develop_agent_delegation.md`](../../docs/partial_develop_agent_delegation.md) — read it to see which tiers are active and what the batching rules are.
 - `booping-reviewer` — milestone diff review
 
 ## Layout
