@@ -46,11 +46,11 @@ The teamlead reads session data from wherever it's stored on this machine (typic
 
 In a single message, spawn three agents in parallel using the canonical briefing header — see [docs/agent-wiring.md](../../docs/agent-wiring.md):
 
-- `booping-techlead` — domains `tech,code,all`. Compare the code diff against the plan's Decisions. Flag execution gaps, shortcuts taken, and tech debt introduced.
-- `booping-product-manager` — domains `product,all`. Verify the business goal was met. If not, why: deprioritized, discovered infeasible, partial?
-- `booping-qa-lead` — domains `qa,all`. Verify testing strategy was executed. Any missing regression coverage, skipped test cases, or shortcuts?
+- `booping-techlead` — compare the code diff against the plan's Decisions. Flag execution gaps, shortcuts taken, and tech debt introduced.
+- `booping-product-manager` — verify the business goal was met. If not, why: deprioritized, discovered infeasible, partial?
+- `booping-qa-lead` — verify testing strategy was executed. Any missing regression coverage, skipped test cases, or shortcuts?
 
-Each returns a short findings doc. Filter `Applicable lessons:` by domain before handing off — a SOLID lesson does not go to the product manager.
+Each returns a short findings doc. Include under `Applicable lessons:` only the lessons relevant to each agent's role — a SOLID lesson does not go to the product manager.
 
 ## Phase 3: User feedback
 

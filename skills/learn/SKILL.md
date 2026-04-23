@@ -47,19 +47,11 @@ This skill does **not** edit `skills/*/SKILL.md` — if the retro identifies a m
 
 Read the retrospective's **Candidate new lessons** and **Root causes** sections. For each candidate, delegate in parallel to:
 
-- `booping-techlead` — is this a tech/architecture rule? (domain: `tech`)
-- `booping-product-manager` — is this a requirements / scoping rule? (domain: `product`)
-- `booping-qa-lead` — is this a testing / quality rule? (domain: `qa`)
+- `booping-techlead` — is this a tech/architecture rule?
+- `booping-product-manager` — is this a requirements / scoping rule?
+- `booping-qa-lead` — is this a testing / quality rule?
 
-Each agent returns a short verdict: accept / reject / reshape, with the proposed rule text.
-
-**Domain assignment** for the final lesson file:
-
-- Exactly one of techlead / PM / QA accepts → use their domain (`tech`, `product`, or `qa`)
-- Rule is about worker-level code discipline (boy-scout, monkey-patch smell, unexpected test pass) → `code`
-- Two or more role agents accept, or the rule is cross-cutting → `all`
-
-See [docs/agent-wiring.md](../../docs/agent-wiring.md) for how each domain maps to which agents receive the lesson in later briefings.
+Each agent returns a short verdict: accept / reject / reshape, with the proposed rule text. Candidates accepted by zero role agents are worker-discipline rules (boy-scout, monkey-patch smell, unexpected test pass) — still valid lessons; note the classification in the user summary for traceability.
 
 ## Phase 1.5: Update-vs-create + outdated sweep
 
@@ -77,22 +69,7 @@ Report in the user summary which lessons were created / updated / deleted.
 For each accepted candidate that isn't already covered:
 
 1. Pick the next incrementing ID by reading `ls ~/Claude/{project}/lessons/` and finding the highest existing `{N}_*.md`.
-2. Write `~/Claude/{project}/lessons/{N}_{kebab-title}.md` with frontmatter:
-
-```yaml
----
-id: {N}
-title: ...
-retro: retrospectives/YYYYMMDD-title.md
-created: YYYY-MM-DD
-scope: groom | develop | retro | all
-domain: tech | product | qa | code | all
----
-```
-
-Body structure: **Rule** (1 sentence), **Why** (the incident or constraint), **How to apply** (concrete trigger and check).
-
-`domain:` is load-bearing — orchestrators filter lessons by domain before briefing agents. A wrong tag means an agent either misses a rule that applies to them or gets one they shouldn't care about.
+2. Write `~/Claude/{project}/lessons/{N}_{kebab-title}.md` using the lesson template at [docs/template_lesson.md](../../docs/template_lesson.md). Body structure: **Rule** (1 sentence), **Why** (the incident or constraint), **How to apply** (concrete trigger and check).
 
 ## Phase 3: Skill / agent extensions
 

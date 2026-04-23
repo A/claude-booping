@@ -37,7 +37,7 @@ This skill is **wide-domain** — it must work across very different projects (b
 - Read [research agents](../../docs/partial_agents_researcher_tiers.md) — delegate research to researchers to keep this skill's context clean.
 - Read [sprint planning](../../docs/partial_sprint_planning.md) — full estimation framework: scale, totals, sizing thresholds, defensive buffer.
 - Read extra instructions for grooming skill from `~/Claude/{project_name}/_booping/skill_groom.md` if present.
-- Read all lessons in `~/Claude/{project_name}/lessons/`.
+- Read lessons per [read lessons](../../docs/partial_read_lessons.md).
 - Read [plan transitions for /groom](../../docs/partial_plan_transitions_groom.md) for the valid transitions and how to apply them.
 
 ## High-level workflow

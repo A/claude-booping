@@ -30,7 +30,7 @@ This skill is **wide-domain** — it must work across very different projects. P
 - Read [research agents](../../docs/partial_agents_researcher_tiers.md) — delegate heavy reading to researchers to keep context clean.
 - Read [plan transitions for /develop](../../docs/partial_plan_transitions_develop.md) — the only transitions this skill owns.
 - Read [agent delegation](../../docs/partial_develop_agent_delegation.md) — the active SP→agent mapping and batching rules for this skill.
-- Read all lessons in `~/Claude/{project_name}/lessons/`.
+- Read lessons per [read lessons](../../docs/partial_read_lessons.md).
 - Read `~/Claude/{project_name}/_booping/skill_develop.md` — project-local overrides, if present.
 - Read the attached repo's `CLAUDE.md` — project conventions for the code under development.
 
@@ -46,7 +46,7 @@ This skill is **wide-domain** — it must work across very different projects. P
 
 Resolve the plan path from `$ARGUMENTS`; if missing, ask and list recent plans with `ls -t ~/Claude/{project_name}/plans/`.
 
-Read the plan file, all lessons in `~/Claude/{project_name}/lessons/`, the vault `CLAUDE.md`, and the repo `CLAUDE.md`. Spot-check 2–3 key files named in the plan to detect codebase drift; delegate to `booping-researcher-middle` when the set is large (see the research-agents partial).
+Read the plan file, the vault `CLAUDE.md`, and the repo `CLAUDE.md`. (Lessons are already loaded in Preflight per [read lessons](../../docs/partial_read_lessons.md).) Spot-check 2–3 key files named in the plan to detect codebase drift; delegate to `booping-researcher-middle` when the set is large (see the research-agents partial).
 
 **Validate entry status**: the plan's `status:` must be `ready-for-dev` or `backlog`. Any other status means `/develop` has no claim — stop and report clearly.
 
@@ -75,7 +75,7 @@ Create the sprint branch per [branch naming](../../docs/partial_branch_naming.md
 For each milestone:
 
 1. `TaskCreate` one task per plan task.
-2. Group and delegate per [agent delegation](../../docs/partial_develop_agent_delegation.md). Always delegate — even a 1-line change. Brief each agent using the header documented in [docs/agent-wiring.md](../../docs/agent-wiring.md); do NOT re-embed the template here. Filter `Applicable lessons:` by the worker's domain set (`code`, `tech`, `all` for developer agents).
+2. Group and delegate per [agent delegation](../../docs/partial_develop_agent_delegation.md). Always delegate — even a 1-line change. Brief each agent using the header documented in [docs/agent-wiring.md](../../docs/agent-wiring.md); do NOT re-embed the template here. Include under `Applicable lessons:` only the lessons relevant to the specific task.
 3. When the worker reports done:
    - Run the milestone's `Verify` command.
    - Flip each completed task's DoD checkboxes in the plan: `- [ ]` → `- [x]`.

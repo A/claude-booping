@@ -32,7 +32,7 @@ This skill is **wide-domain** — it must work across very different projects. P
 - Read [plan statuses](../../docs/partial_plan_statuses.md).
 - Read [research agents](../../docs/partial_agents_researcher_tiers.md) — delegate heavy reading to researchers to keep context clean.
 - Read `~/Claude/{project_name}/CLAUDE.md` — vault and project conventions.
-- Read all lessons in `~/Claude/{project_name}/lessons/`.
+- Read lessons per [read lessons](../../docs/partial_read_lessons.md).
 - Read `~/Claude/{project_name}/_booping/skill_chat.md` if present — project-local overrides.
 
 ## High-level workflow
