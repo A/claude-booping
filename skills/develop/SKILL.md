@@ -32,7 +32,7 @@ This skill is **wide-domain** — it must work across very different projects. P
 - Read [agent delegator](../../docs/partial_agent_developers_delegator.md) — the active delegation strategy, including the SP→agent mapping, batching rules, and briefing template.
 - Read [project quality checks](../../docs/partial_development_quality_checks.md) — how to detect and run the project's own lint / typecheck / test tooling during the sprint.
 - Read lessons per [read lessons](../../docs/partial_read_lessons.md).
-- Read `~/Claude/{project_name}/_booping/skill_develop.md` — project-local overrides, if present.
+- Read `~/Claude/{project_name}/_booping/skill_develop.md` per [extra instructions](../../docs/partial_extra_instructions.md) — silent-skip if absent.
 - Read the attached repo's `CLAUDE.md` — project conventions for the code under development.
 
 ## High-level workflow
@@ -78,15 +78,16 @@ Create the sprint branch per [branch naming](../../docs/partial_branch_naming.md
 For each milestone:
 
 1. `TaskCreate` one task per plan task.
-2. Group and delegate per the active strategy in [agent delegator](../../docs/partial_agent_developers_delegator.md); use the briefing template from that partial. Always delegate — even a 1-line change.
-3. When the worker reports done:
+2. Build the `Contract:` block before composing any briefing: read the bodies of `../../docs/partial_agents_developer_rules.md`, `../../docs/partial_agents_developer_workflow.md`, and `../../docs/partial_extra_instructions.md`; concatenate them under a `Contract:` heading. Prepend an `Extra instructions file: ~/Claude/{project}/_booping/agent_booping-developer.md` line. Include the resulting block at the top of every `Agent()` call's prompt argument.
+3. Group and delegate per the active strategy in [agent delegator](../../docs/partial_agent_developers_delegator.md); use the briefing template from that partial. Always delegate — even a 1-line change.
+4. When the worker reports done:
    - Run the milestone's `Verify` command.
    - Run the configured-but-manual quality commands identified in Phase 0 (see [project quality checks](../../docs/partial_development_quality_checks.md)).
    - Flip each completed task's DoD checkboxes in the plan: `- [ ]` → `- [x]`.
    - Flip each task row in the milestone's status table: `pending` → `done`.
-4. Delegate a milestone-diff review to a researcher per [research agents](../../docs/partial_agents_researchers_delegator.md). Ask it to read the diff on the sprint branch and return a bulleted summary covering: plan adherence, scope creep, and regression risk. The orchestrator decides what to action; project-specific triage rules, if any, live in `_booping/skill_develop.md`.
-5. Flip the milestone status to `done`, then commit in the attached repo: `<prefix>(<scope>): M<n> <summary>`.
-6. Report milestone completion to the user with a one-paragraph summary (what shipped, reviewer verdict, any deferred items) before starting the next milestone.
+5. Delegate a milestone-diff review to a researcher per [research agents](../../docs/partial_agents_researchers_delegator.md). Ask it to read the diff on the sprint branch and return a bulleted summary covering: plan adherence, scope creep, and regression risk. The orchestrator decides what to action; project-specific triage rules, if any, live in `_booping/skill_develop.md`.
+6. Flip the milestone status to `done`, then commit in the attached repo: `<prefix>(<scope>): M<n> <summary>`.
+7. Report milestone completion to the user with a one-paragraph summary (what shipped, reviewer verdict, any deferred items) before starting the next milestone.
 
 Parallelism: dispatch tasks (within a milestone or across milestones) in parallel `Agent` calls in the same message only when their briefings touch disjoint files/components. The skill judges disjointness from the plan's file lists — no plan marker required. Sequential otherwise. Parallel agents share the sprint branch; never use `isolation: "worktree"` (see Hard rules).
 

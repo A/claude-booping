@@ -26,22 +26,30 @@ The skill owns all reads and writes against the project vault (`~/Claude/{projec
 Lesson context reaches agents through two baked-in channels, not per-briefing routing:
 
 - **Plan** — `/groom` folded applicable lessons into DoD items and Verify commands at grooming time. The skill pastes those fields into the briefing verbatim.
-- **Shared extension** — `/learn` writes project-wide developer rules into `~/Claude/{project}/_booping/agent_booping-developer.md`. Each agent reads it at Startup.
+- **Contract** — `/develop` reads `partial_agents_developer_rules.md`, `partial_agents_developer_workflow.md`, and `partial_extra_instructions.md` at runtime, concatenates their bodies under a `Contract:` heading, and prepends that block to every `Agent()` call. Agents do not scan the plugin tree.
 
-The skill does not filter or inline lessons per-briefing. If a lesson isn't already in the plan or the extension, it won't reach the agent.
+The skill does not filter or inline lessons per-briefing. If a lesson isn't already in the plan or the contract block, it won't reach the agent.
 
 ### Briefing template
+
+The skill reads the three partials at runtime (`partial_agents_developer_rules.md`, `partial_agents_developer_workflow.md`, `partial_extra_instructions.md`) and concatenates their bodies under the `Contract:` heading. Agents do not scan the plugin tree.
 
 Every briefing sent via `Agent()` starts with this header:
 
 ```
-agent_extension: ~/Claude/{project}/_booping/agent_booping-developer.md
+Contract:
+  <literal concatenation of:
+    docs/partial_agents_developer_rules.md body
+    docs/partial_agents_developer_workflow.md body
+    docs/partial_extra_instructions.md body>
+
+Extra instructions file: ~/Claude/{project}/_booping/agent_booping-developer.md
 
 Task / goal: <what to change and why>
 Decisions that apply: <plan decisions relevant here>
-Related files: <files relevant to this task; read the ones you'll touch. If something outside this list needs to change, stop and report.>
+Related files: <files relevant; read only the ones you'll touch. If something outside this list needs to change, stop and report.>
 DoD: <checklist from the plan, verbatim>
 Verify: <exact test/lint commands the agent must run before reporting done>
 ```
 
-Both `booping-developer-middle` and `booping-developer-senior` share the same `agent_extension` file. The path is verbatim; the agent reads it or skips silently if absent.
+Both `booping-developer-middle` and `booping-developer-senior` receive the same `Contract:` block. The `Extra instructions file:` path is verbatim; the agent reads it or skips silently if absent.
