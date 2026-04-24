@@ -46,6 +46,12 @@ def resolve_project(arg_project):
         for line in marker.read_text().splitlines():
             if line.startswith("project_name:"):
                 return Path("~/Claude").expanduser() / line.split(":", 1)[1].strip()
+    claude_root = Path("~/Claude").expanduser().resolve()
+    cwd = Path.cwd().resolve()
+    if cwd == claude_root or claude_root in cwd.parents:
+        rel = cwd.relative_to(claude_root)
+        if rel.parts:
+            return claude_root / rel.parts[0]
     sys.stderr.write("error: pass --project or run inside a repo with a .booping marker\n")
     sys.exit(2)
 

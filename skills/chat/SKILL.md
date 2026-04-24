@@ -3,7 +3,7 @@ name: chat
 description: General working mode for project discussion, vault navigation, and small ad-hoc tasks. Opens with a vault status summary. Use for reviewing plans, exploring lessons, casual Q&A, and minor edits that fit within a single session.
 argument-hint: [topic or artifact reference]
 user-invocable: true
-effort: xhigh
+effort: high
 allowed-tools:
   - Read
   - Write

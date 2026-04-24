@@ -16,6 +16,7 @@ allowed-tools:
   - Bash(ls -la ~/Claude)
   - Bash(booping-init:*)
   - AskUserQuestion
+effort: high
 ---
 
 # booping — /install

@@ -19,7 +19,7 @@ allowed-tools:
   - AskUserQuestion
   - WebSearch
   - WebFetch
-effort: xhigh
+effort: high
 ---
 
 # booping — /groom

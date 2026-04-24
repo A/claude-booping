@@ -14,7 +14,7 @@ allowed-tools:
   - AskUserQuestion
   - TaskCreate
   - TaskUpdate
-effort: xhigh
+effort: high
 ---
 
 # booping — /develop

@@ -15,7 +15,7 @@ allowed-tools:
   - Bash(git commit *)
   - Bash(grep *)
   - AskUserQuestion
-effort: xhigh
+effort: high
 ---
 
 # booping — /learn

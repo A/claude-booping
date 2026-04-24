@@ -18,7 +18,7 @@ allowed-tools:
   - Bash(booping-plans *)
   - Agent
   - AskUserQuestion
-effort: xhigh
+effort: high
 ---
 
 # booping — /retro
