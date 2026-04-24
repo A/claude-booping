@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# Scaffold a new booping project at ~/Claude/{project-name}.
+# Installed on PATH automatically when the booping plugin is enabled.
+# Usage: booping-create-project <project-name> [cwd-to-attach]
+
+set -euo pipefail
+
+if [ $# -lt 1 ]; then
+    echo "Usage: $0 <project-name> [cwd-to-attach]" >&2
+    exit 1
+fi
+
+PROJECT="$1"
+ATTACH_CWD="${2:-$(pwd)}"
+# If the second arg is an absolute path, use it directly as the project root
+# (useful for smoketests and non-standard locations). Otherwise default to ~/Claude/$PROJECT.
+IS_ABSOLUTE_ROOT=0
+if [[ "${2:-}" == /* ]]; then
+    ROOT="$2"
+    IS_ABSOLUTE_ROOT=1
+else
+    ROOT="$HOME/Claude/$PROJECT"
+fi
+
+if [ -d "$ROOT" ]; then
+    echo "Project already exists: $ROOT" >&2
+    exit 1
+fi
+
+mkdir -p "$ROOT"/{plans,retrospectives,lessons,_booping,requests}
+
+# Smoketest / absolute-path invocations don't write a marker —
+# they are transient and should leave no global state.
+# Normal invocations write a '.booping' marker in cwd so resolve_project can find the vault.
+if [ "$IS_ABSOLUTE_ROOT" -eq 0 ]; then
+    if [ -d "$ATTACH_CWD" ] && [ ! -f "$ATTACH_CWD/.booping" ]; then
+        echo "project_name: $PROJECT" > "$ATTACH_CWD/.booping"
+        echo "Wrote marker: $ATTACH_CWD/.booping"
+    fi
+fi
+
+echo "Initialized: $ROOT"
+echo "Run booping-create-project --help for usage."

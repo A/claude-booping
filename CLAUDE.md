@@ -16,7 +16,7 @@ Stale and **not refactored to the new contract** — treat as broken until updat
 
 - `skills/{install,help}/`
 - (deleted) Five agents deleted in the 2026-04 `/retro` refactor — no agent remains dormant.
-- `bin/booping-init`, `skills/install/template-claude-md.md`
+- `bin/booping-create-project`, `skills/install/template-claude-md.md`
 
 ## Layout
 
