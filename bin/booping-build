@@ -32,6 +32,7 @@ SRC = ROOT / "src"
 TEMPLATES = SRC / "templates"
 CONFIG_FILE = SRC / "config.yaml"
 SKILLS_OUT = ROOT / "skills"
+DOCS_OUT = ROOT / "docs"
 
 def load_config() -> dict:
     if not CONFIG_FILE.exists():
@@ -48,28 +49,33 @@ def build_env() -> Environment:
     )
 
 
-def render_skill(env: Environment, config: dict, src: Path) -> tuple[Path, str]:
-    name = src.name.removesuffix(".md.j2")
-    tpl = env.get_template(f"skills/{src.name}")
-    body = tpl.render(config=config, source=str(src.relative_to(ROOT)))
-    out = SKILLS_OUT / name / "SKILL.md"
-    return out, body
+def render_template(env: Environment, config: dict, tpl_rel: str) -> str:
+    return env.get_template(tpl_rel).render(config=config)
+
+
+def render_group(env: Environment, config: dict, subdir: str, out_for: callable) -> int:
+    src_dir = TEMPLATES / subdir
+    if not src_dir.exists():
+        return 0
+    count = 0
+    for src in sorted(src_dir.glob("*.md.j2")):
+        name = src.name.removesuffix(".md.j2")
+        body = render_template(env, config, f"{subdir}/{src.name}")
+        out = out_for(name)
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(body)
+        print(f"rendered {out.relative_to(ROOT)}")
+        count += 1
+    return count
 
 
 def build_once() -> int:
     env = build_env()
     config = load_config()
-    skills_dir = TEMPLATES / "skills"
-    if not skills_dir.exists():
-        print(f"no skills to render (missing {skills_dir})", file=sys.stderr)
-        return 0
     count = 0
-    for src in sorted(skills_dir.glob("*.md.j2")):
-        out, content = render_skill(env, config, src)
-        out.parent.mkdir(parents=True, exist_ok=True)
-        out.write_text(content)
-        print(f"rendered {out.relative_to(ROOT)}")
-        count += 1
+    count += render_group(env, config, "skills", lambda name: SKILLS_OUT / name / "SKILL.md")
+    count += render_group(env, config, "docs", lambda name: DOCS_OUT / f"{name}.md")
+    count += render_group(env, config, "plan_templates", lambda name: DOCS_OUT / "plan_templates" / f"{name}.md")
     return count
 
 

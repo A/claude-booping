@@ -49,7 +49,7 @@ Resolve the plan path from `$ARGUMENTS`; if missing, ask and list recent plans w
 
 Read the plan file and the repo `CLAUDE.md`. (Lessons are already loaded in Preflight per [read lessons](../../docs/partial_read_lessons.md).) Spot-check 2–3 key files named in the plan to detect codebase drift; delegate to `booping-researcher-middle` when the set is large (see the research-agents partial).
 
-**Validate entry status**: the plan's `status:` must be `ready-for-dev` or `backlog`. Any other status means `/develop` has no claim — stop and report clearly.
+**Validate entry status**: the plan's `status:` must be `ready-for-dev`. Any other status means `/develop` has no claim — stop and report clearly. Plans that have not been through `/groom` approval must be routed through `/groom` first.
 
 Classify the project's quality tooling per [project quality checks](../../docs/partial_development_quality_checks.md): which tools are hook-enforced (let them run naturally at commit time) and which are configured-but-manual (the skill will run them per milestone).
 
@@ -71,9 +71,7 @@ Create the sprint branch per [branch naming](../../docs/partial_branch_naming.md
 
 ## Phase 3 Execute
 
-**Apply the entry transition per [../../docs/partial_plan_transitions_develop.md](../../docs/partial_plan_transitions_develop.md):**
-- Picked up from `ready-for-dev`: set `status: in-progress`, `started: <today>`.
-- Picked up from `backlog`: set `status: in-progress`, `planned: <today>`, `started: <today>` in the same edit.
+**Apply the entry transition per [../../docs/partial_plan_transitions_develop.md](../../docs/partial_plan_transitions_develop.md):** set `status: in-progress`, `started: <today>`.
 
 For each milestone:
 

@@ -16,18 +16,45 @@ Migrating to a template-driven skill pipeline. State of play:
 
 - `src/config.yaml` — single source of truth for structured data the pipeline renders into skills (plan statuses + transitions, task types, per-skill description / effort / agents / etc.).
 - `src/templates/skills/<name>.md.j2` — skill templates. One file per skill; renders to `skills/<name>/SKILL.md`.
-- `src/templates/_partials/_*.j2` — reusable fragments. Underscore prefix marks them as inputs, not outputs. Include via `{% include %}` (data-only partials) or import + macro call (parameterized partials, e.g. `_plan_transitions.j2`).
-- `src/docs/*.md` — reference docs lazy-loaded by skills via `[label](src/docs/...)` links. No `partial_` prefix.
+- `src/templates/docs/<name>.md.j2` — doc templates (frontmatter template, etc.). Render to `docs/<name>.md`.
+- `src/templates/plan_templates/<name>.md.j2` — core plan templates (backend, frontend, claude-skill, cli). Each has YAML frontmatter (`name`, `description`) + two top-level sections: `# Plan Body` and `# Quality Checklist`. Render to `docs/plan_templates/<name>.md`. User projects may add their own templates under `~/Claude/{project}/plan_templates/*.md` (hand-authored `.md`, same frontmatter shape + two sections).
+- `src/templates/_partials/_*.j2` — reusable fragments. Underscore prefix marks them as inputs, not outputs. Include via `{% include %}` (data-only partials) or import + macro call (parameterized partials, e.g. `_plan_transitions.j2`, `_plan_frontmatter.j2`, `_plan_template.j2`).
+- `src/docs/*.md` — reference docs lazy-loaded by skills via `[label](src/docs/...)` links. No `partial_` prefix. Hand-authored.
 - `skills/<name>/SKILL.md` — **generated output** for template-driven skills; **authored** directly for the not-yet-migrated ones. Never edit a generated `SKILL.md` by hand.
-- `docs/partial_*.md`, `docs/template_*.md` — legacy partials/templates still referenced by unmigrated skills.
+- `docs/plan_templates/*.md`, `docs/template_plan_frontmatter.md` — **generated output** from `src/templates/`; never hand-edit.
+- `docs/partial_*.md`, other `docs/template_*.md` — legacy partials/templates still referenced by unmigrated skills.
 - `agents/` — sub-agent definitions.
 - `bin/` — standalone uv inline scripts:
-  - `booping-build` — render; `--watch` for dev loop.
+  - `booping-build` — render skill and doc templates from `src/templates/` → `skills/*/SKILL.md` and `docs/*.md`; `--watch` for dev loop.
   - `booping-project-name` — reads `.booping` in cwd; prints a fenced YAML block (`name:`, `directory:`) when initialized, or a paragraph pointing at `src/docs/how_to_initialize_project.md` when not. Designed to be inlined via `!`bin/booping-project-name`` at skill-load time.
   - `booping-sprint-threshold` — prints the SP total above which /groom should suggest splitting a plan. Not a velocity (no cadence); a heuristic ceiling. Today echoes `sprint.default_threshold_sp` from config. Inlined via `!`bin/booping-sprint-threshold``.
   - `booping-extra-instructions <filename>` — reads `~/Claude/{project}/_booping/<filename>` and prints a framed "User-specific instructions" block wrapping the body; prints nothing if the project isn't initialized or the file is missing. Inlined per-skill via `!`bin/booping-extra-instructions skill_<name>.md`` so project overrides travel with the skill without a separate read step.
   - `booping-lessons` — enumerates `~/Claude/{project}/lessons/*.md`, prints a "Lessons" block with an index and each lesson's full body plus a conflict-handling rule. Prints "No lessons accumulated yet" when the directory is empty; prints nothing if the project isn't initialized. Inlined via `!`bin/booping-lessons`` so the active rule set is live at skill load.
+  - `booping-plan-templates` — enumerates core plan templates from `docs/plan_templates/*.md` plus project-local templates from `~/Claude/{project}/plan_templates/*.md`; prints a grouped list with each template's name, description, and path. Inlined via `!`bin/booping-plan-templates`` so available templates are discoverable at skill load.
   - `booping-plans`, `booping-validate-plan`, `booping-create-project` — as before.
+
+## Config vs skill — ownership boundary
+
+Config is the **contract between skills** and, looking forward, the **user-facing customisation surface**. A per-project user override of `src/config.yaml` is the intended path for tuning the plan lifecycle, sprint scale, task types, and agent wiring. Rendering stays build-time for now (`booping-build` compiles plugin config → `skills/*/SKILL.md`); a per-project rebuild is the intended rollout for user overrides. Dynamic runtime compilation via inline `!`commands`` so config isn't baked is a future iteration — out of scope for now.
+
+What the **config owns**:
+
+- Where a plan can go (statuses, transitions, owner).
+- Boundaries of each move (`gates` — verifiable preconditions; `when` — human-readable trigger).
+- Artifacts produced in a state.
+- Side effects on exit (`on_exit` — frontmatter mutations, commits, etc.).
+- Structured surfaces that other skills / CLIs also consume: task types, sprint scale, agent capabilities.
+
+What the **skill owns**:
+
+- Verbs and heuristics — *how* to produce the artifacts and clear the gates for the states it owns.
+- User interaction — what to ask, when, how to present, how to handle approval vs change requests vs cancellation.
+- Judgment calls the contract can't pre-specify.
+- Invariants the skill enforces across all its states ("Hard rules").
+
+What goes in **docs/**: long-form craft (quality checklists, cross-validation rules, split guidance) that's reusable or too long to inline. Lazy-loaded from the skill body.
+
+The skill body must not restate the flow the transitions table already carries. If a fact is in config, the skill body does not also describe it in prose.
 
 ## Principles
 
@@ -51,10 +78,9 @@ Migrating to a template-driven skill pipeline. State of play:
 
 Top-level keys currently in use:
 
-- `skills.<name>.description` — body-level description, rendered into the skill and reusable by `/help`.
 - `skills.<name>.effort` — frontmatter `effort` value.
 - `skills.<name>.agents.<agent-name>.good_for` / `.bad_for` — delegation guidance rendered by `_available_agents.j2`.
-- `plan.statuses.<key>` — `desc`, `owner` (skill), `terminal` (bool), `transitions` (list of `{to, skill, when, requirements}`). Filtered per-skill by `_plan_transitions.j2` (macro shows only statuses a skill owns or has transitions out of, and only rows where `skill == <current>`). `requirements` is a list of short instruction strings rendered verbatim into the `Requirements` column (e.g. `"set \`planned: yyyymmdd hh:mm\`"`).
+- `plan.statuses.<key>` — `desc`, `owner` (skill), `terminal` (bool), optional `artifacts` (list of strings describing what the state produces), `transitions` (list of `{to, skill, when, gates?, on_exit?}`). Filtered per-skill by `_plan_transitions.j2` (macro shows only statuses a skill owns or has transitions out of, and only rows where `skill == <current>`). `gates` is a list of verifiable preconditions rendered into the `Gates` column; `on_exit` is a list of short instruction strings (frontmatter mutations, side effects) rendered verbatim into the `On exit` column (e.g. `"set \`planned: yyyymmdd hh:mm\`"`).
 - `tasks` — list of `{type, description, doc_uri}`. Rendered by `_task_classification.j2` as bullets with a lazy-load link to `doc_uri` (relative from repo root).
 - `sprint` — `scale` (list of `{sp, meaning}`), `default_threshold_sp` (SP total past which /groom should propose splitting — not a velocity), `redecompose_threshold` (tasks ≥ this SP must be re-decomposed), `group_threshold` (tasks ≤ this SP should be grouped into one agent briefing). Rendered by `_sprint_planning.j2`; `redecompose_threshold` / `group_threshold` are skipped when falsy. Threshold is inlined at skill-load time via `!`bin/booping-sprint-threshold``.
 
@@ -62,13 +88,17 @@ Top-level keys currently in use:
 
 - Statuses + transitions live in `src/config.yaml` (`plan.statuses`). The rendered skill body shows only that skill's slice. Terminal states: `done`, `fail`, `cancelled`.
 - Status transitions are **manual frontmatter edits**, not CLI mutations. The skill applies them when a trigger in its rendered transitions table matches an internal action.
-- Current flow: `backlog → awaiting-plan-review → in-progress → awaiting-retro → awaiting-learning → done` (with `cancelled` / `fail` terminal branches). `in-spec` was renamed to `awaiting-plan-review`; `ready-for-dev` exists but is orphaned in the new flow (kept as a legacy fallback — candidate for removal).
+- Current flow: `backlog → in-spec → awaiting-plan-review → ready-for-dev → in-progress → awaiting-retro → awaiting-learning → done`, with `cancelled` / `fail` terminal branches and in-groom loopbacks (`awaiting-plan-review → in-spec`, `in-spec → backlog`).
+  - `backlog` is for parked plans only (split stubs, user-filed ideas not yet in grooming). Active groom runs write directly to `in-spec`.
+  - `in-spec` is where `/groom` does its work. `awaiting-plan-review` is the explicit user-approval gate. `ready-for-dev` is the queue `/develop` claims from. No backlog-shortcut into `/develop`.
+- Each transition carries `when` (trigger), optional `gates` (verifiable preconditions), and optional `on_exit` (frontmatter mutations / side effects). Each status carries optional `artifacts` (what the state produces).
 - After a transition, verify with `booping-plans --status <new-status>`.
 - `sprints.md` is a snapshot regenerated by `/chat` on orient via `booping-plans --format=md`; never hand-edit.
 
 ## Project vault layout (`~/Claude/{project}/`)
 
 - `plans/{YYYYMMDD}-{kebab-title}.md` — plan files; frontmatter per `docs/template_plan_frontmatter.md`. Sibling stubs set `split_from: plans/...` to point at the primary plan they were split from.
+- `plan_templates/*.md` — project-local plan templates. Each has frontmatter (`name`, `description`) + two top-level sections (`# Plan Body`, `# Quality Checklist`). Picked up by `booping-plan-templates` alongside core templates; can override a core template by sharing its `name`, or add entirely new ones.
 - `lessons/` — accumulated lessons; loaded by skills' Preflight.
 - `_booping/skill_<name>.md` — project-local extensions to wide-domain skills.
 - `CLAUDE.md` — project conventions; loaded by skills.

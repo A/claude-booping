@@ -56,12 +56,12 @@ booping-plans --format=md > ~/Claude/{project_name}/sprints.md
 Then count plans by status:
 
 ```bash
-for s in backlog in-spec ready-for-dev in-progress awaiting-retro awaiting-learning done fail cancelled; do
+for s in backlog in-spec awaiting-plan-review ready-for-dev in-progress awaiting-retro awaiting-learning done fail cancelled; do
   printf '%s\t%d\n' "$s" "$(booping-plans --status "$s" 2>/dev/null | tail -n +2 | wc -l)"
 done
 ```
 
-The **first assistant message** must include the resulting 9-row count table. If `backlog >= 5` or `awaiting-retro >= 1`, append a one-line nudge (e.g. "5 plans in backlog — consider a groom session" or "1 plan awaiting retro").
+The **first assistant message** must include the resulting 10-row count table. If `backlog >= 5` or `awaiting-retro >= 1` or `awaiting-plan-review >= 1`, append a one-line nudge (e.g. "5 plans in backlog — consider a groom session", "1 plan awaiting retro", "2 plans awaiting review").
 
 ## Phase 1 Ingest
 

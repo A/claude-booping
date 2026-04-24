@@ -99,6 +99,9 @@ Tier is selected by the skill per `docs/partial_agents_researchers_delegator.md`
 
 /groom  ──► requests/YYYYMMDD-*.md  →  plans/YYYYMMDD-*.md
 
+/groom  ──► backlog → in-spec → awaiting-plan-review → ready-for-dev
+            (on user approval; cancelled / back-to-in-spec branches otherwise)
+
 /develop ──► sprint branch; per milestone:
              • spawns booping-developer-{middle,senior} per task
              • milestone-diff review via booping-researcher-{middle,senior}

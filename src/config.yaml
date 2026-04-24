@@ -23,7 +23,6 @@ tasks:
 skills:
   groom:
     effort: high
-    description: "Produces a development plan across domains (backend, frontend, Claude Code skills, CLI tools, etc.) and task types (bugs, features, refactorings, etc.). Plans are written so an agentic tool such as Claude Code can execute them with only the plan file as context."
     agents:
       booping-researcher:
         good_for:
@@ -42,94 +41,128 @@ skills:
 plan:
   statuses:
     backlog:
-      desc: "Draft or parked idea; /groom writes here initially while iterating before review."
+      desc: "Parked plan — not actively being worked on. Sibling stubs from split sprints and user-filed ideas not yet in grooming live here."
       owner: groom
       terminal: false
+      artifacts:
+        - "Plan stub at ~/Claude/{project}/plans/{YYYYMMDD}-{kebab-title}.md (split siblings or parked ideas)"
+      transitions:
+        - to: in-spec
+          skill: groom
+          when: "User asks /groom to shape a parked plan, or /groom is invoked on a fresh request"
+        - to: cancelled
+          skill: groom
+          when: "User shelves the request before grooming"
+          on_exit:
+            - "set `completed: yyyymmdd hh:mm`"
+
+    in-spec:
+      desc: "/groom is actively specifying — researching, designing, drafting the plan."
+      owner: groom
+      terminal: false
+      artifacts:
+        - "Plan at ~/Claude/{project}/plans/{YYYYMMDD}-{kebab-title}.md with all milestones, SP estimates, and DoDs"
+        - "Sibling stub plans (one per split sprint) under the same plans/ path"
       transitions:
         - to: awaiting-plan-review
           skill: groom
-          when: "Plan draft is complete and ready for user review"
-          requirements:
+          when: "Draft is complete and ready to present to the user"
+          gates:
+            - "Cross-validation run (see [cross-validation](../../docs/partial_cross_validation.md)) — single-file-bug skip acceptable"
+            - "Every task estimated; any task ≥ redecompose_threshold SP has been re-decomposed"
+          on_exit:
             - "set `planned: yyyymmdd hh:mm`"
-        - to: cancelled
-          skill: groom
-          when: "User shelves the work"
-          requirements:
-            - "set `completed: yyyymmdd hh:mm`"
         - to: backlog
           skill: groom
-          when: "More iteration needed"
-        - to: in-progress
-          skill: develop
-          when: "/develop claims directly, skipping the review stopover"
-          requirements:
-            - "set `planned: yyyymmdd hh:mm`"
-            - "set `started: yyyymmdd hh:mm`"
+          when: "User parks the work mid-grooming to revisit later"
+        - to: cancelled
+          skill: groom
+          when: "User shelves the work mid-grooming"
+          on_exit:
+            - "set `completed: yyyymmdd hh:mm`"
 
     awaiting-plan-review:
-      desc: "Plan drafted by /groom and parked here while waiting for the user to approve, request changes, or cancel."
+      desc: "Plan drafted; /groom is presenting to the user and awaiting explicit approval, change request, or cancellation."
       owner: groom
       terminal: false
       transitions:
+        - to: ready-for-dev
+          skill: groom
+          when: "User explicitly approves the plan ('looks good', 'ship it'). Silence does not count."
+          gates:
+            - "Explicit user approval captured"
+        - to: in-spec
+          skill: groom
+          when: "User requests changes that require re-research or re-design"
         - to: cancelled
           skill: groom
           when: "User shelves the plan instead of approving"
-          requirements:
+          on_exit:
             - "set `completed: yyyymmdd hh:mm`"
-        - to: in-progress
-          skill: develop
-          when: "User approves the plan and /develop picks it up"
-          requirements:
-            - "set `started: yyyymmdd hh:mm`"
 
     ready-for-dev:
-      desc: "Spec accepted; sp and planned set; queued for /develop to claim."
+      desc: "Approved by user. Queued for /develop to claim."
       owner: develop
       terminal: false
       transitions:
         - to: in-progress
           skill: develop
-          when: "/develop claims a previously-confirmed plan at the start of Phase 3 (Execute)"
-          requirements:
+          when: "/develop claims the plan at the start of its execute phase"
+          on_exit:
             - "set `started: yyyymmdd hh:mm`"
 
     in-progress:
-      desc: "/develop has claimed the plan; started auto-filled on transition."
+      desc: "/develop has claimed the plan and is executing milestones."
       owner: develop
       terminal: false
+      artifacts:
+        - "Code changes per milestone on the sprint branch"
+        - "DoD checkboxes flipped to [x] as tasks complete"
       transitions:
         - to: awaiting-retro
           skill: develop
-          when: "All milestones done, Final Verification green, every DoD checkbox marked [x]"
-          requirements:
+          when: "All milestones done"
+          gates:
+            - "Every DoD checkbox marked [x]"
+            - "Final Verification green"
+          on_exit:
             - "set `completed: yyyymmdd hh:mm`"
         - to: fail
           skill: develop
-          when: "Unrecoverable blocker after two documented fix attempts on the same milestone (user-approved abort)"
-          requirements:
+          when: "Unrecoverable blocker on the same milestone"
+          gates:
+            - "Two fix attempts documented in the plan"
+            - "User has approved the abort"
+          on_exit:
             - "set `completed: yyyymmdd hh:mm`"
 
     awaiting-retro:
-      desc: "All milestones done; completed auto-filled; waiting for /retro."
+      desc: "All milestones done; waiting for /retro to write the retrospective."
       owner: retro
       terminal: false
       transitions:
         - to: awaiting-learning
           skill: retro
-          when: "Retrospective markdown written and saved to retrospectives/; self-review checklist passed"
-          requirements:
+          when: "Retrospective written and saved"
+          gates:
+            - "Retrospective markdown saved to retrospectives/"
+            - "Self-review checklist passed"
+          on_exit:
             - "set `retro: retrospectives/YYYYMMDD-{kebab-title}.md`"
             - "set `goal: success | partial | fail`"
 
     awaiting-learning:
-      desc: "Retro written; retro and goal set; waiting for /learn to absorb lessons."
+      desc: "Retro written; waiting for /learn to absorb lessons."
       owner: learn
       terminal: false
       transitions:
         - to: done
           skill: learn
-          when: "All accepted learnings written to their targets; review table confirmed by user"
-          requirements:
+          when: "All accepted learnings written"
+          gates:
+            - "User confirmed the review table"
+            - "Every accepted lesson written to its target file"
+          on_exit:
             - "set `completed: yyyymmdd hh:mm`"
 
     done:
@@ -137,9 +170,9 @@ plan:
       terminal: true
 
     fail:
-      desc: "Terminal technical failure. /develop hit an unrecoverable blocker; completed auto-filled."
+      desc: "Terminal technical failure. /develop hit an unrecoverable blocker."
       terminal: true
 
     cancelled:
-      desc: "Terminal product/priority decision. User shelved the plan; completed auto-filled."
+      desc: "Terminal product decision. User shelved the plan."
       terminal: true

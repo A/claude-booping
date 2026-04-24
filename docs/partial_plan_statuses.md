@@ -1,8 +1,9 @@
 | Status | Meaning |
 |--------|---------|
-| `backlog` | Draft or parked idea; `/groom` writes here initially. |
-| `in-spec` | `/groom` is actively refining: running agents, filling frontmatter, computing estimates. |
-| `ready-for-dev` | Spec accepted; `sp` and `planned` set; queued for `/develop` to claim. |
+| `backlog` | Parked plan — not actively being worked on. Split stubs and user-filed ideas not yet in grooming. |
+| `in-spec` | `/groom` is actively specifying: research, design, drafting. |
+| `awaiting-plan-review` | Plan drafted; `/groom` is presenting and waiting for explicit user approval, change request, or cancellation. |
+| `ready-for-dev` | User approved. Queued for `/develop` to claim. |
 | `in-progress` | `/develop` has claimed the plan; `started` auto-filled on transition. |
 | `awaiting-retro` | All milestones done; `completed` auto-filled; waiting for `/retro`. |
 | `awaiting-learning` | Retro written; `retro` and `goal` set; waiting for `/learn` to absorb lessons. |
