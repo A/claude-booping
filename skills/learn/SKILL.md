@@ -15,14 +15,14 @@ allowed-tools:
   - Bash(git commit *)
   - Bash(grep *)
   - AskUserQuestion
-effort: xhigh
+effort: high
 ---
 
 # booping — /learn
 
 Turn retrospective findings into durable behavior changes routed to exactly one target each.
 
-This skill is **wide-domain** — it must work across very different projects. Project-specific concerns live in `_booping/skill_learn.md`, lessons, and the vault `CLAUDE.md`. Do not bake them into this skill.
+This skill is **wide-domain** — it must work across very different projects. Project-specific concerns live in `_booping/skill_learn.md` and lessons. Do not bake them into this skill.
 
 ## Preflight
 
@@ -72,7 +72,7 @@ Before drafting the review table, check whether each candidate duplicates or con
 1. `ls ~/Claude/{project_name}/lessons/` — enumerate existing lessons.
 2. `ls ~/Claude/{project_name}/_booping/` — enumerate existing project-local extensions.
 3. For each candidate, read ONLY the `_booping/` files whose name matches a candidate-relevant skill or agent (filter, don't dump everything).
-4. Read the vault `CLAUDE.md` and the attached repo's `CLAUDE.md` in full (both are short).
+4. Read the attached repo's `CLAUDE.md` in full.
 
 Record a sweep verdict per candidate as one of:
 
@@ -95,7 +95,7 @@ Write paths use these templates (resolve each placeholder before writing):
 - `lessons/{N}_<kebab>.md` — `{N}` is the next integer, computed from `ls lessons/` highest existing prefix + 1; body uses [template_lesson.md](../../docs/template_lesson.md).
 - `_booping/skill_<name>.md` — per-skill extension in this project's vault.
 - `_booping/agent_<name>.md` — per-agent extension in this project's vault.
-- Vault `CLAUDE.md` and repo `CLAUDE.md` — one-line bullet additions; no paragraph rewrites.
+- Repo `CLAUDE.md` — one-line bullet additions; no paragraph rewrites.
 
 Target types beyond these base five come from partials loaded in Preflight and carry their own write-path and commit guidance — defer to them.
 
@@ -113,7 +113,7 @@ Commit the vault updates from the vault working directory:
 
 ```bash
 cd ~/Claude/{project_name}
-git add lessons/ _booping/ CLAUDE.md plans/<plan-filename>.md
+git add lessons/ _booping/ plans/<plan-filename>.md
 git commit -m "learn: <kebab-retro-title> done"
 ```
 

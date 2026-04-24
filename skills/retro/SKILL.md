@@ -18,7 +18,7 @@ allowed-tools:
   - Bash(booping-plans *)
   - Agent
   - AskUserQuestion
-effort: xhigh
+effort: high
 ---
 
 # booping — /retro
@@ -27,7 +27,7 @@ Produce a retrospective grounded in session logs, code diff, and user feedback �
 
 The retrospective artifact is the sole output. If the retro surfaces work that belongs in `lessons/` or `_booping/skill_*.md`, the skill records the implication in the retro body and instructs the user to run `/learn` — it does not do that work itself.
 
-This skill is **wide-domain** — it must work across very different projects. Project-specific concerns live in `_booping/skill_retro.md`, lessons, and the vault `CLAUDE.md`.
+This skill is **wide-domain** — it must work across very different projects. Project-specific concerns live in `_booping/skill_retro.md` and lessons.
 
 ## Preflight
 

@@ -3,7 +3,7 @@ name: chat
 description: General working mode for project discussion, vault navigation, and small ad-hoc tasks. Opens with a vault status summary. Use for reviewing plans, exploring lessons, casual Q&A, and minor edits that fit within a single session.
 argument-hint: [topic or artifact reference]
 user-invocable: true
-effort: xhigh
+effort: high
 allowed-tools:
   - Read
   - Write
@@ -24,14 +24,13 @@ allowed-tools:
 
 General working mode: discussion, vault navigation, and small ad-hoc edits. Opens every session with a live vault status summary.
 
-This skill is **wide-domain** — it must work across very different projects. Project-specific behavior lives in `_booping/skill_chat.md`, lessons, and the vault `CLAUDE.md`. Do not bake stack details into this skill.
+This skill is **wide-domain** — it must work across very different projects. Project-specific behavior lives in `_booping/skill_chat.md` and lessons. Do not bake stack details into this skill.
 
 ## Preflight
 
 - Read and resolve project based on [project resolution principle](../../docs/partial_project_resolution.md).
 - Read [plan statuses](../../docs/partial_plan_statuses.md).
 - Read [research agents](../../docs/partial_agents_researchers_delegator.md) — delegate heavy reading to researchers to keep context clean.
-- Read `~/Claude/{project_name}/CLAUDE.md` — vault and project conventions.
 - Read lessons per [read lessons](../../docs/partial_read_lessons.md).
 - Read from `~/Claude/{project}/_booping/skill_chat.md`. Silently skip, if file doesn't exist.
 

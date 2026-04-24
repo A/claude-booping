@@ -4,19 +4,15 @@ Claude Code plugin that grooms and executes plans across user projects. Plans li
 
 ## Status (April 2026)
 
-Mid-refactor. Current and trustworthy:
+Post-refactor. Current and trustworthy:
 
-- `skills/groom/SKILL.md`, `skills/chat/SKILL.md`, `skills/develop/SKILL.md`, `skills/retro/SKILL.md`, `skills/learn/SKILL.md`
+- `skills/groom/SKILL.md`, `skills/chat/SKILL.md`, `skills/develop/SKILL.md`, `skills/retro/SKILL.md`, `skills/learn/SKILL.md`, `skills/install/SKILL.md`, `skills/help/SKILL.md`
 - `agents/booping-researcher-{senior,middle,junior}.md`
 - `agents/booping-developer-{junior,middle,senior}.md` — refactored to the new contract: skill-owned vault, shared `_booping/agent_booping-developer.md` extension, briefing-based invocation.
-- `bin/booping-plans` (read-only; ~80 lines)
+- `bin/booping-plans` (read-only; ~80 lines), `bin/booping-create-project`, `bin/booping-validate-plan`
 - Everything in `docs/` (`partial_*.md`, `template_*.md`)
 
-Stale and **not refactored to the new contract** — treat as broken until updated:
-
-- `skills/{install,help}/`
-- (deleted) Five agents deleted in the 2026-04 `/retro` refactor — no agent remains dormant.
-- `bin/booping-init`, `skills/install/template-claude-md.md`
+Nothing currently stale — if you spot drift, file it as a new groom request.
 
 ## Layout
 

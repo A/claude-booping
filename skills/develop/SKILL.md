@@ -14,14 +14,14 @@ allowed-tools:
   - AskUserQuestion
   - TaskCreate
   - TaskUpdate
-effort: xhigh
+effort: high
 ---
 
 # booping — /develop
 
 Execute a plan by delegating every task to a worker agent. The orchestrator never edits application code.
 
-This skill is **wide-domain** — it must work across very different projects. Project-specific concerns (deploy checklists, SP thresholds, stack conventions) live in `_booping/skill_develop.md`, lessons, and the vault `CLAUDE.md`. Do not bake them into this skill.
+This skill is **wide-domain** — it must work across very different projects. Project-specific concerns (deploy checklists, SP thresholds, stack conventions) live in `_booping/skill_develop.md` and lessons. Do not bake them into this skill.
 
 ## Preflight
 
@@ -47,7 +47,7 @@ This skill is **wide-domain** — it must work across very different projects. P
 
 Resolve the plan path from `$ARGUMENTS`; if missing, ask and list recent plans with `ls -t ~/Claude/{project_name}/plans/`.
 
-Read the plan file, the vault `CLAUDE.md`, and the repo `CLAUDE.md`. (Lessons are already loaded in Preflight per [read lessons](../../docs/partial_read_lessons.md).) Spot-check 2–3 key files named in the plan to detect codebase drift; delegate to `booping-researcher-middle` when the set is large (see the research-agents partial).
+Read the plan file and the repo `CLAUDE.md`. (Lessons are already loaded in Preflight per [read lessons](../../docs/partial_read_lessons.md).) Spot-check 2–3 key files named in the plan to detect codebase drift; delegate to `booping-researcher-middle` when the set is large (see the research-agents partial).
 
 **Validate entry status**: the plan's `status:` must be `ready-for-dev` or `backlog`. Any other status means `/develop` has no claim — stop and report clearly.
 

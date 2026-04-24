@@ -19,14 +19,14 @@ allowed-tools:
   - AskUserQuestion
   - WebSearch
   - WebFetch
-effort: xhigh
+effort: high
 ---
 
 # booping — /groom
 
 Produce a plan that a fresh agent can execute with only the plan file as context.
 
-This skill is **wide-domain** — it must work across very different projects (backends, frontends, content sites, CLIs). Project-specific concerns (frameworks, stack patterns, SOLID enforcement, lint/test commands, etc.) live in lessons, `CLAUDE.md`, and `_booping/skill_groom.md`. Do **not** bake them into this skill.
+This skill is **wide-domain** — it must work across very different projects (backends, frontends, content sites, CLIs). Project-specific concerns (frameworks, stack patterns, SOLID enforcement, lint/test commands, etc.) live in lessons and `_booping/skill_groom.md`. Do **not** bake them into this skill.
 
 ## Preflight
 
@@ -62,7 +62,7 @@ Before drafting anything, build the picture:
 - **Ask upfront**: *"What new components, dependencies, APIs, or workflow changes will this likely require?"* Use the answer to scope research. Project-specific framings (e.g. registries / builders / harnesses for codebases that have those) live in `_booping/skill_groom.md` and stack on top of this generic question.
 - **Map the blast radius**: which files, modules, integrations, and external surfaces will change. Delegate the codebase read to a researcher (default `booping-researcher-middle`).
 - **Check for prior art**: existing patterns to reuse. Researcher returns paths + brief descriptions, not full file dumps.
-- **Re-read constraints**: the relevant `CLAUDE.md` sections, project extensions, and applicable lessons.
+- **Re-read constraints**: project extensions and applicable lessons.
 - **Verify external references**: any package version, image tag, API endpoint, CLI flag, or config option named in the plan must be verified against current docs. Delegate to a researcher with web access. Never assume — always verify.
 
 ## Phase 2 — Design
@@ -154,7 +154,7 @@ The `plans/{YYYYMMDD}-*.md` glob picks up the primary plan plus any sibling stub
 
 - Does **not** start implementation — even tempting 1-SP items.
 - Does **not** duplicate lesson content. Reference by ID: `Applies lesson: 0007_no-mocked-db`.
-- Does **not** bake project-specific patterns, framework rules, or stack details into this skill. Those live in `_booping/skill_groom.md`, lessons, and `CLAUDE.md`.
+- Does **not** bake project-specific patterns, framework rules, or stack details into this skill. Those live in `_booping/skill_groom.md` and lessons.
 
 ## Hard rules
 
