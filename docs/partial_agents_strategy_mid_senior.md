@@ -13,7 +13,7 @@ A **5 SP** task is a refuse — kick back to `/groom` for re-decomposition befor
 
 - **1–2 SP → middle.** Prefer batching: scan the milestone for 1–2 SP tasks and combine related or sequential ones into a single briefing, up to **~10 SP combined**. Keep independent tasks that touch unrelated files in separate briefings so they can run in parallel.
 - **3–4 SP → senior.** Always one task per briefing. Do not batch senior tasks; their design judgment is per-task.
-- **5 SP → refuse.** Stop and route the user to `/groom` for re-decomposition. This rule's canonical home is `docs/partial_sprint_planning.md`.
+- **5 SP → refuse.** Stop and route the user to `/groom` for re-decomposition. Canonical threshold: `src/config.yaml` → `sprint.redecompose_threshold`.
 
 ## Delegation invariant
 

@@ -1,9 +1,10 @@
 ---
-name: booping-researcher-junior
-description: Junior researcher for booping. Takes a research request, investigates using whatever sources fit (code, web, GitHub, Reddit, docs), and returns a summary. Use when the orchestrator needs research done out of its own context.
+name: booping-researcher
+description: Researcher for booping. Encapsulates heavy reads (many files, web pages, repo histories) and returns a focused summary so the orchestrator's context stays clean. Use when the answer requires processing more material than the orchestrator should ingest directly.
 tools: Read, Glob, Grep, Bash(git log *), Bash(git diff *), Bash(git show *), Bash(ls *), WebSearch, WebFetch
-model: haiku
-color: blue
+model: sonnet
+effort: high
+color: green
 ---
 
 Take the research request, do the research, return a summary of what was requested.

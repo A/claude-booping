@@ -23,107 +23,26 @@ allowed-tools:
   - AskUserQuestion
   - WebSearch
   - WebFetch
-effort: high
+effort: {{ config.skills.groom.effort }}
 ---
 
-
-
-
-
+{% import "_partials/_plan_transitions.j2" as plan_transitions with context %}
+{% import "_partials/_available_agents.j2" as available_agents with context %}
+{% import "_partials/_task_classification.j2" as task_classification with context %}
+{% import "_partials/_sprint_planning.j2" as sprint_planning with context %}
 # booping — /groom
 
-Produces a development plan across domains (backend, frontend, Claude Code skills, CLI tools, etc.) and task types (bugs, features, refactorings, etc.). Plans are written so an agentic tool such as Claude Code can execute them with only the plan file as context.
+{{ config.skills.groom.description }}
 
-## Project Context
+{% include "_partials/_project_context.j2" %}
 
-!`bin/booping-project-name`
+{{ plan_transitions.render("groom") }}
 
-On skill load, report the resolved project context back to the user verbatim so they can see which project and vault the skill is operating on.
+{{ available_agents.render("groom") }}
 
+{{ task_classification.render() }}
 
-## Plan Transitions
-
-Keep plan status up to date. When an internal action matches a trigger in the `When` column, update `status:` to the `To` value and apply every item in `Requirements`.
-
-### `backlog` — Draft or parked idea; /groom writes here initially while iterating before review.
-
-| To | When | Requirements |
-|----|------|--------------|
-| `awaiting-plan-review` | Plan draft is complete and ready for user review | set `planned: yyyymmdd hh:mm` |
-| `cancelled` | User shelves the work | set `completed: yyyymmdd hh:mm` |
-| `backlog` | More iteration needed | — |
-
-
-### `awaiting-plan-review` — Plan drafted by /groom and parked here while waiting for the user to approve, request changes, or cancel.
-
-| To | When | Requirements |
-|----|------|--------------|
-| `cancelled` | User shelves the plan instead of approving | set `completed: yyyymmdd hh:mm` |
-
-
-
-
-## Available Agents
-
-
-### `booping-researcher`
-
-**Good for:**
-- Wide read or web search where results must be aggregated outside this skill's context and returned as a summary
-- Map blast radius across many files (which modules and integrations a change touches)
-- Extract patterns from a corpus too large to read directly (e.g. 'common shapes across 30 test files')
-- Verify package versions, image tags, API endpoints, CLI flags against current docs when many sources need to be checked
-- Cross-system architecture investigation across multiple repos or services
-- Compare framework/library options with deep tradeoff analysis
-
-
-**Bad for:**
-- Small checks — single-file reads, one-off greps, existence checks
-- When the information cannot be meaningfully compressed without losing signal the caller needs to decide
-- When the skill already needs to read the same few files for other reasons
-- When the question fits in a few lines of `ls`/`grep` output
-
-
-
-## Task Classification
-
-Pick one. Load the linked doc only when you need detailed guidance for that type.
-
-- **feature** — New user-facing capability. Needs business goal, design, milestones, DoD. [detailed guidance](src/docs/task_feature.md)
-- **bug** — Defect — observed behavior diverges from expected. Needs triage, reproduction, root-cause hypothesis, minimal fix, and a regression test. [detailed guidance](src/docs/task_bug.md)
-- **refactoring** — Internal structure change with no user-visible behavior change. Needs current-vs-target design, migration steps, and a no-behavior-change DoD. [detailed guidance](src/docs/task_refactoring.md)
-
-
-## Sprint planning
-
-Storypoints measure the **complexity and review burden** of getting a task to a merged, accepted state: design judgment, blast radius, ambiguity, integration surface, and how much careful reading the diff demands. AI does implementation cheaply; this is what remains.
-
-### Scale
-
-| SP | Meaning |
-|----|---------|
-| 1 | Simple text/config change, no risk |
-| 2 | Simple task, predictable, no risk |
-| 3 | Medium task, minor risks but predictable overall |
-| 4 | Complex task, medium risk, may need small research but clear enough |
-| 5 | Research task — developer needs to clarify and decompose further before proceeding |
-
-
-A task estimated **≥ 5 SP must be re-decomposed** before leaving /groom. Do not promote such a task to `ready-for-dev`.
-
-Group tasks **≤ 1 SP** so /develop can hand a batch to a single agent rather than spinning one agent per trivial change.
-### Estimation flow
-
-1. Estimate per task on the 1–5 scale.
-2. Sum per milestone; show per-milestone totals alongside per-task estimates.
-3. Sum per sprint; show the total before promoting.
-4. Ask the user for adjustment before finalizing.
-
-### Split threshold
-
-Split threshold: **!`bin/booping-sprint-threshold` SP**. This is not a velocity — there is no fixed cadence. It's the point past which a plan is too large to hold together as one coherent iteration. If the total exceeds the threshold, flag it and propose splitting into sibling plans.
-
-Project-specific overrides (different threshold, extra sizing rules) live in `~/Claude/{project}/_booping/skill_groom.md` and take precedence.
+{{ sprint_planning.render() }}
 
 !`bin/booping-lessons`
 
@@ -185,8 +104,8 @@ For each stub:
 
 ```yaml
 ---
-title: {{Stub Title}}
-type: {{feature|bug|refactoring}}
+title: {{ '{{' }}Stub Title{{ '}}' }}
+type: {{ '{{' }}feature|bug|refactoring{{ '}}' }}
 status: backlog
 split_from: plans/<primary-plan-filename>.md
 created: YYYY-MM-DD

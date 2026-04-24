@@ -1,0 +1,37 @@
+{% macro render() -%}
+## Sprint planning
+
+Storypoints measure the **complexity and review burden** of getting a task to a merged, accepted state: design judgment, blast radius, ambiguity, integration surface, and how much careful reading the diff demands. AI does implementation cheaply; this is what remains.
+
+### Scale
+
+| SP | Meaning |
+|----|---------|
+{% for row in config.sprint.scale -%}
+| {{ row.sp }} | {{ row.meaning }} |
+{% endfor %}
+{%- if config.sprint.redecompose_threshold %}
+
+A task estimated **≥ {{ config.sprint.redecompose_threshold }} SP must be re-decomposed** before leaving /groom. Do not promote such a task to `ready-for-dev`.
+{%- endif %}
+{%- if config.sprint.group_threshold %}
+
+Group tasks **≤ {{ config.sprint.group_threshold }} SP** so /develop can hand a batch to a single agent rather than spinning one agent per trivial change.
+{%- endif %}
+
+{%- set sp_values = config.sprint.scale | map(attribute="sp") | list %}
+{%- set sp_min = sp_values | min %}
+{%- set sp_max = sp_values | max %}
+### Estimation flow
+
+1. Estimate per task on the {{ sp_min }}–{{ sp_max }} scale.
+2. Sum per milestone; show per-milestone totals alongside per-task estimates.
+3. Sum per sprint; show the total before promoting.
+4. Ask the user for adjustment before finalizing.
+
+### Split threshold
+
+Split threshold: **!`bin/booping-sprint-threshold` SP**. This is not a velocity — there is no fixed cadence. It's the point past which a plan is too large to hold together as one coherent iteration. If the total exceeds the threshold, flag it and propose splitting into sibling plans.
+
+Project-specific overrides (different threshold, extra sizing rules) live in `~/Claude/{project}/_booping/skill_groom.md` and take precedence.
+{%- endmacro %}

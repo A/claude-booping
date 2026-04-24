@@ -1,0 +1,104 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.11"
+# dependencies = [
+#   "jinja2>=3.1",
+#   "pyyaml>=6.0",
+#   "watchfiles>=0.21",
+# ]
+# ///
+"""booping-build: render src/templates + src/config into skills/ and docs/.
+
+Skills are authored in src/templates/skills/<name>.md.j2; partials live in
+src/templates/partials/. Structured data (plan statuses, transitions, etc.)
+lives in src/config/*.yaml and is exposed to templates as `config.<stem>`.
+
+Output files get a generated banner comment. Do not edit them by hand.
+
+Usage:
+  booping-build              # one-shot render
+  booping-build --watch      # watch src/ and re-render on change
+"""
+import argparse
+import sys
+import traceback
+from pathlib import Path
+
+import yaml
+from jinja2 import Environment, FileSystemLoader, StrictUndefined
+
+ROOT = Path(__file__).resolve().parent.parent
+SRC = ROOT / "src"
+TEMPLATES = SRC / "templates"
+CONFIG_FILE = SRC / "config.yaml"
+SKILLS_OUT = ROOT / "skills"
+
+def load_config() -> dict:
+    if not CONFIG_FILE.exists():
+        return {}
+    return yaml.safe_load(CONFIG_FILE.read_text()) or {}
+
+
+def build_env() -> Environment:
+    return Environment(
+        loader=FileSystemLoader(str(TEMPLATES)),
+        autoescape=False,
+        keep_trailing_newline=True,
+        undefined=StrictUndefined,
+    )
+
+
+def render_skill(env: Environment, config: dict, src: Path) -> tuple[Path, str]:
+    name = src.name.removesuffix(".md.j2")
+    tpl = env.get_template(f"skills/{src.name}")
+    body = tpl.render(config=config, source=str(src.relative_to(ROOT)))
+    out = SKILLS_OUT / name / "SKILL.md"
+    return out, body
+
+
+def build_once() -> int:
+    env = build_env()
+    config = load_config()
+    skills_dir = TEMPLATES / "skills"
+    if not skills_dir.exists():
+        print(f"no skills to render (missing {skills_dir})", file=sys.stderr)
+        return 0
+    count = 0
+    for src in sorted(skills_dir.glob("*.md.j2")):
+        out, content = render_skill(env, config, src)
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(content)
+        print(f"rendered {out.relative_to(ROOT)}")
+        count += 1
+    return count
+
+
+def watch() -> None:
+    from watchfiles import watch as _watch
+
+    try:
+        build_once()
+    except Exception:
+        traceback.print_exc()
+    print(f"watching {SRC.relative_to(ROOT)}/ for changes... (Ctrl-C to stop)")
+    for changes in _watch(str(SRC)):
+        paths = ", ".join(sorted({Path(p).relative_to(ROOT).as_posix() for _, p in changes}))
+        print(f"\nchange: {paths}")
+        try:
+            build_once()
+        except Exception:
+            traceback.print_exc()
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description="Render booping skills from src/templates.")
+    ap.add_argument("--watch", action="store_true", help="watch src/ and re-render on change")
+    args = ap.parse_args()
+    if args.watch:
+        watch()
+        return 0
+    return 0 if build_once() >= 0 else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

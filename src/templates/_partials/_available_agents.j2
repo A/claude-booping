@@ -1,0 +1,17 @@
+{% macro render(skill) -%}
+## Available Agents
+
+{% for agent, spec in config.skills[skill].agents.items() %}
+### `{{ agent }}`
+
+**Good for:**
+{% for t in spec.good_for -%}
+- {{ t }}
+{% endfor %}
+
+**Bad for:**
+{% for t in spec.bad_for -%}
+- {{ t }}
+{% endfor %}
+{% endfor -%}
+{%- endmacro %}

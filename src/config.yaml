@@ -1,0 +1,145 @@
+sprint:
+  default_threshold_sp: 35
+  redecompose_threshold: 5
+  group_threshold: 1
+  scale:
+    - { sp: 1, meaning: "Simple text/config change, no risk" }
+    - { sp: 2, meaning: "Simple task, predictable, no risk" }
+    - { sp: 3, meaning: "Medium task, minor risks but predictable overall" }
+    - { sp: 4, meaning: "Complex task, medium risk, may need small research but clear enough" }
+    - { sp: 5, meaning: "Research task — developer needs to clarify and decompose further before proceeding" }
+
+tasks:
+  - type: feature
+    description: "New user-facing capability. Needs business goal, design, milestones, DoD."
+    doc_uri: src/docs/task_feature.md
+  - type: bug
+    description: "Defect — observed behavior diverges from expected. Needs triage, reproduction, root-cause hypothesis, minimal fix, and a regression test."
+    doc_uri: src/docs/task_bug.md
+  - type: refactoring
+    description: "Internal structure change with no user-visible behavior change. Needs current-vs-target design, migration steps, and a no-behavior-change DoD."
+    doc_uri: src/docs/task_refactoring.md
+
+skills:
+  groom:
+    effort: high
+    description: "Produces a development plan across domains (backend, frontend, Claude Code skills, CLI tools, etc.) and task types (bugs, features, refactorings, etc.). Plans are written so an agentic tool such as Claude Code can execute them with only the plan file as context."
+    agents:
+      booping-researcher:
+        good_for:
+          - "Wide read or web search where results must be aggregated outside this skill's context and returned as a summary"
+          - "Map blast radius across many files (which modules and integrations a change touches)"
+          - "Extract patterns from a corpus too large to read directly (e.g. 'common shapes across 30 test files')"
+          - "Verify package versions, image tags, API endpoints, CLI flags against current docs when many sources need to be checked"
+          - "Cross-system architecture investigation across multiple repos or services"
+          - "Compare framework/library options with deep tradeoff analysis"
+        bad_for:
+          - "Small checks — single-file reads, one-off greps, existence checks"
+          - "When the information cannot be meaningfully compressed without losing signal the caller needs to decide"
+          - "When the skill already needs to read the same few files for other reasons"
+          - "When the question fits in a few lines of `ls`/`grep` output"
+
+plan:
+  statuses:
+    backlog:
+      desc: "Draft or parked idea; /groom writes here initially while iterating before review."
+      owner: groom
+      terminal: false
+      transitions:
+        - to: awaiting-plan-review
+          skill: groom
+          when: "Plan draft is complete and ready for user review"
+          requirements:
+            - "set `planned: yyyymmdd hh:mm`"
+        - to: cancelled
+          skill: groom
+          when: "User shelves the work"
+          requirements:
+            - "set `completed: yyyymmdd hh:mm`"
+        - to: backlog
+          skill: groom
+          when: "More iteration needed"
+        - to: in-progress
+          skill: develop
+          when: "/develop claims directly, skipping the review stopover"
+          requirements:
+            - "set `planned: yyyymmdd hh:mm`"
+            - "set `started: yyyymmdd hh:mm`"
+
+    awaiting-plan-review:
+      desc: "Plan drafted by /groom and parked here while waiting for the user to approve, request changes, or cancel."
+      owner: groom
+      terminal: false
+      transitions:
+        - to: cancelled
+          skill: groom
+          when: "User shelves the plan instead of approving"
+          requirements:
+            - "set `completed: yyyymmdd hh:mm`"
+        - to: in-progress
+          skill: develop
+          when: "User approves the plan and /develop picks it up"
+          requirements:
+            - "set `started: yyyymmdd hh:mm`"
+
+    ready-for-dev:
+      desc: "Spec accepted; sp and planned set; queued for /develop to claim."
+      owner: develop
+      terminal: false
+      transitions:
+        - to: in-progress
+          skill: develop
+          when: "/develop claims a previously-confirmed plan at the start of Phase 3 (Execute)"
+          requirements:
+            - "set `started: yyyymmdd hh:mm`"
+
+    in-progress:
+      desc: "/develop has claimed the plan; started auto-filled on transition."
+      owner: develop
+      terminal: false
+      transitions:
+        - to: awaiting-retro
+          skill: develop
+          when: "All milestones done, Final Verification green, every DoD checkbox marked [x]"
+          requirements:
+            - "set `completed: yyyymmdd hh:mm`"
+        - to: fail
+          skill: develop
+          when: "Unrecoverable blocker after two documented fix attempts on the same milestone (user-approved abort)"
+          requirements:
+            - "set `completed: yyyymmdd hh:mm`"
+
+    awaiting-retro:
+      desc: "All milestones done; completed auto-filled; waiting for /retro."
+      owner: retro
+      terminal: false
+      transitions:
+        - to: awaiting-learning
+          skill: retro
+          when: "Retrospective markdown written and saved to retrospectives/; self-review checklist passed"
+          requirements:
+            - "set `retro: retrospectives/YYYYMMDD-{kebab-title}.md`"
+            - "set `goal: success | partial | fail`"
+
+    awaiting-learning:
+      desc: "Retro written; retro and goal set; waiting for /learn to absorb lessons."
+      owner: learn
+      terminal: false
+      transitions:
+        - to: done
+          skill: learn
+          when: "All accepted learnings written to their targets; review table confirmed by user"
+          requirements:
+            - "set `completed: yyyymmdd hh:mm`"
+
+    done:
+      desc: "Terminal success. /learn has absorbed all lessons."
+      terminal: true
+
+    fail:
+      desc: "Terminal technical failure. /develop hit an unrecoverable blocker; completed auto-filled."
+      terminal: true
+
+    cancelled:
+      desc: "Terminal product/priority decision. User shelved the plan; completed auto-filled."
+      terminal: true

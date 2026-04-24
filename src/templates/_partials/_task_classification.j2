@@ -1,0 +1,9 @@
+{% macro render() -%}
+## Task Classification
+
+Pick one. Load the linked doc only when you need detailed guidance for that type.
+
+{% for t in config.tasks -%}
+- **{{ t.type }}** — {{ t.description }} [detailed guidance]({{ t.doc_uri }})
+{% endfor %}
+{%- endmacro %}

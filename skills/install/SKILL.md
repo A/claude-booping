@@ -173,7 +173,7 @@ Commands available in this project to validate changes. When writing a milestone
 
 ## Sizing calibration
 
-{{"Sprint cap: {{value}} SP." if user supplied — else "(default — see docs/partial_sprint_planning.md)"}}
+{{"Sprint cap: {{value}} SP." if user supplied — else "(default — see `src/config.yaml` → `sprint.default_threshold_sp`)"}}
 ```
 
 ### File 3 — `~/Claude/{project}/_booping/skill_develop.md`

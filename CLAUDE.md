@@ -1,81 +1,108 @@
 # booping plugin — project guide
 
-Claude Code plugin that grooms and executes plans across user projects. Plans live under `~/Claude/{project}/` (the per-project vault); skills, agents, and templates live in this repo.
+Claude Code plugin that grooms and executes plans across user projects. Plans live under `~/Claude/{project}/` (the per-project vault); skills, agents, templates, and config live in this repo.
 
 ## Status (April 2026)
 
-Post-refactor. Current and trustworthy:
+Migrating to a template-driven skill pipeline. State of play:
 
-- `skills/groom/SKILL.md`, `skills/chat/SKILL.md`, `skills/develop/SKILL.md`, `skills/retro/SKILL.md`, `skills/learn/SKILL.md`, `skills/install/SKILL.md`, `skills/help/SKILL.md`
-- `agents/booping-researcher-{senior,middle,junior}.md`
-- `agents/booping-developer-{junior,middle,senior}.md` — refactored to the new contract: skill-owned vault, shared `_booping/agent_booping-developer.md` extension, briefing-based invocation.
-- `bin/booping-plans` (read-only; ~80 lines), `bin/booping-create-project`, `bin/booping-validate-plan`
-- Everything in `docs/` (`partial_*.md`, `template_*.md`)
-
-Nothing currently stale — if you spot drift, file it as a new groom request.
+- **Template pipeline is live**: `src/config.yaml` + `src/templates/` → `skills/*/SKILL.md` via `bin/booping-build`.
+- **`/groom`** is the pilot — fully template-driven; its `skills/groom/SKILL.md` is a generated artifact rendered from `src/templates/skills/groom.md.j2`.
+- **Other skills** (`chat`, `develop`, `retro`, `learn`, `install`, `help`) still author their `SKILL.md` by hand and reference `docs/partial_*.md`. They are due for migration but work as-is in the meantime.
+- **Agents**: `booping-researcher.md` (single, consolidated from former junior/middle/senior tiers; `model: sonnet`, `effort: high`). `booping-developer-{middle,senior}.md` unchanged.
+- **CLIs**: `booping-plans` (read-only), `booping-create-project`, `booping-validate-plan` — unchanged. New: `booping-build`, `booping-project-name`.
 
 ## Layout
 
+- `src/config.yaml` — single source of truth for structured data the pipeline renders into skills (plan statuses + transitions, task types, per-skill description / effort / agents / etc.).
+- `src/templates/skills/<name>.md.j2` — skill templates. One file per skill; renders to `skills/<name>/SKILL.md`.
+- `src/templates/_partials/_*.j2` — reusable fragments. Underscore prefix marks them as inputs, not outputs. Include via `{% include %}` (data-only partials) or import + macro call (parameterized partials, e.g. `_plan_transitions.j2`).
+- `src/docs/*.md` — reference docs lazy-loaded by skills via `[label](src/docs/...)` links. No `partial_` prefix.
+- `skills/<name>/SKILL.md` — **generated output** for template-driven skills; **authored** directly for the not-yet-migrated ones. Never edit a generated `SKILL.md` by hand.
+- `docs/partial_*.md`, `docs/template_*.md` — legacy partials/templates still referenced by unmigrated skills.
 - `agents/` — sub-agent definitions.
-- `bin/` — standalone uv inline scripts.
-- `docs/` — partials (`partial_*.md`) and templates (`template_*.md`) that skills include by reference.
-- `skills/` — skill definitions. `groom/` is the canonical pattern.
+- `bin/` — standalone uv inline scripts:
+  - `booping-build` — render; `--watch` for dev loop.
+  - `booping-project-name` — reads `.booping` in cwd; prints a fenced YAML block (`name:`, `directory:`) when initialized, or a paragraph pointing at `src/docs/how_to_initialize_project.md` when not. Designed to be inlined via `!`bin/booping-project-name`` at skill-load time.
+  - `booping-sprint-threshold` — prints the SP total above which /groom should suggest splitting a plan. Not a velocity (no cadence); a heuristic ceiling. Today echoes `sprint.default_threshold_sp` from config. Inlined via `!`bin/booping-sprint-threshold``.
+  - `booping-extra-instructions <filename>` — reads `~/Claude/{project}/_booping/<filename>` and prints a framed "User-specific instructions" block wrapping the body; prints nothing if the project isn't initialized or the file is missing. Inlined per-skill via `!`bin/booping-extra-instructions skill_<name>.md`` so project overrides travel with the skill without a separate read step.
+  - `booping-lessons` — enumerates `~/Claude/{project}/lessons/*.md`, prints a "Lessons" block with an index and each lesson's full body plus a conflict-handling rule. Prints "No lessons accumulated yet" when the directory is empty; prints nothing if the project isn't initialized. Inlined via `!`bin/booping-lessons`` so the active rule set is live at skill load.
+  - `booping-plans`, `booping-validate-plan`, `booping-create-project` — as before.
 
-## Doc conventions
+## Principles
 
-- `docs/partial_*.md` — reusable fragments. Skills reference them from their Preflight section so the operating context loads up front. Keep depth in partials; keep skills lean.
-- `docs/template_*.md` — copy-into-place templates. `template_plan_frontmatter.md` is the frontmatter spec; other skills can reference it without dragging the body template along.
+- **Minimum useful context**: show only information the skill needs to perform its job. Never bake in stale, speculative, or unrelated data.
+- **Less prose, less drift**: every extra sentence in a skill or partial adds tension between what's written and what the model does. Cut motivation, restated context, "you are the skill / you are responsible to" preambles, and any explanation the schema or a referenced doc already carries. The schema is the source of truth; prose decays.
+- **Pre-execute with `!`commands``**: inject dynamic content (project name, vault path) into the skill body at load time via inline shell. Saves a round-trip tool call per fact.
+- **Lazy-load with `[doc](path)` references**: link to docs the skill reads only when the situation demands it. Keeps the baseline skill body small.
+- **Hard-wire with j2 partials**: use `{% include %}` (or a macro) for content that *must* be present every invocation. Reserve partials for mandatory data that would otherwise force an unnecessary tool call.
+- **Schema over prose**: structured data lives in `src/config.yaml`. If a format or value is there, the skill body must not also describe it in prose — render from config.
 
 ## Skill design
 
 - **Wide-domain**: skills must work across stacks (Django, Rust, Hugo, etc.). Project-specific concerns live in `~/Claude/{project}/_booping/skill_<name>.md`, `lessons/`, and the project's own `CLAUDE.md` — never in the skill here.
-- **Phases over flat sections**: Preflight → High-level workflow → Phase 0..N. Preflight loads partials and project context.
-- **Research delegation**: when a skill needs to read code or do web research, delegate to `booping-researcher-{senior,middle,junior}` to protect the skill's context. Researcher returns a summary, not raw dumps.
+- **Phases over flat sections**: Preflight → High-level workflow → Phase 0..N.
+- **Preflight becomes thinner** in template-driven skills: items that were "Read partial X" now appear either as inlined partial content, as `!`command`` blocks, or as lazy `[detailed guidance](src/docs/…)` links. Preflight is for the things that still require the model to act (e.g. read vault lessons, read `_booping/skill_<name>.md`).
+- **Research delegation**: delegate heavy reads / summarization work to `booping-researcher` to protect the skill's context. The agent is for *aggregating many sources into a summary*, not for single-file spot checks — those stay in the skill.
 - **Agent wiring**: skills own all reads/writes against `~/Claude/{project}/`. Agents touch only code in the attached repo and never scan the vault. Briefings carry task / decisions / files / DoD / Verify — no lesson paths. Lesson context reaches agents via two baked-in channels: DoD + Verify pasted from the plan (folded in by `/groom`) and the shared extension `~/Claude/{project}/_booping/agent_booping-developer.md` (folded in by `/learn`).
 - **Per-project quality checks**: `/develop` classifies the attached repo's quality tooling (lint, typecheck, tests) into hook-enforced (runs on commit) vs configured-but-manual (skill runs per milestone) per `docs/partial_development_quality_checks.md`. Plan-authored `Verify` commands target milestone DoD; project quality commands run alongside them.
 
+## Config schema (`src/config.yaml`)
+
+Top-level keys currently in use:
+
+- `skills.<name>.description` — body-level description, rendered into the skill and reusable by `/help`.
+- `skills.<name>.effort` — frontmatter `effort` value.
+- `skills.<name>.agents.<agent-name>.good_for` / `.bad_for` — delegation guidance rendered by `_available_agents.j2`.
+- `plan.statuses.<key>` — `desc`, `owner` (skill), `terminal` (bool), `transitions` (list of `{to, skill, when, requirements}`). Filtered per-skill by `_plan_transitions.j2` (macro shows only statuses a skill owns or has transitions out of, and only rows where `skill == <current>`). `requirements` is a list of short instruction strings rendered verbatim into the `Requirements` column (e.g. `"set \`planned: yyyymmdd hh:mm\`"`).
+- `tasks` — list of `{type, description, doc_uri}`. Rendered by `_task_classification.j2` as bullets with a lazy-load link to `doc_uri` (relative from repo root).
+- `sprint` — `scale` (list of `{sp, meaning}`), `default_threshold_sp` (SP total past which /groom should propose splitting — not a velocity), `redecompose_threshold` (tasks ≥ this SP must be re-decomposed), `group_threshold` (tasks ≤ this SP should be grouped into one agent briefing). Rendered by `_sprint_planning.j2`; `redecompose_threshold` / `group_threshold` are skipped when falsy. Threshold is inlined at skill-load time via `!`bin/booping-sprint-threshold``.
+
 ## Plan lifecycle
 
-- 9 statuses (see `docs/partial_plan_statuses.md`). Plans are born in `backlog`.
-- Status transitions are **manual frontmatter edits**, not CLI mutations. Each skill documents its allowed transitions in `docs/partial_plan_transitions_<skill>.md` (e.g. `partial_plan_transitions_groom.md`).
+- Statuses + transitions live in `src/config.yaml` (`plan.statuses`). The rendered skill body shows only that skill's slice. Terminal states: `done`, `fail`, `cancelled`.
+- Status transitions are **manual frontmatter edits**, not CLI mutations. The skill applies them when a trigger in its rendered transitions table matches an internal action.
+- Current flow: `backlog → awaiting-plan-review → in-progress → awaiting-retro → awaiting-learning → done` (with `cancelled` / `fail` terminal branches). `in-spec` was renamed to `awaiting-plan-review`; `ready-for-dev` exists but is orphaned in the new flow (kept as a legacy fallback — candidate for removal).
 - After a transition, verify with `booping-plans --status <new-status>`.
-- `booping-plans` is read-only for listing. `sprints.md` is a snapshot regenerated by `/chat` on orient via `booping-plans --format=md`; never hand-edit.
+- `sprints.md` is a snapshot regenerated by `/chat` on orient via `booping-plans --format=md`; never hand-edit.
 
 ## Project vault layout (`~/Claude/{project}/`)
 
-- `requests/{YYYYMMDD}-{kebab-title}.md` — saved user request. Cross-referenced from the plan via `source:`; references the plan back via `plan:`.
-- `plans/{YYYYMMDD}-{kebab-title}.md` — plan files; frontmatter per `docs/template_plan_frontmatter.md`. Sibling stubs use `source: split-from:plans/...`.
+- `plans/{YYYYMMDD}-{kebab-title}.md` — plan files; frontmatter per `docs/template_plan_frontmatter.md`. Sibling stubs set `split_from: plans/...` to point at the primary plan they were split from.
 - `lessons/` — accumulated lessons; loaded by skills' Preflight.
 - `_booping/skill_<name>.md` — project-local extensions to wide-domain skills.
 - `CLAUDE.md` — project conventions; loaded by skills.
 
 ## CLI
 
-- `booping-plans` — list plans, filter by status, sort by any frontmatter field. Tab-separated output for piping. Single-file uv inline script.
-- `booping-validate-plan <plan-path>` — Gemini cross-validation. Handles its own API-key check; never inspect `GEMINI_API_KEY` from agent context.
+- `bin/booping-build` — render skills from `src/`. `--watch` re-renders on change (via `watchfiles`).
+- `bin/booping-project-name` — emit project context (YAML block or uninitialized notice) for inlining into skills via `!`…``.
+- `bin/booping-plans` — list plans, filter by status, sort by any frontmatter field. Tab-separated output.
+- `bin/booping-validate-plan <plan-path>` — Gemini cross-validation. Handles its own API-key check; never inspect `GEMINI_API_KEY` from agent context.
+- `just build`, `just watch` — shortcuts for the renderer.
 - No tests. (User-set policy.)
 
 ## Editing conventions
 
+- For template-driven skills: edit `src/templates/` and `src/config.yaml`; never edit the generated `skills/<name>/SKILL.md` directly. Run `just build` (or keep `just watch` running) to regenerate.
 - Prefer extracting to a partial over inlining when prose grows past a paragraph or two.
+- Prefer moving structured data into `src/config.yaml` over prose in partials.
 - No comments that restate code. Only WHY for non-obvious bits.
 - No tests in `bin/`.
 - Conventional commits with scope: `feat(booping): ...`, `fix(install): ...`, etc.
 - The plugin code itself stays stack-agnostic — no Python/Django/JS specifics inside skills.
 
-## When refactoring stale skills
+## Migrating an old skill to the template pipeline
 
-Use `skills/groom/SKILL.md` as the reference shape. Common partials worth reusing on the Preflight:
+Use `src/templates/skills/groom.md.j2` as the reference.
 
-- `partial_project_resolution` — resolve project, read vault CLAUDE.md.
-- `partial_plan_statuses` — lifecycle vocabulary.
-- `partial_read_lessons` — uniform lesson-load + summary step.
-- `partial_agents_researchers_delegator` — tier catalogue when the skill delegates reading.
-- `partial_agent_developers_delegator` + `partial_agents_strategy_mid_senior` — when the skill spawns worker agents for code edits.
-- `partial_sprint_planning`, `partial_plan_quality_checklist` — grooming-time plan hygiene.
-- `partial_cross_validation` — optional second-model review on high-risk plans.
-- `partial_development_quality_checks` — runtime lint/typecheck/test policy (for `/develop`-like skills).
+1. Copy `skills/<name>/SKILL.md` → `src/templates/skills/<name>.md.j2`.
+2. Move structured values (`effort`, `description`, per-skill agents, task-type / status / transition surfaces touching this skill) into `src/config.yaml`.
+3. Replace the project-resolution Preflight bullet with `{% include "_partials/_project_context.j2" %}`.
+4. Replace the plan-transitions Preflight bullet with `{{ plan_transitions.render("<skill>") }}` (import the macro with `with context`).
+5. Replace the task-classification Preflight bullet with `{{ task_classification.render() }}`.
+6. Replace agent-delegation Preflight bullets with `{{ available_agents.render("<skill>") }}`.
+7. For any remaining partial read that fits the "small detail the skill loads on demand" shape, move it to `src/docs/<name>.md` and swap the Preflight bullet for a lazy `[detailed guidance](src/docs/<name>.md)` link.
+8. Rebuild, sanity-check the rendered `skills/<name>/SKILL.md`, then delete the now-unreferenced `docs/partial_*.md` predecessors.
 
-Each refactored skill needs its own `partial_plan_transitions_<skill>.md` listing the status transitions it owns.
-
-Agent families follow a two-layer convention: a delegator partial (`partial_<domain>_delegator.md`) is the entry-point catalogue listing available strategies; each strategy partial (`partial_agents_strategy_<name>.md`) carries the tier roster, SP→agent mapping, and briefing template. Current examples: `partial_agent_developers_delegator.md` → `partial_agents_strategy_mid_senior.md` for code tasks; `partial_agents_researchers_delegator.md` → `partial_agents_researchers_strategy_senior_middle_junior.md` for research. Project-specific extra instructions live under `~/Claude/{project}/_booping/` — skills read `skill_<name>.md`, agents read `agent_<name>.md`; callers silently skip if the file is absent.
+When the last old skill is migrated, `docs/partial_*.md` and `docs/template_*.md` can be retired wholesale.
