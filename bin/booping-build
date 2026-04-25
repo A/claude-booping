@@ -33,6 +33,7 @@ TEMPLATES = SRC / "templates"
 CONFIG_FILE = SRC / "config.yaml"
 SKILLS_OUT = ROOT / "skills"
 DOCS_OUT = ROOT / "docs"
+AGENTS_OUT = ROOT / "agents"
 
 def load_config() -> dict:
     if not CONFIG_FILE.exists():
@@ -76,6 +77,7 @@ def build_once() -> int:
     count += render_group(env, config, "skills", lambda name: SKILLS_OUT / name / "SKILL.md")
     count += render_group(env, config, "docs", lambda name: DOCS_OUT / f"{name}.md")
     count += render_group(env, config, "plan_templates", lambda name: DOCS_OUT / "plan_templates" / f"{name}.md")
+    count += render_group(env, config, "agents", lambda name: AGENTS_OUT / f"{name}.md")
     return count
 
 

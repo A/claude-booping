@@ -26,13 +26,13 @@ The skill owns all reads and writes against the project vault (`~/Claude/{projec
 Lesson context reaches agents through two baked-in channels, not per-briefing routing:
 
 - **Plan** — `/groom` folded applicable lessons into DoD items and Verify commands at grooming time. The skill pastes those fields into the briefing verbatim.
-- **Agent extension** — the shared `agent_booping-developer.md` extension in the project vault (owned by `/learn`) is read by the agent itself during Preflight at `~/Claude/{project}/_booping/agent_booping-developer.md`. The agent also self-loads `partial_agents_developer_rules.md` and `partial_agents_developer_workflow.md` from its own Preflight. The skill does not prepend a contract block or inject an extra-instructions path.
+- **Agent extension** — the shared `agent_booping-developer.md` extension in the project vault (owned by `/learn`) is injected at agent load time via `!`bin/booping-extra-instructions agent_booping-developer.md`` at the bottom of the agent body. The skill does not prepend a contract block or inject an extra-instructions path. Rules, workflow, and report format are inlined in the agent body itself.
 
 The skill does not filter or inline lessons per-briefing. If a lesson isn't already in the plan or the agent extension file, it won't reach the agent.
 
 ### Briefing template
 
-Developer agents self-load their full operating contract (rules, workflow, extra instructions) via their own Preflight. The skill only passes the task envelope.
+Developer agents carry their full operating contract (rules, workflow, report format) inline in the agent body, plus the project-local extension injected via `!`bin/booping-extra-instructions agent_booping-developer.md``. The skill only passes the task envelope.
 
 Every briefing sent via `Agent()` uses this body:
 
@@ -41,7 +41,7 @@ Task / goal: <what to change and why>
 Decisions that apply: <plan decisions relevant here>
 Related files: <files relevant; read only the ones you'll touch. If something outside this list needs to change, stop and report.>
 DoD: <checklist from the plan, verbatim>
-Verify: <exact test/lint commands the agent must run before reporting done>
+Verify: <exact test/lint commands the orchestrator will run after the agent reports done — informational for the agent>
 ```
 
 Both `booping-developer-middle` and `booping-developer-senior` receive identical briefings.
