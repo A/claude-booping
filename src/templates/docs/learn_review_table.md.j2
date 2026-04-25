@@ -2,16 +2,17 @@ The review table is the single artifact the orchestrator presents to the user be
 
 ## Column shape
 
-| # | Target | Type | Brief description |
-|---|--------|------|-------------------|
-| 1 | `lessons/0005_kebab-title.md` | `lesson` | One sentence stating the rule. |
-| 2 | `_booping/skill_develop.md` | `skill-ext` | One sentence stating the behaviour change. |
-| … | … | … | … |
+| # | Target | Type | Rule | Example |
+|---|--------|------|------|---------|
+| 1 | `lessons/0005_kebab-title.md` | `lesson` | One imperative sentence. | One concrete sentence. |
+| 2 | `_booping/skill_develop.md` | `skill-ext` | One imperative sentence. | One concrete sentence. |
+| … | … | … | … | … |
 
 - `#` — stable integer, assigned once; used by the user to reject individual rows.
 - `Target` — exact file path or path-template (e.g. `_booping/skill_<name>.md`). Resolve templates before writing.
 - `Type` — one of the target types from the Routing Matrix inlined in the skill body.
-- `Brief description` — one sentence; imperative form preferred.
+- `Rule` — one sentence, imperative form (`do X` / `don't Y`). Single concern — if you need "and", "plus", or `;`, decompose into two rows.
+- `Example` — one sentence, concrete; what went wrong or right.
 
 ## User interaction
 
@@ -25,4 +26,4 @@ Present the table and then ask:
 
 ## Split rule
 
-If a user-added row's `Brief description` covers two distinct rules, the orchestrator splits it into two rows (assigning the next available `#` values) before any write. Never write a single row that conflates two rules.
+If a user-added row's `Rule` cell carries two distinct rules, split into two rows (assigning the next available `#` values) before any write. The `Example` cell should illustrate exactly the rule in its row. Never write a single row that conflates two rules.
