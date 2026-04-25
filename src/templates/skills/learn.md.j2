@@ -17,62 +17,24 @@ allowed-tools:
   - Bash(bin/booping-debug-mode:*)
   - Bash(bin/booping-project-name:*)
   - AskUserQuestion
-effort: high
+effort: {{ config.skills.learn.effort }}
 ---
 
-
-
+{% import "_partials/_plan_transitions.j2" as plan_transitions with context %}
+{% import "_partials/_available_agents.j2" as available_agents with context %}
 # booping — /learn
 
 Turn retrospective findings into durable behavior changes routed to exactly one target each.
 
 This skill is **wide-domain** — it must work across very different projects. Project-specific concerns live in `_booping/skill_learn.md` and lessons. Do not bake them into this skill.
 
-## Project Context
+{% include "_partials/_project_context.j2" %}
 
-!`bin/booping-project-name`
+{{ plan_transitions.render("learn") }}
 
-On skill load, report the resolved project context back to the user verbatim so they can see which project and vault the skill is operating on.
+{{ available_agents.render("learn") }}
 
-
-## Plan Transitions
-
-This table is the contract: the valid moves and their requirements — `Gates` (must hold before the move) and `On exit` (must be fulfilled when taking the move). Both are strict. When an internal action matches a `When` trigger, verify every `Gate` holds, fulfill every `On exit` requirement, update `status:` to the `To` value, then commit the change to the vault:
-
-```bash
-cd ~/Claude/{project}
-git add plans/<plan-file>.md   # plus any sibling artifacts written in the same run
-git commit -m "<to-status>: <kebab-title>"
-```
-
-One commit per transition. Sibling stubs written in the same run go in the same commit.
-
-### `awaiting-learning` — Retro written; waiting for /learn to absorb lessons.
-
-| To | When | Gates | On exit |
-|----|------|-------|---------|
-| `done` | All accepted learnings written | User confirmed the review table; Every accepted lesson written to its target file | set `completed: yyyymmdd hh:mm` |
-
-
-
-
-
-
-## Routing Matrix
-
-This matrix is the routing contract for /learn candidates. Every accepted learning lands in exactly one target — no duplicates across targets, no multi-target rows.
-
-| Target | When to use | Lands at | Examples |
-|--------|-------------|----------|----------|
-| **Lesson** | Cross-framework principle reaching every skill — design heuristic, test discipline, IA rule. Concrete, short, with one example. | `lessons/{N}_<kebab>.md` | "Challenge code design by SOLID principles", "Use AAA in test cases", "Design skill template partials by information hierarchy" |
-| **Skill extra instructions** | Tweak or extend a single skill's method (groom / develop / retro / learn / chat / install / help). | `_booping/skill_<skill>.md` | `skill_groom.md`, `skill_develop.md`, `skill_retro.md`, `skill_learn.md`, `skill_chat.md`, `skill_install.md`, `skill_help.md` |
-| **Agent extra instructions** | Hook a single agent's behavior. Compact list. | `_booping/agent_<full-agent-name>.md` | `agent_booping-researcher.md`, `agent_booping-developer-middle.md`, `agent_booping-developer-senior.md` |
-| **Repository CLAUDE.md** | Project-fact aiding fresh-agent project understanding — layout path, CLI command, code-side convention. One-bullet additions; no paragraph rewrites. | `<repo>/CLAUDE.md` | (single canonical target — no filename variants) |
-
-If a candidate would otherwise span two targets, decompose into two distinct rows; never duplicate the same rule across targets.
-
-The skill infers the exact filename per candidate; the example lists above are validation aids, not full enumerations.
-
+{% include "_partials/_learn_targets.j2" %}
 
 !`bin/booping-debug-mode learn`
 
@@ -135,19 +97,7 @@ Write paths use these templates (resolve each placeholder before writing):
 - `_booping/agent_<name>.md` — per-agent extension in this project's vault.
 - Repo `CLAUDE.md` — one-line bullet additions; no paragraph rewrites.
 
-
----
-id: {{N}}                                      # monotonically-increasing integer; matches the filename prefix
-title: {{One-sentence rule as a prescriptive statement}}
-retro: retrospectives/YYYYMMDD-{{kebab-title}}.md   # the retro that surfaced this lesson
-created: YYYY-MM-DD                            # date this lesson was extracted
----
-
-**Rule**: {{The principle, imperative form. One sentence; at most a short bullet list if the rule has named sub-checks.}}
-
-**Example**: {{One concrete case that illustrates the rule — what went wrong or right, in one or two lines. No motivation paragraphs, no multi-section "how to apply", no forbidden/edge-case lists. The retro carries the backstory; link it via `retro:` frontmatter.}}
-
-
+{% include "_partials/_lesson_template.j2" %}
 
 ## Phase 4 Framework review
 
