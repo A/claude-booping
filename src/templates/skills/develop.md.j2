@@ -14,98 +14,22 @@ allowed-tools:
   - AskUserQuestion
   - TaskCreate
   - TaskUpdate
-effort: high
+effort: {{ config.skills.develop.effort }}
 ---
 
-
-
+{% import "_partials/_plan_transitions.j2" as plan_transitions with context %}
+{% import "_partials/_available_agents.j2" as available_agents with context %}
 # booping — /develop
 
 Execute a plan by delegating every task to a worker agent. The orchestrator never edits application code.
 
 This skill is **wide-domain** — it must work across very different projects. Project-specific concerns (deploy checklists, SP thresholds, stack conventions) live in `_booping/skill_develop.md` and lessons. Do not bake them into this skill.
 
-## Project Context
+{% include "_partials/_project_context.j2" %}
 
-!`bin/booping-project-name`
+{{ plan_transitions.render("develop") }}
 
-On skill load, report the resolved project context back to the user verbatim so they can see which project and vault the skill is operating on.
-
-
-## Plan Transitions
-
-This table is the contract: the valid moves and their requirements — `Gates` (must hold before the move) and `On exit` (must be fulfilled when taking the move). Both are strict. When an internal action matches a `When` trigger, verify every `Gate` holds, fulfill every `On exit` requirement, update `status:` to the `To` value, then commit the change to the vault:
-
-```bash
-cd ~/Claude/{project}
-git add plans/<plan-file>.md   # plus any sibling artifacts written in the same run
-git commit -m "<to-status>: <kebab-title>"
-```
-
-One commit per transition. Sibling stubs written in the same run go in the same commit.
-
-### `ready-for-dev` — Approved by user. Queued for /develop to claim.
-
-| To | When | Gates | On exit |
-|----|------|-------|---------|
-| `in-progress` | /develop claims the plan at the start of its execute phase | — | set `started: yyyymmdd hh:mm` |
-
-
-### `in-progress` — /develop has claimed the plan and is executing milestones.
-
-**Artifacts**
-- Code changes per milestone on the sprint branch
-- DoD checkboxes flipped to [x] as tasks complete
-
-
-| To | When | Gates | On exit |
-|----|------|-------|---------|
-| `awaiting-retro` | All milestones done | Every DoD checkbox marked [x]; Final Verification green | set `completed: yyyymmdd hh:mm` |
-| `fail` | Unrecoverable blocker on the same milestone | Two fix attempts documented in the plan; User has approved the abort | set `completed: yyyymmdd hh:mm` |
-
-
-
-
-## Available Agents
-
-
-### `booping-developer-middle`
-
-**Good for:**
-- 1–2 SP tasks; batch related tasks up to ~10 SP combined per briefing
-- Mechanical or predictable changes: config edits, simple additions, low-risk refactors
-
-
-**Bad for:**
-- 3+ SP — route to senior
-- Design-judgment work — architectural decisions, non-trivial trade-offs
-- 5+ SP — refuse, route back to /groom for re-decomposition
-
-
-### `booping-developer-senior`
-
-**Good for:**
-- 3–4 SP tasks — one per briefing (no batching)
-- Design-judgment work — architectural decisions, non-trivial trade-offs, integration surface changes
-- Non-trivial refactoring with blast radius across multiple modules
-
-
-**Bad for:**
-- 1–2 SP — middle handles those
-- 5+ SP — refuse, route back to /groom for re-decomposition
-
-
-### `booping-researcher`
-
-**Good for:**
-- Phase 0 drift spot-check: given a large set of plan-named files, determine whether actual file shape matches the plan's assumptions
-
-
-**Bad for:**
-- Milestone-diff review — that stays in the skill
-- Single-file reads — call Read directly
-
-
+{{ available_agents.render("develop") }}
 
 ## High-level workflow
 
@@ -148,11 +72,9 @@ Pick the prefix from the plan's `type`:
 
 | Plan `type` | Branch prefix |
 |-------------|---------------|
-| feature | `feat/` |
-| bug | `fix/` |
-| refactoring | `refactor/` |
-| other | `chore/` |
-
+{% for type, prefix in config.plan.branch_prefixes.items() -%}
+| {{ type }} | `{{ prefix }}/` |
+{% endfor %}
 
 One branch per sprint. A sprint that spans multiple repos uses the same kebab title in each repo. Project-specific prefix overrides (e.g. `hotfix/`) live in `~/Claude/{project_name}/_booping/skill_develop.md`.
 
