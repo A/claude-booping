@@ -10,7 +10,7 @@ The review table is the single artifact the orchestrator presents to the user be
 
 - `#` — stable integer, assigned once; used by the user to reject individual rows.
 - `Target` — exact file path or path-template (e.g. `_booping/skill_<name>.md`). Resolve templates before writing.
-- `Type` — sourced from `docs/partial_learn_targets.md`, plus any types activated at runtime by other partials loaded during Preflight.
+- `Type` — one of the target types from the Routing Matrix inlined in the skill body.
 - `Brief description` — one sentence; imperative form preferred.
 
 ## User interaction

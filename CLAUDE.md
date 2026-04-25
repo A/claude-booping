@@ -7,8 +7,8 @@ Claude Code plugin that grooms and executes plans across user projects. Plans li
 Migrating to a template-driven skill pipeline. State of play:
 
 - **Template pipeline is live**: `src/config.yaml` + `src/templates/` → `skills/*/SKILL.md` and `agents/*.md` via `bin/booping-build`.
-- **`/groom`, `/develop`, and `/retro`** are fully template-driven; their `skills/*/SKILL.md` are generated artifacts.
-- **Other skills** (`chat`, `learn`, `install`, `help`) still author their `SKILL.md` by hand and reference `docs/partial_*.md`. They are due for migration but work as-is in the meantime.
+- **`/groom`, `/develop`, `/retro`, and `/learn`** are fully template-driven; their `skills/*/SKILL.md` are generated artifacts.
+- **Other skills** (`chat`, `install`, `help`) still author their `SKILL.md` by hand and reference `docs/partial_*.md`. They are due for migration but work as-is in the meantime.
 - **Agents**: all three (`booping-researcher`, `booping-developer-middle`, `booping-developer-senior`) are template-driven. The two developer tiers share `_partials/_developer_body.j2` — only frontmatter (`model`, `effort`, `reasoning`, `color`) diverges. Each agent injects project-local extensions via `!`bin/booping-extra-instructions agent_booping-<name>.md`` at the bottom of its body.
 - **CLIs**: `booping-plans` (read-only), `booping-create-project`, `booping-validate-plan` — unchanged. New: `booping-build`, `booping-project-name`.
 
