@@ -7,8 +7,8 @@ Claude Code plugin that grooms and executes plans across user projects. Plans li
 Migrating to a template-driven skill pipeline. State of play:
 
 - **Template pipeline is live**: `src/config.yaml` + `src/templates/` → `skills/*/SKILL.md` via `bin/booping-build`.
-- **`/groom`** is the pilot — fully template-driven; its `skills/groom/SKILL.md` is a generated artifact rendered from `src/templates/skills/groom.md.j2`.
-- **Other skills** (`chat`, `develop`, `retro`, `learn`, `install`, `help`) still author their `SKILL.md` by hand and reference `docs/partial_*.md`. They are due for migration but work as-is in the meantime.
+- **`/groom` and `/develop`** are fully template-driven; their `skills/*/SKILL.md` are generated artifacts.
+- **Other skills** (`chat`, `retro`, `learn`, `install`, `help`) still author their `SKILL.md` by hand and reference `docs/partial_*.md`. They are due for migration but work as-is in the meantime.
 - **Agents**: `booping-researcher.md` (single, consolidated from former junior/middle/senior tiers; `model: sonnet`, `effort: high`). `booping-developer-{middle,senior}.md` unchanged.
 - **CLIs**: `booping-plans` (read-only), `booping-create-project`, `booping-validate-plan` — unchanged. New: `booping-build`, `booping-project-name`.
 
@@ -72,14 +72,15 @@ The skill body must not restate the flow the transitions table already carries. 
 - **Preflight becomes thinner** in template-driven skills: items that were "Read partial X" now appear either as inlined partial content, as `!`command`` blocks, or as lazy `[detailed guidance](src/docs/…)` links. Preflight is for the things that still require the model to act (e.g. read vault lessons, read `_booping/skill_<name>.md`).
 - **Research delegation**: delegate heavy reads / summarization work to `booping-researcher` to protect the skill's context. The agent is for *aggregating many sources into a summary*, not for single-file spot checks — those stay in the skill.
 - **Agent wiring**: skills own all reads/writes against `~/Claude/{project}/`. Agents touch only code in the attached repo and never scan the vault. Briefings carry task / decisions / files / DoD / Verify — no lesson paths. Lesson context reaches agents via two baked-in channels: DoD + Verify pasted from the plan (folded in by `/groom`) and the shared extension `~/Claude/{project}/_booping/agent_booping-developer.md` (folded in by `/learn`).
-- **Per-project quality checks**: `/develop` classifies the attached repo's quality tooling (lint, typecheck, tests) into hook-enforced (runs on commit) vs configured-but-manual (skill runs per milestone) per `docs/partial_development_quality_checks.md`. Plan-authored `Verify` commands target milestone DoD; project quality commands run alongside them.
+- **Per-project quality checks**: `/develop` runs the project's own lint / typecheck / test tooling once at Phase 4 (Final Verification), alongside plan-authored `Verify` commands. Command discovery order: repo `CLAUDE.md` → `_booping/skill_develop.md` → inspection of `package.json`, `pyproject.toml`, `Justfile`, etc.
 
 ## Config schema (`src/config.yaml`)
 
 Top-level keys currently in use:
 
 - `skills.<name>.effort` — frontmatter `effort` value.
-- `skills.<name>.agents.<agent-name>.good_for` / `.bad_for` — delegation guidance rendered by `_available_agents.j2`.
+- `skills.<name>.agents.<agent-name>.good_for` / `.bad_for` — delegation guidance rendered by `_available_agents.j2`. Currently used by `/groom` and `/develop`.
+- `plan.branch_prefixes` — map of plan `type` → git branch prefix (e.g. `feature → feat/`). Rendered by the develop template.
 - `plan.statuses.<key>` — `desc`, `owner` (skill), `terminal` (bool), optional `artifacts` (list of strings describing what the state produces), `transitions` (list of `{to, skill, when, gates?, on_exit?}`). Filtered per-skill by `_plan_transitions.j2` (macro shows only statuses a skill owns or has transitions out of, and only rows where `skill == <current>`). `gates` is a list of verifiable preconditions rendered into the `Gates` column; `on_exit` is a list of short instruction strings (frontmatter mutations, side effects) rendered verbatim into the `On exit` column (e.g. `"set \`planned: yyyymmdd hh:mm\`"`).
 - `tasks` — list of `{type, description, doc_uri}`. Rendered by `_task_classification.j2` as bullets with a lazy-load link to `doc_uri` (relative from repo root).
 - `sprint` — `scale` (list of `{sp, meaning}`), `default_threshold_sp` (SP total past which /groom should propose splitting — not a velocity), `redecompose_threshold` (tasks ≥ this SP must be re-decomposed), `group_threshold` (tasks ≤ this SP should be grouped into one agent briefing). Rendered by `_sprint_planning.j2`; `redecompose_threshold` / `group_threshold` are skipped when falsy. Threshold is inlined at skill-load time via `!`bin/booping-sprint-threshold``.
