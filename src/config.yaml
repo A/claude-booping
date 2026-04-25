@@ -35,10 +35,8 @@ skills:
       booping-developer-senior:
         good_for:
           - "3–4 SP tasks — one per briefing (no batching)"
-          - "Design-judgment work — architectural decisions, non-trivial trade-offs, integration surface changes"
-          - "Non-trivial refactoring with blast radius across multiple modules"
         bad_for:
-          - "1–2 SP — middle handles those"
+          - "1–2 SP — cost-effective to route to middle"
           - "5+ SP — refuse, route back to /groom for re-decomposition"
       booping-researcher:
         good_for:
@@ -64,13 +62,24 @@ skills:
           - "When the skill already needs to read the same few files for other reasons"
           - "When the question fits in a few lines of `ls`/`grep` output"
 
-plan:
-  branch_prefixes:
-    feature: feat
-    bug: fix
-    refactoring: refactor
-    other: chore
+git:
+  commit_message: '<agent>: <plan title> <message>'
+  branches:
+    - branch: feat/
+      when:
+        - feature
+    - branch: fix/
+      when:
+        - bug
+    - branch: refactor/
+      when:
+        - refactoring
+    - branch: chore/
+      when:
+        - other
+        - tooling, dependency bumps, formatting
 
+plan:
   statuses:
     backlog:
       desc: "Parked plan — not actively being worked on. Sibling stubs from split sprints and user-filed ideas not yet in grooming live here."
@@ -159,6 +168,7 @@ plan:
             - "Final Verification green"
           on_exit:
             - "set `completed: yyyymmdd hh:mm`"
+            - "suggest `/retro <plan-path>`"
         - to: fail
           skill: develop
           when: "Unrecoverable blocker on the same milestone"
