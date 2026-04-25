@@ -99,7 +99,7 @@ Validate entry status: the plan's `status:` must be `awaiting-learning`. On mism
 
 ## Phase 1 Extract candidates
 
-Read the retrospective's `What went wrong`, `Root causes`, `Action items`, and `Takeaways` sections. **Decompose** each insight into atomic candidates — one rule per candidate — BEFORE target assignment.
+Read the retrospective file and extract candidates for self-learning. **Decompose** each insight into atomic candidates — one rule per candidate — BEFORE target assignment.
 
 For each candidate, pick a target from the matrix rendered above.
 
