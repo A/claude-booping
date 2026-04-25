@@ -140,7 +140,7 @@ retro: retrospectives/YYYYMMDD-{{kebab-title}}.md   # the retro that surfaced th
 created: YYYY-MM-DD                            # date this lesson was extracted
 ---
 
-**Rule**: {{The principle, imperative form. One compact paragraph; a short bullet list is fine when the rule has named sub-checks.}}
+{{The principle, imperative form. One compact paragraph; a short bullet list is fine when the rule has named sub-checks.}}
 
 **Example**: {{One concrete case that illustrates the rule — what went wrong or right, in one or two lines. No motivation paragraphs, no multi-section "how to apply", no forbidden/edge-case lists. The retro carries the backstory; link it via `retro:` frontmatter.}}
 
@@ -185,4 +185,4 @@ git commit -m "docs(claude-md): <short summary>"
 - (c) One rule per lesson file; bodies follow the lesson body shape included in Phase 3 above.
 - (d) Every accepted learning lands in exactly one target. Multi-rule insights decompose into multiple rows; the same rule must never be routed to two targets simultaneously — decomposition is the only escape hatch.
 - (g) Never propose a rule whose trigger is "try harder" or "be careful". The rule must be mechanically checkable.
-- (h) Lesson bodies are compact: one **Rule** + one **Example**, per the lesson body shape included in Phase 3 above. No motivation paragraphs, no multi-section "how to apply", no forbidden/edge-case lists — backstory lives in the linked retro. Target is 20–40 lessons inlined at skill load without bloating context.
+- (h) Lesson bodies are compact: one rule paragraph plus one **Example**, per the lesson body shape included in Phase 3 above. No motivation paragraphs, no multi-section "how to apply", no forbidden/edge-case lists — backstory lives in the linked retro. Target is 20–40 lessons inlined at skill load without bloating context.
