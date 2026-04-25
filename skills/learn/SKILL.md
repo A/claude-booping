@@ -16,6 +16,7 @@ allowed-tools:
   - Bash(grep *)
   - Bash(bin/booping-debug-mode:*)
   - Bash(bin/booping-project-name:*)
+  - Bash(bin/booping-plans:*)
   - AskUserQuestion
 effort: high
 ---
@@ -74,6 +75,10 @@ The skill infers the exact filename per candidate; the example lists above are v
 
 !`bin/booping-debug-mode learn`
 
+## Plans awaiting learning
+
+!`bin/booping-plans --status awaiting-learning`
+
 ## High-level workflow
 
 1. Intake — resolve retro path, validate `awaiting-learning` status.
@@ -91,11 +96,17 @@ Every accepted learning lands in **exactly one** target. If a candidate would ot
 
 ## Phase 0 Intake
 
-Resolve the retro path from `$ARGUMENTS`; if missing, default to the most recent file in `~/Claude/{project_name}/retrospectives/`. Read the retrospective file and follow its `plan:` frontmatter to the associated plan.
+The current set of plans in `awaiting-learning` is listed in the [Plans awaiting learning](#plans-awaiting-learning) block above (rendered at skill load).
 
-Validate entry status: the plan's `status:` must be `awaiting-learning`. On mismatch, STOP with this verbatim error:
+Resolve `$ARGUMENTS` to a retrospective file path.
 
-> `/learn requires a plan in status 'awaiting-learning'; got '<current-status>' for <retro-path>. Run 'booping-plans --status awaiting-learning' to list candidates.`
+**No `$ARGUMENTS`**: present the plans list to the user via `AskUserQuestion` (single-select; one option per plan). Read the selected plan's `retro:` frontmatter to resolve the retrospective file.
+
+**`$ARGUMENTS` provided**: treat it as the retrospective file path. Read it and follow its `plans:` frontmatter to the associated plan.
+
+Validate the resolved plan's `status:` is `awaiting-learning`. On mismatch, STOP with this verbatim error:
+
+> `/learn requires a plan in status 'awaiting-learning'; got '<current-status>' for <plan-path>. Use the list above to pick a candidate.`
 
 ## Phase 1 Extract candidates
 
