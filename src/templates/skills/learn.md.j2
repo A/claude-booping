@@ -38,7 +38,7 @@ Turn retrospective findings into durable behavior changes routed to exactly one 
 
 ## High-level workflow
 
-1. Intake — resolve retro path, validate `awaiting-learning` status.
+1. Intake — resolve retro path, validate `{{ config.skills.learn.status }}` status.
 2. Extract candidates — inline, decomposed into atomic rules, routed via the matrix.
 3. Update-vs-create sweep — filtered read of existing lessons and extensions.
 4. Present unified review table — user accepts / rejects / adds rows.
@@ -55,9 +55,9 @@ Every accepted learning lands in **exactly one** target. If a candidate would ot
 
 Resolve the retro path from `$ARGUMENTS`; if missing, default to the most recent file in `~/Claude/{project_name}/retrospectives/`. Read the retrospective file and follow its `plan:` frontmatter to the associated plan.
 
-Validate entry status: the plan's `status:` must be `awaiting-learning`. On mismatch, STOP with this verbatim error:
+Validate entry status: the plan's `status:` must be `{{ config.skills.learn.status }}`. On mismatch, STOP with this verbatim error:
 
-> `/learn requires a plan in status 'awaiting-learning'; got '<current-status>' for <retro-path>. Run 'booping-plans --status awaiting-learning' to list candidates.`
+> `/learn requires a plan in status '{{ config.skills.learn.status }}'; got '<current-status>' for <retro-path>. Run 'booping-plans --status {{ config.skills.learn.status }}' to list candidates.`
 
 ## Phase 1 Extract candidates
 
@@ -105,7 +105,7 @@ Project-local extensions (`_booping/skill_<name>.md`, `_booping/agent_<name>.md`
 
 ## Phase 5 Transition + commit
 
-Apply the `awaiting-learning → done` transition per the transitions table above: set `status: done` and `completed: <today>`. Run `booping-plans --status done` to confirm.
+Apply the `{{ config.skills.learn.status }} → done` transition per the transitions table above: set `status: done` and `completed: <today>`. Run `booping-plans --status done` to confirm.
 
 Commit the vault updates from the vault working directory:
 
@@ -126,7 +126,7 @@ git commit -m "docs(claude-md): <short summary>"
 ## What learn does NOT do
 
 - Does **not** write methodology changes to `skills/*/SKILL.md` or `agents/*.md` in the plugin repo by default. Extensions land in the vault under `_booping/`.
-- Does **not** transition plans to any status other than `awaiting-learning → done`.
+- Does **not** transition plans to any status other than `{{ config.skills.learn.status }} → done`.
 - Does **not** regenerate `sprints.md`; `/chat` owns that.
 
 ## Hard rules
