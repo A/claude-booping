@@ -26,8 +26,6 @@ effort: high
 
 Turn retrospective findings into durable behavior changes routed to exactly one target each.
 
-This skill is **wide-domain** — it must work across very different projects. Project-specific concerns live in `_booping/skill_learn.md` and lessons. Do not bake them into this skill.
-
 ## Project Context
 
 !`bin/booping-project-name`
