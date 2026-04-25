@@ -64,6 +64,7 @@ skills:
 
   retro:
     effort: high
+    status: awaiting-retro
     agents:
       booping-researcher:
         good_for:
@@ -203,6 +204,11 @@ plan:
           on_exit:
             - "set `retro: retrospectives/YYYYMMDD-{kebab-title}.md`"
             - "set `goal: success | partial | fail`"
+        - to: done
+          skill: retro
+          when: "User opts to skip retro for a stale plan and mark it done without retrospective or learning"
+          on_exit:
+            - "set `goal: skipped`"
 
     awaiting-learning:
       desc: "Retro written; waiting for /learn to absorb lessons."

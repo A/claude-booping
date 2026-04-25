@@ -1,0 +1,63 @@
+## Retrospective template
+
+Follow the structure below when drafting the retrospective body.
+
+### Frontmatter example
+
+```yaml
+plans:
+  - plans/20260401-feature-x-implementation.md
+  - plans/20260408-feature-x-integration.md
+date: 2026-04-23
+goal_summary: Feature X shipped on time with clean integration; auth layer needed pre-review validation.
+goal_verdicts:
+  plans/20260401-feature-x-implementation.md: success
+  plans/20260408-feature-x-integration.md: partial
+```
+
+### What went well
+
+Concrete wins. What was achieved, what worked as designed. Keep it brief — 3–5 bullet points with specifics, not vague praise (avoid "good communication"; say "API contract locked before implementation" instead).
+
+- ...
+- ...
+
+### What went wrong
+
+For each issue, include a subsection with this four-line format:
+
+#### {{ '{{Issue name}}' }}
+
+**What happened**: Factual description of the problem.
+
+**Root cause**: The underlying pattern or plan/decision blind spot — name it as a pattern, not a restatement of what happened.
+
+**Impact**: What does this cost now (rework, tech debt, user confusion, process delay)?
+
+### Lesson gaps
+
+Loaded lessons (from `~/Claude/{project}/lessons/` or project `CLAUDE.md` instructions) that should have prevented or caught one or more flagged problems but were not applied. For each:
+
+- `lessons/XXXX_lesson-title.md` — rule was "...", but we did "..." instead, which caused [which issue(s)].
+
+### Action items & takeaways
+
+Specific next steps that address the issues above. Two types in one table:
+
+- **Task** — sprint-scoped, one-time work (a fix to ship, a follow-up plan to file, a doc to write). Has an owner and a clear definition of done.
+- **Heuristic** — a standing behavioral change for this project, persists until explicitly retired (e.g. "when env vars change, include a CI-config task in the plan").
+
+| # | Type | Item | Owner | Status |
+|---|------|------|-------|--------|
+| 1 | Task / Heuristic | ... | Next sprint / Person / standing | Planned |
+
+### Self-review checklist
+
+Before committing a retrospective, confirm all items below are true:
+
+- [ ] Each "what went wrong" item has a named root cause (a pattern, not a restatement).
+- [ ] Lesson gaps cite existing lessons by path and explain the gap.
+- [ ] Items are specific with an owner (or "standing" for heuristics) and a clear next step.
+- [ ] Heuristics are concrete enough that someone could apply them next sprint — not platitudes.
+- [ ] "What went well" is honest, not inflated to balance criticism.
+- [ ] No blame language — focus on decisions and processes, not people.
