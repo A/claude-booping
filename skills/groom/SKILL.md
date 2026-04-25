@@ -115,7 +115,7 @@ One commit per transition. Sibling stubs written in the same run go in the same 
 
 ## Task Classification
 
-Pick one. Load the linked doc only when you need detailed guidance for that type.
+Pick one. Load the linked doc for the matched type before proceeding.
 
 - **feature** — New user-facing capability. Needs business goal, design, milestones, DoD. [detailed guidance](src/docs/task_feature.md)
 - **bug** — Defect — observed behavior diverges from expected. Needs triage, reproduction, root-cause hypothesis, minimal fix, and a regression test. [detailed guidance](src/docs/task_bug.md)
@@ -151,7 +151,7 @@ Group tasks **≤ 1 SP** so /develop can hand a batch to a single agent rather t
 
 ### Split threshold
 
-Split threshold: **!`bin/booping-sprint-threshold` SP**. This is not a velocity — there is no fixed cadence. It's the point past which a plan is too large to hold together as one coherent iteration. If the total exceeds the threshold, flag it and propose splitting into sibling plans.
+Split threshold: !`bin/booping-sprint-threshold` SP. This is not a velocity — there is no fixed cadence. It's the point past which a plan is too large to hold together as one coherent iteration. If the total exceeds the threshold, flag it and propose splitting into sibling plans.
 
 Project-specific overrides (different threshold, extra sizing rules) live in `~/Claude/{project}/_booping/skill_groom.md` and take precedence.
 

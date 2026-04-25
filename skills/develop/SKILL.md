@@ -123,6 +123,10 @@ Branches always live in the attached repo. Always ask the user before switching 
 Format: `<agent>: <plan title> <message>`
 
 
+## Plan selection
+
+If `$ARGUMENTS` is empty, run `booping-plans --status ready-for-dev` and `booping-plans --status awaiting-plan-review` in parallel, combine the results, and present them to the user via `AskUserQuestion` (single-select) with each entry showing the plan title and its status. Use the selected plan path as the plan for this session. If both lists are empty, stop and tell the user there are no plans ready.
+
 ## High-level workflow
 
 1. Intake — load plan, validate entry status, spot-check codebase.

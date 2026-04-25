@@ -33,7 +33,7 @@ Group tasks **≤ {{ config.sprint.group_threshold }} SP** so /develop can hand 
 
 ### Split threshold
 
-Split threshold: **!`bin/booping-sprint-threshold` SP**. This is not a velocity — there is no fixed cadence. It's the point past which a plan is too large to hold together as one coherent iteration. If the total exceeds the threshold, flag it and propose splitting into sibling plans.
+Split threshold: !`bin/booping-sprint-threshold` SP. This is not a velocity — there is no fixed cadence. It's the point past which a plan is too large to hold together as one coherent iteration. If the total exceeds the threshold, flag it and propose splitting into sibling plans.
 
 Project-specific overrides (different threshold, extra sizing rules) live in `~/Claude/{project}/_booping/skill_groom.md` and take precedence.
 {%- endmacro %}
