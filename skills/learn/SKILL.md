@@ -81,7 +81,7 @@ The skill infers the exact filename per candidate; the example lists above are v
 3. Update-vs-create sweep — filtered read of existing lessons and extensions.
 4. Present unified review table — user accepts / rejects / adds rows.
 5. Write accepted items — one pass per target type, no per-edit prompts.
-6. Framework review, transition, and commit.
+6. Transition and commit.
 
 ## Single-location rule
 
@@ -146,13 +146,7 @@ created: YYYY-MM-DD                            # date this lesson was extracted
 
 
 
-## Phase 4 Framework review
-
-List the plugin `skills/` and `agents/` directories with `ls`. For each skill or agent whose name appears in Phase 1's candidate list, read only that file (filter, don't dump everything). If a retro pattern indicates that a plugin skill or agent would benefit from a project-local extension, append additional rows to the review table and re-confirm with the user via `AskUserQuestion`.
-
-Project-local extensions (`_booping/skill_<name>.md`, `_booping/agent_<name>.md`) are the default framework-review output regardless of flags.
-
-## Phase 5 Transition + commit
+## Phase 4 Transition + commit
 
 Apply the `awaiting-learning → done` transition per the transitions table above: set `status: done` and `completed: <today>`. Run `booping-plans --status done` to confirm.
 
