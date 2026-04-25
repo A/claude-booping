@@ -18,11 +18,11 @@ allowed-tools:
   - Bash(booping-plans *)
   - Agent
   - AskUserQuestion
-effort: high
+effort: {{ config.skills.retro.effort }}
 ---
 
-
-
+{% import "_partials/_plan_transitions.j2" as plan_transitions with context %}
+{% import "_partials/_available_agents.j2" as available_agents with context %}
 # booping — /retro
 
 Produce a retrospective grounded in session logs, code diff, and user feedback — not vibes.
@@ -31,49 +31,11 @@ The retrospective artifact is the sole output. If the retro surfaces work that b
 
 This skill is **wide-domain** — it must work across very different projects. Project-specific concerns live in `_booping/skill_retro.md` and lessons.
 
-## Project Context
+{% include "_partials/_project_context.j2" %}
 
-!`bin/booping-project-name`
+{{ plan_transitions.render("retro") }}
 
-On skill load, report the resolved project context back to the user verbatim so they can see which project and vault the skill is operating on.
-
-
-## Plan Transitions
-
-This table is the contract: the valid moves and their requirements — `Gates` (must hold before the move) and `On exit` (must be fulfilled when taking the move). Both are strict. When an internal action matches a `When` trigger, verify every `Gate` holds, fulfill every `On exit` requirement, update `status:` to the `To` value, then commit the change to the vault:
-
-```bash
-cd ~/Claude/{project}
-git add plans/<plan-file>.md   # plus any sibling artifacts written in the same run
-git commit -m "<to-status>: <kebab-title>"
-```
-
-One commit per transition. Sibling stubs written in the same run go in the same commit.
-
-### `awaiting-retro` — All milestones done; waiting for /retro to write the retrospective.
-
-| To | When | Gates | On exit |
-|----|------|-------|---------|
-| `awaiting-learning` | Retrospective written and saved | Retrospective markdown saved to retrospectives/; Self-review checklist passed | set `retro: retrospectives/YYYYMMDD-{kebab-title}.md`; set `goal: success | partial | fail` |
-
-
-
-
-## Available Agents
-
-
-### `booping-researcher`
-
-**Good for:**
-- Phase 0 session-log search: scan ~/.claude/projects/ across all session logs for the plan's time window and aggregate into a structured summary of user questions, blockers, and detours
-
-
-**Bad for:**
-- Single-file reads — call Read directly
-- Phase 2 sprint analysis — stays in the orchestrator
-- Phase 4 lesson cross-check — stays in the orchestrator using the in-context lesson set
-
-
+{{ available_agents.render("retro") }}
 
 !`bin/booping-lessons`
 
