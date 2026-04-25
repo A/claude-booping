@@ -21,6 +21,32 @@ tasks:
     doc_uri: src/docs/task_refactoring.md
 
 skills:
+  develop:
+    effort: high
+    agents:
+      booping-developer-middle:
+        good_for:
+          - "1–2 SP tasks; batch related tasks up to ~10 SP combined per briefing"
+          - "Mechanical or predictable changes: config edits, simple additions, low-risk refactors"
+        bad_for:
+          - "3+ SP — route to senior"
+          - "Design-judgment work — architectural decisions, non-trivial trade-offs"
+          - "5+ SP — refuse, route back to /groom for re-decomposition"
+      booping-developer-senior:
+        good_for:
+          - "3–4 SP tasks — one per briefing (no batching)"
+          - "Design-judgment work — architectural decisions, non-trivial trade-offs, integration surface changes"
+          - "Non-trivial refactoring with blast radius across multiple modules"
+        bad_for:
+          - "1–2 SP — middle handles those"
+          - "5+ SP — refuse, route back to /groom for re-decomposition"
+      booping-researcher:
+        good_for:
+          - "Phase 0 drift spot-check: given a large set of plan-named files, determine whether actual file shape matches the plan's assumptions"
+        bad_for:
+          - "Milestone-diff review — that stays in the skill"
+          - "Single-file reads — call Read directly"
+
   groom:
     effort: high
     agents:
@@ -39,6 +65,12 @@ skills:
           - "When the question fits in a few lines of `ls`/`grep` output"
 
 plan:
+  branch_prefixes:
+    feature: feat
+    bug: fix
+    refactoring: refactor
+    other: chore
+
   statuses:
     backlog:
       desc: "Parked plan — not actively being worked on. Sibling stubs from split sprints and user-filed ideas not yet in grooming live here."
