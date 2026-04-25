@@ -1,0 +1,39 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.11"
+# dependencies = []
+# ///
+"""booping-debug-mode: print debug-mode message when the toggle file is present.
+
+Usage: booping-debug-mode <skill>
+
+Resolves the plugin root from the script's own location. When
+`<plugin-root>/skills/<skill>/.debug_enabled` exists, prints the debug-mode
+message with the absolute template path filled in. Prints nothing otherwise.
+"""
+import sys
+from pathlib import Path
+
+PLUGIN_ROOT = Path(__file__).resolve().parent.parent
+
+
+def main() -> int:
+    if len(sys.argv) != 2:
+        return 0
+    skill = sys.argv[1]
+    skill_dir = PLUGIN_ROOT / "skills" / skill
+    if not skill_dir.is_dir():
+        return 0
+    if not (skill_dir / ".debug_enabled").exists():
+        return 0
+    print(
+        f"Debug mode enabled. You can update this skill at "
+        f"{PLUGIN_ROOT}/src/templates/skills/{skill}.md.j2. "
+        f"If the issue is generic enough to fix on the framework level, "
+        f"review the skill code and suggest changes to the user."
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -62,6 +62,9 @@ skills:
           - "When the skill already needs to read the same few files for other reasons"
           - "When the question fits in a few lines of `ls`/`grep` output"
 
+  learn:
+    effort: high
+
   retro:
     effort: high
     status: awaiting-retro

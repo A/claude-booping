@@ -1,7 +1,9 @@
 {% macro render(skill) -%}
+{%- set agents = config.skills[skill].get("agents", {}) -%}
+{%- if agents -%}
 ## Available Agents
 
-{% for agent, spec in config.skills[skill].agents.items() %}
+{% for agent, spec in agents.items() %}
 ### `{{ agent }}`
 
 **Good for:**
@@ -14,4 +16,5 @@
 - {{ t }}
 {% endfor %}
 {% endfor -%}
+{%- endif %}
 {%- endmacro %}
