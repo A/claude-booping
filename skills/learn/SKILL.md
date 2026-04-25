@@ -148,29 +148,15 @@ created: YYYY-MM-DD                            # date this lesson was extracted
 
 ## Phase 4 Transition + commit
 
-Apply the `awaiting-learning → done` transition per the transitions table above: set `status: done` and `completed: <today>`. Run `booping-plans --status done` to confirm.
+Apply the exit transition from the transitions table above; the partial covers the vault commit shape.
 
-Commit the vault updates from the vault working directory:
-
-```bash
-cd ~/Claude/{project_name}
-git add lessons/ _booping/ plans/<plan-filename>.md
-git commit -m "learn: <kebab-retro-title> done"
-```
-
-If Phase 3 wrote to the attached repo's `CLAUDE.md`, commit that separately from the repo working directory:
+If Phase 3 also wrote to the attached repo's `CLAUDE.md`, commit that separately in the repo working tree (the partial covers vault commits only):
 
 ```bash
 cd <repo-path>
 git add CLAUDE.md
 git commit -m "docs(claude-md): <short summary>"
 ```
-
-## What learn does NOT do
-
-- Does **not** write methodology changes to `skills/*/SKILL.md` or `agents/*.md` in the plugin repo by default. Extensions land in the vault under `_booping/`.
-- Does **not** transition plans to any status other than `awaiting-learning → done`.
-- Does **not** regenerate `sprints.md`; `/chat` owns that.
 
 ## Hard rules
 
