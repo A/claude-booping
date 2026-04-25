@@ -124,6 +124,8 @@ Pick one. Load the linked doc only when you need detailed guidance for that type
 
 ## Sprint planning
 
+A plan is estimated as a single sprint — the plan's `sp` field is the sprint total, summed up from milestone SPs, which are summed up from task SPs.
+
 Storypoints measure the **complexity and review burden** of getting a task to a merged, accepted state: design judgment, blast radius, ambiguity, integration surface, and how much careful reading the diff demands. AI does implementation cheaply; this is what remains.
 
 ### Scale
@@ -205,7 +207,7 @@ Groom produces a specified, estimated, user-reviewed plan. The transitions table
 
 - **Challenge scope**: ask upfront what new components, dependencies, APIs, or workflow changes this likely needs.
 - **Review the codebase**: map the blast radius — files, modules, integrations, external surfaces; check prior art.
-- **Research when uncertain**: for complex, novel, or non-obvious work, search the web for current best practices, competing approaches, and known pitfalls before locking design decisions. Delegate broad multi-source research to `booping-researcher`.
+- **Research when uncertain**: for complex, novel, or non-obvious work, search the web for current best practices, competing approaches, and known pitfalls before locking design decisions.
 - **Verify external references**: every package version, image tag, API endpoint, CLI flag, or config option named in the plan is checked against current docs. Never assume.
 - **Draft design with the user**: architecture, pattern choices, data / API / config surface changes, open trade-offs. Iterate until aligned before writing.
 - **Write the plan**: pick a plan template from [Plan Structure](#plan-structure) whose name + description matches the work, then produce the plan against its `# Plan Body`.
