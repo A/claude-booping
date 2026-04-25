@@ -89,7 +89,7 @@ After the table is accepted, write every accepted row in a single pass per targe
 
 Write paths use these templates (resolve each placeholder before writing):
 
-- `lessons/{N}_<kebab>.md` — `{N}` is the next integer, computed from `ls lessons/` highest existing prefix + 1; body follows the lesson body shape inlined below.
+- `lessons/{N}_<kebab>.md` — one rule per file. `{N}` is the next integer, computed from `ls lessons/` highest existing prefix + 1; body follows the lesson body shape inlined below.
 - `_booping/skill_<name>.md` — per-skill extension in this project's vault.
 - `_booping/agent_<name>.md` — per-agent extension in this project's vault.
 - Repo `CLAUDE.md` — one-line bullet additions; no paragraph rewrites.
@@ -108,11 +108,3 @@ git add CLAUDE.md
 git commit -m "docs(claude-md): <short summary>"
 ```
 
-## Hard rules
-
-- (a) The orchestrator owns all reads and writes; there is no role-agent fan-out and no researcher delegation for classification.
-- (b) Terminology for activation-gated behaviours (including plugin-side editing) belongs exclusively to the partials that own those behaviours; do not name or paraphrase their vocabulary here.
-- (c) One rule per lesson file; bodies follow the lesson body shape included in Phase 3 above.
-- (d) Every accepted learning lands in exactly one target. Multi-rule insights decompose into multiple rows; the same rule must never be routed to two targets simultaneously — decomposition is the only escape hatch.
-- (g) Never propose a rule whose trigger is "try harder" or "be careful". The rule must be mechanically checkable.
-- (h) Lesson bodies are compact: one rule paragraph plus one **Example**, per the lesson body shape included in Phase 3 above. No motivation paragraphs, no multi-section "how to apply", no forbidden/edge-case lists — backstory lives in the linked retro. Target is 20–40 lessons inlined at skill load without bloating context.
