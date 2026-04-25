@@ -107,7 +107,7 @@ For each candidate, pick a target from the matrix rendered above.
 
 Before drafting the review table, check whether each candidate duplicates or conflicts with existing coverage:
 
-Read every lesson under `~/Claude/{project_name}/lessons/`, every extension file under `~/Claude/{project_name}/_booping/`, and the attached repo's `CLAUDE.md`. Skip silently when a directory is empty or a file is absent. Together these are the lookup set for the dup-check sweep. Do not invoke `bin/booping-lessons` or `bin/booping-extra-instructions` here — read the files directly so the eager-load bias is avoided.
+Read every lesson under `~/Claude/{project_name}/lessons/`, every extension file under `~/Claude/{project_name}/_booping/`, and the attached repo's `CLAUDE.md`. Skip silently when a directory is empty or a file is absent. Together these are the lookup set for the dup-check sweep.
 
 Record a sweep verdict per candidate as one of:
 
