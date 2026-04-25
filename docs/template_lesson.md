@@ -5,8 +5,6 @@ retro: retrospectives/YYYYMMDD-{{kebab-title}}.md   # the retro that surfaced th
 created: YYYY-MM-DD                            # date this lesson was extracted
 ---
 
-**Rule**: {{The behavior change, stated as a crisp prescriptive rule. Imperative form. One sentence, two at most.}}
+**Rule**: {{The principle, imperative form. One sentence; at most a short bullet list if the rule has named sub-checks.}}
 
-**Why**: {{The concrete incident that motivated the rule. Cite the retro, commit SHA, or sprint where the problem surfaced. Enough detail that a future agent understands *why* the rule exists, not just what it says.}}
-
-**How to apply**: {{Specific triggers — when a skill or agent should consult this rule — and checks — how to verify the rule was followed. Include forbidden anti-patterns and required replacements when useful. Bullet list is fine.}}
+**Example**: {{One concrete case that illustrates the rule — what went wrong or right, in one or two lines. No motivation paragraphs, no multi-section "how to apply", no forbidden/edge-case lists. The retro carries the backstory; link it via `retro:` frontmatter.}}

@@ -142,4 +142,5 @@ Any additional commit boundaries required by partials loaded in Preflight are th
 - (d) Every accepted learning lands in exactly one target. Multi-rule insights decompose into multiple rows; the same rule must never be routed to two targets simultaneously — decomposition is the only escape hatch.
 - (e) The matrix of types lives in [partial_learn_targets](../../docs/partial_learn_targets.md) — do not inline it here.
 - (f) The review-table column-by-column documentation lives in [template_learn_review_table](../../docs/template_learn_review_table.md) — do not inline it here.
-- (g) Never propose a rule whose trigger is "try harder" or "be careful". The `How to apply` section must be mechanically checkable.
+- (g) Never propose a rule whose trigger is "try harder" or "be careful". The rule must be mechanically checkable.
+- (h) Lesson bodies are compact: one **Rule** + one **Example**, per [template_lesson.md](../../docs/template_lesson.md). No motivation paragraphs, no multi-section "how to apply", no forbidden/edge-case lists — backstory lives in the linked retro. Target is 20–40 lessons inlined at skill load without bloating context.
