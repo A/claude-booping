@@ -45,7 +45,7 @@ The plugin ships with a `.claude-plugin/marketplace.json` so the second command 
 ### From GitHub
 
 ```
-/plugin marketplace add <owner>/claude-booping
+/plugin marketplace add A/claude-booping
 /plugin install booping@booping-local
 ```
 
