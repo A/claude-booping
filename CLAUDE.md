@@ -8,7 +8,7 @@ Migrating to a template-driven skill pipeline. State of play:
 
 - **Template pipeline is live**: `src/config.yaml` + `src/templates/` → `skills/*/SKILL.md` and `agents/*.md` via `bin/booping-build`.
 - **`/groom`, `/develop`, `/retro`, and `/learn`** are fully template-driven; their `skills/*/SKILL.md` are generated artifacts.
-- **Other skills** (`chat`, `install`, `help`) still author their `SKILL.md` by hand and reference `docs/partial_*.md`. They are due for migration but work as-is in the meantime.
+- **Only `/chat`** still authors its `SKILL.md` by hand and references `docs/partial_*.md`. Migration to the template pipeline is pending; it works as-is in the meantime.
 - **Agents**: all three (`booping-researcher`, `booping-developer-middle`, `booping-developer-senior`) are template-driven. The two developer tiers share `_partials/_developer_body.j2` — only frontmatter (`model`, `effort`, `reasoning`, `color`) diverges. Each agent injects project-local extensions via `!`bin/booping-extra-instructions agent_booping-<name>.md`` at the bottom of its body.
 - **CLIs**: `booping-plans` (read-only), `booping-create-project`, `booping-external-llm-call` (renamed from `booping-validate-plan`; renders a Jinja2 prompt template under `bin/llm-call-templates/` and sends it to Gemini). New: `booping-build`, `booping-project-name`.
 
@@ -23,15 +23,18 @@ Migrating to a template-driven skill pipeline. State of play:
 - `src/docs/*.md` — reference docs lazy-loaded by skills via `[label](src/docs/...)` links. No `partial_` prefix. Hand-authored.
 - `skills/<name>/SKILL.md` — **generated output** for template-driven skills; **authored** directly for the not-yet-migrated ones. Never edit a generated `SKILL.md` by hand.
 - `docs/plan_templates/*.md`, `docs/template_plan_frontmatter.md` — **generated output** from `src/templates/`; never hand-edit.
-- `docs/partial_*.md`, other `docs/template_*.md` — legacy partials/templates still referenced by unmigrated skills.
+- `docs/partial_*.md` — four surviving legacy partials still consumed by `/chat` (`partial_project_resolution.md`, `partial_plan_statuses.md`, `partial_agents_researchers_delegator.md`, `partial_agents_researchers_strategy_senior_middle_junior.md`). Other `docs/template_*.md` are legacy templates pending cleanup.
 - `agents/<name>.md` — **generated output** from `src/templates/agents/`; never hand-edit.
 - `bin/` — standalone uv inline scripts:
+  - `booping-agents` — reads `agents/*.md` frontmatter; emits a `## Agents` markdown table for `/help` to inline at skill load via `!`bin/booping-agents``.
   - `booping-build` — render skill, agent, doc, and plan templates from `src/templates/` → `skills/*/SKILL.md`, `agents/*.md`, `docs/*.md`, `docs/plan_templates/*.md`; `--watch` for dev loop.
-  - `booping-project-name` — reads `.booping` in cwd; prints a fenced YAML block (`name:`, `directory:`) when initialized, or a paragraph pointing at `src/docs/how_to_initialize_project.md` when not. Designed to be inlined via `!`bin/booping-project-name`` at skill-load time.
-  - `booping-sprint-threshold` — prints the SP total above which /groom should suggest splitting a plan. Not a velocity (no cadence); a heuristic ceiling. Today echoes `sprint.default_threshold_sp` from config. Inlined via `!`bin/booping-sprint-threshold``.
   - `booping-extra-instructions <filename>` — reads `~/Claude/{project}/_booping/<filename>` and prints a framed "User-specific instructions" block wrapping the body; prints nothing if the project isn't initialized or the file is missing. Inlined per-skill via `!`bin/booping-extra-instructions skill_<name>.md`` and per-agent via `!`bin/booping-extra-instructions agent_booping-<name>.md`` so project overrides travel with the skill or agent without a separate read step.
   - `booping-lessons` — enumerates `~/Claude/{project}/lessons/*.md`, prints a "Lessons" block with an index and each lesson's full body plus a conflict-handling rule. Prints "No lessons accumulated yet" when the directory is empty; prints nothing if the project isn't initialized. Inlined via `!`bin/booping-lessons`` so the active rule set is live at skill load.
   - `booping-plan-templates` — enumerates core plan templates from `docs/plan_templates/*.md` plus project-local templates from `~/Claude/{project}/plan_templates/*.md`; prints a grouped list with each template's name, description, and path. Inlined via `!`bin/booping-plan-templates`` so available templates are discoverable at skill load.
+  - `booping-project-name` — reads `.booping` in cwd; prints a fenced YAML block (`name:`, `directory:`) when initialized, or a paragraph pointing at `src/docs/how_to_initialize_project.md` when not. Designed to be inlined via `!`bin/booping-project-name`` at skill-load time.
+  - `booping-skills` — reads `skills/*/SKILL.md` frontmatter; emits a `## Skills` markdown table for `/help` to inline via `!`bin/booping-skills``.
+  - `booping-sprint-threshold` — prints the SP total above which /groom should suggest splitting a plan. Not a velocity (no cadence); a heuristic ceiling. Today echoes `sprint.default_threshold_sp` from config. Inlined via `!`bin/booping-sprint-threshold``.
+  - `booping-workflow` — walks `src/config.yaml` `plan.statuses` + `transitions`; emits a `## Workflow` per-skill chain block for `/help` to inline via `!`bin/booping-workflow``.
   - `booping-plans`, `booping-external-llm-call`, `booping-create-project` — as before.
 
 ## Config vs skill — ownership boundary
@@ -137,4 +140,4 @@ Use `src/templates/skills/groom.md.j2` as the reference.
 7. For any remaining partial read that fits the "small detail the skill loads on demand" shape, move it to `src/docs/<name>.md` and swap the Preflight bullet for a lazy `[detailed guidance](src/docs/<name>.md)` link.
 8. Rebuild, sanity-check the rendered `skills/<name>/SKILL.md`, then delete the now-unreferenced `docs/partial_*.md` predecessors.
 
-When the last old skill is migrated, `docs/partial_*.md` and `docs/template_*.md` can be retired wholesale.
+When `/chat` migrates (the only remaining hand-authored skill), `docs/partial_*.md` and any remaining `docs/template_*.md` can be retired wholesale.

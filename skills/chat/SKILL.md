@@ -65,7 +65,7 @@ The **first assistant message** must include the resulting 10-row count table. I
 
 ## Phase 1 Ingest
 
-Read artifacts referenced in `$ARGUMENTS` or named during conversation before answering questions about them. When the request spans more than ~3 artifacts, delegate the read to a researcher (`booping-researcher-middle` by default) and have it return a summary, not raw dumps.
+Read artifacts referenced in `$ARGUMENTS` or named during conversation before answering questions about them. When the request spans more than ~3 artifacts, delegate the read to `booping-researcher` and have it return a summary, not raw dumps.
 
 ## Phase 2 Discuss / act
 

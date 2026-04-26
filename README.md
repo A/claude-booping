@@ -46,13 +46,11 @@ After installing, `cd` into a repo and run `/install` to scaffold `~/Claude/{pro
 
 ## Sub-agents
 
-Researcher agents — invoked by skills for research, code reading, and analysis:
+Researcher agent — invoked by skills for research, code reading, and analysis:
 
 | Agent | Role |
 |-------|------|
-| `booping-researcher-junior` | Junior-tier research context (haiku) |
-| `booping-researcher-middle` | Mid-tier research context (sonnet); default for most queries |
-| `booping-researcher-senior` | Senior-tier research context (opus); high-complexity code review |
+| `booping-researcher` | Encapsulates heavy reads (many files, web pages, repo histories) and returns a focused summary so the orchestrator's context stays clean |
 
 Developer agents — invoked from `/develop` per task:
 
