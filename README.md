@@ -49,8 +49,6 @@ The plugin ships with a `.claude-plugin/marketplace.json` so the second command 
 /plugin install booping@booping-local
 ```
 
-The `<owner>/<repo>` shorthand resolves to the public GitHub repo. Full URLs (`https://github.com/<owner>/claude-booping` or `git@github.com:<owner>/claude-booping.git`) also work.
-
 After installing, `cd` into the target repo and run `/install`. That single step scaffolds `~/Claude/{project}/` (with `plans/`, `retrospectives/`, `lessons/`, `notes/`, `_booping/`).
 
 ## Quick start
