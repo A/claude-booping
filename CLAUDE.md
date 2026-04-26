@@ -2,15 +2,17 @@
 
 Claude Code plugin that grooms and executes plans across user projects. Plans live under `~/Claude/{project}/` (the per-project vault); skills, agents, templates, and config live in this repo.
 
-## Status (April 2026)
+## Status
 
-Migrating to a template-driven skill pipeline. State of play:
+_Last updated: 2026-04-26._
+
+Template-driven skill pipeline is live. Current state:
 
 - **Template pipeline is live**: `src/config.yaml` + `src/templates/` → `skills/*/SKILL.md` and `agents/*.md` via `bin/booping-build`.
 - **`/groom`, `/develop`, `/retro`, and `/learn`** are fully template-driven; their `skills/*/SKILL.md` are generated artifacts.
 - **Only `/chat`** still authors its `SKILL.md` by hand and references `docs/partial_*.md`. Migration to the template pipeline is pending; it works as-is in the meantime.
 - **Agents**: all three (`booping-researcher`, `booping-developer-middle`, `booping-developer-senior`) are template-driven. The two developer tiers share `_partials/_developer_body.j2` — only frontmatter (`model`, `effort`, `reasoning`, `color`) diverges. Each agent injects project-local extensions via `!`bin/booping-extra-instructions agent_booping-<name>.md`` at the bottom of its body.
-- **CLIs**: `booping-plans` (read-only), `booping-create-project`, `booping-external-llm-call` (renamed from `booping-validate-plan`; renders a Jinja2 prompt template under `bin/llm-call-templates/` and sends it to Gemini). New: `booping-build`, `booping-project-name`.
+- **CLIs**: `booping-plans` (read-only), `booping-create-project`, `booping-external-llm-call` (renders a Jinja2 prompt template under `bin/llm-call-templates/` and sends it to Gemini), `booping-build`, `booping-project-name`.
 
 ## Layout
 
@@ -23,7 +25,7 @@ Migrating to a template-driven skill pipeline. State of play:
 - `src/docs/*.md` — reference docs lazy-loaded by skills via `[label](src/docs/...)` links. No `partial_` prefix. Hand-authored.
 - `skills/<name>/SKILL.md` — **generated output** for template-driven skills; **authored** directly for the not-yet-migrated ones. Never edit a generated `SKILL.md` by hand.
 - `docs/plan_templates/*.md`, `docs/template_plan_frontmatter.md` — **generated output** from `src/templates/`; never hand-edit.
-- `docs/partial_*.md` — four surviving legacy partials still consumed by `/chat` (`partial_project_resolution.md`, `partial_plan_statuses.md`, `partial_agents_researchers_delegator.md`, `partial_agents_researchers_strategy_senior_middle_junior.md`). Other `docs/template_*.md` are legacy templates pending cleanup.
+- `docs/partial_*.md` — six surviving legacy partials. Five are consumed by `/chat` (the only hand-authored skill): `partial_agents_researchers_delegator.md`, `partial_agents_researchers_strategy_senior_middle_junior.md`, `partial_plan_statuses.md`, `partial_project_resolution.md`, `partial_read_lessons.md`. One — `partial_cross_validation.md` — is referenced from rendered `/groom` transitions in `src/config.yaml` (`in-spec → awaiting-plan-review` gates). Other `docs/template_*.md` are legacy templates pending cleanup.
 - `agents/<name>.md` — **generated output** from `src/templates/agents/`; never hand-edit.
 - `bin/` — standalone uv inline scripts:
   - `booping-agents` — reads `agents/*.md` frontmatter; emits a `## Agents` markdown table for `/help` to inline at skill load via `!`bin/booping-agents``.
@@ -103,6 +105,7 @@ Top-level keys currently in use:
 
 ## Project vault layout (`~/Claude/{project}/`)
 
+- The vault is **Obsidian-ready**: markdown files + YAML frontmatter that Obsidian renders as Properties. No proprietary database. Open `~/Claude/{project}/` in Obsidian for graph view + backlinks across plans, retros, and lessons.
 - `plans/{YYYYMMDD}-{kebab-title}.md` — plan files; frontmatter per `docs/template_plan_frontmatter.md`. Sibling stubs set `split_from: plans/...` to point at the primary plan they were split from.
 - `plan_templates/*.md` — project-local plan templates. Each has frontmatter (`name`, `description`) + two top-level sections (`# Plan Body`, `# Quality Checklist`). Picked up by `booping-plan-templates` alongside core templates; can override a core template by sharing its `name`, or add entirely new ones.
 - `lessons/` — accumulated lessons; loaded by skills' Preflight.
@@ -128,6 +131,7 @@ Top-level keys currently in use:
 - No tests in `bin/`.
 - Conventional commits with scope: `feat(booping): ...`, `fix(install): ...`, etc.
 - The plugin code itself stays stack-agnostic — no Python/Django/JS specifics inside skills.
+- README.md's Statuses section is hand-maintained narrative — revisit it whenever `src/config.yaml` `plan.statuses` changes (status name, description, terminal flag, or addition/removal).
 
 ## Migrating an old skill to the template pipeline
 
