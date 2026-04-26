@@ -1,0 +1,151 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.11"
+# dependencies = [
+#     "google-genai>=0.3.0",
+#     "jinja2>=3.1",
+# ]
+# ///
+"""Render a prompt template under bin/llm-call-templates/ with caller-supplied
+context, then send it to an external LLM (currently Gemini).
+
+Usage:
+    booping-external-llm-call --prompt=<name> [--context.<key>=<path>]... \\
+        [--model=<id>] [-- <free-text message>]
+
+Args:
+    --prompt=<name>          Template stem under bin/llm-call-templates/
+                             (e.g. `validate-plan` → `validate-plan.md.j2`).
+    --context.<key>=<path>   File or directory; contents become `{{ <key> }}`
+                             in the rendered template. Directory paths
+                             concatenate every `*.md` child.
+    --model=<id>             Override the Gemini model. Default reads
+                             $BOOPING_VALIDATOR_MODEL or `gemini-3.1-pro-preview`.
+    Positional args after `--` (or any unrecognized trailing tokens) become
+    `{{ message }}` in the template — free-text the caller wants to add.
+
+Environment:
+    GEMINI_API_KEY           Required for the API call. If unset the script
+                             prints the rendered prompt to stderr and exits 2.
+"""
+
+import os
+import sys
+from pathlib import Path
+
+import google.genai as genai
+from jinja2 import Environment, FileSystemLoader, StrictUndefined
+
+EXIT_OK = 0
+EXIT_ERROR = 1
+EXIT_SKIPPED = 2
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+TEMPLATE_DIR = SCRIPT_DIR / "llm-call-templates"
+
+
+def load_path(value: str) -> str:
+    path = Path(value).expanduser()
+    if not path.exists():
+        raise FileNotFoundError(f"context path does not exist: {path}")
+    if path.is_dir():
+        files = sorted(path.glob("*.md"))
+        if not files:
+            return ""
+        return "\n\n".join(f.read_text() for f in files)
+    return path.read_text()
+
+
+def parse_args(argv: list[str]) -> tuple[str, dict[str, str], str | None, str]:
+    prompt: str | None = None
+    context: dict[str, str] = {}
+    model: str | None = None
+    message_parts: list[str] = []
+    seen_separator = False
+
+    for token in argv:
+        if seen_separator:
+            message_parts.append(token)
+            continue
+        if token == "--":
+            seen_separator = True
+            continue
+        if token.startswith("--prompt="):
+            prompt = token.split("=", 1)[1]
+        elif token.startswith("--model="):
+            model = token.split("=", 1)[1]
+        elif token.startswith("--context."):
+            key_value = token[len("--context."):]
+            if "=" not in key_value:
+                raise ValueError(f"--context.<key> requires =<value>: {token}")
+            key, value = key_value.split("=", 1)
+            context[key] = load_path(value)
+        else:
+            message_parts.append(token)
+
+    if prompt is None:
+        raise ValueError("--prompt=<name> is required")
+
+    message = " ".join(message_parts).strip()
+    return prompt, context, model, message
+
+
+def render_prompt(prompt_name: str, context: dict[str, str], message: str) -> str:
+    template_file = TEMPLATE_DIR / f"{prompt_name}.md.j2"
+    if not template_file.exists():
+        raise FileNotFoundError(f"prompt template not found: {template_file}")
+
+    env = Environment(
+        loader=FileSystemLoader(str(TEMPLATE_DIR)),
+        undefined=StrictUndefined,
+        keep_trailing_newline=True,
+    )
+    template = env.get_template(template_file.name)
+    render_ctx = {"message": message, **{k: v for k, v in context.items()}}
+    # message is allowed to be empty; provide defaults for any unused vars
+    # by letting StrictUndefined raise — the template author should declare
+    # everything it expects. Empty string for declared-but-empty is fine.
+    return template.render(**render_ctx)
+
+
+def call_gemini(rendered: str, model: str | None) -> int:
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        print(
+            "GEMINI_API_KEY not set — printing rendered prompt and skipping call.",
+            file=sys.stderr,
+        )
+        print(rendered)
+        return EXIT_SKIPPED
+
+    os.environ.pop("GOOGLE_API_KEY", None)
+    client = genai.Client(api_key=api_key)
+    resolved_model = model or os.environ.get(
+        "BOOPING_VALIDATOR_MODEL", "gemini-3.1-pro-preview"
+    )
+
+    try:
+        response = client.models.generate_content(
+            model=resolved_model, contents=rendered
+        )
+        print(response.text)
+    except Exception as e:
+        print(f"LLM request failed: {e}", file=sys.stderr)
+        return EXIT_ERROR
+
+    return EXIT_OK
+
+
+def main(argv: list[str]) -> int:
+    try:
+        prompt_name, context, model, message = parse_args(argv)
+        rendered = render_prompt(prompt_name, context, message)
+    except (ValueError, FileNotFoundError) as e:
+        print(str(e), file=sys.stderr)
+        return EXIT_ERROR
+
+    return call_gemini(rendered, model)
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

@@ -13,7 +13,7 @@ allowed-tools:
   - Bash(git diff *)
   - Bash(git add *)
   - Bash(git commit *)
-  - Bash(booping-validate-plan:*)
+  - Bash(booping-external-llm-call:*)
   - Bash(booping-plans:*)
   - Bash(bin/booping-project-name:*)
   - Bash(bin/booping-sprint-threshold:*)

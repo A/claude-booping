@@ -1,12 +1,14 @@
 Mandatory for features and refactorings; optional for single-file bugs.
 
-Run `booping-validate-plan` **once per plan** during grooming, after addressing the user's initial feedback on the draft. Do not re-run on every iteration. Cross-validation is an advisory review, not a CI gate — re-running burns tokens without proportional value. If the user makes substantive scope changes after the first validation, re-running is acceptable; iterative wording tweaks are not grounds to re-run.
+Run `booping-external-llm-call --prompt=validate-plan` **once per plan** during grooming, after addressing the user's initial feedback on the draft. Do not re-run on every iteration. Cross-validation is an advisory review, not a CI gate — re-running burns tokens without proportional value. If the user makes substantive scope changes after the first validation, re-running is acceptable; iterative wording tweaks are not grounds to re-run.
 
 ```bash
-booping-validate-plan ~/Claude/{project}/plans/YYYYMMDD-{kebab-title}.md
+booping-external-llm-call --prompt=validate-plan \
+  --context.plan=~/Claude/{project}/plans/YYYYMMDD-{kebab-title}.md \
+  --context.lessons=~/Claude/{project}/lessons/
 ```
 
-`booping-validate-plan` ships in the plugin's `bin/` and is auto-added to PATH. It derives the project from the plans path, loads `~/Claude/{project}/lessons/` as the rubric, and handles its own API-key check.
+`booping-external-llm-call` ships in the plugin's `bin/` and is auto-added to PATH. Templates live under `bin/llm-call-templates/`. The CLI handles its own API-key check.
 
 **Security:** never inspect the environment for `GEMINI_API_KEY` (no `env | grep`, no `printenv`, no reading `.env` files). Call the validator blind.
 

@@ -10,7 +10,7 @@ Migrating to a template-driven skill pipeline. State of play:
 - **`/groom`, `/develop`, `/retro`, and `/learn`** are fully template-driven; their `skills/*/SKILL.md` are generated artifacts.
 - **Other skills** (`chat`, `install`, `help`) still author their `SKILL.md` by hand and reference `docs/partial_*.md`. They are due for migration but work as-is in the meantime.
 - **Agents**: all three (`booping-researcher`, `booping-developer-middle`, `booping-developer-senior`) are template-driven. The two developer tiers share `_partials/_developer_body.j2` — only frontmatter (`model`, `effort`, `reasoning`, `color`) diverges. Each agent injects project-local extensions via `!`bin/booping-extra-instructions agent_booping-<name>.md`` at the bottom of its body.
-- **CLIs**: `booping-plans` (read-only), `booping-create-project`, `booping-validate-plan` — unchanged. New: `booping-build`, `booping-project-name`.
+- **CLIs**: `booping-plans` (read-only), `booping-create-project`, `booping-external-llm-call` (renamed from `booping-validate-plan`; renders a Jinja2 prompt template under `bin/llm-call-templates/` and sends it to Gemini). New: `booping-build`, `booping-project-name`.
 
 ## Layout
 
@@ -32,7 +32,7 @@ Migrating to a template-driven skill pipeline. State of play:
   - `booping-extra-instructions <filename>` — reads `~/Claude/{project}/_booping/<filename>` and prints a framed "User-specific instructions" block wrapping the body; prints nothing if the project isn't initialized or the file is missing. Inlined per-skill via `!`bin/booping-extra-instructions skill_<name>.md`` and per-agent via `!`bin/booping-extra-instructions agent_booping-<name>.md`` so project overrides travel with the skill or agent without a separate read step.
   - `booping-lessons` — enumerates `~/Claude/{project}/lessons/*.md`, prints a "Lessons" block with an index and each lesson's full body plus a conflict-handling rule. Prints "No lessons accumulated yet" when the directory is empty; prints nothing if the project isn't initialized. Inlined via `!`bin/booping-lessons`` so the active rule set is live at skill load.
   - `booping-plan-templates` — enumerates core plan templates from `docs/plan_templates/*.md` plus project-local templates from `~/Claude/{project}/plan_templates/*.md`; prints a grouped list with each template's name, description, and path. Inlined via `!`bin/booping-plan-templates`` so available templates are discoverable at skill load.
-  - `booping-plans`, `booping-validate-plan`, `booping-create-project` — as before.
+  - `booping-plans`, `booping-external-llm-call`, `booping-create-project` — as before.
 
 ## Config vs skill — ownership boundary
 
@@ -110,7 +110,7 @@ Top-level keys currently in use:
 - `bin/booping-build` — render skills from `src/`. `--watch` re-renders on change (via `watchfiles`).
 - `bin/booping-project-name` — emit project context (YAML block or uninitialized notice) for inlining into skills via `!`…``.
 - `bin/booping-plans` — list plans, filter by status, sort by any frontmatter field. Tab-separated output.
-- `bin/booping-validate-plan <plan-path>` — Gemini cross-validation. Handles its own API-key check; never inspect `GEMINI_API_KEY` from agent context.
+- `bin/booping-external-llm-call --prompt=<name> --context.<key>=<path>... [-- <free-text>]` — render a Jinja2 prompt template from `bin/llm-call-templates/<name>.md.j2` against caller-supplied context (file or directory paths read into `{{ <key> }}`; trailing free-text becomes `{{ message }}`) and send it to Gemini. Handles its own API-key check; never inspect `GEMINI_API_KEY` from agent context. Current templates: `validate-plan` (cross-validates a plan against project lessons).
 - `just build`, `just watch` — shortcuts for the renderer.
 - No tests. (User-set policy.)
 
