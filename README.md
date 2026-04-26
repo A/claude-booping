@@ -37,7 +37,7 @@ Loads the plugin into the current session only.
 
 ```
 /plugin marketplace add /path/to/claude-booping/
-/plugin install booping@booping-local
+/plugin install booping@booping
 ```
 
 The plugin ships with a `.claude-plugin/marketplace.json` so the second command works.
@@ -46,7 +46,7 @@ The plugin ships with a `.claude-plugin/marketplace.json` so the second command 
 
 ```
 /plugin marketplace add A/claude-booping
-/plugin install booping@booping-local
+/plugin install booping@booping
 ```
 
 After installing, `cd` into the target repo and run `/install`. That single step scaffolds `~/Claude/{project}/` (with `plans/`, `retrospectives/`, `lessons/`, `notes/`, `_booping/`).
