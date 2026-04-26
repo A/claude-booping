@@ -3,7 +3,7 @@ name: help
 description: Show what booping is, the available commands, and how to use them. Use when the user asks for help, wants a tour of the plugin, or is onboarding.
 argument-hint: "[topic: skills | agents | layout | workflow]"
 user-invocable: true
-effort: low
+effort: {{ config.skills.help.effort }}
 allowed-tools:
   - Read
   - Bash(ls *)
@@ -18,12 +18,7 @@ allowed-tools:
 
 Orient the user to the booping plugin. This skill is read-only — it never scaffolds, migrates, or writes files. That is `/install`'s job.
 
-## Project Context
-
-!`bin/booping-project-name`
-
-On skill load, report the resolved project context back to the user verbatim so they can see which project and vault the skill is operating on.
-
+{% include "_partials/_project_context.j2" %}
 
 ## High-level workflow
 
