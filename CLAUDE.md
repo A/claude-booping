@@ -76,10 +76,11 @@ Content shared across skills/agents, or extracted from a single skill body to ke
 
 Out of framework scope — authored per-project, loaded by skills at runtime.
 
-- Project conventions (`CLAUDE.md`).
 - Per-skill / per-agent extensions (`_booping/skill_<name>.md`, `_booping/agent_<name>.md`).
 - Accumulated lessons (`lessons/`).
 - Project-local plan templates (`plan_templates/*.md`).
+
+The attached repo's own `CLAUDE.md` is also loaded by skills (it sits in the repo, not the vault) — same role as the above: project conventions the framework reads but doesn't author.
 
 ## Principles
 
@@ -146,7 +147,8 @@ Top-level keys currently in use:
 - `lessons/` — accumulated lessons; loaded by skills' Preflight.
 - `notes/` — user notes (plan-review comments, code-review threads, ideas for next sprints). Not consumed by skills or agents — purely for the user's own reference.
 - `_booping/skill_<name>.md` — project-local extensions to wide-domain skills.
-- `CLAUDE.md` — project conventions; loaded by skills.
+
+(Project conventions live in the attached repo's own `CLAUDE.md`, not in the vault.)
 
 ## CLI
 
