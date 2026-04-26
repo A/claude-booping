@@ -28,6 +28,7 @@ Migrating to a template-driven skill pipeline. State of play:
 - `bin/` — standalone uv inline scripts:
   - `booping-agents` — reads `agents/*.md` frontmatter; emits a `## Agents` markdown table for `/help` to inline at skill load via `!`bin/booping-agents``.
   - `booping-build` — render skill, agent, doc, and plan templates from `src/templates/` → `skills/*/SKILL.md`, `agents/*.md`, `docs/*.md`, `docs/plan_templates/*.md`; `--watch` for dev loop.
+  - `booping-commands` — emits `/help`'s `## Commands` block; the "First time in a repo: /install" line is shown only when the cwd has no `.booping` marker. Inlined via `!`bin/booping-commands``.
   - `booping-extra-instructions <filename>` — reads `~/Claude/{project}/_booping/<filename>` and prints a framed "User-specific instructions" block wrapping the body; prints nothing if the project isn't initialized or the file is missing. Inlined per-skill via `!`bin/booping-extra-instructions skill_<name>.md`` and per-agent via `!`bin/booping-extra-instructions agent_booping-<name>.md`` so project overrides travel with the skill or agent without a separate read step.
   - `booping-lessons` — enumerates `~/Claude/{project}/lessons/*.md`, prints a "Lessons" block with an index and each lesson's full body plus a conflict-handling rule. Prints "No lessons accumulated yet" when the directory is empty; prints nothing if the project isn't initialized. Inlined via `!`bin/booping-lessons`` so the active rule set is live at skill load.
   - `booping-plan-templates` — enumerates core plan templates from `docs/plan_templates/*.md` plus project-local templates from `~/Claude/{project}/plan_templates/*.md`; prints a grouped list with each template's name, description, and path. Inlined via `!`bin/booping-plan-templates`` so available templates are discoverable at skill load.
@@ -105,6 +106,7 @@ Top-level keys currently in use:
 - `plans/{YYYYMMDD}-{kebab-title}.md` — plan files; frontmatter per `docs/template_plan_frontmatter.md`. Sibling stubs set `split_from: plans/...` to point at the primary plan they were split from.
 - `plan_templates/*.md` — project-local plan templates. Each has frontmatter (`name`, `description`) + two top-level sections (`# Plan Body`, `# Quality Checklist`). Picked up by `booping-plan-templates` alongside core templates; can override a core template by sharing its `name`, or add entirely new ones.
 - `lessons/` — accumulated lessons; loaded by skills' Preflight.
+- `notes/` — user notes (plan-review comments, code-review threads, ideas for next sprints). Not consumed by skills or agents — purely for the user's own reference.
 - `_booping/skill_<name>.md` — project-local extensions to wide-domain skills.
 - `CLAUDE.md` — project conventions; loaded by skills.
 

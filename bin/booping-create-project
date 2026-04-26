@@ -27,7 +27,7 @@ if [ -d "$ROOT" ]; then
     exit 1
 fi
 
-mkdir -p "$ROOT"/{plans,retrospectives,lessons,_booping,requests}
+mkdir -p "$ROOT"/{plans,retrospectives,lessons,_booping,notes}
 
 # Smoketest / absolute-path invocations don't write a marker —
 # they are transient and should leave no global state.
