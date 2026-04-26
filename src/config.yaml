@@ -21,6 +21,12 @@ tasks:
     doc_uri: src/docs/task_refactoring.md
 
 skills:
+  help:
+    effort: low
+
+  install:
+    effort: high
+
   develop:
     effort: high
     agents:
