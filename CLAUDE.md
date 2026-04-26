@@ -40,37 +40,72 @@ Template-driven skill pipeline is live. Current state:
   - `booping-workflow` — walks `src/config.yaml` `plan.statuses` + `transitions`; emits a `## Workflow` per-skill chain block for `/help` to inline via `!`bin/booping-workflow``.
   - `booping-plans`, `booping-external-llm-call`, `booping-create-project` — as before.
 
-## Config vs skill — ownership boundary
+## Information ownership
 
-Config is the **contract between skills** and, looking forward, the **user-facing customisation surface**. A per-project user override of `src/config.yaml` is the intended path for tuning the plan lifecycle, sprint scale, task types, and agent wiring. Rendering stays build-time for now (`booping-build` compiles plugin config → `skills/*/SKILL.md`); a per-project rebuild is the intended rollout for user overrides. Dynamic runtime compilation via inline `!`commands`` so config isn't baked is a future iteration — out of scope for now.
+Every piece of information lives in exactly one of these owners. When you can't decide where something belongs, walk this list top-down.
 
-What the **config owns**:
+### `src/config.yaml`
+
+The contract between skills and, looking forward, the user-facing customisation surface. Per-project overrides via a user-owned `src/config.yaml` are the planned next step for tuning the plan lifecycle, sprint scale, task types, and agent wiring. Rendering stays build-time for now (`booping-build` compiles plugin config → `skills/*/SKILL.md`); dynamic runtime compilation via inline `!`commands`` so config isn't baked is a future iteration.
 
 - Where a plan can go (statuses, transitions, owner).
 - Boundaries of each move (`gates` — verifiable preconditions; `when` — human-readable trigger).
 - Artifacts produced in a state.
 - Side effects on exit (`on_exit` — frontmatter mutations, commits, etc.).
-- Structured surfaces that other skills / CLIs also consume: task types, sprint scale, agent capabilities.
+- Structured surfaces that other skills / CLIs also consume: task types, sprint scale, agent capabilities, branch conventions.
 
-What the **skill owns**:
+### Skill (`src/templates/skills/<name>.md.j2`)
 
-- Verbs and heuristics — *how* to produce the artifacts and clear the gates for the states it owns.
+Instructions, goal, rules, and judgement specific to one skill — the verbs and heuristics for clearing the gates that config defines.
+
+- Verbs and heuristics — *how* to produce the artifacts and clear the gates for the states this skill owns.
 - User interaction — what to ask, when, how to present, how to handle approval vs change requests vs cancellation.
 - Judgment calls the contract can't pre-specify.
 - Invariants the skill enforces across all its states ("Hard rules").
 
-What goes in **docs/**: long-form craft (quality checklists, cross-validation rules, split guidance) that's reusable or too long to inline. Lazy-loaded from the skill body.
+### Shared template fragments (`src/templates/_partials/`, `src/docs/`)
 
-The skill body must not restate the flow the transitions table already carries. If a fact is in config, the skill body does not also describe it in prose.
+Content shared across skills/agents, or extracted from a single skill body to keep it lean.
+
+- Cross-cutting guides included into multiple skills (git guide, plan transitions, available agents, project context).
+- Process fragments extracted from a single skill into its own partial (sprint planning, plan-frontmatter shape, task classification).
+- Bodies shared across sibling agents (`_developer_body.j2` for the two developer tiers).
+- Lazy-loaded craft docs (`src/docs/*.md`) that a skill links into via `[label](src/docs/...)` when the situation demands it.
+
+### Project vault (`~/Claude/{project}/`)
+
+Out of framework scope — authored per-project, loaded by skills at runtime.
+
+- Project conventions (`CLAUDE.md`).
+- Per-skill / per-agent extensions (`_booping/skill_<name>.md`, `_booping/agent_<name>.md`).
+- Accumulated lessons (`lessons/`).
+- Project-local plan templates (`plan_templates/*.md`).
 
 ## Principles
 
 - **Minimum useful context**: show only information the skill needs to perform its job. Never bake in stale, speculative, or unrelated data.
 - **Less prose, less drift**: every extra sentence in a skill or partial adds tension between what's written and what the model does. Cut motivation, restated context, "you are the skill / you are responsible to" preambles, and any explanation the schema or a referenced doc already carries. The schema is the source of truth; prose decays.
-- **Pre-execute with `!`commands``**: inject dynamic content (project name, vault path) into the skill body at load time via inline shell. Saves a round-trip tool call per fact.
-- **Lazy-load with `[doc](path)` references**: link to docs the skill reads only when the situation demands it. Keeps the baseline skill body small.
-- **Hard-wire with j2 partials**: use `{% include %}` (or a macro) for content that *must* be present every invocation. Reserve partials for mandatory data that would otherwise force an unnecessary tool call.
 - **Schema over prose**: structured data lives in `src/config.yaml`. If a format or value is there, the skill body must not also describe it in prose — render from config.
+
+## Information hierarchy
+
+When you write a skill, walk these questions top-down for every piece of information you're tempted to inline. Each step moves the cost out of the skill body and into a cheaper mechanism.
+
+1. **Does the skill need this for its main route?** Load it eagerly: inline a CLI fact via `!`command``, or include a static fragment as a partial.
+   - Example: project name + path loaded at skill load via `!`bin/booping-project-name``.
+   - Example: the git guide included via the `_git_guide.j2` partial.
+
+2. **Does the skill need this only on a specific route, or only when a condition holds?** Lazy-load with a `[label](src/docs/...)` link; the model fetches it when the situation demands it.
+   - Example: `/groom` links to per-task-type guidance; only the active type's guide (one of `feature`, `bug`, `refactoring`) is loaded per plan.
+
+3. **Does the skill need the whole, or only one slice?** Split into a partial.
+   - Example: `/develop` only needs the plan frontmatter shape; it does not pull in the full plan-template body.
+
+4. **Is this information already available to the skill?** Remove the duplicate.
+   - Example: plan transitions are rendered into each skill via `_plan_transitions.j2`. Skills must not restate the flow in their own prose.
+
+5. **Is the value dynamic?** Reference the source, never the literal.
+   - Example: the status `/learn` queries to find plans to absorb is named in `src/config.yaml`; the skill renders from there rather than spelling the status name in prose.
 
 ## Skill design
 
