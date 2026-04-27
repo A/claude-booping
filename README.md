@@ -10,6 +10,14 @@ A self-learning, project-scoped sprint workflow for Claude Code. booping turns a
 
 The vault at `~/Claude/{project}/` is markdown-only with YAML frontmatter that Obsidian renders natively as Properties. One vault per project, side-by-side with whatever else you keep in `~/Claude/`. No proprietary database, no lock-in — just files you can grep, version, and edit by hand.
 
+## Disclaimer
+
+booping is aimed at **experienced developers and tech leads** — people comfortable making architectural calls, decomposing work, and reviewing code critically. The skills assume you can tell a sharp plan from a vague one and a sound diff from a sloppy one.
+
+It's built for **iterative, agile-style development**: maintenance, incremental features, or growing a project sprint by sprint. It is **not** a waterfall tool — don't hand it a whole-project spec and expect a finished product. One plan is one sprint; the loop compounds across many.
+
+The framework is **in beta**. Planned next steps include a `/code-review` skill that addresses review feedback context-aware in fresh sessions, and per-project configuration so users can tune the lifecycle, sprint scale, and agent wiring without forking the plugin.
+
 ## Dependencies
 
 Required: `uv` and `git`. Optional: `GEMINI_API_KEY` environment variable for `/groom` cross-validation against Gemini.
@@ -25,29 +33,14 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 
 ## Installation
 
-### Development (fastest)
-
-```bash
-claude --plugin-dir /path/to/claude-booping/
-```
-
-Loads the plugin into the current session only.
-
-### Via Claude Code marketplace (persistent)
-
-```
-/plugin marketplace add /path/to/claude-booping/
-/plugin install booping@booping
-```
-
-The plugin ships with a `.claude-plugin/marketplace.json` so the second command works.
-
-### From GitHub
+Inside Claude Code, register the marketplace once, then install the plugin:
 
 ```
 /plugin marketplace add A/claude-booping
 /plugin install booping@booping
 ```
+
+Update later via `/plugin update booping` (or from the `/plugin` UI).
 
 After installing, `cd` into the target repo and run `/install`. That single step scaffolds `~/Claude/{project}/` (with `plans/`, `retrospectives/`, `lessons/`, `notes/`, `_booping/`).
 
@@ -119,7 +112,7 @@ A plan carries one of the following statuses in its frontmatter. Terminal states
 
 ## Sprints & SPs
 
-In booping, a **plan is a sprint** — the unit `/groom` produces and `/develop` executes end-to-end. Story Points (SP) measure the sprint's **complexity and review burden**, not effort or time. A 20-SP sprint might take a couple of hours on one project and a full session on another; what matters is that SPs give you a feel for the size and review weight of the sprint, independent of how fast the underlying work happens.
+In booping, a **plan is a sprint** — the unit `/groom` produces and `/develop` executes end-to-end. Story Points (SP) measure the sprint's **complexity and review burden**, not effort or time. A 20-SP sprint might take a couple of hours on one project, a full session on another, and a full day on a third; what matters is that SPs give you a feel for the size and review weight of the sprint, independent of how fast the underlying work happens.
 
 The 1–5 scale (`src/config.yaml` `sprint.scale`):
 
@@ -147,6 +140,16 @@ Wide-domain skills stay stack-agnostic. Project-specific concerns live entirely 
 `/retro` reads the plan, scans the session logs and git diff for what actually shipped, and writes a retrospective at `~/Claude/{project}/retrospectives/YYYYMMDD-{kebab-title}.md` — what worked, what didn't, divergences from spec, the business goal outcome.
 
 `/learn` then reviews the retrospective with the user, picks the durable findings, and writes them into two surfaces: project-wide lessons (`~/Claude/{project}/lessons/{N}_{title}.md`) and extra instructions for the matching skill or agent (`~/Claude/{project}/_booping/skill_<name>.md`, `_booping/agent_<name>.md`). Lessons are loaded by future `/groom` and `/develop` invocations; extension files travel with the matching skill or agent at load time. The user confirms each finding before it lands.
+
+## What booping doesn't do
+
+booping is a feedback loop, not an autopilot. Three things stay your job:
+
+- **Plan review is still on you.** `/groom` produces a draft and waits at `awaiting-plan-review` for a reason — sharpen it, push back, ask for splits. As lessons accumulate, plans drift toward your style and constraints, but only if you fed the loop honest reviews. Shit in, shit out.
+- **Code review is still on you.** `/develop` ships milestones; you own the quality bar. Read the diffs, flag what's off, and bring that feedback into `/retro` so `/learn` can turn it into rules the next sprint will honour.
+- **Learning isn't automatic.** `/retro` and `/learn` are scaffolding for a feedback loop, not a substitute for one. You still need to sit with the retrospective, confirm which findings are durable, and let `/learn` write them down. Skip that step and the loop stalls.
+
+Invest in the loop and it compounds. Treat it as a magic box and you'll get magic-box results.
 
 ## License
 
