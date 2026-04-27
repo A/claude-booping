@@ -104,6 +104,15 @@ One commit per transition. Sibling stubs written in the same run go in the same 
 
 
 
+## Plan editing
+
+After modifying any plan's SPs or status, run:
+
+```bash
+booping-plans --format=md > ~/Claude/{project}/sprints.md
+```
+
+
 ## Git
 
 Branches always live in the attached repo. Always ask the user before switching or creating a branch. Branch names use kebab-case (lowercase, hyphenated).

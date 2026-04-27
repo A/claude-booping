@@ -52,11 +52,20 @@ On skill load, report the resolved project context back to the user verbatim so 
 
 
 
+## Plan editing
+
+After modifying any plan's SPs or status, run:
+
+```bash
+booping-plans --format=md > ~/Claude/{project}/sprints.md
+```
+
+
 !`bin/booping-lessons`
 
 ## High-level workflow
 
-1. **Orient** (Phase 0) — regenerate `sprints.md`, count plans by status, surface the snapshot in the first message.
+1. **Orient** (Phase 0) — refresh `sprints.md`, then surface a counts table and an active-plans table in the first message.
 2. **Ingest** (Phase 1) — read any artifacts named in `$ARGUMENTS` or surfaced mid-conversation.
 3. **Discuss / act** (Phase 2) — answer questions, navigate the vault, make small edits as needed.
 4. **Hand-offs** (Phase 3) — route work that has grown beyond chat's scope to the right skill.
@@ -65,23 +74,18 @@ On skill load, report the resolved project context back to the user verbatim so 
 
 ## Phase 0 Orient
 
-Regenerate the snapshot before the first assistant message:
+Refresh the snapshot before the first assistant message:
 
 ```bash
 booping-plans --format=md > ~/Claude/{project_name}/sprints.md
 ```
 
-`sprints.md` is chat-owned — `/chat` is its sole writer. Never hand-edit it.
+The **first assistant message** must include two tables:
 
-Then count plans by status:
+1. **Counts** — one row per status in `config.plan.statuses` (`backlog, in-spec, awaiting-plan-review, ready-for-dev, in-progress, awaiting-retro, awaiting-learning, done, fail, cancelled`) with the plan count.
+2. **Active plans** — one row per plan whose status is `ready-for-dev`, `in-progress`, `awaiting-retro`, or `awaiting-learning`, columns `Status | Plan`. Omit the table entirely if all four are empty.
 
-```bash
-for s in backlog in-spec awaiting-plan-review ready-for-dev in-progress awaiting-retro awaiting-learning done fail cancelled; do
-  printf '%s\t%d\n' "$s" "$(booping-plans --status "$s" 2>/dev/null | tail -n +2 | wc -l)"
-done
-```
-
-The **first assistant message** must include the resulting 10-row count table. If `backlog >= 5` or `awaiting-retro >= 1` or `awaiting-plan-review >= 1`, append a one-line nudge (e.g. "5 plans in backlog — consider a groom session", "1 plan awaiting retro", "2 plans awaiting review").
+Use `booping-plans --status <s>` to assemble both.
 
 ## Phase 1 Ingest
 
@@ -105,17 +109,5 @@ Escalate rather than stretch:
 - For routine work owned by another skill (groom, develop, retro, learn), recommend that skill rather than reproducing its workflow inline.
 - When the user explicitly asks for an inline frontmatter tweak, status flip, or small code edit, just do it — no transitions table walk, no `<to-status>: <kebab-title>` commit ceremony.
 - When the user asks about valid statuses, available transitions, or how to flip a plan's status manually, lazy-load [plan lifecycle](../../docs/plan_lifecycle_overview.md) to ground the answer in the current `config.plan.statuses` shape.
-
-## What chat does NOT do
-
-- **No plan-status transitions.** Chat owns none. Status changes are manual frontmatter edits made by the appropriate skill.
-- **No retrospective writing.** That belongs to `/retro`.
-- **No lesson extraction.** That belongs to `/learn`.
-
-## Hard rules
-
-- Never commit, push, or run destructive git operations. User runs those.
-- When a task grows beyond ~1 file or needs estimation, escalate to `/groom` rather than expanding in-session scope.
-- Never hand-edit `sprints.md` — regenerate it via `booping-plans --format=md` only.
 
 !`bin/booping-extra-instructions skill_chat.md`

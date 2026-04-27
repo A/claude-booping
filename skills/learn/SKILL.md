@@ -57,6 +57,15 @@ One commit per transition. Sibling stubs written in the same run go in the same 
 
 
 
+## Plan editing
+
+After modifying any plan's SPs or status, run:
+
+```bash
+booping-plans --format=md > ~/Claude/{project}/sprints.md
+```
+
+
 ## Routing Matrix
 
 This matrix is the routing contract for /learn candidates. Every accepted learning lands in exactly one target — no duplicates across targets, no multi-target rows.

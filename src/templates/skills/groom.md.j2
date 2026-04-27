@@ -41,6 +41,8 @@ Produces a development plan across domains (backend, frontend, Claude Code skill
 
 {{ available_agents.render("groom") }}
 
+{% include "_partials/_shared_instructions.j2" %}
+
 {{ task_classification.render() }}
 
 {{ sprint_planning.render() }}

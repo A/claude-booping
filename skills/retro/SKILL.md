@@ -74,6 +74,15 @@ One commit per transition. Sibling stubs written in the same run go in the same 
 
 
 
+## Plan editing
+
+After modifying any plan's SPs or status, run:
+
+```bash
+booping-plans --format=md > ~/Claude/{project}/sprints.md
+```
+
+
 !`bin/booping-lessons`
 
 ## Plans awaiting retro
