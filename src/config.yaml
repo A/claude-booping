@@ -131,7 +131,7 @@ plan:
           skill: groom
           when: "Draft is complete and ready to present to the user"
           gates:
-            - "Cross-validation run (see [cross-validation](../../docs/partial_cross_validation.md)) — single-file-bug skip acceptable"
+            - "Cross-validation run (see [cross-validation](../../src/docs/cross_validation.md)) — single-file-bug skip acceptable"
             - "Every task estimated; any task ≥ redecompose_threshold SP has been re-decomposed"
           on_exit:
             - "set `planned: yyyymmdd hh:mm`"

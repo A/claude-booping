@@ -75,7 +75,7 @@ One commit per transition. Sibling stubs written in the same run go in the same 
 
 | To | When | Gates | On exit |
 |----|------|-------|---------|
-| `awaiting-plan-review` | Draft is complete and ready to present to the user | Cross-validation run (see [cross-validation](../../docs/partial_cross_validation.md)) — single-file-bug skip acceptable; Every task estimated; any task ≥ redecompose_threshold SP has been re-decomposed | set `planned: yyyymmdd hh:mm` |
+| `awaiting-plan-review` | Draft is complete and ready to present to the user | Cross-validation run (see [cross-validation](../../src/docs/cross_validation.md)) — single-file-bug skip acceptable; Every task estimated; any task ≥ redecompose_threshold SP has been re-decomposed | set `planned: yyyymmdd hh:mm` |
 | `backlog` | User parks the work mid-grooming to revisit later | — | — |
 | `cancelled` | User shelves the work mid-grooming | — | set `completed: yyyymmdd hh:mm` |
 
