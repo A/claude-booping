@@ -1,6 +1,6 @@
 {
   "name": "booping",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Per-project grooming, implementation, retrospective, and lessons workflow with mandatory sub-agent delegation",
   "author": {
     "name": "Anton"
