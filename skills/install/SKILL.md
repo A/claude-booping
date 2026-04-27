@@ -69,10 +69,12 @@ Resolve the project name: kebab-cased, defaulting to the CWD basename. The user 
 1. Invoke the scaffolder via the `Bash(booping-create-project:*)` allow-list entry:
 
    ```
-   booping-create-project <project-name> <cwd>
+   booping-create-project <project-name>
    ```
 
-   where `<project-name>` is the kebab-cased name resolved in Phase 1 and `<cwd>` is the absolute path captured via `pwd` at skill start. The executable is on PATH when the plugin is enabled (`bin/` is auto-added). The script creates `~/Claude/{project-name}/` with five directories — `plans`, `retrospectives`, `lessons`, `_booping`, `notes` — and writes a `.booping` marker in `<cwd>` with content `project_name: {project-name}`. No `sprints.md` and no `CLAUDE.md` are seeded.
+   where `<project-name>` is the kebab-cased name resolved in Phase 1. The executable is on PATH when the plugin is enabled (`bin/` is auto-added). The script creates `~/Claude/{project-name}/` with five directories — `plans`, `retrospectives`, `lessons`, `_booping`, `notes` — and writes a `.booping` marker in the current working directory (the bash subshell inherits Claude's cwd) with content `project_name: {project-name}`. No `sprints.md` and no `CLAUDE.md` are seeded.
+
+   Do **not** pass an absolute path as a second argument — the script reserves that form for smoketests (it overrides the project root and skips the marker write).
 
 **Attach mode**:
 
