@@ -17,40 +17,19 @@ allowed-tools:
   - Bash(cat ~/Claude/*)
   - AskUserQuestion
   - Agent
-effort: high
+effort: {{ config.skills.chat.effort }}
 ---
 
 # booping — /chat
 
-
+{% import "_partials/_available_agents.j2" as available_agents with context %}
 General working mode: discussion, vault navigation, and small ad-hoc edits. Opens every session with a live vault status summary.
 
 This skill is **wide-domain** — it must work across very different projects. Project-specific behavior lives in `_booping/skill_chat.md` and lessons. Do not bake stack details into this skill.
 
-## Project Context
+{% include "_partials/_project_context.j2" %}
 
-!`bin/booping-project-name`
-
-On skill load, report the resolved project context back to the user verbatim so they can see which project and vault the skill is operating on.
-
-
-## Available Agents
-
-
-### `booping-researcher`
-
-**Good for:**
-- Vault-wide reads aggregated into a summary (e.g. what plans exist, recurring themes across retros)
-- Plan or retro content extraction across ≥3 files where the results need to be compressed before returning to the skill
-- Web search aggregation when the user asks an open question that requires pulling from multiple sources
-
-
-**Bad for:**
-- Single-file reads — call Read directly
-- Simple greps or existence checks that fit in a few lines of output
-- Questions answerable with a short `ls` or `grep`
-
-
+{{ available_agents.render("chat") }}
 
 !`bin/booping-lessons`
 
@@ -76,7 +55,7 @@ booping-plans --format=md > ~/Claude/{project_name}/sprints.md
 Then count plans by status:
 
 ```bash
-for s in backlog in-spec awaiting-plan-review ready-for-dev in-progress awaiting-retro awaiting-learning done fail cancelled; do
+for s in {{ config.plan.statuses.keys() | join(' ') }}; do
   printf '%s\t%d\n' "$s" "$(booping-plans --status "$s" 2>/dev/null | tail -n +2 | wc -l)"
 done
 ```
