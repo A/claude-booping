@@ -1,0 +1,40 @@
+{% macro render(skill) -%}
+## Plan Transitions
+
+This table is the contract: the valid moves and their requirements — `Gates` (must hold before the move) and `On exit` (must be fulfilled when taking the move). Both are strict. When an internal action matches a `When` trigger, verify every `Gate` holds, fulfill every `On exit` requirement, update `status:` to the `To` value, then commit the change to the vault:
+
+```bash
+cd ~/Claude/{project}
+git add plans/<plan-file>.md   # plus any sibling artifacts written in the same run
+git commit -m "<to-status>: <kebab-title>"
+```
+
+One commit per transition. Sibling stubs written in the same run go in the same commit.
+
+{% for key, s in config.plan.statuses.items() -%}
+{%- set rows = (s.get("transitions") or []) | selectattr("skill", "equalto", skill) | list -%}
+{%- if s.get("owner") == skill or rows -%}
+### `{{ key }}` — {{ s.desc }}
+
+{% if s.get("artifacts") -%}
+**Artifacts**
+{% for a in s.artifacts -%}
+- {{ a }}
+{% endfor %}
+
+{% endif -%}
+
+{% if rows -%}
+| To | When | Gates | On exit |
+|----|------|-------|---------|
+{% for t in rows -%}
+| `{{ t.to }}` | {{ t.when }} | {% set gs = t.get("gates") %}{% if gs %}{% for g in gs %}{{ g }}{% if not loop.last %}; {% endif %}{% endfor %}{% else %}—{% endif %} | {% set ox = t.get("on_exit") %}{% if ox %}{% for o in ox %}{{ o }}{% if not loop.last %}; {% endif %}{% endfor %}{% else %}—{% endif %} |
+{% endfor %}
+
+{% else -%}
+_`/{{ skill }}` owns this state; iterate in place until the user signals a move._
+
+{% endif -%}
+{% endif -%}
+{%- endfor -%}
+{%- endmacro %}

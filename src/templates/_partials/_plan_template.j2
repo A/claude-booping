@@ -1,0 +1,28 @@
+## Plan Structure
+
+A plan is a markdown file at `~/Claude/{project}/plans/{YYYYMMDD}-{kebab-title}.md` (date = first-written date). Three parts in order:
+
+### Frontmatter
+
+```yaml
+{% include "_partials/_plan_frontmatter.j2" %}
+```
+
+### Title
+
+Top-level heading matching `title:` from the frontmatter:
+
+```
+{% raw %}# {{Descriptive Title}}{% endraw %}
+```
+
+### Body + Quality Checklist
+
+Pick a plan template whose name + description matches the dominant surface of the work. Each template is one file with two top-level sections:
+
+- `# Plan Body` — the structure to follow while drafting the plan.
+- `# Quality Checklist` — the rules the plan must pass before moving out of `in-spec`.
+
+Read the selected template, write the plan against its `# Plan Body`, then verify against its `# Quality Checklist`.
+
+!`bin/booping-plan-templates`

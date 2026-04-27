@@ -18,7 +18,7 @@ allowed-tools:
   - Bash(pwd)
   - Bash(booping-create-project:*)
   - Bash(booping-plans:*)
-  - Agent
+  - Bash(bin/booping-extra-instructions:*)
   - AskUserQuestion
 ---
 
@@ -28,18 +28,12 @@ Bootstrap the current repo as a booping project. This skill scaffolds the vault 
 
 This skill is **wide-domain** — it must work across very different projects (backends, frontends, content sites, CLIs). Project conventions live in `~/Claude/{project}/_booping/skill_<name>.md` and `~/Claude/{project}/_booping/agent_<name>.md`, never in this skill.
 
-## Preflight
-
-- Read and resolve project based on [project resolution principle](../../docs/partial_project_resolution.md).
-- Read [plan statuses](../../docs/partial_plan_statuses.md).
-- Read [research agents](../../docs/partial_agents_researchers_delegator.md) — delegate narrow stack detection to `booping-researcher-junior`.
-
 ## High-level workflow
 
 1. Detect state.
 2. Decide mode (new / attach / cancel).
 3. Scaffold (new: run `booping-create-project`; attach: write `.booping` only).
-4. Detect stack (delegate to `booping-researcher-junior`).
+4. Detect stack (orchestrator reads stack-signal files directly).
 5. Populate vault extensions (three files in `_booping/`).
 6. Verify & seed `sprints.md`.
 
@@ -78,7 +72,7 @@ Resolve the project name: kebab-cased, defaulting to the CWD basename. The user 
    booping-create-project <project-name> <cwd>
    ```
 
-   where `<project-name>` is the kebab-cased name resolved in Phase 1 and `<cwd>` is the absolute path captured via `pwd` at skill start. The executable is on PATH when the plugin is enabled (`bin/` is auto-added). The script creates `~/Claude/{project-name}/` with five directories — `plans`, `retrospectives`, `lessons`, `_booping`, `requests` — and writes a `.booping` marker in `<cwd>` with content `project_name: {project-name}`. No `sprints.md` and no `CLAUDE.md` are seeded.
+   where `<project-name>` is the kebab-cased name resolved in Phase 1 and `<cwd>` is the absolute path captured via `pwd` at skill start. The executable is on PATH when the plugin is enabled (`bin/` is auto-added). The script creates `~/Claude/{project-name}/` with five directories — `plans`, `retrospectives`, `lessons`, `_booping`, `notes` — and writes a `.booping` marker in `<cwd>` with content `project_name: {project-name}`. No `sprints.md` and no `CLAUDE.md` are seeded.
 
 **Attach mode**:
 
@@ -86,117 +80,43 @@ Resolve the project name: kebab-cased, defaulting to the CWD basename. The user 
 
 ## Phase 3 Detect stack
 
-Delegate to `booping-researcher-junior` via the `Agent` tool (haiku tier, narrow lookup). The orchestrator owns every write in later phases — the agent returns a summary only.
+The orchestrator reads stack-signal files directly and synthesizes a structured summary in context. No agent dispatch.
 
-Briefing shape:
+Read only these files if present in the attached repo at `<cwd>`:
 
-```
-Brief: Scan the attached repo at {{cwd}} for stack signals. Read only these files if present:
-pyproject.toml, package.json, Cargo.toml, go.mod, Gemfile, Justfile, Makefile,
-.github/workflows/*, .pre-commit-config.yaml, README.md, CONTRIBUTING.md.
+`pyproject.toml`, `package.json`, `Cargo.toml`, `go.mod`, `Gemfile`, `Justfile`, `Makefile`, `.github/workflows/*`, `.pre-commit-config.yaml`, `README.md`, `CONTRIBUTING.md`.
 
-Return a compact summary with these fields (each on its own line):
-  language: <e.g. "Python 3.12", "Rust 1.80", "TypeScript 5 + React 19">
-  validations: <list of {command, role} pairs covering EVERY validation the project offers —
-    tests, linters, typecheckers, formatters, security scanners, coverage, doctest — do NOT
-    restrict to "test" + "lint">
-  hook_enforced_commands: <subset of validations that fires from .pre-commit-config.yaml
-    or an equivalent CI/hook config>
-  configured_manual_commands: <the complement — configured but not hook-fired>
-  env_notes: <Docker Compose, required services, env vars needed before commands run>
+From those, infer a summary with these fields (each on its own line):
 
-Return `unknown` for any field you can't resolve. No file writes; summary only.
-```
+- `language` — e.g. "Python 3.12", "Rust 1.80", "TypeScript 5 + React 19".
+- `validations` — list of `{command, role}` pairs covering EVERY validation the project offers — tests, linters, typecheckers, formatters, security scanners, coverage, doctest — do NOT restrict to "test" + "lint".
+- `hook_enforced_commands` — subset of validations that fires from `.pre-commit-config.yaml` or an equivalent CI/hook config.
+- `configured_manual_commands` — the complement: configured but not hook-fired.
+- `env_notes` — Docker Compose, required services, env vars needed before commands run.
+
+Return `unknown` for any field you can't resolve.
 
 ## Phase 4 Populate vault extensions
 
-Present the researcher's findings back to the user as `AskUserQuestion` defaults so they can confirm or override each field (one prompt per field, or one grouped prompt — either is fine).
+Present the Phase 3 findings back to the user as `AskUserQuestion` defaults so they can confirm or override each field (one prompt per field, or one grouped prompt — either is fine).
 
 Then write **three** extension files under `~/Claude/{project}/_booping/`:
 
-- `~/Claude/{project}/_booping/agent_booping-developer.md` — stack + conventions for developer-agent tiers.
-- `~/Claude/{project}/_booping/skill_groom.md` — validation catalogue + sizing calibration.
-- `~/Claude/{project}/_booping/skill_develop.md` — quality-check classification + env notes.
+1. `~/Claude/{project}/_booping/agent_booping-developer.md` — stack + conventions for developer-agent tiers.
+2. `~/Claude/{project}/_booping/skill_groom.md` — validation catalogue + sizing calibration.
+3. `~/Claude/{project}/_booping/skill_develop.md` — quality-check classification + env notes.
 
-Each file's skeleton is shown in its section below.
+Skeletons for the three files are documented in `src/docs/install_extension_files.md` — load them when ready to write.
 
 **Skip-if-exists rule (attach mode)**: if a target file already exists non-empty, skip the write and print `preserved existing: <path>` to the user. Files that exist but are empty (e.g. a stub created by `booping-create-project`) may be overwritten.
 
-**Stack-mismatch guard (attach mode)**: when `_booping/agent_booping-developer.md` is preserved, compare the researcher's detected `language` value against the first non-heading line under the existing file's `## Stack` header. If they differ, prompt the user via `AskUserQuestion` with three options before proceeding:
+**Stack-mismatch guard (attach mode)**: when `_booping/agent_booping-developer.md` is preserved, compare the Phase 3 detected `language` value against the first non-heading line under the existing file's `## Stack` header. If they differ, prompt the user via `AskUserQuestion` with three options before proceeding:
 
 - `keep existing`
 - `overwrite with detected`
 - `append new stack section`
 
 This mismatch check prevents silently feeding a new Python repo with an old Rust vault's context.
-
-### File 1 — `~/Claude/{project}/_booping/agent_booping-developer.md`
-
-Stack + conventions only; no commands.
-
-```markdown
-# booping-developer (project extension)
-
-Project-local stack and conventions for all active developer-agent tiers.
-
-## Stack
-{{language}}
-
-## Conventions
-{{conventions — e.g. "ruff for lint, mypy for typing, pytest for tests; prefer protocol over base class; no mocked DB in integration tests"}}
-
-## Notes
-
-- If a task touches areas outside the stack above, stop and escalate to the orchestrator before implementing.
-- Always prefer the project's own commands over ad-hoc invocations. If the task specifies a Verify command, run that — don't substitute.
-```
-
-### File 2 — `~/Claude/{project}/_booping/skill_groom.md`
-
-Catalogue of validations + optional sizing calibration.
-
-```markdown
-# groom (project extension)
-
-Project-local facts for grooming.
-
-## Available validations
-
-Commands available in this project to validate changes. When writing a milestone's `Verify` block or the plan's `Final Verification` section, pick the subset that actually exercises what the milestone changed — don't blanket-run everything.
-
-{{validations — one bullet per command with a short role description, e.g.:
-- `just test` — unit + integration suite
-- `just lint` — ruff check + ruff format --check
-- `just typecheck` — basedpyright
-- `pre-commit run --all-files` — full hook suite
-— or `(none detected — populate this file manually when commands exist)` }}
-
-## Sizing calibration
-
-{{"Sprint cap: {{value}} SP." if user supplied — else "(default — see docs/partial_sprint_planning.md)"}}
-```
-
-### File 3 — `~/Claude/{project}/_booping/skill_develop.md`
-
-Quality-check classification + env notes.
-
-```markdown
-# develop (project extension)
-
-Project-local facts for development.
-
-## Quality-check classification
-
-Hook-enforced (runs automatically at commit, no skill action required):
-{{hook_enforced_commands — one per line, or "(none)" if empty}}
-
-Configured-but-manual (skill picks the relevant ones per milestone per docs/partial_development_quality_checks.md — not all need to run on every milestone):
-{{configured_manual_commands — one per line, or "(none)" if empty}}
-
-## Dev environment
-
-{{env_notes — e.g. "Docker Compose up + Redis required before tests" — or "(none)"}}
-```
 
 ## Phase 5 Verify & seed sprints.md
 
@@ -216,3 +136,5 @@ Configured-but-manual (skill picks the relevant ones per milestone per docs/part
 - **Never overwrite an existing `~/Claude/{name}/` directory without confirmation.** If the target exists, default to attach-mode instead.
 - **Never write `.booping` without asking.** Attach mode prompts for confirmation before writing the marker.
 - **Never edit the attached repo's own `CLAUDE.md`.** This skill only writes under `~/Claude/{project}/`.
+
+!`bin/booping-extra-instructions skill_install.md`

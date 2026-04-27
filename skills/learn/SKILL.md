@@ -14,27 +14,79 @@ allowed-tools:
   - Bash(git add *)
   - Bash(git commit *)
   - Bash(grep *)
+  - Bash(bin/booping-debug-mode:*)
+  - Bash(bin/booping-project-name:*)
+  - Bash(bin/booping-plans:*)
   - AskUserQuestion
 effort: high
 ---
+
+
 
 # booping — /learn
 
 Turn retrospective findings into durable behavior changes routed to exactly one target each.
 
-This skill is **wide-domain** — it must work across very different projects. Project-specific concerns live in `_booping/skill_learn.md` and lessons. Do not bake them into this skill.
+## Project Context
 
-## Preflight
+!`bin/booping-project-name`
 
-- Read and resolve project based on [project resolution principle](../../docs/partial_project_resolution.md).
-- Read [plan statuses](../../docs/partial_plan_statuses.md).
-- Read [plan transitions for /learn](../../docs/partial_plan_transitions_learn.md) — the only transition this skill owns.
-- Read [learning targets](../../docs/partial_learn_targets.md) — the Type / Holds / Picked-when matrix this skill routes every candidate through.
-- Read [partial_debug_delegator](../../docs/partial_debug_delegator.md) — cheap gate that runs the mechanical check and, only when active, loads `partial_debug_learn` to extend the type vocabulary defined in `partial_learn_targets`.
-- Read [review-table template](../../docs/template_learn_review_table.md) — format for Phase 2's user-facing table.
-- Read lessons per [read lessons](../../docs/partial_read_lessons.md).
-- Read from `~/Claude/{project}/_booping/skill_learn.md`. Silently skip, if file doesn't exist.
-- Read the attached repo's `CLAUDE.md` — project conventions.
+On skill load, report the resolved project context back to the user verbatim so they can see which project and vault the skill is operating on.
+
+
+## Plan Transitions
+
+This table is the contract: the valid moves and their requirements — `Gates` (must hold before the move) and `On exit` (must be fulfilled when taking the move). Both are strict. When an internal action matches a `When` trigger, verify every `Gate` holds, fulfill every `On exit` requirement, update `status:` to the `To` value, then commit the change to the vault:
+
+```bash
+cd ~/Claude/{project}
+git add plans/<plan-file>.md   # plus any sibling artifacts written in the same run
+git commit -m "<to-status>: <kebab-title>"
+```
+
+One commit per transition. Sibling stubs written in the same run go in the same commit.
+
+### `awaiting-learning` — Retro written; waiting for /learn to absorb lessons.
+
+| To | When | Gates | On exit |
+|----|------|-------|---------|
+| `done` | All accepted learnings written | User confirmed the review table; Every accepted lesson written to its target file | set `completed: yyyymmdd hh:mm` |
+
+
+
+
+
+
+## Plan editing
+
+After modifying any plan's SPs or status, run:
+
+```bash
+booping-plans --format=md > ~/Claude/{project}/sprints.md
+```
+
+
+## Routing Matrix
+
+This matrix is the routing contract for /learn candidates. Every accepted learning lands in exactly one target — no duplicates across targets, no multi-target rows.
+
+| Target | When to use | Lands at | Examples |
+|--------|-------------|----------|----------|
+| **Lesson** | Cross-framework principle reaching every skill — design heuristic, test discipline, IA rule. Concrete, short, with one example. | `lessons/{N}_<kebab>.md` | "Challenge code design by SOLID principles", "Use AAA in test cases", "Design skill template partials by information hierarchy" |
+| **Skill extra instructions** | Tweak or extend a single skill's method (groom / develop / retro / learn / chat / install / help). | `_booping/skill_<skill>.md` | `skill_groom.md`, `skill_develop.md`, `skill_retro.md`, `skill_learn.md`, `skill_chat.md`, `skill_install.md`, `skill_help.md` |
+| **Agent extra instructions** | Hook a single agent's behavior. Compact list. | `_booping/agent_<full-agent-name>.md` | `agent_booping-researcher.md`, `agent_booping-developer-middle.md`, `agent_booping-developer-senior.md` |
+| **Repository CLAUDE.md** | Project-fact aiding fresh-agent project understanding — layout path, CLI command, code-side convention. One-bullet additions; no paragraph rewrites. | `<repo>/CLAUDE.md` | (single canonical target — no filename variants) |
+
+If a candidate would otherwise span two targets, decompose into two distinct rows; never duplicate the same rule across targets.
+
+The skill infers the exact filename per candidate; the example lists above are validation aids, not full enumerations.
+
+
+!`bin/booping-debug-mode learn`
+
+## Plans awaiting learning
+
+!`bin/booping-plans --status awaiting-learning`
 
 ## High-level workflow
 
@@ -43,36 +95,51 @@ This skill is **wide-domain** — it must work across very different projects. P
 3. Update-vs-create sweep — filtered read of existing lessons and extensions.
 4. Present unified review table — user accepts / rejects / adds rows.
 5. Write accepted items — one pass per target type, no per-edit prompts.
-6. Framework review, transition, and commit.
+6. Transition and commit.
 
 ## Single-location rule
 
-Every accepted learning lands in **exactly one** target. If a candidate would otherwise span two targets, decompose it into two distinct rows in the review table — one row per target. The `Type` vocabulary and routing tests live in [partial_learn_targets](../../docs/partial_learn_targets.md); do not restate the matrix here.
+Every accepted learning lands in **exactly one** target. If a candidate would otherwise span two targets, decompose it into two distinct rows in the review table — one row per target. The four targets, when-to-use tests, and example filenames live in the matrix rendered above; do not restate it elsewhere in this body.
 
 ---
 
 ## Phase 0 Intake
 
-Resolve the retro path from `$ARGUMENTS`; if missing, default to the most recent file in `~/Claude/{project_name}/retrospectives/`. Read the retrospective file and follow its `plan:` frontmatter to the associated plan.
+The current set of plans in `awaiting-learning` is listed in the [Plans awaiting learning](#plans-awaiting-learning) block above (rendered at skill load).
 
-Validate entry status: the plan's `status:` must be `awaiting-learning`. On mismatch, STOP with this verbatim error:
+Resolve `$ARGUMENTS` to a retrospective file path.
 
-> `/learn requires a plan in status 'awaiting-learning'; got '<current-status>' for <retro-path>. Run 'booping-plans --status awaiting-learning' to list candidates.`
+**No `$ARGUMENTS`**: branch on the plans-list size.
+- **Zero plans**: STOP with `No plans in awaiting-learning. Run /retro first to write a retrospective.`
+- **Exactly one plan**: auto-select it (do not call `AskUserQuestion` — it requires ≥2 options).
+- **Multiple plans**: present the list via `AskUserQuestion` (single-select; one option per plan).
+
+Read the selected plan's `retro:` frontmatter to resolve the retrospective file.
+
+**`$ARGUMENTS` provided**: treat it as the retrospective file path. Read it and follow its `plans:` frontmatter to the associated plan.
+
+Validate the resolved plan's `status:` is `awaiting-learning`. On mismatch, STOP with this verbatim error:
+
+> `/learn requires a plan in status 'awaiting-learning'; got '<current-status>' for <plan-path>. Use the list above to pick a candidate.`
 
 ## Phase 1 Extract candidates
 
-Read the retrospective's `What went wrong`, `Root causes`, `Action items`, and `Takeaways` sections. **Decompose** each insight into atomic candidates — one rule per candidate — BEFORE target assignment.
+Read the retrospective file and extract candidates for self-learning. **Decompose** each insight into atomic candidates — one rule per candidate — BEFORE target assignment.
 
-For each candidate, pick a target from the Type vocabulary using the matrix in [partial_learn_targets](../../docs/partial_learn_targets.md). The available type set for this run is `BASE_TYPES ∪ types-activated-by-loaded-partials` — trust the matrix as extended by whichever partials the Preflight loaded.
+Each candidate must satisfy:
+
+- **Imperative form** — `do X` or `don't Y`. Not "X happened" or "X is good".
+- **Single concern** — if you can't state the rule without "and", "plus", or `;`, split it.
+- **No bare internal IDs** — when referring to an existing lesson, pair the ID with its title slug (e.g. `lesson 0004 (information-architecture-pattern)`, not just `lesson 0004`). Same for retro-internal codes; restate the underlying mechanic.
+- **One sentence each in the report** — the review-table `Rule` and `Example` cells are one sentence each. The persisted lesson file may elaborate the rule into a compact paragraph after approval.
+
+For each candidate, pick a target from the matrix rendered above.
 
 ## Phase 1.5 Update-vs-create sweep
 
 Before drafting the review table, check whether each candidate duplicates or conflicts with existing coverage:
 
-1. `ls ~/Claude/{project_name}/lessons/` — enumerate existing lessons.
-2. `ls ~/Claude/{project_name}/_booping/` — enumerate existing project-local extensions.
-3. For each candidate, read ONLY the `_booping/` files whose name matches a candidate-relevant skill or agent (filter, don't dump everything).
-4. Read the attached repo's `CLAUDE.md` in full.
+Read every lesson under `~/Claude/{project_name}/lessons/`, every extension file under `~/Claude/{project_name}/_booping/`, and the attached repo's `CLAUDE.md`. Skip silently when a directory is empty or a file is absent. Together these are the lookup set for the dup-check sweep.
 
 Record a sweep verdict per candidate as one of:
 
@@ -82,7 +149,7 @@ Record a sweep verdict per candidate as one of:
 
 ## Phase 2 Present unified review table
 
-Render the review table using the format defined in [template_learn_review_table](../../docs/template_learn_review_table.md). Use `AskUserQuestion` once to collect the user's accept / reject / add response.
+Render the review table using the format defined in [review table format](../../docs/learn_review_table.md). Use `AskUserQuestion` once to collect the user's accept / reject / add response.
 
 Do not prompt per row. Do not inline the column-by-column documentation here — the template owns the format, the accept/reject syntax, and the user-added-row split rule.
 
@@ -92,32 +159,30 @@ After the table is accepted, write every accepted row in a single pass per targe
 
 Write paths use these templates (resolve each placeholder before writing):
 
-- `lessons/{N}_<kebab>.md` — `{N}` is the next integer, computed from `ls lessons/` highest existing prefix + 1; body uses [template_lesson.md](../../docs/template_lesson.md).
+- `lessons/{N}_<kebab>.md` — one rule per file. `{N}` is the next integer, computed from `ls lessons/` highest existing prefix + 1; body follows the lesson body shape inlined below.
 - `_booping/skill_<name>.md` — per-skill extension in this project's vault.
 - `_booping/agent_<name>.md` — per-agent extension in this project's vault.
 - Repo `CLAUDE.md` — one-line bullet additions; no paragraph rewrites.
 
-Target types beyond these base five come from partials loaded in Preflight and carry their own write-path and commit guidance — defer to them.
 
-## Phase 4 Framework review
+---
+id: {{N}}                                      # monotonically-increasing integer; matches the filename prefix
+title: {{One-sentence rule as a prescriptive statement}}
+retro: retrospectives/YYYYMMDD-{{kebab-title}}.md   # the retro that surfaced this lesson
+created: YYYY-MM-DD                            # date this lesson was extracted
+---
 
-List the plugin `skills/` and `agents/` directories with `ls`. For each skill or agent whose name appears in Phase 1's candidate list, read only that file (filter, don't dump everything). If a retro pattern indicates that a plugin skill or agent would benefit from a project-local extension, append additional rows to the review table and re-confirm with the user via `AskUserQuestion`.
+{{The principle, imperative form. One compact paragraph; a short bullet list is fine when the rule has named sub-checks.}}
 
-Project-local extensions (`_booping/skill_<name>.md`, `_booping/agent_<name>.md`) are the default framework-review output regardless of flags. Any additional framework-review targets come from partials loaded in Preflight.
+**Example**: {{One concrete case that illustrates the rule — what went wrong or right, in one or two lines. No motivation paragraphs, no multi-section "how to apply", no forbidden/edge-case lists. The retro carries the backstory; link it via `retro:` frontmatter.}}
 
-## Phase 5 Transition + commit
 
-Apply the `awaiting-learning → done` transition per [partial_plan_transitions_learn](../../docs/partial_plan_transitions_learn.md): set `status: done` and `completed: <today>`. Run `booping-plans --status done` to confirm.
 
-Commit the vault updates from the vault working directory:
+## Phase 4 Transition + commit
 
-```bash
-cd ~/Claude/{project_name}
-git add lessons/ _booping/ plans/<plan-filename>.md
-git commit -m "learn: <kebab-retro-title> done"
-```
+Apply the exit transition from the transitions table above; the partial covers the vault commit shape.
 
-If Phase 3 wrote to the attached repo's `CLAUDE.md`, commit that separately from the repo working directory:
+If Phase 3 also wrote to the attached repo's `CLAUDE.md`, commit that separately in the repo working tree (the partial covers vault commits only):
 
 ```bash
 cd <repo-path>
@@ -125,21 +190,3 @@ git add CLAUDE.md
 git commit -m "docs(claude-md): <short summary>"
 ```
 
-Any additional commit boundaries required by partials loaded in Preflight are those partials' own responsibility — do not inline their commit shape here.
-
-## What learn does NOT do
-
-- Does **not** write methodology changes to `skills/*/SKILL.md` or `agents/*.md` in the plugin repo by default. Extensions land in the vault under `_booping/`.
-- Does **not** transition plans to any status other than `awaiting-learning → done`.
-- Does **not** regenerate `sprints.md`; `/chat` owns that.
-- Does **not** delegate candidate classification to role agents — those agents have been deleted.
-
-## Hard rules
-
-- (a) The orchestrator owns all reads and writes; there is no role-agent fan-out and no researcher delegation for classification.
-- (b) Terminology for activation-gated behaviours (including plugin-side editing) belongs exclusively to the partials that own those behaviours; do not name or paraphrase their vocabulary here.
-- (c) One rule per lesson file; bodies follow [template_lesson.md](../../docs/template_lesson.md).
-- (d) Every accepted learning lands in exactly one target. Multi-rule insights decompose into multiple rows; the same rule must never be routed to two targets simultaneously — decomposition is the only escape hatch.
-- (e) The matrix of types lives in [partial_learn_targets](../../docs/partial_learn_targets.md) — do not inline it here.
-- (f) The review-table column-by-column documentation lives in [template_learn_review_table](../../docs/template_learn_review_table.md) — do not inline it here.
-- (g) Never propose a rule whose trigger is "try harder" or "be careful". The `How to apply` section must be mechanically checkable.

@@ -1,0 +1,11 @@
+1. Locate sessions referencing each plan (search `~/.claude/projects/`).
+2. Extract the user-side messages.
+3. Return a structured summary per plan with four sections — what frustrated the user (implementation or planning misses), what the user changed (likely planning misses), what the user said about the code (taste / convention / quality misses), and where loaded lessons appear to have been ignored:
+   - **User tensions** — frustration, disagreement, or pushback at the orchestrator's choices. Per item: description (one line), trigger (the orchestrator action, output, or omission that prompted it), optional sparing quote.
+   - **Late change requests** — scope additions, reversed decisions, or requirements clarified mid-sprint. Per item: description, trigger (what surfaced the need + roughly when in the sprint).
+   - **Code feedback** — comments the user made on the code itself: naming, structure, patterns, conventions, missing tests, dead code, etc. Per item: description, the file or symbol the comment was about, and what the user wanted instead.
+   - **Ignored / unapplied lessons** — places where the session record shows behavior that contradicts a lesson included in the brief below. Per item: lesson path, the rule, what happened instead, and which session message(s) surfaced it.
+
+The lesson set to cross-check against is included verbatim with this brief. Do not load any other lessons.
+
+Drop items with low value for the retrospective. Do not copy raw logs into the summary.

@@ -1,0 +1,14 @@
+Lifecycle reference for plan statuses and transitions across skills. Lazy-loaded by `/chat` when the user asks about valid moves or wants a manual status flip. Operational gates (cross-validation, redecomposition checks) and `on_exit` ceremony are intentionally omitted — those belong to the owning skill's contract in `src/templates/_partials/_plan_transitions.j2`.
+{% for key, s in config.plan.statuses.items() %}
+
+### `{{ key }}`
+
+{{ s.desc }}
+{% if s.terminal %}
+_Terminal — no outgoing transitions._
+{% else %}
+
+| To | When | Owner |
+|----|------|-------|
+{% for t in s.transitions %}| `{{ t.to }}` | {{ t.when }} | /{{ t.skill }} |
+{% endfor %}{% endif %}{% endfor %}

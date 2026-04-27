@@ -1,0 +1,106 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.11"
+# dependencies = ["pyyaml>=6.0"]
+# ///
+"""booping-plan-templates: enumerate plan templates for inlining into a skill.
+
+Two scopes:
+
+1. Core — `docs/plan_templates/*.md` under the plugin root (plugin-provided,
+   generic across stacks).
+2. Project — `~/Claude/{project}/plan_templates/*.md` if the cwd is a booping
+   project (user-authored, project-specific; override or add to core).
+
+For each template, reads its frontmatter (`name`, `description`), and prints a
+markdown block the skill renders verbatim.
+"""
+import sys
+from pathlib import Path
+
+import yaml
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
+CORE_DIR = REPO_ROOT / "docs" / "plan_templates"
+
+
+def resolve_project_dir() -> Path | None:
+    path = Path.cwd() / ".booping"
+    if not path.exists():
+        return None
+    try:
+        data = yaml.safe_load(path.read_text()) or {}
+    except yaml.YAMLError:
+        return None
+    name = data.get("project_name") if isinstance(data, dict) else None
+    if not isinstance(name, str) or not name:
+        return None
+    return Path.home() / "Claude" / name / "plan_templates"
+
+
+def extract_frontmatter(path: Path) -> dict:
+    text = path.read_text()
+    if not text.startswith("---\n"):
+        return {}
+    try:
+        rest = text[4:]
+        fm_text, _ = rest.split("\n---", 1)
+        return yaml.safe_load(fm_text) or {}
+    except (ValueError, yaml.YAMLError):
+        return {}
+
+
+def enumerate_dir(dir_: Path) -> list[dict]:
+    if not dir_.exists():
+        return []
+    out: list[dict] = []
+    for p in sorted(dir_.glob("*.md")):
+        fm = extract_frontmatter(p)
+        out.append(
+            {
+                "name": fm.get("name") or p.stem,
+                "description": fm.get("description") or "",
+                "path": str(p),
+            }
+        )
+    return out
+
+
+def render_group(label: str, items: list[dict]) -> str:
+    if not items:
+        return ""
+    lines = [f"**{label}**:"]
+    for t in items:
+        desc = t["description"] or "(no description)"
+        lines.append(f"- `{t['name']}` — {desc} (`{t['path']}`)")
+    return "\n".join(lines)
+
+
+def main() -> int:
+    core = enumerate_dir(CORE_DIR)
+    project_dir = resolve_project_dir()
+    project = enumerate_dir(project_dir) if project_dir else []
+
+    print("### Available plan templates\n")
+
+    blocks = []
+    if core:
+        blocks.append(render_group("Core (plugin-provided, generic)", core))
+    if project:
+        blocks.append(render_group(f"Project (from `{project_dir}`)", project))
+    if not blocks:
+        print("_No plan templates found._\n")
+    else:
+        print("\n\n".join(blocks))
+        print()
+
+    print(
+        "Pick the template whose name + description best matches the dominant surface of the work. "
+        "Read the file; follow its `# Plan Body` when writing the plan; verify against its `# Quality Checklist` before leaving `in-spec`. "
+        "If none fit, create a new template at `~/Claude/{project}/plan_templates/<name>.md` with frontmatter (`name`, `description`) and two top-level headers (`# Plan Body`, `# Quality Checklist`)."
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

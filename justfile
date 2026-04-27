@@ -1,7 +1,10 @@
-test:
-    uv run --with pytest --with pytest-cov --with "ruamel.yaml>=0.18" pytest bin/tests/ -v --cov=bin --cov-report=term-missing
+default:
+    @just --list
 
-lint-backlog:
-    ! grep -rniE 'backlog/' agents/ skills/ docs/
+# Render src/templates + src/config.yaml into skills/ and docs/
+build:
+    bin/booping-build
 
-check: lint-backlog test
+# Watch src/ and re-render on change
+watch:
+    bin/booping-build --watch

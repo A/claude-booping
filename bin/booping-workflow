@@ -1,0 +1,160 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.11"
+# dependencies = ["pyyaml>=6.0"]
+# ///
+"""booping-workflow: render lifecycle chains grouped by skill for inlining into /help."""
+import sys
+from collections import defaultdict
+from pathlib import Path
+
+import yaml
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
+CONFIG_PATH = REPO_ROOT / "src" / "config.yaml"
+
+# Skills in display order (matched from config data, not hardcoded flow)
+SKILL_ORDER = ["groom", "develop", "retro", "learn"]
+
+
+def load_config() -> dict:
+    return yaml.safe_load(CONFIG_PATH.read_text()) or {}
+
+
+def collect_transitions(statuses: dict) -> dict[str, list[dict]]:
+    """Group all transitions by skill. Each entry: {from, to, obj}."""
+    by_skill: dict[str, list[dict]] = defaultdict(list)
+    for from_status, status_data in statuses.items():
+        for t in status_data.get("transitions") or []:
+            skill = t.get("skill")
+            if skill:
+                by_skill[skill].append({"from": from_status, "to": t["to"], "obj": t})
+    return by_skill
+
+
+def terminal_statuses(statuses: dict) -> list[str]:
+    return sorted(k for k, v in statuses.items() if v.get("terminal"))
+
+
+def build_chain(skill: str, transitions: list[dict], terminals: set[str]) -> str:
+    """Build the chain string for a skill."""
+    # adjacency: from -> list of to
+    adj: dict[str, list[str]] = defaultdict(list)
+    all_froms = set()
+    all_tos = set()
+    for t in transitions:
+        adj[t["from"]].append(t["to"])
+        all_froms.add(t["from"])
+        all_tos.add(t["to"])
+
+    # Entry: a from-status that is not reached by any transition in this skill
+    # (i.e. not in all_tos, or if all are reachable, pick the one not in all_tos)
+    candidate_entries = all_froms - all_tos
+    if not candidate_entries:
+        # Fallback: first from in insertion order
+        candidate_entries = {transitions[0]["from"]}
+    # Pick alphabetically for determinism; in practice there's one
+    entry = sorted(candidate_entries)[0]
+
+    # Walk primary chain: prefer non-terminal forward steps; fall back to
+    # a `done` step only when no non-terminal forward option exists (i.e.
+    # done is the natural terminus, not a skip).
+    def is_non_terminal_forward(to: str, chain: list[str]) -> bool:
+        return to not in terminals and to not in chain
+
+    chain: list[str] = [entry]
+    visited = {entry}
+    current = entry
+    while True:
+        nexts = adj.get(current, [])
+        forward = [n for n in nexts if is_non_terminal_forward(n, chain)]
+        if forward:
+            nxt = forward[0]
+        else:
+            # No non-terminal forward step — check for a `done` terminus
+            done_steps = [n for n in nexts if n == "done"]
+            if done_steps:
+                chain.append("done")
+            break
+        chain.append(nxt)
+        visited.add(nxt)
+        current = nxt
+
+    chain_str = " → ".join(chain)
+
+    # Classify annotations (transitions not in primary forward edges)
+    primary_edges = set(zip(chain, chain[1:]))
+    annotations: dict[str, list[str]] = defaultdict(list)
+
+    for t in transitions:
+        frm, to = t["from"], t["to"]
+        if (frm, to) in primary_edges:
+            continue
+        if to in terminals and to == "cancelled":
+            annotations["cancellation"].append(frm)
+        elif to in terminals and to == "fail":
+            annotations["failure"].append(frm)
+        elif to in terminals and to == "done":
+            # skip only when done wasn't folded into the chain already
+            annotations["skip"].append(frm)
+        elif to == "backlog":
+            # parking: explicitly moving work back to the holding state
+            annotations["parking"].append(f"{frm} → {to}")
+        elif to in chain and chain.index(to) < chain.index(frm):
+            annotations["loopback"].append(f"{frm} → {to}")
+        else:
+            annotations["parking"].append(f"{frm} → {to}")
+
+    lines = [f"/{skill:<8} {chain_str}"]
+    indent = " " * 10
+
+    if "loopback" in annotations:
+        for item in annotations["loopback"]:
+            lines.append(f"{indent}(loopback: {item})")
+    if "parking" in annotations:
+        for item in annotations["parking"]:
+            lines.append(f"{indent}(parking: {item})")
+    if "cancellation" in annotations:
+        froms = "/".join(annotations["cancellation"])
+        lines.append(f"{indent}(cancellation: {froms} → cancelled)")
+    if "failure" in annotations:
+        froms = "/".join(annotations["failure"])
+        lines.append(f"{indent}(failure: {froms} → fail)")
+    if "skip" in annotations:
+        froms = "/".join(annotations["skip"])
+        lines.append(f"{indent}(skip: {froms} → done)")
+
+    return "\n".join(lines)
+
+
+def main() -> int:
+    cfg = load_config()
+    statuses = cfg.get("plan", {}).get("statuses", {})
+    by_skill = collect_transitions(statuses)
+    terminals = set(terminal_statuses(statuses))
+
+    skill_blocks = []
+    # Use SKILL_ORDER for display; fall back to sorted for any extra skills in data
+    seen = set()
+    ordered_skills = [s for s in SKILL_ORDER if s in by_skill]
+    seen.update(ordered_skills)
+    ordered_skills += sorted(s for s in by_skill if s not in seen)
+
+    for skill in ordered_skills:
+        transitions = by_skill[skill]
+        skill_blocks.append(build_chain(skill, transitions, terminals))
+
+    terminal_list = " · ".join(terminal_statuses(statuses))
+
+    print("## Workflow\n")
+    print("```text")
+    print("\n\n".join(skill_blocks))
+    print()
+    print(f"Terminal states: {terminal_list}")
+    print("```")
+
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

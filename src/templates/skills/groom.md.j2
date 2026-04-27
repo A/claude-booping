@@ -1,0 +1,77 @@
+---
+name: groom
+description: Deep-research a feature, bug, or refactor and produce a specified, estimated plan with Definition of Done. Cross-validates architecture with a second model when useful. Use when the user describes a new piece of work that needs to be shaped before implementation.
+argument-hint: [task description or issue reference]
+user-invocable: true
+allowed-tools:
+  - Read
+  - Write
+  - Glob
+  - Grep
+  - Bash(ls *)
+  - Bash(git log *)
+  - Bash(git diff *)
+  - Bash(git add *)
+  - Bash(git commit *)
+  - Bash(booping-external-llm-call:*)
+  - Bash(booping-plans:*)
+  - Bash(bin/booping-project-name:*)
+  - Bash(bin/booping-sprint-threshold:*)
+  - Bash(bin/booping-extra-instructions:*)
+  - Bash(bin/booping-lessons:*)
+  - Bash(bin/booping-plan-templates:*)
+  - Agent
+  - AskUserQuestion
+  - WebSearch
+  - WebFetch
+effort: {{ config.skills.groom.effort }}
+---
+
+{% import "_partials/_plan_transitions.j2" as plan_transitions with context %}
+{% import "_partials/_available_agents.j2" as available_agents with context %}
+{% import "_partials/_task_classification.j2" as task_classification with context %}
+{% import "_partials/_sprint_planning.j2" as sprint_planning with context %}
+# booping — /groom
+
+Produces a development plan across domains (backend, frontend, Claude Code skills, CLI tools, etc.) and task types (bugs, features, refactorings, etc.). Plans are written so an agentic tool such as Claude Code can execute them with only the plan file as context.
+
+{% include "_partials/_project_context.j2" %}
+
+{{ plan_transitions.render("groom") }}
+
+{{ available_agents.render("groom") }}
+
+{% include "_partials/_shared_instructions.j2" %}
+
+{{ task_classification.render() }}
+
+{{ sprint_planning.render() }}
+
+{% include "_partials/_plan_template.j2" %}
+
+!`bin/booping-lessons`
+
+## Craft
+
+Groom produces a specified, estimated, user-reviewed plan. The transitions table governs *when* each step is required; this list is *what* must be performed.
+
+- **Challenge scope**: ask upfront what new components, dependencies, APIs, or workflow changes this likely needs.
+- **Review the codebase**: map the blast radius — files, modules, integrations, external surfaces; check prior art.
+- **Research when uncertain**: for complex, novel, or non-obvious work, search the web for current best practices, competing approaches, and known pitfalls before locking design decisions.
+- **Verify external references**: every package version, image tag, API endpoint, CLI flag, or config option named in the plan is checked against current docs. Never assume.
+- **Draft design with the user**: architecture, pattern choices, data / API / config surface changes, open trade-offs. Iterate until aligned before writing.
+- **Write the plan**: pick a plan template from [Plan Structure](#plan-structure) whose name + description matches the work, then produce the plan against its `# Plan Body`.
+- **Present and iterate**: show approach summary, milestones, SP totals, plan file path. Ask *"Ready for development, or want changes?"* Iterate on changes until the user explicitly approves.
+
+## Hard rules
+
+- The orchestrator never edits files outside `{project}/plans/`.
+- Each milestone executable in a fresh session with only the plan as context.
+- User approval is **explicit** — "looks good" is enough; silence is not.
+
+## What groom does NOT do
+
+- Does **not** start implementation — even tempting 1-SP items.
+- Does **not** duplicate lesson content. Reference lessons by ID.
+
+!`bin/booping-extra-instructions skill_groom.md`

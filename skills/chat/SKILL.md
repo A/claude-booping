@@ -1,9 +1,8 @@
 ---
 name: chat
-description: General working mode for project discussion, vault navigation, and small ad-hoc tasks. Opens with a vault status summary. Use for reviewing plans, exploring lessons, casual Q&A, and minor edits that fit within a single session.
+description: "Context-aware chat about the project: discuss plans, retros, lessons, and code; navigate the vault; and handle chores (frontmatter tweaks, status flips, inline plan or code edits) without invoking the heavier skills. Opens every session with a vault status summary."
 argument-hint: [topic or artifact reference]
 user-invocable: true
-effort: high
 allowed-tools:
   - Read
   - Write
@@ -18,25 +17,55 @@ allowed-tools:
   - Bash(cat ~/Claude/*)
   - AskUserQuestion
   - Agent
+effort: high
 ---
 
 # booping — /chat
+
 
 General working mode: discussion, vault navigation, and small ad-hoc edits. Opens every session with a live vault status summary.
 
 This skill is **wide-domain** — it must work across very different projects. Project-specific behavior lives in `_booping/skill_chat.md` and lessons. Do not bake stack details into this skill.
 
-## Preflight
+## Project Context
 
-- Read and resolve project based on [project resolution principle](../../docs/partial_project_resolution.md).
-- Read [plan statuses](../../docs/partial_plan_statuses.md).
-- Read [research agents](../../docs/partial_agents_researchers_delegator.md) — delegate heavy reading to researchers to keep context clean.
-- Read lessons per [read lessons](../../docs/partial_read_lessons.md).
-- Read from `~/Claude/{project}/_booping/skill_chat.md`. Silently skip, if file doesn't exist.
+!`bin/booping-project-name`
+
+On skill load, report the resolved project context back to the user verbatim so they can see which project and vault the skill is operating on.
+
+
+## Available Agents
+
+
+### `booping-researcher`
+
+**Good for:**
+- Vault-wide reads aggregated into a summary (e.g. what plans exist, recurring themes across retros)
+- Plan or retro content extraction across ≥3 files where the results need to be compressed before returning to the skill
+- Web search aggregation when the user asks an open question that requires pulling from multiple sources
+
+
+**Bad for:**
+- Single-file reads — call Read directly
+- Simple greps or existence checks that fit in a few lines of output
+- Questions answerable with a short `ls` or `grep`
+
+
+
+## Plan editing
+
+After modifying any plan's SPs or status, run:
+
+```bash
+booping-plans --format=md > ~/Claude/{project}/sprints.md
+```
+
+
+!`bin/booping-lessons`
 
 ## High-level workflow
 
-1. **Orient** (Phase 0) — regenerate `sprints.md`, count plans by status, surface the snapshot in the first message.
+1. **Orient** (Phase 0) — refresh `sprints.md`, then surface a counts table and an active-plans table in the first message.
 2. **Ingest** (Phase 1) — read any artifacts named in `$ARGUMENTS` or surfaced mid-conversation.
 3. **Discuss / act** (Phase 2) — answer questions, navigate the vault, make small edits as needed.
 4. **Hand-offs** (Phase 3) — route work that has grown beyond chat's scope to the right skill.
@@ -45,33 +74,26 @@ This skill is **wide-domain** — it must work across very different projects. P
 
 ## Phase 0 Orient
 
-Regenerate the snapshot before the first assistant message:
+Refresh the snapshot before the first assistant message:
 
 ```bash
 booping-plans --format=md > ~/Claude/{project_name}/sprints.md
 ```
 
-`sprints.md` is chat-owned — `/chat` is its sole writer. Never hand-edit it.
+The **first assistant message** must include two tables:
 
-Then count plans by status:
+1. **Counts** — one row per status in `config.plan.statuses` (`backlog, in-spec, awaiting-plan-review, ready-for-dev, in-progress, awaiting-retro, awaiting-learning, done, fail, cancelled`) with the plan count.
+2. **Active plans** — one row per plan whose status is `ready-for-dev`, `in-progress`, `awaiting-retro`, or `awaiting-learning`, columns `Status | Plan`. Omit the table entirely if all four are empty.
 
-```bash
-for s in backlog in-spec ready-for-dev in-progress awaiting-retro awaiting-learning done fail cancelled; do
-  printf '%s\t%d\n' "$s" "$(booping-plans --status "$s" 2>/dev/null | tail -n +2 | wc -l)"
-done
-```
-
-The **first assistant message** must include the resulting 9-row count table. If `backlog >= 5` or `awaiting-retro >= 1`, append a one-line nudge (e.g. "5 plans in backlog — consider a groom session" or "1 plan awaiting retro").
+Use `booping-plans --status <s>` to assemble both.
 
 ## Phase 1 Ingest
 
-Read artifacts referenced in `$ARGUMENTS` or named during conversation before answering questions about them. When the request spans more than ~3 artifacts, delegate the read to a researcher (`booping-researcher-middle` by default) and have it return a summary, not raw dumps.
+Read artifacts referenced in `$ARGUMENTS` or named during conversation before answering questions about them. When the request spans more than ~3 artifacts, delegate the read to `booping-researcher` and have it return a summary, not raw dumps.
 
 ## Phase 2 Discuss / act
 
 Answer questions, explore the vault (Glob/Grep inside `~/Claude/{project_name}/`), and make small edits that fit within the current session. When the user refers to something not yet loaded, read it before answering.
-
-You may delegate research to a `booping-researcher-{senior,middle,junior}` agent when you need a summary from files, code, web searches, or docs — see [research agents](../../docs/partial_agents_researchers_delegator.md) for tier selection.
 
 ## Phase 3 Hand-offs
 
@@ -82,14 +104,10 @@ Escalate rather than stretch:
 - `/retro <plan-path>` — a plan just finished (`awaiting-retro`) that needs a retrospective written.
 - `/learn <retro-path>` — a retro just written (`awaiting-learning`) that needs lessons extracted.
 
-## What chat does NOT do
+## Maintenance-tool boundary
 
-- **No plan-status transitions.** Chat owns none. Status changes are manual frontmatter edits made by the appropriate skill.
-- **No retrospective writing.** That belongs to `/retro`.
-- **No lesson extraction.** That belongs to `/learn`.
+- For routine work owned by another skill (groom, develop, retro, learn), recommend that skill rather than reproducing its workflow inline.
+- When the user explicitly asks for an inline frontmatter tweak, status flip, or small code edit, just do it — no transitions table walk, no `<to-status>: <kebab-title>` commit ceremony.
+- When the user asks about valid statuses, available transitions, or how to flip a plan's status manually, lazy-load [plan lifecycle](../../docs/plan_lifecycle_overview.md) to ground the answer in the current `config.plan.statuses` shape.
 
-## Hard rules
-
-- Never commit, push, or run destructive git operations. User runs those.
-- When a task grows beyond ~1 file or needs estimation, escalate to `/groom` rather than expanding in-session scope.
-- Never hand-edit `sprints.md` — regenerate it via `booping-plans --format=md` only.
+!`bin/booping-extra-instructions skill_chat.md`

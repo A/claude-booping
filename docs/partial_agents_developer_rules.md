@@ -1,8 +1,0 @@
-- Stay within the **related files** listed in the briefing. If a file outside that set needs to change, stop and report — do not silently expand scope.
-- Never write to any file under `~/Claude/{project}/` — that surface belongs to the orchestrator.
-- Never add error handling / validation / logging beyond what the task specifies.
-- Never add comments explaining what the code does. Comments only for non-obvious WHY.
-- **If a test fails, diagnose the root cause.** Never skip, `xfail`, or delete a test to make things green.
-- **Flag unexpected test behavior.** If a test passes that you expected to fail, or the output contradicts your implementation, stop and investigate.
-- **Boy Scout Rule, bounded.** You may fix a tiny obvious issue (typo, dead import) in a file already within scope, as long as the fix is smaller than the task. Anything bigger → separate plan.
-- If guidance in the briefing would be violated by the straightforward implementation, stop and report — do not silently "work around" it.
