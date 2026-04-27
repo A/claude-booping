@@ -4,13 +4,11 @@ Claude Code plugin that grooms and executes plans across user projects. Plans li
 
 ## Status
 
-_Last updated: 2026-04-26._
+_Last updated: 2026-04-27._
 
 Template-driven skill pipeline is live. Current state:
 
-- **Template pipeline is live**: `src/config.yaml` + `src/templates/` → `skills/*/SKILL.md` and `agents/*.md` via `bin/booping-build`.
-- **`/groom`, `/develop`, `/retro`, and `/learn`** are fully template-driven; their `skills/*/SKILL.md` are generated artifacts.
-- **Only `/chat`** still authors its `SKILL.md` by hand and references `docs/partial_*.md`. Migration to the template pipeline is pending; it works as-is in the meantime.
+- **Template pipeline is live**: all skills (`/chat`, `/groom`, `/develop`, `/retro`, `/learn`) are now template-driven from `src/config.yaml` + `src/templates/`; every `skills/*/SKILL.md` is a generated artifact.
 - **Agents**: all three (`booping-researcher`, `booping-developer-middle`, `booping-developer-senior`) are template-driven. The two developer tiers share `_partials/_developer_body.j2` — only frontmatter (`model`, `effort`, `reasoning`, `color`) diverges. Each agent injects project-local extensions via `!`bin/booping-extra-instructions agent_booping-<name>.md`` at the bottom of its body.
 - **CLIs**: `booping-plans` (read-only), `booping-create-project`, `booping-external-llm-call` (renders a Jinja2 prompt template under `bin/llm-call-templates/` and sends it to Gemini), `booping-build`, `booping-project-name`.
 
@@ -22,10 +20,9 @@ Template-driven skill pipeline is live. Current state:
 - `src/templates/docs/<name>.md.j2` — doc templates (frontmatter template, etc.). Render to `docs/<name>.md`.
 - `src/templates/plan_templates/<name>.md.j2` — core plan templates (backend, frontend, claude-skill, cli). Each has YAML frontmatter (`name`, `description`) + two top-level sections: `# Plan Body` and `# Quality Checklist`. Render to `docs/plan_templates/<name>.md`. User projects may add their own templates under `~/Claude/{project}/plan_templates/*.md` (hand-authored `.md`, same frontmatter shape + two sections).
 - `src/templates/_partials/_*.j2` — reusable fragments. Underscore prefix marks them as inputs, not outputs. Include via `{% include %}` (data-only partials) or import + macro call (parameterized partials, e.g. `_plan_transitions.j2`, `_plan_frontmatter.j2`, `_plan_template.j2`).
-- `src/docs/*.md` — reference docs lazy-loaded by skills via `[label](src/docs/...)` links. No `partial_` prefix. Hand-authored.
-- `skills/<name>/SKILL.md` — **generated output** for template-driven skills; **authored** directly for the not-yet-migrated ones. Never edit a generated `SKILL.md` by hand.
-- `docs/plan_templates/*.md`, `docs/template_plan_frontmatter.md` — **generated output** from `src/templates/`; never hand-edit.
-- `docs/partial_*.md` — six surviving legacy partials. Five are consumed by `/chat` (the only hand-authored skill): `partial_agents_researchers_delegator.md`, `partial_agents_researchers_strategy_senior_middle_junior.md`, `partial_plan_statuses.md`, `partial_project_resolution.md`, `partial_read_lessons.md`. One — `partial_cross_validation.md` — is referenced from rendered `/groom` transitions in `src/config.yaml` (`in-spec → awaiting-plan-review` gates). Other `docs/template_*.md` are legacy templates pending cleanup.
+- `src/docs/*.md` — reference docs lazy-loaded by skills via `[label](src/docs/...)` links. Hand-authored. Cross-validation gates reference `src/docs/cross_validation.md` (consumed by `/groom`'s `in-spec → awaiting-plan-review` transition).
+- `skills/<name>/SKILL.md` — **generated output**; never edit by hand.
+- `docs/` — **generated output** only: `docs/plan_templates/*.md`, `docs/template_plan_frontmatter.md`, `docs/plan_lifecycle_overview.md` (lazy-loaded by `/chat` for the full lifecycle reference), and the `docs/images/` directory. Never hand-edit.
 - `agents/<name>.md` — **generated output** from `src/templates/agents/`; never hand-edit.
 - `bin/` — standalone uv inline scripts:
   - `booping-agents` — reads `agents/*.md` frontmatter; emits a `## Agents` markdown table for `/help` to inline at skill load via `!`bin/booping-agents``.
@@ -170,17 +167,18 @@ Top-level keys currently in use:
 - The plugin code itself stays stack-agnostic — no Python/Django/JS specifics inside skills.
 - README.md's Statuses section is hand-maintained narrative — revisit it whenever `src/config.yaml` `plan.statuses` changes (status name, description, terminal flag, or addition/removal).
 
-## Migrating an old skill to the template pipeline
+## Adding a new template-driven skill
 
 Use `src/templates/skills/groom.md.j2` as the reference.
 
-1. Copy `skills/<name>/SKILL.md` → `src/templates/skills/<name>.md.j2`.
-2. Move structured values (`effort`, `description`, per-skill agents, task-type / status / transition surfaces touching this skill) into `src/config.yaml`.
-3. Replace the project-resolution Preflight bullet with `{% include "_partials/_project_context.j2" %}`.
-4. Replace the plan-transitions Preflight bullet with `{{ plan_transitions.render("<skill>") }}` (import the macro with `with context`).
-5. Replace the task-classification Preflight bullet with `{{ task_classification.render() }}`.
-6. Replace agent-delegation Preflight bullets with `{{ available_agents.render("<skill>") }}`.
-7. For any remaining partial read that fits the "small detail the skill loads on demand" shape, move it to `src/docs/<name>.md` and swap the Preflight bullet for a lazy `[detailed guidance](src/docs/<name>.md)` link.
-8. Rebuild, sanity-check the rendered `skills/<name>/SKILL.md`, then delete the now-unreferenced `docs/partial_*.md` predecessors.
-
-When `/chat` migrates (the only remaining hand-authored skill), `docs/partial_*.md` and any remaining `docs/template_*.md` can be retired wholesale.
+1. Decide what goes in config vs prose: structured values (`effort`, `description`, per-skill agents, task-type / status / transition surfaces) belong in `src/config.yaml`; verbs, heuristics, and judgment calls go in the template.
+2. Author the template at `src/templates/skills/<name>.md.j2`. Standard wiring in the template body:
+   - `{% include "_partials/_project_context.j2" %}` — loads project name/path at skill load.
+   - `{{ available_agents.render("<name>") }}` (import macro with `with context`) — renders agent delegation table from config.
+   - `{{ plan_transitions.render("<name>") }}` (import macro with `with context`) — renders the transitions slice for this skill.
+   - `` !`bin/booping-lessons` `` — inlines live lessons at skill load.
+   - `` !`bin/booping-extra-instructions skill_<name>.md` `` — inlines project-local skill extension at skill load.
+3. Add the skill's `effort` and `agents` block to `src/config.yaml` under `skills.<name>`.
+4. For any detail only some routes need, write it as `src/docs/<name>.md` and lazy-link from the skill body with `[label](src/docs/<name>.md)` rather than inlining.
+5. Run `just build` to render `skills/<name>/SKILL.md`.
+6. Sanity-check the rendered output — confirm transitions, agent table, and project context wiring are correct.
