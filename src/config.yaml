@@ -84,6 +84,19 @@ skills:
           - "Phase 2 sprint analysis — stays in the orchestrator"
           - "Phase 4 lesson cross-check — stays in the orchestrator using the in-context lesson set"
 
+  chat:
+    effort: high
+    agents:
+      booping-researcher:
+        good_for:
+          - "Vault-wide reads aggregated into a summary (e.g. what plans exist, recurring themes across retros)"
+          - "Plan or retro content extraction across ≥3 files where the results need to be compressed before returning to the skill"
+          - "Web search aggregation when the user asks an open question that requires pulling from multiple sources"
+        bad_for:
+          - "Single-file reads — call Read directly"
+          - "Simple greps or existence checks that fit in a few lines of output"
+          - "Questions answerable with a short `ls` or `grep`"
+
 git:
   commit_message: '<agent>: <plan title> <message>'
   branches:
