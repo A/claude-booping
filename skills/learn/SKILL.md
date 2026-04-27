@@ -29,7 +29,7 @@ Turn retrospective findings into durable behavior changes routed to exactly one 
 
 ## Project Context
 
-!`bin/booping-project-name`
+!`${CLAUDE_PLUGIN_ROOT}/bin/booping-project-name`
 
 On skill load, report the resolved project context back to the user verbatim so they can see which project and vault the skill is operating on.
 
@@ -82,11 +82,11 @@ If a candidate would otherwise span two targets, decompose into two distinct row
 The skill infers the exact filename per candidate; the example lists above are validation aids, not full enumerations.
 
 
-!`bin/booping-debug-mode learn`
+!`${CLAUDE_PLUGIN_ROOT}/bin/booping-debug-mode learn`
 
 ## Plans awaiting learning
 
-!`bin/booping-plans --status awaiting-learning`
+!`${CLAUDE_PLUGIN_ROOT}/bin/booping-plans --status awaiting-learning`
 
 ## High-level workflow
 
@@ -149,7 +149,7 @@ Record a sweep verdict per candidate as one of:
 
 ## Phase 2 Present unified review table
 
-Render the review table using the format defined in [review table format](../../docs/learn_review_table.md). Use `AskUserQuestion` once to collect the user's accept / reject / add response.
+Render the review table using the format defined in [review table format](${CLAUDE_PLUGIN_ROOT}/docs/learn_review_table.md). Use `AskUserQuestion` once to collect the user's accept / reject / add response.
 
 Do not prompt per row. Do not inline the column-by-column documentation here — the template owns the format, the accept/reject syntax, and the user-added-row split rule.
 

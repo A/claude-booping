@@ -31,7 +31,7 @@ Produce a project- and plan-specific retrospective grounded in session logs, cod
 
 ## Project Context
 
-!`bin/booping-project-name`
+!`${CLAUDE_PLUGIN_ROOT}/bin/booping-project-name`
 
 On skill load, report the resolved project context back to the user verbatim so they can see which project and vault the skill is operating on.
 
@@ -83,11 +83,11 @@ booping-plans --format=md > ~/Claude/{project}/sprints.md
 ```
 
 
-!`bin/booping-lessons`
+!`${CLAUDE_PLUGIN_ROOT}/bin/booping-lessons`
 
 ## Plans awaiting retro
 
-!`bin/booping-plans --status awaiting-retro`
+!`${CLAUDE_PLUGIN_ROOT}/bin/booping-plans --status awaiting-retro`
 
 ## High-level workflow
 
@@ -208,7 +208,7 @@ Draft the retrospective following the [Retrospective template](#retrospective-te
 
 Run the template's inline self-review checklist. Any `no` → fix before proceeding.
 
-Then **show the user a summary of the draft in chat** following the [retro pre-save summary format](docs/retro_summary_format.md). Hold the full draft in context; do not write the file yet.
+Then **show the user a summary of the draft in chat** following the [retro pre-save summary format](${CLAUDE_PLUGIN_ROOT}/docs/retro_summary_format.md). Hold the full draft in context; do not write the file yet.
 
 Ask via `AskUserQuestion`: *"Save this retrospective?"* with options:
 
@@ -247,7 +247,7 @@ After the commit, tell the user the retrospective is saved and offer `/learn` to
 
 - Does **not** edit any files other than the retrospective itself (and the plan frontmatter for the status transition). All findings stay in the retro body.
 
-!`bin/booping-extra-instructions skill_retro.md`
+!`${CLAUDE_PLUGIN_ROOT}/bin/booping-extra-instructions skill_retro.md`
 
 ---
 

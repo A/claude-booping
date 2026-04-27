@@ -123,7 +123,7 @@ Verify before leaving `in-spec`. Every item must be satisfiable by reading the p
 
 ## Frontmatter
 
-- [ ] Frontmatter matches [plan frontmatter](../../docs/template_plan_frontmatter.md) — every required field present and shaped correctly.
+- [ ] Frontmatter matches [plan frontmatter](${CLAUDE_PLUGIN_ROOT}/docs/template_plan_frontmatter.md) — every required field present and shaped correctly.
 - [ ] `sp` equals the sum of per-task SP across milestones.
 - [ ] `business_goal` is set (non-empty) for `feature` and `refactoring` plans.
 

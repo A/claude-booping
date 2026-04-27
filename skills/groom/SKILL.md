@@ -37,7 +37,7 @@ Produces a development plan across domains (backend, frontend, Claude Code skill
 
 ## Project Context
 
-!`bin/booping-project-name`
+!`${CLAUDE_PLUGIN_ROOT}/bin/booping-project-name`
 
 On skill load, report the resolved project context back to the user verbatim so they can see which project and vault the skill is operating on.
 
@@ -75,7 +75,7 @@ One commit per transition. Sibling stubs written in the same run go in the same 
 
 | To | When | Gates | On exit |
 |----|------|-------|---------|
-| `awaiting-plan-review` | Draft is complete and ready to present to the user | Cross-validation run (see [cross-validation](../../src/docs/cross_validation.md)) — single-file-bug skip acceptable; Every task estimated; any task ≥ redecompose_threshold SP has been re-decomposed | set `planned: yyyymmdd hh:mm` |
+| `awaiting-plan-review` | Draft is complete and ready to present to the user | Cross-validation run (see [cross-validation](${CLAUDE_PLUGIN_ROOT}/src/docs/cross_validation.md)) — single-file-bug skip acceptable; Every task estimated; any task ≥ redecompose_threshold SP has been re-decomposed | set `planned: yyyymmdd hh:mm` |
 | `backlog` | User parks the work mid-grooming to revisit later | — | — |
 | `cancelled` | User shelves the work mid-grooming | — | set `completed: yyyymmdd hh:mm` |
 
@@ -126,9 +126,9 @@ booping-plans --format=md > ~/Claude/{project}/sprints.md
 
 Pick one. Load the linked doc for the matched type before proceeding.
 
-- **feature** — New user-facing capability. Needs business goal, design, milestones, DoD. [detailed guidance](src/docs/task_feature.md)
-- **bug** — Defect — observed behavior diverges from expected. Needs triage, reproduction, root-cause hypothesis, minimal fix, and a regression test. [detailed guidance](src/docs/task_bug.md)
-- **refactoring** — Internal structure change with no user-visible behavior change. Needs current-vs-target design, migration steps, and a no-behavior-change DoD. [detailed guidance](src/docs/task_refactoring.md)
+- **feature** — New user-facing capability. Needs business goal, design, milestones, DoD. [detailed guidance](${CLAUDE_PLUGIN_ROOT}/src/docs/task_feature.md)
+- **bug** — Defect — observed behavior diverges from expected. Needs triage, reproduction, root-cause hypothesis, minimal fix, and a regression test. [detailed guidance](${CLAUDE_PLUGIN_ROOT}/src/docs/task_bug.md)
+- **refactoring** — Internal structure change with no user-visible behavior change. Needs current-vs-target design, migration steps, and a no-behavior-change DoD. [detailed guidance](${CLAUDE_PLUGIN_ROOT}/src/docs/task_refactoring.md)
 
 
 ## Sprint planning
@@ -160,7 +160,7 @@ Group tasks **≤ 1 SP** so /develop can hand a batch to a single agent rather t
 
 ### Split threshold
 
-Split threshold: !`bin/booping-sprint-threshold` SP. This is not a velocity — there is no fixed cadence. It's the point past which a plan is too large to hold together as one coherent iteration. If the total exceeds the threshold, flag it and propose splitting into sibling plans.
+Split threshold: !`${CLAUDE_PLUGIN_ROOT}/bin/booping-sprint-threshold` SP. This is not a velocity — there is no fixed cadence. It's the point past which a plan is too large to hold together as one coherent iteration. If the total exceeds the threshold, flag it and propose splitting into sibling plans.
 
 Project-specific overrides (different threshold, extra sizing rules) live in `~/Claude/{project}/_booping/skill_groom.md` and take precedence.
 
@@ -205,10 +205,10 @@ Pick a plan template whose name + description matches the dominant surface of th
 
 Read the selected template, write the plan against its `# Plan Body`, then verify against its `# Quality Checklist`.
 
-!`bin/booping-plan-templates`
+!`${CLAUDE_PLUGIN_ROOT}/bin/booping-plan-templates`
 
 
-!`bin/booping-lessons`
+!`${CLAUDE_PLUGIN_ROOT}/bin/booping-lessons`
 
 ## Craft
 
@@ -233,4 +233,4 @@ Groom produces a specified, estimated, user-reviewed plan. The transitions table
 - Does **not** start implementation — even tempting 1-SP items.
 - Does **not** duplicate lesson content. Reference lessons by ID.
 
-!`bin/booping-extra-instructions skill_groom.md`
+!`${CLAUDE_PLUGIN_ROOT}/bin/booping-extra-instructions skill_groom.md`

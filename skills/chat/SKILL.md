@@ -29,7 +29,7 @@ This skill is **wide-domain** — it must work across very different projects. P
 
 ## Project Context
 
-!`bin/booping-project-name`
+!`${CLAUDE_PLUGIN_ROOT}/bin/booping-project-name`
 
 On skill load, report the resolved project context back to the user verbatim so they can see which project and vault the skill is operating on.
 
@@ -61,7 +61,7 @@ booping-plans --format=md > ~/Claude/{project}/sprints.md
 ```
 
 
-!`bin/booping-lessons`
+!`${CLAUDE_PLUGIN_ROOT}/bin/booping-lessons`
 
 ## High-level workflow
 
@@ -108,6 +108,6 @@ Escalate rather than stretch:
 
 - For routine work owned by another skill (groom, develop, retro, learn), recommend that skill rather than reproducing its workflow inline.
 - When the user explicitly asks for an inline frontmatter tweak, status flip, or small code edit, just do it — no transitions table walk, no `<to-status>: <kebab-title>` commit ceremony.
-- When the user asks about valid statuses, available transitions, or how to flip a plan's status manually, lazy-load [plan lifecycle](../../docs/plan_lifecycle_overview.md) to ground the answer in the current `config.plan.statuses` shape.
+- When the user asks about valid statuses, available transitions, or how to flip a plan's status manually, lazy-load [plan lifecycle](${CLAUDE_PLUGIN_ROOT}/docs/plan_lifecycle_overview.md) to ground the answer in the current `config.plan.statuses` shape.
 
-!`bin/booping-extra-instructions skill_chat.md`
+!`${CLAUDE_PLUGIN_ROOT}/bin/booping-extra-instructions skill_chat.md`

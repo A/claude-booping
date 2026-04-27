@@ -106,7 +106,7 @@ Then write **three** extension files under `~/Claude/{project}/_booping/`:
 2. `~/Claude/{project}/_booping/skill_groom.md` — validation catalogue + sizing calibration.
 3. `~/Claude/{project}/_booping/skill_develop.md` — quality-check classification + env notes.
 
-Skeletons for the three files are documented in `src/docs/install_extension_files.md` — load them when ready to write.
+Skeletons for the three files are documented in `${CLAUDE_PLUGIN_ROOT}/src/docs/install_extension_files.md` — load them when ready to write.
 
 **Skip-if-exists rule (attach mode)**: if a target file already exists non-empty, skip the write and print `preserved existing: <path>` to the user. Files that exist but are empty (e.g. a stub created by `booping-create-project`) may be overwritten.
 
@@ -137,4 +137,4 @@ This mismatch check prevents silently feeding a new Python repo with an old Rust
 - **Never write `.booping` without asking.** Attach mode prompts for confirmation before writing the marker.
 - **Never edit the attached repo's own `CLAUDE.md`.** This skill only writes under `~/Claude/{project}/`.
 
-!`bin/booping-extra-instructions skill_install.md`
+!`${CLAUDE_PLUGIN_ROOT}/bin/booping-extra-instructions skill_install.md`

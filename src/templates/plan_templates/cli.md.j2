@@ -70,7 +70,7 @@ Name sections to update (new CLI in the `CLI` section, new inlining point in a s
 
 ## Frontmatter
 
-- [ ] Frontmatter matches [plan frontmatter](../../docs/template_plan_frontmatter.md).
+- [ ] Frontmatter matches [plan frontmatter](${CLAUDE_PLUGIN_ROOT}/docs/template_plan_frontmatter.md).
 - [ ] `sp` equals the sum of per-task SP across milestones.
 
 ## Content

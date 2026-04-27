@@ -37,11 +37,11 @@ Turn retrospective findings into durable behavior changes routed to exactly one 
 
 {% include "_partials/_learn_targets.j2" %}
 
-!`bin/booping-debug-mode learn`
+!`${CLAUDE_PLUGIN_ROOT}/bin/booping-debug-mode learn`
 
 ## Plans awaiting learning
 
-!`bin/booping-plans --status {{ config.skills.learn.status }}`
+!`${CLAUDE_PLUGIN_ROOT}/bin/booping-plans --status {{ config.skills.learn.status }}`
 
 ## High-level workflow
 
@@ -104,7 +104,7 @@ Record a sweep verdict per candidate as one of:
 
 ## Phase 2 Present unified review table
 
-Render the review table using the format defined in [review table format](../../docs/learn_review_table.md). Use `AskUserQuestion` once to collect the user's accept / reject / add response.
+Render the review table using the format defined in [review table format](${CLAUDE_PLUGIN_ROOT}/docs/learn_review_table.md). Use `AskUserQuestion` once to collect the user's accept / reject / add response.
 
 Do not prompt per row. Do not inline the column-by-column documentation here — the template owns the format, the accept/reject syntax, and the user-added-row split rule.
 

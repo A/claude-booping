@@ -12,13 +12,13 @@ sprint:
 tasks:
   - type: feature
     description: "New user-facing capability. Needs business goal, design, milestones, DoD."
-    doc_uri: src/docs/task_feature.md
+    doc_uri: ${CLAUDE_PLUGIN_ROOT}/src/docs/task_feature.md
   - type: bug
     description: "Defect — observed behavior diverges from expected. Needs triage, reproduction, root-cause hypothesis, minimal fix, and a regression test."
-    doc_uri: src/docs/task_bug.md
+    doc_uri: ${CLAUDE_PLUGIN_ROOT}/src/docs/task_bug.md
   - type: refactoring
     description: "Internal structure change with no user-visible behavior change. Needs current-vs-target design, migration steps, and a no-behavior-change DoD."
-    doc_uri: src/docs/task_refactoring.md
+    doc_uri: ${CLAUDE_PLUGIN_ROOT}/src/docs/task_refactoring.md
 
 skills:
   help:
@@ -144,7 +144,7 @@ plan:
           skill: groom
           when: "Draft is complete and ready to present to the user"
           gates:
-            - "Cross-validation run (see [cross-validation](../../src/docs/cross_validation.md)) — single-file-bug skip acceptable"
+            - "Cross-validation run (see [cross-validation](${CLAUDE_PLUGIN_ROOT}/src/docs/cross_validation.md)) — single-file-bug skip acceptable"
             - "Every task estimated; any task ≥ redecompose_threshold SP has been re-decomposed"
           on_exit:
             - "set `planned: yyyymmdd hh:mm`"
