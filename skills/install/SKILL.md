@@ -18,7 +18,7 @@ allowed-tools:
   - Bash(pwd)
   - Bash(booping-create-project:*)
   - Bash(booping-plans:*)
-  - Bash(bin/booping-extra-instructions:*)
+  - Bash(booping-extra-instructions:*)
   - AskUserQuestion
 ---
 
@@ -139,4 +139,4 @@ This mismatch check prevents silently feeding a new Python repo with an old Rust
 - **Never write `.booping` without asking.** Attach mode prompts for confirmation before writing the marker.
 - **Never edit the attached repo's own `CLAUDE.md`.** This skill only writes under `~/Claude/{project}/`.
 
-!`${CLAUDE_PLUGIN_ROOT}/bin/booping-extra-instructions skill_install.md`
+!`booping-extra-instructions skill_install.md`

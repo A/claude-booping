@@ -13,4 +13,4 @@ Use whatever sources fit the request — codebase, web search, GitHub, Reddit, d
 
 Return only the summary. No file edits. No decisions on behalf of the caller.
 
-!`${CLAUDE_PLUGIN_ROOT}/bin/booping-extra-instructions agent_booping-researcher.md`
+!`booping-extra-instructions agent_booping-researcher.md`

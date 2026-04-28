@@ -26,7 +26,7 @@ Execute a plan by delegating every task to a worker agent. The orchestrator neve
 
 ## Project Context
 
-!`${CLAUDE_PLUGIN_ROOT}/bin/booping-project-name`
+!`booping-project-name`
 
 On skill load, report the resolved project context back to the user verbatim so they can see which project and vault the skill is operating on.
 
@@ -198,4 +198,4 @@ The project's own lint / typecheck / formatter / test tooling runs once at Phase
 - Does **not** write application code itself — every task delegates to a worker.
 - Does **not** accept scope additions — changes are limited to the plan scope.
 
-!`${CLAUDE_PLUGIN_ROOT}/bin/booping-extra-instructions skill_develop.md`
+!`booping-extra-instructions skill_develop.md`

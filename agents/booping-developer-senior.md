@@ -42,5 +42,5 @@ Signal completion to the orchestrator with a brief summary and the files you cha
 - path/to/file
 ~~~
 
-!`${CLAUDE_PLUGIN_ROOT}/bin/booping-extra-instructions agent_booping-developer.md`
+!`booping-extra-instructions agent_booping-developer.md`
 

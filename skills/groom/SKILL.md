@@ -15,11 +15,11 @@ allowed-tools:
   - Bash(git commit *)
   - Bash(booping-external-llm-call:*)
   - Bash(booping-plans:*)
-  - Bash(bin/booping-project-name:*)
-  - Bash(bin/booping-sprint-threshold:*)
-  - Bash(bin/booping-extra-instructions:*)
-  - Bash(bin/booping-lessons:*)
-  - Bash(bin/booping-plan-templates:*)
+  - Bash(booping-project-name:*)
+  - Bash(booping-sprint-threshold:*)
+  - Bash(booping-extra-instructions:*)
+  - Bash(booping-lessons:*)
+  - Bash(booping-plan-templates:*)
   - Agent
   - AskUserQuestion
   - WebSearch
@@ -37,7 +37,7 @@ Produces a development plan across domains (backend, frontend, Claude Code skill
 
 ## Project Context
 
-!`${CLAUDE_PLUGIN_ROOT}/bin/booping-project-name`
+!`booping-project-name`
 
 On skill load, report the resolved project context back to the user verbatim so they can see which project and vault the skill is operating on.
 
@@ -160,7 +160,7 @@ Group tasks **≤ 1 SP** so /develop can hand a batch to a single agent rather t
 
 ### Split threshold
 
-Split threshold: !`${CLAUDE_PLUGIN_ROOT}/bin/booping-sprint-threshold` SP. This is not a velocity — there is no fixed cadence. It's the point past which a plan is too large to hold together as one coherent iteration. If the total exceeds the threshold, flag it and propose splitting into sibling plans.
+Split threshold: !`booping-sprint-threshold` SP. This is not a velocity — there is no fixed cadence. It's the point past which a plan is too large to hold together as one coherent iteration. If the total exceeds the threshold, flag it and propose splitting into sibling plans.
 
 Project-specific overrides (different threshold, extra sizing rules) live in `~/Claude/{project}/_booping/skill_groom.md` and take precedence.
 
@@ -205,10 +205,10 @@ Pick a plan template whose name + description matches the dominant surface of th
 
 Read the selected template, write the plan against its `# Plan Body`, then verify against its `# Quality Checklist`.
 
-!`${CLAUDE_PLUGIN_ROOT}/bin/booping-plan-templates`
+!`booping-plan-templates`
 
 
-!`${CLAUDE_PLUGIN_ROOT}/bin/booping-lessons`
+!`booping-lessons`
 
 ## Craft
 
@@ -233,4 +233,4 @@ Groom produces a specified, estimated, user-reviewed plan. The transitions table
 - Does **not** start implementation — even tempting 1-SP items.
 - Does **not** duplicate lesson content. Reference lessons by ID.
 
-!`${CLAUDE_PLUGIN_ROOT}/bin/booping-extra-instructions skill_groom.md`
+!`booping-extra-instructions skill_groom.md`

@@ -15,7 +15,7 @@ allowed-tools:
   - Bash(git add *)
   - Bash(git commit *)
   - Bash(ls *)
-  - Bash(bin/booping-plans:*)
+  - Bash(booping-plans:*)
   - Agent
   - AskUserQuestion
   - WebSearch
@@ -31,7 +31,7 @@ Produce a project- and plan-specific retrospective grounded in session logs, cod
 
 ## Project Context
 
-!`${CLAUDE_PLUGIN_ROOT}/bin/booping-project-name`
+!`booping-project-name`
 
 On skill load, report the resolved project context back to the user verbatim so they can see which project and vault the skill is operating on.
 
@@ -83,11 +83,11 @@ booping-plans --format=md > ~/Claude/{project}/sprints.md
 ```
 
 
-!`${CLAUDE_PLUGIN_ROOT}/bin/booping-lessons`
+!`booping-lessons`
 
 ## Plans awaiting retro
 
-!`${CLAUDE_PLUGIN_ROOT}/bin/booping-plans --status awaiting-retro`
+!`booping-plans --status awaiting-retro`
 
 ## High-level workflow
 
@@ -247,7 +247,7 @@ After the commit, tell the user the retrospective is saved and offer `/learn` to
 
 - Does **not** edit any files other than the retrospective itself (and the plan frontmatter for the status transition). All findings stay in the retro body.
 
-!`${CLAUDE_PLUGIN_ROOT}/bin/booping-extra-instructions skill_retro.md`
+!`booping-extra-instructions skill_retro.md`
 
 ---
 

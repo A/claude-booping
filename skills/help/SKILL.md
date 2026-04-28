@@ -7,12 +7,12 @@ effort: low
 allowed-tools:
   - Read
   - Bash(ls *)
-  - Bash(bin/booping-commands:*)
-  - Bash(bin/booping-skills:*)
-  - Bash(bin/booping-agents:*)
-  - Bash(bin/booping-workflow:*)
-  - Bash(bin/booping-project-name:*)
-  - Bash(bin/booping-extra-instructions:*)
+  - Bash(booping-commands:*)
+  - Bash(booping-skills:*)
+  - Bash(booping-agents:*)
+  - Bash(booping-workflow:*)
+  - Bash(booping-project-name:*)
+  - Bash(booping-extra-instructions:*)
 ---
 
 # booping — /help
@@ -21,7 +21,7 @@ Orient the user to the booping plugin. This skill is read-only — it never scaf
 
 ## Project Context
 
-!`${CLAUDE_PLUGIN_ROOT}/bin/booping-project-name`
+!`booping-project-name`
 
 On skill load, report the resolved project context back to the user verbatim so they can see which project and vault the skill is operating on.
 
@@ -42,11 +42,11 @@ Decide which body section(s) to print based on `$ARGUMENTS`:
 
 Print the section(s) chosen in Phase 0 verbatim, in the order listed above.
 
-!`${CLAUDE_PLUGIN_ROOT}/bin/booping-commands`
+!`booping-commands`
 
-!`${CLAUDE_PLUGIN_ROOT}/bin/booping-skills`
+!`booping-skills`
 
-!`${CLAUDE_PLUGIN_ROOT}/bin/booping-agents`
+!`booping-agents`
 
 ## Layout
 
@@ -61,15 +61,15 @@ Print the section(s) chosen in Phase 0 verbatim, in the order listed above.
     └── sprints.md               # regenerated on every plan transition
 ```
 
-!`${CLAUDE_PLUGIN_ROOT}/bin/booping-workflow`
+!`booping-workflow`
 
 ## Extensions
 
 Project-specific guidance and accumulated knowledge layer onto skills and agents at runtime:
 
-- **Lessons** — `~/Claude/{project}/lessons/*.md`. Authored by `/learn` after retrospectives; inlined into every skill at load via `!`${CLAUDE_PLUGIN_ROOT}/bin/booping-lessons``.
-- **Skill overrides** — `~/Claude/{project}/_booping/skill_<name>.md`. Inlined into the matching skill at load via `!`${CLAUDE_PLUGIN_ROOT}/bin/booping-extra-instructions skill_<name>.md``.
-- **Agent overrides** — `~/Claude/{project}/_booping/agent_booping-<name>.md`. Inlined into the matching agent at load via `!`${CLAUDE_PLUGIN_ROOT}/bin/booping-extra-instructions agent_booping-<name>.md``.
+- **Lessons** — `~/Claude/{project}/lessons/*.md`. Authored by `/learn` after retrospectives; inlined into every skill at load via `!`booping-lessons``.
+- **Skill overrides** — `~/Claude/{project}/_booping/skill_<name>.md`. Inlined into the matching skill at load via `!`booping-extra-instructions skill_<name>.md``.
+- **Agent overrides** — `~/Claude/{project}/_booping/agent_booping-<name>.md`. Inlined into the matching agent at load via `!`booping-extra-instructions agent_booping-<name>.md``.
 
 ## Hard rules
 
@@ -79,4 +79,4 @@ Project-specific guidance and accumulated knowledge layer onto skills and agents
 
 - `README.md` — higher-level overview.
 
-!`${CLAUDE_PLUGIN_ROOT}/bin/booping-extra-instructions skill_help.md`
+!`booping-extra-instructions skill_help.md`

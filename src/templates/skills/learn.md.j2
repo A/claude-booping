@@ -14,9 +14,9 @@ allowed-tools:
   - Bash(git add *)
   - Bash(git commit *)
   - Bash(grep *)
-  - Bash(bin/booping-debug-mode:*)
-  - Bash(bin/booping-project-name:*)
-  - Bash(bin/booping-plans:*)
+  - Bash(booping-debug-mode:*)
+  - Bash(booping-project-name:*)
+  - Bash(booping-plans:*)
   - AskUserQuestion
 effort: {{ config.skills.learn.effort }}
 ---
@@ -37,11 +37,11 @@ Turn retrospective findings into durable behavior changes routed to exactly one 
 
 {% include "_partials/_learn_targets.j2" %}
 
-!`${CLAUDE_PLUGIN_ROOT}/bin/booping-debug-mode learn`
+!`booping-debug-mode learn`
 
 ## Plans awaiting learning
 
-!`${CLAUDE_PLUGIN_ROOT}/bin/booping-plans --status {{ config.skills.learn.status }}`
+!`booping-plans --status {{ config.skills.learn.status }}`
 
 ## High-level workflow
 

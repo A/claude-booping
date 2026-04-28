@@ -14,9 +14,9 @@ allowed-tools:
   - Bash(git add *)
   - Bash(git commit *)
   - Bash(grep *)
-  - Bash(bin/booping-debug-mode:*)
-  - Bash(bin/booping-project-name:*)
-  - Bash(bin/booping-plans:*)
+  - Bash(booping-debug-mode:*)
+  - Bash(booping-project-name:*)
+  - Bash(booping-plans:*)
   - AskUserQuestion
 effort: high
 ---
@@ -29,7 +29,7 @@ Turn retrospective findings into durable behavior changes routed to exactly one 
 
 ## Project Context
 
-!`${CLAUDE_PLUGIN_ROOT}/bin/booping-project-name`
+!`booping-project-name`
 
 On skill load, report the resolved project context back to the user verbatim so they can see which project and vault the skill is operating on.
 
@@ -82,11 +82,11 @@ If a candidate would otherwise span two targets, decompose into two distinct row
 The skill infers the exact filename per candidate; the example lists above are validation aids, not full enumerations.
 
 
-!`${CLAUDE_PLUGIN_ROOT}/bin/booping-debug-mode learn`
+!`booping-debug-mode learn`
 
 ## Plans awaiting learning
 
-!`${CLAUDE_PLUGIN_ROOT}/bin/booping-plans --status awaiting-learning`
+!`booping-plans --status awaiting-learning`
 
 ## High-level workflow
 
