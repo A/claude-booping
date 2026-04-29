@@ -1,15 +1,11 @@
 from __future__ import annotations
 
 import argparse
-import sys
 
+from booping.commands import build as build_cmd
 from booping.commands import debug as debug_cmd
 from booping.commands import render as render_cmd
-
-
-def _not_implemented(args: argparse.Namespace) -> None:
-    print(f"not implemented: {args.subcommand}", file=sys.stderr)
-    sys.exit(1)
+from booping.commands import render_sprints as render_sprints_cmd
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -21,11 +17,9 @@ def build_parser() -> argparse.ArgumentParser:
     sub.required = True
 
     render_cmd.add_parser(sub)
+    render_sprints_cmd.add_parser(sub)
+    build_cmd.add_parser(sub)
     debug_cmd.add_parser(sub)
-
-    for name in ("plans",):
-        p = sub.add_parser(name)
-        p.set_defaults(func=_not_implemented)
 
     return parser
 

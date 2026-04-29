@@ -27,15 +27,31 @@ This skill is **wide-domain** — it must work across very different projects. P
 Refresh the snapshot before the first assistant message:
 
 ```bash
-booping plans --format=md > ~/Claude/{project_name}/sprints.md
+booping render-sprints
 ```
 
 The **first assistant message** must include two tables:
 
-1. **Counts** — one row per status in `config.plan.statuses` (`{{ config.plan.statuses.keys() | join(', ') }}`) with the plan count.
-2. **Active plans** — one row per plan whose status is `ready-for-dev`, `in-progress`, `awaiting-retro`, or `awaiting-learning`, columns `Status | Plan`. Omit the table entirely if all four are empty.
+**1. Counts**
 
-Use `booping plans --status <s>` to assemble both.
+| Status | Plans |
+| --- | --- |
+{% for status_key in config.plan.statuses.keys() -%}
+| {{ status_key }} | {{ context.plans | selectattr('status', 'equalto', status_key) | list | length }} |
+{% endfor %}
+**2. Active plans**
+
+{% set active_statuses = ['ready-for-dev', 'in-progress', 'awaiting-retro', 'awaiting-learning'] -%}
+{% set active_plans = context.plans | selectattr('status', 'in', active_statuses) | list -%}
+{% if active_plans -%}
+| Status | Plan |
+| --- | --- |
+{% for plan in active_plans -%}
+| {{ plan.status }} | [{{ plan.title | replace("|", "\\|") | replace("\n", " ") }}](plans/{{ plan.path.name }}) |
+{% endfor %}
+{%- else -%}
+_No active plans._
+{% endif %}
 
 ## Phase 1 Ingest
 
@@ -58,6 +74,6 @@ Escalate rather than stretch:
 
 - For routine work owned by another skill (groom, develop, retro, learn), recommend that skill rather than reproducing its workflow inline.
 - When the user explicitly asks for an inline frontmatter tweak, status flip, or small code edit, just do it — no transitions table walk, no `<to-status>: <kebab-title>` commit ceremony.
-- When the user asks about valid statuses, available transitions, or how to flip a plan's status manually, lazy-load [plan lifecycle](${CLAUDE_PLUGIN_ROOT}/docs/plan_lifecycle_overview.md) to ground the answer in the current `config.plan.statuses` shape.
+- When the user asks about valid statuses, available transitions, or how to flip a plan's status manually, run `bin/booping render src/templates/docs/plan_lifecycle_overview.md.j2` and use that output to ground the answer in the current `config.plan.statuses` shape.
 
 {{ tools.render('src/templates/_partials/_extra_instructions.j2', extra_instruction_key='skill_chat') }}

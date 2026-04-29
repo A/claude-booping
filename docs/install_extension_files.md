@@ -9,7 +9,7 @@ Stack + conventions only; no commands.
 ```markdown
 # booping-developer (project extension)
 
-Project-local stack and conventions for all active developer-agent tiers.
+Project-local stack and conventions for the developer agent.
 
 ## Stack
 {{language}}
@@ -62,7 +62,7 @@ Project-local facts for development.
 Hook-enforced (runs automatically at commit, no skill action required):
 {{hook_enforced_commands — one per line, or "(none)" if empty}}
 
-Configured-but-manual (skill picks the relevant ones per milestone per src/docs/development_quality_checks.md — not all need to run on every milestone):
+Configured-but-manual (skill picks the relevant ones per milestone per docs/development_quality_checks.md — not all need to run on every milestone):
 {{configured_manual_commands — one per line, or "(none)" if empty}}
 
 ## Dev environment

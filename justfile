@@ -1,18 +1,13 @@
 default:
     @just --list
 
-# Render docs and plan-template static artifacts (manual; no watcher)
-build-docs:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    for tpl in src/templates/docs/*.md.j2; do
-        out="docs/$(basename "${tpl%.j2}")"
-        bin/booping render "$tpl" --output "$out"
-    done
-    for tpl in src/templates/plan_templates/*.md.j2; do
-        out="docs/plan_templates/$(basename "${tpl%.j2}")"
-        bin/booping render "$tpl" --output "$out"
-    done
+# Render src/files/**/*.j2 to plugin-root destinations (skills/, agents/)
+build:
+    bin/booping build
+
+# Watch src/files/ and src/config_files.yaml; rebuild on change (requires watchexec)
+dev:
+    watchexec -w src/files -w src/config_files.yaml -- bin/booping build
 
 # Lint booping-python
 lint:

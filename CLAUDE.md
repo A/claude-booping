@@ -4,32 +4,33 @@ Claude Code plugin that grooms and executes plans across user projects. Plans li
 
 ## Status
 
-_Last updated: 2026-04-29._
+_Last updated: 2026-04-30._
 
-Runtime template-rendering pipeline is live. Current state:
+Runtime template-rendering pipeline + build-time `src/files/` pipeline are both live. Current state:
 
-- **Runtime rendering**: skills and agents are thin shells (frontmatter + one `!`booping render <template-path>`` line). Templates are rendered at skill-load time by `bin/booping` (Python uv project at `booping-python/`). No build step required for skill/agent changes.
-- **Project config override**: `~/Claude/{project}/config.yaml` deep-merges over `src/config.yaml` at render time. Project keys win; missing keys fall through to core; lists replace wholesale.
-- **Single CLI**: `bin/booping` with subcommands `render`, `plans`, `debug-context`, `debug-template`. All standalone `bin/booping-*` helper scripts (11 scripts that previously injected dynamic content) have been removed; their functionality is now part of the Python CLI or handled by Jinja2 context loading.
-- **Static docs**: `docs/` and `docs/plan_templates/` are still pre-rendered. Rebuild with `just build-docs` when their `.md.j2` sources change.
+- **Build-time skills/agents**: every committed `skills/<name>/SKILL.md` and `agents/<name>.md` is generated from `src/files/<rel>.j2` via `just build` (which calls `bin/booping build`). Frontmatter values that vary across files (today: `effort`) live in `src/config_files.yaml`, a build-only config that is **not** project-overridable.
+- **Runtime rendering**: the body of each generated thin shell is a single `!`booping render src/templates/.../<name>.md.j2`` line; bodies are rendered at skill-load time by `bin/booping` (Python uv project at `booping-python/`).
+- **Project config override**: `~/Claude/{project}/config.yaml` deep-merges over `src/config.yaml` at render time (runtime only — does not affect `config_files.yaml`).
+- **Single CLI**: `bin/booping` with subcommands `render`, `render-sprints`, `build`, `debug-context`, `debug-template`.
+- **Static docs**: `docs/` is hand-authored from this point on (no build step). The single dynamic doc (`plan_lifecycle_overview`) is rendered at runtime via `bin/booping render src/templates/docs/plan_lifecycle_overview.md.j2`.
 
 ## Layout
 
-- `booping-python/` — uv Python project containing the `booping` CLI (subcommands `render`, `plans`, `debug-context`, `debug-template`). Source under `booping-python/src/booping/`; tests under `booping-python/tests/`.
+- `booping-python/` — uv Python project containing the `booping` CLI (subcommands `render`, `render-sprints`, `build`, `debug-context`, `debug-template`). Source under `booping-python/src/booping/`; tests under `booping-python/tests/`.
 - `bin/booping` — shell wrapper: resolves plugin root from its own location and exec's `uv run --project booping-python booping "$@"`.
 - `bin/booping-create-project` — standalone uv inline script; scaffolds `~/Claude/{project}/` vault directories + `.booping` marker. Out of scope for the runtime pipeline.
 - `bin/booping-external-llm-call` — standalone uv inline script; renders a Jinja2 prompt template from `bin/llm-call-templates/` and sends it to Gemini. Out of scope for the runtime pipeline.
-- `src/config.yaml` — single source of truth for structured data rendered into skills (plan statuses + transitions, task types, per-skill description / effort / agents / etc.). Loaded at render time by `Context.assemble()`.
-- `src/templates/skills/<name>.md.j2` — skill templates. Rendered at skill-load time via `!`booping render ...`` in the thin shell.
-- `src/templates/agents/<name>.md.j2` — agent templates. Same shape. The two developer tiers share `_partials/_developer_body.j2`.
-- `src/templates/docs/<name>.md.j2` — doc templates. Pre-rendered to `docs/<name>.md` via `just build-docs`.
-- `src/templates/plan_templates/<name>.md.j2` — core plan templates (backend, frontend, claude-skill, cli). Pre-rendered to `docs/plan_templates/<name>.md` via `just build-docs`. User projects may add their own under `~/Claude/{project}/plan_templates/*.md` (hand-authored `.md`, same frontmatter + two-section shape).
+- `src/config.yaml` — single source of truth for structured data rendered into skills at runtime (plan statuses + transitions, task types, per-skill agents / status / etc.). Loaded at render time by `Context.assemble()`. Project-overridable.
+- `src/config_files.yaml` — **build-only** config consumed by `bin/booping build`. Carries frontmatter values that vary across `src/files/**/*.j2` templates (today: just `effort` per skill / per agent). **Not** project-overridable.
+- `src/files/<rel>.j2` — **build-time templates** for every committed `skills/<name>/SKILL.md` and `agents/<name>.md`. Mirrors the plugin root one-to-one. Each template is a thin shell (frontmatter + a single `!`booping render src/templates/...`` line); rendered by `just build` using `src/config_files.yaml`.
+- `src/templates/skills/<name>.md.j2` — runtime skill templates. Rendered at skill-load time via `!`booping render ...`` in the generated thin shell.
+- `src/templates/agents/<name>.md.j2` — runtime agent templates. Same shape. The developer agent's body lives in `_partials/_developer_body.j2`.
+- `src/templates/docs/plan_lifecycle_overview.md.j2` — the single runtime-rendered doc (uses `config.plan.statuses`). Invoked from `/chat` via `bin/booping render`.
 - `src/templates/_partials/_*.j2` — reusable fragments. Include via `{% include %}` (data-only) or import + macro (parameterized, e.g. `_plan_transitions.j2`). Parameterized partials receive call-site arguments via the `kwargs` namespace.
-- `src/docs/*.md` — reference docs lazy-loaded by skills via `[label](src/docs/...)` links. Hand-authored.
-- `skills/<name>/SKILL.md` — **hand-authored thin shell**: frontmatter + a single `!`booping render src/templates/skills/<name>.md.j2`` line. Never generated; edit frontmatter in place.
-- `agents/<name>.md` — **hand-authored thin shell**: same shape + `!`booping render src/templates/agents/<name>.md.j2``.
-- `docs/` — **pre-rendered static output**: `docs/plan_templates/*.md`, `docs/template_plan_frontmatter.md`, `docs/plan_lifecycle_overview.md`, `docs/images/`. Rebuild with `just build-docs` when `.md.j2` sources change. Never hand-edit.
-- `~/Claude/{project}/config.yaml` — optional per-project config override; deep-merges over `src/config.yaml` at render time.
+- `skills/<name>/SKILL.md` — **build artefact** rendered from `src/files/skills/<name>/SKILL.md.j2`. Never hand-edit; edit the `src/files/` template and run `just build`.
+- `agents/<name>.md` — **build artefact** rendered from `src/files/agents/<name>.md.j2`. Same rule.
+- `docs/` — **hand-authored static reference docs**, lazy-loaded by skills via `${CLAUDE_PLUGIN_ROOT}/docs/<name>.md` links. Includes `docs/plan_templates/*.md`, `docs/template_plan_frontmatter.md`, and `docs/images/`. No build step touches this directory.
+- `~/Claude/{project}/config.yaml` — optional per-project config override; deep-merges over `src/config.yaml` at render time (runtime only).
 
 ## Information ownership
 
@@ -54,14 +55,14 @@ Instructions, goal, rules, and judgement specific to one skill — the verbs and
 - Judgment calls the contract can't pre-specify.
 - Invariants the skill enforces across all its states ("Hard rules").
 
-### Shared template fragments (`src/templates/_partials/`, `src/docs/`)
+### Shared template fragments (`src/templates/_partials/`, `docs/`)
 
 Content shared across skills/agents, or extracted from a single skill body to keep it lean.
 
 - Cross-cutting guides included into multiple skills (git guide, plan transitions, available agents, project context).
 - Process fragments extracted from a single skill into its own partial (sprint planning, plan-frontmatter shape, task classification).
-- Bodies shared across sibling agents (`_developer_body.j2` for the two developer tiers).
-- Lazy-loaded craft docs (`src/docs/*.md`) that a skill links into via `[label](src/docs/...)` when the situation demands it.
+- Bodies extracted from a single agent into a partial (`_developer_body.j2` for the developer agent).
+- Lazy-loaded craft docs (`docs/*.md`) that a skill links into via `[label](${CLAUDE_PLUGIN_ROOT}/docs/<name>.md)` when the situation demands it.
 
 ### Project vault (`~/Claude/{project}/`)
 
@@ -87,7 +88,7 @@ When you write a skill, walk these questions top-down for every piece of informa
    - Example: project name + path rendered into skill body via `{% include "_partials/_project_context.j2" %}`.
    - Example: the git guide included via the `_git_guide.j2` partial.
 
-2. **Does the skill need this only on a specific route, or only when a condition holds?** Lazy-load with a `[label](src/docs/...)` link; the model fetches it when the situation demands it.
+2. **Does the skill need this only on a specific route, or only when a condition holds?** Lazy-load with a `[label](${CLAUDE_PLUGIN_ROOT}/docs/<name>.md)` link; the model fetches it when the situation demands it.
    - Example: `/groom` links to per-task-type guidance; only the active type's guide (one of `feature`, `bug`, `refactoring`) is loaded per plan.
 
 3. **Does the skill need the whole, or only one slice?** Split into a partial.
@@ -103,7 +104,7 @@ When you write a skill, walk these questions top-down for every piece of informa
 
 - **Wide-domain**: skills must work across stacks (Django, Rust, Hugo, etc.). Project-specific concerns live in `~/Claude/{project}/_booping/skill_<name>.md`, `lessons/`, and the project's own `CLAUDE.md` — never in the skill here.
 - **Phases over flat sections**: Preflight → High-level workflow → Phase 0..N.
-- **Preflight becomes thinner** in template-driven skills: items that were "Read partial X" now appear either as inlined partial content, as `!`command`` blocks, or as lazy `[detailed guidance](src/docs/…)` links. Preflight is for the things that still require the model to act (e.g. read vault lessons, read `_booping/skill_<name>.md`).
+- **Preflight becomes thinner** in template-driven skills: items that were "Read partial X" now appear either as inlined partial content, as `!`command`` blocks, or as lazy `[detailed guidance](${CLAUDE_PLUGIN_ROOT}/docs/…)` links. Preflight is for the things that still require the model to act (e.g. read vault lessons, read `_booping/skill_<name>.md`).
 - **Research delegation**: delegate heavy reads / summarization work to `booping-researcher` to protect the skill's context. The agent is for *aggregating many sources into a summary*, not for single-file spot checks — those stay in the skill.
 - **Agent wiring**: skills own all reads/writes against `~/Claude/{project}/`. Agents touch only code in the attached repo and never scan the vault. Briefings carry the request, related files, and DoD — no lesson paths. Lesson context reaches agents via two baked-in channels: DoD + Verify pasted from the plan (folded in by `/groom`) and the shared extension at `~/Claude/{project}/_booping/agent_booping-<name>.md`, injected at agent load time via `tools.render('src/templates/_partials/_extra_instructions.j2', extra_instruction_key='agent_booping-<name>')` in the agent template (owned by `/learn`).
 - **Per-project quality checks**: `/develop` runs the project's own lint / typecheck / test tooling once at Phase 4 (Final Verification), alongside plan-authored `Verify` commands. Command discovery order: repo `CLAUDE.md` → `_booping/skill_develop.md` → inspection of `package.json`, `pyproject.toml`, `Justfile`, etc.
@@ -112,8 +113,8 @@ When you write a skill, walk these questions top-down for every piece of informa
 
 Top-level keys currently in use:
 
-- `skills.<name>.effort` — frontmatter `effort` value.
 - `skills.<name>.agents.<agent-name>.good_for` / `.bad_for` — delegation guidance rendered by `_available_agents.j2`. Currently used by `/groom` and `/develop`.
+- `skills.<name>.status` — the plan status this skill owns (e.g. `learn → awaiting-learning`, `retro → awaiting-retro`). Rendered into skill bodies that gate on a single status.
 - `git.branches` — list of `{branch, when}` entries. `branch` is the literal prefix string (slash and format up to user, e.g. `feat/`); `when` is a list of short matches (plan `type` names like `feature`, or freeform descriptors). Rendered via `_git_guide.j2` macro; consumed by `/develop` for branch selection.
 - `plan.statuses.<key>` — `desc`, `owner` (skill), `terminal` (bool), optional `artifacts` (list of strings describing what the state produces), `transitions` (list of `{to, skill, when, gates?, on_exit?}`). Filtered per-skill by `_plan_transitions.j2` (macro shows only statuses a skill owns or has transitions out of, and only rows where `skill == <current>`). `gates` is a list of verifiable preconditions rendered into the `Gates` column; `on_exit` is a list of short instruction strings (frontmatter mutations, side effects) rendered verbatim into the `On exit` column (e.g. `"set \`planned: yyyymmdd hh:mm\`"`).
 - `tasks` — list of `{type, description, doc_uri}`. Rendered by `_task_classification.j2` as bullets with a lazy-load link to `doc_uri` (relative from repo root).
@@ -127,8 +128,8 @@ Top-level keys currently in use:
   - `backlog` is for parked plans only (split stubs, user-filed ideas not yet in grooming). Active groom runs write directly to `in-spec`.
   - `in-spec` is where `/groom` does its work. `awaiting-plan-review` is the explicit user-approval gate. `ready-for-dev` is the queue `/develop` claims from. No backlog-shortcut into `/develop`.
 - Each transition carries `when` (trigger), optional `gates` (verifiable preconditions), and optional `on_exit` (frontmatter mutations / side effects). Each status carries optional `artifacts` (what the state produces).
-- After a transition, verify with `booping plans --status <new-status>`.
-- `sprints.md` is a snapshot derived from plan frontmatter via `booping plans --format=md`. `/chat` refreshes it on orient; nothing else regenerates it today, so it can drift between plan transitions. A planned PostToolUse + SessionStart/End hook bundle (queued as a follow-up plan) will refresh it automatically on every plan write. Never hand-edit it.
+- After a transition, verify by re-reading the plan frontmatter to confirm `status:` matches the new state.
+- `sprints.md` is a snapshot rendered from `context.plans` via `booping render-sprints` (template `src/templates/sprints.md.j2`). `/chat` refreshes it on orient; nothing else regenerates it today, so it can drift between plan transitions. A planned PostToolUse + SessionStart/End hook bundle (queued as a follow-up plan) will refresh it automatically on every plan write. Never hand-edit it.
 
 ## Project vault layout (`~/Claude/{project}/`)
 
@@ -143,19 +144,22 @@ Top-level keys currently in use:
 
 ## CLI
 
-- `bin/booping render <template-path> [--output <path>]` — render a Jinja2 template with full project context to stdout (or to a file with `--output`). Used at skill-load time via `!`booping render ...`` and for static doc regeneration.
-- `bin/booping plans [--status <s>] [--format=md]` — list plans from the vault, filter by status, sort by frontmatter field.
+- `bin/booping render <template-path> [--output <path>]` — render a Jinja2 template with full project context to stdout (or to a file with `--output`). Used at skill-load time via `!`booping render ...`` and to invoke the runtime `plan_lifecycle_overview` doc.
+- `bin/booping render-sprints [--output <path>]` — render `<vault>/sprints.md` from `src/templates/sprints.md.j2`. Default output is the resolved vault's `sprints.md`; `--output PATH` overrides; `--output -` writes to stdout.
+- `bin/booping build` — render every `src/files/**/*.j2` to its plugin-root destination using `src/config_files.yaml`. Run after editing any `src/files/<rel>.j2` or `src/config_files.yaml`.
 - `bin/booping debug-context` — dump the assembled `Context` as YAML for troubleshooting.
 - `bin/booping debug-template <template-path>` — render a template and append a debug context footer.
 - `bin/booping-create-project <project-name>` — scaffold `~/Claude/{project}/` vault directories + `.booping` marker.
 - `bin/booping-external-llm-call --prompt=<name> --context.<key>=<path>... [-- <free-text>]` — render a Jinja2 prompt template from `bin/llm-call-templates/<name>.md.j2` and send it to Gemini. Handles its own API-key check. Current templates: `validate-plan`.
-- `just build-docs` — pre-render `src/templates/docs/*.md.j2` and `src/templates/plan_templates/*.md.j2` to their static output paths under `docs/`.
+- `just build` — one-shot build via `bin/booping build`. `just dev` watches `src/files/` + `src/config_files.yaml` and rebuilds on change (requires `watchexec`).
 - `just lint`, `just typecheck`, `just test` — run ruff, basedpyright, pytest against `booping-python/`.
 
 ## Editing conventions
 
-- Edits to `src/templates/skills/*.md.j2`, `src/templates/agents/*.md.j2`, and `src/templates/_partials/*.j2` are **live** — rendered at skill-load time, no rebuild needed. Edits to `src/templates/docs/*.md.j2` or `src/templates/plan_templates/*.md.j2` require `just build-docs` to regenerate the static outputs under `docs/`.
-- `skills/<name>/SKILL.md` and `agents/<name>.md` are **hand-authored thin shells** — edit frontmatter in place when it needs changing (e.g. adding a new allowed-tool). Never replace the body.
+- Edits to `src/templates/skills/*.md.j2`, `src/templates/agents/*.md.j2`, and `src/templates/_partials/*.j2` are **live** — rendered at skill-load time, no rebuild needed.
+- Edits to `src/files/**/*.j2` or `src/config_files.yaml` require `just build` to materialize into the on-disk `skills/<name>/SKILL.md` / `agents/<name>.md`. `git diff -- skills/ agents/` after `just build` is the drift signal.
+- `skills/<name>/SKILL.md` and `agents/<name>.md` are **build artefacts** — never hand-edit. Edit `src/files/<rel>.j2` (or `src/config_files.yaml` for shared frontmatter values) and run `just build`.
+- `docs/*.md` is hand-authored. No build step regenerates it.
 - Prefer extracting to a partial over inlining when prose grows past a paragraph or two.
 - Prefer moving structured data into `src/config.yaml` over prose in partials.
 - No comments that restate code. Only WHY for non-obvious bits.
@@ -167,14 +171,14 @@ Top-level keys currently in use:
 
 Use `src/templates/skills/chat.md.j2` as the reference.
 
-1. Decide what goes in config vs prose: structured values (`effort`, `description`, per-skill agents, task-type / status / transition surfaces) belong in `src/config.yaml`; verbs, heuristics, and judgment calls go in the template.
+1. Decide what goes in config vs prose: structured values (per-skill agents, owned status, task-type / status / transition surfaces) belong in `src/config.yaml`; verbs, heuristics, and judgment calls go in the template.
 2. Author the template at `src/templates/skills/<name>.md.j2`. No frontmatter — the thin shell carries it. Standard wiring:
    - `{% include "_partials/_project_context.j2" %}` — loads project name/path at render time.
    - `{{ available_agents.render("<name>") }}` (import macro with `with context`) — renders agent delegation table from config.
    - `{{ plan_transitions.render("<name>") }}` (import macro with `with context`) — renders the transitions slice for this skill.
    - `{{ tools.render('src/templates/_partials/_lessons.j2') }}` — inlines live lessons.
    - `{{ tools.render('src/templates/_partials/_extra_instructions.j2', extra_instruction_key='skill_<name>') }}` — inlines project-local skill extension.
-3. Add the skill's `effort` and `agents` block to `src/config.yaml` under `skills.<name>`.
-4. For any detail only some routes need, write it as `src/docs/<name>.md` and lazy-link from the skill body with `[label](src/docs/<name>.md)` rather than inlining.
-5. **Hand-author** `skills/<name>/SKILL.md` as a thin shell: copy frontmatter shape from a sibling skill (e.g. `skills/chat/SKILL.md`); set `allowed-tools` (include `Bash(booping:*)` plus any non-booping shell calls the skill needs); set the body to `!`booping render src/templates/skills/<name>.md.j2``. No build step.
-6. Sanity-check by running `bin/booping render src/templates/skills/<name>.md.j2` and inspecting the output.
+3. Add the skill's `agents` block (and any `status` it owns) to `src/config.yaml` under `skills.<name>`. Skills with no structured surface still get an empty entry (`<name>: {}`) so `_available_agents.j2` can resolve them.
+4. For any detail only some routes need, write it as `docs/<name>.md` and lazy-link from the skill body with `[label](${CLAUDE_PLUGIN_ROOT}/docs/<name>.md)` rather than inlining.
+5. **Author** `src/files/skills/<name>/SKILL.md.j2` as a thin shell: copy frontmatter shape from a sibling (e.g. `src/files/skills/chat/SKILL.md.j2`); set `allowed-tools` (include `Bash(booping:*)` plus any non-booping shell calls the skill needs); use `effort: {{ skills.<name>.effort }}` and add the matching key to `src/config_files.yaml` under `skills:`; set the body to `!`booping render src/templates/skills/<name>.md.j2``.
+6. Run `just build` to materialize `skills/<name>/SKILL.md`. Sanity-check by running `bin/booping render src/templates/skills/<name>.md.j2` and inspecting the output.
