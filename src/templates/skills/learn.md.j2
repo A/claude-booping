@@ -37,11 +37,22 @@ Turn retrospective findings into durable behavior changes routed to exactly one 
 
 {% include "_partials/_learn_targets.j2" %}
 
-!`booping-debug-mode learn`
+{%- if context.skills.learn.debug_enabled %}
+Debug mode enabled. You can update this skill at {{ context.skills.learn.path }}. If the issue is generic enough to fix on the framework level, review the skill code and suggest changes to the user.
+{%- endif %}
 
 ## Plans awaiting learning
 
-!`booping-plans --status {{ config.skills.learn.status }}`
+{%- set learn_plans = context.plans | selectattr("status", "equalto", config.skills.learn.status) | list %}
+{%- if learn_plans %}
+| Status | Plan |
+|--------|------|
+{%- for p in learn_plans %}
+| `{{ p.status }}` | `{{ p.path }}` — {{ p.title }} |
+{%- endfor %}
+{%- else %}
+_No plans in `{{ config.skills.learn.status }}`._
+{%- endif %}
 
 ## High-level workflow
 
