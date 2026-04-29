@@ -10,12 +10,12 @@ Runtime template-rendering pipeline is live. Current state:
 
 - **Runtime rendering**: skills and agents are thin shells (frontmatter + one `!`booping render <template-path>`` line). Templates are rendered at skill-load time by `bin/booping` (Python uv project at `booping-python/`). No build step required for skill/agent changes.
 - **Project config override**: `~/Claude/{project}/config.yaml` deep-merges over `src/config.yaml` at render time. Project keys win; missing keys fall through to core; lists replace wholesale.
-- **Single CLI**: `bin/booping` with subcommands `render`, `plans`, `debug-context`, `debug-template`. All standalone `bin/booping-*` helper scripts (11 scripts that previously injected dynamic content) have been removed; their functionality is now part of the Python CLI or handled by Jinja2 context loading.
+- **Single CLI**: `bin/booping` with subcommands `render`, `render-sprints`, `debug-context`, `debug-template`. All standalone `bin/booping-*` helper scripts (11 scripts that previously injected dynamic content) have been removed; their functionality is now part of the Python CLI or handled by Jinja2 context loading.
 - **Static docs**: `docs/` and `docs/plan_templates/` are still pre-rendered. Rebuild with `just build-docs` when their `.md.j2` sources change.
 
 ## Layout
 
-- `booping-python/` — uv Python project containing the `booping` CLI (subcommands `render`, `plans`, `debug-context`, `debug-template`). Source under `booping-python/src/booping/`; tests under `booping-python/tests/`.
+- `booping-python/` — uv Python project containing the `booping` CLI (subcommands `render`, `render-sprints`, `debug-context`, `debug-template`). Source under `booping-python/src/booping/`; tests under `booping-python/tests/`.
 - `bin/booping` — shell wrapper: resolves plugin root from its own location and exec's `uv run --project booping-python booping "$@"`.
 - `bin/booping-create-project` — standalone uv inline script; scaffolds `~/Claude/{project}/` vault directories + `.booping` marker. Out of scope for the runtime pipeline.
 - `bin/booping-external-llm-call` — standalone uv inline script; renders a Jinja2 prompt template from `bin/llm-call-templates/` and sends it to Gemini. Out of scope for the runtime pipeline.
@@ -127,8 +127,8 @@ Top-level keys currently in use:
   - `backlog` is for parked plans only (split stubs, user-filed ideas not yet in grooming). Active groom runs write directly to `in-spec`.
   - `in-spec` is where `/groom` does its work. `awaiting-plan-review` is the explicit user-approval gate. `ready-for-dev` is the queue `/develop` claims from. No backlog-shortcut into `/develop`.
 - Each transition carries `when` (trigger), optional `gates` (verifiable preconditions), and optional `on_exit` (frontmatter mutations / side effects). Each status carries optional `artifacts` (what the state produces).
-- After a transition, verify with `booping plans --status <new-status>`.
-- `sprints.md` is a snapshot derived from plan frontmatter via `booping plans --format=md`. `/chat` refreshes it on orient; nothing else regenerates it today, so it can drift between plan transitions. A planned PostToolUse + SessionStart/End hook bundle (queued as a follow-up plan) will refresh it automatically on every plan write. Never hand-edit it.
+- After a transition, verify by re-reading the plan frontmatter to confirm `status:` matches the new state.
+- `sprints.md` is a snapshot rendered from `context.plans` via `booping render-sprints` (template `src/templates/sprints.md.j2`). `/chat` refreshes it on orient; nothing else regenerates it today, so it can drift between plan transitions. A planned PostToolUse + SessionStart/End hook bundle (queued as a follow-up plan) will refresh it automatically on every plan write. Never hand-edit it.
 
 ## Project vault layout (`~/Claude/{project}/`)
 
@@ -144,7 +144,7 @@ Top-level keys currently in use:
 ## CLI
 
 - `bin/booping render <template-path> [--output <path>]` — render a Jinja2 template with full project context to stdout (or to a file with `--output`). Used at skill-load time via `!`booping render ...`` and for static doc regeneration.
-- `bin/booping plans [--status <s>] [--format=md]` — list plans from the vault, filter by status, sort by frontmatter field.
+- `bin/booping render-sprints [--output <path>]` — render `<vault>/sprints.md` from `src/templates/sprints.md.j2`. Default output is the resolved vault's `sprints.md`; `--output PATH` overrides; `--output -` writes to stdout.
 - `bin/booping debug-context` — dump the assembled `Context` as YAML for troubleshooting.
 - `bin/booping debug-template <template-path>` — render a template and append a debug context footer.
 - `bin/booping-create-project <project-name>` — scaffold `~/Claude/{project}/` vault directories + `.booping` marker.
