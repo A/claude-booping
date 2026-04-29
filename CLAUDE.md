@@ -19,7 +19,7 @@ Runtime template-rendering pipeline is live. Current state:
 - `bin/booping` — shell wrapper: resolves plugin root from its own location and exec's `uv run --project booping-python booping "$@"`.
 - `bin/booping-create-project` — standalone uv inline script; scaffolds `~/Claude/{project}/` vault directories + `.booping` marker. Out of scope for the runtime pipeline.
 - `bin/booping-external-llm-call` — standalone uv inline script; renders a Jinja2 prompt template from `bin/llm-call-templates/` and sends it to Gemini. Out of scope for the runtime pipeline.
-- `src/config.yaml` — single source of truth for structured data rendered into skills (plan statuses + transitions, task types, per-skill description / effort / agents / etc.). Loaded at render time by `Context.assemble()`.
+- `src/config.yaml` — single source of truth for structured data rendered into skills (plan statuses + transitions, task types, per-skill agents / status / etc.). Loaded at render time by `Context.assemble()`.
 - `src/templates/skills/<name>.md.j2` — skill templates. Rendered at skill-load time via `!`booping render ...`` in the thin shell.
 - `src/templates/agents/<name>.md.j2` — agent templates. Same shape. The two developer tiers share `_partials/_developer_body.j2`.
 - `src/templates/docs/<name>.md.j2` — doc templates. Pre-rendered to `docs/<name>.md` via `just build-docs`.
@@ -112,8 +112,8 @@ When you write a skill, walk these questions top-down for every piece of informa
 
 Top-level keys currently in use:
 
-- `skills.<name>.effort` — frontmatter `effort` value.
 - `skills.<name>.agents.<agent-name>.good_for` / `.bad_for` — delegation guidance rendered by `_available_agents.j2`. Currently used by `/groom` and `/develop`.
+- `skills.<name>.status` — the plan status this skill owns (e.g. `learn → awaiting-learning`, `retro → awaiting-retro`). Rendered into skill bodies that gate on a single status.
 - `git.branches` — list of `{branch, when}` entries. `branch` is the literal prefix string (slash and format up to user, e.g. `feat/`); `when` is a list of short matches (plan `type` names like `feature`, or freeform descriptors). Rendered via `_git_guide.j2` macro; consumed by `/develop` for branch selection.
 - `plan.statuses.<key>` — `desc`, `owner` (skill), `terminal` (bool), optional `artifacts` (list of strings describing what the state produces), `transitions` (list of `{to, skill, when, gates?, on_exit?}`). Filtered per-skill by `_plan_transitions.j2` (macro shows only statuses a skill owns or has transitions out of, and only rows where `skill == <current>`). `gates` is a list of verifiable preconditions rendered into the `Gates` column; `on_exit` is a list of short instruction strings (frontmatter mutations, side effects) rendered verbatim into the `On exit` column (e.g. `"set \`planned: yyyymmdd hh:mm\`"`).
 - `tasks` — list of `{type, description, doc_uri}`. Rendered by `_task_classification.j2` as bullets with a lazy-load link to `doc_uri` (relative from repo root).
@@ -167,14 +167,14 @@ Top-level keys currently in use:
 
 Use `src/templates/skills/chat.md.j2` as the reference.
 
-1. Decide what goes in config vs prose: structured values (`effort`, `description`, per-skill agents, task-type / status / transition surfaces) belong in `src/config.yaml`; verbs, heuristics, and judgment calls go in the template.
+1. Decide what goes in config vs prose: structured values (per-skill agents, owned status, task-type / status / transition surfaces) belong in `src/config.yaml`; verbs, heuristics, and judgment calls go in the template.
 2. Author the template at `src/templates/skills/<name>.md.j2`. No frontmatter — the thin shell carries it. Standard wiring:
    - `{% include "_partials/_project_context.j2" %}` — loads project name/path at render time.
    - `{{ available_agents.render("<name>") }}` (import macro with `with context`) — renders agent delegation table from config.
    - `{{ plan_transitions.render("<name>") }}` (import macro with `with context`) — renders the transitions slice for this skill.
    - `{{ tools.render('src/templates/_partials/_lessons.j2') }}` — inlines live lessons.
    - `{{ tools.render('src/templates/_partials/_extra_instructions.j2', extra_instruction_key='skill_<name>') }}` — inlines project-local skill extension.
-3. Add the skill's `effort` and `agents` block to `src/config.yaml` under `skills.<name>`.
+3. Add the skill's `agents` block (and any `status` it owns) to `src/config.yaml` under `skills.<name>`. Skills with no structured surface still get an empty entry (`<name>: {}`) so `_available_agents.j2` can resolve them.
 4. For any detail only some routes need, write it as `src/docs/<name>.md` and lazy-link from the skill body with `[label](src/docs/<name>.md)` rather than inlining.
 5. **Hand-author** `skills/<name>/SKILL.md` as a thin shell: copy frontmatter shape from a sibling skill (e.g. `skills/chat/SKILL.md`); set `allowed-tools` (include `Bash(booping:*)` plus any non-booping shell calls the skill needs); set the body to `!`booping render src/templates/skills/<name>.md.j2``. No build step.
 6. Sanity-check by running `bin/booping render src/templates/skills/<name>.md.j2` and inspecting the output.

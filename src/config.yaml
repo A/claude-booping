@@ -21,14 +21,11 @@ tasks:
     doc_uri: ${CLAUDE_PLUGIN_ROOT}/src/docs/task_refactoring.md
 
 skills:
-  help:
-    effort: low
+  help: {}
 
-  install:
-    effort: high
+  install: {}
 
   develop:
-    effort: high
     agents:
       booping-developer-middle:
         good_for:
@@ -52,7 +49,6 @@ skills:
           - "Single-file reads — call Read directly"
 
   groom:
-    effort: high
     agents:
       booping-researcher:
         good_for:
@@ -69,11 +65,9 @@ skills:
           - "When the question fits in a few lines of `ls`/`grep` output"
 
   learn:
-    effort: high
     status: awaiting-learning
 
   retro:
-    effort: high
     status: awaiting-retro
     agents:
       booping-researcher:
@@ -85,7 +79,6 @@ skills:
           - "Phase 4 lesson cross-check — stays in the orchestrator using the in-context lesson set"
 
   chat:
-    effort: high
     agents:
       booping-researcher:
         good_for:
