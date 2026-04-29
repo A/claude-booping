@@ -1,5 +1,12 @@
 ## Project Context
 
-!`booping-project-name`
+{%- if context.project is not none %}
+```yaml
+name: {{ context.project.name }}
+directory: {{ context.project.directory }}
+```
+{%- else %}
+Project not initialized — no `.booping` file in the current directory. Before proceeding with the user's request, onboard them per the procedure in `${CLAUDE_PLUGIN_ROOT}/src/docs/how_to_initialize_project.md`. Read that file, walk the user through it, then retry.
+{%- endif %}
 
 On skill load, report the resolved project context back to the user verbatim so they can see which project and vault the skill is operating on.

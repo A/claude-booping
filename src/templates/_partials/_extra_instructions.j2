@@ -1,0 +1,9 @@
+{%- set key = kwargs.extra_instruction_key -%}
+{%- set body = context.extra_instructions.get(key, "") -%}
+{%- if body %}
+## User-specific instructions
+
+These instructions come from prior coding sessions and user feedback in this project. They override the skill instructions above — where they disagree, follow these.
+
+{{ body.rstrip() }}
+{%- endif %}

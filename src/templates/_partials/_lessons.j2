@@ -1,0 +1,21 @@
+{%- if context.project is not none %}
+## Lessons
+
+{%- if context.lessons %}
+The following {{ context.lessons | length }} lesson(s) are loaded for the rest of the session. Keep them in context; never silently violate a loaded lesson. If one conflicts with a user request, plan decision, or in-progress task, stop and flag it before continuing.
+
+### Index
+
+{%- for lesson in context.lessons %}
+- `{{ lesson.path.name }}` — {{ lesson.title }}
+{%- endfor %}
+{%- for lesson in context.lessons %}
+
+### {{ lesson.id }} — {{ lesson.title }}
+
+{{ lesson.body.rstrip() }}
+{%- endfor %}
+{%- else %}
+No lessons accumulated yet in this project.
+{%- endif %}
+{%- endif %}
