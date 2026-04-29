@@ -1,6 +1,14 @@
+# booping config. Per-project overrides live at `~/Claude/{project}/config.yaml`
+# and deep-merge over this file at render time (project keys win; missing keys
+# fall through; lists replace wholesale). Override anything below.
+
+# Sprint sizing knobs. SP measures complexity / review burden, not effort.
 sprint:
+  # Soft cap past which /groom proposes splitting into sibling sprints.
   default_threshold_sp: 35
+  # Tasks at or above this SP must be re-decomposed before leaving /groom.
   redecompose_threshold: 5
+  # Max consecutive milestones /develop may bundle into one agent briefing.
   max_milestones_per_agent: 2
   scale:
     - { sp: 1, meaning: "Simple text/config change, no risk" }
@@ -9,6 +17,8 @@ sprint:
     - { sp: 4, meaning: "Complex task, medium risk, may need small research but clear enough" }
     - { sp: 5, meaning: "Research task — developer needs to clarify and decompose further before proceeding" }
 
+# Task types /groom classifies plans into. `doc_uri` is lazy-loaded by /groom
+# when the active plan matches the type.
 tasks:
   - type: feature
     description: "New user-facing capability. Needs business goal, design, milestones, DoD."
@@ -20,6 +30,9 @@ tasks:
     description: "Internal structure change with no user-visible behavior change. Needs current-vs-target design, migration steps, and a no-behavior-change DoD."
     doc_uri: ${CLAUDE_PLUGIN_ROOT}/docs/task_refactoring.md
 
+# Per-skill wiring. `agents` drives the delegation table rendered into each
+# skill body; `status` names the plan state the skill owns. Add an empty `{}`
+# for skills with no structured surface so the renderer can still resolve them.
 skills:
   help: {}
 
@@ -79,6 +92,8 @@ skills:
           - "Simple greps or existence checks that fit in a few lines of output"
           - "Questions answerable with a short `ls` or `grep`"
 
+# Git conventions. `branches` maps task types (and free-form descriptors) to
+# branch prefixes; /develop picks the prefix matching the plan's type.
 git:
   commit_message: '<agent>: <plan title> <message>'
   branches:
@@ -96,6 +111,10 @@ git:
         - other
         - tooling, dependency bumps, formatting
 
+# Plan lifecycle: every status, its owner skill, artifacts produced, and the
+# transitions out (with `when` triggers, `gates` preconditions, `on_exit` side
+# effects). Skills render only their own slice from this table. Terminal
+# states: done, fail, cancelled.
 plan:
   statuses:
     backlog:

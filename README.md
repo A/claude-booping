@@ -16,7 +16,7 @@ booping is aimed at **experienced developers and tech leads** — people comfort
 
 It's built for **iterative, agile-style development**: maintenance, incremental features, or growing a project sprint by sprint. It is **not** a waterfall tool — don't hand it a whole-project spec and expect a finished product. One plan is one sprint; the loop compounds across many.
 
-The framework is **in beta**. Per-project configuration is now live: place a `~/Claude/{project}/config.yaml` file in your vault and it deep-merges over the plugin's `src/config.yaml` at render time — the lifecycle, sprint scale, and agent wiring are the natural targets for per-project tuning. Planned next steps include a `/code-review` skill that addresses review feedback context-aware in fresh sessions.
+The framework is **in beta** — expect the lifecycle, config schema, and skill set to keep moving. Per-project overrides are live: drop a `config.yaml` in your vault and it deep-merges over [`src/config.yaml`](src/config.yaml) (commented) at render time.
 
 ## Dependencies
 
@@ -122,7 +122,7 @@ The 1–5 scale (`src/config.yaml` `sprint.scale`):
 - **4 SP** — Complex task, medium risk, may need small research but clear enough.
 - **5 SP** — Research task — developer needs to clarify and decompose further before proceeding.
 
-In practice, sprints over **35 SP** (`sprint.default_threshold_sp`) get hard to keep reviewable, so `/groom` ends up suggesting a split into sibling sprints above that mark. It's a soft cap, **not a velocity** — booping has no fixed cadence and no per-week capacity. Tasks at 5 SP must be re-decomposed; tasks at 1 SP should be grouped into a single agent briefing.
+In practice, sprints over **35 SP** (`sprint.default_threshold_sp`) get hard to keep reviewable, so `/groom` ends up suggesting a split into sibling sprints above that mark. It's a soft cap, **not a velocity** — booping has no fixed cadence and no per-week capacity. Tasks at 5 SP must be re-decomposed before leaving `/groom`; `/develop` may bundle up to `sprint.max_milestones_per_agent` (default 2) consecutive milestones into a single agent briefing to amortise spawn cost.
 
 ## Extensibility
 
