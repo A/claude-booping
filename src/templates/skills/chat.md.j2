@@ -9,7 +9,7 @@ allowed-tools:
   - Edit
   - Glob
   - Grep
-  - Bash(booping-plans:*)
+  - Bash(booping:*)
   - Bash(ls *)
   - Bash(git status *)
   - Bash(git log *)
@@ -49,7 +49,7 @@ This skill is **wide-domain** — it must work across very different projects. P
 Refresh the snapshot before the first assistant message:
 
 ```bash
-booping-plans --format=md > ~/Claude/{project_name}/sprints.md
+booping plans --format=md > ~/Claude/{project_name}/sprints.md
 ```
 
 The **first assistant message** must include two tables:
@@ -57,7 +57,7 @@ The **first assistant message** must include two tables:
 1. **Counts** — one row per status in `config.plan.statuses` (`{{ config.plan.statuses.keys() | join(', ') }}`) with the plan count.
 2. **Active plans** — one row per plan whose status is `ready-for-dev`, `in-progress`, `awaiting-retro`, or `awaiting-learning`, columns `Status | Plan`. Omit the table entirely if all four are empty.
 
-Use `booping-plans --status <s>` to assemble both.
+Use `booping plans --status <s>` to assemble both.
 
 ## Phase 1 Ingest
 

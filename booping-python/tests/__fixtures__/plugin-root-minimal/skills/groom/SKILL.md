@@ -7,7 +7,7 @@ effort: high
 allowed-tools:
   - Read
   - Write
-  - Bash(booping-plans:*)
+  - Bash(booping:*)
 ---
 
 # /groom

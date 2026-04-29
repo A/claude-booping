@@ -15,7 +15,7 @@ When a skill is invoked but no `.booping` file exists in the current working dir
    ```
 5. **Add to `.gitignore`** if step 3 was yes.
 6. **Ensure the vault exists** at `~/Claude/{chosen-name}/`. Create it if missing.
-7. **Resume the original request** — the project is now resolved on the next `!`bin/booping-project-name`` call.
+7. **Resume the original request** — the project is now resolved on the next skill load (project context is assembled by `booping render`).
 
 ## Notes
 

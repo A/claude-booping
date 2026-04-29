@@ -36,7 +36,7 @@ Execute a plan by delegating every task to a worker agent. The orchestrator neve
 
 ## Plan selection
 
-If `$ARGUMENTS` is empty, run `booping-plans --status ready-for-dev` and `booping-plans --status awaiting-plan-review` in parallel, combine the results, and present them to the user via `AskUserQuestion` (single-select) with each entry showing the plan title and its status. Use the selected plan path as the plan for this session. If both lists are empty, stop and tell the user there are no plans ready.
+If `$ARGUMENTS` is empty, run `booping plans --status ready-for-dev` and `booping plans --status awaiting-plan-review` in parallel, combine the results, and present them to the user via `AskUserQuestion` (single-select) with each entry showing the plan title and its status. Use the selected plan path as the plan for this session. If both lists are empty, stop and tell the user there are no plans ready.
 
 ## High-level workflow
 
@@ -88,7 +88,7 @@ Within a milestone, run tasks in parallel when their files don't overlap and the
 
 1. Run the plan's Final Verification commands **plus** the project's own lint / typecheck / test commands (see below). Once, at sprint end.
 2. Confirm every DoD checkbox is `[x]` and every milestone status is `done`.
-3. Apply the `All milestones done` exit transition from the transitions table above; verify with `booping-plans`.
+3. Apply the `All milestones done` exit transition from the transitions table above; verify with `booping plans`.
 4. Commit the vault updates.
 
 If Final Verification fails, delegate the fix to a worker agent; two failed fix attempts on the same issue trigger the failure exit transition from the transitions table.

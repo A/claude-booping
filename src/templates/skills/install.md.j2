@@ -17,8 +17,7 @@ allowed-tools:
   - Bash(ls -la ~/Claude)
   - Bash(pwd)
   - Bash(booping-create-project:*)
-  - Bash(booping-plans:*)
-  - Bash(booping-extra-instructions:*)
+  - Bash(booping:*)
   - AskUserQuestion
 ---
 
@@ -127,10 +126,10 @@ This mismatch check prevents silently feeding a new Python repo with an old Rust
 3. Seed the snapshot so `/develop`'s Phase 4 commit doesn't crash on a fresh vault:
 
    ```bash
-   booping-plans --format=md > ~/Claude/{name}/sprints.md
+   booping plans --format=md > ~/Claude/{name}/sprints.md
    ```
 
-   `booping-plans` on a plans-empty vault emits header + separator cleanly, matching what `/chat`'s orient would regenerate. Seeding is idempotent so `/chat` can overwrite later.
+   `booping plans` on a plans-empty vault emits header + separator cleanly, matching what `/chat`'s orient would regenerate. Seeding is idempotent so `/chat` can overwrite later.
 4. Report next steps: suggest `/chat` (for exploration) or `/groom <topic>` (to spec work).
 
 ## Hard rules
