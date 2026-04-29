@@ -21,7 +21,11 @@ def main(argv: list[str] | None = None) -> int:
         from booping.commands.render import handle
 
         return handle(args)
-    if args.command in ("plans", "debug-context", "debug-template"):
+    if args.command == "debug-context":
+        from booping.commands.debug import handle as debug_handle
+
+        return debug_handle(args)
+    if args.command in ("plans", "debug-template"):
         print(f"not implemented: {args.command}", file=sys.stderr)
         return 1
     parser.print_help(file=sys.stderr)

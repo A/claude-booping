@@ -1,0 +1,1 @@
+Project-specific developer rules: always run the full test suite before committing.
