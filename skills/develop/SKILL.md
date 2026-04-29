@@ -16,6 +16,7 @@ allowed-tools:
   - TaskCreate
   - TaskUpdate
 effort: low
+context: fork
 ---
 
 !`booping render src/templates/skills/develop.md.j2`
