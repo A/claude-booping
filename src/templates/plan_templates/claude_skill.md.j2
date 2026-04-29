@@ -25,7 +25,7 @@ How the skill interacts with other skills via shared config (statuses, agents, t
 
 **Goal**: one sentence — the observable change in the rendered skill or shared config.
 
-**Verify**: rebuild command and sanity check (e.g. `bin/booping-build && diff skills/<name>/SKILL.md`).
+**Verify**: render and sanity check (e.g. `bin/booping render src/templates/skills/<name>.md.j2` and review output).
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
@@ -41,7 +41,7 @@ How the skill interacts with other skills via shared config (statuses, agents, t
 
 ## Final Verification
 
-- [ ] `bin/booping-build` renders cleanly.
+- [ ] `just build-docs` renders cleanly (for doc/plan-template changes) or `bin/booping render src/templates/skills/<name>.md.j2` produces clean output (for skill/agent changes).
 - [ ] Rendered skill body reviewed (no stale state names, no prose that duplicates rendered tables, no `{{placeholder}}` leaks).
 - [ ] Project-local extension points (`_booping/skill_<name>.md`) still inline correctly.
 

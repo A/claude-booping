@@ -1,32 +1,3 @@
----
-name: groom
-description: Deep-research a feature, bug, or refactor and produce a specified, estimated plan with Definition of Done. Cross-validates architecture with a second model when useful. Use when the user describes a new piece of work that needs to be shaped before implementation.
-argument-hint: [task description or issue reference]
-user-invocable: true
-allowed-tools:
-  - Read
-  - Write
-  - Glob
-  - Grep
-  - Bash(ls *)
-  - Bash(git log *)
-  - Bash(git diff *)
-  - Bash(git add *)
-  - Bash(git commit *)
-  - Bash(booping-external-llm-call:*)
-  - Bash(booping-plans:*)
-  - Bash(booping-project-name:*)
-  - Bash(booping-sprint-threshold:*)
-  - Bash(booping-extra-instructions:*)
-  - Bash(booping-lessons:*)
-  - Bash(booping-plan-templates:*)
-  - Agent
-  - AskUserQuestion
-  - WebSearch
-  - WebFetch
-effort: {{ config.skills.groom.effort }}
----
-
 {% import "_partials/_plan_transitions.j2" as plan_transitions with context %}
 {% import "_partials/_available_agents.j2" as available_agents with context %}
 {% import "_partials/_task_classification.j2" as task_classification with context %}

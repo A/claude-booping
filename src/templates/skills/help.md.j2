@@ -1,14 +1,3 @@
----
-name: help
-description: Show what booping is, the available commands, and how to use them. Use when the user asks for help, wants a tour of the plugin, or is onboarding.
-argument-hint: "[topic: skills | agents | layout | workflow | extensions]"
-user-invocable: true
-effort: {{ config.skills.help.effort }}
-allowed-tools:
-  - Read
-  - Bash(ls *)
----
-
 # booping — /help
 
 Orient the user to the booping plugin. This skill is read-only — it never scaffolds, migrates, or writes files. That is `/install`'s job.

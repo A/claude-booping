@@ -1,26 +1,3 @@
----
-name: learn
-description: Extract lessons from a retrospective and fold improvements into project-local skill/agent extensions under _booping/. Use after /retro writes a retrospective.
-argument-hint: [retrospective file path]
-user-invocable: true
-allowed-tools:
-  - Read
-  - Write
-  - Edit
-  - Glob
-  - Grep
-  - Bash(ls *)
-  - Bash(test *)
-  - Bash(git add *)
-  - Bash(git commit *)
-  - Bash(grep *)
-  - Bash(booping-debug-mode:*)
-  - Bash(booping-project-name:*)
-  - Bash(booping-plans:*)
-  - AskUserQuestion
-effort: {{ config.skills.learn.effort }}
----
-
 {% import "_partials/_plan_transitions.j2" as plan_transitions with context %}
 {% import "_partials/_available_agents.j2" as available_agents with context %}
 # booping — /learn

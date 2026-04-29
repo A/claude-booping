@@ -1,14 +1,6 @@
 default:
     @just --list
 
-# Render src/templates + src/config.yaml into skills/ and docs/
-build:
-    bin/booping-build
-
-# Watch src/ and re-render on change
-watch:
-    bin/booping-build --watch
-
 # Render docs and plan-template static artifacts (manual; no watcher)
 build-docs:
     #!/usr/bin/env bash
