@@ -15,7 +15,7 @@ allowed-tools:
   - AskUserQuestion
   - TaskCreate
   - TaskUpdate
-effort: high
+effort: low
 ---
 
 !`booping render src/templates/skills/develop.md.j2`

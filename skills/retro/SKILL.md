@@ -20,7 +20,7 @@ allowed-tools:
   - AskUserQuestion
   - WebSearch
   - WebFetch
-effort: high
+effort: medium
 ---
 
 !`booping render src/templates/skills/retro.md.j2`

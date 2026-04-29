@@ -17,7 +17,7 @@ allowed-tools:
   - Bash(cat ~/Claude/*)
   - AskUserQuestion
   - Agent
-effort: high
+effort: low
 ---
 
 !`booping render src/templates/skills/chat.md.j2`
