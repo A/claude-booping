@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import sys
 
+from booping.commands import debug as debug_cmd
 from booping.commands import render as render_cmd
 
 
@@ -20,8 +21,9 @@ def build_parser() -> argparse.ArgumentParser:
     sub.required = True
 
     render_cmd.add_parser(sub)
+    debug_cmd.add_parser(sub)
 
-    for name in ("plans", "debug-context", "debug-template"):
+    for name in ("plans",):
         p = sub.add_parser(name)
         p.set_defaults(func=_not_implemented)
 

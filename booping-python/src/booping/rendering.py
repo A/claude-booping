@@ -7,6 +7,14 @@ from typing import Any
 from jinja2 import ChainableUndefined, Environment, FileSystemLoader
 
 
+class RenderCycleError(Exception):
+    pass
+
+
+class RenderDepthExceededError(Exception):
+    pass
+
+
 class LenientUndefined(ChainableUndefined):
     """Undefined that silently absorbs attribute access, subscript, iteration, and .get()."""
 
@@ -63,16 +71,25 @@ def get_plugin_root() -> Path:
     return _plugin_root
 
 
+def _build_env(loader_root: Path) -> Environment:
+    return Environment(
+        loader=FileSystemLoader(str(loader_root)),
+        undefined=LenientUndefined,
+        keep_trailing_newline=True,
+    )
+
+
 def render(
     template_path: Path | str,
-    context: dict[str, object],
-    config: dict[str, object],
-    tools: dict[str, object],
-    kwargs: dict[str, object],
+    context: object,
+    config: object,
+    tools: object,
+    kwargs: dict[str, Any],
     plugin_root: Path | None = None,
 ) -> str:
+    from booping.tools import Tools  # local import to avoid circular at module level
+
     root = plugin_root if plugin_root is not None else get_plugin_root()
-    # Templates use includes relative to src/templates/ (mirrors booping-build loader root).
     templates_dir = root / "src" / "templates"
     path = Path(template_path).resolve()
 
@@ -83,15 +100,23 @@ def render(
         loader_root = root
         template_name = str(path.relative_to(root))
     else:
-        # Template lives outside plugin root — read as string (no include support).
         loader_root = root
         template_name = None
 
-    env = Environment(
-        loader=FileSystemLoader(str(loader_root)),
-        undefined=LenientUndefined,
-        keep_trailing_newline=True,
-    )
+    env = _build_env(loader_root)
+
+    # Top-level render seeds an empty stack and constructs a real Tools instance.
+    real_tools: Tools
+    if isinstance(tools, Tools):
+        real_tools = tools
+    else:
+        real_tools = Tools(
+            env=env,
+            context=context,
+            config=config,
+            plugin_root=root,
+            render_stack=[],
+        )
 
     if template_name is not None:
         template = env.get_template(template_name)
@@ -102,6 +127,6 @@ def render(
     return template.render(
         context=context,
         config=config,
-        tools=tools,
+        tools=real_tools,
         kwargs=kwargs,
     )

@@ -33,6 +33,12 @@ line-length = 100
 select = ["E", "F", "I", "UP"]
 
 [tool.basedpyright]
-include = ["src"]
+include = ["src", "tests"]
+extraPaths = ["src"]
 pythonVersion = "3.12"
 typeCheckingMode = "strict"
+
+[tool.pyright]
+include = ["src", "tests"]
+extraPaths = ["src"]
+pythonVersion = "3.12"

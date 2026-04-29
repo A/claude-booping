@@ -4,6 +4,7 @@ import argparse
 import sys
 from pathlib import Path
 
+from booping.context import Context
 from booping.rendering import render
 
 
@@ -14,10 +15,11 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
 
 
 def _run(args: argparse.Namespace) -> None:
+    ctx = Context.assemble()
     result = render(
         template_path=args.path,
-        context={},
-        config={},
+        context=ctx,
+        config=ctx.config,
         tools={},
         kwargs={},
     )
