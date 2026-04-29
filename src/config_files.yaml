@@ -1,12 +1,12 @@
 skills:
-  chat:    { effort: low }
-  develop: { effort: low }
+  chat:    { effort: medium }
+  develop: { effort: medium }
   groom:   { effort: high }
-  help:    { effort: low }
+  help:    { effort: medium }
   install: { effort: medium }
   learn:   { effort: high }
   retro:   { effort: medium }
 
 agents:
   booping-developer:  { effort: medium }
-  booping-researcher: { effort: high }
+  booping-researcher: { effort: medium }
