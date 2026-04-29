@@ -20,6 +20,8 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
 def _run_context(args: argparse.Namespace) -> None:
     ctx = Context.assemble()
     data = ctx.model_dump(mode="json")
+    data["skills"] = sorted(data.get("skills", {}))
+    data["agents"] = sorted(data.get("agents", {}))
     sys.stdout.write(yaml.dump(data, allow_unicode=True, sort_keys=True))
 
 
