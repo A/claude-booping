@@ -47,6 +47,6 @@ class Skill(BaseModel):
                 model=str(model_val) if model_val is not None else None,
                 allowed_tools=_str_list(fm.get("allowed-tools")),
                 user_invocable=bool(fm.get("user-invocable", False)),
-                debug_enabled=(skill_dir / ".debug_enabled").exists(),
+                debug_enabled=bool(fm.get("debug-enabled", False)),
             )
         return result
