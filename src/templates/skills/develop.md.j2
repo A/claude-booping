@@ -35,9 +35,9 @@ _No plans in `ready-for-dev` or `awaiting-plan-review`. Stop and tell the user t
 ## High-level workflow
 
 1. Intake — load plan, validate entry status, spot-check codebase.
-2. Plan groupings — propose batched task groups per milestone, confirm with user.
+2. Plan groupings — propose milestone groups for agent briefings, confirm with user.
 3. Branch — create the sprint branch in the attached repo.
-4. Execute — transition plan, run the milestone loop.
+4. Execute — transition plan, run the milestone-group loop.
 5. Finalize — Final Verification, apply the exit transition, commit vault.
 
 ## Phase 0 Intake
@@ -48,11 +48,11 @@ Load the plan and the repo `CLAUDE.md`. If the plan was created more than 1h ago
 
 ## Phase 1 Plan groupings
 
-{% if config.sprint.group_threshold -%}
-For each milestone, propose task groupings: tasks **≤ {{ config.sprint.group_threshold }} SP** can be batched into a single agent briefing (subject to the agent roster's batching limits). Larger tasks stay one-per-briefing.
+{% if config.sprint.max_milestones_per_agent -%}
+Group consecutive milestones into agent briefings: each briefing covers **up to {{ config.sprint.max_milestones_per_agent }} milestone(s)**. Group only when the milestones share enough context that one agent handling them in sequence is cheaper than spinning a fresh agent per milestone. Otherwise keep them one-per-briefing.
 
 {% endif -%}
-Then present total SP, milestone list, execution order{% if config.sprint.group_threshold %}, and the proposed groupings{% endif %}. Include any drift findings from Phase 0. Ask the user to confirm (and adjust scope if drift was raised).
+Present total SP, milestone list, execution order, and the proposed milestone groups. Include any drift findings from Phase 0. Ask the user to confirm (and adjust scope if drift was raised).
 
 ## Phase 2 Branch
 
@@ -64,19 +64,20 @@ One branch per sprint. In multi-repo projects, reuse the same branch name across
 
 **Apply the entry transition** per the transitions table above.
 
-For each milestone:
+Milestone groups run **sequentially** — never spawn parallel agents on the same sprint branch.
 
-1. `TaskCreate` one task per task group from Phase 1.
-2. Compose the briefing from task/DoD/Verify.
-3. Delegate each group per the agent roster above; always delegate — even a 1-line change.
-4. When the worker reports done:
+For each milestone group from Phase 1:
+
+1. `TaskCreate` one task for the group.
+2. Compose one briefing covering every milestone in the group: per-milestone request, related files, DoD, and Verify.
+3. Delegate to `booping-developer`; always delegate — even a 1-line change.
+4. When the worker reports done, for **each milestone** in the group:
    - Verify developer work.
    - Flip each completed task's DoD checkboxes in the plan: `- [ ]` → `- [x]`.
    - Flip each task row in the milestone's status table: `pending` → `done`.
-5. Flip the milestone status to `done`, then commit in the attached repo per the [Git](#git) guide.
-6. Report milestone completion to the user with a one-paragraph summary (what shipped, any deferred items) before starting the next milestone.
-
-Within a milestone, run tasks in parallel when their files don't overlap and they don't depend on each other. Otherwise run them sequentially. Don't use worktrees — parallel agents share the sprint branch.
+   - Flip the milestone status to `done`.
+   - Commit in the attached repo per the [Git](#git) guide (one commit per milestone).
+5. Report group completion to the user with a one-paragraph summary (what shipped, any deferred items) before starting the next group.
 
 ## Phase 4 Finalize
 

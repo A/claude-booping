@@ -8,6 +8,5 @@ skills:
   retro:   { effort: medium }
 
 agents:
-  booping-developer-middle: { effort: medium }
-  booping-developer-senior: { effort: high }
-  booping-researcher:       { effort: high }
+  booping-developer:  { effort: medium }
+  booping-researcher: { effort: high }

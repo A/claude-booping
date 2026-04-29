@@ -1,7 +1,7 @@
 sprint:
   default_threshold_sp: 35
   redecompose_threshold: 5
-  group_threshold: 1
+  max_milestones_per_agent: 2
   scale:
     - { sp: 1, meaning: "Simple text/config change, no risk" }
     - { sp: 2, meaning: "Simple task, predictable, no risk" }
@@ -27,20 +27,9 @@ skills:
 
   develop:
     agents:
-      booping-developer-middle:
+      booping-developer:
         good_for:
-          - "1–2 SP tasks; batch related tasks up to ~10 SP combined per briefing"
-          - "Mechanical or predictable changes: config edits, simple additions, low-risk refactors"
-        bad_for:
-          - "3+ SP — route to senior"
-          - "Design-judgment work — architectural decisions, non-trivial trade-offs"
-          - "5+ SP — refuse, route back to /groom for re-decomposition"
-      booping-developer-senior:
-        good_for:
-          - "3–4 SP tasks — one per briefing (no batching)"
-        bad_for:
-          - "1–2 SP — cost-effective to route to middle"
-          - "5+ SP — refuse, route back to /groom for re-decomposition"
+          - "All coding tasks — always delegate; never edit application code from the orchestrator"
       booping-researcher:
         good_for:
           - "Phase 0 drift spot-check: given a large set of plan-named files, determine whether actual file shape matches the plan's assumptions"

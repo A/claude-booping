@@ -16,9 +16,9 @@ Storypoints measure the **complexity and review burden** of getting a task to a 
 
 A task estimated **≥ {{ config.sprint.redecompose_threshold }} SP must be re-decomposed** before leaving /groom. Do not promote such a task to `ready-for-dev`.
 {%- endif %}
-{%- if config.sprint.group_threshold %}
+{%- if config.sprint.max_milestones_per_agent %}
 
-Group tasks **≤ {{ config.sprint.group_threshold }} SP** so /develop can hand a batch to a single agent rather than spinning one agent per trivial change.
+/develop may bundle **up to {{ config.sprint.max_milestones_per_agent }} consecutive milestone(s)** into a single agent briefing — size milestones with that combined review burden in mind.
 {%- endif %}
 
 {%- set sp_values = config.sprint.scale | map(attribute="sp") | list %}

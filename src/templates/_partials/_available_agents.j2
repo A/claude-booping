@@ -10,11 +10,12 @@
 {% for t in spec.good_for -%}
 - {{ t }}
 {% endfor %}
-
+{% if spec.bad_for %}
 **Bad for:**
 {% for t in spec.bad_for -%}
 - {{ t }}
 {% endfor %}
+{% endif -%}
 {% endfor -%}
 {%- endif %}
 {%- endmacro %}

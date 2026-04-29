@@ -9,7 +9,7 @@ Stack + conventions only; no commands.
 ```markdown
 # booping-developer (project extension)
 
-Project-local stack and conventions for all active developer-agent tiers.
+Project-local stack and conventions for the developer agent.
 
 ## Stack
 {{language}}

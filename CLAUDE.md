@@ -24,7 +24,7 @@ Runtime template-rendering pipeline + build-time `src/files/` pipeline are both 
 - `src/config_files.yaml` — **build-only** config consumed by `bin/booping build`. Carries frontmatter values that vary across `src/files/**/*.j2` templates (today: just `effort` per skill / per agent). **Not** project-overridable.
 - `src/files/<rel>.j2` — **build-time templates** for every committed `skills/<name>/SKILL.md` and `agents/<name>.md`. Mirrors the plugin root one-to-one. Each template is a thin shell (frontmatter + a single `!`booping render src/templates/...`` line); rendered by `just build` using `src/config_files.yaml`.
 - `src/templates/skills/<name>.md.j2` — runtime skill templates. Rendered at skill-load time via `!`booping render ...`` in the generated thin shell.
-- `src/templates/agents/<name>.md.j2` — runtime agent templates. Same shape. The two developer tiers share `_partials/_developer_body.j2`.
+- `src/templates/agents/<name>.md.j2` — runtime agent templates. Same shape. The developer agent's body lives in `_partials/_developer_body.j2`.
 - `src/templates/docs/plan_lifecycle_overview.md.j2` — the single runtime-rendered doc (uses `config.plan.statuses`). Invoked from `/chat` via `bin/booping render`.
 - `src/templates/_partials/_*.j2` — reusable fragments. Include via `{% include %}` (data-only) or import + macro (parameterized, e.g. `_plan_transitions.j2`). Parameterized partials receive call-site arguments via the `kwargs` namespace.
 - `skills/<name>/SKILL.md` — **build artefact** rendered from `src/files/skills/<name>/SKILL.md.j2`. Never hand-edit; edit the `src/files/` template and run `just build`.
@@ -61,7 +61,7 @@ Content shared across skills/agents, or extracted from a single skill body to ke
 
 - Cross-cutting guides included into multiple skills (git guide, plan transitions, available agents, project context).
 - Process fragments extracted from a single skill into its own partial (sprint planning, plan-frontmatter shape, task classification).
-- Bodies shared across sibling agents (`_developer_body.j2` for the two developer tiers).
+- Bodies extracted from a single agent into a partial (`_developer_body.j2` for the developer agent).
 - Lazy-loaded craft docs (`docs/*.md`) that a skill links into via `[label](${CLAUDE_PLUGIN_ROOT}/docs/<name>.md)` when the situation demands it.
 
 ### Project vault (`~/Claude/{project}/`)
