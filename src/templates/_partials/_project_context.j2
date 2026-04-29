@@ -1,5 +1,14 @@
+{% macro render() -%}
 ## Project Context
 
-!`booping-project-name`
+{% if context.project -%}
+```yaml
+name: {{ context.project.name }}
+directory: {{ context.project.directory }}
+```
+{% else %}
+Project not initialized. Run `/booping:install` first.
+{%- endif %}
 
 On skill load, report the resolved project context back to the user verbatim so they can see which project and vault the skill is operating on.
+{%- endmacro %}

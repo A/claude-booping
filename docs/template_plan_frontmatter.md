@@ -12,4 +12,3 @@ retro: null                      # path to retrospective file, set by /retro
 goal: null                       # success | partial | fail — set by /retro
 business_goal: ""                # features and refactorings: user/internal-visible outcome
 ---
-

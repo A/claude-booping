@@ -1,3 +1,4 @@
+{% macro render() -%}
 ## Plan Structure
 
 A plan is a markdown file at `~/Claude/{project}/plans/{YYYYMMDD}-{kebab-title}.md` (date = first-written date). Three parts in order:
@@ -25,4 +26,7 @@ Pick a plan template whose name + description matches the dominant surface of th
 
 Read the selected template, write the plan against its `# Plan Body`, then verify against its `# Quality Checklist`.
 
-!`booping-plan-templates`
+{% for t in context.plan_templates -%}
+- **{{ t.name }}**{% if t.description %}: {{ t.description }}{% endif %} (`{{ t.path }}`){% if t.source == 'project' %} *(project override)*{% endif %}
+{% endfor %}
+{%- endmacro %}

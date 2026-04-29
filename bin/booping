@@ -1,0 +1,6 @@
+#!/bin/sh
+# Resolve plugin root from this script's location and exec booping Python CLI
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PLUGIN_ROOT="$(dirname "$SCRIPT_DIR")"
+cd "$PLUGIN_ROOT"
+exec uv run --project "$PLUGIN_ROOT/booping-python" booping "$@"

@@ -7,10 +7,4 @@ effort: high
 color: green
 ---
 
-Take the research request, do the research, return a summary of what was requested.
-
-Use whatever sources fit the request — codebase, web search, GitHub, Reddit, documentation, etc. Pick sources based on the request, not a fixed checklist.
-
-Return only the summary. No file edits. No decisions on behalf of the caller.
-
-!`booping-extra-instructions agent_booping-researcher.md`
+!`booping render agents/booping-researcher.md.j2`

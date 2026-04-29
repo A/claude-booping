@@ -97,4 +97,3 @@ _Terminal — no outgoing transitions._
 Terminal product decision. User shelved the plan.
 
 _Terminal — no outgoing transitions._
-

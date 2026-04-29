@@ -7,12 +7,7 @@ effort: {{ config.skills.help.effort }}
 allowed-tools:
   - Read
   - Bash(ls *)
-  - Bash(booping-commands:*)
-  - Bash(booping-skills:*)
-  - Bash(booping-agents:*)
-  - Bash(booping-workflow:*)
-  - Bash(booping-project-name:*)
-  - Bash(booping-extra-instructions:*)
+  - Bash(booping:*)
 ---
 
 # booping — /help
@@ -37,11 +32,25 @@ Decide which body section(s) to print based on `$ARGUMENTS`:
 
 Print the section(s) chosen in Phase 0 verbatim, in the order listed above.
 
-!`booping-commands`
+## Commands
 
-!`booping-skills`
+- `/booping:help [topic]` — show this help
+- `/booping:install [project-name]` — scaffold or attach a project
+- `/booping:chat [topic]` — vault navigation and discussion
+- `/booping:groom <topic>` — shape new work into a plan
+- `/booping:develop <plan-path>` — execute a groomed plan
+- `/booping:retro <plan-path>` — write a retrospective
+- `/booping:learn <retro-path>` — absorb lessons from a retro
 
-!`booping-agents`
+## Skills
+
+{% for name, skill in context.skills.items() -%}
+- **`{{ name }}`**: {{ skill.description }}{% endfor %}
+
+## Agents
+
+{% for name, agent in context.agents.items() -%}
+- **`{{ name }}`**: {{ agent.description }}{% endfor %}
 
 ## Layout
 
@@ -56,15 +65,19 @@ Print the section(s) chosen in Phase 0 verbatim, in the order listed above.
     └── sprints.md               # regenerated on every plan transition
 ```
 
-!`booping-workflow`
+## Workflow
+
+{% for status_name, status in config.plan.statuses.items() -%}
+- **{{ status_name }}**: {{ status.desc }}{% if status.terminal %} _(terminal)_{% endif %}
+{% endfor %}
 
 ## Extensions
 
-Project-specific guidance and accumulated knowledge layer onto skills and agents at runtime:
+Project-specific guidance and accumulated knowledge layer onto skills and agents at runtime via the runtime context loader:
 
-- **Lessons** — `~/Claude/{project}/lessons/*.md`. Authored by `/learn` after retrospectives; inlined into every skill at load via `!`booping-lessons``.
-- **Skill overrides** — `~/Claude/{project}/_booping/skill_<name>.md`. Inlined into the matching skill at load via `!`booping-extra-instructions skill_<name>.md``.
-- **Agent overrides** — `~/Claude/{project}/_booping/agent_booping-<name>.md`. Inlined into the matching agent at load via `!`booping-extra-instructions agent_booping-<name>.md``.
+- **Lessons** — `~/Claude/{project}/lessons/*.md`. Authored by `/learn` after retrospectives; inlined into every skill at load.
+- **Skill overrides** — `~/Claude/{project}/_booping/skill_<name>.md`. Inlined into the matching skill at load.
+- **Agent overrides** — `~/Claude/{project}/_booping/agent_booping-<name>.md`. Inlined into the matching agent at load.
 
 ## Hard rules
 
@@ -74,4 +87,4 @@ Project-specific guidance and accumulated knowledge layer onto skills and agents
 
 - `README.md` — higher-level overview.
 
-!`booping-extra-instructions skill_help.md`
+{{ tools.render('_partials/_extra_instructions.j2', extra_instruction_key='skill_help') }}

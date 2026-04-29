@@ -1,0 +1,8 @@
+sprint:
+  default_threshold_sp: 35
+  redecompose_threshold: 5
+  group_threshold: 1
+  scale:
+    - { sp: 1, meaning: "Simple" }
+    - { sp: 2, meaning: "Medium" }
+    - { sp: 3, meaning: "Complex" }

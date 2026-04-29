@@ -1,0 +1,12 @@
+{% macro render(key) -%}
+{%- set content = context.extra_instructions.get(key, '') -%}
+{%- if content -%}
+---
+
+## User-specific instructions
+
+{{ content.strip() }}
+
+---
+{%- endif -%}
+{%- endmacro %}

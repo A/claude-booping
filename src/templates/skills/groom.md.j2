@@ -14,12 +14,7 @@ allowed-tools:
   - Bash(git add *)
   - Bash(git commit *)
   - Bash(booping-external-llm-call:*)
-  - Bash(booping-plans:*)
-  - Bash(booping-project-name:*)
-  - Bash(booping-sprint-threshold:*)
-  - Bash(booping-extra-instructions:*)
-  - Bash(booping-lessons:*)
-  - Bash(booping-plan-templates:*)
+  - Bash(booping:*)
   - Agent
   - AskUserQuestion
   - WebSearch
@@ -49,7 +44,7 @@ Produces a development plan across domains (backend, frontend, Claude Code skill
 
 {% include "_partials/_plan_template.j2" %}
 
-!`booping-lessons`
+{% include "_partials/_lessons.j2" %}
 
 ## Craft
 
@@ -74,4 +69,4 @@ Groom produces a specified, estimated, user-reviewed plan. The transitions table
 - Does **not** start implementation — even tempting 1-SP items.
 - Does **not** duplicate lesson content. Reference lessons by ID.
 
-!`booping-extra-instructions skill_groom.md`
+{{ tools.render('_partials/_extra_instructions.j2', extra_instruction_key='skill_groom') }}

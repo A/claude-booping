@@ -14,9 +14,6 @@ allowed-tools:
   - Bash(git add *)
   - Bash(git commit *)
   - Bash(grep *)
-  - Bash(booping-debug-mode:*)
-  - Bash(booping-project-name:*)
-  - Bash(booping-plans:*)
   - AskUserQuestion
 effort: {{ config.skills.learn.effort }}
 ---
@@ -37,11 +34,17 @@ Turn retrospective findings into durable behavior changes routed to exactly one 
 
 {% include "_partials/_learn_targets.j2" %}
 
-!`booping-debug-mode learn`
+{% if context.skills.learn.debug_enabled %}Debug mode enabled. You can update this skill at <template path>{% endif %}
 
 ## Plans awaiting learning
 
-!`booping-plans --status {{ config.skills.learn.status }}`
+{% for plan in context.plans -%}
+{%- if plan.status == config.skills.learn.status -%}
+- [`{{ plan.title }}`]({{ plan.path }}) ({{ plan.type }}, {{ plan.sp }} SP)
+{%- endif -%}
+{% endfor %}
+{% if context.plans | selectattr('status', 'equalto', config.skills.learn.status) | list | length == 0 %}_(empty)_
+{% endif %}
 
 ## High-level workflow
 
@@ -132,4 +135,3 @@ cd <repo-path>
 git add CLAUDE.md
 git commit -m "docs(claude-md): <short summary>"
 ```
-

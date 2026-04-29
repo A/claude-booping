@@ -1,0 +1,32 @@
+[project]
+name = "booping"
+version = "0.1.0"
+description = "Booping plugin runtime renderer"
+requires-python = ">=3.12"
+package = "."
+dependencies = [
+    "jinja2>=3.1.0",
+    "pyyaml>=6.0",
+    "pydantic>=2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-snapshot>=0.9",
+    "ruff>=0.1.0",
+    "basedpyright>=1.0",
+]
+
+[project.scripts]
+booping = "booping.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.ruff]
+src = ["src"]
+
+[tool.basedpyright]
+pythonVersion = "3.12"

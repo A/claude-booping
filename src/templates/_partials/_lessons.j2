@@ -1,0 +1,15 @@
+{% macro render() -%}
+{%- if context.lessons -%}
+## Lessons
+
+{% for lesson in context.lessons -%}
+### {{ loop.index }}. {{ lesson.title }}
+
+{{ lesson.body.strip() }}
+
+{% endfor %}
+{% if context.lessons | length == 1 %}lesson{% else %}lessons{% endif %} loaded from `~/Claude/{project}/lessons/`. Conflicts are resolved by preferring the first lesson in iteration order.
+{% else %}
+No lessons accumulated yet.
+{% endif %}
+{%- endmacro %}
