@@ -10,7 +10,8 @@ from jinja2.ext import LoopControlExtension
 
 from booping.context import Context
 from booping.context.config import Config as ConfigLoader
-from booping.rendering import find_plugin_root
+from booping.rendering import find_plugin_root, render
+from booping.tools import Tools
 
 if TYPE_CHECKING:
     import argparse
@@ -165,9 +166,16 @@ def handle_debug_template(args: argparse.Namespace) -> int:
     tpl = env.get_template(str(template_rel))
 
     context = ctx.model_dump(mode="python")
+    tools = Tools(
+        render_fn=render,
+        plugin_root=str(plugin_root),
+        vault=str(vault) if vault else None,
+    )
     render_globals: dict[str, Any] = {
         "context": context,
         "config": ctx.config,
+        "tools": tools,
+        "kwargs": {},
     }
 
     try:
