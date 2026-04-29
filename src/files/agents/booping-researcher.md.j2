@@ -1,0 +1,10 @@
+---
+name: booping-researcher
+description: Researcher for booping. Encapsulates heavy reads (many files, web pages, repo histories) and returns a focused summary so the orchestrator's context stays clean. Use when the answer requires processing more material than the orchestrator should ingest directly.
+tools: Read, Glob, Grep, Bash(git log *), Bash(git diff *), Bash(git show *), Bash(ls *), WebSearch, WebFetch
+model: sonnet
+effort: {{ agents["booping-researcher"].effort }}
+color: green
+---
+
+!`booping render src/templates/agents/booping-researcher.md.j2`

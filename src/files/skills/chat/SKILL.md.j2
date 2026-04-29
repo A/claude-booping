@@ -1,0 +1,23 @@
+---
+name: chat
+description: "Context-aware chat about the project: discuss plans, retros, lessons, and code; navigate the vault; and handle chores (frontmatter tweaks, status flips, inline plan or code edits) without invoking the heavier skills. Opens every session with a vault status summary."
+argument-hint: [topic or artifact reference]
+user-invocable: true
+allowed-tools:
+  - Read
+  - Write
+  - Edit
+  - Glob
+  - Grep
+  - Bash(booping:*)
+  - Bash(ls *)
+  - Bash(git status *)
+  - Bash(git log *)
+  - Bash(git diff *)
+  - Bash(cat ~/Claude/*)
+  - AskUserQuestion
+  - Agent
+effort: {{ skills.chat.effort }}
+---
+
+!`booping render src/templates/skills/chat.md.j2`
