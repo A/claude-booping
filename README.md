@@ -16,7 +16,7 @@ booping is aimed at **experienced developers and tech leads** — people comfort
 
 It's built for **iterative, agile-style development**: maintenance, incremental features, or growing a project sprint by sprint. It is **not** a waterfall tool — don't hand it a whole-project spec and expect a finished product. One plan is one sprint; the loop compounds across many.
 
-The framework is **in beta**. Planned next steps include a `/code-review` skill that addresses review feedback context-aware in fresh sessions, and per-project configuration so users can tune the lifecycle, sprint scale, and agent wiring without forking the plugin.
+The framework is **in beta**. Per-project configuration is now live: place a `~/Claude/{project}/config.yaml` file in your vault and it deep-merges over the plugin's `src/config.yaml` at render time — the lifecycle, sprint scale, and agent wiring are the natural targets for per-project tuning. Planned next steps include a `/code-review` skill that addresses review feedback context-aware in fresh sessions.
 
 ## Dependencies
 
