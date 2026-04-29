@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 from booping.context import Context
-from booping.rendering import render
+from booping.rendering import get_plugin_root, render
 
 
 def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:  # type: ignore[type-arg]
@@ -17,8 +17,11 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
 
 def _run(args: argparse.Namespace) -> None:
     ctx = Context.assemble()
+    template_path: Path = args.path
+    if not template_path.is_absolute():
+        template_path = get_plugin_root() / template_path
     result = render(
-        template_path=args.path,
+        template_path=template_path,
         context=ctx,
         config=ctx.config,
         tools={},
