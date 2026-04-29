@@ -3,6 +3,7 @@ from typing import Any
 
 import yaml
 from jinja2 import Environment, FileSystemLoader, Undefined
+from jinja2.ext import LoopControlExtension
 
 from booping.context import Context
 from booping.tools import Tools
@@ -93,6 +94,7 @@ def render(
         autoescape=False,
         keep_trailing_newline=True,
         undefined=LenientUndefined,
+        extensions=[LoopControlExtension],
     )
 
     template_rel = Path(template_path).resolve().relative_to(templates_dir)

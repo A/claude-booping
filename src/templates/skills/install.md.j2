@@ -139,4 +139,4 @@ This mismatch check prevents silently feeding a new Python repo with an old Rust
 - **Never write `.booping` without asking.** Attach mode prompts for confirmation before writing the marker.
 - **Never edit the attached repo's own `CLAUDE.md`.** This skill only writes under `~/Claude/{project}/`.
 
-!`booping-extra-instructions skill_install.md`
+{{ tools.render('src/templates/_partials/_extra_instructions.j2', extra_instruction_key='skill_install') }}

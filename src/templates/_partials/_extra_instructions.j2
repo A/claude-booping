@@ -1,5 +1,5 @@
 {%- set key = kwargs.extra_instruction_key -%}
-{%- set body = context.extra_instructions.get(key, "") -%}
+{%- set body = context.extra_instructions[key] if key in context.extra_instructions else "" -%}
 {%- if body %}
 ## User-specific instructions
 

@@ -1,18 +1,12 @@
 ---
 name: help
-description: Show what booping is, the available commands, and how to use them. Use when the user asks for help, wants a tour of the plugin, or is onboarding.
+description: "Show what booping is, the available commands, and how to use them. Use when the user asks for help, wants a tour of the plugin, or is onboarding."
 argument-hint: "[topic: skills | agents | layout | workflow | extensions]"
 user-invocable: true
 effort: {{ config.skills.help.effort }}
 allowed-tools:
   - Read
   - Bash(ls *)
-  - Bash(booping-commands:*)
-  - Bash(booping-skills:*)
-  - Bash(booping-agents:*)
-  - Bash(booping-workflow:*)
-  - Bash(booping-project-name:*)
-  - Bash(booping-extra-instructions:*)
 ---
 
 # booping — /help
@@ -37,11 +31,41 @@ Decide which body section(s) to print based on `$ARGUMENTS`:
 
 Print the section(s) chosen in Phase 0 verbatim, in the order listed above.
 
-!`booping-commands`
+## Commands
 
-!`booping-skills`
+```
+booping — per-project grooming / implementation / retro / lessons with mandatory sub-agent delegation
+{%- if context.project is none %}
 
-!`booping-agents`
+First time in a repo:  /install
+{%- endif %}
+
+Start a discussion:    /chat
+Spec new work:         /groom <topic>
+  ↳ review the plan, refine scope and acceptance criteria — better plan, better results
+Execute a plan:        /develop ~/Claude/<project>/plans/YYYYMMDD-*.md
+  ↳ code-review the diff and address feedback before retro
+After a sprint ships:  /retro ~/Claude/<project>/plans/YYYYMMDD-*.md
+Extract lessons:       /learn [~/Claude/<project>/retrospectives/YYYYMMDD-*.md]
+```
+
+Artifacts live at `~/Claude/{project}/`.
+
+## Skills
+
+| Slash | Purpose |
+|-------|---------|
+{%- for name, skill in context.skills | dictsort(by="key") %}
+| `/{{ name }}` | {{ skill.description }} |
+{%- endfor %}
+
+## Agents
+
+| Agent | Description | Model |
+|-------|-------------|-------|
+{%- for name, agent in context.agents | dictsort(by="key") %}
+| `{{ name }}` | {{ agent.description }} | {{ agent.model or "" }} |
+{%- endfor %}
 
 ## Layout
 
@@ -56,15 +80,145 @@ Print the section(s) chosen in Phase 0 verbatim, in the order listed above.
     └── sprints.md               # regenerated on every plan transition
 ```
 
-!`booping-workflow`
+{% set workflow_skill_order = ["groom", "develop", "retro", "learn"] -%}
+{%- set terminal_statuses = [] -%}
+{%- for key, s in config.plan.statuses.items() -%}
+{%- if s.get("terminal", false) -%}
+{%- set _ = terminal_statuses.append(key) -%}
+{%- endif -%}
+{%- endfor -%}
+{%- set by_skill = {} -%}
+{%- for from_status, s in config.plan.statuses.items() -%}
+{%- for t in (s.get("transitions") or []) -%}
+{%- set skill = t.get("skill", "") -%}
+{%- if skill -%}
+{%- if skill not in by_skill -%}
+{%- set _ = by_skill.update({skill: []}) -%}
+{%- endif -%}
+{%- set _ = by_skill[skill].append({"from": from_status, "to": t["to"]}) -%}
+{%- endif -%}
+{%- endfor -%}
+{%- endfor -%}
+{%- set ordered_skills = [] -%}
+{%- for s in workflow_skill_order -%}
+{%- if s in by_skill -%}
+{%- set _ = ordered_skills.append(s) -%}
+{%- endif -%}
+{%- endfor -%}
+{%- for s in by_skill | dictsort(by="key") -%}
+{%- if s[0] not in ordered_skills -%}
+{%- set _ = ordered_skills.append(s[0]) -%}
+{%- endif -%}
+{%- endfor -%}
+## Workflow
+
+```text
+{%- for skill in ordered_skills %}
+{%- set transitions = by_skill[skill] -%}
+{%- set all_froms = [] -%}{%- set all_tos = [] -%}
+{%- for t in transitions -%}
+{%- set _ = all_froms.append(t["from"]) -%}
+{%- set _ = all_tos.append(t["to"]) -%}
+{%- endfor -%}
+{%- set entry_candidates = [] -%}
+{%- for f in all_froms -%}
+{%- if f not in all_tos -%}
+{%- set _ = entry_candidates.append(f) -%}
+{%- endif -%}
+{%- endfor -%}
+{%- if not entry_candidates -%}
+{%- set entry = transitions[0]["from"] -%}
+{%- else -%}
+{%- set entry = entry_candidates[0] -%}
+{%- endif -%}
+{%- set chain = [entry] -%}
+{%- set current = entry -%}
+{%- for _ in range(20) -%}
+{%- set nexts = [] -%}
+{%- for t in transitions -%}
+{%- if t["from"] == current and t["to"] not in chain and t["to"] not in terminal_statuses -%}
+{%- set _ = nexts.append(t["to"]) -%}
+{%- endif -%}
+{%- endfor -%}
+{%- if nexts -%}
+{%- set nxt = nexts[0] -%}
+{%- set _ = chain.append(nxt) -%}
+{%- set current = nxt -%}
+{%- else -%}
+{%- set done_steps = [] -%}
+{%- for t in transitions -%}
+{%- if t["from"] == current and t["to"] == "done" -%}
+{%- set _ = done_steps.append(t["to"]) -%}
+{%- endif -%}
+{%- endfor -%}
+{%- if done_steps -%}
+{%- set _ = chain.append("done") -%}
+{%- endif -%}
+{%- break -%}
+{%- endif -%}
+{%- endfor -%}
+{%- set primary_edges = [] -%}
+{%- for i in range(chain | length - 1) -%}
+{%- set _ = primary_edges.append((chain[i], chain[i+1])) -%}
+{%- endfor -%}
+{%- set annotations = {"loopback": [], "parking": [], "cancellation": [], "failure": [], "skip": []} -%}
+{%- for t in transitions -%}
+{%- set frm = t["from"] -%}
+{%- set to = t["to"] -%}
+{%- set is_primary = false -%}
+{%- for pe in primary_edges -%}
+{%- if pe[0] == frm and pe[1] == to -%}
+{%- set is_primary = true -%}
+{%- endif -%}
+{%- endfor -%}
+{%- if not is_primary -%}
+{%- if to == "cancelled" -%}
+{%- set _ = annotations["cancellation"].append(frm) -%}
+{%- elif to == "fail" -%}
+{%- set _ = annotations["failure"].append(frm) -%}
+{%- elif to == "done" -%}
+{%- set _ = annotations["skip"].append(frm) -%}
+{%- elif to == "backlog" -%}
+{%- set _ = annotations["parking"].append(frm ~ " → " ~ to) -%}
+{%- elif to in chain and frm in chain and chain.index(to) < chain.index(frm) -%}
+{%- set _ = annotations["loopback"].append(frm ~ " → " ~ to) -%}
+{%- else -%}
+{%- set _ = annotations["parking"].append(frm ~ " → " ~ to) -%}
+{%- endif -%}
+{%- endif -%}
+{%- endfor -%}
+/{{ skill }}    {{ chain | join(" → ") }}
+{%- if annotations["loopback"] -%}
+{%- for item in annotations["loopback"] %}
+          (loopback: {{ item }})
+{%- endfor -%}
+{%- endif -%}
+{%- if annotations["parking"] -%}
+{%- for item in annotations["parking"] %}
+          (parking: {{ item }})
+{%- endfor -%}
+{%- endif -%}
+{%- if annotations["cancellation"] -%}
+          (cancellation: {{ annotations["cancellation"] | join("/") }} → cancelled)
+{%- endif -%}
+{%- if annotations["failure"] -%}
+          (failure: {{ annotations["failure"] | join("/") }} → fail)
+{%- endif -%}
+{%- if annotations["skip"] -%}
+          (skip: {{ annotations["skip"] | join("/") }} → done)
+{%- endif -%}
+{%- endfor %}
+
+Terminal states: {{ terminal_statuses | join(" · ") }}
+```
 
 ## Extensions
 
 Project-specific guidance and accumulated knowledge layer onto skills and agents at runtime:
 
-- **Lessons** — `~/Claude/{project}/lessons/*.md`. Authored by `/learn` after retrospectives; inlined into every skill at load via `!`booping-lessons``.
-- **Skill overrides** — `~/Claude/{project}/_booping/skill_<name>.md`. Inlined into the matching skill at load via `!`booping-extra-instructions skill_<name>.md``.
-- **Agent overrides** — `~/Claude/{project}/_booping/agent_booping-<name>.md`. Inlined into the matching agent at load via `!`booping-extra-instructions agent_booping-<name>.md``.
+- **Lessons** — `~/Claude/{project}/lessons/*.md`. Authored by `/learn` after retrospectives; loaded into every skill at render time via the lessons context loader.
+- **Skill overrides** — `~/Claude/{project}/_booping/skill_<name>.md`. Loaded into the matching skill at render time via the extra-instructions context loader.
+- **Agent overrides** — `~/Claude/{project}/_booping/agent_booping-<name>.md`. Loaded into the matching agent at render time via the extra-instructions context loader.
 
 ## Hard rules
 
@@ -74,4 +228,4 @@ Project-specific guidance and accumulated knowledge layer onto skills and agents
 
 - `README.md` — higher-level overview.
 
-!`booping-extra-instructions skill_help.md`
+{{ tools.render('src/templates/_partials/_extra_instructions.j2', extra_instruction_key='skill_help') }}
