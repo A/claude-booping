@@ -1,0 +1,7 @@
+# Help
+
+Sprint threshold: {{ config.sprint.default_threshold_sp }}
+
+{% for task in config.tasks %}
+- {{ task.type }}: {{ task.description }}
+{% endfor %}

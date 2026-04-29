@@ -3,4 +3,8 @@ __pycache__/
 *.pyc
 .DS_Store
 .booping
+!booping-python/tests/__fixtures__/**/.booping
 .debug_enabled
+booping-python/.venv/
+booping-python/.pytest_cache/
+booping-python/.ruff_cache/

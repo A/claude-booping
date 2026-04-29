@@ -1,0 +1,1 @@
+Project-specific grooming rules: always require a design doc for feature plans.

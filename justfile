@@ -8,3 +8,15 @@ build:
 # Watch src/ and re-render on change
 watch:
     bin/booping-build --watch
+
+# Lint booping-python
+lint:
+    cd booping-python && uv run ruff check .
+
+# Typecheck booping-python
+typecheck:
+    cd booping-python && uv run basedpyright
+
+# Test booping-python
+test:
+    cd booping-python && uv run pytest

@@ -1,0 +1,36 @@
+sprint:
+  default_threshold_sp: 35
+  redecompose_threshold: 5
+  group_threshold: 1
+  scale:
+    - { sp: 1, meaning: "Simple text/config change" }
+    - { sp: 2, meaning: "Simple task" }
+    - { sp: 3, meaning: "Medium task" }
+    - { sp: 4, meaning: "Complex task" }
+    - { sp: 5, meaning: "Research task" }
+
+tasks:
+  - type: feature
+    description: "New user-facing capability"
+  - type: bug
+    description: "Defect"
+
+skills:
+  help:
+    effort: low
+
+plan:
+  statuses:
+    backlog:
+      desc: "Parked plan"
+      owner: groom
+      terminal: false
+      transitions: []
+    in-spec:
+      desc: "Actively specifying"
+      owner: groom
+      terminal: false
+      transitions: []
+    done:
+      desc: "Terminal success"
+      terminal: true
