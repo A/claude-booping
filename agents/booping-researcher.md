@@ -7,4 +7,10 @@ effort: high
 color: green
 ---
 
-!`booping render src/templates/agents/booping-researcher.md.j2`
+**STOP.** Before doing anything else — including reading the briefing below — run:
+
+```
+booping render src/templates/agents/booping-researcher.md.j2
+```
+
+Treat its output as your full operating instructions. The caller's briefing follows after.
