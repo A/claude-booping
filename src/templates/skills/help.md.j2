@@ -7,12 +7,6 @@ effort: {{ config.skills.help.effort }}
 allowed-tools:
   - Read
   - Bash(ls *)
-  - Bash(booping-commands:*)
-  - Bash(booping-skills:*)
-  - Bash(booping-agents:*)
-  - Bash(booping-workflow:*)
-  - Bash(booping-project-name:*)
-  - Bash(booping-extra-instructions:*)
 ---
 
 # booping — /help
@@ -37,11 +31,43 @@ Decide which body section(s) to print based on `$ARGUMENTS`:
 
 Print the section(s) chosen in Phase 0 verbatim, in the order listed above.
 
-!`booping-commands`
+{# --- Commands block --- #}
+{% set _cmd_rows = [] %}
+{% if context.project is none %}{% set _cmd_rows = _cmd_rows + [("First time in a repo:", "/install")] %}{% endif %}
+{% set _cmd_rows = _cmd_rows + [
+  ("Start a discussion:", "/chat"),
+  ("Spec new work:", "/groom <topic>"),
+  ("Execute a plan:", "/develop ~/Claude/<project>/plans/YYYYMMDD-*.md"),
+  ("After a sprint ships:", "/retro ~/Claude/<project>/plans/YYYYMMDD-*.md"),
+  ("Extract lessons:", "/learn [~/Claude/<project>/retrospectives/YYYYMMDD-*.md]"),
+] %}
+{% set _cmd_ns = namespace(width=0) %}
+{% for row in _cmd_rows %}{% if row[0] | length > _cmd_ns.width %}{% set _cmd_ns.width = row[0] | length %}{% endif %}{% endfor %}
+## Commands
 
-!`booping-skills`
+```
+booping — per-project grooming / implementation / retro / lessons with mandatory sub-agent delegation
 
-!`booping-agents`
+{% for row in _cmd_rows %}{{ "%-*s  %s" | format(_cmd_ns.width, row[0], row[1]) }}
+{% if row[1] == "/groom <topic>" %}  ↳ review the plan, refine scope and acceptance criteria — better plan, better results
+{% elif row[1] == "/develop ~/Claude/<project>/plans/YYYYMMDD-*.md" %}  ↳ code-review the diff and address feedback before retro
+{% endif %}{% endfor %}```
+
+Artifacts live at `~/Claude/{project}/`.
+
+## Skills
+
+| Slash | Purpose |
+|-------|---------|
+{% for name, skill in context.skills.items() %}| `{{ "/" + name }}` | {{ skill.description }} |
+{% endfor %}
+
+## Agents
+
+| Agent | Description | Model |
+|-------|-------------|-------|
+{% for name, agent in context.agents.items() %}| `{{ name }}` | {{ agent.description }} | {{ agent.model or "" }} |
+{% endfor %}
 
 ## Layout
 
@@ -56,15 +82,120 @@ Print the section(s) chosen in Phase 0 verbatim, in the order listed above.
     └── sprints.md               # regenerated on every plan transition
 ```
 
-!`booping-workflow`
+{# --- Workflow block --- #}
+{# Step 1: collect terminal statuses #}
+{% set _statuses = config.plan.statuses %}
+{% set _t_ns = namespace(terminals=[]) %}
+{% for sname, sdata in _statuses.items() %}{% if sdata.terminal %}{% set _t_ns.terminals = _t_ns.terminals + [sname] %}{% endif %}{% endfor %}
+{% set _terminals_sorted = _t_ns.terminals | sort %}
+
+{# Step 2: collect transitions by skill via dict mutation #}
+{% set _by_skill = {} %}
+{% for sname, sdata in _statuses.items() %}
+{% for t in sdata.transitions or [] %}
+{% if t.skill %}
+{% if t.skill not in _by_skill %}{% set _ = _by_skill.update({t.skill: []}) %}{% endif %}
+{% set _ = _by_skill[t.skill].append({"from": sname, "to": t.to}) %}
+{% endif %}
+{% endfor %}
+{% endfor %}
+
+{# Step 3: ordered skill list #}
+{% set _skill_order_defined = ["groom", "develop", "retro", "learn"] %}
+{% set _ord_ns = namespace(ordered=[]) %}
+{% for s in _skill_order_defined %}{% if s in _by_skill %}{% set _ord_ns.ordered = _ord_ns.ordered + [s] %}{% endif %}{% endfor %}
+{% for s in _by_skill.keys() | sort %}{% if s not in _skill_order_defined %}{% set _ord_ns.ordered = _ord_ns.ordered + [s] %}{% endif %}{% endfor %}
+
+{# Step 4: build chain block per skill #}
+{% set _wf_ns = namespace(skill_blocks=[]) %}
+{% for skill in _ord_ns.ordered %}
+{% set _transitions = _by_skill[skill] %}
+
+{# Build adjacency via dict mutation #}
+{% set _adj = {} %}
+{% set _adj_ns = namespace(all_froms=[], all_tos=[]) %}
+{% for t in _transitions %}
+{% if t.from not in _adj %}{% set _ = _adj.update({t.from: []}) %}{% endif %}
+{% set _ = _adj[t.from].append(t.to) %}
+{% if t.from not in _adj_ns.all_froms %}{% set _adj_ns.all_froms = _adj_ns.all_froms + [t.from] %}{% endif %}
+{% if t.to not in _adj_ns.all_tos %}{% set _adj_ns.all_tos = _adj_ns.all_tos + [t.to] %}{% endif %}
+{% endfor %}
+
+{# Find entry: froms not reachable as a 'to' in this skill #}
+{% set _entry_ns = namespace(candidates=[]) %}
+{% for f in _adj_ns.all_froms %}{% if f not in _adj_ns.all_tos %}{% set _entry_ns.candidates = _entry_ns.candidates + [f] %}{% endif %}{% endfor %}
+{% if not _entry_ns.candidates %}{% set _entry_ns.candidates = [_transitions[0].from] %}{% endif %}
+{% set _entry = (_entry_ns.candidates | sort)[0] %}
+
+{# Walk primary chain using namespace for mutable state #}
+{% set _chain_ns = namespace(chain=[_entry], current=_entry, done=false) %}
+{% for _step in range(20) %}
+{% if not _chain_ns.done %}
+{% set _nxts = _adj.get(_chain_ns.current, []) %}
+{% set _fwd_ns = namespace(found=[]) %}
+{% for n in _nxts %}{% if n not in _terminals_sorted and n not in _chain_ns.chain %}{% set _fwd_ns.found = _fwd_ns.found + [n] %}{% endif %}{% endfor %}
+{% if _fwd_ns.found %}
+{% set _chain_ns.chain = _chain_ns.chain + [_fwd_ns.found[0]] %}
+{% set _chain_ns.current = _fwd_ns.found[0] %}
+{% else %}
+{% set _done_ns = namespace(has_done=false) %}
+{% for n in _nxts %}{% if n == "done" %}{% set _done_ns.has_done = true %}{% endif %}{% endfor %}
+{% if _done_ns.has_done %}{% set _chain_ns.chain = _chain_ns.chain + ["done"] %}{% endif %}
+{% set _chain_ns.done = true %}
+{% endif %}
+{% endif %}
+{% endfor %}
+
+{# Primary edges as set of "from|to" strings #}
+{% set _edges_ns = namespace(primary=[]) %}
+{% for i in range(_chain_ns.chain | length - 1) %}{% set _edges_ns.primary = _edges_ns.primary + [_chain_ns.chain[i] + "|" + _chain_ns.chain[i+1]] %}{% endfor %}
+
+{# Classify off-chain transitions #}
+{% set _ann_ns = namespace(loopback=[], parking=[], cancel_froms=[], fail_froms=[], skip_froms=[]) %}
+{% for t in _transitions %}
+{% set _edge_key = t.from + "|" + t.to %}
+{% if _edge_key not in _edges_ns.primary %}
+{% if t.to in _terminals_sorted and t.to == "cancelled" %}
+{% set _ann_ns.cancel_froms = _ann_ns.cancel_froms + [t.from] %}
+{% elif t.to in _terminals_sorted and t.to == "fail" %}
+{% set _ann_ns.fail_froms = _ann_ns.fail_froms + [t.from] %}
+{% elif t.to in _terminals_sorted and t.to == "done" %}
+{% set _ann_ns.skip_froms = _ann_ns.skip_froms + [t.from] %}
+{% elif t.to == "backlog" %}
+{% set _ann_ns.parking = _ann_ns.parking + [t.from + " → " + t.to] %}
+{% elif t.to in _chain_ns.chain and _chain_ns.chain.index(t.to) < _chain_ns.chain.index(t.from) %}
+{% set _ann_ns.loopback = _ann_ns.loopback + [t.from + " → " + t.to] %}
+{% else %}
+{% set _ann_ns.parking = _ann_ns.parking + [t.from + " → " + t.to] %}
+{% endif %}
+{% endif %}
+{% endfor %}
+
+{# Build the block text via list mutation #}
+{% set _block = ["/" + skill.ljust(8) + " " + (_chain_ns.chain | join(" → "))] %}
+{% for item in _ann_ns.loopback %}{% set _ = _block.append("          (loopback: " + item + ")") %}{% endfor %}
+{% for item in _ann_ns.parking %}{% set _ = _block.append("          (parking: " + item + ")") %}{% endfor %}
+{% if _ann_ns.cancel_froms %}{% set _ = _block.append("          (cancellation: " + (_ann_ns.cancel_froms | join("/")) + " → cancelled)") %}{% endif %}
+{% if _ann_ns.fail_froms %}{% set _ = _block.append("          (failure: " + (_ann_ns.fail_froms | join("/")) + " → fail)") %}{% endif %}
+{% if _ann_ns.skip_froms %}{% set _ = _block.append("          (skip: " + (_ann_ns.skip_froms | join("/")) + " → done)") %}{% endif %}
+{% set _wf_ns.skill_blocks = _wf_ns.skill_blocks + [_block | join("\n")] %}
+{% endfor %}
+
+## Workflow
+
+```text
+{{ _wf_ns.skill_blocks | join("\n\n") }}
+
+Terminal states: {{ _terminals_sorted | join(" · ") }}
+```
 
 ## Extensions
 
 Project-specific guidance and accumulated knowledge layer onto skills and agents at runtime:
 
-- **Lessons** — `~/Claude/{project}/lessons/*.md`. Authored by `/learn` after retrospectives; inlined into every skill at load via `!`booping-lessons``.
-- **Skill overrides** — `~/Claude/{project}/_booping/skill_<name>.md`. Inlined into the matching skill at load via `!`booping-extra-instructions skill_<name>.md``.
-- **Agent overrides** — `~/Claude/{project}/_booping/agent_booping-<name>.md`. Inlined into the matching agent at load via `!`booping-extra-instructions agent_booping-<name>.md``.
+- **Lessons** — `~/Claude/{project}/lessons/*.md`. Authored by `/learn` after retrospectives; loaded into every skill at startup via the runtime context loader.
+- **Skill overrides** — `~/Claude/{project}/_booping/skill_<name>.md`. Loaded into the matching skill at startup via the runtime context loader.
+- **Agent overrides** — `~/Claude/{project}/_booping/agent_booping-<name>.md`. Loaded into the matching agent at startup via the runtime context loader.
 
 ## Hard rules
 
@@ -74,4 +205,4 @@ Project-specific guidance and accumulated knowledge layer onto skills and agents
 
 - `README.md` — higher-level overview.
 
-!`booping-extra-instructions skill_help.md`
+{{ tools.render('src/templates/_partials/_extra_instructions.j2', extra_instruction_key='skill_help') }}

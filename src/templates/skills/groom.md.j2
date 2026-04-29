@@ -49,7 +49,7 @@ Produces a development plan across domains (backend, frontend, Claude Code skill
 
 {% include "_partials/_plan_template.j2" %}
 
-!`booping-lessons`
+{{ tools.render('src/templates/_partials/_lessons.j2') }}
 
 ## Craft
 
@@ -74,4 +74,4 @@ Groom produces a specified, estimated, user-reviewed plan. The transitions table
 - Does **not** start implementation — even tempting 1-SP items.
 - Does **not** duplicate lesson content. Reference lessons by ID.
 
-!`booping-extra-instructions skill_groom.md`
+{{ tools.render('src/templates/_partials/_extra_instructions.j2', extra_instruction_key='skill_groom') }}

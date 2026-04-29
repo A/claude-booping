@@ -37,8 +37,3 @@ include = ["src", "tests"]
 extraPaths = ["src"]
 pythonVersion = "3.12"
 typeCheckingMode = "strict"
-
-[tool.pyright]
-include = ["src", "tests"]
-extraPaths = ["src"]
-pythonVersion = "3.12"

@@ -25,4 +25,25 @@ Pick a plan template whose name + description matches the dominant surface of th
 
 Read the selected template, write the plan against its `# Plan Body`, then verify against its `# Quality Checklist`.
 
-!`booping-plan-templates`
+### Available plan templates
+
+{% set core_templates = context.plan_templates | selectattr("source", "equalto", "core") | list %}
+{% set project_templates = context.plan_templates | selectattr("source", "equalto", "project") | list %}
+{% if core_templates %}
+**Core (plugin-provided, generic)**:
+{% for t in core_templates %}
+- `{{ t.name }}` — {{ t.description or "(no description)" }} (`{{ t.path }}`)
+{% endfor %}
+{% endif %}
+{% if project_templates %}
+
+**Project (from `{{ project_templates[0].path.parent }}`)**:
+{% for t in project_templates %}
+- `{{ t.name }}` — {{ t.description or "(no description)" }} (`{{ t.path }}`)
+{% endfor %}
+{% endif %}
+{% if not core_templates and not project_templates %}
+_No plan templates found._
+{% endif %}
+
+Pick the template whose name + description best matches the dominant surface of the work. Read the file; follow its `# Plan Body` when writing the plan; verify against its `# Quality Checklist` before leaving `in-spec`. If none fit, create a new template at `~/Claude/{project}/plan_templates/<name>.md` with frontmatter (`name`, `description`) and two top-level headers (`# Plan Body`, `# Quality Checklist`).
