@@ -33,7 +33,7 @@ Every plan walks this loop once. The next plan inherits the lessons.
 ## Why booping
 
 - **Artifacts as a meta-source.** Plans, retros, and lessons are not throwaway scratchpads — they are durable on-disk markdown you can mine later for documentation, onboarding material, research notes, or a historical trace of how a codebase actually evolved. The vault becomes its own knowledge base.
-- **A benchmarking surface.** Because plans are reproducible files, you can run the same plan twice with different models (Opus vs. Sonnet vs. GLM) and diff the resulting commits to see how each model behaves on your codebase. The framework gives you the controlled inputs needed for honest comparison.
+- **A benchmarking surface.** Because plans are reproducible files, you can run the same plan twice with different models (Opus vs. Sonnet vs. GLM) and compare the resulting diffs to see how each model behaves on your codebase. The framework gives you the controlled inputs needed for honest comparison.
 - **Agile-iteration scaffolding made durable.** Sprint cadence, reviews, retrospectives, and lessons are normally social rituals that decay when nobody writes them down. booping gives each ritual a concrete file and a concrete command, so the loop survives across sessions, machines, and weeks of context loss.
 - **Story points as a personal estimation track record.** Every plan carries an SP estimate, every retro records what actually shipped. Over many sprints you accumulate honest data on how your estimates compare to reality on this specific codebase — a private calibration log you can't get from a ticket tracker.
 

@@ -23,19 +23,6 @@ To resume a plan already in `in-progress` (e.g. after a stopped session), invoke
 
 ## Best practices
 
-### Ask `/develop` to stop after each milestone
-
-For longer plans or unfamiliar territory, tell `/develop` in your prompt to pause between milestones and let you start a fresh Claude Code session for the next group. Two reasons:
-
-- **Context stays small.** A fresh session for each milestone group keeps the orchestrator's context window lean — you avoid the slow drift that comes with running multiple groups back-to-back.
-- **Natural review checkpoint.** You read the diff, confirm the verification output, and only then resume. Mistakes are caught at one milestone instead of three.
-
-This is a per-invocation choice, not a config knob. Mention it in the prompt:
-
-```text
-/develop plans/20260430-foo.md stop after each milestone group
-```
-
 ### Run code review in a fresh session
 
 When you want a [/code-review](code_review.md) pass, do it from a **fresh session**, not the same one that ran `/develop`. `/code-review` reads the diff and the plan, which is unaffected by orchestrator context, but the reviewer benefits from a clean slate without any of `/develop`'s execution traces in scope.
