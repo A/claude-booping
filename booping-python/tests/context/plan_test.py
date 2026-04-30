@@ -21,6 +21,7 @@ def test_load_all_count_and_fields() -> None:
     assert plan.goal == "Implement full-text search across the widget catalog."
     assert plan.business_goal == "Users can find widgets faster via keyword search."
     assert plan.split_from is None
+    assert plan.commit == "0123456789abcdef0123456789abcdef01234567"
 
 
 def test_load_all_missing_plans_dir() -> None:
@@ -37,3 +38,4 @@ def test_load_all_second_plan() -> None:
     assert plan.type == "bug"
     assert plan.status == "ready-for-dev"
     assert plan.sp == 2
+    assert plan.commit is None
