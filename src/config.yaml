@@ -155,6 +155,7 @@ plan:
             - "Every task estimated; any task ≥ redecompose_threshold SP has been re-decomposed"
           on_exit:
             - "set `planned: yyyymmdd hh:mm`"
+            - "set `commit: <repo HEAD>` from `context.project.git_commit`"
         - to: backlog
           skill: groom
           when: "User parks the work mid-grooming to revisit later"
@@ -193,6 +194,7 @@ plan:
           when: "/develop claims the plan at the start of its execute phase"
           on_exit:
             - "set `started: yyyymmdd hh:mm`"
+            - "set `commit: <repo HEAD>` from `context.project.git_commit` (only after the user confirmed the plan is still valid, or the legacy fallback applied)"
 
     in-progress:
       desc: "/develop has claimed the plan and is executing milestones."
