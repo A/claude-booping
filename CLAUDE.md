@@ -29,7 +29,7 @@ Runtime template-rendering pipeline + build-time `src/files/` pipeline are both 
 - `src/templates/_partials/_*.j2` — reusable fragments. Include via `{% include %}` (data-only) or import + macro (parameterized, e.g. `_plan_transitions.j2`). Parameterized partials receive call-site arguments via the `kwargs` namespace.
 - `skills/<name>/SKILL.md` — **build artefact** rendered from `src/files/skills/<name>/SKILL.md.j2`. Never hand-edit; edit the `src/files/` template and run `just build`.
 - `agents/<name>.md` — **build artefact** rendered from `src/files/agents/<name>.md.j2`. Same rule.
-- `docs/` — **hand-authored static reference docs**, lazy-loaded by skills via `${CLAUDE_PLUGIN_ROOT}/docs/<name>.md` links. Includes `docs/plan_templates/*.md`, `docs/template_plan_frontmatter.md`, and `docs/images/`. No build step touches this directory.
+- `docs/` — **hand-authored static reference docs**, lazy-loaded by skills via `${CLAUDE_PLUGIN_ROOT}/docs/<name>.md` links. Includes `docs/plan_templates/*.md`, `docs/review_templates/*.md`, `docs/template_plan_frontmatter.md`, and `docs/images/`. No build step touches this directory.
 - `~/Claude/{project}/config.yaml` — optional per-project config override; deep-merges over `src/config.yaml` at render time (runtime only).
 
 ## Information ownership
@@ -71,6 +71,7 @@ Out of framework scope — authored per-project, loaded by skills at runtime.
 - Per-skill / per-agent extensions (`_booping/skill_<name>.md`, `_booping/agent_<name>.md`).
 - Accumulated lessons (`lessons/`).
 - Project-local plan templates (`plan_templates/*.md`).
+- Project-local review templates (`review_templates/*.md`).
 
 The attached repo's own `CLAUDE.md` is also loaded by skills (it sits in the repo, not the vault) — same role as the above: project conventions the framework reads but doesn't author.
 
@@ -118,6 +119,7 @@ Top-level keys currently in use:
 - `git.branches` — list of `{branch, when}` entries. `branch` is the literal prefix string (slash and format up to user, e.g. `feat/`); `when` is a list of short matches (plan `type` names like `feature`, or freeform descriptors). Rendered via `_git_guide.j2` macro; consumed by `/develop` for branch selection.
 - `plan.statuses.<key>` — `desc`, `owner` (skill), `terminal` (bool), optional `artifacts` (list of strings describing what the state produces), `transitions` (list of `{to, skill, when, gates?, on_exit?}`). Filtered per-skill by `_plan_transitions.j2` (macro shows only statuses a skill owns or has transitions out of, and only rows where `skill == <current>`). `gates` is a list of verifiable preconditions rendered into the `Gates` column; `on_exit` is a list of short instruction strings (frontmatter mutations, side effects) rendered verbatim into the `On exit` column (e.g. `"set \`planned: yyyymmdd hh:mm\`"`).
 - `tasks` — list of `{type, description, doc_uri}`. Rendered by `_task_classification.j2` as bullets with a lazy-load link to `doc_uri` (relative from repo root).
+- `code_review.stack_markers` — map of `{dependency-substring: template-name}`. `/code-review` scans the repo's manifest files for these substrings to pick which review templates from `docs/review_templates/` (and `~/Claude/{project}/review_templates/`) apply to the current diff.
 - `sprint` — `scale` (list of `{sp, meaning}`), `default_threshold_sp` (SP total past which /groom should propose splitting — not a velocity), `redecompose_threshold` (tasks ≥ this SP must be re-decomposed), `group_threshold` (tasks ≤ this SP should be grouped into one agent briefing). Rendered by `_sprint_planning.j2`; `redecompose_threshold` / `group_threshold` are skipped when falsy. Threshold is rendered inline at skill-load time from `config.sprint.default_threshold_sp`.
 
 ## Plan lifecycle
@@ -136,6 +138,7 @@ Top-level keys currently in use:
 - The vault is **Obsidian-ready**: markdown files + YAML frontmatter that Obsidian renders as Properties. No proprietary database. Open `~/Claude/{project}/` in Obsidian for graph view + backlinks across plans, retros, and lessons.
 - `plans/{YYYYMMDD}-{kebab-title}.md` — plan files; frontmatter per `docs/template_plan_frontmatter.md`. Sibling stubs set `split_from: plans/...` to point at the primary plan they were split from.
 - `plan_templates/*.md` — project-local plan templates. Each has frontmatter (`name`, `description`) + two top-level sections (`# Plan Body`, `# Quality Checklist`). Discovered alongside core templates by `PlanTemplate.load_all()`; can override a core template by sharing its `name`, or add entirely new ones.
+- `review_templates/*.md` — project-local code-review templates. Loaded by `/code-review` alongside core templates under `docs/review_templates/`; selected per-plan based on stack signals.
 - `lessons/` — accumulated lessons; loaded by skills' Preflight.
 - `notes/` — user notes (plan-review comments, code-review threads, ideas for next sprints). Not consumed by skills or agents — purely for the user's own reference.
 - `_booping/skill_<name>.md` — project-local extensions to wide-domain skills.
