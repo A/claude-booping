@@ -75,6 +75,8 @@
               <ul class="current">
                 <li class="toctree-l1 current"><a class="reference internal current" href="#">Project config</a>
     <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#snapshot-srcconfigyaml">Snapshot: src/config.yaml</a>
+    </li>
     <li class="toctree-l2"><a class="reference internal" href="#top-level-keys">Top-level keys</a>
         <ul>
     <li class="toctree-l3"><a class="reference internal" href="#sprint">sprint</a>
@@ -126,6 +128,276 @@
               
                 <h1 id="project-config">Project config</h1>
 <p>booping reads a single structured config — <code>src/config.yaml</code> in the plugin — and merges any project-local override from <code>~/Claude/{project}/config.yaml</code> over it at skill-load time. This page tours every top-level key and explains the override mechanic.</p>
+<h2 id="snapshot-srcconfigyaml">Snapshot: <code>src/config.yaml</code></h2>
+<p>For context, the current plugin defaults. Source of truth: <a href="https://github.com/A/claude-booping/blob/master/src/config.yaml"><code>src/config.yaml</code></a> (this snapshot may lag).</p>
+<details>
+<summary>Show full config</summary>
+
+
+<pre><code class="language-yaml">sprint:
+  default_threshold_sp: 35
+  redecompose_threshold: 5
+  max_milestones_per_agent: 2
+  scale:
+    - { sp: 1, meaning: &quot;Simple text/config change, no risk&quot; }
+    - { sp: 2, meaning: &quot;Simple task, predictable, no risk&quot; }
+    - { sp: 3, meaning: &quot;Medium task, minor risks but predictable overall&quot; }
+    - { sp: 4, meaning: &quot;Complex task, medium risk, may need small research but clear enough&quot; }
+    - { sp: 5, meaning: &quot;Research task — developer needs to clarify and decompose further before proceeding&quot; }
+
+tasks:
+  - type: feature
+    description: &quot;New user-facing capability. Needs business goal, design, milestones, DoD.&quot;
+    doc_uri: ${CLAUDE_PLUGIN_ROOT}/docs/task_feature.md
+  - type: bug
+    description: &quot;Defect — observed behavior diverges from expected. Needs triage, reproduction, root-cause hypothesis, minimal fix, and a regression test.&quot;
+    doc_uri: ${CLAUDE_PLUGIN_ROOT}/docs/task_bug.md
+  - type: refactoring
+    description: &quot;Internal structure change with no user-visible behavior change. Needs current-vs-target design, migration steps, and a no-behavior-change DoD.&quot;
+    doc_uri: ${CLAUDE_PLUGIN_ROOT}/docs/task_refactoring.md
+
+skills:
+  help: {}
+
+  install: {}
+
+  develop:
+    agents:
+      booping-developer:
+        good_for:
+          - &quot;All coding tasks — always delegate; never edit application code from the orchestrator&quot;
+      booping-researcher:
+        good_for:
+          - &quot;Phase 0 drift spot-check: given a large set of plan-named files, determine whether actual file shape matches the plan's assumptions&quot;
+        bad_for:
+          - &quot;Milestone-diff review — that stays in the skill&quot;
+          - &quot;Single-file reads — call Read directly&quot;
+
+  groom:
+    agents:
+      booping-researcher:
+        good_for:
+          - &quot;Wide read or web search where results must be aggregated outside this skill's context and returned as a summary&quot;
+          - &quot;Map blast radius across many files (which modules and integrations a change touches)&quot;
+          - &quot;Extract patterns from a corpus too large to read directly (e.g. 'common shapes across 30 test files')&quot;
+          - &quot;Verify package versions, image tags, API endpoints, CLI flags against current docs when many sources need to be checked&quot;
+          - &quot;Cross-system architecture investigation across multiple repos or services&quot;
+          - &quot;Compare framework/library options with deep tradeoff analysis&quot;
+        bad_for:
+          - &quot;Small checks — single-file reads, one-off greps, existence checks&quot;
+          - &quot;When the information cannot be meaningfully compressed without losing signal the caller needs to decide&quot;
+          - &quot;When the skill already needs to read the same few files for other reasons&quot;
+          - &quot;When the question fits in a few lines of `ls`/`grep` output&quot;
+
+  learn:
+    status: awaiting-learning
+
+  retro:
+    status: awaiting-retro
+    agents:
+      booping-researcher:
+        good_for:
+          - &quot;Phase 0 session-log search: scan ~/.claude/projects/ across all session logs for the plan's time window and aggregate into a structured summary of user questions, blockers, and detours&quot;
+        bad_for:
+          - &quot;Single-file reads — call Read directly&quot;
+          - &quot;Phase 2 sprint analysis — stays in the orchestrator&quot;
+          - &quot;Phase 4 lesson cross-check — stays in the orchestrator using the in-context lesson set&quot;
+
+  code-review:
+    status: awaiting-retro
+    agents:
+      booping-researcher:
+        good_for:
+          - &quot;Blast-radius reads on large diffs (≥ ~5 files) aggregated into a compressed summary of touched modules and integration points&quot;
+        bad_for:
+          - &quot;Single-file reads — call Read directly&quot;
+          - &quot;Small greps or existence checks that fit in a few lines of output&quot;
+      booping-developer:
+        good_for:
+          - &quot;Applying user-approved non-trivial fixes surfaced by the review (BLOCKER or SUGGESTION)&quot;
+        bad_for:
+          - &quot;Trivial inline nits — orchestrator handles those directly&quot;
+
+  chat:
+    agents:
+      booping-researcher:
+        good_for:
+          - &quot;Vault-wide reads aggregated into a summary (e.g. what plans exist, recurring themes across retros)&quot;
+          - &quot;Plan or retro content extraction across ≥3 files where the results need to be compressed before returning to the skill&quot;
+          - &quot;Web search aggregation when the user asks an open question that requires pulling from multiple sources&quot;
+        bad_for:
+          - &quot;Single-file reads — call Read directly&quot;
+          - &quot;Simple greps or existence checks that fit in a few lines of output&quot;
+          - &quot;Questions answerable with a short `ls` or `grep`&quot;
+
+git:
+  commit_message: '&lt;agent&gt;: &lt;plan title&gt; &lt;message&gt;'
+  branches:
+    - branch: feat/
+      when:
+        - feature
+    - branch: fix/
+      when:
+        - bug
+    - branch: refactor/
+      when:
+        - refactoring
+    - branch: chore/
+      when:
+        - other
+        - tooling, dependency bumps, formatting
+
+plan:
+  statuses:
+    backlog:
+      desc: &quot;Parked plan — not actively being worked on. Sibling stubs from split sprints and user-filed ideas not yet in grooming live here.&quot;
+      owner: groom
+      terminal: false
+      artifacts:
+        - &quot;Plan stub at ~/Claude/{project}/plans/{YYYYMMDD}-{kebab-title}.md (split siblings or parked ideas)&quot;
+      transitions:
+        - to: in-spec
+          skill: groom
+          when: &quot;User asks /groom to shape a parked plan, or /groom is invoked on a fresh request&quot;
+        - to: cancelled
+          skill: groom
+          when: &quot;User shelves the request before grooming&quot;
+          on_exit:
+            - &quot;set `completed: yyyymmdd hh:mm`&quot;
+
+    in-spec:
+      desc: &quot;/groom is actively specifying — researching, designing, drafting the plan.&quot;
+      owner: groom
+      terminal: false
+      artifacts:
+        - &quot;Plan at ~/Claude/{project}/plans/{YYYYMMDD}-{kebab-title}.md with all milestones, SP estimates, and DoDs&quot;
+        - &quot;Sibling stub plans (one per split sprint) under the same plans/ path&quot;
+      transitions:
+        - to: awaiting-plan-review
+          skill: groom
+          when: &quot;Draft is complete and ready to present to the user&quot;
+          gates:
+            - &quot;Cross-validation run (see [cross-validation](${CLAUDE_PLUGIN_ROOT}/docs/cross_validation.md)) — single-file-bug skip acceptable&quot;
+            - &quot;Every task estimated; any task ≥ redecompose_threshold SP has been re-decomposed&quot;
+          on_exit:
+            - &quot;set `planned: yyyymmdd hh:mm`&quot;
+            - &quot;set `commit: &lt;repo HEAD&gt;` from `context.project.git_commit`&quot;
+        - to: backlog
+          skill: groom
+          when: &quot;User parks the work mid-grooming to revisit later&quot;
+        - to: cancelled
+          skill: groom
+          when: &quot;User shelves the work mid-grooming&quot;
+          on_exit:
+            - &quot;set `completed: yyyymmdd hh:mm`&quot;
+
+    awaiting-plan-review:
+      desc: &quot;Plan drafted; /groom is presenting to the user and awaiting explicit approval, change request, or cancellation.&quot;
+      owner: groom
+      terminal: false
+      transitions:
+        - to: ready-for-dev
+          skill: groom
+          when: &quot;User explicitly approves the plan ('looks good', 'ship it'). Silence does not count.&quot;
+          gates:
+            - &quot;Explicit user approval captured&quot;
+        - to: in-spec
+          skill: groom
+          when: &quot;User requests changes that require re-research or re-design&quot;
+        - to: cancelled
+          skill: groom
+          when: &quot;User shelves the plan instead of approving&quot;
+          on_exit:
+            - &quot;set `completed: yyyymmdd hh:mm`&quot;
+
+    ready-for-dev:
+      desc: &quot;Approved by user. Queued for /develop to claim.&quot;
+      owner: develop
+      terminal: false
+      transitions:
+        - to: in-progress
+          skill: develop
+          when: &quot;/develop claims the plan at the start of its execute phase&quot;
+          on_exit:
+            - &quot;set `started: yyyymmdd hh:mm`&quot;
+            - &quot;set `commit: &lt;repo HEAD&gt;` from `context.project.git_commit` (only after the user confirmed the plan is still valid, or the legacy fallback applied)&quot;
+
+    in-progress:
+      desc: &quot;/develop has claimed the plan and is executing milestones.&quot;
+      owner: develop
+      terminal: false
+      artifacts:
+        - &quot;Code changes per milestone on the sprint branch&quot;
+        - &quot;DoD checkboxes flipped to [x] as tasks complete&quot;
+      transitions:
+        - to: awaiting-retro
+          skill: develop
+          when: &quot;All milestones done&quot;
+          gates:
+            - &quot;Every DoD checkbox marked [x]&quot;
+            - &quot;Final Verification green&quot;
+          on_exit:
+            - &quot;set `completed: yyyymmdd hh:mm`&quot;
+            - &quot;suggest `/retro &lt;plan-path&gt;`&quot;
+        - to: fail
+          skill: develop
+          when: &quot;Unrecoverable blocker on the same milestone&quot;
+          gates:
+            - &quot;Two fix attempts documented in the plan&quot;
+            - &quot;User has approved the abort&quot;
+          on_exit:
+            - &quot;set `completed: yyyymmdd hh:mm`&quot;
+
+    awaiting-retro:
+      desc: &quot;All milestones done; waiting for /retro to write the retrospective.&quot;
+      owner: retro
+      terminal: false
+      transitions:
+        - to: awaiting-learning
+          skill: retro
+          when: &quot;Retrospective written and saved&quot;
+          gates:
+            - &quot;Retrospective markdown saved to retrospectives/&quot;
+            - &quot;Self-review checklist passed&quot;
+          on_exit:
+            - &quot;set `retro: retrospectives/YYYYMMDD-{kebab-title}.md`&quot;
+            - &quot;set `goal: success | partial | fail`&quot;
+        - to: done
+          skill: retro
+          when: &quot;User opts to skip retro for a stale plan and mark it done without retrospective or learning&quot;
+          on_exit:
+            - &quot;set `goal: skipped`&quot;
+
+    awaiting-learning:
+      desc: &quot;Retro written; waiting for /learn to absorb lessons.&quot;
+      owner: learn
+      terminal: false
+      transitions:
+        - to: done
+          skill: learn
+          when: &quot;All accepted learnings written&quot;
+          gates:
+            - &quot;User confirmed the review table&quot;
+            - &quot;Every accepted lesson written to its target file&quot;
+          on_exit:
+            - &quot;set `completed: yyyymmdd hh:mm`&quot;
+
+    done:
+      desc: &quot;Terminal success. /learn has absorbed all lessons.&quot;
+      terminal: true
+
+    fail:
+      desc: &quot;Terminal technical failure. /develop hit an unrecoverable blocker.&quot;
+      terminal: true
+
+    cancelled:
+      desc: &quot;Terminal product decision. User shelved the plan.&quot;
+      terminal: true
+</code></pre>
+
+
+</details>
+
 <h2 id="top-level-keys">Top-level keys</h2>
 <h3 id="sprint"><code>sprint</code></h3>
 <p>Sprint sizing thresholds and the story-point scale. Drives <code>/groom</code>'s split proposals, the per-task re-decompose gate, and <code>/develop</code>'s milestone grouping.</p>
