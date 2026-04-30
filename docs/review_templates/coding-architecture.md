@@ -1,6 +1,6 @@
 ---
-name: craft
-description: Generic software-craft checklist — SOLID, boundaries, DI seams, data access. Always loaded.
+name: coding-architecture
+description: Generic coding-architecture checklist — SOLID, boundaries, DI seams, data access. Always loaded.
 layer: generic
 ---
 

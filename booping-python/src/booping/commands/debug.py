@@ -26,7 +26,7 @@ def _run_context(args: argparse.Namespace) -> None:
     data = ctx.model_dump(mode="json")
     data["skills"] = sorted(data.get("skills", {}))
     data["agents"] = sorted(data.get("agents", {}))
-    for key in ("plans", "lessons", "retros", "plan_templates"):
+    for key in ("plans", "lessons", "retros", "plan_templates", "review_templates"):
         for item in data.get(key, []):
             if "body" in item:
                 item["body"] = _summarize_body(item["body"])
