@@ -14,6 +14,7 @@ nav:
   - Quick start: quick_start.md
   - Install: install.md
   - Vault: vault.md
+  - Project config: project_config.md
   - Commands:
       - /groom: groom.md
       - /develop: develop.md
@@ -22,4 +23,3 @@ nav:
       - /learn: learn.md
       - /chat: chat.md
       - /help: help.md
-  - Project config: project_config.md

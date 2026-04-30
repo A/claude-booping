@@ -11,10 +11,12 @@ It is the only skill with an "orient" responsibility. The other skills assume yo
 ## Command
 
 ```text
-/chat                       # orient against the current project
-/chat <free-text question>  # orient, then answer the question
-/chat plans/YYYYMMDD-...md  # orient, then load the named artefact
+/chat
+/chat we're continuing to wrap up the develop skill refactor — i'll give you ad-hoc tasks
+/chat plans/20260423-refactor-develop-skill-to-groom-pattern.md address the issues from the previous implementation
 ```
+
+Bare `/chat` orients against the current project. The free-text body is read verbatim — mention a plan path, a retro path, a question, or a small change request and the skill picks it up.
 
 The free-text body is read verbatim. Anything you mention — a plan path, a retro path, a question about a lesson, a small change request — is picked up.
 

@@ -11,9 +11,11 @@ It is a **stateless side-skill**: it does not own a plan-lifecycle status, does 
 ## Command
 
 ```text
-/code-review                                  # review the current diff against the in-progress plan
-/code-review plans/YYYYMMDD-{kebab-title}.md  # review against a specific plan
+/code-review
+/code-review plans/20260430-user-facing-documentation-site.md
 ```
+
+Bare `/code-review` picks the plan currently in `awaiting-retro` (the queue `/develop` just finished). Pass a plan path to review against a different one — useful when you ran `/develop` in another session and want to review the diff before retro.
 
 Run it from a fresh Claude Code session — see [Run code review in a fresh session](develop.md#run-code-review-in-a-fresh-session) on the `/develop` page for why.
 

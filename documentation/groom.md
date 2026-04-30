@@ -17,10 +17,13 @@ Spec a sprint: take a rough request and produce a reviewable plan file under `~/
 Examples:
 
 ```text
-/groom add a CLI flag --dry-run to bin/booping render
-/groom plans/20260430-user-facing-documentation-site.md continue from in-spec
-/groom feat/auth: scaffold OAuth login, branch off main, stop after each milestone for review
+/groom
+/groom i want to refactor install and help skills to match other skills style
+/groom plans/20260430-user-facing-documentation-site.md — we're continuing to shape this; here's feedback to address
+/groom add current git commit hash to the booping CLI context, then add it to plan files; on /develop start, if the plan commit differs from repo HEAD, check git log between the two
 ```
+
+Bare `/groom` picks up whatever you've been discussing in the current session. Pass a plan path to keep iterating on a draft you've already started.
 
 The free-text body is read verbatim — anything you say there reaches the skill.
 
@@ -39,7 +42,10 @@ Brief prompt — lots of room for misalignment:
 Detailed prompt — sharply scoped, fewer rounds of revision:
 
 ```text
-/groom add per-IP rate limiting to the /api/* routes in apps/api/. Use Redis (already a dep). 100 req/min default; configurable via env. Return 429 with Retry-After. No new middleware framework — extend the existing one in apps/api/middleware/.
+/groom add per-IP rate limiting to the /api/* routes in apps/api/.
+Use Redis (already a dep). 100 req/min default; configurable via env.
+Return 429 with Retry-After. No new middleware framework — extend the
+existing one in apps/api/middleware/.
 ```
 
 The detailed version costs you 30 seconds of typing and saves a full revision cycle.

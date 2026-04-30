@@ -16,9 +16,12 @@ The two inputs are stitched into one retro file under `~/Claude/{project}/retros
 ## Command
 
 ```text
-/retro                                  # retro the plan currently in awaiting-retro
-/retro plans/YYYYMMDD-{kebab-title}.md  # retro a specific plan
+/retro
+/retro plans/20260422-plans-as-data-refactor.md
+/retro ~/Claude/claude-booping/plans/20260425-migrate-retro-skill-to-template-pipeline.md
 ```
+
+Bare `/retro` picks the plan currently in `awaiting-retro`. Pass a plan path to retro a specific one — absolute, `~/Claude/...`, or vault-relative all work.
 
 `/retro` walks the plan from `awaiting-retro → awaiting-learning` once the retro file is written and you have signed off.
 

@@ -13,13 +13,16 @@ By default `/develop` runs all milestone groups in **one session**. Stopping aft
 ## Command
 
 ```text
-/develop                                  # auto-claim the next ready-for-dev plan
-/develop plans/YYYYMMDD-{kebab-title}.md  # claim a specific plan
+/develop
+/develop plans/20260423-refactor-chat-skill-to-groom-pattern.md
+/develop ~/Claude/claude-booping/plans/20260430-src-files-build-pipeline.md pause after each milestone
+/develop ~/Claude/claude-booping/plans/20260429-skill-runtime-template-rendering.md re-implement from master, don't toggle todos in the plan
+continue to develop plans/20260428-snippet-pre-filter-pipeline.md
 ```
 
-Auto-claim picks the oldest plan in `ready-for-dev`. If the queue is empty `/develop` reports it and exits — it does not silently fall back to `in-progress` plans.
+Bare `/develop` claims the oldest plan in `ready-for-dev`; the queue-empty case is reported and the skill exits — no silent fallback to `in-progress` plans. Pass a plan path (absolute, `~/Claude/...`, or vault-relative) to claim a specific one. Free-text after the path reaches the skill verbatim — useful for stop-after-each-milestone or model-comparison runs.
 
-To resume a plan already in `in-progress` (e.g. after a stopped session), invoke `/develop` with the explicit path; the skill picks up at the first milestone whose DoDs are not all `[x]`.
+To resume a plan already in `in-progress` (e.g. after a stopped session), invoke `/develop` with the explicit path; the skill picks up at the first milestone whose DoDs are not all `[x]`. "continue to develop &lt;plan&gt;" works as a natural-language equivalent.
 
 ## Best practices
 

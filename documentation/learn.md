@@ -11,9 +11,12 @@ Compress retro findings into durable, actionable rules: global lessons that ever
 ## Command
 
 ```text
-/learn                                  # learn from the plan currently in awaiting-learning
-/learn plans/YYYYMMDD-{kebab-title}.md  # learn from a specific plan
+/learn
+/learn retrospectives/20260423-skill-refactors-chat-develop-retro.md
+/learn ~/Claude/claude-booping/retrospectives/20260422-plans-as-data-refactor.md
 ```
+
+Bare `/learn` picks the plan currently in `awaiting-learning`. Pass a retro file path to absorb lessons from a specific one.
 
 `/learn` walks the plan from `awaiting-learning → done` once you have signed off on the proposed updates.
 
