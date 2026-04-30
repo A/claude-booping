@@ -55,6 +55,10 @@
                 <li class="toctree-l1"><a class="reference internal" href="../vault/">Vault</a>
                 </li>
               </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../project_config/">Project config</a>
+                </li>
+              </ul>
               <p class="caption"><span class="caption-text">Commands</span></p>
               <ul class="current">
                   <li class="toctree-l1"><a class="reference internal" href="../groom/">/groom</a>
@@ -85,10 +89,6 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../help/">/help</a>
                   </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../project_config/">Project config</a>
-                </li>
               </ul>
       </div>
     </div>
@@ -126,9 +126,11 @@
 </ul>
 <p>The two inputs are stitched into one retro file under <code>~/Claude/{project}/retrospectives/</code>, named to match the plan it covers.</p>
 <h2 id="command">Command</h2>
-<pre><code class="language-text">/retro                                  # retro the plan currently in awaiting-retro
-/retro plans/YYYYMMDD-{kebab-title}.md  # retro a specific plan
+<pre><code class="language-text">/retro
+/retro plans/20260422-plans-as-data-refactor.md
+/retro ~/Claude/claude-booping/plans/20260425-migrate-retro-skill-to-template-pipeline.md
 </code></pre>
+<p>Bare <code>/retro</code> picks the plan currently in <code>awaiting-retro</code>. Pass a plan path to retro a specific one — absolute, <code>~/Claude/...</code>, or vault-relative all work.</p>
 <p><code>/retro</code> walks the plan from <code>awaiting-retro → awaiting-learning</code> once the retro file is written and you have signed off.</p>
 <h2 id="best-practices">Best practices</h2>
 <h3 id="shit-in-shit-out">Shit in, shit out</h3>

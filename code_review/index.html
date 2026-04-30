@@ -55,6 +55,10 @@
                 <li class="toctree-l1"><a class="reference internal" href="../vault/">Vault</a>
                 </li>
               </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../project_config/">Project config</a>
+                </li>
+              </ul>
               <p class="caption"><span class="caption-text">Commands</span></p>
               <ul class="current">
                   <li class="toctree-l1"><a class="reference internal" href="../groom/">/groom</a>
@@ -96,10 +100,6 @@
                   <li class="toctree-l1"><a class="reference internal" href="../help/">/help</a>
                   </li>
               </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../project_config/">Project config</a>
-                </li>
-              </ul>
       </div>
     </div>
     </nav>
@@ -131,9 +131,10 @@
 <p><code>/code-review</code> is the explicit second pair of eyes between <code>/develop</code> and <code>/retro</code>. It is most useful when the implementation pass ran on a cheaper or faster model — for example you let <code>/develop</code> run under Sonnet or GLM and want Opus to catch what the implementer missed. Even on a single-model loop, a fresh-session review surfaces issues the orchestrator's growing context tends to wave through.</p>
 <p>It is a <strong>stateless side-skill</strong>: it does not own a plan-lifecycle status, does not transition the plan, and does not write a persistent report file. The output is a feedback list in the chat session, plus any inline fixes it applies and any follow-up briefings it dispatches.</p>
 <h2 id="command">Command</h2>
-<pre><code class="language-text">/code-review                                  # review the current diff against the in-progress plan
-/code-review plans/YYYYMMDD-{kebab-title}.md  # review against a specific plan
+<pre><code class="language-text">/code-review
+/code-review plans/20260430-user-facing-documentation-site.md
 </code></pre>
+<p>Bare <code>/code-review</code> picks the plan currently in <code>awaiting-retro</code> (the queue <code>/develop</code> just finished). Pass a plan path to review against a different one — useful when you ran <code>/develop</code> in another session and want to review the diff before retro.</p>
 <p>Run it from a fresh Claude Code session — see <a href="../develop/#run-code-review-in-a-fresh-session">Run code review in a fresh session</a> on the <code>/develop</code> page for why.</p>
 <h2 id="best-practices">Best practices</h2>
 <h3 id="define-your-own-review-templates">Define your own review templates</h3>

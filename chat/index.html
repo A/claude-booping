@@ -55,6 +55,10 @@
                 <li class="toctree-l1"><a class="reference internal" href="../vault/">Vault</a>
                 </li>
               </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../project_config/">Project config</a>
+                </li>
+              </ul>
               <p class="caption"><span class="caption-text">Commands</span></p>
               <ul class="current">
                   <li class="toctree-l1"><a class="reference internal" href="../groom/">/groom</a>
@@ -81,10 +85,6 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../help/">/help</a>
                   </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../project_config/">Project config</a>
-                </li>
               </ul>
       </div>
     </div>
@@ -117,10 +117,11 @@
 <p><code>/chat</code> is the entry point you reach for when you sit down at a project and want to know where things stand — what is in flight, what is parked, what just shipped — before deciding whether to run anything heavier. It is also the right tool for small one-off work: reading a plan, tweaking a frontmatter field, writing a quick note under <code>notes/</code>, answering a question about the codebase. Anything that does not produce a durable plan artefact lives here.</p>
 <p>It is the only skill with an "orient" responsibility. The other skills assume you already know which plan you are working on; <code>/chat</code> is where that picture comes from.</p>
 <h2 id="command">Command</h2>
-<pre><code class="language-text">/chat                       # orient against the current project
-/chat &lt;free-text question&gt;  # orient, then answer the question
-/chat plans/YYYYMMDD-...md  # orient, then load the named artefact
+<pre><code class="language-text">/chat
+/chat we're continuing to wrap up the develop skill refactor — i'll give you ad-hoc tasks
+/chat plans/20260423-refactor-develop-skill-to-groom-pattern.md address the issues from the previous implementation
 </code></pre>
+<p>Bare <code>/chat</code> orients against the current project. The free-text body is read verbatim — mention a plan path, a retro path, a question, or a small change request and the skill picks it up.</p>
 <p>The free-text body is read verbatim. Anything you mention — a plan path, a retro path, a question about a lesson, a small change request — is picked up.</p>
 <h2 id="what-it-is-for">What it is for</h2>
 <ul>

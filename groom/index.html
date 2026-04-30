@@ -55,6 +55,10 @@
                 <li class="toctree-l1"><a class="reference internal" href="../vault/">Vault</a>
                 </li>
               </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../project_config/">Project config</a>
+                </li>
+              </ul>
               <p class="caption"><span class="caption-text">Commands</span></p>
               <ul class="current">
                   <li class="toctree-l1 current"><a class="reference internal current" href="#">/groom</a>
@@ -96,10 +100,6 @@
                   <li class="toctree-l1"><a class="reference internal" href="../help/">/help</a>
                   </li>
               </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../project_config/">Project config</a>
-                </li>
-              </ul>
       </div>
     </div>
     </nav>
@@ -134,10 +134,12 @@
 <pre><code class="language-text">/groom &lt;free-text request, optionally referencing a parked plan&gt;
 </code></pre>
 <p>Examples:</p>
-<pre><code class="language-text">/groom add a CLI flag --dry-run to bin/booping render
-/groom plans/20260430-user-facing-documentation-site.md continue from in-spec
-/groom feat/auth: scaffold OAuth login, branch off main, stop after each milestone for review
+<pre><code class="language-text">/groom
+/groom i want to refactor install and help skills to match other skills style
+/groom plans/20260430-user-facing-documentation-site.md — we're continuing to shape this; here's feedback to address
+/groom add current git commit hash to the booping CLI context, then add it to plan files; on /develop start, if the plan commit differs from repo HEAD, check git log between the two
 </code></pre>
+<p>Bare <code>/groom</code> picks up whatever you've been discussing in the current session. Pass a plan path to keep iterating on a draft you've already started.</p>
 <p>The free-text body is read verbatim — anything you say there reaches the skill.</p>
 <h2 id="best-practices">Best practices</h2>
 <h3 id="more-detail-in-the-prompt-sharper-plan">More detail in the prompt = sharper plan</h3>
@@ -146,7 +148,10 @@
 <pre><code class="language-text">/groom add rate limiting
 </code></pre>
 <p>Detailed prompt — sharply scoped, fewer rounds of revision:</p>
-<pre><code class="language-text">/groom add per-IP rate limiting to the /api/* routes in apps/api/. Use Redis (already a dep). 100 req/min default; configurable via env. Return 429 with Retry-After. No new middleware framework — extend the existing one in apps/api/middleware/.
+<pre><code class="language-text">/groom add per-IP rate limiting to the /api/* routes in apps/api/.
+Use Redis (already a dep). 100 req/min default; configurable via env.
+Return 429 with Retry-After. No new middleware framework — extend the
+existing one in apps/api/middleware/.
 </code></pre>
 <p>The detailed version costs you 30 seconds of typing and saves a full revision cycle.</p>
 <h3 id="free-text-prompt-extras">Free-text prompt extras</h3>
@@ -207,7 +212,7 @@
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../vault/" class="btn btn-neutral float-left" title="Vault"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../project_config/" class="btn btn-neutral float-left" title="Project config"><span class="icon icon-circle-arrow-left"></span> Previous</a>
         <a href="../develop/" class="btn btn-neutral float-right" title="/develop">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
@@ -235,7 +240,7 @@
         </span>
     
     
-      <span><a href="../vault/" style="color: #fcfcfc">&laquo; Previous</a></span>
+      <span><a href="../project_config/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
     
       <span><a href="../develop/" style="color: #fcfcfc">Next &raquo;</a></span>

@@ -55,6 +55,10 @@
                 <li class="toctree-l1"><a class="reference internal" href="../vault/">Vault</a>
                 </li>
               </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../project_config/">Project config</a>
+                </li>
+              </ul>
               <p class="caption"><span class="caption-text">Commands</span></p>
               <ul class="current">
                   <li class="toctree-l1"><a class="reference internal" href="../groom/">/groom</a>
@@ -88,10 +92,6 @@
                   <li class="toctree-l1"><a class="reference internal" href="../help/">/help</a>
                   </li>
               </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../project_config/">Project config</a>
-                </li>
-              </ul>
       </div>
     </div>
     </nav>
@@ -123,9 +123,11 @@
 <p><code>/retro</code> records what happened on one plan. <code>/learn</code> is the step that turns those observations into rules booping will obey on every future plan. Without <code>/learn</code>, retros pile up unread and the same friction repeats sprint after sprint; with <code>/learn</code>, each sprint leaves the project a little better calibrated.</p>
 <p><code>/learn</code> reads the retro file from the plan currently in <code>awaiting-learning</code>, proposes a small set of updates (new lesson entries, edits to existing lessons, additions to the relevant <code>_booping/</code> extension files), and asks you to review each proposal before writing.</p>
 <h2 id="command">Command</h2>
-<pre><code class="language-text">/learn                                  # learn from the plan currently in awaiting-learning
-/learn plans/YYYYMMDD-{kebab-title}.md  # learn from a specific plan
+<pre><code class="language-text">/learn
+/learn retrospectives/20260423-skill-refactors-chat-develop-retro.md
+/learn ~/Claude/claude-booping/retrospectives/20260422-plans-as-data-refactor.md
 </code></pre>
+<p>Bare <code>/learn</code> picks the plan currently in <code>awaiting-learning</code>. Pass a retro file path to absorb lessons from a specific one.</p>
 <p><code>/learn</code> walks the plan from <code>awaiting-learning → done</code> once you have signed off on the proposed updates.</p>
 <h2 id="what-it-writes">What it writes</h2>
 <p><code>/learn</code> is the <strong>only</strong> authorised author for two surfaces inside the vault:</p>
