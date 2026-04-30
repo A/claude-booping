@@ -79,6 +79,7 @@ skills:
           - "Phase 4 lesson cross-check — stays in the orchestrator using the in-context lesson set"
 
   code-review:
+    status: awaiting-retro
     agents:
       booping-researcher:
         good_for:
