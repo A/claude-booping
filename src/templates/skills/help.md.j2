@@ -46,9 +46,10 @@ Artifacts live at `~/Claude/{project}/`.
 
 ## Skills
 
-| Slash | Purpose |
-|-------|---------|
-{% for name, skill in context.skills.items() %}| `{{ "/" + name }}` | {{ skill.description }} |
+{% set _docs_base = "https://A.github.io/claude-booping" %}
+| Slash | Purpose | Reference |
+|-------|---------|-----------|
+{% for name, skill in context.skills.items() %}{% set _doc = name | replace("-", "_") %}| [`{{ "/" + name }}`](${CLAUDE_PLUGIN_ROOT}/documentation/{{ _doc }}.md) | {{ skill.description }} | [docs site]({{ _docs_base }}/{{ _doc }}/) |
 {% endfor %}
 
 ## Agents
@@ -193,5 +194,6 @@ Project-specific guidance and accumulated knowledge layer onto skills and agents
 ## See also
 
 - `README.md` — higher-level overview.
+- [docs site]({{ _docs_base }}/) — walkthrough + per-command reference.
 
 {{ tools.render('src/templates/_partials/_extra_instructions.j2', extra_instruction_key='skill_help') }}

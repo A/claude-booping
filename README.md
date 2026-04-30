@@ -46,6 +46,8 @@ After installing, `cd` into the target repo and run `/install`. That single step
 
 ## Quick start
 
+For a hand-holding walkthrough and per-command reference, see the [docs site](https://A.github.io/claude-booping/).
+
 The full loop is five commands. Run them in order:
 
 ```bash

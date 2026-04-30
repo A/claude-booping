@@ -30,6 +30,7 @@ Runtime template-rendering pipeline + build-time `src/files/` pipeline are both 
 - `skills/<name>/SKILL.md` — **build artefact** rendered from `src/files/skills/<name>/SKILL.md.j2`. Never hand-edit; edit the `src/files/` template and run `just build`.
 - `agents/<name>.md` — **build artefact** rendered from `src/files/agents/<name>.md.j2`. Same rule.
 - `docs/` — **hand-authored static reference docs**, lazy-loaded by skills via `${CLAUDE_PLUGIN_ROOT}/docs/<name>.md` links. Includes `docs/plan_templates/*.md`, `docs/review_templates/*.md`, `docs/template_plan_frontmatter.md`, and `docs/images/`. No build step touches this directory.
+- `documentation/` — **end-user docs site source**; per-page markdown consumed by MkDocs (`mkdocs.yml` at repo root). Built and deployed to the `gh-pages` branch by `.github/workflows/docs.yml` on push to `main` (published at `https://A.github.io/claude-booping/`). Also lazy-loaded by `/help` via `${CLAUDE_PLUGIN_ROOT}/documentation/<name>.md`. Distinct from `docs/` (which is plugin-internal lazy-load fragments owned by skills); `documentation/` is the public reference site.
 - `~/Claude/{project}/config.yaml` — optional per-project config override; deep-merges over `src/config.yaml` at render time (runtime only).
 
 ## Information ownership
@@ -163,6 +164,7 @@ Top-level keys currently in use:
 - Edits to `src/files/**/*.j2` or `src/config_files.yaml` require `just build` to materialize into the on-disk `skills/<name>/SKILL.md` / `agents/<name>.md`. `git diff -- skills/ agents/` after `just build` is the drift signal.
 - `skills/<name>/SKILL.md` and `agents/<name>.md` are **build artefacts** — never hand-edit. Edit `src/files/<rel>.j2` (or `src/config_files.yaml` for shared frontmatter values) and run `just build`.
 - `docs/*.md` is hand-authored. No build step regenerates it.
+- `documentation/*.md` is hand-authored. Only `mkdocs build` consumes it, and the build runs in GitHub Actions on push to `main` (`.github/workflows/docs.yml`) — there is no local-build-on-commit step. Use `just docs` / `just docs-serve` for local preview.
 - Prefer extracting to a partial over inlining when prose grows past a paragraph or two.
 - Prefer moving structured data into `src/config.yaml` over prose in partials.
 - No comments that restate code. Only WHY for non-obvious bits.
