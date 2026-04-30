@@ -25,6 +25,9 @@ dev = [
     "ruff",
     "basedpyright",
 ]
+docs = [
+    "mkdocs",
+]
 
 [tool.ruff]
 line-length = 100

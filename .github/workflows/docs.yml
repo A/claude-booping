@@ -1,0 +1,37 @@
+name: docs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - documentation/**
+      - mkdocs.yml
+      - .github/workflows/docs.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Sync docs deps
+        run: uv sync --group docs --project booping-python
+
+      - name: Build site
+        run: uv run --group docs --project booping-python mkdocs build --strict
+
+      - name: Disable Jekyll
+        run: touch site/.nojekyll
+
+      - name: Deploy to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site

@@ -1,0 +1,26 @@
+site_name: booping
+site_description: A self-learning, project-scoped sprint workflow for Claude Code.
+site_url: https://A.github.io/claude-booping/
+repo_url: https://github.com/A/claude-booping
+repo_name: A/claude-booping
+docs_dir: documentation
+strict: true
+
+theme:
+  name: readthedocs
+
+nav:
+  - Home: index.md
+  - Quick start: quick_start.md
+  - Install: install.md
+  - Vault: vault.md
+  - Commands:
+      - /groom: groom.md
+      - /develop: develop.md
+      - /code-review: code_review.md
+      - /retro: retro.md
+      - /learn: learn.md
+      - /chat: chat.md
+      - /help: help.md
+  - Project config: project_config.md
+  - CLI: cli.md

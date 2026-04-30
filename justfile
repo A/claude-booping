@@ -20,3 +20,11 @@ typecheck:
 # Run booping-python tests
 test:
     cd booping-python && uv run pytest
+
+# Build the documentation site (strict)
+docs:
+    uv run --group docs --project booping-python mkdocs build --strict
+
+# Serve the documentation site locally with live reload
+docs-serve:
+    uv run --group docs --project booping-python mkdocs serve
