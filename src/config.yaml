@@ -9,17 +9,6 @@ sprint:
     - { sp: 4, meaning: "Complex task, medium risk, may need small research but clear enough" }
     - { sp: 5, meaning: "Research task — developer needs to clarify and decompose further before proceeding" }
 
-code_review:
-  stack_markers:
-    django: django
-    temporalio: temporal
-    temporal: temporal
-    react: react
-    vue: vue
-    axum: axum
-    leptos: leptos
-    diesel: diesel
-
 tasks:
   - type: feature
     description: "New user-facing capability. Needs business goal, design, milestones, DoD."

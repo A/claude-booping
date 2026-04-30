@@ -9,8 +9,6 @@ This skill is **wide-domain** — it must work across very different stacks. Sta
 
 {{ available_agents.render("code-review") }}
 
-{% include "_partials/_shared_instructions.j2" %}
-
 {% include "_partials/_review_template.j2" %}
 
 {{ tools.render('src/templates/_partials/_lessons.j2') }}
@@ -59,25 +57,15 @@ Confirm scope with the user when ambiguous (e.g. multiple plausible diff bases).
 
 ### (b) Stack discovery
 
-Detect the stack from repo manifests:
-
-- `pyproject.toml`, `package.json`, `Cargo.toml`, `go.mod`, `Gemfile`.
-
-Read whichever manifests exist at the repo root. Map each dependency key to a stack marker via `config.code_review.stack_markers`:
-
-```yaml
-{% for dep, marker in config.code_review.stack_markers.items() -%}
-{{ dep }}: {{ marker }}
-{% endfor %}
-```
-
-Collect the resulting `stack_markers` set. Also surface the concrete tooling the project uses (configured type-checker, linter, test runner, ORM) by reading the manifest's tool sections — report these names back to the user.
+Inspect the repo to identify the languages, frameworks, and tooling actually in use. Read whichever manifests exist at the repo root (`pyproject.toml`, `package.json`, `Cargo.toml`, `go.mod`, `Gemfile`, …) and surface the concrete tooling (type-checker, linter, test runner, ORM, framework) back to the user. Read source files when the manifest is ambiguous.
 
 When tooling is ambiguous (e.g. multiple type-checkers configured, no clear linter, mixed-language repo), ask the user to confirm before continuing.
 
 ### (c) Template selection
 
-From the **Available review checklists** table above, load every template whose `applies_to` is empty **or** intersects the detected `stack_markers`. Report the loaded set back to the user (`name` + layer) before running them.
+From the **Available review checklists** table above, pick the templates whose `description` is a good fit for the stack you just identified. Always include every `generic` template. Add `language` and `framework` templates only when their description matches a real signal in the repo — do not load a checklist whose subject does not exist in the codebase.
+
+Report the loaded set back to the user (`name` + layer + one-line reason) before running them. If the choice is unclear, ask.
 
 Project-local templates with the same `name` as a core template override the core file — that resolution already happened at skill-load; the rendered table reflects the effective set.
 

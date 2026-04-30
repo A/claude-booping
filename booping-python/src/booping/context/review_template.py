@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Literal, get_args
+from typing import Literal, cast, get_args
 
 from pydantic import BaseModel
 
@@ -18,7 +18,6 @@ class ReviewTemplate(BaseModel):
     body: str
     source: Literal["core", "project"]
     layer: Layer
-    applies_to: list[str] = []
 
     @classmethod
     def _build(cls, path: Path, source: Literal["core", "project"]) -> ReviewTemplate:
@@ -31,21 +30,13 @@ class ReviewTemplate(BaseModel):
                 f"{path}: invalid or missing 'layer' frontmatter (got {layer_raw!r}); "
                 f"expected one of {_VALID_LAYERS}"
             )
-        applies_to_raw: Any = fm.get("applies_to", [])
-        if applies_to_raw is None:
-            applies_to: list[str] = []
-        elif isinstance(applies_to_raw, list):
-            applies_to = [str(x) for x in applies_to_raw]  # type: ignore[reportUnknownVariableType]
-        else:
-            raise ValueError(f"{path}: 'applies_to' must be a list when present")
         return cls(
             name=name,
             description=description,
             path=path,
             body=body,
             source=source,
-            layer=layer_raw,
-            applies_to=applies_to,
+            layer=cast(Layer, layer_raw),
         )
 
     @classmethod

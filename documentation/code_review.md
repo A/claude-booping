@@ -29,7 +29,7 @@ Use this directory for checklists specific to your stack or domain — house sty
 
 ### Stack auto-detect
 
-`/code-review` scans the repo's manifest files (`pyproject.toml`, `package.json`, `Cargo.toml`, `go.mod`, etc.) for substrings declared in `code_review.stack_markers` and selects the matching review templates. You do not pass the stack on the command line — it is inferred from what is actually pinned.
+`/code-review` inspects the repo's manifest files (`pyproject.toml`, `package.json`, `Cargo.toml`, `go.mod`, etc.) and source code, then picks the review templates whose `description` frontmatter matches the stack it identified. Generic templates always run; language and framework templates load only when a real signal for them exists. You do not pass the stack on the command line — it is inferred from what is actually pinned.
 
 ### Severity labels
 
@@ -47,15 +47,4 @@ This is the same triage shape `/develop` uses on the feedback list — see [Revi
 
 ## Config
 
-`/code-review` reads the following key from `src/config.yaml`. See [Project config](project_config.md) for the deep-merge override mechanics; per-project tweaks live in `~/Claude/{project}/config.yaml`.
-
-- **`code_review.stack_markers`** — map of `{dependency-substring: template-name}` used to auto-detect which review templates apply. Example:
-
-  ```yaml
-  code_review:
-    stack_markers:
-      django: django
-      react: react
-  ```
-
-  When `/code-review` finds the substring `django` anywhere in the repo's manifest files, it loads `docs/review_templates/django.md` (and `~/Claude/{project}/review_templates/django.md` if present) into the review pass. Add an entry per dependency you want to gate on; the matching template name resolves against both core and project-local template directories.
+`/code-review` has no dedicated config keys. Template selection is driven by the `description` frontmatter on each review template under `docs/review_templates/` and `~/Claude/{project}/review_templates/`. To make a project-local checklist available to the review pass, drop it under your vault's `review_templates/` with a clear `description` — the skill loads it when the repo's stack matches.

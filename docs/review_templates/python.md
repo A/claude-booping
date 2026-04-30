@@ -2,7 +2,6 @@
 name: python
 description: Python-specific checklist — type safety, style, testing patterns, exceptions, comments, idioms.
 layer: language
-applies_to: [python]
 ---
 
 # Quality Checklist

@@ -42,7 +42,7 @@ Project-local plan templates. Each file has frontmatter (`name`, `description`) 
 
 ## `review_templates/`
 
-Project-local code-review templates. Loaded by [/code-review](code_review.md) alongside the core templates and selected per-plan based on stack signals from `code_review.stack_markers` in `src/config.yaml`. Use this directory to add review checklists specific to your stack or domain.
+Project-local code-review templates. Loaded by [/code-review](code_review.md) alongside the core templates; the skill picks the matching subset by inspecting the repo's manifests and reading each template's `description` frontmatter. Use this directory to add review checklists specific to your stack or domain.
 
 ## `sprints.md`
 
