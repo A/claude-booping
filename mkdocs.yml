@@ -23,4 +23,3 @@ nav:
       - /chat: chat.md
       - /help: help.md
   - Project config: project_config.md
-  - CLI: cli.md

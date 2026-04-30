@@ -60,4 +60,5 @@ Treat the feedback list the same way `/groom` treats Gemini's cross-validation o
 
 - **`sprint.max_milestones_per_agent`** — maximum number of consecutive milestones grouped into a single `booping-developer` briefing. `/develop` only groups when the milestones share enough context that one agent handling them in sequence is cheaper than spinning a fresh agent per milestone; otherwise it stays one milestone per briefing. Default `2`.
 - **`git.branches`** — list of `{branch, when}` entries that map plan `type` (or freeform descriptors) to a branch prefix. `/develop` picks the branch prefix from this list before starting work.
+- **`git.commit_message`** — conventional-commit format string used for in-plan commits. Override per-project to enforce a different commit shape.
 - **`skills.develop.agents`** — the agents `/develop` is allowed to delegate to, with `good_for` / `bad_for` guidance rendered into the skill body. `booping-developer` is the implementation channel; `booping-researcher` is reserved for Phase 0 drift spot-checks across many plan-named files.

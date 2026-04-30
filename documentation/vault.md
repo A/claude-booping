@@ -32,9 +32,9 @@ Free-form user notes — plan-review comments, code-review threads, ideas for ne
 
 Per-skill extension file. Loaded automatically into the matching skill's context at invocation time, so the project's local conventions reach `/groom`, `/develop`, etc. without you having to restate them. Authored and updated by [/learn](learn.md) — do not hand-edit unless you know what `/learn` would have written.
 
-## `_booping/agent_<name>.md`
+## `_booping/agent_<full-agent-name>.md`
 
-Per-agent extension file. Injected into the matching worker agent's body at agent load time, so subagents (e.g. `booping-developer`, `booping-researcher`) inherit project rules without separate reads. Authored and updated by [/learn](learn.md).
+Per-agent extension file. Injected into the matching worker agent's body at agent load time, so subagents inherit project rules without separate reads. The filename uses the agent's full name (which starts with `booping-`) — e.g. `_booping/agent_booping-developer.md`, `_booping/agent_booping-researcher.md`. Authored and updated by [/learn](learn.md).
 
 ## `plan_templates/`
 

@@ -86,4 +86,4 @@ Because lists replace wholesale, the project file must include every branch entr
 
 ## Verifying the merged config
 
-Run `bin/booping debug-context` from the project directory (the one with the `.booping` marker) to dump the assembled context — including the merged config — as YAML. This is the authoritative answer to "what value is the skill actually seeing?" See [CLI](cli.md#debug-context).
+Run `bin/booping debug-context` from the project directory (the one with the `.booping` marker) to dump the assembled context — including the merged config — as YAML. This is the authoritative answer to "what value is the skill actually seeing?"

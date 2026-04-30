@@ -22,7 +22,7 @@ Compress retro findings into durable, actionable rules: global lessons that ever
 `/learn` is the **only** authorised author for two surfaces inside the vault:
 
 - **Global lessons** at `~/Claude/{project}/lessons/{N}_{title}.md` — durable rules every skill picks up via Preflight on every invocation. `N` is a monotonic counter so the directory stays ordered chronologically.
-- **Per-skill and per-agent extension files** at `~/Claude/{project}/_booping/skill_<name>.md` and `~/Claude/{project}/_booping/agent_<name>.md` — narrower rules that only reach the matching skill or worker agent, injected at load time. These are the right home for findings too specific to belong in global lessons (e.g. "when running `/develop` on this monorepo, prefer pnpm over npm").
+- **Per-skill and per-agent extension files** at `~/Claude/{project}/_booping/skill_<name>.md` and `~/Claude/{project}/_booping/agent_<full-agent-name>.md` (e.g. `agent_booping-developer.md`) — narrower rules that only reach the matching skill or worker agent, injected at load time. These are the right home for findings too specific to belong in global lessons (e.g. "when running `/develop` on this monorepo, prefer pnpm over npm").
 
 See [Vault](vault.md#lessons) for the directory layout and how each file reaches the active context.
 
