@@ -44,10 +44,6 @@ Per-skill delegation guidance rendered into each skill's "Available agents" tabl
 
 Skills also use `skills.<name>.status` to declare the single status they own (e.g. `learn → awaiting-learning`, `retro → awaiting-retro`).
 
-### `code_review.stack_markers`
-
-Map of `{dependency-substring: template-name}` used by `/code-review` to auto-detect which review templates apply. The substring is matched against the repo's manifest files (`pyproject.toml`, `package.json`, `Cargo.toml`, `go.mod`, etc.); the value resolves against both `docs/review_templates/` and `~/Claude/{project}/review_templates/`. See [/code-review](code_review.md#stack-auto-detect).
-
 ## Overriding for one project
 
 Drop a YAML file at `~/Claude/{project}/config.yaml` to override or extend the plugin's defaults for that project. The override file deep-merges over `src/config.yaml` at render time:

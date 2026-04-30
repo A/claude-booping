@@ -9,11 +9,35 @@ This skill is **wide-domain** — it must work across very different stacks. Sta
 
 {{ available_agents.render("code-review") }}
 
-{% include "_partials/_shared_instructions.j2" %}
-
 {% include "_partials/_review_template.j2" %}
 
 {{ tools.render('src/templates/_partials/_lessons.j2') }}
+
+## Plan selection
+
+When `$ARGUMENTS` is empty, pick a plan to drive the diff range. When `$ARGUMENTS` carries a diff range or file list, skip this section entirely and use the existing flow in phase (a).
+
+{%- set cr_status = config.skills["code-review"].status %}
+{%- set review_candidates = context.plans | selectattr('status', 'equalto', cr_status) | list %}
+{%- if review_candidates %}
+
+Plans currently in `{{ cr_status }}`:
+
+| SP | Title |
+| --- | --- |
+{% for plan in review_candidates -%}
+| {{ plan.sp or "?" }} | [{{ plan.title | replace("|", "\\|") | replace("\n", " ") }}](plans/{{ plan.path.name }}) |
+{% endfor %}
+
+Use `AskUserQuestion` (single-select) to pick one. Then derive the diff range from the selected plan's `commit:` field (see phase (a)).
+
+If the selected plan has no `commit:` (legacy plan): stop and ask the user to either pass a diff range manually as `$ARGUMENTS` or pick a different plan that has `commit:`.
+{%- else %}
+
+_No plans in the configured code-review status (`{{ cr_status }}`). Either pass a diff target as `$ARGUMENTS` or stop and tell the user._
+{%- endif %}
+
+No plan-status transition occurs — `/code-review` remains stateless.
 
 ## Craft
 
@@ -21,35 +45,27 @@ Walk these phases in order. Each phase has a clear exit before the next begins.
 
 ### (a) Identify target
 
-Determine what to review from `$ARGUMENTS`:
+Determine what to review:
 
-- A diff range (e.g. `HEAD~3..HEAD`, `main..feature/x`) — use `git diff <range>` and `git log <range>` to enumerate changed files.
-- A list of files or directories — read them directly (delegate aggregated reads per the agent table above when appropriate).
-- An uncommitted working tree — use `git status` + `git diff` (staged and unstaged).
+- **From a selected plan** (when `$ARGUMENTS` was empty and a plan was picked above): diff range is `<selected plan.commit>..HEAD`. Run `git diff <selected plan.commit>..HEAD` and `git log --oneline <selected plan.commit>..HEAD` to enumerate changed files.
+- **From `$ARGUMENTS`**:
+  - A diff range (e.g. `HEAD~3..HEAD`, `main..feature/x`) — use `git diff <range>` and `git log <range>` to enumerate changed files.
+  - A list of files or directories — read them directly (delegate aggregated reads per the agent table above when appropriate).
+  - An uncommitted working tree — use `git status` + `git diff` (staged and unstaged).
 
 Confirm scope with the user when ambiguous (e.g. multiple plausible diff bases). Surface the resolved file list back before proceeding.
 
 ### (b) Stack discovery
 
-Detect the stack from repo manifests:
-
-- `pyproject.toml`, `package.json`, `Cargo.toml`, `go.mod`, `Gemfile`.
-
-Read whichever manifests exist at the repo root. Map each dependency key to a stack marker via `config.code_review.stack_markers`:
-
-```yaml
-{% for dep, marker in config.code_review.stack_markers.items() -%}
-{{ dep }}: {{ marker }}
-{% endfor %}
-```
-
-Collect the resulting `stack_markers` set. Also surface the concrete tooling the project uses (configured type-checker, linter, test runner, ORM) by reading the manifest's tool sections — report these names back to the user.
+Inspect the repo to identify the languages, frameworks, and tooling actually in use. Read whichever manifests exist at the repo root (`pyproject.toml`, `package.json`, `Cargo.toml`, `go.mod`, `Gemfile`, …) and surface the concrete tooling (type-checker, linter, test runner, ORM, framework) back to the user. Read source files when the manifest is ambiguous.
 
 When tooling is ambiguous (e.g. multiple type-checkers configured, no clear linter, mixed-language repo), ask the user to confirm before continuing.
 
 ### (c) Template selection
 
-From the **Available review checklists** table above, load every template whose `applies_to` is empty **or** intersects the detected `stack_markers`. Report the loaded set back to the user (`name` + layer) before running them.
+From the **Available review checklists** table above, pick the templates whose `description` is a good fit for the stack you just identified. Always include every `generic` template. Add `language` and `framework` templates only when their description matches a real signal in the repo — do not load a checklist whose subject does not exist in the codebase.
+
+Report the loaded set back to the user (`name` + layer + one-line reason) before running them. If the choice is unclear, ask.
 
 Project-local templates with the same `name` as a core template override the core file — that resolution already happened at skill-load; the rendered table reflects the effective set.
 

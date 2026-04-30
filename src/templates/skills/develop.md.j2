@@ -42,9 +42,30 @@ _No plans in `ready-for-dev` or `awaiting-plan-review`. Stop and tell the user t
 
 ## Phase 0 Intake
 
-Load the plan and the repo `CLAUDE.md`. If the plan was created more than 1h ago, double-check for codebase drift against the files it names.
+Load the plan and the repo `CLAUDE.md`.
 
 **Validate entry status**: the plan's `status:` must match an entry transition in the table above. Otherwise stop and report clearly.
+
+### Plan-validity check
+
+Compare the plan's `commit:` field with `context.project.git_commit`.
+
+- **Equal**: proceed.
+- **Different**: run the cheap-summary commands first — do **not** load the full `git diff` into context until the user has opted to revalidate.
+
+  ```bash
+  git diff --name-only <plan.commit>..HEAD
+  git diff --shortstat <plan.commit>..HEAD
+  git log --oneline <plan.commit>..HEAD
+  ```
+
+  - If none of the changed files appear in the plan's task `Files` columns and the shortstat is small: surface the summary and proceed.
+  - If plan-touched files changed, or the shortstat is large: ask the user verbatim — *"Want me to revalidate the plan against the changes?"*
+    - On revalidate: load only the plan-named slice of the diff (`git diff <plan.commit>..HEAD -- <plan files>`).
+      - **Trivial drift** (small text shifts, no semantic conflict with milestones): apply in-place plan edits, surface the diff, ask explicit user approval, then proceed.
+      - **Non-trivial drift**: halt verbatim — *"The drift is significant — re-shape the plan with `/groom <plan-path>` before continuing."* Do not transition.
+
+- **`plan.commit` is `None` (legacy plan)**: skip the commit-based validity check; warn the user the plan predates commit tracking; fall back to a file-named drift spot-check (read each file the plan names; flag mismatches against plan assumptions). The `set commit: <repo HEAD>` `on_exit` mutation still applies on transition — current HEAD becomes the new baseline.
 
 ## Phase 1 Plan groupings
 
