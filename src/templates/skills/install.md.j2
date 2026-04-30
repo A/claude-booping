@@ -1,27 +1,3 @@
----
-name: install
-description: Scaffold a booping project under ~/Claude/{project}/ and attach it to the current repo. Use when onboarding a new repo or formalizing an existing one.
-argument-hint: "[project-name]"
-user-invocable: true
-effort: {{ config.skills.install.effort }}
-allowed-tools:
-  - Read
-  - Write
-  - Edit
-  - Glob
-  - Bash(ls ~/Claude/*)
-  - Bash(ls ~/Claude)
-  - Bash(ls -1 ~/Claude/*)
-  - Bash(ls -1 ~/Claude)
-  - Bash(ls -la ~/Claude/*)
-  - Bash(ls -la ~/Claude)
-  - Bash(pwd)
-  - Bash(booping-create-project:*)
-  - Bash(booping-plans:*)
-  - Bash(bin/booping-extra-instructions:*)
-  - AskUserQuestion
----
-
 # booping — /install
 
 Bootstrap the current repo as a booping project. This skill scaffolds the vault under `~/Claude/{project}/`, writes the `.booping` marker in the attached repo, and seeds project-local extensions under `_booping/`.
@@ -104,11 +80,11 @@ Present the Phase 3 findings back to the user as `AskUserQuestion` defaults so t
 
 Then write **three** extension files under `~/Claude/{project}/_booping/`:
 
-1. `~/Claude/{project}/_booping/agent_booping-developer.md` — stack + conventions for developer-agent tiers.
+1. `~/Claude/{project}/_booping/agent_booping-developer.md` — stack + conventions for the developer agent.
 2. `~/Claude/{project}/_booping/skill_groom.md` — validation catalogue + sizing calibration.
 3. `~/Claude/{project}/_booping/skill_develop.md` — quality-check classification + env notes.
 
-Skeletons for the three files are documented in `${CLAUDE_PLUGIN_ROOT}/src/docs/install_extension_files.md` — load them when ready to write.
+Skeletons for the three files are documented in `${CLAUDE_PLUGIN_ROOT}/docs/install_extension_files.md` — load them when ready to write.
 
 **Skip-if-exists rule (attach mode)**: if a target file already exists non-empty, skip the write and print `preserved existing: <path>` to the user. Files that exist but are empty (e.g. a stub created by `booping-create-project`) may be overwritten.
 
@@ -127,10 +103,10 @@ This mismatch check prevents silently feeding a new Python repo with an old Rust
 3. Seed the snapshot so `/develop`'s Phase 4 commit doesn't crash on a fresh vault:
 
    ```bash
-   booping-plans --format=md > ~/Claude/{name}/sprints.md
+   booping render-sprints
    ```
 
-   `booping-plans` on a plans-empty vault emits header + separator cleanly, matching what `/chat`'s orient would regenerate. Seeding is idempotent so `/chat` can overwrite later.
+   `booping render-sprints` on a plans-empty vault writes the snapshot's header + separator cleanly (no data rows). It resolves the freshly-created vault from the `.booping` marker just written, so no path argument is needed. Seeding is idempotent so `/chat` can overwrite later.
 4. Report next steps: suggest `/chat` (for exploration) or `/groom <topic>` (to spec work).
 
 ## Hard rules
@@ -139,4 +115,4 @@ This mismatch check prevents silently feeding a new Python repo with an old Rust
 - **Never write `.booping` without asking.** Attach mode prompts for confirmation before writing the marker.
 - **Never edit the attached repo's own `CLAUDE.md`.** This skill only writes under `~/Claude/{project}/`.
 
-!`${CLAUDE_PLUGIN_ROOT}/bin/booping-extra-instructions skill_install.md`
+{{ tools.render('src/templates/_partials/_extra_instructions.j2', extra_instruction_key='skill_install') }}

@@ -11,5 +11,6 @@ completed: null                  # set on terminal transition (done/fail/cancell
 retro: null                      # path to retrospective file, set by /retro
 goal: null                       # success | partial | fail — set by /retro
 business_goal: ""                # features and refactorings: user/internal-visible outcome
+commit: null                     # repo HEAD when groom finalised draft, re-snapshotted by /develop at sprint entry
 ---
 

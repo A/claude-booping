@@ -1,0 +1,9 @@
+{% set _ei_key = kwargs.extra_instruction_key %}
+{% set _ei_body = context.extra_instructions.get(_ei_key, "") if _ei_key else "" %}
+{% if _ei_body and _ei_body.strip() %}
+## User-specific instructions
+
+These instructions come from prior coding sessions and user feedback in this project. They override the skill instructions above — where they disagree, follow these.
+
+{{ _ei_body.strip() }}
+{% endif %}

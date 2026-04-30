@@ -1,26 +1,3 @@
----
-name: learn
-description: Extract lessons from a retrospective and fold improvements into project-local skill/agent extensions under _booping/. Use after /retro writes a retrospective.
-argument-hint: [retrospective file path]
-user-invocable: true
-allowed-tools:
-  - Read
-  - Write
-  - Edit
-  - Glob
-  - Grep
-  - Bash(ls *)
-  - Bash(test *)
-  - Bash(git add *)
-  - Bash(git commit *)
-  - Bash(grep *)
-  - Bash(bin/booping-debug-mode:*)
-  - Bash(bin/booping-project-name:*)
-  - Bash(bin/booping-plans:*)
-  - AskUserQuestion
-effort: {{ config.skills.learn.effort }}
----
-
 {% import "_partials/_plan_transitions.j2" as plan_transitions with context %}
 {% import "_partials/_available_agents.j2" as available_agents with context %}
 # booping — /learn
@@ -37,11 +14,14 @@ Turn retrospective findings into durable behavior changes routed to exactly one 
 
 {% include "_partials/_learn_targets.j2" %}
 
-!`${CLAUDE_PLUGIN_ROOT}/bin/booping-debug-mode learn`
+{% if context.skills['learn'].debug_enabled %}Debug mode enabled. You can update this skill at ${CLAUDE_PLUGIN_ROOT}/src/templates/skills/learn.md.j2. If the issue is generic enough to fix on the framework level, review the skill code and suggest changes to the user.{% endif %}
 
 ## Plans awaiting learning
 
-!`${CLAUDE_PLUGIN_ROOT}/bin/booping-plans --status {{ config.skills.learn.status }}`
+{% set _learn_plans = context.plans | selectattr("status", "equalto", config.skills.learn.status) | sort(attribute="created", reverse=True) | list %}
+status	sp	title	created	planned	completed	retro	path
+{% for plan in _learn_plans %}{{ plan.status }}	{{ plan.sp if plan.sp is not none else "" }}	{{ plan.title }}	{{ plan.created if plan.created is not none else "" }}	{{ plan.planned if plan.planned is not none else "" }}	{{ plan.completed if plan.completed is not none else "" }}	{{ plan.retro if plan.retro is not none else "" }}	plans/{{ plan.path.name }}
+{% endfor %}
 
 ## High-level workflow
 

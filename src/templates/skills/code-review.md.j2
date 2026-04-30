@@ -1,0 +1,125 @@
+# booping — /code-review
+
+{% import "_partials/_available_agents.j2" as available_agents with context %}
+Review changed code (diff, files, or directory) against layered, stack-aware checklists plus plan- and lesson-aware dynamic checks. Stateless side-skill — output is chat-only, no persistent report, no plan-lifecycle status.
+
+This skill is **wide-domain** — it must work across very different stacks. Stack-specific rules live in checklist templates (core under `docs/review_templates/`, project-local under `~/Claude/{project}/review_templates/`). Project-specific concerns live there or in `_booping/skill_code-review.md`. Do not bake stack details into this skill.
+
+{% include "_partials/_project_context.j2" %}
+
+{{ available_agents.render("code-review") }}
+
+{% include "_partials/_review_template.j2" %}
+
+{{ tools.render('src/templates/_partials/_lessons.j2') }}
+
+## Plan selection
+
+When `$ARGUMENTS` is empty, pick a plan to drive the diff range. When `$ARGUMENTS` carries a diff range or file list, skip this section entirely and use the existing flow in phase (a).
+
+{%- set cr_status = config.skills["code-review"].status %}
+{%- set review_candidates = context.plans | selectattr('status', 'equalto', cr_status) | list %}
+{%- if review_candidates %}
+
+Plans currently in `{{ cr_status }}`:
+
+| SP | Title |
+| --- | --- |
+{% for plan in review_candidates -%}
+| {{ plan.sp or "?" }} | [{{ plan.title | replace("|", "\\|") | replace("\n", " ") }}](plans/{{ plan.path.name }}) |
+{% endfor %}
+
+Use `AskUserQuestion` (single-select) to pick one. Then derive the diff range from the selected plan's `commit:` field (see phase (a)).
+
+If the selected plan has no `commit:` (legacy plan): stop and ask the user to either pass a diff range manually as `$ARGUMENTS` or pick a different plan that has `commit:`.
+{%- else %}
+
+_No plans in the configured code-review status (`{{ cr_status }}`). Either pass a diff target as `$ARGUMENTS` or stop and tell the user._
+{%- endif %}
+
+No plan-status transition occurs — `/code-review` remains stateless.
+
+## Craft
+
+Walk these phases in order. Each phase has a clear exit before the next begins.
+
+### (a) Identify target
+
+Determine what to review:
+
+- **From a selected plan** (when `$ARGUMENTS` was empty and a plan was picked above): diff range is `<selected plan.commit>..HEAD`. Run `git diff <selected plan.commit>..HEAD` and `git log --oneline <selected plan.commit>..HEAD` to enumerate changed files.
+- **From `$ARGUMENTS`**:
+  - A diff range (e.g. `HEAD~3..HEAD`, `main..feature/x`) — use `git diff <range>` and `git log <range>` to enumerate changed files.
+  - A list of files or directories — read them directly (delegate aggregated reads per the agent table above when appropriate).
+  - An uncommitted working tree — use `git status` + `git diff` (staged and unstaged).
+
+Confirm scope with the user when ambiguous (e.g. multiple plausible diff bases). Surface the resolved file list back before proceeding.
+
+### (b) Stack discovery
+
+Inspect the repo to identify the languages, frameworks, and tooling actually in use. Read whichever manifests exist at the repo root (`pyproject.toml`, `package.json`, `Cargo.toml`, `go.mod`, `Gemfile`, …) and surface the concrete tooling (type-checker, linter, test runner, ORM, framework) back to the user. Read source files when the manifest is ambiguous.
+
+When tooling is ambiguous (e.g. multiple type-checkers configured, no clear linter, mixed-language repo), ask the user to confirm before continuing.
+
+### (c) Template selection
+
+From the **Available review checklists** table above, pick the templates whose `description` is a good fit for the stack you just identified. Always include every `generic` template. Add `language` and `framework` templates only when their description matches a real signal in the repo — do not load a checklist whose subject does not exist in the codebase.
+
+Report the loaded set back to the user (`name` + layer + one-line reason) before running them. If the choice is unclear, ask.
+
+Project-local templates with the same `name` as a core template override the core file — that resolution already happened at skill-load; the rendered table reflects the effective set.
+
+### (d) Map blast radius
+
+For diffs spanning roughly five or more files, delegate a blast-radius read to `booping-researcher` with the file list — ask it to summarise which modules / integration points / public APIs the change touches and return a compressed summary.
+
+For smaller changes, read the files directly. Do not delegate single-file reads.
+
+### (e) Run loaded checklists
+
+For each loaded checklist, walk every item against the changed code. Collect findings as you go. Items the project's configured linter or formatter already enforces are filtered out — they are noise, not review signal.
+
+### (f) Skill-level dynamic checks
+
+Run these on top of the static checklists. They are plan- and lesson-aware and cannot live in static templates.
+
+1. **Lesson compliance** (`BLOCKER` on violation). Walk every loaded lesson above. Any change that contradicts a lesson is a blocker — surface the lesson id, the violating snippet, and the corrective fix.
+2. **Plan-DoD alignment** (when the user names a plan in `$ARGUMENTS`). Read the plan's frontmatter and DoD checkboxes; cross-reference each `[x]` against the diff. Flag any DoD item marked done that the diff does not actually deliver.
+3. **Plan-intent match** (when a plan is in scope). Verify the implementation matches the plan's mandated test methodology, structural pattern, and architectural decisions. A diff that solves the user's problem with a different approach than the plan specified is a finding, not silently-accepted variation.
+
+### (g) Present findings
+
+Group by severity, in this order:
+
+- `BLOCKER` — lesson violation, broken contract, security issue, or DoD/intent mismatch.
+- `SUGGESTION` — non-blocking improvement (design, clarity, robustness).
+- `NIT` — trivial inline edit (rename, comment, small reorganisation).
+
+For each finding: file + line, the offending snippet, the proposed fix as an exact replacement snippet, and a one-line rationale citing the checklist item or lesson id. No persistent report file — output is chat-only.
+
+### (h) Wrap up
+
+After presenting findings, ask the user how to handle them:
+
+- Trivial inline `NIT`s that the user approves: apply directly via `Edit`.
+- Non-trivial fixes (`BLOCKER` or `SUGGESTION`) that the user approves: delegate to `booping-developer` with a briefing carrying the finding, the file list, and the proposed fix.
+- No commits, no pushes — the user owns those.
+
+## Hard rules
+
+- **No commits without approval.** Never `git commit` or `git push` from this skill. The user owns commits during a review run.
+- **Linter-handled style is filtered out.** If the project's configured linter or formatter would catch it, do not surface it as a finding.
+- **Lesson violation = `BLOCKER`.** Always. No softening to `SUGGESTION`.
+- **Never edit application code beyond trivial inline nits.** Anything non-trivial routes through `booping-developer`. The orchestrator does not refactor or restructure during review.
+- **No persistent report.** Output is chat-only. Do not write a review file under `~/Claude/{project}/` or anywhere else.
+
+## What `/code-review` does NOT do
+
+- Does not own or transition any plan-lifecycle status. It is a stateless side-skill.
+- Does not run the project's tests, lint, or type-check. Those are the user's tools; the skill reviews the diff against principles.
+- Does not commit, push, or open PRs.
+- Does not write persistent review artefacts to the vault.
+- Does not refactor or rewrite code beyond user-approved trivial nits.
+- Does not transition the plan named in `$ARGUMENTS` — review is read-only against plan state.
+
+{{ tools.render('src/templates/_partials/_extra_instructions.j2', extra_instruction_key='skill_code-review') }}

@@ -1,22 +1,3 @@
----
-name: develop
-description: Execute a groomed plan milestone-by-milestone via sub-agents. Use after /groom produces a plan file that is ready to implement.
-argument-hint: [plan file path]
-user-invocable: true
-allowed-tools:
-  - Read
-  - Write
-  - Edit
-  - Glob
-  - Grep
-  - Bash
-  - Agent
-  - AskUserQuestion
-  - TaskCreate
-  - TaskUpdate
-effort: {{ config.skills.develop.effort }}
----
-
 {% import "_partials/_plan_transitions.j2" as plan_transitions with context %}
 {% import "_partials/_available_agents.j2" as available_agents with context %}
 {% import "_partials/_git_guide.j2" as git_guide with context %}
@@ -36,29 +17,63 @@ Execute a plan by delegating every task to a worker agent. The orchestrator neve
 
 ## Plan selection
 
-If `$ARGUMENTS` is empty, run `booping-plans --status ready-for-dev` and `booping-plans --status awaiting-plan-review` in parallel, combine the results, and present them to the user via `AskUserQuestion` (single-select) with each entry showing the plan title and its status. Use the selected plan path as the plan for this session. If both lists are empty, stop and tell the user there are no plans ready.
+If `$ARGUMENTS` is empty, present the candidates below to the user via `AskUserQuestion` (single-select). Use the selected plan path as the plan for this session.
+
+{%- set candidates = context.plans | selectattr('status', 'in', ['ready-for-dev', 'awaiting-plan-review']) | list %}
+{%- if candidates %}
+
+| Status | Plan |
+| --- | --- |
+{% for plan in candidates -%}
+| {{ plan.status }} | [{{ plan.title | replace("|", "\\|") | replace("\n", " ") }}](plans/{{ plan.path.name }}) |
+{% endfor %}
+{%- else %}
+
+_No plans in `ready-for-dev` or `awaiting-plan-review`. Stop and tell the user there are no plans ready._
+{%- endif %}
 
 ## High-level workflow
 
 1. Intake — load plan, validate entry status, spot-check codebase.
-2. Plan groupings — propose batched task groups per milestone, confirm with user.
+2. Plan groupings — propose milestone groups for agent briefings, confirm with user.
 3. Branch — create the sprint branch in the attached repo.
-4. Execute — transition plan, run the milestone loop.
+4. Execute — transition plan, run the milestone-group loop.
 5. Finalize — Final Verification, apply the exit transition, commit vault.
 
 ## Phase 0 Intake
 
-Load the plan and the repo `CLAUDE.md`. If the plan was created more than 1h ago, double-check for codebase drift against the files it names.
+Load the plan and the repo `CLAUDE.md`.
 
 **Validate entry status**: the plan's `status:` must match an entry transition in the table above. Otherwise stop and report clearly.
 
+### Plan-validity check
+
+Compare the plan's `commit:` field with `context.project.git_commit`.
+
+- **Equal**: proceed.
+- **Different**: run the cheap-summary commands first — do **not** load the full `git diff` into context until the user has opted to revalidate.
+
+  ```bash
+  git diff --name-only <plan.commit>..HEAD
+  git diff --shortstat <plan.commit>..HEAD
+  git log --oneline <plan.commit>..HEAD
+  ```
+
+  - If none of the changed files appear in the plan's task `Files` columns and the shortstat is small: surface the summary and proceed.
+  - If plan-touched files changed, or the shortstat is large: ask the user verbatim — *"Want me to revalidate the plan against the changes?"*
+    - On revalidate: load only the plan-named slice of the diff (`git diff <plan.commit>..HEAD -- <plan files>`).
+      - **Trivial drift** (small text shifts, no semantic conflict with milestones): apply in-place plan edits, surface the diff, ask explicit user approval, then proceed.
+      - **Non-trivial drift**: halt verbatim — *"The drift is significant — re-shape the plan with `/groom <plan-path>` before continuing."* Do not transition.
+
+- **`plan.commit` is `None` (legacy plan)**: skip the commit-based validity check; warn the user the plan predates commit tracking; fall back to a file-named drift spot-check (read each file the plan names; flag mismatches against plan assumptions). The `set commit: <repo HEAD>` `on_exit` mutation still applies on transition — current HEAD becomes the new baseline.
+
 ## Phase 1 Plan groupings
 
-{% if config.sprint.group_threshold -%}
-For each milestone, propose task groupings: tasks **≤ {{ config.sprint.group_threshold }} SP** can be batched into a single agent briefing (subject to the agent roster's batching limits). Larger tasks stay one-per-briefing.
+{% if config.sprint.max_milestones_per_agent -%}
+Group consecutive milestones into agent briefings: each briefing covers **up to {{ config.sprint.max_milestones_per_agent }} milestone(s)**. Group only when the milestones share enough context that one agent handling them in sequence is cheaper than spinning a fresh agent per milestone. Otherwise keep them one-per-briefing.
 
 {% endif -%}
-Then present total SP, milestone list, execution order{% if config.sprint.group_threshold %}, and the proposed groupings{% endif %}. Include any drift findings from Phase 0. Ask the user to confirm (and adjust scope if drift was raised).
+Present total SP, milestone list, execution order, and the proposed milestone groups. Include any drift findings from Phase 0. Ask the user to confirm (and adjust scope if drift was raised).
 
 ## Phase 2 Branch
 
@@ -70,25 +85,26 @@ One branch per sprint. In multi-repo projects, reuse the same branch name across
 
 **Apply the entry transition** per the transitions table above.
 
-For each milestone:
+Milestone groups run **sequentially** — never spawn parallel agents on the same sprint branch.
 
-1. `TaskCreate` one task per task group from Phase 1.
-2. Compose the briefing from task/DoD/Verify.
-3. Delegate each group per the agent roster above; always delegate — even a 1-line change.
-4. When the worker reports done:
+For each milestone group from Phase 1:
+
+1. `TaskCreate` one task for the group.
+2. Compose one briefing covering every milestone in the group: per-milestone request, related files, DoD, and Verify.
+3. Delegate to `booping-developer`; always delegate — even a 1-line change.
+4. When the worker reports done, for **each milestone** in the group:
    - Verify developer work.
    - Flip each completed task's DoD checkboxes in the plan: `- [ ]` → `- [x]`.
    - Flip each task row in the milestone's status table: `pending` → `done`.
-5. Flip the milestone status to `done`, then commit in the attached repo per the [Git](#git) guide.
-6. Report milestone completion to the user with a one-paragraph summary (what shipped, any deferred items) before starting the next milestone.
-
-Within a milestone, run tasks in parallel when their files don't overlap and they don't depend on each other. Otherwise run them sequentially. Don't use worktrees — parallel agents share the sprint branch.
+   - Flip the milestone status to `done`.
+   - Commit in the attached repo per the [Git](#git) guide (one commit per milestone).
+5. Report group completion to the user with a one-paragraph summary (what shipped, any deferred items) before starting the next group.
 
 ## Phase 4 Finalize
 
 1. Run the plan's Final Verification commands **plus** the project's own lint / typecheck / test commands (see below). Once, at sprint end.
 2. Confirm every DoD checkbox is `[x]` and every milestone status is `done`.
-3. Apply the `All milestones done` exit transition from the transitions table above; verify with `booping-plans`.
+3. Apply the `All milestones done` exit transition from the transitions table above; re-read the plan frontmatter to confirm `status:` matches the new state.
 4. Commit the vault updates.
 
 If Final Verification fails, delegate the fix to a worker agent; two failed fix attempts on the same issue trigger the failure exit transition from the transitions table.
@@ -102,4 +118,4 @@ The project's own lint / typecheck / formatter / test tooling runs once at Phase
 - Does **not** write application code itself — every task delegates to a worker.
 - Does **not** accept scope additions — changes are limited to the plan scope.
 
-!`${CLAUDE_PLUGIN_ROOT}/bin/booping-extra-instructions skill_develop.md`
+{{ tools.render('src/templates/_partials/_extra_instructions.j2', extra_instruction_key='skill_develop') }}

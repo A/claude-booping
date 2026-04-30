@@ -1,28 +1,3 @@
----
-name: retro
-description: Generate a project- and plan-specific sprint retrospective by reviewing session logs, gathering user feedback, and comparing plan vs built. No cross-project generalization or candidate lessons. Use after /develop reports a sprint DONE, or when the user explicitly asks to retro a plan.
-argument-hint: [plan file path(s), space-separated; omit to pick interactively]
-user-invocable: true
-allowed-tools:
-  - Read
-  - Write
-  - Edit
-  - Glob
-  - Grep
-  - Bash(git log *)
-  - Bash(git diff *)
-  - Bash(git show *)
-  - Bash(git add *)
-  - Bash(git commit *)
-  - Bash(ls *)
-  - Bash(bin/booping-plans:*)
-  - Agent
-  - AskUserQuestion
-  - WebSearch
-  - WebFetch
-effort: {{ config.skills.retro.effort }}
----
-
 {% import "_partials/_plan_transitions.j2" as plan_transitions with context %}
 {% import "_partials/_available_agents.j2" as available_agents with context %}
 # booping — /retro
@@ -37,11 +12,14 @@ Produce a project- and plan-specific retrospective grounded in session logs, cod
 
 {% include "_partials/_shared_instructions.j2" %}
 
-!`${CLAUDE_PLUGIN_ROOT}/bin/booping-lessons`
+{{ tools.render('src/templates/_partials/_lessons.j2') }}
 
 ## Plans awaiting retro
 
-!`${CLAUDE_PLUGIN_ROOT}/bin/booping-plans --status {{ config.skills.retro.status }}`
+{% set _retro_plans = context.plans | selectattr("status", "equalto", config.skills.retro.status) | sort(attribute="created", reverse=True) | list %}
+status	sp	title	created	planned	completed	retro	path
+{% for plan in _retro_plans %}{{ plan.status }}	{{ plan.sp if plan.sp is not none else "" }}	{{ plan.title }}	{{ plan.created if plan.created is not none else "" }}	{{ plan.planned if plan.planned is not none else "" }}	{{ plan.completed if plan.completed is not none else "" }}	{{ plan.retro if plan.retro is not none else "" }}	plans/{{ plan.path.name }}
+{% endfor %}
 
 ## High-level workflow
 
@@ -184,7 +162,7 @@ After the commit, tell the user the retrospective is saved and offer `/learn` to
 
 - Does **not** edit any files other than the retrospective itself (and the plan frontmatter for the status transition). All findings stay in the retro body.
 
-!`${CLAUDE_PLUGIN_ROOT}/bin/booping-extra-instructions skill_retro.md`
+{{ tools.render('src/templates/_partials/_extra_instructions.j2', extra_instruction_key='skill_retro') }}
 
 ---
 

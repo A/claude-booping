@@ -1,7 +1,7 @@
 sprint:
   default_threshold_sp: 35
   redecompose_threshold: 5
-  group_threshold: 1
+  max_milestones_per_agent: 2
   scale:
     - { sp: 1, meaning: "Simple text/config change, no risk" }
     - { sp: 2, meaning: "Simple task, predictable, no risk" }
@@ -12,38 +12,24 @@ sprint:
 tasks:
   - type: feature
     description: "New user-facing capability. Needs business goal, design, milestones, DoD."
-    doc_uri: ${CLAUDE_PLUGIN_ROOT}/src/docs/task_feature.md
+    doc_uri: ${CLAUDE_PLUGIN_ROOT}/docs/task_feature.md
   - type: bug
     description: "Defect — observed behavior diverges from expected. Needs triage, reproduction, root-cause hypothesis, minimal fix, and a regression test."
-    doc_uri: ${CLAUDE_PLUGIN_ROOT}/src/docs/task_bug.md
+    doc_uri: ${CLAUDE_PLUGIN_ROOT}/docs/task_bug.md
   - type: refactoring
     description: "Internal structure change with no user-visible behavior change. Needs current-vs-target design, migration steps, and a no-behavior-change DoD."
-    doc_uri: ${CLAUDE_PLUGIN_ROOT}/src/docs/task_refactoring.md
+    doc_uri: ${CLAUDE_PLUGIN_ROOT}/docs/task_refactoring.md
 
 skills:
-  help:
-    effort: low
+  help: {}
 
-  install:
-    effort: high
+  install: {}
 
   develop:
-    effort: high
     agents:
-      booping-developer-middle:
+      booping-developer:
         good_for:
-          - "1–2 SP tasks; batch related tasks up to ~10 SP combined per briefing"
-          - "Mechanical or predictable changes: config edits, simple additions, low-risk refactors"
-        bad_for:
-          - "3+ SP — route to senior"
-          - "Design-judgment work — architectural decisions, non-trivial trade-offs"
-          - "5+ SP — refuse, route back to /groom for re-decomposition"
-      booping-developer-senior:
-        good_for:
-          - "3–4 SP tasks — one per briefing (no batching)"
-        bad_for:
-          - "1–2 SP — cost-effective to route to middle"
-          - "5+ SP — refuse, route back to /groom for re-decomposition"
+          - "All coding tasks — always delegate; never edit application code from the orchestrator"
       booping-researcher:
         good_for:
           - "Phase 0 drift spot-check: given a large set of plan-named files, determine whether actual file shape matches the plan's assumptions"
@@ -52,7 +38,6 @@ skills:
           - "Single-file reads — call Read directly"
 
   groom:
-    effort: high
     agents:
       booping-researcher:
         good_for:
@@ -69,11 +54,9 @@ skills:
           - "When the question fits in a few lines of `ls`/`grep` output"
 
   learn:
-    effort: high
     status: awaiting-learning
 
   retro:
-    effort: high
     status: awaiting-retro
     agents:
       booping-researcher:
@@ -84,8 +67,22 @@ skills:
           - "Phase 2 sprint analysis — stays in the orchestrator"
           - "Phase 4 lesson cross-check — stays in the orchestrator using the in-context lesson set"
 
+  code-review:
+    status: awaiting-retro
+    agents:
+      booping-researcher:
+        good_for:
+          - "Blast-radius reads on large diffs (≥ ~5 files) aggregated into a compressed summary of touched modules and integration points"
+        bad_for:
+          - "Single-file reads — call Read directly"
+          - "Small greps or existence checks that fit in a few lines of output"
+      booping-developer:
+        good_for:
+          - "Applying user-approved non-trivial fixes surfaced by the review (BLOCKER or SUGGESTION)"
+        bad_for:
+          - "Trivial inline nits — orchestrator handles those directly"
+
   chat:
-    effort: high
     agents:
       booping-researcher:
         good_for:
@@ -144,10 +141,11 @@ plan:
           skill: groom
           when: "Draft is complete and ready to present to the user"
           gates:
-            - "Cross-validation run (see [cross-validation](${CLAUDE_PLUGIN_ROOT}/src/docs/cross_validation.md)) — single-file-bug skip acceptable"
+            - "Cross-validation run (see [cross-validation](${CLAUDE_PLUGIN_ROOT}/docs/cross_validation.md)) — single-file-bug skip acceptable"
             - "Every task estimated; any task ≥ redecompose_threshold SP has been re-decomposed"
           on_exit:
             - "set `planned: yyyymmdd hh:mm`"
+            - "set `commit: <repo HEAD>` from `context.project.git_commit`"
         - to: backlog
           skill: groom
           when: "User parks the work mid-grooming to revisit later"
@@ -186,6 +184,7 @@ plan:
           when: "/develop claims the plan at the start of its execute phase"
           on_exit:
             - "set `started: yyyymmdd hh:mm`"
+            - "set `commit: <repo HEAD>` from `context.project.git_commit` (only after the user confirmed the plan is still valid, or the legacy fallback applied)"
 
     in-progress:
       desc: "/develop has claimed the plan and is executing milestones."

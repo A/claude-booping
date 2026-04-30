@@ -1,0 +1,22 @@
+---
+name: code-review
+description: "Review changed code (diff, files, or directory) against layered, stack-aware checklists plus plan- and lesson-aware dynamic checks. Stateless side-skill — chat-only output, no plan-lifecycle status, no persistent report."
+argument-hint: [diff range | files | directory | plan reference]
+user-invocable: true
+allowed-tools:
+  - Read
+  - Write
+  - Edit
+  - Glob
+  - Grep
+  - Bash(git diff *)
+  - Bash(git log *)
+  - Bash(git status *)
+  - Bash(cat *)
+  - Bash(booping:*)
+  - Agent
+  - AskUserQuestion
+effort: medium
+---
+
+!`booping render src/templates/skills/code-review.md.j2`
