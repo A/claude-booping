@@ -13,6 +13,7 @@ from booping.context.plan import Plan
 from booping.context.plan_template import PlanTemplate
 from booping.context.project import Project
 from booping.context.retro import Retro
+from booping.context.review_template import ReviewTemplate
 from booping.context.skill import Skill
 from booping.rendering import get_plugin_root
 
@@ -23,6 +24,7 @@ class Context(BaseModel):
     lessons: list[Lesson] = []
     retros: list[Retro] = []
     plan_templates: list[PlanTemplate] = []
+    review_templates: list[ReviewTemplate] = []
     skills: dict[str, Skill] = {}
     agents: dict[str, Agent] = {}
     config: dict[str, Any] = {}
@@ -57,6 +59,7 @@ class Context(BaseModel):
             lessons = Lesson.load_all(vault)
             retros = Retro.load_all(vault)
             plan_templates = PlanTemplate.load_all(root, vault)
+            review_templates = ReviewTemplate.load_all(root, vault)
             extra_instructions = ei_mod.load(vault)
         else:
             cfg = config_mod.load(root, [])
@@ -64,6 +67,7 @@ class Context(BaseModel):
             lessons = []
             retros = []
             plan_templates = PlanTemplate.load_all(root, Path("/dev/null"))
+            review_templates = ReviewTemplate.load_all(root, Path("/dev/null"))
             extra_instructions = {}
 
         skills = Skill.load_all(root)
@@ -75,6 +79,7 @@ class Context(BaseModel):
             lessons=lessons,
             retros=retros,
             plan_templates=plan_templates,
+            review_templates=review_templates,
             skills=skills,
             agents=agents,
             config=cfg,
