@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://A.github.io/claude-booping/code_review/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>/code-review - booping</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "/code-review";
+        var mkdocs_page_input_path = "code_review.md";
+        var mkdocs_page_url = "/claude-booping/code_review/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> booping
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../quick_start/">Quick start</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../install/">Install</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../vault/">Vault</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Commands</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../groom/">/groom</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../develop/">/develop</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">/code-review</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#why">Why</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#command">Command</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#best-practices">Best practices</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#define-your-own-review-templates">Define your own review templates</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#behaviour-notes">Behaviour notes</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#stack-auto-detect">Stack auto-detect</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#severity-labels">Severity labels</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#trivial-inline-non-trivial-via-agent">Trivial inline, non-trivial via agent</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#config">Config</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../retro/">/retro</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../learn/">/learn</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../chat/">/chat</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../help/">/help</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../project_config/">Project config</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">booping</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Commands</li>
+      <li class="breadcrumb-item active">/code-review</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/A/claude-booping/edit/master/docs/code_review.md">Edit on A/claude-booping</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="code-review">/code-review</h1>
+<p>Run a quality-gate review over the current diff against the active plan, producing a categorised feedback list with inline trivial fixes and <code>booping-developer</code> briefings for non-trivial ones.</p>
+<h2 id="why">Why</h2>
+<p><code>/code-review</code> is the explicit second pair of eyes between <code>/develop</code> and <code>/retro</code>. It is most useful when the implementation pass ran on a cheaper or faster model — for example you let <code>/develop</code> run under Sonnet or GLM and want Opus to catch what the implementer missed. Even on a single-model loop, a fresh-session review surfaces issues the orchestrator's growing context tends to wave through.</p>
+<p>It is a <strong>stateless side-skill</strong>: it does not own a plan-lifecycle status, does not transition the plan, and does not write a persistent report file. The output is a feedback list in the chat session, plus any inline fixes it applies and any follow-up briefings it dispatches.</p>
+<h2 id="command">Command</h2>
+<pre><code class="language-text">/code-review                                  # review the current diff against the in-progress plan
+/code-review plans/YYYYMMDD-{kebab-title}.md  # review against a specific plan
+</code></pre>
+<p>Run it from a fresh Claude Code session — see <a href="../develop/#run-code-review-in-a-fresh-session">Run code review in a fresh session</a> on the <code>/develop</code> page for why.</p>
+<h2 id="best-practices">Best practices</h2>
+<h3 id="define-your-own-review-templates">Define your own review templates</h3>
+<p>The plugin ships a small set of stack-agnostic and stack-specific review templates under <code>docs/review_templates/</code>. Project-local templates live in <code>~/Claude/{project}/review_templates/</code> and are loaded alongside the core ones; a project template with the same name overrides its core counterpart.</p>
+<p>Use this directory for checklists specific to your stack or domain — house style, perf budgets, security rules, framework-specific footguns. See <a href="../vault/#review_templates">Vault</a> for the directory layout.</p>
+<h2 id="behaviour-notes">Behaviour notes</h2>
+<h3 id="stack-auto-detect">Stack auto-detect</h3>
+<p><code>/code-review</code> inspects the repo's manifest files (<code>pyproject.toml</code>, <code>package.json</code>, <code>Cargo.toml</code>, <code>go.mod</code>, etc.) and source code, then picks the review templates whose <code>description</code> frontmatter matches the stack it identified. Generic templates always run; language and framework templates load only when a real signal for them exists. You do not pass the stack on the command line — it is inferred from what is actually pinned.</p>
+<h3 id="severity-labels">Severity labels</h3>
+<p>Findings are categorised so the post-review triage is mechanical:</p>
+<ul>
+<li><strong>BLOCKER</strong> — must be applied before merge. Bugs, security issues, broken contracts, missed plan DoDs.</li>
+<li><strong>SUGGESTION</strong> — apply if the cost is low; defer with an explicit one-liner otherwise.</li>
+<li><strong>NIT</strong> — apply or skip on judgment; no record needed.</li>
+</ul>
+<p>This is the same triage shape <code>/develop</code> uses on the feedback list — see <a href="../develop/#review-the-code-review-feedback-list">Review the code-review feedback list</a>.</p>
+<h3 id="trivial-inline-non-trivial-via-agent">Trivial inline, non-trivial via agent</h3>
+<p><code>/code-review</code> applies trivial fixes (typos, obvious dead code, single-line corrections) inline within the review session. Non-trivial fixes are dispatched as a follow-up briefing to <code>booping-developer</code> so the orchestrator stays a reviewer and the implementation channel stays consistent with the rest of the loop.</p>
+<h2 id="config">Config</h2>
+<p><code>/code-review</code> has no dedicated config keys. Template selection is driven by the <code>description</code> frontmatter on each review template under <code>docs/review_templates/</code> and <code>~/Claude/{project}/review_templates/</code>. To make a project-local checklist available to the review pass, drop it under your vault's <code>review_templates/</code> with a clear <code>description</code> — the skill loads it when the repo's stack matches.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../develop/" class="btn btn-neutral float-left" title="/develop"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../retro/" class="btn btn-neutral float-right" title="/retro">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/A/claude-booping" class="fa fa-code-fork" style="color: #fcfcfc"> A/claude-booping</a>
+        </span>
+    
+    
+      <span><a href="../develop/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../retro/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

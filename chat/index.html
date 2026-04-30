@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://A.github.io/claude-booping/chat/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>/chat - booping</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "/chat";
+        var mkdocs_page_input_path = "chat.md";
+        var mkdocs_page_url = "/claude-booping/chat/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> booping
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../quick_start/">Quick start</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../install/">Install</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../vault/">Vault</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Commands</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../groom/">/groom</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../develop/">/develop</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../code_review/">/code-review</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../retro/">/retro</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../learn/">/learn</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">/chat</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#why">Why</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#command">Command</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#what-it-is-for">What it is for</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#escalation">Escalation</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../help/">/help</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../project_config/">Project config</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">booping</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Commands</li>
+      <li class="breadcrumb-item active">/chat</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/A/claude-booping/edit/master/docs/chat.md">Edit on A/claude-booping</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="chat">/chat</h1>
+<p>The orient-and-working-mode command. Use it to land in a project, get your bearings, navigate the vault, and handle small ad-hoc tasks that do not warrant a plan file.</p>
+<h2 id="why">Why</h2>
+<p><code>/chat</code> is the entry point you reach for when you sit down at a project and want to know where things stand — what is in flight, what is parked, what just shipped — before deciding whether to run anything heavier. It is also the right tool for small one-off work: reading a plan, tweaking a frontmatter field, writing a quick note under <code>notes/</code>, answering a question about the codebase. Anything that does not produce a durable plan artefact lives here.</p>
+<p>It is the only skill with an "orient" responsibility. The other skills assume you already know which plan you are working on; <code>/chat</code> is where that picture comes from.</p>
+<h2 id="command">Command</h2>
+<pre><code class="language-text">/chat                       # orient against the current project
+/chat &lt;free-text question&gt;  # orient, then answer the question
+/chat plans/YYYYMMDD-...md  # orient, then load the named artefact
+</code></pre>
+<p>The free-text body is read verbatim. Anything you mention — a plan path, a retro path, a question about a lesson, a small change request — is picked up.</p>
+<h2 id="what-it-is-for">What it is for</h2>
+<ul>
+<li><strong>Orient.</strong> Land in a project and see what is in flight, what is parked, and what is queued.</li>
+<li><strong>Navigate the vault.</strong> Open plans, retros, lessons, and notes; cross-reference them; surface the relevant slice of <code>~/Claude/{project}/</code> for whatever you are about to do.</li>
+<li><strong>Light edits.</strong> Frontmatter tweaks, manual status flips, small notes under <code>notes/</code>, single-line corrections to a plan that does not need re-grooming.</li>
+<li><strong>Ad-hoc small tasks.</strong> Questions about the codebase, quick reads, one-off greps. The kind of work where opening a plan file would be heavier than the work itself.</li>
+</ul>
+<p>See <a href="../vault/">Vault</a> for the layout <code>/chat</code> navigates over.</p>
+<h2 id="escalation">Escalation</h2>
+<p><code>/chat</code> is bounded by what fits inside a single session without producing a durable artefact. When the conversation outgrows that boundary, escalate rather than stretch the skill:</p>
+<ul>
+<li><strong>Scope grows into real work</strong> → <code>/groom &lt;topic&gt;</code>. Anything that needs research, milestones, story-point estimates, or a plan file belongs in <code>/groom</code>. The rule of thumb: if you would want a retro on it later, it is <code>/groom</code> material now.</li>
+<li><strong>A <code>ready-for-dev</code> plan is waiting</strong> → <code>/develop &lt;plan-path&gt;</code>. <code>/chat</code> will route you there rather than trying to implement milestones inline.</li>
+<li><strong>A plan just finished</strong> → <code>/retro &lt;plan-path&gt;</code> to capture findings; <code>/learn</code> afterwards.</li>
+</ul>
+<p>The hand-off is explicit: <code>/chat</code> recommends the next command and stops, rather than reproducing another skill's workflow inline. See <a href="../groom/">/groom</a>, <a href="../develop/">/develop</a>, <a href="../retro/">/retro</a>, and <a href="../learn/">/learn</a> for what each of those commands owns.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../learn/" class="btn btn-neutral float-left" title="/learn"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../help/" class="btn btn-neutral float-right" title="/help">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/A/claude-booping" class="fa fa-code-fork" style="color: #fcfcfc"> A/claude-booping</a>
+        </span>
+    
+    
+      <span><a href="../learn/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../help/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="description" content="A self-learning, project-scoped sprint workflow for Claude Code." /><link rel="canonical" href="https://A.github.io/claude-booping/" />
+      <link rel="shortcut icon" href="img/favicon.ico" />
+    <title>booping</title>
+    <link rel="stylesheet" href="css/theme.css" />
+    <link rel="stylesheet" href="css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Home";
+        var mkdocs_page_input_path = "index.md";
+        var mkdocs_page_url = "/claude-booping/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="." class="icon icon-home"> booping
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="./search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Home</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#the-loop">The loop</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#why-booping">Why booping</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#read-next">Read next</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="quick_start/">Quick start</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="install/">Install</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="vault/">Vault</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Commands</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="groom/">/groom</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="develop/">/develop</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="code_review/">/code-review</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="retro/">/retro</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="learn/">/learn</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="chat/">/chat</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="help/">/help</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="project_config/">Project config</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href=".">booping</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Home</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/A/claude-booping/edit/master/docs/index.md">Edit on A/claude-booping</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="booping">booping</h1>
+<p>A self-learning, project-scoped sprint workflow for Claude Code. booping turns a feature idea into a durable, on-disk loop — <strong>groom → develop → retro → learn</strong> — that effectively utilizes sub-agents to avoid context rot, with optional Gemini cross-validation when <code>GEMINI_API_KEY</code> is set. Every artifact (plans, retros, lessons, sprint snapshots) lives under <code>~/Claude/{project}/</code>, one folder per codebase, so weeks-long programs stay legible long after the session ends.</p>
+<p>The vault at <code>~/Claude/{project}/</code> is plain markdown with YAML frontmatter, so Obsidian renders it natively as Properties. No proprietary database, no lock-in — just files you can grep, version, and edit by hand.</p>
+<h2 id="the-loop">The loop</h2>
+<pre><code class="language-text">        ┌─────────┐
+        │  groom  │  spec → cross-validate → review gate
+        └────┬────┘
+             │ ready-for-dev
+             ▼
+       ┌──────────┐
+       │  develop │  claim → execute milestone-by-milestone
+       └────┬─────┘
+            │ awaiting-retro
+            │   (optional side-route: /code-review on the in-progress diff)
+            ▼
+        ┌────────┐
+        │  retro │  what shipped vs spec → durable findings
+        └────┬───┘
+             │ awaiting-learning
+             ▼
+        ┌────────┐
+        │  learn │  fold findings into lessons + extension files
+        └────────┘
+</code></pre>
+<p>Every plan walks this loop once. The next plan inherits the lessons.</p>
+<h2 id="why-booping">Why booping</h2>
+<ul>
+<li><strong>Artifacts as a meta-source.</strong> Plans, retros, and lessons are not throwaway scratchpads — they are durable on-disk markdown you can mine later for documentation, onboarding material, research notes, or a historical trace of how a codebase actually evolved. The vault becomes its own knowledge base.</li>
+<li><strong>A benchmarking surface.</strong> Because plans are reproducible files, you can run the same plan twice with different models (Opus vs. Sonnet vs. GLM) and compare the resulting diffs to see how each model behaves on your codebase. The framework gives you the controlled inputs needed for honest comparison.</li>
+<li><strong>Agile-iteration scaffolding made durable.</strong> Sprint cadence, reviews, retrospectives, and lessons are normally social rituals that decay when nobody writes them down. booping gives each ritual a concrete file and a concrete command, so the loop survives across sessions, machines, and weeks of context loss.</li>
+<li><strong>Story points as a personal estimation track record.</strong> Every plan carries an SP estimate, every retro records what actually shipped. Over many sprints you accumulate honest data on how your estimates compare to reality on this specific codebase — a private calibration log you can't get from a ticket tracker.</li>
+</ul>
+<h2 id="read-next">Read next</h2>
+<ul>
+<li><a href="quick_start/">Quick start</a> — install the plugin, run <code>/install</code>, ship your first plan end-to-end.</li>
+<li><a href="install/">Install</a> — prerequisites and what <code>/install</code> scaffolds.</li>
+<li><a href="vault/">Vault</a> — full tour of <code>~/Claude/{project}/</code>: what every file and directory is for.</li>
+<li><a href="groom/">/groom</a> — spec a sprint, with cross-validation and the user-approval gate.</li>
+<li><a href="develop/">/develop</a> — claim a ready plan and execute milestones.</li>
+<li><a href="code_review/">/code-review</a> — stack-aware review of the in-progress diff.</li>
+<li><a href="retro/">/retro</a> — capture what actually shipped vs. the spec.</li>
+<li><a href="learn/">/learn</a> — fold retro findings into durable rules.</li>
+<li><a href="chat/">/chat</a> — orient inside the vault and handle ad-hoc small tasks.</li>
+<li><a href="help/">/help</a> — command index.</li>
+<li><a href="project_config/">Project config</a> — tour of <code>src/config.yaml</code> and the per-project override mechanic.</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="quick_start/" class="btn btn-neutral float-right" title="Quick start">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/A/claude-booping" class="fa fa-code-fork" style="color: #fcfcfc"> A/claude-booping</a>
+        </span>
+    
+    
+    
+      <span><a href="quick_start/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = ".";</script>
+    <script src="js/theme_extra.js"></script>
+    <script src="js/theme.js"></script>
+      <script src="search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
+
+<!--
+MkDocs version : 1.6.1
+Build Date UTC : 2026-04-30 10:39:22.476623+00:00
+-->

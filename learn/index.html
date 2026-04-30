@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://A.github.io/claude-booping/learn/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>/learn - booping</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "/learn";
+        var mkdocs_page_input_path = "learn.md";
+        var mkdocs_page_url = "/claude-booping/learn/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> booping
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../quick_start/">Quick start</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../install/">Install</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../vault/">Vault</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Commands</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../groom/">/groom</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../develop/">/develop</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../code_review/">/code-review</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../retro/">/retro</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">/learn</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#why">Why</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#command">Command</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#what-it-writes">What it writes</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#best-practices">Best practices</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#review-every-proposed-update">Review every proposed update</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#shit-in-shit-out">Shit in, shit out</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../chat/">/chat</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../help/">/help</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../project_config/">Project config</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">booping</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Commands</li>
+      <li class="breadcrumb-item active">/learn</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/A/claude-booping/edit/master/docs/learn.md">Edit on A/claude-booping</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="learn">/learn</h1>
+<p>Compress retro findings into durable, actionable rules: global lessons that every skill loads, plus per-skill and per-agent extension files that target a specific surface.</p>
+<h2 id="why">Why</h2>
+<p><code>/retro</code> records what happened on one plan. <code>/learn</code> is the step that turns those observations into rules booping will obey on every future plan. Without <code>/learn</code>, retros pile up unread and the same friction repeats sprint after sprint; with <code>/learn</code>, each sprint leaves the project a little better calibrated.</p>
+<p><code>/learn</code> reads the retro file from the plan currently in <code>awaiting-learning</code>, proposes a small set of updates (new lesson entries, edits to existing lessons, additions to the relevant <code>_booping/</code> extension files), and asks you to review each proposal before writing.</p>
+<h2 id="command">Command</h2>
+<pre><code class="language-text">/learn                                  # learn from the plan currently in awaiting-learning
+/learn plans/YYYYMMDD-{kebab-title}.md  # learn from a specific plan
+</code></pre>
+<p><code>/learn</code> walks the plan from <code>awaiting-learning → done</code> once you have signed off on the proposed updates.</p>
+<h2 id="what-it-writes">What it writes</h2>
+<p><code>/learn</code> is the <strong>only</strong> authorised author for two surfaces inside the vault:</p>
+<ul>
+<li><strong>Global lessons</strong> at <code>~/Claude/{project}/lessons/{N}_{title}.md</code> — durable rules every skill picks up via Preflight on every invocation. <code>N</code> is a monotonic counter so the directory stays ordered chronologically.</li>
+<li><strong>Per-skill and per-agent extension files</strong> at <code>~/Claude/{project}/_booping/skill_&lt;name&gt;.md</code> and <code>~/Claude/{project}/_booping/agent_&lt;full-agent-name&gt;.md</code> (e.g. <code>agent_booping-developer.md</code>) — narrower rules that only reach the matching skill or worker agent, injected at load time. These are the right home for findings too specific to belong in global lessons (e.g. "when running <code>/develop</code> on this monorepo, prefer pnpm over npm").</li>
+</ul>
+<p>See <a href="../vault/#lessons">Vault</a> for the directory layout and how each file reaches the active context.</p>
+<h2 id="best-practices">Best practices</h2>
+<h3 id="review-every-proposed-update">Review every proposed update</h3>
+<p><code>/learn</code> proposes — you commit. Read each proposed lesson and extension edit before approving. Three things to check:</p>
+<ul>
+<li><strong>Actionability.</strong> A lesson should tell a future skill what to do, not just describe the past. "Be careful with migrations" is a description; "Run <code>manage.py migrate --plan</code> before applying any migration generated this session" is a rule.</li>
+<li><strong>Right home.</strong> A rule that only matters for <code>/develop</code> belongs in <code>_booping/skill_develop.md</code>, not in global <code>lessons/</code> where every skill pays the context cost. Conversely, a cross-skill convention belongs in <code>lessons/</code>.</li>
+<li><strong>Direction.</strong> A lesson should point forward. If the proposed update is really a complaint about the past plan, send it back — it is retro material, not lesson material.</li>
+</ul>
+<h3 id="shit-in-shit-out">Shit in, shit out</h3>
+<p><code>/learn</code> proposes updates from whatever the retro file says. Accepting proposals blindly produces conflicting and useless rules: redundant overlaps, contradictions with existing lessons, vague platitudes that fire on every plan and steer none. Review every proposal as if you were the one writing it — because once you approve, you are.</p>
+<p>This is the second half of the same warning that applies to <a href="../retro/#shit-in-shit-out">/retro</a>: a sloppy retro produces sloppy lesson proposals, and a rubber-stamped <code>/learn</code> writes those sloppy proposals to disk where they will steer every future sprint.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../retro/" class="btn btn-neutral float-left" title="/retro"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../chat/" class="btn btn-neutral float-right" title="/chat">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/A/claude-booping" class="fa fa-code-fork" style="color: #fcfcfc"> A/claude-booping</a>
+        </span>
+    
+    
+      <span><a href="../retro/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../chat/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

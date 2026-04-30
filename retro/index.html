@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://A.github.io/claude-booping/retro/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>/retro - booping</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "/retro";
+        var mkdocs_page_input_path = "retro.md";
+        var mkdocs_page_url = "/claude-booping/retro/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> booping
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../quick_start/">Quick start</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../install/">Install</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../vault/">Vault</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Commands</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../groom/">/groom</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../develop/">/develop</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../code_review/">/code-review</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">/retro</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#why">Why</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#command">Command</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#best-practices">Best practices</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#shit-in-shit-out">Shit in, shit out</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#reviewing-the-retro-file">Reviewing the retro file</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../learn/">/learn</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../chat/">/chat</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../help/">/help</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../project_config/">Project config</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">booping</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Commands</li>
+      <li class="breadcrumb-item active">/retro</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/A/claude-booping/edit/master/docs/retro.md">Edit on A/claude-booping</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="retro">/retro</h1>
+<p>Capture a project- and task-specific retrospective for a shipped plan: what diverged, what felt off during <code>/develop</code>, what the diff and session log reveal, in a single retro file ready for <a href="../learn/">/learn</a> to compress.</p>
+<h2 id="why">Why</h2>
+<p><code>/retro</code> is the moment booping turns lived experience into a written record. Without it, every irritation that surfaced during <code>/develop</code> evaporates the moment the session closes; with it, those irritations become the input to a durable rule.</p>
+<p>The skill draws from <strong>two inputs</strong>:</p>
+<ul>
+<li><strong>User-asked questions.</strong> <code>/retro</code> interviews you — what felt smooth, what felt forced, where you had to push back on the agent, where the plan was wrong. These are the high-signal sources because you noticed the friction in the moment.</li>
+<li><strong>Session-log and git-diff scan.</strong> <code>/retro</code> reads the <code>/develop</code> session transcript and the produced diff to surface tensions you did not flag explicitly — repeated retries, abandoned approaches, churn between commits, places where the agent did something the plan did not specify. These are the issues you might not have logged but that the artifacts remember.</li>
+</ul>
+<p>The two inputs are stitched into one retro file under <code>~/Claude/{project}/retrospectives/</code>, named to match the plan it covers.</p>
+<h2 id="command">Command</h2>
+<pre><code class="language-text">/retro                                  # retro the plan currently in awaiting-retro
+/retro plans/YYYYMMDD-{kebab-title}.md  # retro a specific plan
+</code></pre>
+<p><code>/retro</code> walks the plan from <code>awaiting-retro → awaiting-learning</code> once the retro file is written and you have signed off.</p>
+<h2 id="best-practices">Best practices</h2>
+<h3 id="shit-in-shit-out">Shit in, shit out</h3>
+<p>The retro is only as honest as your answers. <code>/retro</code> will ask you targeted questions and give you a structure to fill, but it cannot invent insight you did not surface. If you breeze through the questions with "fine, fine, ship it", the retro records nothing useful and <a href="../learn/">/learn</a> has nothing to compress into a lesson.</p>
+<p>You are responsible for thinking about what should change. The skill helps you write it down.</p>
+<p>In practice:</p>
+<ul>
+<li>Take the <code>/retro</code> interview seriously even when the plan went well — the durable lessons often come from successful sprints, not just painful ones.</li>
+<li>If a friction point is hard to name, describe the symptom rather than skip the question. <code>/learn</code> can work from "the agent kept re-reading the same three files before each milestone" — it cannot work from "context was annoying".</li>
+<li>Distinguish "this plan was unusual" from "this is how I want booping to behave from now on". Only the second category is worth a lesson.</li>
+</ul>
+<h2 id="reviewing-the-retro-file">Reviewing the retro file</h2>
+<p>After <code>/retro</code> writes the file, read it before letting <a href="../learn/">/learn</a> act on it. The goal is to separate <strong>durable findings</strong> from <strong>one-off complaints</strong>.</p>
+<p>What to keep:</p>
+<ul>
+<li><strong>Durable findings</strong> — patterns that will recur across sprints. "The agent picks the wrong test runner when both pytest and unittest are present" is a project rule worth lifting into <code>_booping/skill_develop.md</code> or <code>lessons/</code>.</li>
+<li><strong>Process gaps</strong> — places where the lifecycle itself failed you. "I wanted to stop after milestone 2 but did not realise I had to say so up front" is feedback for the prompt habits you bring to <code>/groom</code> and <code>/develop</code>.</li>
+</ul>
+<p>What to mark as one-off:</p>
+<ul>
+<li><strong>Plan-specific complaints</strong> — issues caused by this particular plan being under-specified. Fix the plan or your next prompt; do not codify a rule.</li>
+<li><strong>Mood and momentum notes</strong> — useful context for you, but not lesson material.</li>
+</ul>
+<p>A clear note in the retro file (a short tag, a separate section, or just an inline annotation) tells <code>/learn</code> which findings to compress into rules and which to leave behind. Without this triage you are asking <code>/learn</code> to invent the distinction itself, and that is exactly the place "shit in, shit out" bites hardest.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../code_review/" class="btn btn-neutral float-left" title="/code-review"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../learn/" class="btn btn-neutral float-right" title="/learn">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/A/claude-booping" class="fa fa-code-fork" style="color: #fcfcfc"> A/claude-booping</a>
+        </span>
+    
+    
+      <span><a href="../code_review/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../learn/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

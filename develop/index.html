@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://A.github.io/claude-booping/develop/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>/develop - booping</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "/develop";
+        var mkdocs_page_input_path = "develop.md";
+        var mkdocs_page_url = "/claude-booping/develop/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> booping
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../quick_start/">Quick start</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../install/">Install</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../vault/">Vault</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Commands</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../groom/">/groom</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">/develop</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#what-it-does">What it does</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#command">Command</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#best-practices">Best practices</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#run-code-review-in-a-fresh-session">Run code review in a fresh session</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#try-alternative-models-for-implementation">Try alternative models for implementation</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#review-the-code-review-feedback-list">Review the code-review feedback list</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#config">Config</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../code_review/">/code-review</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../retro/">/retro</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../learn/">/learn</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../chat/">/chat</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../help/">/help</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../project_config/">Project config</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">booping</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Commands</li>
+      <li class="breadcrumb-item active">/develop</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/A/claude-booping/edit/master/docs/develop.md">Edit on A/claude-booping</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="develop">/develop</h1>
+<p>Claim a <code>ready-for-dev</code> plan and execute its milestones, delegating coding to <code>booping-developer</code> and orchestrating verification, commits, and status transitions on the way to <code>awaiting-retro</code>.</p>
+<h2 id="what-it-does">What it does</h2>
+<p><code>/develop</code> walks a plan through <code>ready-for-dev → in-progress → awaiting-retro</code>. It claims exactly one plan, picks the right branch from <code>git.branches</code>, groups consecutive milestones into agent briefings, runs each briefing through <code>booping-developer</code>, verifies milestone DoDs, runs the project's lint / typecheck / test gates at Final Verification, and flips the plan's status when every checkbox is <code>[x]</code> and Final Verification is green.</p>
+<p><code>/develop</code> does not edit application code from the orchestrator — all coding is delegated. The orchestrator owns reads/writes against the vault, briefing assembly, verification, and commits.</p>
+<p>By default <code>/develop</code> runs all milestone groups in <strong>one session</strong>. Stopping after each milestone is a user-prompt-level instruction, not default behaviour (see Best practices).</p>
+<h2 id="command">Command</h2>
+<pre><code class="language-text">/develop                                  # auto-claim the next ready-for-dev plan
+/develop plans/YYYYMMDD-{kebab-title}.md  # claim a specific plan
+</code></pre>
+<p>Auto-claim picks the oldest plan in <code>ready-for-dev</code>. If the queue is empty <code>/develop</code> reports it and exits — it does not silently fall back to <code>in-progress</code> plans.</p>
+<p>To resume a plan already in <code>in-progress</code> (e.g. after a stopped session), invoke <code>/develop</code> with the explicit path; the skill picks up at the first milestone whose DoDs are not all <code>[x]</code>.</p>
+<h2 id="best-practices">Best practices</h2>
+<h3 id="run-code-review-in-a-fresh-session">Run code review in a fresh session</h3>
+<p>When you want a <a href="../code_review/">/code-review</a> pass, do it from a <strong>fresh session</strong>, not the same one that ran <code>/develop</code>. <code>/code-review</code> reads the diff and the plan, which is unaffected by orchestrator context, but the reviewer benefits from a clean slate without any of <code>/develop</code>'s execution traces in scope.</p>
+<h3 id="try-alternative-models-for-implementation">Try alternative models for implementation</h3>
+<p>Because plans are reproducible files, you can run the same plan with different models — for example use a cheaper or faster model (Sonnet, GLM) for the implementation pass under <code>/develop</code>, and reserve Opus for <a href="../code_review/">/code-review</a> afterward. The plan file is the controlled input; the diff is the controlled output. Swap models, compare diffs, calibrate which model gives you acceptable quality on your codebase.</p>
+<h3 id="review-the-code-review-feedback-list">Review the code-review feedback list</h3>
+<p>After <code>/code-review</code> produces its findings, work the list explicitly:</p>
+<ul>
+<li><strong>BLOCKER</strong> — must be applied before merge. Trivial fixes happen inline in the review session; non-trivial fixes go back through <code>booping-developer</code> via a follow-up briefing.</li>
+<li><strong>SUGGESTION</strong> — apply if the cost is low; defer with an explicit one-liner in the plan otherwise. Do not silently drop.</li>
+<li><strong>NIT</strong> — apply or skip on judgment; no record needed.</li>
+</ul>
+<p>Treat the feedback list the same way <code>/groom</code> treats Gemini's cross-validation output: every BLOCKER must be addressed, deferrals are explicit, no item is silently dropped.</p>
+<h2 id="config">Config</h2>
+<p><code>/develop</code> reads the following keys from <code>src/config.yaml</code>. See <a href="../project_config/">Project config</a> for the deep-merge override mechanics; per-project tweaks live in <code>~/Claude/{project}/config.yaml</code>.</p>
+<ul>
+<li><strong><code>sprint.max_milestones_per_agent</code></strong> — maximum number of consecutive milestones grouped into a single <code>booping-developer</code> briefing. <code>/develop</code> only groups when the milestones share enough context that one agent handling them in sequence is cheaper than spinning a fresh agent per milestone; otherwise it stays one milestone per briefing. Default <code>2</code>.</li>
+<li><strong><code>git.branches</code></strong> — list of <code>{branch, when}</code> entries that map plan <code>type</code> (or freeform descriptors) to a branch prefix. <code>/develop</code> picks the branch prefix from this list before starting work.</li>
+<li><strong><code>git.commit_message</code></strong> — conventional-commit format string used for in-plan commits. Override per-project to enforce a different commit shape.</li>
+<li><strong><code>skills.develop.agents</code></strong> — the agents <code>/develop</code> is allowed to delegate to, with <code>good_for</code> / <code>bad_for</code> guidance rendered into the skill body. <code>booping-developer</code> is the implementation channel; <code>booping-researcher</code> is reserved for Phase 0 drift spot-checks across many plan-named files.</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../groom/" class="btn btn-neutral float-left" title="/groom"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../code_review/" class="btn btn-neutral float-right" title="/code-review">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/A/claude-booping" class="fa fa-code-fork" style="color: #fcfcfc"> A/claude-booping</a>
+        </span>
+    
+    
+      <span><a href="../groom/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../code_review/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://A.github.io/claude-booping/install/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Install - booping</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Install";
+        var mkdocs_page_input_path = "install.md";
+        var mkdocs_page_url = "/claude-booping/install/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> booping
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../quick_start/">Quick start</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Install</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#prerequisites">Prerequisites</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#plugin-install">Plugin install</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#scaffold-the-project-vault">Scaffold the project vault</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#verify">Verify</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../vault/">Vault</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Commands</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../groom/">/groom</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../develop/">/develop</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../code_review/">/code-review</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../retro/">/retro</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../learn/">/learn</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../chat/">/chat</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../help/">/help</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../project_config/">Project config</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">booping</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Install</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/A/claude-booping/edit/master/docs/install.md">Edit on A/claude-booping</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="install">Install</h1>
+<h2 id="prerequisites">Prerequisites</h2>
+<p>Required:</p>
+<ul>
+<li><strong><code>uv</code></strong> — drives the plugin's Python tooling. The <code>bin/booping</code> wrapper is <code>uv run --project booping-python booping ...</code>, so every skill load goes through uv.</li>
+<li><strong><code>git</code></strong> — the plugin assumes a git working tree for branching, diffs, and commit attribution during <code>/develop</code> and <code>/code-review</code>.</li>
+</ul>
+<p>Optional:</p>
+<ul>
+<li><strong><code>GEMINI_API_KEY</code></strong> — when set in your environment, <code>/groom</code> cross-validates the drafted plan against Gemini once before handing it to you for review. Without the key, cross-validation skips silently — the rest of the loop is unaffected.</li>
+</ul>
+<p>Install the prerequisites:</p>
+<pre><code class="language-bash"># macOS
+brew install uv git
+
+# Linux (Debian/Ubuntu)
+sudo apt install -y git
+curl -LsSf https://astral.sh/uv/install.sh | sh
+</code></pre>
+<h2 id="plugin-install">Plugin install</h2>
+<p>Inside Claude Code, register the marketplace once and install the plugin:</p>
+<pre><code class="language-text">/plugin marketplace add A/claude-booping
+/plugin install booping@booping
+</code></pre>
+<p>Update later with <code>/plugin update booping</code> (or from the <code>/plugin</code> UI).</p>
+<h2 id="scaffold-the-project-vault">Scaffold the project vault</h2>
+<p><code>cd</code> into the target repository and run:</p>
+<pre><code class="language-text">/install
+</code></pre>
+<p><code>/install</code> is idempotent and scaffolds the per-project vault at <code>~/Claude/{project}/</code>:</p>
+<ul>
+<li><code>plans/</code> — sprint plans authored by <code>/groom</code>, executed by <code>/develop</code>.</li>
+<li><code>retrospectives/</code> — retro files authored by <code>/retro</code>.</li>
+<li><code>lessons/</code> — durable rules authored by <code>/learn</code>.</li>
+<li><code>notes/</code> — your own free-form notes (untouched by skills).</li>
+<li><code>_booping/</code> — per-skill / per-agent extension files authored by <code>/learn</code>.</li>
+<li><code>.booping</code> — marker file telling other skills the vault is ready.</li>
+</ul>
+<p>For the full directory tour (including <code>plan_templates/</code>, <code>review_templates/</code>, <code>sprints.md</code>, and <code>config.yaml</code>), see <a href="../vault/">Vault</a>.</p>
+<h2 id="verify">Verify</h2>
+<p>After <code>/install</code>, run <code>/chat</code> inside the same repo. It should orient against the freshly scaffolded vault, regenerate <code>~/Claude/{project}/sprints.md</code>, and report that the vault is empty — your signal that you're ready to run your first <a href="../groom/">/groom</a>.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../quick_start/" class="btn btn-neutral float-left" title="Quick start"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../vault/" class="btn btn-neutral float-right" title="Vault">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/A/claude-booping" class="fa fa-code-fork" style="color: #fcfcfc"> A/claude-booping</a>
+        </span>
+    
+    
+      <span><a href="../quick_start/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../vault/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

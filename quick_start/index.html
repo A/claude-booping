@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://A.github.io/claude-booping/quick_start/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Quick start - booping</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Quick start";
+        var mkdocs_page_input_path = "quick_start.md";
+        var mkdocs_page_url = "/claude-booping/quick_start/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> booping
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Quick start</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#1-install-the-plugin">1. Install the plugin</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#2-scaffold-the-project-vault">2. Scaffold the project vault</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#3-orient-with-chat">3. Orient with /chat</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#4-read-the-sprint-snapshot">4. Read the sprint snapshot</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#5-first-groom">5. First /groom</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#6-first-develop">6. First /develop</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#7-first-retro">7. First /retro</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#8-first-learn">8. First /learn</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../install/">Install</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../vault/">Vault</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Commands</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../groom/">/groom</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../develop/">/develop</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../code_review/">/code-review</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../retro/">/retro</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../learn/">/learn</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../chat/">/chat</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../help/">/help</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../project_config/">Project config</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">booping</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Quick start</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/A/claude-booping/edit/master/docs/quick_start.md">Edit on A/claude-booping</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="quick-start">Quick start</h1>
+<p>This walkthrough takes you from a fresh checkout to a fully shipped first plan. Run the commands in order; the skills will list candidates if you forget an exact filename.</p>
+<p>The shortest possible path is the five-command loop in the <a href="https://github.com/A/claude-booping#quick-start">README Quick start</a>. The walkthrough below adds the orient step and the per-command context a new user benefits from.</p>
+<h2 id="1-install-the-plugin">1. Install the plugin</h2>
+<p>Inside Claude Code, register the marketplace once and install the plugin:</p>
+<pre><code class="language-text">/plugin marketplace add A/claude-booping
+/plugin install booping@booping
+</code></pre>
+<p>Update later with <code>/plugin update booping</code> (or from the <code>/plugin</code> UI).</p>
+<p>See <a href="../install/">Install</a> for prerequisites (<code>uv</code>, <code>git</code>, optional <code>GEMINI_API_KEY</code>).</p>
+<h2 id="2-scaffold-the-project-vault">2. Scaffold the project vault</h2>
+<p><code>cd</code> into the target repository and run:</p>
+<pre><code class="language-text">/install
+</code></pre>
+<p>That single step creates <code>~/Claude/{project}/</code> with <code>plans/</code>, <code>retrospectives/</code>, <code>lessons/</code>, <code>notes/</code>, <code>_booping/</code>, and a <code>.booping</code> marker file so other skills know the vault is ready. See <a href="../vault/">Vault</a> for what each directory is for.</p>
+<h2 id="3-orient-with-chat">3. Orient with /chat</h2>
+<p>Before grooming anything, run:</p>
+<pre><code class="language-text">/chat
+</code></pre>
+<p><code>/chat</code> is the orient/working-mode command. It loads the project vault, refreshes the on-disk sprint snapshot at <code>~/Claude/{project}/sprints.md</code>, and is the right surface for vault navigation, reading existing plans, and small ad-hoc edits. When scope grows past "small task", <code>/chat</code> escalates you into <code>/groom</code>.</p>
+<h2 id="4-read-the-sprint-snapshot">4. Read the sprint snapshot</h2>
+<p>Open <code>~/Claude/{project}/sprints.md</code>. It is a regenerated view of every plan in the vault grouped by status. On a fresh project it will be near-empty — that is expected.</p>
+<p><code>sprints.md</code> is a build artefact, never hand-edit it (see <a href="../vault/">Vault</a>).</p>
+<h2 id="5-first-groom">5. First /groom</h2>
+<p>Spec your first sprint with a free-text description:</p>
+<pre><code class="language-text">/groom Add per-tenant rate limiting to the public API
+</code></pre>
+<p><code>/groom</code> researches the codebase, drafts a plan under <code>~/Claude/{project}/plans/{YYYYMMDD}-{kebab-title}.md</code>, optionally cross-validates it against Gemini (if <code>GEMINI_API_KEY</code> is set), and stops at <code>awaiting-plan-review</code> for your explicit approval. Sharpen it, push back, ask for splits — the more detailed your initial brief, the sharper the resulting plan.</p>
+<p>When you approve, <code>/groom</code> flips the plan to <code>ready-for-dev</code>.</p>
+<h2 id="6-first-develop">6. First /develop</h2>
+<p>Either auto-claim the next ready plan:</p>
+<pre><code class="language-text">/develop
+</code></pre>
+<p>or target a specific one:</p>
+<pre><code class="language-text">/develop plans/20260426-per-tenant-rate-limiting.md
+</code></pre>
+<p><code>/develop</code> walks the milestones, delegating implementation to the <code>booping-developer</code> agent and reading code via <code>booping-researcher</code> when a milestone requires it. When all milestones are done, the plan moves to <code>awaiting-retro</code>.</p>
+<h2 id="7-first-retro">7. First /retro</h2>
+<p>Capture what actually shipped:</p>
+<pre><code class="language-text">/retro plans/20260426-per-tenant-rate-limiting.md
+</code></pre>
+<p><code>/retro</code> reads the plan, scans session logs and <code>git diff</code>, and writes a retrospective at <code>~/Claude/{project}/retrospectives/{YYYYMMDD}-{kebab-title}.md</code>. It also asks you about tensions you noticed during develop. Review the retrospective file — it is the input to <code>/learn</code>, and shit in means shit out.</p>
+<h2 id="8-first-learn">8. First /learn</h2>
+<p>Fold the retro into durable rules:</p>
+<pre><code class="language-text">/learn retrospectives/20260426-per-tenant-rate-limiting.md
+</code></pre>
+<p><code>/learn</code> proposes lessons (<code>~/Claude/{project}/lessons/{N}_{title}.md</code>) and per-skill / per-agent extension files (<code>~/Claude/{project}/_booping/skill_&lt;name&gt;.md</code>, <code>_booping/agent_&lt;name&gt;.md</code>) for your confirmation. Approved lessons are loaded by future <code>/groom</code> and <code>/develop</code> invocations; extensions travel with the matching skill or agent at load time.</p>
+<p>When <code>/learn</code> finishes, the plan reaches <code>done</code> and your first loop is complete. The next <code>/groom</code> you run inherits everything you just learned.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href=".." class="btn btn-neutral float-left" title="Home"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../install/" class="btn btn-neutral float-right" title="Install">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/A/claude-booping" class="fa fa-code-fork" style="color: #fcfcfc"> A/claude-booping</a>
+        </span>
+    
+    
+      <span><a href=".." style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../install/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

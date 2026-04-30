@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://A.github.io/claude-booping/project_config/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Project config - booping</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Project config";
+        var mkdocs_page_input_path = "project_config.md";
+        var mkdocs_page_url = "/claude-booping/project_config/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> booping
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../quick_start/">Quick start</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../install/">Install</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../vault/">Vault</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Commands</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../groom/">/groom</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../develop/">/develop</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../code_review/">/code-review</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../retro/">/retro</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../learn/">/learn</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../chat/">/chat</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../help/">/help</a>
+                  </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Project config</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#top-level-keys">Top-level keys</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#sprint">sprint</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#git">git</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#tasks">tasks</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#planstatuses">plan.statuses</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#skillsnameagents">skills.&lt;name&gt;.agents</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#overriding-for-one-project">Overriding for one project</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#example-tweak-the-sp-threshold-and-add-a-branch-convention">Example: tweak the SP threshold and add a branch convention</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#verifying-the-merged-config">Verifying the merged config</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">booping</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Project config</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/A/claude-booping/edit/master/docs/project_config.md">Edit on A/claude-booping</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="project-config">Project config</h1>
+<p>booping reads a single structured config — <code>src/config.yaml</code> in the plugin — and merges any project-local override from <code>~/Claude/{project}/config.yaml</code> over it at skill-load time. This page tours every top-level key and explains the override mechanic.</p>
+<h2 id="top-level-keys">Top-level keys</h2>
+<h3 id="sprint"><code>sprint</code></h3>
+<p>Sprint sizing thresholds and the story-point scale. Drives <code>/groom</code>'s split proposals, the per-task re-decompose gate, and <code>/develop</code>'s milestone grouping.</p>
+<ul>
+<li><strong><code>sprint.default_threshold_sp</code></strong> — soft cap on total SP per plan. Above this, <code>/groom</code> proposes splitting the plan into sibling stubs. Default: <code>35</code>.</li>
+<li><strong><code>sprint.redecompose_threshold</code></strong> — per-task SP value at or above which <code>/groom</code> must re-decompose the task before the plan can leave <code>in-spec</code>. Default: <code>5</code>.</li>
+<li><strong><code>sprint.max_milestones_per_agent</code></strong> — cap on consecutive milestones grouped into one <code>booping-developer</code> briefing by <code>/develop</code>. Default: <code>2</code>.</li>
+<li><strong><code>sprint.scale</code></strong> — the 1–5 SP definitions rendered into <code>/groom</code>'s body. Each entry is <code>{sp, meaning}</code>. Replace wholesale to redefine the scale; do not partial-edit (lists merge by replacement, see below).</li>
+</ul>
+<h3 id="git"><code>git</code></h3>
+<p>Branch and commit conventions consumed by <code>/develop</code>.</p>
+<ul>
+<li><strong><code>git.commit_message</code></strong> — the conventional commit format string the orchestrator follows for in-plan commits.</li>
+<li><strong><code>git.branches</code></strong> — list of <code>{branch, when}</code> entries. <code>branch</code> is the literal prefix (e.g. <code>feat/</code>, <code>fix/</code>); <code>when</code> is a list of short matches against the plan <code>type</code> (<code>feature</code>, <code>bug</code>, <code>refactoring</code>) or freeform descriptors. <code>/develop</code> walks this list to pick the sprint branch prefix.</li>
+</ul>
+<h3 id="tasks"><code>tasks</code></h3>
+<p>The task-type taxonomy <code>/groom</code> classifies every request against. Each entry is <code>{type, description, doc_uri}</code>. The matching <code>doc_uri</code> lazy-loads detailed guidance for that task type during grooming. Adding a new task type means adding both a <code>tasks</code> entry and the corresponding doc under <code>docs/</code>.</p>
+<h3 id="planstatuses"><code>plan.statuses</code></h3>
+<p>The full plan-lifecycle definition: every status, who owns it, what it produces, what transitions out of it, what gates each transition has, and what <code>on_exit</code> mutations fire. Skills render only the slice they own (transitions where <code>skill: &lt;self&gt;</code>), so editing this key reshapes every skill's plan-transitions table at the next skill load.</p>
+<p>Each status carries:</p>
+<ul>
+<li><code>desc</code> — one-line human description.</li>
+<li><code>owner</code> — the skill that owns this state.</li>
+<li><code>terminal</code> — bool; terminal states (<code>done</code>, <code>fail</code>, <code>cancelled</code>) cannot transition out.</li>
+<li><code>artifacts</code> — list of strings describing what the state produces.</li>
+<li><code>transitions</code> — list of <code>{to, skill, when, gates?, on_exit?}</code>.</li>
+</ul>
+<p>See <a href="https://github.com/A/claude-booping/blob/main/src/templates/docs/plan_lifecycle_overview.md.j2">Plan lifecycle overview</a> for the rendered status graph; or run <code>bin/booping render src/templates/docs/plan_lifecycle_overview.md.j2</code> locally.</p>
+<h3 id="skillsnameagents"><code>skills.&lt;name&gt;.agents</code></h3>
+<p>Per-skill delegation guidance rendered into each skill's "Available agents" table. Each agent entry has <code>good_for</code> (a list of bullets describing when to delegate) and an optional <code>bad_for</code> (when not to). Currently populated for <code>groom</code>, <code>develop</code>, <code>retro</code>, <code>code-review</code>, and <code>chat</code>.</p>
+<p>Skills also use <code>skills.&lt;name&gt;.status</code> to declare the single status they own (e.g. <code>learn → awaiting-learning</code>, <code>retro → awaiting-retro</code>).</p>
+<h2 id="overriding-for-one-project">Overriding for one project</h2>
+<p>Drop a YAML file at <code>~/Claude/{project}/config.yaml</code> to override or extend the plugin's defaults for that project. The override file deep-merges over <code>src/config.yaml</code> at render time:</p>
+<ul>
+<li><strong>Dict keys merge.</strong> A project key is added or replaces the plugin's value; sibling keys the project file does not mention fall through unchanged.</li>
+<li><strong>List keys replace wholesale.</strong> If the project file sets <code>sprint.scale</code> or <code>git.branches</code>, the project list replaces the plugin list entirely — there is no element-level merge.</li>
+<li><strong>No rebuild required.</strong> The merge happens at skill-load time, every time. Edit, save, run a skill — the new values are live.</li>
+</ul>
+<p>The override takes effect at the next skill load. Nothing in <code>src/files/</code> or the build artefacts is touched.</p>
+<h3 id="example-tweak-the-sp-threshold-and-add-a-branch-convention">Example: tweak the SP threshold and add a branch convention</h3>
+<p><code>~/Claude/{project}/config.yaml</code>:</p>
+<pre><code class="language-yaml">sprint:
+  default_threshold_sp: 25  # smaller cap for this project's faster cadence
+
+git:
+  branches:                 # list — replaces the plugin defaults wholesale
+    - branch: feat/
+      when: [feature]
+    - branch: fix/
+      when: [bug]
+    - branch: refactor/
+      when: [refactoring]
+    - branch: docs/
+      when: [docs, documentation]   # new prefix for doc-only plans
+    - branch: chore/
+      when: [other, tooling]
+</code></pre>
+<p>After the next skill load, <code>/groom</code> proposes splitting at 25 SP instead of 35, and <code>/develop</code> picks <code>docs/</code> for plans typed <code>docs</code>.</p>
+<p>Because lists replace wholesale, the project file must include every branch entry it wants to keep — omitting a row removes it. Dict keys behave the opposite way: <code>sprint.default_threshold_sp: 25</code> does not affect <code>sprint.redecompose_threshold</code> or <code>sprint.scale</code>, which fall through from the plugin defaults.</p>
+<h2 id="verifying-the-merged-config">Verifying the merged config</h2>
+<p>Run <code>bin/booping debug-context</code> from the project directory (the one with the <code>.booping</code> marker) to dump the assembled context — including the merged config — as YAML. This is the authoritative answer to "what value is the skill actually seeing?"</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../help/" class="btn btn-neutral float-left" title="/help"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/A/claude-booping" class="fa fa-code-fork" style="color: #fcfcfc"> A/claude-booping</a>
+        </span>
+    
+    
+      <span><a href="../help/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
