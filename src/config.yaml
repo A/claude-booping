@@ -78,6 +78,20 @@ skills:
           - "Phase 2 sprint analysis — stays in the orchestrator"
           - "Phase 4 lesson cross-check — stays in the orchestrator using the in-context lesson set"
 
+  code-review:
+    agents:
+      booping-researcher:
+        good_for:
+          - "Blast-radius reads on large diffs (≥ ~5 files) aggregated into a compressed summary of touched modules and integration points"
+        bad_for:
+          - "Single-file reads — call Read directly"
+          - "Small greps or existence checks that fit in a few lines of output"
+      booping-developer:
+        good_for:
+          - "Applying user-approved non-trivial fixes surfaced by the review (BLOCKER or SUGGESTION)"
+        bad_for:
+          - "Trivial inline nits — orchestrator handles those directly"
+
   chat:
     agents:
       booping-researcher:

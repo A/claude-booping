@@ -1,0 +1,28 @@
+### Available review checklists
+
+{% set generic = context.review_templates | selectattr("layer", "equalto", "generic") | list %}
+{% set language = context.review_templates | selectattr("layer", "equalto", "language") | list %}
+{% set framework = context.review_templates | selectattr("layer", "equalto", "framework") | list %}
+{% if generic %}
+**Generic**:
+{% for t in generic %}
+- `{{ t.name }}` — {{ t.description or "(no description)" }} (`{{ t.path }}`)
+{% endfor %}
+{% endif %}
+{% if language %}
+**Language**:
+{% for t in language %}
+- `{{ t.name }}` — {{ t.description or "(no description)" }} (`{{ t.path }}`)
+{% endfor %}
+{% endif %}
+{% if framework %}
+**Framework**:
+{% for t in framework %}
+- `{{ t.name }}` — {{ t.description or "(no description)" }} (`{{ t.path }}`)
+{% endfor %}
+{% endif %}
+{% if not generic and not language and not framework %}
+_No review checklists found._
+{% endif %}
+
+Project-local templates extend or override any layer by `name`: see `~/Claude/{{ context.project.name if context.project else "{project}" }}/review_templates/`.
