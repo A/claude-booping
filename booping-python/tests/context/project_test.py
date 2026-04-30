@@ -38,10 +38,20 @@ def test_load_cwd_captures_git_commit(tmp_path: Path) -> None:
     repo = tmp_path / "repo"
     repo.mkdir()
     (repo / ".booping").write_text("project_name: gittest\n")
-    env = {**os.environ, "GIT_AUTHOR_NAME": "t", "GIT_AUTHOR_EMAIL": "t@t",
-           "GIT_COMMITTER_NAME": "t", "GIT_COMMITTER_EMAIL": "t@t"}
+    env = {
+        **os.environ,
+        "GIT_AUTHOR_NAME": "t",
+        "GIT_AUTHOR_EMAIL": "t@t",
+        "GIT_COMMITTER_NAME": "t",
+        "GIT_COMMITTER_EMAIL": "t@t",
+    }
     subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
-    subprocess.run(["git", "commit", "-q", "--allow-empty", "-m", "init"], cwd=repo, check=True, env=env)
+    subprocess.run(
+        ["git", "commit", "-q", "--allow-empty", "-m", "init"],
+        cwd=repo,
+        check=True,
+        env=env,
+    )
     project = Project.load_cwd(start=repo)
     assert project is not None
     assert project.git_commit is not None
