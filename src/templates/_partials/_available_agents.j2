@@ -1,21 +1,33 @@
 {% macro render(skill) -%}
-{%- set agents = config.skills[skill].get("agents", {}) -%}
+{%- set skill_cfg = config.skills[skill] -%}
+{%- set agents = skill_cfg.get("agents", {}) -%}
+{%- set hide_internal = skill_cfg.get("disable_internal_agents", False) -%}
 {%- if agents -%}
 ## Available Agents
 
 {% for agent, spec in agents.items() %}
+{%- if not (hide_internal and spec.get("internal", False)) %}
 ### `{{ agent }}`
 
+{% if spec.get("type", "agent") == "agent" -%}
+Invoke via the `Agent` tool with `subagent_type="{{ agent }}"`.
+{%- else -%}
+This is a `cli` agent. To run it, execute: `booping run-agent {{ agent }}` (pipe the briefing on stdin).
+{%- endif %}
+
+{% if spec.good_for %}
 **Good for:**
 {% for t in spec.good_for -%}
 - {{ t }}
 {% endfor %}
+{% endif -%}
 {% if spec.bad_for %}
 **Bad for:**
 {% for t in spec.bad_for -%}
 - {{ t }}
 {% endfor %}
 {% endif -%}
+{%- endif -%}
 {% endfor -%}
 {%- endif %}
 {%- endmacro %}
