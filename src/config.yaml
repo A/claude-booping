@@ -28,9 +28,11 @@ skills:
   develop:
     agents:
       booping-developer:
+        internal: true
         good_for:
           - "All coding tasks — always delegate; never edit application code from the orchestrator"
       booping-researcher:
+        internal: true
         good_for:
           - "Phase 0 drift spot-check: given a large set of plan-named files, determine whether actual file shape matches the plan's assumptions"
         bad_for:
@@ -40,6 +42,7 @@ skills:
   groom:
     agents:
       booping-researcher:
+        internal: true
         good_for:
           - "Wide read or web search where results must be aggregated outside this skill's context and returned as a summary"
           - "Map blast radius across many files (which modules and integrations a change touches)"
@@ -60,6 +63,7 @@ skills:
     status: awaiting-retro
     agents:
       booping-researcher:
+        internal: true
         good_for:
           - "Phase 0 session-log search: scan ~/.claude/projects/ across all session logs for the plan's time window and aggregate into a structured summary of user questions, blockers, and detours"
         bad_for:
@@ -71,12 +75,14 @@ skills:
     status: awaiting-retro
     agents:
       booping-researcher:
+        internal: true
         good_for:
           - "Blast-radius reads on large diffs (≥ ~5 files) aggregated into a compressed summary of touched modules and integration points"
         bad_for:
           - "Single-file reads — call Read directly"
           - "Small greps or existence checks that fit in a few lines of output"
       booping-developer:
+        internal: true
         good_for:
           - "Applying user-approved non-trivial fixes surfaced by the review (BLOCKER or SUGGESTION)"
         bad_for:
@@ -85,6 +91,7 @@ skills:
   chat:
     agents:
       booping-researcher:
+        internal: true
         good_for:
           - "Vault-wide reads aggregated into a summary (e.g. what plans exist, recurring themes across retros)"
           - "Plan or retro content extraction across ≥3 files where the results need to be compressed before returning to the skill"
