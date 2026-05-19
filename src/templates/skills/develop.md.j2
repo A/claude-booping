@@ -69,6 +69,8 @@ Compare the plan's `commit:` field with `context.project.git_commit`.
 
 ## Phase 1 Plan groupings
 
+**Worker selection**: if the rendered Available Agents table contains more than one entry, present them via `AskUserQuestion` and **hold the selected worker id in-session** — `/develop` is a single continuous session, no persistence to the plan file. Use the same worker id for every milestone group in this sprint. If only one entry is present, use it.
+
 {% if config.sprint.max_milestones_per_agent -%}
 Group consecutive milestones into agent briefings: each briefing covers **up to {{ config.sprint.max_milestones_per_agent }} milestone(s)**. Group only when the milestones share enough context that one agent handling them in sequence is cheaper than spinning a fresh agent per milestone. Otherwise keep them one-per-briefing.
 
@@ -91,7 +93,9 @@ For each milestone group from Phase 1:
 
 1. `TaskCreate` one task for the group.
 2. Compose one briefing covering every milestone in the group: per-milestone request, related files, DoD, and Verify.
-3. Delegate to `booping-developer`; always delegate — even a 1-line change.
+3. Delegate to the worker selected in Phase 1 (always delegate — even a 1-line change):
+   - **`type: agent`** (native): invoke via the `Agent` tool with `subagent_type=<id>`. Briefing passes in the `prompt` arg.
+   - **`type: cli`**: invoke via `Bash` — pipe the briefing on stdin to `booping run-agent <id>`. For long-running commands use `run_in_background: true` and poll — see [cli agent delegation](${CLAUDE_PLUGIN_ROOT}/docs/cli_agent_delegation.md).
 4. When the worker reports done, for **each milestone** in the group:
    - Verify developer work.
    - Flip each completed task's DoD checkboxes in the plan: `- [ ]` → `- [x]`.
