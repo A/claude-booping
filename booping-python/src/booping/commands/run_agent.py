@@ -30,6 +30,7 @@ import argparse
 import shlex
 import subprocess
 import sys
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, cast
 
@@ -114,6 +115,22 @@ def compose_prompt(extension: str, briefing: str) -> str:
     return extension + "\n\n---\n\n" + briefing
 
 
+def log_invocation(vault_dir: Path | None, agent_id: str, command: str) -> None:
+    """Append one line to `<vault>/_booping/.booping.log` recording this call.
+
+    Format: `<iso8601-utc>: [run-agent] <agent_id>: `<command>``.
+    Silent no-op when there is no resolved vault (e.g. running outside a project).
+    """
+    if vault_dir is None:
+        return
+    log_dir = vault_dir / "_booping"
+    log_dir.mkdir(parents=True, exist_ok=True)
+    ts = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+    line = f"{ts}: [run-agent] {agent_id}: `{command}`\n"
+    with (log_dir / ".booping.log").open("a", encoding="utf-8") as f:
+        _ = f.write(line)
+
+
 def render_command(command_template: str, final_prompt: str) -> list[str]:
     quoted = shlex.quote(final_prompt)
     env = Environment(autoescape=False, keep_trailing_newline=True)
@@ -156,6 +173,8 @@ def run_with_context(args: argparse.Namespace, ctx: Context) -> None:
     vault_dir = ctx.project.directory if ctx.project is not None else None
     extension = read_extension(vault_dir, agent_id)
     final_prompt = compose_prompt(extension, briefing)
+
+    log_invocation(vault_dir, agent_id, command_template)
 
     argv = render_command(command_template, final_prompt)
     child = subprocess.run(argv, check=False, shell=False)  # noqa: S603

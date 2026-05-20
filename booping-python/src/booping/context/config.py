@@ -4,6 +4,7 @@ from typing import Any, Literal, Self
 from pydantic import BaseModel, ConfigDict, model_validator
 
 from booping.context._yaml import safe_load_path, safe_load_str
+from booping.utils import deep_merge
 
 
 class AgentConfig(BaseModel):
@@ -45,24 +46,13 @@ def validate_skills(cfg: dict[str, Any]) -> None:
             raise ValueError(f"invalid config for skills.{name}: {exc}") from exc
 
 
-def _deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
-    result: dict[str, Any] = dict(base)
-    for key, val in override.items():
-        base_val: Any = result.get(key)
-        if isinstance(base_val, dict) and isinstance(val, dict):
-            # Both are dicts — recurse. Use type: ignore because isinstance narrowing
-            # produces dict[Unknown, Unknown] in basedpyright strict mode for Any values.
-            result[key] = _deep_merge(base_val, val)  # type: ignore[arg-type]
-        else:
-            result[key] = val
-    return result
-
-
 def load(plugin_root: Path, override_paths: list[Path]) -> dict[str, Any]:
     core_path = plugin_root / "src" / "config.yaml"
     merged: dict[str, Any] = safe_load_str(core_path.read_text())
     for path in override_paths:
         if path.exists():
             override = safe_load_path(path)
-            merged = _deep_merge(merged, override)
+            # `agents` is shallow-merged: each agent entry is atomic — an override
+            # flipping one field must restate the rest of that entry.
+            merged = deep_merge(merged, override, shallow_merge_keys=["agents"])
     return merged

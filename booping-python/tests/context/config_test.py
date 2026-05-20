@@ -107,6 +107,41 @@ def test_loader_does_not_filter_internal_when_disable_flag_set(tmp_path: Path) -
     assert "booping-researcher" in agents
 
 
+def test_agent_entry_replaces_wholesale(tmp_path: Path) -> None:
+    """Project override of `skills.<name>.agents.<id>` replaces the entry, not deep-merges.
+
+    The core entry's `internal: true` must NOT leak into the override.
+    """
+    plugin_root = Path(__file__).resolve().parents[3]
+    override_path = tmp_path / "config.yaml"
+    override_path.write_text(
+        yaml.dump(
+            {
+                "skills": {
+                    "develop": {
+                        "agents": {
+                            "booping-developer": {
+                                "type": "cli",
+                                "command": "pi --print",
+                                "good_for": ["overridden"],
+                            }
+                        }
+                    }
+                }
+            }
+        )
+    )
+    cfg = config_mod.load(plugin_root, [override_path])
+    entry = cfg["skills"]["develop"]["agents"]["booping-developer"]  # type: ignore[index]
+    assert entry == {
+        "type": "cli",
+        "command": "pi --print",
+        "good_for": ["overridden"],
+    }
+    # Sibling agent stays untouched.
+    assert cfg["skills"]["develop"]["agents"]["booping-researcher"]["internal"] is True  # type: ignore[index]
+
+
 def test_ordered_override_paths_signature() -> None:
     """Verify function accepts a list of override paths (multiple entries)."""
     plugin_root = get_fixture_path("plugin-root-minimal")

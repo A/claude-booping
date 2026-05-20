@@ -14,6 +14,16 @@ from booping.context import Context
 from tests.helpers import get_fixture_path
 
 
+@pytest.fixture(autouse=True)
+def clean_booping_log() -> Any:
+    """Remove `.booping.log` from the shared fixture vault before and after each test
+    so cli-run tests don't accumulate log lines across runs."""
+    log = get_fixture_path("vault-with-cli-agent") / "_booping" / ".booping.log"
+    log.unlink(missing_ok=True)
+    yield
+    log.unlink(missing_ok=True)
+
+
 def _make_args(agent_id: str, briefing_file: Path | None = None) -> argparse.Namespace:
     return argparse.Namespace(id=agent_id, briefing_file=briefing_file)
 
@@ -245,6 +255,50 @@ def test_run_agent_help_lists_subcommand() -> None:
 
 
 # ---- type: agent (no-type defaults to agent) explicit case ----
+
+
+def test_log_invocation_appends_line_to_booping_log(
+    monkeypatch: pytest.MonkeyPatch, capfd: pytest.CaptureFixture[str]
+) -> None:
+    """A successful cli-agent invocation appends one line to
+    `<vault>/_booping/.booping.log` with the documented format."""
+    import re
+
+    ctx = _assemble_fixture_ctx()
+    _stdin(monkeypatch, "BRIEFING")
+    args = _make_args("test-cli")
+    with pytest.raises(SystemExit) as ei:
+        ra.run_with_context(args, ctx)
+    _ = capfd.readouterr()
+    assert ei.value.code == 0
+
+    assert ctx.project is not None
+    log_path = ctx.project.directory / "_booping" / ".booping.log"
+    assert log_path.is_file()
+    lines = log_path.read_text().splitlines()
+    assert len(lines) == 1
+    # Format: `<iso8601-utc>: [run-agent] <id>: `<command>``
+    pattern = (
+        r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z: \[run-agent\] test-cli: `printf %s`$"
+    )
+    assert re.match(pattern, lines[0]), f"unexpected log line: {lines[0]!r}"
+
+
+def test_log_invocation_no_project_no_file(tmp_path: Path) -> None:
+    """When ctx.project is None, log_invocation is a no-op (no crash, no file)."""
+    ra.log_invocation(None, "any-id", "any-command")
+    # Sanity: passing a real vault writes the file.
+    ra.log_invocation(tmp_path, "x", "y")
+    assert (tmp_path / "_booping" / ".booping.log").is_file()
+
+
+def test_log_invocation_appends_not_overwrites(tmp_path: Path) -> None:
+    ra.log_invocation(tmp_path, "first", "cmd1")
+    ra.log_invocation(tmp_path, "second", "cmd2")
+    lines = (tmp_path / "_booping" / ".booping.log").read_text().splitlines()
+    assert len(lines) == 2
+    assert "first: `cmd1`" in lines[0]
+    assert "second: `cmd2`" in lines[1]
 
 
 def test_resolve_agent_returns_first_match() -> None:
