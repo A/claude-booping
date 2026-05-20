@@ -30,6 +30,7 @@ import argparse
 import shlex
 import subprocess
 import sys
+import time
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, cast
@@ -109,10 +110,18 @@ def read_extension(vault_dir: Path | None, agent_id: str) -> str:
     return ext_path.read_text()
 
 
+OUTPUT_GUIDE = (
+    "# Output contract (booping)\n"
+    "Your final reply MUST contain ONLY the list of files you changed, one per "
+    "line, paths relative to the repo root. No prose, no preamble, no markdown, "
+    "no fenced code blocks, no commentary. If you changed nothing, reply with an "
+    "empty string.\n"
+)
+
+
 def compose_prompt(extension: str, briefing: str) -> str:
-    if extension.strip() == "":
-        return briefing
-    return extension + "\n\n---\n\n" + briefing
+    body = briefing if extension.strip() == "" else extension + "\n\n---\n\n" + briefing
+    return OUTPUT_GUIDE + "\n---\n\n" + body
 
 
 def log_invocation(vault_dir: Path | None, agent_id: str, command: str) -> None:
@@ -127,6 +136,37 @@ def log_invocation(vault_dir: Path | None, agent_id: str, command: str) -> None:
     log_dir.mkdir(parents=True, exist_ok=True)
     ts = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
     line = f"{ts}: [run-agent] {agent_id}: `{command}`\n"
+    with (log_dir / ".booping.log").open("a", encoding="utf-8") as f:
+        _ = f.write(line)
+
+
+def log_completion(
+    vault_dir: Path | None,
+    agent_id: str,
+    exit_code: int,
+    elapsed: float,
+    stdout: str,
+    stderr: str,
+) -> None:
+    """Append a completion line to `<vault>/_booping/.booping.log` after exec.
+
+    Format: `<iso8601-utc>: [run-agent] <agent_id>: exit=<code> elapsed=<s>s
+    stdout[0:100]=<repr> stderr=<repr>`. stderr is logged in full (repr-escaped so
+    newlines do not break the single-line log entry).
+    Silent no-op when there is no resolved vault.
+    """
+    if vault_dir is None:
+        return
+    log_dir = vault_dir / "_booping"
+    log_dir.mkdir(parents=True, exist_ok=True)
+    ts = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+    out_snip = repr(stdout[:100])
+    err_full = repr(stderr)
+    line = (
+        f"{ts}: [run-agent] {agent_id}: "
+        f"exit={exit_code} elapsed={elapsed:.2f}s "
+        f"stdout[0:100]={out_snip} stderr={err_full}\n"
+    )
     with (log_dir / ".booping.log").open("a", encoding="utf-8") as f:
         _ = f.write(line)
 
@@ -177,5 +217,56 @@ def run_with_context(args: argparse.Namespace, ctx: Context) -> None:
     log_invocation(vault_dir, agent_id, command_template)
 
     argv = render_command(command_template, final_prompt)
-    child = subprocess.run(argv, check=False, shell=False)  # noqa: S603
+    repo_dir = ctx.project.repo_directory if ctx.project is not None else None
+    before = {(p, _git_porcelain_code(line)) for line, p in _porcelain_pairs(repo_dir)}
+    start = time.monotonic()
+    child = subprocess.run(  # noqa: S603
+        argv, check=False, shell=False, capture_output=True, text=True
+    )
+    elapsed = time.monotonic() - start
+
+    sys.stdout.write(child.stdout)
+    sys.stderr.write(child.stderr)
+
+    after = {(p, _git_porcelain_code(line)) for line, p in _porcelain_pairs(repo_dir)}
+    delta_paths = sorted({p for p, _ in (before ^ after)})
+    if delta_paths:
+        sys.stdout.write("\n--- changed files ---\n")
+        for p in delta_paths:
+            sys.stdout.write(p + "\n")
+
+    log_completion(
+        vault_dir, agent_id, child.returncode, elapsed, child.stdout, child.stderr
+    )
     sys.exit(child.returncode)
+
+
+def _git_porcelain_code(line: str) -> str:
+    return line[:2]
+
+
+def _porcelain_pairs(repo_dir: Path | None) -> list[tuple[str, str]]:
+    """Return list of (raw_line, path) tuples from `git status --porcelain`."""
+    if repo_dir is None:
+        return []
+    try:
+        r = subprocess.run(  # noqa: S603
+            ["git", "status", "--porcelain"],
+            cwd=repo_dir,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except FileNotFoundError:
+        return []
+    if r.returncode != 0:
+        return []
+    pairs: list[tuple[str, str]] = []
+    for line in r.stdout.splitlines():
+        if len(line) < 4:
+            continue
+        path = line[3:]
+        if " -> " in path:
+            path = path.split(" -> ", 1)[1]
+        pairs.append((line, path))
+    return pairs

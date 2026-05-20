@@ -69,13 +69,21 @@ def test_render_command_quotes_metachars_in_placeholder() -> None:
     assert argv == ["echo", "$VAR `boom` two words"]
 
 
+_GUIDE_PREFIX = ra.OUTPUT_GUIDE + "\n---\n\n"
+
+
 def test_compose_prompt_with_extension() -> None:
-    assert ra.compose_prompt("ext", "brief") == "ext\n\n---\n\nbrief"
+    assert ra.compose_prompt("ext", "brief") == _GUIDE_PREFIX + "ext\n\n---\n\nbrief"
 
 
 def test_compose_prompt_empty_extension() -> None:
-    assert ra.compose_prompt("", "brief") == "brief"
-    assert ra.compose_prompt("   \n", "brief") == "brief"
+    assert ra.compose_prompt("", "brief") == _GUIDE_PREFIX + "brief"
+    assert ra.compose_prompt("   \n", "brief") == _GUIDE_PREFIX + "brief"
+
+
+def test_compose_prompt_always_starts_with_output_guide() -> None:
+    assert ra.compose_prompt("", "brief").startswith(ra.OUTPUT_GUIDE)
+    assert ra.compose_prompt("ext", "brief").startswith(ra.OUTPUT_GUIDE)
 
 
 def test_read_extension_missing_file_returns_empty(tmp_path: Path) -> None:
@@ -143,7 +151,7 @@ def test_cli_agent_without_extension_briefing_only(
         ra.run_with_context(args, ctx)
     out = capfd.readouterr()
     assert ei.value.code == 0
-    assert out.out == "BRIEFING"
+    assert out.out == _GUIDE_PREFIX + "BRIEFING"
 
 
 def test_no_placeholder_appends_prompt_as_last_arg(
@@ -159,7 +167,7 @@ def test_no_placeholder_appends_prompt_as_last_arg(
         ra.run_with_context(args, ctx)
     out = capfd.readouterr()
     assert ei.value.code == 0
-    assert out.out == "EXTENSION CONTENT for test-cli agent.\n\n\n---\n\nBRIEFING"
+    assert out.out == _GUIDE_PREFIX + "EXTENSION CONTENT for test-cli agent.\n\n\n---\n\nBRIEFING"
 
 
 def test_cli_agent_extension_prepended(
@@ -180,7 +188,7 @@ def test_cli_agent_extension_prepended(
     out = capfd.readouterr()
     assert ei.value.code == 0
     # extension file ends in `\n`; separator is `\n\n---\n\n`
-    assert out.out == "EXTENSION CONTENT for test-cli agent.\n\n\n---\n\nBRIEFING"
+    assert out.out == _GUIDE_PREFIX + "EXTENSION CONTENT for test-cli agent.\n\n\n---\n\nBRIEFING"
 
 
 def test_briefing_file_path(
@@ -196,7 +204,7 @@ def test_briefing_file_path(
         ra.run_with_context(args, ctx)
     out = capfd.readouterr()
     assert ei.value.code == 0
-    assert out.out == "FROM FILE"
+    assert out.out == _GUIDE_PREFIX + "FROM FILE"
 
 
 def test_nonzero_child_exit_propagates(
@@ -235,7 +243,7 @@ def test_metachars_in_prompt_no_injection(
         ra.run_with_context(args, ctx)
     out = capfd.readouterr()
     assert ei.value.code == 0
-    assert out.out == "$HOME `whoami` 'q' \"q\"\nnewline"
+    assert out.out == _GUIDE_PREFIX + "$HOME `whoami` 'q' \"q\"\nnewline"
 
 
 # ---- Subprocess --help integration ----
@@ -276,12 +284,16 @@ def test_log_invocation_appends_line_to_booping_log(
     log_path = ctx.project.directory / "_booping" / ".booping.log"
     assert log_path.is_file()
     lines = log_path.read_text().splitlines()
-    assert len(lines) == 1
-    # Format: `<iso8601-utc>: [run-agent] <id>: `<command>``
-    pattern = (
+    assert len(lines) == 2
+    invocation_pattern = (
         r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z: \[run-agent\] test-cli: `printf %s`$"
     )
-    assert re.match(pattern, lines[0]), f"unexpected log line: {lines[0]!r}"
+    assert re.match(invocation_pattern, lines[0]), f"unexpected invocation line: {lines[0]!r}"
+    completion_pattern = (
+        r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z: \[run-agent\] test-cli: "
+        r"exit=0 elapsed=\d+\.\d{2}s stdout\[0:100\]=.+ stderr=.+$"
+    )
+    assert re.match(completion_pattern, lines[1]), f"unexpected completion line: {lines[1]!r}"
 
 
 def test_log_invocation_no_project_no_file(tmp_path: Path) -> None:
@@ -299,6 +311,44 @@ def test_log_invocation_appends_not_overwrites(tmp_path: Path) -> None:
     assert len(lines) == 2
     assert "first: `cmd1`" in lines[0]
     assert "second: `cmd2`" in lines[1]
+
+
+def test_changed_files_trailer_emitted_on_delta(
+    monkeypatch: pytest.MonkeyPatch, capfd: pytest.CaptureFixture[str]
+) -> None:
+    """When `_porcelain_pairs` reports new entries after exec, a trailer listing
+    the changed paths is appended to stdout."""
+    ctx = _assemble_fixture_ctx()
+    calls = {"n": 0}
+
+    def fake_pairs(_repo_dir: Any) -> list[tuple[str, str]]:
+        calls["n"] += 1
+        if calls["n"] == 1:
+            return []  # before
+        return [("?? new.txt", "new.txt"), (" M edited.py", "edited.py")]  # after
+
+    monkeypatch.setattr(ra, "_porcelain_pairs", fake_pairs)
+    _stdin(monkeypatch, "BRIEFING")
+    with pytest.raises(SystemExit) as ei:
+        ra.run_with_context(_make_args("test-cli-with-placeholder"), ctx)
+    out = capfd.readouterr()
+    assert ei.value.code == 0
+    assert "\n--- changed files ---\n" in out.out
+    assert "edited.py" in out.out
+    assert "new.txt" in out.out
+
+
+def test_no_trailer_when_no_delta(
+    monkeypatch: pytest.MonkeyPatch, capfd: pytest.CaptureFixture[str]
+) -> None:
+    ctx = _assemble_fixture_ctx()
+    monkeypatch.setattr(ra, "_porcelain_pairs", lambda _r: [])
+    _stdin(monkeypatch, "BRIEFING")
+    with pytest.raises(SystemExit) as ei:
+        ra.run_with_context(_make_args("test-cli-with-placeholder"), ctx)
+    out = capfd.readouterr()
+    assert ei.value.code == 0
+    assert "changed files" not in out.out
 
 
 def test_resolve_agent_returns_first_match() -> None:
