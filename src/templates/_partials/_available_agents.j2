@@ -5,6 +5,9 @@
 {%- if agents -%}
 ## Available Agents
 
+Use only the agents defined below, unless there is a clear instruction to use
+other agents.
+
 {% for agent, spec in agents.items() %}
 {%- if not (hide_internal and spec.get("internal", False)) %}
 ### `{{ agent }}`
