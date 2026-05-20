@@ -9,6 +9,7 @@ from typing import Any
 
 import pytest
 
+from booping import logging as booping_logging
 from booping.commands import run_agent as ra
 from booping.context import Context
 from tests.helpers import get_fixture_path
@@ -298,19 +299,19 @@ def test_log_invocation_appends_line_to_booping_log(
 
 def test_log_invocation_no_project_no_file(tmp_path: Path) -> None:
     """When ctx.project is None, log_invocation is a no-op (no crash, no file)."""
-    ra.log_invocation(None, "any-id", "any-command")
+    booping_logging.log_invocation(None, "run-agent", "any-id: `any-command`")
     # Sanity: passing a real vault writes the file.
-    ra.log_invocation(tmp_path, "x", "y")
+    booping_logging.log_invocation(tmp_path, "run-agent", "x: `y`")
     assert (tmp_path / "_booping" / ".booping.log").is_file()
 
 
 def test_log_invocation_appends_not_overwrites(tmp_path: Path) -> None:
-    ra.log_invocation(tmp_path, "first", "cmd1")
-    ra.log_invocation(tmp_path, "second", "cmd2")
+    booping_logging.log_invocation(tmp_path, "run-agent", "first: `cmd1`")
+    booping_logging.log_invocation(tmp_path, "run-agent", "second: `cmd2`")
     lines = (tmp_path / "_booping" / ".booping.log").read_text().splitlines()
     assert len(lines) == 2
     assert "first: `cmd1`" in lines[0]
-    assert "second: `cmd2`" in lines[1]
+    assert "[run-agent] second: `cmd2`" in lines[1]
 
 
 def test_changed_files_trailer_emitted_on_delta(
@@ -342,7 +343,10 @@ def test_no_trailer_when_no_delta(
     monkeypatch: pytest.MonkeyPatch, capfd: pytest.CaptureFixture[str]
 ) -> None:
     ctx = _assemble_fixture_ctx()
-    monkeypatch.setattr(ra, "_porcelain_pairs", lambda _r: [])
+
+    def _empty(_r: Any) -> list[tuple[str, str]]:
+        return []
+    monkeypatch.setattr(ra, "_porcelain_pairs", _empty)
     _stdin(monkeypatch, "BRIEFING")
     with pytest.raises(SystemExit) as ei:
         ra.run_with_context(_make_args("test-cli-with-placeholder"), ctx)

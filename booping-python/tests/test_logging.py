@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 import re
+import subprocess
 from pathlib import Path
+
+import pytest
 
 from booping.logging import log_invocation
 
@@ -48,3 +51,36 @@ def test_log_invocation_creates_parent_directory(tmp_path: Path) -> None:
     log_invocation(vault=tmp_path, subcommand="render", detail="foo.j2")
     log_file = tmp_path / "_booping" / ".booping.log"
     assert log_file.exists()
+
+
+def test_render_subprocess_integration_log(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Invoking bin/booping render via subprocess writes one [render] line to the log."""
+    repo_dir = tmp_path / "repo"
+    repo_dir.mkdir()
+    (repo_dir / ".booping").touch()
+
+    # Point HOME at tmp_path so Project.load_cwd() resolves vault under tmp_path/Claude/
+    monkeypatch.setenv("HOME", str(tmp_path))
+
+    plugin_root = Path(__file__).resolve().parents[2]
+    booping_bin = plugin_root / "bin" / "booping"
+
+    result = subprocess.run(
+        [str(booping_bin), "render", "src/templates/skills/chat.md.j2"],
+        cwd=repo_dir,
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    assert result.returncode == 0
+
+    log_file = tmp_path / "Claude" / "repo" / "_booping" / ".booping.log"
+    assert log_file.is_file()
+    lines = log_file.read_text().strip().splitlines()
+    assert len(lines) == 1
+    assert re.match(
+        r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z: \[render\] .+$",
+        lines[0],
+    ), f"unexpected log line: {lines[0]!r}"

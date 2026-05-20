@@ -31,12 +31,12 @@ import shlex
 import subprocess
 import sys
 import time
-from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, cast
 
 from jinja2 import Environment
 
+from booping import logging as booping_logging
 from booping.context import Context
 
 
@@ -124,53 +124,6 @@ def compose_prompt(extension: str, briefing: str) -> str:
     return OUTPUT_GUIDE + "\n---\n\n" + body
 
 
-def log_invocation(vault_dir: Path | None, agent_id: str, command: str) -> None:
-    """Append one line to `<vault>/_booping/.booping.log` recording this call.
-
-    Format: `<iso8601-utc>: [run-agent] <agent_id>: `<command>``.
-    Silent no-op when there is no resolved vault (e.g. running outside a project).
-    """
-    if vault_dir is None:
-        return
-    log_dir = vault_dir / "_booping"
-    log_dir.mkdir(parents=True, exist_ok=True)
-    ts = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
-    line = f"{ts}: [run-agent] {agent_id}: `{command}`\n"
-    with (log_dir / ".booping.log").open("a", encoding="utf-8") as f:
-        _ = f.write(line)
-
-
-def log_completion(
-    vault_dir: Path | None,
-    agent_id: str,
-    exit_code: int,
-    elapsed: float,
-    stdout: str,
-    stderr: str,
-) -> None:
-    """Append a completion line to `<vault>/_booping/.booping.log` after exec.
-
-    Format: `<iso8601-utc>: [run-agent] <agent_id>: exit=<code> elapsed=<s>s
-    stdout[0:100]=<repr> stderr=<repr>`. stderr is logged in full (repr-escaped so
-    newlines do not break the single-line log entry).
-    Silent no-op when there is no resolved vault.
-    """
-    if vault_dir is None:
-        return
-    log_dir = vault_dir / "_booping"
-    log_dir.mkdir(parents=True, exist_ok=True)
-    ts = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
-    out_snip = repr(stdout[:100])
-    err_full = repr(stderr)
-    line = (
-        f"{ts}: [run-agent] {agent_id}: "
-        f"exit={exit_code} elapsed={elapsed:.2f}s "
-        f"stdout[0:100]={out_snip} stderr={err_full}\n"
-    )
-    with (log_dir / ".booping.log").open("a", encoding="utf-8") as f:
-        _ = f.write(line)
-
-
 def render_command(command_template: str, final_prompt: str) -> list[str]:
     quoted = shlex.quote(final_prompt)
     env = Environment(autoescape=False, keep_trailing_newline=True)
@@ -214,7 +167,9 @@ def run_with_context(args: argparse.Namespace, ctx: Context) -> None:
     extension = read_extension(vault_dir, agent_id)
     final_prompt = compose_prompt(extension, briefing)
 
-    log_invocation(vault_dir, agent_id, command_template)
+    booping_logging.log_invocation(
+        vault_dir, "run-agent", f"{agent_id}: `{command_template}`"
+    )
 
     argv = render_command(command_template, final_prompt)
     repo_dir = ctx.project.repo_directory if ctx.project is not None else None
@@ -235,8 +190,15 @@ def run_with_context(args: argparse.Namespace, ctx: Context) -> None:
         for p in delta_paths:
             sys.stdout.write(p + "\n")
 
-    log_completion(
-        vault_dir, agent_id, child.returncode, elapsed, child.stdout, child.stderr
+    out_snip = repr(child.stdout[:100])
+    err_full = repr(child.stderr)
+    booping_logging.log_invocation(
+        vault_dir,
+        "run-agent",
+        (
+            f"{agent_id}: exit={child.returncode} elapsed={elapsed:.2f}s "
+            f"stdout[0:100]={out_snip} stderr={err_full}"
+        ),
     )
     sys.exit(child.returncode)
 
