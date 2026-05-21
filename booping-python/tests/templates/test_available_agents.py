@@ -57,10 +57,7 @@ def test_booping_developer_overridden_to_cli_replaces_wholesale() -> None:
     # Render side: cli invocation line under booping-developer; no Agent-tool line.
     result = _render_develop(vault)
     assert "### `booping-developer`" in result
-    assert (
-        "This is a `cli` agent. To run it, execute: `booping run-agent booping-developer` "
-        "(pipe the briefing on stdin)."
-    ) in result
+    assert "booping run-agent booping-developer" in result
     assert (
         'Invoke via the `Agent` tool with `subagent_type="booping-developer"`.'
         not in result
@@ -85,10 +82,7 @@ def test_cli_override_filters_internal_and_renders_cli_invocation() -> None:
 
     # pi-mesh cli entry rendered with cli invocation line
     assert "### `pi-mesh`" in result
-    assert (
-        "This is a `cli` agent. To run it, execute: `booping run-agent pi-mesh` "
-        "(pipe the briefing on stdin)."
-    ) in result
+    assert "booping run-agent pi-mesh" in result
 
     # Underlying command never leaks into rendered skill prose
     assert "pi --print" not in result

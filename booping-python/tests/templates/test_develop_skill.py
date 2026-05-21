@@ -34,25 +34,35 @@ def test_phase_3_step_3_no_hardcoded_booping_developer() -> None:
     assert "booping-developer" not in phase3
 
 
-def test_phase_1_contains_worker_pick_clause() -> None:
+def test_phase_1_omits_worker_selection() -> None:
     body = _render_develop(get_fixture_path("vault-empty"))
     phase1 = _phase_slice(body, "## Phase 1 Plan groupings", "## Phase 2 Branch")
 
-    assert (
-        "**Worker selection**: if the rendered Available Agents table contains "
-        "more than one entry, present them via `AskUserQuestion` and **hold the "
-        "selected worker id in-session** — `/develop` is a single continuous "
-        "session, no persistence to the plan file. Use the same worker id for "
-        "every milestone group in this sprint. If only one entry is present, use it."
-    ) in phase1
+    # Worker-selection logic lives in Available Agents, not Phase 1.
+    assert "Worker selection" not in phase1
+    assert "AskUserQuestion" not in phase1
 
 
-def test_phase_3_step_3_has_both_type_branches() -> None:
+def test_phase_3_delegates_via_available_agents_section() -> None:
     body = _render_develop(get_fixture_path("vault-empty"))
     phase3 = _phase_slice(body, "## Phase 3 Execute", "## Phase 4 Finalize")
 
-    assert "`type: agent`" in phase3
-    assert "`type: cli`" in phase3
-    assert "subagent_type=<id>" in phase3
-    assert "booping run-agent <id>" in phase3
-    assert "docs/cli_agent_delegation.md" in phase3
+    # Phase 3 no longer spells out per-type invocation mechanics.
+    assert "`type: agent`" not in phase3
+    assert "`type: cli`" not in phase3
+    assert "subagent_type=<id>" not in phase3
+    assert "booping run-agent <id>" not in phase3
+    # It points at the Available Agents section.
+    assert "Available Agents" in phase3
+
+
+def test_available_agents_section_carries_invocation_mechanics() -> None:
+    body = _render_develop(get_fixture_path("vault-empty"))
+    start = body.index("## Available Agents")
+    end = body.index("\n## ", start + 1)
+    aa = body[start:end]
+
+    # Native agents render via the Agent tool.
+    assert 'Invoke via the `Agent` tool with `subagent_type="booping-developer"`' in aa
+    # The "always delegate / use only listed agents" rule lives here.
+    assert "Always delegate" in aa

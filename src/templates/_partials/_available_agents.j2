@@ -5,17 +5,17 @@
 {%- if agents -%}
 ## Available Agents
 
-Use only the agents defined below, unless there is a clear instruction to use
-other agents.
+Always delegate to one of the agents listed below — never use any other agent
+not on this list, and never do the work directly.
 
 {% for agent, spec in agents.items() %}
 {%- if not (hide_internal and spec.get("internal", False)) %}
 ### `{{ agent }}`
 
 {% if spec.get("type", "agent") == "agent" -%}
-Invoke via the `Agent` tool with `subagent_type="{{ agent }}"`.
+Invoke via the `Agent` tool with `subagent_type="{{ agent }}"`. Pass the briefing in the `prompt` arg.
 {%- else -%}
-This is a `cli` agent. To run it, execute: `booping run-agent {{ agent }}` (pipe the briefing on stdin).
+Invoke via the `Bash` tool: pipe the briefing on stdin to `booping run-agent {{ agent }}`. For commands that may run more than a few seconds, use `run_in_background: true` and poll `BashOutput` instead of blocking the foreground.
 {%- endif %}
 
 {% if spec.good_for %}

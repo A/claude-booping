@@ -4,7 +4,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from booping import logging as booping_logging
+from booping import logger
 from booping.context import Context
 from booping.rendering import get_plugin_root, render
 
@@ -39,10 +39,10 @@ def _run(args: argparse.Namespace) -> None:
     else:
         resolved = str(ctx.project.directory / "sprints.md")
 
-    booping_logging.log_invocation(
+    logger.log(
         vault=ctx.project.directory,
         subcommand="render-sprints",
-        detail=f"→ {resolved}",
+        message=f"→ {resolved}",
     )
 
     template_path = get_plugin_root() / "src/templates/sprints.md.j2"

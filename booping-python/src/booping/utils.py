@@ -6,16 +6,6 @@ def deep_merge(
     override: dict[str, Any],
     shallow_merge_keys: list[str] | None = None,
 ) -> dict[str, Any]:
-    """Recursively merge `override` into `base`, returning a new dict.
-
-    Default behaviour: dict values recurse, scalars and lists replace wholesale.
-
-    `shallow_merge_keys`: container keys whose dict values are shallow-merged —
-    each child of the override's value replaces the matching child in base
-    instead of recursing further. Use for id-keyed collections whose entries
-    are atomic (e.g. `agents` — flipping one field on an entry must restate
-    the rest of that entry).
-    """
     shallow_keys = set(shallow_merge_keys or [])
     result: dict[str, Any] = dict(base)
     for key, val in override.items():

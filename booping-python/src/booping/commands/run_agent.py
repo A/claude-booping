@@ -1,29 +1,3 @@
-"""`booping run-agent <id>` — exec a cli-typed agent from `skills.*.agents.<id>`.
-
-Resolution: walk `context.config["skills"]` in iteration order; the first skill
-whose `agents` mapping contains `<id>` wins. Uniqueness across skills is not
-enforced.
-
-Hard-errors (exit 2, one-line stderr) on:
-- unknown id
-- entry with `internal: true`
-- entry with `type` missing or `type: agent` (native agents are dispatched via
-  Claude Code's `Agent` tool, not this CLI)
-
-Briefing source: `--briefing-file PATH` if given, else stdin. Refuses to read a
-TTY stdin (prevents indefinite hang in interactive shells).
-
-Extension: `<context.project.directory>/_booping/agent_<id>.md`, prepended to
-the briefing with `\n\n---\n\n` as separator. Missing or empty file → briefing
-alone.
-
-Command rendering: the entry's `command` is a Jinja2 template with one variable
-`prompt = shlex.quote(final_prompt)`. When the template body has no
-`{{ prompt }}` placeholder, the quoted prompt is appended as the last positional
-arg. Executed via `subprocess.run(shlex.split(rendered), shell=False)` —
-stdout/stderr inherit the parent's, exit code propagates.
-"""
-
 from __future__ import annotations
 
 import argparse
@@ -36,7 +10,7 @@ from typing import Any, cast
 
 from jinja2 import Environment
 
-from booping import logging as booping_logging
+from booping import logger
 from booping.context import Context
 
 
@@ -68,7 +42,6 @@ def die(msg: str) -> None:
 def resolve_agent(
     cfg: dict[str, Any], agent_id: str
 ) -> tuple[str, dict[str, Any]] | None:
-    """Return (skill_name, entry_dict) for the first skill whose `agents` contains agent_id."""
     skills_any: Any = cfg.get("skills", {})
     if not isinstance(skills_any, dict):
         return None
@@ -89,7 +62,6 @@ def resolve_agent(
 
 
 def stdin_is_tty() -> bool:
-    """Indirection so tests can monkeypatch."""
     return sys.stdin.isatty()
 
 
@@ -146,7 +118,7 @@ def run_with_context(args: argparse.Namespace, ctx: Context) -> None:
         die(f"agent '{agent_id}' not found in any skill's agents block")
         return
 
-    _skill_name, entry = resolved
+    entry = resolved[1]
 
     if entry.get("internal") is True:
         die(f"agent '{agent_id}' is internal; use the Agent tool, not booping run-agent")
@@ -167,9 +139,7 @@ def run_with_context(args: argparse.Namespace, ctx: Context) -> None:
     extension = read_extension(vault_dir, agent_id)
     final_prompt = compose_prompt(extension, briefing)
 
-    booping_logging.log_invocation(
-        vault_dir, "run-agent", f"{agent_id}: `{command_template}`"
-    )
+    logger.log(vault_dir, "run-agent", f"{agent_id}: `{command_template}`")
 
     argv = render_command(command_template, final_prompt)
     repo_dir = ctx.project.repo_directory if ctx.project is not None else None
@@ -192,7 +162,7 @@ def run_with_context(args: argparse.Namespace, ctx: Context) -> None:
 
     out_snip = repr(child.stdout[:100])
     err_full = repr(child.stderr)
-    booping_logging.log_invocation(
+    logger.log(
         vault_dir,
         "run-agent",
         (
@@ -208,7 +178,6 @@ def _git_porcelain_code(line: str) -> str:
 
 
 def _porcelain_pairs(repo_dir: Path | None) -> list[tuple[str, str]]:
-    """Return list of (raw_line, path) tuples from `git status --porcelain`."""
     if repo_dir is None:
         return []
     try:
