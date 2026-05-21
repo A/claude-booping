@@ -11,17 +11,18 @@ Drop this into `~/Claude/<project>/config.yaml` to route `/develop`'s worker to 
 ```yaml
 skills:
   develop:
-    # Hide the built-in agents so /develop only sees this cli worker.
+    # Make /develop see only the explicitly defined agents below.
     disable_internal_agents: true
     agents:
+      # `pi-developer` is the agent id — e.g. used to look up the agent body
+      # at `<vault>/_booping/agent_pi-developer.md`.
       pi-developer:
         # `cli` makes this entry runnable as an external command instead of a
         # native Claude Code subagent.
         type: cli
-        # Shell command to exec. `{{ prompt }}` is substituted with the
-        # `shlex.quote`-d final prompt — safe against any briefing content.
-        # Omit the placeholder and the quoted prompt is appended as the last
-        # positional arg.
+        # Shell command to exec. `{{ prompt }}` is substituted with the final
+        # prompt, safely quoted against any briefing content. Omit the
+        # placeholder and the prompt is appended as the last positional arg.
         command: "pi --print {{ prompt }}"
         good_for:
           - "Implements one milestone group per invocation"
