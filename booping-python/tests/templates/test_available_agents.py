@@ -26,8 +26,17 @@ def test_default_config_renders_native_invocation_lines() -> None:
     vault = get_fixture_path("vault-empty")
     result = _render_develop(vault)
 
-    assert 'Invoke via the `Agent` tool with `subagent_type="booping-developer"`.' in result
-    assert 'Invoke via the `Agent` tool with `subagent_type="booping-researcher"`.' in result
+    assert (
+        'Invoke via the `Agent` tool with `subagent_type="booping:booping-developer"`.'
+        in result
+    )
+    assert (
+        'Invoke via the `Agent` tool with `subagent_type="booping:booping-researcher"`.'
+        in result
+    )
+    # Internal native agents are namespaced; bare forms must not appear.
+    assert 'subagent_type="booping-developer"' not in result
+    assert 'subagent_type="booping-researcher"' not in result
 
     # Each native entry still renders its good_for block; researcher carries a bad_for.
     assert "### `booping-developer`" in result
@@ -67,7 +76,7 @@ def test_booping_developer_overridden_to_cli_replaces_wholesale() -> None:
     # Sibling native agent (booping-researcher) keeps the Agent-tool invocation line —
     # only the targeted entry was overridden.
     assert (
-        'Invoke via the `Agent` tool with `subagent_type="booping-researcher"`.'
+        'Invoke via the `Agent` tool with `subagent_type="booping:booping-researcher"`.'
         in result
     )
 
@@ -86,3 +95,15 @@ def test_cli_override_filters_internal_and_renders_cli_invocation() -> None:
 
     # Underlying command never leaks into rendered skill prose
     assert "pi --print" not in result
+
+
+def test_non_internal_native_agent_renders_bare_subagent_type() -> None:
+    """A native entry with no `internal` flag renders the bare subagent_type
+    (no `booping:` prefix). disable_internal_agents only drops internal entries,
+    so test-no-type still renders."""
+    vault = get_fixture_path("vault-with-cli-agent")
+    result = _render_develop(vault)
+
+    assert "### `test-no-type`" in result
+    assert 'subagent_type="test-no-type"' in result
+    assert 'subagent_type="booping:test-no-type"' not in result

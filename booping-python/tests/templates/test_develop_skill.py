@@ -63,6 +63,6 @@ def test_available_agents_section_carries_invocation_mechanics() -> None:
     aa = body[start:end]
 
     # Native agents render via the Agent tool.
-    assert 'Invoke via the `Agent` tool with `subagent_type="booping-developer"`' in aa
+    assert 'Invoke via the `Agent` tool with `subagent_type="booping:booping-developer"`' in aa
     # The "always delegate / use only listed agents" rule lives here.
     assert "Always delegate" in aa
