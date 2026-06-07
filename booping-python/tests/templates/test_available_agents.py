@@ -44,6 +44,9 @@ def test_default_config_renders_native_invocation_lines() -> None:
     assert "**Good for:**" in result
     assert "**Bad for:**" in result
 
+    # No cli agents → no registry-miss fallback note.
+    assert "/booping:compile" not in result
+
 
 def test_booping_developer_overridden_to_cli_replaces_wholesale() -> None:
     """Project override of `skills.develop.agents.booping-developer` as a cli
@@ -63,10 +66,15 @@ def test_booping_developer_overridden_to_cli_replaces_wholesale() -> None:
     }
     assert "internal" not in entry
 
-    # Render side: cli invocation line under booping-developer; no Agent-tool line.
+    # Render side: cli entries render the native wrapper invocation, not a Bash
+    # run-agent line. The wrapper's registry name is cli_agent_<id>.
     result = _render_develop(vault)
     assert "### `booping-developer`" in result
-    assert "booping run-agent booping-developer" in result
+    assert (
+        'Invoke via the `Agent` tool with `subagent_type="cli_agent_booping-developer"`.'
+        in result
+    )
+    assert "booping run-agent" not in result
     assert (
         'Invoke via the `Agent` tool with `subagent_type="booping-developer"`.'
         not in result
@@ -89,9 +97,18 @@ def test_cli_override_filters_internal_and_renders_cli_invocation() -> None:
     assert "### `booping-developer`" not in result
     assert "### `booping-researcher`" not in result
 
-    # pi-mesh cli entry rendered with cli invocation line
+    # pi-mesh cli entry rendered as a native wrapper invocation
     assert "### `pi-mesh`" in result
-    assert "booping run-agent pi-mesh" in result
+    assert (
+        'Invoke via the `Agent` tool with `subagent_type="cli_agent_pi-mesh"`.' in result
+    )
+    assert "booping run-agent" not in result
+
+    # Registry-miss fallback note renders once when a cli agent is present
+    assert (
+        "If a cli agent above is missing from the registry, run `/booping:compile`"
+        in result
+    )
 
     # Underlying command never leaks into rendered skill prose
     assert "pi --print" not in result
