@@ -22,4 +22,5 @@ nav:
       - /retro: retro.md
       - /learn: learn.md
       - /chat: chat.md
+      - /compile: compile.md
       - /help: help.md
