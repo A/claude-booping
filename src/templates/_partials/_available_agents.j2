@@ -2,6 +2,7 @@
 {%- set skill_cfg = config.skills[skill] -%}
 {%- set agents = skill_cfg.get("agents", {}) -%}
 {%- set hide_internal = skill_cfg.get("disable_internal_agents", False) -%}
+{%- set ns = namespace(has_cli=false) -%}
 {%- if agents -%}
 ## Available Agents
 
@@ -12,14 +13,13 @@ not on this list, and never do the work directly.
 {%- if not (hide_internal and spec.get("internal", False)) %}
 ### `{{ agent }}`
 
-{% if spec.get("type", "agent") == "agent" -%}
-{% if spec.get("internal", False) -%}
+{% if spec.get("type", "agent") == "cli" -%}
+{% set ns.has_cli = true -%}
+Invoke via the `Agent` tool with `subagent_type="cli_agent_{{ agent }}"`. Pass the briefing in the `prompt` arg.
+{%- elif spec.get("internal", False) -%}
 Invoke via the `Agent` tool with `subagent_type="booping:{{ agent }}"`. Pass the briefing in the `prompt` arg.
 {%- else -%}
 Invoke via the `Agent` tool with `subagent_type="{{ agent }}"`. Pass the briefing in the `prompt` arg.
-{%- endif %}
-{%- else -%}
-Invoke via the `Bash` tool: pipe the briefing on stdin to `booping run-agent {{ agent }}`. For commands that may run more than a few seconds, use `run_in_background: true` and poll `BashOutput` instead of blocking the foreground.
 {%- endif %}
 
 {% if spec.good_for %}
@@ -36,5 +36,8 @@ Invoke via the `Bash` tool: pipe the briefing on stdin to `booping run-agent {{ 
 {% endif -%}
 {%- endif -%}
 {% endfor -%}
+{%- if ns.has_cli %}
+If a cli agent above is missing from the registry, run `/booping:compile` and restart Claude Code.
+{% endif -%}
 {%- endif %}
 {%- endmacro %}
