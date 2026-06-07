@@ -15,7 +15,7 @@ allowed-tools:
   - AskUserQuestion
   - TaskCreate
   - TaskUpdate
-effort: low
+effort: medium
 context: fork
 ---
 

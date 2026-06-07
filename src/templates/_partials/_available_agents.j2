@@ -1,21 +1,40 @@
 {% macro render(skill) -%}
-{%- set agents = config.skills[skill].get("agents", {}) -%}
+{%- set skill_cfg = config.skills[skill] -%}
+{%- set agents = skill_cfg.get("agents", {}) -%}
+{%- set hide_internal = skill_cfg.get("disable_internal_agents", False) -%}
 {%- if agents -%}
 ## Available Agents
 
+Always delegate to one of the agents listed below — never use any other agent
+not on this list, and never do the work directly.
+
 {% for agent, spec in agents.items() %}
+{%- if not (hide_internal and spec.get("internal", False)) %}
 ### `{{ agent }}`
 
+{% if spec.get("type", "agent") == "agent" -%}
+{% if spec.get("internal", False) -%}
+Invoke via the `Agent` tool with `subagent_type="booping:{{ agent }}"`. Pass the briefing in the `prompt` arg.
+{%- else -%}
+Invoke via the `Agent` tool with `subagent_type="{{ agent }}"`. Pass the briefing in the `prompt` arg.
+{%- endif %}
+{%- else -%}
+Invoke via the `Bash` tool: pipe the briefing on stdin to `booping run-agent {{ agent }}`. For commands that may run more than a few seconds, use `run_in_background: true` and poll `BashOutput` instead of blocking the foreground.
+{%- endif %}
+
+{% if spec.good_for %}
 **Good for:**
 {% for t in spec.good_for -%}
 - {{ t }}
 {% endfor %}
+{% endif -%}
 {% if spec.bad_for %}
 **Bad for:**
 {% for t in spec.bad_for -%}
 - {{ t }}
 {% endfor %}
 {% endif -%}
+{%- endif -%}
 {% endfor -%}
 {%- endif %}
 {%- endmacro %}

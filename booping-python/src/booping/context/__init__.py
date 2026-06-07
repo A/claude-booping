@@ -55,6 +55,7 @@ class Context(BaseModel):
         if vault is not None:
             override_paths = [vault / "config.yaml"]
             cfg = config_mod.load(root, override_paths)
+            config_mod.validate_skills(cfg)
             plans = Plan.load_all(vault)
             lessons = Lesson.load_all(vault)
             retros = Retro.load_all(vault)
@@ -63,6 +64,7 @@ class Context(BaseModel):
             extra_instructions = ei_mod.load(vault)
         else:
             cfg = config_mod.load(root, [])
+            config_mod.validate_skills(cfg)
             plans = []
             lessons = []
             retros = []

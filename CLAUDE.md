@@ -46,6 +46,7 @@ Loaded at skill-load time by `Context.assemble()` — no build step. Per-project
 - Artifacts produced in a state.
 - Side effects on exit (`on_exit` — frontmatter mutations, commits, etc.).
 - Structured surfaces that other skills / CLIs also consume: task types, sprint scale, agent capabilities, branch conventions.
+- Delegate kind (native subagent vs external cli worker) — config-driven via the `type` discriminator on each `skills.<name>.agents.<id>` entry.
 
 ### Skill (`src/templates/skills/<name>.md.j2`)
 
@@ -108,7 +109,7 @@ When you write a skill, walk these questions top-down for every piece of informa
 - **Phases over flat sections**: Preflight → High-level workflow → Phase 0..N.
 - **Preflight becomes thinner** in template-driven skills: items that were "Read partial X" now appear either as inlined partial content, as `!`command`` blocks, or as lazy `[detailed guidance](${CLAUDE_PLUGIN_ROOT}/docs/…)` links. Preflight is for the things that still require the model to act (e.g. read vault lessons, read `_booping/skill_<name>.md`).
 - **Research delegation**: delegate heavy reads / summarization work to `booping-researcher` to protect the skill's context. The agent is for *aggregating many sources into a summary*, not for single-file spot checks — those stay in the skill.
-- **Agent wiring**: skills own all reads/writes against `~/Claude/{project}/`. Agents touch only code in the attached repo and never scan the vault. Briefings carry the request, related files, and DoD — no lesson paths. Lesson context reaches agents via two baked-in channels: DoD + Verify pasted from the plan (folded in by `/groom`) and the shared extension at `~/Claude/{project}/_booping/agent_booping-<name>.md`, injected at agent load time via `tools.render('src/templates/_partials/_extra_instructions.j2', extra_instruction_key='agent_booping-<name>')` in the agent template (owned by `/learn`).
+- **Agent wiring**: skills own all reads/writes against `~/Claude/{project}/`. Agents touch only code in the attached repo and never scan the vault. Briefings carry the request, related files, and DoD — no lesson paths. Lesson context reaches agents via two baked-in channels: DoD + Verify pasted from the plan (folded in by `/groom`) and the shared extension at `~/Claude/{project}/_booping/agent_booping-<name>.md`, injected at agent load time via `tools.render('src/templates/_partials/_extra_instructions.j2', extra_instruction_key='agent_booping-<name>')` in the agent template (owned by `/learn`). `/develop` may also delegate to an external cli worker via `booping run-agent <id>`; the extension channel (`<vault>/_booping/agent_<id>.md`) is shared between native and cli paths.
 - **Per-project quality checks**: `/develop` runs the project's own lint / typecheck / test tooling once at Phase 4 (Final Verification), alongside plan-authored `Verify` commands. Command discovery order: repo `CLAUDE.md` → `_booping/skill_develop.md` → inspection of `package.json`, `pyproject.toml`, `Justfile`, etc.
 
 ## Config schema (`src/config.yaml`)
@@ -116,6 +117,7 @@ When you write a skill, walk these questions top-down for every piece of informa
 Top-level keys currently in use:
 
 - `skills.<name>.agents.<agent-name>.good_for` / `.bad_for` — delegation guidance rendered by `_available_agents.j2`. Currently used by `/groom` and `/develop`.
+- `skills.<name>.agents.<agent-name>.type` (`agent` default vs `cli`), `.command` (Jinja2 template, required when `type: cli`), `.internal` (true on built-in entries), and per-skill `skills.<name>.disable_internal_agents` — control native vs external-cli delegation. See [docs/cli_agent_delegation.md](docs/cli_agent_delegation.md).
 - `skills.<name>.status` — the plan status this skill owns or reads. `learn` owns `awaiting-learning`; `retro` owns `awaiting-retro`. `code-review` is stateless (does not own a status) but reads `skills.code-review.status` (default `awaiting-retro`) for its argument-free plan picker. Rendered into skill bodies that gate on or query a single status.
 - `git.branches` — list of `{branch, when}` entries. `branch` is the literal prefix string (slash and format up to user, e.g. `feat/`); `when` is a list of short matches (plan `type` names like `feature`, or freeform descriptors). Rendered via `_git_guide.j2` macro; consumed by `/develop` for branch selection.
 - `plan.statuses.<key>` — `desc`, `owner` (skill), `terminal` (bool), optional `artifacts` (list of strings describing what the state produces), `transitions` (list of `{to, skill, when, gates?, on_exit?}`). Filtered per-skill by `_plan_transitions.j2` (macro shows only statuses a skill owns or has transitions out of, and only rows where `skill == <current>`). `gates` is a list of verifiable preconditions rendered into the `Gates` column; `on_exit` is a list of short instruction strings (frontmatter mutations, side effects) rendered verbatim into the `On exit` column (e.g. `"set \`planned: yyyymmdd hh:mm\`"`).
@@ -143,6 +145,7 @@ Top-level keys currently in use:
 - `lessons/` — accumulated lessons; loaded by skills' Preflight.
 - `notes/` — user notes (plan-review comments, code-review threads, ideas for next sprints). Not consumed by skills or agents — purely for the user's own reference.
 - `_booping/skill_<name>.md` — project-local extensions to wide-domain skills.
+- `_booping/.booping.log` — append-only invocation log. `render` / `render-sprints` write one line per call; `run-agent` writes two (invocation pre-exec + completion post-exec). Format: `<iso8601-utc>: [<subcommand>] <detail>`.
 
 (Project conventions live in the attached repo's own `CLAUDE.md`, not in the vault.)
 
@@ -151,6 +154,7 @@ Top-level keys currently in use:
 - `bin/booping render <template-path> [--output <path>]` — render a Jinja2 template with full project context to stdout (or to a file with `--output`). Used at skill-load time via `!`booping render ...`` and to invoke the runtime `plan_lifecycle_overview` doc.
 - `bin/booping render-sprints [--output <path>]` — render `<vault>/sprints.md` from `src/templates/sprints.md.j2`. Default output is the resolved vault's `sprints.md`; `--output PATH` overrides; `--output -` writes to stdout.
 - `bin/booping build` — render every `src/files/**/*.j2` to its plugin-root destination using `src/config_files.yaml`. Run after editing any `src/files/<rel>.j2` or `src/config_files.yaml`.
+- `bin/booping run-agent <id> [--briefing-file PATH]` — resolve a `type: cli` agent from merged config, prepend the matching `<vault>/_booping/agent_<id>.md` extension to the briefing (stdin or `--briefing-file`), and exec the configured `command`. See [docs/cli_agent_delegation.md](docs/cli_agent_delegation.md).
 - `bin/booping debug-context` — dump the assembled `Context` as YAML for troubleshooting.
 - `bin/booping debug-template <template-path>` — render a template and append a debug context footer.
 - `bin/booping-create-project <project-name>` — scaffold `~/Claude/{project}/` vault directories + `.booping` marker.

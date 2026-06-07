@@ -1,0 +1,8 @@
+skills:
+  develop:
+    agents:
+      booping-developer:
+        type: cli
+        command: "my-cli --print"
+        good_for:
+          - "Overridden coding worker"

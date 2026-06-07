@@ -4,6 +4,7 @@ import argparse
 import sys
 from pathlib import Path
 
+from booping import logger
 from booping.context import Context
 from booping.rendering import get_plugin_root, render
 
@@ -17,6 +18,16 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
 
 def _run(args: argparse.Namespace) -> None:
     ctx = Context.assemble()
+
+    message = str(args.path)
+    if args.output is not None:
+        message = f"{message} → {args.output}"
+    logger.log(
+        vault=ctx.project.directory if ctx.project is not None else None,
+        subcommand="render",
+        message=message,
+    )
+
     template_path: Path = args.path
     if not template_path.is_absolute():
         template_path = get_plugin_root() / template_path
