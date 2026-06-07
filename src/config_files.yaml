@@ -1,6 +1,7 @@
 skills:
   chat:        { effort: low }
   code-review: { effort: medium }
+  compile:     { effort: low }
   develop: { effort: medium }
   groom:   { effort: high }
   help:    { effort: low }
