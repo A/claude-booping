@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 
 from booping.commands import build as build_cmd
+from booping.commands import compile as compile_cmd
 from booping.commands import debug as debug_cmd
 from booping.commands import render as render_cmd
 from booping.commands import render_cli_agent as render_cli_agent_cmd
@@ -24,6 +25,7 @@ def build_parser() -> argparse.ArgumentParser:
     debug_cmd.add_parser(sub)
     run_agent_cmd.add_parser(sub)
     render_cli_agent_cmd.add_parser(sub)
+    compile_cmd.add_parser(sub)
 
     return parser
 
