@@ -57,7 +57,7 @@ When you approve, `/groom` flips the plan to `ready-for-dev`.
 
 ## 6. First /develop
 
-Either auto-claim the next ready plan:
+Either run bare and pick from the candidate list (plans in `ready-for-dev` or `awaiting-plan-review`):
 
 ```text
 /develop
@@ -69,7 +69,7 @@ or target a specific one:
 /develop plans/20260426-per-tenant-rate-limiting.md
 ```
 
-`/develop` walks the milestones, delegating implementation to the `booping-developer` agent and reading code via `booping-researcher` when a milestone requires it. When all milestones are done, the plan moves to `awaiting-retro`.
+`/develop` walks the milestones, delegating implementation to the `booping-developer` agent. `booping-researcher` is reserved for the Phase 0 drift spot-check — when a plan touches many files, it confirms the actual file shapes still match the plan's assumptions before execution begins. When all milestones are done, the plan moves to `awaiting-retro`.
 
 ## 7. First /retro
 

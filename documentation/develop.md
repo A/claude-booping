@@ -1,10 +1,10 @@
 # /develop
 
-Claim a `ready-for-dev` plan and execute its milestones, delegating coding to `booping-developer` and orchestrating verification, commits, and status transitions on the way to `awaiting-retro`.
+Pick a plan from an interactive candidate list and execute its milestones, delegating coding to `booping-developer` and orchestrating verification, commits, and status transitions on the way to `awaiting-retro`.
 
 ## What it does
 
-`/develop` walks a plan through `ready-for-dev → in-progress → awaiting-retro`. It claims exactly one plan, picks the right branch from `git.branches`, groups consecutive milestones into agent briefings, runs each briefing through `booping-developer`, verifies milestone DoDs, runs the project's lint / typecheck / test gates at Final Verification, and flips the plan's status when every checkbox is `[x]` and Final Verification is green.
+`/develop` walks a plan through `ready-for-dev → in-progress → awaiting-retro`. It works on exactly one plan, picks the right branch from `git.branches`, groups consecutive milestones into agent briefings, runs each briefing through `booping-developer`, verifies milestone DoDs, runs the project's lint / typecheck / test gates at Final Verification, and flips the plan's status when every checkbox is `[x]` and Final Verification is green.
 
 `/develop` does not edit application code from the orchestrator — all coding is delegated. The orchestrator owns reads/writes against the vault, briefing assembly, verification, and commits.
 
@@ -20,7 +20,7 @@ By default `/develop` runs all milestone groups in **one session**. Stopping aft
 continue to develop plans/20260428-snippet-pre-filter-pipeline.md
 ```
 
-Bare `/develop` claims the oldest plan in `ready-for-dev`; the queue-empty case is reported and the skill exits — no silent fallback to `in-progress` plans. Pass a plan path (absolute, `~/Claude/...`, or vault-relative) to claim a specific one. Free-text after the path reaches the skill verbatim — useful for stop-after-each-milestone or model-comparison runs.
+Bare `/develop` presents a single-select `AskUserQuestion` candidate list drawn from every plan in `ready-for-dev` and `awaiting-plan-review`; you pick the one to run. When no plan is in either status, the skill reports the empty queue and exits — no silent fallback to `in-progress` plans. Pass a plan path (absolute, `~/Claude/...`, or vault-relative) to skip the picker and target a specific one. Free-text after the path reaches the skill verbatim — useful for stop-after-each-milestone or model-comparison runs.
 
 To resume a plan already in `in-progress` (e.g. after a stopped session), invoke `/develop` with the explicit path; the skill picks up at the first milestone whose DoDs are not all `[x]`. "continue to develop &lt;plan&gt;" works as a natural-language equivalent.
 

@@ -9,7 +9,7 @@ Capture a project- and task-specific retrospective for a shipped plan: what dive
 The skill draws from **two inputs**:
 
 - **User-asked questions.** `/retro` interviews you — what felt smooth, what felt forced, where you had to push back on the agent, where the plan was wrong. These are the high-signal sources because you noticed the friction in the moment.
-- **Session-log and git-diff scan.** `/retro` reads the `/develop` session transcript and the produced diff to surface tensions you did not flag explicitly — repeated retries, abandoned approaches, churn between commits, places where the agent did something the plan did not specify. These are the issues you might not have logged but that the artifacts remember.
+- **Session-log mining and plan-stage lesson check.** `/retro` delegates to `booping-researcher` to mine the `/develop` session transcript for tensions you did not flag explicitly — repeated retries, abandoned approaches, places where the agent did something the plan did not specify — and to check the planning stage against the active lessons. The code diff is grounding context for these reads, not a separate scan phase. These are the issues you might not have logged but that the artifacts remember.
 
 The two inputs are stitched into one retro file under `~/Claude/{project}/retrospectives/`, named to match the plan it covers.
 
