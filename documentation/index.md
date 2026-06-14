@@ -12,11 +12,11 @@ The vault at `~/Claude/{project}/` is plain markdown with YAML frontmatter, so O
         └────┬────┘
              │ ready-for-dev
              ▼
-       ┌──────────┐
-       │  develop │  claim → execute milestone-by-milestone
-       └────┬─────┘
+       ┌──────────┐      ┌───────────────┐
+       │  develop │─────▶│  code-review  │  stack-aware review
+       │          │◀─────│  (optional)   │  of the in-progress diff
+       └────┬─────┘      └───────────────┘
             │ awaiting-retro
-            │   (optional side-route: /code-review on the in-progress diff)
             ▼
         ┌────────┐
         │  retro │  what shipped vs spec → durable findings
@@ -28,7 +28,7 @@ The vault at `~/Claude/{project}/` is plain markdown with YAML frontmatter, so O
         └────────┘
 ```
 
-Every plan walks this loop once. The next plan inherits the lessons.
+Every plan walks this loop once. The next plan inherits the lessons. `/code-review` is an optional side-route off `/develop` — a stateless pass over the in-progress diff that changes no plan status before you continue to `/retro`.
 
 ## Why booping
 

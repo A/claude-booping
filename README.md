@@ -16,7 +16,7 @@ booping is aimed at **experienced developers and tech leads** — people comfort
 
 It's built for **iterative, agile-style development**: maintenance, incremental features, or growing a project sprint by sprint. It is **not** a waterfall tool — don't hand it a whole-project spec and expect a finished product. One plan is one sprint; the loop compounds across many.
 
-The framework is **in beta**. Per-project configuration is now live: place a `~/Claude/{project}/config.yaml` file in your vault and it deep-merges over the plugin's `src/config.yaml` at render time — the lifecycle, sprint scale, and agent wiring are the natural targets for per-project tuning. The `/code-review` skill is now available as a side-route for stack-aware review of in-progress diffs against the active plan.
+Per-project configuration tunes the framework to each codebase: place a `~/Claude/{project}/config.yaml` file in your vault and it deep-merges over the plugin's `src/config.yaml` at render time — the lifecycle, sprint scale, and agent wiring are the natural targets for per-project tuning. The `/code-review` skill is a side-route for stack-aware review of in-progress diffs against the active plan.
 
 ## Dependencies
 
@@ -132,7 +132,7 @@ Wide-domain skills stay stack-agnostic. Project-specific concerns live entirely 
 
 - **`~/Claude/{project}/_booping/skill_<name>.md`** — per-skill extension. Loaded automatically into the skill's context at invocation. Use it to teach `/groom` your codebase's conventions or `/develop` your test runner.
 - **`~/Claude/{project}/_booping/agent_<name>.md`** — per-agent extension. Injected into the matching agent's body at load time so worker agents inherit project rules without separate reads.
-- **`~/Claude/{project}/plan_templates/*.md`** — project-local plan templates. Discovered alongside the core templates (`backend`, `frontend`, `claude-skill`, `cli`); can override a core one by sharing its `name` or add entirely new ones.
+- **`~/Claude/{project}/plan_templates/*.md`** — project-local plan templates. Discovered alongside the core templates (`backend`, `frontend`, `claude-skill`, `cli`, `documentation`); can override a core one by sharing its `name` or add entirely new ones.
 - **`~/Claude/{project}/review_templates/*.md`** — project-local code-review templates. Loaded by `/code-review` alongside the core templates (`coding-architecture`, `python`, `security`); the skill picks the matching subset by inspecting the repo's manifests and reading each template's `description` frontmatter.
 - **`~/Claude/{project}/lessons/`** — accumulated rules from `/learn`. Read by skills' Preflight on every invocation.
 
