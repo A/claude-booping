@@ -95,7 +95,7 @@ Group by severity, in this order:
 - `SUGGESTION` — non-blocking improvement (design, clarity, robustness).
 - `NIT` — trivial inline edit (rename, comment, small reorganisation).
 
-For each finding: file + line, the offending snippet, the proposed fix as an exact replacement snippet, and a one-line rationale citing the checklist item or lesson id. No persistent report file — output is chat-only.
+For each finding: file + line, the offending snippet, the proposed fix as an exact replacement snippet, and a one-line rationale citing the checklist item or lesson id. No persistent report file — output is chat-only unless a project extension directs a different presentation surface.
 
 ### (h) Wrap up
 
@@ -111,7 +111,7 @@ After presenting findings, ask the user how to handle them:
 - **Linter-handled style is filtered out.** If the project's configured linter or formatter would catch it, do not surface it as a finding.
 - **Lesson violation = `BLOCKER`.** Always. No softening to `SUGGESTION`.
 - **Never edit application code beyond trivial inline nits.** Anything non-trivial routes through `booping-developer`. The orchestrator does not refactor or restructure during review.
-- **No persistent report.** Output is chat-only. Do not write a review file under `~/Claude/{project}/` or anywhere else.
+- **No persistent report.** Output is chat-only unless a project extension directs a different presentation surface. Do not write a review file under `~/Claude/{project}/` or anywhere else.
 
 ## What `/code-review` does NOT do
 
