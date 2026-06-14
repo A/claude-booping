@@ -14,3 +14,7 @@ For the published documentation site, see [https://A.github.io/claude-booping/](
 - [`/retro`](retro.md) — capture what actually shipped versus the spec: durable findings recorded under `retrospectives/`.
 - [`/learn`](learn.md) — fold retro findings into durable rules under `lessons/` and per-skill / per-agent extension files under `_booping/`.
 - [`/help`](help.md) — this index.
+
+## Extending booping
+
+- [Integrating external agents](integrating-external-agents.md) — wire a skill (e.g. `/develop` or `/code-review`) to delegate to your own Claude Code agent instead of, or alongside, the built-in workers.

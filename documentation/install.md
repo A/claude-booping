@@ -47,8 +47,11 @@ Update later with `/plugin update booping` (or from the `/plugin` UI).
 - `retrospectives/` — retro files authored by `/retro`.
 - `lessons/` — durable rules authored by `/learn`.
 - `notes/` — your own free-form notes (untouched by skills).
-- `_booping/` — per-skill / per-agent extension files authored by `/learn`.
-- `.booping` — marker file telling other skills the vault is ready.
+- `_booping/` — per-skill / per-agent extension files. `/install` seeds three from the stack it detects, and `/learn` keeps them current afterwards:
+    - `_booping/agent_booping-developer.md` — stack + conventions for the developer agent.
+    - `_booping/skill_groom.md` — validation catalogue + sizing calibration.
+    - `_booping/skill_develop.md` — quality-check classification + env notes.
+- `.booping` — marker file (written in the repo root, not the vault) telling skills which vault to resolve.
 
 For the full directory tour (including `plan_templates/`, `review_templates/`, `sprints.md`, and `config.yaml`), see [Vault](vault.md).
 

@@ -25,6 +25,16 @@ Bare `/retro` picks the plan currently in `awaiting-retro`. Pass a plan path to 
 
 `/retro` walks the plan from `awaiting-retro → awaiting-learning` once the retro file is written and you have signed off.
 
+### Multiple plans in one run
+
+A retro can cover more than one plan. Pass several plan paths to retro them together, or run bare and pick from the `awaiting-retro` list — the picker is multi-select, so you can fold several finished plans into one retrospective. When you name some plans on the command line and others are also sitting in `awaiting-retro`, `/retro` asks you per remaining plan whether to **include** it in this run, **postpone** it (leave it queued), or **skip retro and mark it done**.
+
+The written retro file always carries `plans:` as a YAML list (even for a single plan) and a `goal_verdicts:` mapping with your per-plan verdict, so a multi-plan retro records each plan's outcome separately.
+
+### Skipping the retro
+
+Some plans are not worth a retrospective — a stale split stub, a trivial change you already understand. For those, pick **skip retro and mark it done** in the per-plan prompt. `/retro` then walks that plan straight from `awaiting-retro → done` (bypassing `awaiting-learning`), stamping `goal: skipped` in its frontmatter, with no retrospective file and no `/learn` step. Use it deliberately — a skipped plan contributes nothing to the lesson loop.
+
 ## Best practices
 
 ### Shit in, shit out
