@@ -40,9 +40,11 @@ skills:
   develop:
     agents:
       booping-developer:
+        internal: true
         good_for:
           - "All coding tasks — always delegate; never edit application code from the orchestrator"
       booping-researcher:
+        internal: true
         good_for:
           - "Phase 0 drift spot-check: given a large set of plan-named files, determine whether actual file shape matches the plan's assumptions"
         bad_for:
@@ -52,6 +54,7 @@ skills:
   groom:
     agents:
       booping-researcher:
+        internal: true
         good_for:
           - "Wide read or web search where results must be aggregated outside this skill's context and returned as a summary"
           - "Map blast radius across many files (which modules and integrations a change touches)"
@@ -72,6 +75,7 @@ skills:
     status: awaiting-retro
     agents:
       booping-researcher:
+        internal: true
         good_for:
           - "Phase 0 session-log search: scan ~/.claude/projects/ across all session logs for the plan's time window and aggregate into a structured summary of user questions, blockers, and detours"
         bad_for:
@@ -83,12 +87,14 @@ skills:
     status: awaiting-retro
     agents:
       booping-researcher:
+        internal: true
         good_for:
           - "Blast-radius reads on large diffs (≥ ~5 files) aggregated into a compressed summary of touched modules and integration points"
         bad_for:
           - "Single-file reads — call Read directly"
           - "Small greps or existence checks that fit in a few lines of output"
       booping-developer:
+        internal: true
         good_for:
           - "Applying user-approved non-trivial fixes surfaced by the review (BLOCKER or SUGGESTION)"
         bad_for:
@@ -97,6 +103,7 @@ skills:
   chat:
     agents:
       booping-researcher:
+        internal: true
         good_for:
           - "Vault-wide reads aggregated into a summary (e.g. what plans exist, recurring themes across retros)"
           - "Plan or retro content extraction across ≥3 files where the results need to be compressed before returning to the skill"
@@ -312,6 +319,9 @@ See [Plan lifecycle overview](https://github.com/A/claude-booping/blob/main/src/
 ### `skills.<name>.agents`
 
 Per-skill delegation guidance rendered into each skill's "Available agents" table. Each agent entry has `good_for` (a list of bullets describing when to delegate) and an optional `bad_for` (when not to). Currently populated for `groom`, `develop`, `retro`, `code-review`, and `chat`.
+
+- **`skills.<name>.agents.<id>.internal`** — `true` on booping's built-in workers (`booping-developer`, `booping-researcher`). Marks an entry as plugin-owned so it can be hidden from a skill's table when that skill opts out of built-ins (see below). Self-contained global agents a project registers omit this flag.
+- **`skills.<name>.disable_internal_agents`** — when set on a skill, `_available_agents.j2` hides every `internal: true` entry from that skill's table, leaving only the agents the project explicitly registered (e.g. a self-contained global external agent). See [integrating external agents](integrating-external-agents.md).
 
 Skills also use `skills.<name>.status` to declare the single status they own (e.g. `learn → awaiting-learning`, `retro → awaiting-retro`).
 

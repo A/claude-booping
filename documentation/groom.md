@@ -114,5 +114,6 @@ Behaviour:
 
 - **`sprint.default_threshold_sp`** — soft cap on total SP per plan; above this `/groom` proposes a split.
 - **`sprint.redecompose_threshold`** — per-task SP value at or above which the task must be re-decomposed before the plan can leave `in-spec`.
+- **`sprint.scale`** — the 1–5 SP definitions (each a `{sp, meaning}` entry) driving the story-point scale prose rendered into `/groom`'s body.
 - **`tasks`** — list of `{type, description, doc_uri}` entries (`feature`, `bug`, `refactoring`). `/groom` classifies the request against this list; the matching `doc_uri` lazy-loads detailed guidance for that task type.
 - **`plan.statuses`** — the lifecycle slice `/groom` owns (`backlog`, `in-spec`, `awaiting-plan-review`) plus its outgoing transitions. The gates and `on_exit` mutations rendered into the skill body come from here.
