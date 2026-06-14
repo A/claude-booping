@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://A.github.io/claude-booping/integrating-external-agents/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Integrating external agents - booping</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Integrating external agents";
+        var mkdocs_page_input_path = "integrating-external-agents.md";
+        var mkdocs_page_url = "/claude-booping/integrating-external-agents/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> booping
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../quick_start/">Quick start</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../install/">Install</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../vault/">Vault</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../project_config/">Project config</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Integrating external agents</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#how-to-disable-internal-agents">How to disable internal agents</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#level-1-connect-an-external-claude-code-agent">Level 1 — Connect an external Claude Code agent</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#level-2-wrap-an-external-cli-worker">Level 2 — Wrap an external CLI worker</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#step-by-step">Step by step</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#level-3-go-to-examples">Level 3 — Go-to examples</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#a-plannotator-reviewer-browser-code-review">(a) plannotator-reviewer — browser code review</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#b-pi-developer-cli-delegation">(b) pi-developer — CLI delegation</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Commands</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../groom/">/groom</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../develop/">/develop</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../code_review/">/code-review</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../retro/">/retro</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../learn/">/learn</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../chat/">/chat</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../help/">/help</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">booping</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Integrating external agents</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/A/claude-booping/edit/master/docs/integrating-external-agents.md">Edit on A/claude-booping</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="integrating-external-agents">Integrating external agents</h1>
+<p>booping ships with built-in worker agents (<code>booping-developer</code>, <code>booping-researcher</code>). You can also wire any skill to delegate to <strong>your own</strong> agent — a plain Claude Code agent with different instructions or a cheaper model, or a Claude Code agent that fronts an external CLI worker or a browser review surface.</p>
+<p>Every integration comes down to two pieces of project config:</p>
+<ul>
+<li><strong><code>skills.&lt;name&gt;.agents.&lt;id&gt;</code></strong> in your vault config (<code>~/Claude/{project}/config.yaml</code>) tells the skill which agents are available to it. Each entry carries <code>good_for</code> / <code>bad_for</code> bullets that guide the skill toward the right choice.</li>
+<li><strong><code>_booping/skill_&lt;name&gt;.md</code></strong> is where you override or extend a skill's behavior — for example, to tell the skill to use your external agent and how to brief it.</li>
+</ul>
+<p>You invoke an agent by its bare name through the <code>Agent</code> tool (<code>subagent_type="&lt;id&gt;"</code>). Any agent file you drop into <code>~/.claude/agents/</code> is registered for every project automatically; if you add it mid-session, start a new session to pick it up.</p>
+<p>See <a href="../project_config/">Project config</a> for the config-merge rules and <a href="../vault/">Vault</a> for the extension-file conventions.</p>
+<h2 id="how-to-disable-internal-agents">How to disable internal agents</h2>
+<p>booping's built-in agents (<code>booping-developer</code>, <code>booping-researcher</code>) stay available to every skill by default. When you want your external agent to be the <em>only</em> worker a skill delegates to, the built-ins can compete against it and the skill may pick a built-in when you wanted yours.</p>
+<p>Set <code>skills.&lt;name&gt;.disable_internal_agents: true</code> for that skill. This leaves only the agents you registered yourself, so the skill always reaches for your external agent.</p>
+<h2 id="level-1-connect-an-external-claude-code-agent">Level 1 — Connect an external Claude Code agent</h2>
+<p>The simplest case: a plain global Claude Code agent — same kind booping ships, just yours. Maybe it carries different instructions, or runs on a cheaper model like haiku. You want a skill (say <code>/develop</code>) to use it to write code.</p>
+<p><strong>1. Create the agent</strong> at <code>~/.claude/agents/haiku-developer.md</code>:</p>
+<pre><code class="language-markdown">---
+name: haiku-developer
+description: Lightweight developer worker for small, well-scoped coding briefings. Use from /develop when the milestone group is simple enough to run on a cheaper model.
+tools: Read, Write, Edit, Bash
+model: haiku
+---
+
+You implement the milestone(s) in the briefing the skill hands you.
+Stay within the related files listed. Report back in milestone format.
+
+[...your workflow, hard rules, report format...]
+</code></pre>
+<p><strong>2. Register it</strong> in <code>~/Claude/{project}/config.yaml</code>:</p>
+<pre><code class="language-yaml">skills:
+  develop:
+    agents:
+      haiku-developer:
+        good_for:
+          - &quot;Small, well-scoped milestone groups where a cheaper model is enough&quot;
+        bad_for:
+          - &quot;Large or tricky changes that need the stronger built-in worker&quot;
+</code></pre>
+<p><strong>3. Tell the skill to use it</strong> in <code>~/Claude/{project}/_booping/skill_develop.md</code>:</p>
+<pre><code class="language-markdown">### Prefer haiku-developer for small groups
+
+For small, well-scoped milestone groups, delegate to `haiku-developer`
+(`subagent_type=&quot;haiku-developer&quot;`). Brief it with the request, the related
+files, and the DoD + Verify pasted from the plan. Its returned message is the
+milestone report.
+</code></pre>
+<p>That's the whole integration — no CLI, no script.</p>
+<h2 id="level-2-wrap-an-external-cli-worker">Level 2 — Wrap an external CLI worker</h2>
+<p>To delegate to an external CLI (for example, a headless coding CLI), front it with a Claude Code agent.</p>
+<p>The split is what makes this work:</p>
+<ul>
+<li><strong>The agent owns the interaction.</strong> It takes the briefing, drives the external CLI, validates the result against the briefing's definition of done, and reports back in milestone format. All CLI trivia (flags, model selection, retries) lives in the agent body.</li>
+<li><strong>The skill extension shapes the briefing.</strong> <code>_booping/skill_&lt;name&gt;.md</code> tells the skill which fields to pass and how to invoke the agent — the agent itself only knows how to drive its backend, not what a given skill should hand over.</li>
+</ul>
+<p>When the backend needs more orchestration than a single command (a server, a browser, readiness checks), put that trivia in a global transport script under <code>~/.claude/bin/</code> and have the agent call the script instead of reimplementing it. Case (a) below is that shape; case (b) drives a CLI directly.</p>
+<h3 id="step-by-step">Step by step</h3>
+<ol>
+<li>Create a global agent at <code>~/.claude/agents/&lt;id&gt;.md</code> that drives your CLI and reports in milestone format.</li>
+<li>Ask Claude to wire the agent into the target skill's config — you should end up with a <code>skills.&lt;name&gt;.agents.&lt;id&gt;</code> block like the examples below.</li>
+<li>Ask Claude to update the skill's extra instructions (<code>_booping/skill_&lt;name&gt;.md</code>) to shape the briefing.</li>
+<li>Test it: run the skill and confirm it delegates to your agent.</li>
+</ol>
+<h2 id="level-3-go-to-examples">Level 3 — Go-to examples</h2>
+<p>Two reference recipes you can adapt.</p>
+<h3 id="a-plannotator-reviewer-browser-code-review">(a) <code>plannotator-reviewer</code> — browser code review</h3>
+<p>A bespoke agent that drives a browser review surface, wired into <a href="../code_review/">/code-review</a>. The agent fronts a global transport script (<code>~/.claude/bin/booping-plannotator-review</code>) that launches the review, seeds findings, opens the browser, and blocks until the human submits.</p>
+<p><strong>Global agent — <code>~/.claude/agents/plannotator-reviewer.md</code></strong></p>
+<pre><code class="language-markdown">---
+name: plannotator-reviewer
+description: Seeds booping /code-review findings into a Plannotator browser review, lets a human review code + AI comments together, and returns their feedback.
+tools: Read, Write, Bash
+model: sonnet
+---
+
+You drive the Plannotator browser review surface for booping's `/code-review`.
+You own only the *interaction*: map findings to Plannotator's annotation
+contract, run the transport script, and return the human's feedback.
+
+All transport trivia (port, launch, readiness, curl, exit codes) lives in
+`~/.claude/bin/booping-plannotator-review` — do not reimplement it.
+
+[...mapping table, procedure, report contract...]
+</code></pre>
+<p>The agent body maps booping findings to the annotation contract, writes the batch to a temp file, runs <code>~/.claude/bin/booping-plannotator-review &lt;ref&gt; &lt;batch.json&gt;</code>, and returns the human's feedback verbatim.</p>
+<p><strong>Vault config — <code>~/Claude/{project}/config.yaml</code></strong></p>
+<pre><code class="language-yaml">skills:
+  code-review:
+    agents:
+      plannotator-reviewer:
+        good_for:
+          - &quot;Interactive browser review of a diff with AI findings pre-seeded; human confirms/dismisses inline and feedback returns to the harness&quot;
+        bad_for:
+          - &quot;Headless / CI runs, no display available, or a quick chat-only review&quot;
+</code></pre>
+<p><strong>Skill extension — <code>~/Claude/{project}/_booping/skill_code-review.md</code></strong></p>
+<pre><code class="language-markdown">### Plannotator browser review — required surface
+
+This project reviews every diff in Plannotator, never in chat.
+
+After findings are computed, delegate to `plannotator-reviewer`
+(`subagent_type=&quot;plannotator-reviewer&quot;`). Brief it with:
+- the resolved diff ref (PR URL, or a non-URL token like `HEAD`),
+- the repo path to run in,
+- every finding as `file:lineStart[-lineEnd] · side · severity · snippet · fix · rationale`.
+
+The agent's returned message is the human's feedback — proceed from it directly.
+</code></pre>
+<h3 id="b-pi-developer-cli-delegation">(b) <code>pi-developer</code> — CLI delegation</h3>
+<p>A headless one-shot CLI worker, wired into <a href="../develop/">/develop</a>. There is no transport script — the agent runs the external CLI (<code>pi --print …</code>) directly via its own <code>Bash</code>.</p>
+<p><strong>Global agent — <code>~/.claude/agents/pi-developer.md</code></strong></p>
+<pre><code class="language-markdown">---
+name: pi-developer
+description: Developer worker that implements a milestone group by driving the pi headless CLI (one-shot, non-interactive). Use from /develop when delegating a coding briefing to the external pi worker instead of the built-in booping-developer.
+tools: Read, Bash
+model: sonnet
+---
+
+You implement a milestone group by driving the `pi` headless CLI. You own only
+the *interaction*: take the briefing, hand it to `pi`, validate the result
+against the briefing's DoD/Verify, retry once on shortfall, and report in
+milestone format.
+
+`pi` is a one-shot, non-interactive command. You run it directly via Bash:
+`pi --print --provider ollama-cloud --model kimi-k2.6 &quot;$(cat &quot;$brief&quot;)&quot;`
+
+[...procedure, hard rules, report format...]
+</code></pre>
+<p>The agent body writes the briefing to a temp file, runs the pinned <code>pi</code> invocation, checks <code>git status --porcelain</code> against the briefing's DoD, retries once with a correction on shortfall, and reports in the standard milestone format.</p>
+<p><strong>Vault config — <code>~/Claude/{project}/config.yaml</code></strong></p>
+<pre><code class="language-yaml">skills:
+  develop:
+    agents:
+      pi-developer:
+        good_for:
+          - &quot;Implementing a milestone group via the headless pi CLI (one-shot, non-interactive) — the preferred worker for coding tasks in this repo&quot;
+        bad_for:
+          - &quot;Drift spot-checks or non-coding reads — those stay in the skill or go to booping-researcher&quot;
+</code></pre>
+<p><strong>Skill extension — <code>~/Claude/{project}/_booping/skill_develop.md</code></strong></p>
+<pre><code class="language-markdown">### Briefing the pi-developer worker
+
+For this project, prefer `pi-developer` for milestone-group implementation.
+
+When you delegate, invoke `pi-developer` (`subagent_type=&quot;pi-developer&quot;`) and
+brief it with:
+- the request for each milestone in the group,
+- the related files to touch / read,
+- the DoD for each milestone (paste verbatim from the plan),
+- the Verify commands (paste verbatim from the plan),
+- project / stack context.
+
+The agent's returned message is its milestone report — verify from it as usual.
+</code></pre>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../project_config/" class="btn btn-neutral float-left" title="Project config"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../groom/" class="btn btn-neutral float-right" title="/groom">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/A/claude-booping" class="fa fa-code-fork" style="color: #fcfcfc"> A/claude-booping</a>
+        </span>
+    
+    
+      <span><a href="../project_config/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../groom/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
