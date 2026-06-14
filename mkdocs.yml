@@ -15,6 +15,7 @@ nav:
   - Install: install.md
   - Vault: vault.md
   - Project config: project_config.md
+  - Integrating external agents: integrating-external-agents.md
   - Commands:
       - /groom: groom.md
       - /develop: develop.md
@@ -22,5 +23,4 @@ nav:
       - /retro: retro.md
       - /learn: learn.md
       - /chat: chat.md
-      - /compile: compile.md
       - /help: help.md

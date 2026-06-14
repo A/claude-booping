@@ -6,9 +6,5 @@ __pycache__/
 .debug_enabled
 site/
 
-# Generated cli-agent native wrappers (booping compile). Surgical by prefix:
-# hand-authored non-prefixed agents under .claude/agents/ stay tracked.
-.claude/agents/cli_agent_*.md
-
 # Fixture vaults need their own .booping markers tracked in git.
 !booping-python/tests/__fixtures__/**/.booping

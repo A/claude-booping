@@ -48,20 +48,8 @@ def test_list_replacement() -> None:
 
 def test_agent_config_native_validates() -> None:
     cfg = AgentConfig.model_validate({"internal": True, "good_for": ["x"]})
-    assert cfg.type == "agent"
-    assert cfg.command is None
     assert cfg.internal is True
-
-
-def test_agent_config_cli_without_command_errors() -> None:
-    with pytest.raises(Exception):
-        AgentConfig.model_validate({"type": "cli"})
-
-
-def test_agent_config_cli_with_command_validates() -> None:
-    cfg = AgentConfig.model_validate({"type": "cli", "command": "pi --print"})
-    assert cfg.type == "cli"
-    assert cfg.command == "pi --print"
+    assert cfg.good_for == ["x"]
 
 
 def test_agent_config_rejects_unknown_field() -> None:
@@ -74,8 +62,8 @@ def test_skill_config_disable_internal_agents_default() -> None:
     assert cfg.disable_internal_agents is False
 
 
-def test_validate_skills_raises_on_cli_without_command() -> None:
-    bad = {"skills": {"develop": {"agents": {"x": {"type": "cli"}}}}}
+def test_validate_skills_raises_on_unknown_agent_field() -> None:
+    bad = {"skills": {"develop": {"agents": {"x": {"bogus": "field"}}}}}
     with pytest.raises(ValueError):
         config_mod.validate_skills(bad)
 
@@ -86,7 +74,7 @@ def test_validate_skills_passes_on_valid_config() -> None:
             "develop": {
                 "agents": {
                     "booping-developer": {"internal": True, "good_for": ["coding"]},
-                    "pi-mesh": {"type": "cli", "command": "pi --print"},
+                    "pi-developer": {"good_for": ["coding"], "bad_for": ["exploration"]},
                 },
                 "disable_internal_agents": True,
             }
@@ -121,9 +109,8 @@ def test_agent_entry_replaces_wholesale(tmp_path: Path) -> None:
                     "develop": {
                         "agents": {
                             "booping-developer": {
-                                "type": "cli",
-                                "command": "pi --print",
                                 "good_for": ["overridden"],
+                                "bad_for": ["nothing"],
                             }
                         }
                     }
@@ -134,9 +121,8 @@ def test_agent_entry_replaces_wholesale(tmp_path: Path) -> None:
     cfg = config_mod.load(plugin_root, [override_path])
     entry = cfg["skills"]["develop"]["agents"]["booping-developer"]  # type: ignore[index]
     assert entry == {
-        "type": "cli",
-        "command": "pi --print",
         "good_for": ["overridden"],
+        "bad_for": ["nothing"],
     }
     # Sibling agent stays untouched.
     assert cfg["skills"]["develop"]["agents"]["booping-researcher"]["internal"] is True  # type: ignore[index]

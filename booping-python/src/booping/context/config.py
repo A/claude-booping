@@ -1,7 +1,7 @@
 from pathlib import Path
-from typing import Any, Literal, Self
+from typing import Any
 
-from pydantic import BaseModel, ConfigDict, model_validator
+from pydantic import BaseModel, ConfigDict
 
 from booping.context._yaml import safe_load_path, safe_load_str
 from booping.utils import deep_merge
@@ -10,17 +10,9 @@ from booping.utils import deep_merge
 class AgentConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    type: Literal["agent", "cli"] = "agent"
-    command: str | None = None
     internal: bool = False
     good_for: list[str] = []
     bad_for: list[str] = []
-
-    @model_validator(mode="after")
-    def _command_required_for_cli(self) -> Self:
-        if self.type == "cli" and not self.command:
-            raise ValueError("agent entry with `type: cli` requires non-empty `command`")
-        return self
 
 
 class SkillConfig(BaseModel):
