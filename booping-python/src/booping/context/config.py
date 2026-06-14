@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -8,7 +9,7 @@ from booping.utils import deep_merge
 
 
 class AgentConfig(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="ignore")
 
     internal: bool = False
     good_for: list[str] = []
@@ -25,13 +26,28 @@ class SkillConfig(BaseModel):
 
 def validate_skills(cfg: dict[str, Any]) -> None:
     """Run each `skills.<name>` block through `SkillConfig.model_validate` for its
-    side effects (raising on bad shape). Does not mutate cfg."""
+    side effects (raising on bad shape). Unknown agent fields are downgraded to a
+    stderr warning rather than an error. Does not mutate cfg."""
+    known_fields = set(AgentConfig.model_fields)
     skills = cfg.get("skills", {})
     if not isinstance(skills, dict):
         return
     for name, block in skills.items():  # type: ignore[misc]
         if not isinstance(block, dict):
             continue
+        agents = block.get("agents", {})  # type: ignore[misc]
+        if isinstance(agents, dict):
+            for agent_id, entry in agents.items():  # type: ignore[misc]
+                if not isinstance(entry, dict):
+                    continue
+                unknown = set(entry) - known_fields  # type: ignore[arg-type]
+                if unknown:
+                    keys = ", ".join(sorted(unknown))  # type: ignore[arg-type]
+                    print(
+                        f"warning: skills.{name}.agents.{agent_id} has unknown "
+                        f"field(s): {keys}",
+                        file=sys.stderr,
+                    )
         try:
             SkillConfig.model_validate(block)
         except Exception as exc:

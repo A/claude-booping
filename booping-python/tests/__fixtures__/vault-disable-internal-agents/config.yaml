@@ -1,0 +1,7 @@
+skills:
+  develop:
+    disable_internal_agents: true
+    agents:
+      test-no-type:
+        good_for:
+          - "a plain agent entry — renders bare subagent_type"

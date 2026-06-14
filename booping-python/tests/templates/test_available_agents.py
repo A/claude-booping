@@ -49,7 +49,7 @@ def test_non_internal_agent_renders_plain_subagent_type() -> None:
     """A non-internal agent renders plainly as `subagent_type="<agent>"` —
     no `booping:` prefix and no cli wrapper. disable_internal_agents drops
     internal entries, so the native pair is gone here but test-no-type stays."""
-    vault = get_fixture_path("vault-with-cli-agent")
+    vault = get_fixture_path("vault-disable-internal-agents")
     result = _render_develop(vault)
 
     # disable_internal_agents: true drops native entries

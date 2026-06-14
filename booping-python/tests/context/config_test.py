@@ -52,9 +52,9 @@ def test_agent_config_native_validates() -> None:
     assert cfg.good_for == ["x"]
 
 
-def test_agent_config_rejects_unknown_field() -> None:
-    with pytest.raises(Exception):
-        AgentConfig.model_validate({"tipe": "cli"})
+def test_agent_config_ignores_unknown_field() -> None:
+    cfg = AgentConfig.model_validate({"tipe": "cli"})
+    assert not hasattr(cfg, "tipe")
 
 
 def test_skill_config_disable_internal_agents_default() -> None:
@@ -62,10 +62,13 @@ def test_skill_config_disable_internal_agents_default() -> None:
     assert cfg.disable_internal_agents is False
 
 
-def test_validate_skills_raises_on_unknown_agent_field() -> None:
+def test_validate_skills_warns_on_unknown_agent_field(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
     bad = {"skills": {"develop": {"agents": {"x": {"bogus": "field"}}}}}
-    with pytest.raises(ValueError):
-        config_mod.validate_skills(bad)
+    config_mod.validate_skills(bad)
+    err = capsys.readouterr().err
+    assert "bogus" in err
 
 
 def test_validate_skills_passes_on_valid_config() -> None:
