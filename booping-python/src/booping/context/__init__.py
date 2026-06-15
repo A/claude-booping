@@ -7,6 +7,7 @@ from pydantic import BaseModel
 
 from booping.context import config as config_mod
 from booping.context import extra_instructions as ei_mod
+from booping.context import lifecycle as lifecycle
 from booping.context.agent import Agent
 from booping.context.lesson import Lesson
 from booping.context.plan import Plan

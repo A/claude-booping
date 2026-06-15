@@ -1,0 +1,112 @@
+# on_exit → hooks equivalence table
+# Every mutation from the pre-change on_exit table appears exactly once in the new wiring.
+# Location types: edge_hooks, superstate_on_entry
+
+entries:
+  # backlog → cancelled
+  - from: backlog
+    to: cancelled
+    old: "set `completed: yyyymmdd hh:mm`"
+    new_location: superstate_on_entry
+    new_target: terminal
+    new_hook: "frontmatter-update completed=@now"
+
+  # in-spec → awaiting-plan-review
+  - from: in-spec
+    to: awaiting-plan-review
+    old: "set `planned: yyyymmdd hh:mm`"
+    new_location: edge_hooks
+    new_target: "in-spec → awaiting-plan-review"
+    new_hook: "frontmatter-update planned=@now"
+
+  - from: in-spec
+    to: awaiting-plan-review
+    old: "set `commit: <repo HEAD>` from `context.project.git_commit`"
+    new_location: edge_hooks
+    new_target: "in-spec → awaiting-plan-review"
+    new_hook: "frontmatter-update commit=@head"
+
+  # in-spec → cancelled
+  - from: in-spec
+    to: cancelled
+    old: "set `completed: yyyymmdd hh:mm`"
+    new_location: superstate_on_entry
+    new_target: terminal
+    new_hook: "frontmatter-update completed=@now"
+
+  # awaiting-plan-review → cancelled
+  - from: awaiting-plan-review
+    to: cancelled
+    old: "set `completed: yyyymmdd hh:mm`"
+    new_location: superstate_on_entry
+    new_target: terminal
+    new_hook: "frontmatter-update completed=@now"
+
+  # ready-for-dev → in-progress
+  - from: ready-for-dev
+    to: in-progress
+    old: "set `started: yyyymmdd hh:mm`"
+    new_location: superstate_on_entry
+    new_target: executing
+    new_hook: "frontmatter-update started=@now"
+
+  - from: ready-for-dev
+    to: in-progress
+    old: "set `commit: <repo HEAD>` from `context.project.git_commit` (only after the user confirmed the plan is still valid, or the legacy fallback applied)"
+    new_location: superstate_on_entry
+    new_target: executing
+    new_hook: "frontmatter-update commit=@head"
+
+  # in-progress → awaiting-retro
+  - from: in-progress
+    to: awaiting-retro
+    old: "set `completed: yyyymmdd hh:mm`"
+    new_location: superstate_on_entry
+    new_target: closing
+    new_hook: "frontmatter-update completed=@now"
+
+  - from: in-progress
+    to: awaiting-retro
+    old: "suggest `/retro <plan-path>`"
+    new_location: edge_hooks
+    new_target: "in-progress → awaiting-retro"
+    new_hook: "suggest /retro"
+
+  # in-progress → fail
+  - from: in-progress
+    to: fail
+    old: "set `completed: yyyymmdd hh:mm`"
+    new_location: superstate_on_entry
+    new_target: terminal
+    new_hook: "frontmatter-update completed=@now"
+
+  # awaiting-retro → awaiting-learning
+  - from: awaiting-retro
+    to: awaiting-learning
+    old: "set `retro: retrospectives/YYYYMMDD-{kebab-title}.md`"
+    new_location: edge_hooks
+    new_target: "awaiting-retro → awaiting-learning"
+    new_hook: "frontmatter-update retro=retrospectives/YYYYMMDD-{kebab-title}.md"
+
+  - from: awaiting-retro
+    to: awaiting-learning
+    old: "set `goal: success | partial | fail`"
+    new_location: edge_hooks
+    new_target: "awaiting-retro → awaiting-learning"
+    new_hook: "frontmatter-update goal=success|partial|fail"
+
+  # awaiting-retro → done
+  - from: awaiting-retro
+    to: done
+    old: "set `goal: skipped`"
+    new_location: edge_hooks
+    new_target: "awaiting-retro → done"
+    new_hook: "frontmatter-update goal=skipped"
+
+  # awaiting-learning → done
+  - from: awaiting-learning
+    to: done
+    old: "set `completed: yyyymmdd hh:mm`"
+    new_location: superstate_on_entry
+    new_target: terminal
+    new_hook: "frontmatter-update completed=@now"

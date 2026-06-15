@@ -133,8 +133,6 @@ plan:
         - to: cancelled
           skill: groom
           when: "User shelves the request before grooming"
-          on_exit:
-            - "set `completed: yyyymmdd hh:mm`"
 
     in-spec:
       desc: "/groom is actively specifying — researching, designing, drafting the plan."
@@ -150,17 +148,15 @@ plan:
           gates:
             - "Cross-validation run (see [cross-validation](${CLAUDE_PLUGIN_ROOT}/docs/cross_validation.md)) — single-file-bug skip acceptable"
             - "Every task estimated; any task ≥ redecompose_threshold SP has been re-decomposed"
-          on_exit:
-            - "set `planned: yyyymmdd hh:mm`"
-            - "set `commit: <repo HEAD>` from `context.project.git_commit`"
+          hooks:
+            - frontmatter-update planned=@now
+            - frontmatter-update commit=@head
         - to: backlog
           skill: groom
           when: "User parks the work mid-grooming to revisit later"
         - to: cancelled
           skill: groom
           when: "User shelves the work mid-grooming"
-          on_exit:
-            - "set `completed: yyyymmdd hh:mm`"
 
     awaiting-plan-review:
       desc: "Plan drafted; /groom is presenting to the user and awaiting explicit approval, change request, or cancellation."
@@ -178,8 +174,6 @@ plan:
         - to: cancelled
           skill: groom
           when: "User shelves the plan instead of approving"
-          on_exit:
-            - "set `completed: yyyymmdd hh:mm`"
 
     ready-for-dev:
       desc: "Approved by user. Queued for /develop to claim."
@@ -189,9 +183,6 @@ plan:
         - to: in-progress
           skill: develop
           when: "/develop claims the plan at the start of its execute phase"
-          on_exit:
-            - "set `started: yyyymmdd hh:mm`"
-            - "set `commit: <repo HEAD>` from `context.project.git_commit` (only after the user confirmed the plan is still valid, or the legacy fallback applied)"
 
     in-progress:
       desc: "/develop has claimed the plan and is executing milestones."
@@ -207,17 +198,14 @@ plan:
           gates:
             - "Every DoD checkbox marked [x]"
             - "Final Verification green"
-          on_exit:
-            - "set `completed: yyyymmdd hh:mm`"
-            - "suggest `/retro <plan-path>`"
+          hooks:
+            - suggest /retro
         - to: fail
           skill: develop
           when: "Unrecoverable blocker on the same milestone"
           gates:
             - "Two fix attempts documented in the plan"
             - "User has approved the abort"
-          on_exit:
-            - "set `completed: yyyymmdd hh:mm`"
 
     awaiting-retro:
       desc: "All milestones done; waiting for /retro to write the retrospective."
@@ -230,14 +218,14 @@ plan:
           gates:
             - "Retrospective markdown saved to retrospectives/"
             - "Self-review checklist passed"
-          on_exit:
-            - "set `retro: retrospectives/YYYYMMDD-{kebab-title}.md`"
-            - "set `goal: success | partial | fail`"
+          hooks:
+            - frontmatter-update retro=retrospectives/YYYYMMDD-{kebab-title}.md
+            - frontmatter-update goal=success|partial|fail
         - to: done
           skill: retro
           when: "User opts to skip retro for a stale plan and mark it done without retrospective or learning"
-          on_exit:
-            - "set `goal: skipped`"
+          hooks:
+            - frontmatter-update goal=skipped
 
     awaiting-learning:
       desc: "Retro written; waiting for /learn to absorb lessons."
@@ -250,8 +238,6 @@ plan:
           gates:
             - "User confirmed the review table"
             - "Every accepted lesson written to its target file"
-          on_exit:
-            - "set `completed: yyyymmdd hh:mm`"
 
     done:
       desc: "Terminal success. /learn has absorbed all lessons."
@@ -264,3 +250,56 @@ plan:
     cancelled:
       desc: "Terminal product decision. User shelved the plan."
       terminal: true
+
+  superstates:
+    planning:
+      states:
+        - backlog
+        - in-spec
+        - awaiting-plan-review
+        - ready-for-dev
+      transitions:
+        - to: cancelled
+          skill: groom
+          when: "User shelves the request"
+        - to: in-progress
+          skill: develop
+          when: "Plan is claimed for execution"
+      on_exit: []
+      on_entry: []
+    executing:
+      states:
+        - in-progress
+      transitions:
+        - to: fail
+          skill: develop
+          when: "Unrecoverable blocker on the same milestone"
+          gates:
+            - "Two fix attempts documented in the plan"
+            - "User has approved the abort"
+      on_exit: []
+      on_entry:
+        - frontmatter-update started=@now
+        - frontmatter-update commit=@head
+    closing:
+      states:
+        - awaiting-retro
+        - awaiting-learning
+      transitions: []
+      on_exit: []
+      on_entry:
+        - frontmatter-update completed=@now
+    terminal:
+      states:
+        - done
+        - fail
+        - cancelled
+      transitions: []
+      on_exit: []
+      on_entry:
+        - frontmatter-update completed=@now
+
+  hooks:
+    post:
+      - render-sprints
+      - vault-commit
