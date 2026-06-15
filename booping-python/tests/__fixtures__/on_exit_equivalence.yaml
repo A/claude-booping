@@ -1,5 +1,17 @@
 # on_exit → hooks equivalence table
-# Every mutation from the pre-change on_exit table appears exactly once in the new wiring.
+#
+# Complete expected mutation set per edge: every frontmatter mutation
+# resolve_hooks(from, to) emits — beyond the mechanical status=<to> set — is
+# listed here exactly once. The lone non-frontmatter row is `suggest /retro`.
+# TestEquivalence asserts both directions: every listed mutation is present in
+# the new wiring, AND the wiring emits no frontmatter mutation that isn't listed
+# here. Add a row whenever a new mutation is wired in, or the no-extras check
+# fails.
+#
+# `old` records the pre-change on_exit-table mutation this row replaces, or
+# "(none — superstate-hook addition)" for a mutation the superstate wiring adds
+# that the old table never produced.
+#
 # Location types: edge_hooks, superstate_on_entry
 
 entries:
@@ -103,10 +115,81 @@ entries:
     new_target: "awaiting-retro → done"
     new_hook: "frontmatter-update goal=skipped"
 
+  # Deliberate superstate-hook addition: the old on_exit table set only
+  # `goal: skipped` on the skip-retro edge and no `completed`. The terminal
+  # superstate's on_entry now stamps `completed` on every edge into a terminal
+  # state, so this skip-retro edge gains it too — an intentional improvement,
+  # not an equivalence break.
+  - from: awaiting-retro
+    to: done
+    old: "(none — superstate-hook addition)"
+    new_location: superstate_on_entry
+    new_target: terminal
+    new_hook: "frontmatter-update completed=@now"
+
   # awaiting-learning → done
   - from: awaiting-learning
     to: done
     old: "set `completed: yyyymmdd hh:mm`"
+    new_location: superstate_on_entry
+    new_target: terminal
+    new_hook: "frontmatter-update completed=@now"
+
+  # Inherited "group" edges — the planning superstate's own → in-progress and
+  # → cancelled transitions, reachable from every planning substate. They cross
+  # a superstate boundary, so the executing / terminal on_entry hooks fire. The
+  # old per-status on_exit table did not enumerate these inherited edges; they
+  # are listed here so the complete-mutation-set check covers them.
+
+  # backlog → in-progress (inherited planning → executing)
+  - from: backlog
+    to: in-progress
+    old: "(none — inherited planning edge)"
+    new_location: superstate_on_entry
+    new_target: executing
+    new_hook: "frontmatter-update started=@now"
+
+  - from: backlog
+    to: in-progress
+    old: "(none — inherited planning edge)"
+    new_location: superstate_on_entry
+    new_target: executing
+    new_hook: "frontmatter-update commit=@head"
+
+  # in-spec → in-progress (inherited planning → executing)
+  - from: in-spec
+    to: in-progress
+    old: "(none — inherited planning edge)"
+    new_location: superstate_on_entry
+    new_target: executing
+    new_hook: "frontmatter-update started=@now"
+
+  - from: in-spec
+    to: in-progress
+    old: "(none — inherited planning edge)"
+    new_location: superstate_on_entry
+    new_target: executing
+    new_hook: "frontmatter-update commit=@head"
+
+  # awaiting-plan-review → in-progress (inherited planning → executing)
+  - from: awaiting-plan-review
+    to: in-progress
+    old: "(none — inherited planning edge)"
+    new_location: superstate_on_entry
+    new_target: executing
+    new_hook: "frontmatter-update started=@now"
+
+  - from: awaiting-plan-review
+    to: in-progress
+    old: "(none — inherited planning edge)"
+    new_location: superstate_on_entry
+    new_target: executing
+    new_hook: "frontmatter-update commit=@head"
+
+  # ready-for-dev → cancelled (inherited planning → terminal)
+  - from: ready-for-dev
+    to: cancelled
+    old: "(none — inherited planning edge)"
     new_location: superstate_on_entry
     new_target: terminal
     new_hook: "frontmatter-update completed=@now"

@@ -7,6 +7,8 @@ from booping.commands import debug as debug_cmd
 from booping.commands import frontmatter_update as frontmatter_update_cmd
 from booping.commands import render as render_cmd
 from booping.commands import render_sprints as render_sprints_cmd
+from booping.commands import transition as transition_cmd
+from booping.commands import vault_commit as vault_commit_cmd
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -22,6 +24,8 @@ def build_parser() -> argparse.ArgumentParser:
     build_cmd.add_parser(sub)
     debug_cmd.add_parser(sub)
     frontmatter_update_cmd.add_parser(sub)
+    transition_cmd.add_parser(sub)
+    vault_commit_cmd.add_parser(sub)
 
     return parser
 

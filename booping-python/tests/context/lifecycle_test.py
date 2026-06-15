@@ -261,12 +261,52 @@ class TestEquivalence:
                 )
 
     def test_no_duplicate_mutations(self, equivalence_table: list[dict[str, Any]]) -> None:
-        """Each (from, to, old) triple is unique in the equivalence table."""
+        """Each (from, to, new_hook) mutation is listed once. Keying on the
+        emitted hook (not the `old` provenance) — multiple new mutations may
+        share one `old` source (e.g. inherited planning edges)."""
         seen: set[tuple[str, str, str]] = set()
         for entry in equivalence_table:
-            key = (str(entry["from"]), str(entry["to"]), str(entry["old"]))
+            key = (str(entry["from"]), str(entry["to"]), str(entry["new_hook"]))
             assert key not in seen, f"Duplicate entry: {key}"
             seen.add(key)
+
+    def test_mutation_set_matches_fixture_exactly(
+        self, full_config: dict[str, Any], equivalence_table: list[dict[str, Any]]
+    ) -> None:
+        """For every valid edge, the frontmatter mutations resolve_hooks emits
+        equal EXACTLY the set documented in the fixture — none missing, none
+        undocumented. The mechanical status=<to> set is excluded (it is implied
+        by every edge, not a tracked mutation). This is the "no extras"
+        direction: a stray mutation wired in without a fixture row fails here.
+        """
+        # Documented frontmatter mutations per edge, keyed (from, to).
+        documented: dict[tuple[str, str], set[str]] = {}
+        for entry in equivalence_table:
+            new_hook = str(entry["new_hook"])
+            if not new_hook.startswith("frontmatter-update "):
+                continue  # non-frontmatter rows (e.g. `suggest /retro`) aren't tracked here
+            key = (str(entry["from"]), str(entry["to"]))
+            documented.setdefault(key, set()).add(new_hook)
+
+        statuses: dict[str, Any] = full_config.get("plan", {}).get("statuses", {})
+        for from_s in statuses:
+            for edge in resolve_edges(from_s, full_config):
+                key = (from_s, edge.to)
+                hooks = resolve_hooks(from_s, edge.to, full_config)
+                actual = {
+                    h
+                    for h in hooks
+                    if h.startswith("frontmatter-update ")
+                    and not h.startswith("frontmatter-update status=")
+                }
+                expected = documented.get(key, set())
+                assert actual == expected, (
+                    f"Mutation set mismatch for {from_s} → {edge.to}.\n"
+                    f"  resolve_hooks emits: {sorted(actual)}\n"
+                    f"  fixture documents : {sorted(expected)}\n"
+                    f"  undocumented extras: {sorted(actual - expected)}\n"
+                    f"  documented missing : {sorted(expected - actual)}"
+                )
 
 
 # ---------------------------------------------------------------------------
@@ -274,7 +314,7 @@ class TestEquivalence:
 # ---------------------------------------------------------------------------
 
 class TestDeepMergeSafety:
-    def test_superstates_merge_over_empty_override(self, full_config: dict[str, Any]) -> None:
+    def test_superstates_merge_over_empty_override(self) -> None:
         """plan.superstates + plan.hooks deep-merge cleanly over an empty
         project override (no contract regression)."""
         plugin_root = Path(__file__).resolve().parents[3]
@@ -299,7 +339,7 @@ class TestDeepMergeSafety:
         assert "render-sprints" in post
         assert "vault-commit" in post
 
-    def test_original_statuses_preserved_after_merge(self, full_config: dict[str, Any]) -> None:
+    def test_original_statuses_preserved_after_merge(self) -> None:
         """Existing plan.statuses content is not lost after adding superstates."""
         plugin_root = Path(__file__).resolve().parents[3]
         cfg = config_mod.load(plugin_root, [])
