@@ -4,7 +4,7 @@ Spec a sprint: take a rough request and produce a reviewable plan file under `~/
 
 ## What it does
 
-`/groom` walks a request through the early lifecycle states — `backlog` or fresh request → `in-spec` → `awaiting-plan-review` → `ready-for-dev`. The output is a single markdown plan file with YAML frontmatter that subsequent skills (`/develop`, `/retro`, `/learn`) read. Status transitions are manual frontmatter edits performed by `/groom` as it clears each gate; no CLI mutates them.
+`/groom` walks a request through the early lifecycle states — `backlog` or fresh request → `in-spec` → `awaiting-plan-review` → `ready-for-dev`. The output is a single markdown plan file with YAML frontmatter that subsequent skills (`/develop`, `/retro`, `/learn`) read. As `/groom` clears each gate it fires a `booping transition` command that moves the plan and applies every mechanical mutation the move entails — `/groom` decides the move, the command performs it.
 
 `/groom` does the research, drafts the milestones, estimates story points, optionally cross-validates against Gemini, and then hands the plan to you for explicit approval before it can move to `ready-for-dev`. Silence does not count as approval.
 
@@ -71,7 +71,7 @@ When `/groom` enters `awaiting-plan-review` it presents the plan and waits for y
 
 What to check before approving:
 
-- **Goal is sharp.** The business goal in frontmatter matches the request, with no scope creep.
+- **Goal is sharp.** The `summary` in frontmatter matches the request, with no scope creep.
 - **Milestones cover the goal end-to-end.** No silent gaps, no "and then ..." vagueness in the last milestone.
 - **Tasks are sized honestly.** No 5-SP tasks except deliberate research spikes (see Story points).
 - **Definitions of done are verifiable.** Each task DoD checkbox is something you can mechanically confirm — not "code looks good".
@@ -116,4 +116,4 @@ Behaviour:
 - **`sprint.redecompose_threshold`** — per-task SP value at or above which the task must be re-decomposed before the plan can leave `in-spec`.
 - **`sprint.scale`** — the 1–5 SP definitions (each a `{sp, meaning}` entry) driving the story-point scale prose rendered into `/groom`'s body.
 - **`tasks`** — list of `{type, description, doc_uri}` entries (`feature`, `bug`, `refactoring`). `/groom` classifies the request against this list; the matching `doc_uri` lazy-loads detailed guidance for that task type.
-- **`plan.statuses`** — the lifecycle slice `/groom` owns (`backlog`, `in-spec`, `awaiting-plan-review`) plus its outgoing transitions. The gates and `on_exit` mutations rendered into the skill body come from here.
+- **`plan.statuses`** — the lifecycle slice `/groom` owns (`backlog`, `in-spec`, `awaiting-plan-review`) plus its outgoing transitions. The gates and the auto-applied mutations rendered into the skill body come from here.

@@ -6,9 +6,9 @@ This page is the reference for every file and directory inside the vault. For th
 
 ## `plans/`
 
-Sprint plans live here as `{YYYYMMDD}-{kebab-title}.md`. Each plan carries a YAML frontmatter (status, type, story points, business goal, etc.) and a body of milestones with tasks. Authored by [/groom](groom.md), executed by [/develop](develop.md).
+Sprint plans live here as `{YYYYMMDD}-{kebab-title}.md`. Each plan carries a YAML frontmatter (status, type, story points, a one-line `summary`, etc.) and a body of milestones with tasks. Authored by [/groom](groom.md), executed by [/develop](develop.md).
 
-A plan walks the status table from `backlog` / `in-spec` through `awaiting-plan-review`, `ready-for-dev`, `in-progress`, `awaiting-retro`, `awaiting-learning`, to `done`. Status transitions are manual frontmatter edits performed by the owning skill — no CLI mutates them.
+A plan walks the status table from `backlog` / `in-spec` through `awaiting-plan-review`, `ready-for-dev`, `in-progress`, `awaiting-retro`, `awaiting-learning`, to `done`. The owning skill moves a plan by running a `booping transition` command, which performs the status change and every mechanical mutation it entails in one step.
 
 Sibling stubs created by a `/groom`-driven split point at the primary plan via `split_from: plans/...` in their frontmatter.
 

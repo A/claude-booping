@@ -145,8 +145,6 @@ plan:
         - to: cancelled
           skill: groom
           when: "User shelves the request before grooming"
-          on_exit:
-            - "set `completed: yyyymmdd hh:mm`"
 
     in-spec:
       desc: "/groom is actively specifying — researching, designing, drafting the plan."
@@ -162,17 +160,12 @@ plan:
           gates:
             - "Cross-validation run (see [cross-validation](${CLAUDE_PLUGIN_ROOT}/docs/cross_validation.md)) — single-file-bug skip acceptable"
             - "Every task estimated; any task ≥ redecompose_threshold SP has been re-decomposed"
-          on_exit:
-            - "set `planned: yyyymmdd hh:mm`"
-            - "set `commit: <repo HEAD>` from `context.project.git_commit`"
         - to: backlog
           skill: groom
           when: "User parks the work mid-grooming to revisit later"
         - to: cancelled
           skill: groom
           when: "User shelves the work mid-grooming"
-          on_exit:
-            - "set `completed: yyyymmdd hh:mm`"
 
     awaiting-plan-review:
       desc: "Plan drafted; /groom is presenting to the user and awaiting explicit approval, change request, or cancellation."
@@ -190,8 +183,6 @@ plan:
         - to: cancelled
           skill: groom
           when: "User shelves the plan instead of approving"
-          on_exit:
-            - "set `completed: yyyymmdd hh:mm`"
 
     ready-for-dev:
       desc: "Approved by user. Queued for /develop to claim."
@@ -201,9 +192,6 @@ plan:
         - to: in-progress
           skill: develop
           when: "/develop claims the plan at the start of its execute phase"
-          on_exit:
-            - "set `started: yyyymmdd hh:mm`"
-            - "set `commit: <repo HEAD>` from `context.project.git_commit` (only after the user confirmed the plan is still valid, or the legacy fallback applied)"
 
     in-progress:
       desc: "/develop has claimed the plan and is executing milestones."
@@ -219,17 +207,12 @@ plan:
           gates:
             - "Every DoD checkbox marked [x]"
             - "Final Verification green"
-          on_exit:
-            - "set `completed: yyyymmdd hh:mm`"
-            - "suggest `/retro <plan-path>`"
         - to: fail
           skill: develop
           when: "Unrecoverable blocker on the same milestone"
           gates:
             - "Two fix attempts documented in the plan"
             - "User has approved the abort"
-          on_exit:
-            - "set `completed: yyyymmdd hh:mm`"
 
     awaiting-retro:
       desc: "All milestones done; waiting for /retro to write the retrospective."
@@ -242,14 +225,9 @@ plan:
           gates:
             - "Retrospective markdown saved to retrospectives/"
             - "Self-review checklist passed"
-          on_exit:
-            - "set `retro: retrospectives/YYYYMMDD-{kebab-title}.md`"
-            - "set `goal: success | partial | fail`"
         - to: done
           skill: retro
           when: "User opts to skip retro for a stale plan and mark it done without retrospective or learning"
-          on_exit:
-            - "set `goal: skipped`"
 
     awaiting-learning:
       desc: "Retro written; waiting for /learn to absorb lessons."
@@ -262,8 +240,6 @@ plan:
           gates:
             - "User confirmed the review table"
             - "Every accepted lesson written to its target file"
-          on_exit:
-            - "set `completed: yyyymmdd hh:mm`"
 
     done:
       desc: "Terminal success. /learn has absorbed all lessons."
@@ -276,6 +252,31 @@ plan:
     cancelled:
       desc: "Terminal product decision. User shelved the plan."
       terminal: true
+
+  # Statuses also group into named superstates (additive, overridable).
+  superstates:
+    planning:
+      states: [backlog, in-spec, awaiting-plan-review, ready-for-dev]
+      transitions:
+        - to: cancelled
+          skill: groom
+          when: "User shelves the request"
+        - to: in-progress
+          skill: develop
+          when: "Plan is claimed for execution"
+    executing:
+      states: [in-progress]
+      transitions:
+        - to: fail
+          skill: develop
+          when: "Unrecoverable blocker on the same milestone"
+          gates:
+            - "Two fix attempts documented in the plan"
+            - "User has approved the abort"
+    closing:
+      states: [awaiting-retro, awaiting-learning]
+    terminal:
+      states: [done, fail, cancelled]
 ```
 
 </details>
@@ -304,7 +305,7 @@ The task-type taxonomy `/groom` classifies every request against. Each entry is 
 
 ### `plan.statuses`
 
-The full plan-lifecycle definition: every status, who owns it, what it produces, what transitions out of it, what gates each transition has, and what `on_exit` mutations fire. Skills render only the slice they own (transitions where `skill: <self>`), so editing this key reshapes every skill's plan-transitions table at the next skill load.
+The full plan-lifecycle definition: every status, who owns it, what it produces, what transitions out of it, and what gates each transition has. Skills render only the slice they own (transitions where `skill: <self>`), so editing this key reshapes every skill's plan-transitions table at the next skill load.
 
 Each status carries:
 
@@ -312,9 +313,17 @@ Each status carries:
 - `owner` — the skill that owns this state.
 - `terminal` — bool; terminal states (`done`, `fail`, `cancelled`) cannot transition out.
 - `artifacts` — list of strings describing what the state produces.
-- `transitions` — list of `{to, skill, when, gates?, on_exit?}`.
+- `transitions` — list of `{to, skill, when, gates?}`.
 
 See [Plan lifecycle overview](https://github.com/A/claude-booping/blob/main/src/templates/docs/plan_lifecycle_overview.md.j2) for the rendered status graph; or run `bin/booping render src/templates/docs/plan_lifecycle_overview.md.j2` locally.
+
+### `plan.superstates`
+
+Statuses also group into a few named **superstates** — `planning`, `executing`, `closing`, and `terminal` — each listing its member statuses and any transitions shared across the whole group. This is an overridable, additive surface: a project override deep-merges over the plugin defaults the same way the rest of the config does, so you can add or adjust a superstate's members or shared transitions without restating the others. Most projects never touch it; it exists so the lifecycle can describe group-level moves once instead of repeating them on every status.
+
+## Plan frontmatter: `summary`
+
+Each plan file carries a `summary` field in its YAML frontmatter — a one-line statement of the plan's intent (≤ ~120 characters). `/groom` writes it when drafting the plan; it is the human-readable label that surfaces in `sprints.md` and makes plans searchable across the vault. (It replaced the older, longer `business_goal` field.)
 
 ### `skills.<name>.agents`
 
