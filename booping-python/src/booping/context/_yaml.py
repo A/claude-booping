@@ -95,11 +95,19 @@ def split_frontmatter_md(text: str) -> tuple[str, str, str]:
     return before_yaml, yaml_text, after_yaml
 
 
-def update_frontmatter(path: Path, updates: dict[str, object]) -> None:
+def update_frontmatter(
+    path: Path,
+    updates: dict[str, object],
+    removals: list[str] | None = None,
+) -> None:
     """Update frontmatter keys in a markdown file using ruamel.yaml round-trip mode.
 
     Preserves comments, key order, and body text.  Only the extracted YAML
     block is passed to the parser — the body is never parsed as YAML.
+
+    ``removals`` lists keys to drop from the frontmatter; missing keys are
+    ignored.  Removals are applied before updates so a key may be removed and
+    re-added in one call.
     """
     text = path.read_text()
     before_yaml, yaml_text, after_yaml = split_frontmatter_md(text)
@@ -108,6 +116,10 @@ def update_frontmatter(path: Path, updates: dict[str, object]) -> None:
     data = ry.load(yaml_text)  # type: ignore[reportUnknownMemberType]
     if data is None:
         data = CommentedMap()
+
+    for key in removals or []:
+        if key in data:
+            del data[key]
 
     for key, value in updates.items():
         data[key] = value

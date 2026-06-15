@@ -19,9 +19,17 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
     p.add_argument("plan", type=Path, help="Path to the plan markdown file")
     p.add_argument(
         "pairs",
-        nargs="+",
+        nargs="*",
         metavar="key=val",
         help="Frontmatter key=value pairs (@now, @today, @head interpolation)",
+    )
+    p.add_argument(
+        "--remove",
+        dest="removals",
+        action="append",
+        default=[],
+        metavar="key",
+        help="Frontmatter key to remove (repeatable); applied before key=value sets",
     )
     p.set_defaults(func=_run)
 
@@ -67,7 +75,12 @@ def _run(args: argparse.Namespace) -> None:
         print(f"error: plan not found: {plan_path}", file=sys.stderr)
         sys.exit(1)
 
+    removals: list[str] = list(getattr(args, "removals", None) or [])
     updates = _parse_pairs(args.pairs)
+
+    if not updates and not removals:
+        print("error: nothing to do: provide key=value pairs and/or --remove", file=sys.stderr)
+        sys.exit(1)
 
     project = Project.load_cwd()
     repo_dir = project.repo_directory if project is not None else None
@@ -77,7 +90,7 @@ def _run(args: argparse.Namespace) -> None:
         resolved[key] = _interpolate(value, repo_dir)
 
     try:
-        update_frontmatter(plan_path, resolved)
+        update_frontmatter(plan_path, resolved, removals=removals)
     except ValueError as exc:
         print(f"error: {exc}", file=sys.stderr)
         sys.exit(1)
@@ -86,10 +99,10 @@ def _run(args: argparse.Namespace) -> None:
         sys.exit(2)
 
     vault = project.directory if project is not None else None
-    keys_str = " ".join(resolved.keys())
-    logger.log(vault=vault, subcommand="frontmatter-update", message=f"{plan_path} {keys_str}")
-
-    print(
-        f"updated {plan_path}: {', '.join(f'{k}={v}' for k, v in resolved.items())}",
-        file=sys.stderr,
+    changed = [f"-{k}" for k in removals] + list(resolved.keys())
+    logger.log(
+        vault=vault, subcommand="frontmatter-update", message=f"{plan_path} {' '.join(changed)}"
     )
+
+    parts = [f"-{k}" for k in removals] + [f"{k}={v}" for k, v in resolved.items()]
+    print(f"updated {plan_path}: {', '.join(parts)}", file=sys.stderr)

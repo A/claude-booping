@@ -22,7 +22,7 @@ class Plan(BaseModel):
     completed: str | None = None
     retro: str | None = None
     goal: str | None = None
-    business_goal: str = ""
+    summary: str = ""
     commit: str | None = None
     body: str = ""
 
@@ -56,7 +56,7 @@ def _from_fm(path: Path, fm: dict[str, Any], body: str) -> Plan:
         completed=str(completed_raw) if completed_raw is not None else None,
         retro=str(fm["retro"]) if fm.get("retro") is not None else None,
         goal=str(fm["goal"]) if fm.get("goal") is not None else None,
-        business_goal=str(fm.get("business_goal", "")),
+        summary=str(fm.get("summary", "")),
         commit=str(fm["commit"]) if fm.get("commit") is not None else None,
         body=body,
     )

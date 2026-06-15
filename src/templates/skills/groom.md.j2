@@ -32,6 +32,7 @@ Groom produces a specified, estimated, user-reviewed plan. The transitions table
 - **Verify external references**: every package version, image tag, API endpoint, CLI flag, or config option named in the plan is checked against current docs. Never assume.
 - **Draft design with the user**: architecture, pattern choices, data / API / config surface changes, open trade-offs. Iterate until aligned before writing.
 - **Write the plan**: pick a plan template from [Plan Structure](#plan-structure) whose name + description matches the work, then produce the plan against its `# Plan Body`.
+- **Write `summary`**: set the `summary:` frontmatter to a single line of plain plan intent — ≤ ~120 chars / ~20 words, no prose, no trailing period needed. It feeds search and the `sprints.md` snapshot.
 - **Present and iterate**: show approach summary, milestones, SP totals, plan file path. Ask *"Ready for development, or want changes?"* Iterate on changes until the user explicitly approves.
 
 ## Hard rules

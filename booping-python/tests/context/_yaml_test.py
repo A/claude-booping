@@ -169,3 +169,50 @@ class TestUpdateFrontmatter:
 
         with pytest.raises(ValueError, match="opening"):
             update_frontmatter(plan, {"status": "in-progress"})
+
+    def test_removes_key_preserves_others_comments_order_body(self, tmp_path: Path) -> None:
+        body = "# Body\n\n- item 1\n- item 2\n"
+        md = (
+            "---\n"
+            "title: Foo  # important\n"
+            "business_goal: Users can find widgets faster.\n"
+            "status: backlog\n"
+            "# trailing section\n"
+            "sp: 5\n"
+            f"---\n{body}"
+        )
+        plan = tmp_path / "plan.md"
+        plan.write_text(md)
+
+        update_frontmatter(plan, {}, removals=["business_goal"])
+
+        text = plan.read_text()
+        assert "business_goal" not in text
+        assert "title: Foo" in text
+        assert "# important" in text
+        assert "# trailing section" in text
+        assert "status: backlog" in text
+        assert "sp: 5" in text
+        assert text.index("title") < text.index("status") < text.index("sp")
+        assert text.endswith(body)
+
+    def test_removes_missing_key_is_noop(self, tmp_path: Path) -> None:
+        md = "---\ntitle: Foo\nstatus: backlog\n---\nbody\n"
+        plan = tmp_path / "plan.md"
+        plan.write_text(md)
+
+        update_frontmatter(plan, {}, removals=["nonexistent"])
+
+        assert plan.read_text() == md
+
+    def test_remove_then_add_same_key(self, tmp_path: Path) -> None:
+        md = "---\ntitle: Foo\nbusiness_goal: old\nstatus: backlog\n---\nbody\n"
+        plan = tmp_path / "plan.md"
+        plan.write_text(md)
+
+        update_frontmatter(plan, {"summary": ""}, removals=["business_goal"])
+
+        text = plan.read_text()
+        assert "business_goal" not in text
+        assert "summary:" in text
+        assert "title: Foo" in text

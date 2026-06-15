@@ -183,6 +183,46 @@ class TestFrontmatterUpdateCLI:
         assert "planned:" in text
         assert "status: in-progress" in text
 
+    def test_remove_key_and_add_empty(self, tmp_path: Path) -> None:
+        body = "# My Plan\n\n- [ ] 3 SP: Task one\n"
+        plan = _make_plan(
+            tmp_path,
+            "title: Foo  # keep\ntype: feature\nbusiness_goal: Users find widgets faster.\n"
+            "status: backlog",
+            body=body,
+        )
+
+        fu_cmd._run(  # type: ignore[reportPrivateUsage]
+            _ns(plan=plan, pairs=["summary="], removals=["business_goal"]),
+        )
+
+        text = plan.read_text()
+        assert "business_goal" not in text
+        assert "summary:" in text
+        assert "title: Foo" in text
+        assert "# keep" in text
+        assert "type: feature" in text
+        assert text.endswith(body)
+
+    def test_remove_only_no_pairs(self, tmp_path: Path) -> None:
+        plan = _make_plan(tmp_path, "title: Foo\nbusiness_goal: x\nstatus: backlog")
+
+        fu_cmd._run(_ns(plan=plan, pairs=[], removals=["business_goal"]))  # type: ignore[reportPrivateUsage]
+
+        text = plan.read_text()
+        assert "business_goal" not in text
+        assert "title: Foo" in text
+
+    def test_nothing_to_do_exits_1(
+        self, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+    ) -> None:
+        plan = _make_plan(tmp_path, "title: Foo\nstatus: backlog")
+
+        with pytest.raises(SystemExit) as excinfo:
+            fu_cmd._run(_ns(plan=plan, pairs=[], removals=[]))  # type: ignore[reportPrivateUsage]
+        assert excinfo.value.code == 1
+        assert "nothing to do" in capsys.readouterr().err
+
     def test_logs_to_booping_log(self, tmp_path: Path) -> None:
         """Log line appended to _booping/.booping.log."""
         vault = tmp_path / "vault"

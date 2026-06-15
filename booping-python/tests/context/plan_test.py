@@ -19,7 +19,7 @@ def test_load_all_count_and_fields() -> None:
     assert plan.sp == 5
     assert plan.created == date(2026, 1, 1)
     assert plan.goal == "Implement full-text search across the widget catalog."
-    assert plan.business_goal == "Users can find widgets faster via keyword search."
+    assert plan.summary == "Users can find widgets faster via keyword search."
     assert plan.split_from is None
     assert plan.commit == "0123456789abcdef0123456789abcdef01234567"
 
