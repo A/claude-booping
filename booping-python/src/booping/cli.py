@@ -4,6 +4,7 @@ import argparse
 
 from booping.commands import build as build_cmd
 from booping.commands import debug as debug_cmd
+from booping.commands import frontmatter_update as frontmatter_update_cmd
 from booping.commands import render as render_cmd
 from booping.commands import render_sprints as render_sprints_cmd
 
@@ -20,6 +21,7 @@ def build_parser() -> argparse.ArgumentParser:
     render_sprints_cmd.add_parser(sub)
     build_cmd.add_parser(sub)
     debug_cmd.add_parser(sub)
+    frontmatter_update_cmd.add_parser(sub)
 
     return parser
 

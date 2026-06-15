@@ -6,6 +6,7 @@ dependencies = [
     "jinja2",
     "pyyaml",
     "pydantic",
+    "ruamel.yaml==0.19.1",
 ]
 
 [project.scripts]
