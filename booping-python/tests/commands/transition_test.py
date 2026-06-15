@@ -124,6 +124,68 @@ class TestHappyPath:
 
 
 # ---------------------------------------------------------------------------
+# 1b. --also passthrough
+# ---------------------------------------------------------------------------
+
+class TestAlsoPassthrough:
+    def test_also_artifact_committed_alongside_plan(self, tmp_path: Path) -> None:
+        repo, vault, plan, env = _setup(tmp_path)
+
+        artifact = vault / "retro" / "20260101-my-feature.md"
+        artifact.parent.mkdir(parents=True)
+        artifact.write_text("# Retrospective\n")
+
+        result = _run_transition(
+            repo, env, "awaiting-plan-review", str(plan), "--also", str(artifact)
+        )
+        assert result.returncode == 0, result.stderr
+
+        # Exactly one new commit, and it carries the artifact + plan + sprints.md.
+        log = _git(vault, ["log", "--oneline"]).stdout.strip().splitlines()
+        assert len(log) == 2  # initial + the transition commit
+
+        files = _git(
+            vault, ["show", "--name-only", "--pretty=format:", "HEAD"]
+        ).stdout.strip().splitlines()
+        files = [f for f in files if f]
+        assert "retro/20260101-my-feature.md" in files
+        assert "plans/20260101-my-feature.md" in files
+        assert "sprints.md" in files
+
+        # The artifact is committed (not lingering as untracked / unstaged).
+        porcelain = _git(vault, ["status", "--porcelain"]).stdout.strip()
+        assert "retro/20260101-my-feature.md" not in porcelain
+
+    def test_without_also_does_not_commit_extra_artifacts(
+        self, tmp_path: Path
+    ) -> None:
+        repo, vault, plan, env = _setup(tmp_path)
+
+        # An unrelated artifact present in the vault but not passed via --also.
+        stray = vault / "retro" / "20260101-my-feature.md"
+        stray.parent.mkdir(parents=True)
+        stray.write_text("# Retrospective\n")
+
+        result = _run_transition(repo, env, "awaiting-plan-review", str(plan))
+        assert result.returncode == 0, result.stderr
+
+        # The transition commit stages only plan + sprints.md; the stray file is
+        # left untracked.
+        files = _git(
+            vault, ["show", "--name-only", "--pretty=format:", "HEAD"]
+        ).stdout.strip().splitlines()
+        files = [f for f in files if f]
+        assert "retro/20260101-my-feature.md" not in files
+        assert "plans/20260101-my-feature.md" in files
+        assert "sprints.md" in files
+
+        porcelain = _git(
+            vault, ["status", "--porcelain", "--untracked-files=all"]
+        ).stdout
+        assert "?? retro/20260101-my-feature.md" in porcelain
+
+
+# ---------------------------------------------------------------------------
 # 2. Invalid target
 # ---------------------------------------------------------------------------
 
@@ -220,7 +282,9 @@ class TestUnknownHook:
         plan = _make_plan(vault, "in-spec")
         _inject_config(monkeypatch, ["bogus-hook some=thing"])
 
-        args = argparse.Namespace(to_status="awaiting-plan-review", plan=plan)
+        args = argparse.Namespace(
+            to_status="awaiting-plan-review", plan=plan, also=None
+        )
         with pytest.raises(SystemExit) as excinfo:
             transition_cmd._run(args)  # type: ignore[reportPrivateUsage]
 
@@ -249,7 +313,9 @@ class TestHookFailureMidList:
             ],
         )
 
-        args = argparse.Namespace(to_status="awaiting-plan-review", plan=plan)
+        args = argparse.Namespace(
+            to_status="awaiting-plan-review", plan=plan, also=None
+        )
         with pytest.raises(SystemExit) as excinfo:
             transition_cmd._run(args)  # type: ignore[reportPrivateUsage]
 

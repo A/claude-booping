@@ -24,6 +24,19 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
         "to_status", metavar="to", help="Target status to transition to"
     )
     p.add_argument("plan", type=Path, help="Path to the plan markdown file")
+    p.add_argument(
+        "--also",
+        dest="also",
+        action="append",
+        type=Path,
+        default=None,
+        metavar="PATH",
+        help=(
+            "Vault artifact authored for this move (e.g. a retrospective "
+            "file or sibling stub plan) to stage + commit alongside the "
+            "plan in the same transition commit. Repeatable."
+        ),
+    )
     p.set_defaults(func=_run)
 
 
@@ -125,14 +138,17 @@ def _dispatch_render_sprints(project: Project | None) -> None:
     print(f"wrote {len(ctx.plans)} plans to {output_path}", file=sys.stderr)
 
 
-def _dispatch_vault_commit(to_status: str, plan_path: Path) -> None:
+def _dispatch_vault_commit(
+    to_status: str, plan_path: Path, also: list[Path]
+) -> None:
     """Run vault-commit inline."""
-    do_vault_commit(to_status=to_status, plan_path=plan_path)
+    do_vault_commit(to_status=to_status, plan_path=plan_path, also=also)
 
 
 def _run(args: argparse.Namespace) -> None:
     to_status: str = args.to_status
     plan_path: Path = args.plan
+    also: list[Path] = args.also or []
 
     if not plan_path.is_file():
         print(f"error: plan not found: {plan_path}", file=sys.stderr)
@@ -183,7 +199,7 @@ def _run(args: argparse.Namespace) -> None:
             elif hook_name == "render-sprints":
                 _dispatch_render_sprints(project)
             elif hook_name == "vault-commit":
-                _dispatch_vault_commit(to_status, plan_path)
+                _dispatch_vault_commit(to_status, plan_path, also)
             elif hook_name == "suggest":
                 # suggest hooks are LLM-facing hints; skip in dispatcher
                 continue

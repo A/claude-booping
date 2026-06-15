@@ -103,9 +103,9 @@ Write paths use these templates (resolve each placeholder before writing):
 
 ## Phase 4 Transition + commit
 
-Apply the exit transition from the transitions table above; the partial covers the vault commit shape.
+Take the exit transition from the transitions table above.
 
-If Phase 3 also wrote to the attached repo's `CLAUDE.md`, commit that separately in the repo working tree (the partial covers vault commits only):
+If Phase 3 also wrote to the attached repo's `CLAUDE.md`, commit that separately in the repo working tree (the transition only touches the vault, never the attached repo):
 
 ```bash
 cd <repo-path>
