@@ -32,6 +32,15 @@ Groom produces a specified, estimated, user-reviewed plan. The transitions table
 - **Verify external references**: every package version, image tag, API endpoint, CLI flag, or config option named in the plan is checked against current docs. Never assume.
 - **Draft design with the user**: architecture, pattern choices, data / API / config surface changes, open trade-offs. Iterate until aligned before writing.
 - **Write the plan**: pick a plan template from [Plan Structure](#plan-structure) whose name + description matches the work, then produce the plan against its `# Plan Body`.
+- **Write `summary`**: set the `summary:` frontmatter to a single line of plain plan intent — ≤ ~120 chars / ~20 words, no prose, no trailing period needed. It feeds search and the `sprints.md` snapshot.
+{%- if context.project and context.project.is_local_vault %}
+- **Offer a branch** (local vault only): the vault lives inside the repo, so the next `booping transition` (`in-spec → awaiting-plan-review`) commits the plan onto the current branch. Before that move, offer to create/switch to a dedicated branch so the plan never lands on the default branch unintentionally. Derive the default name from the plan's `type`:
+
+  | Plan type | Branch prefix |
+  |-----------|---------------|
+{% for entry in config.git.branches %}  | {{ entry.when | join(", ") }} | `{{ entry.branch }}` |
+{% endfor %}  Default name = matched prefix + the kebab plan slug (e.g. `feat/local-vault-directories`) — must match what `/develop` would pick so it reuses the branch. Ask the user; they may decline and keep the current branch. On accept: `git switch -c <name>` for a new branch, or `git switch <name>` if it already exists.
+{%- endif %}
 - **Present and iterate**: show approach summary, milestones, SP totals, plan file path. Ask *"Ready for development, or want changes?"* Iterate on changes until the user explicitly approves.
 
 ## Hard rules

@@ -146,21 +146,17 @@ goal_verdicts:
   plans/YYYYMMDD-{kebab-title}.md: success  # or `partial` or `fail`
 ```
 
-Apply the transition per the transitions table above to each plan in `plans:`.
-
-`<retro-basename>` is the retrospective filename (`YYYYMMDD-{kebab-title}.md`); `<plan-basename-N>` is each plan file's basename. Commit the vault:
+Take the transition per the transitions table above for each plan in `plans:`, passing the retrospective file via `--also` so it is committed in the same transition commit:
 
 ```bash
-cd ~/Claude/{project_name}
-git add retrospectives/<retro-basename>.md plans/<plan-basename-1>.md plans/<plan-basename-2>.md ...
-git commit -m "retro: {kebab-sprint-title}"
+booping transition <to-status> plans/YYYYMMDD-{kebab-title}.md --also retrospectives/YYYYMMDD-{kebab-title}.md
 ```
 
-After the commit, tell the user the retrospective is saved and offer `/learn` to absorb lessons. Do not auto-launch.
+Then tell the user the retrospective is saved and offer `/learn` to absorb lessons. Do not auto-launch.
 
 ## What retro does NOT do
 
-- Does **not** edit any files other than the retrospective itself (and the plan frontmatter for the status transition). All findings stay in the retro body.
+- Does **not** edit any files other than the retrospective itself; the plan transition is owned by `booping transition`. All findings stay in the retro body.
 
 {{ tools.render('src/templates/_partials/_extra_instructions.j2', extra_instruction_key='skill_retro') }}
 

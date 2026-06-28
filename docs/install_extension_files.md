@@ -1,10 +1,10 @@
 # Install extension file skeletons
 
-Skeletons populated by `/install` Phase 4 in the project vault.
+Skeletons for the `_booping/` extension files `/install` Phase 4 may seed. Seed a file only when it carries project-local signal the repo `CLAUDE.md` does not already own; otherwise skip it (Phase 4 prints the locked skip message). Never copy a command catalogue from the repo into a vault file.
 
 ## File: `~/Claude/{project}/_booping/agent_booping-developer.md`
 
-Stack + conventions only; no commands.
+Stack + conventions only; no commands. Always seeded (subject to the attach-mode skip-if-exists rule).
 
 ```markdown
 # booping-developer (project extension)
@@ -25,47 +25,28 @@ Project-local stack and conventions for the developer agent.
 
 ## File: `~/Claude/{project}/_booping/skill_groom.md`
 
-Catalogue of validations + optional sizing calibration.
+Seed **only** when the user supplies a real groom override (e.g. a sprint-cap SP value). Do not seed a validations catalogue, and do not write a config-path sizing stub — `sprint.default_threshold_sp` is already rendered into the groom skill body. With no real override, skip the file.
 
 ```markdown
 # groom (project extension)
 
 Project-local facts for grooming.
 
-## Available validations
-
-Commands available in this project to validate changes. When writing a milestone's `Verify` block or the plan's `Final Verification` section, pick the subset that actually exercises what the milestone changed — don't blanket-run everything.
-
-{{validations — one bullet per command with a short role description, e.g.:
-- `just test` — unit + integration suite
-- `just lint` — ruff check + ruff format --check
-- `just typecheck` — basedpyright
-- `pre-commit run --all-files` — full hook suite
-— or `(none detected — populate this file manually when commands exist)` }}
-
 ## Sizing calibration
 
-{{"Sprint cap: {{value}} SP." if user supplied — else "(default — see `src/config.yaml` → `sprint.default_threshold_sp`)"}}
+Sprint cap: {{value}} SP.
 ```
 
 ## File: `~/Claude/{project}/_booping/skill_develop.md`
 
-Quality-check classification + env notes.
+Seed **only** when there is dev signal the repo `CLAUDE.md` lacks (e.g. required services / env setup it does not document). Do not copy a command list — `CLAUDE.md` owns the command catalogue. If nothing remains once `CLAUDE.md`'s coverage is removed, skip the file.
 
 ```markdown
 # develop (project extension)
 
 Project-local facts for development.
 
-## Quality-check classification
-
-Hook-enforced (runs automatically at commit, no skill action required):
-{{hook_enforced_commands — one per line, or "(none)" if empty}}
-
-Configured-but-manual (skill picks the relevant ones per milestone per docs/development_quality_checks.md — not all need to run on every milestone):
-{{configured_manual_commands — one per line, or "(none)" if empty}}
-
 ## Dev environment
 
-{{env_notes — e.g. "Docker Compose up + Redis required before tests" — or "(none)"}}
+{{env_notes — signal CLAUDE.md does not already document, e.g. "Docker Compose up + Redis required before tests"}}
 ```

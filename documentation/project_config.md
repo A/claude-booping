@@ -40,9 +40,11 @@ skills:
   develop:
     agents:
       booping-developer:
+        internal: true
         good_for:
           - "All coding tasks — always delegate; never edit application code from the orchestrator"
       booping-researcher:
+        internal: true
         good_for:
           - "Phase 0 drift spot-check: given a large set of plan-named files, determine whether actual file shape matches the plan's assumptions"
         bad_for:
@@ -52,6 +54,7 @@ skills:
   groom:
     agents:
       booping-researcher:
+        internal: true
         good_for:
           - "Wide read or web search where results must be aggregated outside this skill's context and returned as a summary"
           - "Map blast radius across many files (which modules and integrations a change touches)"
@@ -72,6 +75,7 @@ skills:
     status: awaiting-retro
     agents:
       booping-researcher:
+        internal: true
         good_for:
           - "Phase 0 session-log search: scan ~/.claude/projects/ across all session logs for the plan's time window and aggregate into a structured summary of user questions, blockers, and detours"
         bad_for:
@@ -83,12 +87,14 @@ skills:
     status: awaiting-retro
     agents:
       booping-researcher:
+        internal: true
         good_for:
           - "Blast-radius reads on large diffs (≥ ~5 files) aggregated into a compressed summary of touched modules and integration points"
         bad_for:
           - "Single-file reads — call Read directly"
           - "Small greps or existence checks that fit in a few lines of output"
       booping-developer:
+        internal: true
         good_for:
           - "Applying user-approved non-trivial fixes surfaced by the review (BLOCKER or SUGGESTION)"
         bad_for:
@@ -97,6 +103,7 @@ skills:
   chat:
     agents:
       booping-researcher:
+        internal: true
         good_for:
           - "Vault-wide reads aggregated into a summary (e.g. what plans exist, recurring themes across retros)"
           - "Plan or retro content extraction across ≥3 files where the results need to be compressed before returning to the skill"
@@ -138,8 +145,6 @@ plan:
         - to: cancelled
           skill: groom
           when: "User shelves the request before grooming"
-          on_exit:
-            - "set `completed: yyyymmdd hh:mm`"
 
     in-spec:
       desc: "/groom is actively specifying — researching, designing, drafting the plan."
@@ -155,17 +160,12 @@ plan:
           gates:
             - "Cross-validation run (see [cross-validation](${CLAUDE_PLUGIN_ROOT}/docs/cross_validation.md)) — single-file-bug skip acceptable"
             - "Every task estimated; any task ≥ redecompose_threshold SP has been re-decomposed"
-          on_exit:
-            - "set `planned: yyyymmdd hh:mm`"
-            - "set `commit: <repo HEAD>` from `context.project.git_commit`"
         - to: backlog
           skill: groom
           when: "User parks the work mid-grooming to revisit later"
         - to: cancelled
           skill: groom
           when: "User shelves the work mid-grooming"
-          on_exit:
-            - "set `completed: yyyymmdd hh:mm`"
 
     awaiting-plan-review:
       desc: "Plan drafted; /groom is presenting to the user and awaiting explicit approval, change request, or cancellation."
@@ -183,8 +183,6 @@ plan:
         - to: cancelled
           skill: groom
           when: "User shelves the plan instead of approving"
-          on_exit:
-            - "set `completed: yyyymmdd hh:mm`"
 
     ready-for-dev:
       desc: "Approved by user. Queued for /develop to claim."
@@ -194,9 +192,6 @@ plan:
         - to: in-progress
           skill: develop
           when: "/develop claims the plan at the start of its execute phase"
-          on_exit:
-            - "set `started: yyyymmdd hh:mm`"
-            - "set `commit: <repo HEAD>` from `context.project.git_commit` (only after the user confirmed the plan is still valid, or the legacy fallback applied)"
 
     in-progress:
       desc: "/develop has claimed the plan and is executing milestones."
@@ -212,17 +207,12 @@ plan:
           gates:
             - "Every DoD checkbox marked [x]"
             - "Final Verification green"
-          on_exit:
-            - "set `completed: yyyymmdd hh:mm`"
-            - "suggest `/retro <plan-path>`"
         - to: fail
           skill: develop
           when: "Unrecoverable blocker on the same milestone"
           gates:
             - "Two fix attempts documented in the plan"
             - "User has approved the abort"
-          on_exit:
-            - "set `completed: yyyymmdd hh:mm`"
 
     awaiting-retro:
       desc: "All milestones done; waiting for /retro to write the retrospective."
@@ -235,14 +225,9 @@ plan:
           gates:
             - "Retrospective markdown saved to retrospectives/"
             - "Self-review checklist passed"
-          on_exit:
-            - "set `retro: retrospectives/YYYYMMDD-{kebab-title}.md`"
-            - "set `goal: success | partial | fail`"
         - to: done
           skill: retro
           when: "User opts to skip retro for a stale plan and mark it done without retrospective or learning"
-          on_exit:
-            - "set `goal: skipped`"
 
     awaiting-learning:
       desc: "Retro written; waiting for /learn to absorb lessons."
@@ -255,8 +240,6 @@ plan:
           gates:
             - "User confirmed the review table"
             - "Every accepted lesson written to its target file"
-          on_exit:
-            - "set `completed: yyyymmdd hh:mm`"
 
     done:
       desc: "Terminal success. /learn has absorbed all lessons."
@@ -269,6 +252,40 @@ plan:
     cancelled:
       desc: "Terminal product decision. User shelved the plan."
       terminal: true
+
+  # Statuses also group into named superstates (additive, overridable).
+  superstates:
+    specification:
+      states: [backlog, in-spec]
+      transitions:
+        - to: cancelled
+          skill: groom
+          when: "User shelves the request"
+    planned:
+      states: [awaiting-plan-review, ready-for-dev]
+      transitions:
+        - to: cancelled
+          skill: groom
+          when: "User shelves the plan"
+    executing:
+      states: [in-progress]
+      transitions:
+        - to: fail
+          skill: develop
+          when: "Unrecoverable blocker on the same milestone"
+          gates:
+            - "Two fix attempts documented in the plan"
+            - "User has approved the abort"
+    review:
+      states: [awaiting-retro, awaiting-learning]
+      transitions:
+        - to: done
+          skill: retro
+          when: "User skips remaining review steps and marks the plan done"
+          hooks:
+            - frontmatter-update goal=skipped
+    terminal:
+      states: [done, fail, cancelled]
 ```
 
 </details>
@@ -297,7 +314,7 @@ The task-type taxonomy `/groom` classifies every request against. Each entry is 
 
 ### `plan.statuses`
 
-The full plan-lifecycle definition: every status, who owns it, what it produces, what transitions out of it, what gates each transition has, and what `on_exit` mutations fire. Skills render only the slice they own (transitions where `skill: <self>`), so editing this key reshapes every skill's plan-transitions table at the next skill load.
+The full plan-lifecycle definition: every status, who owns it, what it produces, what transitions out of it, and what gates each transition has. Skills render only the slice they own (transitions where `skill: <self>`), so editing this key reshapes every skill's plan-transitions table at the next skill load.
 
 Each status carries:
 
@@ -305,13 +322,24 @@ Each status carries:
 - `owner` — the skill that owns this state.
 - `terminal` — bool; terminal states (`done`, `fail`, `cancelled`) cannot transition out.
 - `artifacts` — list of strings describing what the state produces.
-- `transitions` — list of `{to, skill, when, gates?, on_exit?}`.
+- `transitions` — list of `{to, skill, when, gates?}`.
 
 See [Plan lifecycle overview](https://github.com/A/claude-booping/blob/main/src/templates/docs/plan_lifecycle_overview.md.j2) for the rendered status graph; or run `bin/booping render src/templates/docs/plan_lifecycle_overview.md.j2` locally.
+
+### `plan.superstates`
+
+Statuses also group into named **superstates** forming the lifecycle spine `specification` → `planned` → `executing` → `review` → `terminal` — each listing its member statuses and any transitions shared across the whole group. Phase-wide moves live on the superstate instead of being repeated on every member: both `specification` and `planned` offer → cancelled, `executing` offers → fail, and `review` offers the → done skip-ahead. A status's own edges union with its superstate's, and the substate wins on a `to` collision (so `awaiting-learning`'s gated → done overrides the `review` skip edge). This is an overridable, additive surface: a project override deep-merges over the plugin defaults the same way the rest of the config does, so you can add or adjust a superstate's members or shared transitions without restating the others. Most projects never touch it; it exists so the lifecycle can describe group-level moves once instead of repeating them on every status.
+
+## Plan frontmatter: `summary`
+
+Each plan file carries a `summary` field in its YAML frontmatter — a one-line statement of the plan's intent (≤ ~120 characters). `/groom` writes it when drafting the plan; it is the human-readable label that surfaces in `sprints.md` and makes plans searchable across the vault. (It replaced the older, longer `business_goal` field.)
 
 ### `skills.<name>.agents`
 
 Per-skill delegation guidance rendered into each skill's "Available agents" table. Each agent entry has `good_for` (a list of bullets describing when to delegate) and an optional `bad_for` (when not to). Currently populated for `groom`, `develop`, `retro`, `code-review`, and `chat`.
+
+- **`skills.<name>.agents.<id>.internal`** — `true` on booping's built-in workers (`booping-developer`, `booping-researcher`). Marks an entry as plugin-owned so it can be hidden from a skill's table when that skill opts out of built-ins (see below). Self-contained global agents a project registers omit this flag.
+- **`skills.<name>.disable_internal_agents`** — when set on a skill, `_available_agents.j2` hides every `internal: true` entry from that skill's table, leaving only the agents the project explicitly registered (e.g. a self-contained global external agent). See [integrating external agents](integrating-external-agents.md).
 
 Skills also use `skills.<name>.status` to declare the single status they own (e.g. `learn → awaiting-learning`, `retro → awaiting-retro`).
 

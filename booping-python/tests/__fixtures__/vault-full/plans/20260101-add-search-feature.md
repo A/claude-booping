@@ -10,7 +10,7 @@ started: "20260102 08:00"
 completed: null
 retro: null
 goal: Implement full-text search across the widget catalog.
-business_goal: Users can find widgets faster via keyword search.
+summary: Users can find widgets faster via keyword search.
 commit: 0123456789abcdef0123456789abcdef01234567
 ---
 

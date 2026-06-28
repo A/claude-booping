@@ -9,7 +9,7 @@ Capture a project- and task-specific retrospective for a shipped plan: what dive
 The skill draws from **two inputs**:
 
 - **User-asked questions.** `/retro` interviews you — what felt smooth, what felt forced, where you had to push back on the agent, where the plan was wrong. These are the high-signal sources because you noticed the friction in the moment.
-- **Session-log and git-diff scan.** `/retro` reads the `/develop` session transcript and the produced diff to surface tensions you did not flag explicitly — repeated retries, abandoned approaches, churn between commits, places where the agent did something the plan did not specify. These are the issues you might not have logged but that the artifacts remember.
+- **Session-log mining and plan-stage lesson check.** `/retro` delegates to `booping-researcher` to mine the `/develop` session transcript for tensions you did not flag explicitly — repeated retries, abandoned approaches, places where the agent did something the plan did not specify — and to check the planning stage against the active lessons. The code diff is grounding context for these reads, not a separate scan phase. These are the issues you might not have logged but that the artifacts remember.
 
 The two inputs are stitched into one retro file under `~/Claude/{project}/retrospectives/`, named to match the plan it covers.
 
@@ -24,6 +24,16 @@ The two inputs are stitched into one retro file under `~/Claude/{project}/retros
 Bare `/retro` picks the plan currently in `awaiting-retro`. Pass a plan path to retro a specific one — absolute, `~/Claude/...`, or vault-relative all work.
 
 `/retro` walks the plan from `awaiting-retro → awaiting-learning` once the retro file is written and you have signed off.
+
+### Multiple plans in one run
+
+A retro can cover more than one plan. Pass several plan paths to retro them together, or run bare and pick from the `awaiting-retro` list — the picker is multi-select, so you can fold several finished plans into one retrospective. When you name some plans on the command line and others are also sitting in `awaiting-retro`, `/retro` asks you per remaining plan whether to **include** it in this run, **postpone** it (leave it queued), or **skip retro and mark it done**.
+
+The written retro file always carries `plans:` as a YAML list (even for a single plan) and a `goal_verdicts:` mapping with your per-plan verdict, so a multi-plan retro records each plan's outcome separately.
+
+### Skipping the retro
+
+Some plans are not worth a retrospective — a stale split stub, a trivial change you already understand. For those, pick **skip retro and mark it done** in the per-plan prompt. `/retro` then walks that plan straight from `awaiting-retro → done` (bypassing `awaiting-learning`), stamping `goal: skipped` in its frontmatter, with no retrospective file and no `/learn` step. Use it deliberately — a skipped plan contributes nothing to the lesson loop.
 
 ## Best practices
 

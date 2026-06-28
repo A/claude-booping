@@ -38,3 +38,13 @@ See [Vault](vault.md) for the layout `/chat` navigates over.
 - **A plan just finished** → `/retro <plan-path>` to capture findings; `/learn` afterwards.
 
 The hand-off is explicit: `/chat` recommends the next command and stops, rather than reproducing another skill's workflow inline. See [/groom](groom.md), [/develop](develop.md), [/retro](retro.md), and [/learn](learn.md) for what each of those commands owns.
+
+## Behaviour notes
+
+### Lifecycle questions
+
+When you ask about valid statuses, available transitions, or how to flip a plan's status by hand, `/chat` renders the live plan-lifecycle overview (`bin/booping render src/templates/docs/plan_lifecycle_overview.md.j2`) and grounds its answer in that output — so the explanation always reflects the current `plan.statuses` config rather than a hard-coded recital.
+
+### Researcher delegation for wide reads
+
+`/chat` makes small ad-hoc reads itself, but when a request spans more than a few artifacts — "summarise everything we decided about auth across these plans and retros" — it delegates the read to `booping-researcher` and works from the returned summary rather than dumping raw files into the session. This keeps the working context focused even when the question reaches across the vault.

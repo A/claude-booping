@@ -13,6 +13,7 @@ allowed-tools:
   - Bash(git diff *)
   - Bash(git add *)
   - Bash(git commit *)
+  - Bash(git:*)
   - Bash(booping-external-llm-call:*)
   - Bash(booping:*)
   - Agent

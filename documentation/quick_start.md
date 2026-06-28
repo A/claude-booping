@@ -25,7 +25,7 @@ See [Install](install.md) for prerequisites (`uv`, `git`, optional `GEMINI_API_K
 /install
 ```
 
-That single step creates `~/Claude/{project}/` with `plans/`, `retrospectives/`, `lessons/`, `notes/`, `_booping/`, and a `.booping` marker file so other skills know the vault is ready. See [Vault](vault.md) for what each directory is for.
+`/install` prompts for the vault location — the default `~/Claude/{project}/` or a repo-local directory (wired via the `.booping` marker's `vault_path:` key). Either way that single step creates the vault with `plans/`, `retrospectives/`, `lessons/`, `notes/`, `_booping/`, and a `.booping` marker file so other skills know the vault is ready. See [Vault](vault.md) for what each directory is for.
 
 ## 3. Orient with /chat
 
@@ -41,7 +41,7 @@ Before grooming anything, run:
 
 Open `~/Claude/{project}/sprints.md`. It is a regenerated view of every plan in the vault grouped by status. On a fresh project it will be near-empty — that is expected.
 
-`sprints.md` is a build artefact, never hand-edit it (see [Vault](vault.md)).
+`sprints.md` is a build artefact, never hand-edit it (see [Vault](vault.md)). It is a snapshot rather than a live view: nothing auto-refreshes it on a plan write yet, so it can drift between `/chat` orients. Re-run `/chat` (or `bin/booping render-sprints`) for a current picture, and treat the plan files as the source of truth.
 
 ## 5. First /groom
 
@@ -57,7 +57,7 @@ When you approve, `/groom` flips the plan to `ready-for-dev`.
 
 ## 6. First /develop
 
-Either auto-claim the next ready plan:
+Either run bare and pick from the candidate list (plans in `ready-for-dev` or `awaiting-plan-review`):
 
 ```text
 /develop
@@ -69,7 +69,17 @@ or target a specific one:
 /develop plans/20260426-per-tenant-rate-limiting.md
 ```
 
-`/develop` walks the milestones, delegating implementation to the `booping-developer` agent and reading code via `booping-researcher` when a milestone requires it. When all milestones are done, the plan moves to `awaiting-retro`.
+`/develop` walks the milestones, delegating implementation to the `booping-developer` agent. `booping-researcher` is reserved for the Phase 0 drift spot-check — when a plan touches many files, it confirms the actual file shapes still match the plan's assumptions before execution begins. When all milestones are done, the plan moves to `awaiting-retro`.
+
+### Optional: /code-review before retro
+
+Once a plan is in `awaiting-retro`, you can run a quality-gate review over the diff before capturing the retro:
+
+```text
+/code-review
+```
+
+Bare `/code-review` picks the plan in `awaiting-retro` and reviews `<plan commit>..HEAD` against stack-aware checklists, returning severity-labelled findings in chat. It is a **stateless side-skill** — it does not transition the plan, so the next step is still `/retro`. Run it from a fresh session (often under a stronger model than the one that implemented). See [/code-review](code_review.md) for details.
 
 ## 7. First /retro
 

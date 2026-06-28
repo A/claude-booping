@@ -47,6 +47,12 @@ This is the same triage shape `/develop` uses on the feedback list — see [Revi
 
 `/code-review` applies trivial fixes (typos, obvious dead code, single-line corrections) inline within the review session. Non-trivial fixes are dispatched as a follow-up briefing to `booping-developer` so the orchestrator stays a reviewer and the implementation channel stays consistent with the rest of the loop.
 
+### Blast-radius reads on large diffs
+
+When a diff spans roughly five or more files, `/code-review` delegates a blast-radius read to `booping-researcher` — handing it the file list and asking for a compressed summary of which modules, integration points, and public APIs the change touches. This keeps the review session's context lean on big diffs. Smaller changes are read directly; single-file reads are never delegated.
+
 ## Config
 
-`/code-review` has no dedicated config keys. Template selection is driven by the `description` frontmatter on each review template under `docs/review_templates/` and `~/Claude/{project}/review_templates/`. To make a project-local checklist available to the review pass, drop it under your vault's `review_templates/` with a clear `description` — the skill loads it when the repo's stack matches.
+`/code-review` has one config key, `skills.code-review.status` (default `awaiting-retro`). It controls the **argument-free plan picker**: bare `/code-review` lists the plans currently in that status and asks you to pick one, then derives the diff range from the selected plan's `commit:` field. Point it at a different status in your project `config.yaml` if you want bare `/code-review` to pull from another queue. Passing a diff range or file list as `$ARGUMENTS` bypasses the picker entirely.
+
+Template selection has no config keys — it is driven by the `description` frontmatter on each review template under `docs/review_templates/` and `~/Claude/{project}/review_templates/`. To make a project-local checklist available to the review pass, drop it under your vault's `review_templates/` with a clear `description` — the skill loads it when the repo's stack matches.

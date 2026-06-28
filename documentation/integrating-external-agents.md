@@ -15,7 +15,7 @@ See [Project config](project_config.md) for the config-merge rules and [Vault](v
 
 booping's built-in agents (`booping-developer`, `booping-researcher`) stay available to every skill by default. When you want your external agent to be the *only* worker a skill delegates to, the built-ins can compete against it and the skill may pick a built-in when you wanted yours.
 
-Set `skills.<name>.disable_internal_agents: true` for that skill. This leaves only the agents you registered yourself, so the skill always reaches for your external agent.
+Set `skills.<name>.disable_internal_agents: true` for that skill. This leaves only the agents you registered yourself, so the skill always reaches for your external agent. The flag (and the per-agent `internal` marker it filters on) is documented in the [`skills.<name>.agents` key tour](project_config.md#skillsnameagents).
 
 ## Level 1 — Connect an external Claude Code agent
 

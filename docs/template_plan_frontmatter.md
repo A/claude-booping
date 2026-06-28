@@ -10,7 +10,7 @@ started: null                    # set when transitioning ready-for-dev → in-p
 completed: null                  # set on terminal transition (done/fail/cancelled) or entry to awaiting-retro
 retro: null                      # path to retrospective file, set by /retro
 goal: null                       # success | partial | fail — set by /retro
-business_goal: ""                # features and refactorings: user/internal-visible outcome
+summary: ""                      # one-line plan intent for search + sprints.md (≤ ~120 chars)
 commit: null                     # repo HEAD when groom finalised draft, re-snapshotted by /develop at sprint entry
 ---
 

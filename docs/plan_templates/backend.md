@@ -125,12 +125,12 @@ Verify before leaving `in-spec`. Every item must be satisfiable by reading the p
 
 - [ ] Frontmatter matches [plan frontmatter](${CLAUDE_PLUGIN_ROOT}/docs/template_plan_frontmatter.md) — every required field present and shaped correctly.
 - [ ] `sp` equals the sum of per-task SP across milestones.
-- [ ] `business_goal` is set (non-empty) for `feature` and `refactoring` plans.
+- [ ] `summary` is set (non-empty, single line, ≤ ~120 chars) for `feature` and `refactoring` plans.
 
 ## Content
 
 - [ ] Context explains "why now", not just "what".
-- [ ] For features and refactorings: business goal is phrased as the user/internal-visible outcome, not engineering output.
+- [ ] For features and refactorings: `summary` is phrased as the user/internal-visible outcome, not engineering output.
 - [ ] Definition of Done bullets are testable (verifiable by command or inspectable output).
 - [ ] Decisions table lists real alternatives — no empty "Alternative considered" rows.
 - [ ] Every milestone has a `Verify` command or verifiable outcome.

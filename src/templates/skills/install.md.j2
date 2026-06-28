@@ -7,10 +7,10 @@ This skill is **wide-domain** — it must work across very different projects (b
 ## High-level workflow
 
 1. Detect state.
-2. Decide mode (new / attach / cancel).
+2. Decide mode (new / attach / cancel) and vault location (default `~/Claude/{name}` / local repo-relative dir).
 3. Scaffold (new: run `booping-create-project`; attach: write `.booping` only).
 4. Detect stack (orchestrator reads stack-signal files directly).
-5. Populate vault extensions (three files in `_booping/`).
+5. Populate vault extensions (seed only files carrying signal the repo `CLAUDE.md` lacks).
 6. Verify & seed `sprints.md`.
 
 ---
@@ -38,6 +38,13 @@ If `$ARGUMENTS` supplies a project name, default to `new` with that name (still 
 
 Resolve the project name: kebab-cased, defaulting to the CWD basename. The user confirms or overrides before proceeding. The resolved name flows into Phase 2 as `<project-name>`.
 
+**Vault location** — ask once (both new and attach modes use the same prompt) via `AskUserQuestion`:
+
+- **default** — keep the vault at `~/Claude/{name}` (current behavior). No `vault_path:` key is written to the marker.
+- **local** — keep the vault inside the repo at a repo-relative dir, default `./booping`. The user may rename it; this default is the single tunable knob. The chosen dir flows into Phase 2 as `<local-dir>`.
+
+The resolved location (`default` or `local` + `<local-dir>`) flows into Phase 2.
+
 ## Phase 2 Scaffold
 
 **New mode**:
@@ -45,16 +52,19 @@ Resolve the project name: kebab-cased, defaulting to the CWD basename. The user 
 1. Invoke the scaffolder via the `Bash(booping-create-project:*)` allow-list entry:
 
    ```
-   booping-create-project <project-name>
+   booping-create-project <project-name>            # default location
+   booping-create-project <project-name> --local <local-dir>   # local location
    ```
 
-   where `<project-name>` is the kebab-cased name resolved in Phase 1. The executable is on PATH when the plugin is enabled (`bin/` is auto-added). The script creates `~/Claude/{project-name}/` with five directories — `plans`, `retrospectives`, `lessons`, `_booping`, `notes` — and writes a `.booping` marker in the current working directory (the bash subshell inherits Claude's cwd) with content `project_name: {project-name}`. No `sprints.md` and no `CLAUDE.md` are seeded.
+   where `<project-name>` is the kebab-cased name resolved in Phase 1 and `<local-dir>` is the repo-relative dir chosen in Phase 1 (local location only). The executable is on PATH when the plugin is enabled (`bin/` is auto-added). The script creates the vault — at `~/Claude/{project-name}/` (default) or `<local-dir>` (local) — with five directories — `plans`, `retrospectives`, `lessons`, `_booping`, `notes` — and writes a `.booping` marker in the current working directory (the bash subshell inherits Claude's cwd): `project_name: {project-name}` for default, plus a `vault_path: <local-dir>` line for local. No `sprints.md` and no `CLAUDE.md` are seeded.
 
    Do **not** pass an absolute path as a second argument — the script reserves that form for smoketests (it overrides the project root and skips the marker write).
 
 **Attach mode**:
 
-1. Only write `.booping` in the CWD, after explicit user confirmation. Content: one line `project_name: <selected-name>`. Do NOT touch anything under `~/Claude/{name}/`.
+1. Only write `.booping` in the CWD, after explicit user confirmation. Do NOT touch anything under the vault directory. Content depends on the Phase 1 location choice:
+   - **default** — one line `project_name: <selected-name>`.
+   - **local** — two lines `project_name: <selected-name>` and `vault_path: <local-dir>`.
 
 ## Phase 3 Detect stack
 
@@ -62,15 +72,14 @@ The orchestrator reads stack-signal files directly and synthesizes a structured 
 
 Read only these files if present in the attached repo at `<cwd>`:
 
-`pyproject.toml`, `package.json`, `Cargo.toml`, `go.mod`, `Gemfile`, `Justfile`, `Makefile`, `.github/workflows/*`, `.pre-commit-config.yaml`, `README.md`, `CONTRIBUTING.md`.
+`pyproject.toml`, `package.json`, `Cargo.toml`, `go.mod`, `Gemfile`, `Justfile`, `Makefile`, `.github/workflows/*`, `.pre-commit-config.yaml`, `README.md`, `CONTRIBUTING.md`, `CLAUDE.md`.
 
 From those, infer a summary with these fields (each on its own line):
 
-- `language` — e.g. "Python 3.12", "Rust 1.80", "TypeScript 5 + React 19".
-- `validations` — list of `{command, role}` pairs covering EVERY validation the project offers — tests, linters, typecheckers, formatters, security scanners, coverage, doctest — do NOT restrict to "test" + "lint".
-- `hook_enforced_commands` — subset of validations that fires from `.pre-commit-config.yaml` or an equivalent CI/hook config.
-- `configured_manual_commands` — the complement: configured but not hook-fired.
+- `language` — e.g. "Python 3.12", "Rust 1.80", "TypeScript 5 + React 19". Feeds the developer-agent file.
 - `env_notes` — Docker Compose, required services, env vars needed before commands run.
+
+Read the repo `CLAUDE.md` separately and note what it already documents — especially the project's command catalogue (test / lint / typecheck / build) and dev-environment setup. Phase 4 diffs the seed candidates against this to decide which extension files to skip.
 
 Return `unknown` for any field you can't resolve.
 
@@ -78,13 +87,15 @@ Return `unknown` for any field you can't resolve.
 
 Present the Phase 3 findings back to the user as `AskUserQuestion` defaults so they can confirm or override each field (one prompt per field, or one grouped prompt — either is fine).
 
-Then write **three** extension files under `~/Claude/{project}/_booping/`:
+**Seed policy**: write an extension file only when it carries project-local signal the repo `CLAUDE.md` does not already own; otherwise skip it with an explicit message. Never copy a command catalogue from the repo into a vault file. Per file, under `~/Claude/{project}/_booping/`:
 
-1. `~/Claude/{project}/_booping/agent_booping-developer.md` — stack + conventions for the developer agent.
-2. `~/Claude/{project}/_booping/skill_groom.md` — validation catalogue + sizing calibration.
-3. `~/Claude/{project}/_booping/skill_develop.md` — quality-check classification + env notes.
+1. `agent_booping-developer.md` — stack + conventions for the developer agent. **Always seed** (subject to the skip-if-exists rule below).
+2. `skill_groom.md` — seed **only** when the user supplies a real groom override (e.g. a sprint-cap SP value). Never seed a validations catalogue, and never write a config-path `## Sizing calibration` stub — `sprint.default_threshold_sp` is already rendered into the groom skill body. If there is no real override, skip and print `skipped skill_groom.md — no project-local groom override`.
+3. `skill_develop.md` — seed **only** when there is dev signal the repo `CLAUDE.md` lacks (e.g. required services / env setup it does not document). Never copy a command list. If `CLAUDE.md` already documents the dev commands and there is no extra env signal, skip and print `skipped skill_develop.md — CLAUDE.md already documents the dev commands`.
 
-Skeletons for the three files are documented in `${CLAUDE_PLUGIN_ROOT}/docs/install_extension_files.md` — load them when ready to write.
+For each file actually written, print `wrote <path>`.
+
+Skeletons for the seeded files are documented in `${CLAUDE_PLUGIN_ROOT}/docs/install_extension_files.md` — load them when ready to write.
 
 **Skip-if-exists rule (attach mode)**: if a target file already exists non-empty, skip the write and print `preserved existing: <path>` to the user. Files that exist but are empty (e.g. a stub created by `booping-create-project`) may be overwritten.
 
@@ -98,15 +109,15 @@ This mismatch check prevents silently feeding a new Python repo with an old Rust
 
 ## Phase 5 Verify & seed sprints.md
 
-1. Print `ls ~/Claude/{name}/` so the user can see what landed.
-2. Read `<cwd>/.booping` to confirm it exists and the content is correct (one line `project_name: {name}`).
+1. Print `ls` of the vault dir (`~/Claude/{name}/` for default, `<local-dir>/` for local) so the user can see what landed.
+2. Read `<cwd>/.booping` to confirm it exists and the content is correct (`project_name: {name}`, plus `vault_path: <local-dir>` for local).
 3. Seed the snapshot so `/develop`'s Phase 4 commit doesn't crash on a fresh vault:
 
    ```bash
    booping render-sprints
    ```
 
-   `booping render-sprints` on a plans-empty vault writes the snapshot's header + separator cleanly (no data rows). It resolves the freshly-created vault from the `.booping` marker just written, so no path argument is needed. Seeding is idempotent so `/chat` can overwrite later.
+   `booping render-sprints` on a plans-empty vault writes the snapshot's header + separator cleanly (no data rows). It resolves the freshly-created vault from the `.booping` marker just written (honoring `vault_path:` for local vaults), so no path argument is needed. Seeding is idempotent so `/chat` can overwrite later.
 4. Report next steps: suggest `/chat` (for exploration) or `/groom <topic>` (to spec work).
 
 ## Hard rules

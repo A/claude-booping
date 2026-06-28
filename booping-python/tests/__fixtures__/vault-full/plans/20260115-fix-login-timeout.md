@@ -10,7 +10,7 @@ started: null
 completed: null
 retro: null
 goal: Session tokens expire prematurely when the user's clock drifts slightly.
-business_goal: ""
+summary: ""
 ---
 
 # Fix login timeout bug
