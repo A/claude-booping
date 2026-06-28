@@ -7,7 +7,7 @@ This skill is **wide-domain** — it must work across very different projects (b
 ## High-level workflow
 
 1. Detect state.
-2. Decide mode (new / attach / cancel).
+2. Decide mode (new / attach / cancel) and vault location (default `~/Claude/{name}` / local repo-relative dir).
 3. Scaffold (new: run `booping-create-project`; attach: write `.booping` only).
 4. Detect stack (orchestrator reads stack-signal files directly).
 5. Populate vault extensions (three files in `_booping/`).
@@ -38,6 +38,13 @@ If `$ARGUMENTS` supplies a project name, default to `new` with that name (still 
 
 Resolve the project name: kebab-cased, defaulting to the CWD basename. The user confirms or overrides before proceeding. The resolved name flows into Phase 2 as `<project-name>`.
 
+**Vault location** — ask once (both new and attach modes use the same prompt) via `AskUserQuestion`:
+
+- **default** — keep the vault at `~/Claude/{name}` (current behavior). No `vault_path:` key is written to the marker.
+- **local** — keep the vault inside the repo at a repo-relative dir, default `./booping`. The user may rename it; this default is the single tunable knob. The chosen dir flows into Phase 2 as `<local-dir>`.
+
+The resolved location (`default` or `local` + `<local-dir>`) flows into Phase 2.
+
 ## Phase 2 Scaffold
 
 **New mode**:
@@ -45,16 +52,19 @@ Resolve the project name: kebab-cased, defaulting to the CWD basename. The user 
 1. Invoke the scaffolder via the `Bash(booping-create-project:*)` allow-list entry:
 
    ```
-   booping-create-project <project-name>
+   booping-create-project <project-name>            # default location
+   booping-create-project <project-name> --local <local-dir>   # local location
    ```
 
-   where `<project-name>` is the kebab-cased name resolved in Phase 1. The executable is on PATH when the plugin is enabled (`bin/` is auto-added). The script creates `~/Claude/{project-name}/` with five directories — `plans`, `retrospectives`, `lessons`, `_booping`, `notes` — and writes a `.booping` marker in the current working directory (the bash subshell inherits Claude's cwd) with content `project_name: {project-name}`. No `sprints.md` and no `CLAUDE.md` are seeded.
+   where `<project-name>` is the kebab-cased name resolved in Phase 1 and `<local-dir>` is the repo-relative dir chosen in Phase 1 (local location only). The executable is on PATH when the plugin is enabled (`bin/` is auto-added). The script creates the vault — at `~/Claude/{project-name}/` (default) or `<local-dir>` (local) — with five directories — `plans`, `retrospectives`, `lessons`, `_booping`, `notes` — and writes a `.booping` marker in the current working directory (the bash subshell inherits Claude's cwd): `project_name: {project-name}` for default, plus a `vault_path: <local-dir>` line for local. No `sprints.md` and no `CLAUDE.md` are seeded.
 
    Do **not** pass an absolute path as a second argument — the script reserves that form for smoketests (it overrides the project root and skips the marker write).
 
 **Attach mode**:
 
-1. Only write `.booping` in the CWD, after explicit user confirmation. Content: one line `project_name: <selected-name>`. Do NOT touch anything under `~/Claude/{name}/`.
+1. Only write `.booping` in the CWD, after explicit user confirmation. Do NOT touch anything under the vault directory. Content depends on the Phase 1 location choice:
+   - **default** — one line `project_name: <selected-name>`.
+   - **local** — two lines `project_name: <selected-name>` and `vault_path: <local-dir>`.
 
 ## Phase 3 Detect stack
 
@@ -98,15 +108,15 @@ This mismatch check prevents silently feeding a new Python repo with an old Rust
 
 ## Phase 5 Verify & seed sprints.md
 
-1. Print `ls ~/Claude/{name}/` so the user can see what landed.
-2. Read `<cwd>/.booping` to confirm it exists and the content is correct (one line `project_name: {name}`).
+1. Print `ls` of the vault dir (`~/Claude/{name}/` for default, `<local-dir>/` for local) so the user can see what landed.
+2. Read `<cwd>/.booping` to confirm it exists and the content is correct (`project_name: {name}`, plus `vault_path: <local-dir>` for local).
 3. Seed the snapshot so `/develop`'s Phase 4 commit doesn't crash on a fresh vault:
 
    ```bash
    booping render-sprints
    ```
 
-   `booping render-sprints` on a plans-empty vault writes the snapshot's header + separator cleanly (no data rows). It resolves the freshly-created vault from the `.booping` marker just written, so no path argument is needed. Seeding is idempotent so `/chat` can overwrite later.
+   `booping render-sprints` on a plans-empty vault writes the snapshot's header + separator cleanly (no data rows). It resolves the freshly-created vault from the `.booping` marker just written (honoring `vault_path:` for local vaults), so no path argument is needed. Seeding is idempotent so `/chat` can overwrite later.
 4. Report next steps: suggest `/chat` (for exploration) or `/groom <topic>` (to spec work).
 
 ## Hard rules
