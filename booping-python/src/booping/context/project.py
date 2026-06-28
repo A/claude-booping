@@ -25,7 +25,7 @@ class Project(BaseModel):
                 project_name = str(data.get("project_name", candidate.name))
                 return cls(
                     name=project_name,
-                    directory=Path.home() / "Claude" / project_name,
+                    directory=_resolve_vault_dir(data.get("vault_path"), candidate, project_name),
                     repo_directory=candidate,
                     git_commit=_resolve_git_commit(candidate),
                 )
@@ -33,6 +33,16 @@ class Project(BaseModel):
             if parent == candidate:
                 return None
             candidate = parent
+
+
+def _resolve_vault_dir(vault_path: object, candidate: Path, project_name: str) -> Path:
+    """Resolve the vault directory from a marker's vault_path, or default to ~/Claude/{name}."""
+    if not vault_path:
+        return Path.home() / "Claude" / project_name
+    path = Path(str(vault_path)).expanduser()
+    if path.is_absolute():
+        return path
+    return (candidate / path).resolve()
 
 
 def _resolve_git_commit(repo_directory: Path) -> str | None:
