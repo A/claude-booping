@@ -191,6 +191,79 @@ class TestVaultCommitIntegration:
         assert "plans/20240115-my-feature.md" in show.stdout
         assert "lessons/learned.md" in show.stdout
 
+    def test_shared_repo_excludes_prestaged_code(self, tmp_path: Path) -> None:
+        """In a shared code+vault repo, a pre-staged unrelated file must not be
+        swept into the plan commit and must stay in the index."""
+        vault = _init_vault(tmp_path)
+        plan = vault / "plans" / "20240115-my-feature.md"
+
+        # Pre-stage an unrelated code file
+        unrelated = vault / "src" / "module.py"
+        unrelated.parent.mkdir(exist_ok=True)
+        unrelated.write_text("x = 1\n")
+        _git(vault, ["add", "src/module.py"])
+
+        plan.write_text(
+            "---\nstatus: ready-for-dev\ntitle: My feature\n"
+            "---\n\n# Plan body\n"
+        )
+        (vault / "sprints.md").write_text("# Updated sprints\n")
+
+        vc_cmd.do_vault_commit(
+            to_status="ready-for-dev", plan_path=plan, vault=vault
+        )
+
+        # The commit lists only plan + sprints paths
+        names = _git(vault, ["log", "-1", "--name-only", "--format="])
+        committed = [line for line in names.stdout.strip().splitlines() if line]
+        assert sorted(committed) == [
+            "plans/20240115-my-feature.md",
+            "sprints.md",
+        ]
+
+        # The pre-staged unrelated file is still in the index, uncommitted
+        cached = _git(vault, ["diff", "--cached", "--name-only"])
+        assert "src/module.py" in cached.stdout
+
+    def test_local_subdir_vault(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Vault is a plans/-bearing subdir of the repo; resolve_vault (via
+        Project.load_cwd) returns the subdir and the commit succeeds."""
+        repo = tmp_path / "repo"
+        repo.mkdir()
+        _git(repo, ["init"])
+        _git(repo, ["config", "user.email", "test@example.com"])
+        _git(repo, ["config", "user.name", "Test"])
+
+        vault = repo / "vault"
+        plans = vault / "plans"
+        plans.mkdir(parents=True)
+        (vault / ".booping").write_text(
+            "project_name: test-project\nvault_path: .\n"
+        )
+        (vault / "sprints.md").write_text("# Sprints\n")
+        plan = plans / "20240115-my-feature.md"
+        plan.write_text(
+            "---\nstatus: awaiting-plan-review\ntitle: My feature\n---\n\n# Body\n"
+        )
+        _git(repo, ["add", "-A"])
+        _git(repo, ["commit", "-m", "initial"])
+
+        # resolve_vault uses Project.load_cwd() → must run from inside the vault
+        monkeypatch.chdir(vault)
+        assert vc_cmd.resolve_vault(plan).resolve() == vault.resolve()
+
+        plan.write_text(
+            "---\nstatus: ready-for-dev\ntitle: My feature\n---\n\n# Body\n"
+        )
+        (vault / "sprints.md").write_text("# Updated\n")
+
+        vc_cmd.do_vault_commit(to_status="ready-for-dev", plan_path=plan)
+
+        log = _git(repo, ["log", "--oneline", "-1"])
+        assert "ready-for-dev: 20240115-my-feature" in log.stdout
+
     def test_missing_plan_exits_1(
         self, tmp_path: Path, capsys: pytest.CaptureFixture[str]
     ) -> None:

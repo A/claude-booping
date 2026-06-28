@@ -106,8 +106,8 @@ def do_vault_commit(
         )
         sys.exit(2)
 
-    # Check if there is anything to commit
-    status_result = _git(vault, ["status", "--porcelain", "--"])
+    # Check if there is anything to commit (scoped to the plan paths only)
+    status_result = _git(vault, ["status", "--porcelain", "--", *rel_paths])
     if status_result.returncode != 0:
         print(
             f"error: git status failed: {status_result.stderr.strip()}",
@@ -124,7 +124,7 @@ def do_vault_commit(
     plan_stem = plan_path.stem
     commit_msg = f"{to_status}: {plan_stem}"
 
-    commit_result = _git(vault, ["commit", "-m", commit_msg])
+    commit_result = _git(vault, ["commit", "-m", commit_msg, "--", *rel_paths])
     if commit_result.returncode != 0:
         print(
             f"error: git commit failed: {commit_result.stderr.strip()}",
