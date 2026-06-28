@@ -130,9 +130,6 @@ plan:
         - to: in-spec
           skill: groom
           when: "User asks /groom to shape a parked plan, or /groom is invoked on a fresh request"
-        - to: cancelled
-          skill: groom
-          when: "User shelves the request before grooming"
 
     in-spec:
       desc: "/groom is actively specifying — researching, designing, drafting the plan."
@@ -154,9 +151,6 @@ plan:
         - to: backlog
           skill: groom
           when: "User parks the work mid-grooming to revisit later"
-        - to: cancelled
-          skill: groom
-          when: "User shelves the work mid-grooming"
 
     awaiting-plan-review:
       desc: "Plan drafted; /groom is presenting to the user and awaiting explicit approval, change request, or cancellation."
@@ -171,9 +165,6 @@ plan:
         - to: in-spec
           skill: groom
           when: "User requests changes that require re-research or re-design"
-        - to: cancelled
-          skill: groom
-          when: "User shelves the plan instead of approving"
 
     ready-for-dev:
       desc: "Approved by user. Queued for /develop to claim."
@@ -200,12 +191,6 @@ plan:
             - "Final Verification green"
           hooks:
             - suggest /retro
-        - to: fail
-          skill: develop
-          when: "Unrecoverable blocker on the same milestone"
-          gates:
-            - "Two fix attempts documented in the plan"
-            - "User has approved the abort"
 
     awaiting-retro:
       desc: "All milestones done; waiting for /retro to write the retrospective."
@@ -221,11 +206,6 @@ plan:
           hooks:
             - frontmatter-update retro=retrospectives/YYYYMMDD-{kebab-title}.md
             - frontmatter-update goal=success|partial|fail
-        - to: done
-          skill: retro
-          when: "User opts to skip retro for a stale plan and mark it done without retrospective or learning"
-          hooks:
-            - frontmatter-update goal=skipped
 
     awaiting-learning:
       desc: "Retro written; waiting for /learn to absorb lessons."
@@ -252,19 +232,24 @@ plan:
       terminal: true
 
   superstates:
-    planning:
+    specification:
       states:
         - backlog
         - in-spec
+      transitions:
+        - to: cancelled
+          skill: groom
+          when: "User shelves the request"
+      on_exit: []
+      on_entry: []
+    planned:
+      states:
         - awaiting-plan-review
         - ready-for-dev
       transitions:
         - to: cancelled
           skill: groom
-          when: "User shelves the request"
-        - to: in-progress
-          skill: develop
-          when: "Plan is claimed for execution"
+          when: "User shelves the plan"
       on_exit: []
       on_entry: []
     executing:
@@ -281,11 +266,16 @@ plan:
       on_entry:
         - frontmatter-update started=@now
         - frontmatter-update commit=@head
-    closing:
+    review:
       states:
         - awaiting-retro
         - awaiting-learning
-      transitions: []
+      transitions:
+        - to: done
+          skill: retro
+          when: "User skips remaining review steps and marks the plan done"
+          hooks:
+            - frontmatter-update goal=skipped
       on_exit: []
       on_entry:
         - frontmatter-update completed=@now

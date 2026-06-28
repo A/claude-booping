@@ -40,33 +40,35 @@ class TestResolveEdges:
     def test_own_edges_returned(self, full_config: dict[str, Any]) -> None:
         edges = resolve_edges("backlog", full_config)
         tos = {e.to for e in edges}
-        # Own edges: backlog → in-spec, backlog → cancelled
+        # Own edge: backlog → in-spec
         assert "in-spec" in tos
+
+    def test_inherits_specification_cancelled(self, full_config: dict[str, Any]) -> None:
+        edges = resolve_edges("backlog", full_config)
+        tos = {e.to for e in edges}
+        # Inherited from the specification superstate: → cancelled
         assert "cancelled" in tos
 
-    def test_inherits_planning_edges(self, full_config: dict[str, Any]) -> None:
-        edges = resolve_edges("backlog", full_config)
-        tos = {e.to for e in edges}
-        # Inherited from planning: backlog also gets → in-progress
-        assert "in-progress" in tos
-
     def test_substate_wins_on_collision(self, full_config: dict[str, Any]) -> None:
-        # backlog has its own → cancelled edge; planning also has → cancelled.
-        # The substate edge should win, so there's only one cancelled edge.
-        edges = resolve_edges("backlog", full_config)
-        cancelled_edges = [e for e in edges if e.to == "cancelled"]
-        assert len(cancelled_edges) == 1
-        # The substate edge carries the specific "when"
-        assert "before grooming" in cancelled_edges[0].when
+        # awaiting-learning has its own gated → done edge; the review superstate
+        # also offers → done (the skip path). The substate edge wins on the `to`
+        # collision, so there's only one done edge and it carries the gated "when".
+        edges = resolve_edges("awaiting-learning", full_config)
+        done_edges = [e for e in edges if e.to == "done"]
+        assert len(done_edges) == 1
+        assert "accepted learnings" in done_edges[0].when
 
-    def test_in_spec_gets_inherited_in_progress(self, full_config: dict[str, Any]) -> None:
-        edges = resolve_edges("in-spec", full_config)
-        tos = {e.to for e in edges}
-        assert "in-progress" in tos
+    def test_spec_states_do_not_reach_in_progress(self, full_config: dict[str, Any]) -> None:
+        # in-progress lives only on ready-for-dev now; specification-phase states
+        # must not inherit a shortcut into execution.
+        for status in ("backlog", "in-spec", "awaiting-plan-review"):
+            tos = {e.to for e in resolve_edges(status, full_config)}
+            assert "in-progress" not in tos
 
     def test_in_progress_own_edges(self, full_config: dict[str, Any]) -> None:
         edges = resolve_edges("in-progress", full_config)
         tos = {e.to for e in edges}
+        # Own: → awaiting-retro.  Inherited from executing: → fail.
         assert "awaiting-retro" in tos
         assert "fail" in tos
 
@@ -77,19 +79,20 @@ class TestResolveEdges:
     def test_ready_for_dev_gets_inherited_cancelled(self, full_config: dict[str, Any]) -> None:
         edges = resolve_edges("ready-for-dev", full_config)
         tos = {e.to for e in edges}
-        # Own: → in-progress.  Inherited from planning: → cancelled.
+        # Own: → in-progress.  Inherited from planned: → cancelled.
         assert "in-progress" in tos
         assert "cancelled" in tos
 
     def test_awaiting_plan_review_edges(self, full_config: dict[str, Any]) -> None:
         edges = resolve_edges("awaiting-plan-review", full_config)
         tos = {e.to for e in edges}
-        # Own: → ready-for-dev, → in-spec, → cancelled
+        # Own: → ready-for-dev, → in-spec
         assert "ready-for-dev" in tos
         assert "in-spec" in tos
+        # Inherited from planned: → cancelled
         assert "cancelled" in tos
-        # Inherited from planning: → in-progress (no collision)
-        assert "in-progress" in tos
+        # No shortcut into execution
+        assert "in-progress" not in tos
 
 
 # ---------------------------------------------------------------------------
@@ -112,7 +115,7 @@ class TestResolveHooks:
         assert "vault-commit" in hooks
 
     def test_planning_to_terminal_boundary(self, full_config: dict[str, Any]) -> None:
-        # backlog → cancelled: crosses planning → terminal
+        # backlog → cancelled: crosses specification → terminal
         hooks = resolve_hooks("backlog", "cancelled", full_config)
         assert hooks[0] == "frontmatter-update status=cancelled"
         # terminal on_entry fires
@@ -121,7 +124,7 @@ class TestResolveHooks:
         assert "render-sprints" in hooks
 
     def test_planning_to_executing_boundary(self, full_config: dict[str, Any]) -> None:
-        # ready-for-dev → in-progress: crosses planning → executing
+        # ready-for-dev → in-progress: crosses planned → executing
         hooks = resolve_hooks("ready-for-dev", "in-progress", full_config)
         assert hooks[0] == "frontmatter-update status=in-progress"
         # executing on_entry fires (started + commit)
@@ -130,8 +133,8 @@ class TestResolveHooks:
         # Post hooks
         assert "render-sprints" in hooks
 
-    def test_executing_to_closing_boundary(self, full_config: dict[str, Any]) -> None:
-        # in-progress → awaiting-retro: crosses executing → closing
+    def test_executing_to_review_boundary(self, full_config: dict[str, Any]) -> None:
+        # in-progress → awaiting-retro: crosses executing → review
         hooks = resolve_hooks("in-progress", "awaiting-retro", full_config)
         assert hooks[0] == "frontmatter-update status=awaiting-retro"
         # closing on_entry fires (completed)
@@ -147,14 +150,14 @@ class TestResolveHooks:
         assert "frontmatter-update completed=@now" in hooks
 
     def test_closing_to_terminal_boundary(self, full_config: dict[str, Any]) -> None:
-        # awaiting-learning → done: crosses closing → terminal
+        # awaiting-learning → done: crosses review → terminal
         hooks = resolve_hooks("awaiting-learning", "done", full_config)
         assert hooks[0] == "frontmatter-update status=done"
         # terminal on_entry fires (completed)
         assert "frontmatter-update completed=@now" in hooks
 
     def test_closing_internal_no_boundary(self, full_config: dict[str, Any]) -> None:
-        # awaiting-retro → awaiting-learning: both in closing
+        # awaiting-retro → awaiting-learning: both in review
         hooks = resolve_hooks("awaiting-retro", "awaiting-learning", full_config)
         assert hooks[0] == "frontmatter-update status=awaiting-learning"
         # Edge hooks
@@ -215,11 +218,11 @@ class TestHookOrdering:
         assert vault_idx == len(hooks) - 1
 
     def test_full_order_crossing_boundary(self, full_config: dict[str, Any]) -> None:
-        # ready-for-dev → in-progress: planning → executing
+        # ready-for-dev → in-progress: planned → executing
         hooks = resolve_hooks("ready-for-dev", "in-progress", full_config)
         expected = [
             "frontmatter-update status=in-progress",
-            # planning on_exit (empty)
+            # planned on_exit (empty)
             # edge hooks (empty — moved to boundary)
             "frontmatter-update started=@now",
             "frontmatter-update commit=@head",
@@ -329,9 +332,10 @@ class TestDeepMergeSafety:
 
         # Superstates should survive the merge
         ss: dict[str, Any] = merged.get("plan", {}).get("superstates", {})
-        assert "planning" in ss
+        assert "specification" in ss
+        assert "planned" in ss
         assert "executing" in ss
-        assert "closing" in ss
+        assert "review" in ss
         assert "terminal" in ss
 
         # Hooks should survive the merge

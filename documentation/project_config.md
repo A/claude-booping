@@ -255,15 +255,18 @@ plan:
 
   # Statuses also group into named superstates (additive, overridable).
   superstates:
-    planning:
-      states: [backlog, in-spec, awaiting-plan-review, ready-for-dev]
+    specification:
+      states: [backlog, in-spec]
       transitions:
         - to: cancelled
           skill: groom
           when: "User shelves the request"
-        - to: in-progress
-          skill: develop
-          when: "Plan is claimed for execution"
+    planned:
+      states: [awaiting-plan-review, ready-for-dev]
+      transitions:
+        - to: cancelled
+          skill: groom
+          when: "User shelves the plan"
     executing:
       states: [in-progress]
       transitions:
@@ -273,8 +276,14 @@ plan:
           gates:
             - "Two fix attempts documented in the plan"
             - "User has approved the abort"
-    closing:
+    review:
       states: [awaiting-retro, awaiting-learning]
+      transitions:
+        - to: done
+          skill: retro
+          when: "User skips remaining review steps and marks the plan done"
+          hooks:
+            - frontmatter-update goal=skipped
     terminal:
       states: [done, fail, cancelled]
 ```
@@ -319,7 +328,7 @@ See [Plan lifecycle overview](https://github.com/A/claude-booping/blob/main/src/
 
 ### `plan.superstates`
 
-Statuses also group into a few named **superstates** — `planning`, `executing`, `closing`, and `terminal` — each listing its member statuses and any transitions shared across the whole group. This is an overridable, additive surface: a project override deep-merges over the plugin defaults the same way the rest of the config does, so you can add or adjust a superstate's members or shared transitions without restating the others. Most projects never touch it; it exists so the lifecycle can describe group-level moves once instead of repeating them on every status.
+Statuses also group into named **superstates** forming the lifecycle spine `specification` → `planned` → `executing` → `review` → `terminal` — each listing its member statuses and any transitions shared across the whole group. Phase-wide moves live on the superstate instead of being repeated on every member: both `specification` and `planned` offer → cancelled, `executing` offers → fail, and `review` offers the → done skip-ahead. A status's own edges union with its superstate's, and the substate wins on a `to` collision (so `awaiting-learning`'s gated → done overrides the `review` skip edge). This is an overridable, additive surface: a project override deep-merges over the plugin defaults the same way the rest of the config does, so you can add or adjust a superstate's members or shared transitions without restating the others. Most projects never touch it; it exists so the lifecycle can describe group-level moves once instead of repeating them on every status.
 
 ## Plan frontmatter: `summary`
 
