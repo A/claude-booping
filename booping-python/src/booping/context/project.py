@@ -14,6 +14,11 @@ class Project(BaseModel):
     repo_directory: Path
     git_commit: str | None = None
 
+    @property
+    def is_local_vault(self) -> bool:
+        """True when the resolved vault lives under the repo (vs a ~/Claude vault)."""
+        return self.directory.resolve().is_relative_to(self.repo_directory.resolve())
+
     @classmethod
     def load_cwd(cls, start: Path | None = None) -> Project | None:
         """Walk up from start (default cwd) looking for .booping; return None on miss."""

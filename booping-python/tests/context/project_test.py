@@ -47,6 +47,22 @@ def test_load_cwd_tilde_vault_path(tmp_path: Path) -> None:
     assert project.directory == Path.home() / "some-vault"
 
 
+def test_is_local_vault_true_for_vault_under_repo(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    (repo / ".booping").write_text("project_name: localvault\nvault_path: ./booping\n")
+    project = Project.load_cwd(start=repo)
+    assert project is not None
+    assert project.is_local_vault is True
+
+
+def test_is_local_vault_false_for_claude_vault() -> None:
+    vault = get_fixture_path("vault-full")
+    project = Project.load_cwd(start=vault)
+    assert project is not None
+    assert project.is_local_vault is False
+
+
 def test_load_cwd_from_subdirectory_walks_up(tmp_path: Path) -> None:
     booping = tmp_path / ".booping"
     booping.write_text("project_name: test-project\n")
