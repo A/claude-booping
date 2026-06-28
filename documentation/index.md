@@ -1,6 +1,6 @@
 # booping
 
-A self-learning, project-scoped sprint workflow for Claude Code. booping turns a feature idea into a durable, on-disk loop — **groom → develop → retro → learn** — that effectively utilizes sub-agents to avoid context rot, with optional Gemini cross-validation when `GEMINI_API_KEY` is set. Every artifact (plans, retros, lessons, sprint snapshots) lives in the per-project vault — `~/Claude/{project}/` by default, or a repo-local directory when you point the `.booping` marker's `vault_path:` key inside the repo — one folder per codebase, so weeks-long programs stay legible long after the session ends.
+A self-learning, project-scoped sprint workflow for Claude Code. booping turns a feature idea into a durable, on-disk loop — **groom → develop → retro → learn** — that effectively utilizes sub-agents to avoid context rot, with optional Gemini cross-validation when `GEMINI_API_KEY` is set. Every artifact (plans, retros, lessons, sprint snapshots) lives in the per-project vault — `~/Claude/{project}/` by default, or a repo-local directory — one folder per codebase, so weeks-long programs stay legible long after the session ends.
 
 The vault is plain markdown with YAML frontmatter, so Obsidian renders it natively as Properties. No proprietary database, no lock-in — just files you can grep, version, and edit by hand.
 
