@@ -6,7 +6,7 @@ For the published documentation site, see [https://A.github.io/claude-booping/](
 
 ## Commands
 
-- [`/install`](install.md) — scaffold the per-project vault under `~/Claude/{project}/` and drop the `.booping` marker. Run once per repo.
+- [`/install`](install.md) — scaffold the per-project vault (`~/Claude/{project}/` by default, or a repo-local dir via the `.booping` `vault_path:` key) and drop the `.booping` marker. Run once per repo.
 - [`/chat`](chat.md) — orient inside the project: surface a vault status summary, navigate plans and retros, handle small ad-hoc edits.
 - [`/groom`](groom.md) — spec a sprint: turn a free-text request into a reviewable plan file with milestones, story points, and definitions of done.
 - [`/develop`](develop.md) — claim a `ready-for-dev` plan and execute it milestone-by-milestone, delegating coding work to `booping-developer`.
