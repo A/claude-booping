@@ -1,17 +1,100 @@
 #!/usr/bin/env bash
-# Scaffold a new booping project at ~/Claude/{project-name}.
+# Scaffold a new booping project.
 # Installed on PATH automatically when the booping plugin is enabled.
-# Usage: booping-create-project <project-name> [cwd-to-attach]
+#
+# Default mode: scaffold the vault at ~/Claude/{project-name} and write a
+#   '.booping' marker (project_name:) in the cwd to attach.
+# Local mode (--local [dir]): scaffold the vault inside the repo at the given
+#   repo-relative dir (default ./booping) and write a marker carrying both
+#   project_name: and vault_path:.
+#
+# Usage:
+#   booping-create-project <project-name> [cwd-to-attach]
+#   booping-create-project <project-name> --local [dir]
 
 set -euo pipefail
 
+usage() {
+    cat <<'EOF'
+Usage:
+  booping-create-project <project-name> [cwd-to-attach]
+  booping-create-project <project-name> --local [dir]
+
+Default mode scaffolds the vault at ~/Claude/<project-name> and writes a
+'.booping' marker (project_name:) in the cwd to attach.
+
+--local [dir]  Scaffold the vault inside the repo at <dir> (repo-relative,
+               default ./booping) and write a marker carrying both
+               project_name: and vault_path:.
+EOF
+}
+
+if [ $# -ge 1 ] && { [ "$1" = "--help" ] || [ "$1" = "-h" ]; }; then
+    usage
+    exit 0
+fi
+
+LOCAL_MODE=0
+LOCAL_DIR="./booping"
+POSITIONAL=()
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --help|-h)
+            usage
+            exit 0
+            ;;
+        --local)
+            LOCAL_MODE=1
+            if [ $# -ge 2 ] && [[ "$2" != -* ]]; then
+                LOCAL_DIR="$2"
+                shift 2
+            else
+                shift
+            fi
+            ;;
+        *)
+            POSITIONAL+=("$1")
+            shift
+            ;;
+    esac
+done
+
+set -- "${POSITIONAL[@]}"
+
 if [ $# -lt 1 ]; then
-    echo "Usage: $0 <project-name> [cwd-to-attach]" >&2
+    usage >&2
     exit 1
 fi
 
 PROJECT="$1"
 ATTACH_CWD="${2:-$(pwd)}"
+
+if [ "$LOCAL_MODE" -eq 1 ]; then
+    ROOT="$LOCAL_DIR"
+
+    if [ -e "$ROOT" ]; then
+        echo "Local vault already exists: $ROOT" >&2
+        exit 1
+    fi
+
+    mkdir -p "$ROOT"/{plans,retrospectives,lessons,_booping,notes}
+
+    printf '_booping/*.log\n' > "$ROOT/.gitignore"
+
+    if [ -d "$ATTACH_CWD" ] && [ ! -f "$ATTACH_CWD/.booping" ]; then
+        {
+            echo "project_name: $PROJECT"
+            echo "vault_path: $LOCAL_DIR"
+        } > "$ATTACH_CWD/.booping"
+        echo "Wrote marker: $ATTACH_CWD/.booping"
+    fi
+
+    echo "Initialized local vault: $ROOT"
+    echo "Run booping-create-project --help for usage."
+    exit 0
+fi
+
 # If the second arg is an absolute path, use it directly as the project root
 # (useful for smoketests and non-standard locations). Otherwise default to ~/Claude/$PROJECT.
 IS_ABSOLUTE_ROOT=0
