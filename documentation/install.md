@@ -41,7 +41,7 @@ Update later with `/plugin update booping` (or from the `/plugin` UI).
 /install
 ```
 
-`/install` is idempotent and scaffolds the per-project vault at `~/Claude/{project}/`:
+`/install` is idempotent and prompts for where the vault should live — the default `~/Claude/{project}/` (kept outside the repo) or a **repo-local** directory (recorded via the `.booping` marker's `vault_path:` key, with a vault `.gitignore` written for you). Either way it scaffolds the per-project vault:
 
 - `plans/` — sprint plans authored by `/groom`, executed by `/develop`.
 - `retrospectives/` — retro files authored by `/retro`.

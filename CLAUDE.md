@@ -1,6 +1,6 @@
 # booping plugin — project guide
 
-Claude Code plugin that grooms and executes plans across user projects. Plans live under `~/Claude/{project}/` (the per-project vault); skills, agents, templates, and config live in this repo.
+Claude Code plugin that grooms and executes plans across user projects. Plans live in the per-project vault — `~/Claude/{project}/` by default, or a repo-local directory via the `.booping` marker's `vault_path:` key; skills, agents, templates, and config live in this repo.
 
 ## Status
 
@@ -18,7 +18,7 @@ Runtime template-rendering pipeline + build-time `src/files/` pipeline are both 
 
 - `booping-python/` — uv Python project containing the `booping` CLI (subcommands `render`, `render-sprints`, `transition`, `frontmatter-update`, `vault-commit`, `build`, `debug-context`, `debug-template`). Source under `booping-python/src/booping/`; tests under `booping-python/tests/`.
 - `bin/booping` — shell wrapper: resolves plugin root from its own location and exec's `uv run --project booping-python booping "$@"`.
-- `bin/booping-create-project` — standalone uv inline script; scaffolds `~/Claude/{project}/` vault directories + `.booping` marker. Out of scope for the runtime pipeline.
+- `bin/booping-create-project` — standalone uv inline script; scaffolds the vault directories + `.booping` marker. Defaults to `~/Claude/{project}/`; with `--local [dir]` (default `./booping`) scaffolds a repo-local vault and writes the `.booping` `vault_path:` key + a vault `.gitignore`. Out of scope for the runtime pipeline.
 - `bin/booping-external-llm-call` — standalone uv inline script; renders a Jinja2 prompt template from `bin/llm-call-templates/` and sends it to Gemini. Out of scope for the runtime pipeline.
 - `src/config.yaml` — single source of truth for structured data rendered into skills at runtime (plan statuses + transitions, task types, per-skill agents / status / etc.). Loaded at render time by `Context.assemble()`. Project-overridable.
 - `src/config_files.yaml` — **build-only** config consumed by `bin/booping build`. Carries frontmatter values that vary across `src/files/**/*.j2` templates (today: just `effort` per skill / per agent). **Not** project-overridable.
@@ -112,6 +112,7 @@ When you write a skill, walk these questions top-down for every piece of informa
 - **Research delegation**: delegate heavy reads / summarization work to `booping-researcher` to protect the skill's context. The agent is for *aggregating many sources into a summary*, not for single-file spot checks — those stay in the skill.
 - **Agent wiring**: skills own all reads/writes against `~/Claude/{project}/`. Agents touch only code in the attached repo and never scan the vault. Briefings carry the request, related files, and DoD — no lesson paths. Lesson context reaches agents via two baked-in channels: DoD + Verify pasted from the plan (folded in by `/groom`) and the shared extension at `~/Claude/{project}/_booping/agent_booping-<name>.md`, injected at agent load time via `tools.render('src/templates/_partials/_extra_instructions.j2', extra_instruction_key='agent_booping-<name>')` in the agent template (owned by `/learn`). A skill (e.g. `/develop`) may also delegate to a **self-contained global agent** the project provides at `~/.claude/agents/<id>.md` — invoked by bare name through the Agent tool (`subagent_type="<id>"`), the same path the built-in workers use. Such an agent is wired in via a plain `skills.<name>.agents.<id>` config block plus a `_booping/skill_<name>.md` extension that shapes its briefing. See [documentation/integrating-external-agents.md](documentation/integrating-external-agents.md).
 - **Per-project quality checks**: `/develop` runs the project's own lint / typecheck / test tooling once at Phase 4 (Final Verification), alongside plan-authored `Verify` commands. Command discovery order: repo `CLAUDE.md` → `_booping/skill_develop.md` → inspection of `package.json`, `pyproject.toml`, `Justfile`, etc.
+- **Local-vault branch offer**: `_project_context.j2` exposes `is_local_vault` (true when the resolved vault lives inside the repo working tree). On a local vault, `/groom` offers to create a branch for the plan before drafting it; the skill carries a `Bash(git:*)` allowance for that step. This is the intended end-state of the local-vault sprint (`/install` prompts for vault location, `booping-create-project --local` scaffolds it).
 
 ## Config schema (`src/config.yaml`)
 
@@ -141,7 +142,8 @@ Top-level keys currently in use:
 
 ## Project vault layout (`~/Claude/{project}/`)
 
-- The vault is **Obsidian-ready**: markdown files + YAML frontmatter that Obsidian renders as Properties. No proprietary database. Open `~/Claude/{project}/` in Obsidian for graph view + backlinks across plans, retros, and lessons.
+- The vault lives at `~/Claude/{project}/` by default, or at a repo-local directory when the `.booping` marker carries an optional `vault_path:` key (relative paths resolve against the repo root; absolute paths and `~` expansion are honoured; absent → `~/Claude/{project}`). `booping-create-project --local [dir]` (default `./booping`) scaffolds the local variant and writes both `vault_path:` and a vault `.gitignore`.
+- The vault is **Obsidian-ready**: markdown files + YAML frontmatter that Obsidian renders as Properties. No proprietary database. Open the vault directory in Obsidian for graph view + backlinks across plans, retros, and lessons.
 - `plans/{YYYYMMDD}-{kebab-title}.md` — plan files; frontmatter per `docs/template_plan_frontmatter.md`. Sibling stubs set `split_from: plans/...` to point at the primary plan they were split from.
 - `plan_templates/*.md` — project-local plan templates. Each has frontmatter (`name`, `description`) + two top-level sections (`# Plan Body`, `# Quality Checklist`). Discovered alongside core templates by `PlanTemplate.load_all()`; can override a core template by sharing its `name`, or add entirely new ones.
 - `review_templates/*.md` — project-local code-review templates. Loaded by `/code-review` alongside core templates under `docs/review_templates/`; selected per-plan based on stack signals.
@@ -162,7 +164,7 @@ Top-level keys currently in use:
 - `bin/booping build` — render every `src/files/**/*.j2` to its plugin-root destination using `src/config_files.yaml`. Run after editing any `src/files/<rel>.j2` or `src/config_files.yaml`.
 - `bin/booping debug-context` — dump the assembled `Context` as YAML for troubleshooting.
 - `bin/booping debug-template <template-path>` — render a template and append a debug context footer.
-- `bin/booping-create-project <project-name>` — scaffold `~/Claude/{project}/` vault directories + `.booping` marker.
+- `bin/booping-create-project <project-name> [--local [dir]]` — scaffold the vault directories + `.booping` marker. By default the vault lands at `~/Claude/{project}/`; `--local [dir]` (default `./booping`) scaffolds a repo-local vault instead, writing a `vault_path:` key into `.booping` plus a vault `.gitignore`.
 - `bin/booping-external-llm-call --prompt=<name> --context.<key>=<path>... [-- <free-text>]` — render a Jinja2 prompt template from `bin/llm-call-templates/<name>.md.j2` and send it to Gemini. Handles its own API-key check. Current templates: `validate-plan`.
 - `just build` — one-shot build via `bin/booping build`. `just dev` watches `src/files/` + `src/config_files.yaml` and rebuilds on change (requires `watchexec`).
 - `just lint`, `just typecheck`, `just test` — run ruff, basedpyright, pytest against `booping-python/`.

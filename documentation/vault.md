@@ -1,6 +1,6 @@
 # Vault
 
-Every booping project gets its own vault at `~/Claude/{project}/`, scaffolded by [/install](install.md). The vault is plain markdown with YAML frontmatter — open the directory in Obsidian for graph view and backlinks across plans, retros, and lessons.
+Every booping project gets its own vault, scaffolded by [/install](install.md). By default it lives at `~/Claude/{project}/`; you can instead keep it **inside the repo** (a local vault) by setting the `.booping` marker's `vault_path:` key. The vault is plain markdown with YAML frontmatter — open the directory in Obsidian for graph view and backlinks across plans, retros, and lessons.
 
 This page is the reference for every file and directory inside the vault. For the lifecycle that ties them together, start at [Quick start](quick_start.md).
 
@@ -62,7 +62,7 @@ It is a *snapshot*, not a live view: nothing auto-refreshes it on a plan write t
 
 ## `.booping`
 
-The marker that ties a repo to its vault. Unlike everything else on this page, `.booping` lives in the **attached repo's working tree** (its root), not inside `~/Claude/{project}/`. It is a one-line file — `project_name: {project}` — written by [/install](install.md), and it is how every skill resolves which vault under `~/Claude/` to operate on. Commit it with the repo so the binding travels with the checkout.
+The marker that ties a repo to its vault. Unlike everything else on this page, `.booping` lives in the **attached repo's working tree** (its root), not inside the vault. It is written by [/install](install.md) and carries the `project_name: {project}` key — how every skill resolves which vault to operate on. It may also carry an optional `vault_path:` key: when present, the vault resolves to that path (relative paths against the repo root, absolute paths and `~` honoured) instead of `~/Claude/{project}/` — this is how a repo-local vault is wired. Commit `.booping` with the repo so the binding travels with the checkout.
 
 ## `config.yaml`
 

@@ -25,7 +25,7 @@ See [Install](install.md) for prerequisites (`uv`, `git`, optional `GEMINI_API_K
 /install
 ```
 
-That single step creates `~/Claude/{project}/` with `plans/`, `retrospectives/`, `lessons/`, `notes/`, `_booping/`, and a `.booping` marker file so other skills know the vault is ready. See [Vault](vault.md) for what each directory is for.
+`/install` prompts for the vault location — the default `~/Claude/{project}/` or a repo-local directory (wired via the `.booping` marker's `vault_path:` key). Either way that single step creates the vault with `plans/`, `retrospectives/`, `lessons/`, `notes/`, `_booping/`, and a `.booping` marker file so other skills know the vault is ready. See [Vault](vault.md) for what each directory is for.
 
 ## 3. Orient with /chat
 
