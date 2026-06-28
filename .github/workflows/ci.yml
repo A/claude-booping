@@ -1,0 +1,38 @@
+name: ci
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - booping-python/**
+      - .github/workflows/ci.yml
+  pull_request:
+    paths:
+      - booping-python/**
+      - .github/workflows/ci.yml
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: booping-python
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Sync deps
+        run: uv sync
+
+      - name: Lint
+        run: uv run ruff check .
+
+      - name: Typecheck
+        run: uv run basedpyright
+
+      - name: Test
+        run: uv run pytest
