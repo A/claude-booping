@@ -124,9 +124,9 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="develop">/develop</h1>
-<p>Claim a <code>ready-for-dev</code> plan and execute its milestones, delegating coding to <code>booping-developer</code> and orchestrating verification, commits, and status transitions on the way to <code>awaiting-retro</code>.</p>
+<p>Pick a plan from an interactive candidate list and execute its milestones, delegating coding to <code>booping-developer</code> and orchestrating verification, commits, and status transitions on the way to <code>awaiting-retro</code>.</p>
 <h2 id="what-it-does">What it does</h2>
-<p><code>/develop</code> walks a plan through <code>ready-for-dev → in-progress → awaiting-retro</code>. It claims exactly one plan, picks the right branch from <code>git.branches</code>, groups consecutive milestones into agent briefings, runs each briefing through <code>booping-developer</code>, verifies milestone DoDs, runs the project's lint / typecheck / test gates at Final Verification, and flips the plan's status when every checkbox is <code>[x]</code> and Final Verification is green.</p>
+<p><code>/develop</code> walks a plan through <code>ready-for-dev → in-progress → awaiting-retro</code>. It works on exactly one plan, picks the right branch from <code>git.branches</code>, groups consecutive milestones into agent briefings, runs each briefing through <code>booping-developer</code>, verifies milestone DoDs, runs the project's lint / typecheck / test gates at Final Verification, and flips the plan's status when every checkbox is <code>[x]</code> and Final Verification is green.</p>
 <p><code>/develop</code> does not edit application code from the orchestrator — all coding is delegated. The orchestrator owns reads/writes against the vault, briefing assembly, verification, and commits.</p>
 <p>By default <code>/develop</code> runs all milestone groups in <strong>one session</strong>. Stopping after each milestone is a user-prompt-level instruction, not default behaviour (see Best practices).</p>
 <h2 id="command">Command</h2>
@@ -136,7 +136,7 @@
 /develop ~/Claude/claude-booping/plans/20260429-skill-runtime-template-rendering.md re-implement from master, don't toggle todos in the plan
 continue to develop plans/20260428-snippet-pre-filter-pipeline.md
 </code></pre>
-<p>Bare <code>/develop</code> claims the oldest plan in <code>ready-for-dev</code>; the queue-empty case is reported and the skill exits — no silent fallback to <code>in-progress</code> plans. Pass a plan path (absolute, <code>~/Claude/...</code>, or vault-relative) to claim a specific one. Free-text after the path reaches the skill verbatim — useful for stop-after-each-milestone or model-comparison runs.</p>
+<p>Bare <code>/develop</code> presents a single-select <code>AskUserQuestion</code> candidate list drawn from every plan in <code>ready-for-dev</code> and <code>awaiting-plan-review</code>; you pick the one to run. When no plan is in either status, the skill reports the empty queue and exits — no silent fallback to <code>in-progress</code> plans. Pass a plan path (absolute, <code>~/Claude/...</code>, or vault-relative) to skip the picker and target a specific one. Free-text after the path reaches the skill verbatim — useful for stop-after-each-milestone or model-comparison runs.</p>
 <p>To resume a plan already in <code>in-progress</code> (e.g. after a stopped session), invoke <code>/develop</code> with the explicit path; the skill picks up at the first milestone whose DoDs are not all <code>[x]</code>. "continue to develop &lt;plan&gt;" works as a natural-language equivalent.</p>
 <h2 id="best-practices">Best practices</h2>
 <h3 id="run-code-review-in-a-fresh-session">Run code review in a fresh session</h3>

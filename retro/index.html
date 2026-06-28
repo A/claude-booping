@@ -76,6 +76,12 @@
     <li class="toctree-l2"><a class="reference internal" href="#why">Why</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#command">Command</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#multiple-plans-in-one-run">Multiple plans in one run</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#skipping-the-retro">Skipping the retro</a>
+    </li>
+        </ul>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#best-practices">Best practices</a>
         <ul>
@@ -126,7 +132,7 @@
 <p>The skill draws from <strong>two inputs</strong>:</p>
 <ul>
 <li><strong>User-asked questions.</strong> <code>/retro</code> interviews you — what felt smooth, what felt forced, where you had to push back on the agent, where the plan was wrong. These are the high-signal sources because you noticed the friction in the moment.</li>
-<li><strong>Session-log and git-diff scan.</strong> <code>/retro</code> reads the <code>/develop</code> session transcript and the produced diff to surface tensions you did not flag explicitly — repeated retries, abandoned approaches, churn between commits, places where the agent did something the plan did not specify. These are the issues you might not have logged but that the artifacts remember.</li>
+<li><strong>Session-log mining and plan-stage lesson check.</strong> <code>/retro</code> delegates to <code>booping-researcher</code> to mine the <code>/develop</code> session transcript for tensions you did not flag explicitly — repeated retries, abandoned approaches, places where the agent did something the plan did not specify — and to check the planning stage against the active lessons. The code diff is grounding context for these reads, not a separate scan phase. These are the issues you might not have logged but that the artifacts remember.</li>
 </ul>
 <p>The two inputs are stitched into one retro file under <code>~/Claude/{project}/retrospectives/</code>, named to match the plan it covers.</p>
 <h2 id="command">Command</h2>
@@ -136,6 +142,11 @@
 </code></pre>
 <p>Bare <code>/retro</code> picks the plan currently in <code>awaiting-retro</code>. Pass a plan path to retro a specific one — absolute, <code>~/Claude/...</code>, or vault-relative all work.</p>
 <p><code>/retro</code> walks the plan from <code>awaiting-retro → awaiting-learning</code> once the retro file is written and you have signed off.</p>
+<h3 id="multiple-plans-in-one-run">Multiple plans in one run</h3>
+<p>A retro can cover more than one plan. Pass several plan paths to retro them together, or run bare and pick from the <code>awaiting-retro</code> list — the picker is multi-select, so you can fold several finished plans into one retrospective. When you name some plans on the command line and others are also sitting in <code>awaiting-retro</code>, <code>/retro</code> asks you per remaining plan whether to <strong>include</strong> it in this run, <strong>postpone</strong> it (leave it queued), or <strong>skip retro and mark it done</strong>.</p>
+<p>The written retro file always carries <code>plans:</code> as a YAML list (even for a single plan) and a <code>goal_verdicts:</code> mapping with your per-plan verdict, so a multi-plan retro records each plan's outcome separately.</p>
+<h3 id="skipping-the-retro">Skipping the retro</h3>
+<p>Some plans are not worth a retrospective — a stale split stub, a trivial change you already understand. For those, pick <strong>skip retro and mark it done</strong> in the per-plan prompt. <code>/retro</code> then walks that plan straight from <code>awaiting-retro → done</code> (bypassing <code>awaiting-learning</code>), stamping <code>goal: skipped</code> in its frontmatter, with no retrospective file and no <code>/learn</code> step. Use it deliberately — a skipped plan contributes nothing to the lesson loop.</p>
 <h2 id="best-practices">Best practices</h2>
 <h3 id="shit-in-shit-out">Shit in, shit out</h3>
 <p>The retro is only as honest as your answers. <code>/retro</code> will ask you targeted questions and give you a structure to fill, but it cannot invent insight you did not surface. If you breeze through the questions with "fine, fine, ship it", the retro records nothing useful and <a href="../learn/">/learn</a> has nothing to compress into a lesson.</p>

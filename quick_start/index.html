@@ -57,6 +57,10 @@
     <li class="toctree-l2"><a class="reference internal" href="#5-first-groom">5. First /groom</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#6-first-develop">6. First /develop</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#optional-code-review-before-retro">Optional: /code-review before retro</a>
+    </li>
+        </ul>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#7-first-retro">7. First /retro</a>
     </li>
@@ -136,7 +140,7 @@
 <p><code>cd</code> into the target repository and run:</p>
 <pre><code class="language-text">/install
 </code></pre>
-<p>That single step creates <code>~/Claude/{project}/</code> with <code>plans/</code>, <code>retrospectives/</code>, <code>lessons/</code>, <code>notes/</code>, <code>_booping/</code>, and a <code>.booping</code> marker file so other skills know the vault is ready. See <a href="../vault/">Vault</a> for what each directory is for.</p>
+<p><code>/install</code> prompts for the vault location — the default <code>~/Claude/{project}/</code> or a repo-local directory (wired via the <code>.booping</code> marker's <code>vault_path:</code> key). Either way that single step creates the vault with <code>plans/</code>, <code>retrospectives/</code>, <code>lessons/</code>, <code>notes/</code>, <code>_booping/</code>, and a <code>.booping</code> marker file so other skills know the vault is ready. See <a href="../vault/">Vault</a> for what each directory is for.</p>
 <h2 id="3-orient-with-chat">3. Orient with /chat</h2>
 <p>Before grooming anything, run:</p>
 <pre><code class="language-text">/chat
@@ -144,7 +148,7 @@
 <p><code>/chat</code> is the orient/working-mode command. It loads the project vault, refreshes the on-disk sprint snapshot at <code>~/Claude/{project}/sprints.md</code>, and is the right surface for vault navigation, reading existing plans, and small ad-hoc edits. When scope grows past "small task", <code>/chat</code> escalates you into <code>/groom</code>.</p>
 <h2 id="4-read-the-sprint-snapshot">4. Read the sprint snapshot</h2>
 <p>Open <code>~/Claude/{project}/sprints.md</code>. It is a regenerated view of every plan in the vault grouped by status. On a fresh project it will be near-empty — that is expected.</p>
-<p><code>sprints.md</code> is a build artefact, never hand-edit it (see <a href="../vault/">Vault</a>).</p>
+<p><code>sprints.md</code> is a build artefact, never hand-edit it (see <a href="../vault/">Vault</a>). It is a snapshot rather than a live view: nothing auto-refreshes it on a plan write yet, so it can drift between <code>/chat</code> orients. Re-run <code>/chat</code> (or <code>bin/booping render-sprints</code>) for a current picture, and treat the plan files as the source of truth.</p>
 <h2 id="5-first-groom">5. First /groom</h2>
 <p>Spec your first sprint with a free-text description:</p>
 <pre><code class="language-text">/groom Add per-tenant rate limiting to the public API
@@ -152,13 +156,18 @@
 <p><code>/groom</code> researches the codebase, drafts a plan under <code>~/Claude/{project}/plans/{YYYYMMDD}-{kebab-title}.md</code>, optionally cross-validates it against Gemini (if <code>GEMINI_API_KEY</code> is set), and stops at <code>awaiting-plan-review</code> for your explicit approval. Sharpen it, push back, ask for splits — the more detailed your initial brief, the sharper the resulting plan.</p>
 <p>When you approve, <code>/groom</code> flips the plan to <code>ready-for-dev</code>.</p>
 <h2 id="6-first-develop">6. First /develop</h2>
-<p>Either auto-claim the next ready plan:</p>
+<p>Either run bare and pick from the candidate list (plans in <code>ready-for-dev</code> or <code>awaiting-plan-review</code>):</p>
 <pre><code class="language-text">/develop
 </code></pre>
 <p>or target a specific one:</p>
 <pre><code class="language-text">/develop plans/20260426-per-tenant-rate-limiting.md
 </code></pre>
-<p><code>/develop</code> walks the milestones, delegating implementation to the <code>booping-developer</code> agent and reading code via <code>booping-researcher</code> when a milestone requires it. When all milestones are done, the plan moves to <code>awaiting-retro</code>.</p>
+<p><code>/develop</code> walks the milestones, delegating implementation to the <code>booping-developer</code> agent. <code>booping-researcher</code> is reserved for the Phase 0 drift spot-check — when a plan touches many files, it confirms the actual file shapes still match the plan's assumptions before execution begins. When all milestones are done, the plan moves to <code>awaiting-retro</code>.</p>
+<h3 id="optional-code-review-before-retro">Optional: /code-review before retro</h3>
+<p>Once a plan is in <code>awaiting-retro</code>, you can run a quality-gate review over the diff before capturing the retro:</p>
+<pre><code class="language-text">/code-review
+</code></pre>
+<p>Bare <code>/code-review</code> picks the plan in <code>awaiting-retro</code> and reviews <code>&lt;plan commit&gt;..HEAD</code> against stack-aware checklists, returning severity-labelled findings in chat. It is a <strong>stateless side-skill</strong> — it does not transition the plan, so the next step is still <code>/retro</code>. Run it from a fresh session (often under a stronger model than the one that implemented). See <a href="../code_review/">/code-review</a> for details.</p>
 <h2 id="7-first-retro">7. First /retro</h2>
 <p>Capture what actually shipped:</p>
 <pre><code class="language-text">/retro plans/20260426-per-tenant-rate-limiting.md

@@ -89,6 +89,8 @@
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#trivial-inline-non-trivial-via-agent">Trivial inline, non-trivial via agent</a>
     </li>
+    <li class="toctree-l3"><a class="reference internal" href="#blast-radius-reads-on-large-diffs">Blast-radius reads on large diffs</a>
+    </li>
         </ul>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#config">Config</a>
@@ -157,8 +159,11 @@
 <p>This is the same triage shape <code>/develop</code> uses on the feedback list — see <a href="../develop/#review-the-code-review-feedback-list">Review the code-review feedback list</a>.</p>
 <h3 id="trivial-inline-non-trivial-via-agent">Trivial inline, non-trivial via agent</h3>
 <p><code>/code-review</code> applies trivial fixes (typos, obvious dead code, single-line corrections) inline within the review session. Non-trivial fixes are dispatched as a follow-up briefing to <code>booping-developer</code> so the orchestrator stays a reviewer and the implementation channel stays consistent with the rest of the loop.</p>
+<h3 id="blast-radius-reads-on-large-diffs">Blast-radius reads on large diffs</h3>
+<p>When a diff spans roughly five or more files, <code>/code-review</code> delegates a blast-radius read to <code>booping-researcher</code> — handing it the file list and asking for a compressed summary of which modules, integration points, and public APIs the change touches. This keeps the review session's context lean on big diffs. Smaller changes are read directly; single-file reads are never delegated.</p>
 <h2 id="config">Config</h2>
-<p><code>/code-review</code> has no dedicated config keys. Template selection is driven by the <code>description</code> frontmatter on each review template under <code>docs/review_templates/</code> and <code>~/Claude/{project}/review_templates/</code>. To make a project-local checklist available to the review pass, drop it under your vault's <code>review_templates/</code> with a clear <code>description</code> — the skill loads it when the repo's stack matches.</p>
+<p><code>/code-review</code> has one config key, <code>skills.code-review.status</code> (default <code>awaiting-retro</code>). It controls the <strong>argument-free plan picker</strong>: bare <code>/code-review</code> lists the plans currently in that status and asks you to pick one, then derives the diff range from the selected plan's <code>commit:</code> field. Point it at a different status in your project <code>config.yaml</code> if you want bare <code>/code-review</code> to pull from another queue. Passing a diff range or file list as <code>$ARGUMENTS</code> bypasses the picker entirely.</p>
+<p>Template selection has no config keys — it is driven by the <code>description</code> frontmatter on each review template under <code>docs/review_templates/</code> and <code>~/Claude/{project}/review_templates/</code>. To make a project-local checklist available to the review pass, drop it under your vault's <code>review_templates/</code> with a clear <code>description</code> — the skill loads it when the repo's stack matches.</p>
               
             </div>
           </div><footer>

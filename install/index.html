@@ -143,14 +143,19 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 <p><code>cd</code> into the target repository and run:</p>
 <pre><code class="language-text">/install
 </code></pre>
-<p><code>/install</code> is idempotent and scaffolds the per-project vault at <code>~/Claude/{project}/</code>:</p>
+<p><code>/install</code> is idempotent and prompts for where the vault should live — the default <code>~/Claude/{project}/</code> (kept outside the repo) or a <strong>repo-local</strong> directory (recorded via the <code>.booping</code> marker's <code>vault_path:</code> key, with a vault <code>.gitignore</code> written for you). Either way it scaffolds the per-project vault:</p>
 <ul>
 <li><code>plans/</code> — sprint plans authored by <code>/groom</code>, executed by <code>/develop</code>.</li>
 <li><code>retrospectives/</code> — retro files authored by <code>/retro</code>.</li>
 <li><code>lessons/</code> — durable rules authored by <code>/learn</code>.</li>
 <li><code>notes/</code> — your own free-form notes (untouched by skills).</li>
-<li><code>_booping/</code> — per-skill / per-agent extension files authored by <code>/learn</code>.</li>
-<li><code>.booping</code> — marker file telling other skills the vault is ready.</li>
+<li><code>_booping/</code> — per-skill / per-agent extension files. <code>/install</code> always seeds <code>agent_booping-developer.md</code>; it seeds the two skill files only when the project carries local signal the repo <code>CLAUDE.md</code> doesn't already own, and skips them otherwise. <code>/learn</code> keeps whatever is seeded current afterwards:<ul>
+<li><code>_booping/agent_booping-developer.md</code> — stack + conventions for the developer agent (always seeded).</li>
+<li><code>_booping/skill_groom.md</code> — seeded only on a real groom override (e.g. a sizing override the repo <code>CLAUDE.md</code> doesn't carry); skipped otherwise.</li>
+<li><code>_booping/skill_develop.md</code> — seeded only when there's dev/env signal the repo <code>CLAUDE.md</code> lacks; skipped otherwise.</li>
+</ul>
+</li>
+<li><code>.booping</code> — marker file (written in the repo root, not the vault) telling skills which vault to resolve.</li>
 </ul>
 <p>For the full directory tour (including <code>plan_templates/</code>, <code>review_templates/</code>, <code>sprints.md</code>, and <code>config.yaml</code>), see <a href="../vault/">Vault</a>.</p>
 <h2 id="verify">Verify</h2>

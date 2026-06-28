@@ -70,6 +70,12 @@
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#planstatuses">plan.statuses</a>
     </li>
+    <li class="toctree-l3"><a class="reference internal" href="#plansuperstates">plan.superstates</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#plan-frontmatter-summary">Plan frontmatter: summary</a>
+        <ul>
     <li class="toctree-l3"><a class="reference internal" href="#skillsnameagents">skills.&lt;name&gt;.agents</a>
     </li>
         </ul>
@@ -168,9 +174,11 @@ skills:
   develop:
     agents:
       booping-developer:
+        internal: true
         good_for:
           - &quot;All coding tasks — always delegate; never edit application code from the orchestrator&quot;
       booping-researcher:
+        internal: true
         good_for:
           - &quot;Phase 0 drift spot-check: given a large set of plan-named files, determine whether actual file shape matches the plan's assumptions&quot;
         bad_for:
@@ -180,6 +188,7 @@ skills:
   groom:
     agents:
       booping-researcher:
+        internal: true
         good_for:
           - &quot;Wide read or web search where results must be aggregated outside this skill's context and returned as a summary&quot;
           - &quot;Map blast radius across many files (which modules and integrations a change touches)&quot;
@@ -200,6 +209,7 @@ skills:
     status: awaiting-retro
     agents:
       booping-researcher:
+        internal: true
         good_for:
           - &quot;Phase 0 session-log search: scan ~/.claude/projects/ across all session logs for the plan's time window and aggregate into a structured summary of user questions, blockers, and detours&quot;
         bad_for:
@@ -211,12 +221,14 @@ skills:
     status: awaiting-retro
     agents:
       booping-researcher:
+        internal: true
         good_for:
           - &quot;Blast-radius reads on large diffs (≥ ~5 files) aggregated into a compressed summary of touched modules and integration points&quot;
         bad_for:
           - &quot;Single-file reads — call Read directly&quot;
           - &quot;Small greps or existence checks that fit in a few lines of output&quot;
       booping-developer:
+        internal: true
         good_for:
           - &quot;Applying user-approved non-trivial fixes surfaced by the review (BLOCKER or SUGGESTION)&quot;
         bad_for:
@@ -225,6 +237,7 @@ skills:
   chat:
     agents:
       booping-researcher:
+        internal: true
         good_for:
           - &quot;Vault-wide reads aggregated into a summary (e.g. what plans exist, recurring themes across retros)&quot;
           - &quot;Plan or retro content extraction across ≥3 files where the results need to be compressed before returning to the skill&quot;
@@ -266,8 +279,6 @@ plan:
         - to: cancelled
           skill: groom
           when: &quot;User shelves the request before grooming&quot;
-          on_exit:
-            - &quot;set `completed: yyyymmdd hh:mm`&quot;
 
     in-spec:
       desc: &quot;/groom is actively specifying — researching, designing, drafting the plan.&quot;
@@ -283,17 +294,12 @@ plan:
           gates:
             - &quot;Cross-validation run (see [cross-validation](${CLAUDE_PLUGIN_ROOT}/docs/cross_validation.md)) — single-file-bug skip acceptable&quot;
             - &quot;Every task estimated; any task ≥ redecompose_threshold SP has been re-decomposed&quot;
-          on_exit:
-            - &quot;set `planned: yyyymmdd hh:mm`&quot;
-            - &quot;set `commit: &lt;repo HEAD&gt;` from `context.project.git_commit`&quot;
         - to: backlog
           skill: groom
           when: &quot;User parks the work mid-grooming to revisit later&quot;
         - to: cancelled
           skill: groom
           when: &quot;User shelves the work mid-grooming&quot;
-          on_exit:
-            - &quot;set `completed: yyyymmdd hh:mm`&quot;
 
     awaiting-plan-review:
       desc: &quot;Plan drafted; /groom is presenting to the user and awaiting explicit approval, change request, or cancellation.&quot;
@@ -311,8 +317,6 @@ plan:
         - to: cancelled
           skill: groom
           when: &quot;User shelves the plan instead of approving&quot;
-          on_exit:
-            - &quot;set `completed: yyyymmdd hh:mm`&quot;
 
     ready-for-dev:
       desc: &quot;Approved by user. Queued for /develop to claim.&quot;
@@ -322,9 +326,6 @@ plan:
         - to: in-progress
           skill: develop
           when: &quot;/develop claims the plan at the start of its execute phase&quot;
-          on_exit:
-            - &quot;set `started: yyyymmdd hh:mm`&quot;
-            - &quot;set `commit: &lt;repo HEAD&gt;` from `context.project.git_commit` (only after the user confirmed the plan is still valid, or the legacy fallback applied)&quot;
 
     in-progress:
       desc: &quot;/develop has claimed the plan and is executing milestones.&quot;
@@ -340,17 +341,12 @@ plan:
           gates:
             - &quot;Every DoD checkbox marked [x]&quot;
             - &quot;Final Verification green&quot;
-          on_exit:
-            - &quot;set `completed: yyyymmdd hh:mm`&quot;
-            - &quot;suggest `/retro &lt;plan-path&gt;`&quot;
         - to: fail
           skill: develop
           when: &quot;Unrecoverable blocker on the same milestone&quot;
           gates:
             - &quot;Two fix attempts documented in the plan&quot;
             - &quot;User has approved the abort&quot;
-          on_exit:
-            - &quot;set `completed: yyyymmdd hh:mm`&quot;
 
     awaiting-retro:
       desc: &quot;All milestones done; waiting for /retro to write the retrospective.&quot;
@@ -363,14 +359,9 @@ plan:
           gates:
             - &quot;Retrospective markdown saved to retrospectives/&quot;
             - &quot;Self-review checklist passed&quot;
-          on_exit:
-            - &quot;set `retro: retrospectives/YYYYMMDD-{kebab-title}.md`&quot;
-            - &quot;set `goal: success | partial | fail`&quot;
         - to: done
           skill: retro
           when: &quot;User opts to skip retro for a stale plan and mark it done without retrospective or learning&quot;
-          on_exit:
-            - &quot;set `goal: skipped`&quot;
 
     awaiting-learning:
       desc: &quot;Retro written; waiting for /learn to absorb lessons.&quot;
@@ -383,8 +374,6 @@ plan:
           gates:
             - &quot;User confirmed the review table&quot;
             - &quot;Every accepted lesson written to its target file&quot;
-          on_exit:
-            - &quot;set `completed: yyyymmdd hh:mm`&quot;
 
     done:
       desc: &quot;Terminal success. /learn has absorbed all lessons.&quot;
@@ -397,6 +386,40 @@ plan:
     cancelled:
       desc: &quot;Terminal product decision. User shelved the plan.&quot;
       terminal: true
+
+  # Statuses also group into named superstates (additive, overridable).
+  superstates:
+    specification:
+      states: [backlog, in-spec]
+      transitions:
+        - to: cancelled
+          skill: groom
+          when: &quot;User shelves the request&quot;
+    planned:
+      states: [awaiting-plan-review, ready-for-dev]
+      transitions:
+        - to: cancelled
+          skill: groom
+          when: &quot;User shelves the plan&quot;
+    executing:
+      states: [in-progress]
+      transitions:
+        - to: fail
+          skill: develop
+          when: &quot;Unrecoverable blocker on the same milestone&quot;
+          gates:
+            - &quot;Two fix attempts documented in the plan&quot;
+            - &quot;User has approved the abort&quot;
+    review:
+      states: [awaiting-retro, awaiting-learning]
+      transitions:
+        - to: done
+          skill: retro
+          when: &quot;User skips remaining review steps and marks the plan done&quot;
+          hooks:
+            - frontmatter-update goal=skipped
+    terminal:
+      states: [done, fail, cancelled]
 </code></pre>
 
 
@@ -420,18 +443,26 @@ plan:
 <h3 id="tasks"><code>tasks</code></h3>
 <p>The task-type taxonomy <code>/groom</code> classifies every request against. Each entry is <code>{type, description, doc_uri}</code>. The matching <code>doc_uri</code> lazy-loads detailed guidance for that task type during grooming. Adding a new task type means adding both a <code>tasks</code> entry and the corresponding doc under <code>docs/</code>.</p>
 <h3 id="planstatuses"><code>plan.statuses</code></h3>
-<p>The full plan-lifecycle definition: every status, who owns it, what it produces, what transitions out of it, what gates each transition has, and what <code>on_exit</code> mutations fire. Skills render only the slice they own (transitions where <code>skill: &lt;self&gt;</code>), so editing this key reshapes every skill's plan-transitions table at the next skill load.</p>
+<p>The full plan-lifecycle definition: every status, who owns it, what it produces, what transitions out of it, and what gates each transition has. Skills render only the slice they own (transitions where <code>skill: &lt;self&gt;</code>), so editing this key reshapes every skill's plan-transitions table at the next skill load.</p>
 <p>Each status carries:</p>
 <ul>
 <li><code>desc</code> — one-line human description.</li>
 <li><code>owner</code> — the skill that owns this state.</li>
 <li><code>terminal</code> — bool; terminal states (<code>done</code>, <code>fail</code>, <code>cancelled</code>) cannot transition out.</li>
 <li><code>artifacts</code> — list of strings describing what the state produces.</li>
-<li><code>transitions</code> — list of <code>{to, skill, when, gates?, on_exit?}</code>.</li>
+<li><code>transitions</code> — list of <code>{to, skill, when, gates?}</code>.</li>
 </ul>
 <p>See <a href="https://github.com/A/claude-booping/blob/main/src/templates/docs/plan_lifecycle_overview.md.j2">Plan lifecycle overview</a> for the rendered status graph; or run <code>bin/booping render src/templates/docs/plan_lifecycle_overview.md.j2</code> locally.</p>
+<h3 id="plansuperstates"><code>plan.superstates</code></h3>
+<p>Statuses also group into named <strong>superstates</strong> forming the lifecycle spine <code>specification</code> → <code>planned</code> → <code>executing</code> → <code>review</code> → <code>terminal</code> — each listing its member statuses and any transitions shared across the whole group. Phase-wide moves live on the superstate instead of being repeated on every member: both <code>specification</code> and <code>planned</code> offer → cancelled, <code>executing</code> offers → fail, and <code>review</code> offers the → done skip-ahead. A status's own edges union with its superstate's, and the substate wins on a <code>to</code> collision (so <code>awaiting-learning</code>'s gated → done overrides the <code>review</code> skip edge). This is an overridable, additive surface: a project override deep-merges over the plugin defaults the same way the rest of the config does, so you can add or adjust a superstate's members or shared transitions without restating the others. Most projects never touch it; it exists so the lifecycle can describe group-level moves once instead of repeating them on every status.</p>
+<h2 id="plan-frontmatter-summary">Plan frontmatter: <code>summary</code></h2>
+<p>Each plan file carries a <code>summary</code> field in its YAML frontmatter — a one-line statement of the plan's intent (≤ ~120 characters). <code>/groom</code> writes it when drafting the plan; it is the human-readable label that surfaces in <code>sprints.md</code> and makes plans searchable across the vault. (It replaced the older, longer <code>business_goal</code> field.)</p>
 <h3 id="skillsnameagents"><code>skills.&lt;name&gt;.agents</code></h3>
 <p>Per-skill delegation guidance rendered into each skill's "Available agents" table. Each agent entry has <code>good_for</code> (a list of bullets describing when to delegate) and an optional <code>bad_for</code> (when not to). Currently populated for <code>groom</code>, <code>develop</code>, <code>retro</code>, <code>code-review</code>, and <code>chat</code>.</p>
+<ul>
+<li><strong><code>skills.&lt;name&gt;.agents.&lt;id&gt;.internal</code></strong> — <code>true</code> on booping's built-in workers (<code>booping-developer</code>, <code>booping-researcher</code>). Marks an entry as plugin-owned so it can be hidden from a skill's table when that skill opts out of built-ins (see below). Self-contained global agents a project registers omit this flag.</li>
+<li><strong><code>skills.&lt;name&gt;.disable_internal_agents</code></strong> — when set on a skill, <code>_available_agents.j2</code> hides every <code>internal: true</code> entry from that skill's table, leaving only the agents the project explicitly registered (e.g. a self-contained global external agent). See <a href="../integrating-external-agents/">integrating external agents</a>.</li>
+</ul>
 <p>Skills also use <code>skills.&lt;name&gt;.status</code> to declare the single status they own (e.g. <code>learn → awaiting-learning</code>, <code>retro → awaiting-retro</code>).</p>
 <h2 id="overriding-for-one-project">Overriding for one project</h2>
 <p>Drop a YAML file at <code>~/Claude/{project}/config.yaml</code> to override or extend the plugin's defaults for that project. The override file deep-merges over <code>src/config.yaml</code> at render time:</p>

@@ -85,6 +85,14 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#escalation">Escalation</a>
     </li>
+    <li class="toctree-l2"><a class="reference internal" href="#behaviour-notes">Behaviour notes</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#lifecycle-questions">Lifecycle questions</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#researcher-delegation-for-wide-reads">Researcher delegation for wide reads</a>
+    </li>
+        </ul>
+    </li>
     </ul>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../help/">/help</a>
@@ -143,6 +151,11 @@
 <li><strong>A plan just finished</strong> → <code>/retro &lt;plan-path&gt;</code> to capture findings; <code>/learn</code> afterwards.</li>
 </ul>
 <p>The hand-off is explicit: <code>/chat</code> recommends the next command and stops, rather than reproducing another skill's workflow inline. See <a href="../groom/">/groom</a>, <a href="../develop/">/develop</a>, <a href="../retro/">/retro</a>, and <a href="../learn/">/learn</a> for what each of those commands owns.</p>
+<h2 id="behaviour-notes">Behaviour notes</h2>
+<h3 id="lifecycle-questions">Lifecycle questions</h3>
+<p>When you ask about valid statuses, available transitions, or how to flip a plan's status by hand, <code>/chat</code> renders the live plan-lifecycle overview (<code>bin/booping render src/templates/docs/plan_lifecycle_overview.md.j2</code>) and grounds its answer in that output — so the explanation always reflects the current <code>plan.statuses</code> config rather than a hard-coded recital.</p>
+<h3 id="researcher-delegation-for-wide-reads">Researcher delegation for wide reads</h3>
+<p><code>/chat</code> makes small ad-hoc reads itself, but when a request spans more than a few artifacts — "summarise everything we decided about auth across these plans and retros" — it delegates the read to <code>booping-researcher</code> and works from the returned summary rather than dumping raw files into the session. This keeps the working context focused even when the question reaches across the vault.</p>
               
             </div>
           </div><footer>

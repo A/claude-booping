@@ -80,6 +80,12 @@
     <li class="toctree-l2"><a class="reference internal" href="#command">Command</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#what-it-writes">What it writes</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#update-vs-create-sweep">Update-vs-create sweep</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#the-review-table">The review table</a>
+    </li>
+        </ul>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#best-practices">Best practices</a>
         <ul>
@@ -134,12 +140,18 @@
 <p>Bare <code>/learn</code> picks the plan currently in <code>awaiting-learning</code>. Pass a retro file path to absorb lessons from a specific one.</p>
 <p><code>/learn</code> walks the plan from <code>awaiting-learning → done</code> once you have signed off on the proposed updates.</p>
 <h2 id="what-it-writes">What it writes</h2>
-<p><code>/learn</code> is the <strong>only</strong> authorised author for two surfaces inside the vault:</p>
+<p><code>/learn</code> routes every accepted finding to <strong>exactly one</strong> target. Three of the four targets live in the vault; the fourth is the attached repo's own <code>CLAUDE.md</code>:</p>
 <ul>
 <li><strong>Global lessons</strong> at <code>~/Claude/{project}/lessons/{N}_{title}.md</code> — durable rules every skill picks up via Preflight on every invocation. <code>N</code> is a monotonic counter so the directory stays ordered chronologically.</li>
 <li><strong>Per-skill and per-agent extension files</strong> at <code>~/Claude/{project}/_booping/skill_&lt;name&gt;.md</code> and <code>~/Claude/{project}/_booping/agent_&lt;full-agent-name&gt;.md</code> (e.g. <code>agent_booping-developer.md</code>) — narrower rules that only reach the matching skill or worker agent, injected at load time. These are the right home for findings too specific to belong in global lessons (e.g. "when running <code>/develop</code> on this monorepo, prefer pnpm over npm").</li>
+<li><strong>The repo's own <code>CLAUDE.md</code></strong> — when a finding is a project convention the model should follow regardless of booping (a coding standard, a structural rule), <code>/learn</code> adds it as a one-line bullet to the attached repo's <code>CLAUDE.md</code>. These edits are committed separately, in the repo working tree, not in the vault.</li>
 </ul>
-<p>See <a href="../vault/#lessons">Vault</a> for the directory layout and how each file reaches the active context.</p>
+<p>A finding never lands in two targets at once. When a candidate would otherwise span two, <code>/learn</code> decomposes it into one row per target before writing.</p>
+<p>See <a href="../vault/#lessons">Vault</a> for the vault directory layout and how each file reaches the active context.</p>
+<h3 id="update-vs-create-sweep">Update-vs-create sweep</h3>
+<p>Before drafting its proposals, <code>/learn</code> reads the existing lessons, extension files, and the repo <code>CLAUDE.md</code> to check whether each candidate is genuinely new. A candidate that duplicates or refines an existing rule becomes an <strong>update</strong> to that rule rather than a fresh, near-duplicate entry; a candidate that contradicts an existing rule is flagged as a <strong>conflict</strong> for you to resolve in the review table. This keeps the lesson set from accumulating redundant or self-contradicting rules over many sprints.</p>
+<h3 id="the-review-table">The review table</h3>
+<p>Every candidate is presented in a single review table before anything is written — one row per landing site, with columns <code>#</code>, <code>Target</code>, <code>Type</code>, <code>Rule</code>, and <code>Example</code>. You accept all, or reject individual rows by number (e.g. <code>2 5</code>), or append your own row in the same shape. Nothing is written until you respond; table acceptance is the consent for the whole write pass — there are no per-row prompts. (The exact column shape and accept/reject syntax live in the plugin-internal <code>docs/learn_review_table.md</code> that the skill loads at runtime.)</p>
 <h2 id="best-practices">Best practices</h2>
 <h3 id="review-every-proposed-update">Review every proposed update</h3>
 <p><code>/learn</code> proposes — you commit. Read each proposed lesson and extension edit before approving. Three things to check:</p>

@@ -135,7 +135,7 @@
 <p>See <a href="../project_config/">Project config</a> for the config-merge rules and <a href="../vault/">Vault</a> for the extension-file conventions.</p>
 <h2 id="how-to-disable-internal-agents">How to disable internal agents</h2>
 <p>booping's built-in agents (<code>booping-developer</code>, <code>booping-researcher</code>) stay available to every skill by default. When you want your external agent to be the <em>only</em> worker a skill delegates to, the built-ins can compete against it and the skill may pick a built-in when you wanted yours.</p>
-<p>Set <code>skills.&lt;name&gt;.disable_internal_agents: true</code> for that skill. This leaves only the agents you registered yourself, so the skill always reaches for your external agent.</p>
+<p>Set <code>skills.&lt;name&gt;.disable_internal_agents: true</code> for that skill. This leaves only the agents you registered yourself, so the skill always reaches for your external agent. The flag (and the per-agent <code>internal</code> marker it filters on) is documented in the <a href="../project_config/#skillsnameagents"><code>skills.&lt;name&gt;.agents</code> key tour</a>.</p>
 <h2 id="level-1-connect-an-external-claude-code-agent">Level 1 — Connect an external Claude Code agent</h2>
 <p>The simplest case: a plain global Claude Code agent — same kind booping ships, just yours. Maybe it carries different instructions, or runs on a cheaper model like haiku. You want a skill (say <code>/develop</code>) to use it to write code.</p>
 <p><strong>1. Create the agent</strong> at <code>~/.claude/agents/haiku-developer.md</code>:</p>

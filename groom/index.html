@@ -132,7 +132,7 @@
                 <h1 id="groom">/groom</h1>
 <p>Spec a sprint: take a rough request and produce a reviewable plan file under <code>~/Claude/{project}/plans/</code> with milestones, tasks, story points, and definitions of done.</p>
 <h2 id="what-it-does">What it does</h2>
-<p><code>/groom</code> walks a request through the early lifecycle states — <code>backlog</code> or fresh request → <code>in-spec</code> → <code>awaiting-plan-review</code> → <code>ready-for-dev</code>. The output is a single markdown plan file with YAML frontmatter that subsequent skills (<code>/develop</code>, <code>/retro</code>, <code>/learn</code>) read. Status transitions are manual frontmatter edits performed by <code>/groom</code> as it clears each gate; no CLI mutates them.</p>
+<p><code>/groom</code> walks a request through the early lifecycle states — <code>backlog</code> or fresh request → <code>in-spec</code> → <code>awaiting-plan-review</code> → <code>ready-for-dev</code>. The output is a single markdown plan file with YAML frontmatter that subsequent skills (<code>/develop</code>, <code>/retro</code>, <code>/learn</code>) read. As <code>/groom</code> clears each gate it fires a <code>booping transition</code> command that moves the plan and applies every mechanical mutation the move entails — <code>/groom</code> decides the move, the command performs it.</p>
 <p><code>/groom</code> does the research, drafts the milestones, estimates story points, optionally cross-validates against Gemini, and then hands the plan to you for explicit approval before it can move to <code>ready-for-dev</code>. Silence does not count as approval.</p>
 <h2 id="command">Command</h2>
 <pre><code class="language-text">/groom &lt;free-text request, optionally referencing a parked plan&gt;
@@ -173,7 +173,7 @@ existing one in apps/api/middleware/.
 <p>When <code>/groom</code> enters <code>awaiting-plan-review</code> it presents the plan and waits for your verdict. The plan is not yet ready for development — you are the gate.</p>
 <p>What to check before approving:</p>
 <ul>
-<li><strong>Goal is sharp.</strong> The business goal in frontmatter matches the request, with no scope creep.</li>
+<li><strong>Goal is sharp.</strong> The <code>summary</code> in frontmatter matches the request, with no scope creep.</li>
 <li><strong>Milestones cover the goal end-to-end.</strong> No silent gaps, no "and then ..." vagueness in the last milestone.</li>
 <li><strong>Tasks are sized honestly.</strong> No 5-SP tasks except deliberate research spikes (see Story points).</li>
 <li><strong>Definitions of done are verifiable.</strong> Each task DoD checkbox is something you can mechanically confirm — not "code looks good".</li>
@@ -209,8 +209,9 @@ existing one in apps/api/middleware/.
 <ul>
 <li><strong><code>sprint.default_threshold_sp</code></strong> — soft cap on total SP per plan; above this <code>/groom</code> proposes a split.</li>
 <li><strong><code>sprint.redecompose_threshold</code></strong> — per-task SP value at or above which the task must be re-decomposed before the plan can leave <code>in-spec</code>.</li>
+<li><strong><code>sprint.scale</code></strong> — the 1–5 SP definitions (each a <code>{sp, meaning}</code> entry) driving the story-point scale prose rendered into <code>/groom</code>'s body.</li>
 <li><strong><code>tasks</code></strong> — list of <code>{type, description, doc_uri}</code> entries (<code>feature</code>, <code>bug</code>, <code>refactoring</code>). <code>/groom</code> classifies the request against this list; the matching <code>doc_uri</code> lazy-loads detailed guidance for that task type.</li>
-<li><strong><code>plan.statuses</code></strong> — the lifecycle slice <code>/groom</code> owns (<code>backlog</code>, <code>in-spec</code>, <code>awaiting-plan-review</code>) plus its outgoing transitions. The gates and <code>on_exit</code> mutations rendered into the skill body come from here.</li>
+<li><strong><code>plan.statuses</code></strong> — the lifecycle slice <code>/groom</code> owns (<code>backlog</code>, <code>in-spec</code>, <code>awaiting-plan-review</code>) plus its outgoing transitions. The gates and the auto-applied mutations rendered into the skill body come from here.</li>
 </ul>
               
             </div>
