@@ -32,13 +32,13 @@ Free-form user notes — plan-review comments, code-review threads, ideas for ne
 
 Per-skill extension file. Loaded automatically into the matching skill's context at invocation time, so the project's local conventions reach `/groom`, `/develop`, etc. without you having to restate them. Authored and updated by [/learn](learn.md) — do not hand-edit unless you know what `/learn` would have written.
 
-[/install](install.md) seeds three of these `_booping/` files from the stack it detects, so the very first `/develop` already has project context:
+[/install](install.md) always seeds `_booping/agent_booping-developer.md`, and seeds the two skill files only when the project carries local signal the repo `CLAUDE.md` does not already own — otherwise it skips them:
 
-- `_booping/agent_booping-developer.md` — stack + conventions for the developer agent.
-- `_booping/skill_groom.md` — validation catalogue + sizing calibration.
-- `_booping/skill_develop.md` — quality-check classification + env notes.
+- `_booping/agent_booping-developer.md` — stack + conventions for the developer agent (always seeded).
+- `_booping/skill_groom.md` — a project-local groom override the repo `CLAUDE.md` doesn't carry (e.g. a sizing override); seeded only when such signal exists.
+- `_booping/skill_develop.md` — project-local dev signal the repo `CLAUDE.md` lacks (e.g. env / service notes); seeded only when such signal exists.
 
-`/learn` keeps these files current as the project accumulates lessons; the seeds are just a starting point.
+`/learn` keeps whatever is seeded current as the project accumulates lessons; the seeds are just a starting point.
 
 ## `_booping/agent_<full-agent-name>.md`
 

@@ -10,7 +10,7 @@ This skill is **wide-domain** — it must work across very different projects (b
 2. Decide mode (new / attach / cancel) and vault location (default `~/Claude/{name}` / local repo-relative dir).
 3. Scaffold (new: run `booping-create-project`; attach: write `.booping` only).
 4. Detect stack (orchestrator reads stack-signal files directly).
-5. Populate vault extensions (three files in `_booping/`).
+5. Populate vault extensions (seed only files carrying signal the repo `CLAUDE.md` lacks).
 6. Verify & seed `sprints.md`.
 
 ---
@@ -72,15 +72,14 @@ The orchestrator reads stack-signal files directly and synthesizes a structured 
 
 Read only these files if present in the attached repo at `<cwd>`:
 
-`pyproject.toml`, `package.json`, `Cargo.toml`, `go.mod`, `Gemfile`, `Justfile`, `Makefile`, `.github/workflows/*`, `.pre-commit-config.yaml`, `README.md`, `CONTRIBUTING.md`.
+`pyproject.toml`, `package.json`, `Cargo.toml`, `go.mod`, `Gemfile`, `Justfile`, `Makefile`, `.github/workflows/*`, `.pre-commit-config.yaml`, `README.md`, `CONTRIBUTING.md`, `CLAUDE.md`.
 
 From those, infer a summary with these fields (each on its own line):
 
-- `language` — e.g. "Python 3.12", "Rust 1.80", "TypeScript 5 + React 19".
-- `validations` — list of `{command, role}` pairs covering EVERY validation the project offers — tests, linters, typecheckers, formatters, security scanners, coverage, doctest — do NOT restrict to "test" + "lint".
-- `hook_enforced_commands` — subset of validations that fires from `.pre-commit-config.yaml` or an equivalent CI/hook config.
-- `configured_manual_commands` — the complement: configured but not hook-fired.
+- `language` — e.g. "Python 3.12", "Rust 1.80", "TypeScript 5 + React 19". Feeds the developer-agent file.
 - `env_notes` — Docker Compose, required services, env vars needed before commands run.
+
+Read the repo `CLAUDE.md` separately and note what it already documents — especially the project's command catalogue (test / lint / typecheck / build) and dev-environment setup. Phase 4 diffs the seed candidates against this to decide which extension files to skip.
 
 Return `unknown` for any field you can't resolve.
 
@@ -88,13 +87,15 @@ Return `unknown` for any field you can't resolve.
 
 Present the Phase 3 findings back to the user as `AskUserQuestion` defaults so they can confirm or override each field (one prompt per field, or one grouped prompt — either is fine).
 
-Then write **three** extension files under `~/Claude/{project}/_booping/`:
+**Seed policy**: write an extension file only when it carries project-local signal the repo `CLAUDE.md` does not already own; otherwise skip it with an explicit message. Never copy a command catalogue from the repo into a vault file. Per file, under `~/Claude/{project}/_booping/`:
 
-1. `~/Claude/{project}/_booping/agent_booping-developer.md` — stack + conventions for the developer agent.
-2. `~/Claude/{project}/_booping/skill_groom.md` — validation catalogue + sizing calibration.
-3. `~/Claude/{project}/_booping/skill_develop.md` — quality-check classification + env notes.
+1. `agent_booping-developer.md` — stack + conventions for the developer agent. **Always seed** (subject to the skip-if-exists rule below).
+2. `skill_groom.md` — seed **only** when the user supplies a real groom override (e.g. a sprint-cap SP value). Never seed a validations catalogue, and never write a config-path `## Sizing calibration` stub — `sprint.default_threshold_sp` is already rendered into the groom skill body. If there is no real override, skip and print `skipped skill_groom.md — no project-local groom override`.
+3. `skill_develop.md` — seed **only** when there is dev signal the repo `CLAUDE.md` lacks (e.g. required services / env setup it does not document). Never copy a command list. If `CLAUDE.md` already documents the dev commands and there is no extra env signal, skip and print `skipped skill_develop.md — CLAUDE.md already documents the dev commands`.
 
-Skeletons for the three files are documented in `${CLAUDE_PLUGIN_ROOT}/docs/install_extension_files.md` — load them when ready to write.
+For each file actually written, print `wrote <path>`.
+
+Skeletons for the seeded files are documented in `${CLAUDE_PLUGIN_ROOT}/docs/install_extension_files.md` — load them when ready to write.
 
 **Skip-if-exists rule (attach mode)**: if a target file already exists non-empty, skip the write and print `preserved existing: <path>` to the user. Files that exist but are empty (e.g. a stub created by `booping-create-project`) may be overwritten.
 
