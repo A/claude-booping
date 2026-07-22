@@ -20,6 +20,30 @@ class Project(BaseModel):
         return self.directory.resolve().is_relative_to(self.repo_directory.resolve())
 
     @classmethod
+    def load_cwd_configured(
+        cls,
+        start: Path | None = None,
+        plugin_root: Path | None = None,
+        global_path: Path | None = None,
+    ) -> Project | None:
+        """Resolve the project/vault the way Context.assemble does.
+
+        Loads core + global config to read `home_dir` (the vault base) before
+        delegating to `load_cwd`. Command call sites must use this rather than
+        the bare `load_cwd()` so they honour the configured vault base; a bare
+        `load_cwd()` silently resolves against the built-in `~/Claude` default.
+        """
+        # Local imports avoid a config/rendering ↔ project import cycle at module load.
+        from booping.context import config as config_mod
+        from booping.rendering import get_plugin_root
+
+        root = plugin_root if plugin_root is not None else get_plugin_root()
+        gpath = global_path if global_path is not None else config_mod.global_config_path()
+        base_cfg = config_mod.load(root, [gpath])
+        home_dir = str(base_cfg.get("home_dir", "~/Claude"))
+        return cls.load_cwd(start=start, home_dir=home_dir)
+
+    @classmethod
     def load_cwd(cls, start: Path | None = None, home_dir: str = "~/Claude") -> Project | None:
         """Walk up from start (default cwd) looking for .booping; return None on miss.
 

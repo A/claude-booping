@@ -47,12 +47,12 @@ class Context(BaseModel):
         global_path = config_mod.global_config_path()
 
         # Resolve the vault before the project tier can be merged: the vault-home base
-        # (`home_dir`) lives in config, so we load core + global first, read `home_dir`
-        # from that partial merge, then resolve the vault. The `.booping` `vault_path:`
-        # marker still wins over `home_dir` inside Project.load_cwd.
-        base_cfg = config_mod.load(root, [global_path])
-        home_dir = str(base_cfg.get("home_dir", "~/Claude"))
-        project = Project.load_cwd(start=start, home_dir=home_dir)
+        # (`home_dir`) lives in config, so load_cwd_configured loads core + global first,
+        # reads `home_dir` from that partial merge, then resolves the vault. The `.booping`
+        # `vault_path:` marker still wins over `home_dir` inside Project.load_cwd.
+        project = Project.load_cwd_configured(
+            start=start, plugin_root=root, global_path=global_path
+        )
 
         if vault_override is not None:
             vault: Path | None = vault_override

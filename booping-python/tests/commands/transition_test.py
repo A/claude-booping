@@ -214,7 +214,9 @@ def _stub_project(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     vault = tmp_path / "vault"
     (vault / "plans").mkdir(parents=True)
 
-    def _fake_load_cwd(cls: type[Project], start: Path | None = None) -> Project:
+    def _fake_load_cwd(
+        cls: type[Project], start: Path | None = None, home_dir: str = "~/Claude"
+    ) -> Project:
         return Project(
             name="tproj",
             directory=vault,

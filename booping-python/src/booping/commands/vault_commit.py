@@ -34,7 +34,7 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
 
 def resolve_vault(plan_path: Path) -> Path:
     """Determine vault directory: from Project if available, else from plan path."""
-    project = Project.load_cwd()
+    project = Project.load_cwd_configured()
     if project is not None:
         return project.directory
     # Heuristic: plans live at <vault>/plans/<name>.md

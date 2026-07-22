@@ -320,6 +320,93 @@ class TestVaultCommitIntegration:
             assert parent == vault.resolve()
 
 
+class TestVaultCommitGlobalHomeDir:
+    """resolve_vault must honour the global-config `home_dir` vault base rather than
+    the hardcoded ~/Claude default (regression for the bare Project.load_cwd() bug)."""
+
+    def _write_global_config(self, xdg: Path, home_dir: Path) -> None:
+        cfg_dir = xdg / "booping"
+        cfg_dir.mkdir(parents=True, exist_ok=True)
+        (cfg_dir / "config.yaml").write_text(f"home_dir: {home_dir}\n")
+
+    def test_resolve_vault_uses_global_home_dir(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+        isolated_xdg_config_home: Path,
+    ) -> None:
+        # Repo with a marker but no vault_path → vault resolves via home_dir.
+        repo = tmp_path / "repo"
+        repo.mkdir()
+        (repo / ".booping").write_text("project_name: myproj\n")
+
+        home = tmp_path / "notes"
+        home.mkdir()
+        self._write_global_config(isolated_xdg_config_home, home)
+
+        vault = home / "myproj"
+        plans = vault / "plans"
+        plans.mkdir(parents=True)
+        plan = plans / "20240115-my-feature.md"
+        plan.write_text("---\nstatus: ready-for-dev\n---\n\n# Body\n")
+
+        monkeypatch.chdir(repo)
+        assert vc_cmd.resolve_vault(plan).resolve() == vault.resolve()
+
+    def test_commit_resolves_vault_from_global_home_dir(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+        isolated_xdg_config_home: Path,
+    ) -> None:
+        repo = tmp_path / "repo"
+        repo.mkdir()
+        (repo / ".booping").write_text("project_name: myproj\n")
+
+        home = tmp_path / "notes"
+        home.mkdir()
+        self._write_global_config(isolated_xdg_config_home, home)
+
+        # The vault the marker + home_dir resolve to — a separate git repo.
+        vault = home / "myproj"
+        plans = vault / "plans"
+        plans.mkdir(parents=True)
+        _git(vault, ["init"])
+        _git(vault, ["config", "user.email", "test@example.com"])
+        _git(vault, ["config", "user.name", "Test"])
+        (vault / "sprints.md").write_text("# Sprints\n")
+        plan = plans / "20240115-my-feature.md"
+        plan.write_text("---\nstatus: awaiting-plan-review\n---\n\n# Body\n")
+        _git(vault, ["add", "sprints.md", "plans/20240115-my-feature.md"])
+        _git(vault, ["commit", "-m", "initial"])
+
+        plan.write_text("---\nstatus: ready-for-dev\n---\n\n# Body\n")
+        (vault / "sprints.md").write_text("# Updated\n")
+
+        # Run from the repo; vault-commit resolves the vault via home_dir and commits there.
+        monkeypatch.chdir(repo)
+        vc_cmd.do_vault_commit(to_status="ready-for-dev", plan_path=plan)
+
+        log = _git(vault, ["log", "--oneline", "-1"])
+        assert "ready-for-dev: 20240115-my-feature" in log.stdout
+
+    def test_bare_default_resolves_home_claude(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """With no global config, the vault base falls back to ~/Claude/<name>."""
+        repo = tmp_path / "repo"
+        repo.mkdir()
+        (repo / ".booping").write_text("project_name: myproj\n")
+
+        plan = tmp_path / "myproj" / "plans" / "20240115-my-feature.md"
+
+        monkeypatch.chdir(repo)
+        expected = (Path("~/Claude").expanduser() / "myproj").resolve()
+        assert vc_cmd.resolve_vault(plan).resolve() == expected
+
+
 class TestGitHelper:
     def test_git_success(self, tmp_path: Path) -> None:
         vault = _init_vault(tmp_path)
