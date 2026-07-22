@@ -1,8 +1,8 @@
 # Playbooks
 
-A **playbook** is a user-authored, multi-step guided procedure that lives in the vault and is driven by the [/playbook](playbooks.md) skill. Where the built-in skills (`/groom`, `/develop`, …) are fixed workflows shipped by the plugin, a playbook is yours to write: an ordered list of prompt steps, each optionally delegated to a sub-agent, with review gates where you want to inspect the output before continuing.
+A **playbook** is a user-authored, multi-step guided procedure that lives in the vault and is driven by the [/playbook](playbooks.md) skill. Where the built-in skills (`/groom`, `/develop`, …) are fixed workflows shipped by the plugin, a playbook is yours to write: an ordered sequence of prompt steps, each optionally delegated to a sub-agent, with review gates where you want to inspect the output before continuing.
 
-Playbooks are plain markdown with YAML frontmatter — no Jinja, no build step. Author them by hand and they show up in `/playbook` immediately.
+A playbook's **manifest body is a Jinja template**: you compose the procedure by calling `inline_step` / `reference_step`, and the call order is the run order. The individual step files stay plain markdown — no Jinja in a step body. Author a playbook by hand and it shows up in `/playbook` immediately.
 
 ## Scopes and shadowing
 
@@ -19,10 +19,12 @@ Each playbook is a directory:
 
 ```
 <name>/
-  playbook.md          # manifest: metadata + ordered step list
+  playbook.md          # manifest: metadata frontmatter + Jinja body composing the steps
   steps/
     <step>.md          # one file per step, in any order on disk
 ```
+
+The loader globs `steps/*.md` (sorted; `_`-prefixed files skipped), but disk order is irrelevant to the run — **the manifest body decides which steps appear and in what order** via its composition calls.
 
 ## Frontmatter contract
 
@@ -32,18 +34,42 @@ Each playbook is a directory:
 - `title` — human-readable name.
 - `summary` — one-line description shown in the `/playbook` listing.
 - `trigger` — natural-language hint the skill matches the user's request against.
-- `steps` — ordered list of step names. Each entry maps to `steps/<step>.md`.
+
+There is **no `steps:` list** — the manifest body composes the steps (see below).
 
 `steps/<step>.md` frontmatter:
 
-- `name` — step identifier.
+- `name` — step identifier (referenced from the manifest body).
 - `summary` — one-line description of the step.
-- `agent` — the sub-agent to run this step (by bare name), or `null` to run the step inline in the conversation.
-- `model` — model hint for the step.
-- `effort` — effort hint for the step.
+- `agent` — how the step runs (see the grammar below).
 - `review_gate` — when non-null, `/playbook` stops after the step, presents the output, and continues only on your explicit confirmation. `null` runs straight through.
+- `title` — *optional* human-readable heading for the step. When absent, the rendered heading is the titleized `name` (e.g. `current-time` → `Current Time`).
 
-The step's **body** is the prompt for that step. When `/playbook` runs a step it appends a `## Run-time context` block (`specs_dir`, `project`) after the body so steps can reference where to write and which project they run against.
+### The `agent` grammar
+
+A single `agent` field decides how the step executes:
+
+- `null` — run the step **inline** in the driving conversation, no sub-agent.
+- `<model>:<effort>` where `model` ∈ `{opus, sonnet, haiku, fable}` (e.g. `sonnet:high`, `haiku:medium`) — spawn a **generic sub-agent** with that model and effort.
+- any other non-null string — spawn a **named sub-agent** via `subagent_type=<value>`. The value is used verbatim, so colons are fine for namespaced agents (e.g. `booping:booping-researcher`, `general-purpose`).
+
+The step **body** is the prompt for that step (plain markdown — never Jinja).
+
+## The manifest body
+
+The `playbook.md` body is a Jinja template. Two functions compose steps:
+
+- `{{ inline_step('name') }}` — pull the step's body **inline** into the rendered procedure.
+- `{{ reference_step('name') }}` — emit a pointer to the step file instead of its body: `Read [Title](<abs path>) for content.`
+
+Call order defines the run sequence — there is no separate ordered list. A step file that is never called simply doesn't appear in the render. Calling an unknown step name **fails the render**.
+
+Each call renders as a `## <Title>` section. If the step has a sub-agent (`agent` non-null) and/or a `review_gate`, the section opens with an `Instructions:` block:
+
+- a **sub-agent bullet** — present when `agent` is non-null, describing how to spawn the step (generic model:effort agent, or named `subagent_type`).
+- a **review-gate bullet** — present when `review_gate` is set, carrying the gate text.
+
+When neither is present the `Instructions:` block is omitted entirely and the section is just the heading plus the body (inline) or the `Read …` pointer (reference). Gates are therefore **rendered from frontmatter, not written into step bodies** — the `/playbook` skill reads the gate bullet and owns pausing/enforcement.
 
 ## Authoring a global playbook
 
@@ -55,7 +81,7 @@ Create the directory under your home vault root:
 ~/Claude/_playbooks/my-playbook/steps/second.md
 ```
 
-Fill in `playbook.md` with the manifest frontmatter above, list your steps in order under `steps:`, and write each `steps/<step>.md` with its own frontmatter and prompt body. Run `/playbook` in any project and it appears in the listing with scope `global`.
+Fill in `playbook.md` with the manifest frontmatter above, then write the body as a Jinja template that calls `inline_step` / `reference_step` in the order you want the steps to run. Write each `steps/<step>.md` with its own frontmatter and plain-markdown prompt body. Run `/playbook` in any project and it appears in the listing with scope `global`.
 
 ## Authoring a local playbook
 
@@ -68,47 +94,83 @@ Same shape, but under the project's vault:
 
 It appears in `/playbook` with scope `local` and, if it shares a `name` with a global playbook, shadows it for that project.
 
+## Rendering
+
+`booping render-playbook <name>` renders the composed procedure — the manifest body with every `inline_step` / `reference_step` call expanded — to stdout, or to a file with `--output PATH` (`--output -` writes to stdout). An unknown playbook name exits 1; an unknown step name raises during the render.
+
 ## Worked example
 
-A minimal global playbook `test` with three steps, each delegated to `general-purpose`. Step 1 carries a review gate.
+A global playbook `demo` with two steps. The first reports the time inline behind a review gate; the second is delegated to a generic `sonnet:high` sub-agent and pulled in by reference.
 
-`~/Claude/_playbooks/test/playbook.md`:
+`~/Claude/_playbooks/demo/playbook.md`:
 
-```yaml
+```markdown
 ---
-name: test
-title: Test
-summary: Smoke-test the playbook runner end to end.
-trigger: run the test playbook
-steps:
-  - current-time
-  - hcmc-weather
-  - btc-price
+name: demo
+title: Demo
+summary: Show off inline + reference step composition.
+trigger: run the demo playbook
 ---
+
+{{ inline_step('current-time') }}
+
+{{ reference_step('write-report') }}
 ```
 
-`~/Claude/_playbooks/test/steps/current-time.md`:
+`~/Claude/_playbooks/demo/steps/current-time.md`:
 
 ```markdown
 ---
 name: current-time
 summary: Report the current time.
 agent: general-purpose
-review_gate: "Ask the user if he sleeps; continue only after an explicit answer."
+review_gate: "Ask the user if they want to continue; proceed only after an explicit answer."
 ---
 
 Report the current date and time in UTC and local time.
 ```
 
-Run trace:
+`~/Claude/_playbooks/demo/steps/write-report.md`:
 
-1. `/playbook` lists `test` (scope `global`).
-2. The orchestrator reads each step file and spawns the sub-agent with the step body plus an appended `## Run-time context` block (`specs_dir`, `project`).
-3. Step 1 returns the timestamps; its `review_gate` **stops** the run and asks the user.
+```markdown
+---
+name: write-report
+title: Write Report
+summary: Draft a short status report.
+agent: sonnet:high
+---
+
+Draft a one-paragraph status report from the timestamp above.
+```
+
+`booping render-playbook demo` produces roughly:
+
+```markdown
+## Current Time
+
+Instructions:
+- Spawn a sub-agent (subagent_type: general-purpose) with the prompt below.
+- Review gate: Ask the user if they want to continue; proceed only after an explicit answer.
+
+Report the current date and time in UTC and local time.
+
+## Write Report
+
+Instructions:
+- Spawn a generic sub-agent (model: sonnet, effort: high) with the referenced content.
+
+Read [Write Report](/abs/path/to/demo/steps/write-report.md) for content.
+```
+
+Run trace under `/playbook`:
+
+1. `/playbook` lists `demo` (scope `global`).
+2. The skill renders the composed procedure and works through it top to bottom.
+3. Step 1 runs (its `agent` names `general-purpose`), returns the timestamps; its `review_gate` **stops** the run and asks the user.
 4. The user answers; execution resumes.
-5. Steps 2–3 run and return a weather line and a BTC price line.
-6. The run closes with a one-paragraph summary combining all three outputs.
+5. Step 2 spawns a `sonnet:high` sub-agent that reads the referenced step file and drafts the report.
+6. The run closes with a short summary combining the outputs.
 
 ## Evals and harness
 
-Playbook eval suites and their run harness live **vault-side** at `~/Claude/_playbooks/`, with their own `README`. They are not part of this repository — the plugin only discovers and drives playbooks; authoring, evaluating, and iterating on them happens in the vault.
+Playbook eval suites and their run harness live **vault-side** at `~/Claude/_playbooks/`, with their own `README`. They are not part of this repository — the plugin only discovers, composes, and drives playbooks; authoring, evaluating, and iterating on them happens in the vault.
