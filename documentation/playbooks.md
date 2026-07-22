@@ -68,6 +68,47 @@ Same shape, but under the project's vault:
 
 It appears in `/playbook` with scope `local` and, if it shares a `name` with a global playbook, shadows it for that project.
 
+## Worked example
+
+A minimal global playbook `test` with three steps, each delegated to `general-purpose`. Step 1 carries a review gate.
+
+`~/Claude/_playbooks/test/playbook.md`:
+
+```yaml
+---
+name: test
+title: Test
+summary: Smoke-test the playbook runner end to end.
+trigger: run the test playbook
+steps:
+  - current-time
+  - hcmc-weather
+  - btc-price
+---
+```
+
+`~/Claude/_playbooks/test/steps/current-time.md`:
+
+```markdown
+---
+name: current-time
+summary: Report the current time.
+agent: general-purpose
+review_gate: "Ask the user if he sleeps; continue only after an explicit answer."
+---
+
+Report the current date and time in UTC and local time.
+```
+
+Run trace:
+
+1. `/playbook` lists `test` (scope `global`).
+2. The orchestrator reads each step file and spawns the sub-agent with the step body plus an appended `## Run-time context` block (`specs_dir`, `project`).
+3. Step 1 returns the timestamps; its `review_gate` **stops** the run and asks the user.
+4. The user answers; execution resumes.
+5. Steps 2–3 run and return a weather line and a BTC price line.
+6. The run closes with a one-paragraph summary combining all three outputs.
+
 ## Evals and harness
 
 Playbook eval suites and their run harness live **vault-side** at `~/Claude/_playbooks/`, with their own `README`. They are not part of this repository — the plugin only discovers and drives playbooks; authoring, evaluating, and iterating on them happens in the vault.
