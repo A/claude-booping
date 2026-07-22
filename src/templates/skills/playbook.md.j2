@@ -1,0 +1,46 @@
+# booping — /playbook
+
+Run a user-authored playbook: a multi-step guided procedure from the vault. Wide-domain — the steps carry all domain specifics; this skill only drives them.
+
+{% include "_partials/_project_context.j2" %}
+
+## Available playbooks
+
+{% if context.playbooks -%}
+| Playbook | Summary | Trigger | Scope | Path |
+| --- | --- | --- | --- | --- |
+{% for pb in context.playbooks -%}
+| {{ pb.name }} | {{ pb.summary | replace("|", "\\|") | replace("\n", " ") }} | {{ pb.trigger | replace("|", "\\|") | replace("\n", " ") }} | {{ pb.scope }} | {{ pb.path }} |
+{% endfor %}
+{%- else -%}
+_No playbooks found. Author one under `<home_dir>/_playbooks/<name>/` (global) or `{{ context.project.directory if context.project else "{vault}" }}/_playbooks/<name>/` (local)._
+{%- endif %}
+
+## Select
+
+Match `$ARGUMENTS` against the `Trigger` / `Playbook` columns. On no clear match or ambiguity, ask which playbook to run. Announce the chosen playbook and its ordered steps before starting.
+
+## Execute
+
+Run the selected playbook's steps in order. For each step:
+
+1. Read the step file (path is `<playbook-dir>/steps/<step>.md`).
+2. Compose the invocation: the step body is the briefing. Append a `## Run-time context` block after it:
+   ```
+   ## Run-time context
+   specs_dir: {{ context.project.directory if context.project else "{vault}" }}/specs
+   project: {{ context.project.name if context.project else "{project}" }}
+   ```
+3. Run it:
+   - **`agent` set and the harness has that sub-agent** → spawn it (`subagent_type="<agent>"`) with the composed briefing.
+   - **`agent` null, or the harness lacks the named agent** → run the step inline in this conversation.
+4. Honor the step's own return contract — the step body defines what to return; pass that through unchanged to the user (and into later steps when they reference it).
+5. **`review_gate` non-null** → STOP after the step. Present the step output and the gate prompt, and continue to the next step only on explicit user confirmation. This pause is in-conversation only — no state is persisted.
+
+## Completion report
+
+After the last step, give a one-paragraph summary: artifacts written and gates passed.
+
+Cross-session resume is not yet supported — a run lives entirely within one conversation.
+
+{{ tools.render('src/templates/_partials/_extra_instructions.j2', extra_instruction_key='skill_playbook') }}

@@ -12,6 +12,7 @@ from booping.context.agent import Agent
 from booping.context.lesson import Lesson
 from booping.context.plan import Plan
 from booping.context.plan_template import PlanTemplate
+from booping.context.playbook import Playbook
 from booping.context.project import Project
 from booping.context.retro import Retro
 from booping.context.review_template import ReviewTemplate
@@ -28,6 +29,7 @@ class Context(BaseModel):
     review_templates: list[ReviewTemplate] = []
     skills: dict[str, Skill] = {}
     agents: dict[str, Agent] = {}
+    playbooks: list[Playbook] = []
     config: dict[str, Any] = {}
     extra_instructions: dict[str, str] = {}
 
@@ -53,6 +55,12 @@ class Context(BaseModel):
         project = Project.load_cwd_configured(
             start=start, plugin_root=root, global_path=global_path
         )
+
+        # Same core+global merge Project.load_cwd_configured reads `home_dir` from —
+        # the global-playbooks root hangs off it, resolved (with `~` expansion) before
+        # the project tier, so a project-tier `home_dir` stays inert here too.
+        base_cfg = config_mod.load(root, [global_path])
+        home_dir = Path(str(base_cfg.get("home_dir", "~/Claude"))).expanduser()
 
         if vault_override is not None:
             vault: Path | None = vault_override
@@ -83,6 +91,7 @@ class Context(BaseModel):
 
         skills = Skill.load_all(root)
         agents = Agent.load_all(root)
+        playbooks = Playbook.load_all(vault, home_dir)
 
         return cls(
             project=project,
@@ -93,6 +102,7 @@ class Context(BaseModel):
             review_templates=review_templates,
             skills=skills,
             agents=agents,
+            playbooks=playbooks,
             config=cfg,
             extra_instructions=extra_instructions,
         )

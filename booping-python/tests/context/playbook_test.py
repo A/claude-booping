@@ -1,0 +1,105 @@
+from __future__ import annotations
+
+from pathlib import Path
+
+import pytest
+
+from booping.context.playbook import Playbook
+from tests.helpers import get_fixture_path
+
+
+def _home() -> Path:
+    return get_fixture_path("playbooks-home")
+
+
+def _vault() -> Path:
+    return get_fixture_path("playbooks-vault")
+
+
+def test_global_only_discovery() -> None:
+    pbs = Playbook.load_all(vault=None, home_dir=_home())
+    names = {pb.name for pb in pbs}
+    # alpha, shared, partial discovered; _lib and nomanifest excluded.
+    assert names == {"alpha", "shared", "partial"}
+    assert all(pb.scope == "global" for pb in pbs)
+
+
+def test_underscore_dirs_excluded() -> None:
+    pbs = Playbook.load_all(vault=None, home_dir=_home())
+    assert "_lib" not in {pb.name for pb in pbs}
+
+
+def test_fields_and_step_ordering() -> None:
+    pbs = Playbook.load_all(vault=None, home_dir=_home())
+    alpha = next(pb for pb in pbs if pb.name == "alpha")
+    assert alpha.title == "Alpha Playbook"
+    assert alpha.summary == "A global-only playbook for testing."
+    assert alpha.trigger == "when the user says alpha"
+    # Steps follow the manifest `steps:` list order.
+    assert [s.name for s in alpha.steps] == ["gather", "draft"]
+
+
+def test_step_review_gate_and_agent_null_vs_set() -> None:
+    pbs = Playbook.load_all(vault=None, home_dir=_home())
+    alpha = next(pb for pb in pbs if pb.name == "alpha")
+    gather, draft = alpha.steps
+    assert gather.agent == "booping-researcher"
+    assert gather.model == "sonnet"
+    assert gather.effort == "medium"
+    assert gather.review_gate is None
+    assert draft.agent is None
+    assert draft.review_gate == "confirm the draft before continuing"
+    assert "Draft the artifact" in draft.body
+
+
+def test_local_shadows_global() -> None:
+    pbs = Playbook.load_all(vault=_vault(), home_dir=_home())
+    by_name = {pb.name: pb for pb in pbs}
+    # shared exists in both roots — local wins, global absent.
+    shared = by_name["shared"]
+    assert shared.scope == "local"
+    assert shared.title == "Local Shared"
+    assert [pb for pb in pbs if pb.name == "shared"] == [shared]
+    # local-only and global-only both present.
+    assert by_name["beta"].scope == "local"
+    assert by_name["alpha"].scope == "global"
+
+
+def test_tolerant_partial_frontmatter() -> None:
+    pbs = Playbook.load_all(vault=None, home_dir=_home())
+    partial = next(pb for pb in pbs if pb.name == "partial")
+    # Missing title falls back to name; missing summary/trigger default to "".
+    assert partial.title == "partial"
+    assert partial.summary == ""
+    assert partial.trigger == ""
+    # Missing step file (`missing`) is dropped; present step (no frontmatter) survives.
+    assert [s.name for s in partial.steps] == ["present"]
+    assert "Body-only step" in partial.steps[0].body
+
+
+def test_missing_roots_empty() -> None:
+    assert Playbook.load_all(vault=None, home_dir=Path("/nonexistent/home")) == []
+    assert (
+        Playbook.load_all(vault=Path("/nonexistent/vault"), home_dir=Path("/nonexistent/home"))
+        == []
+    )
+
+
+def test_global_root_follows_non_default_home_dir(tmp_path: Path) -> None:
+    # A non-default home_dir with its own _playbooks root is honoured.
+    root = tmp_path / "custom-home"
+    pb_dir = root / "_playbooks" / "gamma" / "steps"
+    pb_dir.mkdir(parents=True)
+    (root / "_playbooks" / "gamma" / "playbook.md").write_text(
+        "---\nname: gamma\ntitle: Gamma\nsteps:\n  - s1\n---\nbody\n"
+    )
+    (pb_dir / "s1.md").write_text("---\nname: s1\n---\nstep body\n")
+    pbs = Playbook.load_all(vault=None, home_dir=root)
+    assert [pb.name for pb in pbs] == ["gamma"]
+    assert pbs[0].scope == "global"
+
+
+def test_no_manifest_dir_warns(capsys: pytest.CaptureFixture[str]) -> None:
+    Playbook.load_all(vault=None, home_dir=_home())
+    err = capsys.readouterr().err
+    assert "nomanifest" in err

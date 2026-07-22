@@ -6,6 +6,7 @@ skills:
   help:    { effort: low }
   install: { effort: medium }
   learn:   { effort: high }
+  playbook: { effort: medium }
   retro:   { effort: medium }
 
 agents:

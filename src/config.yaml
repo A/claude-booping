@@ -66,6 +66,8 @@ skills:
   learn:
     status: awaiting-learning
 
+  playbook: {}
+
   retro:
     status: awaiting-retro
     agents:
