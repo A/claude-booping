@@ -239,12 +239,12 @@ class TestFrontmatterUpdateCLI:
     def test_does_not_write_to_real_home(
         self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        """Running from the repo (where the real `.booping` marker resolves the vault to
-        `<home>/Claude/<project>`) must never touch the developer's real `~/Claude`.
+        """Running from a repo whose `.booping` marker resolves the vault to
+        `<home>/Claude/<project>` must never touch the developer's real `~/Claude`.
 
-        HOME is isolated to a tmp dir, so the best-effort `.booping.log` writer lands
-        under the tmp home; the real home — read straight from the passwd database,
-        independent of the HOME env var — stays untouched.
+        HOME (and XDG_CONFIG_HOME) is isolated to a tmp dir, so the best-effort
+        `.booping.log` writer lands under the tmp home; the real home — read straight
+        from the passwd database, independent of the HOME env var — stays untouched.
         """
         import os
         import pwd
@@ -252,8 +252,13 @@ class TestFrontmatterUpdateCLI:
         home = tmp_path / "home"
         home.mkdir()
         monkeypatch.setenv("HOME", str(home))
-        # Run from the repo root, where the checked-in `.booping` marker lives.
-        repo_root = Path(__file__).resolve().parents[3]
+        # Isolate global config too, so the default `home_dir` (~/Claude) is used.
+        monkeypatch.setenv("XDG_CONFIG_HOME", str(home / ".config"))
+        # Run from a self-contained repo dir carrying its own `.booping` marker
+        # (the real repo's marker is gitignored and absent in CI checkouts).
+        repo_root = tmp_path / "repo"
+        repo_root.mkdir()
+        (repo_root / ".booping").write_text("project_name: claude-booping\n")
         monkeypatch.chdir(repo_root)
 
         real_home = Path(pwd.getpwuid(os.getuid()).pw_dir)
