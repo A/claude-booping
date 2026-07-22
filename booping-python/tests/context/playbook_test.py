@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from booping.context.playbook import Playbook
+from booping.context.playbook import Playbook, resolve_agent
 from tests.helpers import get_fixture_path
 
 
@@ -35,21 +35,43 @@ def test_fields_and_step_ordering() -> None:
     assert alpha.title == "Alpha Playbook"
     assert alpha.summary == "A global-only playbook for testing."
     assert alpha.trigger == "when the user says alpha"
-    # Steps follow the manifest `steps:` list order.
-    assert [s.name for s in alpha.steps] == ["gather", "draft"]
+    assert "Alpha playbook overview body" in alpha.body
+    # Steps are discovered by sorted glob of steps/*.md; `_`-prefixed skipped.
+    assert [s.name for s in alpha.steps] == ["draft", "gather"]
 
 
 def test_step_review_gate_and_agent_null_vs_set() -> None:
     pbs = Playbook.load_all(vault=None, home_dir=_home())
     alpha = next(pb for pb in pbs if pb.name == "alpha")
-    gather, draft = alpha.steps
-    assert gather.agent == "booping-researcher"
-    assert gather.model == "sonnet"
-    assert gather.effort == "medium"
+    draft, gather = alpha.steps
+    assert gather.agent == "sonnet:medium"
     assert gather.review_gate is None
     assert draft.agent is None
     assert draft.review_gate == "confirm the draft before continuing"
     assert "Draft the artifact" in draft.body
+
+
+def test_underscore_prefixed_step_skipped() -> None:
+    pbs = Playbook.load_all(vault=None, home_dir=_home())
+    alpha = next(pb for pb in pbs if pb.name == "alpha")
+    assert "ignored" not in {s.name for s in alpha.steps}
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [
+        (None, {"mode": "inline"}),
+        ("sonnet:medium", {"mode": "model", "model": "sonnet", "effort": "medium"}),
+        ("opus:high", {"mode": "model", "model": "opus", "effort": "high"}),
+        ("booping-researcher", {"mode": "named", "name": "booping-researcher"}),
+        (
+            "booping:booping-researcher",
+            {"mode": "named", "name": "booping:booping-researcher"},
+        ),
+    ],
+)
+def test_resolve_agent(value: str | None, expected: dict[str, str]) -> None:
+    assert resolve_agent(value) == expected
 
 
 def test_local_shadows_global() -> None:

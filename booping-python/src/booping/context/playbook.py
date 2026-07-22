@@ -8,17 +8,33 @@ from pydantic import BaseModel
 
 from booping.context._yaml import parse_frontmatter
 
+_MODEL_TIERS = {"opus", "sonnet", "haiku", "fable"}
+
 
 def _warn(msg: str) -> None:
     print(f"warning: {msg}", file=sys.stderr)
 
 
+def resolve_agent(value: str | None) -> dict[str, str]:
+    """Resolve a step's collapsed `agent` grammar into a rendering mode.
+
+    * ``None`` → inline execution.
+    * ``<model>:<effort>`` (model tier before the first colon) → model sub-agent.
+    * any other non-null string → named sub-agent (colons in the name are kept).
+    """
+    if value is None:
+        return {"mode": "inline"}
+    left, sep, right = value.partition(":")
+    if sep and left in _MODEL_TIERS:
+        return {"mode": "model", "model": left, "effort": right}
+    return {"mode": "named", "name": value}
+
+
 class Step(BaseModel):
     name: str
+    title: str | None = None
     summary: str = ""
     agent: str | None = None
-    model: str | None = None
-    effort: str | None = None
     review_gate: str | None = None
     body: str = ""
     path: Path
@@ -31,6 +47,7 @@ class Playbook(BaseModel):
     trigger: str = ""
     scope: Literal["global", "local"]
     path: Path
+    body: str = ""
     steps: list[Step] = []
 
     @classmethod
@@ -70,24 +87,17 @@ def _load_one(pb_dir: Path, scope: Literal["global", "local"]) -> Playbook | Non
         _warn(f"playbook {pb_dir.name}: no playbook.md, skipping")
         return None
 
-    fm, _ = parse_frontmatter(manifest)
+    fm, body = parse_frontmatter(manifest)
     name = str(fm.get("name", pb_dir.name))
     title = str(fm.get("title", name))
     summary = str(fm.get("summary", ""))
     trigger = str(fm.get("trigger", ""))
 
-    steps_raw = fm.get("steps")
-    step_names: list[str] = []
-    if isinstance(steps_raw, list):
-        step_names = [str(s) for s in steps_raw]  # type: ignore[misc]
-    elif steps_raw is not None:
-        _warn(f"playbook {name}: `steps` is not a list, ignoring")
-
     steps: list[Step] = []
-    for step_name in step_names:
-        step = _load_step(pb_dir, name, step_name)
-        if step is not None:
-            steps.append(step)
+    for step_path in sorted((pb_dir / "steps").glob("*.md")):
+        if step_path.name.startswith("_"):
+            continue
+        steps.append(_load_step(step_path))
 
     return Playbook(
         name=name,
@@ -96,22 +106,18 @@ def _load_one(pb_dir: Path, scope: Literal["global", "local"]) -> Playbook | Non
         trigger=trigger,
         scope=scope,
         path=manifest,
+        body=body,
         steps=steps,
     )
 
 
-def _load_step(pb_dir: Path, pb_name: str, step_name: str) -> Step | None:
-    step_path = pb_dir / "steps" / f"{step_name}.md"
-    if not step_path.is_file():
-        _warn(f"playbook {pb_name}: step `{step_name}` file missing, skipping")
-        return None
+def _load_step(step_path: Path) -> Step:
     fm, body = parse_frontmatter(step_path)
     return Step(
-        name=str(fm.get("name", step_name)),
+        name=str(fm.get("name", step_path.stem)),
+        title=_opt_str(fm.get("title")),
         summary=str(fm.get("summary", "")),
         agent=_opt_str(fm.get("agent")),
-        model=_opt_str(fm.get("model")),
-        effort=_opt_str(fm.get("effort")),
         review_gate=_opt_str(fm.get("review_gate")),
         body=body,
         path=step_path,

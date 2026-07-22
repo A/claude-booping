@@ -1,9 +1,7 @@
 ---
 name: gather
 summary: Gather inputs.
-agent: booping-researcher
-model: sonnet
-effort: medium
+agent: sonnet:medium
 review_gate: null
 ---
 
