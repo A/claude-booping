@@ -2,8 +2,17 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import yaml
+
 from booping.context import Context
 from tests.helpers import get_fixture_path
+
+
+def _write_global(xdg: Path, data: dict[str, object]) -> Path:
+    path = xdg / "booping" / "config.yaml"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(yaml.dump(data))
+    return path
 
 
 def test_assemble_smoke() -> None:
@@ -38,3 +47,77 @@ def test_assemble_no_project(tmp_path: Path) -> None:
     assert len(ctx.skills) > 0
     assert len(ctx.agents) > 0
     assert ctx.config != {}
+
+
+def test_assemble_no_project_merges_global(
+    tmp_path: Path, isolated_xdg_config_home: Path
+) -> None:
+    """No-project branch (outside any .booping) still merges the global tier."""
+    plugin_root = get_fixture_path("plugin-root-minimal")
+    _write_global(isolated_xdg_config_home, {"sprint": {"default_threshold_sp": 77}})
+    ctx = Context.assemble(start=tmp_path, plugin_root=plugin_root)
+    assert ctx.project is None
+    assert ctx.config["sprint"]["default_threshold_sp"] == 77
+
+
+def test_assemble_home_dir_drives_vault(
+    tmp_path: Path, isolated_xdg_config_home: Path
+) -> None:
+    """Global `home_dir` + no `vault_path:` → Project.directory == <home_dir>/<name>."""
+    plugin_root = get_fixture_path("plugin-root-minimal")
+    vault_base = tmp_path / "vaults"
+    _write_global(isolated_xdg_config_home, {"home_dir": str(vault_base)})
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    (repo / ".booping").write_text("project_name: myproj\n")
+    ctx = Context.assemble(start=repo, plugin_root=plugin_root)
+    assert ctx.project is not None
+    assert ctx.project.directory == vault_base / "myproj"
+
+
+def test_assemble_vault_path_wins_over_global_home_dir(
+    tmp_path: Path, isolated_xdg_config_home: Path
+) -> None:
+    """`.booping` `vault_path:` set → global `home_dir` ignored."""
+    plugin_root = get_fixture_path("plugin-root-minimal")
+    _write_global(isolated_xdg_config_home, {"home_dir": str(tmp_path / "vaults")})
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    (repo / ".booping").write_text("project_name: vp\nvault_path: ./booping\n")
+    ctx = Context.assemble(start=repo, plugin_root=plugin_root)
+    assert ctx.project is not None
+    assert ctx.project.directory == (repo / "booping").resolve()
+
+
+def test_assemble_default_vault_without_global(tmp_path: Path) -> None:
+    """No global config → default ~/Claude/<name> resolution unchanged (regression)."""
+    plugin_root = get_fixture_path("plugin-root-minimal")
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    (repo / ".booping").write_text("project_name: dproj\n")
+    ctx = Context.assemble(start=repo, plugin_root=plugin_root)
+    assert ctx.project is not None
+    assert ctx.project.directory == Path.home() / "Claude" / "dproj"
+
+
+def test_assemble_project_tier_home_dir_has_no_effect(
+    tmp_path: Path, isolated_xdg_config_home: Path
+) -> None:
+    """`home_dir` set in the project tier is merged into config but does NOT move the
+    vault — the vault is already resolved from core+global by then (documented
+    non-behavior)."""
+    plugin_root = get_fixture_path("plugin-root-minimal")
+    vault_base = tmp_path / "vaults"
+    _write_global(isolated_xdg_config_home, {"home_dir": str(vault_base)})
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    (repo / ".booping").write_text("project_name: proj\n")
+    vault = vault_base / "proj"
+    vault.mkdir(parents=True)
+    (vault / "config.yaml").write_text(yaml.dump({"home_dir": "/tmp/should-be-ignored"}))
+    ctx = Context.assemble(start=repo, plugin_root=plugin_root)
+    assert ctx.project is not None
+    # Vault resolved from the global tier, not the project-tier home_dir.
+    assert ctx.project.directory == vault
+    # The project-tier value is still merged into config — just inert for resolution.
+    assert ctx.config["home_dir"] == "/tmp/should-be-ignored"

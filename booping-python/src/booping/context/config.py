@@ -1,3 +1,4 @@
+import os
 import sys
 from pathlib import Path
 from typing import Any
@@ -6,6 +7,17 @@ from pydantic import BaseModel, ConfigDict
 
 from booping.context._yaml import safe_load_path, safe_load_str
 from booping.utils import deep_merge
+
+
+def global_config_path() -> Path:
+    """Path to the global config tier: ${XDG_CONFIG_HOME:-~/.config}/booping/config.yaml.
+
+    The XDG_CONFIG_HOME env var is read at call time (not import time) so tests can
+    redirect it per-run.
+    """
+    xdg = os.environ.get("XDG_CONFIG_HOME")
+    base = Path(xdg) if xdg else Path.home() / ".config"
+    return base / "booping" / "config.yaml"
 
 
 class AgentConfig(BaseModel):

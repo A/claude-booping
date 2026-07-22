@@ -44,7 +44,15 @@ class Context(BaseModel):
         the real ~/Claude/<project>/ directory that Project.directory resolves to.
         """
         root = plugin_root if plugin_root is not None else get_plugin_root()
-        project = Project.load_cwd(start=start)
+        global_path = config_mod.global_config_path()
+
+        # Resolve the vault before the project tier can be merged: the vault-home base
+        # (`home_dir`) lives in config, so we load core + global first, read `home_dir`
+        # from that partial merge, then resolve the vault. The `.booping` `vault_path:`
+        # marker still wins over `home_dir` inside Project.load_cwd.
+        base_cfg = config_mod.load(root, [global_path])
+        home_dir = str(base_cfg.get("home_dir", "~/Claude"))
+        project = Project.load_cwd(start=start, home_dir=home_dir)
 
         if vault_override is not None:
             vault: Path | None = vault_override
@@ -54,7 +62,7 @@ class Context(BaseModel):
             vault = None
 
         if vault is not None:
-            override_paths = [vault / "config.yaml"]
+            override_paths = [global_path, vault / "config.yaml"]
             cfg = config_mod.load(root, override_paths)
             config_mod.validate_skills(cfg)
             plans = Plan.load_all(vault)
@@ -64,7 +72,7 @@ class Context(BaseModel):
             review_templates = ReviewTemplate.load_all(root, vault)
             extra_instructions = ei_mod.load(vault)
         else:
-            cfg = config_mod.load(root, [])
+            cfg = config_mod.load(root, [global_path])
             config_mod.validate_skills(cfg)
             plans = []
             lessons = []

@@ -1,3 +1,10 @@
+# Vault-home base for per-project vaults (`<home_dir>/<project>/`). Raw string;
+# `~` is expanded at vault-resolution time. Override globally at
+# ${XDG_CONFIG_HOME:-~/.config}/booping/config.yaml. A `.booping` `vault_path:`
+# marker still wins over this. Set in the project tier it has no effect (the vault
+# is already resolved by then).
+home_dir: ~/Claude/
+
 sprint:
   default_threshold_sp: 35
   redecompose_threshold: 5
