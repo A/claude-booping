@@ -19,27 +19,30 @@ _No playbooks found. Author one under `<home_dir>/_playbooks/<name>/` (global) o
 
 ## Select
 
-Match `$ARGUMENTS` against the `Trigger` / `Playbook` columns. On no clear match or ambiguity, ask which playbook to run. Announce the chosen playbook and its ordered steps before starting.
+Match `$ARGUMENTS` against the `Trigger` / `Playbook` columns. On no clear match or ambiguity, ask which playbook to run. Announce the chosen playbook and its `## Execution graph` wave list before starting.
 
 ## Execute
 
-Render the composed procedure: `booping render-playbook <name>` (`<name>` = the selected playbook). It emits `## <Title>` sections in run order; each carries its own directives. Walk them top to bottom, executing exactly what each section declares.
+Render the composed procedure: `booping render-playbook <name>` (`<name>` = the selected playbook). Output is: notices → preamble → `## Execution graph` (numbered wave list) → one `## <Title>` section per step.
 
-For each `## ` section:
+- Any `**STOP — tell the user:**` line → relay it verbatim and do not execute the playbook. `**Note — tell the user:**` → relay it, then continue.
+- Follow the preamble as a playbook-level instruction over the whole run.
 
-1. Read the section content. If the body is `Read [Title](<path>) for content.`, Read that path — its contents are the actual step prompt.
-2. Compose the invocation from the step prompt, then append this block:
+Walk the wave list in order. For each wave (a numbered line; ` ∥ `-separated names run in parallel):
+
+1. Gather each member's `## <Title>` section. A wave-1 body is embedded; otherwise Read the section's link first — its contents are the step prompt.
+2. Compose each member's invocation from its step prompt, and append:
    ```
    ## Run-time context
    specs_dir: {{ context.project.directory if context.project else "{vault}" }}/specs
    project: {{ context.project.name if context.project else "{project}" }}
    ```
-3. Run per the `Instructions:` bullet:
-   - `Run in a sub-agent — model <model>, effort <effort>.` → spawn `subagent_type="general-purpose"` with that `model` and reasoning `effort`, passing the composed invocation as the briefing.
-   - `Run in sub-agent: <name>.` → spawn `subagent_type="<name>"` with the composed invocation as the briefing.
-   - No sub-agent bullet → run the step inline in this conversation.
-4. Honor the step's own return contract — pass its output through unchanged to the user, and into later sections that reference it.
-5. `Review gate:` bullet present → STOP after the step. Present the step output and the gate text, and continue only on explicit user confirmation. In-conversation only — no state is persisted.
+   Then append a bounded return contract: the step prompt's own if it states one, else `Return only: artifacts written + outcome, ≤ 5 lines.`
+3. Run each member per its section's agent bullet: model+effort → `subagent_type="general-purpose"` with that model and reasoning effort; named → `subagent_type="<name>"`; no agent bullet → run inline. A multi-member wave spawns ALL member sub-agents in ONE message and never runs any member inline; wait for all to finish before the next wave.
+4. Any member failure → report it and stop; do not start the next wave.
+5. After the wave completes, honor each member's `Review gate:` bullet: present that member's output labeled by step name alongside the gate text, and continue only on explicit user confirmation. In-conversation only — no state is persisted.
+
+Pass each step's output through unchanged to the user and into later sections that depend on it.
 
 ## Completion report
 
