@@ -45,6 +45,7 @@ class Playbook(BaseModel):
     title: str
     summary: str = ""
     trigger: str = ""
+    requires_project: bool = False
     scope: Literal["global", "local"]
     path: Path
     body: str = ""
@@ -92,6 +93,7 @@ def _load_one(pb_dir: Path, scope: Literal["global", "local"]) -> Playbook | Non
     title = str(fm.get("title", name))
     summary = str(fm.get("summary", ""))
     trigger = str(fm.get("trigger", ""))
+    requires_project = bool(fm.get("requires_project", False))
 
     steps: list[Step] = []
     for step_path in sorted((pb_dir / "steps").glob("*.md")):
@@ -104,6 +106,7 @@ def _load_one(pb_dir: Path, scope: Literal["global", "local"]) -> Playbook | Non
         title=title,
         summary=summary,
         trigger=trigger,
+        requires_project=requires_project,
         scope=scope,
         path=manifest,
         body=body,

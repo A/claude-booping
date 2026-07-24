@@ -34,6 +34,7 @@ The loader globs `steps/*.md` (sorted; `_`-prefixed files skipped), but disk ord
 - `title` — human-readable name.
 - `summary` — one-line description shown in the `/playbook` listing.
 - `trigger` — natural-language hint the skill matches the user's request against.
+- `requires_project` — *optional*, default `false`. When `true`, the playbook only runs with a booping project attached: `/playbook` flags it in the listing and refuses to run it without a project, and `booping render-playbook` refuses to render it (stderr + exit 1).
 
 There is **no `steps:` list** — the manifest body composes the steps (see below).
 

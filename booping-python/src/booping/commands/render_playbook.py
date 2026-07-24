@@ -75,6 +75,13 @@ def _run(args: argparse.Namespace) -> None:
         )
         sys.exit(1)
 
+    if pb.requires_project and ctx.project is None:
+        print(
+            f"error: playbook '{args.name}' requires a booping project; none attached here",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
     output_str: str | None = args.output
     message = args.name
     if output_str is not None and output_str != "-":

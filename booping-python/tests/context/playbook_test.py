@@ -51,6 +51,14 @@ def test_step_review_gate_and_agent_null_vs_set() -> None:
     assert "Draft the artifact" in draft.body
 
 
+def test_requires_project_defaults_false_and_parses_true() -> None:
+    pbs = Playbook.load_all(vault=_vault(), home_dir=_home())
+    by_name = {pb.name: pb for pb in pbs}
+    # Not set in alpha's frontmatter → default False; explicit true in beta.
+    assert by_name["alpha"].requires_project is False
+    assert by_name["beta"].requires_project is True
+
+
 def test_underscore_prefixed_step_skipped() -> None:
     pbs = Playbook.load_all(vault=None, home_dir=_home())
     alpha = next(pb for pb in pbs if pb.name == "alpha")

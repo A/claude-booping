@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import subprocess
 from pathlib import Path
 
@@ -93,6 +94,27 @@ def test_unknown_step_name_raises() -> None:
     pb = pb.model_copy(update={"body": "{{ inline_step('does-not-exist') }}"})
     with pytest.raises(ValueError, match="unknown step 'does-not-exist'"):
         compose(pb)
+
+
+def test_requires_project_without_project_exits_1(tmp_path: Path) -> None:
+    # HOME is isolated (autouse fixture); plant a requires_project playbook in its
+    # default global root. tmp cwd has no `.booping` — no project attached.
+    pb_dir = Path(os.environ["HOME"]) / "Claude" / "_playbooks" / "gated"
+    (pb_dir / "steps").mkdir(parents=True)
+    (pb_dir / "playbook.md").write_text(
+        "---\nname: gated\ntitle: Gated\nrequires_project: true\n---\n"
+        "{{ inline_step('only') }}\n"
+    )
+    (pb_dir / "steps" / "only.md").write_text("---\nname: only\n---\nstep body\n")
+    result = subprocess.run(
+        [str(BOOPING_BIN), "render-playbook", "gated"],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 1
+    assert result.stdout == ""
+    assert "requires a booping project" in result.stderr
 
 
 def test_missing_playbook_exits_1(tmp_path: Path) -> None:
