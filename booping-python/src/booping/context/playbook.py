@@ -40,6 +40,85 @@ class Step(BaseModel):
     path: Path
 
 
+class GraphProblem(BaseModel):
+    kind: Literal["cycle", "unknown_dep"]
+    cycle: list[str] = []  # kind=cycle: the cycle path, e.g. ["a", "b", "a"]
+    dep: str = ""  # kind=unknown_dep: the missing key
+    dependent: str = ""  # kind=unknown_dep: the step that listed it
+
+
+class WaveResolution(BaseModel):
+    waves: list[list[str]] = []  # empty when any problem present
+    problems: list[GraphProblem] = []
+
+
+def resolve_waves(graph: dict[str, list[str]]) -> WaveResolution:
+    """Resolve a dependency graph into ordered waves.
+
+    Wave level = 1 + max(level of deps); steps with no deps land in wave 1.
+    Within a wave, steps keep graph key insertion order. Problems (unknown deps,
+    cycles) are collected, never raised; any problem present → ``waves == []``.
+    """
+    problems: list[GraphProblem] = []
+
+    for step, deps in graph.items():
+        for dep in deps:
+            if dep not in graph:
+                problems.append(
+                    GraphProblem(kind="unknown_dep", dep=dep, dependent=step)
+                )
+
+    # Detect cycles via DFS; one problem per distinct cycle found.
+    WHITE, GREY, BLACK = 0, 1, 2
+    color: dict[str, int] = {node: WHITE for node in graph}
+    seen_cycles: set[tuple[str, ...]] = set()
+
+    def visit(node: str, stack: list[str]) -> None:
+        color[node] = GREY
+        stack.append(node)
+        for dep in graph.get(node, []):
+            if dep not in graph:
+                continue
+            if color[dep] == GREY:
+                idx = stack.index(dep)
+                cyc = stack[idx:] + [dep]
+                key = tuple(cyc)
+                if key not in seen_cycles:
+                    seen_cycles.add(key)
+                    problems.append(GraphProblem(kind="cycle", cycle=cyc))
+            elif color[dep] == WHITE:
+                visit(dep, stack)
+        stack.pop()
+        color[node] = BLACK
+
+    for node in graph:
+        if color[node] == WHITE:
+            visit(node, [])
+
+    if problems:
+        return WaveResolution(waves=[], problems=problems)
+
+    # No problems: compute levels via memoized longest-path.
+    level: dict[str, int] = {}
+
+    def compute(node: str) -> int:
+        if node in level:
+            return level[node]
+        deps = graph[node]
+        level[node] = 1 if not deps else 1 + max(compute(dep) for dep in deps)
+        return level[node]
+
+    for node in graph:
+        compute(node)
+
+    max_level = max(level.values(), default=0)
+    waves: list[list[str]] = [[] for _ in range(max_level)]
+    for node in graph:  # graph insertion order preserved within each wave
+        waves[level[node] - 1].append(node)
+
+    return WaveResolution(waves=waves, problems=[])
+
+
 class Playbook(BaseModel):
     name: str
     title: str
@@ -50,6 +129,7 @@ class Playbook(BaseModel):
     path: Path
     body: str = ""
     steps: list[Step] = []
+    graph: dict[str, list[str]] = {}
 
     @classmethod
     def load_all(cls, vault: Path | None, home_dir: Path) -> list[Playbook]:
@@ -95,6 +175,12 @@ def _load_one(pb_dir: Path, scope: Literal["global", "local"]) -> Playbook | Non
     trigger = str(fm.get("trigger", ""))
     requires_project = bool(fm.get("requires_project", False))
 
+    raw_graph: dict[Any, Any] = fm.get("graph") or {}
+    graph: dict[str, list[str]] = {}
+    for step, deps in raw_graph.items():
+        dep_list: list[Any] = deps or []
+        graph[str(step)] = [str(d) for d in dep_list]
+
     steps: list[Step] = []
     for step_path in sorted((pb_dir / "steps").glob("*.md")):
         if step_path.name.startswith("_"):
@@ -111,6 +197,7 @@ def _load_one(pb_dir: Path, scope: Literal["global", "local"]) -> Playbook | Non
         path=manifest,
         body=body,
         steps=steps,
+        graph=graph,
     )
 
 

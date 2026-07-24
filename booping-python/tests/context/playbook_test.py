@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from booping.context.playbook import Playbook, resolve_agent
+from booping.context.playbook import Playbook, resolve_agent, resolve_waves
 from tests.helpers import get_fixture_path
 
 
@@ -133,3 +133,71 @@ def test_no_manifest_dir_warns(capsys: pytest.CaptureFixture[str]) -> None:
     Playbook.load_all(vault=None, home_dir=_home())
     err = capsys.readouterr().err
     assert "nomanifest" in err
+
+
+def test_graph_loads_verbatim_insertion_order() -> None:
+    pbs = Playbook.load_all(vault=None, home_dir=_home())
+    alpha = next(pb for pb in pbs if pb.name == "alpha")
+    assert alpha.graph == {"gather": [], "draft": ["gather"]}
+    assert list(alpha.graph.keys()) == ["gather", "draft"]
+
+
+def test_graph_missing_defaults_empty() -> None:
+    pbs = Playbook.load_all(vault=None, home_dir=_home())
+    partial = next(pb for pb in pbs if pb.name == "partial")
+    assert partial.graph == {}
+
+
+def test_resolve_waves_diamond() -> None:
+    graph = {"a": [], "b": ["a"], "c": ["a"], "d": ["b", "c"]}
+    res = resolve_waves(graph)
+    assert res.problems == []
+    assert res.waves == [["a"], ["b", "c"], ["d"]]
+
+
+def test_resolve_waves_cross_wave_edge() -> None:
+    # dep from wave 1 (a) consumed in wave 3 (d).
+    graph = {"a": [], "b": ["a"], "c": ["b"], "d": ["a", "c"]}
+    res = resolve_waves(graph)
+    assert res.problems == []
+    assert res.waves == [["a"], ["b"], ["c"], ["d"]]
+
+
+def test_resolve_waves_linear_chain() -> None:
+    graph = {"a": [], "b": ["a"], "c": ["b"]}
+    res = resolve_waves(graph)
+    assert res.problems == []
+    assert res.waves == [["a"], ["b"], ["c"]]
+
+
+def test_resolve_waves_cycle() -> None:
+    graph = {"a": ["b"], "b": ["a"]}
+    res = resolve_waves(graph)
+    assert res.waves == []
+    assert len(res.problems) == 1
+    prob = res.problems[0]
+    assert prob.kind == "cycle"
+    assert prob.cycle[0] == prob.cycle[-1]
+    assert set(prob.cycle) == {"a", "b"}
+
+
+def test_resolve_waves_unknown_dep() -> None:
+    graph = {"a": [], "b": ["a", "missing"]}
+    res = resolve_waves(graph)
+    assert res.waves == []
+    assert len(res.problems) == 1
+    prob = res.problems[0]
+    assert prob.kind == "unknown_dep"
+    assert prob.dep == "missing"
+    assert prob.dependent == "b"
+
+
+def test_resolve_waves_empty_graph() -> None:
+    res = resolve_waves({})
+    assert res.waves == []
+    assert res.problems == []
+
+
+def test_resolve_waves_deterministic() -> None:
+    graph = {"a": [], "b": ["a"], "c": ["a"], "d": ["b", "c"]}
+    assert resolve_waves(graph).waves == resolve_waves(graph).waves
