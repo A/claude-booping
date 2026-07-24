@@ -4,8 +4,6 @@ import os
 import subprocess
 from pathlib import Path
 
-import pytest
-
 from booping.commands.render_playbook import compose
 from booping.context.playbook import Playbook
 from tests.helpers import get_fixture_path
@@ -20,8 +18,12 @@ def _load(name: str) -> Playbook:
     return next(pb for pb in pbs if pb.name == name)
 
 
+def _render(name: str) -> str:
+    return compose(_load(name))
+
+
 def _composed() -> str:
-    return compose(_load("composed"))
+    return _render("composed")
 
 
 def _section(out: str, heading: str) -> str:
@@ -31,69 +33,163 @@ def _section(out: str, heading: str) -> str:
     return out[start:] if rest == -1 else out[start:rest]
 
 
-def test_inline_step_body_present() -> None:
-    out = _composed()
-    assert "Just do the plain thing directly." in out
-    assert "Draft the artifact from the gathered inputs." in out
+# --- happy path -------------------------------------------------------------
 
 
-def test_reference_step_link_present_and_body_absent() -> None:
+def test_section_order() -> None:
     out = _composed()
-    gather = _load("composed").steps[
-        [s.name for s in _load("composed").steps].index("gather")
+    order = [
+        out.index("# Composed Procedure"),
+        out.index("## Execution graph"),
+        out.index("## Gather"),
+        out.index("## Draft"),
+        out.index("## Named Step"),
+        out.index("## Plain"),
     ]
-    assert f"Read [Gather]({gather.path}) for content." in out
-    assert "Gather the raw model-agent inputs" not in out
+    assert order == sorted(order)
 
 
-def test_gate_directive_verbatim() -> None:
+def test_verbatim_preamble_passes_through() -> None:
     out = _composed()
-    assert (
-        '- Review gate: stop after this step — "confirm the draft before continuing";'
-        " continue only on explicit user confirmation." in out
-    )
+    # Body inserted verbatim: the literal Jinja token is NOT evaluated.
+    assert "token: {{ leftover }} — no Jinja evaluation happens here." in out
+
+
+def test_no_notices_on_happy_path() -> None:
+    out = _composed()
+    assert "**STOP" not in out
+    assert "**Note" not in out
+
+
+def test_mermaid_edges() -> None:
+    graph = _section(_composed(), "## Execution graph")
+    assert "flowchart TD" in graph
+    assert "  gather --> draft" in graph
+    assert "  gather --> named-step" in graph
+    assert "  draft --> plain" in graph
+    assert "  named-step --> plain" in graph
+
+
+def test_wave_list_parallel_separator() -> None:
+    graph = _section(_composed(), "## Execution graph")
+    assert "1. `gather`" in graph
+    assert "2. `draft` ∥ `named-step`" in graph
+    assert "3. `plain`" in graph
+
+
+def test_wave_one_body_embedded_no_after() -> None:
+    gather = _section(_composed(), "## Gather")
+    assert "Gather the raw model-agent inputs and return a bulleted list." in gather
+    assert "- After:" not in gather
+    assert "Read [Gather]" not in gather
+
+
+def test_later_wave_read_link_and_after_and_parallel() -> None:
+    out = _composed()
+    draft = _section(out, "## Draft")
+    step = _load("composed").steps
+    draft_step = next(s for s in step if s.name == "draft")
+    assert f"Read [Draft]({draft_step.path}) for content." in draft
+    assert "Draft the artifact from the gathered inputs." not in draft
+    assert "- After: gather" in draft
+    assert "- Parallel with: named-step" in draft
+
+
+def test_single_member_wave_has_after_no_parallel() -> None:
+    plain = _section(_composed(), "## Plain")
+    assert "- After: draft, named-step" in plain
+    assert "- Parallel with:" not in plain
 
 
 def test_model_agent_directive() -> None:
-    out = _composed()
-    assert "- Run in a sub-agent — model sonnet, effort medium." in out
+    gather = _section(_composed(), "## Gather")
+    assert "- Run in a sub-agent — model sonnet, effort medium." in gather
 
 
 def test_named_agent_directive() -> None:
-    out = _composed()
-    assert "- Run in sub-agent: booping-researcher." in out
+    named = _section(_composed(), "## Named Step")
+    assert "- Run in sub-agent: booping-researcher." in named
 
 
-def test_plain_step_has_no_instructions_block() -> None:
-    out = _composed()
-    plain = _section(out, "## Plain")
-    assert "Instructions:" not in plain
-    assert "Run in" not in plain
-    assert "Review gate:" not in plain
+def test_gate_directive_verbatim() -> None:
+    draft = _section(_composed(), "## Draft")
+    assert (
+        '- Review gate: stop after this step — "confirm the draft before continuing";'
+        " continue only on explicit user confirmation." in draft
+    )
 
 
-def test_call_order_drives_section_order() -> None:
-    out = _composed()
-    # Composition order is plain → gather → named-step → draft, which is NOT the
-    # sorted glob order (draft, gather, named-step, plain, uncalled).
-    order = [out.index(h) for h in ("## Plain", "## Gather", "## Named Step", "## Draft")]
-    assert order == sorted(order)
-    # Sanity: draft (last called) really does come after plain (first called),
-    # inverting glob order where draft sorts first.
-    assert out.index("## Plain") < out.index("## Draft")
+def test_no_orphan_note_when_all_wired() -> None:
+    assert "**Note" not in _composed()
 
 
-def test_uncalled_step_absent() -> None:
-    out = _composed()
-    assert "## Uncalled" not in out
-    assert "This uncalled step body must never appear" not in out
+# --- notices ----------------------------------------------------------------
 
 
-def test_unknown_step_name_raises() -> None:
-    pb = _load("composed")
-    pb = pb.model_copy(update={"body": "{{ inline_step('does-not-exist') }}"})
-    with pytest.raises(ValueError, match="unknown step 'does-not-exist'"):
-        compose(pb)
+def _assert_blocking(out: str) -> None:
+    assert "## Execution graph" not in out
+    assert "\n## " not in out  # no step sections
+
+
+def test_missing_step_notice() -> None:
+    out = _render("missing-step")
+    assert (
+        "**STOP — tell the user:** step 'ghost' is referenced in the graph but"
+        " steps/ghost.md does not exist. Do not execute this playbook." in out
+    )
+    _assert_blocking(out)
+
+
+def test_unknown_dep_notice() -> None:
+    out = _render("unknown-dep")
+    assert (
+        "**STOP — tell the user:** 'ghost' is listed as a dependency of 'b' but is"
+        " not a step in the graph. Do not execute this playbook." in out
+    )
+    _assert_blocking(out)
+
+
+def test_cycle_notice() -> None:
+    out = _render("cycle")
+    assert (
+        "**STOP — tell the user:** the graph has a cycle: a → b → a."
+        " Do not execute this playbook." in out
+    )
+    _assert_blocking(out)
+
+
+def test_no_graph_notice() -> None:
+    out = _render("no-graph")
+    assert (
+        "**STOP — tell the user:** playbook 'no-graph' has no graph: in its"
+        " frontmatter. Do not execute this playbook." in out
+    )
+    _assert_blocking(out)
+
+
+def test_inline_in_parallel_notice() -> None:
+    out = _render("inline-in-parallel")
+    assert (
+        "**STOP — tell the user:** step 'one' runs inline (agent: null) but shares a"
+        " wave with other steps; inline steps cannot run in parallel."
+        " Do not execute this playbook." in out
+    )
+    _assert_blocking(out)
+
+
+def test_orphan_note_non_blocking() -> None:
+    out = _render("orphan")
+    assert (
+        "**Note — tell the user:** step 'extra' exists in steps/ but is not wired"
+        " into the graph; it will not run." in out
+    )
+    # Non-blocking: the graph + wired step section still render.
+    assert "## Execution graph" in out
+    assert "## A" in out
+    assert "**STOP" not in out
+
+
+# --- CLI-level --------------------------------------------------------------
 
 
 def test_requires_project_without_project_exits_1(tmp_path: Path) -> None:
@@ -102,8 +198,8 @@ def test_requires_project_without_project_exits_1(tmp_path: Path) -> None:
     pb_dir = Path(os.environ["HOME"]) / "Claude" / "_playbooks" / "gated"
     (pb_dir / "steps").mkdir(parents=True)
     (pb_dir / "playbook.md").write_text(
-        "---\nname: gated\ntitle: Gated\nrequires_project: true\n---\n"
-        "{{ inline_step('only') }}\n"
+        "---\nname: gated\ntitle: Gated\nrequires_project: true\n"
+        "graph:\n  only: []\n---\nPreamble.\n"
     )
     (pb_dir / "steps" / "only.md").write_text("---\nname: only\n---\nstep body\n")
     result = subprocess.run(
@@ -128,3 +224,38 @@ def test_missing_playbook_exits_1(tmp_path: Path) -> None:
     assert result.returncode == 1
     assert result.stdout == ""
     assert "definitely-nonexistent" in result.stderr
+
+
+def test_output_to_file(tmp_path: Path) -> None:
+    # Plant the composed fixture in the isolated HOME's global root, render to a file.
+    src = get_fixture_path("render-playbook-home") / "_playbooks" / "composed"
+    dst = Path(os.environ["HOME"]) / "Claude" / "_playbooks" / "composed"
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    subprocess.run(["cp", "-r", str(src), str(dst)], check=True)
+    out_file = tmp_path / "out.md"
+    result = subprocess.run(
+        [str(BOOPING_BIN), "render-playbook", "composed", "--output", str(out_file)],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0
+    assert result.stdout == ""
+    text = out_file.read_text()
+    assert "## Execution graph" in text
+    assert "token: {{ leftover }}" in text
+
+
+def test_cli_renders_to_stdout(tmp_path: Path) -> None:
+    src = get_fixture_path("render-playbook-home") / "_playbooks" / "composed"
+    dst = Path(os.environ["HOME"]) / "Claude" / "_playbooks" / "composed"
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    subprocess.run(["cp", "-r", str(src), str(dst)], check=True)
+    result = subprocess.run(
+        [str(BOOPING_BIN), "render-playbook", "composed"],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0
+    assert "## Execution graph" in result.stdout
