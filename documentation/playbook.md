@@ -3,9 +3,9 @@
 !!! warning "Unstable — work in progress"
     Playbooks are an experimental feature. The manifest format, step frontmatter, and `/playbook` behaviour may change in breaking ways between releases.
 
-A **playbook** is a user-authored, multi-step guided procedure that lives in the vault and is driven by the `/playbook` skill. Where the built-in skills (`/groom`, `/develop`, …) are fixed workflows shipped by the plugin, a playbook is yours to write: a set of prompt steps, each optionally delegated to a sub-agent, with review gates where you want to inspect the output before continuing.
+A **playbook** is a multi-step guided procedure driven by the `/playbook` skill. Where the built-in skills (`/groom`, `/develop`, …) are fixed workflows shipped by the plugin, a playbook is yours to write: a set of prompt steps, each optionally delegated to a sub-agent, with review gates where you want to inspect the output before continuing. Most playbooks are yours and live in your vault; a few ship with the plugin (see [Scopes and shadowing](#scopes-and-shadowing)).
 
-A playbook's structure is declared by a **`graph:` frontmatter mapping** — each step lists the steps it depends on. The graph defines which steps run, in what order, and which run in parallel. The individual step files stay plain markdown — no Jinja anywhere. Author a playbook by hand and it shows up in `/playbook` immediately.
+A playbook's structure is declared by a **`graph:` frontmatter mapping** — each step lists the steps it depends on. The graph defines which steps run, in what order, and which run in parallel. Bodies are plain markdown by default; a playbook can opt into [Jinja rendering](#jinja-bodies) if it needs live project data. Author a playbook by hand and it shows up in `/playbook` immediately.
 
 ## Scopes and shadowing
 
@@ -16,6 +16,15 @@ Playbooks are discovered from three roots:
 - **Local** — `{vault}/_playbooks/<name>/`. Specific to one project's vault.
 
 When the same playbook `name` exists in more than one root, precedence is **core < global < local** — the narrowest scope wins and the wider ones are hidden. This lets a project override a shared playbook without touching the global copy, and a global playbook override a shipped one. Directories whose name starts with `_` (e.g. `_lib`) are skipped, so you can keep shared helper content alongside playbooks without it being picked up as one.
+
+### Shipped playbooks
+
+One core playbook ships today: **`groom`** — the grooming workflow expressed as a playbook (intake → codebase and web research in parallel → design → draft → present). It is driven by the experimental **`/groom-playbook`** skill, which does nothing but run that playbook.
+
+!!! warning "Experimental — `/groom` is still the one to use"
+    `/groom-playbook` is a parallel experiment, not a replacement. [`/groom`](groom.md) remains the supported way to spec a sprint and is unaffected by it.
+
+Because `groom` is a core playbook, you can override it: put your own `groom` playbook in `~/Claude/_playbooks/groom/` (or a project's `{vault}/_playbooks/groom/`) and yours wins.
 
 ## Layout
 
@@ -42,9 +51,10 @@ Directory order on disk is irrelevant to the run — **the `graph:` frontmatter 
 - `summary` — one-line description shown in the `/playbook` listing.
 - `trigger` — natural-language hint the skill matches the user's request against.
 - `requires_project` — *optional*, default `false`. When `true`, the playbook only runs with a booping project attached: `/playbook` flags it in the listing and refuses to run it without a project, and `booping render-playbook` refuses to render it (stderr + exit 1).
+- `jinja` — *optional*, default `false`. When `true`, the preamble and every step body are rendered as Jinja templates against live project context. See [Jinja bodies](#jinja-bodies).
 - `graph` — mapping of **step name → list of dependency step names**. This is the whole structure: membership (only mapped steps run), order (a step runs after all its dependencies), and parallelism (steps whose dependencies are all satisfied by earlier waves run together).
 
-The manifest **body** is a plain-markdown preamble — a playbook-level instruction inserted verbatim above the rendered procedure. No Jinja, no step calls.
+The manifest **body** is a preamble — a playbook-level instruction inserted above the rendered procedure. No step calls: the graph, not the body, decides what runs.
 
 `<step>/prompt.md` frontmatter (the step identifier comes from the directory name, not frontmatter):
 
@@ -53,7 +63,7 @@ The manifest **body** is a plain-markdown preamble — a playbook-level instruct
 - `review_gate` — when non-null, `/playbook` stops after the step, presents the output, and continues only on your explicit confirmation. `null` runs straight through.
 - `title` — *optional* human-readable heading for the step. When absent, the rendered heading is the titleized directory name (e.g. `current-time` → `Current Time`).
 
-The step **body** is the prompt for that step (plain markdown — never Jinja).
+The step **body** is the prompt for that step.
 
 ### The `agent` grammar
 
@@ -63,12 +73,44 @@ A single `agent` field decides how the step executes:
 - `<model>:<effort>` where `model` ∈ `{opus, sonnet, haiku, fable}` (e.g. `sonnet:high`, `haiku:medium`) — spawn a **generic sub-agent** with that model and effort.
 - any other non-null string — spawn a **named sub-agent** via `subagent_type=<value>`. The value is used verbatim, so colons are fine for namespaced agents (e.g. `booping:booping-researcher`, `general-purpose`).
 
+## Jinja bodies
+
+By default every body — the manifest preamble and each `prompt.md` — is passed through **verbatim**. Braces, `{{ }}`, and template-looking text are just text.
+
+Set `jinja: true` in the manifest frontmatter to opt the **whole playbook** in (it is all-or-nothing — there is no per-step flag). Bodies are then rendered as Jinja templates with the same project context the built-in skills get: the attached project, its config, and the shared fragments the plugin ships. Include paths are resolved **relative to the plugin root**, so they work identically whatever scope your playbook lives in:
+
+```markdown
+---
+name: ship
+title: Ship
+summary: Prepare, check in parallel, then publish.
+trigger: run the ship playbook
+jinja: true
+requires_project: true
+graph:
+  prep: []
+---
+{% import "_partials/_plan_transitions.j2" as plan_transitions with context %}
+# Ship
+
+{{ plan_transitions.render("develop") }}
+
+{% include "_partials/_shared_instructions.j2" %}
+```
+
+Two things change once you opt in:
+
+- **Project context is required.** Rendering a `jinja: true` playbook without a project attached produces a blocking `STOP` notice instead of the procedure. Pair it with `requires_project: true`.
+- **A template error is a blocking notice**, not a crash — the failure is reported in-band and the playbook refuses to run.
+
+Because a Jinja body is meaningless until rendered, later-wave steps of a `jinja: true` playbook are fetched with a command rather than read off disk (see below).
+
 ## How the graph renders
 
 `/playbook` resolves the graph into **waves** — a step joins the earliest wave in which all its dependencies sit in a prior wave. Steps sharing a wave run in parallel.
 
 - **First-wave step bodies are embedded** in the rendered procedure, ready to run.
-- **Later steps are fetched when their wave starts** — the render points at the step file and `/playbook` reads it then.
+- **Later steps are fetched when their wave starts** — the render points at the step file and `/playbook` reads it then. For a `jinja: true` playbook it points at `booping render-playbook <name> --step <step>` instead, so the body arrives already rendered.
 - **Parallel wave members must set `agent`** — inline steps (`agent: null`) can't run in parallel, so a step that shares a wave with others must delegate to a sub-agent.
 - **Review gates pause after the wave** — once every member of a wave finishes, each member's gate is presented (labeled by step) and the run waits for your confirmation before the next wave.
 
@@ -76,7 +118,7 @@ A single `agent` field decides how the step executes:
 
 Problems in the graph surface as in-band notices when you render (or run) the playbook:
 
-- **Blocking `STOP` notices** — the playbook refuses to run. Causes: a step named in the graph has no `<name>/prompt.md` file; a dependency names a step that isn't in the graph; the graph has a cycle; the graph is missing entirely; an inline step shares a parallel wave.
+- **Blocking `STOP` notices** — the playbook refuses to run. Causes: a step named in the graph has no `<name>/prompt.md` file; a dependency names a step that isn't in the graph; the graph has a cycle; the graph is missing entirely; an inline step shares a parallel wave; a `jinja: true` playbook rendered without project context, or whose body fails to render.
 - **Warning notes** — a step directory that exists on disk but isn't wired into the graph produces a note and simply never runs.
 
 ## Authoring a global playbook
@@ -139,6 +181,11 @@ The rendered procedure lists the waves as:
 ## Rendering
 
 `booping render-playbook <name>` renders the composed procedure to stdout, or to a file with `--output PATH` (`--output -` writes to stdout). An unknown playbook name exits 1. Graph problems don't fail the command — they render as the in-band STOP/Note notices described above (exit 0).
+
+Two flags help while authoring:
+
+- `--step <step>` — print just that step's body, with no heading, instruction bullets, or gate wrapping. Handy for eyeballing one prompt in isolation; it is also what the composed procedure tells the driver to run for later waves of a `jinja: true` playbook.
+- `--project <path>` — resolve context against the vault at `<path>` instead of whatever project is attached to the current directory. Lets you render a `requires_project` or `jinja: true` playbook from anywhere.
 
 ## Evals and harness
 

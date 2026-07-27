@@ -1,0 +1,18 @@
+# booping — /groom-playbook
+
+**Experimental.** Playbook-driven grooming, running in parallel to `/groom`. Same outcome — a specified, estimated, user-approved plan — but the procedure comes from the core `groom` playbook instead of this skill body. `/groom` remains the canonical entry point.
+
+{% include "_partials/_project_context.j2" %}
+
+The playbook is `groom`. It requires an attached booping project — if none is attached (see Project Context above), tell the user to run `/install` and stop.
+
+Pass `$ARGUMENTS` (the task description or issue reference) into the first wave's step as the request under grooming.
+
+{% include "_partials/_playbook_driving.j2" %}
+## Completion report
+
+After the last step, give a one-paragraph summary: the plan file written, its status, and the gates passed.
+
+Cross-session resume is not yet supported — a run lives entirely within one conversation. The playbook's own preamble carries the in-vault resume mapping for re-entering an unfinished plan.
+
+{{ tools.render('src/templates/_partials/_extra_instructions.j2', extra_instruction_key='skill_groom-playbook') }}
