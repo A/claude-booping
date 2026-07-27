@@ -1,15 +1,17 @@
 from __future__ import annotations
 
 import argparse
+import posixpath
 import sys
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any, cast
 
-from jinja2 import Environment, FileSystemLoader
+from jinja2 import BaseLoader, ChoiceLoader, DictLoader, Environment, FileSystemLoader
 
 from booping import logger
 from booping.context import Context
-from booping.context.playbook import Playbook, resolve_agent, resolve_waves
+from booping.context.playbook import Playbook, Step, resolve_agent, resolve_waves
 from booping.rendering import LenientUndefined, build_source_env, get_plugin_root
 
 _NO_GRAPH = (
@@ -76,19 +78,53 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
     p.set_defaults(func=_run)
 
 
+class PlaybookEnvironment(Environment):
+    """Resolves `./x` and `../x` against the including template's own directory.
+    Bare names keep hitting the search chain unchanged; a name escaping above the
+    loader root is left alone and degrades to a normal TemplateNotFound.
+    """
+
+    def join_path(self, template: str, parent: str) -> str:
+        if not template.startswith(("./", "../")):
+            return template
+        joined = posixpath.normpath(
+            posixpath.join(posixpath.dirname(parent), template)
+        )
+        return template if joined.startswith("..") else joined
+
+
 def build_env(
-    plugin_root: Path | None = None, context: Context | None = None
+    plugin_root: Path | None = None,
+    context: Context | None = None,
+    *,
+    search_dirs: Sequence[Path] = (),
+    source: tuple[str, str] | None = None,
 ) -> Environment:
     """The env compose() renders its partials — and, for jinja playbooks, its
-    preamble and step bodies — through. Loader root is `src/templates/` either way,
-    so `{% include "_partials/…" %}` resolves from sources living anywhere on disk.
+    preamble and step bodies — through. `search_dirs` are prepended (most specific
+    first) to the always-last `src/templates/` root, so `{% include "_partials/…" %}`
+    resolves from sources living anywhere on disk. `source` is an in-memory body
+    served under a name, so Jinja hands a real `parent` to `join_path`.
     """
     root = plugin_root if plugin_root is not None else get_plugin_root()
+    loaders: list[BaseLoader] = []
+    if source is not None:
+        loaders.append(DictLoader({source[0]: source[1]}))
+    loaders.extend(FileSystemLoader(str(d)) for d in search_dirs if d.is_dir())
+    loaders.append(FileSystemLoader(str(root / "src" / "templates")))
+    loader = ChoiceLoader(loaders)
+
     if context is not None:
-        env = build_source_env(context=context, config=context.config, plugin_root=root)
+        env = build_source_env(
+            context=context,
+            config=context.config,
+            plugin_root=root,
+            loader=loader,
+            env_class=PlaybookEnvironment,
+        )
     else:
-        env = Environment(
-            loader=FileSystemLoader(str(root / "src" / "templates")),
+        env = PlaybookEnvironment(
+            loader=loader,
             undefined=LenientUndefined,
             keep_trailing_newline=True,
         )
@@ -97,10 +133,35 @@ def build_env(
     return env
 
 
-def render_source(env: Environment, source: str) -> tuple[str, str | None]:
-    """Render an ad-hoc source; return (rendered, None) or ("", error message)."""
+def render_body(
+    pb: Playbook,
+    body: str,
+    step: Step | None,
+    context: Context,
+    plugin_root: Path | None = None,
+) -> tuple[str, str | None]:
+    """Render a playbook body (preamble when `step` is None, else a step prompt)
+    against the chain: own dir → playbook dir → playbook roots → `src/templates/`.
+    Returns (rendered, None) or ("", error message).
+    """
+    path = pb.path if step is None else step.path
+    search_dirs: list[Path] = []
+    if step is not None:
+        search_dirs.append(step.path.parent)
+    search_dirs.append(pb.path.parent)
+    search_dirs.extend(pb.search_roots)
+
+    # The body is served under its own basename so `./x` / `../x` inside it resolve
+    # against its own directory — the first entry of the chain.
+    name = path.name
+    env = build_env(
+        plugin_root=plugin_root,
+        context=context,
+        search_dirs=search_dirs,
+        source=(name, body),
+    )
     try:
-        return env.from_string(source).render(), None
+        return env.get_template(name).render(), None
     except Exception as exc:  # any Jinja failure becomes an in-band notice
         return "", f"{type(exc).__name__}: {exc}"
 
@@ -170,13 +231,14 @@ def compose(
             notices.append(_NO_CONTEXT.format(name=pb.name))
             blocking = True
         else:
-            preamble, err = render_source(env, pb.body)
+            preamble, err = render_body(pb, pb.body, None, context, plugin_root)
             if err is not None:
                 notices.append(_JINJA_ERROR.format(where="the preamble", error=err))
                 blocking = True
             # Only wave-1 bodies are embedded; later waves are fetched via --step.
             for name in waves[0] if waves and not blocking else []:
-                rendered, err = render_source(env, steps_by_name[name].body)
+                step = steps_by_name[name]
+                rendered, err = render_body(pb, step.body, step, context, plugin_root)
                 if err is not None:
                     notices.append(
                         _JINJA_ERROR.format(where=f"step '{name}'", error=err)
@@ -226,7 +288,7 @@ def compose_step(pb: Playbook, step_name: str, context: Context | None = None) -
         return step.body
     if context is None:
         return _NO_CONTEXT.format(name=pb.name) + "\n"
-    rendered, err = render_source(build_env(context=context), step.body)
+    rendered, err = render_body(pb, step.body, step, context)
     if err is not None:
         return _JINJA_ERROR.format(where=f"step '{step_name}'", error=err) + "\n"
     return rendered

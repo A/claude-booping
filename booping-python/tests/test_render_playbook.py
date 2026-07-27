@@ -293,6 +293,107 @@ def test_step_body_only_jinja_rendered() -> None:
     assert "Run in a sub-agent" not in out
 
 
+# --- include search chain ---------------------------------------------------
+
+
+def _includes() -> str:
+    return compose(_load("jinja-includes"), context=_ctx())
+
+
+def test_include_from_playbook_dir_by_bare_name() -> None:
+    # Preamble pulls `_references/rules.md` sitting next to playbook.md.
+    assert "RULES-OK" in _includes()
+
+
+def test_include_from_step_dir_by_bare_name() -> None:
+    first = _section(_includes(), "## First")
+    assert "STEP-FIXTURE-OK" in first
+
+
+def test_include_from_playbook_root_by_root_relative_name() -> None:
+    first = _section(_includes(), "## First")
+    assert "ROOT-LIB-OK" in first
+
+
+def test_plugin_partials_still_reachable() -> None:
+    # The include lands inside the step section (its own `## ` heading ends the slice).
+    out = _includes()
+    assert out.index("## Project Context") > out.index("STEP-FIXTURE-OK")
+
+
+def test_relative_includes_resolve_against_including_file() -> None:
+    # rules.md → ./deep/one.md → ../plain.md (depth 3, both `./` and `../`).
+    out = _includes()
+    assert "DEEP-ONE-OK" in out
+    assert "PLAIN-OK" in out
+
+
+def test_step_fetch_matches_embedded_body() -> None:
+    ctx = _ctx()
+    pb = _load("jinja-includes")
+    # Compared up to the partial's own `## ` heading, which ends the composed slice.
+    fetched = compose_step(pb, "first", ctx)
+    head = fetched[: fetched.index("## Project Context")]
+    assert head.strip() in _section(compose(pb, context=ctx), "## First")
+    assert "STEP-FIXTURE-OK" in head
+    assert "ROOT-LIB-OK" in head
+
+
+def test_later_wave_step_fetch_resolves_playbook_dir_include() -> None:
+    assert "RULES-OK" in compose_step(_load("jinja-includes"), "second", _ctx())
+
+
+def _plant_roots(tmp_path: Path, *scopes: str) -> tuple[Path, Path, Path]:
+    """Core / global / local roots, each carrying `_lib/shared.md` for the named
+    scopes, plus a jinja playbook in the local root that includes it.
+    """
+    core, home, vault = tmp_path / "core", tmp_path / "home", tmp_path / "vault"
+    roots = {
+        "core": core / "playbooks",
+        "global": home / "_playbooks",
+        "local": vault / "_playbooks",
+    }
+    for scope, root in roots.items():
+        (root / "_lib").mkdir(parents=True)
+        if scope in scopes:
+            (root / "_lib" / "shared.md").write_text(f"MARKER-{scope}\n")
+    pb_dir = roots["local"] / "inc"
+    (pb_dir / "only").mkdir(parents=True)
+    (pb_dir / "playbook.md").write_text(
+        "---\nname: inc\ntitle: Inc\njinja: true\ngraph:\n  only: []\n---\nPreamble.\n"
+    )
+    (pb_dir / "only" / "prompt.md").write_text(
+        '---\nsummary: only\nagent: sonnet:medium\n---\n{% include "_lib/shared.md" %}\n'
+    )
+    return core, home, vault
+
+
+def _render_inc(tmp_path: Path, *scopes: str) -> str:
+    core, home, vault = _plant_roots(tmp_path, *scopes)
+    pbs = Playbook.load_all(vault=vault, home_dir=home, plugin_root=core)
+    pb = next(p for p in pbs if p.name == "inc")
+    return compose(pb, context=_ctx())
+
+
+def test_root_relative_include_prefers_local(tmp_path: Path) -> None:
+    assert "MARKER-local" in _render_inc(tmp_path, "core", "global", "local")
+
+
+def test_root_relative_include_falls_back_to_global(tmp_path: Path) -> None:
+    assert "MARKER-global" in _render_inc(tmp_path, "core", "global")
+
+
+def test_root_relative_include_falls_back_to_core(tmp_path: Path) -> None:
+    assert "MARKER-core" in _render_inc(tmp_path, "core")
+
+
+def test_missing_include_is_blocking_notice(tmp_path: Path) -> None:
+    out = _render_inc(tmp_path)
+    assert "**STOP — tell the user:** Jinja rendering of step 'only' failed:" in out
+    assert "TemplateNotFound" in out
+    assert "Traceback" not in out
+
+
 # --- CLI-level --------------------------------------------------------------
 
 

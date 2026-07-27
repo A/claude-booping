@@ -4,7 +4,7 @@ from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
 
-from jinja2 import ChainableUndefined, Environment, FileSystemLoader
+from jinja2 import BaseLoader, ChainableUndefined, Environment, FileSystemLoader
 
 
 class RenderCycleError(Exception):
@@ -71,9 +71,14 @@ def get_plugin_root() -> Path:
     return _plugin_root
 
 
-def _build_env(loader_root: Path) -> Environment:
-    return Environment(
-        loader=FileSystemLoader(str(loader_root)),
+def _build_env(
+    loader_root: Path,
+    *,
+    loader: BaseLoader | None = None,
+    env_class: type[Environment] = Environment,
+) -> Environment:
+    return env_class(
+        loader=loader if loader is not None else FileSystemLoader(str(loader_root)),
         undefined=LenientUndefined,
         keep_trailing_newline=True,
     )
@@ -83,6 +88,9 @@ def build_source_env(
     context: object,
     config: object,
     plugin_root: Path | None = None,
+    *,
+    loader: BaseLoader | None = None,
+    env_class: type[Environment] = Environment,
 ) -> Environment:
     """Environment for rendering ad-hoc sources (not files under the plugin root).
 
@@ -93,7 +101,7 @@ def build_source_env(
     from booping.tools import Tools  # local import to avoid circular at module level
 
     root = plugin_root if plugin_root is not None else get_plugin_root()
-    env = _build_env(root / "src" / "templates")
+    env = _build_env(root / "src" / "templates", loader=loader, env_class=env_class)
     globals_: dict[str, Any] = env.globals  # type: ignore[assignment]
     globals_["context"] = context
     globals_["config"] = config

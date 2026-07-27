@@ -212,10 +212,10 @@ def test_global_root_follows_non_default_home_dir(tmp_path: Path) -> None:
     assert pbs[0].scope == "global"
 
 
-def test_no_manifest_dir_warns(capsys: pytest.CaptureFixture[str]) -> None:
+def test_no_manifest_dir_skipped_silently(capsys: pytest.CaptureFixture[str]) -> None:
     Playbook.load_all(vault=None, home_dir=_home(), plugin_root=_no_core())
     err = capsys.readouterr().err
-    assert "nomanifest" in err
+    assert "nomanifest" not in err
 
 
 def test_graph_loads_verbatim_insertion_order() -> None:

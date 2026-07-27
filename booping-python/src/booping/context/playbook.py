@@ -131,6 +131,8 @@ class Playbook(BaseModel):
     body: str = ""
     steps: list[Step] = []
     graph: dict[str, list[str]] = {}
+    # Discovery roots that exist on disk, most specific first (local, global, core).
+    search_roots: list[Path] = []
 
     @classmethod
     def load_all(
@@ -146,17 +148,21 @@ class Playbook(BaseModel):
         result: list[Playbook] = []
         by_name: dict[str, int] = {}
 
-        for scope, root in (
+        roots: list[tuple[str, Path | None]] = [
             ("core", plugin_root / "playbooks"),
             ("global", home_dir / "_playbooks"),
             ("local", vault / "_playbooks" if vault is not None else None),
-        ):
+        ]
+        # Most specific first, so a root-relative include resolves local > global > core.
+        search_roots = [r for _, r in reversed(roots) if r is not None and r.is_dir()]
+
+        for scope, root in roots:
             if root is None or not root.is_dir():
                 continue
             for pb_dir in sorted(root.iterdir()):
                 if not pb_dir.is_dir() or pb_dir.name.startswith("_"):
                     continue
-                pb = _load_one(pb_dir, scope)  # type: ignore[arg-type]
+                pb = _load_one(pb_dir, scope, search_roots)  # type: ignore[arg-type]
                 if pb is None:
                     continue
                 if pb.name in by_name:
@@ -169,11 +175,12 @@ class Playbook(BaseModel):
 
 
 def _load_one(
-    pb_dir: Path, scope: Literal["core", "global", "local"]
+    pb_dir: Path,
+    scope: Literal["core", "global", "local"],
+    search_roots: list[Path] | None = None,
 ) -> Playbook | None:
     manifest = pb_dir / "playbook.md"
     if not manifest.is_file():
-        _warn(f"playbook {pb_dir.name}: no playbook.md, skipping")
         return None
 
     fm, body = parse_frontmatter(manifest)
@@ -212,6 +219,7 @@ def _load_one(
         body=body,
         steps=steps,
         graph=graph,
+        search_roots=search_roots or [],
     )
 
 
