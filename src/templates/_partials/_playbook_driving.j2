@@ -1,0 +1,27 @@
+{#-
+  Playbook driving protocol: render the composed procedure, walk the waves,
+  resolve agents, stop on failure, enforce review gates. Skill-agnostic —
+  included by any skill that drives a playbook. Requires `context`.
+-#}
+## Execute
+
+Render the composed procedure: `booping render-playbook <name>` (`<name>` = the selected playbook). Output is: notices → preamble → `## Execution graph` (numbered wave list) → one `## <Title>` section per step.
+
+- Any `**STOP — tell the user:**` line → relay it verbatim and do not execute the playbook. `**Note — tell the user:**` → relay it, then continue.
+- Follow the preamble as a playbook-level instruction over the whole run. A playbook's preamble may define resume rules for re-entering a procedure mid-run.
+
+Walk the wave list in order. For each wave (a numbered line; ` ∥ `-separated names run in parallel):
+
+1. Gather each member's `## <Title>` section. A wave-1 body is embedded; otherwise Read the section's link first — its contents are the step prompt.
+2. Compose each member's invocation from its step prompt, and append:
+   ```
+   ## Run-time context
+   specs_dir: {{ context.project.directory if context.project else "{vault}" }}/specs
+   project: {{ context.project.name if context.project else "{project}" }}
+   ```
+   Then append a bounded return contract: the step prompt's own if it states one, else `Return only: artifacts written + outcome, ≤ 5 lines.`
+3. Run each member per its section's agent bullet: model+effort → `subagent_type="general-purpose"` with that model and reasoning effort; named → `subagent_type="<name>"`; no agent bullet → run inline. A multi-member wave spawns ALL member sub-agents in ONE message and never runs any member inline; wait for all to finish before the next wave.
+4. Any member failure → report it and stop; do not start the next wave.
+5. After the wave completes, honor each member's `Review gate:` bullet: present that member's output labeled by step name alongside the gate text, and continue only on explicit user confirmation. In-conversation only — no state is persisted.
+
+Pass each step's output through unchanged to the user and into later sections that depend on it.
