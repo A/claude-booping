@@ -125,6 +125,7 @@ class Playbook(BaseModel):
     summary: str = ""
     trigger: str = ""
     requires_project: bool = False
+    jinja: bool = False
     scope: Literal["core", "global", "local"]
     path: Path
     body: str = ""
@@ -181,6 +182,7 @@ def _load_one(
     summary = str(fm.get("summary", ""))
     trigger = str(fm.get("trigger", ""))
     requires_project = bool(fm.get("requires_project", False))
+    jinja = bool(fm.get("jinja", False))
 
     raw_graph: dict[Any, Any] = fm.get("graph") or {}
     graph: dict[str, list[str]] = {}
@@ -204,6 +206,7 @@ def _load_one(
         summary=summary,
         trigger=trigger,
         requires_project=requires_project,
+        jinja=jinja,
         scope=scope,
         path=manifest,
         body=body,

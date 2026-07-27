@@ -12,7 +12,7 @@ Render the composed procedure: `booping render-playbook <name>` (`<name>` = the 
 
 Walk the wave list in order. For each wave (a numbered line; ` ∥ `-separated names run in parallel):
 
-1. Gather each member's `## <Title>` section. A wave-1 body is embedded; otherwise Read the section's link first — its contents are the step prompt.
+1. Gather each member's `## <Title>` section. A wave-1 body is embedded; otherwise the section carries either a Read link (read that file) or a `booping render-playbook <name> --step <step>` command (run it and use its stdout) — either way, the result is the step prompt.
 2. Compose each member's invocation from its step prompt, and append:
    ```
    ## Run-time context

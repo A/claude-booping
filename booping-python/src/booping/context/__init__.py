@@ -42,8 +42,9 @@ class Context(BaseModel):
     ) -> Context:
         """Assemble full context.
 
-        vault_override: used in tests to point loaders at a fixture vault instead of
-        the real ~/Claude/<project>/ directory that Project.directory resolves to.
+        vault_override: point loaders at an explicit vault instead of the
+        ~/Claude/<project>/ directory that Project.directory resolves to. Used by tests
+        (fixture vaults) and by `render-playbook --project`.
         """
         root = plugin_root if plugin_root is not None else get_plugin_root()
         global_path = config_mod.global_config_path()

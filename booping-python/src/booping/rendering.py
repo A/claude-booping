@@ -79,6 +79,34 @@ def _build_env(loader_root: Path) -> Environment:
     )
 
 
+def build_source_env(
+    context: object,
+    config: object,
+    plugin_root: Path | None = None,
+) -> Environment:
+    """Environment for rendering ad-hoc sources (not files under the plugin root).
+
+    Same loader root and globals `render` gives a template under `src/templates/`, but
+    bound as env globals so `env.from_string(...).render()` sees them — and so do the
+    `{% include %}` / `{% import %}` targets the source pulls in.
+    """
+    from booping.tools import Tools  # local import to avoid circular at module level
+
+    root = plugin_root if plugin_root is not None else get_plugin_root()
+    env = _build_env(root / "src" / "templates")
+    globals_: dict[str, Any] = env.globals  # type: ignore[assignment]
+    globals_["context"] = context
+    globals_["config"] = config
+    globals_["tools"] = Tools(
+        env=env,
+        context=context,
+        config=config,
+        plugin_root=root,
+        render_stack=[],
+    )
+    return env
+
+
 def render(
     template_path: Path | str,
     context: object,

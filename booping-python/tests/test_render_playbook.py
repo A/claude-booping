@@ -4,7 +4,8 @@ import os
 import subprocess
 from pathlib import Path
 
-from booping.commands.render_playbook import compose
+from booping.commands.render_playbook import compose, compose_step
+from booping.context import Context
 from booping.context.playbook import Playbook
 from tests.helpers import get_fixture_path
 
@@ -12,10 +13,12 @@ PLUGIN_ROOT = Path(__file__).resolve().parents[2]
 BOOPING_BIN = PLUGIN_ROOT / "bin" / "booping"
 
 
+FIXTURE_HOME = get_fixture_path("render-playbook-home")
+
+
 def _load(name: str) -> Playbook:
-    home = get_fixture_path("render-playbook-home")
     pbs = Playbook.load_all(
-        vault=None, home_dir=home, plugin_root=Path("/nonexistent/plugin-root")
+        vault=None, home_dir=FIXTURE_HOME, plugin_root=Path("/nonexistent/plugin-root")
     )
     return next(pb for pb in pbs if pb.name == name)
 
@@ -205,6 +208,91 @@ def test_orphan_note_non_blocking() -> None:
     assert "**STOP" not in out
 
 
+# --- opt-in Jinja -----------------------------------------------------------
+
+
+def _ctx() -> Context:
+    return Context.assemble()
+
+
+def _threshold(ctx: Context) -> str:
+    return str(ctx.config["sprint"]["default_threshold_sp"])
+
+
+def test_non_jinja_playbook_output_unchanged() -> None:
+    # Byte-identical to the pre-jinja implementation's output (paths normalised).
+    golden = (FIXTURE_HOME.parent / "composed-prejinja.golden.md").read_text()
+    actual = compose(_load("composed"), context=_ctx()).replace(str(FIXTURE_HOME), "{HOME}")
+    assert actual == golden
+
+
+def test_jinja_preamble_renders_expression_and_include() -> None:
+    ctx = _ctx()
+    out = compose(_load("jinja-composed"), context=ctx)
+    assert f"Preamble threshold: {_threshold(ctx)}" in out
+    assert "## Project Context" in out
+
+
+def test_jinja_wave_one_body_renders_with_partial_include() -> None:
+    # The step body lives outside src/templates/ — the include still resolves.
+    ctx = _ctx()
+    out = compose(_load("jinja-composed"), context=ctx)
+    body = out[out.index("## First") :]
+    assert f"Wave-one body, threshold {_threshold(ctx)}." in body
+    # The include lands inside the step section (its own `## ` heading ends the slice).
+    assert body.index("## Project Context") > body.index("Wave-one body")
+
+
+def test_jinja_non_embedded_step_shows_step_command() -> None:
+    second = _section(compose(_load("jinja-composed"), context=_ctx()), "## Second")
+    assert "Run `booping render-playbook jinja-composed --step second` for content." in second
+    assert "Read [Second]" not in second
+
+
+def test_non_jinja_non_embedded_step_keeps_read_link() -> None:
+    draft = _section(compose(_load("composed"), context=_ctx()), "## Draft")
+    assert "Read [Draft]" in draft
+    assert "--step" not in draft
+
+
+def test_jinja_without_context_stops() -> None:
+    out = compose(_load("jinja-composed"))
+    assert (
+        "**STOP — tell the user:** playbook 'jinja-composed' sets jinja: true but was"
+        " rendered without project context. Do not execute this playbook." in out
+    )
+    _assert_blocking(out)
+
+
+def test_jinja_error_is_in_band_stop_notice() -> None:
+    out = compose(_load("jinja-broken"), context=_ctx())
+    assert "**STOP — tell the user:** Jinja rendering of step 'only' failed:" in out
+    assert "TemplateNotFound" in out
+    assert "Traceback" not in out
+    # Blocking: no graph, no step sections — but the preamble still shows.
+    assert "## Execution graph" not in out
+    assert "# Broken" in out
+
+
+def test_step_body_only_non_jinja() -> None:
+    pb = _load("composed")
+    step = next(s for s in pb.steps if s.name == "draft")
+    out = compose_step(pb, "draft", _ctx())
+    assert out == step.body
+    assert "## Draft" not in out
+    assert "Review gate:" not in out
+    assert "Parallel with:" not in out
+
+
+def test_step_body_only_jinja_rendered() -> None:
+    ctx = _ctx()
+    out = compose_step(_load("jinja-composed"), "first", ctx)
+    assert out.startswith(f"Wave-one body, threshold {_threshold(ctx)}.")
+    assert "## Project Context" in out
+    assert "## First" not in out
+    assert "Run in a sub-agent" not in out
+
+
 # --- CLI-level --------------------------------------------------------------
 
 
@@ -260,6 +348,80 @@ def test_output_to_file(tmp_path: Path) -> None:
     text = out_file.read_text()
     assert "## Execution graph" in text
     assert "token: {{ leftover }}" in text
+
+
+def _plant_vault(tmp_path: Path, *names: str) -> Path:
+    """A bare vault dir (no `.booping` marker) carrying the named fixture playbooks."""
+    vault = tmp_path / "vault"
+    (vault / "_playbooks").mkdir(parents=True)
+    for name in names:
+        src = FIXTURE_HOME / "_playbooks" / name
+        subprocess.run(["cp", "-r", str(src), str(vault / "_playbooks" / name)], check=True)
+    return vault
+
+
+def test_project_flag_satisfies_requires_project(tmp_path: Path) -> None:
+    vault = _plant_vault(tmp_path, "requires-project")
+    result = subprocess.run(
+        [str(BOOPING_BIN), "render-playbook", "requires-project", "--project", str(vault)],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0
+    assert "## Execution graph" in result.stdout
+    assert "Only body." in result.stdout
+
+
+def test_step_prints_body_only_and_logs(tmp_path: Path) -> None:
+    vault = _plant_vault(tmp_path, "composed")
+    body = next(s for s in _load("composed").steps if s.name == "draft").body
+    result = subprocess.run(
+        [
+            str(BOOPING_BIN), "render-playbook", "composed",
+            "--step", "draft", "--project", str(vault),
+        ],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0
+    assert result.stdout == body
+    assert "## Draft" not in result.stdout
+    log = (vault / "_booping" / ".booping.log").read_text()
+    assert "[render-playbook] composed --step draft" in log
+
+
+def test_step_renders_jinja_body(tmp_path: Path) -> None:
+    vault = _plant_vault(tmp_path, "jinja-composed")
+    result = subprocess.run(
+        [
+            str(BOOPING_BIN), "render-playbook", "jinja-composed",
+            "--step", "first", "--project", str(vault),
+        ],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0
+    assert "{{" not in result.stdout
+    assert "## Project Context" in result.stdout
+
+
+def test_unknown_step_exits_1(tmp_path: Path) -> None:
+    vault = _plant_vault(tmp_path, "composed")
+    result = subprocess.run(
+        [
+            str(BOOPING_BIN), "render-playbook", "composed",
+            "--step", "nope", "--project", str(vault),
+        ],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 1
+    assert result.stdout == ""
+    assert "step not found" in result.stderr
 
 
 def test_cli_renders_to_stdout(tmp_path: Path) -> None:
