@@ -42,7 +42,7 @@ The manifest **body** is a plain-markdown preamble — a playbook-level instruct
 `steps/<step>.md` frontmatter:
 
 - `name` — step identifier (referenced from the graph).
-- `summary` — one-line description of the step.
+- `summary` — one-line description of the step, rendered into the step's section as a `Summary:` instruction bullet. It is where a step declares execution hints in its own domain words — e.g. *"Can be paralleled as one agent per feature"* — since the runner knows nothing about a playbook's domain.
 - `agent` — how the step runs (see the grammar below).
 - `review_gate` — when non-null, `/playbook` stops after the step, presents the output, and continues only on your explicit confirmation. `null` runs straight through.
 - `title` — *optional* human-readable heading for the step. When absent, the rendered heading is the titleized `name` (e.g. `current-time` → `Current Time`).

@@ -101,6 +101,20 @@ def test_single_member_wave_has_after_no_parallel() -> None:
     assert "- Parallel with:" not in plain
 
 
+def test_summary_directive() -> None:
+    # The step's own summary is surfaced to the driver: it is where a step declares
+    # execution hints (e.g. "one agent per feature") in its own domain words.
+    out = _composed()
+    assert "- Summary: Gather inputs." in _section(out, "## Gather")
+    assert "- Summary: Draft the artifact." in _section(out, "## Draft")
+    assert "- Summary: A plain step with no agent and no gate." in _section(out, "## Plain")
+
+
+def test_summary_leads_the_instructions_block() -> None:
+    draft = _section(_composed(), "## Draft")
+    assert draft.index("- Summary:") < draft.index("- After:")
+
+
 def test_model_agent_directive() -> None:
     gather = _section(_composed(), "## Gather")
     assert "- Run in a sub-agent — model sonnet, effort medium." in gather

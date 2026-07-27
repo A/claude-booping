@@ -9,8 +9,11 @@
 {%- set title = step.title if step.title else step.name.replace('-', ' ') | title -%}
 {%- set ag = resolve_agent(step.agent) -%}
 ## {{ title }}
-{% if deps or siblings or step.agent is not none or step.review_gate is not none %}
+{% if step.summary or deps or siblings or step.agent is not none or step.review_gate is not none %}
 Instructions:
+{% if step.summary -%}
+- Summary: {{ step.summary }}
+{% endif -%}
 {% if deps -%}
 - After: {{ deps | join(', ') }}
 {% endif -%}
