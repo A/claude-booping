@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import tempfile
 from pathlib import Path
 
@@ -135,4 +136,73 @@ def test_ordered_override_paths_signature() -> None:
     """Verify function accepts a list of override paths (multiple entries)."""
     plugin_root = get_fixture_path("plugin-root-minimal")
     cfg = config_mod.load(plugin_root, [Path("/nonexistent1.yaml"), Path("/nonexistent2.yaml")])
+    assert cfg["sprint"]["default_threshold_sp"] == 35  # type: ignore[index]
+
+
+def test_global_config_path_isolated_by_autouse_conftest() -> None:
+    """Canary: the autouse conftest fixture redirects XDG_CONFIG_HOME to a tmp dir,
+    so global_config_path() reflects it *without any explicit fixture request* here."""
+    xdg = os.environ["XDG_CONFIG_HOME"]
+    assert config_mod.global_config_path() == Path(xdg) / "booping" / "config.yaml"
+    # And it is NOT the developer's real ~/.config location.
+    assert config_mod.global_config_path() != Path.home() / ".config" / "booping" / "config.yaml"
+
+
+def test_global_config_path_falls_back_to_dot_config(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("XDG_CONFIG_HOME", raising=False)
+    assert config_mod.global_config_path() == Path.home() / ".config" / "booping" / "config.yaml"
+
+
+def _write_global(xdg: Path, data: dict[str, object]) -> Path:
+    path = xdg / "booping" / "config.yaml"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(yaml.dump(data))
+    return path
+
+
+def test_merge_order_core_global_project(
+    tmp_path: Path, isolated_xdg_config_home: Path
+) -> None:
+    """core (35) → global (99) → project (50): each tier overrides the previous."""
+    plugin_root = get_fixture_path("plugin-root-minimal")
+    global_path = _write_global(
+        isolated_xdg_config_home, {"sprint": {"default_threshold_sp": 99}}
+    )
+    # global overrides core
+    cfg = config_mod.load(plugin_root, [global_path])
+    assert cfg["sprint"]["default_threshold_sp"] == 99  # type: ignore[index]
+    # project overrides global
+    project_path = tmp_path / "config.yaml"
+    project_path.write_text(yaml.dump({"sprint": {"default_threshold_sp": 50}}))
+    cfg = config_mod.load(plugin_root, [global_path, project_path])
+    assert cfg["sprint"]["default_threshold_sp"] == 50  # type: ignore[index]
+
+
+def test_agents_shallow_merge_across_three_tiers(
+    tmp_path: Path, isolated_xdg_config_home: Path
+) -> None:
+    """`agents` blocks shallow-merge across core, global, and project tiers."""
+    plugin_root = Path(__file__).resolve().parents[3]
+    global_path = _write_global(
+        isolated_xdg_config_home,
+        {"skills": {"develop": {"agents": {"g-agent": {"good_for": ["g"]}}}}},
+    )
+    project_path = tmp_path / "config.yaml"
+    project_path.write_text(
+        yaml.dump({"skills": {"develop": {"agents": {"p-agent": {"good_for": ["p"]}}}}})
+    )
+    cfg = config_mod.load(plugin_root, [global_path, project_path])
+    agents = cfg["skills"]["develop"]["agents"]  # type: ignore[index]
+    assert "booping-developer" in agents  # core preserved
+    assert "g-agent" in agents  # global tier added
+    assert "p-agent" in agents  # project tier added
+
+
+def test_missing_global_file_silently_skipped(isolated_xdg_config_home: Path) -> None:
+    plugin_root = get_fixture_path("plugin-root-minimal")
+    missing = isolated_xdg_config_home / "booping" / "config.yaml"
+    assert not missing.exists()
+    cfg = config_mod.load(plugin_root, [missing])
     assert cfg["sprint"]["default_threshold_sp"] == 35  # type: ignore[index]

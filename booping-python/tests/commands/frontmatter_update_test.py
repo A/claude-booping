@@ -235,3 +235,41 @@ class TestFrontmatterUpdateCLI:
 
         text = plan.read_text()
         assert "status: in-progress" in text
+
+    def test_does_not_write_to_real_home(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Running from a repo whose `.booping` marker resolves the vault to
+        `<home>/Claude/<project>` must never touch the developer's real `~/Claude`.
+
+        HOME (and XDG_CONFIG_HOME) is isolated to a tmp dir, so the best-effort
+        `.booping.log` writer lands under the tmp home; the real home — read straight
+        from the passwd database, independent of the HOME env var — stays untouched.
+        """
+        import os
+        import pwd
+
+        home = tmp_path / "home"
+        home.mkdir()
+        monkeypatch.setenv("HOME", str(home))
+        # Isolate global config too, so the default `home_dir` (~/Claude) is used.
+        monkeypatch.setenv("XDG_CONFIG_HOME", str(home / ".config"))
+        # Run from a self-contained repo dir carrying its own `.booping` marker
+        # (the real repo's marker is gitignored and absent in CI checkouts).
+        repo_root = tmp_path / "repo"
+        repo_root.mkdir()
+        (repo_root / ".booping").write_text("project_name: claude-booping\n")
+        monkeypatch.chdir(repo_root)
+
+        real_home = Path(pwd.getpwuid(os.getuid()).pw_dir)
+        real_claude = real_home / "Claude"
+        real_claude_existed = real_claude.exists()
+
+        plan = _make_plan(tmp_path, "title: Foo\nstatus: backlog")
+        fu_cmd._run(_ns(plan=plan, pairs=["status=in-progress"]))  # type: ignore[reportPrivateUsage]
+
+        # The write went under the isolated tmp home (proves logging was attempted)…
+        assert (home / "Claude").exists()
+        # …and never the developer's real home.
+        if not real_claude_existed:
+            assert not real_claude.exists()

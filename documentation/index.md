@@ -49,4 +49,5 @@ Every plan walks this loop once. The next plan inherits the lessons. `/code-revi
 - [/learn](learn.md) — fold retro findings into durable rules.
 - [/chat](chat.md) — orient inside the vault and handle ad-hoc small tasks.
 - [/help](help.md) — command index.
+- [Playbooks](playbook.md) — user-authored multi-step procedures driven by `/playbook`. *Unstable — work in progress.*
 - [Project config](project_config.md) — tour of `src/config.yaml` and the per-project override mechanic.

@@ -159,7 +159,7 @@ def _run(args: argparse.Namespace) -> None:
     from_status = str(fm.get("status", ""))
 
     # Resolve project for interpolation and vault ops
-    project = Project.load_cwd()
+    project = Project.load_cwd_configured()
 
     # Load config
     plugin_root = get_plugin_root()

@@ -6,6 +6,9 @@ repo_name: A/claude-booping
 docs_dir: documentation
 strict: true
 
+markdown_extensions:
+  - admonition
+
 theme:
   name: readthedocs
 
@@ -14,6 +17,7 @@ nav:
   - Quick start: quick_start.md
   - Install: install.md
   - Vault: vault.md
+  - Playbooks (unstable): playbook.md
   - Project config: project_config.md
   - Integrating external agents: integrating-external-agents.md
   - Commands:

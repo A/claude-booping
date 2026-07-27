@@ -1,0 +1,36 @@
+{#-
+  Renders one playbook step section to the locked contract. Inputs:
+    step      — a booping.context.playbook.Step
+    deps      — list[str] this step's deps in graph order (After: bullets; empty for wave 1)
+    siblings  — list[str] the other members of this step's wave (Parallel with:)
+    embed     — True for wave-1 steps (body embedded); else a Read link replaces the body
+  `resolve_agent` is registered as a Jinja global by the driving command.
+-#}
+{%- set title = step.title if step.title else step.name.replace('-', ' ') | title -%}
+{%- set ag = resolve_agent(step.agent) -%}
+## {{ title }}
+{% if step.summary or deps or siblings or step.agent is not none or step.review_gate is not none %}
+Instructions:
+{% if step.summary -%}
+- Summary: {{ step.summary }}
+{% endif -%}
+{% if deps -%}
+- After: {{ deps | join(', ') }}
+{% endif -%}
+{% if siblings -%}
+- Parallel with: {{ siblings | join(', ') }}
+{% endif -%}
+{% if ag.mode == "model" -%}
+- Run in a sub-agent — model {{ ag.model }}, effort {{ ag.effort }}.
+{% elif ag.mode == "named" -%}
+- Run in sub-agent: {{ ag.name }}.
+{% endif -%}
+{% if step.review_gate is not none -%}
+- Review gate: stop after this step — "{{ step.review_gate }}"; continue only on explicit user confirmation.
+{% endif -%}
+{% endif %}
+{% if embed -%}
+{{ step.body }}
+{%- else -%}
+Read [{{ title }}]({{ step.path }}) for content.
+{%- endif %}

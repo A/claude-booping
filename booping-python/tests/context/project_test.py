@@ -47,6 +47,51 @@ def test_load_cwd_tilde_vault_path(tmp_path: Path) -> None:
     assert project.directory == Path.home() / "some-vault"
 
 
+def test_home_dir_base_used_when_no_vault_path(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    (repo / ".booping").write_text("project_name: hd\n")
+    project = Project.load_cwd(start=repo, home_dir="/tmp/x")
+    assert project is not None
+    assert project.directory == Path("/tmp/x") / "hd"
+
+
+def test_vault_path_wins_over_home_dir(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    (repo / ".booping").write_text("project_name: vp\nvault_path: ./booping\n")
+    project = Project.load_cwd(start=repo, home_dir="/tmp/x")
+    assert project is not None
+    assert project.directory == (repo / "booping").resolve()
+
+
+def test_default_home_dir_unchanged(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    (repo / ".booping").write_text("project_name: dh\n")
+    project = Project.load_cwd(start=repo)
+    assert project is not None
+    assert project.directory == Path.home() / "Claude" / "dh"
+
+
+def test_home_dir_tilde_expands(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    (repo / ".booping").write_text("project_name: te\n")
+    project = Project.load_cwd(start=repo, home_dir="~/somewhere")
+    assert project is not None
+    assert project.directory == Path.home() / "somewhere" / "te"
+
+
+def test_is_local_vault_false_for_home_dir_vault(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    (repo / ".booping").write_text("project_name: hv\n")
+    project = Project.load_cwd(start=repo, home_dir="/tmp/x")
+    assert project is not None
+    assert project.is_local_vault is False
+
+
 def test_is_local_vault_true_for_vault_under_repo(tmp_path: Path) -> None:
     repo = tmp_path / "repo"
     repo.mkdir()

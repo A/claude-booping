@@ -1,6 +1,6 @@
 # Project config
 
-booping reads a single structured config — `src/config.yaml` in the plugin — and merges any project-local override from `~/Claude/{project}/config.yaml` over it at skill-load time. This page tours every top-level key and explains the override mechanic.
+booping reads a single structured config — `src/config.yaml` in the plugin — and deep-merges two override tiers over it at skill-load time: a **global** tier (`${XDG_CONFIG_HOME:-~/.config}/booping/config.yaml`) and a **project** tier (`~/Claude/{project}/config.yaml`). The merge order is **core → global → project**, later tiers winning. This page tours every top-level key and explains the override mechanic.
 
 ## Snapshot: `src/config.yaml`
 
@@ -343,6 +343,18 @@ Per-skill delegation guidance rendered into each skill's "Available agents" tabl
 
 Skills also use `skills.<name>.status` to declare the single status they own (e.g. `learn → awaiting-learning`, `retro → awaiting-retro`).
 
+## The global tier
+
+Machine-wide defaults live at `${XDG_CONFIG_HOME:-~/.config}/booping/config.yaml` (typically `~/.config/booping/config.yaml`; `XDG_CONFIG_HOME` is honoured when set). It deep-merges over the plugin's `src/config.yaml` and is in turn overridden by the per-project file — the full order is **core → global → project**. Any key valid in `src/config.yaml` is valid here; the merge rules are identical (dict keys merge, list keys replace wholesale).
+
+The global tier's headline key is **`home_dir`** — the vault-home base under which per-project vaults are scaffolded and resolved (`<home_dir>/<project>/`). It is a raw string (`~` is expanded at vault-resolution time, e.g. `~/Claude/`).
+
+- **Precedence.** A `.booping` marker carrying a `vault_path:` key still wins over `home_dir` — a repo-local vault is resolved directly from the marker, and `home_dir` is not consulted for it. `home_dir` only governs the default `<home_dir>/<project>/` layout.
+- **Project-tier `home_dir` is a no-op.** By the time the project tier merges, the vault has already been resolved (its location is what tells booping where to read the project config from). Setting `home_dir` in `~/Claude/{project}/config.yaml` therefore has no effect — put it in the global tier.
+- **First-run seeding.** `booping-create-project` resolves the vault-home base via a ladder: the global config's `home_dir` if the file is present → `$HOME/Claude` if that directory exists → an interactive prompt (default `~/Claude`). An answer given at the prompt is seeded into the global config file (created if absent; an existing file is never overwritten). Run non-interactively with none of the earlier rungs satisfied, it aborts with instructions rather than scaffolding in an unexpected place.
+
+Read any resolved value — merged across all three tiers — with `booping config-get <dotted.key>` (e.g. `booping config-get home_dir`). Note that `home_dir` prints its raw, unexpanded value.
+
 ## Overriding for one project
 
 Drop a YAML file at `~/Claude/{project}/config.yaml` to override or extend the plugin's defaults for that project. The override file deep-merges over `src/config.yaml` at render time:
@@ -381,4 +393,4 @@ Because lists replace wholesale, the project file must include every branch entr
 
 ## Verifying the merged config
 
-Run `bin/booping debug-context` from the project directory (the one with the `.booping` marker) to dump the assembled context — including the merged config — as YAML. This is the authoritative answer to "what value is the skill actually seeing?"
+Run `bin/booping debug-context` from the project directory (the one with the `.booping` marker) to dump the assembled context — including the merged config — as YAML. This is the authoritative answer to "what value is the skill actually seeing?" For a single value, `bin/booping config-get <dotted.key>` prints just that key resolved across the core → global → project merge (scalars as raw text, mappings/lists as YAML), and works outside any project too (core + global only).

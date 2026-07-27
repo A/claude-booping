@@ -20,8 +20,37 @@ class Project(BaseModel):
         return self.directory.resolve().is_relative_to(self.repo_directory.resolve())
 
     @classmethod
-    def load_cwd(cls, start: Path | None = None) -> Project | None:
-        """Walk up from start (default cwd) looking for .booping; return None on miss."""
+    def load_cwd_configured(
+        cls,
+        start: Path | None = None,
+        plugin_root: Path | None = None,
+        global_path: Path | None = None,
+    ) -> Project | None:
+        """Resolve the project/vault the way Context.assemble does.
+
+        Loads core + global config to read `home_dir` (the vault base) before
+        delegating to `load_cwd`. Command call sites must use this rather than
+        the bare `load_cwd()` so they honour the configured vault base; a bare
+        `load_cwd()` silently resolves against the built-in `~/Claude` default.
+        """
+        # Local imports avoid a config/rendering ↔ project import cycle at module load.
+        from booping.context import config as config_mod
+        from booping.rendering import get_plugin_root
+
+        root = plugin_root if plugin_root is not None else get_plugin_root()
+        gpath = global_path if global_path is not None else config_mod.global_config_path()
+        base_cfg = config_mod.load(root, [gpath])
+        home_dir = str(base_cfg.get("home_dir", "~/Claude"))
+        return cls.load_cwd(start=start, home_dir=home_dir)
+
+    @classmethod
+    def load_cwd(cls, start: Path | None = None, home_dir: str = "~/Claude") -> Project | None:
+        """Walk up from start (default cwd) looking for .booping; return None on miss.
+
+        home_dir is the raw (unexpanded) vault-home string from config; it is the
+        default vault base when the marker carries no `vault_path:`. Precedence:
+        `.booping` `vault_path:` > `home_dir` > built-in default.
+        """
         candidate = (start or Path.cwd()).resolve()
         while True:
             marker = candidate / ".booping"
@@ -30,7 +59,9 @@ class Project(BaseModel):
                 project_name = str(data.get("project_name", candidate.name))
                 return cls(
                     name=project_name,
-                    directory=_resolve_vault_dir(data.get("vault_path"), candidate, project_name),
+                    directory=_resolve_vault_dir(
+                        data.get("vault_path"), candidate, project_name, home_dir
+                    ),
                     repo_directory=candidate,
                     git_commit=_resolve_git_commit(candidate),
                 )
@@ -40,10 +71,18 @@ class Project(BaseModel):
             candidate = parent
 
 
-def _resolve_vault_dir(vault_path: object, candidate: Path, project_name: str) -> Path:
-    """Resolve the vault directory from a marker's vault_path, or default to ~/Claude/{name}."""
+def _resolve_vault_dir(
+    vault_path: object, candidate: Path, project_name: str, home_dir: str = "~/Claude"
+) -> Path:
+    """Resolve the vault directory.
+
+    Precedence: marker `vault_path:` (absolute / ~ / relative-to-repo) > `home_dir`
+    base (raw string from config, `~`-expanded here — the single normalization site)
+    joined with the project name. This function owns all path normalization; the
+    config dict keeps the raw `home_dir` value for display surfaces.
+    """
     if not vault_path:
-        return Path.home() / "Claude" / project_name
+        return Path(home_dir).expanduser() / project_name
     path = Path(str(vault_path)).expanduser()
     if path.is_absolute():
         return path

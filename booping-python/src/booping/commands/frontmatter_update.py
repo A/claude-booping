@@ -82,7 +82,7 @@ def _run(args: argparse.Namespace) -> None:
         print("error: nothing to do: provide key=value pairs and/or --remove", file=sys.stderr)
         sys.exit(1)
 
-    project = Project.load_cwd()
+    project = Project.load_cwd_configured()
     repo_dir = project.repo_directory if project is not None else None
 
     resolved: dict[str, object] = {}

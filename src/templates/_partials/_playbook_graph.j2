@@ -1,0 +1,27 @@
+{#-
+  Renders the "## Execution graph" section. Inputs:
+    graph  — dict[str, list[str]] step → deps, insertion order preserved
+    waves  — list[list[str]] resolved wave order (parallel members per wave)
+  Emits a mermaid flowchart (one edge line per dep, isolated nodes as bare ids)
+  followed by a numbered wave list ("∥"-joined members share a wave).
+-#}
+{%- set depended = [] -%}
+{%- for step, deps in graph.items() -%}
+{%- for dep in deps -%}
+{%- if dep not in depended -%}{{ depended.append(dep) or "" }}{%- endif -%}
+{%- endfor -%}
+{%- endfor -%}
+## Execution graph
+
+```mermaid
+flowchart TD
+{% for step, deps in graph.items() %}{% for dep in deps %}  {{ dep }} --> {{ step }}
+{% endfor %}{% endfor %}{% for step, deps in graph.items() %}{% if not deps and step not in depended %}  {{ step }}
+{% endif %}{% endfor %}```
+
+Steps on one line run in parallel — spawn all their sub-agents in one message,
+wait for all to finish, then start the next wave.
+
+{% for wave in waves -%}
+{{ loop.index }}. {% for name in wave %}`{{ name }}`{% if not loop.last %} ∥ {% endif %}{% endfor %}
+{% endfor -%}
