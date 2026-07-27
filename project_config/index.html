@@ -55,6 +55,10 @@
                 <li class="toctree-l1"><a class="reference internal" href="../vault/">Vault</a>
                 </li>
               </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../playbook/">Playbooks (unstable)</a>
+                </li>
+              </ul>
               <ul class="current">
                 <li class="toctree-l1 current"><a class="reference internal current" href="#">Project config</a>
     <ul class="current">
@@ -79,6 +83,8 @@
     <li class="toctree-l3"><a class="reference internal" href="#skillsnameagents">skills.&lt;name&gt;.agents</a>
     </li>
         </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#the-global-tier">The global tier</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#overriding-for-one-project">Overriding for one project</a>
         <ul>
@@ -137,7 +143,7 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="project-config">Project config</h1>
-<p>booping reads a single structured config — <code>src/config.yaml</code> in the plugin — and merges any project-local override from <code>~/Claude/{project}/config.yaml</code> over it at skill-load time. This page tours every top-level key and explains the override mechanic.</p>
+<p>booping reads a single structured config — <code>src/config.yaml</code> in the plugin — and deep-merges two override tiers over it at skill-load time: a <strong>global</strong> tier (<code>${XDG_CONFIG_HOME:-~/.config}/booping/config.yaml</code>) and a <strong>project</strong> tier (<code>~/Claude/{project}/config.yaml</code>). The merge order is <strong>core → global → project</strong>, later tiers winning. This page tours every top-level key and explains the override mechanic.</p>
 <h2 id="snapshot-srcconfigyaml">Snapshot: <code>src/config.yaml</code></h2>
 <p>For context, the current plugin defaults. Source of truth: <a href="https://github.com/A/claude-booping/blob/master/src/config.yaml"><code>src/config.yaml</code></a> (this snapshot may lag).</p>
 <details>
@@ -464,6 +470,15 @@ plan:
 <li><strong><code>skills.&lt;name&gt;.disable_internal_agents</code></strong> — when set on a skill, <code>_available_agents.j2</code> hides every <code>internal: true</code> entry from that skill's table, leaving only the agents the project explicitly registered (e.g. a self-contained global external agent). See <a href="../integrating-external-agents/">integrating external agents</a>.</li>
 </ul>
 <p>Skills also use <code>skills.&lt;name&gt;.status</code> to declare the single status they own (e.g. <code>learn → awaiting-learning</code>, <code>retro → awaiting-retro</code>).</p>
+<h2 id="the-global-tier">The global tier</h2>
+<p>Machine-wide defaults live at <code>${XDG_CONFIG_HOME:-~/.config}/booping/config.yaml</code> (typically <code>~/.config/booping/config.yaml</code>; <code>XDG_CONFIG_HOME</code> is honoured when set). It deep-merges over the plugin's <code>src/config.yaml</code> and is in turn overridden by the per-project file — the full order is <strong>core → global → project</strong>. Any key valid in <code>src/config.yaml</code> is valid here; the merge rules are identical (dict keys merge, list keys replace wholesale).</p>
+<p>The global tier's headline key is <strong><code>home_dir</code></strong> — the vault-home base under which per-project vaults are scaffolded and resolved (<code>&lt;home_dir&gt;/&lt;project&gt;/</code>). It is a raw string (<code>~</code> is expanded at vault-resolution time, e.g. <code>~/Claude/</code>).</p>
+<ul>
+<li><strong>Precedence.</strong> A <code>.booping</code> marker carrying a <code>vault_path:</code> key still wins over <code>home_dir</code> — a repo-local vault is resolved directly from the marker, and <code>home_dir</code> is not consulted for it. <code>home_dir</code> only governs the default <code>&lt;home_dir&gt;/&lt;project&gt;/</code> layout.</li>
+<li><strong>Project-tier <code>home_dir</code> is a no-op.</strong> By the time the project tier merges, the vault has already been resolved (its location is what tells booping where to read the project config from). Setting <code>home_dir</code> in <code>~/Claude/{project}/config.yaml</code> therefore has no effect — put it in the global tier.</li>
+<li><strong>First-run seeding.</strong> <code>booping-create-project</code> resolves the vault-home base via a ladder: the global config's <code>home_dir</code> if the file is present → <code>$HOME/Claude</code> if that directory exists → an interactive prompt (default <code>~/Claude</code>). An answer given at the prompt is seeded into the global config file (created if absent; an existing file is never overwritten). Run non-interactively with none of the earlier rungs satisfied, it aborts with instructions rather than scaffolding in an unexpected place.</li>
+</ul>
+<p>Read any resolved value — merged across all three tiers — with <code>booping config-get &lt;dotted.key&gt;</code> (e.g. <code>booping config-get home_dir</code>). Note that <code>home_dir</code> prints its raw, unexpanded value.</p>
 <h2 id="overriding-for-one-project">Overriding for one project</h2>
 <p>Drop a YAML file at <code>~/Claude/{project}/config.yaml</code> to override or extend the plugin's defaults for that project. The override file deep-merges over <code>src/config.yaml</code> at render time:</p>
 <ul>
@@ -493,12 +508,12 @@ git:
 <p>After the next skill load, <code>/groom</code> proposes splitting at 25 SP instead of 35, and <code>/develop</code> picks <code>docs/</code> for plans typed <code>docs</code>.</p>
 <p>Because lists replace wholesale, the project file must include every branch entry it wants to keep — omitting a row removes it. Dict keys behave the opposite way: <code>sprint.default_threshold_sp: 25</code> does not affect <code>sprint.redecompose_threshold</code> or <code>sprint.scale</code>, which fall through from the plugin defaults.</p>
 <h2 id="verifying-the-merged-config">Verifying the merged config</h2>
-<p>Run <code>bin/booping debug-context</code> from the project directory (the one with the <code>.booping</code> marker) to dump the assembled context — including the merged config — as YAML. This is the authoritative answer to "what value is the skill actually seeing?"</p>
+<p>Run <code>bin/booping debug-context</code> from the project directory (the one with the <code>.booping</code> marker) to dump the assembled context — including the merged config — as YAML. This is the authoritative answer to "what value is the skill actually seeing?" For a single value, <code>bin/booping config-get &lt;dotted.key&gt;</code> prints just that key resolved across the core → global → project merge (scalars as raw text, mappings/lists as YAML), and works outside any project too (core + global only).</p>
               
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../vault/" class="btn btn-neutral float-left" title="Vault"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../playbook/" class="btn btn-neutral float-left" title="Playbooks (unstable)"><span class="icon icon-circle-arrow-left"></span> Previous</a>
         <a href="../integrating-external-agents/" class="btn btn-neutral float-right" title="Integrating external agents">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
@@ -526,7 +541,7 @@ git:
         </span>
     
     
-      <span><a href="../vault/" style="color: #fcfcfc">&laquo; Previous</a></span>
+      <span><a href="../playbook/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
     
       <span><a href="../integrating-external-agents/" style="color: #fcfcfc">Next &raquo;</a></span>
