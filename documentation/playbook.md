@@ -1,6 +1,9 @@
 # Playbooks
 
-A **playbook** is a user-authored, multi-step guided procedure that lives in the vault and is driven by the [/playbook](playbooks.md) skill. Where the built-in skills (`/groom`, `/develop`, …) are fixed workflows shipped by the plugin, a playbook is yours to write: a set of prompt steps, each optionally delegated to a sub-agent, with review gates where you want to inspect the output before continuing.
+!!! warning "Unstable — work in progress"
+    Playbooks are an experimental feature. The manifest format, step frontmatter, and `/playbook` behaviour may change in breaking ways between releases.
+
+A **playbook** is a user-authored, multi-step guided procedure that lives in the vault and is driven by the `/playbook` skill. Where the built-in skills (`/groom`, `/develop`, …) are fixed workflows shipped by the plugin, a playbook is yours to write: a set of prompt steps, each optionally delegated to a sub-agent, with review gates where you want to inspect the output before continuing.
 
 A playbook's structure is declared by a **`graph:` frontmatter mapping** — each step lists the steps it depends on. The graph defines which steps run, in what order, and which run in parallel. The individual step files stay plain markdown — no Jinja anywhere. Author a playbook by hand and it shows up in `/playbook` immediately.
 
