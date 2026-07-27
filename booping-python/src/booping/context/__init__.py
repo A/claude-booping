@@ -91,7 +91,7 @@ class Context(BaseModel):
 
         skills = Skill.load_all(root)
         agents = Agent.load_all(root)
-        playbooks = Playbook.load_all(vault, home_dir)
+        playbooks = Playbook.load_all(vault, home_dir, root)
 
         return cls(
             project=project,

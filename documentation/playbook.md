@@ -9,12 +9,13 @@ A playbook's structure is declared by a **`graph:` frontmatter mapping** — eac
 
 ## Scopes and shadowing
 
-Playbooks are discovered from two roots:
+Playbooks are discovered from three roots:
 
+- **Core** — `<plugin-root>/playbooks/<name>/`. Shipped with the plugin.
 - **Global** — `<home_dir>/_playbooks/<name>/` (default `~/Claude/_playbooks/`). Shared across every project on the machine.
 - **Local** — `{vault}/_playbooks/<name>/`. Specific to one project's vault.
 
-When the same playbook `name` exists in both roots, the **local one shadows the global one** — the project-local version wins and the global one is hidden. This lets a project override a shared playbook without touching the global copy. Directories whose name starts with `_` (e.g. `_lib`) are skipped, so you can keep shared helper content alongside playbooks without it being picked up as one.
+When the same playbook `name` exists in more than one root, precedence is **core < global < local** — the narrowest scope wins and the wider ones are hidden. This lets a project override a shared playbook without touching the global copy, and a global playbook override a shipped one. Directories whose name starts with `_` (e.g. `_lib`) are skipped, so you can keep shared helper content alongside playbooks without it being picked up as one.
 
 ## Layout
 
@@ -23,11 +24,14 @@ Each playbook is a directory:
 ```
 <name>/
   playbook.md          # manifest: metadata + graph frontmatter, plain-markdown preamble body
-  steps/
-    <step>.md          # one file per step, in any order on disk
+  <step>/              # one directory per step — the directory name IS the step name
+    prompt.md          #   the step itself; everything else in the dir is yours
+  _references/         # `_`-prefixed dirs are not steps — free workspace
 ```
 
-Disk order of `steps/*.md` is irrelevant to the run — **the `graph:` frontmatter decides which steps run and in what order**. Step files whose name starts with `_` are ignored (keep disabled or library steps alongside without wiring them in).
+**A step is a directory and `prompt.md` is the step.** Every non-`_` subdirectory holding a `prompt.md` is a step, and its directory name is the step name the graph references. Nothing else in the directory is loaded — sibling files (fixtures, eval configs, prompt variants like `prompt.haiku-4-5.md`) are invisible to the runner. A non-`_` subdirectory without a `prompt.md` is skipped with a warning.
+
+Directory order on disk is irrelevant to the run — **the `graph:` frontmatter decides which steps run and in what order**. Directories whose name starts with `_` (e.g. `_references/`, `_fixtures/`) are never steps, so you can keep disabled steps and shared material alongside without wiring them in.
 
 ## Frontmatter contract
 
@@ -42,13 +46,12 @@ Disk order of `steps/*.md` is irrelevant to the run — **the `graph:` frontmatt
 
 The manifest **body** is a plain-markdown preamble — a playbook-level instruction inserted verbatim above the rendered procedure. No Jinja, no step calls.
 
-`steps/<step>.md` frontmatter:
+`<step>/prompt.md` frontmatter (the step identifier comes from the directory name, not frontmatter):
 
-- `name` — step identifier (referenced from the graph).
 - `summary` — one-line description of the step, rendered into the step's section as a `Summary:` instruction bullet. It is where a step declares execution hints in its own domain words — e.g. *"Can be paralleled as one agent per feature"* — since the runner knows nothing about a playbook's domain.
 - `agent` — how the step runs (see the grammar below).
 - `review_gate` — when non-null, `/playbook` stops after the step, presents the output, and continues only on your explicit confirmation. `null` runs straight through.
-- `title` — *optional* human-readable heading for the step. When absent, the rendered heading is the titleized `name` (e.g. `current-time` → `Current Time`).
+- `title` — *optional* human-readable heading for the step. When absent, the rendered heading is the titleized directory name (e.g. `current-time` → `Current Time`).
 
 The step **body** is the prompt for that step (plain markdown — never Jinja).
 
@@ -73,8 +76,8 @@ A single `agent` field decides how the step executes:
 
 Problems in the graph surface as in-band notices when you render (or run) the playbook:
 
-- **Blocking `STOP` notices** — the playbook refuses to run. Causes: a step named in the graph has no `steps/<name>.md` file; a dependency names a step that isn't in the graph; the graph has a cycle; the graph is missing entirely; an inline step shares a parallel wave.
-- **Warning notes** — a step file that exists in `steps/` but isn't wired into the graph produces a note and simply never runs.
+- **Blocking `STOP` notices** — the playbook refuses to run. Causes: a step named in the graph has no `<name>/prompt.md` file; a dependency names a step that isn't in the graph; the graph has a cycle; the graph is missing entirely; an inline step shares a parallel wave.
+- **Warning notes** — a step directory that exists on disk but isn't wired into the graph produces a note and simply never runs.
 
 ## Authoring a global playbook
 
@@ -82,11 +85,11 @@ Create the directory under your home vault root:
 
 ```
 ~/Claude/_playbooks/my-playbook/playbook.md
-~/Claude/_playbooks/my-playbook/steps/first.md
-~/Claude/_playbooks/my-playbook/steps/second.md
+~/Claude/_playbooks/my-playbook/first/prompt.md
+~/Claude/_playbooks/my-playbook/second/prompt.md
 ```
 
-Fill in `playbook.md` with the manifest frontmatter (including `graph:`) and a plain-markdown preamble body. Write each `steps/<step>.md` with its own frontmatter and prompt body. Run `/playbook` in any project and it appears in the listing with scope `global`.
+Fill in `playbook.md` with the manifest frontmatter (including `graph:`) and a plain-markdown preamble body. Write each `<step>/prompt.md` with its own frontmatter and prompt body. Run `/playbook` in any project and it appears in the listing with scope `global`.
 
 ## Authoring a local playbook
 
@@ -94,7 +97,7 @@ Same shape, but under the project's vault:
 
 ```
 {vault}/_playbooks/my-playbook/playbook.md
-{vault}/_playbooks/my-playbook/steps/...
+{vault}/_playbooks/my-playbook/<step>/prompt.md
 ```
 
 It appears in `/playbook` with scope `local` and, if it shares a `name` with a global playbook, shadows it for that project.
@@ -121,7 +124,7 @@ graph:
 Ship the current change set. Stop at the first hard failure.
 ```
 
-Each `steps/<name>.md` (`prep`, `lint`, `tests`, `publish`) carries its own frontmatter and prompt body. `lint` and `tests` both depend only on `prep`, so they share a wave; `publish` waits for both.
+Each step directory (`prep/`, `lint/`, `tests/`, `publish/`) holds a `prompt.md` with its own frontmatter and prompt body. `lint` and `tests` both depend only on `prep`, so they share a wave; `publish` waits for both.
 
 The rendered procedure lists the waves as:
 

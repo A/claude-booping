@@ -26,7 +26,7 @@ _CYCLE = (
 )
 _MISSING = (
     "**STOP — tell the user:** step '{name}' is referenced in the graph but"
-    " steps/{name}.md does not exist. Do not execute this playbook."
+    " {name}/prompt.md does not exist. Do not execute this playbook."
 )
 _INLINE_PARALLEL = (
     "**STOP — tell the user:** step '{name}' runs inline (agent: null) but shares a"
@@ -34,7 +34,7 @@ _INLINE_PARALLEL = (
     " Do not execute this playbook."
 )
 _ORPHAN = (
-    "**Note — tell the user:** step '{name}' exists in steps/ but is not wired into"
+    "**Note — tell the user:** step '{name}' exists on disk but is not wired into"
     " the graph; it will not run."
 )
 
@@ -95,7 +95,7 @@ def compose(pb: Playbook, plugin_root: Path | None = None) -> str:
             notices.append(_CYCLE.format(path=" → ".join(prob.cycle)))
             blocking = True
 
-    # Missing step files (graph key order).
+    # Missing step dirs (graph key order).
     for key in graph_keys:
         if key not in step_names:
             notices.append(_MISSING.format(name=key))
@@ -110,7 +110,7 @@ def compose(pb: Playbook, plugin_root: Path | None = None) -> str:
                     notices.append(_INLINE_PARALLEL.format(name=name))
                     blocking = True
 
-    # Orphan step files (steps order) — non-blocking, emitted in both cases.
+    # Orphan step dirs (steps order) — non-blocking, emitted in both cases.
     for step in pb.steps:
         if step.name not in pb.graph:
             notices.append(_ORPHAN.format(name=step.name))

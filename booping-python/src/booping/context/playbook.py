@@ -125,23 +125,28 @@ class Playbook(BaseModel):
     summary: str = ""
     trigger: str = ""
     requires_project: bool = False
-    scope: Literal["global", "local"]
+    scope: Literal["core", "global", "local"]
     path: Path
     body: str = ""
     steps: list[Step] = []
     graph: dict[str, list[str]] = {}
 
     @classmethod
-    def load_all(cls, vault: Path | None, home_dir: Path) -> list[Playbook]:
-        """Discover playbooks from the global root (`home_dir/_playbooks`) and, when a
-        vault is attached, the local root (`vault/_playbooks`). Local shadows global on
-        name collision. `_`-prefixed entries (e.g. `_lib`) are skipped. Missing roots
+    def load_all(
+        cls, vault: Path | None, home_dir: Path, plugin_root: Path
+    ) -> list[Playbook]:
+        """Discover playbooks from the core root (`plugin_root/playbooks`), the global root
+        (`home_dir/_playbooks`) and, when a vault is attached, the local root
+        (`vault/_playbooks`). Roots are scanned core → global → local and a later-scanned
+        playbook replaces an earlier one of the same name, so precedence is
+        core < global < local. `_`-prefixed entries (e.g. `_lib`) are skipped. Missing roots
         yield nothing; missing/partial frontmatter degrades with a warning, not a crash.
         """
         result: list[Playbook] = []
         by_name: dict[str, int] = {}
 
         for scope, root in (
+            ("core", plugin_root / "playbooks"),
             ("global", home_dir / "_playbooks"),
             ("local", vault / "_playbooks" if vault is not None else None),
         ):
@@ -162,7 +167,9 @@ class Playbook(BaseModel):
         return result
 
 
-def _load_one(pb_dir: Path, scope: Literal["global", "local"]) -> Playbook | None:
+def _load_one(
+    pb_dir: Path, scope: Literal["core", "global", "local"]
+) -> Playbook | None:
     manifest = pb_dir / "playbook.md"
     if not manifest.is_file():
         _warn(f"playbook {pb_dir.name}: no playbook.md, skipping")
@@ -182,10 +189,14 @@ def _load_one(pb_dir: Path, scope: Literal["global", "local"]) -> Playbook | Non
         graph[str(step)] = [str(d) for d in dep_list]
 
     steps: list[Step] = []
-    for step_path in sorted((pb_dir / "steps").glob("*.md")):
-        if step_path.name.startswith("_"):
+    for step_dir in sorted(pb_dir.iterdir()):
+        if not step_dir.is_dir() or step_dir.name.startswith("_"):
             continue
-        steps.append(_load_step(step_path))
+        prompt = step_dir / "prompt.md"
+        if not prompt.is_file():
+            _warn(f"playbook {pb_dir.name}: {step_dir.name}/ has no prompt.md, skipping")
+            continue
+        steps.append(_load_step(step_dir.name, prompt))
 
     return Playbook(
         name=name,
@@ -201,10 +212,10 @@ def _load_one(pb_dir: Path, scope: Literal["global", "local"]) -> Playbook | Non
     )
 
 
-def _load_step(step_path: Path) -> Step:
+def _load_step(dir_name: str, step_path: Path) -> Step:
     fm, body = parse_frontmatter(step_path)
     return Step(
-        name=str(fm.get("name", step_path.stem)),
+        name=dir_name,
         title=_opt_str(fm.get("title")),
         summary=str(fm.get("summary", "")),
         agent=_opt_str(fm.get("agent")),

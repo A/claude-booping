@@ -14,7 +14,9 @@ BOOPING_BIN = PLUGIN_ROOT / "bin" / "booping"
 
 def _load(name: str) -> Playbook:
     home = get_fixture_path("render-playbook-home")
-    pbs = Playbook.load_all(vault=None, home_dir=home)
+    pbs = Playbook.load_all(
+        vault=None, home_dir=home, plugin_root=Path("/nonexistent/plugin-root")
+    )
     return next(pb for pb in pbs if pb.name == name)
 
 
@@ -149,7 +151,7 @@ def test_missing_step_notice() -> None:
     out = _render("missing-step")
     assert (
         "**STOP — tell the user:** step 'ghost' is referenced in the graph but"
-        " steps/ghost.md does not exist. Do not execute this playbook." in out
+        " ghost/prompt.md does not exist. Do not execute this playbook." in out
     )
     _assert_blocking(out)
 
@@ -194,7 +196,7 @@ def test_inline_in_parallel_notice() -> None:
 def test_orphan_note_non_blocking() -> None:
     out = _render("orphan")
     assert (
-        "**Note — tell the user:** step 'extra' exists in steps/ but is not wired"
+        "**Note — tell the user:** step 'extra' exists on disk but is not wired"
         " into the graph; it will not run." in out
     )
     # Non-blocking: the graph + wired step section still render.
