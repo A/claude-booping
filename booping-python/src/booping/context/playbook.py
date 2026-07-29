@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any, Literal, cast
 
 from pydantic import BaseModel
 
@@ -40,11 +40,23 @@ class Step(BaseModel):
     path: Path
 
 
+class SubgraphNode(BaseModel):
+    name: str
+    dependencies: list[str] = []
+    repeat: str | None = None
+    graph: dict[str, list[str]] = {}
+
+
 class GraphProblem(BaseModel):
-    kind: Literal["cycle", "unknown_dep"]
+    kind: Literal[
+        "cycle", "unknown_dep", "bad_node", "nested_subgraph", "duplicate_step"
+    ]
     cycle: list[str] = []  # kind=cycle: the cycle path, e.g. ["a", "b", "a"]
     dep: str = ""  # kind=unknown_dep: the missing key
     dependent: str = ""  # kind=unknown_dep: the step that listed it
+    node: str = ""  # kind=bad_node/nested_subgraph/duplicate_step: the offending key
+    detail: str = ""  # kind=bad_node: what is wrong with it
+    scope: str = ""  # subgraph name the problem was found in; "" = outer graph
 
 
 class WaveResolution(BaseModel):
@@ -130,9 +142,39 @@ class Playbook(BaseModel):
     path: Path
     body: str = ""
     steps: list[Step] = []
+    # Outer scope only: plain step → deps, subgraph node → its `dependencies`.
     graph: dict[str, list[str]] = {}
+    subgraphs: dict[str, SubgraphNode] = {}
+    # Shape/scope problems collected while parsing `graph:` frontmatter.
+    graph_problems: list[GraphProblem] = []
     # Discovery roots that exist on disk, most specific first (local, global, core).
     search_roots: list[Path] = []
+
+    @property
+    def executable_step_names(self) -> list[str]:
+        """Every name that must map to a step dir: outer plain steps plus all inner
+        steps. Subgraph keys are grouping nodes and are excluded."""
+        names: list[str] = []
+        for key in self.graph:
+            sub = self.subgraphs.get(key)
+            if sub is None:
+                names.append(key)
+            else:
+                names.extend(sub.graph)
+        return names
+
+    def resolve_scopes(self) -> dict[str, WaveResolution]:
+        """Wave resolution per scope: key ``""`` is the outer graph, any other key is a
+        subgraph name holding its inner graph's resolution. Inner problems carry
+        ``scope`` set to the subgraph name."""
+        scopes: dict[str, WaveResolution] = {"": resolve_waves(self.graph)}
+        for name, sub in self.subgraphs.items():
+            res = resolve_waves(sub.graph)
+            scopes[name] = WaveResolution(
+                waves=res.waves,
+                problems=[p.model_copy(update={"scope": name}) for p in res.problems],
+            )
+        return scopes
 
     @classmethod
     def load_all(
@@ -191,11 +233,7 @@ def _load_one(
     requires_project = bool(fm.get("requires_project", False))
     jinja = bool(fm.get("jinja", False))
 
-    raw_graph: dict[Any, Any] = fm.get("graph") or {}
-    graph: dict[str, list[str]] = {}
-    for step, deps in raw_graph.items():
-        dep_list: list[Any] = deps or []
-        graph[str(step)] = [str(d) for d in dep_list]
+    graph, subgraphs, graph_problems = _parse_graph(fm.get("graph") or {})
 
     steps: list[Step] = []
     for step_dir in sorted(pb_dir.iterdir()):
@@ -219,8 +257,116 @@ def _load_one(
         body=body,
         steps=steps,
         graph=graph,
+        subgraphs=subgraphs,
+        graph_problems=graph_problems,
         search_roots=search_roots or [],
     )
+
+
+_SUBGRAPH_KEYS = {"dependencies", "graph", "repeat"}
+
+
+def _parse_graph(
+    raw_graph: dict[Any, Any],
+) -> tuple[dict[str, list[str]], dict[str, SubgraphNode], list[GraphProblem]]:
+    """Parse the `graph:` mapping into the outer graph, its subgraph nodes and any
+    shape/scope problems. A list value is a plain step's deps; a mapping value is a
+    subgraph node. Malformed nodes are dropped and reported, never raised."""
+    graph: dict[str, list[str]] = {}
+    subgraphs: dict[str, SubgraphNode] = {}
+    problems: list[GraphProblem] = []
+    for raw_key, value in raw_graph.items():
+        key = str(raw_key)
+        if isinstance(value, dict):
+            node = _parse_subgraph(key, value, problems)  # type: ignore[arg-type]
+            if node is None:
+                continue
+            graph[key] = node.dependencies
+            subgraphs[key] = node
+        elif value is None or isinstance(value, list):
+            graph[key] = _str_list(value)
+        else:
+            problems.append(
+                GraphProblem(kind="bad_node", node=key, detail="deps must be a list")
+            )
+
+    seen = set(graph)
+    for name, node in subgraphs.items():
+        for inner in node.graph:
+            if inner in seen:
+                problems.append(
+                    GraphProblem(kind="duplicate_step", node=inner, scope=name)
+                )
+            seen.add(inner)
+
+    return graph, subgraphs, problems
+
+
+def _parse_subgraph(
+    key: str, value: dict[Any, Any], problems: list[GraphProblem]
+) -> SubgraphNode | None:
+    def bad(detail: str) -> None:
+        problems.append(GraphProblem(kind="bad_node", node=key, detail=detail))
+
+    extra = sorted(str(k) for k in value if str(k) not in _SUBGRAPH_KEYS)
+    if extra:
+        bad(f"unknown key(s): {', '.join(extra)}")
+        return None
+    if "dependencies" not in value:
+        bad("missing `dependencies`")
+        return None
+    if "graph" not in value:
+        bad("missing `graph`")
+        return None
+
+    deps = value["dependencies"]
+    if deps is None:
+        deps = []
+    if not isinstance(deps, list):
+        bad("`dependencies` must be a list")
+        return None
+
+    inner_raw = value["graph"]
+    if not isinstance(inner_raw, dict) or not inner_raw:
+        bad("`graph` must be a non-empty mapping")
+        return None
+
+    repeat = value.get("repeat")
+    if repeat is not None and not isinstance(repeat, str):
+        bad("`repeat` must be a string")
+        return None
+
+    inner: dict[str, list[str]] = {}
+    for raw_inner_key, inner_value in cast("dict[Any, Any]", inner_raw).items():
+        inner_key = str(raw_inner_key)
+        if isinstance(inner_value, dict):
+            problems.append(
+                GraphProblem(kind="nested_subgraph", node=inner_key, scope=key)
+            )
+            continue
+        if inner_value is not None and not isinstance(inner_value, list):
+            problems.append(
+                GraphProblem(
+                    kind="bad_node",
+                    node=inner_key,
+                    scope=key,
+                    detail="deps must be a list",
+                )
+            )
+            continue
+        inner[inner_key] = _str_list(inner_value)
+
+    return SubgraphNode(
+        name=key,
+        dependencies=_str_list(deps),
+        repeat=repeat,
+        graph=inner,
+    )
+
+
+def _str_list(value: Any) -> list[str]:
+    items: list[Any] = cast("list[Any]", value) if value else []
+    return [str(item) for item in items]
 
 
 def _load_step(dir_name: str, step_path: Path) -> Step:

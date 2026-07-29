@@ -8,6 +8,17 @@ from booping.context.playbook import Playbook, resolve_agent, resolve_waves
 from tests.helpers import get_fixture_path
 
 
+def _load_graph(tmp_path: Path, graph_yaml: str) -> Playbook:
+    """Load a single playbook whose `graph:` frontmatter block is `graph_yaml`."""
+    pb_dir = tmp_path / "_playbooks" / "sub"
+    pb_dir.mkdir(parents=True)
+    (pb_dir / "playbook.md").write_text(
+        f"---\nname: sub\ntitle: Sub\ngraph:\n{graph_yaml}---\nbody\n"
+    )
+    pbs = Playbook.load_all(vault=None, home_dir=tmp_path, plugin_root=_no_core())
+    return pbs[0]
+
+
 def _home() -> Path:
     return get_fixture_path("playbooks-home")
 
@@ -284,3 +295,190 @@ def test_resolve_waves_empty_graph() -> None:
 def test_resolve_waves_deterministic() -> None:
     graph = {"a": [], "b": ["a"], "c": ["a"], "d": ["b", "c"]}
     assert resolve_waves(graph).waves == resolve_waves(graph).waves
+
+
+_SUBGRAPH_YAML = """\
+  intake: []
+  loop:
+    dependencies: [intake]
+    repeat: until the reviewer is satisfied
+    graph:
+      draft: []
+      review: [draft]
+  publish: [loop]
+"""
+
+
+def test_subgraph_node_parsed(tmp_path: Path) -> None:
+    pb = _load_graph(tmp_path, _SUBGRAPH_YAML)
+    assert pb.graph_problems == []
+    # Outer graph keeps a flat shape; the subgraph key maps to its `dependencies`.
+    assert pb.graph == {"intake": [], "loop": ["intake"], "publish": ["loop"]}
+    assert list(pb.subgraphs) == ["loop"]
+    loop = pb.subgraphs["loop"]
+    assert loop.name == "loop"
+    assert loop.dependencies == ["intake"]
+    assert loop.repeat == "until the reviewer is satisfied"
+    assert loop.graph == {"draft": [], "review": ["draft"]}
+
+
+def test_subgraph_without_repeat_is_none(tmp_path: Path) -> None:
+    pb = _load_graph(
+        tmp_path,
+        "  a: []\n  group:\n    dependencies: [a]\n    graph:\n      b: []\n",
+    )
+    assert pb.graph_problems == []
+    assert pb.subgraphs["group"].repeat is None
+
+
+@pytest.mark.parametrize(
+    ("graph_yaml", "detail_match"),
+    [
+        ("  g:\n    graph:\n      b: []\n", "dependencies"),
+        ("  g:\n    dependencies: []\n", "graph"),
+        (
+            "  g:\n    dependencies: []\n    graph:\n      b: []\n    bogus: 1\n",
+            "bogus",
+        ),
+        ("  g:\n    dependencies: nope\n    graph:\n      b: []\n", "dependencies"),
+        ("  g:\n    dependencies: []\n    graph: nope\n", "graph"),
+        ("  g:\n    dependencies: []\n    graph: {}\n", "graph"),
+    ],
+)
+def test_bad_subgraph_node(tmp_path: Path, graph_yaml: str, detail_match: str) -> None:
+    pb = _load_graph(tmp_path, graph_yaml)
+    assert [p.kind for p in pb.graph_problems] == ["bad_node"]
+    prob = pb.graph_problems[0]
+    assert prob.node == "g"
+    assert detail_match in prob.detail
+    # The malformed node is dropped from both maps.
+    assert pb.graph == {}
+    assert pb.subgraphs == {}
+
+
+def test_nested_subgraph_reported(tmp_path: Path) -> None:
+    pb = _load_graph(
+        tmp_path,
+        "  outer:\n"
+        "    dependencies: []\n"
+        "    graph:\n"
+        "      inner:\n"
+        "        dependencies: []\n"
+        "        graph:\n"
+        "          deep: []\n",
+    )
+    assert [p.kind for p in pb.graph_problems] == ["nested_subgraph"]
+    prob = pb.graph_problems[0]
+    assert prob.node == "inner"
+    assert prob.scope == "outer"
+    assert pb.subgraphs["outer"].graph == {}
+
+
+def test_duplicate_step_outer_and_inner(tmp_path: Path) -> None:
+    pb = _load_graph(
+        tmp_path,
+        "  draft: []\n  loop:\n    dependencies: []\n    graph:\n      draft: []\n",
+    )
+    assert [p.kind for p in pb.graph_problems] == ["duplicate_step"]
+    assert pb.graph_problems[0].node == "draft"
+    assert pb.graph_problems[0].scope == "loop"
+
+
+def test_duplicate_step_across_two_inner_graphs(tmp_path: Path) -> None:
+    pb = _load_graph(
+        tmp_path,
+        "  one:\n    dependencies: []\n    graph:\n      shared: []\n"
+        "  two:\n    dependencies: []\n    graph:\n      shared: []\n",
+    )
+    assert [p.kind for p in pb.graph_problems] == ["duplicate_step"]
+    assert pb.graph_problems[0].node == "shared"
+    assert pb.graph_problems[0].scope == "two"
+
+
+def test_inner_step_colliding_with_subgraph_key(tmp_path: Path) -> None:
+    pb = _load_graph(
+        tmp_path,
+        "  loop:\n    dependencies: []\n    graph:\n      loop: []\n",
+    )
+    assert [p.kind for p in pb.graph_problems] == ["duplicate_step"]
+    assert pb.graph_problems[0].node == "loop"
+
+
+def test_scalar_node_value_is_bad_node(tmp_path: Path) -> None:
+    pb = _load_graph(tmp_path, "  a: nope\n")
+    assert [p.kind for p in pb.graph_problems] == ["bad_node"]
+    assert pb.graph == {}
+
+
+def test_flat_graph_has_no_subgraphs_or_problems() -> None:
+    pbs = Playbook.load_all(vault=None, home_dir=_home(), plugin_root=_no_core())
+    alpha = next(pb for pb in pbs if pb.name == "alpha")
+    assert alpha.subgraphs == {}
+    assert alpha.graph_problems == []
+
+
+def test_resolve_scopes_outer_and_inner_waves(tmp_path: Path) -> None:
+    pb = _load_graph(tmp_path, _SUBGRAPH_YAML)
+    scopes = pb.resolve_scopes()
+    assert set(scopes) == {"", "loop"}
+    # The subgraph node is placed by its `dependencies`, exactly like a plain step.
+    assert scopes[""].waves == [["intake"], ["loop"], ["publish"]]
+    assert scopes[""].problems == []
+    assert scopes["loop"].waves == [["draft"], ["review"]]
+    assert scopes["loop"].problems == []
+
+
+def test_resolve_scopes_inner_problem_carries_scope(tmp_path: Path) -> None:
+    pb = _load_graph(
+        tmp_path,
+        "  a: []\n"
+        "  loop:\n    dependencies: [a]\n    graph:\n      b: [nope]\n      c: [b]\n",
+    )
+    inner = pb.resolve_scopes()["loop"]
+    assert inner.waves == []
+    assert [(p.kind, p.dep, p.dependent, p.scope) for p in inner.problems] == [
+        ("unknown_dep", "nope", "b", "loop")
+    ]
+
+
+def test_inner_dep_on_outer_step_is_unknown(tmp_path: Path) -> None:
+    pb = _load_graph(
+        tmp_path,
+        "  a: []\n  loop:\n    dependencies: [a]\n    graph:\n      b: [a]\n",
+    )
+    inner = pb.resolve_scopes()["loop"]
+    assert [(p.kind, p.dep, p.scope) for p in inner.problems] == [
+        ("unknown_dep", "a", "loop")
+    ]
+
+
+def test_subgraph_dependency_on_inner_step_is_unknown(tmp_path: Path) -> None:
+    pb = _load_graph(
+        tmp_path,
+        "  a: []\n  loop:\n    dependencies: [b]\n    graph:\n      b: []\n",
+    )
+    outer = pb.resolve_scopes()[""]
+    assert [(p.kind, p.dep, p.dependent, p.scope) for p in outer.problems] == [
+        ("unknown_dep", "b", "loop", "")
+    ]
+
+
+def test_inner_cycle_carries_scope(tmp_path: Path) -> None:
+    pb = _load_graph(
+        tmp_path,
+        "  loop:\n    dependencies: []\n    graph:\n      b: [c]\n      c: [b]\n",
+    )
+    probs = pb.resolve_scopes()["loop"].problems
+    assert [p.kind for p in probs] == ["cycle"]
+    assert probs[0].scope == "loop"
+
+
+def test_executable_step_names(tmp_path: Path) -> None:
+    pb = _load_graph(tmp_path, _SUBGRAPH_YAML)
+    assert pb.executable_step_names == ["intake", "draft", "review", "publish"]
+
+
+def test_executable_step_names_flat_graph() -> None:
+    pbs = Playbook.load_all(vault=None, home_dir=_home(), plugin_root=_no_core())
+    alpha = next(pb for pb in pbs if pb.name == "alpha")
+    assert alpha.executable_step_names == ["gather", "draft"]
