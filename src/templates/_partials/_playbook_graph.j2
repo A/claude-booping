@@ -1,9 +1,12 @@
 {#-
   Renders the "## Execution graph" section. Inputs:
-    graph  — dict[str, list[str]] step → deps, insertion order preserved
-    waves  — list[list[str]] resolved wave order (parallel members per wave)
-  Emits a mermaid flowchart (one edge line per dep, isolated nodes as bare ids)
-  followed by a numbered wave list ("∥"-joined members share a wave).
+    graph        — dict[str, list[str]] outer node → deps, insertion order preserved
+    waves        — list[list[str]] resolved outer wave order (parallel members per wave)
+    subgraphs    — dict[str, SubgraphNode] outer keys that are subgraph nodes
+    inner_waves  — dict[str, list[list[str]]] resolved wave order per subgraph
+  Emits a mermaid flowchart (one `subgraph … end` cluster per subgraph node, one edge
+  line per dep, isolated nodes as bare ids) followed by a numbered wave list
+  ("∥"-joined members share a wave; a subgraph's inner waves nest under its entry).
 -#}
 {%- set depended = [] -%}
 {%- for step, deps in graph.items() -%}
@@ -15,13 +18,18 @@
 
 ```mermaid
 flowchart TD
-{% for step, deps in graph.items() %}{% for dep in deps %}  {{ dep }} --> {{ step }}
-{% endfor %}{% endfor %}{% for step, deps in graph.items() %}{% if not deps and step not in depended %}  {{ step }}
+{% for sg_name, sg in subgraphs.items() %}{% set inner_depended = [] %}{% for istep, ideps in sg.graph.items() %}{% for idep in ideps %}{% if idep not in inner_depended %}{{ inner_depended.append(idep) or "" }}{% endif %}{% endfor %}{% endfor %}  subgraph {{ sg_name }}["{{ sg_name }}{% if sg.repeat %} (repeat){% endif %}"]
+{% for istep, ideps in sg.graph.items() %}{% for idep in ideps %}    {{ idep }} --> {{ istep }}
+{% endfor %}{% endfor %}{% for istep, ideps in sg.graph.items() %}{% if not ideps and istep not in inner_depended %}    {{ istep }}
+{% endif %}{% endfor %}  end
+{% endfor %}{% for step, deps in graph.items() %}{% for dep in deps %}  {{ dep }} --> {{ step }}
+{% endfor %}{% endfor %}{% for step, deps in graph.items() %}{% if not deps and step not in depended and step not in subgraphs %}  {{ step }}
 {% endif %}{% endfor %}```
 
 Steps on one line run in parallel — spawn all their sub-agents in one message,
 wait for all to finish, then start the next wave.
 
 {% for wave in waves -%}
-{{ loop.index }}. {% for name in wave %}`{{ name }}`{% if not loop.last %} ∥ {% endif %}{% endfor %}
-{% endfor -%}
+{{ loop.index }}. {% for name in wave %}`{{ name }}`{% if name in subgraphs %} *(subgraph)*{% endif %}{% if not loop.last %} ∥ {% endif %}{% endfor %}
+{% for name in wave %}{% if name in subgraphs %}{% for inner in inner_waves[name] %}    {{ loop.index }}. {% for n in inner %}`{{ n }}`{% if not loop.last %} ∥ {% endif %}{% endfor %}
+{% endfor %}{% endif %}{% endfor %}{% endfor -%}

@@ -11,7 +11,7 @@ from jinja2 import BaseLoader, ChoiceLoader, DictLoader, Environment, FileSystem
 
 from booping import logger
 from booping.context import Context
-from booping.context.playbook import Playbook, Step, resolve_agent, resolve_waves
+from booping.context.playbook import GraphProblem, Playbook, Step, resolve_agent
 from booping.rendering import LenientUndefined, build_source_env, get_plugin_root
 
 _NO_GRAPH = (
@@ -22,8 +22,34 @@ _UNKNOWN_DEP = (
     "**STOP — tell the user:** '{dep}' is listed as a dependency of '{name}' but is"
     " not a step in the graph. Do not execute this playbook."
 )
+_UNKNOWN_DEP_INNER = (
+    "**STOP — tell the user:** in subgraph '{scope}': '{dep}' is listed as a dependency"
+    " of '{name}' but is not a step in that subgraph. Do not execute this playbook."
+)
 _CYCLE = (
     "**STOP — tell the user:** the graph has a cycle: {path}."
+    " Do not execute this playbook."
+)
+_CYCLE_INNER = (
+    "**STOP — tell the user:** in subgraph '{scope}': the graph has a cycle: {path}."
+    " Do not execute this playbook."
+)
+_BAD_NODE = (
+    "**STOP — tell the user:** graph node '{name}' is malformed: {detail}."
+    " Do not execute this playbook."
+)
+_BAD_NODE_INNER = (
+    "**STOP — tell the user:** in subgraph '{scope}': graph node '{name}' is malformed:"
+    " {detail}. Do not execute this playbook."
+)
+_NESTED_SUBGRAPH = (
+    "**STOP — tell the user:** node '{name}' inside subgraph '{scope}' is itself a"
+    " subgraph; only one level of nesting is supported."
+    " Do not execute this playbook."
+)
+_DUPLICATE_STEP = (
+    "**STOP — tell the user:** step '{name}' appears in more than one scope (subgraph"
+    " '{scope}'); step names must be unique across the playbook."
     " Do not execute this playbook."
 )
 _MISSING = (
@@ -166,6 +192,28 @@ def render_body(
         return "", f"{type(exc).__name__}: {exc}"
 
 
+def _shape_notice(prob: GraphProblem) -> str:
+    if prob.kind == "nested_subgraph":
+        return _NESTED_SUBGRAPH.format(name=prob.node, scope=prob.scope)
+    if prob.kind == "duplicate_step":
+        return _DUPLICATE_STEP.format(name=prob.node, scope=prob.scope)
+    template = _BAD_NODE_INNER if prob.scope else _BAD_NODE
+    return template.format(name=prob.node, detail=prob.detail, scope=prob.scope)
+
+
+def _resolver_notice(prob: GraphProblem) -> str:
+    if prob.kind == "cycle":
+        path = " → ".join(prob.cycle)
+        if prob.scope:
+            return _CYCLE_INNER.format(path=path, scope=prob.scope)
+        return _CYCLE.format(path=path)
+    if prob.scope:
+        return _UNKNOWN_DEP_INNER.format(
+            dep=prob.dep, name=prob.dependent, scope=prob.scope
+        )
+    return _UNKNOWN_DEP.format(dep=prob.dep, name=prob.dependent)
+
+
 def compose(
     pb: Playbook, plugin_root: Path | None = None, context: Context | None = None
 ) -> str:
@@ -182,10 +230,10 @@ def compose(
 
     steps_by_name = {s.name: s for s in pb.steps}
     step_names = set(steps_by_name)
-    graph_keys = list(pb.graph.keys())
 
-    resolution = resolve_waves(pb.graph)
-    waves = resolution.waves
+    scopes = pb.resolve_scopes()
+    waves = scopes[""].waves
+    inner_waves = {name: scopes[name].waves for name in pb.subgraphs}
 
     notices: list[str] = []
     blocking = False
@@ -194,34 +242,38 @@ def compose(
         notices.append(_NO_GRAPH.format(name=pb.name))
         blocking = True
 
-    # Resolver problems: unknown_dep entries precede cycle entries (resolve_waves
-    # collects them in that order); render each in problem order.
-    for prob in resolution.problems:
-        if prob.kind == "unknown_dep":
-            notices.append(_UNKNOWN_DEP.format(dep=prob.dep, name=prob.dependent))
-            blocking = True
-        elif prob.kind == "cycle":
-            notices.append(_CYCLE.format(path=" → ".join(prob.cycle)))
+    # Shape problems collected by the loader, then resolver problems per scope
+    # (outer first, subgraphs in graph order).
+    for prob in pb.graph_problems:
+        notices.append(_shape_notice(prob))
+        blocking = True
+
+    for scope in ["", *pb.subgraphs]:
+        for prob in scopes[scope].problems:
+            notices.append(_resolver_notice(prob))
             blocking = True
 
-    # Missing step dirs (graph key order).
-    for key in graph_keys:
+    # Missing step dirs: every executable name (outer plain steps + inner steps) must
+    # map to a step dir; subgraph keys are grouping nodes and map to nothing.
+    for key in pb.executable_step_names:
         if key not in step_names:
             notices.append(_MISSING.format(name=key))
             blocking = True
 
-    # Inline steps sharing a parallel wave (wave order).
-    for wave in waves:
-        if len(wave) > 1:
-            for name in wave:
-                step = steps_by_name.get(name)
-                if step is not None and step.agent is None:
-                    notices.append(_INLINE_PARALLEL.format(name=name))
-                    blocking = True
+    # Inline steps sharing a parallel wave, per scope (outer waves, then inner waves).
+    for scope_waves in [waves, *inner_waves.values()]:
+        for wave in scope_waves:
+            if len(wave) > 1:
+                for name in wave:
+                    step = steps_by_name.get(name)
+                    if step is not None and step.agent is None:
+                        notices.append(_INLINE_PARALLEL.format(name=name))
+                        blocking = True
 
     # Orphan step dirs (steps order) — non-blocking, emitted in both cases.
+    wired = set(pb.executable_step_names) | set(pb.graph)
     for step in pb.steps:
-        if step.name not in pb.graph:
+        if step.name not in wired:
             notices.append(_ORPHAN.format(name=step.name))
 
     preamble = pb.body
@@ -245,23 +297,47 @@ def compose(
     if not blocking:
         sections.append(
             env.get_template("_partials/_playbook_graph.j2")
-            .render(graph=pb.graph, waves=waves)
+            .render(
+                graph=pb.graph,
+                waves=waves,
+                subgraphs=pb.subgraphs,
+                inner_waves=inner_waves,
+            )
             .strip()
         )
         step_tmpl = env.get_template("_partials/_playbook_step.j2")
+
+        def render_step(
+            name: str, deps: list[str], wave: list[str], part_of: str | None
+        ) -> str:
+            sub = pb.subgraphs.get(part_of) if part_of is not None else None
+            return step_tmpl.render(
+                step=steps_by_name[name],
+                deps=deps,
+                siblings=[n for n in wave if n != name],
+                playbook=pb.name,
+                jinja=pb.jinja,
+                part_of=part_of,
+                repeated=sub is not None and sub.repeat is not None,
+            ).strip()
+
         for wave in waves:
             for name in wave:
-                step = steps_by_name[name]
-                siblings = [n for n in wave if n != name]
+                sub = pb.subgraphs.get(name)
+                if sub is None:
+                    sections.append(render_step(name, pb.graph[name], wave, None))
+                    continue
                 sections.append(
                     step_tmpl.render(
-                        step=step,
-                        deps=pb.graph[name],
-                        siblings=siblings,
-                        playbook=pb.name,
-                        jinja=pb.jinja,
+                        subgraph=sub,
+                        waves=inner_waves[name],
                     ).strip()
                 )
+                for inner_wave in inner_waves[name]:
+                    for inner in inner_wave:
+                        sections.append(
+                            render_step(inner, sub.graph[inner], inner_wave, name)
+                        )
 
     return "\n\n".join(sections) + "\n"
 

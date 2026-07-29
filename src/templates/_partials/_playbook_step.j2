@@ -1,17 +1,41 @@
 {#-
-  Renders one playbook step section to the locked contract. Inputs:
+  Renders one section of the composed procedure — either a subgraph intro or a step.
+
+  Subgraph intro (pass `subgraph`):
+    subgraph  — a booping.context.playbook.SubgraphNode
+    waves     — list[list[str]] its inner wave order
+
+  Step section (pass `step`):
     step      — a booping.context.playbook.Step
-    deps      — list[str] this step's deps in graph order (After: bullets; empty for wave 1)
+    deps      — list[str] this step's deps in its own scope (After: bullets; empty for wave 1)
     siblings  — list[str] the other members of this step's wave (Parallel with:)
     playbook  — the playbook name (for the --step fetch command)
     jinja     — True when the playbook sets jinja: true (bodies must be fetched rendered)
+    part_of   — subgraph name when this step lives in one, else none
+    repeated  — True when that subgraph sets `repeat`
   `resolve_agent` is registered as a Jinja global by the driving command.
 -#}
+{%- if subgraph is defined and subgraph -%}
+## Subgraph: {{ subgraph.name }}
+
+Instructions:
+{% if subgraph.dependencies -%}
+- After: {{ subgraph.dependencies | join(', ') }}
+{% endif -%}
+{% if subgraph.repeat -%}
+- Repeat: {{ subgraph.repeat }}
+{% endif -%}
+- Inner waves: {% for wave in waves %}{{ loop.index }}. {% for name in wave %}`{{ name }}`{% if not loop.last %} ∥ {% endif %}{% endfor %}{% if not loop.last %} {% endif %}{% endfor %}
+{%- else -%}
 {%- set title = step.title if step.title else step.name.replace('-', ' ') | title -%}
 {%- set ag = resolve_agent(step.agent) -%}
+{%- set in_subgraph = part_of is defined and part_of -%}
 ## {{ title }}
-{% if step.summary or deps or siblings or step.agent is not none or step.review_gate is not none %}
+{% if step.summary or deps or siblings or in_subgraph or step.agent is not none or step.review_gate is not none %}
 Instructions:
+{% if in_subgraph -%}
+- Part of: {{ part_of }}{% if repeated %} (repeated){% endif %}
+{% endif -%}
 {% if step.summary -%}
 - Summary: {{ step.summary }}
 {% endif -%}
@@ -34,4 +58,5 @@ Instructions:
 Run `booping render-playbook {{ playbook }} --step {{ step.name }}` for content.
 {%- else -%}
 Read [{{ title }}]({{ step.path }}) for content.
+{%- endif %}
 {%- endif %}

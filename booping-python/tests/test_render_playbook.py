@@ -209,6 +209,287 @@ def test_orphan_note_non_blocking() -> None:
     assert "**STOP" not in out
 
 
+# --- subgraphs --------------------------------------------------------------
+
+_SG_GRAPH = """\
+  manifest: []
+  pipeline:
+    dependencies: [manifest]
+    repeat: once per step produced by manifest; instances may run in parallel
+    graph:
+      spec: []
+      fixtures: [spec]
+      tests: [spec]
+  publish: [pipeline]
+"""
+
+_SG_STEPS = {
+    "manifest": "sonnet:medium",
+    "spec": "sonnet:medium",
+    "fixtures": "haiku:low",
+    "tests": "booping-researcher",
+    "publish": "sonnet:medium",
+}
+
+
+def _build(
+    tmp_path: Path,
+    graph_yaml: str,
+    steps: dict[str, str],
+    name: str = "sg",
+) -> Playbook:
+    """A playbook planted in a tmp local root: `graph_yaml` verbatim under `graph:`,
+    one step dir per `steps` entry (name → `agent:` frontmatter value)."""
+    pb_dir = tmp_path / "_playbooks" / name
+    pb_dir.mkdir(parents=True)
+    (pb_dir / "playbook.md").write_text(
+        f"---\nname: {name}\ntitle: SG\ngraph:\n{graph_yaml}---\nPreamble.\n"
+    )
+    for step_name, agent in steps.items():
+        (pb_dir / step_name).mkdir()
+        (pb_dir / step_name / "prompt.md").write_text(
+            f"---\nsummary: {step_name} summary\nagent: {agent}\n---\n{step_name} body\n"
+        )
+    pbs = Playbook.load_all(
+        vault=tmp_path, home_dir=tmp_path / "nohome", plugin_root=tmp_path / "nocore"
+    )
+    return next(p for p in pbs if p.name == name)
+
+
+def _sg(tmp_path: Path) -> Playbook:
+    return _build(tmp_path, _SG_GRAPH, _SG_STEPS)
+
+
+def _sg_out(tmp_path: Path) -> str:
+    return compose(_sg(tmp_path))
+
+
+def test_subgraph_happy_path_has_no_notices(tmp_path: Path) -> None:
+    out = _sg_out(tmp_path)
+    assert "**STOP" not in out
+    assert "**Note" not in out
+
+
+def test_subgraph_key_is_not_missing(tmp_path: Path) -> None:
+    # `pipeline` is a grouping node — it has no step dir and must not be reported.
+    assert "step 'pipeline' is referenced in the graph" not in _sg_out(tmp_path)
+
+
+def test_missing_inner_step_dir_notice(tmp_path: Path) -> None:
+    steps = {k: v for k, v in _SG_STEPS.items() if k != "fixtures"}
+    out = compose(_build(tmp_path, _SG_GRAPH, steps))
+    assert (
+        "**STOP — tell the user:** step 'fixtures' is referenced in the graph but"
+        " fixtures/prompt.md does not exist. Do not execute this playbook." in out
+    )
+    _assert_blocking(out)
+
+
+def test_inner_step_dir_is_not_an_orphan(tmp_path: Path) -> None:
+    assert "**Note" not in _sg_out(tmp_path)
+
+
+def test_unwired_step_dir_is_still_an_orphan(tmp_path: Path) -> None:
+    out = compose(_build(tmp_path, _SG_GRAPH, {**_SG_STEPS, "stray": "sonnet:medium"}))
+    assert (
+        "**Note — tell the user:** step 'stray' exists on disk but is not wired"
+        " into the graph; it will not run." in out
+    )
+    assert "## Execution graph" in out
+
+
+def test_inline_steps_sharing_an_inner_wave_notice(tmp_path: Path) -> None:
+    graph = (
+        "  a: []\n"
+        "  loop:\n    dependencies: [a]\n"
+        "    graph:\n      one: []\n      two: []\n"
+    )
+    out = compose(
+        _build(tmp_path, graph, {"a": "sonnet:medium", "one": "null", "two": "null"})
+    )
+    for name in ("one", "two"):
+        assert (
+            f"**STOP — tell the user:** step '{name}' runs inline (agent: null) but"
+            " shares a wave with other steps; inline steps cannot run in parallel."
+            " Do not execute this playbook." in out
+        )
+    _assert_blocking(out)
+
+
+def test_bad_node_notice(tmp_path: Path) -> None:
+    out = compose(_build(tmp_path, "  a: []\n  g:\n    graph:\n      b: []\n", {"a": "null"}))
+    assert (
+        "**STOP — tell the user:** graph node 'g' is malformed: missing `dependencies`."
+        " Do not execute this playbook." in out
+    )
+    _assert_blocking(out)
+
+
+def test_bad_inner_node_notice_names_the_subgraph(tmp_path: Path) -> None:
+    graph = "  g:\n    dependencies: []\n    graph:\n      b: nope\n"
+    out = compose(_build(tmp_path, graph, {}))
+    assert (
+        "**STOP — tell the user:** in subgraph 'g': graph node 'b' is malformed:"
+        " deps must be a list. Do not execute this playbook." in out
+    )
+    _assert_blocking(out)
+
+
+def test_nested_subgraph_notice(tmp_path: Path) -> None:
+    graph = (
+        "  outer:\n    dependencies: []\n    graph:\n"
+        "      inner:\n        dependencies: []\n        graph:\n          deep: []\n"
+    )
+    out = compose(_build(tmp_path, graph, {}))
+    assert (
+        "**STOP — tell the user:** node 'inner' inside subgraph 'outer' is itself a"
+        " subgraph; only one level of nesting is supported."
+        " Do not execute this playbook." in out
+    )
+    _assert_blocking(out)
+
+
+def test_duplicate_step_notice(tmp_path: Path) -> None:
+    graph = "  draft: []\n  loop:\n    dependencies: []\n    graph:\n      draft: []\n"
+    out = compose(_build(tmp_path, graph, {"draft": "null"}))
+    assert (
+        "**STOP — tell the user:** step 'draft' appears in more than one scope"
+        " (subgraph 'loop'); step names must be unique across the playbook."
+        " Do not execute this playbook." in out
+    )
+    _assert_blocking(out)
+
+
+def test_inner_unknown_dep_notice_names_the_subgraph(tmp_path: Path) -> None:
+    graph = "  loop:\n    dependencies: []\n    graph:\n      b: [ghost]\n"
+    out = compose(_build(tmp_path, graph, {"b": "null"}))
+    assert (
+        "**STOP — tell the user:** in subgraph 'loop': 'ghost' is listed as a"
+        " dependency of 'b' but is not a step in that subgraph."
+        " Do not execute this playbook." in out
+    )
+    _assert_blocking(out)
+
+
+def test_inner_cycle_notice_names_the_subgraph(tmp_path: Path) -> None:
+    graph = "  loop:\n    dependencies: []\n    graph:\n      b: [c]\n      c: [b]\n"
+    out = compose(_build(tmp_path, graph, {"b": "null", "c": "null"}))
+    assert (
+        "**STOP — tell the user:** in subgraph 'loop': the graph has a cycle: b → c → b."
+        " Do not execute this playbook." in out
+    )
+    _assert_blocking(out)
+
+
+def _mermaid(out: str) -> str:
+    body = out.split("```mermaid\n", 1)[1]
+    return body.split("```", 1)[0]
+
+
+def test_mermaid_cluster(tmp_path: Path) -> None:
+    out = _sg_out(tmp_path)
+    assert out.count("```mermaid") == 1
+    chart = _mermaid(out)
+    assert chart.count("  subgraph ") == 1
+    assert chart.count("\n  end\n") == 1
+    assert '  subgraph pipeline["pipeline (repeat)"]\n' in chart
+    # Inner edges sit inside the cluster; outer edges point at the cluster id.
+    cluster = chart.split('  subgraph pipeline["pipeline (repeat)"]\n', 1)[1]
+    cluster = cluster.split("  end\n", 1)[0]
+    assert cluster == "    spec --> fixtures\n    spec --> tests\n"
+    assert "  manifest --> pipeline\n" in chart
+    assert "  pipeline --> publish\n" in chart
+
+
+def test_mermaid_cluster_title_without_repeat(tmp_path: Path) -> None:
+    graph = "  a: []\n  group:\n    dependencies: [a]\n    graph:\n      b: []\n"
+    chart = _mermaid(compose(_build(tmp_path, graph, {"a": "null", "b": "null"})))
+    assert '  subgraph group["group"]\n' in chart
+    # A lone inner step with no deps still shows up as a bare node in the cluster.
+    assert "    b\n" in chart
+
+
+def test_wave_list_nests_inner_waves(tmp_path: Path) -> None:
+    graph = _section(_sg_out(tmp_path), "## Execution graph")
+    assert (
+        "1. `manifest`\n"
+        "2. `pipeline` *(subgraph)*\n"
+        "    1. `spec`\n"
+        "    2. `fixtures` ∥ `tests`\n"
+        "3. `publish`\n" in graph
+    )
+
+
+def test_subgraph_section_order(tmp_path: Path) -> None:
+    out = _sg_out(tmp_path)
+    order = [
+        out.index("## Manifest"),
+        out.index("## Subgraph: pipeline"),
+        out.index("## Spec"),
+        out.index("## Fixtures"),
+        out.index("## Tests"),
+        out.index("## Publish"),
+    ]
+    assert order == sorted(order)
+
+
+def test_subgraph_intro_bullets(tmp_path: Path) -> None:
+    intro = _section(_sg_out(tmp_path), "## Subgraph: pipeline")
+    assert "- After: manifest" in intro
+    assert (
+        "- Repeat: once per step produced by manifest; instances may run in parallel"
+        in intro
+    )
+    assert "- Inner waves: 1. `spec` 2. `fixtures` ∥ `tests`" in intro
+
+
+def test_subgraph_intro_without_repeat_has_no_repeat_bullet(tmp_path: Path) -> None:
+    graph = "  a: []\n  group:\n    dependencies: [a]\n    graph:\n      b: []\n"
+    intro = _section(
+        compose(_build(tmp_path, graph, {"a": "null", "b": "null"})),
+        "## Subgraph: group",
+    )
+    assert "- Repeat:" not in intro
+    assert "- After: a" in intro
+    assert "- Inner waves: 1. `b`" in intro
+
+
+def test_inner_step_part_of_bullet_and_fetch_form(tmp_path: Path) -> None:
+    pb = _sg(tmp_path)
+    out = compose(pb)
+    spec = _section(out, "## Spec")
+    assert spec.index("- Part of: pipeline (repeated)") < spec.index("- Summary:")
+    step = next(s for s in pb.steps if s.name == "spec")
+    assert f"Read [Spec]({step.path}) for content." in spec
+    assert "spec body" not in spec
+    fixtures = _section(out, "## Fixtures")
+    assert "- Part of: pipeline (repeated)" in fixtures
+    assert "- After: spec" in fixtures
+    assert "- Parallel with: tests" in fixtures
+
+
+def test_inner_step_part_of_without_repeat_has_no_suffix(tmp_path: Path) -> None:
+    graph = "  a: []\n  group:\n    dependencies: [a]\n    graph:\n      b: []\n"
+    b = _section(
+        compose(_build(tmp_path, graph, {"a": "null", "b": "null"})), "## B"
+    )
+    assert "- Part of: group\n" in b
+
+
+def test_outer_steps_have_no_part_of_bullet(tmp_path: Path) -> None:
+    out = _sg_out(tmp_path)
+    assert "- Part of:" not in _section(out, "## Manifest")
+    assert "- Part of:" not in _section(out, "## Publish")
+
+
+def test_step_flag_on_inner_step_returns_bare_body(tmp_path: Path) -> None:
+    pb = _sg(tmp_path)
+    out = compose_step(pb, "fixtures")
+    assert out == "fixtures body\n"
+    assert "Part of:" not in out
+    assert "## Fixtures" not in out
+
+
 # --- opt-in Jinja -----------------------------------------------------------
 
 
