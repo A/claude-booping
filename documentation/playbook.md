@@ -52,7 +52,7 @@ Directory order on disk is irrelevant to the run — **the `graph:` frontmatter 
 - `trigger` — natural-language hint the skill matches the user's request against.
 - `requires_project` — *optional*, default `false`. When `true`, the playbook only runs with a booping project attached: `/playbook` flags it in the listing and refuses to run it without a project, and `booping render-playbook` refuses to render it (stderr + exit 1).
 - `jinja` — *optional*, default `false`. When `true`, the preamble and every step body are rendered as Jinja templates against live project context. See [Jinja bodies](#jinja-bodies).
-- `graph` — mapping of **step name → list of dependency step names**. This is the whole structure: membership (only mapped steps run), order (a step runs after all its dependencies), and parallelism (steps whose dependencies are all satisfied by earlier waves run together).
+- `graph` — mapping of **node name → node**. A node whose value is a **list** is a plain step and the list is its dependency step names; a node whose value is a **mapping** is a [subgraph](#subgraphs). This is the whole structure: membership (only mapped steps run), order (a step runs after all its dependencies), and parallelism (steps whose dependencies are all satisfied by earlier waves run together).
 
 The manifest **body** is a preamble — a playbook-level instruction inserted above the rendered procedure. No step calls: the graph, not the body, decides what runs.
 
@@ -109,10 +109,45 @@ Because a Jinja body is meaningless until rendered, later-wave steps of a `jinja
 
 `/playbook` resolves the graph into **waves** — a step joins the earliest wave in which all its dependencies sit in a prior wave. Steps sharing a wave run in parallel.
 
-- **First-wave step bodies are embedded** in the rendered procedure, ready to run.
-- **Later steps are fetched when their wave starts** — the render points at the step file and `/playbook` reads it then. For a `jinja: true` playbook it points at `booping render-playbook <name> --step <step>` instead, so the body arrives already rendered.
+- **Step bodies are never embedded** — every section is fetch-form. The render points at the step file and `/playbook` reads it when the wave starts. For a `jinja: true` playbook it points at `booping render-playbook <name> --step <step>` instead, so the body arrives already rendered.
 - **Parallel wave members must set `agent`** — inline steps (`agent: null`) can't run in parallel, so a step that shares a wave with others must delegate to a sub-agent.
 - **Review gates pause after the wave** — once every member of a wave finishes, each member's gate is presented (labeled by step) and the run waits for your confirmation before the next wave.
+
+## Subgraphs
+
+A `graph:` node whose value is a **mapping** is a *subgraph*: a named group of steps with its own inner graph, optionally run more than once.
+
+```yaml
+graph:
+  manifest: []
+  pipeline:
+    dependencies: [manifest]
+    repeat: once per feature listed by manifest; instances may run in parallel
+    graph:
+      spec: []
+      fixtures: [spec]
+      tests: [spec]
+  publish: [pipeline]
+```
+
+- `dependencies` — *required*, list of **outer** node names the subgraph waits for. Same role as a plain step's dependency list; the whole group joins a wave as one node.
+- `graph` — *required*, non-empty mapping of **inner** step name → inner dependency names. Inner waves are resolved exactly like outer ones.
+- `repeat` — *optional* prose. Its presence means the group runs once per instance the prose describes.
+
+**Scope rule.** `dependencies` reference outer names only; inner dependencies reference inner names only. There is no cross-scope edge: an inner step cannot depend on an outer step, and an outer step depends on the subgraph as a whole. Step names are addressed flat and must be unique across the whole playbook — an inner step still lives in its own `<step>/prompt.md` directory at the playbook root.
+
+**Repeat semantics.** `repeat` is prose, not a count — the driver reads it against the output of the steps in `dependencies` and decides how many instances to run. No `repeat` key means exactly one instance. Each instance walks the inner waves on its own, and each inner step's `review_gate` fires per instance. Instances run in parallel only when **every** inner step sets an `agent`; if any inner step is inline, instances run one at a time.
+
+**One level only.** A subgraph cannot contain another subgraph.
+
+Subgraph-specific STOP conditions (on top of the usual [notices](#notices)):
+
+- the node mapping has an unknown key, or is missing `dependencies` or `graph`;
+- `dependencies` is not a list, `graph` is not a non-empty mapping, or `repeat` is not a string;
+- an inner node's value is a mapping (nested subgraph);
+- a step name appears in more than one scope.
+
+In the rendered procedure the subgraph shows up as a mermaid cluster, a nested entry in the wave list, and a `## Subgraph: <name>` intro section (`After:`, `Repeat:`, `Inner waves:`) followed by its inner step sections, each tagged `Part of: <name>`.
 
 ## Notices
 
@@ -176,7 +211,7 @@ The rendered procedure lists the waves as:
 3. publish
 ```
 
-`prep` runs first (its body embedded). Then `lint` and `tests` spawn together in one message and run in parallel — both must set `agent`. Once both finish (and any review gates are cleared), `publish` runs.
+`prep` runs first (its body fetched when the wave starts). Then `lint` and `tests` spawn together in one message and run in parallel — both must set `agent`. Once both finish (and any review gates are cleared), `publish` runs.
 
 ## Rendering
 

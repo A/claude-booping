@@ -5,14 +5,14 @@
 -#}
 ## Execute
 
-Render the composed procedure: `booping render-playbook <name>` (`<name>` = the selected playbook). Output is: notices → preamble → `## Execution graph` (numbered wave list) → one `## <Title>` section per step.
+Render the composed procedure: `booping render-playbook <name>` (`<name>` = the selected playbook). Output is: notices → preamble → `## Execution graph` (numbered wave list) → one `## <Title>` section per step, plus a `## Subgraph: <name>` intro before each subgraph's steps.
 
 - Any `**STOP — tell the user:**` line → relay it verbatim and do not execute the playbook. `**Note — tell the user:**` → relay it, then continue.
 - Follow the preamble as a playbook-level instruction over the whole run. A playbook's preamble may define resume rules for re-entering a procedure mid-run.
 
 Walk the wave list in order. For each wave (a numbered line; ` ∥ `-separated names run in parallel):
 
-1. Gather each member's `## <Title>` section. A wave-1 body is embedded; otherwise the section carries either a Read link (read that file) or a `booping render-playbook <name> --step <step>` command (run it and use its stdout) — either way, the result is the step prompt.
+1. Fetch each member's step prompt. No body is embedded: every `## <Title>` section carries either a Read link (read that file) or a `booping render-playbook <name> --step <step>` command (run it and use its stdout).
 2. Compose each member's invocation from its step prompt, and append:
    ```
    ## Run-time context
@@ -25,3 +25,13 @@ Walk the wave list in order. For each wave (a numbered line; ` ∥ `-separated n
 5. After the wave completes, honor each member's `Review gate:` bullet: present that member's output labeled by step name alongside the gate text, and continue only on explicit user confirmation. In-conversation only — no state is persisted.
 
 Pass each step's output through unchanged to the user and into later sections that depend on it.
+
+### Subgraph members
+
+A wave member tagged `*(subgraph)*` covers its `## Subgraph: <name>` intro and the inner step sections that follow it. Expand it in place of protocol step 1:
+
+1. Enumerate instances from the intro's `Repeat:` prose read against the output of the steps it lists under `After:` — no `Repeat:` bullet means exactly one instance. Name the enumerated instances before running.
+2. Fetch each inner step's prompt once and reuse that text for every instance.
+3. Per instance, walk the intro's inner wave list in order, applying protocol steps 2–5 to each inner wave. Return contracts and `Review gate:` bullets bind per instance.
+4. Run instances in parallel only when every inner step has an agent bullet; otherwise run them one at a time. Spawn at most 4 instances per message and wait for that batch before the next.
+5. Report completion per instance. Any instance failure → report it naming the instance, and stop; do not start the next wave.
