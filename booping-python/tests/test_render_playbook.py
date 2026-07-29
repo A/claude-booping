@@ -82,11 +82,12 @@ def test_wave_list_parallel_separator() -> None:
     assert "3. `plain`" in graph
 
 
-def test_wave_one_body_embedded_no_after() -> None:
+def test_wave_one_read_link_no_after() -> None:
     gather = _section(_composed(), "## Gather")
-    assert "Gather the raw model-agent inputs and return a bulleted list." in gather
+    gather_step = next(s for s in _load("composed").steps if s.name == "gather")
+    assert f"Read [Gather]({gather_step.path}) for content." in gather
+    assert "Gather the raw model-agent inputs and return a bulleted list." not in gather
     assert "- After:" not in gather
-    assert "Read [Gather]" not in gather
 
 
 def test_later_wave_read_link_and_after_and_parallel() -> None:
@@ -220,7 +221,7 @@ def _threshold(ctx: Context) -> str:
 
 
 def test_non_jinja_playbook_output_unchanged() -> None:
-    # Byte-identical to the pre-jinja implementation's output (paths normalised).
+    # A non-jinja playbook renders identically with or without context (paths normalised).
     golden = (FIXTURE_HOME.parent / "composed-prejinja.golden.md").read_text()
     actual = compose(_load("composed"), context=_ctx()).replace(str(FIXTURE_HOME), "{HOME}")
     assert actual == golden
@@ -233,23 +234,19 @@ def test_jinja_preamble_renders_expression_and_include() -> None:
     assert "## Project Context" in out
 
 
-def test_jinja_wave_one_body_renders_with_partial_include() -> None:
-    # The step body lives outside src/templates/ — the include still resolves.
-    ctx = _ctx()
-    out = compose(_load("jinja-composed"), context=ctx)
-    body = out[out.index("## First") :]
-    assert f"Wave-one body, threshold {_threshold(ctx)}." in body
-    # The include lands inside the step section (its own `## ` heading ends the slice).
-    assert body.index("## Project Context") > body.index("Wave-one body")
+def test_jinja_wave_one_step_shows_step_command() -> None:
+    first = _section(compose(_load("jinja-composed"), context=_ctx()), "## First")
+    assert "Run `booping render-playbook jinja-composed --step first` for content." in first
+    assert "Wave-one body" not in first
 
 
-def test_jinja_non_embedded_step_shows_step_command() -> None:
+def test_jinja_later_wave_step_shows_step_command() -> None:
     second = _section(compose(_load("jinja-composed"), context=_ctx()), "## Second")
     assert "Run `booping render-playbook jinja-composed --step second` for content." in second
     assert "Read [Second]" not in second
 
 
-def test_non_jinja_non_embedded_step_keeps_read_link() -> None:
+def test_non_jinja_step_keeps_read_link() -> None:
     draft = _section(compose(_load("composed"), context=_ctx()), "## Draft")
     assert "Read [Draft]" in draft
     assert "--step" not in draft
@@ -264,14 +261,19 @@ def test_jinja_without_context_stops() -> None:
     _assert_blocking(out)
 
 
-def test_jinja_error_is_in_band_stop_notice() -> None:
+def test_broken_step_body_does_not_break_compose() -> None:
+    # Step bodies are never rendered at compose time — the error waits for the fetch.
     out = compose(_load("jinja-broken"), context=_ctx())
+    assert "**STOP" not in out
+    assert "## Execution graph" in out
+    assert "# Broken" in out
+
+
+def test_jinja_error_is_in_band_stop_notice_at_fetch_time() -> None:
+    out = compose_step(_load("jinja-broken"), "only", _ctx())
     assert "**STOP — tell the user:** Jinja rendering of step 'only' failed:" in out
     assert "TemplateNotFound" in out
     assert "Traceback" not in out
-    # Blocking: no graph, no step sections — but the preamble still shows.
-    assert "## Execution graph" not in out
-    assert "# Broken" in out
 
 
 def test_step_body_only_non_jinja() -> None:
@@ -300,25 +302,26 @@ def _includes() -> str:
     return compose(_load("jinja-includes"), context=_ctx())
 
 
+def _includes_step(name: str) -> str:
+    return compose_step(_load("jinja-includes"), name, _ctx())
+
+
 def test_include_from_playbook_dir_by_bare_name() -> None:
     # Preamble pulls `_references/rules.md` sitting next to playbook.md.
     assert "RULES-OK" in _includes()
 
 
 def test_include_from_step_dir_by_bare_name() -> None:
-    first = _section(_includes(), "## First")
-    assert "STEP-FIXTURE-OK" in first
+    assert "STEP-FIXTURE-OK" in _includes_step("first")
 
 
 def test_include_from_playbook_root_by_root_relative_name() -> None:
-    first = _section(_includes(), "## First")
-    assert "ROOT-LIB-OK" in first
+    assert "ROOT-LIB-OK" in _includes_step("first")
 
 
 def test_plugin_partials_still_reachable() -> None:
-    # The include lands inside the step section (its own `## ` heading ends the slice).
-    out = _includes()
-    assert out.index("## Project Context") > out.index("STEP-FIXTURE-OK")
+    first = _includes_step("first")
+    assert first.index("## Project Context") > first.index("STEP-FIXTURE-OK")
 
 
 def test_relative_includes_resolve_against_including_file() -> None:
@@ -326,17 +329,6 @@ def test_relative_includes_resolve_against_including_file() -> None:
     out = _includes()
     assert "DEEP-ONE-OK" in out
     assert "PLAIN-OK" in out
-
-
-def test_step_fetch_matches_embedded_body() -> None:
-    ctx = _ctx()
-    pb = _load("jinja-includes")
-    # Compared up to the partial's own `## ` heading, which ends the composed slice.
-    fetched = compose_step(pb, "first", ctx)
-    head = fetched[: fetched.index("## Project Context")]
-    assert head.strip() in _section(compose(pb, context=ctx), "## First")
-    assert "STEP-FIXTURE-OK" in head
-    assert "ROOT-LIB-OK" in head
 
 
 def test_later_wave_step_fetch_resolves_playbook_dir_include() -> None:
@@ -372,7 +364,7 @@ def _render_inc(tmp_path: Path, *scopes: str) -> str:
     core, home, vault = _plant_roots(tmp_path, *scopes)
     pbs = Playbook.load_all(vault=vault, home_dir=home, plugin_root=core)
     pb = next(p for p in pbs if p.name == "inc")
-    return compose(pb, context=_ctx())
+    return compose_step(pb, "only", _ctx())
 
 
 def test_root_relative_include_prefers_local(tmp_path: Path) -> None:
@@ -471,7 +463,7 @@ def test_project_flag_satisfies_requires_project(tmp_path: Path) -> None:
     )
     assert result.returncode == 0
     assert "## Execution graph" in result.stdout
-    assert "Only body." in result.stdout
+    assert "Only body." not in result.stdout
 
 
 def test_step_prints_body_only_and_logs(tmp_path: Path) -> None:

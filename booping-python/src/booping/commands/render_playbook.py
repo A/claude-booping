@@ -100,8 +100,8 @@ def build_env(
     search_dirs: Sequence[Path] = (),
     source: tuple[str, str] | None = None,
 ) -> Environment:
-    """The env compose() renders its partials — and, for jinja playbooks, its
-    preamble and step bodies — through. `search_dirs` are prepended (most specific
+    """The env compose() renders its partials and preamble — and compose_step its
+    step bodies — through. `search_dirs` are prepended (most specific
     first) to the always-last `src/templates/` root, so `{% include "_partials/…" %}`
     resolves from sources living anywhere on disk. `source` is an in-memory body
     served under a name, so Jinja hands a real `parent` to `join_path`.
@@ -171,11 +171,12 @@ def compose(
 ) -> str:
     """Render a playbook to the locked output contract:
     notices → body preamble → ``## Execution graph`` → step sections in wave order.
-    The ``graph:`` frontmatter drives sequencing. The preamble and embedded step
-    bodies pass through verbatim unless the playbook sets ``jinja: true``, in which
-    case they are rendered through the full context env (which `context` must
-    supply). Any blocking notice omits both the execution graph and the step
-    sections; non-blocking orphan notes render in either case.
+    The ``graph:`` frontmatter drives sequencing. No step body is ever embedded —
+    every step section is fetch-form. The preamble passes through verbatim unless
+    the playbook sets ``jinja: true``, in which case it is rendered through the full
+    context env (which `context` must supply). Any blocking notice omits both the
+    execution graph and the step sections; non-blocking orphan notes render in
+    either case.
     """
     env = build_env(plugin_root=plugin_root, context=context if pb.jinja else None)
 
@@ -224,7 +225,6 @@ def compose(
             notices.append(_ORPHAN.format(name=step.name))
 
     preamble = pb.body
-    bodies = {name: step.body for name, step in steps_by_name.items()}
 
     if pb.jinja:
         if context is None:
@@ -235,17 +235,6 @@ def compose(
             if err is not None:
                 notices.append(_JINJA_ERROR.format(where="the preamble", error=err))
                 blocking = True
-            # Only wave-1 bodies are embedded; later waves are fetched via --step.
-            for name in waves[0] if waves and not blocking else []:
-                step = steps_by_name[name]
-                rendered, err = render_body(pb, step.body, step, context, plugin_root)
-                if err is not None:
-                    notices.append(
-                        _JINJA_ERROR.format(where=f"step '{name}'", error=err)
-                    )
-                    blocking = True
-                    break
-                bodies[name] = rendered
 
     sections: list[str] = []
     if notices:
@@ -260,17 +249,15 @@ def compose(
             .strip()
         )
         step_tmpl = env.get_template("_partials/_playbook_step.j2")
-        for wave_idx, wave in enumerate(waves):
+        for wave in waves:
             for name in wave:
                 step = steps_by_name[name]
                 siblings = [n for n in wave if n != name]
                 sections.append(
                     step_tmpl.render(
                         step=step,
-                        body=bodies[name],
                         deps=pb.graph[name],
                         siblings=siblings,
-                        embed=wave_idx == 0,
                         playbook=pb.name,
                         jinja=pb.jinja,
                     ).strip()

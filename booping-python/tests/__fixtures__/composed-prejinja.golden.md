@@ -26,7 +26,7 @@ Instructions:
 - Summary: Gather inputs.
 - Run in a sub-agent — model sonnet, effort medium.
 
-Gather the raw model-agent inputs and return a bulleted list.
+Read [Gather]({HOME}/_playbooks/composed/gather/prompt.md) for content.
 
 ## Draft
 

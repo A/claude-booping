@@ -1,10 +1,8 @@
 {#-
   Renders one playbook step section to the locked contract. Inputs:
     step      — a booping.context.playbook.Step
-    body      — the step body to embed (Jinja-rendered when the playbook sets jinja: true)
     deps      — list[str] this step's deps in graph order (After: bullets; empty for wave 1)
     siblings  — list[str] the other members of this step's wave (Parallel with:)
-    embed     — True for wave-1 steps (body embedded); else a fetch instruction replaces it
     playbook  — the playbook name (for the --step fetch command)
     jinja     — True when the playbook sets jinja: true (bodies must be fetched rendered)
   `resolve_agent` is registered as a Jinja global by the driving command.
@@ -32,9 +30,7 @@ Instructions:
 - Review gate: stop after this step — "{{ step.review_gate }}"; continue only on explicit user confirmation.
 {% endif -%}
 {% endif %}
-{% if embed -%}
-{{ body }}
-{%- elif jinja -%}
+{% if jinja -%}
 Run `booping render-playbook {{ playbook }} --step {{ step.name }}` for content.
 {%- else -%}
 Read [{{ title }}]({{ step.path }}) for content.
