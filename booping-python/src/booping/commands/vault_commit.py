@@ -69,7 +69,7 @@ def do_vault_commit(
     plan_path: Path,
     also: list[Path] | None = None,
     vault: Path | None = None,
-) -> None:
+) -> str | None:
     """Core vault-commit logic; callable from transition dispatcher.
 
     Args:
@@ -77,6 +77,9 @@ def do_vault_commit(
         plan_path: path to the plan markdown file.
         also: additional paths to stage.
         vault: vault directory override (for testing / transition inline use).
+
+    Returns:
+        The short sha of the commit, or ``None`` when there was nothing to commit.
     """
     also = also or []
 
@@ -118,7 +121,7 @@ def do_vault_commit(
     if not status_result.stdout.strip():
         # Nothing staged — already committed
         print(f"nothing to commit for {plan_path}", file=sys.stderr)
-        return
+        return None
 
     # Build commit message
     plan_stem = plan_path.stem
@@ -139,7 +142,15 @@ def do_vault_commit(
         message=f"{plan_path} {to_status}",
     )
 
-    print(commit_msg)
+    sha_result = _git(vault, ["rev-parse", "--short", "HEAD"])
+    if sha_result.returncode != 0:
+        print(
+            f"error: git rev-parse failed: {sha_result.stderr.strip()}",
+            file=sys.stderr,
+        )
+        sys.exit(2)
+
+    return sha_result.stdout.strip()
 
 
 def _run(args: argparse.Namespace) -> None:
@@ -147,4 +158,6 @@ def _run(args: argparse.Namespace) -> None:
     to_status: str = args.to_status
     also: list[Path] = args.also
 
-    do_vault_commit(to_status=to_status, plan_path=plan_path, also=also)
+    sha = do_vault_commit(to_status=to_status, plan_path=plan_path, also=also)
+    if sha is not None:
+        print(f"{to_status}: {plan_path.stem}")

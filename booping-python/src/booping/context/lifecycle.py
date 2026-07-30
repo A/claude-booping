@@ -1,7 +1,8 @@
-"""Plan lifecycle resolver — superstate-aware edge + hook resolution.
+"""State-machine resolver — superstate-aware edge + hook resolution.
 
-Reads ``plan.statuses``, ``plan.superstates``, and ``plan.hooks`` from the
-assembled config dict.  Produces valid edges and ordered hook lists for any
+Operates on a *machine dict* carrying ``statuses``, ``superstates``, and
+``hooks`` — the shape of ``config["plan"]`` and of a playbook manifest's
+``states:`` entry alike.  Produces valid edges and ordered hook lists for any
 status transition, without executing them (that is the dispatcher's job).
 """
 from __future__ import annotations
@@ -91,13 +92,12 @@ def _superstate_hooks(key: str, superstate_name: str, superstates: dict[str, Any
 # Public API
 # ---------------------------------------------------------------------------
 
-def resolve_edges(status: str, config: dict[str, Any]) -> list[Edge]:
+def resolve_edges(status: str, machine: dict[str, Any]) -> list[Edge]:
     """Return all valid edges from *status*: own transitions ∪ inherited
     superstate transitions, with substate edges winning on ``to`` collision.
     """
-    plan = config.get("plan", {})
-    statuses = plan.get("statuses", {})
-    superstates = plan.get("superstates", {})
+    statuses = machine.get("statuses", {})
+    superstates = machine.get("superstates", {})
 
     # Own edges
     status_data = statuses.get(status, {})
@@ -117,7 +117,7 @@ def resolve_edges(status: str, config: dict[str, Any]) -> list[Edge]:
     return own_edges + inherited_edges
 
 
-def resolve_hooks(from_status: str, to_status: str, config: dict[str, Any]) -> list[str]:
+def resolve_hooks(from_status: str, to_status: str, machine: dict[str, Any]) -> list[str]:
     """Return the ordered hook list for transitioning *from_status* → *to_status*.
 
     Order:
@@ -125,15 +125,14 @@ def resolve_hooks(from_status: str, to_status: str, config: dict[str, Any]) -> l
     2. on_exit boundary hooks — inner→outer, only if boundary crossed
     3. matched edge hooks
     4. on_entry boundary hooks — outer→inner, only if boundary crossed
-    5. ``plan.hooks.post``
+    5. ``hooks.post``
 
     Raises :class:`InvalidTransitionError` when *to_status* is not reachable.
     """
-    plan = config.get("plan", {})
-    superstates = plan.get("superstates", {})
+    superstates = machine.get("superstates", {})
 
     # 1. Find the matched edge
-    edges = resolve_edges(from_status, config)
+    edges = resolve_edges(from_status, machine)
     matched: Edge | None = None
     for e in edges:
         if e.to == to_status:
@@ -164,7 +163,7 @@ def resolve_hooks(from_status: str, to_status: str, config: dict[str, Any]) -> l
         result.extend(_superstate_hooks("on_entry", to_ss, superstates))
 
     # 5. post hooks (always run)
-    post_hooks = plan.get("hooks", {}).get("post", [])
+    post_hooks = machine.get("hooks", {}).get("post", [])
     result.extend(str(h) for h in post_hooks)
 
     return result

@@ -18,10 +18,11 @@ from booping.context.lifecycle import (
 # ---------------------------------------------------------------------------
 
 @pytest.fixture()
-def full_config() -> dict[str, Any]:
-    """Load the real plugin config (src/config.yaml) with no overrides."""
+def machine() -> dict[str, Any]:
+    """The plan state machine from the real plugin config, with no overrides."""
     plugin_root = Path(__file__).resolve().parents[3]
-    return config_mod.load(plugin_root, [])
+    cfg: dict[str, Any] = config_mod.load(plugin_root, [])
+    return cfg.get("plan", {})
 
 
 @pytest.fixture()
@@ -37,54 +38,54 @@ def equivalence_table() -> list[dict[str, Any]]:
 # ---------------------------------------------------------------------------
 
 class TestResolveEdges:
-    def test_own_edges_returned(self, full_config: dict[str, Any]) -> None:
-        edges = resolve_edges("backlog", full_config)
+    def test_own_edges_returned(self, machine: dict[str, Any]) -> None:
+        edges = resolve_edges("backlog", machine)
         tos = {e.to for e in edges}
         # Own edge: backlog → in-spec
         assert "in-spec" in tos
 
-    def test_inherits_specification_cancelled(self, full_config: dict[str, Any]) -> None:
-        edges = resolve_edges("backlog", full_config)
+    def test_inherits_specification_cancelled(self, machine: dict[str, Any]) -> None:
+        edges = resolve_edges("backlog", machine)
         tos = {e.to for e in edges}
         # Inherited from the specification superstate: → cancelled
         assert "cancelled" in tos
 
-    def test_substate_wins_on_collision(self, full_config: dict[str, Any]) -> None:
+    def test_substate_wins_on_collision(self, machine: dict[str, Any]) -> None:
         # awaiting-learning has its own gated → done edge; the review superstate
         # also offers → done (the skip path). The substate edge wins on the `to`
         # collision, so there's only one done edge and it carries the gated "when".
-        edges = resolve_edges("awaiting-learning", full_config)
+        edges = resolve_edges("awaiting-learning", machine)
         done_edges = [e for e in edges if e.to == "done"]
         assert len(done_edges) == 1
         assert "accepted learnings" in done_edges[0].when
 
-    def test_spec_states_do_not_reach_in_progress(self, full_config: dict[str, Any]) -> None:
+    def test_spec_states_do_not_reach_in_progress(self, machine: dict[str, Any]) -> None:
         # in-progress lives only on ready-for-dev now; specification-phase states
         # must not inherit a shortcut into execution.
         for status in ("backlog", "in-spec", "awaiting-plan-review"):
-            tos = {e.to for e in resolve_edges(status, full_config)}
+            tos = {e.to for e in resolve_edges(status, machine)}
             assert "in-progress" not in tos
 
-    def test_in_progress_own_edges(self, full_config: dict[str, Any]) -> None:
-        edges = resolve_edges("in-progress", full_config)
+    def test_in_progress_own_edges(self, machine: dict[str, Any]) -> None:
+        edges = resolve_edges("in-progress", machine)
         tos = {e.to for e in edges}
         # Own: → awaiting-retro.  Inherited from executing: → fail.
         assert "awaiting-retro" in tos
         assert "fail" in tos
 
-    def test_terminal_status_no_edges(self, full_config: dict[str, Any]) -> None:
-        edges = resolve_edges("done", full_config)
+    def test_terminal_status_no_edges(self, machine: dict[str, Any]) -> None:
+        edges = resolve_edges("done", machine)
         assert edges == []
 
-    def test_ready_for_dev_gets_inherited_cancelled(self, full_config: dict[str, Any]) -> None:
-        edges = resolve_edges("ready-for-dev", full_config)
+    def test_ready_for_dev_gets_inherited_cancelled(self, machine: dict[str, Any]) -> None:
+        edges = resolve_edges("ready-for-dev", machine)
         tos = {e.to for e in edges}
         # Own: → in-progress.  Inherited from planned: → cancelled.
         assert "in-progress" in tos
         assert "cancelled" in tos
 
-    def test_awaiting_plan_review_edges(self, full_config: dict[str, Any]) -> None:
-        edges = resolve_edges("awaiting-plan-review", full_config)
+    def test_awaiting_plan_review_edges(self, machine: dict[str, Any]) -> None:
+        edges = resolve_edges("awaiting-plan-review", machine)
         tos = {e.to for e in edges}
         # Own: → ready-for-dev, → in-spec
         assert "ready-for-dev" in tos
@@ -100,9 +101,9 @@ class TestResolveEdges:
 # ---------------------------------------------------------------------------
 
 class TestResolveHooks:
-    def test_same_superstate_no_boundary_hooks(self, full_config: dict[str, Any]) -> None:
+    def test_same_superstate_no_boundary_hooks(self, machine: dict[str, Any]) -> None:
         # in-spec → awaiting-plan-review: both in planning, no boundary crossed
-        hooks = resolve_hooks("in-spec", "awaiting-plan-review", full_config)
+        hooks = resolve_hooks("in-spec", "awaiting-plan-review", machine)
         assert hooks[0] == "frontmatter-update status=awaiting-plan-review"
         # Edge hooks: planned + commit
         assert "frontmatter-update planned=@now" in hooks
@@ -114,18 +115,18 @@ class TestResolveHooks:
         assert "render-sprints" in hooks
         assert "vault-commit" in hooks
 
-    def test_planning_to_terminal_boundary(self, full_config: dict[str, Any]) -> None:
+    def test_planning_to_terminal_boundary(self, machine: dict[str, Any]) -> None:
         # backlog → cancelled: crosses specification → terminal
-        hooks = resolve_hooks("backlog", "cancelled", full_config)
+        hooks = resolve_hooks("backlog", "cancelled", machine)
         assert hooks[0] == "frontmatter-update status=cancelled"
         # terminal on_entry fires
         assert "frontmatter-update completed=@now" in hooks
         # Post hooks
         assert "render-sprints" in hooks
 
-    def test_planning_to_executing_boundary(self, full_config: dict[str, Any]) -> None:
+    def test_planning_to_executing_boundary(self, machine: dict[str, Any]) -> None:
         # ready-for-dev → in-progress: crosses planned → executing
-        hooks = resolve_hooks("ready-for-dev", "in-progress", full_config)
+        hooks = resolve_hooks("ready-for-dev", "in-progress", machine)
         assert hooks[0] == "frontmatter-update status=in-progress"
         # executing on_entry fires (started + commit)
         assert "frontmatter-update started=@now" in hooks
@@ -133,32 +134,32 @@ class TestResolveHooks:
         # Post hooks
         assert "render-sprints" in hooks
 
-    def test_executing_to_review_boundary(self, full_config: dict[str, Any]) -> None:
+    def test_executing_to_review_boundary(self, machine: dict[str, Any]) -> None:
         # in-progress → awaiting-retro: crosses executing → review
-        hooks = resolve_hooks("in-progress", "awaiting-retro", full_config)
+        hooks = resolve_hooks("in-progress", "awaiting-retro", machine)
         assert hooks[0] == "frontmatter-update status=awaiting-retro"
         # closing on_entry fires (completed)
         assert "frontmatter-update completed=@now" in hooks
         # Edge hook: suggest /retro
         assert "suggest /retro" in hooks
 
-    def test_executing_to_terminal_boundary(self, full_config: dict[str, Any]) -> None:
+    def test_executing_to_terminal_boundary(self, machine: dict[str, Any]) -> None:
         # in-progress → fail: crosses executing → terminal
-        hooks = resolve_hooks("in-progress", "fail", full_config)
+        hooks = resolve_hooks("in-progress", "fail", machine)
         assert hooks[0] == "frontmatter-update status=fail"
         # terminal on_entry fires (completed)
         assert "frontmatter-update completed=@now" in hooks
 
-    def test_closing_to_terminal_boundary(self, full_config: dict[str, Any]) -> None:
+    def test_closing_to_terminal_boundary(self, machine: dict[str, Any]) -> None:
         # awaiting-learning → done: crosses review → terminal
-        hooks = resolve_hooks("awaiting-learning", "done", full_config)
+        hooks = resolve_hooks("awaiting-learning", "done", machine)
         assert hooks[0] == "frontmatter-update status=done"
         # terminal on_entry fires (completed)
         assert "frontmatter-update completed=@now" in hooks
 
-    def test_closing_internal_no_boundary(self, full_config: dict[str, Any]) -> None:
+    def test_closing_internal_no_boundary(self, machine: dict[str, Any]) -> None:
         # awaiting-retro → awaiting-learning: both in review
-        hooks = resolve_hooks("awaiting-retro", "awaiting-learning", full_config)
+        hooks = resolve_hooks("awaiting-retro", "awaiting-learning", machine)
         assert hooks[0] == "frontmatter-update status=awaiting-learning"
         # Edge hooks
         assert "frontmatter-update retro=retrospectives/YYYYMMDD-{kebab-title}.md" in hooks
@@ -166,22 +167,52 @@ class TestResolveHooks:
         # No boundary hooks (same superstate)
         assert "frontmatter-update completed=@now" not in hooks
 
-    def test_awaiting_retro_to_done(self, full_config: dict[str, Any]) -> None:
+    def test_awaiting_retro_to_done(self, machine: dict[str, Any]) -> None:
         # awaiting-retro → done: crosses closing → terminal
-        hooks = resolve_hooks("awaiting-retro", "done", full_config)
+        hooks = resolve_hooks("awaiting-retro", "done", machine)
         assert hooks[0] == "frontmatter-update status=done"
         # Edge hook: goal=skipped
         assert "frontmatter-update goal=skipped" in hooks
         # terminal on_entry fires
         assert "frontmatter-update completed=@now" in hooks
 
-    def test_invalid_transition_raises(self, full_config: dict[str, Any]) -> None:
+    def test_invalid_transition_raises(self, machine: dict[str, Any]) -> None:
         with pytest.raises(InvalidTransitionError):
-            resolve_hooks("done", "in-progress", full_config)
+            resolve_hooks("done", "in-progress", machine)
 
-    def test_invalid_same_status_transition(self, full_config: dict[str, Any]) -> None:
+    def test_invalid_same_status_transition(self, machine: dict[str, Any]) -> None:
         with pytest.raises(InvalidTransitionError):
-            resolve_hooks("in-spec", "in-spec", full_config)
+            resolve_hooks("in-spec", "in-spec", machine)
+
+
+# ---------------------------------------------------------------------------
+# Machine-dict genericity — any dict of the shape resolves, not just plan config
+# ---------------------------------------------------------------------------
+
+class TestArbitraryMachine:
+    def test_resolves_a_non_plan_machine(self) -> None:
+        custom: dict[str, Any] = {
+            "statuses": {
+                "draft": {
+                    "transitions": [
+                        {"to": "shipped", "skill": "x", "hooks": ["frontmatter-update ship=@now"]}
+                    ]
+                },
+                "shipped": {},
+            },
+            "superstates": {
+                "open": {"states": ["draft"], "on_exit": ["frontmatter-update closed=@now"]},
+            },
+            "hooks": {"post": ["render-sprints"]},
+        }
+
+        assert [e.to for e in resolve_edges("draft", custom)] == ["shipped"]
+        assert resolve_hooks("draft", "shipped", custom) == [
+            "frontmatter-update status=shipped",
+            "frontmatter-update closed=@now",
+            "frontmatter-update ship=@now",
+            "render-sprints",
+        ]
 
 
 # ---------------------------------------------------------------------------
@@ -189,37 +220,37 @@ class TestResolveHooks:
 # ---------------------------------------------------------------------------
 
 class TestHookOrdering:
-    def test_order_status_set_first(self, full_config: dict[str, Any]) -> None:
-        hooks = resolve_hooks("in-spec", "awaiting-plan-review", full_config)
+    def test_order_status_set_first(self, machine: dict[str, Any]) -> None:
+        hooks = resolve_hooks("in-spec", "awaiting-plan-review", machine)
         assert hooks[0] == "frontmatter-update status=awaiting-plan-review"
 
-    def test_order_on_exit_before_edge_hooks(self, full_config: dict[str, Any]) -> None:
+    def test_order_on_exit_before_edge_hooks(self, machine: dict[str, Any]) -> None:
         # in-progress → awaiting-retro: exits executing, enters closing
-        hooks = resolve_hooks("in-progress", "awaiting-retro", full_config)
+        hooks = resolve_hooks("in-progress", "awaiting-retro", machine)
         # executing on_exit is empty, but the ordering still holds:
         # edge hooks come before on_entry
         suggest_idx = hooks.index("suggest /retro")
         completed_idx = hooks.index("frontmatter-update completed=@now")
         assert suggest_idx < completed_idx
 
-    def test_order_on_entry_after_edge_hooks(self, full_config: dict[str, Any]) -> None:
+    def test_order_on_entry_after_edge_hooks(self, machine: dict[str, Any]) -> None:
         # awaiting-retro → done: edge hook (goal=skipped) before terminal on_entry
-        hooks = resolve_hooks("awaiting-retro", "done", full_config)
+        hooks = resolve_hooks("awaiting-retro", "done", machine)
         goal_idx = hooks.index("frontmatter-update goal=skipped")
         completed_idx = hooks.index("frontmatter-update completed=@now")
         assert goal_idx < completed_idx
 
-    def test_order_post_hooks_last(self, full_config: dict[str, Any]) -> None:
-        hooks = resolve_hooks("in-spec", "awaiting-plan-review", full_config)
+    def test_order_post_hooks_last(self, machine: dict[str, Any]) -> None:
+        hooks = resolve_hooks("in-spec", "awaiting-plan-review", machine)
         render_idx = hooks.index("render-sprints")
         vault_idx = hooks.index("vault-commit")
         # All other hooks come before post hooks
         assert render_idx == len(hooks) - 2
         assert vault_idx == len(hooks) - 1
 
-    def test_full_order_crossing_boundary(self, full_config: dict[str, Any]) -> None:
+    def test_full_order_crossing_boundary(self, machine: dict[str, Any]) -> None:
         # ready-for-dev → in-progress: planned → executing
-        hooks = resolve_hooks("ready-for-dev", "in-progress", full_config)
+        hooks = resolve_hooks("ready-for-dev", "in-progress", machine)
         expected = [
             "frontmatter-update status=in-progress",
             # planned on_exit (empty)
@@ -238,7 +269,7 @@ class TestHookOrdering:
 
 class TestEquivalence:
     def test_every_old_mutation_appears_in_new_wiring(
-        self, full_config: dict[str, Any], equivalence_table: list[dict[str, Any]]
+        self, machine: dict[str, Any], equivalence_table: list[dict[str, Any]]
     ) -> None:
         """Every pre-change on_exit mutation appears exactly once in the new wiring."""
         for entry in equivalence_table:
@@ -248,14 +279,14 @@ class TestEquivalence:
             new_location: str = str(entry["new_location"])
 
             if new_location == "edge_hooks":
-                hooks = resolve_hooks(from_s, to_s, full_config)
+                hooks = resolve_hooks(from_s, to_s, machine)
                 assert new_hook in hooks, (
                     f"Edge hook {new_hook!r} missing for {from_s} → {to_s}. "
                     f"Got: {hooks}"
                 )
             elif new_location == "superstate_on_entry":
                 target: str = str(entry["new_target"])
-                superstates: dict[str, Any] = full_config.get("plan", {}).get("superstates", {})
+                superstates: dict[str, Any] = machine.get("superstates", {})
                 on_entry: list[Any] = superstates.get(target, {}).get("on_entry", [])
                 on_entry_strs = [str(h) for h in on_entry]
                 assert new_hook in on_entry_strs, (
@@ -274,7 +305,7 @@ class TestEquivalence:
             seen.add(key)
 
     def test_mutation_set_matches_fixture_exactly(
-        self, full_config: dict[str, Any], equivalence_table: list[dict[str, Any]]
+        self, machine: dict[str, Any], equivalence_table: list[dict[str, Any]]
     ) -> None:
         """For every valid edge, the frontmatter mutations resolve_hooks emits
         equal EXACTLY the set documented in the fixture — none missing, none
@@ -291,11 +322,11 @@ class TestEquivalence:
             key = (str(entry["from"]), str(entry["to"]))
             documented.setdefault(key, set()).add(new_hook)
 
-        statuses: dict[str, Any] = full_config.get("plan", {}).get("statuses", {})
+        statuses: dict[str, Any] = machine.get("statuses", {})
         for from_s in statuses:
-            for edge in resolve_edges(from_s, full_config):
+            for edge in resolve_edges(from_s, machine):
                 key = (from_s, edge.to)
-                hooks = resolve_hooks(from_s, edge.to, full_config)
+                hooks = resolve_hooks(from_s, edge.to, machine)
                 actual = {
                     h
                     for h in hooks

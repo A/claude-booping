@@ -48,7 +48,7 @@ This table is the contract: the valid moves and their requirements — `Gates` (
 booping transition <to-status> plans/<plan-file>.md [--also <artifact>...]
 ```
 
-Pass every vault artifact the skill authored for this move (e.g. a retrospective file, a sibling stub plan) via `--also` so it lands in the same transition commit. Do not hand-edit `status:` or hand-run `git commit` — the command owns all of it. After it returns, re-read the plan frontmatter to confirm `status:` matches the new state.
+Pass every vault artifact the skill authored for this move (e.g. a retrospective file, a sibling stub plan) via `--also` so it lands in the same transition commit. Do not hand-edit `status:` or hand-run `git commit` — the command owns all of it. It prints a report of every mutation it applied (`<from> → <to>`, then one line per hook); the report is authoritative — do not re-read the plan to verify.
 
 {% for key, s in config.plan.statuses.items() -%}
 {%- set from_ss = superstate_of(key) | trim -%}

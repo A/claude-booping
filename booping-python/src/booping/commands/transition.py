@@ -5,6 +5,7 @@ import subprocess
 import sys
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 from booping import logger
 from booping.commands.vault_commit import do_vault_commit
@@ -82,10 +83,12 @@ def _parse_pairs(pairs: list[str]) -> dict[str, str]:
 
 def _dispatch_frontmatter_update(
     hook: str, plan_path: Path, project: Project | None
-) -> None:
+) -> dict[str, str]:
     """Parse and apply a frontmatter-update hook string.
 
     E.g. ``frontmatter-update status=ready-for-dev planned=@now``
+
+    Returns the applied key → resolved-value mapping.
     """
     parts = hook.split()
     # First token is the hook name; rest are key=val pairs
@@ -93,18 +96,20 @@ def _dispatch_frontmatter_update(
     updates = _parse_pairs(pairs)
 
     repo_dir = project.repo_directory if project is not None else None
-    resolved: dict[str, object] = {}
+    resolved: dict[str, str] = {}
     for key, value in updates.items():
         resolved[key] = _interpolate(value, repo_dir)
 
     try:
-        update_frontmatter(plan_path, resolved)
+        update_frontmatter(plan_path, {k: v for k, v in resolved.items()})
     except Exception as exc:
         print(f"error: frontmatter-update failed: {exc}", file=sys.stderr)
         sys.exit(2)
 
+    return resolved
 
-def _dispatch_render_sprints(project: Project | None) -> None:
+
+def _dispatch_render_sprints(project: Project | None) -> tuple[int, Path]:
     """Run render-sprints inline (not subprocess)."""
     if project is None:
         print(
@@ -135,14 +140,22 @@ def _dispatch_render_sprints(project: Project | None) -> None:
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(result)
-    print(f"wrote {len(ctx.plans)} plans to {output_path}", file=sys.stderr)
+    return len(ctx.plans), output_path
 
 
 def _dispatch_vault_commit(
     to_status: str, plan_path: Path, also: list[Path]
-) -> None:
-    """Run vault-commit inline."""
-    do_vault_commit(to_status=to_status, plan_path=plan_path, also=also)
+) -> str | None:
+    """Run vault-commit inline; returns the short sha, or None when nothing
+    was committed."""
+    return do_vault_commit(to_status=to_status, plan_path=plan_path, also=also)
+
+
+def _format_frontmatter_line(resolved: dict[str, str]) -> str:
+    pairs = [
+        f'{k}="{v}"' if " " in v else f"{k}={v}" for k, v in resolved.items()
+    ]
+    return "frontmatter: " + " ".join(pairs)
 
 
 def _run(args: argparse.Namespace) -> None:
@@ -170,9 +183,11 @@ def _run(args: argparse.Namespace) -> None:
     # Idempotent re-run: current status already equals target
     idempotent = from_status == to_status
 
+    machine: dict[str, Any] = config.get("plan", {})
+
     if not idempotent:
         # Validate transition
-        edges = resolve_edges(from_status, config)
+        edges = resolve_edges(from_status, machine)
         allowed = {e.to for e in edges}
         if to_status not in allowed:
             allowed_list = ", ".join(sorted(allowed))
@@ -184,22 +199,36 @@ def _run(args: argparse.Namespace) -> None:
             sys.exit(1)
 
         # Get ordered hook list
-        hooks = resolve_hooks(from_status, to_status, config)
+        hooks = resolve_hooks(from_status, to_status, machine)
     else:
         # Idempotent re-run: skip frontmatter-update, run remaining post hooks
-        post_hooks = config.get("plan", {}).get("hooks", {}).get("post", [])
+        post_hooks = machine.get("hooks", {}).get("post", [])
         hooks = [str(h) for h in post_hooks]
+
+    header = (
+        f"{to_status} → {to_status} (idempotent)"
+        if idempotent
+        else f"{from_status} → {to_status}"
+    )
+    report: list[str] = [header]
 
     # Dispatch each hook
     for hook in hooks:
         hook_name = hook.split()[0] if " " in hook else hook
         try:
             if hook_name == "frontmatter-update":
-                _dispatch_frontmatter_update(hook, plan_path, project)
+                resolved = _dispatch_frontmatter_update(hook, plan_path, project)
+                report.append(_format_frontmatter_line(resolved))
             elif hook_name == "render-sprints":
-                _dispatch_render_sprints(project)
+                count, path = _dispatch_render_sprints(project)
+                report.append(f"render-sprints: {count} plans → {path}")
             elif hook_name == "vault-commit":
-                _dispatch_vault_commit(to_status, plan_path, also)
+                sha = _dispatch_vault_commit(to_status, plan_path, also)
+                report.append(
+                    f"vault-commit: {sha}"
+                    if sha is not None
+                    else "vault-commit: nothing to commit"
+                )
             elif hook_name == "suggest":
                 # suggest hooks are LLM-facing hints; skip in dispatcher
                 continue
@@ -221,4 +250,4 @@ def _run(args: argparse.Namespace) -> None:
         message=f"{plan_path} {from_status}→{to_status}",
     )
 
-    print(f"{from_status} → {to_status}")
+    print("\n".join(report))
