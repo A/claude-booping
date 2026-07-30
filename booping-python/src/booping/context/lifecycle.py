@@ -64,10 +64,11 @@ class Edge:
 # ---------------------------------------------------------------------------
 
 def _parse_transition(t: dict[str, Any]) -> Edge:
-    """Parse a raw transition dict from config into an Edge."""
+    """Parse a raw transition dict from config into an Edge. `skill` is plan-only —
+    playbook state machines have no owning skill, so it defaults to empty."""
     return Edge(
         to=str(t["to"]),
-        skill=str(t["skill"]),
+        skill=str(t.get("skill", "")),
         when=str(t.get("when", "")),
         gates=[str(g) for g in t.get("gates", [])],
         hooks=[str(h) for h in t.get("hooks", [])],

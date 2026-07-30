@@ -81,10 +81,10 @@ def _parse_pairs(pairs: list[str]) -> dict[str, str]:
     return updates
 
 
-def _dispatch_frontmatter_update(
-    hook: str, plan_path: Path, project: Project | None
+def dispatch_frontmatter_update(
+    hook: str, target: Path, project: Project | None
 ) -> dict[str, str]:
-    """Parse and apply a frontmatter-update hook string.
+    """Parse and apply a frontmatter-update hook string against *target*.
 
     E.g. ``frontmatter-update status=ready-for-dev planned=@now``
 
@@ -101,7 +101,7 @@ def _dispatch_frontmatter_update(
         resolved[key] = _interpolate(value, repo_dir)
 
     try:
-        update_frontmatter(plan_path, {k: v for k, v in resolved.items()})
+        update_frontmatter(target, {k: v for k, v in resolved.items()})
     except Exception as exc:
         print(f"error: frontmatter-update failed: {exc}", file=sys.stderr)
         sys.exit(2)
@@ -151,7 +151,7 @@ def _dispatch_vault_commit(
     return do_vault_commit(to_status=to_status, plan_path=plan_path, also=also)
 
 
-def _format_frontmatter_line(resolved: dict[str, str]) -> str:
+def format_frontmatter_line(resolved: dict[str, str]) -> str:
     pairs = [
         f'{k}="{v}"' if " " in v else f"{k}={v}" for k, v in resolved.items()
     ]
@@ -217,8 +217,8 @@ def _run(args: argparse.Namespace) -> None:
         hook_name = hook.split()[0] if " " in hook else hook
         try:
             if hook_name == "frontmatter-update":
-                resolved = _dispatch_frontmatter_update(hook, plan_path, project)
-                report.append(_format_frontmatter_line(resolved))
+                resolved = dispatch_frontmatter_update(hook, plan_path, project)
+                report.append(format_frontmatter_line(resolved))
             elif hook_name == "render-sprints":
                 count, path = _dispatch_render_sprints(project)
                 report.append(f"render-sprints: {count} plans → {path}")

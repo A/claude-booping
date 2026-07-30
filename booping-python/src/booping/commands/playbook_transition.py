@@ -1,0 +1,233 @@
+"""Playbook run executor — move a run artifact through a playbook state machine.
+
+The artifact path of a `states:` entry is relative to the run workdir (default cwd);
+the playbook dir stays read-only source. Every artifact mutation happens here — the
+printed report is the authoritative record of what changed.
+"""
+from __future__ import annotations
+
+import argparse
+import os
+import subprocess
+import sys
+from pathlib import Path
+from typing import NoReturn
+
+from booping import logger
+from booping.commands.transition import (
+    dispatch_frontmatter_update,
+    format_frontmatter_line,
+)
+from booping.context import Context
+from booping.context._yaml import parse_frontmatter_only
+from booping.context.lifecycle import resolve_edges, resolve_hooks
+from booping.context.playbook import Playbook, StateMachine
+from booping.context.project import Project
+
+NOT_STARTED = "not-started"
+
+
+def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:  # type: ignore[type-arg]
+    p = subparsers.add_parser(
+        "playbook-transition",
+        help="Move a playbook run artifact to a new status, running its hooks",
+    )
+    p.add_argument("playbook", help="Playbook name")
+    p.add_argument("to_status", metavar="to", help="Target status")
+    p.add_argument(
+        "--state",
+        type=str,
+        default=None,
+        metavar="NAME",
+        help="States entry to move (default: the outer graph's state ref)",
+    )
+    p.add_argument(
+        "--instance",
+        type=str,
+        default=None,
+        metavar="SLUG",
+        help="Instance slug, required iff the artifact path carries {instance}",
+    )
+    p.add_argument(
+        "--workdir",
+        type=str,
+        default=None,
+        metavar="PATH",
+        help="Run workspace the artifact path resolves against (default: cwd)",
+    )
+    p.set_defaults(func=_run)
+
+
+def _fail(message: str, code: int = 1) -> NoReturn:
+    print(f"error: {message}", file=sys.stderr)
+    sys.exit(code)
+
+
+def _resolve_playbook(ctx: Context, name: str) -> Playbook:
+    pb = next((p for p in ctx.playbooks if p.name == name), None)
+    if pb is None:
+        known = ", ".join(sorted(p.name for p in ctx.playbooks)) or "(none)"
+        _fail(f"playbook not found: {name} (known: {known})")
+    return pb
+
+
+def _resolve_state(pb: Playbook, requested: str | None) -> tuple[str, StateMachine]:
+    if not pb.states:
+        _fail(f"playbook '{pb.name}' declares no states")
+    name = requested if requested is not None else pb.state_refs.get("")
+    if name is None:
+        _fail(f"playbook '{pb.name}' declares no state for its outer graph; pass --state")
+    if name not in pb.states:
+        known = ", ".join(sorted(pb.states)) or "(none)"
+        _fail(f"unknown state '{name}' in playbook '{pb.name}' (known: {known})")
+    return name, pb.states[name]
+
+
+def _resolve_artifact(
+    machine: StateMachine, workdir: Path, instance: str | None
+) -> tuple[Path, str]:
+    """Interpolate `{instance}` into the artifact path and anchor it at the workdir.
+    Returns (absolute path, path as written relative to the workdir)."""
+    rel = machine.artifact
+    if "{instance}" in rel:
+        if instance is None:
+            _fail(
+                f"state '{machine.name}' is per-instance "
+                f"(artifact {machine.artifact}); pass --instance SLUG"
+            )
+        rel = rel.replace("{instance}", instance)
+    elif instance is not None:
+        _fail(
+            f"state '{machine.name}' has no {{instance}} in its artifact path "
+            f"({machine.artifact}); --instance is not accepted"
+        )
+    return workdir / rel, rel
+
+
+def _read_status(artifact: Path) -> str:
+    try:
+        fm = parse_frontmatter_only(artifact)
+    except ValueError:
+        fm = {}
+    status = fm.get("status")
+    if status is None or str(status) == "":
+        _fail(f"{artifact}: no frontmatter `status:` key; run state is not readable")
+    return str(status)
+
+
+def _bootstrap(artifact: Path, initial: str) -> None:
+    artifact.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        artifact.write_text(f"---\nstatus: {initial}\n---\n")
+    except OSError as exc:
+        _fail(f"cannot create artifact {artifact}: {exc}", code=2)
+
+
+def _dispatch_script(
+    hook: str,
+    playbook_dir: Path,
+    workdir: Path,
+    artifact: Path,
+    instance: str | None,
+) -> str:
+    parts = hook.split()
+    if len(parts) != 2:
+        _fail(f"malformed script hook: {hook!r}", code=2)
+    name = parts[1]
+    script = playbook_dir / "_scripts" / name
+    if not script.is_file():
+        _fail(f"script hook {name!r} not found at {script}", code=2)
+    if not os.access(script, os.X_OK):
+        _fail(f"script hook {name!r} is not executable: {script}", code=2)
+
+    env = dict(os.environ)
+    env["BOOPING_ARTIFACT"] = str(artifact)
+    env["BOOPING_INSTANCE"] = instance or ""
+    env["BOOPING_WORKDIR"] = str(workdir)
+
+    result = subprocess.run(
+        [str(script)],
+        cwd=str(workdir),
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        if result.stderr:
+            sys.stderr.write(result.stderr)
+        _fail(f"script hook {name!r} exited {result.returncode}", code=2)
+    return name
+
+
+def _run(args: argparse.Namespace) -> None:
+    to_status: str = args.to_status
+    instance: str | None = args.instance
+
+    workdir_arg: str | None = args.workdir
+    workdir = (
+        Path(workdir_arg).expanduser().resolve()
+        if workdir_arg is not None
+        else Path.cwd()
+    )
+    if not workdir.is_dir():
+        _fail(f"workdir not found: {workdir}")
+
+    ctx = Context.assemble(start=workdir)
+    pb = _resolve_playbook(ctx, args.playbook)
+    state_name, machine = _resolve_state(pb, args.state)
+    artifact, artifact_rel = _resolve_artifact(machine, workdir, instance)
+
+    report: list[str] = []
+    bootstrap = not artifact.exists()
+    if bootstrap:
+        if to_status != machine.initial:
+            _fail(
+                f"artifact {artifact_rel} does not exist; the only legal target is "
+                f"the initial status {machine.initial!r}"
+            )
+        _bootstrap(artifact, machine.initial)
+        from_status = NOT_STARTED
+        report.append(f"created {artifact_rel}")
+        report.append(f"{from_status} → {to_status}")
+        report.append(format_frontmatter_line({"status": to_status}))
+        hooks = [str(h) for h in machine.raw.get("hooks", {}).get("post", [])]
+    else:
+        from_status = _read_status(artifact)
+        if from_status == to_status:
+            report.append(f"{to_status} → {to_status} (idempotent)")
+            hooks = [str(h) for h in machine.raw.get("hooks", {}).get("post", [])]
+        else:
+            edges = resolve_edges(from_status, machine.raw)
+            allowed = {e.to for e in edges}
+            if to_status not in allowed:
+                allowed_list = ", ".join(sorted(allowed)) or "(none)"
+                _fail(
+                    f"cannot transition from {from_status!r} to {to_status!r} in state "
+                    f"'{state_name}'; allowed targets: {allowed_list}"
+                )
+            report.append(f"{from_status} → {to_status}")
+            hooks = resolve_hooks(from_status, to_status, machine.raw)
+
+    project: Project | None = ctx.project
+    playbook_dir = pb.path.parent.resolve()
+
+    for hook in hooks:
+        hook_name = hook.split()[0] if hook.split() else ""
+        if hook_name == "frontmatter-update":
+            resolved = dispatch_frontmatter_update(hook, artifact, project)
+            report.append(format_frontmatter_line(resolved))
+        elif hook_name == "script":
+            name = _dispatch_script(hook, playbook_dir, workdir, artifact, instance)
+            report.append(f"script {name}: ok")
+        else:
+            _fail(f"unknown hook: {hook_name!r}", code=2)
+
+    scope = f"{state_name}/{instance}" if instance else state_name
+    logger.log(
+        vault=project.directory if project is not None else None,
+        subcommand="playbook-transition",
+        message=f"{pb.name} {scope} {from_status}→{to_status}",
+    )
+
+    print("\n".join(report))

@@ -1,0 +1,2 @@
+#!/bin/sh
+echo "post" >> "$BOOPING_WORKDIR/post-note.log"

@@ -1,0 +1,3 @@
+#!/bin/sh
+echo "hook says no" >&2
+exit 3
