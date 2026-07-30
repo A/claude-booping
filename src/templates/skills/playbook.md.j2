@@ -26,6 +26,6 @@ Match `$ARGUMENTS` against the `Trigger` / `Playbook` columns. On no clear match
 
 After the last step, give a one-paragraph summary: artifacts written and gates passed.
 
-Cross-session resume is not yet supported — a run lives entirely within one conversation.
+A playbook without a `## State` section has no persisted run state — that run lives entirely within one conversation and cannot be resumed later.
 
 {{ tools.render('src/templates/_partials/_extra_instructions.j2', extra_instruction_key='skill_playbook') }}

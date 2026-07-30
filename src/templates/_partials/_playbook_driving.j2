@@ -9,6 +9,7 @@ Render the composed procedure: `booping render-playbook <name>` (`<name>` = the 
 
 - Any `**STOP — tell the user:**` line → relay it verbatim and do not execute the playbook. `**Note — tell the user:**` → relay it, then continue.
 - Follow the preamble as a playbook-level instruction over the whole run. A playbook's preamble may define resume rules for re-entering a procedure mid-run.
+- A `## State` section in the render → the playbook is stateful; apply **Run state** below before and during the walk. No `## State` section → run state is in-conversation only.
 
 Walk the wave list in order. For each wave (a numbered line; ` ∥ `-separated names run in parallel):
 
@@ -35,3 +36,14 @@ A wave member tagged `*(subgraph)*` covers its `## Subgraph: <name>` intro and t
 3. Per instance, walk the intro's inner wave list in order, applying protocol steps 2–5 to each inner wave. Return contracts and `Review gate:` bullets bind per instance.
 4. Run instances in parallel only when every inner step has an agent bullet; otherwise run them one at a time. Spawn at most 4 instances per message and wait for that batch before the next.
 5. Report completion per instance. Any instance failure → report it naming the instance, and stop; do not start the next wave.
+
+### Run state
+
+Only for a render carrying a `## State` section. Every command below takes `--workdir <workdir>`.
+
+1. Workdir: `{{ context.project.directory if context.project else "{vault}" }}/_runs/<playbook>/<run-slug>/`, `<run-slug>` = `{{ "{YYYYMMDD}" }}-<kebab-topic>`. Create it before the first wave; reuse the existing one when resuming.
+2. On entry — first run and every resume — run `booping playbook-state <name> --workdir <workdir>` and start from the reported frontier: skip work whose status is already past it, re-enter at the first non-terminal status, and treat `not-started` as "bootstrap on the first transition".
+3. When a step outcome matches a `When` cell of the `## State` table, judge that row's `Gates` against the artifact. Gates hold → run that state entry's `Advance:` invocation with `<to>` = the row's `To` cell (plus `--instance <slug>` for a per-instance state). Gates fail → do not transition; report what is missing and stop.
+4. The transition report is authoritative — relay it and move on. Never re-read the artifact to verify a transition.
+5. Never hand-edit an artifact's `status:`, `confirmed:`, or any other hook-written frontmatter key. `booping playbook-transition` is the only writer of run state.
+6. A non-zero exit from `booping playbook-transition` → relay its stderr verbatim and stop.

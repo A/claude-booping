@@ -11,6 +11,7 @@ from jinja2 import BaseLoader, ChoiceLoader, DictLoader, Environment, FileSystem
 
 from booping import logger
 from booping.context import Context
+from booping.context.lifecycle import resolve_edges
 from booping.context.playbook import GraphProblem, Playbook, Step, resolve_agent
 from booping.rendering import LenientUndefined, build_source_env, get_plugin_root
 
@@ -64,6 +65,31 @@ _INLINE_PARALLEL = (
 _ORPHAN = (
     "**Note — tell the user:** step '{name}' exists on disk but is not wired into"
     " the graph; it will not run."
+)
+_GRAPH_IN_BOTH = (
+    "**STOP — tell the user:** playbook '{playbook}' declares graph: in both"
+    " playbook.yaml and playbook.md frontmatter; keep exactly one."
+    " Do not execute this playbook."
+)
+_BAD_MANIFEST = (
+    "**STOP — tell the user:** playbook.yaml of playbook '{playbook}' is malformed:"
+    " {detail}. Do not execute this playbook."
+)
+_BAD_STATE = (
+    "**STOP — tell the user:** states entry '{name}' is malformed: {detail}."
+    " Do not execute this playbook."
+)
+_UNKNOWN_STATE = (
+    "**STOP — tell the user:** the outer graph references state '{name}' but"
+    " playbook.yaml declares no such states entry. Do not execute this playbook."
+)
+_UNKNOWN_STATE_INNER = (
+    "**STOP — tell the user:** subgraph '{scope}' references state '{name}' but"
+    " playbook.yaml declares no such states entry. Do not execute this playbook."
+)
+_ORPHAN_STATE = (
+    "**Note — tell the user:** states entry '{name}' is declared but no graph scope"
+    " references it; it will never be used."
 )
 _NO_CONTEXT = (
     "**STOP — tell the user:** playbook '{name}' sets jinja: true but was rendered"
@@ -192,13 +218,71 @@ def render_body(
         return "", f"{type(exc).__name__}: {exc}"
 
 
-def _shape_notice(prob: GraphProblem) -> str:
+def _shape_notice(prob: GraphProblem, playbook: str) -> str:
     if prob.kind == "nested_subgraph":
         return _NESTED_SUBGRAPH.format(name=prob.node, scope=prob.scope)
     if prob.kind == "duplicate_step":
         return _DUPLICATE_STEP.format(name=prob.node, scope=prob.scope)
+    if prob.kind == "graph_in_both":
+        return _GRAPH_IN_BOTH.format(playbook=playbook)
+    if prob.kind == "bad_manifest":
+        return _BAD_MANIFEST.format(playbook=playbook, detail=prob.detail)
+    if prob.kind == "bad_state":
+        return _BAD_STATE.format(name=prob.node, detail=prob.detail)
+    if prob.kind == "unknown_state":
+        template = _UNKNOWN_STATE_INNER if prob.scope else _UNKNOWN_STATE
+        return template.format(name=prob.node, scope=prob.scope)
+    if prob.kind == "orphan_state":
+        return _ORPHAN_STATE.format(name=prob.node)
     template = _BAD_NODE_INNER if prob.scope else _BAD_NODE
     return template.format(name=prob.node, detail=prob.detail, scope=prob.scope)
+
+
+def _state_entries(pb: Playbook) -> list[dict[str, Any]]:
+    """Everything the ``## State`` section renders, per ``states:`` entry: which graph
+    scopes reference it, whether its artifact is per-instance, and one row per status
+    carrying that status's resolved outgoing edges. Outer entry first."""
+    outer_ref = pb.state_refs.get("")
+    order = [outer_ref] if outer_ref in pb.states else []
+    order.extend(name for name in pb.states if name not in order)
+
+    entries: list[dict[str, Any]] = []
+    for name in order:
+        machine = pb.states[name]
+        rows: list[dict[str, Any]] = []
+        for status, raw in machine.statuses.items():
+            data = cast("dict[str, Any]", raw) if isinstance(raw, dict) else {}
+            rows.append(
+                {
+                    "status": status,
+                    "terminal": bool(data.get("terminal", False)),
+                    "edges": [
+                        {
+                            "to": e.to,
+                            "when": e.when,
+                            "gates": e.gates,
+                            "hooks": e.hooks,
+                        }
+                        for e in resolve_edges(status, machine.raw)
+                    ],
+                }
+            )
+        entries.append(
+            {
+                "name": name,
+                "artifact": machine.artifact,
+                "initial": machine.initial,
+                "scopes": [
+                    "outer graph" if scope == "" else f"subgraph `{scope}`"
+                    for scope, ref in pb.state_refs.items()
+                    if ref == name
+                ],
+                "per_instance": "{instance}" in machine.artifact,
+                "is_outer": name == outer_ref,
+                "rows": rows,
+            }
+        )
+    return entries
 
 
 def _resolver_notice(prob: GraphProblem) -> str:
@@ -245,8 +329,9 @@ def compose(
     # Shape problems collected by the loader, then resolver problems per scope
     # (outer first, subgraphs in graph order).
     for prob in pb.graph_problems:
-        notices.append(_shape_notice(prob))
-        blocking = True
+        notices.append(_shape_notice(prob, pb.name))
+        if prob.kind != "orphan_state":  # a declared-but-unreferenced state is a Note
+            blocking = True
 
     for scope in ["", *pb.subgraphs]:
         for prob in scopes[scope].problems:
@@ -302,6 +387,8 @@ def compose(
                 waves=waves,
                 subgraphs=pb.subgraphs,
                 inner_waves=inner_waves,
+                playbook=pb.name,
+                states=_state_entries(pb),
             )
             .strip()
         )

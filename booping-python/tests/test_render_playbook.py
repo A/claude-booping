@@ -490,6 +490,175 @@ def test_step_flag_on_inner_step_returns_bare_body(tmp_path: Path) -> None:
     assert "## Fixtures" not in out
 
 
+# --- state machines ---------------------------------------------------------
+
+STATES_HOME = get_fixture_path("playbooks-yaml-manifest")
+
+
+def _stateful() -> str:
+    pbs = Playbook.load_all(
+        vault=None, home_dir=STATES_HOME, plugin_root=Path("/nonexistent/plugin-root")
+    )
+    return compose(next(pb for pb in pbs if pb.name == "stateful"))
+
+
+def test_no_state_section_without_states() -> None:
+    assert "## State" not in _composed()
+
+
+def test_state_section_follows_the_execution_graph() -> None:
+    out = _stateful()
+    assert out.index("## Execution graph") < out.index("## State") < out.index("## Intake")
+
+
+def test_state_section_outer_entry() -> None:
+    state = _section(_stateful(), "## State")
+    assert "booping playbook-state stateful --workdir <run workdir>" in state
+    assert "### State: main" in state
+    assert "- Referenced by: outer graph" in state
+    assert "- Artifact: `index.md` (relative to the run workdir)" in state
+    assert "- Initial status: `intaking`" in state
+    assert (
+        "- Advance: `booping playbook-transition stateful <to> --workdir <run workdir>`"
+        in state
+    )
+
+
+def test_state_section_status_rows() -> None:
+    state = _section(_stateful(), "## State")
+    assert (
+        "| `intaking` | `developing-steps` | intake step complete |"
+        " request + scope captured in the artifact | `frontmatter-update intaken=@now` |"
+        in state
+    )
+    assert "| `done` | *(terminal)* | — | — | — |" in state
+
+
+def test_state_section_instance_entry() -> None:
+    state = _section(_stateful(), "## State")
+    assert "### State: step" in state
+    assert "- Referenced by: subgraph `step-pipeline`" in state
+    assert "- Artifact: `steps/{instance}/index.md` (relative to the run workdir)" in state
+    assert (
+        "- Advance: `booping playbook-transition stateful <to> --state step"
+        " --instance <slug> --workdir <run workdir>`" in state
+    )
+
+
+def _build_yaml(
+    tmp_path: Path,
+    manifest_yaml: str,
+    steps: dict[str, str],
+    fm_extra: str = "",
+    name: str = "sy",
+) -> Playbook:
+    """A playbook planted in a tmp local root whose structure lives in `playbook.yaml`."""
+    pb_dir = tmp_path / "_playbooks" / name
+    pb_dir.mkdir(parents=True)
+    (pb_dir / "playbook.md").write_text(
+        f"---\nname: {name}\ntitle: SY\n{fm_extra}---\nPreamble.\n"
+    )
+    (pb_dir / "playbook.yaml").write_text(manifest_yaml)
+    for step_name, agent in steps.items():
+        (pb_dir / step_name).mkdir()
+        (pb_dir / step_name / "prompt.md").write_text(
+            f"---\nsummary: {step_name} summary\nagent: {agent}\n---\n{step_name} body\n"
+        )
+    pbs = Playbook.load_all(
+        vault=tmp_path, home_dir=tmp_path / "nohome", plugin_root=tmp_path / "nocore"
+    )
+    return next(p for p in pbs if p.name == name)
+
+
+_ONE_STATE = """\
+state: main
+graph:
+  a: []
+
+states:
+  main:
+    artifact: index.md
+    initial: start
+    statuses:
+      start:
+        transitions:
+          - to: done
+            when: a returned
+      done: {terminal: true}
+"""
+
+
+def test_graph_in_both_notice(tmp_path: Path) -> None:
+    out = compose(
+        _build_yaml(tmp_path, "graph:\n  a: []\n", {"a": "null"}, fm_extra="graph:\n  a: []\n")
+    )
+    assert (
+        "**STOP — tell the user:** playbook 'sy' declares graph: in both playbook.yaml"
+        " and playbook.md frontmatter; keep exactly one."
+        " Do not execute this playbook." in out
+    )
+    _assert_blocking(out)
+
+
+def test_bad_manifest_notice(tmp_path: Path) -> None:
+    out = compose(_build_yaml(tmp_path, "- just\n- a list\n", {}))
+    assert (
+        "**STOP — tell the user:** playbook.yaml of playbook 'sy' is malformed:"
+        " not a YAML mapping. Do not execute this playbook." in out
+    )
+    _assert_blocking(out)
+
+
+def test_bad_state_notice(tmp_path: Path) -> None:
+    manifest = _ONE_STATE.replace("    artifact: index.md\n", "")
+    out = compose(_build_yaml(tmp_path, manifest, {"a": "null"}))
+    assert (
+        "**STOP — tell the user:** states entry 'main' is malformed: missing `artifact`."
+        " Do not execute this playbook." in out
+    )
+    _assert_blocking(out)
+
+
+def test_unknown_state_notice(tmp_path: Path) -> None:
+    manifest = _ONE_STATE.replace("state: main", "state: nope")
+    out = compose(_build_yaml(tmp_path, manifest, {"a": "null"}))
+    assert (
+        "**STOP — tell the user:** the outer graph references state 'nope' but"
+        " playbook.yaml declares no such states entry."
+        " Do not execute this playbook." in out
+    )
+    _assert_blocking(out)
+
+
+def test_unknown_inner_state_notice_names_the_subgraph(tmp_path: Path) -> None:
+    manifest = (
+        "graph:\n  a: []\n  loop:\n    dependencies: [a]\n    state: nope\n"
+        "    graph:\n      b: []\n"
+    )
+    out = compose(_build_yaml(tmp_path, manifest, {"a": "null", "b": "null"}))
+    assert (
+        "**STOP — tell the user:** subgraph 'loop' references state 'nope' but"
+        " playbook.yaml declares no such states entry."
+        " Do not execute this playbook." in out
+    )
+    _assert_blocking(out)
+
+
+def test_orphan_state_note_non_blocking(tmp_path: Path) -> None:
+    manifest = _ONE_STATE + (
+        "  stray:\n    artifact: stray.md\n    initial: x\n"
+        "    statuses:\n      x: {terminal: true}\n"
+    )
+    out = compose(_build_yaml(tmp_path, manifest, {"a": "null"}))
+    assert (
+        "**Note — tell the user:** states entry 'stray' is declared but no graph scope"
+        " references it; it will never be used." in out
+    )
+    assert "**STOP" not in out
+    assert "## Execution graph" in out
+    assert "## State" in out
+
+
 # --- opt-in Jinja -----------------------------------------------------------
 
 

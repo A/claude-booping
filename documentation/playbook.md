@@ -5,7 +5,10 @@
 
 A **playbook** is a multi-step guided procedure driven by the `/playbook` skill. Where the built-in skills (`/groom`, `/develop`, …) are fixed workflows shipped by the plugin, a playbook is yours to write: a set of prompt steps, each optionally delegated to a sub-agent, with review gates where you want to inspect the output before continuing. Most playbooks are yours and live in your vault; a few ship with the plugin (see [Scopes and shadowing](#scopes-and-shadowing)).
 
-A playbook's structure is declared by a **`graph:` frontmatter mapping** — each step lists the steps it depends on. The graph defines which steps run, in what order, and which run in parallel. Bodies are plain markdown by default; a playbook can opt into [Jinja rendering](#jinja-bodies) if it needs live project data. Author a playbook by hand and it shows up in `/playbook` immediately.
+A playbook's **structure** lives in `playbook.yaml`: the `graph:` (which steps run, in what order, which in parallel) and the optional `states:` (named state machines that persist run state on disk so a run can be resumed). `playbook.md` keeps **identity and prose** — the manifest frontmatter (`name`, `title`, `summary`, `trigger`, …) and the preamble body. Bodies are plain markdown by default; a playbook can opt into [Jinja rendering](#jinja-bodies) if it needs live project data. Author a playbook by hand and it shows up in `/playbook` immediately.
+
+!!! note "Legacy: `graph:` in `playbook.md` frontmatter"
+    A playbook with no `playbook.yaml` still works: `graph:` is read from `playbook.md` frontmatter as before. Declaring `graph:` in **both** places is a blocking STOP — keep exactly one. `state:` / `states:` are `playbook.yaml`-only; there is no frontmatter fallback for them.
 
 ## Scopes and shadowing
 
@@ -32,19 +35,31 @@ Each playbook is a directory:
 
 ```
 <name>/
-  playbook.md          # manifest: metadata + graph frontmatter, plain-markdown preamble body
+  playbook.md          # identity frontmatter + plain-markdown preamble body
+  playbook.yaml        # structure: graph:, state:, states:
   <step>/              # one directory per step — the directory name IS the step name
     prompt.md          #   the step itself; everything else in the dir is yours
+  _scripts/            # executables invoked by `script <name>` transition hooks
   _references/         # `_`-prefixed dirs are not steps — free workspace
 ```
 
 **A step is a directory and `prompt.md` is the step.** Every non-`_` subdirectory holding a `prompt.md` is a step, and its directory name is the step name the graph references. Nothing else in the directory is loaded — sibling files (fixtures, eval configs, prompt variants like `prompt.haiku-4-5.md`) are invisible to the runner. A non-`_` subdirectory without a `prompt.md` is skipped with a warning.
 
-Directory order on disk is irrelevant to the run — **the `graph:` frontmatter decides which steps run and in what order**. Directories whose name starts with `_` (e.g. `_references/`, `_fixtures/`) are never steps, so you can keep disabled steps and shared material alongside without wiring them in.
+Directory order on disk is irrelevant to the run — **the `graph:` decides which steps run and in what order**. Directories whose name starts with `_` (e.g. `_references/`, `_fixtures/`) are never steps, so you can keep disabled steps and shared material alongside without wiring them in.
 
-## Frontmatter contract
+## The manifest
 
-`playbook.md` frontmatter:
+Structure lives in `playbook.yaml`, identity and prose in `playbook.md`.
+
+### `playbook.yaml`
+
+- `graph` — mapping of **node name → node**. A node whose value is a **list** is a plain step and the list is its dependency step names; a node whose value is a **mapping** is a [subgraph](#subgraphs). This is the whole structure: membership (only mapped steps run), order (a step runs after all its dependencies), and parallelism (steps whose dependencies are all satisfied by earlier waves run together).
+- `state` — *optional*, the name of the `states:` entry that governs the **outer** graph.
+- `states` — *optional*, mapping of state-machine name → machine. See [Run state](#run-state).
+
+A subgraph node may carry its own `state:` key, naming the machine that governs each of its instances.
+
+### `playbook.md` frontmatter
 
 - `name` — identifier, unique within a root (used for shadowing).
 - `title` — human-readable name.
@@ -52,7 +67,7 @@ Directory order on disk is irrelevant to the run — **the `graph:` frontmatter 
 - `trigger` — natural-language hint the skill matches the user's request against.
 - `requires_project` — *optional*, default `false`. When `true`, the playbook only runs with a booping project attached: `/playbook` flags it in the listing and refuses to run it without a project, and `booping render-playbook` refuses to render it (stderr + exit 1).
 - `jinja` — *optional*, default `false`. When `true`, the preamble and every step body are rendered as Jinja templates against live project context. See [Jinja bodies](#jinja-bodies).
-- `graph` — mapping of **node name → node**. A node whose value is a **list** is a plain step and the list is its dependency step names; a node whose value is a **mapping** is a [subgraph](#subgraphs). This is the whole structure: membership (only mapped steps run), order (a step runs after all its dependencies), and parallelism (steps whose dependencies are all satisfied by earlier waves run together).
+- `graph` — *legacy fallback only*, same shape as `playbook.yaml`'s `graph:`. Used when the playbook has no `playbook.yaml`.
 
 The manifest **body** is a preamble — a playbook-level instruction inserted above the rendered procedure. No step calls: the graph, not the body, decides what runs.
 
@@ -87,8 +102,6 @@ summary: Prepare, check in parallel, then publish.
 trigger: run the ship playbook
 jinja: true
 requires_project: true
-graph:
-  prep: []
 ---
 {% import "_partials/_plan_transitions.j2" as plan_transitions with context %}
 # Ship
@@ -133,6 +146,7 @@ graph:
 - `dependencies` — *required*, list of **outer** node names the subgraph waits for. Same role as a plain step's dependency list; the whole group joins a wave as one node.
 - `graph` — *required*, non-empty mapping of **inner** step name → inner dependency names. Inner waves are resolved exactly like outer ones.
 - `repeat` — *optional* prose. Its presence means the group runs once per instance the prose describes.
+- `state` — *optional*, the name of the `states:` entry governing each instance of this subgraph. See [Run state](#run-state).
 
 **Scope rule.** `dependencies` reference outer names only; inner dependencies reference inner names only. There is no cross-scope edge: an inner step cannot depend on an outer step, and an outer step depends on the subgraph as a whole. Step names are addressed flat and must be unique across the whole playbook — an inner step still lives in its own `<step>/prompt.md` directory at the playbook root.
 
@@ -149,12 +163,123 @@ Subgraph-specific STOP conditions (on top of the usual [notices](#notices)):
 
 In the rendered procedure the subgraph shows up as a mermaid cluster, a nested entry in the wave list, and a `## Subgraph: <name>` intro section (`After:`, `Repeat:`, `Inner waves:`) followed by its inner step sections, each tagged `Part of: <name>`.
 
+## Run state
+
+Without `states:`, a run lives entirely in one conversation — close it and the run is gone. Declare `states:` and the run's progress is persisted in **artifacts on disk**, so a run can be inspected, resumed later, and advanced only through legal transitions.
+
+A `states:` entry is a **named state machine**:
+
+- `artifact` — path to the markdown file holding this machine's status, **relative to the run workdir**. A `{instance}` placeholder makes the machine per-instance (one artifact per subgraph instance) and is only legal when some subgraph references the machine.
+- `initial` — the status a freshly bootstrapped artifact starts in. Must be a key of `statuses`.
+- `statuses` — mapping of status name → `{transitions: [...]}` or `{terminal: true}`. Each transition has `to`, and optionally `when` (the trigger prose the driver matches a step outcome against), `gates` (verifiable preconditions the driver judges before firing), and `hooks` (mechanical side effects the CLI runs).
+
+A machine is wired to a graph scope by a `state:` ref: the top-level `state:` governs the outer graph, a subgraph's `state:` governs each of its instances.
+
+```yaml
+state: main
+graph:
+  intake: []
+  research-codebase: [intake]
+  research-web: [intake]
+  design: [research-codebase, research-web]
+  step-pipeline:
+    dependencies: [design]
+    state: step
+    repeat: once per item the design names
+    graph:
+      step-spec: []
+      step-review: [step-spec]
+
+states:
+  main:
+    artifact: index.md
+    initial: intaking
+    statuses:
+      intaking:
+        transitions:
+          - to: researching
+            when: intake step complete
+            gates: ["request + scope captured in the artifact"]
+            hooks: ["frontmatter-update intaken=@now"]
+      researching:
+        transitions:
+          - to: developing-steps
+            when: both research steps returned and design confirmed
+            gates: ["research-codebase and research-web done, findings recorded"]
+            hooks: ["frontmatter-update researched=@now commit=@head", "script check-findings"]
+      developing-steps:
+        transitions:
+          - to: done
+            when: every step instance terminal
+            gates: ["every steps/*/index.md status: done"]
+            hooks: ["frontmatter-update completed=@now"]
+      done: {terminal: true}
+  step:
+    artifact: steps/{instance}/index.md
+    initial: spec-ing
+    statuses:
+      spec-ing:
+        transitions:
+          - to: reviewing
+            when: spec written
+            hooks: ["frontmatter-update spec_done=@now"]
+      reviewing:
+        transitions:
+          - to: done
+            when: user confirmed the spec
+            gates: ["explicit user confirmation captured"]
+            hooks: ["frontmatter-update confirmed=@now"]
+      done: {terminal: true}
+```
+
+### Hooks
+
+Two hook forms are available on a transition:
+
+- `frontmatter-update <key>=<val> ...` — set frontmatter keys on the artifact. Values interpolate `@now` (UTC `yyyymmdd hh:mm`), `@today` (`yyyymmdd`) and `@head` (attached repo's HEAD sha).
+- `script <name>` — run `<playbook-dir>/_scripts/<name>`.
+
+The status set itself is implicit — the CLI always writes `status: <to>` before running the transition's hooks.
+
+### `_scripts/` contract
+
+A `script <name>` hook runs the executable at `<playbook-dir>/_scripts/<name>`:
+
+- it must exist and be executable, or the transition fails (exit 2) without mutating anything further;
+- it runs with the **run workdir** as its cwd;
+- it receives `BOOPING_ARTIFACT` (absolute artifact path), `BOOPING_WORKDIR` (absolute run workdir) and `BOOPING_INSTANCE` (the instance slug, empty for a non-instance machine);
+- a non-zero exit aborts the transition; the script's stderr is relayed.
+
+### Run workspace
+
+A run gets its own workdir; artifact paths resolve against it and the playbook directory stays read-only source. The convention `/playbook` follows is:
+
+```
+{vault}/_runs/<playbook>/<run-slug>/
+```
+
+with `<run-slug>` = `{YYYYMMDD}-<kebab-topic>`. Every state command takes `--workdir <path>` (default: cwd).
+
+### Commands
+
+`booping playbook-state <playbook> [--workdir PATH]` — read-only. Prints YAML: the playbook name, the resolved workdir, and per `states:` entry its `artifact`, its current `status` and the `next:` edges leaving it (each with `to` and, when declared, `when` / `gates`). A per-instance entry reports an `instances:` mapping keyed by slug, discovered by globbing the artifact path. An artifact that does not exist yet reports `status: not-started` with a single bootstrap edge to the machine's `initial`. Exits 1 for an unknown playbook, a missing workdir, a playbook with no `states:`, or an artifact with no `status:` key.
+
+`booping playbook-transition <playbook> <to> [--state NAME] [--instance SLUG] [--workdir PATH]` — the only writer of run state. `--state` defaults to the outer graph's `state:` ref; `--instance` is required exactly when the artifact path carries `{instance}`. It reads the artifact's current status, checks that `<to>` is reachable from it, sets `status: <to>`, then runs the matched transition's hooks in order. A missing artifact is bootstrapped — legal only when `<to>` is the machine's `initial`. Re-running the same target is idempotent. It prints a **mutation report** (created/`from → to`/each frontmatter line/each script result) which is the authoritative record — the driver relays it and never re-reads the artifact to verify. Illegal transitions exit 1; hook failures exit 2.
+
+### Resume
+
+Everything needed to resume lives on disk. `/playbook` runs `booping playbook-state <name> --workdir <workdir>` on entry — first run and every resume — and restarts from the reported frontier: work already past its status is skipped, the first non-terminal status is re-entered, and `not-started` means bootstrap on the first transition. Nothing hand-edits an artifact's `status:` or a hook-written key; only `playbook-transition` mutates run state.
+
+### How state renders
+
+A playbook with `states:` renders a `## State` section right after `## Execution graph`: the `playbook-state` invocation for that playbook, then per machine its referencing scopes, artifact path, initial status, the exact `playbook-transition` invocation (with `--state` / `--instance` where the machine needs them), and a status → `to` / `when` / `gates` / `hooks` table. A playbook without `states:` renders no such section.
+
 ## Notices
 
-Problems in the graph surface as in-band notices when you render (or run) the playbook:
+Problems in the manifest surface as in-band notices when you render (or run) the playbook:
 
-- **Blocking `STOP` notices** — the playbook refuses to run. Causes: a step named in the graph has no `<name>/prompt.md` file; a dependency names a step that isn't in the graph; the graph has a cycle; the graph is missing entirely; an inline step shares a parallel wave; a `jinja: true` playbook rendered without project context, or whose body fails to render.
-- **Warning notes** — a step directory that exists on disk but isn't wired into the graph produces a note and simply never runs.
+- **Blocking `STOP` notices** — the playbook refuses to run. Causes: a step named in the graph has no `<name>/prompt.md` file; a dependency names a step that isn't in the graph; the graph has a cycle; the graph is missing entirely; an inline step shares a parallel wave; `graph:` is declared in both `playbook.yaml` and `playbook.md` frontmatter; `playbook.yaml` is unparseable or is not a mapping; a `states:` entry is malformed (missing `artifact`, an `initial` that is not one of its `statuses`, or `{instance}` in the artifact path with no subgraph referencing it); a `state:` ref names a states entry that does not exist; a `jinja: true` playbook rendered without project context, or whose body fails to render.
+- **Warning notes** — a step directory that exists on disk but isn't wired into the graph, or a `states:` entry no graph scope references, produces a note and simply never runs.
 
 ## Authoring a global playbook
 
@@ -162,11 +287,12 @@ Create the directory under your home vault root:
 
 ```
 ~/Claude/_playbooks/my-playbook/playbook.md
+~/Claude/_playbooks/my-playbook/playbook.yaml
 ~/Claude/_playbooks/my-playbook/first/prompt.md
 ~/Claude/_playbooks/my-playbook/second/prompt.md
 ```
 
-Fill in `playbook.md` with the manifest frontmatter (including `graph:`) and a plain-markdown preamble body. Write each `<step>/prompt.md` with its own frontmatter and prompt body. Run `/playbook` in any project and it appears in the listing with scope `global`.
+Fill in `playbook.md` with the identity frontmatter and a plain-markdown preamble body, and `playbook.yaml` with the `graph:` (plus `state:` / `states:` if the run should be resumable). Write each `<step>/prompt.md` with its own frontmatter and prompt body. Run `/playbook` in any project and it appears in the listing with scope `global`.
 
 ## Authoring a local playbook
 
@@ -174,6 +300,7 @@ Same shape, but under the project's vault:
 
 ```
 {vault}/_playbooks/my-playbook/playbook.md
+{vault}/_playbooks/my-playbook/playbook.yaml
 {vault}/_playbooks/my-playbook/<step>/prompt.md
 ```
 
@@ -191,14 +318,19 @@ name: ship
 title: Ship
 summary: Prepare, check in parallel, then publish.
 trigger: run the ship playbook
+---
+
+Ship the current change set. Stop at the first hard failure.
+```
+
+`~/Claude/_playbooks/ship/playbook.yaml`:
+
+```yaml
 graph:
   prep: []
   lint: [prep]
   tests: [prep]
   publish: [lint, tests]
----
-
-Ship the current change set. Stop at the first hard failure.
 ```
 
 Each step directory (`prep/`, `lint/`, `tests/`, `publish/`) holds a `prompt.md` with its own frontmatter and prompt body. `lint` and `tests` both depend only on `prep`, so they share a wave; `publish` waits for both.

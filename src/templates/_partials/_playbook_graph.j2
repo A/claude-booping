@@ -1,9 +1,12 @@
 {#-
-  Renders the "## Execution graph" section. Inputs:
+  Renders the "## Execution graph" section, plus "## State" when the playbook declares
+  state machines. Inputs:
     graph        — dict[str, list[str]] outer node → deps, insertion order preserved
     waves        — list[list[str]] resolved outer wave order (parallel members per wave)
     subgraphs    — dict[str, SubgraphNode] outer keys that are subgraph nodes
     inner_waves  — dict[str, list[list[str]]] resolved wave order per subgraph
+    playbook     — the playbook name (for the state command invocations)
+    states       — list of state entries from render_playbook._state_entries (may be empty)
   Emits a mermaid flowchart (one `subgraph … end` cluster per subgraph node, one edge
   line per dep, isolated nodes as bare ids) followed by a numbered wave list
   ("∥"-joined members share a wave; a subgraph's inner waves nest under its entry).
@@ -33,3 +36,34 @@ wait for all to finish, then start the next wave.
 {{ loop.index }}. {% for name in wave %}`{{ name }}`{% if name in subgraphs %} *(subgraph)*{% endif %}{% if not loop.last %} ∥ {% endif %}{% endfor %}
 {% for name in wave %}{% if name in subgraphs %}{% for inner in inner_waves[name] %}    {{ loop.index }}. {% for n in inner %}`{{ n }}`{% if not loop.last %} ∥ {% endif %}{% endfor %}
 {% endfor %}{% endif %}{% endfor %}{% endfor -%}
+{%- if states %}
+## State
+
+Run state is persisted in artifacts under the run workdir. Only `booping playbook-transition` writes it — never hand-edit an artifact's `status:` or hook-written keys.
+
+Read the whole run's frontier before starting or resuming:
+
+```
+booping playbook-state {{ playbook }} --workdir <run workdir>
+```
+{% for entry in states %}
+### State: {{ entry.name }}
+
+- Referenced by: {{ entry.scopes | join(', ') if entry.scopes else "nothing" }}
+- Artifact: `{{ entry.artifact }}` (relative to the run workdir)
+- Initial status: `{{ entry.initial }}`
+- Advance: `booping playbook-transition {{ playbook }} <to>{% if not entry.is_outer %} --state {{ entry.name }}{% endif %}{% if entry.per_instance %} --instance <slug>{% endif %} --workdir <run workdir>`
+
+| Status | To | When | Gates | Hooks |
+| --- | --- | --- | --- | --- |
+{% for row in entry.rows -%}
+{% if not row.edges -%}
+| `{{ row.status }}` | {% if row.terminal %}*(terminal)*{% else %}*(no exit edges)*{% endif %} | — | — | — |
+{% else -%}
+{% for edge in row.edges -%}
+| `{{ row.status }}` | `{{ edge.to }}` | {{ edge.when or "—" }} | {{ edge.gates | join('; ') if edge.gates else "—" }} | {% if edge.hooks %}{% for h in edge.hooks %}`{{ h }}`{% if not loop.last %}; {% endif %}{% endfor %}{% else %}—{% endif %} |
+{% endfor -%}
+{% endif -%}
+{% endfor %}
+{%- endfor %}
+{%- endif %}
