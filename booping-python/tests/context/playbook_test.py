@@ -19,6 +19,20 @@ def _load_graph(tmp_path: Path, graph_yaml: str) -> Playbook:
     return pbs[0]
 
 
+def _load_manifest(tmp_path: Path, manifest_yaml: str, playbook_md: str) -> Playbook:
+    """Load a single playbook from an explicit playbook.md + playbook.yaml pair."""
+    pb_dir = tmp_path / "_playbooks" / "man"
+    pb_dir.mkdir(parents=True)
+    (pb_dir / "playbook.md").write_text(playbook_md)
+    (pb_dir / "playbook.yaml").write_text(manifest_yaml)
+    pbs = Playbook.load_all(vault=None, home_dir=tmp_path, plugin_root=_no_core())
+    return pbs[0]
+
+
+def _manifests() -> Path:
+    return get_fixture_path("playbooks-yaml-manifest")
+
+
 def _home() -> Path:
     return get_fixture_path("playbooks-home")
 
@@ -482,3 +496,174 @@ def test_executable_step_names_flat_graph() -> None:
     pbs = Playbook.load_all(vault=None, home_dir=_home(), plugin_root=_no_core())
     alpha = next(pb for pb in pbs if pb.name == "alpha")
     assert alpha.executable_step_names == ["gather", "draft"]
+
+
+_NO_GRAPH_MD = "---\nname: man\ntitle: Man\n---\nbody\n"
+_FM_GRAPH_MD = "---\nname: man\ntitle: Man\ngraph:\n  a: []\n---\nbody\n"
+
+
+def _manifest_playbooks() -> dict[str, Playbook]:
+    pbs = Playbook.load_all(vault=None, home_dir=_manifests(), plugin_root=_no_core())
+    return {pb.name: pb for pb in pbs}
+
+
+def test_playbook_yaml_graph_matches_frontmatter_twin() -> None:
+    by_name = _manifest_playbooks()
+    yaml_twin, fm_twin = by_name["yaml-twin"], by_name["fm-twin"]
+    assert yaml_twin.graph_problems == [] and fm_twin.graph_problems == []
+    assert yaml_twin.graph == fm_twin.graph
+    assert yaml_twin.subgraphs == fm_twin.subgraphs
+    assert yaml_twin.executable_step_names == fm_twin.executable_step_names
+    assert yaml_twin.resolve_scopes()[""].waves == fm_twin.resolve_scopes()[""].waves
+    assert yaml_twin.resolve_scopes()[""].waves == [["intake"], ["build"], ["check"]]
+
+
+def test_graph_in_both_files_is_stop(tmp_path: Path) -> None:
+    pb = _load_manifest(tmp_path, "graph:\n  b: []\n", _FM_GRAPH_MD)
+    assert [p.kind for p in pb.graph_problems] == ["graph_in_both"]
+    # The manifest's graph wins, so the rest of the load stays coherent.
+    assert pb.graph == {"b": []}
+
+
+def test_unparseable_manifest_is_stop(tmp_path: Path) -> None:
+    pb = _load_manifest(tmp_path, "graph: [oops\n", _NO_GRAPH_MD)
+    assert [p.kind for p in pb.graph_problems] == ["bad_manifest"]
+    assert pb.graph_problems[0].detail
+
+
+def test_non_mapping_manifest_is_stop(tmp_path: Path) -> None:
+    pb = _load_manifest(tmp_path, "- just\n- a list\n", _NO_GRAPH_MD)
+    assert [p.kind for p in pb.graph_problems] == ["bad_manifest"]
+
+
+def test_manifest_absent_keeps_frontmatter_graph() -> None:
+    pbs = Playbook.load_all(vault=None, home_dir=_home(), plugin_root=_no_core())
+    alpha = next(pb for pb in pbs if pb.name == "alpha")
+    assert alpha.graph == {"gather": [], "draft": ["gather"]}
+    assert alpha.graph_problems == []
+    assert alpha.states == {}
+    assert alpha.state_refs == {}
+
+
+def test_manifest_without_states_is_valid() -> None:
+    yaml_twin = _manifest_playbooks()["yaml-twin"]
+    assert yaml_twin.states == {}
+    assert yaml_twin.state_refs == {}
+    assert yaml_twin.graph_problems == []
+
+
+def test_states_parsed_with_refs() -> None:
+    pb = _manifest_playbooks()["stateful"]
+    assert pb.graph_problems == []
+    assert set(pb.states) == {"main", "step"}
+    main = pb.states["main"]
+    assert main.artifact == "index.md"
+    assert main.initial == "intaking"
+    assert list(main.statuses) == ["intaking", "developing-steps", "done"]
+    assert pb.states["step"].artifact == "steps/{instance}/index.md"
+    assert pb.state_refs == {"": "main", "step-pipeline": "step"}
+    assert pb.subgraphs["step-pipeline"].state == "step"
+
+
+def test_states_raw_preserved_for_resolver() -> None:
+    pb = _manifest_playbooks()["stateful"]
+    raw = pb.states["main"].raw
+    assert raw["artifact"] == "index.md"
+    assert raw["initial"] == "intaking"
+    transition = raw["statuses"]["intaking"]["transitions"][0]
+    assert transition == {
+        "to": "developing-steps",
+        "when": "intake step complete",
+        "gates": ["request + scope captured in the artifact"],
+        "hooks": ["frontmatter-update intaken=@now"],
+    }
+    assert raw["statuses"]["done"] == {"terminal": True}
+
+
+def test_unknown_state_ref(tmp_path: Path) -> None:
+    pb = _load_manifest(
+        tmp_path,
+        "state: nope\ngraph:\n  a: []\n"
+        "states:\n  main:\n    artifact: index.md\n    initial: s\n"
+        "    statuses:\n      s: {terminal: true}\n",
+        _NO_GRAPH_MD,
+    )
+    kinds = [(p.kind, p.node, p.scope) for p in pb.graph_problems]
+    assert ("unknown_state", "nope", "") in kinds
+    assert ("orphan_state", "main", "") in kinds
+
+
+def test_unknown_state_ref_from_subgraph(tmp_path: Path) -> None:
+    pb = _load_manifest(
+        tmp_path,
+        "graph:\n  loop:\n    dependencies: []\n    state: nope\n"
+        "    graph:\n      b: []\n",
+        _NO_GRAPH_MD,
+    )
+    assert [(p.kind, p.node, p.scope) for p in pb.graph_problems] == [
+        ("unknown_state", "nope", "loop")
+    ]
+
+
+def test_orphan_state_only(tmp_path: Path) -> None:
+    pb = _load_manifest(
+        tmp_path,
+        "graph:\n  a: []\n"
+        "states:\n  unused:\n    artifact: index.md\n    initial: s\n"
+        "    statuses:\n      s: {terminal: true}\n",
+        _NO_GRAPH_MD,
+    )
+    assert [(p.kind, p.node) for p in pb.graph_problems] == [("orphan_state", "unused")]
+
+
+@pytest.mark.parametrize(
+    ("entry", "detail_match"),
+    [
+        ("    initial: s\n    statuses:\n      s: {}\n", "artifact"),
+        ("    artifact: index.md\n    statuses:\n      s: {}\n", "initial"),
+        (
+            "    artifact: index.md\n    initial: nope\n    statuses:\n      s: {}\n",
+            "initial",
+        ),
+        ("    artifact: index.md\n    initial: s\n", "initial"),
+        ("", "mapping"),
+    ],
+)
+def test_bad_state_entry(tmp_path: Path, entry: str, detail_match: str) -> None:
+    pb = _load_manifest(
+        tmp_path,
+        f"state: main\ngraph:\n  a: []\nstates:\n  main:\n{entry}",
+        _NO_GRAPH_MD,
+    )
+    assert [p.kind for p in pb.graph_problems] == ["bad_state"]
+    prob = pb.graph_problems[0]
+    assert prob.node == "main"
+    assert detail_match in prob.detail
+    assert pb.states == {}
+
+
+def test_instance_artifact_rejected_outside_subgraph(tmp_path: Path) -> None:
+    pb = _load_manifest(
+        tmp_path,
+        "state: main\ngraph:\n  a: []\n"
+        "states:\n  main:\n    artifact: steps/{instance}/index.md\n    initial: s\n"
+        "    statuses:\n      s: {terminal: true}\n",
+        _NO_GRAPH_MD,
+    )
+    assert [p.kind for p in pb.graph_problems] == ["bad_state"]
+    assert "{instance}" in pb.graph_problems[0].detail
+
+
+def test_instance_artifact_allowed_for_subgraph_state() -> None:
+    pb = _manifest_playbooks()["stateful"]
+    assert pb.graph_problems == []
+    assert "{instance}" in pb.states["step"].artifact
+
+
+def test_subgraph_state_must_be_string(tmp_path: Path) -> None:
+    pb = _load_graph(
+        tmp_path,
+        "  loop:\n    dependencies: []\n    state: 3\n    graph:\n      b: []\n",
+    )
+    assert [p.kind for p in pb.graph_problems] == ["bad_node"]
+    assert "state" in pb.graph_problems[0].detail
