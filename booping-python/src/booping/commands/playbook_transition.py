@@ -215,8 +215,10 @@ def _run(args: argparse.Namespace) -> None:
     for hook in hooks:
         hook_name = hook.split()[0] if hook.split() else ""
         if hook_name == "frontmatter-update":
-            resolved = dispatch_frontmatter_update(hook, artifact, project)
-            report.append(format_frontmatter_line(resolved))
+            rel, resolved = dispatch_frontmatter_update(
+                hook, artifact, project, file_base=workdir, instance=instance
+            )
+            report.append(format_frontmatter_line(resolved, rel))
         elif hook_name == "script":
             name = _dispatch_script(hook, playbook_dir, workdir, artifact, instance)
             report.append(f"script {name}: ok")
