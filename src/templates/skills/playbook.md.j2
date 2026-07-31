@@ -10,9 +10,13 @@ Run a user-authored playbook: a multi-step guided procedure from the vault. Wide
 | Playbook | Summary | Trigger | Scope | Requires project | Path |
 | --- | --- | --- | --- | --- | --- |
 {% for pb in context.playbooks -%}
-| {{ pb.name }} | {{ pb.summary | replace("|", "\\|") | replace("\n", " ") }} | {{ pb.trigger | replace("|", "\\|") | replace("\n", " ") }} | {{ pb.scope }} | {{ "yes" if pb.requires_project else "no" }} | {{ pb.path }} |
+| {{ pb.name }} | {{ pb.summary | replace("|", "\\|") | replace("\n", " ") }} | {{ pb.trigger | replace("|", "\\|") | replace("\n", " ") }} | {{ pb.scope }}{% if pb.clash_scopes %} ⚠ clash ({{ pb.clash_scopes | join(", ") }}){% endif %} | {{ "yes" if pb.requires_project else "no" }} | {{ pb.path }} |
 {% endfor %}
 `Requires project: yes` + no project attached (see Project Context above) → the playbook cannot run here; tell the user it needs a booping project (`/install`) and stop.
+{%- if context.playbooks | selectattr("clash_scopes") | list %}
+
+`⚠ clash` → that name is defined in more than one root; it cannot run until one of them is renamed.
+{%- endif %}
 {%- else -%}
 _No playbooks found. Author one under `<home_dir>/_playbooks/<name>/` (global) or `{{ context.project.directory if context.project else "{vault}" }}/_playbooks/<name>/` (local)._
 {%- endif %}
