@@ -13,29 +13,41 @@ Render the composed procedure: `booping render-playbook <name>` (`<name>` = the 
 
 Walk the wave list in order. For each wave (a numbered line; ` ∥ `-separated names run in parallel):
 
-1. Fetch each member's step prompt. No body is embedded: every `## <Title>` section carries either a Read link (read that file) or a `booping render-playbook <name> --step <step>` command (run it and use its stdout).
-2. Compose each member's invocation from its step prompt, and append:
+1. Never fetch a delegated member's body. Compose a bootstrap prompt per member from its `## <Title>` section alone:
    ```
+   Run: booping render-playbook <name> --step <step>
+   Treat its stdout as your full instruction and follow it.
+
    ## Run-time context
-   specs_dir: {{ context.project.directory if context.project else "{vault}" }}/specs
    project: {{ context.project.name if context.project else "{project}" }}
+   specs_dir: {{ context.project.directory if context.project else "{vault}" }}/specs
+   workdir: <workdir>
+   instance: <slug>
+
+   ## Inputs
+   - <what>: <resolved value, path, or receipt>
+
+   ## Return
+   <return contract>
    ```
-   Then append a bounded return contract: the step prompt's own if it states one, else `Return only: artifacts written + outcome, ≤ 5 lines.`
-3. Run each member per its section's agent bullet: model+effort → `subagent_type="general-purpose"` with that model and reasoning effort; named → `subagent_type="<name>"`; no agent bullet → run inline. A multi-member wave spawns ALL member sub-agents in ONE message and never runs any member inline; wait for all to finish before the next wave.
+   - `workdir:` only when the run has one (see **Run state**); `instance:` only for subgraph instances.
+   - `## Inputs`: one line per entry of the section's `Inputs:` bullet, resolved from that entry's `from` and the receipts of prior waves. `Inputs:` is advisory — a section without it gets no `## Inputs` block, and prior-wave receipts still reach the member through the run-time context.
+   - `## Return`: the section's `Outputs:` entries as a receipt list; no `Outputs:` bullet → `artifacts written + outcome, ≤ 5 lines`.
+2. Run each member per its section's agent bullet: model+effort → `subagent_type="general-purpose"` with that model and reasoning effort; named → `subagent_type="<name>"`; no agent bullet → inline: run that member's `booping render-playbook <name> --step <step>` yourself and execute its stdout as your instruction, under the same run-time context, inputs, and return contract.
+3. A multi-member wave spawns ALL member sub-agents in ONE message and never runs any member inline; wait for all to finish before the next wave.
 4. Any member failure → report it and stop; do not start the next wave.
-5. After the wave completes, honor each member's `Review gate:` bullet: present that member's output labeled by step name alongside the gate text, and continue only on explicit user confirmation. In-conversation only — no state is persisted.
+5. After the wave completes, honor each member's `Review gate:` bullet: present that member's returned receipt labeled by step name alongside the gate text — read the artifacts it names only when the presentation needs them — and continue only on explicit user confirmation. In-conversation only — no state is persisted.
 
 Pass each step's output through unchanged to the user and into later sections that depend on it.
 
 ### Subgraph members
 
-A wave member tagged `*(subgraph)*` covers its `## Subgraph: <name>` intro and the inner step sections that follow it. Expand it in place of protocol step 1:
+A wave member tagged `*(subgraph)*` covers its `## Subgraph: <name>` intro and the inner step sections that follow it. Expand it in place of the member:
 
 1. Enumerate instances from the intro's `Repeat:` prose read against the output of the steps it lists under `After:` — no `Repeat:` bullet means exactly one instance. Name the enumerated instances before running.
-2. Fetch each inner step's prompt once and reuse that text for every instance.
-3. Per instance, walk the intro's inner wave list in order, applying protocol steps 2–5 to each inner wave. Return contracts and `Review gate:` bullets bind per instance.
-4. Run instances in parallel only when every inner step has an agent bullet; otherwise run them one at a time. Spawn at most 4 instances per message and wait for that batch before the next.
-5. Report completion per instance. Any instance failure → report it naming the instance, and stop; do not start the next wave.
+2. Per instance, walk the intro's inner wave list in order, applying protocol steps 1–5 to each inner wave, with `instance: <slug>` added to the run-time context. Every instance runs its own `--step` fetch — never fetch an inner step's body to reuse across instances. Inputs, return contracts, and `Review gate:` bullets bind per instance.
+3. Run instances in parallel only when every inner step has an agent bullet; otherwise run them one at a time. Spawn at most 4 instances per message and wait for that batch before the next.
+4. Report completion per instance. Any instance failure → report it naming the instance, and stop; do not start the next wave.
 
 ### Run state
 
