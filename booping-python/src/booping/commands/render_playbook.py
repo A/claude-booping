@@ -11,6 +11,7 @@ from jinja2 import BaseLoader, ChoiceLoader, DictLoader, Environment, FileSystem
 
 from booping import logger
 from booping.context import Context
+from booping.context.lesson import Lesson
 from booping.context.lifecycle import resolve_edges
 from booping.context.playbook import GraphProblem, Playbook, Step, resolve_agent
 from booping.rendering import LenientUndefined, build_source_env, get_plugin_root
@@ -99,6 +100,15 @@ _JINJA_ERROR = (
     "**STOP — tell the user:** Jinja rendering of {where} failed: {error}."
     " Do not execute this playbook."
 )
+_NAME_CLASH = (
+    "**STOP — tell the user:** playbook '{name}' is defined in more than one root"
+    " ({scopes}) — playbook names must be unique; rename one."
+)
+_ORPHAN_LESSON = (
+    "**Note — tell the user:** lesson '{file}' targets unknown step '{step}' in"
+    " playbook '{name}'; it is ignored."
+)
+_NON_BLOCKING = {"orphan_state", "orphan_lesson"}
 
 
 def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:  # type: ignore[type-arg]
@@ -126,6 +136,11 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
         default=None,
         metavar="PATH",
         help="Output path (default: stdout); use - for stdout",
+    )
+    p.add_argument(
+        "--no-lessons",
+        action="store_true",
+        help="Suppress the Lessons section on both the composed and --step surfaces",
     )
     p.set_defaults(func=_run)
 
@@ -234,6 +249,10 @@ def _shape_notice(prob: GraphProblem, playbook: str) -> str:
         return template.format(name=prob.node, scope=prob.scope)
     if prob.kind == "orphan_state":
         return _ORPHAN_STATE.format(name=prob.node)
+    if prob.kind == "orphan_lesson":
+        return _ORPHAN_LESSON.format(file=prob.detail, step=prob.node, name=playbook)
+    if prob.kind == "name_clash":
+        return _NAME_CLASH.format(name=playbook, scopes=prob.detail)
     template = _BAD_NODE_INNER if prob.scope else _BAD_NODE
     return template.format(name=prob.node, detail=prob.detail, scope=prob.scope)
 
@@ -298,8 +317,25 @@ def _resolver_notice(prob: GraphProblem) -> str:
     return _UNKNOWN_DEP.format(dep=prob.dep, name=prob.dependent)
 
 
+def _render_lessons(
+    lessons: list[Lesson], env: Environment, *, step_mode: bool = False
+) -> str:
+    """The `## Lessons` section for either surface; empty string when nothing applies."""
+    if not lessons:
+        return ""
+    return (
+        env.get_template("_partials/_playbook_lessons.j2")
+        .render(lessons=lessons, step_mode=step_mode)
+        .strip()
+    )
+
+
 def compose(
-    pb: Playbook, plugin_root: Path | None = None, context: Context | None = None
+    pb: Playbook,
+    plugin_root: Path | None = None,
+    context: Context | None = None,
+    *,
+    include_lessons: bool = True,
 ) -> str:
     """Render a playbook to the locked output contract:
     notices → body preamble → ``## Execution graph`` → step sections in wave order.
@@ -330,7 +366,7 @@ def compose(
     # (outer first, subgraphs in graph order).
     for prob in pb.graph_problems:
         notices.append(_shape_notice(prob, pb.name))
-        if prob.kind != "orphan_state":  # a declared-but-unreferenced state is a Note
+        if prob.kind not in _NON_BLOCKING:
             blocking = True
 
     for scope in ["", *pb.subgraphs]:
@@ -380,6 +416,11 @@ def compose(
         sections.append(preamble.strip())
 
     if not blocking:
+        if include_lessons:
+            playbook_lessons = [lesson for lesson in pb.lessons if lesson.step is None]
+            section = _render_lessons(playbook_lessons, env)
+            if section:
+                sections.append(section)
         sections.append(
             env.get_template("_partials/_playbook_graph.j2")
             .render(
@@ -428,19 +469,33 @@ def compose(
     return "\n\n".join(sections) + "\n"
 
 
-def compose_step(pb: Playbook, step_name: str, context: Context | None = None) -> str:
-    """The step body alone — no headings, instruction bullets, or gate chrome.
-    Jinja-rendered when the playbook opts in; verbatim otherwise.
+def compose_step(
+    pb: Playbook,
+    step_name: str,
+    context: Context | None = None,
+    *,
+    include_lessons: bool = True,
+) -> str:
+    """The step body alone — no headings, instruction bullets, or gate chrome —
+    followed by the lessons targeting this step. Jinja-rendered when the playbook
+    opts in; verbatim otherwise (lesson bodies are never Jinja-rendered).
     """
     step = next(s for s in pb.steps if s.name == step_name)
     if not pb.jinja:
-        return step.body
-    if context is None:
+        body = step.body
+    elif context is None:
         return _NO_CONTEXT.format(name=pb.name) + "\n"
-    rendered, err = render_body(pb, step.body, step, context)
-    if err is not None:
-        return _JINJA_ERROR.format(where=f"step '{step_name}'", error=err) + "\n"
-    return rendered
+    else:
+        rendered, err = render_body(pb, step.body, step, context)
+        if err is not None:
+            return _JINJA_ERROR.format(where=f"step '{step_name}'", error=err) + "\n"
+        body = rendered
+
+    lessons = [lesson for lesson in pb.lessons if lesson.step == step_name]
+    if not include_lessons or not lessons:
+        return body
+    section = _render_lessons(lessons, build_env(), step_mode=True)
+    return body.rstrip("\n") + "\n\n" + section + "\n"
 
 
 def _run(args: argparse.Namespace) -> None:
@@ -490,10 +545,11 @@ def _run(args: argparse.Namespace) -> None:
         message=message,
     )
 
+    include_lessons = not args.no_lessons
     if step_name is not None:
-        result = compose_step(pb, step_name, ctx)
+        result = compose_step(pb, step_name, ctx, include_lessons=include_lessons)
     else:
-        result = compose(pb, context=ctx)
+        result = compose(pb, context=ctx, include_lessons=include_lessons)
 
     if output_str is None or output_str == "-":
         sys.stdout.write(result)

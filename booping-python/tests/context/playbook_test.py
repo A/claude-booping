@@ -843,7 +843,7 @@ def test_lesson_with_unknown_step_is_orphan(tmp_path: Path) -> None:
     pb = _load(tmp_path)["one"]
     assert [lesson.id for lesson in pb.lessons] == ["0002_ok"]
     assert [(p.kind, p.node, p.detail) for p in pb.graph_problems] == [
-        ("orphan_lesson", "nope", "0001_orphan")
+        ("orphan_lesson", "nope", "0001_orphan.md")
     ]
 
 

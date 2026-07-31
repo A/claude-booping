@@ -90,7 +90,7 @@ class GraphProblem(BaseModel):
     # kind=bad_state/unknown_state/orphan_state: the states entry name
     # kind=orphan_lesson: the unknown step the lesson points at
     detail: str = ""  # kind=bad_node/bad_manifest/bad_state: what is wrong with it
-    # kind=orphan_lesson: the lesson id; kind=name_clash: the clashing scopes
+    # kind=orphan_lesson: the lesson filename; kind=name_clash: the clashing scopes
     scope: str = ""  # subgraph name the problem was found in; "" = outer graph
 
 
@@ -306,7 +306,9 @@ def _attach_lessons(pb: Playbook, root_lessons: list[Lesson], roots: list[Path])
     for lesson in root_lessons + own:
         if lesson.step is not None and lesson.step not in known:
             pb.graph_problems.append(
-                GraphProblem(kind="orphan_lesson", node=lesson.step, detail=lesson.id)
+                GraphProblem(
+                    kind="orphan_lesson", node=lesson.step, detail=lesson.path.name
+                )
             )
             continue
         kept.append(lesson)

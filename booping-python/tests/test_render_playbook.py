@@ -1031,3 +1031,235 @@ def test_cli_renders_to_stdout(tmp_path: Path) -> None:
     )
     assert result.returncode == 0
     assert "## Execution graph" in result.stdout
+
+
+# --- lessons ----------------------------------------------------------------
+
+
+def _build_lessons(
+    tmp_path: Path,
+    *,
+    root_lessons: dict[str, str] | None = None,
+    pb_lessons: dict[str, str] | None = None,
+    jinja: bool = False,
+    name: str = "les",
+) -> Playbook:
+    """A one-step playbook in a tmp global root, carrying the given `_lessons/` files
+    (mapping filename → full file text) at root and playbook level."""
+    root = tmp_path / "home" / "_playbooks"
+    pb_dir = root / name
+    (pb_dir / "s1").mkdir(parents=True)
+    fm_jinja = "jinja: true\n" if jinja else ""
+    (pb_dir / "playbook.md").write_text(
+        f"---\nname: {name}\ntitle: Les\n{fm_jinja}graph:\n  s1: []\n---\nPreamble.\n"
+    )
+    (pb_dir / "s1" / "prompt.md").write_text("---\nsummary: s1\n---\nStep body.\n")
+    for level, files in (("", root_lessons), (name, pb_lessons)):
+        if not files:
+            continue
+        lessons_dir = (root / level / "_lessons") if level else (root / "_lessons")
+        lessons_dir.mkdir(parents=True, exist_ok=True)
+        for filename, text in files.items():
+            (lessons_dir / filename).write_text(text)
+    pbs = Playbook.load_all(
+        vault=None, home_dir=tmp_path / "home", plugin_root=tmp_path / "nocore"
+    )
+    return next(p for p in pbs if p.name == name)
+
+
+_LESSON_A = "---\ntitle: Alpha rule\n---\nAlpha body.\n"
+_LESSON_B = "---\ntitle: Beta rule\n---\nBeta body.\n"
+_LESSON_STEP = "---\ntitle: Step rule\nstep: s1\n---\nStep-scoped body.\n"
+
+
+def test_lessons_section_locked_format(tmp_path: Path) -> None:
+    pb = _build_lessons(
+        tmp_path,
+        root_lessons={"0001_alpha.md": _LESSON_A},
+        pb_lessons={"0002_beta.md": _LESSON_B},
+    )
+    assert _section(compose(pb), "## Lessons") == (
+        "## Lessons\n"
+        "\n"
+        "The following 2 lesson(s) apply to this playbook. Never silently violate one;"
+        " conflict → stop and flag.\n"
+        "\n"
+        "### 0001_alpha — Alpha rule\n"
+        "*(scope: global)*\n"
+        "\n"
+        "Alpha body.\n"
+        "\n"
+        "### 0002_beta — Beta rule\n"
+        "*(scope: playbook)*\n"
+        "\n"
+        "Beta body.\n"
+    )
+
+
+def test_step_targeted_lessons_absent_from_composed(tmp_path: Path) -> None:
+    pb = _build_lessons(tmp_path, pb_lessons={"0002_step.md": _LESSON_STEP})
+    out = compose(pb)
+    assert "## Lessons" not in out
+    assert "Step-scoped body." not in out
+
+
+def test_no_lessons_no_section(tmp_path: Path) -> None:
+    assert "## Lessons" not in compose(_build_lessons(tmp_path))
+
+
+def test_lessons_section_between_preamble_and_graph(tmp_path: Path) -> None:
+    pb = _build_lessons(tmp_path, pb_lessons={"0001_alpha.md": _LESSON_A})
+    out = compose(pb)
+    order = [out.index("Preamble."), out.index("## Lessons"), out.index("## Execution graph")]
+    assert order == sorted(order)
+
+
+def test_lesson_body_is_not_jinja_rendered(tmp_path: Path) -> None:
+    pb = _build_lessons(
+        tmp_path,
+        pb_lessons={"0001_alpha.md": "---\ntitle: Raw\n---\nToken {{ leftover }} kept.\n"},
+        jinja=True,
+    )
+    assert "Token {{ leftover }} kept." in compose(pb, context=_ctx())
+
+
+def test_step_lessons_locked_format(tmp_path: Path) -> None:
+    pb = _build_lessons(
+        tmp_path, pb_lessons={"0001_alpha.md": _LESSON_A, "0002_step.md": _LESSON_STEP}
+    )
+    assert compose_step(pb, "s1") == (
+        "Step body.\n"
+        "\n"
+        "## Lessons\n"
+        "\n"
+        "The following 1 lesson(s) apply to this step. Never silently violate one.\n"
+        "\n"
+        "### 0002_step — Step rule\n"
+        "\n"
+        "Step-scoped body.\n"
+    )
+
+
+def test_step_lessons_on_jinja_playbook(tmp_path: Path) -> None:
+    pb = _build_lessons(
+        tmp_path,
+        pb_lessons={"0002_step.md": "---\ntitle: Step rule\nstep: s1\n---\n{{ raw }} kept.\n"},
+        jinja=True,
+    )
+    out = compose_step(pb, "s1", _ctx())
+    assert out.startswith("Step body.\n\n## Lessons\n")
+    assert "{{ raw }} kept." in out
+
+
+def test_step_without_targeted_lessons_unchanged(tmp_path: Path) -> None:
+    pb = _build_lessons(tmp_path, pb_lessons={"0001_alpha.md": _LESSON_A})
+    assert compose_step(pb, "s1") == "Step body.\n"
+
+
+def test_no_lessons_flag_suppresses_both_surfaces(tmp_path: Path) -> None:
+    pb = _build_lessons(
+        tmp_path, pb_lessons={"0001_alpha.md": _LESSON_A, "0002_step.md": _LESSON_STEP}
+    )
+    assert "## Lessons" not in compose(pb, include_lessons=False)
+    assert compose_step(pb, "s1", include_lessons=False) == "Step body.\n"
+
+
+def test_orphan_lesson_note_non_blocking(tmp_path: Path) -> None:
+    pb = _build_lessons(
+        tmp_path,
+        pb_lessons={"0003_ghost.md": "---\ntitle: Ghost\nstep: nope\n---\nGhost body.\n"},
+    )
+    out = compose(pb)
+    assert (
+        "**Note — tell the user:** lesson '0003_ghost.md' targets unknown step 'nope'"
+        " in playbook 'les'; it is ignored." in out
+    )
+    assert "**STOP" not in out
+    assert "## Execution graph" in out
+    assert "## Lessons" not in out
+
+
+def test_name_clash_notice_blocks(tmp_path: Path) -> None:
+    _build_lessons(tmp_path, pb_lessons={"0001_alpha.md": _LESSON_A}, name="dup")
+    vault_pb = tmp_path / "vault" / "_playbooks" / "dup"
+    (vault_pb / "s1").mkdir(parents=True)
+    (vault_pb / "playbook.md").write_text(
+        "---\nname: dup\ntitle: Dup\ngraph:\n  s1: []\n---\nPreamble.\n"
+    )
+    (vault_pb / "s1" / "prompt.md").write_text("---\nsummary: s1\n---\nStep body.\n")
+    pbs = Playbook.load_all(
+        vault=tmp_path / "vault",
+        home_dir=tmp_path / "home",
+        plugin_root=tmp_path / "nocore",
+    )
+    out = compose(next(p for p in pbs if p.name == "dup"))
+    assert (
+        "**STOP — tell the user:** playbook 'dup' is defined in more than one root"
+        " (global, local) — playbook names must be unique; rename one." in out
+    )
+    assert "## Lessons" not in out
+    _assert_blocking(out)
+    assert "Preamble." in out
+
+
+def _plant_lessons_vault(tmp_path: Path) -> Path:
+    """A bare vault carrying one playbook with a playbook-scoped and a step-scoped lesson."""
+    vault = tmp_path / "vault"
+    pb_dir = vault / "_playbooks" / "les"
+    (pb_dir / "s1").mkdir(parents=True)
+    (pb_dir / "playbook.md").write_text(
+        "---\nname: les\ntitle: Les\ngraph:\n  s1: []\n---\nPreamble.\n"
+    )
+    (pb_dir / "s1" / "prompt.md").write_text("---\nsummary: s1\n---\nStep body.\n")
+    (pb_dir / "_lessons").mkdir()
+    (pb_dir / "_lessons" / "0001_alpha.md").write_text(_LESSON_A)
+    (pb_dir / "_lessons" / "0002_step.md").write_text(_LESSON_STEP)
+    return vault
+
+
+def test_cli_no_lessons_flag(tmp_path: Path) -> None:
+    vault = _plant_lessons_vault(tmp_path)
+    base = [str(BOOPING_BIN), "render-playbook", "les", "--project", str(vault)]
+    with_lessons = subprocess.run(base, cwd=tmp_path, capture_output=True, text=True)
+    without = subprocess.run(
+        [*base, "--no-lessons"], cwd=tmp_path, capture_output=True, text=True
+    )
+    assert with_lessons.returncode == 0
+    assert "## Lessons" in with_lessons.stdout
+    assert without.returncode == 0
+    assert "## Lessons" not in without.stdout
+
+    step = [*base, "--step", "s1"]
+    step_out = subprocess.run(step, cwd=tmp_path, capture_output=True, text=True)
+    step_bare = subprocess.run(
+        [*step, "--no-lessons"], cwd=tmp_path, capture_output=True, text=True
+    )
+    assert "## Lessons" in step_out.stdout
+    assert step_bare.stdout == "Step body.\n"
+
+
+def test_cli_help_lists_no_lessons(tmp_path: Path) -> None:
+    result = subprocess.run(
+        [str(BOOPING_BIN), "render-playbook", "--help"],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0
+    assert "--no-lessons" in result.stdout
+
+
+def test_cli_unknown_step_still_exits_1_with_lessons(tmp_path: Path) -> None:
+    vault = _plant_lessons_vault(tmp_path)
+    result = subprocess.run(
+        [
+            str(BOOPING_BIN), "render-playbook", "les",
+            "--step", "nope", "--project", str(vault),
+        ],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 1
+    assert result.stdout == ""
+    assert "step not found" in result.stderr
