@@ -31,12 +31,19 @@ def resolve_agent(value: str | None) -> dict[str, str]:
     return {"mode": "named", "name": value}
 
 
+class StepInput(BaseModel):
+    what: str
+    from_: str | None = None
+
+
 class Step(BaseModel):
     name: str
     title: str | None = None
     summary: str = ""
     agent: str | None = None
     review_gate: str | None = None
+    inputs: list[StepInput] = []
+    outputs: list[str] = []
     body: str = ""
     path: Path
 
@@ -289,7 +296,7 @@ def _load_one(
         if not prompt.is_file():
             _warn(f"playbook {pb_dir.name}: {step_dir.name}/ has no prompt.md, skipping")
             continue
-        steps.append(_load_step(step_dir.name, prompt))
+        steps.append(_load_step(step_dir.name, prompt, pb_dir.name))
 
     return Playbook(
         name=name,
@@ -500,7 +507,7 @@ def _str_list(value: Any) -> list[str]:
     return [str(item) for item in items]
 
 
-def _load_step(dir_name: str, step_path: Path) -> Step:
+def _load_step(dir_name: str, step_path: Path, pb_name: str) -> Step:
     fm, body = parse_frontmatter(step_path)
     return Step(
         name=dir_name,
@@ -508,9 +515,53 @@ def _load_step(dir_name: str, step_path: Path) -> Step:
         summary=str(fm.get("summary", "")),
         agent=_opt_str(fm.get("agent")),
         review_gate=_opt_str(fm.get("review_gate")),
+        inputs=_parse_inputs(fm.get("inputs"), pb_name, dir_name),
+        outputs=_parse_outputs(fm.get("outputs"), pb_name, dir_name),
         body=body,
         path=step_path,
     )
+
+
+def _entries(value: Any, key: str, pb_name: str, dir_name: str) -> list[Any]:
+    if value is None:
+        return []
+    if not isinstance(value, list):
+        _warn(f"playbook {pb_name}: {dir_name}/prompt.md has non-list {key}, ignoring")
+        return []
+    return cast("list[Any]", value)
+
+
+def _parse_inputs(value: Any, pb_name: str, dir_name: str) -> list[StepInput]:
+    inputs: list[StepInput] = []
+    for entry in _entries(value, "inputs", pb_name, dir_name):
+        if isinstance(entry, str):
+            inputs.append(StepInput(what=entry))
+            continue
+        what = (
+            cast("dict[Any, Any]", entry).get("what") if isinstance(entry, dict) else None
+        )
+        if not isinstance(what, str) or not what:
+            _warn(
+                f"playbook {pb_name}: {dir_name}/prompt.md has malformed inputs entry, "
+                "skipping"
+            )
+            continue
+        source = cast("dict[Any, Any]", entry).get("from")
+        inputs.append(StepInput(what=what, from_=_opt_str(source)))
+    return inputs
+
+
+def _parse_outputs(value: Any, pb_name: str, dir_name: str) -> list[str]:
+    outputs: list[str] = []
+    for entry in _entries(value, "outputs", pb_name, dir_name):
+        if not isinstance(entry, str) or not entry:
+            _warn(
+                f"playbook {pb_name}: {dir_name}/prompt.md has malformed outputs entry, "
+                "skipping"
+            )
+            continue
+        outputs.append(entry)
+    return outputs
 
 
 def _opt_str(val: Any) -> str | None:
