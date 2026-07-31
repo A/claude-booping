@@ -77,8 +77,25 @@ The manifest **body** is a preamble — a playbook-level instruction inserted ab
 - `agent` — how the step runs (see the grammar below).
 - `review_gate` — when non-null, `/playbook` stops after the step, presents the output, and continues only on your explicit confirmation. `null` runs straight through.
 - `title` — *optional* human-readable heading for the step. When absent, the rendered heading is the titleized directory name (e.g. `current-time` → `Current Time`).
+- `inputs` — *optional* list of what the step expects to be handed. Each entry is either a mapping `{what, from}` (`from` *optional*) or a plain string shorthand for `what`. **Advisory**: the driver uses them to build the step's `## Inputs` block, but the step is not limited to them, and `from` is freeform prose — it is not validated against the graph. A malformed entry warns on stderr and is skipped.
+- `outputs` — *optional* list of plain strings naming what the step produces. They feed later steps' `inputs` and become the step's return contract; without them the driver asks for `artifacts written + outcome, ≤ 5 lines`.
 
 The step **body** is the prompt for that step.
+
+```yaml
+---
+summary: Draft the plan against the approved design
+agent: sonnet:high
+review_gate: Plan draft ready — approve before presenting?
+inputs:
+  - from: design
+    what: approved design doc (path or content)
+  - from: user
+    what: any sizing constraints stated in conversation
+outputs:
+  - plan draft written to {workdir}/plan.md
+---
+```
 
 ### The `agent` grammar
 
@@ -116,13 +133,14 @@ Two things change once you opt in:
 - **Project context is required.** Rendering a `jinja: true` playbook without a project attached produces a blocking `STOP` notice instead of the procedure. Pair it with `requires_project: true`.
 - **A template error is a blocking notice**, not a crash — the failure is reported in-band and the playbook refuses to run.
 
-Because a Jinja body is meaningless until rendered, later-wave steps of a `jinja: true` playbook are fetched with a command rather than read off disk (see below).
+A Jinja body is meaningless until rendered — the `booping render-playbook <name> --step <step>` fetch every step body goes through returns it already rendered (see below).
 
 ## How the graph renders
 
 `/playbook` resolves the graph into **waves** — a step joins the earliest wave in which all its dependencies sit in a prior wave. Steps sharing a wave run in parallel.
 
-- **Step bodies are never embedded** — every section is fetch-form. The render points at the step file and `/playbook` reads it when the wave starts. For a `jinja: true` playbook it points at `booping render-playbook <name> --step <step>` instead, so the body arrives already rendered.
+- **Step bodies are never embedded** — every section ends with the line *Run `booping render-playbook <name> --step <step>` for content.*, the same for plain and `jinja: true` playbooks. A section carries only metadata: summary, dependencies, wave siblings, `Inputs:` / `Outputs:`, agent, review gate.
+- **Delegated steps fetch their own body** — the driver never runs the fetch command for a sub-agent step. It spawns the agent with a bootstrap prompt: the fetch command ("treat its stdout as your full instruction"), a `## Run-time context` block (project, specs dir, plus `workdir` / `instance` where they apply), a `## Inputs` block resolved from the section's declared inputs and prior steps' receipts, and a `## Return` contract built from the declared outputs. An inline step (`agent: null`) is the only case where the driver runs the fetch itself and executes the stdout.
 - **Parallel wave members must set `agent`** — inline steps (`agent: null`) can't run in parallel, so a step that shares a wave with others must delegate to a sub-agent.
 - **Review gates pause after the wave** — once every member of a wave finishes, each member's gate is presented (labeled by step) and the run waits for your confirmation before the next wave.
 
@@ -150,7 +168,7 @@ graph:
 
 **Scope rule.** `dependencies` reference outer names only; inner dependencies reference inner names only. There is no cross-scope edge: an inner step cannot depend on an outer step, and an outer step depends on the subgraph as a whole. Step names are addressed flat and must be unique across the whole playbook — an inner step still lives in its own `<step>/prompt.md` directory at the playbook root.
 
-**Repeat semantics.** `repeat` is prose, not a count — the driver reads it against the output of the steps in `dependencies` and decides how many instances to run. No `repeat` key means exactly one instance. Each instance walks the inner waves on its own, and each inner step's `review_gate` fires per instance. Instances run in parallel only when **every** inner step sets an `agent`; if any inner step is inline, instances run one at a time.
+**Repeat semantics.** `repeat` is prose, not a count — the driver reads it against the output of the steps in `dependencies` and decides how many instances to run. No `repeat` key means exactly one instance. Each instance walks the inner waves on its own — its own `--step` fetch per inner step, never a body reused across instances — and each inner step's `review_gate` fires per instance. Instances run in parallel only when **every** inner step sets an `agent`; if any inner step is inline, instances run one at a time.
 
 **One level only.** A subgraph cannot contain another subgraph.
 
@@ -343,7 +361,7 @@ The rendered procedure lists the waves as:
 3. publish
 ```
 
-`prep` runs first (its body fetched when the wave starts). Then `lint` and `tests` spawn together in one message and run in parallel — both must set `agent`. Once both finish (and any review gates are cleared), `publish` runs.
+`prep` runs first (fetching its own body via `booping render-playbook ship --step prep`). Then `lint` and `tests` spawn together in one message and run in parallel — both must set `agent`. Once both finish (and any review gates are cleared), `publish` runs.
 
 ## Rendering
 
@@ -351,7 +369,7 @@ The rendered procedure lists the waves as:
 
 Two flags help while authoring:
 
-- `--step <step>` — print just that step's body, with no heading, instruction bullets, or gate wrapping. Handy for eyeballing one prompt in isolation; it is also what the composed procedure tells the driver to run for later waves of a `jinja: true` playbook.
+- `--step <step>` — print just that step's body (rendered, for a `jinja: true` playbook), with no heading, instruction bullets, or gate wrapping. This is the command every composed step section points at: each delegated step runs it itself from its bootstrap prompt, the driver runs it for inline steps, and it is handy for eyeballing one prompt in isolation.
 - `--project <path>` — resolve context against the vault at `<path>` instead of whatever project is attached to the current directory. Lets you render a `requires_project` or `jinja: true` playbook from anywhere.
 
 ## Evals and harness
