@@ -9,6 +9,7 @@ Render the composed procedure: `booping render-playbook <name>` (`<name>` = the 
 
 - Any `**STOP — tell the user:**` line → relay it verbatim and do not execute the playbook. `**Note — tell the user:**` → relay it, then continue.
 - Follow the preamble as a playbook-level instruction over the whole run. A playbook's preamble may define resume rules for re-entering a procedure mid-run.
+- Need more than a section's metadata to drive the run — e.g. the user's ask matches the playbook only partially or in a non-standard way → run `booping render-playbook <name> --step <step>` and read that step yourself. Orientation only: spawning still hands over the bootstrap prompt, never a pasted body.
 - A `## State` section in the render → the playbook is stateful; apply **Run state** below before and during the walk. No `## State` section → run state is in-conversation only.
 
 Walk the wave list in order. For each wave (a numbered line; ` ∥ `-separated names run in parallel):
