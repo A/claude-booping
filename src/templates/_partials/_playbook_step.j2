@@ -10,7 +10,6 @@
     deps      — list[str] this step's deps in its own scope (After: bullets; empty for wave 1)
     siblings  — list[str] the other members of this step's wave (Parallel with:)
     playbook  — the playbook name (for the --step fetch command)
-    jinja     — True when the playbook sets jinja: true (bodies must be fetched rendered)
     part_of   — subgraph name when this step lives in one, else none
     repeated  — True when that subgraph sets `repeat`
   `resolve_agent` is registered as a Jinja global by the driving command.
@@ -31,7 +30,7 @@ Instructions:
 {%- set ag = resolve_agent(step.agent) -%}
 {%- set in_subgraph = part_of is defined and part_of -%}
 ## {{ title }}
-{% if step.summary or deps or siblings or in_subgraph or step.agent is not none or step.review_gate is not none %}
+{% if step.summary or deps or siblings or in_subgraph or step.inputs or step.outputs or step.agent is not none or step.review_gate is not none %}
 Instructions:
 {% if in_subgraph -%}
 - Part of: {{ part_of }}{% if repeated %} (repeated){% endif %}
@@ -45,6 +44,16 @@ Instructions:
 {% if siblings -%}
 - Parallel with: {{ siblings | join(', ') }}
 {% endif -%}
+{% if step.inputs -%}
+- Inputs:
+{% for input in step.inputs %}  - {{ input.what }}{% if input.from_ %} (from {{ input.from_ }}){% endif %}
+{% endfor -%}
+{% endif -%}
+{% if step.outputs -%}
+- Outputs:
+{% for output in step.outputs %}  - {{ output }}
+{% endfor -%}
+{% endif -%}
 {% if ag.mode == "model" -%}
 - Run in a sub-agent — model {{ ag.model }}, effort {{ ag.effort }}.
 {% elif ag.mode == "named" -%}
@@ -54,9 +63,5 @@ Instructions:
 - Review gate: stop after this step — "{{ step.review_gate }}"; continue only on explicit user confirmation.
 {% endif -%}
 {% endif %}
-{% if jinja -%}
 Run `booping render-playbook {{ playbook }} --step {{ step.name }}` for content.
-{%- else -%}
-Read [{{ title }}]({{ step.path }}) for content.
-{%- endif %}
 {%- endif %}

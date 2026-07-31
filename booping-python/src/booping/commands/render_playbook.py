@@ -403,7 +403,6 @@ def compose(
                 deps=deps,
                 siblings=[n for n in wave if n != name],
                 playbook=pb.name,
-                jinja=pb.jinja,
                 part_of=part_of,
                 repeated=sub is not None and sub.repeat is not None,
             ).strip()

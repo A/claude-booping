@@ -82,20 +82,17 @@ def test_wave_list_parallel_separator() -> None:
     assert "3. `plain`" in graph
 
 
-def test_wave_one_read_link_no_after() -> None:
+def test_wave_one_fetch_command_no_after() -> None:
     gather = _section(_composed(), "## Gather")
-    gather_step = next(s for s in _load("composed").steps if s.name == "gather")
-    assert f"Read [Gather]({gather_step.path}) for content." in gather
+    assert "Run `booping render-playbook composed --step gather` for content." in gather
     assert "Gather the raw model-agent inputs and return a bulleted list." not in gather
     assert "- After:" not in gather
 
 
-def test_later_wave_read_link_and_after_and_parallel() -> None:
+def test_later_wave_fetch_command_and_after_and_parallel() -> None:
     out = _composed()
     draft = _section(out, "## Draft")
-    step = _load("composed").steps
-    draft_step = next(s for s in step if s.name == "draft")
-    assert f"Read [Draft]({draft_step.path}) for content." in draft
+    assert "Run `booping render-playbook composed --step draft` for content." in draft
     assert "Draft the artifact from the gathered inputs." not in draft
     assert "- After: gather" in draft
     assert "- Parallel with: named-step" in draft
@@ -459,8 +456,7 @@ def test_inner_step_part_of_bullet_and_fetch_form(tmp_path: Path) -> None:
     out = compose(pb)
     spec = _section(out, "## Spec")
     assert spec.index("- Part of: pipeline (repeated)") < spec.index("- Summary:")
-    step = next(s for s in pb.steps if s.name == "spec")
-    assert f"Read [Spec]({step.path}) for content." in spec
+    assert "Run `booping render-playbook sg --step spec` for content." in spec
     assert "spec body" not in spec
     fixtures = _section(out, "## Fixtures")
     assert "- Part of: pipeline (repeated)" in fixtures
@@ -488,6 +484,46 @@ def test_step_flag_on_inner_step_returns_bare_body(tmp_path: Path) -> None:
     assert out == "fixtures body\n"
     assert "Part of:" not in out
     assert "## Fixtures" not in out
+
+
+# --- declared inputs / outputs ----------------------------------------------
+
+
+def _io(tmp_path: Path, extra_frontmatter: str) -> str:
+    """The `## One` section of a single-step playbook whose step carries
+    `extra_frontmatter` (declared inputs/outputs) on top of the usual keys."""
+    pb_dir = tmp_path / "_playbooks" / "io"
+    (pb_dir / "one").mkdir(parents=True)
+    (pb_dir / "playbook.md").write_text(
+        "---\nname: io\ntitle: IO\ngraph:\n  one: []\n---\nPreamble.\n"
+    )
+    (pb_dir / "one" / "prompt.md").write_text(
+        f"---\nsummary: one summary\nagent: null\n{extra_frontmatter}---\none body\n"
+    )
+    pbs = Playbook.load_all(
+        vault=tmp_path, home_dir=tmp_path / "nohome", plugin_root=tmp_path / "nocore"
+    )
+    return _section(compose(next(p for p in pbs if p.name == "io")), "## One")
+
+
+def test_inputs_bullets_with_and_without_from(tmp_path: Path) -> None:
+    section = _io(
+        tmp_path,
+        "inputs:\n  - what: the brief\n    from: intake\n  - a bare input\n",
+    )
+    assert "- Inputs:\n  - the brief (from intake)\n  - a bare input\n" in section
+
+
+def test_outputs_bullets(tmp_path: Path) -> None:
+    section = _io(tmp_path, "outputs:\n  - a draft\n  - a summary line\n")
+    assert "- Outputs:\n  - a draft\n  - a summary line\n" in section
+    assert "- Inputs:" not in section
+
+
+def test_no_labels_when_nothing_declared(tmp_path: Path) -> None:
+    section = _io(tmp_path, "")
+    assert "- Inputs:" not in section
+    assert "- Outputs:" not in section
 
 
 # --- state machines ---------------------------------------------------------
@@ -696,10 +732,25 @@ def test_jinja_later_wave_step_shows_step_command() -> None:
     assert "Read [Second]" not in second
 
 
-def test_non_jinja_step_keeps_read_link() -> None:
-    draft = _section(compose(_load("composed"), context=_ctx()), "## Draft")
-    assert "Read [Draft]" in draft
-    assert "--step" not in draft
+def test_fetch_line_shape_is_uniform_across_jinja_modes() -> None:
+    ctx = _ctx()
+    plain = _section(compose(_load("composed"), context=ctx), "## Draft")
+    jinja = _section(compose(_load("jinja-composed"), context=ctx), "## Second")
+    assert "Run `booping render-playbook composed --step draft` for content." in plain
+    assert (
+        "Run `booping render-playbook jinja-composed --step second` for content." in jinja
+    )
+
+
+def test_no_read_link_form_anywhere() -> None:
+    ctx = _ctx()
+    outs = (
+        compose(_load("composed"), context=ctx),
+        compose(_load("jinja-composed"), context=ctx),
+    )
+    for out in outs:
+        assert "for content." in out
+        assert "] for content." not in out
 
 
 def test_jinja_without_context_stops() -> None:

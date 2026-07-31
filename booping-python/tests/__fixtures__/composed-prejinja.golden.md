@@ -26,7 +26,7 @@ Instructions:
 - Summary: Gather inputs.
 - Run in a sub-agent — model sonnet, effort medium.
 
-Read [Gather]({HOME}/_playbooks/composed/gather/prompt.md) for content.
+Run `booping render-playbook composed --step gather` for content.
 
 ## Draft
 
@@ -37,7 +37,7 @@ Instructions:
 - Run in a sub-agent — model opus, effort high.
 - Review gate: stop after this step — "confirm the draft before continuing"; continue only on explicit user confirmation.
 
-Read [Draft]({HOME}/_playbooks/composed/draft/prompt.md) for content.
+Run `booping render-playbook composed --step draft` for content.
 
 ## Named Step
 
@@ -48,7 +48,7 @@ Instructions:
 - Run in sub-agent: booping-researcher.
 - Review gate: stop after this step — "sign off the research"; continue only on explicit user confirmation.
 
-Read [Named Step]({HOME}/_playbooks/composed/named-step/prompt.md) for content.
+Run `booping render-playbook composed --step named-step` for content.
 
 ## Plain
 
@@ -56,4 +56,4 @@ Instructions:
 - Summary: A plain step with no agent and no gate.
 - After: draft, named-step
 
-Read [Plain]({HOME}/_playbooks/composed/plain/prompt.md) for content.
+Run `booping render-playbook composed --step plain` for content.
