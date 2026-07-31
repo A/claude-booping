@@ -464,3 +464,52 @@ class TestLogLine:
         assert len(transition_lines) == 1
         assert "in-spec→awaiting-plan-review" in transition_lines[0]
         assert str(plan) in transition_lines[0]
+
+
+# ---------------------------------------------------------------------------
+# 7. File-target frontmatter-update hooks
+# ---------------------------------------------------------------------------
+
+class TestFileTargetHook:
+    def test_plan_transition_rejects_file_target(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+        capsys: pytest.CaptureFixture[str],
+    ) -> None:
+        vault = _stub_project(tmp_path, monkeypatch)
+        plan = _make_plan(vault, "in-spec")
+        _inject_config(monkeypatch, ["frontmatter-update brief.md reviewed=yes"])
+
+        args = argparse.Namespace(
+            to_status="awaiting-plan-review", plan=plan, also=None
+        )
+        with pytest.raises(SystemExit) as excinfo:
+            transition_cmd._run(args)  # type: ignore[reportPrivateUsage]
+
+        assert excinfo.value.code == 2
+        assert (
+            "file-target frontmatter-update is not supported in plan transitions"
+            in capsys.readouterr().err
+        )
+
+    def test_no_target_dispatch_returns_none_target(self, tmp_path: Path) -> None:
+        target = tmp_path / "plan.md"
+        target.write_text("---\nstatus: in-spec\n---\n\n# Body\n")
+
+        rel, resolved = transition_cmd.dispatch_frontmatter_update(
+            "frontmatter-update status=ready-for-dev", target, None
+        )
+
+        assert rel is None
+        assert resolved == {"status": "ready-for-dev"}
+
+    def test_report_line_shapes(self) -> None:
+        assert (
+            transition_cmd.format_frontmatter_line({"status": "done"})
+            == "frontmatter: status=done"
+        )
+        assert (
+            transition_cmd.format_frontmatter_line(
+                {"status": "done", "note": "two words"}, "_specs/brief.md"
+            )
+            == 'frontmatter _specs/brief.md: status=done note="two words"'
+        )

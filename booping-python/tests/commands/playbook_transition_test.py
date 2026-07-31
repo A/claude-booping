@@ -297,6 +297,115 @@ def test_instance_artifact_path_interpolated_and_moved(
     assert parse_frontmatter_only(artifact)["status"] == "done"
 
 
+# ---------------------------------------------------------------------------
+# File-target frontmatter-update hooks
+# ---------------------------------------------------------------------------
+
+def _filer(
+    to: str,
+    workdir: Path,
+    *,
+    state: str | None = None,
+    instance: str | None = None,
+) -> None:
+    _run(_args(playbook="filer", to=to, state=state, instance=instance, workdir=workdir))
+
+
+def _filer_drafting(tmp_path: Path) -> None:
+    _plant("filer")
+    _filer("drafting", tmp_path)
+
+
+def test_file_target_hook_updates_sibling_file(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _filer_drafting(tmp_path)
+    (tmp_path / "brief.md").write_text("---\ntitle: Brief\n---\n\nbody\n")
+    capsys.readouterr()
+
+    _filer("filed", tmp_path)
+
+    lines = capsys.readouterr().out.splitlines()
+    assert lines[0] == "drafting → filed"
+    assert lines[1] == "frontmatter: status=filed"
+    assert lines[2].startswith("frontmatter brief.md: reviewed=")
+    brief = parse_frontmatter_only(tmp_path / "brief.md")
+    assert brief["title"] == "Brief"
+    assert brief["reviewed"]
+    # The state artifact itself only carries the status move.
+    assert "reviewed" not in parse_frontmatter_only(tmp_path / "index.md")
+
+
+def test_file_target_hook_interpolates_instance(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _plant("filer")
+    _filer("spec-ing", tmp_path, state="step", instance="alpha")
+    notes = tmp_path / "steps" / "alpha" / "notes.md"
+    notes.write_text("---\ntitle: Notes\n---\n\nbody\n")
+    capsys.readouterr()
+
+    _filer("filed", tmp_path, state="step", instance="alpha")
+
+    lines = capsys.readouterr().out.splitlines()
+    assert lines[2] == "frontmatter steps/alpha/notes.md: seen=recorded"
+    assert parse_frontmatter_only(notes)["seen"] == "recorded"
+
+
+def test_file_target_instance_without_instance_exits_2(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _filer_drafting(tmp_path)
+    capsys.readouterr()
+
+    with pytest.raises(SystemExit) as exc:
+        _filer("filed-instance", tmp_path)
+    assert exc.value.code == 2
+    err = capsys.readouterr().err
+    assert "steps/{instance}/notes.md carries {instance}" in err
+    assert "no instance is in scope" in err
+
+
+def test_file_target_missing_file_exits_2(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _filer_drafting(tmp_path)
+    capsys.readouterr()
+
+    with pytest.raises(SystemExit) as exc:
+        _filer("filed-missing", tmp_path)
+    assert exc.value.code == 2
+    assert "frontmatter-update failed:" in capsys.readouterr().err
+    assert not (tmp_path / "nope.md").exists()
+
+
+def test_file_target_without_frontmatter_block_exits_2(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _filer_drafting(tmp_path)
+    (tmp_path / "raw.md").write_text("no frontmatter here\n")
+    capsys.readouterr()
+
+    with pytest.raises(SystemExit) as exc:
+        _filer("filed-raw", tmp_path)
+    assert exc.value.code == 2
+    assert "frontmatter-update failed:" in capsys.readouterr().err
+
+
+def test_no_target_hook_still_targets_the_artifact(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _filer_drafting(tmp_path)
+    capsys.readouterr()
+
+    _filer("done", tmp_path)
+
+    lines = capsys.readouterr().out.splitlines()
+    assert lines[1] == "frontmatter: status=done"
+    assert lines[2].startswith("frontmatter: noted=")
+    assert parse_frontmatter_only(tmp_path / "index.md")["noted"]
+
+
 def test_cli_end_to_end(tmp_path: Path) -> None:
     _plant()
     workdir = tmp_path / "run"

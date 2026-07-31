@@ -39,7 +39,7 @@ wait for all to finish, then start the next wave.
 {%- if states %}
 ## State
 
-Run state is persisted in artifacts under the run workdir. Only `booping playbook-transition` writes it — never hand-edit an artifact's `status:` or hook-written keys.
+Run state is persisted in artifacts under the run workdir. Only `booping playbook-transition` writes it — never hand-edit an artifact's `status:` or hook-written keys, in the artifact or in any workdir file a hook targets.
 
 Read the whole run's frontier before starting or resuming:
 

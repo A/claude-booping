@@ -82,17 +82,45 @@ def _parse_pairs(pairs: list[str]) -> dict[str, str]:
 
 
 def dispatch_frontmatter_update(
-    hook: str, target: Path, project: Project | None
-) -> dict[str, str]:
+    hook: str,
+    target: Path,
+    project: Project | None,
+    *,
+    file_base: Path | None = None,
+    instance: str | None = None,
+) -> tuple[str | None, dict[str, str]]:
     """Parse and apply a frontmatter-update hook string against *target*.
 
-    E.g. ``frontmatter-update status=ready-for-dev planned=@now``
+    E.g. ``frontmatter-update status=ready-for-dev planned=@now`` or, with a
+    file target, ``frontmatter-update _specs/brief.md reviewed=@today``.
 
-    Returns the applied key → resolved-value mapping.
+    Returns ``(file-target rel-path or None, applied key → resolved-value)``.
     """
     parts = hook.split()
-    # First token is the hook name; rest are key=val pairs
+    # First token is the hook name; rest are key=val pairs, optionally
+    # preceded by a file target (the only token carrying no "=").
     pairs = parts[1:]
+    rel: str | None = None
+    if pairs and "=" not in pairs[0]:
+        rel, pairs = pairs[0], pairs[1:]
+        if file_base is None:
+            print(
+                "error: file-target frontmatter-update is not supported "
+                "in plan transitions",
+                file=sys.stderr,
+            )
+            sys.exit(2)
+        if "{instance}" in rel:
+            if instance is None:
+                print(
+                    f"error: frontmatter-update target {rel} carries "
+                    "{instance} but no instance is in scope",
+                    file=sys.stderr,
+                )
+                sys.exit(2)
+            rel = rel.replace("{instance}", instance)
+        target = file_base / rel
+
     updates = _parse_pairs(pairs)
 
     repo_dir = project.repo_directory if project is not None else None
@@ -106,7 +134,7 @@ def dispatch_frontmatter_update(
         print(f"error: frontmatter-update failed: {exc}", file=sys.stderr)
         sys.exit(2)
 
-    return resolved
+    return rel, resolved
 
 
 def _dispatch_render_sprints(project: Project | None) -> tuple[int, Path]:
@@ -151,11 +179,14 @@ def _dispatch_vault_commit(
     return do_vault_commit(to_status=to_status, plan_path=plan_path, also=also)
 
 
-def format_frontmatter_line(resolved: dict[str, str]) -> str:
+def format_frontmatter_line(
+    resolved: dict[str, str], target: str | None = None
+) -> str:
     pairs = [
         f'{k}="{v}"' if " " in v else f"{k}={v}" for k, v in resolved.items()
     ]
-    return "frontmatter: " + " ".join(pairs)
+    prefix = "frontmatter: " if target is None else f"frontmatter {target}: "
+    return prefix + " ".join(pairs)
 
 
 def _run(args: argparse.Namespace) -> None:
@@ -217,7 +248,9 @@ def _run(args: argparse.Namespace) -> None:
         hook_name = hook.split()[0] if " " in hook else hook
         try:
             if hook_name == "frontmatter-update":
-                resolved = dispatch_frontmatter_update(hook, plan_path, project)
+                _, resolved = dispatch_frontmatter_update(
+                    hook, plan_path, project
+                )
                 report.append(format_frontmatter_line(resolved))
             elif hook_name == "render-sprints":
                 count, path = _dispatch_render_sprints(project)
