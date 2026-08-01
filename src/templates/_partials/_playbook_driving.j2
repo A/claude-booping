@@ -38,9 +38,11 @@ Walk the wave list in order. For each wave (a numbered line; ` ∥ `-separated n
 2. Run each member per its section's detached bullet (rendered from `detached:`): model+effort → `subagent_type="general-purpose"` with that model and reasoning effort; named → `subagent_type="<name>"`; no detached bullet → you perform the step: run that member's `booping render-playbook <name> --step <step>` yourself and execute its stdout as your instruction, under the same run-time context, inputs, and return contract. Assisted: such a body may direct you to delegate its heavy reads to `{{ config.research_agent }}` under the return contract it states — the step stays yours, only that read work leaves your context.
 3. A multi-member wave spawns ALL member sub-agents in ONE message and never runs any member inline; wait for all to finish before the next wave.
 4. Any member failure → report it and stop; do not start the next wave.
-5. After the wave completes, honor each member's `Review gate:` bullet: present that member's returned receipt labeled by step name alongside the gate text — read the artifacts it names only when the presentation needs them — and continue only on explicit user confirmation. In-conversation only — no state is persisted.
+5. After the wave completes, honor each member's `Review gate:` bullet: present that member's returned receipt labeled by step name alongside the gate text — read the artifacts it names only when the presentation needs them — and continue only on explicit user confirmation, collected via `AskUserQuestion` (confirm / request-changes options per the gate's own wording; free text arrives as "Other"). In-conversation only — no state is persisted.
 
 Pass each step's output through unchanged to the user and into later sections that depend on it.
+
+A step return carrying questions for the user (a `## Questions:` block or equivalent) → put the ones with enumerable options via `AskUserQuestion`, batching up to 4 per call — one entry per question, the step's stated options as the options, free text via "Other". An open-ended question — one inviting discussion or a free-form answer — stays plain chat prose; never force it into the tool. Present the rest of the return as normal output first.
 
 ### Agent ids
 
