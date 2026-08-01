@@ -30,7 +30,7 @@ Instructions:
 {%- set ag = resolve_detached(step.detached) -%}
 {%- set in_subgraph = part_of is defined and part_of -%}
 ## {{ title }}
-{% if step.summary or deps or siblings or in_subgraph or step.inputs or step.outputs or step.detached is not none or step.review_gate is not none %}
+{% if step.summary or deps or siblings or in_subgraph or step.detached is not none or step.review_gate is not none %}
 Instructions:
 {% if in_subgraph -%}
 - Part of: {{ part_of }}{% if repeated %} (repeated){% endif %}
@@ -43,16 +43,6 @@ Instructions:
 {% endif -%}
 {% if siblings -%}
 - Parallel with: {{ siblings | join(', ') }}
-{% endif -%}
-{% if step.inputs -%}
-- Inputs:
-{% for input in step.inputs %}  - {{ input.what }}{% if input.from_ %} (from {{ input.from_ }}){% endif %}
-{% endfor -%}
-{% endif -%}
-{% if step.outputs -%}
-- Outputs:
-{% for output in step.outputs %}  - {{ output }}
-{% endfor -%}
 {% endif -%}
 {% if ag.mode == "model" -%}
 - Run in a sub-agent — model {{ ag.model }}, effort {{ ag.effort }}.

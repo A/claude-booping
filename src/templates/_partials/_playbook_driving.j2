@@ -30,11 +30,11 @@ Walk the wave list in order. For each wave (a numbered line; ` ∥ `-separated n
    - <what>: <resolved value, path, or receipt>
 
    ## Return
-   <return contract>
+   artifacts written + outcome, ≤ 5 lines
    ```
    - `workdir:` only when the run has one (see **Run state**); `instance:` only for subgraph instances.
-   - `## Inputs`: one line per entry of the section's `Inputs:` bullet, resolved from that entry's `from` and the receipts of prior waves. `Inputs:` is advisory — a section without it gets no `## Inputs` block, and prior-wave receipts still reach the member through the run-time context.
-   - `## Return`: the section's `Outputs:` entries as a receipt list; no `Outputs:` bullet → `artifacts written + outcome, ≤ 5 lines`.
+   - `## Inputs`: the run-time values this member needs — the user's ask, artifact paths, and the receipts of prior waves it depends on. Nothing to pass → omit the block.
+   - `## Return`: always `artifacts written + outcome, ≤ 5 lines`. The step's own body owns any richer contract.
 2. Run each member per its section's detached bullet (rendered from `detached:`): model+effort → `subagent_type="general-purpose"` with that model and reasoning effort; named → `subagent_type="<name>"`; no detached bullet → you perform the step: run that member's `booping render-playbook <name> --step <step>` yourself and execute its stdout as your instruction, under the same run-time context, inputs, and return contract.
 3. A multi-member wave spawns ALL member sub-agents in ONE message and never runs any member inline; wait for all to finish before the next wave.
 4. Any member failure → report it and stop; do not start the next wave.

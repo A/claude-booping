@@ -109,8 +109,6 @@ The manifest **body** is a preamble — a playbook-level instruction inserted ab
 - `detached` — *optional*. Present → the step runs inside a sub-agent; absent → the runner performs it. See [Delegation levels](#delegation-levels).
 - `review_gate` — when non-null, `/playbook` stops after the step, presents the output, and continues only on your explicit confirmation. `null` runs straight through.
 - `title` — *optional* human-readable heading for the step. When absent, the rendered heading is the titleized directory name (e.g. `current-time` → `Current Time`).
-- `inputs` — *optional* list of what the step expects to be handed. Each entry is either a mapping `{what, from}` (`from` *optional*) or a plain string shorthand for `what`. **Advisory**: the driver uses them to build the step's `## Inputs` block, but the step is not limited to them, and `from` is freeform prose — it is not validated against the graph. A malformed entry warns on stderr and is skipped.
-- `outputs` — *optional* list of plain strings naming what the step produces. They feed later steps' `inputs` and become the step's return contract; without them the driver asks for `artifacts written + outcome, ≤ 5 lines`.
 
 The step **body** is the prompt for that step.
 
@@ -119,13 +117,6 @@ The step **body** is the prompt for that step.
 summary: Draft the plan against the approved design
 detached: sonnet:high
 review_gate: Plan draft ready — approve before presenting?
-inputs:
-  - from: design
-    what: approved design doc (path or content)
-  - from: user
-    what: any sizing constraints stated in conversation
-outputs:
-  - plan draft written to {workdir}/plan.md
 ---
 ```
 
@@ -179,8 +170,8 @@ A Jinja body is meaningless until rendered — the `booping render-playbook <nam
 
 `/playbook` resolves the graph into **waves** — a step joins the earliest wave in which all its dependencies sit in a prior wave. Steps sharing a wave run in parallel.
 
-- **Step bodies are never embedded** — every section ends with the line *Run `booping render-playbook <name> --step <step>` for content.*, the same for plain and `jinja: true` playbooks. A section carries only metadata: summary, dependencies, wave siblings, `Inputs:` / `Outputs:`, delegation, review gate.
-- **Delegated steps fetch their own body** — the driver never runs the fetch command for a sub-agent step. It spawns the agent with a bootstrap prompt: the fetch command ("treat its stdout as your full instruction"), a `## Run-time context` block (project, specs dir, plus `workdir` / `instance` where they apply), a `## Inputs` block resolved from the section's declared inputs and prior steps' receipts, and a `## Return` contract built from the declared outputs. A step without `detached:` is the only case where the driver runs the fetch itself and executes the stdout.
+- **Step bodies are never embedded** — every section ends with the line *Run `booping render-playbook <name> --step <step>` for content.*, the same for plain and `jinja: true` playbooks. A section carries only metadata: summary, dependencies, wave siblings, delegation, review gate.
+- **Delegated steps fetch their own body** — the driver never runs the fetch command for a sub-agent step. It spawns the agent with a bootstrap prompt: the fetch command ("treat its stdout as your full instruction"), a `## Run-time context` block (project, specs dir, plus `workdir` / `instance` where they apply), a `## Inputs` block assembled from the run-time context and prior steps' receipts, and a uniform `## Return` contract (`artifacts written + outcome, ≤ 5 lines`) — a richer contract belongs in the step body. A step without `detached:` is the only case where the driver runs the fetch itself and executes the stdout.
 - **Parallel wave members must be `detached:`** — a step the runner performs itself can't run in parallel, so a step that shares a wave with others must be `detached:`.
 - **Review gates pause after the wave** — once every member of a wave finishes, each member's gate is presented (labeled by step) and the run waits for your confirmation before the next wave.
 

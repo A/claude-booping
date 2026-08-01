@@ -4,6 +4,8 @@ import os
 import subprocess
 from pathlib import Path
 
+import pytest
+
 from booping.commands.render_playbook import compose, compose_step
 from booping.context import Context
 from booping.context.playbook import Playbook
@@ -513,12 +515,12 @@ def test_step_flag_on_inner_step_returns_bare_body(tmp_path: Path) -> None:
     assert "## Fixtures" not in out
 
 
-# --- declared inputs / outputs ----------------------------------------------
+# --- io frontmatter is not a thing --------------------------------------------
 
 
 def _io(tmp_path: Path, extra_frontmatter: str) -> str:
     """The `## One` section of a single-step playbook whose step carries
-    `extra_frontmatter` (declared inputs/outputs) on top of the usual keys."""
+    `extra_frontmatter` on top of the usual keys."""
     pb_dir = tmp_path / "_playbooks" / "io"
     (pb_dir / "one").mkdir(parents=True)
     (pb_dir / "playbook.md").write_text(
@@ -533,24 +535,18 @@ def _io(tmp_path: Path, extra_frontmatter: str) -> str:
     return _section(compose(next(p for p in pbs if p.name == "io")), "## One")
 
 
-def test_inputs_bullets_with_and_without_from(tmp_path: Path) -> None:
-    section = _io(
-        tmp_path,
+@pytest.mark.parametrize(
+    "extra_frontmatter",
+    [
+        "",
         "inputs:\n  - what: the brief\n    from: intake\n  - a bare input\n",
-    )
-    assert "- Inputs:\n  - the brief (from intake)\n  - a bare input\n" in section
-
-
-def test_outputs_bullets(tmp_path: Path) -> None:
-    section = _io(tmp_path, "outputs:\n  - a draft\n  - a summary line\n")
-    assert "- Outputs:\n  - a draft\n  - a summary line\n" in section
-    assert "- Inputs:" not in section
-
-
-def test_no_labels_when_nothing_declared(tmp_path: Path) -> None:
-    section = _io(tmp_path, "")
-    assert "- Inputs:" not in section
-    assert "- Outputs:" not in section
+        "outputs:\n  - a draft\n  - a summary line\n",
+    ],
+)
+def test_io_keys_are_never_rendered(tmp_path: Path, extra_frontmatter: str) -> None:
+    section = _io(tmp_path, extra_frontmatter)
+    assert "Inputs:" not in section
+    assert "Outputs:" not in section
 
 
 # --- state machines ---------------------------------------------------------

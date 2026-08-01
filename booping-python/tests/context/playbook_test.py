@@ -6,8 +6,6 @@ import pytest
 
 from booping.context.playbook import (
     Playbook,
-    Step,
-    StepInput,
     resolve_detached,
     resolve_waves,
 )
@@ -664,70 +662,6 @@ def test_instance_artifact_allowed_for_subgraph_state() -> None:
     pb = _manifest_playbooks()["stateful"]
     assert pb.graph_problems == []
     assert "{instance}" in pb.states["step"].artifact
-
-
-def _load_step_fm(tmp_path: Path, step_fm: str) -> Step:
-    """Load a single-step playbook whose step frontmatter body is `step_fm`."""
-    pb_dir = tmp_path / "_playbooks" / "io"
-    (pb_dir / "one").mkdir(parents=True)
-    (pb_dir / "playbook.md").write_text("---\nname: io\ntitle: IO\n---\nbody\n")
-    (pb_dir / "one" / "prompt.md").write_text(f"---\nsummary: s\n{step_fm}---\ndo it\n")
-    pbs = Playbook.load_all(vault=None, home_dir=tmp_path, plugin_root=_no_core())
-    return pbs[0].steps[0]
-
-
-def test_step_io_absent_keys_default_empty(tmp_path: Path) -> None:
-    step = _load_step_fm(tmp_path, "")
-    assert step.inputs == []
-    assert step.outputs == []
-
-
-def test_step_inputs_mapping_with_from(tmp_path: Path) -> None:
-    step = _load_step_fm(
-        tmp_path, "inputs:\n  - what: the brief\n    from: intake\noutputs:\n  - a draft\n"
-    )
-    assert step.inputs == [StepInput(what="the brief", from_="intake")]
-    assert step.outputs == ["a draft"]
-
-
-def test_step_inputs_mapping_without_from(tmp_path: Path) -> None:
-    step = _load_step_fm(tmp_path, "inputs:\n  - what: the brief\n")
-    assert step.inputs == [StepInput(what="the brief", from_=None)]
-
-
-def test_step_inputs_string_shorthand(tmp_path: Path) -> None:
-    step = _load_step_fm(tmp_path, "inputs:\n  - the brief\n")
-    assert step.inputs == [StepInput(what="the brief", from_=None)]
-
-
-@pytest.mark.parametrize(
-    "entry",
-    ["  - from: intake\n", "  - 3\n", "  - - nested\n"],
-)
-def test_step_malformed_input_entry_skipped(
-    tmp_path: Path, entry: str, capsys: pytest.CaptureFixture[str]
-) -> None:
-    step = _load_step_fm(tmp_path, f"inputs:\n{entry}  - the brief\n")
-    assert step.inputs == [StepInput(what="the brief")]
-    assert "one/prompt.md has malformed inputs entry, skipping" in capsys.readouterr().err
-
-
-def test_step_malformed_output_entry_skipped(
-    tmp_path: Path, capsys: pytest.CaptureFixture[str]
-) -> None:
-    step = _load_step_fm(tmp_path, "outputs:\n  - what: nope\n  - a draft\n")
-    assert step.outputs == ["a draft"]
-    err = capsys.readouterr().err
-    assert "one/prompt.md has malformed outputs entry, skipping" in err
-
-
-@pytest.mark.parametrize("key", ["inputs", "outputs"])
-def test_step_non_list_io_warns_and_empties(
-    tmp_path: Path, key: str, capsys: pytest.CaptureFixture[str]
-) -> None:
-    step = _load_step_fm(tmp_path, f"{key}: just a string\n")
-    assert getattr(step, key) == []
-    assert f"one/prompt.md has non-list {key}, ignoring" in capsys.readouterr().err
 
 
 def test_subgraph_state_must_be_string(tmp_path: Path) -> None:
