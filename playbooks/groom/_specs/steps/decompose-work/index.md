@@ -11,6 +11,8 @@ suite_reviewed_at: 20260731 20:34
 
 ## Contract
 
+- **Delegation** — inline: the runner renders the step and performs it itself, in the main
+  context.
 - **Needs** —
   - the written plan — its milestones, its tasks with their DoD and Verify, and the story
     points per task, per milestone and for the sprint
@@ -23,25 +25,24 @@ suite_reviewed_at: 20260731 20:34
   flagged as a sibling *shape* rather than silently executed. The pass is a refinement over the
   written plan, never a rewrite — it splits tasks and re-sums, and touches nothing else. With no
   conditional edges in the framework, a plan that is already right-sized is answered with a skip
-  note instead of an absent artifact, so the gate and `verify-references` never have to work out
+  note instead of an absent record, so `verify-references` and `present` never have to work out
   whether the pass ran.
 - **Output files** —
-  - `[CREATED|UPDATED] _runs/groom/{slug}/decomposition.md` — written on both paths, never
-    omitted, never empty:
-    - `## Verdict` first — `Refined` or `Skipped`, with the counts that decided it: how many
+  - `[UPDATED] plans/{slug}/index.md` — the `## Refinement` section, written on both paths,
+    never omitted, never empty:
+    - the verdict first — `Refined` or `Skipped`, with the counts that decided it: how many
       tasks were at or over the re-decompose threshold, and where the sprint total sits against
       the split threshold
-    - `## Re-decomposed` — one row per oversized task: what it was and its SP, what it became
+    - `### Re-decomposed` — one row per oversized task: what it was and its SP, what it became
       and their SP; absent on the skip path
-    - `## Totals` — per-milestone before and after, and the sprint total on both; absent on the
+    - `### Totals` — per-milestone before and after, and the sprint total on both; absent on the
       skip path
-    - `## Split candidate` — the seam, the primary and the sibling with their SP, and why the
+    - `### Split candidate` — the seam, the primary and the sibling with their SP, and why the
       seam holds; or the one line that the total is under the threshold and no split is
       recommended
-    - frontmatter carries `reviewed_at: null`, which the confirm edge stamps
     - both thresholds are rendered from config into the prompt — the step never authors them as
       literals of its own
-  - `[UPDATED] plans/{slug}.md`, on the refined path only:
+  - `[UPDATED] plans/{slug}/plan.md`, on the refined path only:
     - each oversized task replaced by the tasks it split into, each standing alone with its own
       DoD and its own Verify — no pair that only works when both land
     - milestone SP totals re-summed from the new tasks, the sprint total re-summed from the
@@ -49,40 +50,31 @@ suite_reviewed_at: 20260731 20:34
     - nothing else changes — not the architecture, not the surviving tasks' DoD or Verify, not
       `summary:`, not the template sections the draft filled in
     - on the skip path the plan file is not opened for writing at all, and does not appear in
-      the harness return
+      the step report
   - no sibling plan and no backlog stub — a split is a recommendation here; `present` puts it to
     the user and each sibling is groomed in its own run
-- **Harness return** — `## Changed:` list, each entry annotated with the verdict and its counts;
+- **Step report** — `## Changed:` list, each entry annotated with the verdict and its counts;
   `## Notes:` — the re-decomposition count, the largest surviving task, the re-summed sprint
-  total, and the split candidate or the note that none is recommended; `## Questions:` — one
-  numbered line per sizing call that is the user's, empty when the pass leaves none.
+  total, and the split candidate or the note that none is recommended. A sizing call that is the
+  user's travels as a note for `present` to ask — this step asks nothing itself.
 - **Review gate** —
-  - the user reworks and confirms the refined plan — milestones, tasks, estimates and any split
-    candidate; explicit confirmation, silence never counts. This is the user's first read of the
-    plan and the run's first-pass feedback.
-  - the gate cannot clear while any task still sits at or over the re-decompose threshold, or
-    while a milestone or sprint total does not sum from its parts
-  - rework touching milestones, tasks or estimates comes back here for another pass; rework that
-    reopens an architecture call sends the run back to design instead
-  - confirming a split candidate confirms the recommendation only — no sibling is created, here
-    or at the gate
+  - none — the user's first read of the plan happens at `present`, on the refined plan
+  - the edge out of decomposing cannot fire while any task still sits at or over the
+    re-decompose threshold, or while a milestone or sprint total does not sum from its parts
+  - a change request from the approval gate that touches milestones, tasks or estimates loops
+    the run back here; one that reopens an architecture call goes to design instead
 
 ## Example artifact
 
-`_runs/groom/20260801-14-30_local-vault-directories/decomposition.md`, refined path:
+`plans/20260801-local-vault-directories/index.md`, the `## Refinement` section, refined path:
 
 ```markdown
----
-reviewed_at: null
----
-# Decomposition — 20260801-14-30_local-vault-directories
-
-## Verdict
+## Refinement
 
 Refined — 2 tasks sat at or over the 5 SP re-decompose threshold; the sprint totals 38 SP,
 past the 35 SP split threshold, so a split candidate is flagged.
 
-## Re-decomposed
+### Re-decomposed
 
 | Was | SP | Became | SP |
 | --- | --- | --- | --- |
@@ -94,7 +86,7 @@ past the 35 SP split threshold, so a split candidate is flagged.
 Each half stands alone — its own DoD, its own Verify. Nothing is left half-configured between
 the two.
 
-## Totals
+### Totals
 
 | Milestone | Before | After |
 | --- | --- | --- |
@@ -108,7 +100,7 @@ the two.
 Re-decomposition redistributes; it does not reduce. Both splits landed on 2 + 3, so every total
 is unchanged — what changed is that the largest task is now 4 SP.
 
-## Split candidate
+### Split candidate
 
 The seam sits between M3 and M4: M1–M3 make the resolution behaviour work for a hand-written
 marker, M4–M5 add the scaffolding that writes one. The second half is useless without the
@@ -119,15 +111,10 @@ first, and the first is shippable without the second.
   `split_from:` pointing at the primary, groomed in its own run once the primary merges.
 ```
 
-On the skip path the file carries the verdict alone:
+On the skip path the section carries the verdict alone:
 
 ```markdown
----
-reviewed_at: null
----
-# Decomposition — 20260801-16-05_fix-stale-session-cookie
-
-## Verdict
+## Refinement
 
 Skipped — no task sits at or over the 5 SP re-decompose threshold (the largest is 3 SP), and
 the sprint totals 9 SP, well under the 35 SP split threshold. The plan file was not touched.
@@ -140,18 +127,15 @@ Refined path:
 ```markdown
 ## Changed:
 
-- [UPDATED] plans/20260801-14-30_local-vault-directories.md — 2 tasks re-decomposed into 4, totals re-summed
-- [CREATED] _runs/groom/20260801-14-30_local-vault-directories/decomposition.md — refined
+- [UPDATED] plans/20260801-local-vault-directories/plan.md — 2 tasks re-decomposed into 4, totals re-summed
+- [UPDATED] plans/20260801-local-vault-directories/index.md — refinement: refined
 
 ## Notes:
 
 - 2 task(s) at or over the 5 SP threshold split into 4; largest surviving task 4 SP
 - sprint total 38 SP, unchanged by the split — both oversized tasks landed on 2 + 3
-- split candidate: primary M1–M3 (22 SP) / sibling M4–M5 (16 SP), seam between M3 and M4
-
-## Questions:
-
-1. Take the split at the M3 / M4 seam, or keep this as one 38 SP sprint?
+- split candidate: primary M1–M3 (22 SP) / sibling M4–M5 (16 SP), seam between M3 and M4 — for
+  present to put to the user
 ```
 
 Skip path — the plan file is absent from `## Changed:` because nothing wrote to it:
@@ -159,13 +143,11 @@ Skip path — the plan file is absent from `## Changed:` because nothing wrote t
 ```markdown
 ## Changed:
 
-- [CREATED] _runs/groom/20260801-16-05_fix-stale-session-cookie/decomposition.md — skipped: nothing oversized
+- [UPDATED] plans/20260801-fix-stale-session-cookie/index.md — refinement: skipped, nothing oversized
 
 ## Notes:
 
 - no task at or over the 5 SP threshold; largest 3 SP
 - sprint total 9 SP, under the 35 SP split threshold; no split recommended
 - plan file untouched
-
-## Questions:
 ```

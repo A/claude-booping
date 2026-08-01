@@ -11,14 +11,17 @@ suite_reviewed_at: 20260731 20:34
 
 ## Contract
 
+- **Delegation** — inline: the runner renders the step and performs it itself, in the main
+  context; the cross-review agent, when configured, is spawned by the runner from this step's
+  instructions.
 - **Needs** —
-  - the settled design — the chosen architecture and why it won, the data / API / config / CLI
-    surface changes, the alternatives rejected, the trade-off calls the user made, and the risks
-    with their mitigations
+  - the settled design — the `## Design` section of `index.md`: the chosen architecture and why
+    it won, the surface changes, the alternatives rejected, the trade-off calls the user made,
+    and the risks with their mitigations
   - the confirmed framing — the restated problem, the task type, the scope boundaries and the
     user's answers to the scope-challenge questions
-  - the blast radius — the files, modules, integrations and external surfaces the work touches,
-    with the prior art and conventions already in play
+  - the blast radius — the `## Blast radius` section of `index.md`, with the prior art and
+    conventions already in play
   - the plan-template catalogue — each template's name, description and the location to read its
     `# Plan Body` and `# Quality Checklist` from
   - the plan frontmatter shape — every key, its type and its default
@@ -32,9 +35,9 @@ suite_reviewed_at: 20260731 20:34
   The cross-review pass happens here, on the fresh draft, so the user's first read lands on a plan
   whose critical findings are already folded in.
 - **Output files** —
-  - `[UPDATED] plans/{slug}.md` — the plan file intake created; this step writes its body and
-    completes its frontmatter. Always `[UPDATED]`, never `[CREATED]` — the file exists from wave 1
-    and is never renamed or re-created.
+  - `[UPDATED] plans/{slug}/plan.md` — the plan file intake created; this step writes its body
+    and completes its frontmatter. Always `[UPDATED]`, never `[CREATED]` — the file exists from
+    wave 1 and is never renamed or re-created.
     - pick the plan template whose name and description match the dominant surface of the work,
       read it, and write the body against its `# Plan Body` — section for section, in its order.
       When no template fits, a new one is authored in the project's own `plan_templates/` before
@@ -69,9 +72,9 @@ suite_reviewed_at: 20260731 20:34
     - deferred findings are recorded in a `## Risk register` section (added after
       `## Out of scope` when the chosen template defines none), one line per finding: the finding,
       its severity, and the reason it was deferred
-  - no other file — the run workdir gets nothing from this step; the cross-review outcome travels
-    in the harness return, not in a file of its own
-- **Harness return** — `## Changed:` with the single plan entry annotated by the template chosen
+  - no other file — the cross-review outcome travels in the step report, not in a file of its
+    own
+- **Step report** — `## Changed:` with the single plan entry annotated by the template chosen
   and the sprint total, and `## Notes:` carrying the milestone/SP breakdown, the
   Quality-Checklist verdict, and the cross-review outcome — findings by severity, what was folded
   in, what was deferred, or the line that no cross-review agent is configured.
@@ -82,7 +85,7 @@ suite_reviewed_at: 20260731 20:34
 
 ## Example artifact
 
-`plans/20260731-14-02_rate-limit-public-api.md`, at the end of draft-plan:
+`plans/20260731-rate-limit-public-api/plan.md`, at the end of draft-plan:
 
 ```markdown
 ---
@@ -204,7 +207,7 @@ and the request is admitted.
 ```markdown
 ## Changed:
 
-- [UPDATED] plans/20260731-14-02_rate-limit-public-api.md — template `backend`, 12 SP
+- [UPDATED] plans/20260731-rate-limit-public-api/plan.md — template `backend`, 12 SP
 
 ## Notes:
 
