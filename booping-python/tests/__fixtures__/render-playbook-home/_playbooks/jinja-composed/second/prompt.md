@@ -1,7 +1,7 @@
 ---
 name: second
 summary: Second step.
-agent: haiku:low
+detached: haiku:low
 ---
 
 Wave-two body, threshold {{ config.sprint.default_threshold_sp }}.

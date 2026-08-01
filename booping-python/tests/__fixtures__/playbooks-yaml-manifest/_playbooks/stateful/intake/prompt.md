@@ -1,6 +1,6 @@
 ---
 summary: intake step.
-agent: sonnet:medium
+detached: sonnet:medium
 ---
 
 intake body.

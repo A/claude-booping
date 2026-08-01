@@ -8,7 +8,7 @@ from booping.context.playbook import (
     Playbook,
     Step,
     StepInput,
-    resolve_agent,
+    resolve_detached,
     resolve_waves,
 )
 from tests.helpers import get_fixture_path
@@ -80,13 +80,13 @@ def test_fields_and_step_ordering() -> None:
     assert all(s.path.name == "prompt.md" for s in alpha.steps)
 
 
-def test_step_review_gate_and_agent_null_vs_set() -> None:
+def test_step_review_gate_and_detached_absent_vs_set() -> None:
     pbs = Playbook.load_all(vault=None, home_dir=_home(), plugin_root=_no_core())
     alpha = next(pb for pb in pbs if pb.name == "alpha")
     draft, gather = alpha.steps
-    assert gather.agent == "sonnet:medium"
+    assert gather.detached == "sonnet:medium"
     assert gather.review_gate is None
-    assert draft.agent is None
+    assert draft.detached is None
     assert draft.review_gate == "confirm the draft before continuing"
     assert "Draft the artifact" in draft.body
 
@@ -141,8 +141,8 @@ def test_prompt_variants_ignored() -> None:
         ),
     ],
 )
-def test_resolve_agent(value: str | None, expected: dict[str, str]) -> None:
-    assert resolve_agent(value) == expected
+def test_resolve_detached(value: str | None, expected: dict[str, str]) -> None:
+    assert resolve_detached(value) == expected
 
 
 def test_local_shadows_global() -> None:

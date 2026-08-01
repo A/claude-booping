@@ -1,7 +1,7 @@
 ---
 name: first
 summary: First step.
-agent: sonnet:medium
+detached: sonnet:medium
 ---
 
 Wave-one body, threshold {{ config.sprint.default_threshold_sp }}.

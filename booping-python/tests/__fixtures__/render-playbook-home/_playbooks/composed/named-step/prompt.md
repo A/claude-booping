@@ -1,7 +1,7 @@
 ---
 name: named-step
 summary: A step delegated to a named agent.
-agent: booping-researcher
+detached: booping-researcher
 review_gate: sign off the research
 ---
 

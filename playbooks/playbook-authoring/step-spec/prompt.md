@@ -1,6 +1,6 @@
 ---
 summary: Write one step's contract and a concrete example of its artifact — the example IS the shape the suite will pin.
-agent: opus:medium
+detached: opus:medium
 review_gate: "The user refines and confirms the spec in-file: the contract bullets and, for a markdown artifact, the example"
 inputs:
   - what: the target step name

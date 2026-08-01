@@ -1,6 +1,6 @@
 ---
 summary: Design the playbook's persisted state machines from decompose's tier verdict — or skip on ephemeral — as a States chart the manifest translates verbatim.
-agent: opus:high
+detached: opus:high
 review_gate: "The user confirms machine granularity — statuses, gates, hooks, artifacts — in-file and re-confirms the index"
 inputs:
   - what: the confirmed decomposition — graph and Steps table

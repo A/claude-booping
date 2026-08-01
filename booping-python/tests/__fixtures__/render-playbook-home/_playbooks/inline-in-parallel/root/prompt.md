@@ -1,7 +1,7 @@
 ---
 name: root
 summary: Root step.
-agent: sonnet:medium
+detached: sonnet:medium
 ---
 
 Root step body.

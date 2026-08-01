@@ -2,7 +2,7 @@
 summary: Assemble the approval summary — approach, milestones, SP totals, plan 
   path and every check outcome; recommend a split when the total passes the 
   threshold, offer a plan branch on a repo-local vault, and carry the approval.
-agent: sonnet:medium
+detached: sonnet:medium
 review_gate: "Explicit user approval — \"looks good\" counts, silence never does;
   on that word the run moves to `ready-for-dev`. A change request loops the run back
   to the status that owns what it touches — milestones, tasks or estimates reopen

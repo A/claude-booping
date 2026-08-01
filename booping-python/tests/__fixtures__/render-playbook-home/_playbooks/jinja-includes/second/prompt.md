@@ -1,7 +1,7 @@
 ---
 name: second
 summary: Second step.
-agent: sonnet:medium
+detached: sonnet:medium
 ---
 
 Second body.

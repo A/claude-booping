@@ -12,7 +12,7 @@
     playbook  — the playbook name (for the --step fetch command)
     part_of   — subgraph name when this step lives in one, else none
     repeated  — True when that subgraph sets `repeat`
-  `resolve_agent` is registered as a Jinja global by the driving command.
+  `resolve_detached` is registered as a Jinja global by the driving command.
 -#}
 {%- if subgraph is defined and subgraph -%}
 ## Subgraph: {{ subgraph.name }}
@@ -27,10 +27,10 @@ Instructions:
 - Inner waves: {% for wave in waves %}{{ loop.index }}. {% for name in wave %}`{{ name }}`{% if not loop.last %} ∥ {% endif %}{% endfor %}{% if not loop.last %} {% endif %}{% endfor %}
 {%- else -%}
 {%- set title = step.title if step.title else step.name.replace('-', ' ') | title -%}
-{%- set ag = resolve_agent(step.agent) -%}
+{%- set ag = resolve_detached(step.detached) -%}
 {%- set in_subgraph = part_of is defined and part_of -%}
 ## {{ title }}
-{% if step.summary or deps or siblings or in_subgraph or step.inputs or step.outputs or step.agent is not none or step.review_gate is not none %}
+{% if step.summary or deps or siblings or in_subgraph or step.inputs or step.outputs or step.detached is not none or step.review_gate is not none %}
 Instructions:
 {% if in_subgraph -%}
 - Part of: {{ part_of }}{% if repeated %} (repeated){% endif %}

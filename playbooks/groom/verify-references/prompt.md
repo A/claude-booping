@@ -2,7 +2,7 @@
 summary: Check every external reference the plan names — package versions, image
   tags, API endpoints, CLI flags, config options — against current upstream docs
   and correct what is wrong.
-agent: opus:medium
+detached: opus:medium
 review_gate: null
 inputs:
 - what: every external reference the confirmed plan names — package and library 

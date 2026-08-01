@@ -1,6 +1,6 @@
 ---
 summary: Write the playbook's manifest early — identity, trigger, and the confirmed graph verbatim; body as a lean guide the renderer completes.
-agent: sonnet:medium
+detached: sonnet:medium
 review_gate: "The user confirms name, trigger, graph, target model and destination root before any per-step file is written"
 inputs:
   - what: the confirmed decomposition — graph verbatim, machines translated verbatim when designed

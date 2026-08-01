@@ -1,6 +1,6 @@
 ---
 summary: Append every user decision the runner relays to _specs/DECISIONS.md, timestamped; bootstrap the file on first call.
-agent: haiku:low
+detached: haiku:low
 review_gate: "none — mechanical log; the user narrows the file later"
 inputs:
   - from: runner

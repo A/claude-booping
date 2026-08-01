@@ -1,6 +1,6 @@
 ---
 summary: step-review step.
-agent: sonnet:medium
+detached: sonnet:medium
 ---
 
 step-review body.

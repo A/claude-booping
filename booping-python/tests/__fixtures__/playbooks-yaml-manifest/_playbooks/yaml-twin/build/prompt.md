@@ -1,6 +1,6 @@
 ---
 summary: build step.
-agent: sonnet:medium
+detached: sonnet:medium
 ---
 
 build body.

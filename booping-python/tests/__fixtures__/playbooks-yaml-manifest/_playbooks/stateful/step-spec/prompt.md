@@ -1,6 +1,6 @@
 ---
 summary: step-spec step.
-agent: sonnet:medium
+detached: sonnet:medium
 ---
 
 step-spec body.

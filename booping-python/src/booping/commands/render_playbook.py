@@ -13,7 +13,7 @@ from booping import logger
 from booping.context import Context
 from booping.context.lesson import Lesson
 from booping.context.lifecycle import resolve_edges
-from booping.context.playbook import GraphProblem, Playbook, Step, resolve_agent
+from booping.context.playbook import GraphProblem, Playbook, Step, resolve_detached
 from booping.rendering import LenientUndefined, build_source_env, get_plugin_root
 
 _NO_GRAPH = (
@@ -59,9 +59,13 @@ _MISSING = (
     " {name}/prompt.md does not exist. Do not execute this playbook."
 )
 _INLINE_PARALLEL = (
-    "**STOP — tell the user:** step '{name}' runs inline (agent: null) but shares a"
-    " wave with other steps; inline steps cannot run in parallel."
+    "**STOP — tell the user:** step '{name}' is not detached but shares a wave with"
+    " other steps; a step sharing a wave must be `detached:`."
     " Do not execute this playbook."
+)
+_LEGACY_AGENT_KEY = (
+    "**STOP — tell the user:** step '{name}' declares `agent:` in its frontmatter;"
+    " that key was renamed to `detached:`. Do not execute this playbook."
 )
 _ORPHAN = (
     "**Note — tell the user:** step '{name}' exists on disk but is not wired into"
@@ -196,7 +200,7 @@ def build_env(
             keep_trailing_newline=True,
         )
     globals_: dict[str, Any] = cast("dict[str, Any]", env.globals)
-    globals_["resolve_agent"] = resolve_agent
+    globals_["resolve_detached"] = resolve_detached
     return env
 
 
@@ -251,6 +255,8 @@ def _shape_notice(prob: GraphProblem, playbook: str) -> str:
         return _ORPHAN_STATE.format(name=prob.node)
     if prob.kind == "orphan_lesson":
         return _ORPHAN_LESSON.format(file=prob.detail, step=prob.node, name=playbook)
+    if prob.kind == "legacy_agent_key":
+        return _LEGACY_AGENT_KEY.format(name=prob.node)
     if prob.kind == "name_clash":
         return _NAME_CLASH.format(name=playbook, scopes=prob.detail)
     template = _BAD_NODE_INNER if prob.scope else _BAD_NODE
@@ -387,7 +393,7 @@ def compose(
             if len(wave) > 1:
                 for name in wave:
                     step = steps_by_name.get(name)
-                    if step is not None and step.agent is None:
+                    if step is not None and step.detached is None:
                         notices.append(_INLINE_PARALLEL.format(name=name))
                         blocking = True
 

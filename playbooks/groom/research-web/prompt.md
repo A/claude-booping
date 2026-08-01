@@ -2,7 +2,7 @@
 summary: For novel or non-obvious work, gather current best practice, competing 
   approaches and known pitfalls with sources; return a skip note when the work 
   is well-trodden.
-agent: opus:medium
+detached: opus:medium
 review_gate: null
 inputs:
 - what: the confirmed framing — the restated problem, the task type, and the 

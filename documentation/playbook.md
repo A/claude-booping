@@ -3,7 +3,7 @@
 !!! warning "Unstable — work in progress"
     Playbooks are an experimental feature. The manifest format, step frontmatter, and `/playbook` behaviour may change in breaking ways between releases.
 
-A **playbook** is a multi-step guided procedure driven by the `/playbook` skill. Where the built-in skills (`/groom`, `/develop`, …) are fixed workflows shipped by the plugin, a playbook is yours to write: a set of prompt steps, each optionally delegated to a sub-agent, with review gates where you want to inspect the output before continuing. Most playbooks are yours and live in your vault; a few ship with the plugin (see [Scopes](#scopes)).
+A **playbook** is a multi-step guided procedure driven by the `/playbook` skill. Where the built-in skills (`/groom`, `/develop`, …) are fixed workflows shipped by the plugin, a playbook is yours to write: a set of prompt steps, each optionally detached into a sub-agent, with review gates where you want to inspect the output before continuing. Most playbooks are yours and live in your vault; a few ship with the plugin (see [Scopes](#scopes)).
 
 A playbook's **structure** lives in `playbook.yaml`: the `graph:` (which steps run, in what order, which in parallel) and the optional `states:` (named state machines that persist run state on disk so a run can be resumed). `playbook.md` keeps **identity and prose** — the manifest frontmatter (`name`, `title`, `summary`, `trigger`, …) and the preamble body. Bodies are plain markdown by default; a playbook can opt into [Jinja rendering](#jinja-bodies) if it needs live project data. Author a playbook by hand and it shows up in `/playbook` immediately.
 
@@ -106,7 +106,7 @@ The manifest **body** is a preamble — a playbook-level instruction inserted ab
 `<step>/prompt.md` frontmatter (the step identifier comes from the directory name, not frontmatter):
 
 - `summary` — one-line description of the step, rendered into the step's section as a `Summary:` instruction bullet. It is where a step declares execution hints in its own domain words — e.g. *"Can be paralleled as one agent per feature"* — since the runner knows nothing about a playbook's domain.
-- `agent` — how the step runs (see the grammar below).
+- `detached` — *optional*. Present → the step runs inside a sub-agent; absent → the runner performs it. See [Delegation levels](#delegation-levels).
 - `review_gate` — when non-null, `/playbook` stops after the step, presents the output, and continues only on your explicit confirmation. `null` runs straight through.
 - `title` — *optional* human-readable heading for the step. When absent, the rendered heading is the titleized directory name (e.g. `current-time` → `Current Time`).
 - `inputs` — *optional* list of what the step expects to be handed. Each entry is either a mapping `{what, from}` (`from` *optional*) or a plain string shorthand for `what`. **Advisory**: the driver uses them to build the step's `## Inputs` block, but the step is not limited to them, and `from` is freeform prose — it is not validated against the graph. A malformed entry warns on stderr and is skipped.
@@ -117,7 +117,7 @@ The step **body** is the prompt for that step.
 ```yaml
 ---
 summary: Draft the plan against the approved design
-agent: sonnet:high
+detached: sonnet:high
 review_gate: Plan draft ready — approve before presenting?
 inputs:
   - from: design
@@ -129,13 +129,21 @@ outputs:
 ---
 ```
 
-### The `agent` grammar
+## Delegation levels
 
-A single `agent` field decides how the step executes:
+A step runs at one of three levels. Only the third has mechanics; the first two are the same runtime shape and differ in what the step body asks for.
 
-- `null` — run the step **inline** in the driving conversation, no sub-agent. An inline step can never share a parallel wave (see below).
+- **inline** — the runner fetches the step body and performs the step itself, in the driving conversation. Everything the step reads lands in the driver's context. No frontmatter key.
+- **assisted** — the runner still performs the step, but delegates the heavy reads or research inside it to the configured researcher agent, which returns a compressed summary. The driver's context holds the summary, not the sources. Expressed as prose in the step body — no frontmatter key.
+- **detached** — an agent fetches and performs the whole step body; the runner sees only the returned receipt. This is the only level with mechanics: the `detached:` frontmatter key.
+
+### The `detached` grammar
+
+- **key absent** — not detached: the runner performs the step (inline or assisted). Such a step can never share a parallel wave (see below).
 - `<model>:<effort>` where `model` ∈ `{opus, sonnet, haiku, fable}` (e.g. `sonnet:high`, `haiku:medium`) — spawn a **generic sub-agent** with that model and effort.
 - any other non-null string — spawn a **named sub-agent** via `subagent_type=<value>`. The value is used verbatim, so colons are fine for namespaced agents (e.g. `booping:booping-researcher`, `general-purpose`).
+
+There is no `null` value: `agent: null` is replaced by simply omitting the key. `agent:` is the **legacy name** of this key — a step still carrying it renders a blocking `**STOP — tell the user:**` notice telling you to rename it to `detached:`.
 
 ## Jinja bodies
 
@@ -171,9 +179,9 @@ A Jinja body is meaningless until rendered — the `booping render-playbook <nam
 
 `/playbook` resolves the graph into **waves** — a step joins the earliest wave in which all its dependencies sit in a prior wave. Steps sharing a wave run in parallel.
 
-- **Step bodies are never embedded** — every section ends with the line *Run `booping render-playbook <name> --step <step>` for content.*, the same for plain and `jinja: true` playbooks. A section carries only metadata: summary, dependencies, wave siblings, `Inputs:` / `Outputs:`, agent, review gate.
-- **Delegated steps fetch their own body** — the driver never runs the fetch command for a sub-agent step. It spawns the agent with a bootstrap prompt: the fetch command ("treat its stdout as your full instruction"), a `## Run-time context` block (project, specs dir, plus `workdir` / `instance` where they apply), a `## Inputs` block resolved from the section's declared inputs and prior steps' receipts, and a `## Return` contract built from the declared outputs. An inline step (`agent: null`) is the only case where the driver runs the fetch itself and executes the stdout.
-- **Parallel wave members must set `agent`** — inline steps (`agent: null`) can't run in parallel, so a step that shares a wave with others must delegate to a sub-agent.
+- **Step bodies are never embedded** — every section ends with the line *Run `booping render-playbook <name> --step <step>` for content.*, the same for plain and `jinja: true` playbooks. A section carries only metadata: summary, dependencies, wave siblings, `Inputs:` / `Outputs:`, delegation, review gate.
+- **Delegated steps fetch their own body** — the driver never runs the fetch command for a sub-agent step. It spawns the agent with a bootstrap prompt: the fetch command ("treat its stdout as your full instruction"), a `## Run-time context` block (project, specs dir, plus `workdir` / `instance` where they apply), a `## Inputs` block resolved from the section's declared inputs and prior steps' receipts, and a `## Return` contract built from the declared outputs. A step without `detached:` is the only case where the driver runs the fetch itself and executes the stdout.
+- **Parallel wave members must be `detached:`** — a step the runner performs itself can't run in parallel, so a step that shares a wave with others must be `detached:`.
 - **Review gates pause after the wave** — once every member of a wave finishes, each member's gate is presented (labeled by step) and the run waits for your confirmation before the next wave.
 
 ## Subgraphs
@@ -200,7 +208,7 @@ graph:
 
 **Scope rule.** `dependencies` reference outer names only; inner dependencies reference inner names only. There is no cross-scope edge: an inner step cannot depend on an outer step, and an outer step depends on the subgraph as a whole. Step names are addressed flat and must be unique across the whole playbook — an inner step still lives in its own `<step>/prompt.md` directory at the playbook root.
 
-**Repeat semantics.** `repeat` is prose, not a count — the driver reads it against the output of the steps in `dependencies` and decides how many instances to run. No `repeat` key means exactly one instance. Each instance walks the inner waves on its own — its own `--step` fetch per inner step, never a body reused across instances — and each inner step's `review_gate` fires per instance. Instances run in parallel only when **every** inner step sets an `agent`; if any inner step is inline, instances run one at a time.
+**Repeat semantics.** `repeat` is prose, not a count — the driver reads it against the output of the steps in `dependencies` and decides how many instances to run. No `repeat` key means exactly one instance. Each instance walks the inner waves on its own — its own `--step` fetch per inner step, never a body reused across instances — and each inner step's `review_gate` fires per instance. Instances run in parallel only when **every** inner step is `detached:`; if any inner step is runner-performed, instances run one at a time.
 
 **One level only.** A subgraph cannot contain another subgraph.
 
@@ -330,7 +338,7 @@ A playbook with `states:` renders a `## State` section right after `## Execution
 
 Problems in the manifest surface as in-band notices when you render (or run) the playbook:
 
-- **Blocking `STOP` notices** — the playbook refuses to run. Causes: a step named in the graph has no `<name>/prompt.md` file; a dependency names a step that isn't in the graph; the graph has a cycle; the graph is missing entirely; an inline step shares a parallel wave; `graph:` is declared in both `playbook.yaml` and `playbook.md` frontmatter; `playbook.yaml` is unparseable or is not a mapping; a `states:` entry is malformed (missing `artifact`, an `initial` that is not one of its `statuses`, or `{instance}` in the artifact path with no subgraph referencing it); a `state:` ref names a states entry that does not exist; a `jinja: true` playbook rendered without project context, or whose body fails to render; the playbook `name` is defined in more than one root.
+- **Blocking `STOP` notices** — the playbook refuses to run. Causes: a step named in the graph has no `<name>/prompt.md` file; a dependency names a step that isn't in the graph; the graph has a cycle; the graph is missing entirely; a step that is not `detached:` shares a parallel wave; a step carries the legacy `agent:` key instead of `detached:`; `graph:` is declared in both `playbook.yaml` and `playbook.md` frontmatter; `playbook.yaml` is unparseable or is not a mapping; a `states:` entry is malformed (missing `artifact`, an `initial` that is not one of its `statuses`, or `{instance}` in the artifact path with no subgraph referencing it); a `state:` ref names a states entry that does not exist; a `jinja: true` playbook rendered without project context, or whose body fails to render; the playbook `name` is defined in more than one root.
 - **Warning notes** — a step directory that exists on disk but isn't wired into the graph, a `states:` entry no graph scope references, or a lesson whose `step:` names a step the playbook doesn't have, produces a note; the step never runs, the entry is never used, the lesson is ignored.
 
 ## Authoring a global playbook
@@ -395,7 +403,7 @@ The rendered procedure lists the waves as:
 3. publish
 ```
 
-`prep` runs first (fetching its own body via `booping render-playbook ship --step prep`). Then `lint` and `tests` spawn together in one message and run in parallel — both must set `agent`. Once both finish (and any review gates are cleared), `publish` runs.
+`prep` runs first (fetching its own body via `booping render-playbook ship --step prep`). Then `lint` and `tests` spawn together in one message and run in parallel — both must be `detached:`. Once both finish (and any review gates are cleared), `publish` runs.
 
 ## Rendering
 

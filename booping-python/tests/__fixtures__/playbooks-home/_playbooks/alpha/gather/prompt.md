@@ -1,7 +1,7 @@
 ---
 name: gather
 summary: Gather inputs.
-agent: sonnet:medium
+detached: sonnet:medium
 review_gate: null
 ---
 

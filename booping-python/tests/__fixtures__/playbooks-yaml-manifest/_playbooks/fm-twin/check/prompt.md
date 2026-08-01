@@ -1,6 +1,6 @@
 ---
 summary: check step.
-agent: sonnet:medium
+detached: sonnet:medium
 ---
 
 check body.

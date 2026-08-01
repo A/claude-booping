@@ -1,6 +1,6 @@
 {#-
   Playbook driving protocol: render the composed procedure, walk the waves,
-  resolve agents, stop on failure, enforce review gates. Skill-agnostic —
+  resolve delegation, stop on failure, enforce review gates. Skill-agnostic —
   included by any skill that drives a playbook. Requires `context`.
 -#}
 ## Execute
@@ -35,7 +35,7 @@ Walk the wave list in order. For each wave (a numbered line; ` ∥ `-separated n
    - `workdir:` only when the run has one (see **Run state**); `instance:` only for subgraph instances.
    - `## Inputs`: one line per entry of the section's `Inputs:` bullet, resolved from that entry's `from` and the receipts of prior waves. `Inputs:` is advisory — a section without it gets no `## Inputs` block, and prior-wave receipts still reach the member through the run-time context.
    - `## Return`: the section's `Outputs:` entries as a receipt list; no `Outputs:` bullet → `artifacts written + outcome, ≤ 5 lines`.
-2. Run each member per its section's agent bullet: model+effort → `subagent_type="general-purpose"` with that model and reasoning effort; named → `subagent_type="<name>"`; no agent bullet → inline: run that member's `booping render-playbook <name> --step <step>` yourself and execute its stdout as your instruction, under the same run-time context, inputs, and return contract.
+2. Run each member per its section's detached bullet (rendered from `detached:`): model+effort → `subagent_type="general-purpose"` with that model and reasoning effort; named → `subagent_type="<name>"`; no detached bullet → you perform the step: run that member's `booping render-playbook <name> --step <step>` yourself and execute its stdout as your instruction, under the same run-time context, inputs, and return contract.
 3. A multi-member wave spawns ALL member sub-agents in ONE message and never runs any member inline; wait for all to finish before the next wave.
 4. Any member failure → report it and stop; do not start the next wave.
 5. After the wave completes, honor each member's `Review gate:` bullet: present that member's returned receipt labeled by step name alongside the gate text — read the artifacts it names only when the presentation needs them — and continue only on explicit user confirmation. In-conversation only — no state is persisted.
@@ -48,7 +48,7 @@ A wave member tagged `*(subgraph)*` covers its `## Subgraph: <name>` intro and t
 
 1. Enumerate instances from the intro's `Repeat:` prose read against the output of the steps it lists under `After:` — no `Repeat:` bullet means exactly one instance. Name the enumerated instances before running.
 2. Per instance, walk the intro's inner wave list in order, applying protocol steps 1–5 to each inner wave, with `instance: <slug>` added to the run-time context. Every instance runs its own `--step` fetch — never fetch an inner step's body to reuse across instances. Inputs, return contracts, and `Review gate:` bullets bind per instance.
-3. Run instances in parallel only when every inner step has an agent bullet; otherwise run them one at a time. Spawn at most 4 instances per message and wait for that batch before the next.
+3. Run instances in parallel only when every inner step has a detached bullet; otherwise run them one at a time. Spawn at most 4 instances per message and wait for that batch before the next.
 4. Report completion per instance. Any instance failure → report it naming the instance, and stop; do not start the next wave.
 
 ### Run state

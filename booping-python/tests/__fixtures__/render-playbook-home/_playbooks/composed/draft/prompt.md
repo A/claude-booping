@@ -1,7 +1,7 @@
 ---
 name: draft
 summary: Draft the artifact.
-agent: opus:high
+detached: opus:high
 review_gate: confirm the draft before continuing
 ---
 

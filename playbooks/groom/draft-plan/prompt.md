@@ -4,7 +4,7 @@ summary: Pick the plan template matching the dominant surface and write the plan
   per task / milestone / sprint, `sp` and `summary` frontmatter; verify against 
   the template's Quality Checklist, then cross-review the draft when the project
   configures a reviewer and fold the findings in.
-agent: opus:high
+detached: opus:high
 review_gate: null
 inputs:
 - what: the settled design — the chosen architecture and why it won, the data / 

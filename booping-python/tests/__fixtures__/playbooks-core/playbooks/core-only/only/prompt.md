@@ -1,6 +1,6 @@
 ---
 summary: The only step.
-agent: sonnet:medium
+detached: sonnet:medium
 ---
 
 Core-only step body.

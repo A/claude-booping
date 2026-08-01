@@ -1,6 +1,6 @@
 ---
 summary: Implement the suite from the step's confirmed test plan — smoke rows as script asserts, regress rows as named rubrics.
-agent: sonnet:medium
+detached: sonnet:medium
 review_gate: "The user reviews the tree; the optimizer steps that follow take the suite to green"
 inputs:
   - what: the target step name

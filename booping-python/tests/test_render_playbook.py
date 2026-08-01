@@ -110,7 +110,7 @@ def test_summary_directive() -> None:
     out = _composed()
     assert "- Summary: Gather inputs." in _section(out, "## Gather")
     assert "- Summary: Draft the artifact." in _section(out, "## Draft")
-    assert "- Summary: A plain step with no agent and no gate." in _section(out, "## Plain")
+    assert "- Summary: A plain step with no delegation and no gate." in _section(out, "## Plain")
 
 
 def test_summary_leads_the_instructions_block() -> None:
@@ -118,12 +118,12 @@ def test_summary_leads_the_instructions_block() -> None:
     assert draft.index("- Summary:") < draft.index("- After:")
 
 
-def test_model_agent_directive() -> None:
+def test_model_detached_directive() -> None:
     gather = _section(_composed(), "## Gather")
     assert "- Run in a sub-agent — model sonnet, effort medium." in gather
 
 
-def test_named_agent_directive() -> None:
+def test_named_detached_directive() -> None:
     named = _section(_composed(), "## Named Step")
     assert "- Run in sub-agent: booping-researcher." in named
 
@@ -187,9 +187,29 @@ def test_no_graph_notice() -> None:
 def test_inline_in_parallel_notice() -> None:
     out = _render("inline-in-parallel")
     assert (
-        "**STOP — tell the user:** step 'one' runs inline (agent: null) but shares a"
-        " wave with other steps; inline steps cannot run in parallel."
+        "**STOP — tell the user:** step 'one' is not detached but shares a wave with"
+        " other steps; a step sharing a wave must be `detached:`."
         " Do not execute this playbook." in out
+    )
+    _assert_blocking(out)
+
+
+def test_legacy_agent_key_notice(tmp_path: Path) -> None:
+    pb_dir = tmp_path / "_playbooks" / "legacy"
+    (pb_dir / "one").mkdir(parents=True)
+    (pb_dir / "playbook.md").write_text(
+        "---\nname: legacy\ntitle: Legacy\ngraph:\n  one: []\n---\nPreamble.\n"
+    )
+    (pb_dir / "one" / "prompt.md").write_text(
+        "---\nsummary: one summary\nagent: opus:low\n---\none body\n"
+    )
+    pbs = Playbook.load_all(
+        vault=tmp_path, home_dir=tmp_path / "nohome", plugin_root=tmp_path / "nocore"
+    )
+    out = compose(next(p for p in pbs if p.name == "legacy"))
+    assert (
+        "**STOP — tell the user:** step 'one' declares `agent:` in its frontmatter;"
+        " that key was renamed to `detached:`. Do not execute this playbook." in out
     )
     _assert_blocking(out)
 
@@ -229,6 +249,11 @@ _SG_STEPS = {
 }
 
 
+def _detached_line(value: str) -> str:
+    """Frontmatter line for a step's delegation; "null" means no `detached:` key."""
+    return "" if value == "null" else f"detached: {value}\n"
+
+
 def _build(
     tmp_path: Path,
     graph_yaml: str,
@@ -236,16 +261,18 @@ def _build(
     name: str = "sg",
 ) -> Playbook:
     """A playbook planted in a tmp local root: `graph_yaml` verbatim under `graph:`,
-    one step dir per `steps` entry (name → `agent:` frontmatter value)."""
+    one step dir per `steps` entry (name → `detached:` frontmatter value; the
+    sentinel "null" plants no `detached:` key at all)."""
     pb_dir = tmp_path / "_playbooks" / name
     pb_dir.mkdir(parents=True)
     (pb_dir / "playbook.md").write_text(
         f"---\nname: {name}\ntitle: SG\ngraph:\n{graph_yaml}---\nPreamble.\n"
     )
-    for step_name, agent in steps.items():
+    for step_name, detached in steps.items():
         (pb_dir / step_name).mkdir()
         (pb_dir / step_name / "prompt.md").write_text(
-            f"---\nsummary: {step_name} summary\nagent: {agent}\n---\n{step_name} body\n"
+            f"---\nsummary: {step_name} summary\n{_detached_line(detached)}---\n"
+            f"{step_name} body\n"
         )
     pbs = Playbook.load_all(
         vault=tmp_path, home_dir=tmp_path / "nohome", plugin_root=tmp_path / "nocore"
@@ -306,8 +333,8 @@ def test_inline_steps_sharing_an_inner_wave_notice(tmp_path: Path) -> None:
     )
     for name in ("one", "two"):
         assert (
-            f"**STOP — tell the user:** step '{name}' runs inline (agent: null) but"
-            " shares a wave with other steps; inline steps cannot run in parallel."
+            f"**STOP — tell the user:** step '{name}' is not detached but shares a"
+            " wave with other steps; a step sharing a wave must be `detached:`."
             " Do not execute this playbook." in out
         )
     _assert_blocking(out)
@@ -498,7 +525,7 @@ def _io(tmp_path: Path, extra_frontmatter: str) -> str:
         "---\nname: io\ntitle: IO\ngraph:\n  one: []\n---\nPreamble.\n"
     )
     (pb_dir / "one" / "prompt.md").write_text(
-        f"---\nsummary: one summary\nagent: null\n{extra_frontmatter}---\none body\n"
+        f"---\nsummary: one summary\n{extra_frontmatter}---\none body\n"
     )
     pbs = Playbook.load_all(
         vault=tmp_path, home_dir=tmp_path / "nohome", plugin_root=tmp_path / "nocore"
@@ -595,10 +622,11 @@ def _build_yaml(
         f"---\nname: {name}\ntitle: SY\n{fm_extra}---\nPreamble.\n"
     )
     (pb_dir / "playbook.yaml").write_text(manifest_yaml)
-    for step_name, agent in steps.items():
+    for step_name, detached in steps.items():
         (pb_dir / step_name).mkdir()
         (pb_dir / step_name / "prompt.md").write_text(
-            f"---\nsummary: {step_name} summary\nagent: {agent}\n---\n{step_name} body\n"
+            f"---\nsummary: {step_name} summary\n{_detached_line(detached)}---\n"
+            f"{step_name} body\n"
         )
     pbs = Playbook.load_all(
         vault=tmp_path, home_dir=tmp_path / "nohome", plugin_root=tmp_path / "nocore"
@@ -856,7 +884,7 @@ def _plant_roots(tmp_path: Path, *scopes: str) -> tuple[Path, Path, Path]:
         "---\nname: inc\ntitle: Inc\njinja: true\ngraph:\n  only: []\n---\nPreamble.\n"
     )
     (pb_dir / "only" / "prompt.md").write_text(
-        '---\nsummary: only\nagent: sonnet:medium\n---\n{% include "_lib/shared.md" %}\n'
+        '---\nsummary: only\ndetached: sonnet:medium\n---\n{% include "_lib/shared.md" %}\n'
     )
     return core, home, vault
 

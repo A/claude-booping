@@ -53,7 +53,7 @@ Run `booping render-playbook composed --step named-step` for content.
 ## Plain
 
 Instructions:
-- Summary: A plain step with no agent and no gate.
+- Summary: A plain step with no delegation and no gate.
 - After: draft, named-step
 
 Run `booping render-playbook composed --step plain` for content.

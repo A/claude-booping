@@ -1,7 +1,7 @@
 ---
 summary: Map the blast radius in the attached repo — touched surfaces, prior 
   art, the conventions that bind the design, and the calls left for it.
-agent: opus:medium
+detached: opus:medium
 review_gate: null
 inputs:
 - what: the confirmed framing — the restated problem and the task type

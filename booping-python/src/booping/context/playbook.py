@@ -17,10 +17,10 @@ def _warn(msg: str) -> None:
     print(f"warning: {msg}", file=sys.stderr)
 
 
-def resolve_agent(value: str | None) -> dict[str, str]:
-    """Resolve a step's collapsed `agent` grammar into a rendering mode.
+def resolve_detached(value: str | None) -> dict[str, str]:
+    """Resolve a step's collapsed `detached` grammar into a rendering mode.
 
-    * ``None`` → inline execution.
+    * ``None`` (key absent) → the runner performs the step.
     * ``<model>:<effort>`` (model tier before the first colon) → model sub-agent.
     * any other non-null string → named sub-agent (colons in the name are kept).
     """
@@ -41,7 +41,7 @@ class Step(BaseModel):
     name: str
     title: str | None = None
     summary: str = ""
-    agent: str | None = None
+    detached: str | None = None
     review_gate: str | None = None
     inputs: list[StepInput] = []
     outputs: list[str] = []
@@ -82,11 +82,13 @@ class GraphProblem(BaseModel):
         "orphan_state",
         "orphan_lesson",
         "name_clash",
+        "legacy_agent_key",
     ]
     cycle: list[str] = []  # kind=cycle: the cycle path, e.g. ["a", "b", "a"]
     dep: str = ""  # kind=unknown_dep: the missing key
     dependent: str = ""  # kind=unknown_dep: the step that listed it
     node: str = ""  # kind=bad_node/nested_subgraph/duplicate_step: the offending key
+    # kind=legacy_agent_key: the step carrying the renamed key
     # kind=bad_state/unknown_state/orphan_state: the states entry name
     # kind=orphan_lesson: the unknown step the lesson points at
     detail: str = ""  # kind=bad_node/bad_manifest/bad_state: what is wrong with it
@@ -361,7 +363,7 @@ def _load_one(
         if not prompt.is_file():
             _warn(f"playbook {pb_dir.name}: {step_dir.name}/ has no prompt.md, skipping")
             continue
-        steps.append(_load_step(step_dir.name, prompt, pb_dir.name))
+        steps.append(_load_step(step_dir.name, prompt, pb_dir.name, graph_problems))
 
     return Playbook(
         name=name,
@@ -572,13 +574,17 @@ def _str_list(value: Any) -> list[str]:
     return [str(item) for item in items]
 
 
-def _load_step(dir_name: str, step_path: Path, pb_name: str) -> Step:
+def _load_step(
+    dir_name: str, step_path: Path, pb_name: str, problems: list[GraphProblem]
+) -> Step:
     fm, body = parse_frontmatter(step_path)
+    if "agent" in fm:
+        problems.append(GraphProblem(kind="legacy_agent_key", node=dir_name))
     return Step(
         name=dir_name,
         title=_opt_str(fm.get("title")),
         summary=str(fm.get("summary", "")),
-        agent=_opt_str(fm.get("agent")),
+        detached=_opt_str(fm.get("detached")),
         review_gate=_opt_str(fm.get("review_gate")),
         inputs=_parse_inputs(fm.get("inputs"), pb_name, dir_name),
         outputs=_parse_outputs(fm.get("outputs"), pb_name, dir_name),

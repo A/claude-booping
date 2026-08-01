@@ -1,6 +1,6 @@
 ---
 summary: Write one step's prompt body and Jinja wrapper from its confirmed spec — seed quality, refined later by the optimizers.
-agent: opus:medium
+detached: opus:medium
 review_gate: "The user reads the body and confirms the contract it states"
 inputs:
   - what: the target step name
