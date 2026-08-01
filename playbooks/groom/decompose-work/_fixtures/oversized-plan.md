@@ -8,15 +8,15 @@ decomposition artifact into the run workdir.
 
 - project: `claude-booping` — the booping plugin repository; the vault it grooms into is the
   default `~/Claude/claude-booping/`
-- run slug: `20260801-14-30_local-vault-directories`
-- run workdir: `_runs/groom/20260801-14-30_local-vault-directories/`, relative to the current
+- run slug: `20260801-local-vault-directories`
+- run workdir: `_runs/groom/20260801-local-vault-directories/`, relative to the current
   working directory — it already holds the confirmed framing, the blast-radius map and the
   confirmed design
-- plan file: `plans/20260801-14-30_local-vault-directories.md`, on disk, written and complete
+- plan file: `plans/20260801-local-vault-directories.md`, on disk, written and complete
 
 ## Inputs
 
-- the written plan — `plans/20260801-14-30_local-vault-directories.md`, on disk: 5 milestones,
+- the written plan — `plans/20260801-local-vault-directories.md`, on disk: 5 milestones,
   per-task and per-milestone story points, the sprint total mirrored in its `sp:` frontmatter
 - the re-decompose threshold — **5 SP**: a task at or over it needs another pass before a single
   agent briefing can carry it
@@ -32,7 +32,7 @@ decomposition artifact into the run workdir.
 
 ## Context files
 
-<file path="plans/20260801-14-30_local-vault-directories.md">
+<file path="plans/20260801-local-vault-directories.md">
 ---
 title: Local vault directories
 type: feature

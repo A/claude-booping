@@ -8,8 +8,8 @@ and it has now returned here with the reworked plan.
 
 - project: `northwind-api` — a Django REST API served by gunicorn, with a Redis instance already
   in use as the cache backend
-- run slug: `20260731-14-02_rate-limit-public-api`
-- run workdir: `_runs/groom/20260731-14-02_rate-limit-public-api/`, relative to the current
+- run slug: `20260731-rate-limit-public-api`
+- run workdir: `_runs/groom/20260731-rate-limit-public-api/`, relative to the current
   working directory
 - the current working directory **is the project vault**, and the vault lives **inside the
   repository being planned**: the repo's `.booping` marker carries `vault_path: booping`, so the
@@ -23,14 +23,14 @@ and it has now returned here with the reworked plan.
 
 ## Inputs
 
-- the reworked plan — `plans/20260731-14-02_rate-limit-public-api.md`, on disk; the decomposition
+- the reworked plan — `plans/20260731-rate-limit-public-api.md`, on disk; the decomposition
   pass applied the user's rework and the user confirmed the result
-- the confirmed design — `_runs/groom/20260731-14-02_rate-limit-public-api/design.md`, on disk;
+- the confirmed design — `_runs/groom/20260731-rate-limit-public-api/design.md`, on disk;
   unchanged since round one, no architecture call was reopened
 - the re-run decomposition —
-  `_runs/groom/20260731-14-02_rate-limit-public-api/decomposition.md`, on disk
+  `_runs/groom/20260731-rate-limit-public-api/decomposition.md`, on disk
 - the reference-verification results —
-  `_runs/groom/20260731-14-02_rate-limit-public-api/references.md`, on disk; unchanged since
+  `_runs/groom/20260731-rate-limit-public-api/references.md`, on disk; unchanged since
   round one, the pass did not re-run
 - the cross-review findings and their deferrals, as `draft-plan` returned them in wave 5;
   unchanged since round one, the reviewer did not re-run:
@@ -40,7 +40,7 @@ and it has now returned here with the reworked plan.
   >   DoD), 2 NOTEs deferred and recorded in the plan's risk register (no machine-readable quota
   >   window in the 429 body; bucket keys not namespaced by API version)
 
-- round one's summary — `_runs/groom/20260731-14-02_rate-limit-public-api/handoff.md`, on disk;
+- round one's summary — `_runs/groom/20260731-rate-limit-public-api/handoff.md`, on disk;
   written at 18:04 and now superseded
 - the user's change request, which sent the run back to the decomposition pass:
 
@@ -53,7 +53,7 @@ and it has now returned here with the reworked plan.
 
 ## Context files
 
-<file path="plans/20260731-14-02_rate-limit-public-api.md">
+<file path="plans/20260731-rate-limit-public-api.md">
 ---
 title: Rate limit the public API
 type: feature
@@ -274,11 +274,11 @@ anything, and can be turned back off by a documented step.
 | `## Operations` | link the rate-limit runbook | M5.3 |
 </file>
 
-<file path="_runs/groom/20260731-14-02_rate-limit-public-api/design.md">
+<file path="_runs/groom/20260731-rate-limit-public-api/design.md">
 ---
 reviewed_at: 20260731 15:10
 ---
-# design — 20260731-14-02_rate-limit-public-api
+# design — 20260731-rate-limit-public-api
 
 ## Approach
 
@@ -332,11 +332,11 @@ at a quarter of the authenticated one.
   by the per-environment flag and the dashboard that shows what enforcement would have rejected.
 </file>
 
-<file path="_runs/groom/20260731-14-02_rate-limit-public-api/decomposition.md">
+<file path="_runs/groom/20260731-rate-limit-public-api/decomposition.md">
 ---
 reviewed_at: 20260731 19:12
 ---
-# Decomposition — 20260731-14-02_rate-limit-public-api
+# Decomposition — 20260731-rate-limit-public-api
 
 ## Verdict
 
@@ -380,8 +380,8 @@ seam's right-hand side from one milestone to two but did not move the seam.
   `split_from:` pointing at the primary, groomed in its own run once the primary merges.
 </file>
 
-<file path="_runs/groom/20260731-14-02_rate-limit-public-api/references.md">
-# references — 20260731-14-02_rate-limit-public-api
+<file path="_runs/groom/20260731-rate-limit-public-api/references.md">
+# references — 20260731-rate-limit-public-api
 
 ## Verdict
 
@@ -405,11 +405,11 @@ Corrected — 6 references checked, 1 corrected, 0 unverifiable.
   https://pypi.org/project/redis/ (checked 20260731)
 </file>
 
-<file path="_runs/groom/20260731-14-02_rate-limit-public-api/handoff.md">
+<file path="_runs/groom/20260731-rate-limit-public-api/handoff.md">
 ---
 reviewed_at: null
 ---
-# handoff — 20260731-14-02_rate-limit-public-api
+# handoff — 20260731-rate-limit-public-api
 
 ## Approach
 
@@ -433,7 +433,7 @@ the authenticated one.
 
 ## Plan
 
-`plans/20260731-14-02_rate-limit-public-api.md` — currently `awaiting-plan-review`.
+`plans/20260731-rate-limit-public-api.md` — currently `awaiting-plan-review`.
 
 ## Checks
 

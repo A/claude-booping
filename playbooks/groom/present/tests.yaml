@@ -14,10 +14,10 @@
       config:
         onTextMode: fail
         expect:
-          - path: '_runs/groom/20260731-14-02_rate-limit-public-api/handoff\.md$'
+          - path: '_runs/groom/20260731-rate-limit-public-api/handoff\.md$'
             minLines: 15
             contains:
-              - '^# handoff — 20260731-14-02_rate-limit-public-api$'
+              - '^# handoff — 20260731-rate-limit-public-api$'
             forbids:
               - '^reviewed_at:'
         noOthers: true
@@ -41,7 +41,7 @@
             rows: { min: 4, max: 4 }
 
           - select: SECTION("Plan")
-            require: 'plans/20260731-14-02_rate-limit-public-api\.md'
+            require: 'plans/20260731-rate-limit-public-api\.md'
           - select: SECTION("Plan")
             require: 'awaiting-plan-review'
 
@@ -59,7 +59,7 @@
     # plan's own milestone SPs, re-summed, against the plan's own 44/35 figures.
     - type: javascript
       value: |
-        const fm = /<file path="_runs\/groom\/20260731-14-02_rate-limit-public-api\/handoff\.md">\n([\s\S]*?)\n<\/file>/.exec(output);
+        const fm = /<file path="_runs\/groom\/20260731-rate-limit-public-api\/handoff\.md">\n([\s\S]*?)\n<\/file>/.exec(output);
         if (!fm) return { pass: false, score: 0, reason: 'no handoff.md file block in output' };
         const content = fm[1];
         const mSection = /## Milestones\n([\s\S]*?)(?:\n## |\n?$)/.exec(content);
@@ -131,9 +131,9 @@
       config:
         onTextMode: fail
         expect:
-          - path: '_runs/groom/20260801-10-30_plan-summary-frontmatter/handoff\.md$'
+          - path: '_runs/groom/20260801-plan-summary-frontmatter/handoff\.md$'
             minLines: 10
-            contains: ['^# handoff — 20260801-10-30_plan-summary-frontmatter$']
+            contains: ['^# handoff — 20260801-plan-summary-frontmatter$']
         noOthers: true
     # NO-SPLIT-SECTION (shape, via strict heading set) + NO-BRANCH-SECTION (shape) +
     # CHECKS-STILL-THREE (shape)
@@ -211,10 +211,10 @@
       config:
         onTextMode: fail
         expect:
-          - path: '_runs/groom/20260731-14-02_rate-limit-public-api/handoff\.md$'
+          - path: '_runs/groom/20260731-rate-limit-public-api/handoff\.md$'
             minLines: 15
             contains:
-              - '^# handoff — 20260731-14-02_rate-limit-public-api$'
+              - '^# handoff — 20260731-rate-limit-public-api$'
               - '^reviewed_at: null$'
         noOthers: true
     # UPDATED-IN-PLACE (same H1/H2 set, no round or revision section appended) + CHANGED-MARKED
@@ -290,7 +290,7 @@
       config:
         onTextMode: fail
         expect:
-          - path: '_runs/groom/20260731-14-02_rate-limit-public-api/handoff\.md$'
+          - path: '_runs/groom/20260731-rate-limit-public-api/handoff\.md$'
             minLines: 15
         noOthers: true
     # APPROVAL-RETURN (Changed [UPDATED] alone, Questions present and empty)
@@ -395,7 +395,7 @@
       config:
         onTextMode: pass
         allow:
-          - '_runs/groom/20260731-14-02_rate-limit-public-api/handoff\.md$'
+          - '_runs/groom/20260731-rate-limit-public-api/handoff\.md$'
         noOthers: true
     - type: javascript
       value: file://../../_lib/asserts/return.js
@@ -419,7 +419,7 @@
     # requested merge (2 SP off milestone 1, milestones 2+3 folded) is not applied
     - type: javascript
       value: |
-        const fm = /<file path="_runs\/groom\/20260731-14-02_rate-limit-public-api\/handoff\.md">\n([\s\S]*?)\n<\/file>/.exec(output);
+        const fm = /<file path="_runs\/groom\/20260731-rate-limit-public-api\/handoff\.md">\n([\s\S]*?)\n<\/file>/.exec(output);
         if (!fm) return { pass: true, score: 1, reason: 'handoff.md unwritten this round — nothing to check (a change request may be handed back before any rewrite)' };
         const content = fm[1];
         const mSection = /## Milestones\n([\s\S]*?)(?:\n## |\n?$)/.exec(content);

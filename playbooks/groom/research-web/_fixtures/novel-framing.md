@@ -8,13 +8,13 @@ practice for it and write the step's artifact into the run workdir.
 - project: `ledger-reporting` — an internal reporting service exposing an HTTP API, deployed as
   several identical processes behind a load balancer, with a shared cache tier already in the
   deployment
-- run slug: `20260801-10-15_export-admission-control`
-- run workdir: `_runs/groom/20260801-10-15_export-admission-control/`, relative to the current
+- run slug: `20260801-export-admission-control`
+- run workdir: `_runs/groom/20260801-export-admission-control/`, relative to the current
   working directory — it already holds the confirmed framing
 
 ## Inputs
 
-- the confirmed framing — `_runs/groom/20260801-10-15_export-admission-control/intake.md`, on
+- the confirmed framing — `_runs/groom/20260801-export-admission-control/intake.md`, on
   disk; confirmed by the user, every scope-challenge question answered
 - the uncertainty signals intake recorded:
   - the service has never taken an admission or rate-limiting dependency, and its shared cache
@@ -24,7 +24,7 @@ practice for it and write the step's artifact into the run workdir.
 
 ## Context files
 
-<file path="_runs/groom/20260801-10-15_export-admission-control/intake.md">
+<file path="_runs/groom/20260801-export-admission-control/intake.md">
 ---
 reviewed_at: 20260801 10:22
 ---

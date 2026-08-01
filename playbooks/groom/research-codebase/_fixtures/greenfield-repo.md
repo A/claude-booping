@@ -3,26 +3,28 @@
 Intake is confirmed: the framing below is the one the user signed off on, scope questions
 answered and boundaries agreed. Map the blast radius of this work in the attached repository.
 
-The repository sits on disk in the current working directory, together with the run workdir
-under `_runs/groom/`. None of it is inlined here and none of it is summarised: read what the
-work touches before writing anything, and follow the references out of the files you are
-pointed at first.
+The repository sits on disk in the current working directory, together with the run workdir —
+the plan directory `plans/{slug}/`, holding the run's `index.md` and its `plan.md`. None of it
+is inlined here and none of it is summarised: read what the work touches before writing
+anything, and follow the references out of the files you are pointed at first.
 
 ## Context files
 
-<file path="_runs/groom/20260731-16-20_remote-entry-sync/intake.md">
+<file path="plans/20260731-remote-entry-sync/index.md">
 ---
-reviewed_at: 20260731 16:41
+status: researching
 ---
-# Intake — push tracked entries to the team API
+# Push tracked entries to the team API
 
-## Request
+## Framing
+
+### Request
 
 > tallyd has been mine alone so far — everything lands in a local file and stays there. The team
 > now runs a hosted timesheet service, and I want `tallyd sync` to push my finished entries to
 > its API so I stop re-typing them into the web form at the end of the week.
 
-## Restated problem
+### Restated problem
 
 Every entry tallyd records lives only on the machine that recorded it. The team's hosted service
 is the system of record for billing, so the same hours are entered twice — once by the tool,
@@ -30,13 +32,13 @@ once by hand. The work is to give tallyd a way to send finished entries to that 
 network, on demand, and to know afterwards which entries have already gone so a second run does
 not send them again.
 
-## Task type
+### Task type
 
 `feature` — a new user-facing capability with its own command, its own configuration and its own
 failure modes. Not a bug (nothing recorded is wrong today) and not a refactoring (the tool gains
 behaviour it does not have).
 
-## Scope boundaries
+### Scope boundaries
 
 **In scope**
 
@@ -51,7 +53,11 @@ behaviour it does not have).
 - the pull direction — the service never writes back into the local store; this is push-only
 - the reporting commands and their output format, which stay exactly as they are
 
-## Scope challenge
+### Web research
+
+Not requested — the request asks for no deep web research, and the user asked for none when the scope questions came back.
+
+### Scope challenge
 
 - [x] Should a partially failed push leave the successful entries marked as sent, or roll the
       whole run back? — answered: keep the successful ones marked; a retry must not re-send them.

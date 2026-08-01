@@ -8,15 +8,15 @@ decomposition artifact into the run workdir.
 
 - project: `helio` — a team-collaboration SaaS: a Django backend and a React web client in one
   repository
-- run slug: `20260801-17-40_notification-center`
-- run workdir: `_runs/groom/20260801-17-40_notification-center/`, relative to the current working
+- run slug: `20260801-notification-center`
+- run workdir: `_runs/groom/20260801-notification-center/`, relative to the current working
   directory — it already holds the confirmed framing, the blast-radius map and the confirmed
   design
-- plan file: `plans/20260801-17-40_notification-center.md`, on disk, written and complete
+- plan file: `plans/20260801-notification-center.md`, on disk, written and complete
 
 ## Inputs
 
-- the written plan — `plans/20260801-17-40_notification-center.md`, on disk: 6 milestones,
+- the written plan — `plans/20260801-notification-center.md`, on disk: 6 milestones,
   per-task and per-milestone story points, the sprint total mirrored in its `sp:` frontmatter
 - the re-decompose threshold — **5 SP**: a task at or over it needs another pass before a single
   agent briefing can carry it
@@ -32,7 +32,7 @@ decomposition artifact into the run workdir.
 
 ## Context files
 
-<file path="plans/20260801-17-40_notification-center.md">
+<file path="plans/20260801-notification-center.md">
 ---
 title: Notification center
 type: feature

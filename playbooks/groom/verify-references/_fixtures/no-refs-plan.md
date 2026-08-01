@@ -7,10 +7,10 @@ what is wrong, and write the step's artifact into the run workdir.
 ## Run-time context
 
 - project: `claude-booping` (the booping plugin repo)
-- run slug: `20260801-09-40_extract-playbook-section-builders`
-- run workdir: `_runs/groom/20260801-09-40_extract-playbook-section-builders/`, relative to the
+- run slug: `20260801-extract-playbook-section-builders`
+- run workdir: `_runs/groom/20260801-extract-playbook-section-builders/`, relative to the
   current working directory
-- plan file: `plans/20260801-09-40_extract-playbook-section-builders.md`, on disk and inlined
+- plan file: `plans/20260801-extract-playbook-section-builders.md`, on disk and inlined
   below
 
 ## Inputs
@@ -22,7 +22,7 @@ what is wrong, and write the step's artifact into the run workdir.
 
 ## Context files
 
-<file path="plans/20260801-09-40_extract-playbook-section-builders.md">
+<file path="plans/20260801-extract-playbook-section-builders.md">
 ---
 title: Extract the playbook section builders into their own module
 type: refactoring
@@ -136,11 +136,11 @@ end-to-end case.
 - The playbook driving partial and the skills that include it.
 </file>
 
-<file path="_runs/groom/20260801-09-40_extract-playbook-section-builders/decomposition.md">
+<file path="_runs/groom/20260801-extract-playbook-section-builders/decomposition.md">
 ---
 reviewed_at: 20260801 09:58
 ---
-# Decomposition — 20260801-09-40_extract-playbook-section-builders
+# Decomposition — 20260801-extract-playbook-section-builders
 
 ## Verdict
 

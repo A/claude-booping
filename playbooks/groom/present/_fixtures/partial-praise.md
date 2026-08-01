@@ -7,8 +7,8 @@ to the harness.
 
 - project: `northwind-api` — a Django REST API served by gunicorn, with a Redis instance already
   in use as the cache backend
-- run slug: `20260731-14-02_rate-limit-public-api`
-- run workdir: `_runs/groom/20260731-14-02_rate-limit-public-api/`, relative to the current
+- run slug: `20260731-rate-limit-public-api`
+- run workdir: `_runs/groom/20260731-rate-limit-public-api/`, relative to the current
   working directory
 - the current working directory **is the project vault**, and the vault lives **inside the
   repository being planned**: the repo's `.booping` marker carries `vault_path: booping`, so the
@@ -22,13 +22,13 @@ to the harness.
 
 ## Inputs
 
-- the drafted plan — `plans/20260731-14-02_rate-limit-public-api.md`, on disk; unchanged since
+- the drafted plan — `plans/20260731-rate-limit-public-api.md`, on disk; unchanged since
   round one
-- the confirmed design — `_runs/groom/20260731-14-02_rate-limit-public-api/design.md`, on disk
+- the confirmed design — `_runs/groom/20260731-rate-limit-public-api/design.md`, on disk
 - the split threshold and the split candidate the decomposition pass flagged —
-  `_runs/groom/20260731-14-02_rate-limit-public-api/decomposition.md`, on disk
+  `_runs/groom/20260731-rate-limit-public-api/decomposition.md`, on disk
 - the reference-verification results —
-  `_runs/groom/20260731-14-02_rate-limit-public-api/references.md`, on disk
+  `_runs/groom/20260731-rate-limit-public-api/references.md`, on disk
 - the cross-review findings and their deferrals, as `draft-plan` returned them:
 
   > - cross-review (`codex`): 3 findings — 1 CRITICAL folded into milestone 2 (the 429 path
@@ -36,7 +36,7 @@ to the harness.
   >   DoD), 2 NOTEs deferred and recorded in the plan's risk register (no machine-readable quota
   >   window in the 429 body; bucket keys not namespaced by API version)
 
-- round one's summary — `_runs/groom/20260731-14-02_rate-limit-public-api/handoff.md`, on disk;
+- round one's summary — `_runs/groom/20260731-rate-limit-public-api/handoff.md`, on disk;
   written at 18:04, and the summary the user is replying to
 - the user's reply to round one, in full — they said nothing else, and nothing about the plan as
   a whole, the split or the branch:
@@ -45,7 +45,7 @@ to the harness.
 
 ## Context files
 
-<file path="plans/20260731-14-02_rate-limit-public-api.md">
+<file path="plans/20260731-rate-limit-public-api.md">
 ---
 title: Rate limit the public API
 type: feature
@@ -252,11 +252,11 @@ needs to watch it and turn it off.
 | `## Operations` | link the rate-limit runbook | M4.4 |
 </file>
 
-<file path="_runs/groom/20260731-14-02_rate-limit-public-api/design.md">
+<file path="_runs/groom/20260731-rate-limit-public-api/design.md">
 ---
 reviewed_at: 20260731 15:10
 ---
-# design — 20260731-14-02_rate-limit-public-api
+# design — 20260731-rate-limit-public-api
 
 ## Approach
 
@@ -310,11 +310,11 @@ at a quarter of the authenticated one.
   by the per-environment flag and the dashboard that shows what enforcement would have rejected.
 </file>
 
-<file path="_runs/groom/20260731-14-02_rate-limit-public-api/decomposition.md">
+<file path="_runs/groom/20260731-rate-limit-public-api/decomposition.md">
 ---
 reviewed_at: 20260731 17:35
 ---
-# Decomposition — 20260731-14-02_rate-limit-public-api
+# Decomposition — 20260731-rate-limit-public-api
 
 ## Verdict
 
@@ -358,8 +358,8 @@ first.
   pointing at the primary, groomed in its own run once the primary merges.
 </file>
 
-<file path="_runs/groom/20260731-14-02_rate-limit-public-api/references.md">
-# references — 20260731-14-02_rate-limit-public-api
+<file path="_runs/groom/20260731-rate-limit-public-api/references.md">
+# references — 20260731-rate-limit-public-api
 
 ## Verdict
 
@@ -383,11 +383,11 @@ Corrected — 6 references checked, 1 corrected, 0 unverifiable.
   https://pypi.org/project/redis/ (checked 20260731)
 </file>
 
-<file path="_runs/groom/20260731-14-02_rate-limit-public-api/handoff.md">
+<file path="_runs/groom/20260731-rate-limit-public-api/handoff.md">
 ---
 reviewed_at: null
 ---
-# handoff — 20260731-14-02_rate-limit-public-api
+# handoff — 20260731-rate-limit-public-api
 
 ## Approach
 
@@ -411,7 +411,7 @@ the authenticated one.
 
 ## Plan
 
-`plans/20260731-14-02_rate-limit-public-api.md` — currently `awaiting-plan-review`.
+`plans/20260731-rate-limit-public-api.md` — currently `awaiting-plan-review`.
 
 ## Checks
 

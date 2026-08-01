@@ -7,13 +7,13 @@ practice for it and write the step's artifact into the run workdir.
 
 - project: `northwind-shop` — a storefront web application on a mainstream web framework, using
   that framework's own session middleware and its server-side session store
-- run slug: `20260801-11-40_stale-session-cookie`
-- run workdir: `_runs/groom/20260801-11-40_stale-session-cookie/`, relative to the current
+- run slug: `20260801-stale-session-cookie`
+- run workdir: `_runs/groom/20260801-stale-session-cookie/`, relative to the current
   working directory — it already holds the confirmed framing
 
 ## Inputs
 
-- the confirmed framing — `_runs/groom/20260801-11-40_stale-session-cookie/intake.md`, on disk;
+- the confirmed framing — `_runs/groom/20260801-stale-session-cookie/intake.md`, on disk;
   confirmed by the user, every scope-challenge question answered
 - the uncertainty signals intake recorded: none — on the grounds the framing states, namely that
   the defect sits on the framework's own session middleware, the fix adds no dependency and no
@@ -22,7 +22,7 @@ practice for it and write the step's artifact into the run workdir.
 
 ## Context files
 
-<file path="_runs/groom/20260801-11-40_stale-session-cookie/intake.md">
+<file path="_runs/groom/20260801-stale-session-cookie/intake.md">
 ---
 reviewed_at: 20260801 11:48
 ---

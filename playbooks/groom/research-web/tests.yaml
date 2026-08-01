@@ -13,7 +13,7 @@
       config:
         onTextMode: fail
         expect:
-          - path: '_runs/groom/20260801-10-15_export-admission-control/research-web\.md$'
+          - path: '_runs/groom/20260801-export-admission-control/research-web\.md$'
             minLines: 15
         noOthers: true
     # FILE-AT-PATH (H1) + SECTIONS + VERDICT-RESEARCHED + APPROACHES-SHAPED + SOURCES-DATED
@@ -24,7 +24,7 @@
         rules: |
           - select: H1
             count: 1
-            match: 'research-web — 20260801-10-15_export-admission-control'
+            match: 'research-web — 20260801-export-admission-control'
 
           - select: H1 > H2
             ordered: [Verdict, Approaches, Pitfalls, Sources]
@@ -123,7 +123,7 @@
       config:
         onTextMode: fail
         expect:
-          - path: '_runs/groom/20260801-11-40_stale-session-cookie/research-web\.md$'
+          - path: '_runs/groom/20260801-stale-session-cookie/research-web\.md$'
             minLines: 3
         noOthers: true
     # SKIP-FILE-WRITTEN (H1) + VERDICT-SKIPPED + SKIP-VERDICT-ONLY
@@ -134,7 +134,7 @@
         rules: |
           - select: H1
             count: 1
-            match: 'research-web — 20260801-11-40_stale-session-cookie'
+            match: 'research-web — 20260801-stale-session-cookie'
 
           - select: H1 > H2
             ordered: [Verdict]

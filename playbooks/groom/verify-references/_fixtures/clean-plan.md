@@ -8,10 +8,10 @@ what is wrong, and write the step's artifact into the run workdir.
 
 - project: `portal` — a Flask application behind a hosted OpenID Connect identity provider,
   managed with `uv`
-- run slug: `20260731-16-05_fix-stale-session-cookie`
-- run workdir: `_runs/groom/20260731-16-05_fix-stale-session-cookie/`, relative to the current
+- run slug: `20260731-fix-stale-session-cookie`
+- run workdir: `_runs/groom/20260731-fix-stale-session-cookie/`, relative to the current
   working directory
-- plan file: `plans/20260731-16-05_fix-stale-session-cookie.md`, on disk and inlined below
+- plan file: `plans/20260731-fix-stale-session-cookie.md`, on disk and inlined below
 
 ## Inputs
 
@@ -24,7 +24,7 @@ what is wrong, and write the step's artifact into the run workdir.
 
 ## Context files
 
-<file path="plans/20260731-16-05_fix-stale-session-cookie.md">
+<file path="plans/20260731-fix-stale-session-cookie.md">
 ---
 title: Expire the session cookie when the identity provider ends the session
 type: bug
@@ -128,11 +128,11 @@ it.
 - The remember-me path, which issues a separate long-lived cookie.
 </file>
 
-<file path="_runs/groom/20260731-16-05_fix-stale-session-cookie/decomposition.md">
+<file path="_runs/groom/20260731-fix-stale-session-cookie/decomposition.md">
 ---
 reviewed_at: 20260731 16:21
 ---
-# Decomposition — 20260731-16-05_fix-stale-session-cookie
+# Decomposition — 20260731-fix-stale-session-cookie
 
 ## Verdict
 

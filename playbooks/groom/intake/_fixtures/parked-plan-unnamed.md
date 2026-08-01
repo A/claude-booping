@@ -13,8 +13,14 @@ Run start: **2026-08-01 16:50 UTC**.
 
 The project is `claude-booping`. Its repository conventions, the task-type catalogue with the
 per-type grooming guidance, and the project vault sit on disk in the current working directory
-— the vault being `plans/` (every plan already filed, parked ones included) and `_runs/`. None
-of it is summarised here: read what the framing needs before writing anything.
+— the vault being `plans/`, where every plan already filed lives: a groomed plan as the
+directory `plans/{slug}/` holding its `plan.md`, a parked one still as the single stub file
+`plans/{slug}.md`. None of it is summarised here: read what the framing needs before writing
+anything.
+
+The run workdir is the plan directory this run works in, `plans/{slug}/`. Its `index.md` does
+not exist yet: create it carrying the frontmatter the machine's first transition writes —
+`status: framing`, and no other key.
 
 Four plans are already filed. One of them is parked.
 
@@ -107,8 +113,9 @@ with `cancelled` and `fail` as terminal branches.
 
 ## Vault layout
 
-- `plans/{YYYYMMDD}-{kebab-title}.md` — plan files, frontmatter per
-  `docs/template_plan_frontmatter.md`.
+- `plans/{YYYYMMDD}-{kebab-title}/plan.md` — a groomed plan is a directory holding its
+  `plan.md`, frontmatter per `docs/template_plan_frontmatter.md`; a parked plan not yet groomed
+  is still the single stub file `plans/{YYYYMMDD}-{kebab-title}.md`.
 - `sprints.md` — a snapshot rendered from the plans; never hand-edited.
 - `plan_templates/`, `review_templates/` — project-local templates, discovered alongside the
   core ones and overriding a core template by name. There is no retro-template directory on
@@ -174,7 +181,7 @@ defect or a decision.
   change": observable behaviour identical before and after.
 </file>
 
-<file path="plans/20260705-15-10_review-template-picker.md">
+<file path="plans/20260705-review-template-picker/plan.md">
 ---
 title: Review template picker
 type: feature
@@ -201,7 +208,7 @@ project template overriding a core one by sharing its name, and per-plan selecti
 the stack signals in the changed files.
 </file>
 
-<file path="plans/20260718-09-40_transition-hook-runner.md">
+<file path="plans/20260718-transition-hook-runner/plan.md">
 ---
 title: Deterministic transition hook runner
 type: refactoring
@@ -228,7 +235,7 @@ status set, date stamps, commit snapshot, `sprints.md` re-render, vault commit �
 one authoritative mutation report. No observable change to where a plan can go.
 </file>
 
-<file path="plans/20260722-11-05_sprints-snapshot-drift.md">
+<file path="plans/20260722-sprints-snapshot-drift/plan.md">
 ---
 title: sprints.md drifts after a manual status edit
 type: bug

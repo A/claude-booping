@@ -8,10 +8,10 @@ what is wrong, and write the step's artifact into the run workdir.
 
 - project: `helpdesk` — a Django service managed with `uv` that ingests support tickets and
   renders them for agents
-- run slug: `20260801-11-40_summarize-support-tickets`
-- run workdir: `_runs/groom/20260801-11-40_summarize-support-tickets/`, relative to the current
+- run slug: `20260801-summarize-support-tickets`
+- run workdir: `_runs/groom/20260801-summarize-support-tickets/`, relative to the current
   working directory
-- plan file: `plans/20260801-11-40_summarize-support-tickets.md`, on disk and inlined below
+- plan file: `plans/20260801-summarize-support-tickets.md`, on disk and inlined below
 
 ## Inputs
 
@@ -24,7 +24,7 @@ what is wrong, and write the step's artifact into the run workdir.
 
 ## Context files
 
-<file path="plans/20260801-11-40_summarize-support-tickets.md">
+<file path="plans/20260801-summarize-support-tickets.md">
 ---
 title: Summarize long ticket threads for agents
 type: feature
@@ -140,11 +140,11 @@ moments.
 - Any history of past summaries.
 </file>
 
-<file path="_runs/groom/20260801-11-40_summarize-support-tickets/decomposition.md">
+<file path="_runs/groom/20260801-summarize-support-tickets/decomposition.md">
 ---
 reviewed_at: 20260801 11:52
 ---
-# Decomposition — 20260801-11-40_summarize-support-tickets
+# Decomposition — 20260801-summarize-support-tickets
 
 ## Verdict
 

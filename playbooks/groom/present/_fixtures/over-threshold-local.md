@@ -7,8 +7,8 @@ presentation of the plan — no handoff has been written before.
 
 - project: `northwind-api` — a Django REST API served by gunicorn, with a Redis instance already
   in use as the cache backend
-- run slug: `20260731-14-02_rate-limit-public-api`
-- run workdir: `_runs/groom/20260731-14-02_rate-limit-public-api/`, relative to the current
+- run slug: `20260731-rate-limit-public-api`
+- run workdir: `_runs/groom/20260731-rate-limit-public-api/`, relative to the current
   working directory
 - the current working directory **is the project vault**, and the vault lives **inside the
   repository being planned**: the repo's `.booping` marker carries `vault_path: booping`, so the
@@ -21,13 +21,13 @@ presentation of the plan — no handoff has been written before.
 
 ## Inputs
 
-- the drafted plan — `plans/20260731-14-02_rate-limit-public-api.md`, on disk; refined by the
+- the drafted plan — `plans/20260731-rate-limit-public-api.md`, on disk; refined by the
   decomposition pass and confirmed by the user, corrections from reference verification folded in
-- the confirmed design — `_runs/groom/20260731-14-02_rate-limit-public-api/design.md`, on disk
+- the confirmed design — `_runs/groom/20260731-rate-limit-public-api/design.md`, on disk
 - the split threshold and the split candidate the decomposition pass flagged —
-  `_runs/groom/20260731-14-02_rate-limit-public-api/decomposition.md`, on disk
+  `_runs/groom/20260731-rate-limit-public-api/decomposition.md`, on disk
 - the reference-verification results —
-  `_runs/groom/20260731-14-02_rate-limit-public-api/references.md`, on disk
+  `_runs/groom/20260731-rate-limit-public-api/references.md`, on disk
 - the cross-review findings and their deferrals, as `draft-plan` returned them (the project
   configures `cross_review.agent: codex`; the reviewer ran once over the finished draft):
 
@@ -40,7 +40,7 @@ presentation of the plan — no handoff has been written before.
 
 ## Context files
 
-<file path="plans/20260731-14-02_rate-limit-public-api.md">
+<file path="plans/20260731-rate-limit-public-api.md">
 ---
 title: Rate limit the public API
 type: feature
@@ -247,11 +247,11 @@ needs to watch it and turn it off.
 | `## Operations` | link the rate-limit runbook | M4.4 |
 </file>
 
-<file path="_runs/groom/20260731-14-02_rate-limit-public-api/design.md">
+<file path="_runs/groom/20260731-rate-limit-public-api/design.md">
 ---
 reviewed_at: 20260731 15:10
 ---
-# design — 20260731-14-02_rate-limit-public-api
+# design — 20260731-rate-limit-public-api
 
 ## Approach
 
@@ -305,11 +305,11 @@ at a quarter of the authenticated one.
   by the per-environment flag and the dashboard that shows what enforcement would have rejected.
 </file>
 
-<file path="_runs/groom/20260731-14-02_rate-limit-public-api/decomposition.md">
+<file path="_runs/groom/20260731-rate-limit-public-api/decomposition.md">
 ---
 reviewed_at: 20260731 17:35
 ---
-# Decomposition — 20260731-14-02_rate-limit-public-api
+# Decomposition — 20260731-rate-limit-public-api
 
 ## Verdict
 
@@ -353,8 +353,8 @@ first.
   pointing at the primary, groomed in its own run once the primary merges.
 </file>
 
-<file path="_runs/groom/20260731-14-02_rate-limit-public-api/references.md">
-# references — 20260731-14-02_rate-limit-public-api
+<file path="_runs/groom/20260731-rate-limit-public-api/references.md">
+# references — 20260731-rate-limit-public-api
 
 ## Verdict
 

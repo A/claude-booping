@@ -3,15 +3,15 @@ Playbook `groom`, target step `design`, first pass — no earlier design exists 
 Run-time context:
 
 - project: `claude-booping` (the booping plugin repo)
-- run slug: `20260801-11-05_fix-plan-date-stamp-timezone`
-- run workdir: `_runs/groom/20260801-11-05_fix-plan-date-stamp-timezone/`
-- plan file: `plans/20260801-11-05_fix-plan-date-stamp-timezone.md` — already created by intake,
+- run slug: `20260801-fix-plan-date-stamp-timezone`
+- run workdir: `_runs/groom/20260801-fix-plan-date-stamp-timezone/`
+- plan file: `plans/20260801-fix-plan-date-stamp-timezone.md` — already created by intake,
   identity frontmatter only
 
 The upstream artifacts follow: the confirmed framing, the blast-radius map, and the
 external-practice file — which carries a skip verdict and nothing else.
 
-## Confirmed framing — `_runs/groom/20260801-11-05_fix-plan-date-stamp-timezone/intake.md`
+## Confirmed framing — `_runs/groom/20260801-fix-plan-date-stamp-timezone/intake.md`
 
 ```markdown
 ---
@@ -60,7 +60,7 @@ new capability, no new surface: the same two call sites keep the same signature.
       log and stays ISO-8601 UTC on purpose.
 ```
 
-## Blast radius — `_runs/groom/20260801-11-05_fix-plan-date-stamp-timezone/research-codebase.md`
+## Blast radius — `_runs/groom/20260801-fix-plan-date-stamp-timezone/research-codebase.md`
 
 ```markdown
 # Blast radius — plan date stamps land on the wrong day
@@ -95,10 +95,10 @@ new capability, no new surface: the same two call sites keep the same signature.
   settle the two policy questions it could have raised.
 ```
 
-## External practice — `_runs/groom/20260801-11-05_fix-plan-date-stamp-timezone/research-web.md`
+## External practice — `_runs/groom/20260801-fix-plan-date-stamp-timezone/research-web.md`
 
 ```markdown
-# research-web — 20260801-11-05_fix-plan-date-stamp-timezone
+# research-web — 20260801-fix-plan-date-stamp-timezone
 
 ## Verdict
 
@@ -106,7 +106,7 @@ Skipped — well-trodden: a timezone bug in the project's own date interpolation
 no new surface, and prior art for the fix already in the repository.
 ```
 
-## Already on disk — `plans/20260801-11-05_fix-plan-date-stamp-timezone.md`
+## Already on disk — `plans/20260801-fix-plan-date-stamp-timezone.md`
 
 ```markdown
 ---

@@ -9,10 +9,10 @@ what is wrong, and write the step's artifact into the run workdir.
 - project: `orders-api` — a Django/DRF service managed with `uv`, deployed as four identical
   application workers behind a load balancer, with a cache tier declared in the repository's
   `compose.yaml`
-- run slug: `20260731-14-02_rate-limit-public-api`
-- run workdir: `_runs/groom/20260731-14-02_rate-limit-public-api/`, relative to the current
+- run slug: `20260731-rate-limit-public-api`
+- run workdir: `_runs/groom/20260731-rate-limit-public-api/`, relative to the current
   working directory
-- plan file: `plans/20260731-14-02_rate-limit-public-api.md`, on disk and inlined below
+- plan file: `plans/20260731-rate-limit-public-api.md`, on disk and inlined below
 
 ## Inputs
 
@@ -24,7 +24,7 @@ what is wrong, and write the step's artifact into the run workdir.
 
 ## Context files
 
-<file path="plans/20260731-14-02_rate-limit-public-api.md">
+<file path="plans/20260731-rate-limit-public-api.md">
 ---
 title: Rate limit the public API
 type: feature
@@ -150,11 +150,11 @@ middleware admits the request and logs.
 | `## Configuration` | document the two quota settings and the fail-open policy | M2.2 |
 </file>
 
-<file path="_runs/groom/20260731-14-02_rate-limit-public-api/decomposition.md">
+<file path="_runs/groom/20260731-rate-limit-public-api/decomposition.md">
 ---
 reviewed_at: 20260731 14:38
 ---
-# Decomposition — 20260731-14-02_rate-limit-public-api
+# Decomposition — 20260731-rate-limit-public-api
 
 ## Verdict
 

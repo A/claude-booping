@@ -1,7 +1,8 @@
 # research-codebase — two fixtures, each at both tiers. smoke asserts the contract, regress
 # judges the content. Conventions (contract/arithmetic split, mdcheck's whole-match `match:` vs
-# substring `require:`, `no_empty` cells) are in docs/eval-checks.md. No FRONTMATTER rule check
-# is needed beyond the explicit `count: 0` below — the map carries no gate, so nothing stamps it.
+# substring `require:`, `no_empty` cells) are in docs/eval-checks.md. The step writes ONE
+# section — `## Blast radius` of the run's `index.md` — so the contract asserts the seeded
+# framing is still there beside it and the run frontmatter is preserved, not restamped.
 
 - description: research-codebase smoke — blast-radius contract on the sprints-report-script repo
   vars:
@@ -18,8 +19,8 @@
       config:
         onTextMode: fail
         expect:
-          - path: '_runs/groom/20260731-14-05_sprints-report-script/research-codebase\.md$'
-            minLines: 15
+          - path: 'plans/20260731-sprints-report-script/index\.md$'
+            minLines: 30
         noOthers: true
     # SECTIONS + SURFACES-TABLE(shape) — fixture-agnostic, anchored so the greenfield smoke
     # case below runs the identical contract
@@ -27,15 +28,20 @@
       type: javascript
       value: file://../../_lib/asserts/mdcheck.js
       config:
-        file: 'research-codebase\.md$'
+        file: 'plans/.+/index\.md$'
         rules: |
           - select: FRONTMATTER
-            count: 0
+            has:
+              status: { enum: [researching] }
 
           - select: H1
             count: 1
 
           - select: H1 > H2
+            ordered: [Framing, Blast radius]
+            strict: true
+
+          - select: SECTION("Blast radius") > H3
             ordered: [Touched surfaces, Prior art, Conventions in play, Unknowns for design]
             strict: true
 
@@ -62,7 +68,7 @@
     - type: javascript
       value: file://../../_lib/asserts/mdcheck.js
       config:
-        file: 'research-codebase\.md$'
+        file: 'plans/.+/index\.md$'
         rules: |
           - select: SECTION("Touched surfaces") > TABLE
             rows: { min: 3 }
@@ -79,7 +85,7 @@
         requireBlock: true
         sections:
           - name: Changed
-            entry: '^-\s+\[(CREATED|UPDATED)\]\s+`?([^`\s]+)`?$'
+            entry: '^-\s+\[(CREATED|UPDATED)\]\s+`?([^`\s]+)`?\s+—\s+blast radius$'
             matchManifest: true
             seededVar: input
             minEntries: 1
@@ -102,8 +108,8 @@
       config:
         onTextMode: fail
         expect:
-          - path: '_runs/groom/20260731-16-20_remote-entry-sync/research-codebase\.md$'
-            minLines: 15
+          - path: 'plans/20260731-remote-entry-sync/index\.md$'
+            minLines: 30
         noOthers: true
     - *a_contract
     - type: javascript
@@ -112,7 +118,7 @@
         requireBlock: true
         sections:
           - name: Changed
-            entry: '^-\s+\[(CREATED|UPDATED)\]\s+`?([^`\s]+)`?$'
+            entry: '^-\s+\[(CREATED|UPDATED)\]\s+`?([^`\s]+)`?\s+—\s+blast radius$'
             matchManifest: true
             seededVar: input
             minEntries: 1

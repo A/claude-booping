@@ -16,9 +16,9 @@
       config:
         onTextMode: fail
         expect:
-          - path: '_runs/groom/20260801-09-15_sprints-report-script/design\.md$'
+          - path: '_runs/groom/20260801-sprints-report-script/design\.md$'
             minLines: 20
-            contains: ['^# design — 20260801-09-15_sprints-report-script$']
+            contains: ['^# design — 20260801-sprints-report-script$']
             forbids: ['^---\s*$']
         noOthers: true
     # SECTIONS + TRADEOFF-SHAPE + RISKS-MITIGATED
@@ -109,10 +109,10 @@
       config:
         onTextMode: fail
         expect:
-          - path: '_runs/groom/20260801-09-15_sprints-report-script/design\.md$'
+          - path: '_runs/groom/20260801-sprints-report-script/design\.md$'
             minLines: 20
             contains:
-              - '^# design — 20260801-09-15_sprints-report-script$'
+              - '^# design — 20260801-sprints-report-script$'
               - 'reviewed_at: 20260801 10:40'
         noOthers: true
     # REVISED-IN-PLACE (section set) — same shared shape contract as the first-pass fixture
@@ -162,9 +162,9 @@
       config:
         onTextMode: fail
         expect:
-          - path: '_runs/groom/20260801-11-05_fix-plan-date-stamp-timezone/design\.md$'
+          - path: '_runs/groom/20260801-fix-plan-date-stamp-timezone/design\.md$'
             minLines: 15
-            contains: ['^# design — 20260801-11-05_fix-plan-date-stamp-timezone$']
+            contains: ['^# design — 20260801-fix-plan-date-stamp-timezone$']
             forbids:
               - '^---\s*$'
               - 'https?://'

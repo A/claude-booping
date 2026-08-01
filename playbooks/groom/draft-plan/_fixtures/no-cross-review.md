@@ -4,16 +4,16 @@ identity frontmatter only — no body has been written yet.
 Run-time context:
 
 - project: `claude-booping` (the booping plugin repo)
-- run slug: `20260801-09-15_sprints-report-script`
-- run workdir: `_runs/groom/20260801-09-15_sprints-report-script/`
-- plan file: `plans/20260801-09-15_sprints-report-script.md` — created by intake, identity
+- run slug: `20260801-sprints-report-script`
+- run workdir: `_runs/groom/20260801-sprints-report-script/`
+- plan file: `plans/20260801-sprints-report-script.md` — created by intake, identity
   frontmatter only
 
 The confirmed framing, the blast-radius map, the confirmed design, the plan file as it stands, the
 plan-template catalogue, the plan frontmatter shape, the sizing scale and the project's
 configuration follow.
 
-## Confirmed framing — `_runs/groom/20260801-09-15_sprints-report-script/intake.md`
+## Confirmed framing — `_runs/groom/20260801-sprints-report-script/intake.md`
 
 ```markdown
 ---
@@ -69,7 +69,7 @@ structure.
       `booping-python`, and no new config key beyond what the retirement removes.
 ```
 
-## Blast radius — `_runs/groom/20260801-09-15_sprints-report-script/research-codebase.md`
+## Blast radius — `_runs/groom/20260801-sprints-report-script/research-codebase.md`
 
 ```markdown
 # Blast radius — sprints report as a playbook script
@@ -116,13 +116,13 @@ structure.
   has no assembled context to ask.
 ```
 
-## Confirmed design — `_runs/groom/20260801-09-15_sprints-report-script/design.md`
+## Confirmed design — `_runs/groom/20260801-sprints-report-script/design.md`
 
 ```markdown
 ---
 reviewed_at: 20260801 10:58
 ---
-# design — 20260801-09-15_sprints-report-script
+# design — 20260801-sprints-report-script
 
 ## Approach
 
@@ -210,7 +210,7 @@ on the fallback path.
   trees for `render-sprints` as a task in the plan.
 ```
 
-## Already on disk — `plans/20260801-09-15_sprints-report-script.md`
+## Already on disk — `plans/20260801-sprints-report-script.md`
 
 ```markdown
 ---

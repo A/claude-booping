@@ -29,10 +29,10 @@
       config:
         onTextMode: fail
         expect:
-          - path: '_runs/groom/20260731-14-02_rate-limit-public-api/references\.md$'
+          - path: '_runs/groom/20260731-rate-limit-public-api/references\.md$'
             minLines: 12
-            contains: ['^# references — 20260731-14-02_rate-limit-public-api$']
-          - path: 'plans/20260731-14-02_rate-limit-public-api\.md$'
+            contains: ['^# references — 20260731-rate-limit-public-api$']
+          - path: 'plans/20260731-rate-limit-public-api\.md$'
             minLines: 50
         noOthers: true
     # SECTIONS + CORRECTIONS-LITERAL(shape) + UNVERIFIABLE(shape) — fixture-agnostic
@@ -110,9 +110,9 @@
       value: |
         const fail = (r) => ({ pass: false, score: 0, reason: r });
         const seed = (context && context.vars && context.vars.input) || '';
-        const seedMatch = /<file path="plans\/20260731-14-02_rate-limit-public-api\.md">\n([\s\S]*?)\n<\/file>/.exec(seed);
+        const seedMatch = /<file path="plans\/20260731-rate-limit-public-api\.md">\n([\s\S]*?)\n<\/file>/.exec(seed);
         if (!seedMatch) return fail('fixture carries no seeded plan file');
-        const writtenMatch = /<file path="plans\/20260731-14-02_rate-limit-public-api\.md">\n([\s\S]*?)\n<\/file>/.exec(output);
+        const writtenMatch = /<file path="plans\/20260731-rate-limit-public-api\.md">\n([\s\S]*?)\n<\/file>/.exec(output);
         if (!writtenMatch) return fail('plan file not in the written manifest — the two stale pins need a literal fix');
         const original = seedMatch[1];
         const written = writtenMatch[1];
@@ -175,9 +175,9 @@
       config:
         onTextMode: fail
         expect:
-          - path: '_runs/groom/20260731-16-05_fix-stale-session-cookie/references\.md$'
+          - path: '_runs/groom/20260731-fix-stale-session-cookie/references\.md$'
             minLines: 8
-            contains: ['^# references — 20260731-16-05_fix-stale-session-cookie$']
+            contains: ['^# references — 20260731-fix-stale-session-cookie$']
         noOthers: true
     # CLEAN-VERDICT + CLEAN-SECTIONS
     - type: javascript
@@ -242,9 +242,9 @@
       config:
         onTextMode: fail
         expect:
-          - path: '_runs/groom/20260801-09-40_extract-playbook-section-builders/references\.md$'
+          - path: '_runs/groom/20260801-extract-playbook-section-builders/references\.md$'
             minLines: 2
-            contains: ['^# references — 20260801-09-40_extract-playbook-section-builders$']
+            contains: ['^# references — 20260801-extract-playbook-section-builders$']
         noOthers: true
     # NOTHING-VERDICT
     - type: javascript
@@ -307,9 +307,9 @@
       value: |
         const fail = (r) => ({ pass: false, score: 0, reason: r });
         const seed = (context && context.vars && context.vars.input) || '';
-        const seedMatch = /<file path="plans\/20260801-11-40_summarize-support-tickets\.md">\n([\s\S]*?)\n<\/file>/.exec(seed);
+        const seedMatch = /<file path="plans\/20260801-summarize-support-tickets\.md">\n([\s\S]*?)\n<\/file>/.exec(seed);
         if (!seedMatch) return fail('fixture carries no seeded plan file');
-        const writtenMatch = /<file path="plans\/20260801-11-40_summarize-support-tickets\.md">\n([\s\S]*?)\n<\/file>/.exec(output);
+        const writtenMatch = /<file path="plans\/20260801-summarize-support-tickets\.md">\n([\s\S]*?)\n<\/file>/.exec(output);
         if (!writtenMatch) return fail('plan file not in the written manifest — the stale `openai==0.28.1` pin needs a literal fix');
         const original = seedMatch[1];
         const written = writtenMatch[1];

@@ -7,8 +7,8 @@ presentation of the plan — no handoff has been written before.
 
 - project: `claude-booping` — the booping plugin repo, a uv Python project with a Jinja2
   rendering pipeline
-- run slug: `20260801-10-30_plan-summary-frontmatter`
-- run workdir: `_runs/groom/20260801-10-30_plan-summary-frontmatter/`, relative to the current
+- run slug: `20260801-plan-summary-frontmatter`
+- run workdir: `_runs/groom/20260801-plan-summary-frontmatter/`, relative to the current
   working directory
 - the current working directory **is the project vault**, and the vault lives **outside the
   repository being planned**: it is the default `~/Claude/claude-booping/`, the repo's `.booping`
@@ -19,13 +19,13 @@ presentation of the plan — no handoff has been written before.
 
 ## Inputs
 
-- the drafted plan — `plans/20260801-10-30_plan-summary-frontmatter.md`, on disk; the
+- the drafted plan — `plans/20260801-plan-summary-frontmatter.md`, on disk; the
   decomposition pass left it untouched and the user confirmed it as drafted
-- the confirmed design — `_runs/groom/20260801-10-30_plan-summary-frontmatter/design.md`, on disk
+- the confirmed design — `_runs/groom/20260801-plan-summary-frontmatter/design.md`, on disk
 - the split threshold and the decomposition pass's outcome —
-  `_runs/groom/20260801-10-30_plan-summary-frontmatter/decomposition.md`, on disk
+  `_runs/groom/20260801-plan-summary-frontmatter/decomposition.md`, on disk
 - the reference-verification results —
-  `_runs/groom/20260801-10-30_plan-summary-frontmatter/references.md`, on disk
+  `_runs/groom/20260801-plan-summary-frontmatter/references.md`, on disk
 - the cross-review outcome, as `draft-plan` returned it:
 
   > - cross-review: no `cross_review` agent configured — not run
@@ -34,7 +34,7 @@ presentation of the plan — no handoff has been written before.
 
 ## Context files
 
-<file path="plans/20260801-10-30_plan-summary-frontmatter.md">
+<file path="plans/20260801-plan-summary-frontmatter.md">
 ---
 title: Plan summary line in frontmatter
 type: feature
@@ -158,11 +158,11 @@ cleanly for those that do not.
 | `## Project vault layout` | name the new frontmatter key | M1.2 |
 </file>
 
-<file path="_runs/groom/20260801-10-30_plan-summary-frontmatter/design.md">
+<file path="_runs/groom/20260801-plan-summary-frontmatter/design.md">
 ---
 reviewed_at: 20260801 11:20
 ---
-# design — 20260801-10-30_plan-summary-frontmatter
+# design — 20260801-plan-summary-frontmatter
 
 ## Approach
 
@@ -203,11 +203,11 @@ the snapshot changes — same rows, same order, same other columns.
   test over the absent case.
 </file>
 
-<file path="_runs/groom/20260801-10-30_plan-summary-frontmatter/decomposition.md">
+<file path="_runs/groom/20260801-plan-summary-frontmatter/decomposition.md">
 ---
 reviewed_at: 20260801 11:52
 ---
-# Decomposition — 20260801-10-30_plan-summary-frontmatter
+# Decomposition — 20260801-plan-summary-frontmatter
 
 ## Verdict
 
@@ -216,8 +216,8 @@ sprint totals 18 SP, under the 35 SP split threshold, so no split candidate is f
 file was not touched.
 </file>
 
-<file path="_runs/groom/20260801-10-30_plan-summary-frontmatter/references.md">
-# references — 20260801-10-30_plan-summary-frontmatter
+<file path="_runs/groom/20260801-plan-summary-frontmatter/references.md">
+# references — 20260801-plan-summary-frontmatter
 
 ## Verdict
 

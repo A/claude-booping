@@ -29,7 +29,7 @@
       config:
         onTextMode: fail
         expect:
-          - path: 'plans/20260801-09-15_sprints-report-script\.md$'
+          - path: 'plans/20260801-sprints-report-script\.md$'
             minLines: 40
         noOthers: true
     # FRONTMATTER-KEYS + H1-MATCHES-TITLE
@@ -337,7 +337,7 @@
       config:
         onTextMode: fail
         expect:
-          - path: 'plans/20260801-09-15_sprints-report-script\.md$'
+          - path: 'plans/20260801-sprints-report-script\.md$'
             minLines: 40
           - path: 'plan_templates/[a-z0-9_-]+\.md$'
             minLines: 15
@@ -363,7 +363,7 @@
         if (!ret) return { pass: false, score: 0, reason: 'no <return> block' };
         const changed = /## Changed:\n([\s\S]*?)(?:\n## |\n?$)/.exec(ret[1]);
         const lines = changed ? changed[1].split('\n').filter((l) => l.trim()) : [];
-        const planLine = lines.find((l) => /plans\/20260801-09-15_sprints-report-script\.md/.test(l));
+        const planLine = lines.find((l) => /plans\/20260801-sprints-report-script\.md/.test(l));
         const templateLine = lines.find((l) => /plan_templates\//.test(l));
         if (!planLine || !/\[UPDATED\]/.test(planLine))
           return { pass: false, score: 0, reason: 'plan entry missing or not [UPDATED]: ' + (planLine || 'absent') };

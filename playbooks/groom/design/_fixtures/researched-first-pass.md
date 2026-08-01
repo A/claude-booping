@@ -3,15 +3,15 @@ Playbook `groom`, target step `design`, first pass — no earlier design exists 
 Run-time context:
 
 - project: `claude-booping` (the booping plugin repo)
-- run slug: `20260801-09-15_sprints-report-script`
-- run workdir: `_runs/groom/20260801-09-15_sprints-report-script/`
-- plan file: `plans/20260801-09-15_sprints-report-script.md` — already created by intake, identity
+- run slug: `20260801-sprints-report-script`
+- run workdir: `_runs/groom/20260801-sprints-report-script/`
+- plan file: `plans/20260801-sprints-report-script.md` — already created by intake, identity
   frontmatter only
 
 The upstream artifacts follow: the confirmed framing, the blast-radius map, and the
 external-practice findings.
 
-## Confirmed framing — `_runs/groom/20260801-09-15_sprints-report-script/intake.md`
+## Confirmed framing — `_runs/groom/20260801-sprints-report-script/intake.md`
 
 ```markdown
 ---
@@ -67,7 +67,7 @@ structure.
       `booping-python`, and no new config key beyond what the retirement removes.
 ```
 
-## Blast radius — `_runs/groom/20260801-09-15_sprints-report-script/research-codebase.md`
+## Blast radius — `_runs/groom/20260801-sprints-report-script/research-codebase.md`
 
 ```markdown
 # Blast radius — sprints report as a playbook script
@@ -108,10 +108,10 @@ structure.
   has no assembled context to ask.
 ```
 
-## External practice — `_runs/groom/20260801-09-15_sprints-report-script/research-web.md`
+## External practice — `_runs/groom/20260801-sprints-report-script/research-web.md`
 
 ```markdown
-# research-web — 20260801-09-15_sprints-report-script
+# research-web — 20260801-sprints-report-script
 
 ## Verdict
 
@@ -169,7 +169,7 @@ playbook dir.
 | https://jinja.palletsprojects.com/en/stable/api/ | `Environment` + `FileSystemLoader` for rendering a template from a directory outside the package | 20260801 |
 ```
 
-## Already on disk — `plans/20260801-09-15_sprints-report-script.md`
+## Already on disk — `plans/20260801-sprints-report-script.md`
 
 ```markdown
 ---

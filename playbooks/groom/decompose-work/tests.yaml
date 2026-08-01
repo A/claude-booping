@@ -26,9 +26,9 @@
       config:
         onTextMode: fail
         expect:
-          - path: '_runs/groom/20260801-14-30_local-vault-directories/decomposition\.md$'
+          - path: '_runs/groom/20260801-local-vault-directories/decomposition\.md$'
             minLines: 15
-          - path: '^plans/20260801-14-30_local-vault-directories\.md$'
+          - path: '^plans/20260801-local-vault-directories\.md$'
             minLines: 100
         noOthers: true
     # SECTIONS-REFINED + FRONTMATTER-NULL(presence) — the shared Refined shape, reused by
@@ -57,7 +57,7 @@
         file: 'decomposition\.md$'
         rules: |
           - select: H1
-            match: 'Decomposition — 20260801-14-30_local-vault-directories'
+            match: 'Decomposition — 20260801-local-vault-directories'
 
           - select: SECTION("Verdict") > P
             require: '5 SP'
@@ -87,7 +87,7 @@
         const files = {};
         let fm;
         while ((fm = FILE_RE.exec(output))) files[fm[1]] = fm[2];
-        const planPath = Object.keys(files).find((p) => /^plans\/20260801-14-30_local-vault-directories\.md$/.test(p));
+        const planPath = Object.keys(files).find((p) => /^plans\/20260801-local-vault-directories\.md$/.test(p));
         const decompPath = Object.keys(files).find((p) => /decomposition\.md$/.test(p));
         if (!planPath) return fail('plan file not in the written-files manifest');
         if (!decompPath) return fail('decomposition.md not in the written-files manifest');
@@ -205,7 +205,7 @@
       config:
         onTextMode: fail
         expect:
-          - path: '_runs/groom/20260801-16-05_fix-stale-session-cookie/decomposition\.md$'
+          - path: '_runs/groom/20260801-fix-stale-session-cookie/decomposition\.md$'
             minLines: 3
         noOthers: true
     # SKIP-VERDICT-ONLY
@@ -216,7 +216,7 @@
         rules: |
           - select: H1
             count: 1
-            match: 'Decomposition — 20260801-16-05_fix-stale-session-cookie'
+            match: 'Decomposition — 20260801-fix-stale-session-cookie'
 
           - select: H1 > H2
             ordered: [Verdict]
@@ -293,7 +293,7 @@
       config:
         onTextMode: fail
         expect:
-          - path: '_runs/groom/20260801-17-40_notification-center/decomposition\.md$'
+          - path: '_runs/groom/20260801-notification-center/decomposition\.md$'
             minLines: 5
         noOthers: true
     # TRAP-SPLIT-FLAGGED + TRAP-BOTH-COUNTS + TRAP-NO-FAKE-SPLITS(sections absent)
@@ -304,7 +304,7 @@
         rules: |
           - select: H1
             count: 1
-            match: 'Decomposition — 20260801-17-40_notification-center'
+            match: 'Decomposition — 20260801-notification-center'
 
           - select: H1 > H2
             ordered: [Verdict, "Split candidate"]
@@ -378,9 +378,9 @@
       config:
         onTextMode: fail
         expect:
-          - path: '_runs/groom/20260801-18-20_indexed-plan-store/decomposition\.md$'
+          - path: '_runs/groom/20260801-indexed-plan-store/decomposition\.md$'
             minLines: 10
-          - path: '^plans/20260801-18-20_indexed-plan-store\.md$'
+          - path: '^plans/20260801-indexed-plan-store\.md$'
             minLines: 80
         noOthers: true
     # SECTIONS-REFINED shape — the same Refined contract as oversized-plan
@@ -392,7 +392,7 @@
         file: 'decomposition\.md$'
         rules: |
           - select: H1
-            match: 'Decomposition — 20260801-18-20_indexed-plan-store'
+            match: 'Decomposition — 20260801-indexed-plan-store'
 
           - select: SECTION("Verdict") > P
             require: '5 SP'
@@ -424,7 +424,7 @@
         const files = {};
         let fm;
         while ((fm = FILE_RE.exec(output))) files[fm[1]] = fm[2];
-        const planPath = Object.keys(files).find((p) => /^plans\/20260801-18-20_indexed-plan-store\.md$/.test(p));
+        const planPath = Object.keys(files).find((p) => /^plans\/20260801-indexed-plan-store\.md$/.test(p));
         const decompPath = Object.keys(files).find((p) => /decomposition\.md$/.test(p));
         if (!planPath) return fail('plan file not in the written-files manifest');
         if (!decompPath) return fail('decomposition.md not in the written-files manifest');

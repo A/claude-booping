@@ -7,20 +7,20 @@ practice for it and write the step's artifact into the run workdir.
 
 - project: `settle-gateway` — a payments integration service that receives partner callbacks over
   HTTP and posts settlement records into the ledger
-- run slug: `20260801-15-05_signed-partner-webhooks`
-- run workdir: `_runs/groom/20260801-15-05_signed-partner-webhooks/`, relative to the current
+- run slug: `20260801-signed-partner-webhooks`
+- run workdir: `_runs/groom/20260801-signed-partner-webhooks/`, relative to the current
   working directory — it already holds the confirmed framing
 - the repository has never implemented HTTP Message Signatures, in any form, on any endpoint
 
 ## Inputs
 
-- the confirmed framing — `_runs/groom/20260801-15-05_signed-partner-webhooks/intake.md`, on
+- the confirmed framing — `_runs/groom/20260801-signed-partner-webhooks/intake.md`, on
   disk; confirmed by the user, every scope-challenge question answered
 - the uncertainty signals intake recorded: none — the list came back empty
 
 ## Context files
 
-<file path="_runs/groom/20260801-15-05_signed-partner-webhooks/intake.md">
+<file path="_runs/groom/20260801-signed-partner-webhooks/intake.md">
 ---
 reviewed_at: 20260801 15:12
 ---

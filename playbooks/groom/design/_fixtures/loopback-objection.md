@@ -4,14 +4,14 @@ this run and the user has objected to exactly one call in it.
 Run-time context:
 
 - project: `claude-booping` (the booping plugin repo)
-- run slug: `20260801-09-15_sprints-report-script`
-- run workdir: `_runs/groom/20260801-09-15_sprints-report-script/`
-- plan file: `plans/20260801-09-15_sprints-report-script.md` — identity frontmatter only, not yet
+- run slug: `20260801-sprints-report-script`
+- run workdir: `_runs/groom/20260801-sprints-report-script/`
+- plan file: `plans/20260801-sprints-report-script.md` — identity frontmatter only, not yet
   drafted
 
 The upstream artifacts, the design as it stands on disk, and the user's objection follow.
 
-## Confirmed framing — `_runs/groom/20260801-09-15_sprints-report-script/intake.md`
+## Confirmed framing — `_runs/groom/20260801-sprints-report-script/intake.md`
 
 ```markdown
 ---
@@ -67,7 +67,7 @@ structure.
       `booping-python`, and no new config key beyond what the retirement removes.
 ```
 
-## Blast radius — `_runs/groom/20260801-09-15_sprints-report-script/research-codebase.md`
+## Blast radius — `_runs/groom/20260801-sprints-report-script/research-codebase.md`
 
 ```markdown
 # Blast radius — sprints report as a playbook script
@@ -108,10 +108,10 @@ structure.
   has no assembled context to ask.
 ```
 
-## External practice — `_runs/groom/20260801-09-15_sprints-report-script/research-web.md`
+## External practice — `_runs/groom/20260801-sprints-report-script/research-web.md`
 
 ```markdown
-# research-web — 20260801-09-15_sprints-report-script
+# research-web — 20260801-sprints-report-script
 
 ## Verdict
 
@@ -169,13 +169,13 @@ playbook dir.
 | https://jinja.palletsprojects.com/en/stable/api/ | `Environment` + `FileSystemLoader` for rendering a template from a directory outside the package | 20260801 |
 ```
 
-## The design on disk — `_runs/groom/20260801-09-15_sprints-report-script/design.md`
+## The design on disk — `_runs/groom/20260801-sprints-report-script/design.md`
 
 ```markdown
 ---
 reviewed_at: 20260801 10:40
 ---
-# design — 20260801-09-15_sprints-report-script
+# design — 20260801-sprints-report-script
 
 ## Approach
 

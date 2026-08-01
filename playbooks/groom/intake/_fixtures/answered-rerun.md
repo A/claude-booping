@@ -1,9 +1,9 @@
 # Input — answered-rerun
 
 Fold the user's answers into the framing. A first pass already ran on this request: it wrote
-`_runs/groom/20260801-10-20_develop-sprint-resume/intake.md`, created
-`plans/20260801-10-20_develop-sprint-resume.md`, and returned three scope questions. The user
-has now answered all three, one line each.
+the `## Framing` section of `plans/20260801-develop-sprint-resume/index.md`, created
+`plans/20260801-develop-sprint-resume/plan.md` beside it, and returned three scope questions.
+The user has now answered all three, one line each, and asked for one more thing.
 
 The user's request, verbatim — unchanged since the first pass:
 
@@ -20,24 +20,29 @@ The user's answers, in the order the first pass numbered the questions:
 3. Trust the record. The final verification pass at the end of the sprint re-runs everything
    anyway.
 
+And one more thing, unprompted: before we design this, go and research how other task runners
+do resumable runs — I want the current practice on the web, not just what our repo already does.
+
 The project is `claude-booping`. Its repository conventions, the task-type catalogue with the
-per-type grooming guidance, the project vault (`plans/`, parked plans included) and the first
-pass's run workdir all sit on disk in the current working directory. Read what the re-framing
-needs before writing anything.
+per-type grooming guidance, the project vault (`plans/`, parked plans included) and the run
+workdir — the plan directory `plans/20260801-develop-sprint-resume/` — all sit on disk in the
+current working directory. Read what the re-framing needs before writing anything.
 
 ## Context files
 
-<file path="_runs/groom/20260801-10-20_develop-sprint-resume/intake.md">
+<file path="plans/20260801-develop-sprint-resume/index.md">
 ---
-reviewed_at: null
+status: framing
 ---
-# Intake — develop sprint resume
+# Develop sprint resume
 
-## Request
+## Framing
+
+### Request
 
 > make `/develop` resume an interrupted sprint without re-running finished milestones
 
-## Restated problem
+### Restated problem
 
 `/develop` claims a plan at `ready-for-dev`, moves it to `in-progress`, and works the plan one
 milestone group at a time, briefing each group into a fresh sub-agent and committing its work
@@ -48,7 +53,7 @@ finished work from pending. The next `/develop` run on that plan begins at the f
 and repeats work that is already committed. The request is that a resumed run pick up where the
 interrupted one stopped.
 
-## Task type
+### Task type
 
 `feature` — a new user-facing capability: `/develop` gains behaviour it does not have today,
 with an outcome the user can name (no repeated work on a resumed sprint), a design and
@@ -58,7 +63,7 @@ to triage or reproduce. Not a `refactoring`: what changes is the observable beha
 resumed run, not the internal structure behind unchanged behaviour, so a "no behaviour change"
 DoD would be false.
 
-## Scope boundaries
+### Scope boundaries
 
 **In scope**
 
@@ -76,7 +81,11 @@ DoD would be false.
   handoff
 - resuming any skill other than `/develop`
 
-## Scope challenge
+### Web research
+
+Not requested — the request asks for no deep web research, and none was asked for since.
+
+### Scope challenge
 
 - [ ] Where should the progress record live — the plan's own frontmatter, its body, or a
       separate file in the vault?
@@ -86,7 +95,7 @@ DoD would be false.
       trust the record?
 </file>
 
-<file path="plans/20260801-10-20_develop-sprint-resume.md">
+<file path="plans/20260801-develop-sprint-resume/plan.md">
 ---
 title: Develop sprint resume
 type: feature
@@ -170,8 +179,9 @@ with `cancelled` and `fail` as terminal branches.
 
 ## Vault layout
 
-- `plans/{YYYYMMDD}-{kebab-title}.md` — plan files, frontmatter per
-  `docs/template_plan_frontmatter.md`.
+- `plans/{YYYYMMDD}-{kebab-title}/plan.md` — a groomed plan is a directory holding its
+  `plan.md`, frontmatter per `docs/template_plan_frontmatter.md`; a parked plan not yet groomed
+  is still the single stub file `plans/{YYYYMMDD}-{kebab-title}.md`.
 - `sprints.md` — a snapshot rendered from the plans; never hand-edited.
 - `plan_templates/`, `review_templates/` — project-local templates, discovered alongside the
   core ones and overriding a core template by name.
@@ -235,7 +245,7 @@ defect or a decision.
   change": observable behaviour identical before and after.
 </file>
 
-<file path="plans/20260705-15-10_review-template-picker.md">
+<file path="plans/20260705-review-template-picker/plan.md">
 ---
 title: Review template picker
 type: feature
@@ -288,7 +298,7 @@ its template per plan and lets a project override the core set from its own
 winning over the built-in ones.
 </file>
 
-<file path="plans/20260718-09-40_transition-hook-runner.md">
+<file path="plans/20260718-transition-hook-runner/plan.md">
 ---
 title: Deterministic transition hook runner
 type: refactoring
@@ -315,7 +325,7 @@ status set, date stamps, commit snapshot, `sprints.md` re-render, vault commit �
 one authoritative mutation report. No observable change to where a plan can go.
 </file>
 
-<file path="plans/20260722-11-05_sprints-snapshot-drift.md">
+<file path="plans/20260722-sprints-snapshot-drift/plan.md">
 ---
 title: sprints.md drifts after a manual status edit
 type: bug

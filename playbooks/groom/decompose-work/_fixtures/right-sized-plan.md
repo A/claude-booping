@@ -7,15 +7,15 @@ decomposition artifact into the run workdir.
 ## Run-time context
 
 - project: `atlas-web` — a Django + DRF application serving a browser client and a mobile app
-- run slug: `20260801-16-05_fix-stale-session-cookie`
-- run workdir: `_runs/groom/20260801-16-05_fix-stale-session-cookie/`, relative to the current
+- run slug: `20260801-fix-stale-session-cookie`
+- run workdir: `_runs/groom/20260801-fix-stale-session-cookie/`, relative to the current
   working directory — it already holds the confirmed framing, the blast-radius map and the
   confirmed design
-- plan file: `plans/20260801-16-05_fix-stale-session-cookie.md`, on disk, written and complete
+- plan file: `plans/20260801-fix-stale-session-cookie.md`, on disk, written and complete
 
 ## Inputs
 
-- the written plan — `plans/20260801-16-05_fix-stale-session-cookie.md`, on disk: 3 milestones,
+- the written plan — `plans/20260801-fix-stale-session-cookie.md`, on disk: 3 milestones,
   per-task and per-milestone story points, the sprint total mirrored in its `sp:` frontmatter
 - the re-decompose threshold — **5 SP**: a task at or over it needs another pass before a single
   agent briefing can carry it
@@ -31,7 +31,7 @@ decomposition artifact into the run workdir.
 
 ## Context files
 
-<file path="plans/20260801-16-05_fix-stale-session-cookie.md">
+<file path="plans/20260801-fix-stale-session-cookie.md">
 ---
 title: Fix stale session cookie surviving logout
 type: bug

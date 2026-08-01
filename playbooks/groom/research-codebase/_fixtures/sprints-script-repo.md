@@ -3,20 +3,22 @@
 Intake is confirmed: the framing below is the one the user signed off on, scope questions
 answered and boundaries agreed. Map the blast radius of this work in the attached repository.
 
-The repository sits on disk in the current working directory, together with the run workdir
-under `_runs/groom/`. None of it is inlined here and none of it is summarised: read what the
-work touches before writing anything, and follow the references out of the files you are
-pointed at first.
+The repository sits on disk in the current working directory, together with the run workdir —
+the plan directory `plans/{slug}/`, holding the run's `index.md` and its `plan.md`. None of it
+is inlined here and none of it is summarised: read what the work touches before writing
+anything, and follow the references out of the files you are pointed at first.
 
 ## Context files
 
-<file path="_runs/groom/20260731-14-05_sprints-report-script/intake.md">
+<file path="plans/20260731-sprints-report-script/index.md">
 ---
-reviewed_at: 20260731 14:22
+status: researching
 ---
-# Intake — sprints report as a playbook script
+# Sprints report as a playbook script
 
-## Request
+## Framing
+
+### Request
 
 > The sprints.md snapshot is booping's job today, but it is not framework behaviour — it is one
 > particular workflow's report. I want it to become a playbook-local script under the groom
@@ -24,7 +26,7 @@ reviewed_at: 20260731 14:22
 > from the core. Playbook-specific behaviour should live in playbooks; the core stays a pure
 > playbook framework.
 
-## Restated problem
+### Restated problem
 
 `render-sprints` is wired into the core three times over: as a public CLI subcommand, as a
 dispatch branch in the plan-transition hook runner, and as a name in the plan lifecycle's
@@ -34,13 +36,13 @@ one they run. The work is to move the behaviour to where it belongs — a playbo
 and take the core's copy out, without leaving the snapshot unrendered for anyone who relies on
 it today.
 
-## Task type
+### Task type
 
 `refactoring` — the behaviour the user sees (a refreshed snapshot after a status move) is meant
 to survive unchanged; what moves is who owns it and where it is invoked from. Not a feature (no
 new capability is asked for) and not a bug (nothing is misbehaving).
 
-## Scope boundaries
+### Scope boundaries
 
 **In scope**
 
@@ -56,7 +58,11 @@ new capability is asked for) and not a bug (nothing is misbehaving).
 - `/develop` — its briefing flow, its milestone loop and the moves it makes stay exactly as they
   are; nothing in this work is allowed to change that skill
 
-## Scope challenge
+### Web research
+
+Requested — the user asked for current practice on how other tools render and refresh a report like this before the design is settled.
+
+### Scope challenge
 
 - [x] Does the snapshot have to keep working for plans moved outside the groom playbook? —
       answered: no guarantee is owed to a run that never enters the playbook; the report is the
@@ -468,7 +474,7 @@ graph:
 
 states:
   run:
-    artifact: run.md
+    artifact: index.md
     initial: in-spec
     statuses:
       in-spec:
@@ -505,10 +511,10 @@ set -euo pipefail
 slug="$(basename "${BOOPING_WORKDIR}")"
 status="$(sed -n 's/^status: //p' "${BOOPING_ARTIFACT}" | head -1)"
 
-# The workdir is {vault}/_runs/{playbook}/{slug}, so the vault is three levels up.
-vault="$(cd "${BOOPING_WORKDIR}/../../.." && pwd)"
+# The workdir is the plan directory {vault}/plans/{slug}, so the vault is two levels up.
+vault="$(cd "${BOOPING_WORKDIR}/../.." && pwd)"
 
-booping frontmatter-update "${vault}/plans/${slug}.md" "status=${status}"
+booping frontmatter-update "${vault}/plans/${slug}/plan.md" "status=${status}"
 </file>
 
 <file path="playbooks/user-stories/playbook.yaml">
@@ -520,7 +526,7 @@ graph:
 
 states:
   main:
-    artifact: run.md
+    artifact: index.md
     initial: reshaking
     statuses:
       reshaking:
