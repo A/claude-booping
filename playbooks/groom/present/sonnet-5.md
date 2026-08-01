@@ -36,8 +36,8 @@ development starts.
 `handoff.md` in the run workdir — reported as `_runs/groom/{slug}/handoff.md`, the only file you
 write.
 
-- Frontmatter: `reviewed_at: null` and nothing else. The approval edge stamps it, not you; on a
-  later pass leave it exactly as it stands.
+- No frontmatter — the file opens at its H1. On a later pass whatever frontmatter is already
+  there is preserved byte for byte; the run's hooks own it.
 - H1 `# handoff — {slug}`, then exactly these H2s, in this order, none extra:
   - `## Approach` — the confirmed design's decision and what it means for the user, in their
     terms. Introduce no architecture call the design did not make.

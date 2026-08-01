@@ -13,7 +13,8 @@ on, the filed plans — and write nothing before you have.
 ## The slug
 
 One slug names the run: `yyyymmdd-hh-mm_{kebab-title}`, minted from the run start time and a short
-title you give the work. Both files below share that stem. Two cases keep an existing slug: a
+title you give the work. Take the timestamp from the local clock — run `date +%Y%m%d-%H-%M` —
+never from memory or UTC. Both files below share that stem. Two cases keep an existing slug: a
 re-run keeps the first pass's, and a run that adopts a parked plan takes that plan's filename stem
 — no fresh slug is minted.
 
@@ -32,7 +33,8 @@ never re-created:
 
 `_runs/groom/{slug}/intake.md` — the framing document:
 
-- frontmatter: `reviewed_at: null`, and nothing else. The confirm edge stamps it.
+- no frontmatter — the file opens at its H1. On a re-run whatever frontmatter is already there
+  is preserved byte for byte; the run's hooks own it.
 - `# Intake — {title}`, then exactly these H2s, in this order:
   - `## Request` — the request as a blockquote, character-for-character. Nothing added, nothing
     tidied, nothing summarised.

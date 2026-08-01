@@ -28,8 +28,7 @@ inputs:
 outputs:
 - "_runs/groom/{slug}/handoff.md — the approval summary: Approach, Milestones, Totals,
   Plan, Checks, Split recommendation (over threshold only), Branch (repo-local vault
-  only), Next; frontmatter carries `reviewed_at: null`, rewritten in place on a later
-  pass"
+  only), Next; no frontmatter authored, rewritten in place on a later pass"
 - the sprint SP total against the split threshold and one line per check 
   outcome, in the harness return
 - on a repo-local vault, the proposed `git switch -c` command for the driver to 

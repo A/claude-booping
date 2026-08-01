@@ -40,7 +40,7 @@ write. `plans/{slug}.md` already exists carrying its identity frontmatter and st
 until the plan is drafted.
 
 - Write no frontmatter. The file opens at its H1; on a re-entry whatever frontmatter is already
-  there is preserved byte for byte — the confirm edge stamps `reviewed_at`, not you.
+  there is preserved byte for byte — the run's hooks own it.
 - H1 `# design — {slug}`, then exactly these H2s, in this order, none extra:
   - `## Approach` — the chosen architecture and pattern choice with the rationale that made it
     win, named against the modules and files the blast radius identified

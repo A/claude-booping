@@ -55,7 +55,7 @@ A wave member tagged `*(subgraph)*` covers its `## Subgraph: <name>` intro and t
 
 Only for a render carrying a `## State` section. Every command below takes `--workdir <workdir>`.
 
-1. Workdir: `{{ context.project.directory if context.project else "{vault}" }}/_runs/<playbook>/<run-slug>/`, `<run-slug>` = `{{ "{YYYYMMDD}" }}-<kebab-topic>`. Create it before the first wave; reuse the existing one when resuming.
+1. Workdir: `{{ context.project.directory if context.project else "{vault}" }}/_runs/<playbook>/<run-slug>/`, `<run-slug>` = `{{ "{YYYYMMDD}" }}-<kebab-topic>`, date taken from the local clock — run `date +%Y%m%d`, never from memory. Create it before the first wave; reuse the existing one when resuming.
 2. On entry — first run and every resume — run `booping playbook-state <name> --workdir <workdir>` and start from the reported frontier: skip work whose status is already past it, re-enter at the first non-terminal status, and treat `not-started` as "bootstrap on the first transition".
 3. When a step outcome matches a `When` cell of the `## State` table, judge that row's `Gates` against the artifact. Gates hold → run that state entry's `Advance:` invocation with `<to>` = the row's `To` cell (plus `--instance <slug>` for a per-instance state). Gates fail → do not transition; report what is missing and stop.
 4. The transition report is authoritative — relay it and move on. Never re-read the artifact to verify a transition.

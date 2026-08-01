@@ -18,7 +18,8 @@
             minLines: 15
             contains:
               - '^# handoff — 20260731-14-02_rate-limit-public-api$'
-              - '^---\nreviewed_at: null\n---$'
+            forbids:
+              - '^reviewed_at:'
         noOthers: true
     # SECTIONS-ORDER + CHECKS-THREE (shape) + MILESTONES-TABLE (shape) + PLAN-PATH-STATUS +
     # SPLIT-SHAPE + BRANCH-PROPOSED

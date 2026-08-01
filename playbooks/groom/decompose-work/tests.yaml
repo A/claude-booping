@@ -39,9 +39,6 @@
       config:
         file: 'decomposition\.md$'
         rules: |
-          - select: FRONTMATTER
-            has: { reviewed_at: { enum: ["null"] } }
-
           - select: H1
             count: 1
 
@@ -96,8 +93,8 @@
         if (!decompPath) return fail('decomposition.md not in the written-files manifest');
         const plan = files[planPath];
         const decomp = files[decompPath];
-        if (!/^---\nreviewed_at: null\n---\n/.test(decomp))
-          return fail('decomposition.md frontmatter is not exactly `reviewed_at: null`');
+        if (/^reviewed_at:/m.test(decomp))
+          return fail('decomposition.md must not author a `reviewed_at:` key');
         const TASK_ROW = /^\|[^|]+\|[^|]*\|[^|]*\|\s*(\d+)\s*\|\s*\w+\s*\|\s*$/gm;
         const blocks = plan.split(/\n(?=### M\d+:)/);
         const heading = {}, taskSum = {}, oversized = [];
@@ -217,9 +214,6 @@
       config:
         file: 'decomposition\.md$'
         rules: |
-          - select: FRONTMATTER
-            has: { reviewed_at: { enum: ["null"] } }
-
           - select: H1
             count: 1
             match: 'Decomposition — 20260801-16-05_fix-stale-session-cookie'
@@ -243,8 +237,8 @@
         const decompPath = Object.keys(files).find((p) => /decomposition\.md$/.test(p));
         if (!decompPath) return fail('decomposition.md not in the written-files manifest');
         const decomp = files[decompPath];
-        if (!/^---\nreviewed_at: null\n---\n/.test(decomp))
-          return fail('decomposition.md frontmatter is not exactly `reviewed_at: null`');
+        if (/^reviewed_at:/m.test(decomp))
+          return fail('decomposition.md must not author a `reviewed_at:` key');
         const verdict = /## Verdict\n([\s\S]*?)(?:\n## |\n?$)/.exec(decomp);
         if (!verdict) return fail('decomposition.md carries no ## Verdict section');
         for (const figure of ['5 SP', '3 SP', '9 SP', '35 SP'])
@@ -308,9 +302,6 @@
       config:
         file: 'decomposition\.md$'
         rules: |
-          - select: FRONTMATTER
-            has: { reviewed_at: { enum: ["null"] } }
-
           - select: H1
             count: 1
             match: 'Decomposition — 20260801-17-40_notification-center'
@@ -349,8 +340,8 @@
         const decompPath = Object.keys(files).find((p) => /decomposition\.md$/.test(p));
         if (!decompPath) return fail('decomposition.md not in the written-files manifest');
         const decomp = files[decompPath];
-        if (!/^---\nreviewed_at: null\n---\n/.test(decomp))
-          return fail('decomposition.md frontmatter is not exactly `reviewed_at: null`');
+        if (/^reviewed_at:/m.test(decomp))
+          return fail('decomposition.md must not author a `reviewed_at:` key');
         const splitSection = /## Split candidate\n([\s\S]*?)(?:\n## |\n?$)/.exec(decomp);
         if (!splitSection) return fail('decomposition.md carries no ## Split candidate section');
         const primary = /\*\*Primary\*\*[^\n]*?(\d+)\s*SP/.exec(splitSection[1]);
@@ -439,8 +430,8 @@
         if (!decompPath) return fail('decomposition.md not in the written-files manifest');
         const plan = files[planPath];
         const decomp = files[decompPath];
-        if (!/^---\nreviewed_at: null\n---\n/.test(decomp))
-          return fail('decomposition.md frontmatter is not exactly `reviewed_at: null`');
+        if (/^reviewed_at:/m.test(decomp))
+          return fail('decomposition.md must not author a `reviewed_at:` key');
         const TASK_ROW = /^\|[^|]+\|[^|]*\|[^|]*\|\s*(\d+)\s*\|\s*\w+\s*\|\s*$/gm;
         const blocks = plan.split(/\n(?=### M\d+:)/);
         const heading = {}, taskSum = {}, oversized = [];

@@ -24,7 +24,7 @@ inputs:
 outputs:
 - "_runs/groom/{slug}/intake.md — the framing document: request verbatim, restated
   problem, task type with its rationale, scope boundaries, scope-challenge questions;
-  frontmatter carries `reviewed_at: null`"
+  no frontmatter authored"
 - "plans/{slug}.md — identity frontmatter only and no body, or the parked plan the
   user named updated in place"
 - "the chosen task type and the resolved plan path, reported in the harness return"

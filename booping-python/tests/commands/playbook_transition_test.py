@@ -379,17 +379,19 @@ def test_file_target_missing_file_exits_2(
     assert not (tmp_path / "nope.md").exists()
 
 
-def test_file_target_without_frontmatter_block_exits_2(
+def test_file_target_without_frontmatter_block_bootstraps_one(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
     _filer_drafting(tmp_path)
     (tmp_path / "raw.md").write_text("no frontmatter here\n")
     capsys.readouterr()
 
-    with pytest.raises(SystemExit) as exc:
-        _filer("filed-raw", tmp_path)
-    assert exc.value.code == 2
-    assert "frontmatter-update failed:" in capsys.readouterr().err
+    _filer("filed-raw", tmp_path)
+
+    assert "frontmatter raw.md: reviewed=" in capsys.readouterr().out
+    text = (tmp_path / "raw.md").read_text()
+    assert text.startswith("---\nreviewed:")
+    assert text.endswith("---\n\nno frontmatter here\n")
 
 
 def test_no_target_hook_still_targets_the_artifact(

@@ -289,7 +289,7 @@ Two hook forms are available on a transition:
 - `frontmatter-update [<file>] <key>=<val> ...` — set frontmatter keys on the artifact, or on `<file>` when a target is given. Values interpolate `@now` (UTC `yyyymmdd hh:mm`), `@today` (`yyyymmdd`) and `@head` (attached repo's HEAD sha).
 - `script <name>` — run `<playbook-dir>/_scripts/<name>`.
 
-The optional `<file>` target is the first token after the hook name that carries no `=`. It resolves against the **run workdir** — the same anchor as the machine's `artifact` — and may carry `{instance}`, interpolated with the instance slug (legal only when an instance is in scope). The file must exist and already have a frontmatter block; a missing file is an error (exit 2) that aborts the transition — nothing is created. In the mutation report a file-target update prints as `frontmatter <file>: k=v` instead of the plain `frontmatter: k=v`.
+The optional `<file>` target is the first token after the hook name that carries no `=`. It resolves against the **run workdir** — the same anchor as the machine's `artifact` — and may carry `{instance}`, interpolated with the instance slug (legal only when an instance is in scope). The file must exist; a missing file is an error (exit 2) that aborts the transition — nothing is created. A file without a frontmatter block gets one prepended, the existing content becoming the body unchanged. In the mutation report a file-target update prints as `frontmatter <file>: k=v` instead of the plain `frontmatter: k=v`.
 
 The status set itself is implicit — the CLI always writes `status: <to>` before running the transition's hooks.
 

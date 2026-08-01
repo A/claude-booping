@@ -108,9 +108,17 @@ def update_frontmatter(
     ``removals`` lists keys to drop from the frontmatter; missing keys are
     ignored.  Removals are applied before updates so a key may be removed and
     re-added in one call.
+
+    A file without a frontmatter block gets one prepended; the existing
+    content becomes the body unchanged.
     """
     text = path.read_text()
-    before_yaml, yaml_text, after_yaml = split_frontmatter_md(text)
+    try:
+        before_yaml, yaml_text, after_yaml = split_frontmatter_md(text)
+    except ValueError:
+        body = text.lstrip("\n")
+        before_yaml, yaml_text = "---\n", ""
+        after_yaml = "---\n\n" + body if body else "---\n"
 
     ry = _rt_yaml()
     data = ry.load(yaml_text)  # type: ignore[reportUnknownMemberType]

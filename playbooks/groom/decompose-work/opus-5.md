@@ -65,9 +65,9 @@ omitted, never empty. Report it as `_runs/groom/{slug}/decomposition.md`, marked
 instead of `[CREATED]` when a re-entered run finds it already there; a re-entry rewrites the file
 in place rather than appending a second round to it.
 
-Frontmatter is `reviewed_at: null` and nothing else — the confirm edge stamps it, not you, and on a
-re-entry whatever value is already there is preserved. The H1 is `# Decomposition — {slug}`,
-carrying the run slug the input names.
+Write no frontmatter — the file opens at its H1, and on a re-entry whatever frontmatter is
+already there is preserved byte for byte; the run's hooks own it. The H1 is
+`# Decomposition — {slug}`, carrying the run slug the input names.
 
 The sections, in this order, none extra:
 

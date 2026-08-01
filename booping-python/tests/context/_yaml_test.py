@@ -163,12 +163,22 @@ class TestUpdateFrontmatter:
         assert "commit: abc123" in text
         assert "title: Foo" in text
 
-    def test_raises_on_missing_frontmatter(self, tmp_path: Path) -> None:
+    def test_bootstraps_missing_frontmatter(self, tmp_path: Path) -> None:
         plan = tmp_path / "plan.md"
-        plan.write_text("no frontmatter here\n")
+        plan.write_text("# Heading\n\nbody text\n")
 
-        with pytest.raises(ValueError, match="opening"):
-            update_frontmatter(plan, {"status": "in-progress"})
+        update_frontmatter(plan, {"status": "in-progress"})
+
+        text = plan.read_text()
+        assert text == "---\nstatus: in-progress\n---\n\n# Heading\n\nbody text\n"
+
+    def test_bootstraps_frontmatter_on_empty_file(self, tmp_path: Path) -> None:
+        plan = tmp_path / "plan.md"
+        plan.write_text("")
+
+        update_frontmatter(plan, {"status": "in-progress"})
+
+        assert plan.read_text() == "---\nstatus: in-progress\n---\n"
 
     def test_removes_key_preserves_others_comments_order_body(self, tmp_path: Path) -> None:
         body = "# Body\n\n- item 1\n- item 2\n"

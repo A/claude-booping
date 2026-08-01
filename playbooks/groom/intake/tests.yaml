@@ -34,8 +34,6 @@
       config:
         file: '_runs/groom/.+/intake\.md$'
         rules: |
-          - select: FRONTMATTER
-            has: { reviewed_at: { enum: ["null"] } }
           - select: H1
             count: 1
             match: '^Intake — .+'

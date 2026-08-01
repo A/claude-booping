@@ -16,7 +16,7 @@ milestones and story points set, external references verified, `summary:` frontm
 and every milestone executable in a fresh session from the plan alone.
 
 One slug names the whole run — `yyyymmdd-hh-mm_{title}`, minted at run start from the request
-title. The plan lands at `plans/{slug}.md` in the vault; the run workdir is
+title, the timestamp taken from the local clock — run `date +%Y%m%d-%H-%M`, never from memory. The plan lands at `plans/{slug}.md` in the vault; the run workdir is
 `{vault}/_runs/groom/{slug}/` — same stem on both. `intake` creates the plan file; the run
 workdir and its `run.md` are bootstrapped by the machine's first transition.
 
