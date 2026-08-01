@@ -1,11 +1,8 @@
 ---
 summary: Settle architecture, pattern choice, data / API / config surface 
-  changes, alternatives and risks; surface every trade-off the user must call.
-detached: opus:high
-review_gate: "The user iterates on the design — rejecting a call, asking for another
-  alternative — and confirms it in-file before any plan body is written; every trade-off
-  call is settled or its recommendation explicitly taken, an unanswered call blocks
-  the gate"
+  changes, alternatives and risks in conversation with the user; every 
+  trade-off that is theirs to call is asked and answered in-step.
+review_gate: null
 reviewed_at: 20260731 19:32
 ---
 

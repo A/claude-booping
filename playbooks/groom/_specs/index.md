@@ -78,7 +78,7 @@ skill itself is untouched and stays the default entry point through beta-testing
 graph:
   intake: []
   research-codebase: [intake]
-  research-web: [intake]
+  research-web: [research-codebase]
   design: [research-codebase, research-web]
   draft-plan: [design]
   decompose-work: [draft-plan]
@@ -87,6 +87,10 @@ graph:
 ```
 
 One run grooms exactly one plan — a split recommended at `present` is groomed as a separate run.
+
+The two research steps are sequential, not a parallel wave: wave co-members must be `detached:`,
+and both research steps are runner-performed (assisted), so a shared wave is impossible — and
+would buy nothing, since the runner executes sequentially anyway.
 
 ## Steps
 
