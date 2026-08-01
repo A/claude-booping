@@ -1,0 +1,63 @@
+- description: step-suite smoke — suite contract for compose
+  vars:
+    target: compose
+    input: file://_fixtures/compose-ready.md
+  metadata:
+    playbook: playbook-authoring
+    step: step-suite
+    fixture: compose-ready
+    tier: smoke
+  assert:
+    # TWO-FILES + CONFIG-SHAPE + TESTS-SHAPE
+    - type: javascript
+      value: file://../../_lib/asserts/files.js
+      config:
+        onTextMode: fail
+        expect:
+          - path: 'mod-review/compose/promptfooconfig\.yaml$'
+            contains:
+              # `file:\/\/` not `file://` — promptfoo loads any config string with a literal
+              # `file://` prefix as an external file and crashes; the regex still matches.
+              - 'file:\/\/opus-5\.md'
+              - 'mode: step'
+              - 'claude_provider\.py'
+              - 'defaultTest: file://\.\./\.\./_lib/grader\.yaml'
+              - 'tests: file://tests\.yaml'
+          - path: 'mod-review/compose/tests\.yaml$'
+            contains:
+              - 'metadata'
+              - 'tier: smoke'
+              - 'tier: regress'
+              - 'javascript'
+              - 'llm-rubric'
+              - 'GROUNDED-FIX'
+        allow: ['mod-review/compose/_fixtures/.+']
+        noOthers: true
+    # NOTES-COMMANDS
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        sections:
+          - name: Changed
+            entry: '^-\s+\[(CREATED|UPDATED)\]\s+`?([^`\s]+)`?$'
+            matchManifest: true
+            seededVar: input
+          - name: Notes
+            entry: '^-?\s*`?just eval-(smoke|regress) .+'
+            minEntries: 2
+            fold: true
+        onlyListed: true
+
+- description: step-suite regress — plan fidelity for compose
+  vars:
+    target: compose
+    input: file://_fixtures/compose-ready.md
+  metadata:
+    playbook: playbook-authoring
+    step: step-suite
+    fixture: compose-ready
+    tier: regress
+  assert:
+    - type: llm-rubric
+      value: "SUITE-FROM-PLAN: The tests implement exactly the confirmed plan — a smoke case whose deterministic asserts pin the example's structure (review H1, Findings, Verdict order, at least one finding), and a regress case carrying a rubric NAMED 'GROUNDED-FIX: …' after the plan's row, both on the small-module fixture the rows name, each case with playbook/step/fixture/tier metadata. Nothing invented beyond the plan's rows. Fails on a missing row, an unnamed rubric, or checks the plan never asked for."

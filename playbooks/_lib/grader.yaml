@@ -1,0 +1,13 @@
+# Shared grader block, file://-included as `defaultTest:` by each suite config.
+# promptfoo resolves these file:// paths from the top-level -c config's dir (the suite dir),
+# NOT from this file — `../_lib` lands in _playbooks/_lib because every suite config sits at
+# _playbooks/<suite>/. Grader mode = the same claude provider with NO `entry` in config
+# (pass-through of the rendered rubricPrompt). Judge model/effort here; env
+# EVAL_JUDGE_MODEL/EFFORT override.
+options:
+  provider:
+    id: file://../../_lib/claude_provider.py
+    config:
+      model: opus
+      effort: medium
+  rubricPrompt: file://../../_lib/rubric_prompt.txt

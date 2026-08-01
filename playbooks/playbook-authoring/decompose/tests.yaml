@@ -1,0 +1,78 @@
+- description: decompose smoke — index contract on the mod-review brief
+  vars:
+    input: file://_fixtures/mod-review-brief.md
+  metadata:
+    playbook: playbook-authoring
+    step: decompose
+    fixture: mod-review-brief
+    tier: smoke
+  assert:
+    # FILE-AT-SLUG + GRAPH-FENCE
+    - type: javascript
+      value: file://../../_lib/asserts/files.js
+      config:
+        onTextMode: fail
+        expect:
+          - path: 'mod-review/_specs/index\.md$'
+            minLines: 15
+            contains: ['graph:']
+        noOthers: true
+    # SECTIONS + TABLE-COLS + MODEL-FORMAT + SPEC-LINKS
+    - type: javascript
+      value: file://../../_lib/asserts/mdcheck.js
+      config:
+        file: 'mod-review/_specs/index\.md$'
+        rules: |
+          - select: H1
+            count: 1
+
+          - select: H1 > H2
+            ordered: [Graph, Steps, Decisions?, Questions?]
+            strict: true
+
+          - select: SECTION("Steps") > TABLE
+            columns: [Step, Summary, Inputs, Artifact, Gate, Model, Spec]
+            rows: { min: 2 }
+
+          # whole-cell match: '\S' would demand a single-char cell — say non-empty as .*\S.*
+          - select: SECTION("Steps") > TABLE > TD[col="Inputs"]
+            match: '(?s).*\S.*'
+
+          - select: SECTION("Steps") > TABLE > TD[col="Step"]
+            match: '^`?[a-z0-9-]+`?$'
+
+          - select: SECTION("Steps") > TABLE > TD[col="Model"]
+            match: '^`?[a-z0-9-]+:(low|medium|high)`?$'
+
+          # require, not match: the prompt says Spec LINKS the spec, so the cell is
+          # `[label](steps/<step>/index.md)` — whole-cell match failed that correct form.
+          - select: SECTION("Steps") > TABLE > TD[col="Spec"]
+            require: 'steps/[a-z0-9-]+/index\.md'
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        sections:
+          - name: Changed
+            entry: '^-\s+\[(CREATED|UPDATED)\]\s+`?([^`\s]+)`?$'
+            matchManifest: true
+            seededVar: input
+          - name: Notes
+            optional: true
+          - name: Questions
+            optional: true
+        onlyListed: true
+
+- description: decompose regress — decomposition fidelity on the mod-review brief
+  vars:
+    input: file://_fixtures/mod-review-brief.md
+  metadata:
+    playbook: playbook-authoring
+    step: decompose
+    fixture: mod-review-brief
+    tier: regress
+  assert:
+    - type: llm-rubric
+      value: "DECOMP-FAITHFUL: The steps, artifacts and gates reflect the described procedure and the brief's wishes — per-file findings stay on disk ungated, one composed report carries the confirming gate, artifacts live under `_review/`. No invented scope: no steps, tools or outputs the description never mentions. Fails on missing sweep/compose-shaped work, a gate on per-file findings, or invented scope."
+    - type: llm-rubric
+      value: "GRAPH-SOUND: The graph orders the per-file sweeping before the composing step, and the per-file fan-out is expressed — either a repeat subgraph or a step whose summary says it runs per changed file. Fails if compose does not depend on the sweeping work or the per-file nature is lost."

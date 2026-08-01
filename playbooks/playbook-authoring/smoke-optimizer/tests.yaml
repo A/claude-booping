@@ -1,0 +1,114 @@
+# smoke-optimizer — three fixtures, one guilty side each: prompt (red-prompt-tree), check
+# (red-check-tree), neither decidable (ambiguous-tree). files.js `noOthers` is the
+# untouched-side check: an untouched seeded file never re-enters the manifest, so any edit to
+# the innocent side surfaces as an unexpected file.
+
+- description: smoke-optimizer smoke — prompt-guilty red on red-prompt-tree
+  vars:
+    target: compose
+    input: file://_fixtures/red-prompt-tree.md
+  metadata:
+    playbook: playbook-authoring
+    step: smoke-optimizer
+    fixture: red-prompt-tree
+    tier: smoke
+  assert:
+    # PROMPT-EDITED + CHECKS-UNTOUCHED
+    - type: javascript
+      value: file://../../_lib/asserts/files.js
+      config:
+        onTextMode: fail
+        expect:
+          - path: 'mod-review/compose/opus-5\.md$'
+            contains: ['Verdict']
+        noOthers: true
+    # RETURN-SECTIONS + CHANGED-NAMES-RED + NEXT-RUN + NO-QUESTIONS
+    - &a_return
+      type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        sections:
+          - name: Changed
+            entry: '^-\s+\[(UPDATED)\]\s+`?([^`\s]+)`?\s+—\s+.*SECTIONS.*$'
+            statuses: [UPDATED]
+            matchManifest: true
+            seededVar: input
+            fold: true
+          - name: Next
+            entry: '^`?just eval-smoke -c mod-review/compose/promptfooconfig\.yaml`?(?:\s.*)?$'
+            fold: true
+          - name: Questions
+            optional: true
+            maxEntries: 0
+        onlyListed: true
+
+- description: smoke-optimizer smoke — check-guilty red on red-check-tree
+  vars:
+    target: compose
+    input: file://_fixtures/red-check-tree.md
+  metadata:
+    playbook: playbook-authoring
+    step: smoke-optimizer
+    fixture: red-check-tree
+    tier: smoke
+  assert:
+    # CHECK-EDITED + PROMPT-UNTOUCHED: the rule shrinks to what the example shows; the
+    # correct prompt is never bent toward the wrong check
+    - type: javascript
+      value: file://../../_lib/asserts/files.js
+      config:
+        onTextMode: fail
+        expect:
+          - path: 'mod-review/compose/tests\.yaml$'
+            forbids: ['Risks']
+        noOthers: true
+    - *a_return
+
+# EXPECTED behavior: the example decides neither side, so the correct outcome is ZERO edits
+# and a question naming FINDING-COUNT — the provider's allow_no_files exists for this case.
+- description: smoke-optimizer smoke — undecidable red on ambiguous-tree
+  vars:
+    target: compose
+    input: file://_fixtures/ambiguous-tree.md
+  metadata:
+    playbook: playbook-authoring
+    step: smoke-optimizer
+    fixture: ambiguous-tree
+    tier: smoke
+  assert:
+    # NO-EDITS
+    - type: javascript
+      value: file://../../_lib/asserts/files.js
+      config:
+        onTextMode: pass
+        expect: []
+        noOthers: true
+    # QUESTION-RETURNED
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        sections:
+          - name: Changed
+            maxEntries: 0
+          - name: Next
+            optional: true
+          - name: Questions
+            entry: '^\d+\.\s+.*FINDING-COUNT.*$'
+            minEntries: 1
+            fold: true
+        onlyListed: true
+
+- description: smoke-optimizer regress — diagnosis grounded on red-prompt-tree
+  vars:
+    target: compose
+    input: file://_fixtures/red-prompt-tree.md
+  metadata:
+    playbook: playbook-authoring
+    step: smoke-optimizer
+    fixture: red-prompt-tree
+    tier: regress
+  assert:
+    - type: llm-rubric
+      value: "DIAGNOSIS-GROUNDED: The Changed rationale states the actual mismatch — the compose prompt body never asked for the Verdict section while the confirmed example artifact carries a `## Verdict` heading — and identifies the PROMPT as the wrong side. The edit adds the missing demand to the prompt body without weakening or rewriting the suite's checks. Fails if the rationale is generic (restates 'SECTIONS failed' without the mismatch), blames the check, or the fix relaxes tests.yaml instead of extending the prompt."

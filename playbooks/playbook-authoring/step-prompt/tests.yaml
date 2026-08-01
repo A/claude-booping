@@ -1,0 +1,57 @@
+- description: step-prompt smoke — prompt pair contract for compose
+  vars:
+    target: compose
+    input: file://_fixtures/compose-spec-manifest.md
+  metadata:
+    playbook: playbook-authoring
+    step: step-prompt
+    fixture: compose-spec-manifest
+    tier: smoke
+  assert:
+    # TWO-FILES + BODY-CLEAN + WRAPPER-SHAPE
+    - type: javascript
+      value: file://../../_lib/asserts/files.js
+      config:
+        onTextMode: fail
+        expect:
+          - path: 'mod-review/compose/opus-5\.md$'
+            minLines: 8
+            forbids: ['^---$', '\{%', '\{\{']
+          - path: 'mod-review/compose/prompt\.md$'
+            contains:
+              - '^summary:'
+              - '^agent: opus:medium$'
+              - '^review_gate:'
+              - '^inputs:'
+              - '^outputs:'
+              - '\{% include "opus-5\.md" %\}'
+            forbids: ['^name:']
+        noOthers: true
+    # NOTES-VERIFY
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        sections:
+          - name: Changed
+            entry: '^-\s+\[(CREATED|UPDATED)\]\s+`?([^`\s]+)`?$'
+            matchManifest: true
+            seededVar: input
+          - name: Notes
+            entry: '^-?\s*`?just verify-wrapper .+'
+            minEntries: 1
+            fold: true
+        onlyListed: true
+
+- description: step-prompt regress — body completeness for compose
+  vars:
+    target: compose
+    input: file://_fixtures/compose-spec-manifest.md
+  metadata:
+    playbook: playbook-authoring
+    step: step-prompt
+    fixture: compose-spec-manifest
+    tier: regress
+  assert:
+    - type: llm-rubric
+      value: "BODY-COMPLETE: The body states what the step receives (the module and the sweep findings), names the file to write (`_review/review.md`) with a document contract matching the confirmed example — the review H1, the Findings section with per-finding fix sketches naming the concrete change, the one-line Verdict — and ends with the step's harness return format. The wrapper's review_gate reproduces the spec's gate. Fails if any of these is missing, or the contract drifts from the example."

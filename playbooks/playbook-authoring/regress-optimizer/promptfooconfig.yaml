@@ -1,0 +1,24 @@
+# regress-optimizer step — read baseline judge failures, tune the prompt; the harness runs
+# baseline and verify. output_mode: files — the consumer edits the seeded step tree in place.
+# allow_no_files: the wrong-rubric fixture's correct outcome is ZERO edits plus a question,
+# which the provider would otherwise reject as a misread task.
+description: playbook-authoring regress-optimizer
+
+prompts:
+  - id: file://opus-5.md
+    label: opus-5
+
+providers:
+  - id: file://../../_lib/claude_provider.py
+    config:
+      mode: step
+      context:
+        - _lib/return-contract.md
+      output_mode: files
+      allow_no_files: true
+      model: opus
+      effort: medium
+
+defaultTest: file://../../_lib/grader.yaml
+
+tests: file://tests.yaml
