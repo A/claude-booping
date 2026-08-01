@@ -4,28 +4,31 @@ Run-time context:
 
 - project: `claude-booping` (the booping plugin repo)
 - run slug: `20260801-sprints-report-script`
-- run workdir: `_runs/groom/20260801-sprints-report-script/`
-- plan file: `plans/20260801-sprints-report-script.md` — already created by intake, identity
+- run workdir: the plan directory `plans/20260801-sprints-report-script/`
+- plan file: `plans/20260801-sprints-report-script/plan.md` — already created by intake, identity
   frontmatter only
 
-The upstream artifacts follow: the confirmed framing, the blast-radius map, and the
-external-practice findings.
+The run's `index.md` is on disk in that directory, carrying the sections the earlier steps wrote:
+`## Framing` and `## Blast radius`. `research.md` sits beside it — the user asked for web
+research at intake. Read them off disk; nothing is summarised here.
 
-## Confirmed framing — `_runs/groom/20260801-sprints-report-script/intake.md`
+## Context files
 
-```markdown
+<file path="plans/20260801-sprints-report-script/index.md">
 ---
-reviewed_at: 20260801 09:32
+status: designing
 ---
-# Intake — sprints report as a playbook script
+# Sprints report as a playbook script
 
-## Request
+## Framing
+
+### Request
 
 > sprints.md should stop being a booping built-in. The groom playbook should render it from its
 > own `_scripts/` hook on the transition edges, and booping's `render-sprints` — the subcommand
 > and the automatic post hook — should go away.
 
-## Restated problem
+### Restated problem
 
 Today the vault snapshot is a framework concern: `render-sprints` is a `booping` subcommand and
 an entry in `plan.hooks.post`, so every `booping transition` re-renders `sprints.md` whatever
@@ -34,14 +37,14 @@ the direction is that playbook-specific behaviour lives in the playbook. The req
 the render into a groom-playbook-local script fired as a `script` hook on the machine's edges,
 then retire the core surface it replaces.
 
-## Task type
+### Task type
 
 `feature` — a new capability (a playbook-owned reporting script with its own invocation contract)
 plus the retirement of the built-in it replaces. Not a bug: nothing diverges from expected
 behaviour. Not a refactoring: the invocation surface users depend on changes, not just its
 structure.
 
-## Scope boundaries
+### Scope boundaries
 
 **In scope**
 
@@ -56,7 +59,12 @@ structure.
 - back-filling or re-rendering historical vaults
 - moving any other post hook (`vault-commit` stays where it is)
 
-## Scope challenge
+### Web research
+
+Requested — the user asked for current practice on how a hook-fired standalone script is
+built before the design is settled.
+
+### Scope challenge
 
 - [x] Should `booping render-sprints` be removed outright, or kept as a deprecated alias for a
       release? — **Answered:** removed outright; every caller is in this repo and moves in the
@@ -65,14 +73,9 @@ structure.
       **Answered:** the whole vault. The file is a snapshot, exactly as today.
 - [x] Any dependency or config surface this must not pull in? — **Answered:** nothing added to
       `booping-python`, and no new config key beyond what the retirement removes.
-```
+## Blast radius
 
-## Blast radius — `_runs/groom/20260801-sprints-report-script/research-codebase.md`
-
-```markdown
-# Blast radius — sprints report as a playbook script
-
-## Touched surfaces
+### Touched surfaces
 
 | Surface | Where | Why it moves | Risk |
 | --- | --- | --- | --- |
@@ -82,7 +85,7 @@ structure.
 | post-hook list | `src/config.yaml` (`plan.hooks.post`) | drops `render-sprints`, leaving `vault-commit` | medium — a project config that pins the list keeps the dead name |
 | CLI docs | `CLAUDE.md`, `documentation/cli.md` | the retired subcommand is documented in both | low |
 
-## Prior art
+### Prior art
 
 - `_scripts/` hooks already run with `BOOPING_WORKDIR`, `BOOPING_ARTIFACT` and `BOOPING_INSTANCE`
   in the environment and cwd set to the run workdir; a non-zero exit aborts the transition. This
@@ -92,7 +95,7 @@ structure.
 - `bin/booping config-get {dotted.key}` is the supported way a shell-side caller reads a resolved
   config value; `bin/booping-create-project` already uses it for `home_dir`.
 
-## Conventions in play
+### Conventions in play
 
 - `skills/` and `agents/` are build artefacts — edit `src/files/**.j2`, then `just build`.
 - Structured data lives in `src/config.yaml`; a skill body never restates it as prose.
@@ -100,24 +103,17 @@ structure.
 - Every change under `booping-python/` clears `just lint`, `just typecheck`, `just test`; a
   removed subcommand takes its tests with it.
 
-## Unknowns for design
+### Unknowns for design
 
 - Whether a script deriving the vault from `BOOPING_WORKDIR` holds for a repo-local vault. The
-  default workdir is `{vault}/_runs/groom/{slug}/`, so the vault is `../../..` — but a repo-local
+  default workdir is the plan directory `{vault}/plans/{slug}/`, so the vault is `../..` — but
+  a repo-local
   vault named by the `.booping` `vault_path:` marker can sit anywhere in the tree, and the script
   has no assembled context to ask.
-```
+</file>
 
-## External practice — `_runs/groom/20260801-sprints-report-script/research-web.md`
-
-```markdown
-# research-web — 20260801-sprints-report-script
-
-## Verdict
-
-Researched — the render leaves the framework's Python process and becomes a standalone program
-fired by a hook; how such a script gets its dependencies, its inputs and its failure policy has no
-precedent in this repository.
+<file path="plans/20260801-sprints-report-script/research.md">
+# research — 20260801-sprints-report-script
 
 ## Approaches
 
@@ -167,9 +163,9 @@ playbook dir.
 | https://peps.python.org/pep-0723/ | inline metadata for a standalone dependency-declaring script | 20260801 |
 | https://docs.astral.sh/uv/guides/scripts/ | `uv run` resolution and caching per script invocation | 20260801 |
 | https://jinja.palletsprojects.com/en/stable/api/ | `Environment` + `FileSystemLoader` for rendering a template from a directory outside the package | 20260801 |
-```
+</file>
 
-## Already on disk — `plans/20260801-sprints-report-script.md`
+## Already on disk — `plans/20260801-sprints-report-script/plan.md`
 
 ```markdown
 ---

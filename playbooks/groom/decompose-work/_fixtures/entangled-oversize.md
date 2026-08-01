@@ -2,21 +2,21 @@
 
 The plan below was written by `draft-plan` against the `backend` template and cross-reviewed in
 place; the user has not read it yet. Refine it against the sizing thresholds and write the
-decomposition artifact into the run workdir.
+`## Refinement` section of the run's `index.md`.
 
 ## Run-time context
 
 - project: `claude-booping` — the booping plugin repository; the vault it grooms into is the
   default `~/Claude/claude-booping/`
 - run slug: `20260801-indexed-plan-store`
-- run workdir: `_runs/groom/20260801-indexed-plan-store/`, relative to the current working
-  directory — it already holds the confirmed framing, the blast-radius map and the confirmed
-  design
-- plan file: `plans/20260801-indexed-plan-store.md`, on disk, written and complete
+- run workdir: the plan directory `plans/20260801-indexed-plan-store/`, relative to the
+  current working directory — its `index.md` already carries the framing, the blast radius
+  and the confirmed design
+- plan file: `plans/20260801-indexed-plan-store/plan.md`, on disk, written and complete
 
 ## Inputs
 
-- the written plan — `plans/20260801-indexed-plan-store.md`, on disk: 4 milestones,
+- the written plan — `plans/20260801-indexed-plan-store/plan.md`, on disk: 4 milestones,
   per-task and per-milestone story points, the sprint total mirrored in its `sp:` frontmatter
 - the re-decompose threshold — **5 SP**: a task at or over it needs another pass before a single
   agent briefing can carry it
@@ -32,7 +32,123 @@ decomposition artifact into the run workdir.
 
 ## Context files
 
-<file path="plans/20260801-indexed-plan-store.md">
+<file path="plans/20260801-indexed-plan-store/index.md">
+---
+status: decomposing
+---
+# Indexed plan store
+
+## Framing
+
+### Request
+
+> Vault reads stay fast as a project's plan history grows past a few hundred plans
+
+### Restated problem
+
+**Current state** — every command that needs plans re-reads the whole `plans/` directory:
+`Context.assemble()` globs `plans/*.md`, parses each file's frontmatter and builds `context.plans`.
+`render-sprints`, `/chat`'s orient refresh and `transition`'s plan lookup each pay that scan.
+
+**Motivation** — one vault has crossed 400 plans and a `booping transition` now spends most of its
+wall time parsing files it never looks at. The scan is O(all plans) for operations that need one
+plan or a summary row per plan.
+
+**Scope** — introducing an on-disk index over the vault's plans, moving the read paths onto it, and
+keeping it current on write. Not: changing the plan file format, the frontmatter keys, or what any
+command outputs.
+
+### Task type
+
+`refactoring` — classified at intake and unchanged since.
+
+### Scope boundaries
+
+**In scope**
+
+- M1: The index and its schema
+- M2: Reads move to the store
+- M3: Writers keep the index current
+- M4: Docs and cleanup
+
+**Out of scope**
+
+- Changing the plan file format or any frontmatter key.
+- A database of any kind — the index is a plain file, rebuilt from markdown.
+- Indexing anything other than plans (retros, lessons, notes stay as they are).
+
+### Web research
+
+Not requested — the request asks for no deep web research, and the user asked for none
+when the scope questions came back.
+
+### Scope challenge
+
+- [x] Anything the request pulls in that it does not state? — answered at intake;
+      the boundaries above are what the answers settled.
+
+## Blast radius
+
+### Touched surfaces
+
+| Surface | Where | Why it moves | Risk |
+| --- | --- | --- | --- |
+| store.py | `booping-python/src/booping/context/store.py` | the index and the only module that touches `plans/` | medium — the plan changes what it does |
+| plan.py | `booping-python/src/booping/context/plan.py` | today's flat-file scan; shrinks to the parsed-plan type | medium — the plan changes what it does |
+| transition.py | `booping-python/src/booping/commands/transition.py` | the hottest single-plan read path | medium — the plan changes what it does |
+
+### Prior art
+
+- `booping-python/src/booping/context/store.py` — the closest existing shape this work follows
+
+### Conventions in play
+
+- the project's own lint / typecheck / test gate runs on every change under these
+  surfaces, and the plan's Final Verification restates it
+
+### Unknowns for design
+
+- none left open: the design below settles every call the map raised
+
+## Design
+
+### Approach
+
+`booping-python/src/booping/context/store.py` gains `PlanStore`, holding the index at
+`{vault}/_booping/plans.index.json`: one record per plan with its path, mtime and parsed
+frontmatter. `PlanStore.all()` returns the summary rows `sprints.md` renders from; `PlanStore.get(path)`
+returns one plan. `Context.assemble()` builds `context.plans` from `PlanStore.all()` instead of
+globbing, and `transition` resolves its target through `PlanStore.get()`. The flat-file scan in
+`context/plan.py` disappears once nothing calls it. Every command that writes a plan calls
+`PlanStore.refresh(path)` before returning, so the next read is already warm.
+
+### Surface changes
+
+- `booping-python/src/booping/context/store.py` — the index and the only module that touches `plans/`
+- `booping-python/src/booping/context/plan.py` — today's flat-file scan; shrinks to the parsed-plan type
+- `booping-python/src/booping/commands/transition.py` — the hottest single-plan read path
+
+### Alternatives
+
+- none survived the blast radius: the approach above is the only one the mapped
+  surfaces support
+
+### Trade-offs
+
+- **Markdown stays the source of truth**: the index is a derived cache — deleting it must cost
+  nothing but a rebuild, so a corrupted or absent index is never a hard failure.
+- **Rebuild on staleness, not on a watcher**: the store compares the index's recorded mtimes
+  against the directory and rebuilds what drifted, so an index edited outside booping self-heals.
+- **One reader type**: every caller goes through `PlanStore`; no command keeps a private path into
+  `plans/`, or the cache and the directory drift apart per caller.
+
+### Risks
+
+- the change lands across several call sites at once — mitigated by the plan's own
+  Final Verification pass
+</file>
+
+<file path="plans/20260801-indexed-plan-store/plan.md">
 ---
 title: Indexed plan store
 type: refactoring

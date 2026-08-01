@@ -2,21 +2,21 @@
 
 The plan below was written by `draft-plan` against the `backend` template and cross-reviewed in
 place; the user has not read it yet. Refine it against the sizing thresholds and write the
-decomposition artifact into the run workdir.
+`## Refinement` section of the run's `index.md`.
 
 ## Run-time context
 
 - project: `claude-booping` — the booping plugin repository; the vault it grooms into is the
   default `~/Claude/claude-booping/`
 - run slug: `20260801-local-vault-directories`
-- run workdir: `_runs/groom/20260801-local-vault-directories/`, relative to the current
-  working directory — it already holds the confirmed framing, the blast-radius map and the
-  confirmed design
-- plan file: `plans/20260801-local-vault-directories.md`, on disk, written and complete
+- run workdir: the plan directory `plans/20260801-local-vault-directories/`, relative to the
+  current working directory — its `index.md` already carries the framing, the blast radius
+  and the confirmed design
+- plan file: `plans/20260801-local-vault-directories/plan.md`, on disk, written and complete
 
 ## Inputs
 
-- the written plan — `plans/20260801-local-vault-directories.md`, on disk: 5 milestones,
+- the written plan — `plans/20260801-local-vault-directories/plan.md`, on disk: 5 milestones,
   per-task and per-milestone story points, the sprint total mirrored in its `sp:` frontmatter
 - the re-decompose threshold — **5 SP**: a task at or over it needs another pass before a single
   agent briefing can carry it
@@ -32,7 +32,128 @@ decomposition artifact into the run workdir.
 
 ## Context files
 
-<file path="plans/20260801-local-vault-directories.md">
+<file path="plans/20260801-local-vault-directories/index.md">
+---
+status: decomposing
+---
+# Local vault directories
+
+## Framing
+
+### Request
+
+> A repo can keep its booping vault inside its own working tree instead of under ~/Claude
+
+### Restated problem
+
+**Current state** — a project's vault always lands at `~/Claude/{project}/`. The `.booping` marker
+in the repo root is checked for existence only; nothing inside it is read. Every vault path in the
+codebase is derived from the home base plus the project name.
+
+**Motivation** — plans, retros and lessons are project artefacts, and for repos that want them
+reviewed in pull requests and versioned with the code, a vault outside the working tree is the
+wrong home. Two teams already keep a hand-maintained copy of their plans in-repo and sync it by
+hand.
+
+**Scope** — reading a vault location out of the `.booping` marker, honouring it everywhere the
+vault is resolved, and scaffolding one. Not: moving an existing vault, syncing between the two
+layouts, or any change to what a vault contains.
+
+### Task type
+
+`feature` — classified at intake and unchanged since.
+
+### Scope boundaries
+
+**In scope**
+
+- M1: Marker parsing
+- M2: Path resolution
+- M3: Callers honour the override
+- M4: Scaffolding
+- M5: Docs and migration notes
+
+**Out of scope**
+
+- Moving or copying an existing vault, in either direction.
+- Any change to what a vault contains or how plans are named.
+- Per-user overrides of a repo's vault location.
+
+### Web research
+
+Not requested — the request asks for no deep web research, and the user asked for none
+when the scope questions came back.
+
+### Scope challenge
+
+- [x] Anything the request pulls in that it does not state? — answered at intake;
+      the boundaries above are what the answers settled.
+
+## Blast radius
+
+### Touched surfaces
+
+| Surface | Where | Why it moves | Risk |
+| --- | --- | --- | --- |
+| vault.py | `booping-python/src/booping/context/vault.py` | the single resolver every caller reads from | medium — the plan changes what it does |
+| project.py | `booping-python/src/booping/context/project.py` | marker discovery and parsing | medium — the plan changes what it does |
+| booping-create-project | `bin/booping-create-project` | the only writer of a marker key | medium — the plan changes what it does |
+| _project_context.j2 | `src/templates/_partials/_project_context.j2` | how skills learn which layout they are on | medium — the plan changes what it does |
+
+### Prior art
+
+- `booping-python/src/booping/context/vault.py` — the closest existing shape this work follows
+
+### Conventions in play
+
+- the project's own lint / typecheck / test gate runs on every change under these
+  surfaces, and the plan's Final Verification restates it
+
+### Unknowns for design
+
+- none left open: the design below settles every call the map raised
+
+## Design
+
+### Approach
+
+`Context.assemble()` resolves the vault once, through a new `resolve_vault(repo_root, config)` in
+`booping-python/src/booping/context/vault.py`. It reads the parsed `.booping` marker, takes
+`vault_path:` when present and resolves it, and otherwise falls back to `<home_dir>/{project}` as
+today. Every caller that builds a vault path — plan loading, `render-sprints`, `vault-commit`,
+`transition` — takes the resolved value off the context instead of re-deriving it. The resolver
+also reports whether the result sits inside the repo working tree, which the project-context
+partial exposes to skill templates as `is_local_vault`.
+
+### Surface changes
+
+- `booping-python/src/booping/context/vault.py` — the single resolver every caller reads from
+- `booping-python/src/booping/context/project.py` — marker discovery and parsing
+- `bin/booping-create-project` — the only writer of a marker key
+- `src/templates/_partials/_project_context.j2` — how skills learn which layout they are on
+
+### Alternatives
+
+- none survived the blast radius: the approach above is the only one the mapped
+  surfaces support
+
+### Trade-offs
+
+- **Marker carries the path**: the location lives in the repo's own `.booping` marker rather than
+  in config — the marker is already the per-repo attachment point, and a vault path is a property
+  of the repo, not of the user's machine.
+- **Relative to the repo root**: a relative `vault_path:` resolves against the repo root, never
+  against the process cwd — skills and hooks run from wherever the user invoked them.
+- **No migration path**: an existing `~/Claude/{project}/` vault stays where it is; adopting a
+  local vault is a manual move plus a marker edit, documented rather than automated.
+
+### Risks
+
+- the change lands across several call sites at once — mitigated by the plan's own
+  Final Verification pass
+</file>
+
+<file path="plans/20260801-local-vault-directories/plan.md">
 ---
 title: Local vault directories
 type: feature
@@ -202,7 +323,7 @@ partial exposes to skill templates as `is_local_vault`.
       `lessons/`, `notes/`, `_booping/`.
 - [ ] The repo's `.booping` marker gains a `vault_path:` key pointing at the scaffolded directory,
       relative to the repo root, without clobbering keys already in the marker.
-- [ ] The scaffolded vault carries a `.gitignore` ignoring `_runs/` and `_booping/.booping.log`.
+- [ ] The scaffolded vault carries a `.gitignore` ignoring `_booping/.booping.log`.
 - [ ] Running it twice is refused rather than overwriting an existing vault.
 
 **Verify**: `bin/booping-create-project demo --local` in a scratch repo, then `bin/booping debug-context | grep vault`

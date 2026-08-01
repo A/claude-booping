@@ -4,39 +4,43 @@ Run-time context:
 
 - project: `claude-booping` (the booping plugin repo)
 - run slug: `20260801-fix-plan-date-stamp-timezone`
-- run workdir: `_runs/groom/20260801-fix-plan-date-stamp-timezone/`
-- plan file: `plans/20260801-fix-plan-date-stamp-timezone.md` — already created by intake,
-  identity frontmatter only
+- run workdir: the plan directory `plans/20260801-fix-plan-date-stamp-timezone/`
+- plan file: `plans/20260801-fix-plan-date-stamp-timezone/plan.md` — already created by
+  intake, identity
+  frontmatter only
 
-The upstream artifacts follow: the confirmed framing, the blast-radius map, and the
-external-practice file — which carries a skip verdict and nothing else.
+The run's `index.md` is on disk in that directory, carrying `## Framing` and `## Blast radius`.
+There is no `research.md`: intake recorded that the user did not ask for web research, and the
+`### Web research` line of the framing says so. Read what is on disk; nothing is summarised here.
 
-## Confirmed framing — `_runs/groom/20260801-fix-plan-date-stamp-timezone/intake.md`
+## Context files
 
-```markdown
+<file path="plans/20260801-fix-plan-date-stamp-timezone/index.md">
 ---
-reviewed_at: 20260801 11:18
+status: designing
 ---
-# Intake — plan date stamps land on the wrong day
+# Plan date stamps land on the wrong day
 
-## Request
+## Framing
+
+### Request
 
 > Plan dates come out on the wrong day. I groomed a plan just after midnight and `created:` says
 > yesterday; `planned:` and `completed:` are off the same way. I'm on UTC+3.
 
-## Restated problem
+### Restated problem
 
 `@now` and `@today` interpolation resolves against UTC in both places that implement it, so for
 anyone not on UTC the stamped calendar day is the UTC day rather than the user's. Near either end
 of the day the plan frontmatter — and every table rendered from it — shows a date the user never
 worked on. The fix is to resolve both tokens in the machine's local zone.
 
-## Task type
+### Task type
 
 `bug` — the behaviour diverges from what the field means to the user (their own calendar day). No
 new capability, no new surface: the same two call sites keep the same signature.
 
-## Scope boundaries
+### Scope boundaries
 
 **In scope**
 
@@ -50,7 +54,12 @@ new capability, no new surface: the same two call sites keep the same signature.
 - `.booping.log` timestamps
 - the `@head` token, which has no timezone dimension
 
-## Scope challenge
+### Web research
+
+Not requested — the request asks for no deep web research, and the user asked for none when
+the scope questions came back.
+
+### Scope challenge
 
 - [x] Should the stamp follow the machine's local zone, or a zone configured in `config.yaml`? —
       **Answered:** the machine's local zone. No config key for it; a configured zone is a feature
@@ -58,14 +67,9 @@ new capability, no new surface: the same two call sites keep the same signature.
 - [x] Back-fill plans already stamped in UTC? — **Answered:** no. The old values stay as they are.
 - [x] Do `.booping.log` lines move to local time too? — **Answered:** no — the log is an event
       log and stays ISO-8601 UTC on purpose.
-```
+## Blast radius
 
-## Blast radius — `_runs/groom/20260801-fix-plan-date-stamp-timezone/research-codebase.md`
-
-```markdown
-# Blast radius — plan date stamps land on the wrong day
-
-## Touched surfaces
+### Touched surfaces
 
 | Surface | Where | Why it moves | Risk |
 | --- | --- | --- | --- |
@@ -73,7 +77,7 @@ new capability, no new surface: the same two call sites keep the same signature.
 | the same resolver, duplicated | `booping-python/src/booping/commands/transition.py` | a second, identical copy of the same three branches | low — the duplication is the reason the bug has two homes |
 | resolver tests | `booping-python/tests/test_frontmatter_update.py`, `booping-python/tests/test_transition.py` | freeze the UTC-formatted strings | low |
 
-## Prior art
+### Prior art
 
 - `booping-python/src/booping/utils.py` already holds the helpers both command modules import —
   the obvious single home for a shared resolver, and the repo's own precedent for de-duplicating
@@ -83,30 +87,19 @@ new capability, no new surface: the same two call sites keep the same signature.
 - Existing tests pin a fixed `datetime` rather than reading the clock; the pattern to follow for
   the local-zone assertions.
 
-## Conventions in play
+### Conventions in play
 
 - `just lint`, `just typecheck`, `just test` gate every change under `booping-python/`.
 - No comments restating code; only WHY for non-obvious bits.
 - Conventional commits with scope (`fix(booping): ...`).
 
-## Unknowns for design
+### Unknowns for design
 
 - None. The fix has one shape, the repo carries the prior art for it, and the scope answers
   settle the two policy questions it could have raised.
-```
+</file>
 
-## External practice — `_runs/groom/20260801-fix-plan-date-stamp-timezone/research-web.md`
-
-```markdown
-# research-web — 20260801-fix-plan-date-stamp-timezone
-
-## Verdict
-
-Skipped — well-trodden: a timezone bug in the project's own date interpolation, no new dependency,
-no new surface, and prior art for the fix already in the repository.
-```
-
-## Already on disk — `plans/20260801-fix-plan-date-stamp-timezone.md`
+## Already on disk — `plans/20260801-fix-plan-date-stamp-timezone/plan.md`
 
 ```markdown
 ---

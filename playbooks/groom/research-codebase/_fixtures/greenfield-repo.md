@@ -55,7 +55,8 @@ behaviour it does not have).
 
 ### Web research
 
-Not requested — the request asks for no deep web research, and the user asked for none when the scope questions came back.
+Not requested — the request asks for no deep web research, and the user asked for none when
+the scope questions came back.
 
 ### Scope challenge
 

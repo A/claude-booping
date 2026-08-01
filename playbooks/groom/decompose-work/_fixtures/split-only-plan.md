@@ -2,21 +2,21 @@
 
 The plan below was written by `draft-plan` against the `backend` template and cross-reviewed in
 place; the user has not read it yet. Refine it against the sizing thresholds and write the
-decomposition artifact into the run workdir.
+`## Refinement` section of the run's `index.md`.
 
 ## Run-time context
 
 - project: `helio` — a team-collaboration SaaS: a Django backend and a React web client in one
   repository
 - run slug: `20260801-notification-center`
-- run workdir: `_runs/groom/20260801-notification-center/`, relative to the current working
-  directory — it already holds the confirmed framing, the blast-radius map and the confirmed
-  design
-- plan file: `plans/20260801-notification-center.md`, on disk, written and complete
+- run workdir: the plan directory `plans/20260801-notification-center/`, relative to the
+  current working directory — its `index.md` already carries the framing, the blast radius
+  and the confirmed design
+- plan file: `plans/20260801-notification-center/plan.md`, on disk, written and complete
 
 ## Inputs
 
-- the written plan — `plans/20260801-notification-center.md`, on disk: 6 milestones,
+- the written plan — `plans/20260801-notification-center/plan.md`, on disk: 6 milestones,
   per-task and per-milestone story points, the sprint total mirrored in its `sp:` frontmatter
 - the re-decompose threshold — **5 SP**: a task at or over it needs another pass before a single
   agent briefing can carry it
@@ -32,7 +32,125 @@ decomposition artifact into the run workdir.
 
 ## Context files
 
-<file path="plans/20260801-notification-center.md">
+<file path="plans/20260801-notification-center/index.md">
+---
+status: decomposing
+---
+# Notification center
+
+## Framing
+
+### Request
+
+> Members get in-app and email notifications for the events they care about, on their own schedule
+
+### Restated problem
+
+**Current state** — three features send email directly from their own view code: mentions,
+invitations and the weekly summary. Each builds its own message, each has its own opt-out column,
+and nothing is recorded in-app. A member who misses an email has no way to see what happened.
+
+**Motivation** — every new feature that wants to notify someone re-invents delivery, and support
+cannot answer "was I notified?". The work is to put one pipeline behind all of them and give
+members a place to read and tune their notifications.
+
+**Scope** — an event → notification pipeline with in-app and email transports, and a preference
+surface members control. Not: push notifications, SMS, or a notification API for third parties.
+
+### Task type
+
+`feature` — classified at intake and unchanged since.
+
+### Scope boundaries
+
+**In scope**
+
+- M1: Event intake
+- M2: Fan-out and dedupe
+- M3: Transports and the in-app feed
+- M4: Preference model and API
+- M5: Preferences UI
+- M6: Digest schedule
+
+**Out of scope**
+
+- Push and SMS transports.
+- A third-party notification API.
+- Per-workspace notification policy set by admins.
+
+### Web research
+
+Not requested — the request asks for no deep web research, and the user asked for none
+when the scope questions came back.
+
+### Scope challenge
+
+- [x] Anything the request pulls in that it does not state? — answered at intake;
+      the boundaries above are what the answers settled.
+
+## Blast radius
+
+### Touched surfaces
+
+| Surface | Where | Why it moves | Risk |
+| --- | --- | --- | --- |
+| api.py | `helio/notifications/api.py` | the single entry point every producer calls | medium — the plan changes what it does |
+| preferences.py | `helio/notifications/preferences.py` | defaults in M2, stored choices in M4 — one interface | medium — the plan changes what it does |
+| fanout.py | `helio/notifications/fanout.py` | where an event becomes notifications | medium — the plan changes what it does |
+| Preferences.tsx | `web/src/notifications/Preferences.tsx` | the member-facing control surface | medium — the plan changes what it does |
+
+### Prior art
+
+- `helio/notifications/api.py` — the closest existing shape this work follows
+
+### Conventions in play
+
+- the project's own lint / typecheck / test gate runs on every change under these
+  surfaces, and the plan's Final Verification restates it
+
+### Unknowns for design
+
+- none left open: the design below settles every call the map raised
+
+## Design
+
+### Approach
+
+Producers call `notify(event)` (`helio/notifications/api.py`), which writes a `NotificationEvent`
+row and enqueues fan-out. The fan-out task (`helio/notifications/fanout.py`) expands an event into
+one `Notification` per recipient per transport, consulting `PreferenceResolver` — which, until M4
+lands, answers every question with the built-in default. Transports
+(`helio/notifications/transports/`) render and deliver. The React client reads the in-app feed from
+`/api/notifications/` and, from M5, edits preferences at `/api/notifications/preferences/`.
+
+### Surface changes
+
+- `helio/notifications/api.py` — the single entry point every producer calls
+- `helio/notifications/preferences.py` — defaults in M2, stored choices in M4 — one interface
+- `helio/notifications/fanout.py` — where an event becomes notifications
+- `web/src/notifications/Preferences.tsx` — the member-facing control surface
+
+### Alternatives
+
+- none survived the blast radius: the approach above is the only one the mapped
+  surfaces support
+
+### Trade-offs
+
+- **Events, not messages**: producers emit a typed domain event; rendering a message per transport
+  is the pipeline's job, so a new transport needs no producer change.
+- **Ship with defaults**: until a member changes anything, every notification type is on and
+  delivered immediately — the pipeline is complete and useful before any preference exists.
+- **Idempotency by event key**: fan-out dedupes on `(event_key, recipient, transport)` so a retried
+  producer cannot double-notify.
+
+### Risks
+
+- the change lands across several call sites at once — mitigated by the plan's own
+  Final Verification pass
+</file>
+
+<file path="plans/20260801-notification-center/plan.md">
 ---
 title: Notification center
 type: feature

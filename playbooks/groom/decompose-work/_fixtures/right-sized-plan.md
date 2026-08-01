@@ -2,20 +2,20 @@
 
 The plan below was written by `draft-plan` against the `backend` template and cross-reviewed in
 place; the user has not read it yet. Refine it against the sizing thresholds and write the
-decomposition artifact into the run workdir.
+`## Refinement` section of the run's `index.md`.
 
 ## Run-time context
 
 - project: `atlas-web` — a Django + DRF application serving a browser client and a mobile app
 - run slug: `20260801-fix-stale-session-cookie`
-- run workdir: `_runs/groom/20260801-fix-stale-session-cookie/`, relative to the current
-  working directory — it already holds the confirmed framing, the blast-radius map and the
-  confirmed design
-- plan file: `plans/20260801-fix-stale-session-cookie.md`, on disk, written and complete
+- run workdir: the plan directory `plans/20260801-fix-stale-session-cookie/`, relative to the
+  current working directory — its `index.md` already carries the framing, the blast radius
+  and the confirmed design
+- plan file: `plans/20260801-fix-stale-session-cookie/plan.md`, on disk, written and complete
 
 ## Inputs
 
-- the written plan — `plans/20260801-fix-stale-session-cookie.md`, on disk: 3 milestones,
+- the written plan — `plans/20260801-fix-stale-session-cookie/plan.md`, on disk: 3 milestones,
   per-task and per-milestone story points, the sprint total mirrored in its `sp:` frontmatter
 - the re-decompose threshold — **5 SP**: a task at or over it needs another pass before a single
   agent briefing can carry it
@@ -31,7 +31,115 @@ decomposition artifact into the run workdir.
 
 ## Context files
 
-<file path="plans/20260801-fix-stale-session-cookie.md">
+<file path="plans/20260801-fix-stale-session-cookie/index.md">
+---
+status: decomposing
+---
+# Fix stale session cookie surviving logout
+
+## Framing
+
+### Request
+
+> Logging out ends the session everywhere, so the next visitor on that browser starts signed out
+
+### Restated problem
+
+**Current state** — `POST /auth/logout/` flushes the server-side session record but returns
+without clearing the `sessionid` cookie. On a shared browser the stale cookie is sent on the next
+request, and because the custom `SessionRefreshMiddleware` re-materialises a session record for any
+cookie it recognises, the visitor lands back inside the previous account.
+
+**Motivation** — reported twice from a shared kiosk build and once from a support agent's browser.
+It is an authentication defect: signing out does not sign the user out.
+
+**Scope** — the logout response and the middleware path that resurrects a flushed session. Not:
+the session backend, token auth for the mobile app, or the session-expiry policy.
+
+### Task type
+
+`bug` — classified at intake and unchanged since.
+
+### Scope boundaries
+
+**In scope**
+
+- M1: Reproduce and cover
+- M2: End the session on logout
+- M3: Guard the regression
+
+**Out of scope**
+
+- Token auth for the mobile app.
+- Session-expiry and idle-timeout policy.
+- The session backend itself.
+
+### Web research
+
+Not requested — the request asks for no deep web research, and the user asked for none
+when the scope questions came back.
+
+### Scope challenge
+
+- [x] Anything the request pulls in that it does not state? — answered at intake;
+      the boundaries above are what the answers settled.
+
+## Blast radius
+
+### Touched surfaces
+
+| Surface | Where | Why it moves | Risk |
+| --- | --- | --- | --- |
+| middleware.py | `atlas/auth/middleware.py` | the path that resurrects a flushed session | medium — the plan changes what it does |
+| views.py | `atlas/auth/views.py` | the logout response that must clear the cookie | medium — the plan changes what it does |
+
+### Prior art
+
+- `atlas/auth/middleware.py` — the closest existing shape this work follows
+
+### Conventions in play
+
+- the project's own lint / typecheck / test gate runs on every change under these
+  surfaces, and the plan's Final Verification restates it
+
+### Unknowns for design
+
+- none left open: the design below settles every call the map raised
+
+## Design
+
+### Approach
+
+`LogoutView.post()` in `atlas/auth/views.py` calls `django.contrib.auth.logout()` and then
+`response.delete_cookie(settings.SESSION_COOKIE_NAME, domain=…, path=…)`.
+`SessionRefreshMiddleware` in `atlas/auth/middleware.py` currently treats "no session record" as
+"refresh it"; it changes to treat an unknown session key as anonymous and to drop the cookie on the
+way out.
+
+### Surface changes
+
+- `atlas/auth/middleware.py` — the path that resurrects a flushed session
+- `atlas/auth/views.py` — the logout response that must clear the cookie
+
+### Alternatives
+
+- none survived the blast radius: the approach above is the only one the mapped
+  surfaces support
+
+### Trade-offs
+
+- **Fix at both ends**: clear the cookie in the logout view *and* stop the middleware from
+  re-materialising a flushed session — either alone leaves a path back in.
+- **Delete rather than expire**: the response deletes the cookie with the same domain and path
+  attributes it was set with, since a mismatched delete is silently ignored by the browser.
+
+### Risks
+
+- the change lands across several call sites at once — mitigated by the plan's own
+  Final Verification pass
+</file>
+
+<file path="plans/20260801-fix-stale-session-cookie/plan.md">
 ---
 title: Fix stale session cookie surviving logout
 type: bug

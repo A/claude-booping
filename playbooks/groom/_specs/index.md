@@ -141,6 +141,8 @@ the vault commit. Full chart — inventory, transitions, script contracts: [stat
 - [x] ~~Accept the two costs the vault-as-workdir mechanism carries, or change one of them?~~ —
       superseded: the plan is now a directory, `plans/{slug}/`, which is also the run workdir;
       the machine's artifact is `index.md` there.
-- [ ] Plan-as-directory breaks `Plan.load_all`'s `plans/*.md` glob and every consumer expecting
-      a plan *file* (`/develop`, `sprints.md`, `/chat`, parked stubs) — the loader change is
-      settled in the groom run for this respec.
+- [x] ~~Plan-as-directory breaks `Plan.load_all`'s `plans/*.md` glob and every consumer expecting
+      a plan *file* (`/develop`, `sprints.md`, `/chat`, parked stubs)~~ — landed: `Plan.load_all`
+      discovers both shapes, keyed by slug, with `plans/{slug}/plan.md` shadowing a same-slug
+      `plans/{slug}.md` (shadowed file warns on stderr). Parked stubs stay files until `intake`
+      adopts one into its directory.

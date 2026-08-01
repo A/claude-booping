@@ -1,12 +1,15 @@
-# verify-references — four fixtures, each at both tiers. smoke asserts the contract (file
-# shape, section skeleton, table columns, the plan diff), regress judges retrieval fidelity.
+# verify-references — four fixtures, each at both tiers. smoke asserts the contract (the
+# `## References` section of the run's `index.md`: verdict LINE first, then its H3s, with the
+# sections other steps own untouched beside it; table columns; the plan diff), regress judges
+# retrieval fidelity.
 # Conventions (contract/arithmetic split, mdcheck's whole-match `match:` vs substring
 # `require:`, `no_empty` cells) are in docs/eval-checks.md.
 #
 # The `Source` column may render as `Source (checked yyyymmdd)` when one date covers every
 # row (see the confirmed example), so its exact header text is NOT pinned via mdcheck's
 # `columns:` — the CHECKED-TABLE arithmetic assert below checks it with a tolerant prefix
-# match instead. `Verdict` never varies, so that column IS asserted through mdcheck.
+# match instead. The `Verdict` column's own vocabulary never varies (`ok`, `corrected`,
+# `unverifiable`, `skipped — stable`), so that column IS asserted through mdcheck.
 #
 # Real runs need live web retrieval; the eval provider denies WebSearch/WebFetch, so the
 # prompt's no-retrieval path (settle against the canonical primary document, cite it by its
@@ -29,10 +32,9 @@
       config:
         onTextMode: fail
         expect:
-          - path: '_runs/groom/20260731-rate-limit-public-api/references\.md$'
-            minLines: 12
-            contains: ['^# references — 20260731-rate-limit-public-api$']
-          - path: 'plans/20260731-rate-limit-public-api\.md$'
+          - path: '^plans/20260731-rate-limit-public-api/index\.md$'
+            minLines: 40
+          - path: '^plans/20260731-rate-limit-public-api/plan\.md$'
             minLines: 50
         noOthers: true
     # SECTIONS + CORRECTIONS-LITERAL(shape) + UNVERIFIABLE(shape) — fixture-agnostic
@@ -40,23 +42,31 @@
       type: javascript
       value: file://../../_lib/asserts/mdcheck.js
       config:
-        file: 'references\.md$'
+        file: 'plans/.+/index\.md$'
         rules: |
           - select: FRONTMATTER
-            count: 0
+            has:
+              status: { enum: [verifying-references] }
 
           - select: H1
             count: 1
 
           - select: H1 > H2
-            ordered: [Verdict, Checked, Corrections, Unverifiable]
+            ordered: [Framing, Blast radius, Design, Refinement, References]
+            strict: true
+
+          - select: SECTION("References") > P
+            count: 1
+
+          - select: SECTION("References") > H3
+            ordered: [Checked, Corrections, Unverifiable]
             strict: true
 
           - select: SECTION("Checked") > TABLE
             rows: { min: 1 }
 
           - select: SECTION("Checked") > TABLE > TD[col="Verdict"]
-            enum: [ok, corrected, unverifiable]
+            enum: [ok, corrected, unverifiable, "skipped — stable"]
 
           - select: SECTION("Corrections") > UL > LI
             min: 1
@@ -72,13 +82,15 @@
     - type: javascript
       value: |
         const fail = (r) => ({ pass: false, score: 0, reason: r });
-        const file = /<file path="[^"]*references\.md">\n([\s\S]*?)\n<\/file>/.exec(output);
-        if (!file) return fail('no references.md in the files manifest');
-        const body = file[1];
+        const file = /<file path="[^"]*\/index\.md">\n([\s\S]*?)\n<\/file>/.exec(output);
+        if (!file) return fail('no index.md in the files manifest');
+        const section = /## References\n([\s\S]*?)(?:\n## |\n?$)/.exec(file[1]);
+        if (!section) return fail('index.md carries no ## References section');
+        const body = section[1];
 
-        const checkedRaw = (/## Checked\n([\s\S]*?)(?:\n## |\n?$)/.exec(body) || [])[1] || '';
+        const checkedRaw = (/### Checked\n([\s\S]*?)(?:\n#{2,3} |\n?$)/.exec(body) || [])[1] || '';
         const tableLines = checkedRaw.split('\n').filter((l) => /^\|/.test(l));
-        if (tableLines.length < 3) return fail('## Checked carries no table with header, delimiter and at least one row');
+        if (tableLines.length < 3) return fail('### Checked carries no table with header, delimiter and at least one row');
         const cellsOf = (l) => l.split('|').map((c) => c.trim()).filter((c, i, a) => i > 0 && i < a.length - 1);
         const header = cellsOf(tableLines[0]);
         const want = ['Reference', 'Named in', 'Plan claims', 'Upstream', 'Verdict'];
@@ -87,19 +99,21 @@
 
         const rows = tableLines.slice(2).map(cellsOf);
 
-        const vline = (/## Verdict\n\n?(.+)/.exec(body) || [])[1];
-        if (!vline || !/^Corrected\b/.test(vline)) return fail('Verdict does not open with `Corrected`: ' + vline);
+        const vline = (/^\s*(\S.*)/.exec(body) || [])[1];
+        if (!vline || !/^Corrected\b/.test(vline)) return fail('the verdict line does not open with `Corrected`: ' + vline);
         const counts = /(\d+)\s+references?\s+checked,\s*(\d+)\s+corrected(?:,\s*(\d+)\s+unverifiable)?/.exec(vline);
-        if (!counts) return fail('Verdict carries no parseable counts: ' + vline);
+        if (!counts) return fail('the verdict line carries no parseable counts: ' + vline);
         const checked = Number(counts[1]), corrected = Number(counts[2]), unverifiable = Number(counts[3] || 0);
-        if (rows.length !== checked) return fail(`Verdict says ${checked} checked, table has ${rows.length} rows`);
+        if (rows.length !== checked) return fail(`the verdict line says ${checked} checked, the table has ${rows.length} rows`);
         const gotCorrected = rows.filter((r) => r[4] === 'corrected').length;
         const gotUnverifiable = rows.filter((r) => r[4] === 'unverifiable').length;
-        if (gotCorrected !== corrected) return fail(`Verdict says ${corrected} corrected, table shows ${gotCorrected}`);
-        if (unverifiable !== gotUnverifiable) return fail(`Verdict says ${unverifiable} unverifiable, table shows ${gotUnverifiable}`);
+        if (gotCorrected !== corrected) return fail(`the verdict line says ${corrected} corrected, the table shows ${gotCorrected}`);
+        if (unverifiable !== gotUnverifiable) return fail(`the verdict line says ${unverifiable} unverifiable, the table shows ${gotUnverifiable}`);
 
         for (const r of rows) {
-          if (r[4] === 'unverifiable') continue;
+          // an unverifiable row, and a row skipped as well-known stable syntax, are the only
+          // ones that may carry `—` instead of a source
+          if (r[4] === 'unverifiable' || /^skipped/.test(r[4])) continue;
           if (!/https:\/\/\S+/.test(r[5])) return fail(`row \`${r[0]}\` (${r[4]}) carries no https:// source: ${r[5]}`);
         }
 
@@ -110,9 +124,9 @@
       value: |
         const fail = (r) => ({ pass: false, score: 0, reason: r });
         const seed = (context && context.vars && context.vars.input) || '';
-        const seedMatch = /<file path="plans\/20260731-rate-limit-public-api\.md">\n([\s\S]*?)\n<\/file>/.exec(seed);
+        const seedMatch = /<file path="plans\/20260731-rate-limit-public-api\/plan\.md">\n([\s\S]*?)\n<\/file>/.exec(seed);
         if (!seedMatch) return fail('fixture carries no seeded plan file');
-        const writtenMatch = /<file path="plans\/20260731-rate-limit-public-api\.md">\n([\s\S]*?)\n<\/file>/.exec(output);
+        const writtenMatch = /<file path="plans\/20260731-rate-limit-public-api\/plan\.md">\n([\s\S]*?)\n<\/file>/.exec(output);
         if (!writtenMatch) return fail('plan file not in the written manifest — the two stale pins need a literal fix');
         const original = seedMatch[1];
         const written = writtenMatch[1];
@@ -175,29 +189,32 @@
       config:
         onTextMode: fail
         expect:
-          - path: '_runs/groom/20260731-fix-stale-session-cookie/references\.md$'
-            minLines: 8
-            contains: ['^# references — 20260731-fix-stale-session-cookie$']
+          - path: '^plans/20260731-fix-stale-session-cookie/index\.md$'
+            minLines: 40
         noOthers: true
     # CLEAN-VERDICT + CLEAN-SECTIONS
     - type: javascript
       value: file://../../_lib/asserts/mdcheck.js
       config:
-        file: 'references\.md$'
+        file: 'plans/.+/index\.md$'
         rules: |
           - select: H1 > H2
-            ordered: [Verdict, Checked]
+            ordered: [Framing, Blast radius, Design, Refinement, References]
             strict: true
 
-          - select: SECTION("Verdict") > P
+          - select: SECTION("References") > P
             count: 1
             require: '^Verified\s+—\s*3\s+references?\s+checked,\s*0\s+corrected\.?'
+
+          - select: SECTION("References") > H3
+            ordered: [Checked]
+            strict: true
 
           - select: SECTION("Checked") > TABLE
             rows: { min: 3, max: 3 }
 
           - select: SECTION("Checked") > TABLE > TD[col="Verdict"]
-            enum: [ok]
+            enum: [ok, "skipped — stable"]
     # CLEAN-RETURN
     - type: javascript
       value: file://../../_lib/asserts/return.js
@@ -225,7 +242,7 @@
     tier: regress
   assert:
     - type: llm-rubric
-      value: "NO-INVENTED-CORRECTIONS: no reference is downgraded to `corrected` or `unverifiable` to manufacture a finding — the pinned dependency, the test-runner flag and the discovery-endpoint payload key are each `ok`, and each row's Upstream cell cites the source confirming that exact literal is current. Fails if any row reads `corrected` or `unverifiable`, or an `ok` row's Upstream cell does not confirm the literal."
+      value: "NO-INVENTED-CORRECTIONS: no reference is downgraded to `corrected` or `unverifiable` to manufacture a finding — the pinned dependency, the test-runner flag and the discovery-endpoint payload key each read `ok` (or, for long-settled syntax, `skipped — stable` with its reason), and every `ok` row's Upstream cell cites the source confirming that exact literal is current. Fails if any row reads `corrected` or `unverifiable`, or an `ok` row's Upstream cell does not confirm the literal."
 
 - description: verify-references smoke — nothing-to-check verdict on no-refs-plan
   vars:
@@ -242,26 +259,28 @@
       config:
         onTextMode: fail
         expect:
-          - path: '_runs/groom/20260801-extract-playbook-section-builders/references\.md$'
-            minLines: 2
-            contains: ['^# references — 20260801-extract-playbook-section-builders$']
+          - path: '^plans/20260801-extract-playbook-section-builders/index\.md$'
+            minLines: 40
         noOthers: true
     # NOTHING-VERDICT
     - type: javascript
       value: file://../../_lib/asserts/mdcheck.js
       config:
-        file: 'references\.md$'
+        file: 'plans/.+/index\.md$'
         rules: |
           - select: H1
             count: 1
 
           - select: H1 > H2
-            ordered: [Verdict]
+            ordered: [Framing, Blast radius, Design, Refinement, References]
             strict: true
 
-          - select: SECTION("Verdict") > P
+          - select: SECTION("References") > P
             count: 1
             require: '^Nothing to check\s+—\s*0\s+references?\s+checked\.'
+
+          - select: SECTION("References") > H3
+            count: 0
     # NOTHING-RETURN
     - type: javascript
       value: file://../../_lib/asserts/return.js
@@ -289,7 +308,7 @@
     tier: regress
   assert:
     - type: llm-rubric
-      value: "NOTHING-JUSTIFIED: the Verdict paragraph names the concrete grounds — every reference the plan makes is repo-internal (module paths like `booping-python/src/booping/render/playbook_sections.py`, the project's own `just test`/`just lint` targets) — instead of treating those repo-internal paths and commands as unverifiable externals. Fails if the rationale lists repo-internal items as rows or as unverifiable, or gives no grounds at all."
+      value: "NOTHING-JUSTIFIED: the verdict line names the concrete grounds — every reference the plan makes is repo-internal (module paths like `booping-python/src/booping/render/playbook_sections.py`, the project's own `just test`/`just lint` targets) — instead of treating those repo-internal paths and commands as unverifiable externals. Fails if the rationale lists repo-internal items as rows or as unverifiable, or gives no grounds at all."
 
 - description: verify-references smoke — literal-only pin fix on invalidating-correction
   vars:
@@ -307,9 +326,9 @@
       value: |
         const fail = (r) => ({ pass: false, score: 0, reason: r });
         const seed = (context && context.vars && context.vars.input) || '';
-        const seedMatch = /<file path="plans\/20260801-summarize-support-tickets\.md">\n([\s\S]*?)\n<\/file>/.exec(seed);
+        const seedMatch = /<file path="plans\/20260801-summarize-support-tickets\/plan\.md">\n([\s\S]*?)\n<\/file>/.exec(seed);
         if (!seedMatch) return fail('fixture carries no seeded plan file');
-        const writtenMatch = /<file path="plans\/20260801-summarize-support-tickets\.md">\n([\s\S]*?)\n<\/file>/.exec(output);
+        const writtenMatch = /<file path="plans\/20260801-summarize-support-tickets\/plan\.md">\n([\s\S]*?)\n<\/file>/.exec(output);
         if (!writtenMatch) return fail('plan file not in the written manifest — the stale `openai==0.28.1` pin needs a literal fix');
         const original = seedMatch[1];
         const written = writtenMatch[1];

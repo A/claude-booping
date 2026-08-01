@@ -5,29 +5,26 @@ Run-time context:
 
 - project: `claude-booping` (the booping plugin repo)
 - run slug: `20260801-sprints-report-script`
-- run workdir: `_runs/groom/20260801-sprints-report-script/`
-- plan file: `plans/20260801-sprints-report-script.md` — created by intake, identity
+- run workdir: the plan directory `plans/20260801-sprints-report-script/`
+- plan file: `plans/20260801-sprints-report-script/plan.md` — created by intake, identity
   frontmatter only
 
 The confirmed framing, the blast-radius map, the confirmed design, the plan file as it stands, the
 plan-template catalogue, the plan frontmatter shape, the sizing scale and the project's
 cross-review configuration follow.
 
-## Confirmed framing — `_runs/groom/20260801-sprints-report-script/intake.md`
+## Confirmed framing — the `## Framing` section of `plans/20260801-sprints-report-script/index.md`
 
 ```markdown
----
-reviewed_at: 20260801 09:32
----
-# Intake — sprints report as a playbook script
+## Framing
 
-## Request
+### Request
 
 > sprints.md should stop being a booping built-in. The groom playbook should render it from its
 > own `_scripts/` hook on the transition edges, and booping's `render-sprints` — the subcommand
 > and the automatic post hook — should go away.
 
-## Restated problem
+### Restated problem
 
 Today the vault snapshot is a framework concern: `render-sprints` is a `booping` subcommand and
 an entry in `plan.hooks.post`, so every `booping transition` re-renders `sprints.md` whatever
@@ -36,14 +33,14 @@ the direction is that playbook-specific behaviour lives in the playbook. The req
 the render into a groom-playbook-local script fired as a `script` hook on the machine's edges,
 then retire the core surface it replaces.
 
-## Task type
+### Task type
 
 `feature` — a new capability (a playbook-owned reporting script with its own invocation contract)
 plus the retirement of the built-in it replaces. Not a bug: nothing diverges from expected
 behaviour. Not a refactoring: the invocation surface users depend on changes, not just its
 structure.
 
-## Scope boundaries
+### Scope boundaries
 
 **In scope**
 
@@ -58,7 +55,12 @@ structure.
 - back-filling or re-rendering historical vaults
 - moving any other post hook (`vault-commit` stays where it is)
 
-## Scope challenge
+### Web research
+
+Requested — the user asked for current practice on how a hook-fired standalone script is
+built before the design is settled.
+
+### Scope challenge
 
 - [x] Should `booping render-sprints` be removed outright, or kept as a deprecated alias for a
       release? — **Answered:** removed outright; every caller is in this repo and moves in the
@@ -69,12 +71,12 @@ structure.
       `booping-python`, and no new config key beyond what the retirement removes.
 ```
 
-## Blast radius — `_runs/groom/20260801-sprints-report-script/research-codebase.md`
+## Blast radius — the `## Blast radius` section of `plans/20260801-sprints-report-script/index.md`
 
 ```markdown
-# Blast radius — sprints report as a playbook script
+## Blast radius
 
-## Touched surfaces
+### Touched surfaces
 
 | Surface | Where | Why it moves | Risk |
 | --- | --- | --- | --- |
@@ -90,7 +92,7 @@ structure.
 | hook wiring | `playbooks/groom/playbook.yaml` | the run machine's edges gain the `script` hooks | medium — a wrong edge renders the snapshot at the wrong moment |
 | CLI docs | `CLAUDE.md`, `documentation/cli.md` | the retired subcommand is documented in both | low |
 
-## Prior art
+### Prior art
 
 - `_scripts/` hooks already run with `BOOPING_WORKDIR`, `BOOPING_ARTIFACT` and `BOOPING_INSTANCE`
   in the environment and cwd set to the run workdir; a non-zero exit aborts the transition. This
@@ -100,7 +102,7 @@ structure.
 - `bin/booping config-get {dotted.key}` is the supported way a shell-side caller reads a resolved
   config value; `bin/booping-create-project` already uses it for `home_dir`.
 
-## Conventions in play
+### Conventions in play
 
 - `skills/` and `agents/` are build artefacts — edit `src/files/**.j2`, then `just build`.
 - Structured data lives in `src/config.yaml`; a skill body never restates it as prose.
@@ -108,23 +110,21 @@ structure.
 - Every change under `booping-python/` clears `just lint`, `just typecheck`, `just test`; a
   removed subcommand takes its tests with it.
 
-## Unknowns for design
+### Unknowns for design
 
 - Whether a script deriving the vault from `BOOPING_WORKDIR` holds for a repo-local vault. The
-  default workdir is `{vault}/_runs/groom/{slug}/`, so the vault is `../../..` — but a repo-local
+  default workdir is the plan directory `{vault}/plans/{slug}/`, so the vault is `../..` — but
+  a repo-local
   vault named by the `.booping` `vault_path:` marker can sit anywhere in the tree, and the script
   has no assembled context to ask.
 ```
 
-## Confirmed design — `_runs/groom/20260801-sprints-report-script/design.md`
+## Confirmed design — the `## Design` section of `plans/20260801-sprints-report-script/index.md`
 
 ```markdown
----
-reviewed_at: 20260801 10:58
----
-# design — 20260801-sprints-report-script
+## Design
 
-## Approach
+### Approach
 
 A standalone uv inline script at `playbooks/groom/_scripts/render-sprints`, fired as a
 `script render-sprints` hook on the run machine's edges. It reads `BOOPING_WORKDIR`, resolves the
@@ -136,7 +136,7 @@ subcommand module and registration go with it, and `plan.hooks.post` in `src/con
 `vault-commit` alone. The script's only framework dependency is `bin/booping config-get`, and only
 on the fallback path.
 
-## Surface changes
+### Surface changes
 
 - **CLI** — `booping render-sprints` removed, together with
   `booping-python/src/booping/commands/render_sprints.py`, its registration in
@@ -160,7 +160,7 @@ on the fallback path.
 - **Template** — `sprints.md.j2` moves under `_scripts/`; columns, sort order and the
   do-not-hand-edit header are unchanged, so the rendered file stays byte-comparable.
 
-## Alternatives
+### Alternatives
 
 - **Thin shell script calling `booping render` on a playbook-local template** — rejected: the
   report would still need the framework to resolve a project context, so the surface the request
@@ -168,7 +168,7 @@ on the fallback path.
 - **Keeping the render as a `booping` subcommand** — rejected: that is the status quo, and the
   request is precisely to move one workflow's report out of the framework.
 
-## Trade-offs
+### Trade-offs
 
 - **Vault resolution: derive from `BOOPING_WORKDIR`, or always ask `booping config-get home_dir`**
   — deriving (`../../..` from the run workdir) needs no framework call and works for the default
@@ -194,7 +194,7 @@ on the fallback path.
   commits per groom run, one per transition, and the diff of any single one says nothing. I want
   a run to land as one commit at the end, covering the plan and the snapshot together."
 
-## Risks
+### Risks
 
 - A vault whose `.booping` marker points somewhere unusual resolves to the wrong directory and the
   snapshot is written outside the vault — mitigated by the `BOOPING_VAULT` override and by
@@ -210,7 +210,7 @@ on the fallback path.
   trees for `render-sprints` as a task in the plan.
 ```
 
-## Already on disk — `plans/20260801-sprints-report-script.md`
+## Already on disk — `plans/20260801-sprints-report-script/plan.md`
 
 ```markdown
 ---

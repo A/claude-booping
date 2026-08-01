@@ -1,15 +1,15 @@
 # Input — under-threshold-plain
 
 Assemble the approval summary for this run and put it to the user. This is the first
-presentation of the plan — no handoff has been written before.
+presentation of the plan — the run's `index.md` carries no `## Approval` section yet.
 
 ## Run-time context
 
 - project: `claude-booping` — the booping plugin repo, a uv Python project with a Jinja2
   rendering pipeline
 - run slug: `20260801-plan-summary-frontmatter`
-- run workdir: `_runs/groom/20260801-plan-summary-frontmatter/`, relative to the current
-  working directory
+- run workdir: the plan directory `plans/20260801-plan-summary-frontmatter/`, relative to the
+  current working directory
 - the current working directory **is the project vault**, and the vault lives **outside the
   repository being planned**: it is the default `~/Claude/claude-booping/`, the repo's `.booping`
   marker carries no `vault_path:` key, and nothing this run writes lands in the repo's working
@@ -19,13 +19,11 @@ presentation of the plan — no handoff has been written before.
 
 ## Inputs
 
-- the drafted plan — `plans/20260801-plan-summary-frontmatter.md`, on disk; the
-  decomposition pass left it untouched and the user confirmed it as drafted
-- the confirmed design — `_runs/groom/20260801-plan-summary-frontmatter/design.md`, on disk
-- the split threshold and the decomposition pass's outcome —
-  `_runs/groom/20260801-plan-summary-frontmatter/decomposition.md`, on disk
-- the reference-verification results —
-  `_runs/groom/20260801-plan-summary-frontmatter/references.md`, on disk
+- the drafted plan — `plans/20260801-plan-summary-frontmatter/plan.md`, on disk; the
+  decomposition pass left it untouched — the user has not read it yet
+- the run's `index.md` — `plans/20260801-plan-summary-frontmatter/index.md`, on disk: `## Framing`,
+  `## Blast radius`, the confirmed `## Design`, the `## Refinement` verdict with the split
+  candidate the sizing pass flagged, and the `## References` results
 - the cross-review outcome, as `draft-plan` returned it:
 
   > - cross-review: no `cross_review` agent configured — not run
@@ -34,7 +32,139 @@ presentation of the plan — no handoff has been written before.
 
 ## Context files
 
-<file path="plans/20260801-plan-summary-frontmatter.md">
+<file path="plans/20260801-plan-summary-frontmatter/index.md">
+---
+status: presenting
+---
+# Plan summary line in frontmatter
+
+## Framing
+
+### Request
+
+> The sprints snapshot says what each plan is for without opening it
+
+### Restated problem
+
+**Current state** — `sprints.md` lists every plan by title and status. A title is a handle, not a
+description, so working out what a plan is actually for means opening it.
+
+**Motivation** — the snapshot is the one place the whole vault is visible at once, and it is the
+least informative view of it.
+
+**Scope** — a `summary:` frontmatter key, loaded with the rest of the plan's frontmatter and
+rendered as a column in the snapshot. Not: back-filling summaries into existing plans, and not
+any change to the snapshot's sort order or its other columns.
+
+### Task type
+
+`feature` — classified at intake and unchanged since.
+
+### Scope boundaries
+
+**In scope**
+
+- M1: Frontmatter key
+- M2: Snapshot column
+
+**Out of scope**
+
+- Back-filling summaries into plans that predate the key.
+- Any change to the snapshot's sort order or its existing columns.
+
+### Web research
+
+Not requested — the request asks for no deep web research, and the user asked for none
+when the scope questions came back.
+
+### Scope challenge
+
+- [x] Anything the request pulls in that it does not state? — answered at intake;
+      the boundaries above are what the answers settled.
+
+## Blast radius
+
+### Touched surfaces
+
+| Surface | Where | Why it moves | Risk |
+| --- | --- | --- | --- |
+| plan.py | `booping-python/src/booping/context/plan.py` | the plan model and its frontmatter loader | medium — the plan changes what it does |
+| sprints.md.j2 | `src/templates/sprints.md.j2` | the snapshot template | medium — the plan changes what it does |
+| template_plan_frontmatter.md | `docs/template_plan_frontmatter.md` | the documented frontmatter shape | medium — the plan changes what it does |
+
+### Prior art
+
+- `booping-python/src/booping/context/plan.py` — the closest existing shape this work follows
+
+### Conventions in play
+
+- the project's own lint / typecheck / test gate runs on every change under these
+  surfaces, and the plan's Final Verification restates it
+
+### Unknowns for design
+
+- none left open: the design below settles every call the map raised
+
+
+## Design
+
+### Approach
+
+One optional `summary:` string on the plan's frontmatter, loaded by the existing frontmatter
+loader into a nullable field on the plan model, and rendered as one extra column in the snapshot
+template. Truncation happens at render time so the stored line stays whole. Nothing else about
+the snapshot changes — same rows, same order, same other columns.
+
+### Surface changes
+
+- **Frontmatter** — a new optional `summary` key, default `null`, documented with the rest of
+  the shape.
+- **Model** — `Plan.summary: str | None`, populated by the loader that already reads the
+  frontmatter; no new parsing path.
+- **Template** — one column in `sprints.md.j2`, truncated for display.
+- **Docs** — the frontmatter shape doc and the docs-site vault page.
+
+### Alternatives
+
+- **A separate description file per plan** — rejected: a second file to keep in sync with the
+  plan, and invisible in Obsidian's Properties view.
+- **Deriving the summary from the plan's first paragraph** — rejected: the first paragraph is
+  written for a reader who has already opened the plan, and it drifts as the plan is revised.
+
+### Trade-offs
+
+- **Truncate at write time or at render time** — truncating on write keeps the template simple
+  but loses the whole line; truncating on render keeps the stored value whole at the cost of one
+  filter in the template. — **Settled:** truncate at render time.
+- **Required or optional key** — requiring it would make every snapshot row informative but
+  breaks every plan already in the vault. — **Settled:** optional, defaulting to null.
+
+### Risks
+
+- A very long summary could push the snapshot table past a readable width — mitigated by the
+  render-time truncation.
+- A plan file predating the key must still load — mitigated by the null default and a loader
+  test over the absent case.
+
+## Refinement
+
+Skipped — no task sits at or over the 5 SP re-decompose threshold (the largest is 4 SP), and the
+sprint totals 18 SP, under the 35 SP split threshold, so no split candidate is flagged. The plan
+file was not touched.
+
+## References
+
+Verified — 2 references checked, 0 corrected, 0 unverifiable.
+
+### Checked
+
+| Reference | Named in | Plan claims | Upstream | Verdict | Source (checked 20260801) |
+| --------- | -------- | ----------- | -------- | ------- | ------------------------- |
+| Jinja2 `truncate` filter | M2.1 · render-time truncation | the filter takes a length and a `killwords` flag | signature is as the plan names it | ok | https://jinja.palletsprojects.com/en/stable/templates/ |
+| Obsidian Properties typing | M1.2 · documented frontmatter shape | an absent key shows as an empty property rather than an error | matches the documented behaviour | ok | https://help.obsidian.md/Editing+and+formatting/Properties |
+</file>
+
+<file path="plans/20260801-plan-summary-frontmatter/plan.md">
 ---
 title: Plan summary line in frontmatter
 type: feature
@@ -158,75 +288,3 @@ cleanly for those that do not.
 | `## Project vault layout` | name the new frontmatter key | M1.2 |
 </file>
 
-<file path="_runs/groom/20260801-plan-summary-frontmatter/design.md">
----
-reviewed_at: 20260801 11:20
----
-# design — 20260801-plan-summary-frontmatter
-
-## Approach
-
-One optional `summary:` string on the plan's frontmatter, loaded by the existing frontmatter
-loader into a nullable field on the plan model, and rendered as one extra column in the snapshot
-template. Truncation happens at render time so the stored line stays whole. Nothing else about
-the snapshot changes — same rows, same order, same other columns.
-
-## Surface changes
-
-- **Frontmatter** — a new optional `summary` key, default `null`, documented with the rest of
-  the shape.
-- **Model** — `Plan.summary: str | None`, populated by the loader that already reads the
-  frontmatter; no new parsing path.
-- **Template** — one column in `sprints.md.j2`, truncated for display.
-- **Docs** — the frontmatter shape doc and the docs-site vault page.
-
-## Alternatives
-
-- **A separate description file per plan** — rejected: a second file to keep in sync with the
-  plan, and invisible in Obsidian's Properties view.
-- **Deriving the summary from the plan's first paragraph** — rejected: the first paragraph is
-  written for a reader who has already opened the plan, and it drifts as the plan is revised.
-
-## Trade-offs
-
-- **Truncate at write time or at render time** — truncating on write keeps the template simple
-  but loses the whole line; truncating on render keeps the stored value whole at the cost of one
-  filter in the template. — **Settled:** truncate at render time.
-- **Required or optional key** — requiring it would make every snapshot row informative but
-  breaks every plan already in the vault. — **Settled:** optional, defaulting to null.
-
-## Risks
-
-- A very long summary could push the snapshot table past a readable width — mitigated by the
-  render-time truncation.
-- A plan file predating the key must still load — mitigated by the null default and a loader
-  test over the absent case.
-</file>
-
-<file path="_runs/groom/20260801-plan-summary-frontmatter/decomposition.md">
----
-reviewed_at: 20260801 11:52
----
-# Decomposition — 20260801-plan-summary-frontmatter
-
-## Verdict
-
-Skipped — no task sits at or over the 5 SP re-decompose threshold (the largest is 4 SP), and the
-sprint totals 18 SP, under the 35 SP split threshold, so no split candidate is flagged. The plan
-file was not touched.
-</file>
-
-<file path="_runs/groom/20260801-plan-summary-frontmatter/references.md">
-# references — 20260801-plan-summary-frontmatter
-
-## Verdict
-
-Verified — 2 references checked, 0 corrected, 0 unverifiable.
-
-## Checked
-
-| Reference | Named in | Plan claims | Upstream | Verdict | Source (checked 20260801) |
-| --------- | -------- | ----------- | -------- | ------- | ------------------------- |
-| Jinja2 `truncate` filter | M2.1 · render-time truncation | the filter takes a length and a `killwords` flag | signature is as the plan names it | ok | https://jinja.palletsprojects.com/en/stable/templates/ |
-| Obsidian Properties typing | M1.2 · documented frontmatter shape | an absent key shows as an empty property rather than an error | matches the documented behaviour | ok | https://help.obsidian.md/Editing+and+formatting/Properties |
-</file>

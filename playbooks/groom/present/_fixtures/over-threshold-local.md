@@ -1,15 +1,15 @@
 # Input — over-threshold-local
 
 Assemble the approval summary for this run and put it to the user. This is the first
-presentation of the plan — no handoff has been written before.
+presentation of the plan — the run's `index.md` carries no `## Approval` section yet.
 
 ## Run-time context
 
 - project: `northwind-api` — a Django REST API served by gunicorn, with a Redis instance already
   in use as the cache backend
 - run slug: `20260731-rate-limit-public-api`
-- run workdir: `_runs/groom/20260731-rate-limit-public-api/`, relative to the current
-  working directory
+- run workdir: the plan directory `plans/20260731-rate-limit-public-api/`, relative to the
+  current working directory
 - the current working directory **is the project vault**, and the vault lives **inside the
   repository being planned**: the repo's `.booping` marker carries `vault_path: booping`, so the
   vault is the repo's `booping/` directory and every commit the run has made so far landed on
@@ -21,13 +21,12 @@ presentation of the plan — no handoff has been written before.
 
 ## Inputs
 
-- the drafted plan — `plans/20260731-rate-limit-public-api.md`, on disk; refined by the
-  decomposition pass and confirmed by the user, corrections from reference verification folded in
-- the confirmed design — `_runs/groom/20260731-rate-limit-public-api/design.md`, on disk
-- the split threshold and the split candidate the decomposition pass flagged —
-  `_runs/groom/20260731-rate-limit-public-api/decomposition.md`, on disk
-- the reference-verification results —
-  `_runs/groom/20260731-rate-limit-public-api/references.md`, on disk
+- the drafted plan — `plans/20260731-rate-limit-public-api/plan.md`, on disk; refined by the
+  decomposition pass, corrections from reference verification folded in, and not yet read by
+  the user
+- the run's `index.md` — `plans/20260731-rate-limit-public-api/index.md`, on disk: `## Framing`,
+  `## Blast radius`, the confirmed `## Design`, the `## Refinement` verdict with the split
+  candidate the sizing pass flagged, and the `## References` results
 - the cross-review findings and their deferrals, as `draft-plan` returned them (the project
   configures `cross_review.agent: codex`; the reviewer ran once over the finished draft):
 
@@ -40,7 +39,200 @@ presentation of the plan — no handoff has been written before.
 
 ## Context files
 
-<file path="plans/20260731-rate-limit-public-api.md">
+<file path="plans/20260731-rate-limit-public-api/index.md">
+---
+status: presenting
+---
+# Rate limit the public API
+
+## Framing
+
+### Request
+
+> Public API callers get a per-key request quota with standard rate-limit headers
+
+### Restated problem
+
+**Current state** — every `/api/` route is served without admission control; one client's retry
+loop saturates all four gunicorn workers and the rest of the callers queue behind it.
+
+**Motivation** — two incidents this quarter traced to a single caller. Support's only lever today
+is revoking the client's key outright.
+
+**Scope** — per-client quotas on `/api/` routes with standard rate-limit headers, a per-IP quota
+for anonymous callers, and a staged rollout with the operational surface to run it. Not:
+per-endpoint budgets, plan tiers, or any quota-management UI.
+
+### Task type
+
+`feature` — classified at intake and unchanged since.
+
+### Scope boundaries
+
+**In scope**
+
+- M1: Bucket + settings
+- M2: Middleware integration
+- M3: Anonymous quota
+- M4: Rollout
+
+**Out of scope**
+
+- Per-endpoint budgets and plan-tier quotas.
+- Any admin surface for inspecting or resetting a caller's bucket.
+
+### Web research
+
+Not requested — the request asks for no deep web research, and the user asked for none
+when the scope questions came back.
+
+### Scope challenge
+
+- [x] Anything the request pulls in that it does not state? — answered at intake;
+      the boundaries above are what the answers settled.
+
+## Blast radius
+
+### Touched surfaces
+
+| Surface | Where | Why it moves | Risk |
+| --- | --- | --- | --- |
+| middleware.py | `api/middleware.py` | the chain every public route passes through; the limiter lands here | medium — the plan changes what it does |
+| base.py | `settings/base.py` | middleware order and the quota settings | medium — the plan changes what it does |
+|  | `api/ratelimit/` | the bucket primitive, its Lua script, key derivation and metrics | medium — the plan changes what it does |
+|  | `ops/grafana/dashboards/` | provisioned dashboards | medium — the plan changes what it does |
+
+### Prior art
+
+- `api/middleware.py` — the closest existing shape this work follows
+
+### Conventions in play
+
+- the project's own lint / typecheck / test gate runs on every change under these
+  surfaces, and the plan's Final Verification restates it
+
+### Unknowns for design
+
+- none left open: the design below settles every call the map raised
+
+
+## Design
+
+### Approach
+
+A token-bucket limiter in the existing API middleware chain, with the buckets held in the Redis
+instance the cache already uses and keyed on the authenticated client id the middleware resolves.
+Consume and refill run as one Lua script so the check is atomic across gunicorn workers. The
+limiter fails open on a Redis outage, logged at error level; anonymous callers get a per-IP quota
+at a quarter of the authenticated one.
+
+### Surface changes
+
+- **Middleware** — `RateLimitMiddleware` after `AuthMiddleware`, so the client id is resolved
+  before the bucket key is built.
+- **Config** — `RATE_LIMIT_PER_MINUTE`, `RATE_LIMIT_BURST`, `RATE_LIMIT_ANON_DIVISOR` and the
+  staged `RATE_LIMIT_ENFORCE` flag.
+- **HTTP** — `X-RateLimit-Remaining` and `X-RateLimit-Reset` on every `/api/` response; 429 with
+  `Retry-After` over quota.
+- **Dependencies** — the `redis` client, reusing the cache's connection pool rather than opening
+  a second one.
+- **Operations** — throttle/admit counters on the existing metrics scrape, a provisioned
+  dashboard, and a runbook.
+
+### Alternatives
+
+- **Per-worker in-process counters** — rejected: four workers multiply the effective limit by
+  four, and the count resets on every deploy.
+- **A limiter at the reverse proxy** — rejected: the proxy cannot resolve the authenticated
+  client id, so quotas could only be per IP, which is the wrong unit for API keys behind NAT.
+- **A fixed-window counter instead of a token bucket** — rejected: the window boundary admits a
+  double burst, which is the exact failure the incidents showed.
+
+### Trade-offs
+
+- **Failure policy: fail open or fail closed** — failing closed turns a cache outage into an API
+  outage; failing open lets a caller exceed quota for the duration of the outage. — **Settled:**
+  fail open, logged at error level, with the outage rate on the dashboard.
+- **Anonymous quota unit: per IP or none at all** — per IP penalises callers behind a shared
+  NAT; leaving anonymous traffic unlimited leaves the incident path open. — **Settled:** per IP
+  at a quarter quota, read from the trusted proxy header.
+- **Rollout: enforce immediately or observe first** — observing first delays the protection but
+  shows the real distribution before anyone is rejected. — **Settled:** staged, observe first per
+  environment.
+
+### Risks
+
+- A forged forwarded header would let an anonymous caller widen its own quota — mitigated by
+  reading the IP only from the trusted proxy hop.
+- The Lua script runs on every public request and is on the latency path — mitigated by keeping
+  it to one round trip and by the fail-open timeout.
+- Staged rollout leaves observe-mode traffic uncapped for as long as the stage lasts — mitigated
+  by the per-environment flag and the dashboard that shows what enforcement would have rejected.
+
+## Refinement
+
+Refined — 2 tasks sat at or over the 5 SP re-decompose threshold; the sprint totals 44 SP, past
+the 35 SP split threshold, so a split candidate is flagged.
+
+### Re-decomposed
+
+| Was | SP | Became | SP |
+| --- | --- | --- | --- |
+| M2 · Middleware with fail-open handling | 6 | M2 · `RateLimitMiddleware` — bucket check, 429 body and `Retry-After` | 4 |
+| | | M2 · Fail-open path on `redis.TimeoutError` with error-level logging | 3 |
+| M4 · Dashboards and runbook | 5 | M4 · Grafana dashboard provisioned from the repo | 4 |
+| | | M4 · Operator runbook — what to watch, how to widen, how to disable | 3 |
+
+Each half stands alone — its own DoD, its own Verify. The fail-open path ships with its own test
+rather than riding on the middleware task's.
+
+### Totals
+
+| Milestone | Before | After |
+| --- | --- | --- |
+| M1 · Bucket + settings | 8 | 8 |
+| M2 · Middleware integration | 11 | 12 |
+| M3 · Anonymous quota | 9 | 9 |
+| M4 · Rollout | 14 | 15 |
+| **Sprint** | **42** | **44** |
+
+Both splits landed on a pair costing one point more than the task they replaced — the separated
+halves each carry their own verification. The largest surviving task is 4 SP.
+
+### Split candidate
+
+The seam sits between M3 and M4: M1–M3 make the limiter work and enforce quotas for both caller
+kinds; M4 is the staged rollout and the operational surface around it. The first half is
+shippable behind the observe flag without the second; the second is meaningless without the
+first.
+
+- **Primary** — Authenticated rate limiting — M1–M3, 29 SP.
+- **Sibling** — Rate-limit rollout — M4, 15 SP; parked as a `backlog` stub with `split_from:`
+  pointing at the primary, groomed in its own run once the primary merges.
+
+## References
+
+Corrected — 6 references checked, 1 corrected, 0 unverifiable.
+
+### Checked
+
+| Reference | Named in | Plan claims | Upstream | Verdict | Source (checked 20260731) |
+| --------- | -------- | ----------- | -------- | ------- | ------------------------- |
+| `redis` (PyPI) floor | M1.2 · "pin the client" | `redis>=4.6` | the `timeout=` argument the design's fail-open path passes landed in 5.0 | corrected | https://pypi.org/project/redis/ |
+| `Retry-After` with 429 | M2.1 · 429 response | required alongside 429 | RFC 6585 §4 defines exactly this pairing | ok | https://www.rfc-editor.org/rfc/rfc6585 |
+| cache backend path | M1.2 · limiter connection | `django.core.cache.backends.redis.RedisCache` | built in since Django 4.0 | ok | https://docs.djangoproject.com/en/stable/topics/cache/ |
+| `X-RateLimit-*` header names | M2.2 · response headers | `X-RateLimit-Remaining`, `X-RateLimit-Reset` | the conventional pair, matching the names the API gateway already emits on its own throttles | ok | https://datatracker.ietf.org/doc/html/draft-ietf-httpapi-ratelimit-headers |
+| Redis Lua atomicity | Architecture · consume+refill | one `EVAL` runs to completion without interleaving | scripts are atomic for their whole execution | ok | https://redis.io/docs/latest/commands/eval/ |
+| Grafana dashboard provisioning path | M4.3 · `ops/grafana/dashboards/` | provisioned from a repo directory | the provisioning directory layout is as the plan names it | ok | https://grafana.com/docs/grafana/latest/administration/provisioning/ |
+
+### Corrections
+
+- **`redis` floor** — M1, task 1.2: `redis>=4.6` → `redis>=5.0`. The fail-open path passes a
+  connection `timeout=`, which the 4.6 line does not accept; it landed in 5.0.
+  https://pypi.org/project/redis/ (checked 20260731)
+</file>
+
+<file path="plans/20260731-rate-limit-public-api/plan.md">
 ---
 title: Rate limit the public API
 type: feature
@@ -247,133 +439,3 @@ needs to watch it and turn it off.
 | `## Operations` | link the rate-limit runbook | M4.4 |
 </file>
 
-<file path="_runs/groom/20260731-rate-limit-public-api/design.md">
----
-reviewed_at: 20260731 15:10
----
-# design — 20260731-rate-limit-public-api
-
-## Approach
-
-A token-bucket limiter in the existing API middleware chain, with the buckets held in the Redis
-instance the cache already uses and keyed on the authenticated client id the middleware resolves.
-Consume and refill run as one Lua script so the check is atomic across gunicorn workers. The
-limiter fails open on a Redis outage, logged at error level; anonymous callers get a per-IP quota
-at a quarter of the authenticated one.
-
-## Surface changes
-
-- **Middleware** — `RateLimitMiddleware` after `AuthMiddleware`, so the client id is resolved
-  before the bucket key is built.
-- **Config** — `RATE_LIMIT_PER_MINUTE`, `RATE_LIMIT_BURST`, `RATE_LIMIT_ANON_DIVISOR` and the
-  staged `RATE_LIMIT_ENFORCE` flag.
-- **HTTP** — `X-RateLimit-Remaining` and `X-RateLimit-Reset` on every `/api/` response; 429 with
-  `Retry-After` over quota.
-- **Dependencies** — the `redis` client, reusing the cache's connection pool rather than opening
-  a second one.
-- **Operations** — throttle/admit counters on the existing metrics scrape, a provisioned
-  dashboard, and a runbook.
-
-## Alternatives
-
-- **Per-worker in-process counters** — rejected: four workers multiply the effective limit by
-  four, and the count resets on every deploy.
-- **A limiter at the reverse proxy** — rejected: the proxy cannot resolve the authenticated
-  client id, so quotas could only be per IP, which is the wrong unit for API keys behind NAT.
-- **A fixed-window counter instead of a token bucket** — rejected: the window boundary admits a
-  double burst, which is the exact failure the incidents showed.
-
-## Trade-offs
-
-- **Failure policy: fail open or fail closed** — failing closed turns a cache outage into an API
-  outage; failing open lets a caller exceed quota for the duration of the outage. — **Settled:**
-  fail open, logged at error level, with the outage rate on the dashboard.
-- **Anonymous quota unit: per IP or none at all** — per IP penalises callers behind a shared
-  NAT; leaving anonymous traffic unlimited leaves the incident path open. — **Settled:** per IP
-  at a quarter quota, read from the trusted proxy header.
-- **Rollout: enforce immediately or observe first** — observing first delays the protection but
-  shows the real distribution before anyone is rejected. — **Settled:** staged, observe first per
-  environment.
-
-## Risks
-
-- A forged forwarded header would let an anonymous caller widen its own quota — mitigated by
-  reading the IP only from the trusted proxy hop.
-- The Lua script runs on every public request and is on the latency path — mitigated by keeping
-  it to one round trip and by the fail-open timeout.
-- Staged rollout leaves observe-mode traffic uncapped for as long as the stage lasts — mitigated
-  by the per-environment flag and the dashboard that shows what enforcement would have rejected.
-</file>
-
-<file path="_runs/groom/20260731-rate-limit-public-api/decomposition.md">
----
-reviewed_at: 20260731 17:35
----
-# Decomposition — 20260731-rate-limit-public-api
-
-## Verdict
-
-Refined — 2 tasks sat at or over the 5 SP re-decompose threshold; the sprint totals 44 SP, past
-the 35 SP split threshold, so a split candidate is flagged.
-
-## Re-decomposed
-
-| Was | SP | Became | SP |
-| --- | --- | --- | --- |
-| M2 · Middleware with fail-open handling | 6 | M2 · `RateLimitMiddleware` — bucket check, 429 body and `Retry-After` | 4 |
-| | | M2 · Fail-open path on `redis.TimeoutError` with error-level logging | 3 |
-| M4 · Dashboards and runbook | 5 | M4 · Grafana dashboard provisioned from the repo | 4 |
-| | | M4 · Operator runbook — what to watch, how to widen, how to disable | 3 |
-
-Each half stands alone — its own DoD, its own Verify. The fail-open path ships with its own test
-rather than riding on the middleware task's.
-
-## Totals
-
-| Milestone | Before | After |
-| --- | --- | --- |
-| M1 · Bucket + settings | 8 | 8 |
-| M2 · Middleware integration | 11 | 12 |
-| M3 · Anonymous quota | 9 | 9 |
-| M4 · Rollout | 14 | 15 |
-| **Sprint** | **42** | **44** |
-
-Both splits landed on a pair costing one point more than the task they replaced — the separated
-halves each carry their own verification. The largest surviving task is 4 SP.
-
-## Split candidate
-
-The seam sits between M3 and M4: M1–M3 make the limiter work and enforce quotas for both caller
-kinds; M4 is the staged rollout and the operational surface around it. The first half is
-shippable behind the observe flag without the second; the second is meaningless without the
-first.
-
-- **Primary** — Authenticated rate limiting — M1–M3, 29 SP.
-- **Sibling** — Rate-limit rollout — M4, 15 SP; parked as a `backlog` stub with `split_from:`
-  pointing at the primary, groomed in its own run once the primary merges.
-</file>
-
-<file path="_runs/groom/20260731-rate-limit-public-api/references.md">
-# references — 20260731-rate-limit-public-api
-
-## Verdict
-
-Corrected — 6 references checked, 1 corrected, 0 unverifiable.
-
-## Checked
-
-| Reference | Named in | Plan claims | Upstream | Verdict | Source (checked 20260731) |
-| --------- | -------- | ----------- | -------- | ------- | ------------------------- |
-| `redis` (PyPI) floor | M1.2 · "pin the client" | `redis>=4.6` | the `timeout=` argument the design's fail-open path passes landed in 5.0 | corrected | https://pypi.org/project/redis/ |
-| `Retry-After` with 429 | M2.1 · 429 response | required alongside 429 | RFC 6585 §4 defines exactly this pairing | ok | https://www.rfc-editor.org/rfc/rfc6585 |
-| cache backend path | M1.2 · limiter connection | `django.core.cache.backends.redis.RedisCache` | built in since Django 4.0 | ok | https://docs.djangoproject.com/en/stable/topics/cache/ |
-| `X-RateLimit-*` header names | M2.2 · response headers | `X-RateLimit-Remaining`, `X-RateLimit-Reset` | the conventional pair, matching the names the API gateway already emits on its own throttles | ok | https://datatracker.ietf.org/doc/html/draft-ietf-httpapi-ratelimit-headers |
-| Redis Lua atomicity | Architecture · consume+refill | one `EVAL` runs to completion without interleaving | scripts are atomic for their whole execution | ok | https://redis.io/docs/latest/commands/eval/ |
-| Grafana dashboard provisioning path | M4.3 · `ops/grafana/dashboards/` | provisioned from a repo directory | the provisioning directory layout is as the plan names it | ok | https://grafana.com/docs/grafana/latest/administration/provisioning/ |
-
-## Corrections
-
-- **`redis` floor** — M1, task 1.2: `redis>=4.6` → `redis>=5.0`. The fail-open path passes a
-  connection `timeout=`, which the 4.6 line does not accept; it landed in 5.0.
-  https://pypi.org/project/redis/ (checked 20260731)
-</file>

@@ -1,28 +1,146 @@
 # Input — no-refs-plan
 
-The plan below was refined by `decompose-work` and confirmed by the user at the decomposition
-gate. Check every external reference it names against current upstream documentation, correct
-what is wrong, and write the step's artifact into the run workdir.
+The plan below was refined by `decompose-work`; the user has not read it yet — the run's only
+review gate is `present`, after this step. Check every external reference the plan names against
+current upstream documentation, correct what is wrong, and write the `## References` section of
+the run's `index.md`.
 
 ## Run-time context
 
 - project: `claude-booping` (the booping plugin repo)
 - run slug: `20260801-extract-playbook-section-builders`
-- run workdir: `_runs/groom/20260801-extract-playbook-section-builders/`, relative to the
-  current working directory
-- plan file: `plans/20260801-extract-playbook-section-builders.md`, on disk and inlined
-  below
+- run workdir: the plan directory `plans/20260801-extract-playbook-section-builders/`,
+  relative to the current working directory
+- plan file: `plans/20260801-extract-playbook-section-builders/plan.md`, on disk beside the
+  run's `index.md`
 
 ## Inputs
 
-- the confirmed, decomposed plan — the file at the path above
-- the decomposition record for the run, with its confirmation stamp
+- the refined plan — the file at the path above
+- the run's `index.md`, on disk: `## Framing`, `## Blast radius`, `## Design` and the
+  `## Refinement` verdict the sizing pass wrote
 - current upstream documentation for every external reference the plan names — the vendor's own
   docs, release notes, changelogs and package registries, read now rather than recalled
 
 ## Context files
 
-<file path="plans/20260801-extract-playbook-section-builders.md">
+<file path="plans/20260801-extract-playbook-section-builders/index.md">
+---
+status: verifying-references
+---
+# Extract the playbook section builders into their own module
+
+## Framing
+
+### Request
+
+> Playbook rendering keeps working exactly as today, from code that is testable piece by piece
+
+### Restated problem
+
+**Current state** — `booping-python/src/booping/commands/render_playbook.py` both composes the
+rendered procedure and builds every piece of it: the wave list, the mermaid graph, the subgraph
+intros and each step section. The lesson-injection helper exists twice, once there and once in
+`booping-python/src/booping/context/playbook.py`.
+
+**Motivation** — every change to one section's shape reaches for the same 400-line module, and the
+only test that covers a builder is the end-to-end composed-output test, so a builder bug surfaces
+as a diff over the whole document.
+
+**Scope** — moving code and adding tests around the seam. Not: changing rendered output, the
+command's arguments, or the discovery rules.
+
+### Task type
+
+`refactoring` — classified at intake and unchanged since.
+
+### Scope boundaries
+
+**In scope**
+
+- M1: Move the builders
+- M2: Lock the seam with tests
+
+**Out of scope**
+
+- The rendered document's shape, the command's arguments and the discovery rules.
+- The playbook driving partial and the skills that include it.
+
+### Web research
+
+Not requested — the request asks for no deep web research, and the user asked for none
+when the scope questions came back.
+
+### Scope challenge
+
+- [x] Anything the request pulls in that it does not state? — answered at intake;
+      the boundaries above are what the answers settled.
+
+## Blast radius
+
+### Touched surfaces
+
+| Surface | Where | Why it moves | Risk |
+| --- | --- | --- | --- |
+| render_playbook.py | `booping-python/src/booping/commands/render_playbook.py` | loads, collects problems, orders and composes | medium — the plan changes what it does |
+| playbook_sections.py | `booping-python/src/booping/render/playbook_sections.py` | new home for the section builders | medium — the plan changes what it does |
+| playbook.py | `booping-python/src/booping/context/playbook.py` | loses its duplicate lesson helper | medium — the plan changes what it does |
+| test_playbook_sections.py | `booping-python/tests/test_playbook_sections.py` | new per-builder tests | medium — the plan changes what it does |
+
+### Prior art
+
+- `booping-python/src/booping/commands/render_playbook.py` — the closest existing shape this work follows
+
+### Conventions in play
+
+- the project's own lint / typecheck / test gate runs on every change under these
+  surfaces, and the plan's Final Verification restates it
+
+### Unknowns for design
+
+- none left open: the design below settles every call the map raised
+
+## Design
+
+### Approach
+
+A new `booping-python/src/booping/render/playbook_sections.py` holds the wave-list, mermaid,
+subgraph-intro, step-section and lesson-injection builders, each a module-level function over
+already-resolved arguments. `commands/render_playbook.py` keeps loading, problem collection and
+ordering, and composes the document from those calls. `context/playbook.py` imports the lesson
+helper instead of carrying its own copy.
+
+### Surface changes
+
+- `booping-python/src/booping/commands/render_playbook.py` — loads, collects problems, orders and composes
+- `booping-python/src/booping/render/playbook_sections.py` — new home for the section builders
+- `booping-python/src/booping/context/playbook.py` — loses its duplicate lesson helper
+- `booping-python/tests/test_playbook_sections.py` — new per-builder tests
+
+### Alternatives
+
+- none survived the blast radius: the approach above is the only one the mapped
+  surfaces support
+
+### Trade-offs
+
+- **Seam**: builders take resolved data and return strings; the command keeps every read, every
+  problem notice and the ordering. Nothing that touches the filesystem moves.
+- **Duplicate helper**: the copy in `context/playbook.py` is deleted rather than kept in sync — the
+  context layer imports the moved one.
+
+### Risks
+
+- the change lands across several call sites at once — mitigated by the plan's own
+  Final Verification pass
+
+## Refinement
+
+Skipped — no task sits at or over the 5 SP re-decompose threshold (the largest is 3 SP), and the
+sprint totals 8 SP, well under the 35 SP split threshold. The plan file was not touched.
+</file>
+
+<file path="plans/20260801-extract-playbook-section-builders/plan.md">
 ---
 title: Extract the playbook section builders into their own module
 type: refactoring
@@ -136,14 +254,3 @@ end-to-end case.
 - The playbook driving partial and the skills that include it.
 </file>
 
-<file path="_runs/groom/20260801-extract-playbook-section-builders/decomposition.md">
----
-reviewed_at: 20260801 09:58
----
-# Decomposition — 20260801-extract-playbook-section-builders
-
-## Verdict
-
-Skipped — no task sits at or over the 5 SP re-decompose threshold (the largest is 3 SP), and the
-sprint totals 8 SP, well under the 35 SP split threshold. The plan file was not touched.
-</file>
