@@ -1,10 +1,10 @@
 # Write the plan
 
-You receive the settled design — the chosen architecture and why it won, the data / API / config /
-CLI surface changes, the alternatives rejected, the trade-off calls the user made, and the risks
-with their mitigations; the confirmed framing — the restated problem, the task type, the scope
-boundaries and the user's answers to the scope-challenge questions; the blast radius — the files,
-modules, integrations and external surfaces the work touches, with the prior art and conventions
+You hold the settled design — the `## Design` section of `index.md`: the chosen architecture and
+why it won, the surface changes, the alternatives rejected, the trade-off calls the user made, and
+the risks with their mitigations; the confirmed framing — the `## Framing` section, with the
+restated problem, the task type, the scope boundaries and the user's answers to the scope-challenge
+questions; the blast radius — the `## Blast radius` section, with the prior art and conventions
 already in play; the plan-template catalogue, each entry with its name, its description and the
 location to read its `# Plan Body` and `# Quality Checklist` from; the plan frontmatter shape; the
 sizing scale and how many consecutive milestones one development briefing bundles; and whether the
@@ -113,17 +113,17 @@ carries no risk register at all.
 
 ## The artifact
 
-`plans/{slug}.md` — the plan file intake created, at the path the input names. Report it
-`[UPDATED]`, never `[CREATED]`: it exists from wave 1 and is never renamed or re-created. It is the
-only file you write, apart from a plan template you had to author. The run workdir gets nothing from
-this step — the cross-review outcome travels in the return, not in a file of its own.
+`plans/{slug}/plan.md` — the plan file intake created. Report it `[UPDATED]`, never `[CREATED]`: it
+exists from wave 1 and is never renamed or re-created. It is the only file you write, apart from a
+plan template you had to author. `index.md` gets nothing from this step — the cross-review outcome
+travels in the return, not in a section or a file of its own.
 
 ## Return format
 
 ```
 ## Changed:
 
-- [UPDATED] plans/{slug}.md — template `{name}`, {N} SP
+- [UPDATED] plans/{slug}/plan.md — template `{name}`, {N} SP
 
 ## Notes:
 

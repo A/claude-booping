@@ -1,33 +1,30 @@
 # Refine the plan against the sizing thresholds
 
-You receive the written plan — its milestones, its tasks with their DoD and Verify, and the story
-points per task, per milestone and for the sprint — together with the re-decompose threshold, the
-split threshold and the SP scale both are measured on. On a loopback re-entry you also receive the
-user's rework and the estimate or milestone it targets, and a decomposition file already exists on
-disk.
+You hold the written plan at `plans/{slug}/plan.md` — its milestones, its tasks with their DoD and
+Verify, and the story points per task, per milestone and for the sprint. On a loopback re-entry you
+also hold the user's rework and the estimate or milestone it targets, and `index.md` already
+carries a `## Refinement` section.
 
 This is a refinement over the written plan, never a rewrite: split the tasks too large for one
 agent briefing, re-sum the totals from the new leaves, flag the sibling shape when the sprint is
-too large to hold together as one iteration — and touch nothing else. The user reads the plan
-right after this pass, so a task left oversized here is one they read.
+too large to hold together as one iteration — and touch nothing else. The user's first read of the
+plan happens at `present`, right after this pass, so a task left oversized here is one they read.
 
 ## Two thresholds, judged separately
 
-The re-decompose threshold decides whether tasks are split. The split threshold decides whether a
-split candidate is flagged. They are independent conditions and the verdict reports both, always: a
-plan with nothing oversized can still sit past the split threshold, and a plan full of oversized
-tasks can total well under it.
+The **{{ config.sprint.redecompose_threshold }} SP re-decompose threshold** decides whether tasks are split. The **{{ config.sprint.default_threshold_sp }} SP split threshold** decides whether a split candidate is flagged.
+They are independent conditions and the verdict reports both, always: a plan with nothing oversized
+can still sit past the split threshold, and a plan full of oversized tasks can total well under it.
 
 - **Refined** — at least one task sits at or over the re-decompose threshold. Split them, re-sum
-  the totals, and write the split candidate section either way.
-- **Skipped** — no task reaches the re-decompose threshold, and the plan file is not opened for
-  writing at all. `Skipped` is a verdict on the splitting alone: when the sprint total is past the
-  split threshold the file still carries its `## Split candidate`, and the verdict says so in the
+  the totals, and write the split candidate subsection either way.
+- **Skipped** — no task reaches the re-decompose threshold, and `plan.md` is not opened for writing
+  at all. `Skipped` is a verdict on the splitting alone: when the sprint total is past the split
+  threshold the section still carries its `### Split candidate`, and the verdict says so in the
   same breath.
 
-Both figures are the input's and only the input's — name the two thresholds as it gives them, never
-as numbers of your own. Measure a task as the plan estimated it; re-estimating a task down to dodge
-a split is the one move this pass must never make.
+Measure a task as the plan estimated it; re-estimating a task down to dodge a split is the one move
+this pass must never make.
 
 ## Re-decomposing
 
@@ -56,39 +53,35 @@ a split is the one move this pass must never make.
   puts the split to the user, and each sibling is groomed in its own run.
 - When the sprint is under the split threshold, say so in one line and recommend no split — on the
   refined path only. A `Skipped` verdict under the threshold has already reported both figures, and
-  drops the section instead of restating them.
+  drops the subsection instead of restating them.
 
-## The artifact
+## The section to write
 
-Write `decomposition.md` into the run workdir the input names — created on every path, never
-omitted, never empty. Report it as `_runs/groom/{slug}/decomposition.md`, marked `[UPDATED]`
-instead of `[CREATED]` when a re-entered run finds it already there; a re-entry rewrites the file
-in place rather than appending a second round to it.
+`## Refinement` in `plans/{slug}/index.md` — the only thing this step writes besides the plan.
+Preserve the file's frontmatter and the sections other steps own; the section is written on both
+paths, never omitted, never empty, and on a re-entry it is revised in place rather than having a
+second round appended to it.
 
-Write no frontmatter — the file opens at its H1, and on a re-entry whatever frontmatter is
-already there is preserved byte for byte; the run's hooks own it. The H1 is
-`# Decomposition — {slug}`, carrying the run slug the input names.
+The section opens with its verdict line, then carries these H3s, in this order, none extra:
 
-The sections, in this order, none extra:
-
-- `## Verdict` — the word `Refined` or `Skipped`, an em dash, then the counts that decided it: how
-  many tasks sat at or over the re-decompose threshold, and where the sprint total sits against the
-  split threshold. Both thresholds named by their figures.
+- the **verdict line**, before any H3 — the word `Refined` or `Skipped`, an em dash, then the
+  counts that decided it: how many tasks sat at or over the re-decompose threshold, and where the
+  sprint total sits against the split threshold. Both thresholds named by their figures.
 
   ```
-  Refined — 2 tasks sat at or over the {re-decompose threshold} SP threshold; the sprint totals
-  38 SP, past the {split threshold} SP split threshold, so a split candidate is flagged.
+  Refined — 2 tasks sat at or over the {{ config.sprint.redecompose_threshold }} SP threshold; the sprint totals 38 SP,
+  past the {{ config.sprint.default_threshold_sp }} SP split threshold, so a split candidate is flagged.
   ```
 
   On the skip path the count of oversized tasks is zero, so the figure carrying it is the largest
-  task's own SP — name it:
+  task's own SP — name it, and say that the plan file was not touched:
 
   ```
-  Skipped — no task sits at or over the {re-decompose threshold} SP threshold (the largest is
-  3 SP), and the sprint totals 9 SP, well under the {split threshold} SP split threshold. The
-  plan file was not touched.
+  Skipped — no task sits at or over the {{ config.sprint.redecompose_threshold }} SP threshold (the largest is 3 SP),
+  and the sprint totals 9 SP, well under the {{ config.sprint.default_threshold_sp }} SP split threshold.
+  The plan file was not touched.
   ```
-- `## Re-decomposed` — a table with the columns `Was`, `SP`, `Became`, `SP`: one row per oversized
+- `### Re-decomposed` — a table with the columns `Was`, `SP`, `Became`, `SP`: one row per oversized
   task naming what it was and its SP, its first replacement and that replacement's SP, then a row
   per further replacement with the `Was` cells left empty. Name every task by the milestone it
   sits in, in the `Was` and `Became` cells alike — a replacement carries its original's milestone:
@@ -97,14 +90,14 @@ The sections, in this order, none extra:
   | M2 · Resolve the vault path from the marker | 5 | M2 · Read the marker's `vault_path:` key | 2 |
   ```
 
-  A line under the table on why each cut stands alone. Absent when nothing was re-decomposed.
-- `## Totals` — a table with the columns `Milestone`, `Before`, `After`, one row per milestone and
+  A line under the table on why each cut stands alone. Absent on the skip path.
+- `### Totals` — a table with the columns `Milestone`, `Before`, `After`, one row per milestone and
   a bold `**Sprint**` row. Every After figure is summed from the updated plan's own tasks, never
-  carried over from the draft. A line under the table on what actually moved. Absent when nothing
-  was re-decomposed.
-- `## Split candidate` — written only when the sprint total is at or over the split threshold, or
-  when the verdict is `Refined`. A `Skipped` verdict on a sprint under the split threshold carries
-  no such section at all — not even a line saying no split is recommended: the verdict has already
+  carried over from the draft. A line under the table on what actually moved. Absent on the skip
+  path.
+- `### Split candidate` — written when the sprint total is at or over the split threshold, or when
+  the verdict is `Refined`. A `Skipped` verdict on a sprint under the split threshold carries no
+  such subsection at all — not even a line saying no split is recommended: the verdict has already
   said both figures, and the heading is dropped with them.
 
   At or over the split threshold: the seam, the primary and the sibling with their milestone ranges
@@ -122,24 +115,20 @@ The sections, in this order, none extra:
 
 ## Return format
 
-Refined path — the plan entry and the decomposition entry, each annotated with the verdict and its
-counts:
+Refined path — the plan entry and the index entry, each annotated with the verdict and its counts:
 
 ```
 ## Changed:
 
-- [UPDATED] plans/{slug}.md — 2 tasks re-decomposed into 4, totals re-summed
-- [CREATED] _runs/groom/{slug}/decomposition.md — refined
+- [UPDATED] plans/{slug}/plan.md — 2 tasks re-decomposed into 4, totals re-summed
+- [UPDATED] plans/{slug}/index.md — refinement: refined
 
 ## Notes:
 
 - 2 task(s) at or over the re-decompose threshold split into 4; largest surviving task 4 SP
 - sprint total 38 SP, unchanged by the split — both oversized tasks landed on 2 + 3
-- split candidate: primary M1–M3 (22 SP) / sibling M4–M5 (16 SP), seam between M3 and M4
-
-## Questions:
-
-1. Take the split at the M3 / M4 seam, or keep this as one 38 SP sprint?
+- split candidate: primary M1–M3 (22 SP) / sibling M4–M5 (16 SP), seam between M3 and M4 — for
+  present to put to the user
 ```
 
 Skip path — the plan file is absent from `## Changed:` because nothing wrote to it:
@@ -147,22 +136,20 @@ Skip path — the plan file is absent from `## Changed:` because nothing wrote t
 ```
 ## Changed:
 
-- [CREATED] _runs/groom/{slug}/decomposition.md — skipped: nothing oversized
+- [UPDATED] plans/{slug}/index.md — refinement: skipped, nothing oversized
 
 ## Notes:
 
 - no task at or over the re-decompose threshold; largest 3 SP
 - sprint total 9 SP, under the split threshold; no split recommended
 - plan file untouched
-
-## Questions:
 ```
 
 The plan stays out of `## Changed:` whenever nothing was re-decomposed — a sprint past the split
-threshold with no oversized task still reports the one `[CREATED]` line, annotated
-`skipped: nothing oversized, split candidate flagged`.
+threshold with no oversized task still reports the one index entry, annotated
+`refinement: skipped, nothing oversized, split candidate flagged`.
 
-`## Questions:` holds only the sizing calls that are the user's — take the split or keep one
-sprint — one line each, and nothing the thresholds already decided. The reply to the harness is
-these three sections alone: no prose before the first heading, nothing outside them, and no
+This step asks the user nothing and pauses the run for nothing: a sizing call that is theirs — take
+the split or keep one sprint — travels as a `## Notes:` line for `present` to put to them. The
+reply is these two sections alone: no prose before the first heading, nothing outside them, and no
 `(none)` placeholder in an empty section.

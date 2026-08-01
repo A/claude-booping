@@ -1,24 +1,25 @@
 # Present the plan for approval
 
-You receive the drafted plan — its approach, its milestones with their per-milestone and sprint SP
-totals, and the path it lives at; the split threshold with the split candidate the refinement pass
-flagged, its sibling shape and rough sizes, or the note that nothing was flagged; the cross-review
-findings with the deferrals recorded against them, or the note that no cross-review agent is
-configured; the reference-verification results — what was checked, what was corrected, what stayed
-unresolved; and whether the vault lives inside the repository being planned. On a later pass you
-also receive the summary the last round wrote and the user's reply to it — a change request, an
-approval, or neither — with whatever changed in the plan since.
+You hold the finished plan at `plans/{slug}/plan.md` — its approach, its milestones with their
+per-milestone and sprint SP totals; the `## Refinement` section of `index.md` with the split
+candidate the refinement pass flagged, its sibling shape and rough sizes, or the note that nothing
+was flagged; the cross-review findings with the deferrals recorded against them, or the note that
+no cross-review agent is configured; the `## References` section — what was checked, what was
+corrected, what stayed unresolved; and whether the vault lives inside the repository being planned.
+On a later pass you also hold the summary the last round wrote and the user's reply to it — a
+change request, an approval, or neither — with whatever changed in the plan since.
 
-Assemble one screen the user can approve from: the approach, the milestones and their SP totals,
-the plan's path, and the outcome of every check the run performed, so approval is a decision on
-evidence rather than on trust. This is the run's only exit — the plan reaches `/develop` through
-this gate and no other — and the last point at which an oversized sprint is called out before
-development starts.
+This is the run's **single review gate** and the user's first read of the plan. Assemble one screen
+they can approve from, opened **human-first**: what the plan does and why, in prose a stakeholder
+reads, before any mechanics — then the milestones and their SP totals, the plan's path, and the
+outcome of every check the run performed, so approval is a decision on evidence rather than on
+trust. It is also the run's only exit — the plan reaches `/develop` through this gate and no
+other — and the last point at which an oversized sprint is called out before development starts.
 
 ## What is yours and what is not
 
-- The plan is finished before you run. Summarise it, never edit it: `handoff.md` is the only file
-  you write and every other file of the run stays exactly as you found it.
+- The plan is finished before you run. Summarise it, never edit it: `plan.md` and every other file
+  of the run stay exactly as you found them.
 - Re-sum, never re-estimate. Every SP figure is the plan's own, and the milestone rows must sum to
   the total you state.
 - Report only what the inputs carry. A check that did not run reads as not run, a check that found
@@ -31,43 +32,47 @@ development starts.
   siblings; parking the stubs is theirs to do. Say so once and never press it again.
 - The branch offer is an offer: propose the command, run no git.
 
-## The artifact
+## The section to write
 
-`handoff.md` in the run workdir — reported as `_runs/groom/{slug}/handoff.md`, the only file you
-write.
+`## Approval` in `plans/{slug}/index.md` — the only thing this step writes. Preserve the file's
+frontmatter and the sections other steps own; the approval edge stamps `reviewed_at` itself, so
+write no frontmatter key of your own.
 
-- No frontmatter — the file opens at its H1. On a later pass whatever frontmatter is already
-  there is preserved byte for byte; the run's hooks own it.
-- H1 `# handoff — {slug}`, then exactly these H2s, in this order, none extra:
-  - `## Approach` — the confirmed design's decision and what it means for the user, in their
-    terms. Introduce no architecture call the design did not make.
-  - `## Milestones` — a table headed `| # | Milestone | SP | Delivers |`, one row per milestone of
-    the plan: `#` its number as a bare numeral (`1`, never `M1`), `Milestone` its name, `SP` its
-    points as a bare numeral, `Delivers` what it hands over.
-  - `## Totals` — the sprint SP total against the split threshold, stated as over or under it.
-  - `## Plan` — the plan's path and the lifecycle status it currently carries.
-  - `## Checks` — one entry each for decomposition, cross-review and references, in that order,
-    none merged, none dropped. Each says what was found and what became of it: which finding was
-    folded in and where, which was deferred and to where, which reference was corrected and from
-    what to what, what stayed unresolved. A pass that had nothing to do reports that as its
-    outcome — nothing oversized, the total under the threshold — rather than going missing. Never
-    a bare "passed".
-  - `## Split recommendation` — **only when the total passes the threshold.** The sibling shape
-    the refinement pass flagged: each sibling with its milestone range and rough SP, each to be
-    parked as a backlog stub and groomed in its own run, and a closing line, worded exactly:
-    Approving the plan whole is also fine; the siblings are a recommendation, not a requirement.
-    Under the threshold the heading does not appear at all.
-  - `## Branch` — **only when the vault lives inside the repository being planned**, as below.
-    Otherwise the heading does not appear at all.
-  - `## Next` — what approval hands to `/develop`, and where a change request loops back to:
-    milestones, tasks or estimates to the refinement pass, architecture or scope to the design.
-- One screen: decidable end to end without opening the plan, and never down at the plan's
-  task-level detail.
-- On a later pass rewrite the file in place at the path it already has — same H1, same H2 set and
-  order, never appended to. Open each section whose inputs moved since the last round with a bold
-  **Changed this round —** and what moved; leave the rest unmarked. Carry the unchanged check
-  outcomes through in substance — neither re-run nor re-worded into fresh verdicts — and let no
-  superseded figure survive anywhere. Add no round, revision or changelog section.
+These H3s, in this order, none extra:
+
+- `### Summary` — the human-first opening: what the plan does and why it matters, in the terms a
+  stakeholder reads, before a single milestone, SP figure or file path appears. It restates the
+  confirmed design's decision and what it means for the user; it introduces no architecture call
+  the design did not make.
+- `### Milestones` — a table headed `| # | Milestone | SP | Delivers |`, one row per milestone of
+  the plan: `#` its number as a bare numeral (`1`, never `M1`), `Milestone` its name, `SP` its
+  points as a bare numeral, `Delivers` what it hands over.
+- `### Totals` — the sprint SP total against the {{ config.sprint.default_threshold_sp }} SP split threshold,
+  stated as over or under it.
+- `### Plan` — `plans/{slug}/plan.md` and the lifecycle status it currently carries.
+- `### Checks` — one entry each for refinement, cross-review and references, in that order, none
+  merged, none dropped. Each says what was found and what became of it: which finding was folded in
+  and where, which was deferred and to where, which reference was corrected and from what to what,
+  what stayed unresolved. A pass that had nothing to do reports that as its outcome — nothing
+  oversized, the total under the threshold — rather than going missing. Never a bare "passed".
+- `### Split recommendation` — **only when the total passes the threshold.** The sibling shape the
+  refinement pass flagged: each sibling with its milestone range and rough SP, each to be parked as
+  a backlog stub and groomed in its own run, and a closing line, worded exactly: Approving the plan
+  whole is also fine; the siblings are a recommendation, not a requirement. Under the threshold the
+  heading does not appear at all.
+- `### Branch` — **only when the vault lives inside the repository being planned**, as below.
+  Otherwise the heading does not appear at all.
+- `### Next` — what approval hands to `/develop`, and where a change request loops back to:
+  milestones, tasks or estimates to the refinement pass, architecture or scope to the design.
+
+One screen: decidable end to end without opening the plan, and never down at the plan's task-level
+detail.
+
+On a later pass rewrite the section in place — same H3 set and order, never appended to. Open each
+subsection whose inputs moved since the last round with a bold **Changed this round —** and what
+moved; leave the rest unmarked. Carry the unchanged check outcomes through in substance — neither
+re-run nor re-worded into fresh verdicts — and let no superseded figure survive anywhere. Add no
+round, revision or changelog subsection.
 
 ## The branch offer
 
@@ -84,14 +89,14 @@ the branch the repository is currently on, so a branch is worth offering before 
 
 ## Handling the user's reply
 
-- **Approval of the plan** — record it and close. Rewrite the summary, put one `decision:` line in
+- **Approval of the plan** — record it and close. Rewrite the section, put one `decision:` line in
   your notes per call the user settled — the approval and whether a sibling is theirs to park, the
   branch accepted or declined — and return an empty `## Questions:`. Write no status, create no
   sibling stub, run no git.
 - **A change request** — name what it touches and hand it to the driver: milestones, tasks or
-  estimates belong to the refinement pass; architecture or scope belongs to the design. Say which
-  in your notes, leave `## Questions:` empty — the run is leaving this step — and change neither
-  the plan nor the summary's figures, which still describe the round under review.
+  estimates send the run back to `decomposing`; architecture or scope sends it back to `designing`.
+  Say which in your notes, leave `## Questions:` empty — the run is leaving this step — and change
+  neither the plan nor the summary's figures, which still describe the round under review.
 - **Anything else** — a comment on one call, praise for one part, a question — is neither approval
   nor a change request. Record it as the comment it is and ask for approval again in plain terms.
 
@@ -100,12 +105,12 @@ the branch the repository is currently on, so a branch is worth offering before 
 ```
 ## Changed:
 
-- [CREATED] _runs/groom/{slug}/handoff.md
+- [UPDATED] plans/{slug}/index.md — approval summary
 
 ## Notes:
 
-- {total} SP across {n} milestones — {over|under} the {threshold} SP threshold
-- decomposition: {what it re-decomposed and re-summed, or its skip note}
+- {total} SP across {n} milestones — {over|under} the {{ config.sprint.default_threshold_sp }} SP threshold
+- refinement: {what it re-decomposed and re-summed, or its skip note}
 - cross-review: {findings, what was folded in where, what was deferred and where}
 - references: {n} checked, {what was corrected}, {what stayed unresolved}
 - proposed on branch accept: `git switch -c {name}`
@@ -116,9 +121,9 @@ the branch the repository is currently on, so a branch is worth offering before 
 2. Create `{name}` for this plan, or stay on the current branch?
 ```
 
-`[UPDATED]` instead of `[CREATED]` when the file already existed. The recommended split is named on
-the SP line when the total is over the threshold; the branch note and the branch question appear on
-a repo-local vault only; the approval question appears on every pass that puts a summary to the
-user. `## Questions:` comes back empty on the pass that records an approval and on the pass that
-hands a change request back. The reply to the harness is these three sections alone: no prose
-before the first heading, nothing outside them, and no `(none)` placeholder in an empty section.
+The recommended split is named on the SP line when the total is over the threshold; the branch note
+and the branch question appear on a repo-local vault only; the approval question appears on every
+pass that puts a summary to the user. `## Questions:` comes back empty on the pass that records an
+approval and on the pass that hands a change request back. The reply is these three sections alone:
+no prose before the first heading, nothing outside them, and no `(none)` placeholder in an empty
+section.
