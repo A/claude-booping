@@ -1,0 +1,122 @@
+state: run
+graph:
+  intake: []
+  research-codebase: [intake]
+  research-web: [intake]
+  design: [research-codebase, research-web]
+  draft-plan: [design]
+  decompose-work: [draft-plan]
+  verify-references: [decompose-work]
+  present: [verify-references]
+
+states:
+  run:
+    artifact: run.md
+    initial: framing
+    statuses:
+      framing:
+        transitions:
+          - to: awaiting-framing-confirm
+            when: "intake wrote `intake.md` and created `plans/{slug}.md` with its identity frontmatter"
+            hooks: ["script plan-in-spec"]
+      awaiting-framing-confirm:
+        transitions:
+          - to: framing
+            when: "the user's answers change the task type, the restated problem or the scope boundaries"
+          - to: researching
+            when: "the user confirms task type and scope boundaries"
+            gates:
+              - "explicit user confirmation captured — silence never counts"
+              - "every scope-challenge question answered"
+            hooks: ["frontmatter-update intake.md reviewed_at=@now"]
+      researching:
+        transitions:
+          - to: designing
+            when: "both research steps returned — the blast-radius map, and the external-practice findings or their skip note"
+      designing:
+        transitions:
+          - to: awaiting-design-confirm
+            when: "design wrote `design.md` with architecture, surface changes, alternatives and risks"
+      awaiting-design-confirm:
+        transitions:
+          - to: designing
+            when: "the user rejects an architecture call or asks for another alternative"
+          - to: researching
+            when: "the user's objection needs blast radius or external practice the research pass missed"
+          - to: drafting
+            when: "the user confirms architecture, surface changes and trade-offs"
+            gates:
+              - "explicit user confirmation captured — silence never counts"
+            hooks: ["frontmatter-update design.md reviewed_at=@now"]
+      drafting:
+        transitions:
+          - to: decomposing
+            when: "draft-plan wrote `plans/{slug}.md` against the template's Plan Body and passed its Quality Checklist"
+            gates:
+              - "cross-review run and every CRITICAL finding folded in or recorded as a deferral — vacuously satisfied with no `cross_review` agent configured"
+      decomposing:
+        transitions:
+          - to: awaiting-decomposition-confirm
+            when: "decompose-work re-decomposed the oversized tasks and re-summed the totals, or returned the skip note"
+            gates:
+              - "every task under the re-decompose threshold"
+              - "milestone and sprint totals re-summed"
+            hooks: ["script plan-awaiting-plan-review"]
+      awaiting-decomposition-confirm:
+        transitions:
+          - to: decomposing
+            when: "the user reworks milestones, tasks or estimates"
+            hooks: ["script plan-in-spec"]
+          - to: designing
+            when: "the user's rework reopens an architecture call"
+            hooks: ["script plan-in-spec"]
+          - to: verifying-references
+            when: "the user confirms the refined plan and any split candidate"
+            gates:
+              - "explicit user confirmation captured — silence never counts"
+            hooks: ["frontmatter-update decomposition.md reviewed_at=@now"]
+      verifying-references:
+        transitions:
+          - to: presenting
+            when: "every external reference the plan names was checked and the corrections folded into the plan"
+      presenting:
+        transitions:
+          - to: awaiting-approval
+            when: "present wrote `handoff.md` — approval summary, split recommendation if any, handoff to `/develop`"
+      awaiting-approval:
+        transitions:
+          - to: decomposing
+            when: "the user's change request touches milestones, tasks or estimates only"
+            hooks: ["script plan-in-spec"]
+          - to: designing
+            when: "the user's change request reopens architecture or scope"
+            hooks: ["script plan-in-spec"]
+          - to: ready-for-dev
+            when: 'the user explicitly approves the plan — "looks good" counts, silence never does'
+            gates:
+              - "explicit user approval captured"
+            hooks:
+              - "frontmatter-update handoff.md reviewed_at=@now"
+              - "script plan-ready-for-dev"
+      ready-for-dev:
+        terminal: true
+
+    superstates:
+      in-spec:
+        states:
+          - framing
+          - awaiting-framing-confirm
+          - researching
+          - designing
+          - awaiting-design-confirm
+          - drafting
+          - decomposing
+      awaiting-plan-review:
+        states:
+          - awaiting-decomposition-confirm
+          - verifying-references
+          - presenting
+          - awaiting-approval
+      terminal:
+        states:
+          - ready-for-dev

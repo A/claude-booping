@@ -1,0 +1,349 @@
+# verify-references — four fixtures, each at both tiers. smoke asserts the contract (file
+# shape, section skeleton, table columns, the plan diff), regress judges retrieval fidelity.
+# Conventions (contract/arithmetic split, mdcheck's whole-match `match:` vs substring
+# `require:`, `no_empty` cells) are in docs/eval-checks.md.
+#
+# The `Source` column may render as `Source (checked yyyymmdd)` when one date covers every
+# row (see the confirmed example), so its exact header text is NOT pinned via mdcheck's
+# `columns:` — the CHECKED-TABLE arithmetic assert below checks it with a tolerant prefix
+# match instead. `Verdict` never varies, so that column IS asserted through mdcheck.
+#
+# Real runs need live web retrieval; the eval provider denies WebSearch/WebFetch, so the
+# prompt's no-retrieval path (settle against the canonical primary document, cite it by its
+# stable URL, correct anyway, caveat in Notes) is what smoke exercises — the asserts pin
+# shape, table, verdict line and plan diff, never a live-fetched fact. The regress rubrics
+# judge retrieval fidelity and only become meaningful once the harness grants live retrieval.
+
+- description: verify-references smoke — two corrections folded into the plan on corrected-plan
+  vars:
+    input: file://_fixtures/corrected-plan.md
+  metadata:
+    playbook: groom
+    step: verify-references
+    fixture: corrected-plan
+    tier: smoke
+  assert:
+    # FILE-AT-PATH
+    - type: javascript
+      value: file://../../_lib/asserts/files.js
+      config:
+        onTextMode: fail
+        expect:
+          - path: '_runs/groom/20260731-14-02_rate-limit-public-api/references\.md$'
+            minLines: 12
+            contains: ['^# references — 20260731-14-02_rate-limit-public-api$']
+          - path: 'plans/20260731-14-02_rate-limit-public-api\.md$'
+            minLines: 50
+        noOthers: true
+    # SECTIONS + CORRECTIONS-LITERAL(shape) + UNVERIFIABLE(shape) — fixture-agnostic
+    - &a_contract
+      type: javascript
+      value: file://../../_lib/asserts/mdcheck.js
+      config:
+        file: 'references\.md$'
+        rules: |
+          - select: FRONTMATTER
+            count: 0
+
+          - select: H1
+            count: 1
+
+          - select: H1 > H2
+            ordered: [Verdict, Checked, Corrections, Unverifiable]
+            strict: true
+
+          - select: SECTION("Checked") > TABLE
+            rows: { min: 1 }
+
+          - select: SECTION("Checked") > TABLE > TD[col="Verdict"]
+            enum: [ok, corrected, unverifiable]
+
+          - select: SECTION("Corrections") > UL > LI
+            min: 1
+            require: '→'
+
+          - select: SECTION("Corrections") > UL > LI
+            require: 'https://'
+
+          - select: SECTION("Unverifiable") > UL > LI
+            min: 1
+    # CHECKED-TABLE(columns + row count) + VERDICT-LINE + SOURCES-DATED — arithmetic across
+    # the Verdict line and the Checked table that no _lib module cross-references
+    - type: javascript
+      value: |
+        const fail = (r) => ({ pass: false, score: 0, reason: r });
+        const file = /<file path="[^"]*references\.md">\n([\s\S]*?)\n<\/file>/.exec(output);
+        if (!file) return fail('no references.md in the files manifest');
+        const body = file[1];
+
+        const checkedRaw = (/## Checked\n([\s\S]*?)(?:\n## |\n?$)/.exec(body) || [])[1] || '';
+        const tableLines = checkedRaw.split('\n').filter((l) => /^\|/.test(l));
+        if (tableLines.length < 3) return fail('## Checked carries no table with header, delimiter and at least one row');
+        const cellsOf = (l) => l.split('|').map((c) => c.trim()).filter((c, i, a) => i > 0 && i < a.length - 1);
+        const header = cellsOf(tableLines[0]);
+        const want = ['Reference', 'Named in', 'Plan claims', 'Upstream', 'Verdict'];
+        if (header.length !== 6 || want.some((h, i) => header[i] !== h) || !/^Source\b/.test(header[5]))
+          return fail('Checked table columns are not exactly Reference, Named in, Plan claims, Upstream, Verdict, Source: ' + header.join(' | '));
+
+        const rows = tableLines.slice(2).map(cellsOf);
+
+        const vline = (/## Verdict\n\n?(.+)/.exec(body) || [])[1];
+        if (!vline || !/^Corrected\b/.test(vline)) return fail('Verdict does not open with `Corrected`: ' + vline);
+        const counts = /(\d+)\s+references?\s+checked,\s*(\d+)\s+corrected(?:,\s*(\d+)\s+unverifiable)?/.exec(vline);
+        if (!counts) return fail('Verdict carries no parseable counts: ' + vline);
+        const checked = Number(counts[1]), corrected = Number(counts[2]), unverifiable = Number(counts[3] || 0);
+        if (rows.length !== checked) return fail(`Verdict says ${checked} checked, table has ${rows.length} rows`);
+        const gotCorrected = rows.filter((r) => r[4] === 'corrected').length;
+        const gotUnverifiable = rows.filter((r) => r[4] === 'unverifiable').length;
+        if (gotCorrected !== corrected) return fail(`Verdict says ${corrected} corrected, table shows ${gotCorrected}`);
+        if (unverifiable !== gotUnverifiable) return fail(`Verdict says ${unverifiable} unverifiable, table shows ${gotUnverifiable}`);
+
+        for (const r of rows) {
+          if (r[4] === 'unverifiable') continue;
+          if (!/https:\/\/\S+/.test(r[5])) return fail(`row \`${r[0]}\` (${r[4]}) carries no https:// source: ${r[5]}`);
+        }
+
+        return { pass: true, score: 1, reason: `${checked} checked / ${corrected} corrected / ${gotUnverifiable} unverifiable — columns, counts and sources agree` };
+    # PLAN-EDITED + PLAN-UNTOUCHED-ELSE — the written plan equals the seeded plan with exactly
+    # the two confirmed pins swapped, nothing else different
+    - type: javascript
+      value: |
+        const fail = (r) => ({ pass: false, score: 0, reason: r });
+        const seed = (context && context.vars && context.vars.input) || '';
+        const seedMatch = /<file path="plans\/20260731-14-02_rate-limit-public-api\.md">\n([\s\S]*?)\n<\/file>/.exec(seed);
+        if (!seedMatch) return fail('fixture carries no seeded plan file');
+        const writtenMatch = /<file path="plans\/20260731-14-02_rate-limit-public-api\.md">\n([\s\S]*?)\n<\/file>/.exec(output);
+        if (!writtenMatch) return fail('plan file not in the written manifest — the two stale pins need a literal fix');
+        const original = seedMatch[1];
+        const written = writtenMatch[1];
+        const expected = original
+          .split('redis==5.0.1').join('redis==6.4.0')
+          .split('redis:7.2-alpine3.18').join('redis:7.2-alpine');
+        if (expected !== written)
+          return fail('plan diff is not exactly the two confirmed literal replacements — something else in the plan changed');
+        return { pass: true, score: 1, reason: 'plan carries exactly the two literal replacements, nothing else changed' };
+    # RETURN-SHAPE
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        sections:
+          - name: Changed
+            entry: '^-\s+\[(CREATED|UPDATED)\]\s+`?([^`\s]+)`?\s+—\s+\S.*$'
+            matchManifest: true
+            seededVar: input
+            minEntries: 2
+            maxEntries: 2
+          - name: Notes
+            fold: true
+            minEntries: 1
+        onlyListed: true
+
+- description: verify-references regress — retrieval fidelity on corrected-plan
+  vars:
+    input: file://_fixtures/corrected-plan.md
+  metadata:
+    playbook: groom
+    step: verify-references
+    fixture: corrected-plan
+    tier: regress
+  assert:
+    - type: llm-rubric
+      value: "SOURCES-RETRIEVED: every Upstream cell traces to that row's own cited source, retrieved during this run and dated for it — not asserted from model memory against an unrelated or generic URL. Fails if any row's source does not plausibly back its own claim, or reads as recalled rather than checked."
+    - type: llm-rubric
+      value: "CLAIMS-SPECIFIC: each Upstream cell states what the source says about that exact literal — the release that is current, that the image tag is no longer published — never a generic \"still supported\" or \"looks fine\". Fails on any Upstream cell that does not name the specific fact backing its Verdict."
+    - type: llm-rubric
+      value: "COVERAGE-COMPLETE: every external reference the plan names is a row — the `redis` pin, the image tag, the `Retry-After`/429 pairing, the cache backend path, the `uv add --group dev` flag, and the `X-RateLimit-Reset` header convention — including the ones reachable only through the M1 Verify command or a task DoD line; no repo-internal path or module is listed as a row. Fails if any of those six references is missing, or a repo-internal detail is listed as a reference."
+    - type: llm-rubric
+      value: "UNVERIFIABLE-HONEST: the `X-RateLimit-Reset` unit reference is marked `unverifiable` with a reason naming that no normative source covers the header convention, and the plan is left exactly as written for it — no invented source, no speculative correction. Fails if that row is marked `ok` or `corrected`, or if a source is fabricated for it."
+    - type: llm-rubric
+      value: "NOTES-ACTIONABLE: `## Notes:` carries the two corrections whose effect reaches the work plus the unverifiable reference, phrased for the approval summary rather than restating the Checked table row by row. Fails if Notes omits a correction or the unverifiable reference, or if it just re-lists the table."
+
+- description: verify-references smoke — clean pass leaves the plan untouched on clean-plan
+  vars:
+    input: file://_fixtures/clean-plan.md
+  metadata:
+    playbook: groom
+    step: verify-references
+    fixture: clean-plan
+    tier: smoke
+  assert:
+    # FILE-AT-PATH + CLEAN-PLAN-UNCHANGED — the provider only echoes a seeded file back when
+    # it was modified, so the plan's absence from the manifest IS "byte-identical to the seed"
+    - type: javascript
+      value: file://../../_lib/asserts/files.js
+      config:
+        onTextMode: fail
+        expect:
+          - path: '_runs/groom/20260731-16-05_fix-stale-session-cookie/references\.md$'
+            minLines: 8
+            contains: ['^# references — 20260731-16-05_fix-stale-session-cookie$']
+        noOthers: true
+    # CLEAN-VERDICT + CLEAN-SECTIONS
+    - type: javascript
+      value: file://../../_lib/asserts/mdcheck.js
+      config:
+        file: 'references\.md$'
+        rules: |
+          - select: H1 > H2
+            ordered: [Verdict, Checked]
+            strict: true
+
+          - select: SECTION("Verdict") > P
+            count: 1
+            require: '^Verified\s+—\s*3\s+references?\s+checked,\s*0\s+corrected\.?'
+
+          - select: SECTION("Checked") > TABLE
+            rows: { min: 3, max: 3 }
+
+          - select: SECTION("Checked") > TABLE > TD[col="Verdict"]
+            enum: [ok]
+    # CLEAN-RETURN
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        sections:
+          - name: Changed
+            entry: '^-\s+\[(CREATED|UPDATED)\]\s+`?([^`\s]+)`?\s+—\s+\S.*$'
+            matchManifest: true
+            seededVar: input
+            minEntries: 1
+            maxEntries: 1
+          - name: Notes
+            fold: true
+            minEntries: 1
+        onlyListed: true
+
+- description: verify-references regress — no manufactured findings on clean-plan
+  vars:
+    input: file://_fixtures/clean-plan.md
+  metadata:
+    playbook: groom
+    step: verify-references
+    fixture: clean-plan
+    tier: regress
+  assert:
+    - type: llm-rubric
+      value: "NO-INVENTED-CORRECTIONS: no reference is downgraded to `corrected` or `unverifiable` to manufacture a finding — the pinned dependency, the test-runner flag and the discovery-endpoint payload key are each `ok`, and each row's Upstream cell cites the source confirming that exact literal is current. Fails if any row reads `corrected` or `unverifiable`, or an `ok` row's Upstream cell does not confirm the literal."
+
+- description: verify-references smoke — nothing-to-check verdict on no-refs-plan
+  vars:
+    input: file://_fixtures/no-refs-plan.md
+  metadata:
+    playbook: groom
+    step: verify-references
+    fixture: no-refs-plan
+    tier: smoke
+  assert:
+    # NOTHING-FILE-WRITTEN
+    - type: javascript
+      value: file://../../_lib/asserts/files.js
+      config:
+        onTextMode: fail
+        expect:
+          - path: '_runs/groom/20260801-09-40_extract-playbook-section-builders/references\.md$'
+            minLines: 2
+            contains: ['^# references — 20260801-09-40_extract-playbook-section-builders$']
+        noOthers: true
+    # NOTHING-VERDICT
+    - type: javascript
+      value: file://../../_lib/asserts/mdcheck.js
+      config:
+        file: 'references\.md$'
+        rules: |
+          - select: H1
+            count: 1
+
+          - select: H1 > H2
+            ordered: [Verdict]
+            strict: true
+
+          - select: SECTION("Verdict") > P
+            count: 1
+            require: '^Nothing to check\s+—\s*0\s+references?\s+checked\.'
+    # NOTHING-RETURN
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        sections:
+          - name: Changed
+            entry: '^-\s+\[(CREATED|UPDATED)\]\s+`?([^`\s]+)`?\s+—\s+\S.*$'
+            matchManifest: true
+            seededVar: input
+            minEntries: 1
+            maxEntries: 1
+          - name: Notes
+            fold: true
+            minEntries: 1
+        onlyListed: true
+
+- description: verify-references regress — grounds are repo-internal on no-refs-plan
+  vars:
+    input: file://_fixtures/no-refs-plan.md
+  metadata:
+    playbook: groom
+    step: verify-references
+    fixture: no-refs-plan
+    tier: regress
+  assert:
+    - type: llm-rubric
+      value: "NOTHING-JUSTIFIED: the Verdict paragraph names the concrete grounds — every reference the plan makes is repo-internal (module paths like `booping-python/src/booping/render/playbook_sections.py`, the project's own `just test`/`just lint` targets) — instead of treating those repo-internal paths and commands as unverifiable externals. Fails if the rationale lists repo-internal items as rows or as unverifiable, or gives no grounds at all."
+
+- description: verify-references smoke — literal-only pin fix on invalidating-correction
+  vars:
+    input: file://_fixtures/invalidating-correction.md
+  metadata:
+    playbook: groom
+    step: verify-references
+    fixture: invalidating-correction
+    tier: smoke
+  assert:
+    # TRAP-EDIT-LITERAL-ONLY + TRAP-NO-REESTIMATE — every changed line swaps the stale
+    # `openai==0.28.1` pin for one consistent replacement and nothing else in the file
+    # (task wording, DoD, SP values, milestone structure, frontmatter) differs
+    - type: javascript
+      value: |
+        const fail = (r) => ({ pass: false, score: 0, reason: r });
+        const seed = (context && context.vars && context.vars.input) || '';
+        const seedMatch = /<file path="plans\/20260801-11-40_summarize-support-tickets\.md">\n([\s\S]*?)\n<\/file>/.exec(seed);
+        if (!seedMatch) return fail('fixture carries no seeded plan file');
+        const writtenMatch = /<file path="plans\/20260801-11-40_summarize-support-tickets\.md">\n([\s\S]*?)\n<\/file>/.exec(output);
+        if (!writtenMatch) return fail('plan file not in the written manifest — the stale `openai==0.28.1` pin needs a literal fix');
+        const original = seedMatch[1];
+        const written = writtenMatch[1];
+        const origLines = original.split('\n');
+        const newLines = written.split('\n');
+        if (origLines.length !== newLines.length)
+          return fail(`plan line count changed (${origLines.length} -> ${newLines.length}) — only the literal pin swap is allowed, nothing added or removed`);
+        const changed = [];
+        for (let i = 0; i < origLines.length; i++) if (origLines[i] !== newLines[i]) changed.push(i);
+        if (!changed.length) return fail('plan is byte-identical — the stale `openai==0.28.1` pin was never corrected');
+        let newPin = null;
+        for (const i of changed) {
+          const o = origLines[i], n = newLines[i];
+          if (!o.includes('openai==0.28.1')) return fail(`line ${i + 1} changed but does not carry the stale pin: "${o}" -> "${n}"`);
+          const m = /openai==([0-9][\w.]*)/.exec(n);
+          if (!m) return fail(`line ${i + 1}: no replacement openai pin found in "${n}"`);
+          if (newPin === null) newPin = m[1];
+          else if (newPin !== m[1]) return fail(`inconsistent replacement pins: openai==${newPin} vs openai==${m[1]}`);
+          if (o.split('openai==0.28.1').join(`openai==${newPin}`) !== n)
+            return fail(`line ${i + 1} changed by more than the pin swap: "${o}" -> "${n}"`);
+        }
+        if ((written.match(/openai==0\.28\.1/g) || []).length) return fail('stale pin `openai==0.28.1` still present somewhere in the plan');
+        return { pass: true, score: 1, reason: `plan edits exactly the pin (-> openai==${newPin}) at ${changed.length} line(s), nothing else` };
+
+- description: verify-references regress — invalidation reported, not resolved, on invalidating-correction
+  vars:
+    input: file://_fixtures/invalidating-correction.md
+  metadata:
+    playbook: groom
+    step: verify-references
+    fixture: invalidating-correction
+    tier: regress
+  assert:
+    - type: llm-rubric
+      value: "TRAP-INVALIDATION-REPORTED: `## Notes:` states that the corrected `openai` release changes the API task 2.1's DoD depends on — `openai.ChatCompletion.create`, reading the reply off `response[\"choices\"][0][\"message\"][\"content\"]`, and catching `openai.error.RateLimitError` are all pre-1.0 SDK shapes a current release does not carry — and hands the call to the approval summary instead of resolving it in place. Fails if Notes says nothing about the DoD depending on the old API shape, or the invalidation is missing entirely."
+    - type: llm-rubric
+      value: "TRAP-NO-NEW-TASKS: no task, milestone or DoD line is added, split or reworded to accommodate the corrected `openai` version — M2's task 2.1/2.2 descriptions and DoD bullets read exactly as the fixture wrote them, the pin aside. Fails if any DoD bullet, task description or milestone is rewritten, added or removed to fix up the API mismatch."

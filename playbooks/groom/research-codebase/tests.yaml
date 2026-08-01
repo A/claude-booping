@@ -1,0 +1,156 @@
+# research-codebase — two fixtures, each at both tiers. smoke asserts the contract, regress
+# judges the content. Conventions (contract/arithmetic split, mdcheck's whole-match `match:` vs
+# substring `require:`, `no_empty` cells) are in docs/eval-checks.md. No FRONTMATTER rule check
+# is needed beyond the explicit `count: 0` below — the map carries no gate, so nothing stamps it.
+
+- description: research-codebase smoke — blast-radius contract on the sprints-report-script repo
+  vars:
+    input: file://_fixtures/sprints-script-repo.md
+  metadata:
+    playbook: groom
+    step: research-codebase
+    fixture: sprints-script-repo
+    tier: smoke
+  assert:
+    # FILE-AT-PATH
+    - type: javascript
+      value: file://../../_lib/asserts/files.js
+      config:
+        onTextMode: fail
+        expect:
+          - path: '_runs/groom/20260731-14-05_sprints-report-script/research-codebase\.md$'
+            minLines: 15
+        noOthers: true
+    # SECTIONS + SURFACES-TABLE(shape) — fixture-agnostic, anchored so the greenfield smoke
+    # case below runs the identical contract
+    - &a_contract
+      type: javascript
+      value: file://../../_lib/asserts/mdcheck.js
+      config:
+        file: 'research-codebase\.md$'
+        rules: |
+          - select: FRONTMATTER
+            count: 0
+
+          - select: H1
+            count: 1
+
+          - select: H1 > H2
+            ordered: [Touched surfaces, Prior art, Conventions in play, Unknowns for design]
+            strict: true
+
+          - select: SECTION("Touched surfaces") > TABLE
+            columns: [Surface, Where, "Why it moves", Risk]
+            rows: { min: 1 }
+
+          - select: SECTION("Touched surfaces") > TABLE > TD
+            no_empty: true
+
+          - select: SECTION("Touched surfaces") > TABLE > TD[col="Risk"]
+            require: '^(low|medium|high)\b'
+
+          - select: SECTION("Prior art") > UL > LI
+            min: 1
+
+          - select: SECTION("Conventions in play") > UL > LI
+            min: 1
+
+          - select: SECTION("Unknowns for design") > UL > LI
+            min: 1
+    # SURFACES-TABLE(row floor) + PATHS-CITED — fixture-specific: this corpus carries at least
+    # three touched surfaces, and every Where cell / Prior art bullet names a repo path
+    - type: javascript
+      value: file://../../_lib/asserts/mdcheck.js
+      config:
+        file: 'research-codebase\.md$'
+        rules: |
+          - select: SECTION("Touched surfaces") > TABLE
+            rows: { min: 3 }
+
+          - select: SECTION("Touched surfaces") > TABLE > TD[col="Where"]
+            require: '`[^`]*[./][^`]*`'
+
+          - select: SECTION("Prior art") > UL > LI
+            require: '`[^`]*[./][^`]*`'
+    # RETURN-SHAPE
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        sections:
+          - name: Changed
+            entry: '^-\s+\[(CREATED|UPDATED)\]\s+`?([^`\s]+)`?$'
+            matchManifest: true
+            seededVar: input
+            minEntries: 1
+            maxEntries: 1
+          - name: Notes
+            minEntries: 1
+        onlyListed: true
+
+- description: research-codebase smoke — NO-SKIP-NOTE contract on a greenfield surface
+  vars:
+    input: file://_fixtures/greenfield-repo.md
+  metadata:
+    playbook: groom
+    step: research-codebase
+    fixture: greenfield-repo
+    tier: smoke
+  assert:
+    - type: javascript
+      value: file://../../_lib/asserts/files.js
+      config:
+        onTextMode: fail
+        expect:
+          - path: '_runs/groom/20260731-16-20_remote-entry-sync/research-codebase\.md$'
+            minLines: 15
+        noOthers: true
+    - *a_contract
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        sections:
+          - name: Changed
+            entry: '^-\s+\[(CREATED|UPDATED)\]\s+`?([^`\s]+)`?$'
+            matchManifest: true
+            seededVar: input
+            minEntries: 1
+            maxEntries: 1
+          - name: Notes
+            minEntries: 1
+        onlyListed: true
+
+- description: research-codebase regress — blast-radius fidelity on the sprints-report-script repo
+  vars:
+    input: file://_fixtures/sprints-script-repo.md
+  metadata:
+    playbook: groom
+    step: research-codebase
+    fixture: sprints-script-repo
+    tier: regress
+  assert:
+    - type: llm-rubric
+      value: "SURFACES-REAL: Every Surface / Where cell in the Touched surfaces table names a file present in the seeded repo — e.g. `booping-python/src/booping/commands/render_sprints.py`, `booping-python/src/booping/commands/transition.py`, `booping-python/src/booping/cli.py`, `src/config.yaml` (`plan.hooks.post`), `src/templates/sprints.md.j2`, `playbooks/groom/playbook.yaml`, `playbooks/groom/_scripts/mirror-plan-status.sh`, or `booping-python/tests/test_transition.py` — and each row's 'why it moves' traces back to the confirmed scope (moving render-sprints out of the core into a playbook-owned script). Fails if any row names a path absent from the corpus, or invents a surface (a file, module or config key the corpus never shows)."
+    - type: llm-rubric
+      value: "RISK-CALIBRATED: The post-hook / dispatch surfaces that fire on every plan move (`plan.hooks.post` in `src/config.yaml` and the `render-sprints` branch in `booping-python/src/booping/commands/transition.py`) carry a HIGHER risk rating than the `src/templates/sprints.md.j2` template's own move — reflecting that every `transition` edge fires the post hooks today, while the template is a low-risk file relocation. Fails if the template's risk is rated equal to or above the post-hook/dispatch surface's risk, or if every row shares one rating with no evidence it was read off the corpus."
+    - type: llm-rubric
+      value: "SCOPE-HELD: No row in the Touched surfaces table names `src/templates/skills/develop.md.j2`, `src/templates/skills/chat.md.j2`, or any other file the intake's Scope boundaries assign to `/develop` — even though `develop.md.j2` sits in the same corpus and references `booping transition`. Nothing outside the confirmed in-scope boundaries (the core's snapshot ownership, the playbook-side script replacement, and the callers that tell a reader to invoke the core command) is listed as touched. Fails if a `/develop`-owned file appears as a touched surface, or a surface outside the stated boundaries is listed."
+    - type: llm-rubric
+      value: "CONVENTIONS-BIND: Each Conventions in play bullet is a constraint on THIS design lifted from the repo's own stated rules — e.g. the build-artefact rule (`skills/{name}/SKILL.md` and `agents/{name}.md` are build artefacts, never hand-edited, regenerated by `just build`), the config-override-tiers rule (a project tier that sets a list key replaces the core's list rather than extending it — relevant to moving `plan.hooks.post`), or the `_scripts/` hook contract (cwd = run workdir, `BOOPING_ARTIFACT`/`BOOPING_WORKDIR`/`BOOPING_INSTANCE` in the env, a non-zero exit aborts the transition). Fails if any bullet is generic engineering advice rather than a rule the repo's own files state."
+    - type: llm-rubric
+      value: "UNKNOWNS-ARE-CALLS: Each Unknowns for design bullet phrases a genuinely unsettled DESIGN CALL the corpus leaves open — e.g. whether `render-sprints` keeps a standalone CLI subcommand once the hook-runner dispatch moves to the playbook script, or how a plan moved outside the groom playbook is meant to get its snapshot refreshed. Fails if a bullet restates a risk already captured in the surfaces table, asks for more reading instead of naming a decision, or invents a question the intake already answers (the intake settles that the template moves with the behaviour and that `/develop` stays untouched — neither may appear as an unknown)."
+    - type: llm-rubric
+      value: "NOTES-HEADLINE: The return's `## Notes:` gives the blast-radius headline — a file count and a module count, plus the riskiest surface named — followed by one line per unknown the map's `Unknowns for design` section lists, without restating the touched-surfaces table or the conventions. Fails if the headline omits a count, names no riskiest surface, repeats the map's content verbatim, or drops an unknown the map lists."
+
+- description: research-codebase regress — greenfield surface reported honestly, not invented
+  vars:
+    input: file://_fixtures/greenfield-repo.md
+  metadata:
+    playbook: groom
+    step: research-codebase
+    fixture: greenfield-repo
+    tier: regress
+  assert:
+    - type: llm-rubric
+      value: "GREENFIELD-DECLARED: Prior art states outright there is no precedent in the repo for pushing entries to a remote API (e.g. 'no prior art in the repo') and cites no path, while Touched surfaces and Conventions in play are still populated from the corpus — e.g. `src/tallyd/storage.py` (the only module allowed to touch persistence), `src/tallyd/errors.py` (the `TallydError` hierarchy every failure must raise into), `src/tallyd/config.py` / `pyproject.toml` (the standard-library-only dependency rule), or `src/tallyd/cli.py` (the registered-command table). Fails if Prior art invents a precedent, borrows an example from outside the repo, or is dropped or left empty, or if Touched surfaces / Conventions in play go empty because there is no prior art."

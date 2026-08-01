@@ -1,0 +1,221 @@
+- description: research-web smoke — researched verdict on the export-admission-control framing
+  vars:
+    input: file://_fixtures/novel-framing.md
+  metadata:
+    playbook: groom
+    step: research-web
+    fixture: novel-framing
+    tier: smoke
+  assert:
+    # FILE-AT-PATH
+    - type: javascript
+      value: file://../../_lib/asserts/files.js
+      config:
+        onTextMode: fail
+        expect:
+          - path: '_runs/groom/20260801-10-15_export-admission-control/research-web\.md$'
+            minLines: 15
+        noOthers: true
+    # FILE-AT-PATH (H1) + SECTIONS + VERDICT-RESEARCHED + APPROACHES-SHAPED + SOURCES-DATED
+    - type: javascript
+      value: file://../../_lib/asserts/mdcheck.js
+      config:
+        file: 'research-web\.md$'
+        rules: |
+          - select: H1
+            count: 1
+            match: 'research-web — 20260801-10-15_export-admission-control'
+
+          - select: H1 > H2
+            ordered: [Verdict, Approaches, Pitfalls, Sources]
+            strict: true
+
+          - select: SECTION("Verdict") > P
+            count: 1
+            match: '(?s)^Researched\b.*\S$'
+
+          - select: SECTION("Approaches") > SECTION(/.+/)
+            min: 2
+            each:
+              - select: UL > LI[text^="Fits:"]
+                min: 1
+              - select: UL > LI[text^="Costs:"]
+                min: 1
+
+          - select: SECTION("Sources") > TABLE
+            columns: [Source, Backs, Checked]
+            rows: { min: 1 }
+
+          - select: SECTION("Sources") > TABLE > TD[col="Source"]
+            match: '^https://\S+$'
+
+          - select: SECTION("Sources") > TABLE > TD[col="Checked"]
+            match: '^\d{8}$'
+
+          - select: SECTION("Sources") > TABLE > TD[col="Backs"]
+            no_empty: true
+    # RETURN-ANNOTATED — Changed/Notes shape, manifest agreement, CREATED status
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        sections:
+          - name: Changed
+            entry: '^-\s+\[(CREATED|UPDATED)\]\s+`?([^`\s]+)`?\s+—\s+\S.*$'
+            matchManifest: true
+            seededVar: input
+            minEntries: 1
+            maxEntries: 1
+          - name: Notes
+            fold: true
+            minEntries: 1
+        onlyListed: true
+    # RETURN-ANNOTATED — the counts in the Changed annotation match the file, Notes carries a
+    # recommendation line and a pitfall count
+    - type: javascript
+      value: |
+        const fail = (r) => ({ pass: false, score: 0, reason: r });
+        const ret = /<return>\n([\s\S]*?)\n<\/return>/.exec(output);
+        if (!ret) return fail('no <return> block');
+        const body = ret[1];
+        const m = /\[(?:CREATED|UPDATED)\][^\n]*researched:\s*(\d+)\s+approaches,\s*(\d+)\s+sources?/.exec(body);
+        if (!m) return fail('Changed entry not annotated `researched: N approaches, M sources`');
+        const file = /<file path="[^"]*research-web\.md">\n([\s\S]*?)\n<\/file>/.exec(output);
+        if (!file) return fail('no research-web.md in the files manifest');
+        const approaches = (file[1].match(/^### /gm) || []).length;
+        const sources = (file[1].match(/^\|\s*https:\/\//gm) || []).length;
+        if (Number(m[1]) !== approaches || Number(m[2]) !== sources)
+          return fail(`Changed says ${m[1]} approaches/${m[2]} sources, file has ${approaches}/${sources}`);
+        if (!/^-\s+recommended:/m.test(body)) return fail('Notes carries no `recommended:` line');
+        if (!/\bpitfall/i.test(body)) return fail('Notes carries no pitfall count');
+        return { pass: true, score: 1, reason: `${approaches} approaches, ${sources} sources — Notes ok` };
+
+- description: research-web regress — content fidelity on the export-admission-control framing
+  vars:
+    input: file://_fixtures/novel-framing.md
+  metadata:
+    playbook: groom
+    step: research-web
+    fixture: novel-framing
+    tier: regress
+  assert:
+    - type: llm-rubric
+      value: "CLAIMS-SOURCED: every approach and every pitfall in research-web.md traces to a row of the Sources table — no claim rests on undated model memory. Fails on any approach, fit/cost line, or pitfall backed by no source row."
+    - type: llm-rubric
+      value: "TRADEOFFS-DECIDABLE: each approach's fit and cost are argued against this request's own constraints — the export endpoint's worker pool starving under concurrent exports, the shared cache tier already running in the deployment, the service-wide budget with a per-caller cap the user confirmed — not stated as generic pros and cons that would read the same on any admission-control request. Fails on a fit/cost line with nothing this-request-specific in it."
+    - type: llm-rubric
+      value: "PITFALLS-CONSTRAIN: each pitfall names the design call it forces on `design` — not a general caution left unresolved. Fails on a pitfall that reads as generic advice with no decision attached."
+    - type: llm-rubric
+      value: "SCOPE-RESPECTED: no approach is placed at the CDN or the reverse proxy in front of the service — the framing excluded that surface (owned by the platform team, blind to caller plan tier and export cost). Fails if any approach lives at the edge/CDN/proxy layer."
+
+- description: research-web smoke — skipped verdict on the stale-session-cookie framing
+  vars:
+    input: file://_fixtures/well-trodden-framing.md
+  metadata:
+    playbook: groom
+    step: research-web
+    fixture: well-trodden-framing
+    tier: smoke
+  assert:
+    # SKIP-FILE-WRITTEN
+    - type: javascript
+      value: file://../../_lib/asserts/files.js
+      config:
+        onTextMode: fail
+        expect:
+          - path: '_runs/groom/20260801-11-40_stale-session-cookie/research-web\.md$'
+            minLines: 3
+        noOthers: true
+    # SKIP-FILE-WRITTEN (H1) + VERDICT-SKIPPED + SKIP-VERDICT-ONLY
+    - type: javascript
+      value: file://../../_lib/asserts/mdcheck.js
+      config:
+        file: 'research-web\.md$'
+        rules: |
+          - select: H1
+            count: 1
+            match: 'research-web — 20260801-11-40_stale-session-cookie'
+
+          - select: H1 > H2
+            ordered: [Verdict]
+            strict: true
+
+          - select: SECTION("Verdict") > P
+            count: 1
+            match: '(?s)^Skipped\b.*\S$'
+    # SKIP-RETURN — Changed/Notes shape, manifest agreement, CREATED status
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        sections:
+          - name: Changed
+            entry: '^-\s+\[(CREATED|UPDATED)\]\s+`?([^`\s]+)`?\s+—\s+\S.*$'
+            matchManifest: true
+            seededVar: input
+            minEntries: 1
+            maxEntries: 1
+          - name: Notes
+            fold: true
+            minEntries: 1
+        onlyListed: true
+    # SKIP-RETURN — skip rationale annotation, no recommendation/pitfall leaking onto the skip path
+    - type: javascript
+      value: |
+        const fail = (r) => ({ pass: false, score: 0, reason: r });
+        const ret = /<return>\n([\s\S]*?)\n<\/return>/.exec(output);
+        if (!ret) return fail('no <return> block');
+        const body = ret[1];
+        if (!/\[(?:CREATED|UPDATED)\][^\n]*skipped:\s*\S/.test(body))
+          return fail('Changed entry not annotated `skipped: {rationale}`');
+        if (!/^-\s+skipped:\s*\S/m.test(body)) return fail('Notes carries no skip rationale');
+        if (/recommended:|\bpitfall/i.test(body))
+          return fail('Notes carries a recommendation or pitfall count on the skip path');
+        return { pass: true, score: 1, reason: 'skip annotation ok' };
+
+- description: research-web regress — skip rationale on the stale-session-cookie framing
+  vars:
+    input: file://_fixtures/well-trodden-framing.md
+  metadata:
+    playbook: groom
+    step: research-web
+    fixture: well-trodden-framing
+    tier: regress
+  assert:
+    - type: llm-rubric
+      value: "SKIP-JUSTIFIED: the Verdict's rationale names the concrete grounds the framing gave — the defect sits on the framework's own session middleware, the fix adds no dependency and no new surface, and prior art for the fix already exists in the repository (the staff logout route, the billing after-request hook). Fails if the rationale is generic or omits any of the three grounds."
+
+- description: research-web smoke — researched verdict despite an empty signal list on the signed-partner-webhooks framing
+  vars:
+    input: file://_fixtures/unsignalled-novelty.md
+  metadata:
+    playbook: groom
+    step: research-web
+    fixture: unsignalled-novelty
+    tier: smoke
+  assert:
+    # TRAP-VERDICT-RESEARCHED
+    - type: javascript
+      value: file://../../_lib/asserts/mdcheck.js
+      config:
+        file: 'research-web\.md$'
+        rules: |
+          - select: SECTION("Verdict") > P
+            count: 1
+            match: '(?s)^Researched\b.*\S$'
+
+          - select: H1 > H2
+            ordered: [Verdict, Approaches, Pitfalls, Sources]
+            strict: true
+
+- description: research-web regress — verdict grounded in novelty, not the signal list, on the signed-partner-webhooks framing
+  vars:
+    input: file://_fixtures/unsignalled-novelty.md
+  metadata:
+    playbook: groom
+    step: research-web
+    fixture: unsignalled-novelty
+    tier: regress
+  assert:
+    - type: llm-rubric
+      value: "TRAP-VERDICT-JUDGED: the rationale grounds the Researched verdict in the request's own novelty — RFC 9421 HTTP Message Signatures, which the repository has never implemented on any endpoint, with no in-house shape to copy — not in the fact that intake's uncertainty-signal list came back empty. Fails if the rationale cites the empty signal list as if it were evidence either way, instead of judging the request itself."

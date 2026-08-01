@@ -1,0 +1,444 @@
+- description: present smoke — first pass, over threshold on over-threshold-local
+  vars:
+    input: file://_fixtures/over-threshold-local.md
+  metadata:
+    playbook: groom
+    step: present
+    fixture: over-threshold-local
+    tier: smoke
+  assert:
+    # FILE-AND-FRONTMATTER (+ plans/*.md byte-identical, enforced by noOthers: a modified plan
+    # would show up in the manifest and fail it)
+    - type: javascript
+      value: file://../../_lib/asserts/files.js
+      config:
+        onTextMode: fail
+        expect:
+          - path: '_runs/groom/20260731-14-02_rate-limit-public-api/handoff\.md$'
+            minLines: 15
+            contains:
+              - '^# handoff — 20260731-14-02_rate-limit-public-api$'
+              - '^---\nreviewed_at: null\n---$'
+        noOthers: true
+    # SECTIONS-ORDER + CHECKS-THREE (shape) + MILESTONES-TABLE (shape) + PLAN-PATH-STATUS +
+    # SPLIT-SHAPE + BRANCH-PROPOSED
+    - type: javascript
+      value: file://../../_lib/asserts/mdcheck.js
+      config:
+        file: 'handoff\.md$'
+        rules: |
+          - select: H1 > H2
+            ordered: [Approach, Milestones, Totals, Plan, Checks, "Split recommendation", Branch, Next]
+            strict: true
+
+          - select: SECTION("Checks") > UL > LI
+            count: 3
+            match: '(?s)^\*\*(Decomposition|Cross-review|References)\*\*.*'
+
+          - select: SECTION("Milestones") > TABLE
+            columns: ["#", "Milestone", "SP", "Delivers"]
+            rows: { min: 4, max: 4 }
+
+          - select: SECTION("Plan")
+            require: 'plans/20260731-14-02_rate-limit-public-api\.md'
+          - select: SECTION("Plan")
+            require: 'awaiting-plan-review'
+
+          - select: SECTION("Split recommendation") > UL > LI
+            count: 2
+            match: '(?s).*SP.*'
+          - select: SECTION("Split recommendation")
+            require: '(?i)approving the plan whole is also fine'
+
+          - select: SECTION("Branch")
+            require: 'git switch -c feat/rate-limit-public-api'
+          - select: SECTION("Branch")
+            require: 'current branch'
+    # MILESTONES-TABLE (arithmetic) + TOTALS-VS-THRESHOLD — the fixture's own arithmetic: the
+    # plan's own milestone SPs, re-summed, against the plan's own 44/35 figures.
+    - type: javascript
+      value: |
+        const fm = /<file path="_runs\/groom\/20260731-14-02_rate-limit-public-api\/handoff\.md">\n([\s\S]*?)\n<\/file>/.exec(output);
+        if (!fm) return { pass: false, score: 0, reason: 'no handoff.md file block in output' };
+        const content = fm[1];
+        const mSection = /## Milestones\n([\s\S]*?)(?:\n## |\n?$)/.exec(content);
+        if (!mSection) return { pass: false, score: 0, reason: 'no Milestones section' };
+        const sps = [...mSection[1].matchAll(/\|\s*\d+\s*\|[^|]*\|\s*(\d+)\s*\|/g)].map((m) => Number(m[1]));
+        const expected = [8, 12, 9, 15];
+        const got = [...sps].sort((a, b) => a - b);
+        const want = [...expected].sort((a, b) => a - b);
+        if (JSON.stringify(got) !== JSON.stringify(want))
+          return { pass: false, score: 0, reason: `Milestones SP column is [${sps.join(', ')}], expected the plan's [${expected.join(', ')}]` };
+        const sum = sps.reduce((a, b) => a + b, 0);
+        if (sum !== 44)
+          return { pass: false, score: 0, reason: `Milestones SPs sum to ${sum}, expected 44` };
+        const tSection = /## Totals\n([\s\S]*?)(?:\n## |\n?$)/.exec(content);
+        if (!tSection) return { pass: false, score: 0, reason: 'no Totals section' };
+        if (!/44/.test(tSection[1]) || !/35/.test(tSection[1]) || !/\bover\b/i.test(tSection[1]))
+          return { pass: false, score: 0, reason: `Totals does not state 44 SP over the 35 SP threshold: ${tSection[1].trim()}` };
+        return { pass: true, score: 1, reason: `Milestones SPs ${sps.join(', ')} sum to 44, Totals states it over the 35 SP threshold` };
+    # RETURN-SHAPE
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        sections:
+          - name: Changed
+            entry: '^-\s+\[(CREATED|UPDATED)\]\s+`?([^`\s]+)`?$'
+            statuses: [CREATED]
+            matchManifest: true
+            maxEntries: 1
+          - name: Notes
+            entry: '^-\s+\S'
+            minEntries: 1
+          - name: Questions
+            entry: '^\d+\.\s+.+'
+            minEntries: 2
+            maxEntries: 2
+        onlyListed: true
+
+- description: present regress — grounding and fidelity on over-threshold-local
+  vars:
+    input: file://_fixtures/over-threshold-local.md
+  metadata:
+    playbook: groom
+    step: present
+    fixture: over-threshold-local
+    tier: regress
+  assert:
+    - type: llm-rubric
+      value: "SP-ARITHMETIC: the milestone SPs sum to the stated 44 and that total is the plan's own — present re-sums, never re-estimates."
+    - type: llm-rubric
+      value: "CHECKS-OUTCOMES: each Checks entry states what was found and what became of it — CRITICAL folded into milestone 2, 2 NOTEs deferred to the risk register, `redis-py` floor 4.6 → 5.0 — never a bare \"passed\"."
+    - type: llm-rubric
+      value: "APPROACH-FROM-DESIGN: Approach restates the confirmed design's decision and its consequences in the user's terms and introduces no architecture call the design did not make."
+    - type: llm-rubric
+      value: "ONE-SCREEN: the summary is decidable end to end without opening the plan, and no section drops to the plan's task-level detail."
+
+- description: present smoke — first pass, under threshold on under-threshold-plain
+  vars:
+    input: file://_fixtures/under-threshold-plain.md
+  metadata:
+    playbook: groom
+    step: present
+    fixture: under-threshold-plain
+    tier: smoke
+  assert:
+    # FILE-AT-PATH
+    - type: javascript
+      value: file://../../_lib/asserts/files.js
+      config:
+        onTextMode: fail
+        expect:
+          - path: '_runs/groom/20260801-10-30_plan-summary-frontmatter/handoff\.md$'
+            minLines: 10
+            contains: ['^# handoff — 20260801-10-30_plan-summary-frontmatter$']
+        noOthers: true
+    # NO-SPLIT-SECTION (shape, via strict heading set) + NO-BRANCH-SECTION (shape) +
+    # CHECKS-STILL-THREE (shape)
+    - type: javascript
+      value: file://../../_lib/asserts/mdcheck.js
+      config:
+        file: 'handoff\.md$'
+        rules: |
+          - select: H1 > H2
+            ordered: [Approach, Milestones, Totals, Plan, Checks, Next]
+            strict: true
+
+          - select: SECTION("Totals")
+            require: '18'
+          - select: SECTION("Totals")
+            require: '35'
+
+          - select: SECTION("Checks") > UL > LI
+            count: 3
+            match: '(?s)^\*\*(Decomposition|Cross-review|References)\*\*.*'
+    # NO-BRANCH-SECTION (return side: no git switch -c line in Notes)
+    - type: javascript
+      value: |
+        const m = /<return>\n([\s\S]*?)\n<\/return>/.exec(output);
+        if (!m) return { pass: false, score: 0, reason: 'no <return> block' };
+        if (/git switch -c/.test(m[1]))
+          return { pass: false, score: 0, reason: 'return carries a `git switch -c` line on a vault outside the repo' };
+        return { pass: true, score: 1, reason: 'no git switch -c line in the return' };
+    # QUESTIONS-APPROVAL-ONLY + RETURN shape
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        sections:
+          - name: Changed
+            entry: '^-\s+\[(CREATED|UPDATED)\]\s+`?([^`\s]+)`?$'
+            statuses: [CREATED]
+            matchManifest: true
+            maxEntries: 1
+          - name: Notes
+            entry: '^-\s+\S'
+            minEntries: 1
+          - name: Questions
+            entry: '^\d+\.\s+.+'
+            minEntries: 1
+            maxEntries: 1
+        onlyListed: true
+
+- description: present regress — no invented findings on under-threshold-plain
+  vars:
+    input: file://_fixtures/under-threshold-plain.md
+  metadata:
+    playbook: groom
+    step: present
+    fixture: under-threshold-plain
+    tier: regress
+  assert:
+    - type: llm-rubric
+      value: "NO-INVENTED-FINDINGS: no cross-review verdict, deferral or reference correction the inputs do not carry — an unconfigured check reads as unconfigured, a clean one as clean."
+    - type: llm-rubric
+      value: "SKIP-NOT-SILENCE: the decomposition skip is reported as an outcome — nothing oversized, total under threshold — rather than omitted as if the pass had not run."
+
+- description: present smoke — returned after rework on returned-after-rework
+  vars:
+    input: file://_fixtures/returned-after-rework.md
+  metadata:
+    playbook: groom
+    step: present
+    fixture: returned-after-rework
+    tier: smoke
+  assert:
+    # FRONTMATTER-PRESERVED
+    - type: javascript
+      value: file://../../_lib/asserts/files.js
+      config:
+        onTextMode: fail
+        expect:
+          - path: '_runs/groom/20260731-14-02_rate-limit-public-api/handoff\.md$'
+            minLines: 15
+            contains:
+              - '^# handoff — 20260731-14-02_rate-limit-public-api$'
+              - '^reviewed_at: null$'
+        noOthers: true
+    # UPDATED-IN-PLACE (same H1/H2 set, no round or revision section appended) + CHANGED-MARKED
+    - type: javascript
+      value: file://../../_lib/asserts/mdcheck.js
+      config:
+        file: 'handoff\.md$'
+        rules: |
+          - select: H1 > H2
+            ordered: [Approach, Milestones, Totals, Plan, Checks, "Split recommendation", Branch, Next]
+            strict: true
+
+          - select: SECTION("Milestones")
+            require: '\*\*Changed this round'
+          - select: SECTION("Totals")
+            require: '\*\*Changed this round'
+          # sections whose inputs did not move this round. Not Checks: the fixture re-ran the
+          # decomposition pass, so that entry legitimately carries the mark.
+          - select: SECTION("Approach")
+            forbid: '\*\*Changed this round'
+          - select: SECTION("Plan")
+            forbid: '\*\*Changed this round'
+          - select: SECTION("Branch")
+            forbid: '\*\*Changed this round'
+    # UPDATED-IN-PLACE (return: [UPDATED], matches the seeded handoff.md) + QUESTIONS-REASKED
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        sections:
+          - name: Changed
+            entry: '^-\s+\[(CREATED|UPDATED)\]\s+`?([^`\s]+)`?$'
+            statuses: [UPDATED]
+            matchManifest: true
+            seededVar: input
+            maxEntries: 1
+          - name: Notes
+            entry: '^-\s+\S'
+            minEntries: 1
+          - name: Questions
+            entry: '^\d+\.\s+.+'
+            minEntries: 2
+            maxEntries: 2
+        onlyListed: true
+
+- description: present regress — rework reflected on returned-after-rework
+  vars:
+    input: file://_fixtures/returned-after-rework.md
+  metadata:
+    playbook: groom
+    step: present
+    fixture: returned-after-rework
+    tier: regress
+  assert:
+    - type: llm-rubric
+      value: "REWORK-REFLECTED: Milestones shows the 5 reworked milestones and Totals the re-summed 47 SP against the threshold; no figure from the superseded round survives anywhere."
+    - type: llm-rubric
+      value: "UNCHANGED-CARRIED: the Checks entries come through unchanged in substance — the cross-review and reference outcomes are neither re-run, re-worded into fresh verdicts, nor dropped."
+
+- description: present smoke — approved whole on approved-whole
+  vars:
+    input: file://_fixtures/approved-whole.md
+  metadata:
+    playbook: groom
+    step: present
+    fixture: approved-whole
+    tier: smoke
+  assert:
+    # NO-SIDE-EFFECTS (no sibling stub, no branch, no status write — enforced by noOthers: any
+    # extra written or modified file, including plans/*.md, fails it)
+    - type: javascript
+      value: file://../../_lib/asserts/files.js
+      config:
+        onTextMode: fail
+        expect:
+          - path: '_runs/groom/20260731-14-02_rate-limit-public-api/handoff\.md$'
+            minLines: 15
+        noOthers: true
+    # APPROVAL-RETURN (Changed [UPDATED] alone, Questions present and empty)
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        sections:
+          - name: Changed
+            entry: '^-\s+\[(CREATED|UPDATED)\]\s+`?([^`\s]+)`?$'
+            statuses: [UPDATED]
+            matchManifest: true
+            seededVar: input
+            maxEntries: 1
+          - name: Notes
+            entry: '^-\s+\S'
+            minEntries: 1
+          - name: Questions
+            entry: '^\d+\.\s+.+'
+            minEntries: 0
+            maxEntries: 0
+        onlyListed: true
+    # DECISIONS-RECORDED — one decision: line for the whole-plan approval, one for the branch
+    - type: javascript
+      value: |
+        const m = /## Notes:\n([\s\S]*?)(?:\n## |\n?$)/.exec(output);
+        if (!m) return { pass: false, score: 0, reason: 'no ## Notes: section in the return' };
+        const decisions = (m[1].match(/^-\s+decision:/gm) || []).length;
+        if (decisions < 2)
+          return { pass: false, score: 0, reason: `Notes carries ${decisions} \`decision:\` line(s), expected >= 2 (approval + branch)` };
+        return { pass: true, score: 1, reason: `Notes carries ${decisions} decision: line(s)` };
+
+- description: present regress — split not required on approved-whole
+  vars:
+    input: file://_fixtures/approved-whole.md
+  metadata:
+    playbook: groom
+    step: present
+    fixture: approved-whole
+    tier: regress
+  assert:
+    - type: llm-rubric
+      value: "SPLIT-NOT-REQUIRED: approval is recorded without pressing the split — the recommendation is left standing and nothing in the return or the file asks the user to reconsider it."
+
+- description: present smoke — warmth is not approval on partial-praise
+  vars:
+    input: file://_fixtures/partial-praise.md
+  metadata:
+    playbook: groom
+    step: present
+    fixture: partial-praise
+    tier: smoke
+  assert:
+    # TRAP-QUESTIONS-OPEN
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        sections:
+          - name: Changed
+            entry: '^-\s+\[(CREATED|UPDATED)\]\s+`?([^`\s]+)`?$'
+            matchManifest: true
+            seededVar: input
+            minEntries: 0
+            maxEntries: 1
+          - name: Notes
+            entry: '^-\s+\S'
+            minEntries: 1
+          - name: Questions
+            entry: '^\d+\.\s+.+'
+            minEntries: 1
+        onlyListed: true
+
+- description: present regress — no approval claim on partial-praise
+  vars:
+    input: file://_fixtures/partial-praise.md
+  metadata:
+    playbook: groom
+    step: present
+    fixture: partial-praise
+    tier: regress
+  assert:
+    - type: llm-rubric
+      value: "TRAP-NO-APPROVAL-CLAIM: no `decision:` line claiming approval and no \"approved\" wording in the return or the file; the reply is recorded as a comment on the approach and approval is asked for again in plain terms."
+
+- description: present smoke — change request handed back on absorbable-change
+  vars:
+    input: file://_fixtures/absorbable-change.md
+  metadata:
+    playbook: groom
+    step: present
+    fixture: absorbable-change
+    tier: smoke
+  assert:
+    # TRAP-PLAN-UNTOUCHED (noOthers: a modified/listed plans/*.md fails it) + no plan file in
+    # the Changed manifest. handoff.md is `allow`, not `expect`, and an empty manifest passes:
+    # the summary still describes the round under review, so a rewrite of it is byte-identical
+    # and the provider collects nothing. Requiring a file here would require present to edit the
+    # summary — the exact thing this trap forbids.
+    - type: javascript
+      value: file://../../_lib/asserts/files.js
+      config:
+        onTextMode: pass
+        allow:
+          - '_runs/groom/20260731-14-02_rate-limit-public-api/handoff\.md$'
+        noOthers: true
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        sections:
+          - name: Changed
+            entry: '^-\s+\[(CREATED|UPDATED)\]\s+`?([^`\s]+)`?$'
+            matchManifest: true
+            seededVar: input
+            minEntries: 0
+            maxEntries: 1
+          - name: Notes
+            entry: '^-\s+\S'
+            minEntries: 1
+          - name: Questions
+            entry: '^\d+\.\s+.+'
+            minEntries: 0
+        onlyListed: true
+    # TRAP-NO-SELF-EDIT — the round under review still shows 4 milestones summing 44 SP; the
+    # requested merge (2 SP off milestone 1, milestones 2+3 folded) is not applied
+    - type: javascript
+      value: |
+        const fm = /<file path="_runs\/groom\/20260731-14-02_rate-limit-public-api\/handoff\.md">\n([\s\S]*?)\n<\/file>/.exec(output);
+        if (!fm) return { pass: true, score: 1, reason: 'handoff.md unwritten this round — nothing to check (a change request may be handed back before any rewrite)' };
+        const content = fm[1];
+        const mSection = /## Milestones\n([\s\S]*?)(?:\n## |\n?$)/.exec(content);
+        if (!mSection) return { pass: false, score: 0, reason: 'no Milestones section' };
+        const sps = [...mSection[1].matchAll(/\|\s*\d+\s*\|[^|]*\|\s*(\d+)\s*\|/g)].map((m) => Number(m[1]));
+        const expected = [8, 12, 9, 15];
+        const got = [...sps].sort((a, b) => a - b);
+        const want = [...expected].sort((a, b) => a - b);
+        if (JSON.stringify(got) !== JSON.stringify(want))
+          return { pass: false, score: 0, reason: `Milestones SP column is [${sps.join(', ')}] — the requested merge/cut was applied; expected the round-under-review's own [${expected.join(', ')}]` };
+        return { pass: true, score: 1, reason: `Milestones SPs unchanged at ${sps.join(', ')}` };
+
+- description: present regress — change request routed back on absorbable-change
+  vars:
+    input: file://_fixtures/absorbable-change.md
+  metadata:
+    playbook: groom
+    step: present
+    fixture: absorbable-change
+    tier: regress
+  assert:
+    - type: llm-rubric
+      value: "TRAP-ROUTED-BACK: the return names the request as one for the refinement pass and hands it back to the driver — present neither answers it, nor negotiates it, nor restates it as already done."

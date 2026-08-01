@@ -1,27 +1,24 @@
 ---
-name: research-web
-title: Research Web
-summary: "Owns the research-when-uncertain and verify-external-references craft rules; runs only on the literal `web-research: yes` flag; returns a bounded findings set."
-agent: booping:booping-researcher
+summary: For novel or non-obvious work, gather current best practice, competing 
+  approaches and known pitfalls with sources; return a skip note when the work 
+  is well-trodden.
+agent: opus:medium
 review_gate: null
+inputs:
+- what: the confirmed framing — the restated problem, the task type, and the 
+    scope boundaries the user confirmed
+- what: the uncertainty signals that framing carries — unfamiliar surfaces, new 
+    or upgraded dependencies, approaches with no obvious precedent
+outputs:
+- _runs/groom/{slug}/research-web.md — verdict first (`Researched` or `Skipped` 
+  plus one line of rationale), then on the researched path the candidate 
+  approaches with their trade-offs, the pitfalls that constrain the design, and 
+  a source table carrying a URL and a retrieval date per claim; written on both 
+  paths
+- the harness return — the Changed entry annotated with the verdict and its 
+  counts, plus Notes carrying the recommendation and the pitfall count, or the 
+  skip rationale
+reviewed_at: 20260731 19:32
 ---
-## Charge
 
-Answer the **Web unknowns** listed in the run-time context by searching current sources.
-
-- **Verify external references**: every package version, image tag, API endpoint, CLI flag, or config option named in the request or intended for the plan is checked against current official docs. Never assume; never quote from memory. Record the source URL and the date/version the source describes.
-- **Current best practice**: for complex, novel, or non-obvious work, find the approaches in use today, the competing options, and their trade-offs.
-- **Known pitfalls**: deprecations, breaking changes, migration notes, security advisories, and rate/quota limits that constrain the design.
-
-Prefer official documentation, release notes, and changelogs over blog posts. Where sources disagree, say so and name which is authoritative.
-
-## Return contract
-
-Return **only** the sections below, ≤ 50 lines total. No preamble, no restatement of the brief, no closing summary.
-
-- **Verified references** — one line per reference: `name` → verified value (version / endpoint / flag) + source URL.
-- **Options** — up to 3 candidate approaches, one line each: approach — main trade-off — source URL.
-- **Pitfalls** — up to 5 one-line items, each with a source URL.
-- **Unresolved** — up to 3 one-line items you could not verify, and what would settle them.
-
-No quoted documentation blocks beyond a single line. Omit a section entirely if it has nothing in it.
+{% include "opus-5.md" %}

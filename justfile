@@ -21,6 +21,30 @@ typecheck:
 test:
     cd booping-python && uv run pytest
 
+# Playbook evals — promptfoo over `claude -p` on subscription auth. Suites live at
+# playbooks/<name>/<step>/promptfooconfig.yaml; pass one with -c, e.g.
+#   just smoke -c playbooks/groom/intake/promptfooconfig.yaml
+
+# run promptfoo eval — args pass straight through
+[no-exit-message]
+eval *args:
+    npx promptfoo@latest eval {{ args }}
+
+# run promptfoo eval, then render a markdown report (status, per-check reasons) in glow
+[no-exit-message]
+eval-md *args:
+    @bin/eval-md.sh {{ args }}
+
+# run only the deterministic tier — cheap, no judge calls
+[no-exit-message]
+smoke *args:
+    npx promptfoo@latest eval --filter-metadata tier=smoke {{ args }}
+
+# run only the judged tier — the real signal, costs judge calls
+[no-exit-message]
+regress *args:
+    npx promptfoo@latest eval --filter-metadata tier=regress {{ args }}
+
 # Build the documentation site (strict)
 docs:
     uv run --group docs --project booping-python mkdocs build --strict

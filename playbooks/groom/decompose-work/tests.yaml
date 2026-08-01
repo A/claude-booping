@@ -1,0 +1,492 @@
+# decompose-work — two thresholds judged separately, so every fixture pins BOTH a redecompose
+# outcome and a split outcome. The Re-decomposed table's own header repeats `SP` for both its
+# Was and Became columns, so no rule ever addresses a cell by `TD[col="SP"]` (ambiguous with a
+# duplicate header) — table-cell arithmetic (row counts, milestone/sprint sums, the Primary +
+# Sibling SP split) rides in a plain-text javascript assert against the materialized files
+# instead, matching the "manifest arithmetic" carve-out for JS asserts. Every inline `javascript`
+# assert below is written as a function BODY — a bare sequence of statements ending in a
+# top-level `return`, no wrapping `function(){}` — per the promptfoo contract the provider runs
+# it under. `mdcheck`'s `enum:` values are raw strings (`"null"`, never YAML `null`), and `rows:`
+# only bounds a `TABLE`'s body rows — a `UL`'s count is `min:`/`count:` on its `LI`s, never
+# `rows:`.
+
+- description: decompose-work smoke — refined split on oversized-plan
+  vars:
+    input: file://_fixtures/oversized-plan.md
+  metadata:
+    playbook: groom
+    step: decompose-work
+    fixture: oversized-plan
+    tier: smoke
+  assert:
+    # FILE-AT-PATH + NO-SIBLING-CREATED — exactly the decomposition artifact and the updated
+    # plan, nothing else anywhere in the manifest (no sibling plan, no backlog stub)
+    - type: javascript
+      value: file://../../_lib/asserts/files.js
+      config:
+        onTextMode: fail
+        expect:
+          - path: '_runs/groom/20260801-14-30_local-vault-directories/decomposition\.md$'
+            minLines: 15
+          - path: '^plans/20260801-14-30_local-vault-directories\.md$'
+            minLines: 100
+        noOthers: true
+    # SECTIONS-REFINED + FRONTMATTER-NULL(presence) — the shared Refined shape, reused by
+    # entangled-oversize below
+    - &a_refined_shape
+      type: javascript
+      value: file://../../_lib/asserts/mdcheck.js
+      config:
+        file: 'decomposition\.md$'
+        rules: |
+          - select: FRONTMATTER
+            has: { reviewed_at: { enum: ["null"] } }
+
+          - select: H1
+            count: 1
+
+          - select: H1 > H2
+            ordered: [Verdict, Re-decomposed, Totals, "Split candidate"]
+            strict: true
+
+          - select: SECTION("Verdict") > P
+            count: 1
+            require: '^Refined\b'
+    # FILE-AT-PATH(H1) + VERDICT-COUNTS + REDECOMPOSED-TABLE(shape) + TOTALS-RESUMMED(shape) +
+    # SPLIT-CANDIDATE-SHAPE(list present)
+    - type: javascript
+      value: file://../../_lib/asserts/mdcheck.js
+      config:
+        file: 'decomposition\.md$'
+        rules: |
+          - select: H1
+            match: 'Decomposition — 20260801-14-30_local-vault-directories'
+
+          - select: SECTION("Verdict") > P
+            require: '5 SP'
+
+          - select: SECTION("Verdict") > P
+            require: '35 SP'
+
+          - select: SECTION("Re-decomposed") > TABLE
+            columns: [Was, SP, Became, SP]
+            rows: { min: 4 }
+
+          - select: SECTION("Totals") > TABLE
+            columns: [Milestone, Before, After]
+            rows: { min: 6, max: 6 }
+
+          - select: SECTION("Split candidate") > UL > LI
+            min: 2
+    # FRONTMATTER-NULL(exactness) + PLAN-TASKS-REPLACED + NO-TASK-OVERSIZED + PLAN-SP-SYNCED +
+    # TOTALS-RESUMMED(the After figures against the plan's own tasks) +
+    # SPLIT-CANDIDATE-SHAPE(the two SP figures sum to the sprint total) — cross-artifact
+    # arithmetic no mdcheck rule can address without a `TD[col="SP"]` ambiguity
+    - type: javascript
+      value: |
+        const fail = (r) => ({ pass: false, score: 0, reason: r });
+        const ok = (r) => ({ pass: true, score: 1, reason: r });
+        const FILE_RE = /^[ \t]*<file path="([^"]+)">\n([\s\S]*?)\n<\/file>[ \t]*$/gm;
+        const files = {};
+        let fm;
+        while ((fm = FILE_RE.exec(output))) files[fm[1]] = fm[2];
+        const planPath = Object.keys(files).find((p) => /^plans\/20260801-14-30_local-vault-directories\.md$/.test(p));
+        const decompPath = Object.keys(files).find((p) => /decomposition\.md$/.test(p));
+        if (!planPath) return fail('plan file not in the written-files manifest');
+        if (!decompPath) return fail('decomposition.md not in the written-files manifest');
+        const plan = files[planPath];
+        const decomp = files[decompPath];
+        if (!/^---\nreviewed_at: null\n---\n/.test(decomp))
+          return fail('decomposition.md frontmatter is not exactly `reviewed_at: null`');
+        const TASK_ROW = /^\|[^|]+\|[^|]*\|[^|]*\|\s*(\d+)\s*\|\s*\w+\s*\|\s*$/gm;
+        const blocks = plan.split(/\n(?=### M\d+:)/);
+        const heading = {}, taskSum = {}, oversized = [];
+        for (const b of blocks) {
+          const h = /^### (M\d+):[^\n]*?—\s*(\d+)\s*SP/.exec(b);
+          if (!h) continue;
+          const id = h[1];
+          heading[id] = Number(h[2]);
+          let sum = 0, t;
+          TASK_ROW.lastIndex = 0;
+          while ((t = TASK_ROW.exec(b))) {
+            const sp = Number(t[1]);
+            sum += sp;
+            if (sp >= 5) oversized.push(`${id} task at ${sp} SP`);
+          }
+          taskSum[id] = sum;
+        }
+        if (oversized.length) return fail('task(s) still at or over the 5 SP threshold: ' + oversized.join(', '));
+        for (const id of Object.keys(heading))
+          if (heading[id] !== taskSum[id])
+            return fail(`${id} heading says ${heading[id]} SP but its own tasks sum to ${taskSum[id]}`);
+        const sprintTotal = Object.values(taskSum).reduce((a, b) => a + b, 0);
+        const spMatch = /\nsp:\s*(\d+)\n/.exec(plan);
+        if (!spMatch) return fail('plan frontmatter carries no `sp:`');
+        if (Number(spMatch[1]) !== sprintTotal)
+          return fail(`plan sp: ${spMatch[1]} does not equal the milestones' own sum ${sprintTotal}`);
+        if (sprintTotal !== 38)
+          return fail(`re-decomposition changed the sprint total to ${sprintTotal} — it must redistribute, never reduce or inflate, the fixture's own 38`);
+        const totalsSection = /## Totals\n([\s\S]*?)(?:\n## |\n?$)/.exec(decomp);
+        if (!totalsSection) return fail('decomposition.md carries no ## Totals section');
+        for (const row of totalsSection[1].matchAll(/\|\s*(M\d+)[^|]*\|\s*(\d+)\s*\|\s*(\d+)\s*\|/g)) {
+          const [, id, , after] = row;
+          if (Number(after) !== taskSum[id])
+            return fail(`Totals After for ${id} is ${after} but the plan's own tasks sum to ${taskSum[id]}`);
+        }
+        const sprintRow = /\*\*Sprint\*\*\s*\|\s*\*\*(\d+)\*\*\s*\|\s*\*\*(\d+)\*\*/.exec(totalsSection[1]);
+        if (!sprintRow) return fail('Totals carries no bold **Sprint** row');
+        if (Number(sprintRow[2]) !== sprintTotal)
+          return fail(`Totals Sprint After is ${sprintRow[2]}, expected ${sprintTotal}`);
+        const splitSection = /## Split candidate\n([\s\S]*?)(?:\n## |\n?$)/.exec(decomp);
+        if (!splitSection) return fail('decomposition.md carries no ## Split candidate section');
+        const primary = /\*\*Primary\*\*[^\n]*?(\d+)\s*SP/.exec(splitSection[1]);
+        const sibling = /\*\*Sibling\*\*[^\n]*?(\d+)\s*SP/.exec(splitSection[1]);
+        if (!primary || !sibling) return fail('Split candidate does not name both Primary and Sibling with their SP');
+        if (Number(primary[1]) + Number(sibling[1]) !== sprintTotal)
+          return fail(`Primary ${primary[1]} SP + Sibling ${sibling[1]} SP != sprint total ${sprintTotal}`);
+        const redecompSection = /## Re-decomposed\n([\s\S]*?)(?:\n## |\n?$)/.exec(decomp);
+        if (!redecompSection) return fail('decomposition.md carries no ## Re-decomposed section');
+        if (!/\bM2\b/.test(redecompSection[1]) || !/\bM4\b/.test(redecompSection[1]))
+          return fail('Re-decomposed does not show both oversized tasks (M2 and M4) as Was rows');
+        const rows = (redecompSection[1].match(/^\|.*\|\s*$/gm) || []).filter((l) => !/^\|\s*-+\s*\|/.test(l));
+        const bodyRows = rows.length - 1;
+        if (bodyRows < 4)
+          return fail(`Re-decomposed carries ${bodyRows} row(s), expected >= 4 (2 oversized tasks x >= 2 replacements each)`);
+        return ok(`sprint ${sprintTotal} SP, ${bodyRows} re-decomposed rows, split ${primary[1]}/${sibling[1]} SP`);
+    # RETURN-ANNOTATED
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        sections:
+          - name: Changed
+            entry: '^-\s+\[(CREATED|UPDATED)\]\s+`?([^`\s]+)`?\s+—\s+\S.*$'
+            matchManifest: true
+            seededVar: input
+            minEntries: 2
+            maxEntries: 2
+          - name: Notes
+            fold: true
+            minEntries: 1
+          - name: Questions
+            entry: '^\d+\.\s+.+'
+            minEntries: 1
+        onlyListed: true
+
+- description: decompose-work regress — split quality and plan fidelity on oversized-plan
+  vars:
+    input: file://_fixtures/oversized-plan.md
+  metadata:
+    playbook: groom
+    step: decompose-work
+    fixture: oversized-plan
+    tier: regress
+  assert:
+    - type: llm-rubric
+      value: "SPLITS-STAND-ALONE: every replacement task's DoD and Verify are satisfiable on their own — no replacement's Verify depends on a sibling replacement having already landed. Fails on any pair where the first half's Verify only passes once the second half exists."
+    - type: llm-rubric
+      value: "SPLITS-AT-SEAMS: task 2.1 (resolve the vault path from the marker) splits at the seam its own DoD bullets already carry — reading the marker's `vault_path:` key vs. resolving relative/absolute/`~` forms against the repo root — and task 4.1 (scaffold a repo-local vault) splits at its own seam — adding the `--local [dir]` flag and its default vs. writing the marker key and the vault `.gitignore`. Fails if either split is an arbitrary 'part 1' / 'part 2' halving instead of a seam in the task's own listed work."
+    - type: llm-rubric
+      value: "NOTHING-ELSE-TOUCHED: the surviving tasks (everything outside M2's 2.1 and M4's 4.1), their DoD, their Verify, the Context/Decisions/Architecture sections, `summary:`, and the Key Files Reference / Final Verification / Out of scope / CLAUDE.md impact sections come through unchanged from the fixture — only the two split tasks and the SP figures differ."
+    - type: llm-rubric
+      value: "SEAM-ARGUED: the Split candidate argues the M3/M4 seam from the plan's own dependencies — M1–M3 deliver marker parsing, path resolution and every caller honouring the override as a shippable local-vault-directories feature on their own, while M4–M5 (scaffolding and docs) are useless without that resolution logic already landed. Fails on a seam argued from SP size alone."
+    - type: llm-rubric
+      value: "QUESTIONS-USER-CALLS: `## Questions:` holds only the split-or-not sizing call — nothing about the mechanical re-decomposition itself, which the pass already applied, and nothing the thresholds already decided."
+
+- description: decompose-work smoke — skip verdict on right-sized-plan
+  vars:
+    input: file://_fixtures/right-sized-plan.md
+  metadata:
+    playbook: groom
+    step: decompose-work
+    fixture: right-sized-plan
+    tier: smoke
+  assert:
+    # SKIP-FILE-WRITTEN + SKIP-PLAN-UNTOUCHED(absent from manifest)
+    - type: javascript
+      value: file://../../_lib/asserts/files.js
+      config:
+        onTextMode: fail
+        expect:
+          - path: '_runs/groom/20260801-16-05_fix-stale-session-cookie/decomposition\.md$'
+            minLines: 3
+        noOthers: true
+    # SKIP-VERDICT-ONLY
+    - type: javascript
+      value: file://../../_lib/asserts/mdcheck.js
+      config:
+        file: 'decomposition\.md$'
+        rules: |
+          - select: FRONTMATTER
+            has: { reviewed_at: { enum: ["null"] } }
+
+          - select: H1
+            count: 1
+            match: 'Decomposition — 20260801-16-05_fix-stale-session-cookie'
+
+          - select: H1 > H2
+            ordered: [Verdict]
+            strict: true
+
+          - select: SECTION("Verdict") > P
+            count: 1
+            require: '^Skipped\b'
+    # FRONTMATTER-NULL(exactness) + SKIP-VERDICT-COUNTS
+    - type: javascript
+      value: |
+        const fail = (r) => ({ pass: false, score: 0, reason: r });
+        const ok = (r) => ({ pass: true, score: 1, reason: r });
+        const FILE_RE = /^[ \t]*<file path="([^"]+)">\n([\s\S]*?)\n<\/file>[ \t]*$/gm;
+        const files = {};
+        let fm;
+        while ((fm = FILE_RE.exec(output))) files[fm[1]] = fm[2];
+        const decompPath = Object.keys(files).find((p) => /decomposition\.md$/.test(p));
+        if (!decompPath) return fail('decomposition.md not in the written-files manifest');
+        const decomp = files[decompPath];
+        if (!/^---\nreviewed_at: null\n---\n/.test(decomp))
+          return fail('decomposition.md frontmatter is not exactly `reviewed_at: null`');
+        const verdict = /## Verdict\n([\s\S]*?)(?:\n## |\n?$)/.exec(decomp);
+        if (!verdict) return fail('decomposition.md carries no ## Verdict section');
+        for (const figure of ['5 SP', '3 SP', '9 SP', '35 SP'])
+          if (!verdict[1].includes(figure))
+            return fail(`Verdict does not carry the fixture's own figure \`${figure}\``);
+        return ok('Verdict carries the fixture\'s own 5/3/9/35 SP figures');
+    # SKIP-RETURN
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        sections:
+          - name: Changed
+            entry: '^-\s+\[(CREATED|UPDATED)\]\s+`?([^`\s]+)`?\s+—\s+\S.*$'
+            matchManifest: true
+            seededVar: input
+            minEntries: 1
+            maxEntries: 1
+          - name: Notes
+            fold: true
+            minEntries: 1
+          - name: Questions
+            entry: '^\d+\.\s+.+'
+            minEntries: 0
+            maxEntries: 0
+        onlyListed: true
+
+- description: decompose-work regress — skip rationale grounded on right-sized-plan
+  vars:
+    input: file://_fixtures/right-sized-plan.md
+  metadata:
+    playbook: groom
+    step: decompose-work
+    fixture: right-sized-plan
+    tier: regress
+  assert:
+    - type: llm-rubric
+      value: "SKIP-GROUNDED: the Verdict's rationale cites the fixture's own figures — the largest task sitting at 3 SP against the 5 SP re-decompose threshold, the 9 SP sprint against the 35 SP split threshold — not a generic claim that the plan is already right-sized."
+
+- description: decompose-work smoke — skip verdict with a flagged split on split-only-plan
+  vars:
+    input: file://_fixtures/split-only-plan.md
+  metadata:
+    playbook: groom
+    step: decompose-work
+    fixture: split-only-plan
+    tier: smoke
+  assert:
+    # TRAP-NO-FAKE-SPLITS(plan untouched)
+    - type: javascript
+      value: file://../../_lib/asserts/files.js
+      config:
+        onTextMode: fail
+        expect:
+          - path: '_runs/groom/20260801-17-40_notification-center/decomposition\.md$'
+            minLines: 5
+        noOthers: true
+    # TRAP-SPLIT-FLAGGED + TRAP-BOTH-COUNTS + TRAP-NO-FAKE-SPLITS(sections absent)
+    - type: javascript
+      value: file://../../_lib/asserts/mdcheck.js
+      config:
+        file: 'decomposition\.md$'
+        rules: |
+          - select: FRONTMATTER
+            has: { reviewed_at: { enum: ["null"] } }
+
+          - select: H1
+            count: 1
+            match: 'Decomposition — 20260801-17-40_notification-center'
+
+          - select: H1 > H2
+            ordered: [Verdict, "Split candidate"]
+            strict: true
+
+          - select: SECTION("Verdict") > P
+            count: 1
+            require: '^Skipped\b'
+
+          - select: SECTION("Verdict") > P
+            require: '35 SP'
+
+          - select: SECTION("Verdict") > P
+            require: '41 SP'
+
+          - select: SECTION("Split candidate") > UL > LI
+            min: 2
+    # TRAP-SPLIT-FLAGGED(the two SP figures sum to the sprint total) + TRAP-NO-FAKE-SPLITS(plan
+    # absent from both the manifest and the return)
+    - type: javascript
+      value: |
+        const fail = (r) => ({ pass: false, score: 0, reason: r });
+        const ok = (r) => ({ pass: true, score: 1, reason: r });
+        if (/^[ \t]*<file path="plans\//m.test(output))
+          return fail('a plan file was written even though nothing sat at or over the re-decompose threshold');
+        const ret = /<return>\n([\s\S]*?)\n<\/return>/.exec(output);
+        if (ret && /plans\//.test(ret[1]))
+          return fail('the return mentions a plans/ path even though nothing was re-decomposed');
+        const FILE_RE = /^[ \t]*<file path="([^"]+)">\n([\s\S]*?)\n<\/file>[ \t]*$/gm;
+        const files = {};
+        let fm;
+        while ((fm = FILE_RE.exec(output))) files[fm[1]] = fm[2];
+        const decompPath = Object.keys(files).find((p) => /decomposition\.md$/.test(p));
+        if (!decompPath) return fail('decomposition.md not in the written-files manifest');
+        const decomp = files[decompPath];
+        if (!/^---\nreviewed_at: null\n---\n/.test(decomp))
+          return fail('decomposition.md frontmatter is not exactly `reviewed_at: null`');
+        const splitSection = /## Split candidate\n([\s\S]*?)(?:\n## |\n?$)/.exec(decomp);
+        if (!splitSection) return fail('decomposition.md carries no ## Split candidate section');
+        const primary = /\*\*Primary\*\*[^\n]*?(\d+)\s*SP/.exec(splitSection[1]);
+        const sibling = /\*\*Sibling\*\*[^\n]*?(\d+)\s*SP/.exec(splitSection[1]);
+        if (!primary || !sibling) return fail('Split candidate does not name both Primary and Sibling with their SP');
+        if (Number(primary[1]) + Number(sibling[1]) !== 41)
+          return fail(`Primary ${primary[1]} SP + Sibling ${sibling[1]} SP != the fixture's own sprint total 41`);
+        return ok(`split candidate ${primary[1]}/${sibling[1]} SP sums to 41, plan untouched`);
+
+- description: decompose-work regress — real seam argued on split-only-plan
+  vars:
+    input: file://_fixtures/split-only-plan.md
+  metadata:
+    playbook: groom
+    step: decompose-work
+    fixture: split-only-plan
+    tier: regress
+  assert:
+    - type: llm-rubric
+      value: "TRAP-SEAM-REAL: the seam is argued from the plan's own dependencies — the delivery pipeline (M1–M3: event intake, fan-out/dedupe, transports and the in-app feed) ships notifications end to end on the built-in defaults without the preferences UI, while M4–M6 (preference model/API, preferences UI, digest schedule) need M2's resolver interface and M3's transports first. Fails if the seam is argued from the SP midpoint or from any grouping other than this dependency chain."
+
+- description: decompose-work smoke — entangled task splits into a vertical slice on entangled-oversize
+  vars:
+    input: file://_fixtures/entangled-oversize.md
+  metadata:
+    playbook: groom
+    step: decompose-work
+    fixture: entangled-oversize
+    tier: smoke
+  assert:
+    # TRAP-ENTANGLED-SPLIT(files) + NO-SIBLING-CREATED-equivalent for this fixture
+    - type: javascript
+      value: file://../../_lib/asserts/files.js
+      config:
+        onTextMode: fail
+        expect:
+          - path: '_runs/groom/20260801-18-20_indexed-plan-store/decomposition\.md$'
+            minLines: 10
+          - path: '^plans/20260801-18-20_indexed-plan-store\.md$'
+            minLines: 80
+        noOthers: true
+    # SECTIONS-REFINED shape — the same Refined contract as oversized-plan
+    - *a_refined_shape
+    # TRAP-ENTANGLED-SPLIT(shape) + TRAP-NO-SPLIT(shape: one line, no bullet list)
+    - type: javascript
+      value: file://../../_lib/asserts/mdcheck.js
+      config:
+        file: 'decomposition\.md$'
+        rules: |
+          - select: H1
+            match: 'Decomposition — 20260801-18-20_indexed-plan-store'
+
+          - select: SECTION("Verdict") > P
+            require: '5 SP'
+
+          - select: SECTION("Verdict") > P
+            require: '35 SP'
+
+          - select: SECTION("Re-decomposed") > TABLE
+            columns: [Was, SP, Became, SP]
+            rows: { min: 2 }
+
+          - select: SECTION("Totals") > TABLE
+            columns: [Milestone, Before, After]
+            rows: { min: 5, max: 5 }
+
+          - select: SECTION("Split candidate") > P
+            count: 1
+            require: '35 SP'
+
+          - select: SECTION("Split candidate") > UL
+            count: 0
+    # TRAP-ENTANGLED-SPLIT(arithmetic: the 5 SP task is gone, no task >= 5, totals re-summed) +
+    # TRAP-NO-SPLIT(no fabricated Primary/Sibling)
+    - type: javascript
+      value: |
+        const fail = (r) => ({ pass: false, score: 0, reason: r });
+        const ok = (r) => ({ pass: true, score: 1, reason: r });
+        const FILE_RE = /^[ \t]*<file path="([^"]+)">\n([\s\S]*?)\n<\/file>[ \t]*$/gm;
+        const files = {};
+        let fm;
+        while ((fm = FILE_RE.exec(output))) files[fm[1]] = fm[2];
+        const planPath = Object.keys(files).find((p) => /^plans\/20260801-18-20_indexed-plan-store\.md$/.test(p));
+        const decompPath = Object.keys(files).find((p) => /decomposition\.md$/.test(p));
+        if (!planPath) return fail('plan file not in the written-files manifest');
+        if (!decompPath) return fail('decomposition.md not in the written-files manifest');
+        const plan = files[planPath];
+        const decomp = files[decompPath];
+        if (!/^---\nreviewed_at: null\n---\n/.test(decomp))
+          return fail('decomposition.md frontmatter is not exactly `reviewed_at: null`');
+        const TASK_ROW = /^\|[^|]+\|[^|]*\|[^|]*\|\s*(\d+)\s*\|\s*\w+\s*\|\s*$/gm;
+        const blocks = plan.split(/\n(?=### M\d+:)/);
+        const heading = {}, taskSum = {}, oversized = [];
+        for (const b of blocks) {
+          const h = /^### (M\d+):[^\n]*?—\s*(\d+)\s*SP/.exec(b);
+          if (!h) continue;
+          const id = h[1];
+          heading[id] = Number(h[2]);
+          let sum = 0, t;
+          TASK_ROW.lastIndex = 0;
+          while ((t = TASK_ROW.exec(b))) {
+            const sp = Number(t[1]);
+            sum += sp;
+            if (sp >= 5) oversized.push(`${id} task at ${sp} SP`);
+          }
+          taskSum[id] = sum;
+        }
+        if (oversized.length) return fail('task(s) still at or over the 5 SP threshold: ' + oversized.join(', '));
+        for (const id of Object.keys(heading))
+          if (heading[id] !== taskSum[id])
+            return fail(`${id} heading says ${heading[id]} SP but its own tasks sum to ${taskSum[id]}`);
+        const sprintTotal = Object.values(taskSum).reduce((a, b) => a + b, 0);
+        const spMatch = /\nsp:\s*(\d+)\n/.exec(plan);
+        if (!spMatch) return fail('plan frontmatter carries no `sp:`');
+        if (Number(spMatch[1]) !== sprintTotal)
+          return fail(`plan sp: ${spMatch[1]} does not equal the milestones' own sum ${sprintTotal}`);
+        if (sprintTotal !== 18)
+          return fail(`re-decomposition changed the sprint total to ${sprintTotal} — it must redistribute, never reduce or inflate, the fixture's own 18`);
+        if (/\*\*Primary\*\*/.test(decomp))
+          return fail('a split candidate was flagged even though the 18 SP sprint sits under the 35 SP threshold');
+        const redecompSection = /## Re-decomposed\n([\s\S]*?)(?:\n## |\n?$)/.exec(decomp);
+        if (!redecompSection) return fail('decomposition.md carries no ## Re-decomposed section');
+        const rows = (redecompSection[1].match(/^\|.*\|\s*$/gm) || []).filter((l) => !/^\|\s*-+\s*\|/.test(l));
+        const bodyRows = rows.length - 1;
+        if (bodyRows < 2)
+          return fail(`Re-decomposed carries ${bodyRows} row(s), expected >= 2 (the one oversized task split into >= 2 replacements)`);
+        return ok(`sprint ${sprintTotal} SP unchanged, ${bodyRows} re-decomposed row(s), no split flagged`);
+
+- description: decompose-work regress — vertical slice on entangled-oversize
+  vars:
+    input: file://_fixtures/entangled-oversize.md
+  metadata:
+    playbook: groom
+    step: decompose-work
+    fixture: entangled-oversize
+    tier: regress
+  assert:
+    - type: llm-rubric
+      value: "TRAP-VERTICAL-SLICE: task 2.1 (move plan reads from flat files to the indexed store) splits into two vertical slices — each moving one read path (e.g. `render-sprints`, `transition`) end to end onto `PlanStore`, `Context.assemble()` populating `context.plans` from it — never an add-the-reader-then-delete-the-writer pair that leaves `PlanStore` half-wired with call sites still split between the old flat-file scan and the new store. Fails if either replacement task alone leaves some caller reading `plans/*.md` directly while another already reads through `PlanStore`, with no working state in between."

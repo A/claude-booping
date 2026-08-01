@@ -1,0 +1,189 @@
+# Shared structural contract — same five H2s, the same "open recommendation or settled choice"
+# shape per Trade-offs entry, the same "names its mitigation" shape per Risks entry — whatever
+# the fixture. Anchored once, reused by every fixture's smoke case.
+- description: design smoke — first pass on researched-first-pass
+  vars:
+    input: file://_fixtures/researched-first-pass.md
+  metadata:
+    playbook: groom
+    step: design
+    fixture: researched-first-pass
+    tier: smoke
+  assert:
+    # FILE-AT-PATH + H1-SLUG + NO-FRONTMATTER
+    - type: javascript
+      value: file://../../_lib/asserts/files.js
+      config:
+        onTextMode: fail
+        expect:
+          - path: '_runs/groom/20260801-09-15_sprints-report-script/design\.md$'
+            minLines: 20
+            contains: ['^# design — 20260801-09-15_sprints-report-script$']
+            forbids: ['^---\s*$']
+        noOthers: true
+    # SECTIONS + TRADEOFF-SHAPE + RISKS-MITIGATED
+    - &a_shape
+      type: javascript
+      value: file://../../_lib/asserts/mdcheck.js
+      config:
+        file: 'design\.md$'
+        rules: |
+          - select: H1 > H2
+            ordered: [Approach, Surface changes, Alternatives, Trade-offs, Risks]
+            strict: true
+
+          - select: SECTION("Trade-offs") > UL > LI
+            min_length: 80
+            match: '(?s).*(?i)(recommended|settled).*'
+
+          - select: SECTION("Risks") > UL > LI
+            min_length: 40
+            match: '(?s).*(?i)mitigat\w*.*'
+    # QUESTIONS-MATCH (shape) — one [CREATED] Changed entry naming the manifest, Questions
+    # numbered, empty only when Trade-offs is empty
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        sections:
+          - name: Changed
+            entry: '^-\s+\[(CREATED|UPDATED)\]\s+`?([^`\s]+)`?$'
+            statuses: [CREATED]
+            matchManifest: true
+            maxEntries: 1
+          - name: Questions
+            entry: '^\d+\.\s+.+'
+            minEntries: 0
+        onlyListed: true
+    # QUESTIONS-MATCH (parity) — arithmetic across two documents (design.md's own Trade-offs
+    # count against the return's Questions count) that no _lib module cross-references; the
+    # return.js call above already pins each section's own shape.
+    - type: javascript
+      value: |
+        const fileMatch = /<file path="[^"]*design\.md">\n([\s\S]*?)\n<\/file>/.exec(output);
+        if (!fileMatch) return { pass: false, score: 0, reason: 'no design.md file block in output' };
+        const tSection = /## Trade-offs\n([\s\S]*?)(?:\n## |\n?$)/.exec(fileMatch[1]);
+        const tradeoffs = tSection ? (tSection[1].match(/^- /gm) || []).length : 0;
+        const returnMatch = /<return>\n([\s\S]*?)\n<\/return>/.exec(output);
+        const qSection = returnMatch ? /## Questions:?\n([\s\S]*?)(?:\n## |\n?$)/.exec(returnMatch[1]) : null;
+        const questions = qSection ? (qSection[1].match(/^\d+\.\s/gm) || []).length : 0;
+        if (tradeoffs !== questions) {
+          return { pass: false, score: 0, reason: `design.md carries ${tradeoffs} Trade-offs entries but the return lists ${questions} Questions` };
+        }
+        return { pass: true, score: 1, reason: `${tradeoffs} Trade-offs == ${questions} Questions` };
+
+- description: design regress — grounding and fidelity on researched-first-pass
+  vars:
+    input: file://_fixtures/researched-first-pass.md
+  metadata:
+    playbook: groom
+    step: design
+    fixture: researched-first-pass
+    tier: regress
+  assert:
+    - type: llm-rubric
+      value: "GROUNDED-IN-BLAST-RADIUS: Approach is argued against the fixture's real paths — `hooks.py`, `sprints.md.j2`, the `plan.hooks.post` list — with the rationale that made it win; no invented path."
+    - type: llm-rubric
+      value: "ANSWERS-UNKNOWN: the map's unknown (vault resolution from `BOOPING_WORKDIR` on a repo-local vault) is decided in Approach or surfaced as a trade-off or risk — never silently dropped."
+    - type: llm-rubric
+      value: "ALTERNATIVES-FROM-RESEARCH: the research approaches not taken appear in `## Alternatives`, each with the single reason it lost."
+    - type: llm-rubric
+      value: "PITFALLS-ANSWERED: each of the 3 pitfalls is designed against in Approach/Surface changes or carried into Risks with a mitigation."
+    - type: llm-rubric
+      value: "SURFACE-CONCRETE: Surface changes name implementable specifics — script name, config key removed from `plan.hooks.post`, env vars read, defaults — not \"config will change\"."
+    - type: llm-rubric
+      value: "USER-CALLS-ONLY: Trade-offs hold calls that are the user's (policy, cost, blast radius), not implementation details design should have settled itself."
+
+- description: design smoke — loopback re-entry on loopback-objection
+  vars:
+    input: file://_fixtures/loopback-objection.md
+  metadata:
+    playbook: groom
+    step: design
+    fixture: loopback-objection
+    tier: smoke
+  assert:
+    # FILE-AT-PATH + FRONTMATTER-PRESERVED
+    - type: javascript
+      value: file://../../_lib/asserts/files.js
+      config:
+        onTextMode: fail
+        expect:
+          - path: '_runs/groom/20260801-09-15_sprints-report-script/design\.md$'
+            minLines: 20
+            contains:
+              - '^# design — 20260801-09-15_sprints-report-script$'
+              - 'reviewed_at: 20260801 10:40'
+        noOthers: true
+    # REVISED-IN-PLACE (section set) — same shared shape contract as the first-pass fixture
+    - *a_shape
+    # REVISED-IN-PLACE (return) — same path, [UPDATED], one file only
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        sections:
+          - name: Changed
+            entry: '^-\s+\[(CREATED|UPDATED)\]\s+`?([^`\s]+)`?$'
+            statuses: [UPDATED]
+            matchManifest: true
+            maxEntries: 1
+          - name: Questions
+            entry: '^\d+\.\s+.+'
+            minEntries: 0
+        onlyListed: true
+
+- description: design regress — objection handling on loopback-objection
+  vars:
+    input: file://_fixtures/loopback-objection.md
+  metadata:
+    playbook: groom
+    step: design
+    fixture: loopback-objection
+    tier: regress
+  assert:
+    - type: llm-rubric
+      value: "ONLY-REOPENED-REWRITTEN: sections carrying settled calls come through unchanged in substance; only the vault-commit call and what depends on it is rewritten."
+    - type: llm-rubric
+      value: "OBJECTION-ADDRESSED: the rewritten call states the choice the objection asks for, and the displaced option moves into `## Alternatives` with the reason it lost."
+
+- description: design smoke — well-trodden fix on skipped-research
+  vars:
+    input: file://_fixtures/skipped-research.md
+  metadata:
+    playbook: groom
+    step: design
+    fixture: skipped-research
+    tier: smoke
+  assert:
+    # FILE-AT-PATH + H1-SLUG + NO-CITATIONS
+    - type: javascript
+      value: file://../../_lib/asserts/files.js
+      config:
+        onTextMode: fail
+        expect:
+          - path: '_runs/groom/20260801-11-05_fix-plan-date-stamp-timezone/design\.md$'
+            minLines: 15
+            contains: ['^# design — 20260801-11-05_fix-plan-date-stamp-timezone$']
+            forbids:
+              - '^---\s*$'
+              - 'https?://'
+              - '\b[Ss]ources?\b\s*\|'
+              - '\|\s*\d{8}\s*\|'
+        noOthers: true
+    # section shape still holds on a skip fixture — same shared contract
+    - *a_shape
+
+- description: design regress — no manufactured practice or calls on skipped-research
+  vars:
+    input: file://_fixtures/skipped-research.md
+  metadata:
+    playbook: groom
+    step: design
+    fixture: skipped-research
+    tier: regress
+  assert:
+    - type: llm-rubric
+      value: "NO-INVENTED-PRACTICE: no \"current practice\", library-comparison or version claim appears — the design argues from the blast radius and prior art alone."
+    - type: llm-rubric
+      value: "NO-MANUFACTURED-CALLS: `## Trade-offs` invents no call the fix does not carry (an explicit none is correct), and `## Questions:` matches it rather than padding."

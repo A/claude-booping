@@ -1,25 +1,42 @@
 ---
-name: present
-title: Present
-summary: "Owns the present-and-iterate craft rule and the explicit-approval gate; fires the approval move per the Plan Transitions table."
-agent: null
-review_gate: "Ready for development, or want changes? Approval must be explicit — 'looks good' is enough, silence is not. On a change request: re-enter draft for wording, scope, milestone, or estimate changes, or re-enter design when the change needs re-research or re-design (move the plan back per the Plan Transitions table first); then present again."
+summary: Assemble the approval summary — approach, milestones, SP totals, plan 
+  path and every check outcome; recommend a split when the total passes the 
+  threshold, offer a plan branch on a repo-local vault, and carry the approval.
+agent: sonnet:medium
+review_gate: "Explicit user approval — \"looks good\" counts, silence never does;
+  on that word the run moves to `ready-for-dev`. A change request loops the run back
+  to the status that owns what it touches — milestones, tasks or estimates reopen
+  the refinement pass, architecture or scope reopens the design — and present never
+  absorbs a change itself. A recommended split is acknowledged, not required: the
+  user may approve the plan whole and park no siblings"
+inputs:
+- what: the drafted plan — its approach, its milestones, the per-milestone and 
+    sprint SP totals, and the path it lives at
+- what: the split threshold, and the split candidate the refinement pass flagged
+    — its sibling shape and rough sizes — or the note that nothing was flagged
+- what: the cross-review findings with the deferrals recorded against them, or 
+    the note that no cross-review agent is configured
+- what: the reference-verification results — what was checked, what was 
+    corrected, what stayed unresolved
+- from: runner
+  what: whether the vault lives inside the repository being planned, and the 
+    project's branch prefix for the plan's type
+- from: user
+  what: on a pass that follows an earlier presentation, the user's reply to it —
+    a change request, an approval, or neither — and what changed in the plan 
+    since that summary
+outputs:
+- "_runs/groom/{slug}/handoff.md — the approval summary: Approach, Milestones, Totals,
+  Plan, Checks, Split recommendation (over threshold only), Branch (repo-local vault
+  only), Next; frontmatter carries `reviewed_at: null`, rewritten in place on a later
+  pass"
+- the sprint SP total against the split threshold and one line per check 
+  outcome, in the harness return
+- on a repo-local vault, the proposed `git switch -c` command for the driver to 
+  run — never run by the step
+- the approval question, plus the branch offer on a repo-local vault; empty once
+  the user has approved or a change request is handed back
+reviewed_at: 20260731 20:19
 ---
-## Present
 
-Show the user, in this order:
-
-1. **Approach summary** — the agreed design in a few lines.
-2. **Milestones** — one line each, with per-milestone SP.
-3. **SP total** for the sprint, and any split proposal that came out of drafting.
-4. **Plan file path**.
-
-Then ask: *"Ready for development, or want changes?"*
-
-- **Explicit approval** → fire the approval move from the Plan Transitions table with `booping transition`, then re-read the plan frontmatter to confirm the new status.
-- **Change request** → do not transition on approval. Route it: wording, scope, milestone, or estimate edits go back to `draft`; anything needing re-research or re-design goes back to `design`, moving the plan back per the Plan Transitions table first. Iterate and present again.
-- **User shelves the work** → take the cancel move from the Plan Transitions table.
-
-## Output
-
-The plan file path and the status the plan ends in.
+{% include "sonnet-5.md" %}

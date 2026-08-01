@@ -1,0 +1,262 @@
+# Plan frontmatter is 13 fixed keys (title, type, status, sp, split_from, created, planned,
+# started, completed, retro, goal, summary, commit). An identity-only plan file is therefore
+# exactly 15 non-blank lines (13 keys + 2 `---` fences) when the body is nothing but whitespace
+# — that count IS the PLAN-BODY-EMPTY check, no separate assert needed.
+
+- description: intake smoke — first pass on a fresh request, no prior framing
+  vars:
+    input: file://_fixtures/fresh-request.md
+  metadata:
+    playbook: groom
+    step: intake
+    fixture: fresh-request
+    tier: smoke
+  assert:
+    # FILES-AND-SLUG + REQUEST-VERBATIM + PLAN-BODY-EMPTY. The slug's title half is the run's
+    # own choice — only the yyyymmdd-hh-mm prefix (minted from the given run start) is pinned;
+    # the same prefix on both paths is as close as a per-path regex gets to "one shared stem".
+    - type: javascript
+      value: file://../../_lib/asserts/files.js
+      config:
+        onTextMode: fail
+        expect:
+          - path: '_runs/groom/20260801-10-20_[a-z0-9-]+/intake\.md$'
+            minLines: 10
+            contains:
+              - '^> make `/develop` resume an interrupted sprint without re-running finished milestones\s*$'
+          - path: 'plans/20260801-10-20_[a-z0-9-]+\.md$'
+            minLines: 15
+            maxLines: 15
+        noOthers: true
+    # INTAKE-SHAPE + SCOPE-SHAPE
+    - type: javascript
+      value: file://../../_lib/asserts/mdcheck.js
+      config:
+        file: '_runs/groom/.+/intake\.md$'
+        rules: |
+          - select: FRONTMATTER
+            has: { reviewed_at: { enum: ["null"] } }
+          - select: H1
+            count: 1
+            match: '^Intake — .+'
+          - select: H1 > H2
+            ordered: [Request, Restated problem, Task type, Scope boundaries, Scope challenge]
+            strict: true
+          - select: SECTION("Scope boundaries") > P[text=/^\*\*In scope\*\*$/] + UL > LI
+            min: 1
+          - select: SECTION("Scope boundaries") > P[text=/^\*\*Out of scope\*\*$/] + UL > LI
+            min: 1
+          - select: SECTION("Scope challenge") > UL > LI
+            min: 1
+    # PLAN-IDENTITY — title/type are the run's own call, judged by TYPE-DISCRIMINATED at regress
+    - type: javascript
+      value: file://../../_lib/asserts/mdcheck.js
+      config:
+        file: 'plans/.+\.md$'
+        rules: |
+          - select: FRONTMATTER
+            has:
+              status: { enum: [in-spec] }
+              type: { enum: [feature, bug, refactoring] }
+              sp: { enum: ["null"] }
+              split_from: { enum: ["null"] }
+              created: { enum: [2026-08-01] }
+              planned: { enum: ["null"] }
+              started: { enum: ["null"] }
+              completed: { enum: ["null"] }
+              retro: { enum: ["null"] }
+              goal: { enum: ["null"] }
+              summary: { enum: ['""'] }
+              commit: { enum: ["null"] }
+    # RETURN-SHAPE
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        sections:
+          - name: Changed
+            entry: '^-\s+\[(CREATED|UPDATED)\]\s+`?([^`\s]+)`?$'
+            matchManifest: true
+            seededVar: input
+            statuses: [CREATED]
+            minEntries: 2
+            maxEntries: 2
+          - name: Notes
+            optional: true
+          - name: Questions
+            entry: '^\d+\.\s+\S'
+            minEntries: 1
+        onlyListed: true
+
+- description: intake regress — framing fidelity on a fresh request
+  vars:
+    input: file://_fixtures/fresh-request.md
+  metadata:
+    playbook: groom
+    step: intake
+    fixture: fresh-request
+    tier: regress
+  assert:
+    - type: llm-rubric
+      value: "TYPE-DISCRIMINATED: The chosen task type is one of the catalogue's three (feature, bug, refactoring) and correct for this request — a new capability `/develop` does not have today, not a defect and not a behaviour-preserving restructuring. The rationale rules out both sibling types by name, each on a stated test (no observed defect to triage rules out bug; observable behaviour changes rule out refactoring). Fails if the type is wrong, or the rationale never names and rules out both siblings."
+    - type: llm-rubric
+      value: "PROBLEM-FAITHFUL: The restated problem names what `/develop` does today — no record of which milestone groups finished, a resumed run restarts from the top — and what must change, in the request's own domain terms (milestones, sprints, `/develop`). Fails on a requirement the request never made (e.g. cross-repo or cross-branch resume), or a restatement missing either today's behaviour or the needed change."
+    - type: llm-rubric
+      value: "BOUNDARIES-DECIDABLE: Every In scope and Out of scope item is decidable on sight. Out of scope names adjacent work the request could plausibly be read to include — resuming mid-milestone, resuming a skill other than `/develop`, cross-repo/cross-branch resume — not an irrelevant strawman. Fails on a vague item, or an Out of scope item nobody would have assumed was in scope."
+    - type: llm-rubric
+      value: "QUESTIONS-CHALLENGE: Every scope-challenge question asks about something the request pulls in but does not state — a new component (the progress record), a dependency, an API, a workflow change — and is answerable in one line. Fails on a question the request already answers, one needing more than a line, or one that does not challenge scope."
+    - type: llm-rubric
+      value: "NO-RESEARCH-LEAK: `intake.md` carries no blast radius, file list, architecture call, milestone or estimate anywhere. Fails if any such content appears, even in passing."
+
+- description: intake smoke — re-run folding the user's answers into the first pass's framing
+  vars:
+    input: file://_fixtures/answered-rerun.md
+  metadata:
+    playbook: groom
+    step: intake
+    fixture: answered-rerun
+    tier: smoke
+  assert:
+    # RERUN-UPDATED + RERUN-QUESTIONS-EMPTY. matchManifest + seededVar together forbid a second
+    # write of any kind — the plan file was seeded (in the corpus) and stays untouched, so only
+    # intake.md, marked UPDATED, may appear.
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        sections:
+          - name: Changed
+            entry: '^-\s+\[(CREATED|UPDATED)\]\s+`?([^`\s]+)`?$'
+            matchManifest: true
+            seededVar: input
+            statuses: [UPDATED]
+            minEntries: 1
+            maxEntries: 1
+          - name: Notes
+            optional: true
+          - name: Questions
+            maxEntries: 0
+        onlyListed: true
+
+- description: intake regress — the answers land, everything else holds
+  vars:
+    input: file://_fixtures/answered-rerun.md
+  metadata:
+    playbook: groom
+    step: intake
+    fixture: answered-rerun
+    tier: regress
+  assert:
+    - type: llm-rubric
+      value: "ANSWERS-FOLDED: Each of the three answers lands where it belongs in the rewritten `intake.md` — the chosen progress-record location, restart-the-group-not-resume-part-done, and trust-the-record-over-re-running-Verify all show up in the relevant section. No scope-challenge checkbox from the first pass is left open. Fails if an answer's substance is missing, or a checkbox is still open."
+    - type: llm-rubric
+      value: "FRAMING-STABLE: What the answers did not touch is unchanged — the request blockquote is intact character-for-character, and the task type is still feature. `## Notes:` in the harness return reports what the answers changed. Fails if the request text drifted, the type moved without cause, or Notes says nothing about what changed."
+
+- description: intake smoke — adopting a parked plan the user names
+  vars:
+    input: file://_fixtures/parked-plan-named.md
+  metadata:
+    playbook: groom
+    step: intake
+    fixture: parked-plan-named
+    tier: smoke
+  assert:
+    # ADOPT-SLUG + half of ADOPT-IN-PLACE: the parked plan's own filename stem is the slug, no
+    # fresh yyyymmdd-hh-mm_ stem minted, and noOthers refuses any other plans/*.md.
+    - type: javascript
+      value: file://../../_lib/asserts/files.js
+      config:
+        onTextMode: fail
+        expect:
+          - path: '_runs/groom/20260715-retro-template-picker/intake\.md$'
+            minLines: 10
+          - path: 'plans/20260715-retro-template-picker\.md$'
+        noOthers: true
+    # rest of ADOPT-IN-PLACE: seededVar makes the parked plan's status UPDATED and intake.md's
+    # status CREATED the only legal combination.
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        sections:
+          - name: Changed
+            entry: '^-\s+\[(CREATED|UPDATED)\]\s+`?([^`\s]+)`?$'
+            matchManifest: true
+            seededVar: input
+            minEntries: 2
+            maxEntries: 2
+          - name: Notes
+            optional: true
+          - name: Questions
+            optional: true
+        onlyListed: true
+    # ADOPT-STATUS-FLIP — status flips, everything pre-existing besides title/type (the run's
+    # own call, judged at regress) is untouched.
+    - type: javascript
+      value: file://../../_lib/asserts/mdcheck.js
+      config:
+        file: 'plans/20260715-retro-template-picker\.md$'
+        rules: |
+          - select: FRONTMATTER
+            has:
+              status: { enum: [in-spec] }
+              sp: { enum: ["null"] }
+              split_from: { enum: ["null"] }
+              created: { enum: [2026-07-15] }
+              planned: { enum: ["null"] }
+              started: { enum: ["null"] }
+              completed: { enum: ["null"] }
+              retro: { enum: ["null"] }
+              goal: { enum: ["null"] }
+              summary: { enum: ['"retros come out in a different shape in every project"'] }
+              commit: { enum: ["null"] }
+
+- description: intake regress — adoption frames the parked plan's own work
+  vars:
+    input: file://_fixtures/parked-plan-named.md
+  metadata:
+    playbook: groom
+    step: intake
+    fixture: parked-plan-named
+    tier: regress
+  assert:
+    - type: llm-rubric
+      value: "ADOPT-FRAMING: `intake.md` frames the parked plan's own work — per-project retro templates overriding the built-in shape, the way `/code-review` already does for review templates — as the request restates it. It reads as one plan's framing, not a fresh plan invented alongside the parked one. Fails if the framing describes work the parked plan does not already cover, or reads as independent of it."
+
+- description: intake smoke — the parked plan is cited when its work is restated but not named
+  vars:
+    input: file://_fixtures/parked-plan-unnamed.md
+  metadata:
+    playbook: groom
+    step: intake
+    fixture: parked-plan-unnamed
+    tier: smoke
+  assert:
+    # TRAP-PARKED-CITED — checked over the whole output (files manifest + return), not just one
+    # section: adopting in place cites the path in the written plan's own filename, raising it as
+    # a question cites it in the return. Either satisfies the row.
+    - type: regex
+      value: 'plans/20260715-retro-template-picker\.md'
+    # arithmetic half of TRAP-NO-DUPLICATE — counting a second plan file is a script's job, not
+    # a rubric's. onTextMode/noOthers stay permissive: this call checks one negative fact only,
+    # and a run that resolves the overlap by asking (no files written) still satisfies it.
+    - type: javascript
+      value: file://../../_lib/asserts/files.js
+      config:
+        onTextMode: pass
+        noOthers: false
+        expect:
+          - path: 'plans/(?!20260715-retro-template-picker\.md$).*\.md$'
+            count: 0
+
+- description: intake regress — the overlap is resolved, not doubled
+  vars:
+    input: file://_fixtures/parked-plan-unnamed.md
+  metadata:
+    playbook: groom
+    step: intake
+    fixture: parked-plan-unnamed
+    tier: regress
+  assert:
+    - type: llm-rubric
+      value: "TRAP-NO-DUPLICATE: The overlap between the request and the parked `plans/20260715-retro-template-picker.md` is resolved before framing proceeds — either the parked plan is adopted in place (its path in `## Changed:`, marked `[UPDATED]`, framed as one plan's work), or the ambiguity is raised as a `## Questions:` item naming the parked plan. Fails if a second plan is minted for the same work without ever naming the parked one."

@@ -1,0 +1,33 @@
+# Decisions
+
+- `[2026-07-31 11:55]` Convert the core groom skill into a playbook.
+- `[2026-07-31 11:55]` The new playbook stays in parallel with the /groom skill until beta-testing finishes — the skill is not replaced or changed.
+- `[2026-07-31 11:55]` Existing groom playbook variants are stale — do not frame the new playbook by them.
+- `[2026-07-31 12:05]` New playbook takes the name `groom`; the stale core playbooks/groom/ is retired (deleted) to free the name.
+- `[2026-07-31 12:15]` sprints.md is out of scope for the groom playbook — user can script it, or a future published booping CLI command (`booping sprints-report`) handles it later.
+- `[2026-07-31 12:15]` Groom playbook's state machine is its own subset of the plan lifecycle, joined at edges with develop's subset (groom ends at ready-for-dev / awaiting-plan-review, develop picks up there) — two different subsets of one machine, not one shared monolithic machine.
+- `[2026-07-31 12:19]` Revises earlier sprints decision: sprints.md rendering stays in scope, but as a playbook-local script under the groom playbook's _scripts/ (hook `script <name>`), not booping's built-in render-sprints — which is later removed from booping. Direction: playbook-specific behavior lives in playbooks; booping core stays a pure playbook framework.
+- `[2026-07-31 13:21]` Cross-validation becomes a config-gated jinja block inside the draft step, not a standalone step or external Gemini call: `{% if config.get('cross_review') %}` spawns sub-agent `subagent_type={{ config.cross_review.agent }}` (e.g. codex) on the plan file; config-absent → block absent, gate vacuously satisfied. Zero framework code — jinja playbooks already receive `config` with custom keys deep-merged.
+- `[2026-07-31 13:21]` Cross-review timing: end of draft, pre-transition out of in-spec (after Quality-Checklist verify) — matches gate placement.
+- `[2026-07-31 13:21]` The draft-step block explicitly replaces docs/cross_validation.md's Gemini path (booping-external-llm-call) for playbook runs; canonical /groom keeps it untouched.
+- `[2026-07-31 13:21]` Cross-review return contract bounded per lesson 0007, exact shape locked at authoring time; findings-only vs verdict-first-line still open.
+- `[2026-07-31 18:26]` Plan file is created early — by intake or by the harness at run start — so its path is known from wave 1; plan filename format is `yyyymmdd-hh-mm_<title>.md`.
+- `[2026-07-31 18:26]` The groom playbook never calls `booping transition`; `booping playbook-transition` on the playbook's own machine owns all plan-state writes, sprints render and vault commit as playbook `_scripts/` hooks.
+- `[2026-07-31 18:26]` Groom's machine starts at `in-spec`; `backlog` stays outside the machine as parking for plans to groom later.
+- `[2026-07-31 18:26]` Vault lessons need no step wiring — booping injects playbook `_lessons/` on rendering.
+- `[2026-07-31 18:26]` Cross-review return contract: findings-only as recommended (`- CRITICAL|RISK|NOTE: <finding> — <plan section>` lines or literal `no findings`).
+- `[2026-07-31 18:30]` No symlink for the groom machine artifact; the artifact directory is the project vault.
+- don't use `<tags>` as placeholder, it breaks obsidian 
+- `[2026-07-31 18:33]` No bare `<something>` angle-bracket placeholders in vault markdown — breaks Obsidian render. Use `{curly}` placeholders or backtick-wrapped text in all groom artifacts (specs, prompts, playbook files).
+- `[2026-07-31 18:34]` Groom run always grooms exactly one plan — the subgraph never spawns sibling instances; the last step (present) only recommends a split to the user based on the SP threshold, siblings are groomed as separate runs.
+- `[2026-07-31 18:36]` Split the groom playbook's draft-plan step in two: a decomposition/estimation step (milestones, tasks, SP, thresholds, split-candidate flag) followed by the plan-writing step (template, plan file, cross-review block).
+- `[2026-07-31 18:39]` Reorder the groom split: draft-plan first, then decompose-work runs after it and before present — and only when the plan exceeds the threshold, otherwise it skips.
+- `[2026-07-31 18:45]` Run slug carries the yyyymmdd-hh-mm-{title} format, aligned with the plan filename stem.
+- `[2026-07-31 18:45]` intake runs on fable:high.
+- `[2026-07-31 18:45]` Vault-as-workdir costs rejected — machine is a workdir-local run.md whose edge hooks stamp the plan via file-target frontmatter-update path hooks (booping updated mid-run to support them); subgraph dissolves back to a flat graph.
+- `[2026-07-31 18:45]` Later a side-effect may create parked sibling plans (backlog split stubs) automatically — out of scope now, present only recommends the split.
+- `[2026-07-31 19:06]` User granted autonomous completion of all remaining playbook-authoring steps — gates auto-confirmed by the runner, ping when done.
+- `[2026-07-31 19:06]` Destination root: core — the plugin repo's playbooks/groom/ (derived from the brief's retire-core-to-free-the-name wish; flagged for user review).
+- `[2026-07-31 19:06]` Target model: per-step models as pinned in the decomposition Steps table, no single override (derived; flagged for user review).
+- `[2026-07-31 19:06]` Regress tier: skip for this run, user can flip later (derived; flagged for user review).
+- `[2026-07-31 19:06]` Run workdir relocated to the target playbook dir playbooks/groom/ per the playbook-authoring preamble; stale core playbook files git-rm'ed (retirement).
