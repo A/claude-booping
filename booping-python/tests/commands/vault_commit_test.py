@@ -126,6 +126,48 @@ class TestVaultCommitIntegration:
         log = _git(vault, ["log", "--oneline", "-1"])
         assert "ready-for-dev: 20250228-another-plan" in log.stdout
 
+    def test_directory_plan_commits_with_slug(self, tmp_path: Path) -> None:
+        vault = _init_vault(tmp_path)
+        plan = vault / "plans" / "20250301-dir-plan" / "plan.md"
+        plan.parent.mkdir()
+        plan.write_text(
+            "---\nstatus: in-spec\ntitle: Dir plan\n---\n\n# Body\n"
+        )
+        _git(vault, ["add", "plans/20250301-dir-plan/plan.md"])
+        _git(vault, ["commit", "-m", "add dir plan"])
+
+        plan.write_text(
+            "---\nstatus: ready-for-dev\ntitle: Dir plan\n---\n\n# Body\n"
+        )
+        (vault / "sprints.md").write_text("# Updated\n")
+
+        vc_cmd.do_vault_commit(
+            to_status="ready-for-dev", plan_path=plan, vault=vault
+        )
+
+        log = _git(vault, ["log", "--oneline", "-1"])
+        assert "ready-for-dev: 20250301-dir-plan" in log.stdout
+
+        names = _git(vault, ["log", "-1", "--name-only", "--format="])
+        committed = [line for line in names.stdout.strip().splitlines() if line]
+        assert sorted(committed) == [
+            "plans/20250301-dir-plan/plan.md",
+            "sprints.md",
+        ]
+
+    def test_resolve_vault_directory_plan_heuristic(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        vault = tmp_path / "custom-vault"
+        plan = vault / "plans" / "20250301-dir-plan" / "plan.md"
+        plan.parent.mkdir(parents=True)
+        plan.write_text("---\n---\n")
+
+        monkeypatch.setattr(
+            vc_cmd.Project, "load_cwd_configured", staticmethod(lambda: None)
+        )
+        assert vc_cmd.resolve_vault(plan) == vault.resolve()
+
     def test_nothing_to_commit_exits_gracefully(
         self, tmp_path: Path, capsys: pytest.CaptureFixture[str]
     ) -> None:

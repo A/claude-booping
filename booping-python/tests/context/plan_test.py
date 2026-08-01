@@ -1,9 +1,19 @@
 from __future__ import annotations
 
 from datetime import date
+from pathlib import Path
+
+import pytest
 
 from booping.context.plan import Plan
 from tests.helpers import get_fixture_path
+
+
+def _write_plan(path: Path, title: str, status: str = "in-spec") -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        f"---\ntitle: {title}\ntype: feature\nstatus: {status}\n---\n\n# Body\n"
+    )
 
 
 def test_load_all_count_and_fields() -> None:
@@ -39,3 +49,43 @@ def test_load_all_second_plan() -> None:
     assert plan.status == "ready-for-dev"
     assert plan.sp == 2
     assert plan.commit is None
+
+
+def test_load_all_mixed_flat_and_directory_plans(tmp_path: Path) -> None:
+    plans = tmp_path / "plans"
+    _write_plan(plans / "20260101-flat.md", "Flat")
+    _write_plan(plans / "20260102-stub.md", "Stub", status="backlog")
+    _write_plan(plans / "20260103-dir" / "plan.md", "Directory")
+    (plans / "20260103-dir" / "notes.md").write_text("scratch\n")
+
+    loaded = Plan.load_all(tmp_path)
+
+    assert [p.slug for p in loaded] == [
+        "20260101-flat",
+        "20260102-stub",
+        "20260103-dir",
+    ]
+    assert [p.title for p in loaded] == ["Flat", "Stub", "Directory"]
+    assert [p.rel_link for p in loaded] == [
+        "plans/20260101-flat.md",
+        "plans/20260102-stub.md",
+        "plans/20260103-dir/plan.md",
+    ]
+
+
+def test_load_all_directory_plan_wins_collision(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    plans = tmp_path / "plans"
+    _write_plan(plans / "20260101-foo.md", "Flat foo")
+    _write_plan(plans / "20260101-foo" / "plan.md", "Directory foo")
+
+    loaded = Plan.load_all(tmp_path)
+
+    assert len(loaded) == 1
+    assert loaded[0].title == "Directory foo"
+    assert loaded[0].rel_link == "plans/20260101-foo/plan.md"
+
+    err = capsys.readouterr().err
+    assert "20260101-foo.md" in err
+    assert "20260101-foo/plan.md" in err

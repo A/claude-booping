@@ -18,7 +18,7 @@ Produce a project- and plan-specific retrospective grounded in session logs, cod
 
 {% set _retro_plans = context.plans | selectattr("status", "equalto", config.skills.retro.status) | sort(attribute="created", reverse=True) | list %}
 status	sp	title	created	planned	completed	retro	path
-{% for plan in _retro_plans %}{{ plan.status }}	{{ plan.sp if plan.sp is not none else "" }}	{{ plan.title }}	{{ plan.created if plan.created is not none else "" }}	{{ plan.planned if plan.planned is not none else "" }}	{{ plan.completed if plan.completed is not none else "" }}	{{ plan.retro if plan.retro is not none else "" }}	plans/{{ plan.path.name }}
+{% for plan in _retro_plans %}{{ plan.status }}	{{ plan.sp if plan.sp is not none else "" }}	{{ plan.title }}	{{ plan.created if plan.created is not none else "" }}	{{ plan.planned if plan.planned is not none else "" }}	{{ plan.completed if plan.completed is not none else "" }}	{{ plan.retro if plan.retro is not none else "" }}	{{ plan.rel_link }}
 {% endfor %}
 
 ## High-level workflow

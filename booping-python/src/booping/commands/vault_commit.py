@@ -37,12 +37,20 @@ def resolve_vault(plan_path: Path) -> Path:
     project = Project.load_cwd_configured()
     if project is not None:
         return project.directory
-    # Heuristic: plans live at <vault>/plans/<name>.md
+    # Heuristic: plans live at <vault>/plans/<name>.md or <vault>/plans/<slug>/plan.md
     parent = plan_path.resolve().parent
     if parent.name == "plans":
         return parent.parent
+    if parent.parent.name == "plans":
+        return parent.parent.parent
     # Final fallback: plan file's parent
     return parent
+
+
+def plan_slug(plan_path: Path) -> str:
+    if plan_path.name == "plan.md":
+        return plan_path.resolve().parent.name
+    return plan_path.stem
 
 
 def _git(cwd: Path, args: list[str]) -> subprocess.CompletedProcess[str]:
@@ -124,8 +132,7 @@ def do_vault_commit(
         return None
 
     # Build commit message
-    plan_stem = plan_path.stem
-    commit_msg = f"{to_status}: {plan_stem}"
+    commit_msg = f"{to_status}: {plan_slug(plan_path)}"
 
     commit_result = _git(vault, ["commit", "-m", commit_msg, "--", *rel_paths])
     if commit_result.returncode != 0:
@@ -160,4 +167,4 @@ def _run(args: argparse.Namespace) -> None:
 
     sha = do_vault_commit(to_status=to_status, plan_path=plan_path, also=also)
     if sha is not None:
-        print(f"{to_status}: {plan_path.stem}")
+        print(f"{to_status}: {plan_slug(plan_path)}")

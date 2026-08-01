@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import sys
 from datetime import date
 from pathlib import Path
 from typing import Any, Literal
@@ -26,16 +27,40 @@ class Plan(BaseModel):
     commit: str | None = None
     body: str = ""
 
+    @property
+    def slug(self) -> str:
+        if self.path.name == "plan.md":
+            return self.path.parent.name
+        return self.path.stem
+
+    @property
+    def rel_link(self) -> str:
+        if self.path.name == "plan.md":
+            return f"plans/{self.path.parent.name}/plan.md"
+        return f"plans/{self.path.name}"
+
     @classmethod
     def load_all(cls, vault: Path) -> list[Plan]:
         plans_dir = vault / "plans"
         if not plans_dir.is_dir():
             return []
-        plans: list[Plan] = []
-        for p in sorted(plans_dir.glob("*.md")):
-            fm, body = parse_frontmatter(p)
-            plans.append(_from_fm(p, fm, body))
-        return plans
+
+        by_slug: dict[str, Path] = {
+            p.parent.name: p for p in plans_dir.glob("*/plan.md")
+        }
+        for p in plans_dir.glob("*.md"):
+            if p.stem in by_slug:
+                print(
+                    f"warning: skipping {p} — shadowed by {by_slug[p.stem]}",
+                    file=sys.stderr,
+                )
+                continue
+            by_slug[p.stem] = p
+
+        return [
+            _from_fm(path, *parse_frontmatter(path))
+            for _, path in sorted(by_slug.items())
+        ]
 
 
 def _from_fm(path: Path, fm: dict[str, Any], body: str) -> Plan:

@@ -26,7 +26,7 @@ Plans currently in `{{ cr_status }}`:
 | SP | Title |
 | --- | --- |
 {% for plan in review_candidates -%}
-| {{ plan.sp or "?" }} | [{{ plan.title | replace("|", "\\|") | replace("\n", " ") }}](plans/{{ plan.path.name }}) |
+| {{ plan.sp or "?" }} | [{{ plan.title | replace("|", "\\|") | replace("\n", " ") }}]({{ plan.rel_link }}) |
 {% endfor %}
 
 Use `AskUserQuestion` (single-select) to pick one. Then derive the diff range from the selected plan's `commit:` field (see phase (a)).

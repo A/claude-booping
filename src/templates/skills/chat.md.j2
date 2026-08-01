@@ -47,7 +47,7 @@ The **first assistant message** must include two tables:
 | Status | Plan |
 | --- | --- |
 {% for plan in active_plans -%}
-| {{ plan.status }} | [{{ plan.title | replace("|", "\\|") | replace("\n", " ") }}](plans/{{ plan.path.name }}) |
+| {{ plan.status }} | [{{ plan.title | replace("|", "\\|") | replace("\n", " ") }}]({{ plan.rel_link }}) |
 {% endfor %}
 {%- else -%}
 _No active plans._

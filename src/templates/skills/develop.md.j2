@@ -25,7 +25,7 @@ If `$ARGUMENTS` is empty, present the candidates below to the user via `AskUserQ
 | Status | Plan |
 | --- | --- |
 {% for plan in candidates -%}
-| {{ plan.status }} | [{{ plan.title | replace("|", "\\|") | replace("\n", " ") }}](plans/{{ plan.path.name }}) |
+| {{ plan.status }} | [{{ plan.title | replace("|", "\\|") | replace("\n", " ") }}]({{ plan.rel_link }}) |
 {% endfor %}
 {%- else %}
 
