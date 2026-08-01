@@ -19,19 +19,42 @@ the graph restates what the graph or the table already says.
   the list its dependencies. A node whose value is a MAPPING is a subgraph: `dependencies:`
   and `graph:` required, `repeat:` prose optional — use one when the procedure repeats work
   per enumerated item.
-- `## Steps` — table with columns Step, Summary, Inputs, Artifact, Gate, Model, Spec.
+- `## Steps` — table with columns Step, Summary, Inputs, Artifact, Gate, Delegation, Model,
+  Spec.
   Inputs is the INFORMATION the step consumes — compact, `;`-separated, artifact-blind:
   never upstream step names or file paths; the user reviews the information flow here
-  before any spec exists, and the step specs seed their Needs from these cells. Model is
+  before any spec exists, and the step specs seed their Needs from these cells. Delegation
+  is `inline`, `assisted` or `detached`, defined in the **Delegation levels** section of
+  `${CLAUDE_PLUGIN_ROOT}/documentation/playbook.md` — read it before filling the column;
+  every step sharing a parallel wave must be `detached`. Model is
   `model:effort` — model one of `opus-5`, `sonnet-5`, `haiku-4-5`; default `opus-5:medium`,
   deviate only where another tier clearly fits.
   Spec links the future `steps/<step>/index.md`.
 - `## Questions` — a checklist of everything the user must settle before step specs are
   written; omit when nothing is open.
 
-No `## Decisions` section — settled items (the brief's wishes, the state-machine verdict) go
+No `## Decisions` section — settled items (the brief's wishes, the gate-design nature, the
+state-machine verdict) go
 into the return's `## Notes:` as `decision: <summary>` lines; the runner records them into
 `_specs/DECISIONS.md`.
+
+## Gate design
+
+Gates are cut together with the steps — the Gate cells are part of the decomposition the
+user reviews, not an afterthought. How many and how early follows from the playbook's
+nature; judge it from the brief and return the call as a decision line
+(`nature: <plan-preparing|narrowing> — <rationale>`).
+
+- **plan-preparing** — the user's intent is already clear when the run starts; the run
+  prepares an artifact and asks only where an important option is genuinely open. Few gates,
+  placed late: gate the finished artifact, leave the working steps ungated.
+- **narrowing** — the intent is unclear at the start; the run narrows understanding
+  top-down, level by level. Gates come earlier and more often: each level is confirmed
+  before the next spends work on it.
+
+Getting it wrong is expensive both ways — gates through a plan-preparing run stall it on
+questions the user already answered; too few gates in a narrowing run let a wrong reading
+run all the way to the artifact.
 
 ## State-machine verdict
 
@@ -65,5 +88,6 @@ never forces a machine; long steps matter only when a session boundary is likely
 
 ## Notes:
 - <n> question(s) open
-- decision: <each settled item, one line, including the state-machine verdict>
+- decision: <each settled item, one line, including the gate-design nature and the
+  state-machine verdict>
 ```

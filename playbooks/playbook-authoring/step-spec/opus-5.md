@@ -12,13 +12,19 @@ replaces chat back-and-forth, and it later becomes the source the step's smoke t
 - frontmatter: write none of your own — the file may already exist with harness-owned keys
   (`status:`, stamps); preserve them untouched
 - the single H1, right after the backlink: `# <step>`
-- `## Contract` — five bold bullets: **Needs** / **Value** / **Output files** /
-  **Harness return** / **Review gate**. Needs, Output files and Review gate are themselves
-  lists. Needs is INFORMATION the step consumes, artifact-blind — never upstream step names
-  or artifact paths; the harness decides where each item comes from, and ordering lives in
-  the graph alone. Seed Needs from the step's Inputs cell in the decomposition table,
-  refining wording only — where the cell seems wrong, raise a `## Questions` item, never
-  diverge silently. Output files stay concrete paths with `[CREATED|UPDATED]` markers.
+- `## Contract` — six bold bullets: **Needs** / **Value** / **Output files** /
+  **Harness return** / **Review gate** / **Delegation**. Needs, Output files and Review gate
+  are themselves lists. Needs is INFORMATION the step consumes, artifact-blind — never
+  upstream step names or artifact paths; the harness decides where each item comes from, and
+  ordering lives in the graph alone. Seed Needs from the step's Inputs cell in the
+  decomposition table, refining wording only — where the cell seems wrong, raise a
+  `## Questions` item, never diverge silently. Output files stay concrete paths with
+  `[CREATED|UPDATED]` markers. Review gate reproduces the decomposition's Gate cell as the
+  playbook's nature — plan-preparing or narrowing, decided there — placed it; never add or
+  drop a gate here, raise a `## Questions` item instead. Delegation is the decomposition's
+  Delegation cell — `inline`, `assisted` or `detached`, defined in the **Delegation levels**
+  section of `${CLAUDE_PLUGIN_ROOT}/documentation/playbook.md`; on a detached step name the
+  model as `model:effort` from the decomposition's Model cell.
 - `## Example artifact` — a compact, fenced example of the document the step produces; what
   it shows is what the suite will pin.
 - `## Return Format` — the step's harness return, verbatim.

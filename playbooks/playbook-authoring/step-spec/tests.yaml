@@ -8,7 +8,7 @@
     fixture: compose-from-decomposition
     tier: smoke
   assert:
-    # FILE-AT-PATH + FIVE-BULLETS (index update allowed by the backlink rule)
+    # FILE-AT-PATH + SIX-BULLETS (index update allowed by the backlink rule)
     - type: javascript
       value: file://../../_lib/asserts/files.js
       config:
@@ -21,6 +21,7 @@
               - '\*\*Output files\*\*'
               - '\*\*Harness return\*\*'
               - '\*\*Review gate\*\*'
+              - '\*\*Delegation\*\*'
               - '\[← index\]'
         allow: ['mod-review/_specs/index\.md$']
         noOthers: true
@@ -38,7 +39,7 @@
             strict: true
 
           - select: SECTION("Contract") > UL > LI
-            min: 5
+            min: 6
     - type: javascript
       value: file://../../_lib/asserts/return.js
       config:
@@ -64,6 +65,6 @@
     tier: regress
   assert:
     - type: llm-rubric
-      value: "CONTRACT-GROUNDED: The contract reflects the decomposition's compose row — the output file is `_review/review.md`, the review gate is the user confirming findings, and the value restates composing per-file findings into one signed-off report. The example artifact is a compact fenced review report consistent with the contract. Fails if the artifact path, gate or purpose drifts from the decomposition."
+      value: "CONTRACT-GROUNDED: The contract reflects the decomposition's compose row — the output file is `_review/review.md`, the review gate is the user confirming findings, and the value restates composing per-file findings into one signed-off report, and the Delegation bullet copies the row's cell (detached) naming its model as `opus-5:medium`. The example artifact is a compact fenced review report consistent with the contract. Fails if the artifact path, gate or purpose drifts from the decomposition."
     - type: llm-rubric
       value: "NEEDS-BLIND: The Needs bullet lists INFORMATION only — the findings and module content the step consumes — never upstream step names ('sweep's output') or artifact paths ('_review/<file>.md'). Fails if any Needs item names a step or a path."

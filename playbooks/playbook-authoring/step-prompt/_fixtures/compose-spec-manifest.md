@@ -22,6 +22,7 @@ reviewed_at: 20260730 09:00
   judged from the module alone.
 - **Review gate** —
   - the user confirms the findings before anything is filed
+- **Delegation** — detached, `opus-5:medium`
 
 ## Example artifact
 

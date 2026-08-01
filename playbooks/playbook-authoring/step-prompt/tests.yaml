@@ -20,12 +20,11 @@
           - path: 'mod-review/compose/prompt\.md$'
             contains:
               - '^summary:'
-              - '^agent: opus:medium$'
+              - '^detached: opus:medium$'
               - '^review_gate:'
-              - '^inputs:'
-              - '^outputs:'
               - '\{% include "opus-5\.md" %\}'
-            forbids: ['^name:']
+            # io lives in the spec, and `agent:` is the legacy name of `detached:`
+            forbids: ['^name:', '^agent:', '^inputs:', '^outputs:']
         noOthers: true
     # NOTES-VERIFY
     - type: javascript
@@ -54,4 +53,4 @@
     tier: regress
   assert:
     - type: llm-rubric
-      value: "BODY-COMPLETE: The body states what the step receives (the module and the sweep findings), names the file to write (`_review/review.md`) with a document contract matching the confirmed example — the review H1, the Findings section with per-finding fix sketches naming the concrete change, the one-line Verdict — and ends with the step's harness return format. The wrapper's review_gate reproduces the spec's gate. Fails if any of these is missing, or the contract drifts from the example."
+      value: "BODY-COMPLETE: The body states what the step receives (the module and the sweep findings), names the file to write (`_review/review.md`) with a document contract matching the confirmed example — the review H1, the Findings section with per-finding fix sketches naming the concrete change, the one-line Verdict — and ends with the step's harness return format. The wrapper's review_gate reproduces the spec's gate, and its `detached:` value carries the spec's model family and effort. Fails if any of these is missing, or the contract drifts from the example."

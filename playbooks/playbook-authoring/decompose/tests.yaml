@@ -31,8 +31,11 @@
             strict: true
 
           - select: SECTION("Steps") > TABLE
-            columns: [Step, Summary, Inputs, Artifact, Gate, Model, Spec]
+            columns: [Step, Summary, Inputs, Artifact, Gate, Delegation, Model, Spec]
             rows: { min: 2 }
+
+          - select: SECTION("Steps") > TABLE > TD[col="Delegation"]
+            match: '^`?(inline|assisted|detached)`?$'
 
           # whole-cell match: '\S' would demand a single-char cell — say non-empty as .*\S.*
           - select: SECTION("Steps") > TABLE > TD[col="Inputs"]
@@ -74,5 +77,7 @@
   assert:
     - type: llm-rubric
       value: "DECOMP-FAITHFUL: The steps, artifacts and gates reflect the described procedure and the brief's wishes — per-file findings stay on disk ungated, one composed report carries the confirming gate, artifacts live under `_review/`. No invented scope: no steps, tools or outputs the description never mentions. Fails on missing sweep/compose-shaped work, a gate on per-file findings, or invented scope."
+    - type: llm-rubric
+      value: "GATES-BY-NATURE: The brief states the goal outright, so the run is plan-preparing: the return names that nature in a decision line, and the Gate cells follow it — only the composed report is gated, the per-file work is not. Fails if the nature is never called, or the gates contradict it (a gate on every step, or no gate at all)."
     - type: llm-rubric
       value: "GRAPH-SOUND: The graph orders the per-file sweeping before the composing step, and the per-file fan-out is expressed — either a repeat subgraph or a step whose summary says it runs per changed file. Fails if compose does not depend on the sweeping work or the per-file nature is lost."
