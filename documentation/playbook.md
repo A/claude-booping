@@ -128,6 +128,8 @@ A step runs at one of three levels. Only the third has mechanics; the first two 
 - **assisted** — the runner still performs the step, but delegates the heavy reads or research inside it to the configured researcher agent, which returns a compressed summary. The driver's context holds the summary, not the sources. Expressed as prose in the step body — no frontmatter key.
 - **detached** — an agent fetches and performs the whole step body; the runner sees only the returned receipt. This is the only level with mechanics: the `detached:` frontmatter key.
 
+The researcher an assisted step delegates to is the `research_agent` config key (core default `booping:booping-researcher`), overridable per project like any other config value. A `jinja: true` body reads it as `{{ config.research_agent }}` — the same way an optional key such as `cross_review` is read with `{% if config.get("cross_review") %}`.
+
 ### The `detached` grammar
 
 - **key absent** — not detached: the runner performs the step (inline or assisted). Such a step can never share a parallel wave (see below).

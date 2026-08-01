@@ -5,6 +5,9 @@
 # is already resolved by then).
 home_dir: ~/Claude/
 
+# Agent an assisted playbook step delegates its heavy reads to.
+research_agent: "booping:booping-researcher"
+
 sprint:
   default_threshold_sp: 35
   redecompose_threshold: 5

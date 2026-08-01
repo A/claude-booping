@@ -35,12 +35,18 @@ Walk the wave list in order. For each wave (a numbered line; ` ∥ `-separated n
    - `workdir:` only when the run has one (see **Run state**); `instance:` only for subgraph instances.
    - `## Inputs`: the run-time values this member needs — the user's ask, artifact paths, and the receipts of prior waves it depends on. Nothing to pass → omit the block.
    - `## Return`: always `artifacts written + outcome, ≤ 5 lines`. The step's own body owns any richer contract.
-2. Run each member per its section's detached bullet (rendered from `detached:`): model+effort → `subagent_type="general-purpose"` with that model and reasoning effort; named → `subagent_type="<name>"`; no detached bullet → you perform the step: run that member's `booping render-playbook <name> --step <step>` yourself and execute its stdout as your instruction, under the same run-time context, inputs, and return contract.
+2. Run each member per its section's detached bullet (rendered from `detached:`): model+effort → `subagent_type="general-purpose"` with that model and reasoning effort; named → `subagent_type="<name>"`; no detached bullet → you perform the step: run that member's `booping render-playbook <name> --step <step>` yourself and execute its stdout as your instruction, under the same run-time context, inputs, and return contract. Assisted: such a body may direct you to delegate its heavy reads to `{{ config.research_agent }}` under the return contract it states — the step stays yours, only that read work leaves your context.
 3. A multi-member wave spawns ALL member sub-agents in ONE message and never runs any member inline; wait for all to finish before the next wave.
 4. Any member failure → report it and stop; do not start the next wave.
 5. After the wave completes, honor each member's `Review gate:` bullet: present that member's returned receipt labeled by step name alongside the gate text — read the artifacts it names only when the presentation needs them — and continue only on explicit user confirmation. In-conversation only — no state is persisted.
 
 Pass each step's output through unchanged to the user and into later sections that depend on it.
+
+### Agent ids
+
+Record the id of every agent you spawn — delegated step or delegated reads alike — in the run artifact's `agents:` frontmatter mapping, keyed by step name. Looping back to a step within this conversation → resume its agent by that id (SendMessage) instead of spawning a fresh one, so its context carries over.
+
+Resume only an id **this conversation recorded from its own spawn**. An id read back from the artifact on a resumed run is stale by definition: spawn fresh and overwrite the entry.
 
 ### Subgraph members
 
@@ -55,7 +61,7 @@ A wave member tagged `*(subgraph)*` covers its `## Subgraph: <name>` intro and t
 
 Only for a render carrying a `## State` section. Every command below takes `--workdir <workdir>`.
 
-1. Workdir: `{{ context.project.directory if context.project else "{vault}" }}/_runs/<playbook>/<run-slug>/`, `<run-slug>` = `{{ "{YYYYMMDD}" }}-<kebab-topic>`, date taken from the local clock — run `date +%Y%m%d`, never from memory. Create it before the first wave; reuse the existing one when resuming.
+1. Workdir: the convention the preamble names, when it names one; otherwise `{{ context.project.directory if context.project else "{vault}" }}/_runs/<playbook>/<run-slug>/`. `<run-slug>` = `{{ "{YYYYMMDD}" }}-<kebab-topic>`, date taken from the local clock — run `date +%Y%m%d`, never from memory. Create it before the first wave; reuse the existing one when resuming.
 2. On entry — first run and every resume — run `booping playbook-state <name> --workdir <workdir>` and start from the reported frontier: skip work whose status is already past it, re-enter at the first non-terminal status, and treat `not-started` as "bootstrap on the first transition".
 3. When a step outcome matches a `When` cell of the `## State` table, judge that row's `Gates` against the artifact. Gates hold → run that state entry's `Advance:` invocation with `<to>` = the row's `To` cell (plus `--instance <slug>` for a per-instance state). Gates fail → do not transition; report what is missing and stop.
 4. The transition report is authoritative — relay it and move on. Never re-read the artifact to verify a transition.
