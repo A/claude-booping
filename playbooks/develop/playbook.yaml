@@ -1,0 +1,52 @@
+state: run
+graph:
+  intake: []
+  provision: [intake]
+  develop-loop: [provision]
+  verify: [develop-loop]
+  wrap-up: [verify]
+
+states:
+  run:
+    artifact: index.md
+    initial: awaiting-plan-review
+    statuses:
+      awaiting-plan-review:
+        transitions:
+          - to: ready-for-dev
+            when: "intake captured the user's explicit approval of the plan it entered on — \"looks good\" counts, silence never does"
+            gates:
+              - "explicit user approval captured"
+            hooks: ["frontmatter-update reviewed_at=@now"]
+      ready-for-dev:
+        transitions:
+          - to: in-progress
+            when: "provision created the confirmed sprint branch and settled the milestone groups; the first group is about to be delegated"
+            gates:
+              - "the user confirmed the branch name"
+              - "no unresolved non-trivial drift — that halts back to grooming instead"
+            hooks: ["frontmatter-update started=@now", "frontmatter-update commit=@head"]
+      in-progress:
+        transitions:
+          - to: awaiting-retro
+            when: "verify came back green on the project's guardrails and wrap-up made the closing commit and reported the sprint"
+            gates:
+              - "every DoD checkbox [x] and every milestone status done"
+              - "the project's guardrails and the plan's Final Verification green"
+            hooks: ["frontmatter-update completed=@now"]
+          - to: fail
+            when: "an unrecoverable blocker at any point in the sprint, verification included, after two fix attempts on the same issue"
+            gates:
+              - "two fix attempts documented in the plan"
+              - "the user approved the abort"
+            hooks: ["frontmatter-update completed=@now"]
+      awaiting-retro:
+        terminal: true
+      fail:
+        terminal: true
+
+    superstates:
+      terminal:
+        states:
+          - awaiting-retro
+          - fail

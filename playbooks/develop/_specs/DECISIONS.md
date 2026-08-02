@@ -1,0 +1,27 @@
+# Decisions
+- `[2026-08-02 08:52]` The new `develop` playbook must stay close to the original /develop skill prose — do not rewrite simple prompts into large prose; that adds no value and eats tokens.
+- `[2026-08-02 08:52]` Unlike the groom port, the develop playbook must not miss connecting the proper docs the skill references (plan templates, review templates, frontmatter docs, etc.).
+- `[2026-08-02 08:58]` Develop run workdir is the groomed plan's own directory (`{vault}/plans/{slug}/`); the vault path is detected deterministically at run time by the playbook driver — never hardcoded.
+- `[2026-08-02 08:58]` Sprint git-branch creation must be confirmed with the user (branch confirmation gate) before the branch is created.
+- `[2026-08-02 09:09]` The driver/preamble resolves the plan (and thus the workdir) before the first step — invocation argument, else a candidate table of plans at the entry statuses.
+- `[2026-08-02 09:09]` Develop accepts both `ready-for-dev` and `awaiting-plan-review` entry statuses (approval confirmed at intake); machine statuses are the shared plan lifecycle names directly — no `plan_status:` mirror, no playbook-local `_scripts/`.
+- `[2026-08-02 09:09]` Group completion between execute instances is an informational report, not a review gate.
+- `[2026-08-02 09:09]` Project quality commands run once at sprint end (skill body wins over docs/development_quality_checks.md); review templates and task-type guidance stay out of develop's scope.
+- `[2026-08-02 09:09]` New shared partials may be added under `playbooks/_partials/` (branch conventions + commit format, develop-flavoured agents block).
+- `[2026-08-02 09:09]` Mid-sprint failure exit is allowed: unrecoverable blocker after two documented fix attempts plus user-approved abort, from any executing point as well as finalize.
+- `[2026-08-02 09:14]` Target eval model for the develop playbook's steps is opus:medium.
+- `[2026-08-02 09:14]` Prompt files are named `base.md`, not by model (no per-model prompt filenames).
+- `[2026-08-02 09:14]` Destination root is the core `playbooks/` in the plugin repo (playbooks/develop/), same as groom.
+- `[2026-08-02 09:14]` The decomposition (graph, step table, resolved questions) was confirmed as written.
+- `[2026-08-02 09:25]` plan-groupings is redundant as a separate step — merged with branch creation into one step `provision`: confirms the git branch, defines groupings internally with no review gate on groupings.
+- `[2026-08-02 09:25]` The execute subgraph collapses into one step `develop-loop`: pick group → delegate to worker (detached-work case) → close group (quality gates, lint) → next group.
+- `[2026-08-02 09:25]` After develop-loop, a detached step validates overall quality rules (tests, lint, etc.); then a final `wrap-up` step updates documentation, commits, reports to the user.
+- `[2026-08-02 09:25]` The run's only review gate is code review.
+- `[2026-08-02 09:33]` No code-quality review step: the reviewer is just a validator. The review gate is guardrails only — linter, tests, and whatever else confirms the PR is ready to be opened and CI doesn't fail — surfaced by the detached `verify` step for user confirmation.
+- `[2026-08-02 09:33]` Quality checks run at sprint end only: develop-loop groups close on their plan-authored Verify commands alone; the project's full quality suite runs once in `verify`.
+- `[2026-08-02 09:48]` The sprint branch is created from the repo's current branch (git default), not the project's default branch. (user)
+- `[2026-08-02 09:48]` Verify reports DoD/milestone completeness: the validator reads plan state off disk and includes it in its pass/fail return; wrap-up just closes. (user)
+- `[2026-08-02 09:48]` Provision fires the `ready-for-dev` → `in-progress` edge at its end, after branch creation; develop-loop keeps only an idempotent resume guard. (runner, consistency call)
+- `[2026-08-02 09:48]` Verify's detached model string is `sonnet:medium` — the `detached:` grammar accepts only opus|sonnet|haiku|fable tiers. (runner, mechanical)
+- `[2026-08-02 09:52]` Evals are skipped for every step of this run: no test plans, fixtures, suites, or optimizer passes. The step pipeline reduces to spec → prompt. The already-written test plans for intake and develop-loop stay on disk unused; their open trap-row offers are moot.
+- `[2026-08-02 10:03]` Verify has no user-review gate: the run's exit is decided by the guardrails alone — green verdict proceeds to wrap-up, red goes back to the runner for fixes and a verify re-run. The guardrails verify runs are the project's known, discoverable ones (the step's discovery ladder), never ad-hoc. The only user stop in the run remains the branch-name confirmation.
