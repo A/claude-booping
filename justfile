@@ -21,6 +21,18 @@ typecheck:
 test:
     cd booping-python && uv run pytest
 
+# Render every playbook against the fixture vault into playbooks/<name>/_reports/output.md
+playbook-reports:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    for manifest in playbooks/*/playbook.md; do
+        name=$(basename "$(dirname "$manifest")")
+        bin/booping render-playbook "$name" \
+            --project playbooks/_fixtures/vault \
+            --set now=19700101-00-00 \
+            --output "playbooks/$name/_reports/output.md"
+    done
+
 # Playbook evals — promptfoo over `claude -p` on subscription auth. Suites live at
 # playbooks/<name>/<step>/promptfooconfig.yaml; pass one with -c, e.g.
 #   just smoke -c playbooks/groom/intake/promptfooconfig.yaml
