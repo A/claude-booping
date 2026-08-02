@@ -3,11 +3,9 @@ graph:
   intake: []
   research-codebase: [intake]
   research-web: [research-codebase]
-  design: [research-codebase, research-web]
-  draft-plan: [design]
-  decompose-work: [draft-plan]
-  verify-references: [decompose-work]
-  present: [verify-references]
+  draft-plan: [research-codebase, research-web]
+  cross-review: [draft-plan]
+  present: [cross-review]
 
 states:
   run:
@@ -17,49 +15,37 @@ states:
       framing:
         transitions:
           - to: researching
-            when: "intake filled the framing into `index.md`, created `plan.md`, and the user's answers settled the scope questions — clear intent is enough"
+            when: "intake posted the framing brief in chat, created `index.md` with its identity frontmatter, and the user's answers settled the scope questions — clear intent is enough"
             gates:
               - "answers that change the task type, the restated problem or a boundary re-run intake first"
             hooks: ["script plan-in-spec"]
       researching:
         transitions:
-          - to: designing
-            when: "the blast radius is recorded, and `research.md` is written or the skip recorded — per intake's web-research decision"
-      designing:
-        transitions:
           - to: drafting
-            when: "architecture, surface changes and trade-offs are settled with the user in conversation — every call that is the user's is answered"
-          - to: researching
-            when: "the conversation needs blast radius or external practice the research pass missed — including a mid-design request for web research"
+            when: "the blast-radius map and the web-research findings are both posted in chat"
       drafting:
         transitions:
-          - to: decomposing
-            when: "draft-plan wrote `plan.md`'s body against the template's Plan Body and passed its Quality Checklist"
+          - to: cross-reviewing
+            when: "architecture, surface changes and trade-offs are settled with the user in conversation, and draft-plan wrote `index.md`'s body against the template's Plan Body and passed its Quality Checklist"
             gates:
-              - "cross-review run and every CRITICAL finding folded in or recorded as a deferral — vacuously satisfied with no `cross_review` agent configured"
-      decomposing:
-        transitions:
-          - to: verifying-references
-            when: "decompose-work re-decomposed the oversized tasks and re-summed the totals, or recorded the skip"
-            gates:
-              - "every task under the re-decompose threshold"
-              - "milestone and sprint totals re-summed"
-            hooks: ["script plan-awaiting-plan-review"]
-      verifying-references:
+              - "every call that is the user's is answered"
+          - to: researching
+            when: "the design needs blast radius or external practice the research pass missed"
+      cross-reviewing:
         transitions:
           - to: presenting
-            when: "the novel, load-bearing references were checked and the corrections folded into the plan"
+            when: "the cross-review pass disposed of every finding, or no `cross_review` agent is configured and the pass was skipped"
+            gates:
+              - "every CRITICAL finding folded in or recorded as a deferral — vacuously satisfied with no `cross_review` agent configured"
+            hooks: ["script plan-awaiting-plan-review"]
       presenting:
         transitions:
           - to: awaiting-approval
-            when: "present wrote the `## Approval` section — summary, split recommendation if any, handoff to `/develop`"
+            when: "present posted the approval screen in chat — summary, split recommendation if any, handoff to `/develop`"
       awaiting-approval:
         transitions:
-          - to: decomposing
-            when: "the user's change request touches milestones, tasks or estimates only"
-            hooks: ["script plan-in-spec"]
-          - to: designing
-            when: "the user's change request reopens architecture or scope"
+          - to: drafting
+            when: "the user's change request touches the plan itself — architecture, scope, milestones, tasks or estimates"
             hooks: ["script plan-in-spec"]
           - to: ready-for-dev
             when: 'the user explicitly approves the plan — "looks good" counts, silence never does'
@@ -76,12 +62,10 @@ states:
         states:
           - framing
           - researching
-          - designing
           - drafting
-          - decomposing
+          - cross-reviewing
       awaiting-plan-review:
         states:
-          - verifying-references
           - presenting
           - awaiting-approval
       terminal:

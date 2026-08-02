@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import subprocess
+from datetime import datetime
 from pathlib import Path
 
 import pytest
@@ -47,11 +48,11 @@ def test_section_order() -> None:
     out = _composed()
     order = [
         out.index("# Composed Procedure"),
-        out.index("## Execution graph"),
-        out.index("## Gather"),
-        out.index("## Draft"),
-        out.index("## Named Step"),
-        out.index("## Plain"),
+        out.index("## Playbook Steps"),
+        out.index("## Step: Gather"),
+        out.index("## Step: Draft"),
+        out.index("## Step: Named Step"),
+        out.index("## Step: Plain"),
     ]
     assert order == sorted(order)
 
@@ -68,40 +69,42 @@ def test_no_notices_on_happy_path() -> None:
     assert "**Note" not in out
 
 
-def test_mermaid_edges() -> None:
-    graph = _section(_composed(), "## Execution graph")
-    assert "flowchart TD" in graph
-    assert "  gather --> draft" in graph
-    assert "  gather --> named-step" in graph
-    assert "  draft --> plain" in graph
-    assert "  named-step --> plain" in graph
+def test_graph_table_rows_in_dependency_order() -> None:
+    graph = _section(_composed(), "## Playbook Steps")
+    assert "| Step | Dependencies | Summary | Review gate |" in graph
+    rows = [line for line in graph.splitlines() if line.startswith("| `")]
+    assert [" | ".join(row.split(" | ")[:2]) for row in rows] == [
+        "| `gather` | —",
+        "| `draft` | `gather`",
+        "| `named-step` | `gather`",
+        "| `plain` | `draft`, `named-step`",
+    ]
 
 
-def test_wave_list_parallel_separator() -> None:
-    graph = _section(_composed(), "## Execution graph")
-    assert "1. `gather`" in graph
-    assert "2. `draft` ∥ `named-step`" in graph
-    assert "3. `plain`" in graph
+def test_graph_table_states_dependency_driven_ordering() -> None:
+    graph = _section(_composed(), "## Playbook Steps")
+    assert "Execute the steps in the most effective order considering their dependencies." in graph
 
 
-def test_wave_one_fetch_command_no_after() -> None:
-    gather = _section(_composed(), "## Gather")
-    assert "Run `booping render-playbook composed --step gather` for content." in gather
+def test_detached_section_is_summary_then_delegation_order() -> None:
+    # A delegated section carries no instruction bullets: its dependencies and wave
+    # order already sit in the step table, so the driver needs the summary and the
+    # order to spawn, nothing else.
+    gather = _section(_composed(), "## Step: Gather")
+    assert "Gather inputs." in gather
     assert "Gather the raw model-agent inputs and return a bulleted list." not in gather
+    assert "Instructions:" not in gather
     assert "- After:" not in gather
 
 
-def test_later_wave_fetch_command_and_after_and_parallel() -> None:
-    out = _composed()
-    draft = _section(out, "## Draft")
-    assert "Run `booping render-playbook composed --step draft` for content." in draft
-    assert "Draft the artifact from the gathered inputs." not in draft
-    assert "- After: gather" in draft
-    assert "- Parallel with: named-step" in draft
+def test_detached_section_drops_deps_and_siblings() -> None:
+    draft = _section(_composed(), "## Step: Draft")
+    assert "- After: gather" not in draft
+    assert "Parallel with" not in draft
 
 
 def test_single_member_wave_has_after_no_parallel() -> None:
-    plain = _section(_composed(), "## Plain")
+    plain = _section(_composed(), "## Step: Plain")
     assert "- After: draft, named-step" in plain
     assert "- Parallel with:" not in plain
 
@@ -110,30 +113,38 @@ def test_summary_directive() -> None:
     # The step's own summary is surfaced to the driver: it is where a step declares
     # execution hints (e.g. "one agent per feature") in its own domain words.
     out = _composed()
-    assert "- Summary: Gather inputs." in _section(out, "## Gather")
-    assert "- Summary: Draft the artifact." in _section(out, "## Draft")
-    assert "- Summary: A plain step with no delegation and no gate." in _section(out, "## Plain")
+    assert "Gather inputs." in _section(out, "## Step: Gather")
+    assert "Draft the artifact." in _section(out, "## Step: Draft")
+    plain = _section(out, "## Step: Plain")
+    assert "- Summary: A plain step with no delegation and no gate." in plain
 
 
-def test_summary_leads_the_instructions_block() -> None:
-    draft = _section(_composed(), "## Draft")
-    assert draft.index("- Summary:") < draft.index("- After:")
+def test_summary_leads_the_delegation_order() -> None:
+    draft = _section(_composed(), "## Step: Draft")
+    assert draft.index("Draft the artifact.") < draft.index("Tell a sub-agent")
 
 
 def test_model_detached_directive() -> None:
-    gather = _section(_composed(), "## Gather")
-    assert "- Run in a sub-agent — model sonnet, effort medium." in gather
+    gather = _section(_composed(), "## Step: Gather")
+    assert (
+        "Tell a sub-agent — model sonnet, effort medium — to get its instructions by"
+        " calling this command: `booping render-playbook composed --step gather`."
+        in gather
+    )
 
 
 def test_named_detached_directive() -> None:
-    named = _section(_composed(), "## Named Step")
-    assert "- Run in sub-agent: booping-researcher." in named
+    named = _section(_composed(), "## Step: Named Step")
+    assert (
+        "Tell the `booping-researcher` agent to get its instructions by calling this"
+        " command: `booping render-playbook composed --step named-step`." in named
+    )
 
 
 def test_gate_directive_verbatim() -> None:
-    draft = _section(_composed(), "## Draft")
+    draft = _section(_composed(), "## Step: Draft")
     assert (
-        '- Review gate: stop after this step — "confirm the draft before continuing";'
+        'Review gate: stop after this step — "confirm the draft before continuing";'
         " continue only on explicit user confirmation." in draft
     )
 
@@ -146,7 +157,7 @@ def test_no_orphan_note_when_all_wired() -> None:
 
 
 def _assert_blocking(out: str) -> None:
-    assert "## Execution graph" not in out
+    assert "## Playbook Steps" not in out
     assert "\n## " not in out  # no step sections
 
 
@@ -223,8 +234,8 @@ def test_orphan_note_non_blocking() -> None:
         " into the graph; it will not run." in out
     )
     # Non-blocking: the graph + wired step section still render.
-    assert "## Execution graph" in out
-    assert "## A" in out
+    assert "## Playbook Steps" in out
+    assert "## Step: A" in out
     assert "**STOP" not in out
 
 
@@ -321,7 +332,7 @@ def test_unwired_step_dir_is_still_an_orphan(tmp_path: Path) -> None:
         "**Note — tell the user:** step 'stray' exists on disk but is not wired"
         " into the graph; it will not run." in out
     )
-    assert "## Execution graph" in out
+    assert "## Playbook Steps" in out
 
 
 def test_inline_steps_sharing_an_inner_wave_notice(tmp_path: Path) -> None:
@@ -407,54 +418,37 @@ def test_inner_cycle_notice_names_the_subgraph(tmp_path: Path) -> None:
     _assert_blocking(out)
 
 
-def _mermaid(out: str) -> str:
-    body = out.split("```mermaid\n", 1)[1]
-    return body.split("```", 1)[0]
+def test_graph_table_carries_summary_and_gate() -> None:
+    graph = _section(_composed(), "## Playbook Steps")
+    plain = next(line for line in graph.splitlines() if line.startswith("| `plain`"))
+    step = next(s for s in _load("composed").steps if s.name == "plain")
+    assert step.summary in plain
+    assert (step.review_gate or "—") in plain
 
 
-def test_mermaid_cluster(tmp_path: Path) -> None:
-    out = _sg_out(tmp_path)
-    assert out.count("```mermaid") == 1
-    chart = _mermaid(out)
-    assert chart.count("  subgraph ") == 1
-    assert chart.count("\n  end\n") == 1
-    assert '  subgraph pipeline["pipeline (repeat)"]\n' in chart
-    # Inner edges sit inside the cluster; outer edges point at the cluster id.
-    cluster = chart.split('  subgraph pipeline["pipeline (repeat)"]\n', 1)[1]
-    cluster = cluster.split("  end\n", 1)[0]
-    assert cluster == "    spec --> fixtures\n    spec --> tests\n"
-    assert "  manifest --> pipeline\n" in chart
-    assert "  pipeline --> publish\n" in chart
-
-
-def test_mermaid_cluster_title_without_repeat(tmp_path: Path) -> None:
-    graph = "  a: []\n  group:\n    dependencies: [a]\n    graph:\n      b: []\n"
-    chart = _mermaid(compose(_build(tmp_path, graph, {"a": "null", "b": "null"})))
-    assert '  subgraph group["group"]\n' in chart
-    # A lone inner step with no deps still shows up as a bare node in the cluster.
-    assert "    b\n" in chart
-
-
-def test_wave_list_nests_inner_waves(tmp_path: Path) -> None:
-    graph = _section(_sg_out(tmp_path), "## Execution graph")
-    assert (
-        "1. `manifest`\n"
-        "2. `pipeline` *(subgraph)*\n"
-        "    1. `spec`\n"
-        "    2. `fixtures` ∥ `tests`\n"
-        "3. `publish`\n" in graph
-    )
+def test_graph_table_lists_subgraph_then_its_inner_steps(tmp_path: Path) -> None:
+    graph = _section(_sg_out(tmp_path), "## Playbook Steps")
+    rows = [line for line in graph.splitlines() if line.startswith("| `")]
+    assert [" | ".join(row.split(" | ")[:2]) for row in rows] == [
+        "| `manifest` | —",
+        "| `pipeline` *(subgraph)* | `manifest`",
+        "| `spec` *(in pipeline)* | —",
+        "| `fixtures` *(in pipeline)* | `spec`",
+        "| `tests` *(in pipeline)* | `spec`",
+        "| `publish` | `pipeline`",
+    ]
+    assert "once per step produced by manifest" in rows[1]
 
 
 def test_subgraph_section_order(tmp_path: Path) -> None:
     out = _sg_out(tmp_path)
     order = [
-        out.index("## Manifest"),
+        out.index("## Step: Manifest"),
         out.index("## Subgraph: pipeline"),
-        out.index("## Spec"),
-        out.index("## Fixtures"),
-        out.index("## Tests"),
-        out.index("## Publish"),
+        out.index("## Step: Spec"),
+        out.index("## Step: Fixtures"),
+        out.index("## Step: Tests"),
+        out.index("## Step: Publish"),
     ]
     assert order == sorted(order)
 
@@ -480,31 +474,30 @@ def test_subgraph_intro_without_repeat_has_no_repeat_bullet(tmp_path: Path) -> N
     assert "- Inner waves: 1. `b`" in intro
 
 
-def test_inner_step_part_of_bullet_and_fetch_form(tmp_path: Path) -> None:
+def test_inner_step_part_of_and_delegation_order(tmp_path: Path) -> None:
     pb = _sg(tmp_path)
     out = compose(pb)
-    spec = _section(out, "## Spec")
-    assert spec.index("- Part of: pipeline (repeated)") < spec.index("- Summary:")
-    assert "Run `booping render-playbook sg --step spec` for content." in spec
+    spec = _section(out, "## Step: Spec")
+    assert spec.index("spec summary") < spec.index("Part of: pipeline (repeated)")
+    assert "`booping render-playbook sg --step spec`" in spec
     assert "spec body" not in spec
-    fixtures = _section(out, "## Fixtures")
-    assert "- Part of: pipeline (repeated)" in fixtures
-    assert "- After: spec" in fixtures
-    assert "- Parallel with: tests" in fixtures
+    fixtures = _section(out, "## Step: Fixtures")
+    assert "Part of: pipeline (repeated)" in fixtures
+    assert "Parallel with" not in fixtures
 
 
 def test_inner_step_part_of_without_repeat_has_no_suffix(tmp_path: Path) -> None:
     graph = "  a: []\n  group:\n    dependencies: [a]\n    graph:\n      b: []\n"
     b = _section(
-        compose(_build(tmp_path, graph, {"a": "null", "b": "null"})), "## B"
+        compose(_build(tmp_path, graph, {"a": "null", "b": "null"})), "## Step: B"
     )
     assert "- Part of: group\n" in b
 
 
 def test_outer_steps_have_no_part_of_bullet(tmp_path: Path) -> None:
     out = _sg_out(tmp_path)
-    assert "- Part of:" not in _section(out, "## Manifest")
-    assert "- Part of:" not in _section(out, "## Publish")
+    assert "- Part of:" not in _section(out, "## Step: Manifest")
+    assert "- Part of:" not in _section(out, "## Step: Publish")
 
 
 def test_step_flag_on_inner_step_returns_bare_body(tmp_path: Path) -> None:
@@ -512,7 +505,7 @@ def test_step_flag_on_inner_step_returns_bare_body(tmp_path: Path) -> None:
     out = compose_step(pb, "fixtures")
     assert out == "fixtures body\n"
     assert "Part of:" not in out
-    assert "## Fixtures" not in out
+    assert "## Step: Fixtures" not in out
 
 
 # --- io frontmatter is not a thing --------------------------------------------
@@ -532,7 +525,7 @@ def _io(tmp_path: Path, extra_frontmatter: str) -> str:
     pbs = Playbook.load_all(
         vault=tmp_path, home_dir=tmp_path / "nohome", plugin_root=tmp_path / "nocore"
     )
-    return _section(compose(next(p for p in pbs if p.name == "io")), "## One")
+    return _section(compose(next(p for p in pbs if p.name == "io")), "## Step: One")
 
 
 @pytest.mark.parametrize(
@@ -567,7 +560,7 @@ def test_no_state_section_without_states() -> None:
 
 def test_state_section_follows_the_execution_graph() -> None:
     out = _stateful()
-    assert out.index("## Execution graph") < out.index("## State") < out.index("## Intake")
+    assert out.index("## Playbook Steps") < out.index("## State") < out.index("## Step: Intake")
 
 
 def test_state_section_outer_entry() -> None:
@@ -585,12 +578,15 @@ def test_state_section_outer_entry() -> None:
 
 def test_state_section_status_rows() -> None:
     state = _section(_stateful(), "## State")
+    assert "| Status | To | When | Gates |" in state
     assert (
         "| `intaking` | `developing-steps` | intake step complete |"
-        " request + scope captured in the artifact | `frontmatter-update intaken=@now` |"
+        " request + scope captured in the artifact |"
         in state
     )
-    assert "| `done` | *(terminal)* | — | — | — |" in state
+    assert "| `done` | *(terminal)* | — | — |" in state
+    # Hooks are the transition command's business, not the driver's.
+    assert "frontmatter-update intaken=@now" not in state
 
 
 def test_state_section_instance_entry() -> None:
@@ -715,7 +711,7 @@ def test_orphan_state_note_non_blocking(tmp_path: Path) -> None:
         " references it; it will never be used." in out
     )
     assert "**STOP" not in out
-    assert "## Execution graph" in out
+    assert "## Playbook Steps" in out
     assert "## State" in out
 
 
@@ -745,25 +741,24 @@ def test_jinja_preamble_renders_expression_and_include() -> None:
 
 
 def test_jinja_wave_one_step_shows_step_command() -> None:
-    first = _section(compose(_load("jinja-composed"), context=_ctx()), "## First")
-    assert "Run `booping render-playbook jinja-composed --step first` for content." in first
+    first = _section(compose(_load("jinja-composed"), context=_ctx()), "## Step: First")
+    assert "`booping render-playbook jinja-composed --step first`" in first
     assert "Wave-one body" not in first
 
 
 def test_jinja_later_wave_step_shows_step_command() -> None:
-    second = _section(compose(_load("jinja-composed"), context=_ctx()), "## Second")
-    assert "Run `booping render-playbook jinja-composed --step second` for content." in second
+    second = _section(compose(_load("jinja-composed"), context=_ctx()), "## Step: Second")
+    assert "`booping render-playbook jinja-composed --step second`" in second
     assert "Read [Second]" not in second
 
 
 def test_fetch_line_shape_is_uniform_across_jinja_modes() -> None:
     ctx = _ctx()
-    plain = _section(compose(_load("composed"), context=ctx), "## Draft")
-    jinja = _section(compose(_load("jinja-composed"), context=ctx), "## Second")
-    assert "Run `booping render-playbook composed --step draft` for content." in plain
-    assert (
-        "Run `booping render-playbook jinja-composed --step second` for content." in jinja
-    )
+    plain = _section(compose(_load("composed"), context=ctx), "## Step: Draft")
+    jinja = _section(compose(_load("jinja-composed"), context=ctx), "## Step: Second")
+    order = "to get its instructions by calling this command:"
+    assert f"{order} `booping render-playbook composed --step draft`." in plain
+    assert f"{order} `booping render-playbook jinja-composed --step second`." in jinja
 
 
 def test_no_read_link_form_anywhere() -> None:
@@ -773,8 +768,156 @@ def test_no_read_link_form_anywhere() -> None:
         compose(_load("jinja-composed"), context=ctx),
     )
     for out in outs:
-        assert "for content." in out
-        assert "] for content." not in out
+        assert "`booping render-playbook" in out
+        assert "](" not in out
+
+
+# --- inline steps -----------------------------------------------------------
+
+
+def test_inline_embeds_non_detached_body_and_drops_fetch() -> None:
+    plain = _section(compose(_load("composed"), inline_steps=True), "## Step: Plain")
+    assert "Just do the plain thing directly." in plain
+    assert "for content." not in plain
+
+
+def test_inline_keeps_fetch_form_for_detached_steps() -> None:
+    out = compose(_load("composed"), inline_steps=True)
+    for step in ("gather", "draft", "named-step"):
+        assert (
+            "to get its instructions by calling this command:"
+            f" `booping render-playbook composed --step {step}`." in out
+        )
+
+
+def test_inline_jinja_body_renders_through_context(tmp_path: Path) -> None:
+    pb_dir = tmp_path / "_playbooks" / "ij"
+    (pb_dir / "one").mkdir(parents=True)
+    (pb_dir / "playbook.md").write_text(
+        "---\nname: ij\ntitle: IJ\njinja: true\ngraph:\n  one: []\n---\nPreamble.\n"
+    )
+    (pb_dir / "one" / "prompt.md").write_text(
+        "---\nsummary: one\n---\nThreshold {{ config.sprint.default_threshold_sp }}.\n"
+    )
+    pbs = Playbook.load_all(
+        vault=tmp_path, home_dir=tmp_path / "nohome", plugin_root=tmp_path / "nocore"
+    )
+    ctx = _ctx()
+    out = compose(next(p for p in pbs if p.name == "ij"), context=ctx, inline_steps=True)
+    assert f"Threshold {_threshold(ctx)}." in out
+    assert "for content." not in out
+
+
+def test_jinja_preamble_renders_now_stamp(tmp_path: Path) -> None:
+    pb_dir = tmp_path / "_playbooks" / "nw"
+    (pb_dir / "one").mkdir(parents=True)
+    (pb_dir / "playbook.md").write_text(
+        "---\nname: nw\ntitle: NW\njinja: true\ngraph:\n  one: []\n---\n"
+        'Stamp {{ now("%Y%m%d") }}.\n'
+    )
+    (pb_dir / "one" / "prompt.md").write_text("---\nsummary: one\n---\nOne body.\n")
+    pbs = Playbook.load_all(
+        vault=tmp_path, home_dir=tmp_path / "nohome", plugin_root=tmp_path / "nocore"
+    )
+    out = compose(next(p for p in pbs if p.name == "nw"), context=_ctx())
+    assert f"Stamp {datetime.now().strftime('%Y%m%d')}." in out
+
+
+def _fm_playbook(tmp_path: Path, name: str, prompt_frontmatter: str) -> Playbook:
+    pb_dir = tmp_path / "_playbooks" / name
+    (pb_dir / "one").mkdir(parents=True)
+    (pb_dir / "playbook.md").write_text(
+        f"---\nname: {name}\ntitle: {name}\njinja: true\ngraph:\n  one: []\n---\nPreamble.\n"
+    )
+    (pb_dir / "one" / "prompt.md").write_text(
+        f"---\n{prompt_frontmatter}\n---\nOne body.\n"
+    )
+    pbs = Playbook.load_all(
+        vault=tmp_path, home_dir=tmp_path / "nohome", plugin_root=tmp_path / "nocore"
+    )
+    return next(p for p in pbs if p.name == name)
+
+
+def test_jinja_step_summary_renders_through_context(tmp_path: Path) -> None:
+    ctx = _ctx()
+    pb = _fm_playbook(
+        tmp_path, "fs", "summary: Split past {{ config.sprint.default_threshold_sp }} SP"
+    )
+    assert f"- Summary: Split past {_threshold(ctx)} SP" in compose(pb, context=ctx)
+
+
+def test_jinja_step_detached_renders_through_context(tmp_path: Path) -> None:
+    pb = _fm_playbook(
+        tmp_path, "fd", "summary: one\ndetached: '{{ config.research_agent }}'"
+    )
+    ctx = _ctx()
+    out = compose(pb, context=ctx)
+    assert f"Tell the `{ctx.config['research_agent']}` agent to get its" in out
+
+
+def test_jinja_step_detached_rendering_empty_falls_back_to_inline(
+    tmp_path: Path,
+) -> None:
+    # The config key the step names is absent: the step is runner-performed rather
+    # than delegated to an agent with an empty name.
+    pb = _fm_playbook(
+        tmp_path, "fe", "summary: one\ndetached: '{{ config.no_such_key.agent }}'"
+    )
+    out = compose(pb, context=_ctx())
+    assert "Tell the `" not in out
+    assert "- Summary: one" in out
+
+
+def test_non_jinja_playbook_leaves_frontmatter_verbatim(tmp_path: Path) -> None:
+    pb_dir = tmp_path / "_playbooks" / "fv"
+    (pb_dir / "one").mkdir(parents=True)
+    (pb_dir / "playbook.md").write_text(
+        "---\nname: fv\ntitle: FV\ngraph:\n  one: []\n---\nPreamble.\n"
+    )
+    (pb_dir / "one" / "prompt.md").write_text(
+        "---\nsummary: Past {{ config.sprint.default_threshold_sp }} SP\n---\nOne body.\n"
+    )
+    pbs = Playbook.load_all(
+        vault=tmp_path, home_dir=tmp_path / "nohome", plugin_root=tmp_path / "nocore"
+    )
+    out = compose(next(p for p in pbs if p.name == "fv"), context=_ctx())
+    assert "- Summary: Past {{ config.sprint.default_threshold_sp }} SP" in out
+
+
+def test_jinja_step_frontmatter_error_is_in_band_stop(tmp_path: Path) -> None:
+    pb = _fm_playbook(tmp_path, "fx", "summary: one\ndetached: '{{ oops('")
+    out = compose(pb, context=_ctx())
+    assert "**STOP — tell the user:** Jinja rendering of step 'one' frontmatter" in out
+    assert "## Playbook Steps" not in out
+
+
+def test_manifest_inline_steps_key_implies_inline(tmp_path: Path) -> None:
+    pb_dir = tmp_path / "_playbooks" / "mi"
+    (pb_dir / "one").mkdir(parents=True)
+    (pb_dir / "playbook.md").write_text(
+        "---\nname: mi\ntitle: MI\ninline_steps: true\ngraph:\n  one: []\n---\nPreamble.\n"
+    )
+    (pb_dir / "one" / "prompt.md").write_text("---\nsummary: one\n---\nOne body.\n")
+    pbs = Playbook.load_all(
+        vault=tmp_path, home_dir=tmp_path / "nohome", plugin_root=tmp_path / "nocore"
+    )
+    out = compose(next(p for p in pbs if p.name == "mi"))
+    assert "One body." in out
+    assert "for content." not in out
+
+
+def test_inline_appends_step_scoped_lessons(tmp_path: Path) -> None:
+    pb = _build(tmp_path, "  a: []\n", {"a": "null"}, name="il")
+    lessons_dir = tmp_path / "_playbooks" / "il" / "_lessons"
+    lessons_dir.mkdir()
+    (lessons_dir / "0001_watch.md").write_text("---\nstep: a\n---\nWatch the seam.\n")
+    pbs = Playbook.load_all(
+        vault=tmp_path, home_dir=tmp_path / "nohome", plugin_root=tmp_path / "nocore"
+    )
+    pb = next(p for p in pbs if p.name == "il")
+    out = compose(pb, inline_steps=True)
+    assert "Watch the seam." in out
+    assert "Watch the seam." not in compose(pb, inline_steps=True, include_lessons=False)
 
 
 def test_jinja_without_context_stops() -> None:
@@ -790,7 +933,7 @@ def test_broken_step_body_does_not_break_compose() -> None:
     # Step bodies are never rendered at compose time — the error waits for the fetch.
     out = compose(_load("jinja-broken"), context=_ctx())
     assert "**STOP" not in out
-    assert "## Execution graph" in out
+    assert "## Playbook Steps" in out
     assert "# Broken" in out
 
 
@@ -806,7 +949,7 @@ def test_step_body_only_non_jinja() -> None:
     step = next(s for s in pb.steps if s.name == "draft")
     out = compose_step(pb, "draft", _ctx())
     assert out == step.body
-    assert "## Draft" not in out
+    assert "## Step: Draft" not in out
     assert "Review gate:" not in out
     assert "Parallel with:" not in out
 
@@ -816,7 +959,7 @@ def test_step_body_only_jinja_rendered() -> None:
     out = compose_step(_load("jinja-composed"), "first", ctx)
     assert out.startswith(f"Wave-one body, threshold {_threshold(ctx)}.")
     assert "## Project Context" in out
-    assert "## First" not in out
+    assert "## Step: First" not in out
     assert "Run in a sub-agent" not in out
 
 
@@ -964,7 +1107,7 @@ def test_output_to_file(tmp_path: Path) -> None:
     assert result.returncode == 0
     assert result.stdout == ""
     text = out_file.read_text()
-    assert "## Execution graph" in text
+    assert "## Playbook Steps" in text
     assert "token: {{ leftover }}" in text
 
 
@@ -987,7 +1130,7 @@ def test_project_flag_satisfies_requires_project(tmp_path: Path) -> None:
         text=True,
     )
     assert result.returncode == 0
-    assert "## Execution graph" in result.stdout
+    assert "## Playbook Steps" in result.stdout
     assert "Only body." not in result.stdout
 
 
@@ -1005,7 +1148,7 @@ def test_step_prints_body_only_and_logs(tmp_path: Path) -> None:
     )
     assert result.returncode == 0
     assert result.stdout == body
-    assert "## Draft" not in result.stdout
+    assert "## Step: Draft" not in result.stdout
     log = (vault / "_booping" / ".booping.log").read_text()
     assert "[render-playbook] composed --step draft" in log
 
@@ -1054,7 +1197,7 @@ def test_cli_renders_to_stdout(tmp_path: Path) -> None:
         text=True,
     )
     assert result.returncode == 0
-    assert "## Execution graph" in result.stdout
+    assert "## Playbook Steps" in result.stdout
 
 
 # --- lessons ----------------------------------------------------------------
@@ -1134,7 +1277,7 @@ def test_no_lessons_no_section(tmp_path: Path) -> None:
 def test_lessons_section_between_preamble_and_graph(tmp_path: Path) -> None:
     pb = _build_lessons(tmp_path, pb_lessons={"0001_alpha.md": _LESSON_A})
     out = compose(pb)
-    order = [out.index("Preamble."), out.index("## Lessons"), out.index("## Execution graph")]
+    order = [out.index("Preamble."), out.index("## Lessons"), out.index("## Playbook Steps")]
     assert order == sorted(order)
 
 
@@ -1199,7 +1342,7 @@ def test_orphan_lesson_note_non_blocking(tmp_path: Path) -> None:
         " in playbook 'les'; it is ignored." in out
     )
     assert "**STOP" not in out
-    assert "## Execution graph" in out
+    assert "## Playbook Steps" in out
     assert "## Lessons" not in out
 
 

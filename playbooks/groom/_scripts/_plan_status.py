@@ -4,9 +4,10 @@
 Invoked with the target lifecycle status as argv[1]. Environment (set by
 `booping playbook-transition`): BOOPING_WORKDIR = {vault}/plans/{slug}.
 
-Stamps `status:` on the run's `plan.md`, re-renders the vault's sprints.md from
-plan frontmatter, and commits both. Self-contained: the vault carries no
-`.booping` marker, so nothing here shells back into `booping`.
+Stamps `plan_status:` on the run's `index.md` (the run machine owns `status:`,
+so the lifecycle mirror lives under its own key), re-renders the vault's
+sprints.md from plan frontmatter, and commits both. Self-contained: the vault
+carries no `.booping` marker, so nothing here shells back into `booping`.
 """
 
 import os
@@ -36,10 +37,12 @@ def stamp_status(plan: Path, status: str) -> None:
     if not text.startswith("---\n"):
         sys.exit(f"plan has no frontmatter: {plan}")
     head, sep, body = text.partition("\n---\n")
-    if re.search(r"^status:.*$", head, re.MULTILINE):
-        head = re.sub(r"^status:.*$", f"status: {status}", head, count=1, flags=re.MULTILINE)
+    if re.search(r"^plan_status:.*$", head, re.MULTILINE):
+        head = re.sub(
+            r"^plan_status:.*$", f"plan_status: {status}", head, count=1, flags=re.MULTILINE
+        )
     else:
-        head += f"\nstatus: {status}"
+        head += f"\nplan_status: {status}"
     plan.write_text(head + sep + body)
 
 
@@ -87,17 +90,17 @@ def main() -> None:
     workdir = Path(os.environ.get("BOOPING_WORKDIR", ".")).resolve()
     slug = workdir.name
     vault = workdir.parent.parent
-    plan = workdir / "plan.md"
+    plan = workdir / "index.md"
     if not plan.is_file():
         sys.exit(f"plan not found: {plan}")
 
     stamp_status(plan, status)
     count = render_sprints(vault)
-    print(f"plan-status: plans/{slug}/plan.md → {status}; sprints.md: {count} plans")
+    print(f"plan-status: plans/{slug}/index.md → {status}; sprints.md: {count} plans")
 
     if (vault / ".git").exists():
         subprocess.run(
-            ["git", "-C", str(vault), "add", f"plans/{slug}/plan.md", "sprints.md"], check=True
+            ["git", "-C", str(vault), "add", f"plans/{slug}/index.md", "sprints.md"], check=True
         )
         result = subprocess.run(
             ["git", "-C", str(vault), "commit", "-q", "-m", f"groom: {slug} → {status}"],

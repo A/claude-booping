@@ -14,7 +14,12 @@ from booping.context import Context
 from booping.context.lesson import Lesson
 from booping.context.lifecycle import resolve_edges
 from booping.context.playbook import GraphProblem, Playbook, Step, resolve_detached
-from booping.rendering import LenientUndefined, build_source_env, get_plugin_root
+from booping.rendering import (
+    LenientUndefined,
+    build_source_env,
+    get_plugin_root,
+    now,
+)
 
 _NO_GRAPH = (
     "**STOP — tell the user:** playbook '{name}' has no graph: in its frontmatter."
@@ -146,6 +151,15 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
         action="store_true",
         help="Suppress the Lessons section on both the composed and --step surfaces",
     )
+    p.add_argument(
+        "--inline-steps",
+        action="store_true",
+        help=(
+            "Embed each non-detached step's body in its composed section instead of"
+            " the fetch command (detached steps keep fetch-form); implied by"
+            " `inline_steps: true` in the playbook's manifest frontmatter"
+        ),
+    )
     p.set_defaults(func=_run)
 
 
@@ -201,6 +215,7 @@ def build_env(
         )
     globals_: dict[str, Any] = cast("dict[str, Any]", env.globals)
     globals_["resolve_detached"] = resolve_detached
+    globals_["now"] = now
     return env
 
 
@@ -235,6 +250,38 @@ def render_body(
         return env.get_template(name).render(), None
     except Exception as exc:  # any Jinja failure becomes an in-band notice
         return "", f"{type(exc).__name__}: {exc}"
+
+
+def _render_step_fields(
+    pb: Playbook,
+    step: Step,
+    context: Context,
+    plugin_root: Path | None = None,
+) -> tuple[Step, str | None]:
+    """Render the frontmatter fields a `jinja: true` playbook may template —
+    `summary` and `detached` — through the step's own loader chain. A `detached`
+    that renders empty (the config key it names is absent) degrades to
+    runner-performed. Returns (step, None) or (step, error message).
+    """
+    fields = {"summary": step.summary, "detached": step.detached}
+    if not any(v and "{" in v for v in fields.values()):
+        return step, None
+
+    search_dirs = [step.path.parent, pb.path.parent, *pb.search_roots]
+    env = build_env(
+        plugin_root=plugin_root, context=context, search_dirs=search_dirs
+    )
+    rendered: dict[str, Any] = {}
+    for key, value in fields.items():
+        if not value:
+            continue
+        try:
+            rendered[key] = env.from_string(value).render().strip()
+        except Exception as exc:
+            return step, f"{type(exc).__name__}: {exc}"
+    if "detached" in rendered and not rendered["detached"]:
+        rendered["detached"] = None
+    return step.model_copy(update=rendered), None
 
 
 def _shape_notice(prob: GraphProblem, playbook: str) -> str:
@@ -342,19 +389,40 @@ def compose(
     context: Context | None = None,
     *,
     include_lessons: bool = True,
+    inline_steps: bool = False,
 ) -> str:
     """Render a playbook to the locked output contract:
-    notices → body preamble → ``## Execution graph`` → step sections in wave order.
-    The ``graph:`` frontmatter drives sequencing. No step body is ever embedded —
-    every step section is fetch-form. The preamble passes through verbatim unless
+    notices → body preamble → ``## Playbook Steps`` → step sections in wave order.
+    The ``graph:`` frontmatter drives sequencing. By default no step body is
+    embedded — every step section is fetch-form. With ``inline_steps`` (the
+    parameter, or ``inline_steps: true`` in the playbook's manifest frontmatter)
+    each non-detached step's body (plus its step-scoped lessons) replaces the
+    fetch command; detached steps keep fetch-form so their agents fetch their own
+    body. The preamble passes through verbatim unless
     the playbook sets ``jinja: true``, in which case it is rendered through the full
     context env (which `context` must supply). Any blocking notice omits both the
     execution graph and the step sections; non-blocking orphan notes render in
     either case.
     """
     env = build_env(plugin_root=plugin_root, context=context if pb.jinja else None)
+    inline_steps = inline_steps or pb.inline_steps
 
-    steps_by_name = {s.name: s for s in pb.steps}
+    steps = list(pb.steps)
+    field_errors: list[str] = []
+    if pb.jinja and context is not None:
+        resolved: list[Step] = []
+        for step in steps:
+            step, err = _render_step_fields(pb, step, context, plugin_root)
+            if err is not None:
+                field_errors.append(
+                    _JINJA_ERROR.format(
+                        where=f"step '{step.name}' frontmatter", error=err
+                    )
+                )
+            resolved.append(step)
+        steps = resolved
+
+    steps_by_name = {s.name: s for s in steps}
     step_names = set(steps_by_name)
 
     scopes = pb.resolve_scopes()
@@ -374,6 +442,10 @@ def compose(
         notices.append(_shape_notice(prob, pb.name))
         if prob.kind not in _NON_BLOCKING:
             blocking = True
+
+    if field_errors:
+        notices.extend(field_errors)
+        blocking = True
 
     for scope in ["", *pb.subgraphs]:
         for prob in scopes[scope].problems:
@@ -399,7 +471,7 @@ def compose(
 
     # Orphan step dirs (steps order) — non-blocking, emitted in both cases.
     wired = set(pb.executable_step_names) | set(pb.graph)
-    for step in pb.steps:
+    for step in steps:
         if step.name not in wired:
             notices.append(_ORPHAN.format(name=step.name))
 
@@ -434,6 +506,7 @@ def compose(
                 waves=waves,
                 subgraphs=pb.subgraphs,
                 inner_waves=inner_waves,
+                steps=steps_by_name,
                 playbook=pb.name,
                 states=_state_entries(pb),
             )
@@ -441,24 +514,50 @@ def compose(
         )
         step_tmpl = env.get_template("_partials/_playbook_step.j2")
 
-        def render_step(
-            name: str, deps: list[str], wave: list[str], part_of: str | None
-        ) -> str:
+        def inline_body(step: Step) -> str:
+            if not pb.jinja:
+                body = step.body
+            else:
+                # context is present here: jinja without context is blocking above.
+                assert context is not None
+                rendered, err = render_body(pb, step.body, step, context, plugin_root)
+                if err is not None:
+                    return _JINJA_ERROR.format(
+                        where=f"step '{step.name}'", error=err
+                    )
+                body = rendered
+            lessons = (
+                [lesson for lesson in pb.lessons if lesson.step == step.name]
+                if include_lessons
+                else []
+            )
+            section = _render_lessons(lessons, env, step_mode=True)
+            if section:
+                body = body.rstrip("\n") + "\n\n" + section
+            return body.strip()
+
+        def render_step(name: str, deps: list[str], part_of: str | None) -> str:
             sub = pb.subgraphs.get(part_of) if part_of is not None else None
+            step = steps_by_name[name]
+            body = (
+                inline_body(step)
+                if inline_steps and step.detached is None
+                else None
+            )
             return step_tmpl.render(
-                step=steps_by_name[name],
+                step=step,
                 deps=deps,
-                siblings=[n for n in wave if n != name],
                 playbook=pb.name,
                 part_of=part_of,
                 repeated=sub is not None and sub.repeat is not None,
+                body=body,
             ).strip()
 
         for wave in waves:
             for name in wave:
                 sub = pb.subgraphs.get(name)
                 if sub is None:
-                    sections.append(render_step(name, pb.graph[name], wave, None))
+                    sections.append(render_step(name, pb.graph[name], None))
                     continue
                 sections.append(
                     step_tmpl.render(
@@ -469,7 +568,7 @@ def compose(
                 for inner_wave in inner_waves[name]:
                     for inner in inner_wave:
                         sections.append(
-                            render_step(inner, sub.graph[inner], inner_wave, name)
+                            render_step(inner, sub.graph[inner], name)
                         )
 
     return "\n\n".join(sections) + "\n"
@@ -555,7 +654,12 @@ def _run(args: argparse.Namespace) -> None:
     if step_name is not None:
         result = compose_step(pb, step_name, ctx, include_lessons=include_lessons)
     else:
-        result = compose(pb, context=ctx, include_lessons=include_lessons)
+        result = compose(
+            pb,
+            context=ctx,
+            include_lessons=include_lessons,
+            inline_steps=args.inline_steps,
+        )
 
     if output_str is None or output_str == "-":
         sys.stdout.write(result)

@@ -77,7 +77,7 @@ Receipts must name paths absolutely — a relative path is ambiguous once the ru
 
 **Lessons for a playbook you don't own.** A playbook-level `_lessons/` directory is picked up from *every* root, whether or not that root holds the playbook itself. So a project can attach its own lessons to the shipped `groom` playbook simply by creating `{vault}/_playbooks/groom/_lessons/` — no `playbook.md`, no copy, no name clash.
 
-**Where they surface.** Playbook-scoped lessons render as a `## Lessons` section in the composed procedure, between the preamble and `## Execution graph`; they bind the driver for the whole run. Step-scoped lessons are appended to that step's `booping render-playbook <name> --step <step>` output, so they reach exactly the sub-agent running that step. `--no-lessons` suppresses both, which is useful when diffing a prompt against its file on disk.
+**Where they surface.** Playbook-scoped lessons render as a `## Lessons` section in the composed procedure, between the preamble and `## Playbook Steps`; they bind the driver for the whole run. Step-scoped lessons are appended to that step's `booping render-playbook <name> --step <step>` output, so they reach exactly the sub-agent running that step. `--no-lessons` suppresses both, which is useful when diffing a prompt against its file on disk.
 
 ## The manifest
 
@@ -138,11 +138,22 @@ The researcher an assisted step delegates to is the `research_agent` config key 
 
 There is no `null` value: `agent: null` is replaced by simply omitting the key. `agent:` is the **legacy name** of this key — a step still carrying it renders a blocking `**STOP — tell the user:**` notice telling you to rename it to `detached:`.
 
+Under `jinja: true` the value is a template like any body, so the agent can come from config instead of being hard-coded:
+
+```yaml
+---
+summary: Second-model review of the written plan
+detached: "{{ config.cross_review.agent }}"
+---
+```
+
+When the key it names is absent from the merged config the value renders empty, and the step degrades to runner-performed rather than spawning an agent with no name — so a playbook can offer an optional reviewer and let the preamble say to skip the step when none is configured.
+
 ## Jinja bodies
 
 By default every body — the manifest preamble and each `prompt.md` — is passed through **verbatim**. Braces, `{{ }}`, and template-looking text are just text.
 
-Set `jinja: true` in the manifest frontmatter to opt the **whole playbook** in (it is all-or-nothing — there is no per-step flag). Bodies are then rendered as Jinja templates with the same project context the built-in skills get: the attached project, its config, and the shared fragments the plugin ships. Include paths are resolved **relative to the plugin root**, so they work identically whatever scope your playbook lives in:
+Set `jinja: true` in the manifest frontmatter to opt the **whole playbook** in (it is all-or-nothing — there is no per-step flag). Bodies — plus the `summary` and `detached` frontmatter fields of each step — are then rendered as Jinja templates with the same project context the built-in skills get: the attached project, its config, and the shared fragments the plugin ships. Include paths are resolved **relative to the plugin root**, so they work identically whatever scope your playbook lives in:
 
 ```markdown
 ---
@@ -170,12 +181,12 @@ A Jinja body is meaningless until rendered — the `booping render-playbook <nam
 
 ## How the graph renders
 
-`/playbook` resolves the graph into **waves** — a step joins the earliest wave in which all its dependencies sit in a prior wave. Steps sharing a wave run in parallel.
+`/playbook` renders the graph as a **step table** — one row per step, in dependency order, carrying the step name, its dependencies, its summary and its review gate. A step runs once every step in its `Dependencies` cell is done; steps whose dependencies are all satisfied run together.
 
-- **Step bodies are never embedded** — every section ends with the line *Run `booping render-playbook <name> --step <step>` for content.*, the same for plain and `jinja: true` playbooks. A section carries only metadata: summary, dependencies, wave siblings, delegation, review gate.
+- **Step bodies are never embedded** — every section ends with the command that fetches the body, the same for plain and `jinja: true` playbooks. A runner-performed step's section is a metadata block (summary, dependencies, review gate) closed by *Run `booping render-playbook <name> --step <step>` for content.* A **detached** step's section is instead one order to the driver — its summary as a paragraph, its review gate when it has one, then *Tell the `<agent>` agent to get its instructions by calling this command: `booping render-playbook <name> --step <step>`.* Its dependencies and wave order are omitted there; the step table above already carries them.
 - **Delegated steps fetch their own body** — the driver never runs the fetch command for a sub-agent step. It spawns the agent with a bootstrap prompt: the fetch command ("treat its stdout as your full instruction"), a `## Run-time context` block (project, specs dir, plus `workdir` / `instance` where they apply), a `## Inputs` block assembled from the run-time context and prior steps' receipts, and a uniform `## Return` contract (`artifacts written + outcome, ≤ 5 lines`) — a richer contract belongs in the step body. A step without `detached:` is the only case where the driver runs the fetch itself and executes the stdout.
-- **Parallel wave members must be `detached:`** — a step the runner performs itself can't run in parallel, so a step that shares a wave with others must be `detached:`.
-- **Review gates pause after the wave** — once every member of a wave finishes, each member's gate is presented (labeled by step) and the run waits for your confirmation before the next wave.
+- **Steps that can run together must be `detached:`** — a step the runner performs itself can't run in parallel, so a step whose dependencies are satisfied at the same time as another's must be `detached:`.
+- **Review gates pause after the batch** — once every step running together finishes, each one's gate is presented (labeled by step) and the run waits for your confirmation before the next batch.
 
 ## Subgraphs
 
@@ -212,7 +223,7 @@ Subgraph-specific STOP conditions (on top of the usual [notices](#notices)):
 - an inner node's value is a mapping (nested subgraph);
 - a step name appears in more than one scope.
 
-In the rendered procedure the subgraph shows up as a mermaid cluster, a nested entry in the wave list, and a `## Subgraph: <name>` intro section (`After:`, `Repeat:`, `Inner waves:`) followed by its inner step sections, each tagged `Part of: <name>`.
+In the rendered procedure the subgraph shows up as its own step-table row tagged `*(subgraph)*` (carrying its outer dependencies and its `repeat` prose), followed by its inner steps tagged `*(in <name>)*`, plus a `## Subgraph: <name>` intro section (`After:`, `Repeat:`, `Inner waves:`) and its inner step sections, each tagged `Part of: <name>`.
 
 ## Run state
 
@@ -325,7 +336,7 @@ Everything needed to resume lives on disk. `/playbook` runs `booping playbook-st
 
 ### How state renders
 
-A playbook with `states:` renders a `## State` section right after `## Execution graph`: the `playbook-state` invocation for that playbook, then per machine its referencing scopes, artifact path, initial status, the exact `playbook-transition` invocation (with `--state` / `--instance` where the machine needs them), and a status → `to` / `when` / `gates` / `hooks` table. A playbook without `states:` renders no such section.
+A playbook with `states:` renders a `## State` section right after `## Playbook Steps`: the `playbook-state` invocation for that playbook, then per machine its referencing scopes, artifact path, initial status, the exact `playbook-transition` invocation (with `--state` / `--instance` where the machine needs them), and a status → `to` / `when` / `gates` table. A playbook without `states:` renders no such section.
 
 ## Notices
 
@@ -386,14 +397,17 @@ graph:
   publish: [lint, tests]
 ```
 
-Each step directory (`prep/`, `lint/`, `tests/`, `publish/`) holds a `prompt.md` with its own frontmatter and prompt body. `lint` and `tests` both depend only on `prep`, so they share a wave; `publish` waits for both.
+Each step directory (`prep/`, `lint/`, `tests/`, `publish/`) holds a `prompt.md` with its own frontmatter and prompt body. `lint` and `tests` both depend only on `prep`, so they run together; `publish` waits for both.
 
-The rendered procedure lists the waves as:
+The rendered procedure lists the steps as:
 
 ```
-1. prep
-2. lint ∥ tests
-3. publish
+| Step | Dependencies | Summary | Review gate |
+| --- | --- | --- | --- |
+| `prep` | — | … | — |
+| `lint` | `prep` | … | — |
+| `tests` | `prep` | … | — |
+| `publish` | `lint`, `tests` | … | — |
 ```
 
 `prep` runs first (fetching its own body via `booping render-playbook ship --step prep`). Then `lint` and `tests` spawn together in one message and run in parallel — both must be `detached:`. Once both finish (and any review gates are cleared), `publish` runs.

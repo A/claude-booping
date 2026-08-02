@@ -43,8 +43,4 @@ these parts, in this order:
   sibling type out by name and on a stated test.
 - **Problem** — what the system does today and what must change, in the request's own
   domain terms.
-- **Web research** — one line, `Requested` or `Not requested`, with what settles it: the user
-  asked for deep web research in the request itself or explicitly → `Requested`; anything else →
-  `Not requested`. State the line on both paths; `research-web` executes it mechanically and no
-  later step re-judges it.
 - **Clarifications and Decisions**: list of one-line clarifications and decisions made with user when refining on this plan

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterator
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -71,17 +72,25 @@ def get_plugin_root() -> Path:
     return _plugin_root
 
 
+def now(fmt: str = "%Y%m%d-%H-%M") -> str:
+    """Local wall-clock stamp, evaluated at render time."""
+    return datetime.now().strftime(fmt)
+
+
 def _build_env(
     loader_root: Path,
     *,
     loader: BaseLoader | None = None,
     env_class: type[Environment] = Environment,
 ) -> Environment:
-    return env_class(
+    env = env_class(
         loader=loader if loader is not None else FileSystemLoader(str(loader_root)),
         undefined=LenientUndefined,
         keep_trailing_newline=True,
     )
+    globals_: dict[str, Any] = env.globals  # type: ignore[assignment]
+    globals_["now"] = now
+    return env
 
 
 def build_source_env(

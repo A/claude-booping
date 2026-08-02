@@ -1,9 +1,17 @@
 from __future__ import annotations
 
+from datetime import datetime
+
 import pytest
 from jinja2 import Environment, FileSystemLoader
 
-from booping.rendering import LenientUndefined, RenderCycleError, RenderDepthExceededError, render
+from booping.rendering import (
+    LenientUndefined,
+    RenderCycleError,
+    RenderDepthExceededError,
+    build_source_env,
+    render,
+)
 from booping.tools import Tools
 from tests.helpers import get_fixture_path
 
@@ -93,6 +101,15 @@ def test_tools_render_mutual_reference_raises_cycle_error() -> None:
             kwargs={},
             plugin_root=fixture,
         )
+
+
+def test_now_global_renders_local_stamp() -> None:
+    fixture = get_fixture_path("plugin-root-minimal")
+    env = build_source_env(context={}, config={}, plugin_root=fixture)
+
+    rendered = env.from_string('{{ now("%Y%m%d") }}').render()
+
+    assert rendered == datetime.now().strftime("%Y%m%d")
 
 
 def test_tools_render_depth_limit() -> None:

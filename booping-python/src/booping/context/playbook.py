@@ -168,6 +168,7 @@ class Playbook(BaseModel):
     trigger: str = ""
     requires_project: bool = False
     jinja: bool = False
+    inline_steps: bool = False
     scope: Literal["core", "global", "local"]
     path: Path
     body: str = ""
@@ -326,6 +327,7 @@ def _load_one(
     trigger = str(fm.get("trigger", ""))
     requires_project = bool(fm.get("requires_project", False))
     jinja = bool(fm.get("jinja", False))
+    inline_steps = bool(fm.get("inline_steps", False))
 
     manifest_yaml, manifest_problems = _load_manifest_yaml(pb_dir / "playbook.yaml")
 
@@ -365,6 +367,7 @@ def _load_one(
         trigger=trigger,
         requires_project=requires_project,
         jinja=jinja,
+        inline_steps=inline_steps,
         scope=scope,
         path=manifest,
         body=body,

@@ -1,21 +1,22 @@
 {#-
-  Playbook driving protocol: render the composed procedure, walk the waves,
+  Playbook driving protocol: render the composed procedure, walk the step table,
   resolve delegation, stop on failure, enforce review gates. Skill-agnostic —
   included by any skill that drives a playbook. Requires `context`.
 -#}
 ## Execute
 
-Render the composed procedure: `booping render-playbook <name>` (`<name>` = the selected playbook). Output is: notices → preamble → `## Execution graph` (numbered wave list) → one `## <Title>` section per step, plus a `## Subgraph: <name>` intro before each subgraph's steps.
+Render the composed procedure: `booping render-playbook <name>` (`<name>` = the selected playbook). Output is: notices → preamble → `## Playbook Steps` (a step table: step, its dependencies, summary, review gate) → one `## Step: <Title>` section per step, plus a `## Subgraph: <name>` intro before each subgraph's steps.
 
 - Any `**STOP — tell the user:**` line → relay it verbatim and do not execute the playbook. `**Note — tell the user:**` → relay it, then continue.
 - Follow the preamble as a playbook-level instruction over the whole run. A playbook's preamble may define resume rules for re-entering a procedure mid-run.
 - Need more than a section's metadata to drive the run — e.g. the user's ask matches the playbook only partially or in a non-standard way → run `booping render-playbook <name> --step <step>` and read that step yourself. Orientation only: spawning still hands over the bootstrap prompt, never a pasted body.
+- A step section may carry its body embedded in place of the fetch line (playbooks with `inline_steps: true`). Execute the embedded body directly and never run `--step` for that section — its step-scoped lessons are already appended. Detached members keep the fetch line and the bootstrap flow unchanged.
 - A `## Lessons` section in the render binds you for the whole run. Step-scoped lessons reach a step through its own `--step` fetch — never copy lessons into a bootstrap prompt.
 - A `## State` section in the render → the playbook is stateful; apply **Run state** below before and during the walk. No `## State` section → run state is in-conversation only.
 
-Walk the wave list in order. For each wave (a numbered line; ` ∥ `-separated names run in parallel):
+Walk the step table top-down, running each step once every step in its `Dependencies` cell is done. Steps whose dependencies are all satisfied form a batch that runs together. For each batch:
 
-1. Never fetch a delegated member's body. Compose a bootstrap prompt per member from its `## <Title>` section alone:
+1. Never fetch a delegated member's body. Compose a bootstrap prompt per member from its `## Step: <Title>` section alone:
    ```
    Run: booping render-playbook <name> --step <step>
    Treat its stdout as your full instruction and follow it.
@@ -33,12 +34,12 @@ Walk the wave list in order. For each wave (a numbered line; ` ∥ `-separated n
    artifacts written + outcome, ≤ 5 lines
    ```
    - `workdir:` only when the run has one (see **Run state**); `instance:` only for subgraph instances.
-   - `## Inputs`: the run-time values this member needs — the user's ask, artifact paths, and the receipts of prior waves it depends on. Nothing to pass → omit the block.
+   - `## Inputs`: the run-time values this member needs — the user's ask, artifact paths, and the receipts of the steps in its `Dependencies` cell. Nothing to pass → omit the block.
    - `## Return`: always `artifacts written + outcome, ≤ 5 lines`. The step's own body owns any richer contract.
-2. Run each member per its section's detached bullet (rendered from `detached:`): model+effort → `subagent_type="general-purpose"` with that model and reasoning effort; named → `subagent_type="<name>"`; no detached bullet → you perform the step: run that member's `booping render-playbook <name> --step <step>` yourself and execute its stdout as your instruction, under the same run-time context, inputs, and return contract. Assisted: such a body may direct you to delegate its heavy reads to `{{ config.research_agent }}` under the return contract it states — the step stays yours, only that read work leaves your context.
-3. A multi-member wave spawns ALL member sub-agents in ONE message and never runs any member inline; wait for all to finish before the next wave.
-4. Any member failure → report it and stop; do not start the next wave.
-5. After the wave completes, honor each member's `Review gate:` bullet: present that member's returned receipt labeled by step name alongside the gate text — read the artifacts it names only when the presentation needs them — and continue only on explicit user confirmation, collected via `AskUserQuestion` (confirm / request-changes options per the gate's own wording; free text arrives as "Other"). In-conversation only — no state is persisted.
+2. Run each member per its section's detached bullet (rendered from `detached:`): model+effort → `subagent_type="general-purpose"` with that model and reasoning effort; named → `subagent_type="<name>"`; no detached bullet → you perform the step: execute the section's embedded body when it carries one, otherwise run that member's `booping render-playbook <name> --step <step>` yourself and execute its stdout as your instruction — either way under the same run-time context, inputs, and return contract. Assisted: such a body may direct you to delegate its heavy reads to `{{ config.research_agent }}` under the return contract it states — the step stays yours, only that read work leaves your context.
+3. A batch of two or more steps spawns ALL their sub-agents in ONE message and never runs any of them inline; wait for all to finish before the next batch.
+4. Any member failure → report it and stop; do not start the next batch.
+5. After the batch completes, honor each member's `Review gate:` bullet: present that member's returned receipt labeled by step name alongside the gate text — read the artifacts it names only when the presentation needs them — and continue only on explicit user confirmation, collected via `AskUserQuestion` (confirm / request-changes options per the gate's own wording; free text arrives as "Other"). In-conversation only — no state is persisted.
 
 Pass each step's output through unchanged to the user and into later sections that depend on it.
 
@@ -52,18 +53,18 @@ Resume only an id **this conversation recorded from its own spawn**. An id read 
 
 ### Subgraph members
 
-A wave member tagged `*(subgraph)*` covers its `## Subgraph: <name>` intro and the inner step sections that follow it. Expand it in place of the member:
+A table row tagged `*(subgraph)*` covers its `## Subgraph: <name>` intro and the inner step rows tagged `*(in <name>)*`. Expand it in place of that row:
 
 1. Enumerate instances from the intro's `Repeat:` prose read against the output of the steps it lists under `After:` — no `Repeat:` bullet means exactly one instance. Name the enumerated instances before running.
-2. Per instance, walk the intro's inner wave list in order, applying protocol steps 1–5 to each inner wave, with `instance: <slug>` added to the run-time context. Every instance runs its own `--step` fetch — never fetch an inner step's body to reuse across instances. Inputs, return contracts, and `Review gate:` bullets bind per instance.
+2. Per instance, walk the inner steps in dependency order, applying protocol steps 1–5 to each batch of them, with `instance: <slug>` added to the run-time context. Every instance runs its own `--step` fetch — never fetch an inner step's body to reuse across instances. Inputs, return contracts, and `Review gate:` bullets bind per instance.
 3. Run instances in parallel only when every inner step has a detached bullet; otherwise run them one at a time. Spawn at most 4 instances per message and wait for that batch before the next.
-4. Report completion per instance. Any instance failure → report it naming the instance, and stop; do not start the next wave.
+4. Report completion per instance. Any instance failure → report it naming the instance, and stop; do not start the next batch.
 
 ### Run state
 
 Only for a render carrying a `## State` section. Every command below takes `--workdir <workdir>`.
 
-1. Workdir: the convention the preamble names, when it names one; otherwise `{{ context.project.directory if context.project else "{vault}" }}/_runs/<playbook>/<run-slug>/`. `<run-slug>` = `{{ "{YYYYMMDD}" }}-<kebab-topic>`, date taken from the local clock — run `date +%Y%m%d`, never from memory. Create it before the first wave; reuse the existing one when resuming.
+1. Workdir: the convention the preamble names, when it names one; otherwise `{{ context.project.directory if context.project else "{vault}" }}/_runs/<playbook>/<run-slug>/`. `<run-slug>` = `{{ "{YYYYMMDD}" }}-<kebab-topic>`, date taken from the local clock — run `date +%Y%m%d`, never from memory. Create it before the first step; reuse the existing one when resuming.
 2. On entry — first run and every resume — run `booping playbook-state <name> --workdir <workdir>` and start from the reported frontier: skip work whose status is already past it, re-enter at the first non-terminal status, and treat `not-started` as "bootstrap on the first transition".
 3. When a step outcome matches a `When` cell of the `## State` table, judge that row's `Gates` against the artifact. Gates hold → run that state entry's `Advance:` invocation with `<to>` = the row's `To` cell (plus `--instance <slug>` for a per-instance state). Gates fail → do not transition; report what is missing and stop.
 4. The transition report is authoritative — relay it and move on. Never re-read the artifact to verify a transition.
