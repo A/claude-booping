@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import re
 import subprocess
 from datetime import datetime
 from pathlib import Path
@@ -8,6 +9,7 @@ from pathlib import Path
 import pytest
 
 from booping.commands.render_playbook import (
+    build_env,
     compose,
     compose_step,
     parse_set_overrides,
@@ -1551,3 +1553,21 @@ def test_set_override_documented_in_help(tmp_path: Path) -> None:
     assert result.returncode == 0
     assert "--set" in result.stdout
     assert "KEY=VALUE" in result.stdout
+
+
+# --- pinnable now() ---------------------------------------------------------
+
+
+def test_pinned_now_reaches_playbook_bodies() -> None:
+    ctx = _ctx().model_copy(
+        update={"config": {**_ctx().config, "now": "19700101-00-00"}}
+    )
+    env = build_env(context=ctx)
+    assert env.from_string('{{ now() }}|{{ now("%H:%M") }}').render() == (
+        "19700101-00-00|19700101-00-00"
+    )
+
+
+def test_unpinned_now_in_playbook_bodies_is_time_shaped() -> None:
+    env = build_env(context=_ctx())
+    assert re.fullmatch(r"\d{8}-\d{2}-\d{2}", env.from_string("{{ now() }}").render())

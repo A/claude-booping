@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from jinja2 import BaseLoader, ChainableUndefined, Environment, FileSystemLoader
 
@@ -77,11 +77,30 @@ def now(fmt: str = "%Y%m%d-%H-%M") -> str:
     return datetime.now().strftime(fmt)
 
 
+def make_now(config: object = None) -> Callable[..., str]:
+    """The `now` global a rendering env gets. A `now` key in config pins it: every
+    call returns that value verbatim, whatever format is asked for — which makes a
+    render byte-reproducible. Absent → the live wall-clock stamp.
+    """
+    pinned: object = (
+        cast("dict[str, Any]", config).get("now") if isinstance(config, dict) else None
+    )
+    if pinned is None:
+        return now
+    value = str(pinned)
+
+    def pinned_now(fmt: str = "%Y%m%d-%H-%M") -> str:  # noqa: ARG001
+        return value
+
+    return pinned_now
+
+
 def _build_env(
     loader_root: Path,
     *,
     loader: BaseLoader | None = None,
     env_class: type[Environment] = Environment,
+    config: object = None,
 ) -> Environment:
     env = env_class(
         loader=loader if loader is not None else FileSystemLoader(str(loader_root)),
@@ -89,7 +108,7 @@ def _build_env(
         keep_trailing_newline=True,
     )
     globals_: dict[str, Any] = env.globals  # type: ignore[assignment]
-    globals_["now"] = now
+    globals_["now"] = make_now(config)
     return env
 
 
@@ -110,7 +129,12 @@ def build_source_env(
     from booping.tools import Tools  # local import to avoid circular at module level
 
     root = plugin_root if plugin_root is not None else get_plugin_root()
-    env = _build_env(root / "src" / "templates", loader=loader, env_class=env_class)
+    env = _build_env(
+        root / "src" / "templates",
+        loader=loader,
+        env_class=env_class,
+        config=config,
+    )
     globals_: dict[str, Any] = env.globals  # type: ignore[assignment]
     globals_["context"] = context
     globals_["config"] = config
@@ -148,7 +172,7 @@ def render(
         loader_root = root
         template_name = None
 
-    env = _build_env(loader_root)
+    env = _build_env(loader_root, config=config)
 
     # Top-level render seeds an empty stack and constructs a real Tools instance.
     real_tools: Tools
