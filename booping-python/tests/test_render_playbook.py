@@ -7,7 +7,11 @@ from pathlib import Path
 
 import pytest
 
-from booping.commands.render_playbook import compose, compose_step
+from booping.commands.render_playbook import (
+    compose,
+    compose_step,
+    parse_set_overrides,
+)
 from booping.context import Context
 from booping.context.playbook import Playbook
 from tests.helpers import get_fixture_path
@@ -1430,3 +1434,120 @@ def test_cli_unknown_step_still_exits_1_with_lessons(tmp_path: Path) -> None:
     assert result.returncode == 1
     assert result.stdout == ""
     assert "step not found" in result.stderr
+
+
+# --- --set config overrides -------------------------------------------------
+
+
+def test_set_override_parses_dotted_key_into_nested_mapping() -> None:
+    assert parse_set_overrides(["a.b.c=x"]) == {"a": {"b": {"c": "x"}}}
+
+
+def test_set_override_parses_flat_key_and_keeps_value_a_string() -> None:
+    assert parse_set_overrides(["threshold=3"]) == {"threshold": "3"}
+
+
+def test_set_override_parses_value_containing_equals() -> None:
+    assert parse_set_overrides(["a.b=x=y"]) == {"a": {"b": "x=y"}}
+
+
+def test_set_override_repeated_pairs_later_wins() -> None:
+    parsed = parse_set_overrides(["a.b=1", "a.c=2", "a.b=3"])
+    assert parsed == {"a": {"b": "3", "c": "2"}}
+
+
+def test_set_override_malformed_pair_raises() -> None:
+    with pytest.raises(ValueError, match="nope"):
+        parse_set_overrides(["nope"])
+
+
+def test_set_override_wins_over_core_value(tmp_path: Path) -> None:
+    vault = _plant_vault(tmp_path, "jinja-composed")
+    result = subprocess.run(
+        [
+            str(BOOPING_BIN), "render-playbook", "jinja-composed",
+            "--project", str(vault),
+            "--set", "sprint.default_threshold_sp=7",
+        ],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0
+    assert "Preamble threshold: 7" in result.stdout
+
+
+def test_set_override_repeated_later_wins_on_cli(tmp_path: Path) -> None:
+    vault = _plant_vault(tmp_path, "jinja-composed")
+    result = subprocess.run(
+        [
+            str(BOOPING_BIN), "render-playbook", "jinja-composed",
+            "--project", str(vault),
+            "--set", "sprint.default_threshold_sp=7",
+            "--set", "sprint.default_threshold_sp=9",
+        ],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0
+    assert "Preamble threshold: 9" in result.stdout
+
+
+def test_set_override_applies_to_step_surface(tmp_path: Path) -> None:
+    vault = _plant_vault(tmp_path, "jinja-composed")
+    result = subprocess.run(
+        [
+            str(BOOPING_BIN), "render-playbook", "jinja-composed",
+            "--step", "first", "--project", str(vault),
+            "--set", "sprint.default_threshold_sp=7",
+        ],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0
+    assert "Wave-one body, threshold 7." in result.stdout
+
+
+def test_set_override_malformed_pair_exits_1(tmp_path: Path) -> None:
+    vault = _plant_vault(tmp_path, "jinja-composed")
+    result = subprocess.run(
+        [
+            str(BOOPING_BIN), "render-playbook", "jinja-composed",
+            "--project", str(vault), "--set", "nope",
+        ],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 1
+    assert result.stdout == ""
+    assert "nope" in result.stderr
+
+
+def test_set_override_absent_leaves_config_unchanged(tmp_path: Path) -> None:
+    vault = _plant_vault(tmp_path, "jinja-composed")
+    result = subprocess.run(
+        [
+            str(BOOPING_BIN), "render-playbook", "jinja-composed",
+            "--project", str(vault),
+        ],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0
+    assert "Preamble threshold: 35" in result.stdout
+
+
+def test_set_override_documented_in_help(tmp_path: Path) -> None:
+    result = subprocess.run(
+        [str(BOOPING_BIN), "render-playbook", "--help"],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0
+    assert "--set" in result.stdout
+    assert "KEY=VALUE" in result.stdout

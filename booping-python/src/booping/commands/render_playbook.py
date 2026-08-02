@@ -20,6 +20,7 @@ from booping.rendering import (
     get_plugin_root,
     now,
 )
+from booping.utils import deep_merge
 
 _NO_GRAPH = (
     "**STOP — tell the user:** playbook '{name}' has no graph: in its frontmatter."
@@ -145,6 +146,18 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
         default=None,
         metavar="PATH",
         help="Output path (default: stdout); use - for stdout",
+    )
+    p.add_argument(
+        "--set",
+        action="append",
+        dest="set_overrides",
+        default=None,
+        metavar="KEY=VALUE",
+        help=(
+            "Override a config value for this render (dotted key, e.g."
+            " sprint.default_threshold_sp=3); repeatable, later pairs win, and the"
+            " value wins over every config tier"
+        ),
     )
     p.add_argument(
         "--no-lessons",
@@ -282,6 +295,27 @@ def _render_step_fields(
     if "detached" in rendered and not rendered["detached"]:
         rendered["detached"] = None
     return step.model_copy(update=rendered), None
+
+
+def parse_set_overrides(pairs: Sequence[str]) -> dict[str, Any]:
+    """`a.b=c` → `{"a": {"b": "c"}}`, accumulated later-wins across pairs. Values stay
+    strings. Raises ValueError carrying the offending pair when it has no `=`.
+    """
+    overrides: dict[str, Any] = {}
+    for pair in pairs:
+        key, sep, value = pair.partition("=")
+        if not sep:
+            raise ValueError(pair)
+        nested: dict[str, Any] = {}
+        cursor = nested
+        parts = key.split(".")
+        for part in parts[:-1]:
+            child: dict[str, Any] = {}
+            cursor[part] = child
+            cursor = child
+        cursor[parts[-1]] = value
+        overrides = deep_merge(overrides, nested)
+    return overrides
 
 
 def _shape_notice(prob: GraphProblem, playbook: str) -> str:
@@ -604,11 +638,29 @@ def compose_step(
 
 
 def _run(args: argparse.Namespace) -> None:
+    set_pairs: list[str] = args.set_overrides or []
+    try:
+        overrides = parse_set_overrides(set_pairs)
+    except ValueError as exc:
+        print(
+            f"error: malformed --set pair (expected KEY=VALUE): {exc}",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
     project_str: str | None = args.project
     vault_override = (
         Path(project_str).expanduser().resolve() if project_str is not None else None
     )
     ctx = Context.assemble(vault_override=vault_override)
+    if overrides:
+        ctx = ctx.model_copy(
+            update={
+                "config": deep_merge(
+                    ctx.config, overrides, shallow_merge_keys=["agents"]
+                )
+            }
+        )
 
     pb = next((p for p in ctx.playbooks if p.name == args.name), None)
     if pb is None:
