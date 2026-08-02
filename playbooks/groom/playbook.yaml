@@ -41,7 +41,7 @@ states:
       presenting:
         transitions:
           - to: awaiting-approval
-            when: "present posted the approval screen in chat — summary, split recommendation if any, handoff to `/develop`"
+            when: "present posted the approval screen in chat — summary, split recommendation if any, handoff to the `develop` playbook"
       awaiting-approval:
         transitions:
           - to: drafting

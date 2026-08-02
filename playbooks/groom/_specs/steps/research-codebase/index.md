@@ -13,40 +13,40 @@ suite_reviewed_at: 20260731 19:47
 
 - **Delegation** — assisted: the runner renders and owns the step and decides what is mapped;
   the heavy reads are delegated to the researcher agent config names, which returns the
-  compressed map; the runner writes it into `index.md`. The runner records the agent's id in
-  `index.md` so a loopback resumes the same agent instead of spawning a fresh one.
+  compressed map; the runner posts it in chat.
 - **Needs** —
-  - the confirmed framing — the restated problem and the task type
-  - the scope boundaries the user confirmed
+  - the confirmed framing brief — the restated problem, the task type and the settled
+    decisions
   - the repository's code and the conventions it follows
 - **Value** — the blast radius in the attached repo: what the work moves, what it must imitate,
-  and which conventions bind it — so `design` argues from the actual code instead of
+  and which conventions bind it — so `draft-plan` argues from the actual code instead of
   assumptions. The heavy reads happen in the researcher agent; only the map reaches the runner's
   context. A specific fact the repo cannot settle (an installed tool's flag, a pinned version's
   behaviour) may be checked against local ground truth first — `tool --help`, lockfiles — and
   the web only for the one fact, through the same agent; surveying external practice stays
-  `research-web`'s job, behind the user's request.
+  `research-web`'s job.
 - **Output files** —
-  - `[UPDATED] plans/{slug}/index.md` — the `## Blast radius` section:
+  - none — the map is posted in chat, not written to the plan directory:
     - touched surfaces — files, modules, integrations and external surfaces the work moves,
       each with why it moves and how risky the move is
     - prior art — the closest existing implementations the work should follow, by path
     - conventions in play — the repo rules that bind this work (project guide, build
       artefacts, ownership boundaries), each stated as a constraint on the design
-    - unknowns for design — what the codebase could not settle, phrased as the call `design`
-      has to make; open external questions land here too, so the user can request web research
-      when they matter
+    - unknowns for the design — what the codebase could not settle, phrased as the call
+      `draft-plan` has to make; open external questions land here too, for `research-web`
+      to take up
     - a greenfield surface is reported as such ("no prior art in the repo"), never omitted —
       the step has no skip note
-- **Step report** — `## Changed:` list; `## Notes:` — the blast-radius headline (how many
-  files across how many modules, the riskiest surface) and each unknown left for `design`.
+- **Step report** — the map itself, closed by `## Notes:` — the blast-radius headline (how
+  many files across how many modules, the riskiest surface) and each unknown left for the
+  design conversation in `draft-plan`.
 - **Review gate** —
   - none — the map is not shown for approval on its own; it reaches the user folded into the
-    design conversation
+    design conversation in `draft-plan`
 
-## Example artifact
+## Example findings
 
-`plans/20260731-sprints-report-script/index.md`, the `## Blast radius` section:
+Posted in chat, the `## Blast radius` map:
 
 ```markdown
 ## Blast radius
@@ -78,9 +78,6 @@ suite_reviewed_at: 20260731 19:47
 ## Return Format
 
 ```markdown
-## Changed:
-- [UPDATED] plans/20260731-sprints-report-script/index.md — blast radius
-
 ## Notes:
 - blast radius: 7 files across 3 modules, 1 external surface (the `booping` CLI)
 - for design: vault resolution from `BOOPING_WORKDIR` on a repo-local vault

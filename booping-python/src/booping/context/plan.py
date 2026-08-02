@@ -9,6 +9,11 @@ from pydantic import BaseModel
 
 from booping.context._yaml import parse_frontmatter
 
+# Directory-plan filenames, preference order. Legacy dual-file dirs pair a full
+# `plan.md` with a bare `index.md` run artifact, so `plan.md` wins when both
+# exist; new-style dirs (groom playbook) carry only `index.md`.
+DIR_PLAN_NAMES = ("plan.md", "index.md")
+
 
 class Plan(BaseModel):
     path: Path
@@ -29,14 +34,14 @@ class Plan(BaseModel):
 
     @property
     def slug(self) -> str:
-        if self.path.name == "plan.md":
+        if self.path.name in DIR_PLAN_NAMES:
             return self.path.parent.name
         return self.path.stem
 
     @property
     def rel_link(self) -> str:
-        if self.path.name == "plan.md":
-            return f"plans/{self.path.parent.name}/plan.md"
+        if self.path.name in DIR_PLAN_NAMES:
+            return f"plans/{self.path.parent.name}/{self.path.name}"
         return f"plans/{self.path.name}"
 
     @classmethod
@@ -45,9 +50,16 @@ class Plan(BaseModel):
         if not plans_dir.is_dir():
             return []
 
-        by_slug: dict[str, Path] = {
-            p.parent.name: p for p in plans_dir.glob("*/plan.md")
-        }
+        by_slug: dict[str, Path] = {}
+        for name in DIR_PLAN_NAMES:
+            for p in plans_dir.glob(f"*/{name}"):
+                if p.parent.name in by_slug:
+                    print(
+                        f"warning: skipping {p} — shadowed by {by_slug[p.parent.name]}",
+                        file=sys.stderr,
+                    )
+                    continue
+                by_slug[p.parent.name] = p
         for p in plans_dir.glob("*.md"):
             if p.stem in by_slug:
                 print(
@@ -57,10 +69,16 @@ class Plan(BaseModel):
                 continue
             by_slug[p.stem] = p
 
-        return [
-            _from_fm(path, *parse_frontmatter(path))
-            for _, path in sorted(by_slug.items())
-        ]
+        plans: list[Plan] = []
+        for _, path in sorted(by_slug.items()):
+            try:
+                plans.append(_from_fm(path, *parse_frontmatter(path)))
+            except Exception as exc:
+                print(
+                    f"warning: skipping {path} — not a loadable plan ({exc})",
+                    file=sys.stderr,
+                )
+        return plans
 
 
 def _from_fm(path: Path, fm: dict[str, Any], body: str) -> Plan:

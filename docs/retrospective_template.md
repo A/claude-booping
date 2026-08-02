@@ -1,8 +1,8 @@
-## Retrospective template
+# Retrospective template
 
 Follow the structure below when drafting the retrospective body.
 
-### Frontmatter example
+## Frontmatter example
 
 ```yaml
 plans:
@@ -15,18 +15,18 @@ goal_verdicts:
   plans/20260408-feature-x-integration.md: partial
 ```
 
-### What went well
+## What went well
 
 Concrete wins. What was achieved, what worked as designed. Keep it brief — 3–5 bullet points with specifics, not vague praise (avoid "good communication"; say "API contract locked before implementation" instead).
 
 - ...
 - ...
 
-### What went wrong
+## What went wrong
 
 For each issue, include a subsection with this four-line format:
 
-#### {{ '{{Issue name}}' }}
+#### {{Issue name}}
 
 **What happened**: Factual description of the problem.
 
@@ -34,13 +34,13 @@ For each issue, include a subsection with this four-line format:
 
 **Impact**: What does this cost now (rework, tech debt, user confusion, process delay)?
 
-### Lesson gaps
+## Lesson gaps
 
 Loaded lessons (from `~/Claude/{project}/lessons/` or project `CLAUDE.md` instructions) that should have prevented or caught one or more flagged problems but were not applied. For each:
 
 - `lessons/XXXX_lesson-title.md` — rule was "...", but we did "..." instead, which caused [which issue(s)].
 
-### Action items & takeaways
+## Action items & takeaways
 
 Specific next steps that address the issues above. Two types in one table:
 
@@ -51,7 +51,7 @@ Specific next steps that address the issues above. Two types in one table:
 |---|------|------|-------|--------|
 | 1 | Task / Heuristic | ... | Next sprint / Person / standing | Planned |
 
-### Self-review checklist
+## Self-review checklist
 
 Before committing a retrospective, confirm all items below are true:
 

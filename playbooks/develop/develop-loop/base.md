@@ -13,8 +13,9 @@ For each confirmed milestone group, in order:
    files, DoD and Verify, plus the project conventions and the plan's scope boundary. Briefings
    carry no lesson paths — the worker gets its lesson context from its own extension file.
 3. Delegate the briefing to the worker agent named in [Available Agents](#available-agents) —
-   always delegate, even for a one-line change.
-4. When the worker reports done, for **each milestone** in the group:
+   always delegate, even for a one-line change. 
+4. Do not continue next milestone in the same agent by resurrecting it with ID. Always start a fresh agent with empty context.
+5. When the worker reports done, for **each milestone** in the group:
    - Verify the output against the milestone's DoD and the resulting diff.
    - Run the milestone's plan-authored `Verify` command — the project's own guardrails all wait for
      `verify` at sprint end.

@@ -73,6 +73,55 @@ def test_load_all_mixed_flat_and_directory_plans(tmp_path: Path) -> None:
     ]
 
 
+def test_load_all_index_md_directory_plan(tmp_path: Path) -> None:
+    plans = tmp_path / "plans"
+    _write_plan(plans / "20260104-run" / "index.md", "Run-shaped")
+    (plans / "20260104-run" / "request.md").write_text("brief\n")
+
+    loaded = Plan.load_all(tmp_path)
+
+    assert [p.slug for p in loaded] == ["20260104-run"]
+    assert loaded[0].rel_link == "plans/20260104-run/index.md"
+
+
+def test_load_all_plan_md_wins_over_index_md(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    plans = tmp_path / "plans"
+    _write_plan(plans / "20260105-both" / "plan.md", "Legacy")
+    (plans / "20260105-both" / "index.md").write_text(
+        "---\nstatus: awaiting-approval\n---\n"
+    )
+
+    loaded = Plan.load_all(tmp_path)
+
+    assert len(loaded) == 1
+    assert loaded[0].title == "Legacy"
+    assert loaded[0].rel_link == "plans/20260105-both/plan.md"
+
+    err = capsys.readouterr().err
+    assert "20260105-both/index.md" in err
+    assert "20260105-both/plan.md" in err
+
+
+def test_load_all_skips_malformed_plan(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    plans = tmp_path / "plans"
+    _write_plan(plans / "20260106-good.md", "Good")
+    (plans / "20260107-run-artifact" / "index.md").parent.mkdir(parents=True)
+    (plans / "20260107-run-artifact" / "index.md").write_text(
+        "---\nstatus: framing\n---\n"
+    )
+
+    loaded = Plan.load_all(tmp_path)
+
+    assert [p.title for p in loaded] == ["Good"]
+    err = capsys.readouterr().err
+    assert "20260107-run-artifact/index.md" in err
+    assert "not a loadable plan" in err
+
+
 def test_load_all_directory_plan_wins_collision(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:

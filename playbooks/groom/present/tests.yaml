@@ -1,5 +1,5 @@
 # present is the run's SINGLE review gate: it writes the `## Approval` section of the run's
-# `index.md` — the user's first read of the plan — and the plan reaches `/develop` through this
+# `index.md` — the user's first read of the plan — and the plan reaches `develop` through this
 # gate and no other. Every smoke case therefore pins both the section's own shape and the
 # gate's behaviour: approval is explicit, a change request is handed back untouched, and the
 # step edits neither the plan nor any other section of the index.
@@ -132,7 +132,7 @@
     - type: llm-rubric
       value: "ONE-SCREEN: the summary is decidable end to end without opening the plan, and no subsection drops to the plan's task-level detail."
     - type: llm-rubric
-      value: "SOLE-GATE: `### Next` says approval hands the plan to `/develop` and names where a change request loops back to — milestones, tasks or estimates to the refinement pass, architecture or scope to the design. Fails if it names another review step, an intermediate confirmation, or no loopback at all."
+      value: "SOLE-GATE: `### Next` says approval hands the plan to the `develop` playbook (`/playbook develop {plan path}`) and names where a change request loops back to — milestones, tasks or estimates to the refinement pass, architecture or scope to the design. Fails if it names another review step, an intermediate confirmation, or no loopback at all."
     - type: llm-rubric
       value: "OTHER-SECTIONS-UNTOUCHED: `## Framing`, `## Blast radius`, `## Design`, `## Refinement` and `## References` come through unchanged — present summarises them, it does not rewrite them."
 

@@ -56,6 +56,8 @@ Invoke via the `Agent` tool with `subagent_type="booping:booping-researcher"`. P
 
 - Never write angle-bracket placeholders (`<name>`, `<path>`) into a file or a chat reply. Obsidian
   reads them as HTML tags and stops rendering the block that holds them. Write `{name}`, `{path}`.
+- Never manually break markdown lines. Write each paragraph, bullet, or table row as one line and
+  let the renderer wrap it — hard line breaks turn into mid-sentence breaks after any later edit.
 
 ## Playbook Steps
 
@@ -109,7 +111,7 @@ good" counts, silence never does. That approval is what the `awaiting-plan-revie
 
 ## Plan-validity check
 
-Compare the plan's `commit:` field with the repo's current HEAD, `4eada8ed5433d75478d9aaf9cfc5ba65ae8b71de`.
+Compare the plan's `commit:` field with the repo's current HEAD, `4611dfe80ab77086598fbb9922f0dd30a566932c`.
 
 - **Equal**: proceed.
 - **Different**: run the cheap-summary commands first — do **not** load the full `git diff` into

@@ -48,9 +48,13 @@ def stamp_status(plan: Path, status: str) -> None:
 
 def discover_plans(vault: Path) -> list[tuple[str, Path]]:
     """Mixed-shape discovery, mirroring `Plan.load_all`: `plans/{slug}/plan.md`
-    directory plans shadow same-slug `plans/{slug}.md` file plans."""
+    (or `plans/{slug}/index.md`) directory plans shadow same-slug
+    `plans/{slug}.md` file plans; `plan.md` wins when a directory has both."""
     plans_dir = vault / "plans"
-    by_slug: dict[str, Path] = {p.parent.name: p for p in plans_dir.glob("*/plan.md")}
+    by_slug: dict[str, Path] = {}
+    for name in ("plan.md", "index.md"):
+        for p in plans_dir.glob(f"*/{name}"):
+            by_slug.setdefault(p.parent.name, p)
     for p in plans_dir.glob("*.md"):
         by_slug.setdefault(p.stem, p)
     return sorted(by_slug.items())

@@ -12,86 +12,77 @@ suite_reviewed_at: 20260731 20:34
 ## Contract
 
 - **Delegation** — inline: the runner renders the step and performs it itself, in the main
-  context; the cross-review agent, when configured, is spawned by the runner from this step's
-  instructions.
+  context.
 - **Needs** —
-  - the settled design — the `## Design` section of `index.md`: the chosen architecture and why
-    it won, the surface changes, the alternatives rejected, the trade-off calls the user made,
-    and the risks with their mitigations
-  - the confirmed framing — the restated problem, the task type, the scope boundaries and the
-    user's answers to the scope-challenge questions
-  - the blast radius — the `## Blast radius` section of `index.md`, with the prior art and
-    conventions already in play
+  - the confirmed framing brief — the restated problem, the task type, and the decisions the
+    user settled at intake
+  - the research findings this conversation already carries — the blast-radius map with its
+    prior art and conventions, and the web findings with their sources
   - the plan-template catalogue — each template's name, description and the location to read its
     `# Plan Body` and `# Quality Checklist` from
   - the plan frontmatter shape — every key, its type and its default
-  - the sizing scale — what each story-point value means — and how many consecutive milestones a
-    development run bundles into one agent briefing, which bounds how large a milestone may be
-  - whether the project configures a cross-review agent, and which agent it names
-- **Value** — the design becomes an executable plan in the vault: milestones and tasks each
-  carrying file paths, a testable DoD and a Verify, story points at every level, and a `summary:`
-  line — written against a template chosen for the dominant surface and verified against that
-  template's own checklist, so the plan passes or fails on published rules rather than on taste.
-  The cross-review pass happens here, on the fresh draft, so the user's first read lands on a plan
-  whose critical findings are already folded in.
+  - the sizing scale — what each story-point value means — and the split threshold the sprint
+    total is judged against
+- **Value** — the design is settled with the user and becomes an executable plan, both in this
+  one step: architecture, pattern choices, data / API / config surface changes and open
+  trade-offs are iterated in conversation until aligned, then written as milestones and tasks
+  each carrying file paths, a testable DoD and a Verify, story points at every level, and a
+  `summary:` line — against a template chosen for the dominant surface and verified against
+  that template's own checklist, so the plan passes or fails on published rules rather than on
+  taste.
 - **Output files** —
-  - `[UPDATED] plans/{slug}/plan.md` — the plan file intake created; this step writes its body
-    and completes its frontmatter. Always `[UPDATED]`, never `[CREATED]` — the file exists from
-    wave 1 and is never renamed or re-created.
+  - `[UPDATED] plans/{slug}/index.md` — the plan document intake created; this step writes its
+    body and completes its frontmatter. Always `[UPDATED]`, never `[CREATED]` — the file exists
+    from wave 1 and is never renamed or re-created.
+    - the design is settled with the user first — architecture, surface changes, alternatives
+      and trade-offs, iterated in conversation until aligned. Nothing is written before that
+      alignment, and a design that needs blast radius or external practice the research pass
+      missed sends the run back to `researching` instead of guessing.
     - pick the plan template whose name and description match the dominant surface of the work,
       read it, and write the body against its `# Plan Body` — section for section, in its order.
       When no template fits, a new one is authored in the project's own `plan_templates/` before
       drafting rather than improvising a shape.
     - every milestone carries a one-sentence goal, a `Verify` command or observable outcome, a
       task table with exact file paths and per-task story points, and a checkbox DoD per task;
-      each milestone is executable in a fresh session with only the plan file as context
-    - story points are set per task, summed per milestone and summed into the sprint total. The
-      estimate is the honest one for the work as it stands — enforcing the re-decompose threshold
-      and flagging a split are the sizing pass's job, and this step never inflates or splits a
-      task to dodge them.
+      each milestone is executable in a fresh session with only the plan as context
+    - story points are set per task, summed per milestone and summed into the sprint total. A
+      total past the split threshold is offered as a split at a dependency seam — the first
+      slice shippable on its own, each later one useless without it — keeping only the first
+      slice that fits the threshold in this plan and parking the rest as sibling stubs to be
+      groomed in their own runs; the user may decline and keep one plan. The estimate is the
+      honest one for the work as it stands — a task is never inflated or split to dodge the
+      threshold.
     - frontmatter keys this step owns: `sp` (the sprint total) and `summary` (one line of plain
       plan intent, ≤ ~120 chars, phrased as the visible outcome, not the engineering output).
       `title` and `type` are intake's and are only corrected if the design changed them; the H1
-      matches `title`. `status` is never written here — the machine's edge hooks own it, as do the
-      remaining date and outcome keys.
+      matches `title`. `status` is never written here — the run machine owns it, and the
+      lifecycle mirror `plan_status:` belongs to the edge scripts, as do the remaining date and
+      outcome keys.
     - verify the finished draft against the template's `# Quality Checklist` before returning; an
       unsatisfied item is fixed, not reported as satisfied
-    - cross-review, when the project's config carries a `cross_review` key: the finished draft is
-      handed to the agent it names, exactly once per invocation, after the Quality-Checklist pass
-      and before returning. This replaces the external-validator path booping's cross-validation
-      doc describes — a playbook run never calls it. The reviewer's return contract is fixed here
-      and is never renegotiated mid-run: findings only, one per line, each
-      `- CRITICAL|RISK|NOTE: {finding} — {plan section}`, or the literal `no findings`, and
-      nothing else — no preamble, no verdict line, no summary. With the key absent nothing is
-      spawned, the plan is returned as drafted, and the drafting gate is vacuously satisfied.
-    - every `CRITICAL` finding is folded into the plan, or recorded as a deferral; `RISK` is
-      folded in when it does not reopen a call the user already settled, otherwise recorded;
-      `NOTE` is folded in at the step's discretion and never blocks. A finding that reopens a
-      settled design call is acted on nowhere in the plan — it travels as a note line so the
-      runner can route it back to design.
-    - deferred findings are recorded in a `## Risk register` section (added after
-      `## Out of scope` when the chosen template defines none), one line per finding: the finding,
-      its severity, and the reason it was deferred
-  - no other file — the cross-review outcome travels in the step report, not in a file of its
-    own
+  - no other file — the runner never edits files outside `plans/`, and the cross-review of the
+    draft is the next step's job, not this one's
 - **Step report** — `## Changed:` with the single plan entry annotated by the template chosen
   and the sprint total, and `## Notes:` carrying the milestone/SP breakdown, the
-  Quality-Checklist verdict, and the cross-review outcome — findings by severity, what was folded
-  in, what was deferred, or the line that no cross-review agent is configured.
+  Quality-Checklist verdict, and the split offer with the user's answer when the total passed
+  the threshold.
 - **Review gate** —
-  - none — the user never reads the draft at this point; the sizing pass refines it first
-  - the edge out of drafting is gated on the cross-review being run and every `CRITICAL` folded in
-    or recorded as a deferral, which this step's return evidences
+  - the in-conversation design alignment is the confirmation — no separate approval of the
+    written draft is asked for; the user's first full read lands at `present`
+  - the edge out of `drafting` moves to `cross-reviewing` once the body is written against the
+    template's Plan Body, the Quality Checklist passed, and every call that is the user's is
+    answered; a design that needs ground the research pass missed loops back to `researching`
 
 ## Example artifact
 
-`plans/20260731-rate-limit-public-api/plan.md`, at the end of draft-plan:
+`plans/20260731-10-05_rate-limit-public-api/index.md`, at the end of draft-plan:
 
 ```markdown
 ---
+status: drafting
+plan_status: in-spec
 title: Rate limit the public API
 type: feature
-status: in-spec
 sp: 12
 split_from: null
 created: 2026-07-31
@@ -189,12 +180,6 @@ and the request is admitted.
 - Per-endpoint budgets and plan-tier quotas.
 - Any admin surface for inspecting or resetting a caller's bucket.
 
-## Risk register
-
-- **RISK, deferred** — the quota is not enforced for internal service-to-service calls, which
-  bypass `AuthMiddleware`. Deferred: internal callers are trusted today and gating them changes
-  the auth surface, which is out of this plan's scope.
-
 ## CLAUDE.md impact
 
 | Section | Change | Owning task |
@@ -207,23 +192,11 @@ and the request is admitted.
 ```markdown
 ## Changed:
 
-- [UPDATED] plans/20260731-rate-limit-public-api/plan.md — template `backend`, 12 SP
+- [UPDATED] plans/20260731-10-05_rate-limit-public-api/index.md — template `backend`, 12 SP
 
 ## Notes:
 
 - milestones: M1 bucket primitive 5 SP, M2 middleware wiring 7 SP; sprint total 12 SP
 - quality checklist (`backend`): all items pass
-- cross-review (`codex`): 3 findings — 1 CRITICAL folded in (fail-open path was untested, now
-  task 2.1 DoD), 1 RISK deferred to the risk register (internal callers bypass the limiter),
-  1 NOTE folded in
-```
-
-With no cross-review agent configured, the last note is one line instead:
-
-```markdown
-## Notes:
-
-- milestones: M1 bucket primitive 5 SP, M2 middleware wiring 7 SP; sprint total 12 SP
-- quality checklist (`backend`): all items pass
-- cross-review: no `cross_review` agent configured — not run
+- sprint total under the split threshold — no split offered
 ```

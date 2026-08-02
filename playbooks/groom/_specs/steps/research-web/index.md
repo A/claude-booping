@@ -13,35 +13,35 @@ suite_reviewed_at: 20260731 19:47
 
 - **Delegation** — assisted: the runner renders and owns the step and decides what is
   researched; the configured researcher agent performs the web reads and returns the findings
-  with their sources; the runner writes the artifact. The runner records the agent's id in
-  `index.md` so a loopback resumes the same agent instead of spawning a fresh one.
+  with their sources; the runner posts them in chat.
 - **Needs** —
-  - the confirmed framing — the restated problem, the task type, and the scope boundaries the
-    user confirmed
-  - intake's web-research decision — `requested` or `not requested`
-- **Value** — when the user asked for it, settles what current external practice says before the
-  architecture is called, so design argues from dated sources rather than model memory. The
-  decision is the user's, recorded at intake and executed here mechanically — the step never
-  judges novelty itself. With no conditional edges in the framework the step always runs; on the
-  not-requested path its whole work is one skip line, so `design` never has to work out whether
-  research happened.
+  - the confirmed framing brief — the restated problem, the task type, and the decisions the
+    user settled
+  - the blast-radius map — in particular the open external questions and the external
+    references (packages, images, APIs, flags, config options) the work names
+- **Value** — settles the external ground the design rests on before the architecture is
+  called. Where the work is complex, novel, or non-obvious, current best practice, competing
+  approaches and known pitfalls are researched, so `draft-plan` argues from dated sources
+  rather than model memory. Every external reference the plan will name — package version,
+  image tag, API endpoint, CLI flag, config option — is checked against current docs, never
+  assumed. Where the work is routine and no reference is in doubt, the step's whole output is
+  one line saying so, so `draft-plan` never has to work out whether research happened; facts
+  answerable from local ground truth are not fetched.
 - **Output files** —
-  - on the requested path: `[CREATED] plans/{slug}/research.md` — the candidate approaches with
-    their trade-offs and fit, the pitfalls that constrain the design, and a source table
-    carrying a URL and a retrieval date per claim. Research is sized to the open questions the
-    framing carries — one primary source per question, stopping once the design call is
-    constrained; facts answerable from local ground truth are not fetched.
-  - on the not-requested path: `[UPDATED] plans/{slug}/index.md` — a one-line
-    `Web research: not requested` note in the `## Framing` section; no `research.md` is created.
-- **Step report** — `## Changed:` list, plus `## Notes:` carrying the recommendation and the
-  pitfall count, or the skip line.
+  - none — the findings are posted in chat, not written to the plan directory: the candidate
+    approaches with their trade-offs and fit, the pitfalls that constrain the design, the
+    verified references, and a source table carrying a URL and a retrieval date per claim.
+    Research is sized to the open questions the framing and the blast radius carry — one
+    primary source per question, stopping once the design call is constrained.
+- **Step report** — the findings themselves, closed by `## Notes:` carrying the
+  recommendation, the pitfall count and the reference verdicts — or the one skip line.
 - **Review gate** —
   - none — the step never pauses the run; its findings reach the user through the design
-    conversation
+    conversation in `draft-plan`
 
-## Example artifact
+## Example findings
 
-`plans/20260731-rate-limit-public-api/research.md`, requested path:
+Posted in chat, when the work warranted research:
 
 ```markdown
 # research — rate-limit-public-api
@@ -82,29 +82,21 @@ Counts requests per key per window directly in the primary datastore.
 
 ## Return Format
 
-Requested path:
+When the work warranted research:
 
 ```markdown
-## Changed:
-
-- [CREATED] plans/20260731-rate-limit-public-api/research.md — 2 approaches, 2 sources
-
 ## Notes:
 
 - recommended: token bucket in gateway middleware — lowest retire cost, keys on what the
   gateway already resolves
 - 3 pitfall(s) the design must answer, one of them a fail-open vs fail-closed call
+- references: `redis-py` floor verified at 5.0 against current docs
 ```
 
-Not-requested path:
+When nothing was uncertain and no reference was in doubt:
 
 ```markdown
-## Changed:
-
-- [UPDATED] plans/20260731-fix-stale-session-cookie/index.md — web research: not requested
-
 ## Notes:
 
-- web research not requested at intake; open external questions, if any, are in the blast
-  radius for the user to escalate
+- routine work, no external references in doubt — no web research performed
 ```

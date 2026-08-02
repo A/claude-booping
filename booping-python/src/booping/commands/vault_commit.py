@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 
 from booping import logger
+from booping.context.plan import DIR_PLAN_NAMES
 from booping.context.project import Project
 
 
@@ -37,7 +38,7 @@ def resolve_vault(plan_path: Path) -> Path:
     project = Project.load_cwd_configured()
     if project is not None:
         return project.directory
-    # Heuristic: plans live at <vault>/plans/<name>.md or <vault>/plans/<slug>/plan.md
+    # Heuristic: plans live at <vault>/plans/<name>.md or <vault>/plans/<slug>/{index,plan}.md
     parent = plan_path.resolve().parent
     if parent.name == "plans":
         return parent.parent
@@ -48,7 +49,7 @@ def resolve_vault(plan_path: Path) -> Path:
 
 
 def plan_slug(plan_path: Path) -> str:
-    if plan_path.name == "plan.md":
+    if plan_path.name in DIR_PLAN_NAMES:
         return plan_path.resolve().parent.name
     return plan_path.stem
 
