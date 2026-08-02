@@ -1,0 +1,217 @@
+Turn retrospective findings into durable behavior changes routed to exactly one target each.
+
+## Guidance
+
+- Learn handles plans in `awaiting-learning` status.
+- The retrospective lives at `plans/{primary-slug}/retro.md`; its `plans:` frontmatter lists the working set the run covers, and the plan whose directory holds it is the **primary**.
+- The run workdir is the primary plan's directory `plans/{primary-slug}/` — `index.md` there is the run artifact.
+- Learn writes only to this project's vault (`lessons/`, `_booping/`) and the attached repo's `CLAUDE.md` — **never** the global `~/.claude/CLAUDE.md` or any user-level scope.
+
+## Single-location rule
+
+Every accepted learning lands in **exactly one** target. If a candidate would otherwise span two targets, decompose it into two distinct rows in the review table — one row per target. The four targets, when-to-use tests, and example filenames live in the routing matrix below; do not restate it elsewhere.
+
+## Routing Matrix
+
+This matrix is the routing contract for /learn candidates. Every accepted learning lands in exactly one target — no duplicates across targets, no multi-target rows.
+
+| Target | When to use | Lands at | Examples |
+|--------|-------------|----------|----------|
+| **Lesson** | Cross-framework principle reaching every skill — design heuristic, test discipline, IA rule. Concrete, short, with one example. | `lessons/{N}_<kebab>.md` | "Challenge code design by SOLID principles", "Use AAA in test cases", "Design skill template partials by information hierarchy" |
+| **Skill extra instructions** | Tweak or extend a single skill's method (groom / develop / retro / learn / chat / install / help). | `_booping/skill_<skill>.md` | `skill_groom.md`, `skill_develop.md`, `skill_retro.md`, `skill_learn.md`, `skill_chat.md`, `skill_install.md`, `skill_help.md` |
+| **Agent extra instructions** | Hook a single agent's behavior. Compact list. | `_booping/agent_<full-agent-name>.md` | `agent_booping-researcher.md`, `agent_booping-developer.md` |
+| **Repository CLAUDE.md** | Project-fact aiding fresh-agent project understanding — layout path, CLI command, code-side convention. One-bullet additions; no paragraph rewrites. | `<repo>/CLAUDE.md` (the attached repo's file — **never** the global `~/.claude/CLAUDE.md` or any user-level scope) | (single canonical target — no filename variants) |
+
+If a candidate would otherwise span two targets, decompose into two distinct rows; never duplicate the same rule across targets.
+
+The skill infers the exact filename per candidate; the example lists above are validation aids, not full enumerations.
+
+
+## Plans awaiting learning
+
+_No plans at `awaiting-learning`._
+
+## High-level workflow
+
+1. Intake — resolve the retrospective and its working set; validate `awaiting-learning` status.
+2. Extract candidates — inline, decomposed into atomic rules, routed via the matrix.
+3. Update-vs-create sweep — filtered read of existing lessons and extensions.
+4. Present unified review table — user accepts / rejects / adds rows.
+5. Write accepted items — one pass per target type, no per-edit prompts.
+6. Transition and commit.
+
+
+
+
+
+## Shared instructions
+
+- Never write angle-bracket placeholders (`<name>`, `<path>`) into a file or a chat reply. Obsidian
+  reads them as HTML tags and stops rendering the block that holds them. Write `{name}`, `{path}`.
+- Never manually break markdown lines. Write each paragraph, bullet, or table row as one line and
+  let the renderer wrap it — hard line breaks turn into mid-sentence breaks after any later edit.
+
+## Playbook Steps
+
+Execute the steps in the most effective order considering their dependencies.
+
+| Step | Dependencies | Summary | Review gate |
+| --- | --- | --- | --- |
+| `intake` | — | Resolve the run's retrospective — from `$ARGUMENTS` as a retro path, or by picking a plan from the awaiting-learning list and following its `retro:` frontmatter — settle the working set from the retro's `plans:` list with the primary plan's directory as the workdir, validate every plan sits at learn's entry status, then read the retrospective in full and each plan for context. | — |
+| `extract-candidates` | `intake` | Decompose every retrospective insight into atomic candidates — one imperative rule per candidate, single concern, no bare internal IDs, one sentence per review-table cell — and route each to exactly one target from the preamble's routing matrix, holding the set in context for the sweep. | — |
+| `dedup-sweep` | `extract-candidates` | Sweep every candidate against existing coverage — the vault's lessons, the `_booping/` extensions, and the repo's `CLAUDE.md` — and record a per-candidate verdict: new, update-existing at the target already holding the rule, or a conflict flagged visibly for the review table. | — |
+| `review-table` | `dedup-sweep` | Present the unified review table in the format the review-table doc owns — every candidate with its target and sweep verdict, conflicts flagged — and collect the user's accept / reject / add response in a single `AskUserQuestion` call, never per row; the recorded response is the run's consent to write. | — |
+| `write` | `review-table` | Write every accepted row in one pass per target type — new lesson files at the next free number, in-place updates to the file the sweep matched, `_booping/` extension edits, one-line bullets into the repo's `CLAUDE.md` — with table acceptance as the sole consent and never a write outside the vault and the attached repo. | — |
+| `transition` | `write` | Fire the exit transition from the workdir — `booping playbook-transition learn done` — whose hook moves every sibling plan to `done`, re-renders sprints.md and commits the vault including the written lessons and extensions; commit any repo `CLAUDE.md` addition separately in the repo working tree, then close on a report of items written per target. | — |
+
+## State
+
+Run state is persisted in artifacts under the run workdir. Only `booping playbook-transition` writes it — never hand-edit an artifact's `status`.
+
+Read the whole run's frontier before starting or resuming:
+
+```
+booping playbook-state learn --workdir <run workdir>
+```
+
+### State: run
+
+- Referenced by: outer graph
+- Artifact: `index.md` (relative to the run workdir)
+- Initial status: `awaiting-learning`
+- Advance: `booping playbook-transition learn <to> --workdir <run workdir>`
+
+| Status | To | When | Gates |
+| --- | --- | --- | --- |
+| `awaiting-learning` | `done` | every accepted row from the confirmed review table is written to its single target | user confirmed the review table — the accept / reject / add response is recorded; every accepted lesson written to its target file |
+| `done` | *(terminal)* | — | — |
+
+## Step: Intake
+The current set of plans in `awaiting-learning` is listed in the [Plans awaiting learning](#plans-awaiting-learning) table of the preamble.
+
+Resolve `$ARGUMENTS` to a retrospective file path.
+
+**No `$ARGUMENTS`**: branch on the plans-list size.
+
+- **Zero plans**: STOP with `No plans in awaiting-learning. Run the retro playbook first to write a retrospective.`
+- **Exactly one plan**: auto-select it (do not call `AskUserQuestion` — it requires ≥2 options).
+- **Multiple plans**: present the list via `AskUserQuestion` (single-select; one option per plan). Plans sharing one `retro:` value are one working set — offer the set as a single option, not one option per sibling.
+
+Read the selected plan's `retro:` frontmatter to resolve the retrospective file.
+
+**`$ARGUMENTS` provided**: treat it as the retrospective file path. Read it and follow its `plans:` frontmatter to the associated plans.
+
+## Working set and workdir
+
+The retrospective's `plans:` frontmatter is the **working set** — every plan this run absorbs lessons for. The plan whose directory holds the retrospective is the **primary**, and its directory `plans/{primary-slug}/` is the run workdir. A retrospective without a `plans:` list covers only the plan it was resolved from.
+
+Validate every working-set plan's `status:` is `awaiting-learning`. On mismatch, STOP with this verbatim error:
+
+> `learn playbook requires a plan in status 'awaiting-learning'; got '{current-status}' for {plan-path}. Use the list above to pick a candidate.`
+
+Read the retrospective in full — it is the sole source the run extracts from. Read each working-set plan for context only: scope, decisions on record, what the retro's findings refer to.
+
+## The report — posted in chat
+
+```markdown
+## Learn intake
+
+Retrospective: {path}
+Working set: {a table with columns: plan path, status, goal verdict from the retro's `goal_verdicts:` when present}
+```
+
+## Step: Extract Candidates
+Extract candidates for self-learning from the retrospective read at `intake`. **Decompose** each insight into atomic candidates — one rule per candidate — BEFORE target assignment.
+
+Each candidate must satisfy:
+
+- **Imperative form** — `do X` or `don't Y`. Not "X happened" or "X is good".
+- **Single concern** — if you can't state the rule without "and", "plus", or `;`, split it.
+- **No bare internal IDs** — when referring to an existing lesson, pair the ID with its title slug (e.g. `lesson 0004 (information-architecture-pattern)`, not just `lesson 0004`). Same for retro-internal codes; restate the underlying mechanic.
+- **One sentence each in the report** — the review-table `Rule` and `Example` cells are one sentence each. The persisted lesson file may elaborate the rule into a compact paragraph after approval.
+
+For each candidate, pick a target from the routing matrix in the preamble.
+
+Nothing is presented to the user yet — the dedup sweep runs first, and the review table is the single surface where candidates appear.
+
+## Step: Dedup Sweep
+Before drafting the review table, check whether each candidate duplicates or conflicts with existing coverage:
+
+Read every lesson under the vault's `lessons/`, every extension file under the vault's `_booping/`, and the attached repo's `CLAUDE.md`. Skip silently when a directory is empty or a file is absent. Together these are the lookup set for the dup-check sweep.
+
+Record a sweep verdict per candidate as one of:
+
+- `new` — no prior coverage at any target.
+- `update existing at target X` — duplicate or refinement of a rule already written at `X`; the candidate becomes an update to `X`, not a fresh write at a different target.
+- `conflict with existing at target X` — surface to the user in the review table as a visible flag.
+
+## Step: Review Table
+Render the review table using the format defined in [review table format](${CLAUDE_PLUGIN_ROOT}/docs/learn_review_table.md). Use `AskUserQuestion` once to collect the user's accept / reject / add response.
+
+Do not prompt per row. Do not inline the column-by-column documentation here — the template owns the format, the accept/reject syntax, and the user-added-row split rule.
+
+The confirmed response is what the exit edge's first gate names — record it. Nothing is written in this step.
+
+## Step: Write
+After the table is accepted, write every accepted row in a single pass per target type. No per-edit `AskUserQuestion` calls; table acceptance is the consent.
+
+Write paths use these templates (resolve each placeholder before writing):
+
+- `lessons/{N}_{kebab}.md` — one rule per file. `{N}` is the next integer, computed from `ls lessons/` highest existing prefix + 1; body follows the lesson body shape inlined below. The `retro:` frontmatter points at the run's retrospective, `plans/{primary-slug}/retro.md`.
+- `_booping/skill_{name}.md` — per-skill extension in this project's vault.
+- `_booping/agent_{name}.md` — per-agent extension in this project's vault.
+- Repo `CLAUDE.md` — the attached repo's `CLAUDE.md`, one-line bullet additions; no paragraph rewrites. **Never** write to the global `~/.claude/CLAUDE.md` or any user-level scope — learn only touches this project's vault and the attached repo.
+
+An `update existing at target X` row edits the file already holding the rule in place — no fresh file at another target.
+
+
+---
+id: {{N}}                                      # monotonically-increasing integer; matches the filename prefix
+title: {{One-sentence rule as a prescriptive statement}}
+retro: retrospectives/YYYYMMDD-{{kebab-title}}.md   # the retro that surfaced this lesson
+created: YYYY-MM-DD                            # date this lesson was extracted
+---
+
+{{The principle, imperative form. One compact paragraph; a short bullet list is fine when the rule has named sub-checks.}}
+
+**Example**: {{One concrete case that illustrates the rule — what went wrong or right, in one or two lines. No motivation paragraphs, no multi-section "how to apply", no forbidden/edge-case lists. The retro carries the backstory; link it via `retro:` frontmatter.}}
+
+## Step: Transition
+# Transition and commit
+
+Everything accepted is on disk; nothing here re-drafts or re-opens the table.
+
+## 1. Transition
+
+Fired from the workdir, once every accepted item is written:
+
+```bash
+booping playbook-transition learn done
+```
+
+The command writes the primary plan's `status:`, then runs `close-working-set`, which moves every sibling in the retrospective's `plans:` list to `done`, re-renders the vault's `sprints.md`, and commits the plans together with the `lessons/` and `_booping/` files this run wrote. Nothing here hand-edits plan frontmatter or runs `booping vault-commit`.
+
+```
+awaiting-learning → done
+script close-working-set: ok
+```
+
+That report is authoritative — do not re-read the plans to verify the moves.
+
+## 2. Repo `CLAUDE.md` commit
+
+If `write` also wrote to the attached repo's `CLAUDE.md`, commit that separately in the repo working tree (the transition only touches the vault, never the attached repo):
+
+```bash
+cd {repo-path}
+git add CLAUDE.md
+git commit -m "docs(claude-md): {short summary}"
+```
+
+## 3. Closing report
+
+Post in chat: the plans closed with their new statuses, then a table of the items written — each with its target path and whether it was a new write or an in-place update — and the rejected-row count. No `/learn` re-offer; the working set is done.
+
+## Replay
+
+A replay that finds the accepted items already written re-fires nothing it does not need: a plan still at `awaiting-learning` takes the transition alone; a plan already at `done` is only re-reported, with the transition line reading `already at done — no transition taken`.
