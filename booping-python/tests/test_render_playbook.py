@@ -15,6 +15,7 @@ from booping.commands.render_playbook import (
     parse_set_overrides,
 )
 from booping.context import Context
+from booping.context.lesson import Lesson
 from booping.context.playbook import Playbook
 from tests.helpers import get_fixture_path
 
@@ -912,18 +913,19 @@ def test_manifest_inline_steps_key_implies_inline(tmp_path: Path) -> None:
     assert "for content." not in out
 
 
-def test_inline_appends_step_scoped_lessons(tmp_path: Path) -> None:
+def test_inline_appends_step_targeted_lessons(tmp_path: Path) -> None:
     pb = _build(tmp_path, "  a: []\n", {"a": "null"}, name="il")
-    lessons_dir = tmp_path / "_playbooks" / "il" / "_lessons"
+    lessons_dir = tmp_path / "_lessons"
     lessons_dir.mkdir()
-    (lessons_dir / "0001_watch.md").write_text("---\nstep: a\n---\nWatch the seam.\n")
-    pbs = Playbook.load_all(
-        vault=tmp_path, home_dir=tmp_path / "nohome", plugin_root=tmp_path / "nocore"
+    (lessons_dir / "0001_watch.md").write_text(
+        "---\ntargets: [il/a]\n---\nWatch the seam.\n"
     )
-    pb = next(p for p in pbs if p.name == "il")
-    out = compose(pb, inline_steps=True)
+    ctx = Context(targeted_lessons=Lesson.load_dir(lessons_dir, scope="project"))
+    out = compose(pb, context=ctx, inline_steps=True)
     assert "Watch the seam." in out
-    assert "Watch the seam." not in compose(pb, inline_steps=True, include_lessons=False)
+    assert "Watch the seam." not in compose(
+        pb, context=ctx, inline_steps=True, include_lessons=False
+    )
 
 
 def test_jinja_without_context_stops() -> None:
@@ -1212,13 +1214,14 @@ def test_cli_renders_to_stdout(tmp_path: Path) -> None:
 def _build_lessons(
     tmp_path: Path,
     *,
-    root_lessons: dict[str, str] | None = None,
-    pb_lessons: dict[str, str] | None = None,
+    lessons: dict[str, str] | None = None,
     jinja: bool = False,
     name: str = "les",
-) -> Playbook:
-    """A one-step playbook in a tmp global root, carrying the given `_lessons/` files
-    (mapping filename → full file text) at root and playbook level."""
+    base: Context | None = None,
+) -> tuple[Playbook, Context]:
+    """A one-step playbook in a tmp global root, plus a context whose
+    `targeted_lessons` come from a tmp project `_lessons/` carrying the given files
+    (mapping filename → full file text)."""
     root = tmp_path / "home" / "_playbooks"
     pb_dir = root / name
     (pb_dir / "s1").mkdir(parents=True)
@@ -1227,80 +1230,101 @@ def _build_lessons(
         f"---\nname: {name}\ntitle: Les\n{fm_jinja}graph:\n  s1: []\n---\nPreamble.\n"
     )
     (pb_dir / "s1" / "prompt.md").write_text("---\nsummary: s1\n---\nStep body.\n")
-    for level, files in (("", root_lessons), (name, pb_lessons)):
-        if not files:
-            continue
-        lessons_dir = (root / level / "_lessons") if level else (root / "_lessons")
-        lessons_dir.mkdir(parents=True, exist_ok=True)
-        for filename, text in files.items():
-            (lessons_dir / filename).write_text(text)
+    lessons_dir = tmp_path / "vault" / "_lessons"
+    lessons_dir.mkdir(parents=True, exist_ok=True)
+    for filename, text in (lessons or {}).items():
+        (lessons_dir / filename).write_text(text)
     pbs = Playbook.load_all(
         vault=None, home_dir=tmp_path / "home", plugin_root=tmp_path / "nocore"
     )
-    return next(p for p in pbs if p.name == name)
+    ctx = (base if base is not None else Context()).model_copy(
+        update={
+            "targeted_lessons": Lesson.load_dir(lessons_dir, scope="project"),
+            "lessons": [],
+        }
+    )
+    return next(p for p in pbs if p.name == name), ctx
 
 
-_LESSON_A = "---\ntitle: Alpha rule\n---\nAlpha body.\n"
-_LESSON_B = "---\ntitle: Beta rule\n---\nBeta body.\n"
-_LESSON_STEP = "---\ntitle: Step rule\nstep: s1\n---\nStep-scoped body.\n"
+_LESSON_A = "---\ntitle: Alpha rule\ntargets: [les]\n---\nAlpha body.\n"
+_LESSON_B = "---\ntitle: Beta rule\ntargets: [les]\n---\nBeta body.\n"
+_LESSON_STEP = "---\ntitle: Step rule\ntargets: [les/s1]\n---\nStep-scoped body.\n"
+_LESSON_OTHER = "---\ntitle: Other rule\ntargets: [other, other/s1]\n---\nOther body.\n"
 
 
 def test_lessons_section_locked_format(tmp_path: Path) -> None:
-    pb = _build_lessons(
-        tmp_path,
-        root_lessons={"0001_alpha.md": _LESSON_A},
-        pb_lessons={"0002_beta.md": _LESSON_B},
+    pb, ctx = _build_lessons(
+        tmp_path, lessons={"0001_alpha.md": _LESSON_A, "0002_beta.md": _LESSON_B}
     )
-    assert _section(compose(pb), "## Lessons") == (
+    assert _section(compose(pb, context=ctx), "## Lessons") == (
         "## Lessons\n"
         "\n"
         "The following 2 lesson(s) apply to this playbook. Never silently violate one;"
         " conflict → stop and flag.\n"
         "\n"
         "### 0001_alpha — Alpha rule\n"
-        "*(scope: global)*\n"
+        "*(scope: project)*\n"
         "\n"
         "Alpha body.\n"
         "\n"
         "### 0002_beta — Beta rule\n"
-        "*(scope: playbook)*\n"
+        "*(scope: project)*\n"
         "\n"
         "Beta body.\n"
     )
 
 
-def test_step_targeted_lessons_absent_from_composed(tmp_path: Path) -> None:
-    pb = _build_lessons(tmp_path, pb_lessons={"0002_step.md": _LESSON_STEP})
-    out = compose(pb)
+def test_playbook_target_absent_from_step_surface(tmp_path: Path) -> None:
+    pb, ctx = _build_lessons(tmp_path, lessons={"0001_alpha.md": _LESSON_A})
+    assert "## Lessons" in compose(pb, context=ctx)
+    assert compose_step(pb, "s1", ctx) == "Step body.\n"
+
+
+def test_step_target_absent_from_composed_section(tmp_path: Path) -> None:
+    pb, ctx = _build_lessons(tmp_path, lessons={"0002_step.md": _LESSON_STEP})
+    out = compose(pb, context=ctx)
     assert "## Lessons" not in out
     assert "Step-scoped body." not in out
 
 
+def test_other_playbook_target_renders_nowhere(tmp_path: Path) -> None:
+    pb, ctx = _build_lessons(tmp_path, lessons={"0001_other.md": _LESSON_OTHER})
+    out = compose(pb, context=ctx)
+    assert "Other body." not in out
+    assert "## Lessons" not in out
+    assert "Other body." not in compose_step(pb, "s1", ctx)
+    assert "**Note" not in out
+
+
 def test_no_lessons_no_section(tmp_path: Path) -> None:
-    assert "## Lessons" not in compose(_build_lessons(tmp_path))
+    pb, ctx = _build_lessons(tmp_path)
+    assert "## Lessons" not in compose(pb, context=ctx)
 
 
 def test_lessons_section_between_preamble_and_graph(tmp_path: Path) -> None:
-    pb = _build_lessons(tmp_path, pb_lessons={"0001_alpha.md": _LESSON_A})
-    out = compose(pb)
+    pb, ctx = _build_lessons(tmp_path, lessons={"0001_alpha.md": _LESSON_A})
+    out = compose(pb, context=ctx)
     order = [out.index("Preamble."), out.index("## Lessons"), out.index("## Playbook Steps")]
     assert order == sorted(order)
 
 
 def test_lesson_body_is_not_jinja_rendered(tmp_path: Path) -> None:
-    pb = _build_lessons(
+    pb, ctx = _build_lessons(
         tmp_path,
-        pb_lessons={"0001_alpha.md": "---\ntitle: Raw\n---\nToken {{ leftover }} kept.\n"},
+        lessons={
+            "0001_alpha.md": "---\ntitle: Raw\ntargets: [les]\n---\nToken {{ leftover }} kept.\n"
+        },
         jinja=True,
+        base=_ctx(),
     )
-    assert "Token {{ leftover }} kept." in compose(pb, context=_ctx())
+    assert "Token {{ leftover }} kept." in compose(pb, context=ctx)
 
 
 def test_step_lessons_locked_format(tmp_path: Path) -> None:
-    pb = _build_lessons(
-        tmp_path, pb_lessons={"0001_alpha.md": _LESSON_A, "0002_step.md": _LESSON_STEP}
+    pb, ctx = _build_lessons(
+        tmp_path, lessons={"0001_alpha.md": _LESSON_A, "0002_step.md": _LESSON_STEP}
     )
-    assert compose_step(pb, "s1") == (
+    assert compose_step(pb, "s1", ctx) == (
         "Step body.\n"
         "\n"
         "## Lessons\n"
@@ -1314,35 +1338,40 @@ def test_step_lessons_locked_format(tmp_path: Path) -> None:
 
 
 def test_step_lessons_on_jinja_playbook(tmp_path: Path) -> None:
-    pb = _build_lessons(
+    pb, ctx = _build_lessons(
         tmp_path,
-        pb_lessons={"0002_step.md": "---\ntitle: Step rule\nstep: s1\n---\n{{ raw }} kept.\n"},
+        lessons={
+            "0002_step.md": "---\ntitle: Step rule\ntargets: [les/s1]\n---\n{{ raw }} kept.\n"
+        },
         jinja=True,
+        base=_ctx(),
     )
-    out = compose_step(pb, "s1", _ctx())
+    out = compose_step(pb, "s1", ctx)
     assert out.startswith("Step body.\n\n## Lessons\n")
     assert "{{ raw }} kept." in out
 
 
-def test_step_without_targeted_lessons_unchanged(tmp_path: Path) -> None:
-    pb = _build_lessons(tmp_path, pb_lessons={"0001_alpha.md": _LESSON_A})
-    assert compose_step(pb, "s1") == "Step body.\n"
+def test_step_lessons_inline_surface(tmp_path: Path) -> None:
+    pb, ctx = _build_lessons(tmp_path, lessons={"0002_step.md": _LESSON_STEP})
+    out = compose(pb, context=ctx, inline_steps=True)
+    assert "Step-scoped body." in out
+    assert out.index("Step body.") < out.index("Step-scoped body.")
 
 
 def test_no_lessons_flag_suppresses_both_surfaces(tmp_path: Path) -> None:
-    pb = _build_lessons(
-        tmp_path, pb_lessons={"0001_alpha.md": _LESSON_A, "0002_step.md": _LESSON_STEP}
+    pb, ctx = _build_lessons(
+        tmp_path, lessons={"0001_alpha.md": _LESSON_A, "0002_step.md": _LESSON_STEP}
     )
-    assert "## Lessons" not in compose(pb, include_lessons=False)
-    assert compose_step(pb, "s1", include_lessons=False) == "Step body.\n"
+    assert "## Lessons" not in compose(pb, context=ctx, include_lessons=False)
+    assert compose_step(pb, "s1", ctx, include_lessons=False) == "Step body.\n"
 
 
-def test_orphan_lesson_note_non_blocking(tmp_path: Path) -> None:
-    pb = _build_lessons(
+def test_unknown_step_target_note_non_blocking(tmp_path: Path) -> None:
+    pb, ctx = _build_lessons(
         tmp_path,
-        pb_lessons={"0003_ghost.md": "---\ntitle: Ghost\nstep: nope\n---\nGhost body.\n"},
+        lessons={"0003_ghost.md": "---\ntitle: Ghost\ntargets: [les/nope]\n---\nGhost body.\n"},
     )
-    out = compose(pb)
+    out = compose(pb, context=ctx)
     assert (
         "**Note — tell the user:** lesson '0003_ghost.md' targets unknown step 'nope'"
         " in playbook 'les'; it is ignored." in out
@@ -1352,8 +1381,62 @@ def test_orphan_lesson_note_non_blocking(tmp_path: Path) -> None:
     assert "## Lessons" not in out
 
 
+def test_untargeted_lesson_note(tmp_path: Path) -> None:
+    pb, ctx = _build_lessons(
+        tmp_path,
+        lessons={
+            "0004_bare.md": "---\ntitle: Bare\n---\nBare body.\n",
+            "0005_bad.md": "---\ntitle: Bad\ntargets: ['les/*']\n---\nBad body.\n",
+        },
+    )
+    out = compose(pb, context=ctx)
+    assert (
+        "**Note — tell the user:** lesson 0004_bare.md has no valid targets:"
+        " — not injected." in out
+    )
+    assert (
+        "**Note — tell the user:** lesson 0005_bad.md has no valid targets:"
+        " — not injected." in out
+    )
+    assert "Bare body." not in out
+    assert "Bad body." not in out
+    assert "Bad body." not in compose_step(pb, "s1", ctx)
+
+
+def test_legacy_lesson_dirs_note(tmp_path: Path) -> None:
+    pb, ctx = _build_lessons(tmp_path)
+    legacy_root = tmp_path / "home" / "_playbooks" / "_lessons"
+    legacy_root.mkdir()
+    (legacy_root / "0001_old.md").write_text("---\ntitle: Old\n---\nOld body.\n")
+    legacy_pb = tmp_path / "home" / "_playbooks" / "les" / "_lessons"
+    legacy_pb.mkdir()
+    (legacy_pb / "0002_old.md").write_text("---\ntitle: Older\n---\nOlder body.\n")
+    vault_lessons = tmp_path / "vault" / "lessons"
+    vault_lessons.mkdir(parents=True)
+    (vault_lessons / "0003_vault.md").write_text("---\ntitle: Vault\n---\nVault body.\n")
+    ctx = ctx.model_copy(update={"lessons": Lesson.load_dir(vault_lessons)})
+
+    out = compose(pb, context=ctx)
+    for path in (legacy_root, legacy_pb, vault_lessons):
+        assert (
+            f"**Note — tell the user:** legacy lessons detected ({path}) — playbooks no"
+            " longer read them; migrate to _lessons/ with targets: frontmatter." in out
+        )
+    assert "**STOP" not in out
+    assert "Old body." not in out
+    assert "## Lessons" not in out
+    assert "legacy lessons detected" not in compose(
+        pb, context=ctx, include_lessons=False
+    )
+
+
+def test_no_notices_without_legacy_or_untargeted(tmp_path: Path) -> None:
+    pb, ctx = _build_lessons(tmp_path, lessons={"0001_alpha.md": _LESSON_A})
+    assert "**Note" not in compose(pb, context=ctx)
+
+
 def test_name_clash_notice_blocks(tmp_path: Path) -> None:
-    _build_lessons(tmp_path, pb_lessons={"0001_alpha.md": _LESSON_A}, name="dup")
+    _build_lessons(tmp_path, lessons={"0001_alpha.md": _LESSON_A}, name="dup")
     vault_pb = tmp_path / "vault" / "_playbooks" / "dup"
     (vault_pb / "s1").mkdir(parents=True)
     (vault_pb / "playbook.md").write_text(
@@ -1375,32 +1458,41 @@ def test_name_clash_notice_blocks(tmp_path: Path) -> None:
     assert "Preamble." in out
 
 
-def _plant_lessons_vault(tmp_path: Path) -> Path:
-    """A bare vault carrying one playbook with a playbook-scoped and a step-scoped lesson."""
-    vault = tmp_path / "vault"
+def _plant_lessons_vault(tmp_path: Path, *, with_lessons: bool = True) -> Path:
+    """A bare vault carrying one playbook, optionally with a playbook-targeted and a
+    step-targeted lesson in the vault `_lessons/` root."""
+    vault = tmp_path / ("vault" if with_lessons else "bare-vault")
     pb_dir = vault / "_playbooks" / "les"
     (pb_dir / "s1").mkdir(parents=True)
     (pb_dir / "playbook.md").write_text(
         "---\nname: les\ntitle: Les\ngraph:\n  s1: []\n---\nPreamble.\n"
     )
     (pb_dir / "s1" / "prompt.md").write_text("---\nsummary: s1\n---\nStep body.\n")
-    (pb_dir / "_lessons").mkdir()
-    (pb_dir / "_lessons" / "0001_alpha.md").write_text(_LESSON_A)
-    (pb_dir / "_lessons" / "0002_step.md").write_text(_LESSON_STEP)
+    if with_lessons:
+        (vault / "_lessons").mkdir()
+        (vault / "_lessons" / "0001_alpha.md").write_text(_LESSON_A)
+        (vault / "_lessons" / "0002_step.md").write_text(_LESSON_STEP)
     return vault
 
 
 def test_cli_no_lessons_flag(tmp_path: Path) -> None:
     vault = _plant_lessons_vault(tmp_path)
+    bare = _plant_lessons_vault(tmp_path, with_lessons=False)
     base = [str(BOOPING_BIN), "render-playbook", "les", "--project", str(vault)]
     with_lessons = subprocess.run(base, cwd=tmp_path, capture_output=True, text=True)
     without = subprocess.run(
         [*base, "--no-lessons"], cwd=tmp_path, capture_output=True, text=True
     )
+    bare_out = subprocess.run(
+        [str(BOOPING_BIN), "render-playbook", "les", "--project", str(bare)],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+    )
     assert with_lessons.returncode == 0
     assert "## Lessons" in with_lessons.stdout
     assert without.returncode == 0
-    assert "## Lessons" not in without.stdout
+    assert without.stdout == bare_out.stdout
 
     step = [*base, "--step", "s1"]
     step_out = subprocess.run(step, cwd=tmp_path, capture_output=True, text=True)
@@ -1408,6 +1500,8 @@ def test_cli_no_lessons_flag(tmp_path: Path) -> None:
         [*step, "--no-lessons"], cwd=tmp_path, capture_output=True, text=True
     )
     assert "## Lessons" in step_out.stdout
+    assert "Step-scoped body." in step_out.stdout
+    assert "Alpha body." not in step_out.stdout
     assert step_bare.stdout == "Step body.\n"
 
 

@@ -6,6 +6,7 @@ import pytest
 
 from booping.context.playbook import (
     Playbook,
+    legacy_lesson_dirs,
     resolve_detached,
     resolve_waves,
 )
@@ -707,86 +708,34 @@ def _load(tmp_path: Path) -> dict[str, Playbook]:
     return {pb.name: pb for pb in pbs}
 
 
-def test_project_root_lesson_lands_on_every_playbook(tmp_path: Path) -> None:
+def test_legacy_lesson_dirs_no_longer_load(tmp_path: Path) -> None:
     core, glob, local = _roots(tmp_path)
     _write_playbook(core, "one", "One")
-    _write_playbook(glob, "two", "Two")
-    _write_lesson(local / "_lessons", "0001_shared.md")
-    by_name = _load(tmp_path)
-    for pb in by_name.values():
-        assert [(lesson.id, lesson.scope) for lesson in pb.lessons] == [("0001_shared", "project")]
-
-
-def test_playbook_lesson_without_manifest_in_overlay_root(tmp_path: Path) -> None:
-    core, _, local = _roots(tmp_path)
-    _write_playbook(core, "groom", "Groom")
-    _write_lesson(local / "groom" / "_lessons", "0001_note.md")
-    pb = _load(tmp_path)["groom"]
-    assert pb.scope == "core"
-    assert [(lesson.id, lesson.scope) for lesson in pb.lessons] == [("0001_note", "playbook")]
+    _write_lesson(local / "_lessons", "0001_root.md")
+    _write_lesson(glob / "one" / "_lessons", "0002_pb.md")
+    pb = _load(tmp_path)["one"]
+    assert not hasattr(pb, "lessons")
     assert pb.graph_problems == []
 
 
-def test_playbook_lesson_collision_local_wins(tmp_path: Path) -> None:
-    core, _, local = _roots(tmp_path)
-    _write_playbook(core, "groom", "Groom")
-    _write_lesson(core / "groom" / "_lessons", "0001_note.md", "core copy")
-    _write_lesson(local / "groom" / "_lessons", "0001_note.md", "local copy")
-    pb = _load(tmp_path)["groom"]
-    assert len(pb.lessons) == 1
-    assert "local copy" in pb.lessons[0].body
-
-
-def test_root_lesson_collision_project_wins(tmp_path: Path) -> None:
+def test_legacy_lesson_dirs_reports_root_and_playbook_level(tmp_path: Path) -> None:
     core, glob, local = _roots(tmp_path)
     _write_playbook(core, "one", "One")
-    _write_lesson(glob / "_lessons", "0001_root.md", "global copy")
-    _write_lesson(local / "_lessons", "0001_root.md", "project copy")
+    _write_lesson(core / "_lessons", "0001_core.md")
+    _write_lesson(glob / "one" / "_lessons", "0002_pb.md")
+    _write_lesson(local / "_lessons", "0003_project.md")
     pb = _load(tmp_path)["one"]
-    assert [(lesson.id, lesson.scope) for lesson in pb.lessons] == [("0001_root", "project")]
-    assert "project copy" in pb.lessons[0].body
+    assert sorted(legacy_lesson_dirs(pb.search_roots)) == sorted(
+        [core / "_lessons", glob / "one" / "_lessons", local / "_lessons"]
+    )
 
 
-def test_lesson_scope_order_and_filename_sort(tmp_path: Path) -> None:
-    core, glob, local = _roots(tmp_path)
-    _write_playbook(core, "one", "One")
-    _write_lesson(core / "_lessons", "0002_core_b.md")
-    _write_lesson(core / "_lessons", "0001_core_a.md")
-    _write_lesson(glob / "_lessons", "0003_global.md")
-    _write_lesson(local / "_lessons", "0004_project.md")
-    _write_lesson(local / "one" / "_lessons", "0006_pb_b.md")
-    _write_lesson(core / "one" / "_lessons", "0005_pb_a.md")
-    pb = _load(tmp_path)["one"]
-    assert [(lesson.id, lesson.scope) for lesson in pb.lessons] == [
-        ("0001_core_a", "core"),
-        ("0002_core_b", "core"),
-        ("0003_global", "global"),
-        ("0004_project", "project"),
-        ("0005_pb_a", "playbook"),
-        ("0006_pb_b", "playbook"),
-    ]
-
-
-def test_lesson_with_unknown_step_is_orphan(tmp_path: Path) -> None:
+def test_legacy_lesson_dirs_ignores_empty_and_missing(tmp_path: Path) -> None:
     core, _, _ = _roots(tmp_path)
     _write_playbook(core, "one", "One")
-    lessons_dir = core / "one" / "_lessons"
-    lessons_dir.mkdir(parents=True)
-    (lessons_dir / "0001_orphan.md").write_text("---\nstep: nope\n---\nbody\n")
-    (lessons_dir / "0002_ok.md").write_text("---\nstep: s1\n---\nbody\n")
+    (core / "_lessons").mkdir()
     pb = _load(tmp_path)["one"]
-    assert [lesson.id for lesson in pb.lessons] == ["0002_ok"]
-    assert [(p.kind, p.node, p.detail) for p in pb.graph_problems] == [
-        ("orphan_lesson", "nope", "0001_orphan.md")
-    ]
-
-
-def test_no_lesson_dirs_anywhere(tmp_path: Path) -> None:
-    core, _, _ = _roots(tmp_path)
-    _write_playbook(core, "one", "One")
-    pb = _load(tmp_path)["one"]
-    assert pb.lessons == []
-    assert pb.graph_problems == []
+    assert legacy_lesson_dirs(pb.search_roots) == []
 
 
 def test_lessons_dir_not_treated_as_playbook_or_step(tmp_path: Path) -> None:
@@ -820,12 +769,11 @@ def test_no_name_clash(tmp_path: Path) -> None:
         assert pb.graph_problems == []
 
 
-def test_clashing_name_still_unions_lessons(tmp_path: Path) -> None:
+def test_clashing_name_keeps_search_roots(tmp_path: Path) -> None:
     core, glob, local = _roots(tmp_path)
     _write_playbook(core, "dup", "Core Dup")
     _write_playbook(local, "dup", "Local Dup")
-    _write_lesson(core / "dup" / "_lessons", "0001_core.md")
     _write_lesson(glob / "dup" / "_lessons", "0002_global.md")
-    _write_lesson(local / "dup" / "_lessons", "0003_local.md")
     pb = _load(tmp_path)["dup"]
-    assert [lesson.id for lesson in pb.lessons] == ["0001_core", "0002_global", "0003_local"]
+    assert pb.search_roots == [local, glob, core]
+    assert legacy_lesson_dirs(pb.search_roots) == [glob / "dup" / "_lessons"]

@@ -11,6 +11,7 @@ from jinja2 import BaseLoader, ChoiceLoader, DictLoader, Environment, FileSystem
 
 from booping import logger
 from booping.context import Context
+from booping.context import playbook as playbook_mod
 from booping.context.lesson import Lesson
 from booping.context.lifecycle import resolve_edges
 from booping.context.playbook import GraphProblem, Playbook, Step, resolve_detached
@@ -114,11 +115,18 @@ _NAME_CLASH = (
     "**STOP — tell the user:** playbook '{name}' is defined in more than one root"
     " ({scopes}) — playbook names must be unique; rename one."
 )
-_ORPHAN_LESSON = (
+_UNKNOWN_STEP_TARGET = (
     "**Note — tell the user:** lesson '{file}' targets unknown step '{step}' in"
     " playbook '{name}'; it is ignored."
 )
-_NON_BLOCKING = {"orphan_state", "orphan_lesson"}
+_LEGACY_LESSONS = (
+    "**Note — tell the user:** legacy lessons detected ({paths}) — playbooks no longer"
+    " read them; migrate to _lessons/ with targets: frontmatter."
+)
+_UNTARGETED_LESSON = (
+    "**Note — tell the user:** lesson {file} has no valid targets: — not injected."
+)
+_NON_BLOCKING = {"orphan_state"}
 
 
 def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:  # type: ignore[type-arg]
@@ -334,8 +342,6 @@ def _shape_notice(prob: GraphProblem, playbook: str) -> str:
         return template.format(name=prob.node, scope=prob.scope)
     if prob.kind == "orphan_state":
         return _ORPHAN_STATE.format(name=prob.node)
-    if prob.kind == "orphan_lesson":
-        return _ORPHAN_LESSON.format(file=prob.detail, step=prob.node, name=playbook)
     if prob.kind == "legacy_agent_key":
         return _LEGACY_AGENT_KEY.format(name=prob.node)
     if prob.kind == "name_clash":
@@ -402,6 +408,62 @@ def _resolver_notice(prob: GraphProblem) -> str:
             dep=prob.dep, name=prob.dependent, scope=prob.scope
         )
     return _UNKNOWN_DEP.format(dep=prob.dep, name=prob.dependent)
+
+
+def _targeted(context: Context | None) -> list[Lesson]:
+    return list(context.targeted_lessons) if context is not None else []
+
+
+def playbook_lessons(lessons: list[Lesson], name: str) -> list[Lesson]:
+    """Lessons whose `targets:` name the playbook as a whole."""
+    return [
+        lesson
+        for lesson in lessons
+        if any(
+            t.kind == "playbook" and t.playbook == name for t in lesson.parsed_targets
+        )
+    ]
+
+
+def step_lessons(lessons: list[Lesson], name: str, step: str) -> list[Lesson]:
+    """Lessons whose `targets:` name `{playbook}/{step}`."""
+    return [
+        lesson
+        for lesson in lessons
+        if any(
+            t.kind == "step" and t.playbook == name and t.step == step
+            for t in lesson.parsed_targets
+        )
+    ]
+
+
+def _lesson_notices(pb: Playbook, context: Context | None) -> list[str]:
+    """Migration + opt-in notes: retired lesson dirs still on disk, lessons in the new
+    roots carrying no usable target, and step targets naming an unknown step."""
+    notices: list[str] = []
+
+    legacy = [str(p) for p in playbook_mod.legacy_lesson_dirs(pb.search_roots)]
+    if context is not None and context.lessons:
+        legacy.append(str(context.lessons[0].path.parent))
+    notices.extend(_LEGACY_LESSONS.format(paths=path) for path in sorted(set(legacy)))
+
+    known = set(pb.executable_step_names) | {step.name for step in pb.steps}
+    for lesson in _targeted(context):
+        if not lesson.parsed_targets:
+            notices.append(_UNTARGETED_LESSON.format(file=lesson.path.name))
+            continue
+        for target in lesson.parsed_targets:
+            if (
+                target.kind == "step"
+                and target.playbook == pb.name
+                and target.step not in known
+            ):
+                notices.append(
+                    _UNKNOWN_STEP_TARGET.format(
+                        file=lesson.path.name, step=target.step, name=pb.name
+                    )
+                )
+    return notices
 
 
 def _render_lessons(
@@ -509,6 +571,9 @@ def compose(
         if step.name not in wired:
             notices.append(_ORPHAN.format(name=step.name))
 
+    if include_lessons:
+        notices.extend(_lesson_notices(pb, context))
+
     preamble = pb.body
 
     if pb.jinja:
@@ -529,8 +594,9 @@ def compose(
 
     if not blocking:
         if include_lessons:
-            playbook_lessons = [lesson for lesson in pb.lessons if lesson.step is None]
-            section = _render_lessons(playbook_lessons, env)
+            section = _render_lessons(
+                playbook_lessons(_targeted(context), pb.name), env
+            )
             if section:
                 sections.append(section)
         sections.append(
@@ -561,7 +627,7 @@ def compose(
                     )
                 body = rendered
             lessons = (
-                [lesson for lesson in pb.lessons if lesson.step == step.name]
+                step_lessons(_targeted(context), pb.name, step.name)
                 if include_lessons
                 else []
             )
@@ -630,7 +696,7 @@ def compose_step(
             return _JINJA_ERROR.format(where=f"step '{step_name}'", error=err) + "\n"
         body = rendered
 
-    lessons = [lesson for lesson in pb.lessons if lesson.step == step_name]
+    lessons = step_lessons(_targeted(context), pb.name, step_name)
     if not include_lessons or not lessons:
         return body
     section = _render_lessons(lessons, build_env(), step_mode=True)

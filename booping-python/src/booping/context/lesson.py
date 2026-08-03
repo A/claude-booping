@@ -51,7 +51,6 @@ class Lesson(BaseModel):
     title: str
     body: str
     frontmatter: dict[str, Any]
-    step: str | None = None
     scope: str | None = None
     targets: list[str] = []
     parsed_targets: list[LessonTarget] = []
@@ -67,7 +66,6 @@ class Lesson(BaseModel):
             fm, body = parse_frontmatter(p)
             stem = p.stem
             title = str(fm.get("title", stem))
-            step = fm.get("step")
             raw = fm.get("targets")
             entries: list[Any] = []
             if isinstance(raw, str):
@@ -82,7 +80,6 @@ class Lesson(BaseModel):
                     title=title,
                     body=body,
                     frontmatter=fm,
-                    step=str(step) if step is not None else None,
                     scope=scope,
                     targets=[str(entry) for entry in entries],
                     parsed_targets=[r for r in results if isinstance(r, LessonTarget)],

@@ -40,19 +40,19 @@ def test_load_dir_missing_dir(tmp_path: Path) -> None:
     assert Lesson.load_dir(tmp_path / "nope") == []
 
 
-def test_load_dir_step_and_scope(tmp_path: Path) -> None:
+def test_load_dir_scope_comes_from_caller(tmp_path: Path) -> None:
     (tmp_path / "0001_scoped.md").write_text("---\nstep: research-web\n---\nbody\n")
     (tmp_path / "0002_plain.md").write_text("---\ntitle: Plain\n---\nbody\n")
-    lessons = Lesson.load_dir(tmp_path, scope="playbook")
-    assert [lesson.step for lesson in lessons] == ["research-web", None]
-    assert {lesson.scope for lesson in lessons} == {"playbook"}
+    lessons = Lesson.load_dir(tmp_path, scope="project")
+    assert {lesson.scope for lesson in lessons} == {"project"}
+    assert not any(hasattr(lesson, "step") for lesson in lessons)
 
 
 def test_load_dir_frontmatterless_falls_back_to_stem(tmp_path: Path) -> None:
     (tmp_path / "0001_bare.md").write_text("just a body\n")
     lessons = Lesson.load_dir(tmp_path)
-    assert [(lesson.title, lesson.step, lesson.body) for lesson in lessons] == [
-        ("0001_bare", None, "just a body\n")
+    assert [(lesson.title, lesson.body) for lesson in lessons] == [
+        ("0001_bare", "just a body\n")
     ]
     assert lessons[0].targets == []
     assert lessons[0].parsed_targets == []

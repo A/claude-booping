@@ -8,7 +8,6 @@ import yaml
 from pydantic import BaseModel
 
 from booping.context._yaml import parse_frontmatter
-from booping.context.lesson import Lesson
 
 _MODEL_TIERS = {"opus", "sonnet", "haiku", "fable"}
 
@@ -73,7 +72,6 @@ class GraphProblem(BaseModel):
         "bad_state",
         "unknown_state",
         "orphan_state",
-        "orphan_lesson",
         "name_clash",
         "legacy_agent_key",
     ]
@@ -83,9 +81,8 @@ class GraphProblem(BaseModel):
     node: str = ""  # kind=bad_node/nested_subgraph/duplicate_step: the offending key
     # kind=legacy_agent_key: the step carrying the renamed key
     # kind=bad_state/unknown_state/orphan_state: the states entry name
-    # kind=orphan_lesson: the unknown step the lesson points at
     detail: str = ""  # kind=bad_node/bad_manifest/bad_state: what is wrong with it
-    # kind=orphan_lesson: the lesson filename; kind=name_clash: the clashing scopes
+    # kind=name_clash: the clashing scopes
     scope: str = ""  # subgraph name the problem was found in; "" = outer graph
 
 
@@ -184,8 +181,6 @@ class Playbook(BaseModel):
     graph_problems: list[GraphProblem] = []
     # Discovery roots that exist on disk, most specific first (local, global, core).
     search_roots: list[Path] = []
-    # Root-level then playbook-level lessons, most general scope first.
-    lessons: list[Lesson] = []
     # Scopes declaring this name when 2+ roots carry a playbook.md for it.
     clash_scopes: list[str] = []
 
@@ -254,12 +249,7 @@ class Playbook(BaseModel):
                     by_name[pb.name] = len(result)
                     result.append(pb)
 
-        existing = [(scope, root) for scope, root in roots if root and root.is_dir()]
-        root_lessons = _merge_lessons(
-            [(_ROOT_LESSON_SCOPES[scope], root / "_lessons") for scope, root in existing]
-        )
         for pb in result:
-            _attach_lessons(pb, root_lessons, [root for _, root in existing])
             clash = scopes_by_name[pb.name]
             if len(clash) > 1:
                 pb.clash_scopes = clash
@@ -270,45 +260,18 @@ class Playbook(BaseModel):
         return result
 
 
-_ROOT_LESSON_SCOPES = {"core": "core", "global": "global", "local": "project"}
-
-
-def _merge_lessons(dirs: list[tuple[str, Path]]) -> list[Lesson]:
-    """Load each `(scope, dir)` pair, ordered least → most specific. A filename carried by
-    several dirs keeps only its most specific copy; output keeps the given dir order."""
-    loaded = [Lesson.load_dir(path, scope=scope) for scope, path in dirs]
-    winner: dict[str, int] = {}
-    for index, lessons in enumerate(loaded):
-        for lesson in lessons:
-            winner[lesson.path.name] = index
-    merged: list[Lesson] = []
-    for index, lessons in enumerate(loaded):
-        merged.extend(
-            lesson for lesson in lessons if winner[lesson.path.name] == index
-        )
-    return merged
-
-
-def _attach_lessons(pb: Playbook, root_lessons: list[Lesson], roots: list[Path]) -> None:
-    """Root-level lessons plus this playbook's own `_lessons/` unioned across every root
-    (a name may carry lessons in a root that has no playbook.md for it). A lesson whose
-    `step:` names an unknown step is dropped and reported."""
-    own = sorted(
-        _merge_lessons([("playbook", root / pb.name / "_lessons") for root in roots]),
-        key=lambda lesson: lesson.path.name,
-    )
-    known = {step.name for step in pb.steps}
-    kept: list[Lesson] = []
-    for lesson in root_lessons + own:
-        if lesson.step is not None and lesson.step not in known:
-            pb.graph_problems.append(
-                GraphProblem(
-                    kind="orphan_lesson", node=lesson.step, detail=lesson.path.name
-                )
-            )
+def legacy_lesson_dirs(roots: list[Path]) -> list[Path]:
+    """Retired playbook lesson dirs that still carry markdown — `<root>/_lessons/` and
+    `<root>/<playbook>/_lessons/` — across the given discovery roots. Nothing reads them
+    any more; render surfaces them as a migration notice."""
+    found: list[Path] = []
+    for root in roots:
+        if not root.is_dir():
             continue
-        kept.append(lesson)
-    pb.lessons = kept
+        candidates = [root / "_lessons"]
+        candidates.extend(d / "_lessons" for d in sorted(root.iterdir()) if d.is_dir())
+        found.extend(c for c in candidates if c.is_dir() and any(c.glob("*.md")))
+    return found
 
 
 def _load_one(
