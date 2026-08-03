@@ -1,4 +1,26 @@
+from collections.abc import Sequence
 from typing import Any
+
+
+def parse_set_overrides(pairs: Sequence[str]) -> dict[str, Any]:
+    """`a.b=c` → `{"a": {"b": "c"}}`, accumulated later-wins across pairs. Values stay
+    strings. Raises ValueError carrying the offending pair when it has no `=`.
+    """
+    overrides: dict[str, Any] = {}
+    for pair in pairs:
+        key, sep, value = pair.partition("=")
+        if not sep:
+            raise ValueError(pair)
+        nested: dict[str, Any] = {}
+        cursor = nested
+        parts = key.split(".")
+        for part in parts[:-1]:
+            child: dict[str, Any] = {}
+            cursor[part] = child
+            cursor = child
+        cursor[parts[-1]] = value
+        overrides = deep_merge(overrides, nested)
+    return overrides
 
 
 def deep_merge(

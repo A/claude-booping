@@ -212,7 +212,7 @@ class Playbook(BaseModel):
 
     @classmethod
     def load_all(
-        cls, vault: Path | None, home_dir: Path, plugin_root: Path
+        cls, vault: Path | None, home_dir: Path | None, plugin_root: Path
     ) -> list[Playbook]:
         """Discover playbooks from the core root (`plugin_root/playbooks`), the global root
         (`home_dir/_playbooks`) and, when a vault is attached, the local root
@@ -220,6 +220,9 @@ class Playbook(BaseModel):
         playbook replaces an earlier one of the same name, so precedence is
         core < global < local. `_`-prefixed entries (e.g. `_lib`) are skipped. Missing roots
         yield nothing; missing/partial frontmatter degrades with a warning, not a crash.
+
+        `home_dir=None` pins discovery to core + local, dropping the machine-local global
+        root — what makes a render against an explicit vault reproducible elsewhere.
         """
         result: list[Playbook] = []
         by_name: dict[str, int] = {}
@@ -227,7 +230,7 @@ class Playbook(BaseModel):
 
         roots: list[tuple[str, Path | None]] = [
             ("core", plugin_root / "playbooks"),
-            ("global", home_dir / "_playbooks"),
+            ("global", home_dir / "_playbooks" if home_dir is not None else None),
             ("local", vault / "_playbooks" if vault is not None else None),
         ]
         # Most specific first, so a root-relative include resolves local > global > core.

@@ -1,13 +1,10 @@
-## Lesson Target Space
-
-Every lesson targets exactly one entry from the space below, written into its `targets:` frontmatter list. Entry forms — exact names only, no globs, no wildcards, no negation:
-
-- `{playbook}` — the whole playbook, e.g. `{{ context.playbooks[0].name if context.playbooks else "groom" }}`
-- `{playbook}/{step}` — one step of it, e.g. `{{ context.playbooks[0].name ~ "/" ~ context.playbooks[0].steps[0].name if context.playbooks and context.playbooks[0].steps else "groom/intake" }}`
-- `agent:{id}` — one agent, e.g. `agent:booping-developer`
-
 {% set _lts_model_tiers = ["opus", "sonnet", "haiku", "fable"] -%}
-{% for _lts_pb in context.playbooks %}
+{%- set _lts_wanted = (config.get("targets_for") or "") | replace(" ", "") -%}
+{%- set _lts_wanted = _lts_wanted.split(",") | reject("equalto", "") | list -%}
+{%- set _lts_selected = context.playbooks | selectattr("name", "in", _lts_wanted) | list -%}
+{%- if _lts_selected -%}
+## Lesson Targets
+{% for _lts_pb in _lts_selected %}
 ### {{ _lts_pb.name }}
 
 {% set _lts_steps = _lts_pb.steps | sort(attribute="name") -%}
@@ -52,3 +49,4 @@ Every lesson targets exactly one entry from the space below, written into its `t
 {% endfor %}
 {%- endif -%}
 {% endfor %}
+{%- endif -%}

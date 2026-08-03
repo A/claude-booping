@@ -12,11 +12,11 @@ from booping.commands.render_playbook import (
     build_env,
     compose,
     compose_step,
-    parse_set_overrides,
 )
 from booping.context import Context
 from booping.context.lesson import Lesson
 from booping.context.playbook import Playbook
+from booping.utils import parse_set_overrides
 from tests.helpers import get_fixture_path
 
 PLUGIN_ROOT = Path(__file__).resolve().parents[2]

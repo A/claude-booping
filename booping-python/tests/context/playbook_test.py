@@ -228,6 +228,23 @@ def test_local_shadows_global_shadows_core() -> None:
     assert by_name["beta"].scope == "local"
 
 
+def test_pinned_discovery_skips_global_root() -> None:
+    pbs = Playbook.load_all(vault=_vault(), home_dir=None, plugin_root=_core())
+    by_name = {pb.name: pb for pb in pbs}
+    # `alpha` only exists in core + global — the global copy is not consulted.
+    assert by_name["alpha"].scope == "core"
+    assert by_name["shared"].scope == "local"
+    assert by_name["core-only"].scope == "core"
+    assert by_name["beta"].scope == "local"
+
+
+def test_pinned_discovery_reports_only_two_root_clashes() -> None:
+    pbs = Playbook.load_all(vault=_vault(), home_dir=None, plugin_root=_core())
+    by_name = {pb.name: pb for pb in pbs}
+    assert by_name["shared"].clash_scopes == ["core", "local"]
+    assert by_name["alpha"].clash_scopes == []
+
+
 def test_global_root_follows_non_default_home_dir(tmp_path: Path) -> None:
     # A non-default home_dir with its own _playbooks root is honoured.
     root = tmp_path / "custom-home"

@@ -23,3 +23,68 @@ def test_render_resolves_relative_path_against_plugin_root_not_cwd(
     )
 
     assert "# booping — /chat" in result.stdout
+
+
+def _render(tmp_path: Path, body: str, *args: str) -> subprocess.CompletedProcess[str]:
+    plugin_root = Path(__file__).resolve().parents[3]
+    template = tmp_path / "probe.md.j2"
+    template.write_text(body)
+    return subprocess.run(
+        [str(plugin_root / "bin" / "booping"), "render", str(template), *args],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+    )
+
+
+def test_render_set_override_wins_over_core_value(tmp_path: Path) -> None:
+    result = _render(
+        tmp_path,
+        "{{ config.sprint.default_threshold_sp }}\n",
+        "--set",
+        "sprint.default_threshold_sp=7",
+    )
+    assert result.returncode == 0
+    assert result.stdout.strip() == "7"
+
+
+def test_render_set_override_repeated_pairs_later_wins(tmp_path: Path) -> None:
+    result = _render(
+        tmp_path,
+        "{{ config.sprint.default_threshold_sp }}\n",
+        "--set",
+        "sprint.default_threshold_sp=7",
+        "--set",
+        "sprint.default_threshold_sp=9",
+    )
+    assert result.returncode == 0
+    assert result.stdout.strip() == "9"
+
+
+def test_render_set_deep_merges_leaving_siblings(tmp_path: Path) -> None:
+    result = _render(
+        tmp_path,
+        "{{ config.sprint.default_threshold_sp }}|{{ config.sprint.scale | length > 0 }}\n",
+        "--set",
+        "sprint.default_threshold_sp=7",
+    )
+    assert result.returncode == 0
+    assert result.stdout.strip() == "7|True"
+
+
+def test_render_set_pins_now(tmp_path: Path) -> None:
+    result = _render(
+        tmp_path,
+        '{{ now("%Y%m%d") }}\n',
+        "--set",
+        "now=19700101-00-00",
+    )
+    assert result.returncode == 0
+    assert result.stdout.strip() == "19700101-00-00"
+
+
+def test_render_set_malformed_pair_exits_1(tmp_path: Path) -> None:
+    result = _render(tmp_path, "x\n", "--set", "nope")
+    assert result.returncode == 1
+    assert result.stdout == ""
+    assert "malformed --set pair" in result.stderr

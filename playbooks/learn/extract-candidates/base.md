@@ -9,6 +9,8 @@ Each candidate must satisfy:
 
 For each candidate, pick a target from the routing matrix in the preamble. When the target is a lesson, pick its `targets:` entries from the target space below — the routing matrix decides *which kind of file* the candidate lands in, the target space decides *what the lesson is wired to*.
 
+Work the target space in two passes: read the table of contents, shortlist the playbooks the candidates actually touch, then run the fetch command for exactly those (one call, names joined by commas) and pick entries from what comes back. Never guess a step name that the fetched targets did not show.
+
 Nothing is presented to the user yet — the dedup sweep runs first, and the review table is the single surface where candidates appear.
 
-{% include "_partials/lesson_target_space.md" %}
+{% include "_partials/lesson_target_toc.md" %}

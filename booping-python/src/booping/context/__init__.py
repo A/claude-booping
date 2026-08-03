@@ -93,7 +93,11 @@ class Context(BaseModel):
 
         skills = Skill.load_all(root)
         agents = Agent.load_all(root)
-        playbooks = Playbook.load_all(vault, home_dir, root)
+        # An explicit vault pins playbook discovery to core + that vault: the global root
+        # is machine-local, and a pinned render must be reproducible on another machine.
+        playbooks = Playbook.load_all(
+            vault, None if vault_override is not None else home_dir, root
+        )
         targeted_lessons = Lesson.load_targeted(home_dir, vault)
 
         return cls(

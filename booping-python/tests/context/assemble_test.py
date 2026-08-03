@@ -148,6 +148,44 @@ def test_assemble_targeted_lessons_empty_without_roots(
     assert ctx.targeted_lessons == []
 
 
+def _write_playbook(root: Path, name: str) -> None:
+    step = root / "_playbooks" / name / "s1"
+    step.mkdir(parents=True)
+    (root / "_playbooks" / name / "playbook.md").write_text(
+        f"---\nname: {name}\ntitle: {name}\ngraph:\n  s1: []\n---\nbody\n"
+    )
+    (step / "prompt.md").write_text("---\nsummary: s1\n---\nstep body\n")
+
+
+def test_assemble_vault_override_pins_playbook_discovery(
+    tmp_path: Path, isolated_xdg_config_home: Path
+) -> None:
+    plugin_root = get_fixture_path("plugin-root-minimal")
+    vault_base = tmp_path / "vaults"
+    vault_base.mkdir()
+    _write_global(isolated_xdg_config_home, {"home_dir": str(vault_base)})
+    _write_playbook(vault_base, "global-only")
+    vault = tmp_path / "pinned"
+    vault.mkdir()
+    _write_playbook(vault, "local-only")
+
+    ctx = Context.assemble(start=tmp_path, plugin_root=plugin_root, vault_override=vault)
+    assert [pb.name for pb in ctx.playbooks] == ["local-only"]
+
+
+def test_assemble_without_override_keeps_global_playbooks(
+    tmp_path: Path, isolated_xdg_config_home: Path
+) -> None:
+    plugin_root = get_fixture_path("plugin-root-minimal")
+    vault_base = tmp_path / "vaults"
+    vault_base.mkdir()
+    _write_global(isolated_xdg_config_home, {"home_dir": str(vault_base)})
+    _write_playbook(vault_base, "global-only")
+
+    ctx = Context.assemble(start=tmp_path, plugin_root=plugin_root)
+    assert [pb.name for pb in ctx.playbooks] == ["global-only"]
+
+
 def test_assemble_project_tier_home_dir_has_no_effect(
     tmp_path: Path, isolated_xdg_config_home: Path
 ) -> None:

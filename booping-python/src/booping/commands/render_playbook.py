@@ -21,7 +21,7 @@ from booping.rendering import (
     get_plugin_root,
     make_now,
 )
-from booping.utils import deep_merge
+from booping.utils import deep_merge, parse_set_overrides
 
 _NO_GRAPH = (
     "**STOP — tell the user:** playbook '{name}' has no graph: in its frontmatter."
@@ -303,27 +303,6 @@ def _render_step_fields(
     if "detached" in rendered and not rendered["detached"]:
         rendered["detached"] = None
     return step.model_copy(update=rendered), None
-
-
-def parse_set_overrides(pairs: Sequence[str]) -> dict[str, Any]:
-    """`a.b=c` → `{"a": {"b": "c"}}`, accumulated later-wins across pairs. Values stay
-    strings. Raises ValueError carrying the offending pair when it has no `=`.
-    """
-    overrides: dict[str, Any] = {}
-    for pair in pairs:
-        key, sep, value = pair.partition("=")
-        if not sep:
-            raise ValueError(pair)
-        nested: dict[str, Any] = {}
-        cursor = nested
-        parts = key.split(".")
-        for part in parts[:-1]:
-            child: dict[str, Any] = {}
-            cursor[part] = child
-            cursor = child
-        cursor[parts[-1]] = value
-        overrides = deep_merge(overrides, nested)
-    return overrides
 
 
 def _shape_notice(prob: GraphProblem, playbook: str) -> str:
