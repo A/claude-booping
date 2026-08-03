@@ -186,6 +186,27 @@ def test_assemble_without_override_keeps_global_playbooks(
     assert [pb.name for pb in ctx.playbooks] == ["global-only"]
 
 
+def test_assemble_vault_override_pins_targeted_lessons(
+    tmp_path: Path, isolated_xdg_config_home: Path
+) -> None:
+    plugin_root = get_fixture_path("plugin-root-minimal")
+    vault_base = tmp_path / "vaults"
+    vault_base.mkdir()
+    _write_global(isolated_xdg_config_home, {"home_dir": str(vault_base)})
+    _write_targeted_lesson(vault_base, "0001_global.md", "groom")
+    vault = tmp_path / "pinned"
+    vault.mkdir()
+    _write_targeted_lesson(vault, "0002_project.md", "groom")
+
+    pinned = Context.assemble(
+        start=tmp_path, plugin_root=plugin_root, vault_override=vault
+    )
+    assert [lesson.id for lesson in pinned.targeted_lessons] == ["0002_project"]
+
+    unpinned = Context.assemble(start=tmp_path, plugin_root=plugin_root)
+    assert [lesson.id for lesson in unpinned.targeted_lessons] == ["0001_global"]
+
+
 def test_assemble_project_tier_home_dir_has_no_effect(
     tmp_path: Path, isolated_xdg_config_home: Path
 ) -> None:
