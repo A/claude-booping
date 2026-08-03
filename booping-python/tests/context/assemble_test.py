@@ -100,6 +100,54 @@ def test_assemble_default_vault_without_global(tmp_path: Path) -> None:
     assert ctx.project.directory == Path.home() / "Claude" / "dproj"
 
 
+def _write_targeted_lesson(root: Path, name: str, target: str) -> None:
+    lessons = root / "_lessons"
+    lessons.mkdir(parents=True, exist_ok=True)
+    (lessons / name).write_text(f"---\ntargets:\n  - {target}\n---\nbody\n")
+
+
+def test_assemble_targeted_lessons_from_both_roots(
+    tmp_path: Path, isolated_xdg_config_home: Path
+) -> None:
+    plugin_root = get_fixture_path("plugin-root-minimal")
+    vault_base = tmp_path / "vaults"
+    _write_global(isolated_xdg_config_home, {"home_dir": str(vault_base)})
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    (repo / ".booping").write_text("project_name: tl\n")
+    vault = vault_base / "tl"
+    vault.mkdir(parents=True)
+    _write_targeted_lesson(vault_base, "0001_global.md", "groom")
+    _write_targeted_lesson(vault, "0002_project.md", "agent:booping-developer")
+
+    ctx = Context.assemble(start=repo, plugin_root=plugin_root)
+    assert [lesson.id for lesson in ctx.targeted_lessons] == ["0001_global", "0002_project"]
+    assert [lesson.scope for lesson in ctx.targeted_lessons] == ["global", "project"]
+
+
+def test_assemble_targeted_lessons_global_only_without_project(
+    tmp_path: Path, isolated_xdg_config_home: Path
+) -> None:
+    plugin_root = get_fixture_path("plugin-root-minimal")
+    vault_base = tmp_path / "vaults"
+    vault_base.mkdir()
+    _write_global(isolated_xdg_config_home, {"home_dir": str(vault_base)})
+    _write_targeted_lesson(vault_base, "0001_global.md", "groom")
+
+    ctx = Context.assemble(start=tmp_path, plugin_root=plugin_root)
+    assert ctx.project is None
+    assert [lesson.id for lesson in ctx.targeted_lessons] == ["0001_global"]
+
+
+def test_assemble_targeted_lessons_empty_without_roots(
+    tmp_path: Path, isolated_xdg_config_home: Path
+) -> None:
+    plugin_root = get_fixture_path("plugin-root-minimal")
+    _write_global(isolated_xdg_config_home, {"home_dir": str(tmp_path / "vaults")})
+    ctx = Context.assemble(start=tmp_path, plugin_root=plugin_root)
+    assert ctx.targeted_lessons == []
+
+
 def test_assemble_project_tier_home_dir_has_no_effect(
     tmp_path: Path, isolated_xdg_config_home: Path
 ) -> None:

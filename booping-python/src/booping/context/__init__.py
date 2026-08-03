@@ -24,6 +24,7 @@ class Context(BaseModel):
     project: Project | None = None
     plans: list[Plan] = []
     lessons: list[Lesson] = []
+    targeted_lessons: list[Lesson] = []
     retros: list[Retro] = []
     plan_templates: list[PlanTemplate] = []
     review_templates: list[ReviewTemplate] = []
@@ -93,11 +94,13 @@ class Context(BaseModel):
         skills = Skill.load_all(root)
         agents = Agent.load_all(root)
         playbooks = Playbook.load_all(vault, home_dir, root)
+        targeted_lessons = Lesson.load_targeted(home_dir, vault)
 
         return cls(
             project=project,
             plans=plans,
             lessons=lessons,
+            targeted_lessons=targeted_lessons,
             retros=retros,
             plan_templates=plan_templates,
             review_templates=review_templates,
