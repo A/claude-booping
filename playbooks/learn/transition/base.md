@@ -10,7 +10,7 @@ Fired from the workdir, once every accepted item is written:
 booping playbook-transition learn done
 ```
 
-The command writes the primary plan's `status:`, then runs `close-working-set`, which moves every sibling in the retrospective's `plans:` list to `done`, re-renders the vault's `sprints.md`, and commits the plans together with the `lessons/` and `_booping/` files this run wrote. Nothing here hand-edits plan frontmatter or runs `booping vault-commit`.
+The command writes the primary plan's `status:`, then runs `close-working-set`, which moves every sibling in the retrospective's `plans:` list to `done`, re-renders the vault's `sprints.md`, and commits the plans together with the `_lessons/` and `_booping/` files this run wrote. Nothing here hand-edits plan frontmatter or runs `booping vault-commit`.
 
 ```
 awaiting-learning → done

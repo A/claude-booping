@@ -18,7 +18,7 @@ Turn retrospective findings into durable behavior changes routed to exactly one 
 - Learn handles plans in `{{ config.skills.learn.status }}` status.
 - The retrospective lives at `plans/{primary-slug}/retro.md`; its `plans:` frontmatter lists the working set the run covers, and the plan whose directory holds it is the **primary**.
 - The run workdir is the primary plan's directory `plans/{primary-slug}/` — `index.md` there is the run artifact.
-- Learn writes only to this project's vault (`lessons/`, `_booping/`) and the attached repo's `CLAUDE.md` — **never** the global `~/.claude/CLAUDE.md` or any user-level scope.
+- Learn writes only to this project's vault (`_lessons/`, `_booping/`) and the attached repo's `CLAUDE.md` — **never** the global `~/.claude/CLAUDE.md` or any user-level scope.
 
 ## Single-location rule
 

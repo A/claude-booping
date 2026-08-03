@@ -7,7 +7,7 @@ Environment (set by `booping playbook-transition`): BOOPING_WORKDIR =
 Reads the working set out of the workdir's `retro.md` (`plans:`), sets
 `status: done` on every plan other than the primary (the primary's own status is
 written by `playbook-transition` before the hooks run), re-renders the vault's
-sprints.md and commits — staging `lessons/` and `_booping/` so the files the
+sprints.md and commits — staging `_lessons/` and `_booping/` so the files the
 run wrote land in the same commit. Self-contained: the vault carries no
 `.booping` marker, so nothing here shells back into `booping`, and nothing
 outside the standard library is imported.
@@ -156,7 +156,7 @@ def main() -> None:
 
     if (vault / ".git").exists():
         stage = ["sprints.md", *(rel for rel in plans if isinstance(rel, str))]
-        for extra in ("lessons", "_booping"):
+        for extra in ("_lessons", "_booping"):
             if (vault / extra).exists():
                 stage.append(extra)
         subprocess.run(["git", "-C", str(vault), "add", *stage], check=True)
