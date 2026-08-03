@@ -18,7 +18,7 @@ Playbooks are discovered from three roots:
 - **Global** — `<home_dir>/_playbooks/<name>/` (default `~/Claude/_playbooks/`). Shared across every project on the machine.
 - **Local** — `{vault}/_playbooks/<name>/`. Specific to one project's vault.
 
-**A playbook `name` must be unique across all three roots.** The same name in two roots is a name clash: `/playbook` marks the entry `⚠ clash` in its listing, and rendering the playbook returns a blocking STOP notice instead of the procedure — neither copy runs until one of them is renamed. Nothing is silently hidden. To adapt a playbook you didn't write, either copy it under a new name or leave it alone and attach [lessons](#lessons) to it. Directories whose name starts with `_` (e.g. `_lib`, `_lessons`) are skipped, so you can keep shared helper content alongside playbooks without it being picked up as one.
+**A playbook `name` must be unique across all three roots.** The same name in two roots is a name clash: `/playbook` marks the entry `⚠ clash` in its listing, and rendering the playbook returns a blocking STOP notice instead of the procedure — neither copy runs until one of them is renamed. Nothing is silently hidden. To adapt a playbook you didn't write, either copy it under a new name or leave it alone and attach [lessons](#lessons) to it. Directories whose name starts with `_` (e.g. `_lib`, `_partials`) are skipped, so you can keep shared helper content alongside playbooks without it being picked up as one.
 
 ### Shipped playbooks
 
@@ -27,7 +27,7 @@ One core playbook ships today: **`groom`** — the grooming workflow expressed a
 !!! warning "Experimental — `/groom` is still the one to use"
     `/groom-playbook` is a parallel experiment, not a replacement. [`/groom`](groom.md) remains the supported way to spec a sprint and is unaffected by it.
 
-A playbook of your own named `groom` would clash with it rather than replace it. To bend the shipped procedure to a project, add [lessons](#lessons) under `{vault}/_playbooks/groom/_lessons/`; to fork it, copy the directory under a different name.
+A playbook of your own named `groom` would clash with it rather than replace it. To bend the shipped procedure to a project, add [lessons](#lessons) in `{vault}/_lessons/` targeting `groom`; to fork it, copy the directory under a different name.
 
 ## Layout
 
@@ -39,7 +39,6 @@ Each playbook is a directory:
   playbook.yaml        # structure: graph:, state:, states:
   <step>/              # one directory per step — the directory name IS the step name
     prompt.md          #   the step itself; everything else in the dir is yours
-  _lessons/            # standing rules injected into every run of this playbook
   _scripts/            # executables invoked by `script <name>` transition hooks
   _references/         # `_`-prefixed dirs are not steps — free workspace
 ```
@@ -50,34 +49,53 @@ Directory order on disk is irrelevant to the run — **the `graph:` decides whic
 
 ## Lessons
 
-A **lesson** is a short standing rule injected into a playbook run — the way to correct a procedure without editing its prompts. Lessons are markdown files named `NNNN_title.md`, kept in `_lessons/` directories and loaded in filename order. Where the directory sits decides who the lesson binds:
+A **lesson** is a short standing rule injected into a playbook run — the way to correct a procedure without editing its prompts. Lessons are markdown files (the convention is `NNNN_title.md`), loaded in filename order from exactly **two** directories:
 
-| Scope | Directory | Applies to |
+| Scope | Directory | Reaches |
 | --- | --- | --- |
-| Global | `<home_dir>/_playbooks/_lessons/` | every playbook, in every project |
-| Project | `{vault}/_playbooks/_lessons/` | every playbook, in this project |
-| Playbook | `<root>/<name>/_lessons/` | that one playbook |
-| Step | any of the above, plus `step:` in the file's frontmatter | that one step of that playbook |
+| Global | `<home_dir>/_lessons/` (default `~/Claude/_lessons/`) | every project on the machine |
+| Project | `{vault}/_lessons/` | this project only |
 
-A lesson file is prose with optional frontmatter:
+Neither directory decides *what* a lesson binds — the file's own `targets:` frontmatter does. A lesson with no usable `targets:` is injected nowhere: **lessons are opt-in.**
 
 ```markdown
 ---
 title: Name every artifact path absolutely
-step: draft
+targets:
+  - groom
+  - ship/publish
+  - agent:booping-developer
 ---
 
 Receipts must name paths absolutely — a relative path is ambiguous once the run moves between workdirs.
 ```
 
 - `title` — *optional*, used in the lesson's heading; defaults to the filename without its extension.
-- `step` — *optional*. With it, the lesson reaches only that step. Without it, the lesson binds the whole run. A `step:` naming a step the playbook does not have produces a warning note and the lesson is ignored.
+- `targets` — the list of things this lesson is injected into. A bare scalar (`targets: groom`) counts as a one-entry list.
 
-**Same filename in two scopes → the most specific one wins.** A `0002_receipts.md` in both the global and the project `_lessons/` loads once, from the project; the same holds for a playbook-level file present in more than one root. Give lessons distinct names unless you mean to replace one.
+### Target forms
 
-**Lessons for a playbook you don't own.** A playbook-level `_lessons/` directory is picked up from *every* root, whether or not that root holds the playbook itself. So a project can attach its own lessons to the shipped `groom` playbook simply by creating `{vault}/_playbooks/groom/_lessons/` — no `playbook.md`, no copy, no name clash.
+Exact names only — no globs, no wildcards, no negation:
 
-**Where they surface.** Playbook-scoped lessons render as a `## Lessons` section in the composed procedure, between the preamble and `## Playbook Steps`; they bind the driver for the whole run. Step-scoped lessons are appended to that step's `booping render-playbook <name> --step <step>` output, so they reach exactly the sub-agent running that step. `--no-lessons` suppresses both, which is useful when diffing a prompt against its file on disk.
+| Form | Example | Injected into |
+| --- | --- | --- |
+| `{playbook}` | `groom` | the `## Lessons` section of that playbook's composed procedure |
+| `{playbook}/{step}` | `ship/publish` | that one step's prompt, on both the `--step` and inline surfaces |
+| `agent:{id}` | `agent:booping-developer` | that agent's body, at agent load time |
+
+A lesson may carry several entries, of mixed forms. An entry that matches none of the three forms is ignored (see [Notices](#notices)).
+
+**Playbook authors do nothing.** Injection happens in `booping render-playbook` itself — there is no lessons partial to include, and a playbook cannot opt out of receiving them.
+
+!!! warning "Agent targets reach booping's own agents only"
+    `agent:` targets are injected into the plugin's internal agents — `agent:booping-developer` and `agent:booping-researcher`. An [external or global agent](integrating-external-agents.md) at `~/.claude/agents/<id>.md`, and a sub-agent spawned by model tier (`detached: sonnet:high`), receive **no** targeted lessons: their bodies are not rendered by booping. To reach one of those, target the step it performs (`{playbook}/{step}`) — the step prompt is fetched by the agent itself.
+
+**Same filename in both directories → the project copy wins.** A `0002_receipts.md` present in `~/Claude/_lessons/` and in `{vault}/_lessons/` loads once, from the vault. Give lessons distinct names unless you mean to shadow one.
+
+**Where they surface.** Playbook-targeted lessons render as a `## Lessons` section in the composed procedure, between the preamble and `## Playbook Steps`; they bind the driver for the whole run. Step-targeted lessons are appended to that step's `booping render-playbook <name> --step <step>` output, so they reach exactly the agent running that step (and to the embedded body when the playbook renders steps inline). `--no-lessons` suppresses both sections *and* the lesson notices, so the output matches a lesson-free vault byte for byte — useful when diffing a prompt against its file on disk.
+
+!!! note "Legacy: playbook-local `_lessons/` and `step:`"
+    Earlier versions read `_lessons/` directories placed inside a discovery root or inside a playbook directory, and scoped a lesson to a step with a `step:` frontmatter key. Neither is read any more. Move those files into `{vault}/_lessons/` (or `<home_dir>/_lessons/`) and replace `step: draft` with `targets: [<playbook>/draft]`. While a retired directory still holds markdown, every render of that playbook emits a non-blocking migration note naming it.
 
 ## The manifest
 
@@ -343,7 +361,8 @@ A playbook with `states:` renders a `## State` section right after `## Playbook 
 Problems in the manifest surface as in-band notices when you render (or run) the playbook:
 
 - **Blocking `STOP` notices** — the playbook refuses to run. Causes: a step named in the graph has no `<name>/prompt.md` file; a dependency names a step that isn't in the graph; the graph has a cycle; the graph is missing entirely; a step that is not `detached:` shares a parallel wave; a step carries the legacy `agent:` key instead of `detached:`; `graph:` is declared in both `playbook.yaml` and `playbook.md` frontmatter; `playbook.yaml` is unparseable or is not a mapping; a `states:` entry is malformed (missing `artifact`, an `initial` that is not one of its `statuses`, or `{instance}` in the artifact path with no subgraph referencing it); a `state:` ref names a states entry that does not exist; a `jinja: true` playbook rendered without project context, or whose body fails to render; the playbook `name` is defined in more than one root.
-- **Warning notes** — a step directory that exists on disk but isn't wired into the graph, a `states:` entry no graph scope references, or a lesson whose `step:` names a step the playbook doesn't have, produces a note; the step never runs, the entry is never used, the lesson is ignored.
+- **Warning notes** — a step directory that exists on disk but isn't wired into the graph (it never runs), or a `states:` entry no graph scope references (it is never used), produces a note.
+- **Lesson notes** — also non-blocking: a [lesson](#lessons) carrying no usable `targets:` entry (it is injected nowhere), a lesson whose `{playbook}/{step}` target names a step this playbook doesn't have (that entry is ignored), and one note per retired lesson directory still holding markdown on disk — a legacy playbook `_lessons/` dir, or the vault's legacy `lessons/` directory. `--no-lessons` suppresses these along with the lesson sections.
 
 ## Authoring a global playbook
 
@@ -416,13 +435,14 @@ The rendered procedure lists the steps as:
 
 `booping render-playbook <name>` renders the composed procedure to stdout, or to a file with `--output PATH` (`--output -` writes to stdout). An unknown playbook name exits 1. Graph problems don't fail the command — they render as the in-band STOP/Note notices described above (exit 0).
 
-The composed output carries a `## Lessons` section when any playbook-scoped [lesson](#lessons) applies.
+The composed output carries a `## Lessons` section when any [lesson](#lessons) targets the playbook by name.
 
-Three flags help while authoring:
+Four flags help while authoring:
 
 - `--step <step>` — print just that step's body (rendered, for a `jinja: true` playbook), with no heading, instruction bullets, or gate wrapping, followed by the lessons targeting that step. This is the command every composed step section points at: each delegated step runs it itself from its bootstrap prompt, the driver runs it for inline steps, and it is handy for eyeballing one prompt in isolation.
-- `--no-lessons` — drop the `## Lessons` section from the composed output and the step-lesson append from `--step`, leaving the bodies alone.
-- `--project <path>` — resolve context against the vault at `<path>` instead of whatever project is attached to the current directory. Lets you render a `requires_project` or `jinja: true` playbook from anywhere.
+- `--no-lessons` — drop the `## Lessons` section from the composed output, the step-lesson append from `--step`, and the lesson notices, leaving the bodies alone.
+- `--project <path>` — resolve context against the vault at `<path>` instead of whatever project is attached to the current directory. Lets you render a `requires_project` or `jinja: true` playbook from anywhere. It also **pins discovery to core + that vault** — for playbooks and for [lessons](#lessons) alike, skipping both machine-local global roots (`<home_dir>/_playbooks/`, `<home_dir>/_lessons/`), so the same command renders the same bytes on another machine.
+- `--set <dotted.key>=<value>` — override one config value for this render only (repeatable, later pairs win, values stay strings). The pair wins over every config tier. Templates read it through `config`, which is how a partial can be parameterised from the command line.
 
 ## Evals and harness
 

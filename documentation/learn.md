@@ -24,13 +24,33 @@ Bare `/learn` picks the plan currently in `awaiting-learning`. Pass a retro file
 
 `/learn` routes every accepted finding to **exactly one** target. Three of the four targets live in the vault; the fourth is the attached repo's own `CLAUDE.md`:
 
-- **Global lessons** at `~/Claude/{project}/lessons/{N}_{title}.md` — durable rules every skill picks up via Preflight on every invocation. `N` is a monotonic counter so the directory stays ordered chronologically.
-- **Per-skill and per-agent extension files** at `~/Claude/{project}/_booping/skill_<name>.md` and `~/Claude/{project}/_booping/agent_<full-agent-name>.md` (e.g. `agent_booping-developer.md`) — narrower rules that only reach the matching skill or worker agent, injected at load time. These are the right home for findings too specific to belong in global lessons (e.g. "when running `/develop` on this monorepo, prefer pnpm over npm").
+- **Lessons** at `~/Claude/{project}/lessons/{N}_{title}.md` — durable rules every skill picks up via Preflight on every invocation. `N` is a monotonic counter so the directory stays ordered chronologically.
+- **Per-skill and per-agent extension files** at `~/Claude/{project}/_booping/skill_<name>.md` and `~/Claude/{project}/_booping/agent_<full-agent-name>.md` (e.g. `agent_booping-developer.md`) — narrower rules that only reach the matching skill or worker agent, injected at load time. These are the right home for findings too specific to belong in project-wide lessons (e.g. "when running `/develop` on this monorepo, prefer pnpm over npm").
 - **The repo's own `CLAUDE.md`** — when a finding is a project convention the model should follow regardless of booping (a coding standard, a structural rule), `/learn` adds it as a one-line bullet to the attached repo's `CLAUDE.md`. These edits are committed separately, in the repo working tree, not in the vault.
 
 A finding never lands in two targets at once. When a candidate would otherwise span two, `/learn` decomposes it into one row per target before writing.
 
 See [Vault](vault.md#lessons) for the vault directory layout and how each file reaches the active context.
+
+### The `learn` playbook writes targeted lessons
+
+The same procedure also ships as the core `learn` [playbook](playbook.md) (run it with `/playbook learn`). It routes findings to the same four targets, with one difference in the lesson path: it writes to `{vault}/_lessons/{N}_{title}.md` and gives each file a `targets:` frontmatter list naming the playbooks, playbook steps, and agents the rule applies to.
+
+```markdown
+---
+id: 7
+title: Name every artifact path absolutely
+targets:
+  - groom/draft-plan
+  - agent:booping-developer
+retro: plans/20260803-11-29_flat-lessons/retro.md
+created: 2026-08-03
+---
+```
+
+That list is what gets the lesson injected — a `_lessons/` file with no valid `targets:` reaches nothing. To keep the routing honest, the playbook reads the **target space** before proposing: a table of contents of every discovered playbook, then a fetch of the exact playbooks the candidates touch, listing their step names and addressable agents. Target entries are never guessed; they come from that fetch. See [Playbooks → Lessons](playbook.md#lessons) for the target forms and where each one surfaces.
+
+The two lesson directories are separate systems and do not migrate into each other: `lessons/` feeds the built-in skills, `_lessons/` feeds playbooks and agent bodies.
 
 ### Update-vs-create sweep
 

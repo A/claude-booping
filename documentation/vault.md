@@ -22,7 +22,17 @@ A retro records what actually shipped vs. the original spec, divergences, and th
 
 Durable, project-wide rules accumulated over many sprints. Files are named `{N}_{title}.md` where `N` is a monotonic counter so the directory stays ordered chronologically.
 
-Authored by [/learn](learn.md) from confirmed retro findings. Loaded by every skill's Preflight on every invocation, so lessons accumulate into the active context for `/groom` and `/develop` automatically.
+Authored by [/learn](learn.md) from confirmed retro findings. Loaded by every **skill's** Preflight on every invocation, so lessons accumulate into the active context for `/groom` and `/develop` automatically.
+
+Scope note: this directory serves the built-in skills only. [Playbooks](playbook.md) and agent bodies do not read it — they read `_lessons/` below, and a render of any playbook emits a non-blocking note while this directory still holds files.
+
+## `_lessons/`
+
+Targeted lessons — the playbook-side lesson system. Same `{N}_{title}.md` naming, but each file carries a `targets:` frontmatter list saying what it applies to: `{playbook}`, `{playbook}/{step}`, or `agent:{id}`. A file with no valid `targets:` is injected nowhere.
+
+Written by the core `learn` [playbook](playbook.md). Injected by `booping render-playbook` into the composed procedure or a step prompt, and into the bodies of booping's own agents at load time.
+
+A machine-wide sibling at `<home_dir>/_lessons/` (default `~/Claude/_lessons/`) applies to every project; a file of the same name here shadows it. See [Playbooks → Lessons](playbook.md#lessons) for the full reference.
 
 ## `notes/`
 
