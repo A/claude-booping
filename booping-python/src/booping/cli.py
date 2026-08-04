@@ -11,6 +11,7 @@ from booping.commands import playbook_transition as playbook_transition_cmd
 from booping.commands import render as render_cmd
 from booping.commands import render_playbook as render_playbook_cmd
 from booping.commands import render_sprints as render_sprints_cmd
+from booping.commands import scaffold as scaffold_cmd
 from booping.commands import transition as transition_cmd
 from booping.commands import vault_commit as vault_commit_cmd
 
@@ -29,6 +30,7 @@ def build_parser() -> argparse.ArgumentParser:
     playbook_transition_cmd.add_parser(sub)
     playbook_state_cmd.add_parser(sub)
     config_get_cmd.add_parser(sub)
+    scaffold_cmd.add_parser(sub)
     build_cmd.add_parser(sub)
     debug_cmd.add_parser(sub)
     frontmatter_update_cmd.add_parser(sub)
