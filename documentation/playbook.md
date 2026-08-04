@@ -377,6 +377,14 @@ Create the directory under your home vault root:
 
 Fill in `playbook.md` with the identity frontmatter and a plain-markdown preamble body, and `playbook.yaml` with the `graph:` (plus `state:` / `states:` if the run should be resumable). Write each `<step>/prompt.md` with its own frontmatter and prompt body. Run `/playbook` in any project and it appears in the listing with scope `global`.
 
+To skip the by-hand part, scaffold the skeleton — `playbook.md`, an empty `playbook.yaml` graph, and `_references/`:
+
+```
+bin/booping scaffold playbook.scaffold ~/Claude/_playbooks/my-playbook --set name=my-playbook
+```
+
+See [scaffold trees](project_config.md#scaffold-trees) for the tree itself and how to override or extend it.
+
 ## Authoring a local playbook
 
 Same shape, but under the project's vault:

@@ -132,6 +132,31 @@ git:
         - other
         - tooling, dependency bumps, formatting
 
+# Scaffold tree materialised by
+# `booping scaffold playbook.scaffold <dir> --set name=<name>`: a string is a
+# file's content (Jinja-rendered), a mapping without `type` is a directory's
+# children.
+playbook:
+  scaffold:
+    playbook.md: |
+      ---
+      name: {{ name }}
+      title: {{ name }}
+      summary: One sentence naming what this playbook produces.
+      trigger: the situation a user reaches for this playbook in
+      ---
+
+      # {{ name }}
+
+      Preamble — what the driver needs before the first step: artifact model, hard
+      rules, where the work lands. No step calls here.
+    playbook.yaml: |
+      # Step name -> its dependency step names. Each step is a sibling directory
+      # holding a prompt.md.
+      graph: {}
+    _references:
+      type: dir
+
 plan:
   statuses:
     backlog:

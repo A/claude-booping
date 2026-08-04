@@ -280,6 +280,20 @@ def test_oserror_during_write_exits_2(
     assert str(dest) in result.stderr
 
 
+def test_core_playbook_scaffold_tree(tmp_path: Path) -> None:
+    dest = tmp_path / "demo"
+    result = _run("scaffold", "playbook.scaffold", str(dest), "--set", "name=demo", cwd=tmp_path)
+    assert result.returncode == 0, result.stderr
+    assert sorted(str(p.relative_to(dest)) for p in dest.rglob("*")) == [
+        "_references",
+        "playbook.md",
+        "playbook.yaml",
+    ]
+    assert (dest / "_references").is_dir()
+    assert "\nname: demo\n" in (dest / "playbook.md").read_text()
+    assert "graph:" in (dest / "playbook.yaml").read_text()
+
+
 def test_logs_one_scaffold_line_when_project_attached(
     tmp_path: Path, isolated_xdg_config_home: Path
 ) -> None:

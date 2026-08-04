@@ -330,6 +330,39 @@ See [Plan lifecycle overview](https://github.com/A/claude-booping/blob/main/src/
 
 Statuses also group into named **superstates** forming the lifecycle spine `specification` → `planned` → `executing` → `review` → `terminal` — each listing its member statuses and any transitions shared across the whole group. Phase-wide moves live on the superstate instead of being repeated on every member: both `specification` and `planned` offer → cancelled, `executing` offers → fail, and `review` offers the → done skip-ahead. A status's own edges union with its superstate's, and the substate wins on a `to` collision (so `awaiting-learning`'s gated → done overrides the `review` skip edge). This is an overridable, additive surface: a project override deep-merges over the plugin defaults the same way the rest of the config does, so you can add or adjust a superstate's members or shared transitions without restating the others. Most projects never touch it; it exists so the lifecycle can describe group-level moves once instead of repeating them on every status.
 
+### Scaffold trees
+
+Any mapping in the config can describe a **file/dir tree** that `bin/booping scaffold` materialises on disk:
+
+```
+bin/booping scaffold <config-path> <dest> [--force] [--set KEY=VALUE]...
+```
+
+`<config-path>` is a dotted path into the merged config — the value there *is* the destination directory's contents, with no wrapper key. `<dest>` is created with its parents when missing; a non-empty destination aborts unless you pass `--force`, which overwrites only the files the tree names and never deletes a directory. Exit 0 on success, 1 on a user error (unknown path, malformed tree, non-empty destination without `--force`, bad `--set`, Jinja error in seed content), 2 if a write fails at the OS level. The whole tree is rendered in memory first, so an error leaves the filesystem untouched.
+
+How a node is read:
+
+| Config value | Meaning |
+|---|---|
+| string | File; the string is its content |
+| mapping without `type` | Directory; each key is a child's name |
+| `{type: file}` | File; optional `content` (absent → empty file) |
+| `{type: dir}` | Directory; optional `children` (absent → empty dir) |
+| `null` | Error — write `""` for an empty file, `{}` for an empty dir |
+| list, number, bool | Error, reported against the node's dotted path |
+
+`type` is reserved: a mapping carrying it is an explicit node descriptor, never a directory named `type`. A filename containing `/`, or equal to `.` or `..`, is rejected before anything is written.
+
+File content is Jinja-rendered, so `{{ config.… }}` and `{{ context.… }}` resolve. **`--set` here binds a bare variable** — `--set name=x` fills `{{ name }}` — unlike `booping render` and `booping render-playbook`, where `--set` merges into the config and you write `{{ config.name }}`.
+
+Trees ride the same core → global → project merge as everything else on this page, so a global or project config can add its own tree or override one leaf of a shipped one. The shipped tree is **`playbook.scaffold`**, a playbook skeleton:
+
+```
+bin/booping scaffold playbook.scaffold ~/Claude/_playbooks/my-playbook --set name=my-playbook
+```
+
+producing `playbook.md` (identity frontmatter carrying the name you passed, plus a preamble stub), `playbook.yaml` (an empty `graph:`), and an empty `_references/`.
+
 ## Plan frontmatter: `summary`
 
 Each plan file carries a `summary` field in its YAML frontmatter — a one-line statement of the plan's intent (≤ ~120 characters). `/groom` writes it when drafting the plan; it is the human-readable label that surfaces in `sprints.md` and makes plans searchable across the vault. (It replaced the older, longer `business_goal` field.)
