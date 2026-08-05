@@ -106,6 +106,29 @@ the siblings out by name.
 | `refactoring` | Internal structure change with no user-visible behavior change. Needs current-vs-target design, migration steps, and a no-behavior-change DoD. | [guidance](${CLAUDE_PLUGIN_ROOT}/docs/task_refactoring.md) |
 
 
+## The plan's identity frontmatter
+
+Create `index.md` carrying the shape below. `created` is the run's clock to the minute, not just
+the date — copy the value verbatim. `status` is the run machine's and is written by
+`booping playbook-transition`, never by hand.
+
+---
+title: {Descriptive Title}
+type: feature | bug | refactoring
+status: framing                  # the run machine's status — written by `booping playbook-transition`, never by hand
+sp: {total}                      # sprint total, summed from milestone totals
+split_from: null                 # sibling stubs only: path to the primary plan this was split from
+created: 1970-01-01 00:00        # when the plan directory was created — the run's clock, to the minute
+planned: null                    # date keys — owned by the run machine's edge hooks
+started: null
+completed: null
+retro: null
+goal: null
+summary: ""                      # one-line plan intent for search + plan listings (≤ ~120 chars)
+commit: null
+---
+
+
 ## The brief — written to `request.md`, posted in chat
 
 The framing brief is this step's outcome: it is written to `request.md`, which every later step
@@ -165,7 +188,7 @@ type: feature | bug | refactoring
 status: framing                  # the run machine's status — written by `booping playbook-transition`, never by hand
 sp: {total}                      # sprint total, summed from milestone totals
 split_from: null                 # sibling stubs only: path to the primary plan this was split from
-created: YYYY-MM-DD              # date the plan directory was created
+created: 1970-01-01 00:00        # when the plan directory was created — the run's clock, to the minute
 planned: null                    # date keys — owned by the run machine's edge hooks
 started: null
 completed: null

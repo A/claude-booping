@@ -1,10 +1,11 @@
+{% from "_partials/timestamps.md" import human_ts -%}
 {% raw %}---
 title: {Descriptive Title}
 type: feature | bug | refactoring
 status: framing                  # the run machine's status — written by `booping playbook-transition`, never by hand
 sp: {total}                      # sprint total, summed from milestone totals
 split_from: null                 # sibling stubs only: path to the primary plan this was split from
-created: YYYY-MM-DD              # date the plan directory was created
+{% endraw %}created: {{ human_ts }}{% raw %}        # when the plan directory was created — the run's clock, to the minute
 planned: null                    # date keys — owned by the run machine's edge hooks
 started: null
 completed: null

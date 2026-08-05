@@ -15,6 +15,14 @@ Exactly one per plan. Pick the row the request meets, load its guidance before f
 the siblings out by name.
 
 {% include "_partials/task_types.md" %}
+## The plan's identity frontmatter
+
+Create `index.md` carrying the shape below. `created` is the run's clock to the minute, not just
+the date — copy the value verbatim. `status` is the run machine's and is written by
+`booping playbook-transition`, never by hand.
+
+{% include "_partials/plan_frontmatter.md" %}
+
 ## The brief — written to `request.md`, posted in chat
 
 The framing brief is this step's outcome: it is written to `request.md`, which every later step

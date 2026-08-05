@@ -68,7 +68,7 @@
               type: { enum: [feature, bug, refactoring] }
               sp: { enum: ["null"] }
               split_from: { enum: ["null"] }
-              created: { enum: [2026-08-01] }
+              created: '^2026-08-01( \d{2}:\d{2})?$'
               planned: { enum: ["null"] }
               started: { enum: ["null"] }
               completed: { enum: ["null"] }
