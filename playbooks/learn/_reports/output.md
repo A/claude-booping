@@ -29,7 +29,10 @@ The skill infers the exact filename per candidate; the example lists above are v
 
 ## Plans awaiting learning
 
-_No plans at `awaiting-learning`._
+| Status | SP | Title | Created | Completed | Retro | Path |
+| --- | --- | --- | --- | --- | --- | --- |
+| awaiting-learning | 3 | Session cleanup sweep | 1970-01-03 | 19700103 11:00 | plans/19700103-session-cleanup/retro.md | plans/19700103-session-cleanup/index.md |
+
 
 ## High-level workflow
 

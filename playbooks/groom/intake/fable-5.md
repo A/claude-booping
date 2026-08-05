@@ -6,16 +6,12 @@ You need to read user request and confirm you have all information to work it ou
 
 Check for context, in case a request is related to already existing plan.
 
-{% set _plans = context.plans | rejectattr('status', 'in', ["backlog", "in-spec", "awaiting-plan-review"]) | list -%}
-{% set _dated = _plans | selectattr('created') | sort(attribute='created', reverse=True) | list -%}
-{% set _undated = _plans | rejectattr('created') | list -%}
-{% set _latest = (_dated + _undated)[:10] -%}
+{% set _latest = ('skills.groom.queries.latest_plans' | query)[:10] -%}
 {% if _latest %}
 | state | name | summary | path |
 | --- | --- | --- | --- |
 {% for plan in _latest -%}
-{% set _path = "plans/" ~ plan.slug ~ "/index.md" if plan.path.name in ("plan.md", "index.md") else "plans/" ~ plan.path.name -%}
-| {{ plan.status | replace("|", "\|") | replace("\n", " ") }} | {{ plan.title | replace("|", "\|") | replace("\n", " ") }} | {{ plan.summary | replace("|", "\|") | replace("\n", " ") }} | [plan]({{ _path }}) |
+| {{ plan.status | replace("|", "\|") | replace("\n", " ") }} | {{ plan.title | replace("|", "\|") | replace("\n", " ") }} | {{ plan.summary | replace("|", "\|") | replace("\n", " ") }} | [plan]({{ plan.path }}) |
 {% endfor -%}
 {% else %}
 No plans filed.

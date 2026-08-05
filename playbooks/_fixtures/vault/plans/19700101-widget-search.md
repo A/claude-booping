@@ -8,7 +8,9 @@ planned: 19700101 08:00
 started: 19700101 09:00
 completed: 19700101 12:00
 goal: Users can find widgets by keyword.
+retro: null
 summary: Full-text search across the widget catalog.
+commit: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 ---
 
 # Widget search

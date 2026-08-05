@@ -13,6 +13,7 @@ from booping.context import Context
 from booping.context._yaml import parse_frontmatter_only, update_frontmatter
 from booping.context.lifecycle import resolve_edges, resolve_hooks
 from booping.context.project import Project
+from booping.query import build_spec, run
 from booping.rendering import get_plugin_root, render
 
 
@@ -168,7 +169,7 @@ def _dispatch_render_sprints(project: Project | None) -> tuple[int, Path]:
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(result)
-    return len(ctx.plans), output_path
+    return len(run(build_spec(ctx.config, {}), ctx.project.directory)), output_path
 
 
 def _dispatch_vault_commit(

@@ -6,7 +6,7 @@ the repo's recent commit history, its current branch, and whether the working tr
 uncommitted work; and the plans listed below.
 
 {%- set cr_status = config.skills["code-review"].status %}
-{%- set review_candidates = context.plans | selectattr('status', 'equalto', cr_status) | list %}
+{%- set review_candidates = 'skills.code-review.queries.scope_candidates' | query %}
 {%- if review_candidates %}
 
 ## Plans at the review status
@@ -16,7 +16,7 @@ Each is a candidate; its `commit:` is the diff base.
 | SP | Title | Baseline |
 | --- | --- | --- |
 {% for plan in review_candidates -%}
-| {{ plan.sp or "?" }} | [{{ plan.title | replace("|", "\\|") | replace("\n", " ") }}]({{ plan.rel_link }}) | {{ plan.commit or "— none" }} |
+| {{ plan.sp or "?" }} | [{{ plan.title | replace("|", "\\|") | replace("\n", " ") }}]({{ plan.path }}) | {{ plan.commit or "— none" }} |
 {% endfor %}
 {%- else %}
 

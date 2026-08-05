@@ -83,8 +83,8 @@ Each is a candidate; its `commit:` is the diff base.
 
 | SP | Title | Baseline |
 | --- | --- | --- |
-| 5 | [Widget search](plans/19700101-widget-search.md) | — none |
-| 2 | [Login timeout fix](plans/19700102-login-timeout/index.md) | — none |
+| 5 | [Widget search](plans/19700101-widget-search.md) | aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa |
+| 2 | [Login timeout fix](plans/19700102-login-timeout/index.md) | bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb |
 
 
 ## The question

@@ -6,6 +6,7 @@ from pathlib import Path
 
 from booping import logger
 from booping.context import Context
+from booping.query import build_spec, run
 from booping.rendering import get_plugin_root, render
 
 
@@ -54,15 +55,17 @@ def _run(args: argparse.Namespace) -> None:
         kwargs={},
     )
 
+    plan_count = len(run(build_spec(ctx.config, {}), ctx.project.directory))
+
     if output_str == "-":
         sys.stdout.write(result)
     elif output_str is not None:
         output_path = Path(output_str)
         output_path.parent.mkdir(parents=True, exist_ok=True)
         output_path.write_text(result)
-        print(f"wrote {len(ctx.plans)} plans to {output_path}", file=sys.stderr)
+        print(f"wrote {plan_count} plans to {output_path}", file=sys.stderr)
     else:
         output_path = ctx.project.directory / "sprints.md"
         output_path.parent.mkdir(parents=True, exist_ok=True)
         output_path.write_text(result)
-        print(f"wrote {len(ctx.plans)} plans to {output_path}", file=sys.stderr)
+        print(f"wrote {plan_count} plans to {output_path}", file=sys.stderr)

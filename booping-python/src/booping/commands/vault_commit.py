@@ -6,8 +6,8 @@ import sys
 from pathlib import Path
 
 from booping import logger
-from booping.context.plan import DIR_PLAN_NAMES
 from booping.context.project import Project
+from booping.utils import DIR_PLAN_NAMES
 
 
 def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:  # type: ignore[type-arg]

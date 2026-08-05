@@ -28,13 +28,12 @@ Every accepted learning lands in **exactly one** target. If a candidate would ot
 
 ## Plans awaiting learning
 
-{% set _candidates = context.plans | selectattr("status", "equalto", config.skills.learn.status) | list -%}
-{% set _learn_plans = (_candidates | selectattr("created") | sort(attribute="created", reverse=True) | list) + (_candidates | rejectattr("created") | list) -%}
+{% set _learn_plans = 'skills.learn.queries.candidates' | query -%}
 {% if _learn_plans -%}
 | Status | SP | Title | Created | Completed | Retro | Path |
 | --- | --- | --- | --- | --- | --- | --- |
 {% for plan in _learn_plans -%}
-| {{ plan.status }} | {{ plan.sp if plan.sp is not none else "—" }} | {{ plan.title }} | {{ plan.created if plan.created is not none else "—" }} | {{ plan.completed if plan.completed is not none else "—" }} | {{ plan.retro if plan.retro is not none else "—" }} | {{ plan.rel_link }} |
+| {{ plan.status }} | {{ plan.sp if plan.sp is not none else "—" }} | {{ plan.title }} | {{ plan.created if plan.created is not none else "—" }} | {{ plan.completed if plan.completed is not none else "—" }} | {{ plan.retro if plan.retro is not none else "—" }} | {{ plan.path }} |
 {% endfor -%}
 {%- else -%}
 _No plans at `{{ config.skills.learn.status }}`._

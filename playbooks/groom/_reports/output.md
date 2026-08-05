@@ -115,8 +115,11 @@ Check for context, in case a request is related to already existing plan.
 
 | state | name | summary | path |
 | --- | --- | --- | --- |
+| in-progress | API throttling | Per-client rate limits on the public API. | [plan](plans/19700106-api-throttling/index.md) |
+| awaiting-learning | Session cleanup sweep | Sweep orphaned session rows on expiry. | [plan](plans/19700103-session-cleanup/index.md) |
 | awaiting-retro | Login timeout fix | Session expiry fired one minute early. | [plan](plans/19700102-login-timeout/index.md) |
 | awaiting-retro | Widget search | Full-text search across the widget catalog. | [plan](plans/19700101-widget-search.md) |
+| ready-for-dev | Cache warm-up on deploy | Warm the read cache as part of the deploy step. | [plan](plans/19700104-cache-warmup.md) |
 
 
 ## Task Types

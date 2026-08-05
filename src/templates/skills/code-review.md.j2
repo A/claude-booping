@@ -18,7 +18,7 @@ This skill is **wide-domain** — it must work across very different stacks. Sta
 When `$ARGUMENTS` is empty, pick a plan to drive the diff range. When `$ARGUMENTS` carries a diff range or file list, skip this section entirely and use the existing flow in phase (a).
 
 {%- set cr_status = config.skills["code-review"].status %}
-{%- set review_candidates = context.plans | selectattr('status', 'equalto', cr_status) | list %}
+{%- set review_candidates = ('skills.code-review.queries.review_candidates' | query) if context.vault else [] %}
 {%- if review_candidates %}
 
 Plans currently in `{{ cr_status }}`:
@@ -26,7 +26,7 @@ Plans currently in `{{ cr_status }}`:
 | SP | Title |
 | --- | --- |
 {% for plan in review_candidates -%}
-| {{ plan.sp or "?" }} | [{{ plan.title | replace("|", "\\|") | replace("\n", " ") }}]({{ plan.rel_link }}) |
+| {{ plan.sp or "?" }} | [{{ plan.title | replace("|", "\\|") | replace("\n", " ") }}]({{ plan.path }}) |
 {% endfor %}
 
 Use `AskUserQuestion` (single-select) to pick one. Then derive the diff range from the selected plan's `commit:` field (see phase (a)).

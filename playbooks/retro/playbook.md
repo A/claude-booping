@@ -23,13 +23,12 @@ Produce a project- and plan-specific retrospective grounded in session logs, cod
 
 ## Plans awaiting retro
 
-{% set _candidates = context.plans | selectattr("status", "equalto", config.skills.retro.status) | list -%}
-{% set _retro_plans = (_candidates | selectattr("created") | sort(attribute="created", reverse=True) | list) + (_candidates | rejectattr("created") | list) -%}
+{% set _retro_plans = 'skills.retro.queries.candidates' | query -%}
 {% if _retro_plans -%}
 | Status | SP | Title | Created | Completed | Path |
 | --- | --- | --- | --- | --- | --- |
 {% for plan in _retro_plans -%}
-| {{ plan.status }} | {{ plan.sp if plan.sp is not none else "—" }} | {{ plan.title }} | {{ plan.created if plan.created is not none else "—" }} | {{ plan.completed if plan.completed is not none else "—" }} | {{ plan.rel_link }} |
+| {{ plan.status }} | {{ plan.sp if plan.sp is not none else "—" }} | {{ plan.title }} | {{ plan.created if plan.created is not none else "—" }} | {{ plan.completed if plan.completed is not none else "—" }} | {{ plan.path }} |
 {% endfor -%}
 {%- else -%}
 _No plans at `{{ config.skills.retro.status }}`._

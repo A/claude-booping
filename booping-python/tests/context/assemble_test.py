@@ -23,7 +23,7 @@ def test_assemble_smoke() -> None:
     assert ctx.project is not None
     assert ctx.project.name == "vault-full"
 
-    assert len(ctx.plans) > 0
+    assert ctx.vault == vault
     assert len(ctx.lessons) > 0
     assert len(ctx.retros) > 0
     assert len(ctx.plan_templates) > 0
@@ -39,7 +39,7 @@ def test_assemble_no_project(tmp_path: Path) -> None:
     ctx = Context.assemble(start=tmp_path, plugin_root=plugin_root)
 
     assert ctx.project is None
-    assert ctx.plans == []
+    assert ctx.vault is None
     assert ctx.lessons == []
     assert ctx.retros == []
     # Plan templates still load from plugin root even with no project

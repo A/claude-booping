@@ -36,18 +36,19 @@ The **first assistant message** must include two tables:
 
 | Status | Plans |
 | --- | --- |
+{% set all_plans = ('plans' | query) if context.vault else [] -%}
 {% for status_key in config.plan.statuses.keys() -%}
-| {{ status_key }} | {{ context.plans | selectattr('status', 'equalto', status_key) | list | length }} |
+| {{ status_key }} | {{ all_plans | selectattr('status', 'equalto', status_key) | list | length }} |
 {% endfor %}
 **2. Active plans**
 
 {% set active_statuses = ['ready-for-dev', 'in-progress', 'awaiting-retro', 'awaiting-learning'] -%}
-{% set active_plans = context.plans | selectattr('status', 'in', active_statuses) | list -%}
+{% set active_plans = all_plans | selectattr('status', 'in', active_statuses) | list -%}
 {% if active_plans -%}
 | Status | Plan |
 | --- | --- |
 {% for plan in active_plans -%}
-| {{ plan.status }} | [{{ plan.title | replace("|", "\\|") | replace("\n", " ") }}]({{ plan.rel_link }}) |
+| {{ plan.status }} | [{{ plan.title | replace("|", "\\|") | replace("\n", " ") }}]({{ plan.path }}) |
 {% endfor %}
 {%- else -%}
 _No active plans._

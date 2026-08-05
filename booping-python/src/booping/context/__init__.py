@@ -10,7 +10,6 @@ from booping.context import extra_instructions as ei_mod
 from booping.context import lifecycle as lifecycle
 from booping.context.agent import Agent
 from booping.context.lesson import Lesson
-from booping.context.plan import Plan
 from booping.context.plan_template import PlanTemplate
 from booping.context.playbook import Playbook
 from booping.context.project import Project
@@ -25,7 +24,6 @@ class Context(BaseModel):
     # The vault every loader read from — the project's directory, or the explicit
     # override a pinned render passed. Queries resolve their glob roots against it.
     vault: Path | None = None
-    plans: list[Plan] = []
     lessons: list[Lesson] = []
     targeted_lessons: list[Lesson] = []
     retros: list[Retro] = []
@@ -81,7 +79,6 @@ class Context(BaseModel):
             override_paths = [global_path, vault / "config.yaml"]
             cfg = config_mod.load(root, override_paths)
             config_mod.validate_skills(cfg)
-            plans = Plan.load_all(vault)
             lessons = Lesson.load_all(vault)
             retros = Retro.load_all(vault)
             plan_templates = PlanTemplate.load_all(root, vault)
@@ -90,7 +87,6 @@ class Context(BaseModel):
         else:
             cfg = config_mod.load(root, [global_path])
             config_mod.validate_skills(cfg)
-            plans = []
             lessons = []
             retros = []
             plan_templates = PlanTemplate.load_all(root, Path("/dev/null"))
@@ -108,7 +104,6 @@ class Context(BaseModel):
         return cls(
             project=project,
             vault=vault,
-            plans=plans,
             lessons=lessons,
             targeted_lessons=targeted_lessons,
             retros=retros,
