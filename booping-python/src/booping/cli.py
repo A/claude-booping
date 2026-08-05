@@ -8,6 +8,7 @@ from booping.commands import debug as debug_cmd
 from booping.commands import frontmatter_update as frontmatter_update_cmd
 from booping.commands import playbook_state as playbook_state_cmd
 from booping.commands import playbook_transition as playbook_transition_cmd
+from booping.commands import query as query_cmd
 from booping.commands import render as render_cmd
 from booping.commands import render_playbook as render_playbook_cmd
 from booping.commands import render_sprints as render_sprints_cmd
@@ -30,6 +31,7 @@ def build_parser() -> argparse.ArgumentParser:
     playbook_transition_cmd.add_parser(sub)
     playbook_state_cmd.add_parser(sub)
     config_get_cmd.add_parser(sub)
+    query_cmd.add_parser(sub)
     scaffold_cmd.add_parser(sub)
     build_cmd.add_parser(sub)
     debug_cmd.add_parser(sub)
