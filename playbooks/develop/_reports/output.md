@@ -95,7 +95,7 @@ good" counts, silence never does. That approval is what the `awaiting-plan-revie
 
 ## Plan-validity check
 
-Compare the plan's `commit:` field with the repo's current HEAD, `bea028658449c4679a62ac2aab58a7d7d544cd6b`.
+Compare the plan's `commit:` field with the repo's current HEAD, `62946f72f48dee1a41e9df52f7fbfe84a6ec87ea`.
 
 - **Equal**: proceed.
 - **Different**: run the cheap-summary commands first — do **not** load the full `git diff` into
@@ -178,28 +178,19 @@ Carry intake's outstanding drift alongside them, so `develop-loop` briefs agains
 
 ## Closing the step
 
-With the branch created and the groups settled, fire the run's `ready-for-dev` → `in-progress`
-edge — the `Advance:` invocation from the `## State` section, with `in-progress` as the target:
-
-```bash
-booping playbook-transition develop in-progress --workdir {plan directory}
-```
-
-Its gates: the user confirmed the branch name, and no unresolved non-trivial drift is left — that
-halts back to grooming instead of transitioning. The transition report is authoritative: relay it,
-never re-read `index.md` to verify it.
+With the branch created and the groups settled, advance the run per the `## State` section. Unresolved non-trivial drift halts back to grooming instead of advancing.
 
 ## Return format
 
 ```markdown
 ## Changed:
 
-- [UPDATED] plans/{slug}/index.md — ready-for-dev → in-progress
+- [UPDATED] plans/{slug}/index.md — {status before} → {status after}
 
 ## Notes:
 
 - branch: `{name}` created off the current branch `{base}`, name confirmed by the user
-- transition: `ready-for-dev → in-progress`; frontmatter: started={stamp}, commit={sha}
+- transition: {the transition report verbatim}
 - groups: {n} briefings over {m} milestones (ceiling {c}) — G1 M1+M2, G2 M3, G3 M4+M5
 - drift: {what intake raised and whether anything is outstanding}
 
@@ -305,14 +296,9 @@ commits already landed while the loop ran.
 
 ## 3. Transition
 
-Once the closing commit exists (or there was nothing to commit), fire the exit edge:
-
-```bash
-booping playbook-transition develop awaiting-retro
-```
-
-The plan body is not edited here — no checkbox flipping, no milestone status writing, no new
-sections. A replay that finds the plan already at `awaiting-retro` skips this and continues.
+Once the closing commit exists (or there was nothing to commit), advance the run per the `## State`
+section. The plan body is not edited here — no checkbox flipping, no milestone status writing, no
+new sections.
 
 ## 4. Vault commit
 
@@ -320,7 +306,7 @@ After the transition, so the commit carries the exit status:
 
 ```bash
 git -C {vault} add plans/{slug}
-git -C {vault} commit -q -m "develop: {slug} → awaiting-retro"
+git -C {vault} commit -q -m "develop: {slug} → {new status}"
 ```
 
 ## 5. Sprint report
@@ -340,7 +326,7 @@ Guardrails: {verdict as reported} — {commands}; the plan's Final Verification 
 
 Docs: {what was updated and where}; committed as `{message}`.
 
-The plan is at `awaiting-retro`. Next: `/retro {plan-path}`.
+The plan is at `{new status}`. Next: `/retro {plan-path}`.
 ```
 
 A sprint that invalidated no documentation closes on the same shape, with the docs line reading
@@ -352,14 +338,14 @@ A sprint that invalidated no documentation closes on the same shape, with the do
 ## Changed:
 
 - [UPDATED] {documentation file} — {what changed}
-- [UPDATED] plans/{slug}/index.md — in-progress → awaiting-retro
+- [UPDATED] plans/{slug}/index.md — {status before} → {status after}
 - repo commit: `{closing commit message}`
 
 ## Notes:
 
 - docs: {what was updated and why, or that the sprint invalidated none}
 - transition: {the transition report verbatim}
-- vault-commit: {sha}
+- vault commit: {sha}
 - handoff posted: `/retro {plan-path}`
 
 ## Questions:

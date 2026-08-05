@@ -16,15 +16,6 @@ Produce a project- and plan-specific retrospective grounded in session logs, cod
 | awaiting-retro | 5 | Widget search | 1970-01-01 | 19700101 12:00 | plans/19700101-widget-search/index.md |
 
 
-## High-level workflow
-
-1. Input — select / load the plan(s) for retrospective.
-2. Prepare — review sessions and plan(s); extract the issue list.
-3. User feedback — open-ended overall feedback first, then per-issue triage (refine / accept / dismiss).
-4. Per-issue research and analysis — code reading, web research, prevention design for each accepted issue.
-5. Synthesize — draft using the retrospective template; run lesson cross-check.
-6. Save & transition — write retrospective; apply transitions per the transitions table above; commit.
-
 
 ## Available Agents
 
@@ -80,7 +71,7 @@ booping playbook-state retro --workdir <run workdir>
 | `awaiting-learning` | *(terminal)* | — | — |
 
 ## Step: Intake
-The current set of plans in `awaiting-retro` is listed in the [Plans awaiting retro](#plans-awaiting-retro) table of the preamble, SPs included.
+The current set of candidate plans is listed in the **Plans awaiting retro** table of the preamble, SPs included.
 
 Resolve `$ARGUMENTS` to plan paths.
 
@@ -88,13 +79,13 @@ Resolve `$ARGUMENTS` to plan paths.
 
 **One or more plans provided**:
 
-1. Validate each provided plan's `status:` is `awaiting-retro`. On mismatch, STOP with this verbatim error:
+1. Validate each provided plan's `status:` is the status the `## State` section names as this run's entry. On mismatch, STOP with this verbatim error:
 
-   > `retro playbook requires a plan in status 'awaiting-retro'; got '<current-status>' for <plan-path>. Use the list above to pick a candidate.`
+   > `retro playbook requires a plan in status '{entry-status}'; got '{current-status}' for {plan-path}. Use the list above to pick a candidate.`
 
-2. Identify *other* plans in `awaiting-retro` (those in the inlined list but not in `$ARGUMENTS`). If any exist, ask the user per other plan via `AskUserQuestion`:
+2. Identify *other* plans at that same entry status (those in the inlined list but not in `$ARGUMENTS`). If any exist, ask the user per other plan via `AskUserQuestion`:
    - **Include** — add to this retro run alongside the provided plans.
-   - **Postpone** — leave in `awaiting-retro` (no-op).
+   - **Postpone** — leave the plan where it is (no-op).
    - **Skip retro and mark done** — close the plan now and exclude it from this run.
 3. Close each "skip & mark done" plan before moving to the next step, one `_scripts/drop-plan {slug}` invocation per plan — never a hand edit. The script stamps `status: done`, `goal: skipped` and `completed:` and commits the vault, one commit per plan.
 
@@ -294,8 +285,8 @@ The approved draft arrives from `synthesize` exactly as the user approved it, to
 working set and its primary plan, and the per-plan goal verdicts. Write it as approved — no
 re-drafting, no new findings, no wording the user has not seen.
 
-The order below is fixed: write the file, check its frontmatter covers the working set, fire the
-transition from the workdir, report.
+The order below is fixed: write the file, check its frontmatter covers the working set, advance the
+run, report.
 
 ## 1. Write `retro.md`
 
@@ -331,24 +322,9 @@ either gap.
 
 ## 3. Transition
 
-Fired from the workdir, once `retro.md` is on disk:
-
-```bash
-booping playbook-transition retro awaiting-learning
-```
-
-The command writes the primary plan's `status:`, stamps `reviewed_at` on `retro.md`, then runs
-`close-working-set`, which stamps `retro:` and `goal:` on every plan in the list, moves each
-sibling to `awaiting-learning` and commits. Nothing here hand-edits plan frontmatter, runs
-`booping vault-commit`, or passes an `--also` of its own.
-
-```
-awaiting-retro → awaiting-learning
-frontmatter retro.md: reviewed_at="20260802 15:40"
-script close-working-set: ok
-```
-
-That report is authoritative — do not re-read the plans to verify the moves.
+Once `retro.md` is on disk, advance the run per the `## State` section, from the workdir. The exit
+edge's hooks carry the sibling plans along with the primary; nothing here hand-edits plan
+frontmatter.
 
 ## 4. Closing report
 
@@ -362,8 +338,8 @@ the user may run. Offer it; never launch it.
 
 | Plan | Verdict | Status |
 | ---- | ------- | ------ |
-| `plans/20260728-09-15_playbook-run-state/index.md` | success | `awaiting-learning` |
-| `plans/20260729-11-40_playbook-reports/index.md` | partial | `awaiting-learning` |
+| `plans/20260728-09-15_playbook-run-state/index.md` | success | `{new status}` |
+| `plans/20260729-11-40_playbook-reports/index.md` | partial | `{new status}` |
 
 ### `plans/20260728-09-15_playbook-run-state/index.md`
 
@@ -386,5 +362,5 @@ Next, if you want the lessons absorbed: `/learn plans/20260728-09-15_playbook-ru
 ## Replay
 
 A replay that finds `retro.md` already written re-fires nothing it does not need: a plan still at
-`awaiting-retro` takes the transition alone, a plan already at `awaiting-learning` is only
-re-reported, with the transition line reading `already at awaiting-learning — no transition taken`.
+the entry status takes the transition alone, a plan already past it is only re-reported, with the
+transition line reading `already at {status} — no transition taken`.

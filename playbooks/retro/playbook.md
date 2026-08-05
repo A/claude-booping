@@ -34,15 +34,6 @@ Produce a project- and plan-specific retrospective grounded in session logs, cod
 _No plans at `{{ config.core.retro_playbook.status }}`._
 {%- endif %}
 
-## High-level workflow
-
-1. Input — select / load the plan(s) for retrospective.
-2. Prepare — review sessions and plan(s); extract the issue list.
-3. User feedback — open-ended overall feedback first, then per-issue triage (refine / accept / dismiss).
-4. Per-issue research and analysis — code reading, web research, prevention design for each accepted issue.
-5. Synthesize — draft using the retrospective template; run lesson cross-check.
-6. Save & transition — write retrospective; apply transitions per the transitions table above; commit.
-
 {% set playbook_agents = config.core.retro_playbook -%}
 {% include "_partials/playbook_agents.md" %}
 

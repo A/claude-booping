@@ -5,14 +5,6 @@ a development plan based on it.
 - Date & Time: 1970-01-01 00:00
 - Plan dir: `plans/197001010000_{kebab-title}/`
 
-**High Level Execution**
-- Understand user request and create an empty `plans/197001010000_{kebab-title}/index.md` main artifact
-- Research codebase
-- Research web
-- Draft a solution into `index.md`
-- Cross-check the solution
-- Write and present the final solution to a user
-
 
 ## Available Agents
 

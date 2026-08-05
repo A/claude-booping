@@ -25,14 +25,9 @@ commits already landed while the loop ran.
 
 ## 3. Transition
 
-Once the closing commit exists (or there was nothing to commit), fire the exit edge:
-
-```bash
-booping playbook-transition develop awaiting-retro
-```
-
-The plan body is not edited here — no checkbox flipping, no milestone status writing, no new
-sections. A replay that finds the plan already at `awaiting-retro` skips this and continues.
+Once the closing commit exists (or there was nothing to commit), advance the run per the `## State`
+section. The plan body is not edited here — no checkbox flipping, no milestone status writing, no
+new sections.
 
 ## 4. Vault commit
 
@@ -40,7 +35,7 @@ After the transition, so the commit carries the exit status:
 
 ```bash
 git -C {vault} add plans/{slug}
-git -C {vault} commit -q -m "develop: {slug} → awaiting-retro"
+git -C {vault} commit -q -m "develop: {slug} → {new status}"
 ```
 
 ## 5. Sprint report
@@ -60,7 +55,7 @@ Guardrails: {verdict as reported} — {commands}; the plan's Final Verification 
 
 Docs: {what was updated and where}; committed as `{message}`.
 
-The plan is at `awaiting-retro`. Next: `/retro {plan-path}`.
+The plan is at `{new status}`. Next: `/retro {plan-path}`.
 ```
 
 A sprint that invalidated no documentation closes on the same shape, with the docs line reading
@@ -72,14 +67,14 @@ A sprint that invalidated no documentation closes on the same shape, with the do
 ## Changed:
 
 - [UPDATED] {documentation file} — {what changed}
-- [UPDATED] plans/{slug}/index.md — in-progress → awaiting-retro
+- [UPDATED] plans/{slug}/index.md — {status before} → {status after}
 - repo commit: `{closing commit message}`
 
 ## Notes:
 
 - docs: {what was updated and why, or that the sprint invalidated none}
 - transition: {the transition report verbatim}
-- vault-commit: {sha}
+- vault commit: {sha}
 - handoff posted: `/retro {plan-path}`
 
 ## Questions:

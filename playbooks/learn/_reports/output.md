@@ -34,15 +34,6 @@ The skill infers the exact filename per candidate; the example lists above are v
 | awaiting-learning | 3 | Session cleanup sweep | 1970-01-03 | 19700103 11:00 | plans/19700103-session-cleanup/retro.md | plans/19700103-session-cleanup/index.md |
 
 
-## High-level workflow
-
-1. Intake — resolve the retrospective and its working set; validate `awaiting-learning` status.
-2. Extract candidates — inline, decomposed into atomic rules, routed via the matrix.
-3. Update-vs-create sweep — filtered read of existing lessons and extensions.
-4. Present unified review table — user accepts / rejects / adds rows.
-5. Write accepted items — one pass per target type, no per-edit prompts.
-6. Transition and commit.
-
 
 
 
@@ -89,13 +80,13 @@ booping playbook-state learn --workdir <run workdir>
 | `done` | *(terminal)* | — | — |
 
 ## Step: Intake
-The current set of plans in `awaiting-learning` is listed in the [Plans awaiting learning](#plans-awaiting-learning) table of the preamble.
+The current set of candidate plans is listed in the **Plans awaiting learning** table of the preamble.
 
 Resolve `$ARGUMENTS` to a retrospective file path.
 
 **No `$ARGUMENTS`**: branch on the plans-list size.
 
-- **Zero plans**: STOP with `No plans in awaiting-learning. Run the retro playbook first to write a retrospective.`
+- **Zero plans**: STOP with `No plans at this run's entry status. Run the retro playbook first to write a retrospective.`
 - **Exactly one plan**: auto-select it (do not call `AskUserQuestion` — it requires ≥2 options).
 - **Multiple plans**: present the list via `AskUserQuestion` (single-select; one option per plan). Plans sharing one `retro:` value are one working set — offer the set as a single option, not one option per sibling.
 
@@ -107,9 +98,9 @@ Read the selected plan's `retro:` frontmatter to resolve the retrospective file.
 
 The retrospective's `plans:` frontmatter is the **working set** — every plan this run absorbs lessons for. The plan whose directory holds the retrospective is the **primary**, and its directory `plans/{primary-slug}/` is the run workdir. A retrospective without a `plans:` list covers only the plan it was resolved from.
 
-Validate every working-set plan's `status:` is `awaiting-learning`. On mismatch, STOP with this verbatim error:
+Validate every working-set plan's `status:` is the status the `## State` section names as this run's entry. On mismatch, STOP with this verbatim error:
 
-> `learn playbook requires a plan in status 'awaiting-learning'; got '{current-status}' for {plan-path}. Use the list above to pick a candidate.`
+> `learn playbook requires a plan in status '{entry-status}'; got '{current-status}' for {plan-path}. Use the list above to pick a candidate.`
 
 Read the retrospective in full — it is the sole source the run extracts from. Read each working-set plan for context only: scope, decisions on record, what the retro's findings refer to.
 
@@ -272,20 +263,7 @@ Everything accepted is on disk; nothing here re-drafts or re-opens the table.
 
 ## 1. Transition
 
-Fired from the workdir, once every accepted item is written:
-
-```bash
-booping playbook-transition learn done
-```
-
-The command writes the primary plan's `status:`, then runs `close-working-set`, which moves every sibling in the retrospective's `plans:` list to `done` and commits the plans together with the `_lessons/` and `_booping/` files this run wrote. Nothing here hand-edits plan frontmatter or runs `booping vault-commit`.
-
-```
-awaiting-learning → done
-script close-working-set: ok
-```
-
-That report is authoritative — do not re-read the plans to verify the moves.
+Once every accepted item is written, advance the run per the `## State` section, from the workdir. The exit edge's hooks carry the sibling plans and commit them together with the `_lessons/` and `_booping/` files this run wrote; nothing here hand-edits plan frontmatter.
 
 ## 2. Repo `CLAUDE.md` commit
 
@@ -303,4 +281,4 @@ Post in chat: the plans closed with their new statuses, then a table of the item
 
 ## Replay
 
-A replay that finds the accepted items already written re-fires nothing it does not need: a plan still at `awaiting-learning` takes the transition alone; a plan already at `done` is only re-reported, with the transition line reading `already at done — no transition taken`.
+A replay that finds the accepted items already written re-fires nothing it does not need: a plan still at the entry status takes the transition alone; a plan already past it is only re-reported, with the transition line reading `already at {status} — no transition taken`.

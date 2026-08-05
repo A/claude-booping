@@ -37,28 +37,19 @@ Carry intake's outstanding drift alongside them, so `develop-loop` briefs agains
 
 ## Closing the step
 
-With the branch created and the groups settled, fire the run's `ready-for-dev` → `in-progress`
-edge — the `Advance:` invocation from the `## State` section, with `in-progress` as the target:
-
-```bash
-booping playbook-transition develop in-progress --workdir {plan directory}
-```
-
-Its gates: the user confirmed the branch name, and no unresolved non-trivial drift is left — that
-halts back to grooming instead of transitioning. The transition report is authoritative: relay it,
-never re-read `index.md` to verify it.
+With the branch created and the groups settled, advance the run per the `## State` section. Unresolved non-trivial drift halts back to grooming instead of advancing.
 
 ## Return format
 
 ```markdown
 ## Changed:
 
-- [UPDATED] plans/{slug}/index.md — ready-for-dev → in-progress
+- [UPDATED] plans/{slug}/index.md — {status before} → {status after}
 
 ## Notes:
 
 - branch: `{name}` created off the current branch `{base}`, name confirmed by the user
-- transition: `ready-for-dev → in-progress`; frontmatter: started={stamp}, commit={sha}
+- transition: {the transition report verbatim}
 - groups: {n} briefings over {m} milestones (ceiling {c}) — G1 M1+M2, G2 M3, G3 M4+M5
 - drift: {what intake raised and whether anything is outstanding}
 

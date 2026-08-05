@@ -39,15 +39,6 @@ Every accepted learning lands in **exactly one** target. If a candidate would ot
 _No plans at `{{ config.core.learn_playbook.status }}`._
 {%- endif %}
 
-## High-level workflow
-
-1. Intake — resolve the retrospective and its working set; validate `{{ config.core.learn_playbook.status }}` status.
-2. Extract candidates — inline, decomposed into atomic rules, routed via the matrix.
-3. Update-vs-create sweep — filtered read of existing lessons and extensions.
-4. Present unified review table — user accepts / rejects / adds rows.
-5. Write accepted items — one pass per target type, no per-edit prompts.
-6. Transition and commit.
-
 {% set playbook_agents = config.core.learn_playbook -%}
 {% include "_partials/playbook_agents.md" %}
 

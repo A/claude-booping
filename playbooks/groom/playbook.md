@@ -18,14 +18,6 @@ a development plan based on it.
 - Date & Time: {{ human_ts }}
 - Plan dir: `plans/{{ slug_ts }}_{kebab-title}/`
 
-**High Level Execution**
-- Understand user request and create an empty `plans/{{ slug_ts }}_{kebab-title}/index.md` main artifact
-- Research codebase
-- Research web
-- Draft a solution into `index.md`
-- Cross-check the solution
-- Write and present the final solution to a user
-
 {% set playbook_agents = config.core.groom_playbook -%}
 {% include "_partials/playbook_agents.md" %}
 

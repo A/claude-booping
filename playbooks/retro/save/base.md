@@ -4,8 +4,8 @@ The approved draft arrives from `synthesize` exactly as the user approved it, to
 working set and its primary plan, and the per-plan goal verdicts. Write it as approved — no
 re-drafting, no new findings, no wording the user has not seen.
 
-The order below is fixed: write the file, check its frontmatter covers the working set, fire the
-transition from the workdir, report.
+The order below is fixed: write the file, check its frontmatter covers the working set, advance the
+run, report.
 
 ## 1. Write `retro.md`
 
@@ -41,24 +41,9 @@ either gap.
 
 ## 3. Transition
 
-Fired from the workdir, once `retro.md` is on disk:
-
-```bash
-booping playbook-transition retro awaiting-learning
-```
-
-The command writes the primary plan's `status:`, stamps `reviewed_at` on `retro.md`, then runs
-`close-working-set`, which stamps `retro:` and `goal:` on every plan in the list, moves each
-sibling to `awaiting-learning` and commits. Nothing here hand-edits plan frontmatter, runs
-`booping vault-commit`, or passes an `--also` of its own.
-
-```
-awaiting-retro → awaiting-learning
-frontmatter retro.md: reviewed_at="20260802 15:40"
-script close-working-set: ok
-```
-
-That report is authoritative — do not re-read the plans to verify the moves.
+Once `retro.md` is on disk, advance the run per the `## State` section, from the workdir. The exit
+edge's hooks carry the sibling plans along with the primary; nothing here hand-edits plan
+frontmatter.
 
 ## 4. Closing report
 
@@ -72,8 +57,8 @@ the user may run. Offer it; never launch it.
 
 | Plan | Verdict | Status |
 | ---- | ------- | ------ |
-| `plans/20260728-09-15_playbook-run-state/index.md` | success | `awaiting-learning` |
-| `plans/20260729-11-40_playbook-reports/index.md` | partial | `awaiting-learning` |
+| `plans/20260728-09-15_playbook-run-state/index.md` | success | `{new status}` |
+| `plans/20260729-11-40_playbook-reports/index.md` | partial | `{new status}` |
 
 ### `plans/20260728-09-15_playbook-run-state/index.md`
 
@@ -96,5 +81,5 @@ Next, if you want the lessons absorbed: `/learn plans/20260728-09-15_playbook-ru
 ## Replay
 
 A replay that finds `retro.md` already written re-fires nothing it does not need: a plan still at
-`awaiting-retro` takes the transition alone, a plan already at `awaiting-learning` is only
-re-reported, with the transition line reading `already at awaiting-learning — no transition taken`.
+the entry status takes the transition alone, a plan already past it is only re-reported, with the
+transition line reading `already at {status} — no transition taken`.
