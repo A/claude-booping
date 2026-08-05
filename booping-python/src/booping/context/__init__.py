@@ -22,6 +22,9 @@ from booping.rendering import get_plugin_root
 
 class Context(BaseModel):
     project: Project | None = None
+    # The vault every loader read from — the project's directory, or the explicit
+    # override a pinned render passed. Queries resolve their glob roots against it.
+    vault: Path | None = None
     plans: list[Plan] = []
     lessons: list[Lesson] = []
     targeted_lessons: list[Lesson] = []
@@ -104,6 +107,7 @@ class Context(BaseModel):
 
         return cls(
             project=project,
+            vault=vault,
             plans=plans,
             lessons=lessons,
             targeted_lessons=targeted_lessons,

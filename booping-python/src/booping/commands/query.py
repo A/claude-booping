@@ -10,15 +10,23 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from collections.abc import Mapping, Sequence
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any, NoReturn
 
 import yaml
 
 from booping.context import Context
-from booping.query import QuerySpec, Row, as_dict, run
-from booping.utils import PathError, deep_merge, resolve_path
+from booping.query import (
+    QueryError,
+    QuerySpec,
+    Row,
+    as_dict,
+    as_table,
+    build_spec,
+    resolve_spec,
+    run,
+)
 
 OUTPUTS = ("table", "json", "yaml", "paths")
 
@@ -156,63 +164,15 @@ def _inline_spec(args: argparse.Namespace) -> dict[str, Any]:
 
 def _resolve_spec(config: dict[str, Any], dotted: str) -> dict[str, Any]:
     try:
-        value: Any = resolve_path(config, dotted)
-    except PathError:
-        _fail(f"no query spec at config path: {dotted}")
-    if not isinstance(value, Mapping):
-        _fail(
-            f"config path {dotted} is a {type(value).__name__}, not a query spec mapping"
-        )
-    return dict(value)  # pyright: ignore[reportUnknownArgumentType]
-
-
-def _table_columns(rows: Sequence[dict[str, Any]], spec: QuerySpec) -> list[str]:
-    seen: dict[str, None] = {}
-    for row in rows:
-        for key in row:
-            seen[key] = None
-    if seen:
-        return list(seen)
-    if spec.columns:
-        return list(spec.columns) + [
-            key for key in ("path", "slug") if key not in spec.columns
-        ]
-    return []
-
-
-def _cell(value: Any) -> str:
-    if value is None:
-        return ""
-    if isinstance(value, (list, tuple)):
-        text = ", ".join(_cell(item) for item in value)  # pyright: ignore[reportUnknownArgumentType, reportUnknownVariableType]
-    else:
-        text = str(value)
-    return (
-        text.replace("|", "\\|")
-        .replace("\r\n", " ")
-        .replace("\n", " ")
-        .replace("\r", " ")
-    )
-
-
-def _as_table(rows: Sequence[dict[str, Any]], spec: QuerySpec) -> str:
-    columns = _table_columns(rows, spec)
-    if not columns:
-        return ""
-    lines = [
-        "| " + " | ".join(columns) + " |",
-        "| " + " | ".join("---" for _ in columns) + " |",
-    ]
-    lines += [
-        "| " + " | ".join(_cell(row.get(col)) for col in columns) + " |" for row in rows
-    ]
-    return "\n".join(lines) + "\n"
+        return resolve_spec(config, dotted)
+    except QueryError as exc:
+        _fail(str(exc))
 
 
 def _format(rows: list[Row], spec: QuerySpec, output: str) -> str:
     dicts = [as_dict(row) for row in rows]
     if output == "table":
-        return _as_table(dicts, spec)
+        return as_table(dicts, spec.columns)
     if output == "json":
         return json.dumps(dicts, indent=2, default=str, ensure_ascii=False) + "\n"
     if output == "yaml":
@@ -241,7 +201,7 @@ def _run(args: argparse.Namespace) -> None:
 
     base = _resolve_spec(ctx.config, config_path) if config_path is not None else {}
     try:
-        spec = QuerySpec(**deep_merge(base, inline))
+        spec = build_spec(ctx.config, base, inline)
     except Exception as exc:  # noqa: BLE001 — a malformed spec is a user error
         source = f"config path {config_path}" if config_path else "inline flags"
         _fail(f"invalid query spec from {source}: {exc}")

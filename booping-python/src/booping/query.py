@@ -17,10 +17,17 @@ from typing import Any, cast
 from pydantic import BaseModel
 
 from booping.context._yaml import parse_frontmatter
+from booping.utils import PathError, deep_merge, resolve_path
 
 _GLOB_MAGIC = frozenset("*?[")
 _NE_SUFFIX = "!"
 _IN_SUFFIX = ":in"
+
+DEFAULT_GLOB_PATH = "plans.glob"
+
+
+class QueryError(Exception):
+    """A spec could not be resolved or built."""
 
 
 class Row:
@@ -178,6 +185,104 @@ def project(row: Mapping[str, Any], columns: Sequence[str]) -> dict[str, Any]:
     """Narrow *row* to *columns* in declared order, keeping ``path`` and ``slug``."""
     keys = list(columns) + [key for key in ("path", "slug") if key not in columns]
     return {key: row[key] for key in keys if key in row}
+
+
+def default_glob(config: Mapping[str, Any]) -> list[str]:
+    """The `plans.glob` fallback a spec omitting `glob` inherits."""
+    try:
+        value: Any = resolve_path(dict(config), DEFAULT_GLOB_PATH)
+    except PathError:
+        return []
+    if not isinstance(value, list):
+        return []
+    return [str(item) for item in cast("list[Any]", value)]
+
+
+def build_spec(
+    config: Mapping[str, Any],
+    base: Mapping[str, Any],
+    overrides: Mapping[str, Any] | None = None,
+) -> QuerySpec:
+    """Deep-merge *overrides* over *base* (neither is mutated) into a spec.
+
+    A merged spec without a `glob` inherits the `plans.glob` default.
+    """
+    merged = deep_merge(dict(base), dict(overrides or {}))
+    if not merged.get("glob"):
+        merged["glob"] = default_glob(config)
+    return QuerySpec(**merged)
+
+
+def resolve_spec(config: Mapping[str, Any], dotted: str) -> dict[str, Any]:
+    """The spec mapping at *dotted* in the merged config.
+
+    Raises :class:`QueryError` naming the path when it does not resolve or does
+    not carry a mapping.
+    """
+    try:
+        value: Any = resolve_path(dict(config), dotted)
+    except PathError as exc:
+        raise QueryError(f"no query spec at config path: {dotted}") from exc
+    if not isinstance(value, Mapping):
+        raise QueryError(
+            f"config path {dotted} is a {type(value).__name__}, not a query spec mapping"
+        )
+    return dict(cast("Mapping[str, Any]", value))
+
+
+def table_columns(
+    rows: Sequence[Mapping[str, Any]], columns: Sequence[str] | None = None
+) -> list[str]:
+    """Column order of a table over *rows* — their key union, or *columns* when empty."""
+    seen: dict[str, None] = {}
+    for row in rows:
+        for key in row:
+            seen[key] = None
+    if seen:
+        return list(seen)
+    if columns:
+        return list(columns) + [key for key in ("path", "slug") if key not in columns]
+    return []
+
+
+def cell(value: Any) -> str:
+    """One table cell: `|` escaped, newlines collapsed, `None` empty."""
+    if value is None:
+        return ""
+    if isinstance(value, (list, tuple)):
+        text = ", ".join(cell(item) for item in value)  # pyright: ignore[reportUnknownArgumentType, reportUnknownVariableType]
+    else:
+        text = str(value)
+    return (
+        text.replace("|", "\\|")
+        .replace("\r\n", " ")
+        .replace("\n", " ")
+        .replace("\r", " ")
+    )
+
+
+def as_table(
+    rows: Sequence[Row | Mapping[str, Any]], columns: Sequence[str] | None = None
+) -> str:
+    """A GFM table over *rows*, narrowed to *columns* when given.
+
+    The one table writer — `booping query --output table` and the `as_table`
+    filter both call it, so both emit the same bytes for the same rows.
+    """
+    dicts = [as_dict(row) if isinstance(row, Row) else dict(row) for row in rows]
+    if columns is not None:
+        dicts = [project(row, columns) for row in dicts]
+    header = table_columns(dicts, columns)
+    if not header:
+        return ""
+    lines = [
+        "| " + " | ".join(header) + " |",
+        "| " + " | ".join("---" for _ in header) + " |",
+    ]
+    lines += [
+        "| " + " | ".join(cell(row.get(col)) for col in header) + " |" for row in dicts
+    ]
+    return "\n".join(lines) + "\n"
 
 
 def run(spec: QuerySpec, vault: Path) -> list[Row]:

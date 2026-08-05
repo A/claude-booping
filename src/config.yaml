@@ -30,6 +30,37 @@ tasks:
     description: "Internal structure change with no user-visible behavior change. Needs current-vs-target design, migration steps, and a no-behavior-change DoD."
     doc_uri: ${CLAUDE_PLUGIN_ROOT}/docs/task_refactoring.md
 
+# A **query spec** is any mapping in the merged config, addressed by its dotted
+# path — `booping query --config <dotted.path>` and `{{ '<dotted.path>' | query }}`.
+# Keys, all optional:
+#
+#   glob:    ordered list of vault-relative glob patterns. The first pattern to
+#            claim a slug wins, so precedence is list order. A slug is the parent
+#            directory name when the pattern's last segment is a literal filename
+#            (`plans/*/index.md` -> `alpha`), else the file stem. Omitted -> the
+#            `plans.glob` default below.
+#   where:   mapping of clause -> value. The clause key carries its operator as a
+#            suffix: `k` equality, `k!` inequality, `k:in` membership in a list.
+#            A row missing the field fails every operator.
+#   sort:    frontmatter field name, `-` prefixed for descending. Rows without a
+#            value come last. Omitted -> slug order.
+#   columns: projection, declared order preserved. `path` and `slug` are always
+#            present. Sorting happens before projection, so a sort field need not
+#            be listed.
+#
+# Each spec lives beside its consumer (`skills.<name>.queries.<id>`), never in a
+# central registry, and rides the core -> global -> project merge like any other
+# config value. Inline arguments (`--where`, `| query(where={...})`) deep-merge
+# over a resolved spec for that call only.
+plans:
+  # Plan-shape precedence as data rather than hidden engine logic: a directory
+  # plan is claimed by its `index.md` (then `plan.md`), and a directory shadows a
+  # same-slug flat plan file. A vault with a different mix edits this one key.
+  glob:
+    - plans/*/index.md
+    - plans/*/plan.md
+    - plans/*.md
+
 # Keyed by skill name, and by playbook name for the playbooks that replaced a
 # skill (`groom`, `develop`, `retro`, `learn`) — `playbooks/_partials/available_agents.md`
 # resolves `config.skills[<playbook name>]`, and the retro / learn playbooks read
@@ -52,6 +83,22 @@ skills:
           - "Single-file reads — call Read directly"
 
   groom:
+    queries:
+      # The `intake` step's context table: everything past specification, newest
+      # first. Stated as the statuses it keeps, because the operator vocabulary
+      # is `=`, `!=` and `in` only.
+      latest_plans:
+        where:
+          status:in:
+            - ready-for-dev
+            - in-progress
+            - awaiting-retro
+            - awaiting-learning
+            - done
+            - fail
+            - cancelled
+        sort: "-created"
+        columns: [status, title, summary]
     agents:
       booping-researcher:
         internal: true
@@ -70,11 +117,25 @@ skills:
 
   learn:
     status: awaiting-learning
+    queries:
+      # The playbook's "Plans awaiting learning" table.
+      candidates:
+        where:
+          status: awaiting-learning
+        sort: "-created"
+        columns: [status, sp, title, created, completed, retro]
 
   playbook: {}
 
   retro:
     status: awaiting-retro
+    queries:
+      # The playbook's "Plans awaiting retro" table.
+      candidates:
+        where:
+          status: awaiting-retro
+        sort: "-created"
+        columns: [status, sp, title, created, completed]
     agents:
       booping-researcher:
         internal: true
@@ -87,6 +148,18 @@ skills:
 
   code-review:
     status: awaiting-retro
+    queries:
+      # The `/code-review` skill's argument-free plan picker. Kept in step with
+      # `skills.code-review.status`.
+      review_candidates:
+        where:
+          status: awaiting-retro
+        columns: [sp, title]
+      # The `code-review` playbook's `scope` step, which also needs the diff base.
+      scope_candidates:
+        where:
+          status: awaiting-retro
+        columns: [sp, title, commit]
     agents:
       booping-researcher:
         internal: true

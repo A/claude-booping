@@ -3,9 +3,14 @@ from __future__ import annotations
 from collections.abc import Callable, Iterator
 from datetime import datetime
 from pathlib import Path
-from typing import Any, cast
+from typing import TYPE_CHECKING, Any, cast
 
-from jinja2 import BaseLoader, ChainableUndefined, Environment, FileSystemLoader
+from jinja2 import BaseLoader, ChainableUndefined, Environment, FileSystemLoader, pass_context
+
+if TYPE_CHECKING:
+    from jinja2.runtime import Context as JinjaContext
+
+    from booping.query import Row
 
 
 class RenderCycleError(Exception):
@@ -95,6 +100,47 @@ def make_now(config: object = None) -> Callable[..., str]:
     return pinned_now
 
 
+def _vault_of(context: object) -> Path | None:
+    """The vault a query runs against: the render's resolved vault, else the project's."""
+    vault = getattr(context, "vault", None)
+    if isinstance(vault, Path):
+        return vault
+    project = getattr(context, "project", None)
+    directory = getattr(project, "directory", None)
+    return directory if isinstance(directory, Path) else None
+
+
+def make_query_filter(config: object) -> Callable[..., list[Row]]:
+    """The `query` filter: `{{ 'a.b.c' | query(where={...}) }}`.
+
+    The left-hand side is a dotted config path whose value is the spec; keyword
+    arguments deep-merge over it for this call only. An unresolvable path raises
+    rather than rendering empty.
+    """
+    # Local import: booping.query pulls in booping.context, which imports this module.
+    from booping.query import QueryError, build_spec, resolve_spec, run
+
+    @pass_context
+    def query_filter(
+        jinja_ctx: JinjaContext, spec_path: object, **overrides: Any
+    ) -> list[Row]:
+        cfg = cast("dict[str, Any]", config) if isinstance(config, dict) else {}
+        dotted = str(spec_path)
+        base = resolve_spec(cfg, dotted)
+        vault = _vault_of(jinja_ctx.get("context"))
+        if vault is None:
+            raise QueryError(
+                f"cannot run query {dotted}: no vault resolved for this render"
+            )
+        try:
+            spec = build_spec(cfg, base, overrides)
+        except Exception as exc:
+            raise QueryError(f"invalid query spec at config path {dotted}: {exc}") from exc
+        return run(spec, vault)
+
+    return query_filter
+
+
 def _build_env(
     loader_root: Path,
     *,
@@ -102,6 +148,8 @@ def _build_env(
     env_class: type[Environment] = Environment,
     config: object = None,
 ) -> Environment:
+    from booping.query import as_table  # local import: see make_query_filter
+
     env = env_class(
         loader=loader if loader is not None else FileSystemLoader(str(loader_root)),
         undefined=LenientUndefined,
@@ -109,6 +157,9 @@ def _build_env(
     )
     globals_: dict[str, Any] = env.globals  # type: ignore[assignment]
     globals_["now"] = make_now(config)
+    filters: dict[str, Any] = env.filters  # type: ignore[assignment]
+    filters["query"] = make_query_filter(config)
+    filters["as_table"] = as_table
     return env
 
 

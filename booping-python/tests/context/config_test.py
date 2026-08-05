@@ -9,6 +9,7 @@ import yaml
 
 from booping.context import config as config_mod
 from booping.context.config import AgentConfig, SkillConfig
+from booping.query import QuerySpec, build_spec, resolve_spec
 from tests.helpers import get_fixture_path
 
 
@@ -206,3 +207,45 @@ def test_missing_global_file_silently_skipped(isolated_xdg_config_home: Path) ->
     assert not missing.exists()
     cfg = config_mod.load(plugin_root, [missing])
     assert cfg["sprint"]["default_threshold_sp"] == 35  # type: ignore[index]
+
+
+CORE_QUERY_PATHS = [
+    "skills.code-review.queries.review_candidates",
+    "skills.code-review.queries.scope_candidates",
+    "skills.retro.queries.candidates",
+    "skills.learn.queries.candidates",
+    "skills.groom.queries.latest_plans",
+]
+
+
+def _core_config() -> dict[str, object]:
+    return config_mod.load(Path(__file__).resolve().parents[3], [])
+
+
+def test_plans_glob_is_an_ordered_list() -> None:
+    assert _core_config()["plans"]["glob"] == [  # type: ignore[index]
+        "plans/*/index.md",
+        "plans/*/plan.md",
+        "plans/*.md",
+    ]
+
+
+@pytest.mark.parametrize("dotted", CORE_QUERY_PATHS)
+def test_each_consumer_spec_resolves_to_a_spec_mapping(dotted: str) -> None:
+    spec = resolve_spec(_core_config(), dotted)
+    assert isinstance(spec, dict)
+    assert set(spec) <= {"glob", "where", "sort", "columns"}
+    assert QuerySpec(**spec) is not None
+
+
+@pytest.mark.parametrize("dotted", CORE_QUERY_PATHS)
+def test_a_spec_omitting_glob_falls_back_to_plans_glob(dotted: str) -> None:
+    cfg = _core_config()
+    spec = build_spec(cfg, resolve_spec(cfg, dotted))
+    assert spec.glob == cfg["plans"]["glob"]  # type: ignore[index]
+
+
+def test_a_spec_declaring_glob_keeps_it() -> None:
+    cfg = _core_config()
+    spec = build_spec(cfg, {"glob": ["notes/*.md"]})
+    assert spec.glob == ["notes/*.md"]
