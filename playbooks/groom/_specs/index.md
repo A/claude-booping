@@ -25,7 +25,7 @@ present is the run's **single review gate** — a human-targeted approval summar
 plan, and the handoff to the `develop` playbook (`/playbook develop {plan path}`).
 
 The plan document is `index.md` in `plans/{slug}/` — there is no separate `plan.md`. One slug
-names the whole run: `{YYYYMMDD-HH-MM}_{kebab-title}`, minted by the preamble — a deliberate
+names the whole run: `{YYYYMMDDHHMM}_{kebab-title}`, minted by the preamble — a deliberate
 divergence from the `/groom` skill's date-only slug, so parallel runs on one day cannot collide.
 The plan directory is also the run workdir (`_runs/` is gone): the machine's first transition
 bootstraps `index.md` with the run status, `intake` gives it identity frontmatter and writes the
@@ -36,11 +36,12 @@ The research steps write nothing — their findings are posted in chat. The run'
 (`plan-in-spec`, `plan-awaiting-plan-review`, `plan-ready-for-dev`), which also carry the
 `sprints.md` render and the vault commit.
 
-`cross-review` is a step: `detached: "{{ config.cross_review.agent }}"` resolves at
+`cross-review` is a step: `detached: "{{ config.core.cross_review_agent or '' }}"` resolves at
 render time (the playbook is `jinja: true`), the agent reads `plans/{slug}/index.md` and returns
 severity findings only — `CRITICAL|RISK|NOTE` lines or `no findings` — writing nothing; the
-runner disposes of the findings before advancing. With no `cross_review` agent configured the
-step is skipped and its gate is vacuously satisfied. This replaces the Gemini
+runner disposes of the findings before advancing. With no `core.cross_review_agent` configured the
+step's summary and body both render as skipped, the runner performs nothing, and its gate is
+vacuously satisfied. This replaces the Gemini
 `booping-external-llm-call` path for playbook runs; the canonical `/groom` skill keeps the doc's
 path untouched.
 
@@ -88,7 +89,7 @@ Delegation levels (defined in playbook-authoring / `documentation/playbook.md`):
 | research-codebase | map the blast radius in the attached repo — touched surfaces, prior art, the conventions that bind the design, and the calls left for it; bulk reads delegated                                                                                             | blast-radius map posted in chat                                                                                 | none — reviewed through drafting                                                                                                                            | assisted — researcher agent from `config.research_agent` | [spec](steps/research-codebase/index.md) |
 | research-web      | research the external ground the design rests on — current best practice, competing approaches and known pitfalls where the work is uncertain — and check the external references it names against current docs                                           | web-research findings posted in chat                                                                            | none — reviewed through drafting                                                                                                                            | assisted — researcher agent from `config.research_agent` | [spec](steps/research-web/index.md)      |
 | draft-plan        | settle architecture, surface changes and trade-offs with the user, then pick the plan template matching the dominant surface and write the plan — milestones, tasks with DoD and Verify, story points, `sp` / `summary` frontmatter — against its Checklist | `plans/{slug}/index.md` — plan body written, Quality Checklist passed                                           | none as a status — alignment happens in conversation during the step                                                                                        | inline                                                | [spec](steps/draft-plan/index.md)        |
-| cross-review      | second-model review of the written plan `plans/{slug}/index.md`; returns severity findings only, writes nothing; skipped when no `cross_review` agent is configured                                                                                        | none — findings returned to the runner, who disposes of them                                                    | every CRITICAL finding folded in or recorded as a deferral — vacuously satisfied when the step is skipped                                                    | detached — `config.cross_review.agent`                | [spec](steps/cross-review/index.md)      |
+| cross-review      | second-model review of the written plan `plans/{slug}/index.md`; returns severity findings only, writes nothing; skipped when no `core.cross_review_agent` agent is configured                                                                                        | none — findings returned to the runner, who disposes of them                                                    | every CRITICAL finding folded in or recorded as a deferral — vacuously satisfied when the step is skipped                                                    | detached — `config.cross_review.agent`                | [spec](steps/cross-review/index.md)      |
 | present           | assemble the approval summary — approach, milestones, SP totals, plan path, check outcomes — recommend a split past the threshold, offer a plan branch on a repo-local vault, and carry the approval                                                       | approval summary posted in chat                                                                                 | the run's single review gate: explicit user approval over the summary and the full plan; a change request to the plan itself loops the run back to drafting  | inline                                                | [spec](steps/present/index.md)           |
 
 ## States

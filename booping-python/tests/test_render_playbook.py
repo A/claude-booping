@@ -1758,16 +1758,16 @@ def test_stubbed_macro_reaches_playbook_bodies() -> None:
         update={
             "config": {
                 **_ctx().config,
-                "macro_stubs": {"macros.now": "19700101-00-00"},
+                "macro_stubs": {"macros.date +%Y%m%d%H%M": "197001010000"},
             }
         }
     )
     env = build_env(context=ctx)
-    assert env.from_string("{{ macro('macros.now') }}").render() == "19700101-00-00"
+    body = "{{ macro('macros.date', '+%Y%m%d%H%M') }}"
+    assert env.from_string(body).render() == "197001010000"
 
 
 def test_unstubbed_macro_in_playbook_bodies_is_time_shaped() -> None:
     env = build_env(context=_ctx())
-    assert re.fullmatch(
-        r"\d{8}-\d{2}-\d{2}", env.from_string("{{ macro('macros.now') }}").render()
-    )
+    body = "{{ macro('macros.date', '+%Y%m%d%H%M') }}"
+    assert re.fullmatch(r"\d{12}", env.from_string(body).render())

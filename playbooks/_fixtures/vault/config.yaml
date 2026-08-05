@@ -1,2 +1,2 @@
-cross_review:
-  agent: codex
+core:
+  cross_review_agent: codex

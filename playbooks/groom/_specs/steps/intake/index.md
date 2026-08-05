@@ -31,7 +31,7 @@ suite_reviewed_at: 20260731 19:47
     task type with the rationale that rules each sibling type out by name; the problem —
     what the system does today and what must change, in the request's own domain terms; and
     the clarifications and decisions settled with the user, one line each. The slug is
-    `{YYYYMMDD-HH-MM}_{kebab-title}`.
+    `{YYYYMMDDHHMM}_{kebab-title}`.
   - `[CREATED|UPDATED] plans/{slug}/index.md` — the plan document, identity frontmatter
     only, no body: `title`, `type`, `created`, and every other key of the plan frontmatter
     shape at its default (`sp: null`, `summary: ""`, the rest `null`). `status:` is the run

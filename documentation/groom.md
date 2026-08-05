@@ -111,7 +111,7 @@ Both thresholds are ceilings, not velocity targets. A 12-SP plan is fine; a 38-S
 
 ## Cross-review
 
-`cross-review` is a **detached** step: a second model reads the written plan and returns severity findings only — it never writes. The reviewer is whatever agent `cross_review.agent` names in config; with no `cross_review` agent configured the step is skipped and the run advances straight past it.
+`cross-review` is a **detached** step: a second model reads the written plan and returns severity findings only — it never writes. The reviewer is whatever agent `core.cross_review_agent.agent` names in config; with no `cross_review` agent configured the step is skipped and the run advances straight past it.
 
 Disposing of findings is the runner's job, before the run advances:
 
@@ -129,6 +129,6 @@ The playbook reads these keys from `src/config.yaml`. See [Project config](proje
 - **`sprint.redecompose_threshold`** — per-task SP value at or above which the task must be re-decomposed.
 - **`sprint.scale`** — the 1–5 SP definitions (each a `{sp, meaning}` entry).
 - **`tasks`** — list of `{type, description, doc_uri}` entries (`feature`, `bug`, `refactoring`). The request is classified against this list; the matching `doc_uri` lazy-loads detailed guidance for that task type.
-- **`cross_review.agent`** — the agent that performs the detached cross-review; absent → the step is skipped.
+- **`core.cross_review_agent`** — the agent that performs the detached cross-review; absent → the step is skipped.
 - **`research_agent`** — the agent the two research steps delegate their bulk reads to (default `booping:booping-researcher`).
 - **`skills.groom.agents`** — the delegation table rendered into the playbook.

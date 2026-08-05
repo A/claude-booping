@@ -6,16 +6,8 @@ You need to read user request and confirm you have all information to work it ou
 
 Check for context, in case a request is related to already existing plan.
 
-{% set _latest = ('skills.groom.queries.latest_plans' | query)[:10] -%}
-{% if _latest %}
-| state | name | summary | path |
-| --- | --- | --- | --- |
-{% for plan in _latest -%}
-| {{ plan.status | replace("|", "\|") | replace("\n", " ") }} | {{ plan.title | replace("|", "\|") | replace("\n", " ") }} | {{ plan.summary | replace("|", "\|") | replace("\n", " ") }} | [plan]({{ plan.path }}) |
-{% endfor -%}
-{% else %}
-No plans filed.
-{% endif %}
+{% set query_plans = 'core.groom_playbook.queries.latest_plans' -%}
+{% include "_partials/plans_table.md" %}
 
 ## Task Types
 

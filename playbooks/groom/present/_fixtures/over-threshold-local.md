@@ -28,7 +28,7 @@ presentation of the plan — the run's `index.md` carries no `## Approval` secti
   `## Blast radius`, the confirmed `## Design`, the `## Refinement` verdict with the split
   candidate the sizing pass flagged, and the `## References` results
 - the cross-review findings and their deferrals, as `draft-plan` returned them (the project
-  configures `cross_review.agent: codex`; the reviewer ran once over the finished draft):
+  configures `core.cross_review_agent: codex`; the reviewer ran once over the finished draft):
 
   > - cross-review (`codex`): 3 findings — 1 CRITICAL folded into milestone 2 (the 429 path
   >   returned no `Retry-After`, so callers could not back off deterministically; now task 2.1's

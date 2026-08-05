@@ -21,16 +21,39 @@ typecheck:
 test:
     cd booping-python && uv run pytest
 
-# Render every playbook against the fixture vault into playbooks/<name>/_reports/output.md
-playbook-reports:
+# Committed reports: fixture vault + stubbed macros, byte-reproducible. One playbook
+# with `just playbook-reports groom`. A STOP notice in the output fails the recipe.
+playbook-reports which="*":
     #!/usr/bin/env bash
     set -euo pipefail
-    for manifest in playbooks/*/playbook.md; do
+    failed=()
+    for manifest in playbooks/{{ which }}/playbook.md; do
         name=$(basename "$(dirname "$manifest")")
+        out="playbooks/$name/_reports/output.md"
         bin/booping render-playbook "$name" \
             --project playbooks/_fixtures/vault \
-            --stub-macro macros.now=19700101-00-00 \
-            --output "playbooks/$name/_reports/output.md"
+            --stub-macro "macros.date=19700101-00-00" \
+            --stub-macro "macros.date +%Y%m%d%H%M=197001010000" \
+            --stub-macro "macros.date +%Y-%m-%d %H:%M=1970-01-01 00:00" \
+            --output "$out"
+        grep -q '^\*\*STOP' "$out" && failed+=("$name")
+    done
+    if (( ${#failed[@]} )); then
+        printf 'STOP notice in report: %s\n' "${failed[@]}" >&2
+        exit 1
+    fi
+
+# Debug reports: the attached project's own vault, macros executed for real. Written to
+# playbooks/<name>/_reports/local.md, which is gitignored. STOP notices are the point here,
+# so they print rather than fail.
+playbook-reports-live which="*":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    for manifest in playbooks/{{ which }}/playbook.md; do
+        name=$(basename "$(dirname "$manifest")")
+        out="playbooks/$name/_reports/local.md"
+        bin/booping render-playbook "$name" --output "$out"
+        grep -h '^\*\*STOP' "$out" || true
     done
 
 # Playbook evals — promptfoo over `claude -p` on subscription auth. Suites live at

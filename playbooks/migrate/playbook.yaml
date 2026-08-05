@@ -1,0 +1,8 @@
+graph:
+  survey: []
+  apply:
+    dependencies: [survey]
+    repeat: once per pending migration, in ascending id order; strictly one instance at a time — never in parallel — and a failed instance stops the run
+    graph:
+      apply-migration: []
+  summarize: [apply]

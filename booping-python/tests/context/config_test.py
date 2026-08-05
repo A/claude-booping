@@ -238,7 +238,7 @@ CORE_QUERY_PATHS = [
     "skills.code-review.queries.scope_candidates",
     "skills.retro.queries.candidates",
     "skills.learn.queries.candidates",
-    "skills.groom.queries.latest_plans",
+    "core.groom_playbook.queries.latest_plans",
 ]
 
 

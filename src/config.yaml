@@ -8,14 +8,38 @@ home_dir: ~/Claude/
 # Agent an assisted playbook step delegates its heavy reads to.
 research_agent: "booping:booping-researcher"
 
-# Shell-outs a template body may call by dotted path: `{{ macro('macros.now') }}`.
-# Each value is an argv list (never a shell string) run with shell=False; stdout is
-# stripped and cached per argv tuple for the process, so a macro must be idempotent
-# within one render. Honoured in the core and global tiers only — a project-tier
-# `macros` block is dropped with a stderr warning. `--stub-macro <path>=<literal>`
+core:
+  # Agent that performs the detached second-model review of a drafted plan.
+  # Null → the reviewing step is skipped entirely.
+  cross_review_agent: null
+
+  groom_playbook:
+    queries:
+      # The `intake` step's context table: everything past specification, newest
+      # first. Stated as the statuses it keeps, because the operator vocabulary
+      # is `=`, `!=` and `in` only.
+      latest_plans:
+        where:
+          status:in:
+            - ready-for-dev
+            - in-progress
+            - awaiting-retro
+            - awaiting-learning
+            - done
+            - fail
+            - cancelled
+        sort: "-created"
+        columns: [status, title, summary]
+
+# Shell-outs a template body may call by dotted path: `{{ macro('macros.date', '+%H:%M') }}`.
+# Each value is an argv list (never a shell string) run with shell=False, and the list is a
+# prefix — call-site positional arguments append to it. stdout is stripped and cached per
+# argv tuple for the process, so a macro must be idempotent within one render and two
+# argument variants are two runs. Honoured in the core and global tiers only — a project-tier
+# `macros` block is dropped with a stderr warning. `--stub-macro <path>[ <args>]=<literal>`
 # on `render`, `render-playbook` and `scaffold` returns the literal without executing.
 macros:
-  now: ["date", "+%Y%m%d-%H-%M"]
+  date: ["date"]
 
 sprint:
   default_threshold_sp: 35
@@ -63,7 +87,8 @@ tasks:
 #            present. Sorting happens before projection, so a sort field need not
 #            be listed.
 #
-# Each spec lives beside its consumer (`skills.<name>.queries.<id>`), never in a
+# Each spec lives beside its consumer (`skills.<name>.queries.<id>` for a skill,
+# `core.<playbook>.queries.<id>` for a playbook), never in a
 # central registry, and rides the core -> global -> project merge like any other
 # config value. Inline arguments (`--where`, `| query(where={...})`) deep-merge
 # over a resolved spec for that call only.
@@ -107,22 +132,6 @@ skills:
           - "Single-file reads — call Read directly"
 
   groom:
-    queries:
-      # The `intake` step's context table: everything past specification, newest
-      # first. Stated as the statuses it keeps, because the operator vocabulary
-      # is `=`, `!=` and `in` only.
-      latest_plans:
-        where:
-          status:in:
-            - ready-for-dev
-            - in-progress
-            - awaiting-retro
-            - awaiting-learning
-            - done
-            - fail
-            - cancelled
-        sort: "-created"
-        columns: [status, title, summary]
     agents:
       booping-researcher:
         internal: true

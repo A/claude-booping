@@ -19,7 +19,7 @@ suite_reviewed_at: 20260731 20:34
   - the split threshold, and the split offer draft-plan made with the user's answer, when the
     total passed it
   - the cross-review outcome — the findings with the deferrals recorded against them, or the
-    note that no `cross_review` agent is configured and the pass was skipped
+    note that no `core.cross_review_agent` is configured and the pass was skipped
   - whether the vault lives inside the repository being planned
   - when this presentation follows a change request: what the user asked for and what changed
     in the plan since the last summary

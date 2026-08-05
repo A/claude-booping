@@ -9,12 +9,21 @@ reviewed_at: 20260802 08:55
 
 ## Contract
 
-- **Delegation** — detached: `detached: "{{ config.cross_review.agent }}"` resolves at render
-  time (the playbook is `jinja: true`), so the agent the project's `cross_review` config names
+- **Delegation** — detached: `detached: "{{ config.core.cross_review_agent or '' }}"` resolves at render
+  time (the playbook is `jinja: true`), so the agent the project's `core.cross_review_agent` names
   fetches and performs the step body itself; the runner never reads the instructions. With no
-  `cross_review` agent configured the field renders empty, the step is **skipped** — nothing
-  reviewer-flavoured enters the plan, no findings list, no severity vocabulary, no risk
-  register — and the drafting-side gate is vacuously satisfied.
+  `core.cross_review_agent` configured the field renders empty and the step degrades to
+  runner-performed, but its `summary` and body both render as **skipped** — the rendered summary
+  reads `Skipped — no core.cross_review_agent configured.` and the body instructs the runner to
+  perform nothing and advance. Nothing reviewer-flavoured enters the plan: no findings list, no
+  severity vocabulary, no risk register — and the drafting-side gate is vacuously satisfied.
+  `summary` and `detached` are both Jinja-rendered because the playbook is `jinja: true`.
+- **Runner-visible surface** — the preamble carries no cross-review block; this step owns the
+  whole surface. The configured `summary` therefore carries the finding-disposal rules the
+  runner applies after the agent returns (`CRITICAL` folded in or deferred to `## Risk register`,
+  `RISK` folded in unless it reopens a settled call, `NOTE` at discretion, a finding that reopens
+  a settled design call sending the run back to `drafting`), because a detached step's body goes
+  to the agent and the runner never reads it.
 - **Needs** —
   - the written plan — the full document the reviewer reads end to end (frontmatter, context,
     decisions, architecture, milestones with task tables, DoDs and Verifies, out-of-scope), and
@@ -46,7 +55,7 @@ reviewed_at: 20260802 08:55
   - none on the step itself (`review_gate: null`) — the user never sees the findings raw;
     disposal is the runner's, and present reports the outcome
   - the `cross-reviewing → presenting` edge gates on every `CRITICAL` finding folded in or
-    recorded as a deferral — vacuously satisfied when no `cross_review` agent is configured
+    recorded as a deferral — vacuously satisfied when no `core.cross_review_agent` is configured
     and the step was skipped
 
 ## Example artifact

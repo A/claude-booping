@@ -20,7 +20,7 @@ Per-project configuration tunes the framework to each codebase: place a `~/Claud
 
 ## Dependencies
 
-Required: `uv` and `git`. Optional: a `cross_review.agent` in your config, for a second-model review of every drafted plan.
+Required: `uv` and `git`. Optional: a `core.cross_review_agent` in your config, for a second-model review of every drafted plan.
 
 ```bash
 # macOS

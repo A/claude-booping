@@ -167,7 +167,7 @@ Under `jinja: true` the value is a template like any body, so the agent can come
 ```yaml
 ---
 summary: Second-model review of the written plan
-detached: "{{ config.cross_review.agent }}"
+detached: "{{ config.core.cross_review_agent or '' }}"
 ---
 ```
 

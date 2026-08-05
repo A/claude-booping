@@ -34,9 +34,9 @@ states:
       cross-reviewing:
         transitions:
           - to: presenting
-            when: "the cross-review pass disposed of every finding, or no `cross_review` agent is configured and the pass was skipped"
+            when: "the cross-review pass disposed of every finding, or no `core.cross_review_agent` is configured and the pass was skipped"
             gates:
-              - "every CRITICAL finding folded in or recorded as a deferral — vacuously satisfied with no `cross_review` agent configured"
+              - "every CRITICAL finding folded in or recorded as a deferral — vacuously satisfied with no `core.cross_review_agent` configured"
             hooks: ["script plan-awaiting-plan-review"]
       presenting:
         transitions:

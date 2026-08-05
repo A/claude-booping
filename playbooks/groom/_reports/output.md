@@ -2,26 +2,16 @@ Groom playbook takes user feature-development request, clarifies it if it's need
 a development plan based on it.
 
 **Context:**
-- Date & Time: 19700101-00-00
-- Plan dir: `plans/19700101-00-00_{kebab-title}/`
+- Date & Time: 1970-01-01 00:00
+- Plan dir: `plans/197001010000_{kebab-title}/`
 
 **High Level Execution**
-- Understand user request and create an empty `plans/19700101-00-00_{kebab-title}/index.md` main artifact
+- Understand user request and create an empty `plans/197001010000_{kebab-title}/index.md` main artifact
 - Research codebase
 - Research web
 - Draft a solution into `index.md`
 - Cross-check the solution
 - Write and present the final solution to a user
-
-The groom playbook ends on `ready-for-dev` states, you need to give a note to user to approve the
-created plan by mentioning plan path in the final response.
-
-**Cross-review**
-- `cross-review` runs detached in `codex` and returns findings only. Dispose of them
-  yourself before advancing: `CRITICAL` folded into the plan or recorded as a deferral in
-  `## Risk register`, `RISK` folded in unless it reopens a call the user settled, `NOTE` at your
-  discretion. A finding that reopens a settled design call is folded in nowhere — it sends the run
-  back to `drafting`.
 
 
 
@@ -71,7 +61,7 @@ Execute the steps in the most effective order considering their dependencies.
 | `research-codebase` | `intake` | Map the blast radius in the attached repo — touched surfaces, prior art, the conventions that bind the design, and the calls left for it; the bulk reads are delegated, the map is posted in chat. | — |
 | `research-web` | `research-codebase` | Research the external ground the design rests on — current best practice, competing approaches and known pitfalls where the work is uncertain, and the external references it names, each checked against current docs. | — |
 | `draft-plan` | `research-codebase`, `research-web` | Settle architecture, surface changes and trade-offs with the user, then pick the plan template matching the dominant surface and write the plan against its Plan Body — milestones, tasks with DoD and Verify, story points per task / milestone / sprint, `sp` and `summary` frontmatter; verify against the template's Quality Checklist before returning. | — |
-| `cross-review` | `draft-plan` | Second-model review of the written plan — requires the plan file `plans/{slug}/index.md`, which the reviewing agent reads; it returns severity findings only and writes nothing. Skip the step when the project configures no `cross_review` agent. | — |
+| `cross-review` | `draft-plan` | Second-model review of the written plan — the agent reads the plan file `plans/{slug}/index.md` and returns severity findings only, writing nothing. Dispose of the findings yourself before advancing: `CRITICAL` folded into the plan or recorded as a deferral in `## Risk register`, `RISK` folded in unless it reopens a call the user settled, `NOTE` at your discretion; a finding that reopens a settled design call is folded in nowhere and sends the run back to `drafting`. | — |
 | `present` | `cross-review` | Assemble the approval summary — approach, milestones, SP totals, plan path and every check outcome; recommend a split when the total passes the threshold, offer a plan branch on a repo-local vault, and carry the approval. | The run's only review gate — the summary and the full plan are approved together, and the plan reaches the `develop` playbook through this gate and no other. Ask for the approval in prose, in the message itself — never via `AskUserQuestion`. Explicit user approval: "looks good" counts, silence never does; on that word the run moves to `ready-for-dev`. A change request loops the run back to the status that owns what it touches: any change to the plan — architecture, scope, milestones, tasks or estimates — sends the run back to `drafting`, and present never absorbs a change itself. A recommended split is acknowledged, not required: the user may approve the plan whole and park no siblings |
 
 ## State
@@ -97,7 +87,7 @@ booping playbook-state groom --workdir <run workdir>
 | `researching` | `drafting` | the blast-radius map and the web-research findings are both posted in chat | — |
 | `drafting` | `cross-reviewing` | architecture, surface changes and trade-offs are settled with the user in conversation, and draft-plan wrote `index.md`'s body against the template's Plan Body and passed its Quality Checklist | every call that is the user's is answered |
 | `drafting` | `researching` | the design needs blast radius or external practice the research pass missed | — |
-| `cross-reviewing` | `presenting` | the cross-review pass disposed of every finding, or no `cross_review` agent is configured and the pass was skipped | every CRITICAL finding folded in or recorded as a deferral — vacuously satisfied with no `cross_review` agent configured |
+| `cross-reviewing` | `presenting` | the cross-review pass disposed of every finding, or no `core.cross_review_agent` is configured and the pass was skipped | every CRITICAL finding folded in or recorded as a deferral — vacuously satisfied with no `core.cross_review_agent` configured |
 | `presenting` | `awaiting-approval` | present posted the approval screen in chat — summary, split recommendation if any, handoff to the `develop` playbook | — |
 | `awaiting-approval` | `drafting` | the user's change request touches the plan itself — architecture, scope, milestones, tasks or estimates | — |
 | `awaiting-approval` | `ready-for-dev` | the user explicitly approves the plan — "looks good" counts, silence never does | explicit user approval captured |
@@ -120,6 +110,7 @@ Check for context, in case a request is related to already existing plan.
 | awaiting-retro | Login timeout fix | Session expiry fired one minute early. | [plan](plans/19700102-login-timeout/index.md) |
 | awaiting-retro | Widget search | Full-text search across the widget catalog. | [plan](plans/19700101-widget-search/index.md) |
 | ready-for-dev | Cache warm-up on deploy | Warm the read cache as part of the deploy step. | [plan](plans/19700104-cache-warmup/index.md) |
+
 
 
 ## Task Types
@@ -283,7 +274,7 @@ Project-specific sizing overrides live in `{project}/_booping/skill_groom.md` an
 
 ## Step: Cross Review
 
-Second-model review of the written plan — requires the plan file `plans/{slug}/index.md`, which the reviewing agent reads; it returns severity findings only and writes nothing. Skip the step when the project configures no `cross_review` agent.
+Second-model review of the written plan — the agent reads the plan file `plans/{slug}/index.md` and returns severity findings only, writing nothing. Dispose of the findings yourself before advancing: `CRITICAL` folded into the plan or recorded as a deferral in `## Risk register`, `RISK` folded in unless it reopens a call the user settled, `NOTE` at your discretion; a finding that reopens a settled design call is folded in nowhere and sends the run back to `drafting`.
 
 Tell the `codex` agent to get its instructions by calling this command: `booping render-playbook groom --step cross-review`.
 

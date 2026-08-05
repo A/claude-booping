@@ -26,7 +26,7 @@ presentation of the plan — the run's `index.md` carries no `## Approval` secti
   candidate the sizing pass flagged, and the `## References` results
 - the cross-review outcome, as `draft-plan` returned it:
 
-  > - cross-review: no `cross_review` agent configured — not run
+  > - cross-review: no `core.cross_review_agent` configured — not run
 
 - no earlier presentation of this plan — this is round one, and no change request has been made
 

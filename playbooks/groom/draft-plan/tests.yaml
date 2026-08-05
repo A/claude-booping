@@ -235,7 +235,7 @@
         rules: |
           - select: UL > LI[text*="cross-review"]
             count: 1
-            require: '(?i)no.*cross_review.*configured'
+            require: '(?i)no.*cross_review_agent.*configured'
             forbid: '(?i)CRITICAL|RISK|NOTE:'
 
 - description: draft-plan regress — an unreviewed draft still holds the line on no-cross-review

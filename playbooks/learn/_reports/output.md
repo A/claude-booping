@@ -177,6 +177,13 @@ Turn retrospective findings into durable behavior changes routed to exactly one 
 - Steps: `dedup-sweep`, `extract-candidates`, `intake`, `review-table`, `transition`, `write`
 - Targets: `booping render playbooks/_partials/lesson_target_space.md --set targets_for=learn`
 
+### migrate
+
+Bring a project vault up to date by applying every pending migration the plugin ships, in id order, on one up-front approval.
+
+- Steps: `apply-migration`, `summarize`, `survey`
+- Targets: `booping render playbooks/_partials/lesson_target_space.md --set targets_for=migrate`
+
 ### playbook-authoring
 
 Turn a procedure description into a working playbook — an interviewed brief, a confirmed step decomposition, an early manifest, and then per step a confirmed spec, test plan, fixtures, prompt, suite, and optimizer passes to green.

@@ -9,7 +9,7 @@ Required:
 
 Optional:
 
-- **A cross-review agent** — set `cross_review.agent` in your config and the [groom playbook](groom.md) hands the drafted plan to that agent for a second-model review before presenting it to you. With no agent configured the step is skipped silently — the rest of the loop is unaffected.
+- **A cross-review agent** — set `core.cross_review_agent` in your config and the [groom playbook](groom.md) hands the drafted plan to that agent for a second-model review before presenting it to you. With no agent configured the step is skipped silently — the rest of the loop is unaffected.
 
 Install the prerequisites:
 

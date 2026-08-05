@@ -906,7 +906,7 @@ Story-point scale:
 
 ## Project config
 
-The merged project configuration carries no `cross_review` key:
+The merged project configuration leaves `core.cross_review_agent` null:
 
 ```yaml
 home_dir: ~/Claude

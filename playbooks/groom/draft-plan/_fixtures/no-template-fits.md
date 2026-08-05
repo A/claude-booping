@@ -282,8 +282,8 @@ Story-point scale:
 ## Project config — cross-review
 
 ```yaml
-cross_review:
-  agent: codex
+core:
+  cross_review_agent: codex
 ```
 
 ## Cross-review return — supplied inline

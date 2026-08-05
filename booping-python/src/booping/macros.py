@@ -4,10 +4,17 @@ A macro is an argv list at a dotted config path (`macros.now:
 ["date", "+%Y%m%d-%H-%M"]`). It runs through ``subprocess.run`` with
 ``shell=False``, so nothing a template supplies can be shell-interpreted.
 
+The declared list is an argv *prefix*: a call site may append positional
+arguments (`macro('macros.date', '+%H:%M')`), so a macro declared complete
+(`["date", "+%Y%m%d-%H-%M"]`) and one declared partial (`["date"]`) are the
+same shape.
+
 Results are cached per argv tuple for the life of the process: one subprocess
-however many bodies ask, and no two calls in one render straddling a minute
-boundary. A macro is therefore expected to be idempotent within one render; a
-macro that is not must not be declared.
+however many bodies ask the same way, and no two such calls in one render
+straddling a minute boundary. Distinct arguments are distinct argv tuples and
+so distinct runs — two formats of the same clock can disagree. A macro is
+expected to be idempotent within one render; a macro that is not must not be
+declared.
 """
 from __future__ import annotations
 
@@ -33,7 +40,9 @@ def clear_cache() -> None:
 def parse_stub_macros(pairs: Sequence[str]) -> dict[str, str]:
     """`macros.now=19700101-00-00` → `{"macros.now": "19700101-00-00"}`.
 
-    The key stays a literal dotted string (unlike `--set`, which nests it).
+    The key stays a literal string (unlike `--set`, which nests it) and may
+    carry the call's arguments after the path — `macros.date +%H:%M=00:00`.
+    Split on the first `=`, so an argument containing one cannot be pinned.
     Raises ValueError carrying the offending pair when it has no `=`.
     """
     stubs: dict[str, str] = {}
@@ -65,6 +74,11 @@ def resolve_argv(config: Mapping[str, Any], dotted: str) -> list[str]:
     return [str(item) for item in cast("list[Any]", value)]
 
 
+def label(dotted: str, args: Sequence[str]) -> str:
+    """How a call is named in diagnostics — path alone, or path plus its args."""
+    return " ".join([dotted, *args])
+
+
 def run_argv(dotted: str, argv: Sequence[str]) -> str:
     key = tuple(argv)
     cached = _cache.get(key)
@@ -89,12 +103,16 @@ def run_argv(dotted: str, argv: Sequence[str]) -> str:
     return result
 
 
-def make_macro(config: object = None) -> Callable[[str], str]:
+def make_macro(config: object = None) -> Callable[..., str]:
     """The `macro` global a rendering env gets.
+
+    Extra positional arguments append to the declared argv prefix.
 
     A `macro_stubs` mapping in config (written by `--stub-macro`) short-circuits
     the named paths to a literal without executing anything — what makes a render
-    byte-reproducible.
+    byte-reproducible. A stub key is either the path plus its arguments
+    (`macros.date +%H:%M`), pinning one call, or the path alone, pinning every
+    argument variant of that macro; the specific key wins.
     """
     cfg = cast("dict[str, Any]", config) if isinstance(config, dict) else {}
     raw_stubs: Any = cfg.get(STUB_KEY) or {}
@@ -104,10 +122,13 @@ def make_macro(config: object = None) -> Callable[[str], str]:
         else {}
     )
 
-    def macro(path: str) -> str:
+    def macro(path: str, *args: object) -> str:
         dotted = str(path)
-        if dotted in stubs:
-            return stubs[dotted]
-        return run_argv(dotted, resolve_argv(cfg, dotted))
+        extra = [str(arg) for arg in args]
+        keyed = label(dotted, extra)
+        for key in (keyed, dotted):
+            if key in stubs:
+                return stubs[key]
+        return run_argv(keyed, [*resolve_argv(cfg, dotted), *extra])
 
     return macro
