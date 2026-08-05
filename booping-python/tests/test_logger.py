@@ -26,12 +26,12 @@ def test_log_appends_one_line(tmp_path: Path) -> None:
 
 def test_log_appends_not_overwrites(tmp_path: Path) -> None:
     log(vault=tmp_path, subcommand="render", message="first.j2")
-    log(vault=tmp_path, subcommand="render-sprints", message="→ sprints.md")
+    log(vault=tmp_path, subcommand="query", message="→ 3 rows")
     log_file = tmp_path / "_booping" / ".booping.log"
     lines = log_file.read_text().strip().splitlines()
     assert len(lines) == 2
     assert "[render]" in lines[0] and "first.j2" in lines[0]
-    assert "[render-sprints]" in lines[1] and "→ sprints.md" in lines[1]
+    assert "[query]" in lines[1] and "→ 3 rows" in lines[1]
 
 
 def test_log_empty_message_no_trailing_space(tmp_path: Path) -> None:

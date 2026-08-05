@@ -14,7 +14,7 @@ Execute the steps in the most effective order considering their dependencies.
 | Step | Dependencies | Summary | Review gate |
 | --- | --- | --- | --- |
 | `setup-booping` | — | Settle the machine level — when booping is not yet initialized, ask the preferred home dir (default `~/Claude/`) and create the machine config; either way make the home dir exist as a git repo. | — |
-| `setup-project` | `setup-booping` | Settle the project level — ask location, name and marker visibility, then scaffold the vault tree, write the `.booping` marker, symlink a repo-local vault into the home dir and seed the sprints snapshot; when the project is already wired, report it and offer the change routes. | — |
+| `setup-project` | `setup-booping` | Settle the project level — ask location, name and marker visibility, then scaffold the vault tree, write the `.booping` marker, and symlink a repo-local vault into the home dir; when the project is already wired, report it and offer the change routes. | — |
 
 ## Step: Setup Booping
 # Set booping up on this machine
@@ -87,11 +87,10 @@ Ask first, write after.
 
 Then, in order:
 
-3. `booping scaffold vault.scaffold {vault_dir}` — the vault tree: `plans/`, `retrospectives/`, `_lessons/`, `_booping/`, `notes/` and a `.gitignore`. It takes no `--set` variables. A non-empty destination exits 1; ask before re-running it with `--force` (0 success, 1 user error, 2 OSError). `booping-create-project` is a different path and is not what this step calls.
+3. `booping scaffold vault.scaffold {vault_dir}` — the vault tree: `plans/`, `retrospectives/`, `_lessons/`, `_booping/`, `notes/`, a `sprints.md` Bases view and a `.gitignore`. It takes no `--set` variables. A non-empty destination exits 1; ask before re-running it with `--force` (0 success, 1 user error, 2 OSError). `booping-create-project` is a different path and is not what this step calls.
 4. `{repo_root}/.booping` — `project_name: {name}` always, plus `vault_path: {dir}` resolved against the repo root when the vault lives in the repo.
 5. Repo-local vault only: `{home_dir}/{name}` as a symlink to the absolute vault dir. The scaffold tree cannot make it — it declares directories and text files only — so create it here.
 6. The visibility answer: append `.booping` to `{repo_root}/.gitignore` or to `{repo_root}/.git/info/exclude`. Tracked, or the question skipped → neither file is touched.
-7. `booping render-sprints`, run from the repo root so it resolves the marker just written and honours `vault_path:`. Idempotent.
 
 ## The project is already initialized
 

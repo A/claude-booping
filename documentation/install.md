@@ -46,7 +46,7 @@ The `setup` playbook takes the repo from any starting state to a working booping
 It runs in two steps:
 
 1. **Machine level** — when booping is not yet initialized, it asks for your preferred home dir (default `~/Claude/`), writes the machine config at `${XDG_CONFIG_HOME:-~/.config}/booping/config.yaml`, and makes the home dir exist as a git repo.
-2. **Project level** — it asks where the vault lives (the default `<home_dir>/{project}/`, kept outside the repo, or a **repo-local** directory recorded via the `.booping` marker's `vault_path:` key), the project name, and marker visibility; then scaffolds the vault tree, writes the `.booping` marker, symlinks a repo-local vault into the home dir, and seeds the sprints snapshot.
+2. **Project level** — it asks where the vault lives (the default `<home_dir>/{project}/`, kept outside the repo, or a **repo-local** directory recorded via the `.booping` marker's `vault_path:` key), the project name, and marker visibility; then scaffolds the vault tree, writes the `.booping` marker, symlinks a repo-local vault into the home dir, and seeds `sprints.md`.
 
 The scaffolded vault:
 
@@ -55,6 +55,7 @@ The scaffolded vault:
 - `_lessons/` — durable, targeted rules authored by the [learn playbook](learn.md).
 - `notes/` — your own free-form notes (untouched by skills).
 - `_booping/` — per-skill / per-agent extension files, kept current by learn. Setup creates the directory; it does not seed extension files or detect your stack.
+- `sprints.md` — an Obsidian Bases fence over `plans/`; seeded once, evaluated live by Obsidian.
 - `.gitignore` — vault-level ignores.
 - `.booping` — marker file (written in the repo root, not the vault) telling skills which vault to resolve.
 
@@ -62,4 +63,4 @@ For the full directory tour (including `plan_templates/`, `review_templates/`, `
 
 ## Verify
 
-After setup, run `/chat` inside the same repo. It should orient against the freshly scaffolded vault, regenerate `sprints.md`, and report that the vault is empty — your signal that you're ready to run your first [groom](groom.md).
+After setup, run `/chat` inside the same repo. It should orient against the freshly scaffolded vault and report that it is empty — your signal that you're ready to run your first [groom](groom.md).

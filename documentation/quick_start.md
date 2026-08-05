@@ -35,13 +35,13 @@ Before grooming anything, run:
 /chat
 ```
 
-`/chat` is the orient/working-mode command. It loads the project vault, refreshes the on-disk sprint snapshot at `~/Claude/{project}/sprints.md`, and is the right surface for vault navigation, reading existing plans, and small ad-hoc edits. When scope grows past "small task", `/chat` escalates you into `/playbook groom`.
+`/chat` is the orient/working-mode command. It loads the project vault and is the right surface for vault navigation, reading existing plans, and small ad-hoc edits. When scope grows past "small task", `/chat` escalates you into `/playbook groom`.
 
-## 4. Read the sprint snapshot
+## 4. Read the sprint view
 
-Open `~/Claude/{project}/sprints.md`. It is a regenerated view of every plan in the vault grouped by status. On a fresh project it will be near-empty — that is expected.
+Open `~/Claude/{project}/sprints.md` in Obsidian. It is an [Obsidian Bases](https://help.obsidian.md/bases) fence — a live table over every plan in the vault, evaluated on open, so it is never stale. On a fresh project it will be near-empty; that is expected.
 
-`sprints.md` is a build artefact, never hand-edit it (see [Vault](vault.md)). It is a snapshot rather than a live view: nothing auto-refreshes it on a plan write yet, so it can drift between `/chat` orients. Re-run `/chat` (or `bin/booping render-sprints`) for a current picture, and treat the plan files as the source of truth.
+The fence is seeded once and yours to edit (see [Vault](vault.md)). Outside Obsidian, `bin/booping query --config plans` prints the same listing.
 
 ## 5. First groom
 

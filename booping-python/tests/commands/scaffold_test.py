@@ -294,6 +294,42 @@ def test_core_playbook_scaffold_tree(tmp_path: Path) -> None:
     assert "graph:" in (dest / "playbook.yaml").read_text()
 
 
+def test_core_vault_scaffold_seeds_sprints_base_fence(tmp_path: Path) -> None:
+    import yaml
+
+    dest = tmp_path / "vault"
+    result = _run("scaffold", "vault.scaffold", str(dest), cwd=tmp_path)
+    assert result.returncode == 0, result.stderr
+
+    text = (dest / "sprints.md").read_text()
+    assert text.startswith("```base\n")
+    fence = text.split("```base\n", 1)[1].split("\n```", 1)[0]
+    spec = yaml.safe_load(fence)
+
+    assert spec["filters"] == {"and": ['file.inFolder("plans")']}
+    view = spec["views"][0]
+    assert view["type"] == "table"
+    assert view["order"] == [
+        "status",
+        "sp",
+        "title",
+        "summary",
+        "created",
+        "completed",
+    ]
+    assert view["sort"] == [{"property": "created", "direction": "DESC"}]
+
+
+def test_core_vault_scaffold_non_empty_destination_aborts(tmp_path: Path) -> None:
+    dest = tmp_path / "vault"
+    dest.mkdir()
+    (dest / "stray.md").write_text("x\n")
+
+    result = _run("scaffold", "vault.scaffold", str(dest), cwd=tmp_path)
+    assert result.returncode == 1
+    assert not (dest / "sprints.md").exists()
+
+
 def test_logs_one_scaffold_line_when_project_attached(
     tmp_path: Path, isolated_xdg_config_home: Path
 ) -> None:

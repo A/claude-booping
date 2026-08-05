@@ -9,13 +9,11 @@ This skill is **wide-domain** — it must work across very different projects. P
 
 {{ available_agents.render("chat") }}
 
-{% include "_partials/_shared_instructions.j2" %}
-
 {{ tools.render('src/templates/_partials/_lessons.j2') }}
 
 ## High-level workflow
 
-1. **Orient** (Phase 0) — refresh `sprints.md`, then surface a counts table and an active-plans table in the first message.
+1. **Orient** (Phase 0) — surface a counts table and an active-plans table in the first message.
 2. **Ingest** (Phase 1) — read any artifacts named in `$ARGUMENTS` or surfaced mid-conversation.
 3. **Discuss / act** (Phase 2) — answer questions, navigate the vault, make small edits as needed.
 4. **Hand-offs** (Phase 3) — route work that has grown beyond chat's scope to the right skill.
@@ -23,12 +21,6 @@ This skill is **wide-domain** — it must work across very different projects. P
 ---
 
 ## Phase 0 Orient
-
-Refresh the snapshot before the first assistant message:
-
-```bash
-booping render-sprints
-```
 
 The **first assistant message** must include two tables:
 

@@ -254,6 +254,27 @@ vault:
       type: dir
     notes:
       type: dir
+    # Obsidian Bases fence (core plugin, no install needed) — a live view over
+    # plans/, seeded once and never rewritten.
+    sprints.md: |
+      ```base
+      filters:
+        and:
+          - file.inFolder("plans")
+      views:
+        - type: table
+          name: Plans
+          order:
+            - status
+            - sp
+            - title
+            - summary
+            - created
+            - completed
+          sort:
+            - property: created
+              direction: DESC
+      ```
     .gitignore: |
       _booping/*.log
 
@@ -430,5 +451,4 @@ plan:
 
   hooks:
     post:
-      - render-sprints
       - vault-commit

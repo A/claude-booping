@@ -49,8 +49,8 @@ booping playbook-transition retro awaiting-learning
 
 The command writes the primary plan's `status:`, stamps `reviewed_at` on `retro.md`, then runs
 `close-working-set`, which stamps `retro:` and `goal:` on every plan in the list, moves each
-sibling to `awaiting-learning`, re-renders the vault's `sprints.md` and commits. Nothing here
-hand-edits plan frontmatter, runs `booping vault-commit`, or passes an `--also` of its own.
+sibling to `awaiting-learning` and commits. Nothing here hand-edits plan frontmatter, runs
+`booping vault-commit`, or passes an `--also` of its own.
 
 ```
 awaiting-retro → awaiting-learning

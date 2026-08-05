@@ -9,12 +9,10 @@ from typing import Any
 
 from booping import logger
 from booping.commands.vault_commit import do_vault_commit
-from booping.context import Context
 from booping.context._yaml import parse_frontmatter_only, update_frontmatter
 from booping.context.lifecycle import resolve_edges, resolve_hooks
 from booping.context.project import Project
-from booping.query import build_spec, run
-from booping.rendering import get_plugin_root, render
+from booping.rendering import get_plugin_root
 
 
 def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:  # type: ignore[type-arg]
@@ -138,40 +136,6 @@ def dispatch_frontmatter_update(
     return rel, resolved
 
 
-def _dispatch_render_sprints(project: Project | None) -> tuple[int, Path]:
-    """Run render-sprints inline (not subprocess)."""
-    if project is None:
-        print(
-            "error: no project resolved — run from a directory with a "
-            ".booping marker",
-            file=sys.stderr,
-        )
-        sys.exit(2)
-
-    ctx = Context.assemble()
-    if ctx.project is None:
-        print(
-            "error: no project resolved — run from a directory with a "
-            ".booping marker",
-            file=sys.stderr,
-        )
-        sys.exit(2)
-
-    output_path = ctx.project.directory / "sprints.md"
-    template_path = get_plugin_root() / "src" / "templates" / "sprints.md.j2"
-    result = render(
-        template_path=template_path,
-        context=ctx,
-        config=ctx.config,
-        tools={},
-        kwargs={},
-    )
-
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(result)
-    return len(run(build_spec(ctx.config, {}), ctx.project.directory)), output_path
-
-
 def _dispatch_vault_commit(
     to_status: str, plan_path: Path, also: list[Path]
 ) -> str | None:
@@ -253,9 +217,6 @@ def _run(args: argparse.Namespace) -> None:
                     hook, plan_path, project
                 )
                 report.append(format_frontmatter_line(resolved))
-            elif hook_name == "render-sprints":
-                count, path = _dispatch_render_sprints(project)
-                report.append(f"render-sprints: {count} plans → {path}")
             elif hook_name == "vault-commit":
                 sha = _dispatch_vault_commit(to_status, plan_path, also)
                 report.append(

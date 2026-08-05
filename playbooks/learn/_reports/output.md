@@ -65,7 +65,7 @@ Execute the steps in the most effective order considering their dependencies.
 | `dedup-sweep` | `extract-candidates` | Sweep every candidate against existing coverage — the vault's lessons, the `_booping/` extensions, and the repo's `CLAUDE.md` — and record a per-candidate verdict: new, update-existing at the target already holding the rule, or a conflict flagged visibly for the review table. | — |
 | `review-table` | `dedup-sweep` | Present the unified review table in the format the review-table doc owns — every candidate with its target and sweep verdict, conflicts flagged — and collect the user's accept / reject / add response in a single `AskUserQuestion` call, never per row; the recorded response is the run's consent to write. | — |
 | `write` | `review-table` | Write every accepted row in one pass per target type — new lesson files at the next free number, in-place updates to the file the sweep matched, `_booping/` extension edits, one-line bullets into the repo's `CLAUDE.md` — with table acceptance as the sole consent and never a write outside the vault and the attached repo. | — |
-| `transition` | `write` | Fire the exit transition from the workdir — `booping playbook-transition learn done` — whose hook moves every sibling plan to `done`, re-renders sprints.md and commits the vault including the written lessons and extensions; commit any repo `CLAUDE.md` addition separately in the repo working tree, then close on a report of items written per target. | — |
+| `transition` | `write` | Fire the exit transition from the workdir — `booping playbook-transition learn done` — whose hook moves every sibling plan to `done` and commits the vault including the written lessons and extensions; commit any repo `CLAUDE.md` addition separately in the repo working tree, then close on a report of items written per target. | — |
 
 ## State
 
@@ -272,7 +272,7 @@ Fired from the workdir, once every accepted item is written:
 booping playbook-transition learn done
 ```
 
-The command writes the primary plan's `status:`, then runs `close-working-set`, which moves every sibling in the retrospective's `plans:` list to `done`, re-renders the vault's `sprints.md`, and commits the plans together with the `_lessons/` and `_booping/` files this run wrote. Nothing here hand-edits plan frontmatter or runs `booping vault-commit`.
+The command writes the primary plan's `status:`, then runs `close-working-set`, which moves every sibling in the retrospective's `plans:` list to `done` and commits the plans together with the `_lessons/` and `_booping/` files this run wrote. Nothing here hand-edits plan frontmatter or runs `booping vault-commit`.
 
 ```
 awaiting-learning → done

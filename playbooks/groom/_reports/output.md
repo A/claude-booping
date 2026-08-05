@@ -199,7 +199,7 @@ started: null
 completed: null
 retro: null
 goal: null
-summary: ""                      # one-line plan intent for search + sprints.md (≤ ~120 chars)
+summary: ""                      # one-line plan intent for search + plan listings (≤ ~120 chars)
 commit: null
 ---
 

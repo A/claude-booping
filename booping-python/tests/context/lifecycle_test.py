@@ -112,7 +112,6 @@ class TestResolveHooks:
         assert "frontmatter-update completed=@now" not in hooks
         assert "frontmatter-update started=@now" not in hooks
         # Post hooks
-        assert "render-sprints" in hooks
         assert "vault-commit" in hooks
 
     def test_planning_to_terminal_boundary(self, machine: dict[str, Any]) -> None:
@@ -122,7 +121,7 @@ class TestResolveHooks:
         # terminal on_entry fires
         assert "frontmatter-update completed=@now" in hooks
         # Post hooks
-        assert "render-sprints" in hooks
+        assert "vault-commit" in hooks
 
     def test_planning_to_executing_boundary(self, machine: dict[str, Any]) -> None:
         # ready-for-dev → in-progress: crosses planned → executing
@@ -132,7 +131,7 @@ class TestResolveHooks:
         assert "frontmatter-update started=@now" in hooks
         assert "frontmatter-update commit=@head" in hooks
         # Post hooks
-        assert "render-sprints" in hooks
+        assert "vault-commit" in hooks
 
     def test_executing_to_review_boundary(self, machine: dict[str, Any]) -> None:
         # in-progress → awaiting-retro: crosses executing → review
@@ -203,7 +202,7 @@ class TestArbitraryMachine:
             "superstates": {
                 "open": {"states": ["draft"], "on_exit": ["frontmatter-update closed=@now"]},
             },
-            "hooks": {"post": ["render-sprints"]},
+            "hooks": {"post": ["vault-commit"]},
         }
 
         assert [e.to for e in resolve_edges("draft", custom)] == ["shipped"]
@@ -211,7 +210,7 @@ class TestArbitraryMachine:
             "frontmatter-update status=shipped",
             "frontmatter-update closed=@now",
             "frontmatter-update ship=@now",
-            "render-sprints",
+            "vault-commit",
         ]
 
 
@@ -242,10 +241,8 @@ class TestHookOrdering:
 
     def test_order_post_hooks_last(self, machine: dict[str, Any]) -> None:
         hooks = resolve_hooks("in-spec", "awaiting-plan-review", machine)
-        render_idx = hooks.index("render-sprints")
         vault_idx = hooks.index("vault-commit")
         # All other hooks come before post hooks
-        assert render_idx == len(hooks) - 2
         assert vault_idx == len(hooks) - 1
 
     def test_full_order_crossing_boundary(self, machine: dict[str, Any]) -> None:
@@ -257,7 +254,6 @@ class TestHookOrdering:
             # edge hooks (empty — moved to boundary)
             "frontmatter-update started=@now",
             "frontmatter-update commit=@head",
-            "render-sprints",
             "vault-commit",
         ]
         assert hooks == expected
@@ -318,7 +314,9 @@ class TestEquivalence:
         for entry in equivalence_table:
             new_hook = str(entry["new_hook"])
             if not new_hook.startswith("frontmatter-update "):
-                continue  # non-frontmatter rows (e.g. `suggest /playbook retro`) aren't tracked here
+                # non-frontmatter rows (e.g. `suggest /playbook retro`)
+                # aren't tracked here
+                continue
             key = (str(entry["from"]), str(entry["to"]))
             documented.setdefault(key, set()).add(new_hook)
 
@@ -371,7 +369,6 @@ class TestDeepMergeSafety:
 
         # Hooks should survive the merge
         post: list[Any] = merged.get("plan", {}).get("hooks", {}).get("post", [])
-        assert "render-sprints" in post
         assert "vault-commit" in post
 
     def test_original_statuses_preserved_after_merge(self) -> None:
