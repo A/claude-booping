@@ -1,0 +1,67 @@
+#!/usr/bin/env python3
+"""Close one plan the `retro` run's intake step drops, invoked as
+`_scripts/drop-plan {slug}` once per skipped sibling.
+
+Environment (set by the step's own invocation): BOOPING_WORKDIR =
+{vault}/plans/{primary-slug}, which is also cwd. The dropped plan is a sibling
+under the same `plans/` directory, which is why the state machine cannot reach
+it — its artifact is fixed to the primary.
+
+Stamps `status: done`, `goal: skipped` and `completed:` on the named plan and
+commits it. Self-contained: the vault carries no `.booping` marker, so nothing
+here shells back into `booping`, and nothing outside the standard library is
+imported.
+"""
+
+import os
+import re
+import subprocess
+import sys
+from datetime import UTC, datetime
+from pathlib import Path
+
+
+def stamp(plan: Path, values: dict[str, str]) -> None:
+    text = plan.read_text()
+    if not text.startswith("---\n"):
+        sys.exit(f"plan has no frontmatter: {plan}")
+    head, sep, body = text.partition("\n---\n")
+    for key, value in values.items():
+        pattern = rf"^{re.escape(key)}:.*$"
+        if re.search(pattern, head, re.MULTILINE):
+            head = re.sub(pattern, f"{key}: {value}", head, count=1, flags=re.MULTILINE)
+        else:
+            head += f"\n{key}: {value}"
+    plan.write_text(head + sep + body)
+
+
+def main() -> None:
+    if len(sys.argv) != 2:
+        sys.exit("usage: drop-plan {slug}")
+    slug = sys.argv[1]
+
+    workdir = Path(os.environ.get("BOOPING_WORKDIR", ".")).resolve()
+    vault = workdir.parent.parent
+    rel = f"plans/{slug}/index.md"
+    plan = vault / rel
+    if not plan.is_file():
+        sys.exit(f"plan not found: {plan}")
+
+    completed = datetime.now(UTC).strftime("%Y%m%d %H:%M")
+    stamp(plan, {"status": "done", "goal": "skipped", "completed": completed})
+
+    summary = f"{rel} → done (goal: skipped)"
+    if (vault / ".git").exists():
+        subprocess.run(["git", "-C", str(vault), "add", rel], check=True)
+        result = subprocess.run(
+            ["git", "-C", str(vault), "commit", "-q", "-m", f"retro: {slug} → done"],
+        )
+        summary += "; vault-commit: " + (
+            "ok" if result.returncode == 0 else "nothing to commit"
+        )
+
+    print(f"drop-plan: {summary}")
+
+
+if __name__ == "__main__":
+    main()

@@ -13,8 +13,6 @@ from booping.commands import query as query_cmd
 from booping.commands import render as render_cmd
 from booping.commands import render_playbook as render_playbook_cmd
 from booping.commands import scaffold as scaffold_cmd
-from booping.commands import transition as transition_cmd
-from booping.commands import vault_commit as vault_commit_cmd
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -36,8 +34,6 @@ def build_parser() -> argparse.ArgumentParser:
     build_cmd.add_parser(sub)
     debug_cmd.add_parser(sub)
     frontmatter_update_cmd.add_parser(sub)
-    transition_cmd.add_parser(sub)
-    vault_commit_cmd.add_parser(sub)
 
     return parser
 

@@ -50,7 +50,7 @@ Execute the steps in the most effective order considering their dependencies.
 
 | Step | Dependencies | Summary | Review gate |
 | --- | --- | --- | --- |
-| `intake` | — | Settle the working set the run covers — validate that the plan the preamble resolved sits at retro's entry status, offer every other plan at that status as include / postpone / skip-and-mark-done, apply the skip moves via `booping transition done`, then read each adopted plan in full for context only: scope, story points, dates and decisions on record, never as a source of runner-derived findings. | — |
+| `intake` | — | Settle the working set the run covers — validate that the plan the preamble resolved sits at retro's entry status, offer every other plan at that status as include / postpone / skip-and-mark-done, apply the skip moves via `_scripts/drop-plan`, then read each adopted plan in full for context only: scope, story points, dates and decisions on record, never as a source of runner-derived findings. | — |
 | `prepare` | `intake` | Read each adopted plan in full for context only, then build the issue list without showing it — session-log mining and a plan-stage lesson check delegated in parallel, the lesson set passed verbatim with each brief — and cross-check both returns against the lesson set and the project-local retro extension; the list is withheld until gather-feedback has the user's raw take. | — |
 | `gather-feedback` | `prepare` | Take the user's raw open-ended take before any mined finding is mentioned: four questions asked verbatim, one at a time, each with a free-text option; then walk every mined item in batches for accept / dismiss / the user's own wording, and close by asking per plan whether the plan's goal was reached, the goal presented verbatim as written. | — |
 | `research-issues` | `gather-feedback` | Do focused root-cause work on each accepted issue: read only the files the trigger or the user's wording implicates, compare documented project conventions against what the code actually does where the issue is a convention drift, research current best practice for the underlying class of problem, and design concrete process-level prevention moves — for lesson-tagged issues also judge whether the lesson's wording, trigger or placement is what failed. | — |
@@ -95,8 +95,8 @@ Resolve `$ARGUMENTS` to plan paths.
 2. Identify *other* plans in `awaiting-retro` (those in the inlined list but not in `$ARGUMENTS`). If any exist, ask the user per other plan via `AskUserQuestion`:
    - **Include** — add to this retro run alongside the provided plans.
    - **Postpone** — leave in `awaiting-retro` (no-op).
-   - **Skip retro and mark done** — apply the proper transition to the plan now (per the transitions table above) and exclude from this run.
-3. Apply each "skip & mark done" transition before moving to the next step. One commit per plan.
+   - **Skip retro and mark done** — close the plan now and exclude it from this run.
+3. Close each "skip & mark done" plan before moving to the next step, one `_scripts/drop-plan {slug}` invocation per plan — never a hand edit. The script stamps `status: done`, `goal: skipped` and `completed:` and commits the vault, one commit per plan.
 
 ## The report — posted in chat
 

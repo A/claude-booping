@@ -1,0 +1,54 @@
+#!/usr/bin/env python3
+"""Vault-commit hook for the `groom` playbook's superstate-boundary edges.
+
+Environment (set by `booping playbook-transition`): BOOPING_WORKDIR =
+{vault}/plans/{slug}, which is also cwd.
+
+Stages the run's plan directory and commits it, tagging the message with the
+`status:` `playbook-transition` already wrote to `index.md`. Self-contained: the
+vault carries no `.booping` marker, so nothing here shells back into `booping`,
+and nothing outside the standard library is imported.
+"""
+
+import os
+import re
+import subprocess
+import sys
+from pathlib import Path
+
+
+def read_status(plan: Path) -> str:
+    text = plan.read_text()
+    if not text.startswith("---\n"):
+        sys.exit(f"plan has no frontmatter: {plan}")
+    head, _, _ = text.partition("\n---\n")
+    match = re.search(r"^status:\s*(.+)$", head, re.MULTILINE)
+    if not match:
+        sys.exit(f"plan frontmatter carries no `status:`: {plan}")
+    return match.group(1).strip().strip("\"'")
+
+
+def main() -> None:
+    workdir = Path(os.environ.get("BOOPING_WORKDIR", ".")).resolve()
+    slug = workdir.name
+    vault = workdir.parent.parent
+    plan = workdir / "index.md"
+    if not plan.is_file():
+        sys.exit(f"plan not found: {plan}")
+
+    status = read_status(plan)
+
+    if not (vault / ".git").exists():
+        print(f"commit-plan: plans/{slug} → {status}; no vault git repo")
+        return
+
+    subprocess.run(["git", "-C", str(vault), "add", f"plans/{slug}"], check=True)
+    result = subprocess.run(
+        ["git", "-C", str(vault), "commit", "-q", "-m", f"groom: {slug} → {status}"],
+    )
+    outcome = "ok" if result.returncode == 0 else "nothing to commit"
+    print(f"commit-plan: plans/{slug} → {status}; vault-commit: {outcome}")
+
+
+if __name__ == "__main__":
+    main()

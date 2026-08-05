@@ -9,8 +9,8 @@ The plan is the run's `index.md`: frontmatter, then the title, then the body.
 ```
 
 `sp` and `summary` are yours to write. `title` and `type` are intake's — correct them only where
-the design changed them. `status`, `plan_status`, and every date and outcome key belong to the run
-machine and its hooks: whatever intake left `null` stays `null`.
+the design changed them. `status` and every date and outcome key belong to the run machine and its hooks: whatever intake
+left `null` stays `null`.
 
 ### Title
 

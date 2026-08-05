@@ -12,22 +12,22 @@ status: awaiting-spec-confirm
   - the plan the run opened on — the one named at invocation, else the one the user picked from
     the candidate table
   - each named plan's current lifecycle status, and whether that status is retro's entry point
-    (`config.skills.retro.status`, today `awaiting-retro`)
+    (`config.core.retro_playbook.status`, today `awaiting-retro`)
   - the other plans sitting at that same status, and what the user wants done with each —
     include / postpone / skip-and-mark-done
 - **Value** — the working set settled before a token is spent on mining: the entry status
   validated so a plan retro has no business touching stops the run before anything is read,
   every sibling at the same status dispositioned by the user rather than silently swept in or
-  out, the dropped ones closed through the lifecycle's own skip-ahead edge. Reading the adopted
+  out, the dropped ones closed by the step's own script. Reading the adopted
   plans is `prepare`'s (the skill's Phase 1), not intake's — the step mirrors the skill's
   Phase 0 exactly.
 - **Output files** —
   - none of the step's own — the working set, which plan is primary, and each adopted plan's
     context live in conversation
   - `[UPDATED] plans/{dropped-slug}/index.md` — one per plan the user skips, written by
-    `booping transition done <plan>` and never by hand; the command's own hooks stamp
-    `goal=skipped` / `completed`, re-render `sprints.md` and commit the vault, one commit per
-    plan, all of it before the run proceeds
+    `_scripts/drop-plan {slug}` and never by hand; the script stamps `status: done`,
+    `goal: skipped` and `completed:` and commits the vault, one commit per plan, all of it
+    before the run proceeds
   - nothing else — no retrospective, and no frontmatter on the adopted plans: their `retro:`,
     `goal:` and status stamps are the exit edge's at `save`
 - **Harness return** — none: the step is runner-performed, so it runs in the driving
@@ -40,7 +40,7 @@ status: awaiting-spec-confirm
   - a plan whose `status:` is not retro's entry status stops the run, reported verbatim, with no
     transition taken and no plan read
 - **Delegation** — inline: the runner performs the step in the main context — the status check,
-  the per-sibling questions, the skip transitions and the per-plan reads are all its own. The
+  the per-sibling questions, the drop-plan invocations and the per-plan reads are all its own. The
   working set is small (the plans already at one status) and every read feeds a judgement the
   runner has to make itself.
 
@@ -66,11 +66,7 @@ status. Primary plan for this run.
 Applied for the skipped plan:
 
 ```
-awaiting-retro → done
-frontmatter: goal=skipped
-frontmatter: completed="20260802 15:12"
-render-sprints: 14 plans → /home/anton/Claude/booping/sprints.md
-vault-commit: 3f9a1c2
+drop-plan: plans/20260722-16-10_install-prompt-copy/index.md → done (goal: skipped); vault-commit: ok
 ```
 ````
 
@@ -87,4 +83,4 @@ retro requires a plan in status `awaiting-retro`; got `ready-for-dev` for
 candidates instead.
 ```
 
-No transition is taken, no plan is read, and the run ends there.
+No plan is closed, no plan is read, and the run ends there.

@@ -35,11 +35,11 @@ def test_scalar_int_dotted_path(tmp_path: Path) -> None:
 
 
 def test_mapping_prints_yaml(tmp_path: Path) -> None:
-    result = _run("config-get", "plan.statuses", cwd=tmp_path)
+    result = _run("config-get", "core.plans", cwd=tmp_path)
     assert result.returncode == 0
     parsed = yaml.safe_load(result.stdout)
     assert isinstance(parsed, dict)
-    assert "backlog" in parsed
+    assert "glob" in parsed
 
 
 def test_missing_key_exits_1_nothing_on_stdout(tmp_path: Path) -> None:

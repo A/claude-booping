@@ -31,10 +31,8 @@ The plan directory is also the run workdir (`_runs/` is gone): the machine's fir
 bootstraps `index.md` with the run status, `intake` gives it identity frontmatter and writes the
 framing brief to `request.md` beside it, and `draft-plan` writes the plan body into `index.md`.
 The research steps write nothing — their findings are posted in chat. The run's `status:` on
-`index.md` belongs to the machine; the plan-lifecycle status `/develop`, `sprints.md` and
-`/chat` read is stamped as `plan_status:` on the same file by playbook-local `_scripts/` hooks
-(`plan-in-spec`, `plan-awaiting-plan-review`, `plan-ready-for-dev`), which also carry the
-`sprints.md` render and the vault commit.
+`index.md` belongs to the machine, and the playbook-local `_scripts/commit-plan` hook commits the
+plan to the vault on every edge that closes a superstate.
 
 `cross-review` is a step: `detached: "{{ config.core.cross_review_agent or '' }}"` resolves at
 render time (the playbook is `jinja: true`), the agent reads `plans/{slug}/index.md` and returns

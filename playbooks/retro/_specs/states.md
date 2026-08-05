@@ -3,9 +3,8 @@
 One machine, `run` — an **artifact lifecycle**, not a procedure tracker, the same shape
 `develop`'s machine has: its statuses *are* the shared plan-lifecycle names, written onto the
 `status:` key of the primary plan's own `index.md` (`{vault}/plans/{primary-slug}/index.md`, also
-the run workdir). It duplicates nothing — it **is** retro's slice of the plan lifecycle, the same
-key `booping transition` writes, and the two never run on one plan at once because retro owns the
-plan for the length of the run. It joins develop's machine at the entry (`awaiting-retro` is
+the run workdir). It duplicates nothing — it **is** retro's slice of the plan lifecycle, and this
+machine is the only writer of that key for the length of the run. It joins develop's machine at the entry (`awaiting-retro` is
 develop's terminal) and hands to `/learn` at the exit (`awaiting-learning` is the status `/learn`
 claims).
 
@@ -47,10 +46,9 @@ set out of `retro.md`'s frontmatter:
 - `close-working-set` — for every plan in `retro.md`'s `plans:` list, stamp
   `retro: plans/{primary-slug}/retro.md` (the one shared retrospective, vault-relative like the
   lifecycle's existing `retro=` value) and `goal:` from that plan's entry in `goal_verdicts:`; for
-  every plan *other than the primary*, also set `status: awaiting-learning`. Then re-render the
-  vault's `sprints.md` and commit — the two side effects `booping transition` used to bring. The
-  primary's own `status:` is not the script's: `playbook-transition` writes it before the hooks
-  run. Self-contained, like groom's `_scripts/_plan_status.py` — the vault carries no `.booping`
+  every plan *other than the primary*, also set `status: awaiting-learning`. Then commit the vault.
+  The primary's own `status:` is not the script's: `playbook-transition` writes it before the hooks
+  run. Self-contained, like groom's `_scripts/commit-plan` — the vault carries no `.booping`
   marker, so nothing shells back into `booping`.
 
 A script rather than hooks because **both values retro must stamp are runtime-valued** and hook
@@ -59,16 +57,13 @@ the primary slug.
 
 **Sibling plans** — the runner's call on the question decompose left open, split by move:
 
-- **Dropped at intake** (`skip retro and mark done`) → `booping transition done <plan>`, the shared
-  lifecycle's own `review → done` skip-ahead edge. Its `goal=skipped` stamp and the
-  `render-sprints` / `vault-commit` post hooks are already correct and static. Step prose, one
-  command per plan, before the run proceeds.
-- **Adopted at save** → folded into `close-working-set`, *not* `booping transition`. Two reasons:
-  the shared `awaiting-retro → awaiting-learning` edge's hooks are authoring placeholders
-  (`retro=retrospectives/YYYYMMDD-{kebab-title}.md`, `goal=success|partial|fail` — `_interpolate`
-  passes any non-`@` value through verbatim, so they would be stamped literally), and DECISIONS
-  forbids rewriting them; and a file-targeted `frontmatter-update <file> …` hook cannot reach a
-  sibling either, since its slug is unknown at authoring time and the count varies per run.
+- **Dropped at intake** (`skip retro and mark done`) → `_scripts/drop-plan {slug}`, which stamps
+  `status: done`, `goal: skipped` and `completed:` on that plan and commits it. A machine edge
+  could never reach it: this machine's artifact is fixed to the primary plan. Step prose, one
+  invocation per plan, before the run proceeds.
+- **Adopted at save** → folded into `close-working-set`, for the same reason: a file-targeted
+  `frontmatter-update <file> …` hook cannot reach a sibling, since its slug is unknown at
+  authoring time and the count varies per run.
 
 Every step re-reads the plan's on-disk state before acting, which makes a replay inside the status
 idempotent and keeps the resume frontier complete:
@@ -87,7 +82,7 @@ per-instance machine**: one run produces one retrospective, and each sibling's s
 `status:` / `retro:` / `goal:` the exit hook stamps on it — `{instance}` would have nothing to key
 on.
 
-Paths retro deliberately does **not** own: `done` stays the shared lifecycle's edge, taken by
-`booping transition` for dropped siblings and never written by this machine; and both abort paths —
+Paths retro deliberately does **not** own: `done` is stamped by `_scripts/drop-plan` for dropped
+siblings and never written by this machine; and both abort paths —
 a cancel at synthesize, a wrong-status stop at intake — end the run with no transition at all,
 leaving the plan at `awaiting-retro`.

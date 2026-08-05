@@ -33,21 +33,21 @@ def _split_result(text: str) -> tuple[str, str, str]:
 
 class TestParsePairs:
     def test_valid_pairs(self) -> None:
-        result = fu_cmd._parse_pairs(["status=in-progress", "sp=5"])  # type: ignore[reportPrivateUsage]
+        result = fu_cmd.parse_pairs(["status=in-progress", "sp=5"])
         assert result == {"status": "in-progress", "sp": "5"}
 
     def test_value_with_equals_sign(self) -> None:
-        result = fu_cmd._parse_pairs(["goal=a = b"])  # type: ignore[reportPrivateUsage]
+        result = fu_cmd.parse_pairs(["goal=a = b"])
         assert result == {"goal": "a = b"}
 
     def test_empty_key_exits_1(self) -> None:
         with pytest.raises(SystemExit) as excinfo:
-            fu_cmd._parse_pairs(["=value"])  # type: ignore[reportPrivateUsage]
+            fu_cmd.parse_pairs(["=value"])
         assert excinfo.value.code == 1
 
     def test_no_equals_exits_1(self) -> None:
         with pytest.raises(SystemExit) as excinfo:
-            fu_cmd._parse_pairs(["noequals"])  # type: ignore[reportPrivateUsage]
+            fu_cmd.parse_pairs(["noequals"])
         assert excinfo.value.code == 1
 
 
@@ -56,13 +56,13 @@ class TestParsePairs:
 
 class TestInterpolate:
     def test_now(self) -> None:
-        result = fu_cmd._interpolate("@now", None)  # type: ignore[reportPrivateUsage]
+        result = fu_cmd.interpolate("@now", None)
         # Should be yyyymmdd hh:mm format
         parsed = datetime.strptime(result, "%Y%m%d %H:%M")
         assert parsed is not None
 
     def test_today(self) -> None:
-        result = fu_cmd._interpolate("@today", None)  # type: ignore[reportPrivateUsage]
+        result = fu_cmd.interpolate("@today", None)
         assert result == datetime.now(UTC).strftime("%Y-%m-%d")
 
     def test_head(self) -> None:
@@ -74,15 +74,15 @@ class TestInterpolate:
             check=True,
         )
         expected = git_result.stdout.strip()
-        actual = fu_cmd._interpolate("@head", Path.cwd())  # type: ignore[reportPrivateUsage]
+        actual = fu_cmd.interpolate("@head", Path.cwd())
         assert actual == expected
         assert len(actual) == 40
 
     def test_literal_value(self) -> None:
-        assert fu_cmd._interpolate("hello", None) == "hello"  # type: ignore[reportPrivateUsage]
+        assert fu_cmd.interpolate("hello", None) == "hello"
 
     def test_at_sign_prefix_not_interpolated(self) -> None:
-        assert fu_cmd._interpolate("@notatoken", None) == "@notatoken"  # type: ignore[reportPrivateUsage]
+        assert fu_cmd.interpolate("@notatoken", None) == "@notatoken"
 
 
 # ── CLI integration ──────────────────────────────────────────────────────

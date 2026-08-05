@@ -1,8 +1,7 @@
 {% raw %}---
 title: {Descriptive Title}
 type: feature | bug | refactoring
-status: in-spec                  # lifecycle mirror — the run machine's hooks own it
-plan_status: null                # same — never written by hand
+status: framing                  # the run machine's status — written by `booping playbook-transition`, never by hand
 sp: {total}                      # sprint total, summed from milestone totals
 split_from: null                 # sibling stubs only: path to the primary plan this was split from
 created: YYYY-MM-DD              # date the plan directory was created

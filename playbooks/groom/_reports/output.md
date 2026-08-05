@@ -162,8 +162,7 @@ The plan is the run's `index.md`: frontmatter, then the title, then the body.
 ---
 title: {Descriptive Title}
 type: feature | bug | refactoring
-status: in-spec                  # lifecycle mirror — the run machine's hooks own it
-plan_status: null                # same — never written by hand
+status: framing                  # the run machine's status — written by `booping playbook-transition`, never by hand
 sp: {total}                      # sprint total, summed from milestone totals
 split_from: null                 # sibling stubs only: path to the primary plan this was split from
 created: YYYY-MM-DD              # date the plan directory was created
@@ -179,8 +178,8 @@ commit: null
 ```
 
 `sp` and `summary` are yours to write. `title` and `type` are intake's — correct them only where
-the design changed them. `status`, `plan_status`, and every date and outcome key belong to the run
-machine and its hooks: whatever intake left `null` stays `null`.
+the design changed them. `status` and every date and outcome key belong to the run machine and its hooks: whatever intake
+left `null` stays `null`.
 
 ### Title
 

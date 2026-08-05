@@ -14,17 +14,71 @@ from pathlib import Path
 from typing import NoReturn
 
 from booping import logger
-from booping.commands.transition import (
-    dispatch_frontmatter_update,
-    format_frontmatter_line,
-)
+from booping.commands.frontmatter_update import interpolate, parse_pairs
 from booping.context import Context
-from booping.context._yaml import parse_frontmatter_only
+from booping.context._yaml import parse_frontmatter_only, update_frontmatter
 from booping.context.lifecycle import resolve_edges, resolve_hooks
 from booping.context.playbook import Playbook, StateMachine
 from booping.context.project import Project
 
 NOT_STARTED = "not-started"
+
+
+def dispatch_frontmatter_update(
+    hook: str,
+    target: Path,
+    project: Project | None,
+    *,
+    file_base: Path,
+    instance: str | None = None,
+) -> tuple[str | None, dict[str, str]]:
+    """Parse and apply a frontmatter-update hook string against *target*.
+
+    E.g. ``frontmatter-update status=ready-for-dev planned=@now`` or, with a
+    file target, ``frontmatter-update _specs/brief.md reviewed=@today``.
+
+    Returns ``(file-target rel-path or None, applied key → resolved-value)``.
+    """
+    # First token is the hook name; rest are key=val pairs, optionally
+    # preceded by a file target (the only token carrying no "=").
+    pairs = hook.split()[1:]
+    rel: str | None = None
+    if pairs and "=" not in pairs[0]:
+        rel, pairs = pairs[0], pairs[1:]
+        if "{instance}" in rel:
+            if instance is None:
+                print(
+                    f"error: frontmatter-update target {rel} carries "
+                    "{instance} but no instance is in scope",
+                    file=sys.stderr,
+                )
+                sys.exit(2)
+            rel = rel.replace("{instance}", instance)
+        target = file_base / rel
+
+    repo_dir = project.repo_directory if project is not None else None
+    resolved = {
+        key: interpolate(value, repo_dir)
+        for key, value in parse_pairs(pairs).items()
+    }
+
+    try:
+        update_frontmatter(target, dict(resolved))
+    except Exception as exc:
+        print(f"error: frontmatter-update failed: {exc}", file=sys.stderr)
+        sys.exit(2)
+
+    return rel, resolved
+
+
+def format_frontmatter_line(
+    resolved: dict[str, str], target: str | None = None
+) -> str:
+    pairs = [
+        f'{k}="{v}"' if " " in v else f"{k}={v}" for k, v in resolved.items()
+    ]
+    prefix = "frontmatter: " if target is None else f"frontmatter {target}: "
+    return prefix + " ".join(pairs)
 
 
 def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:  # type: ignore[type-arg]

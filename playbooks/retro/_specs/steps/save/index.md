@@ -66,7 +66,7 @@ status: awaiting-spec-confirm
 The hook script the exit edge names, `_scripts/close-working-set`, does not exist yet: shipping
 it belongs to this step's prompt and wrapper work. Its contract, restated from
 [states](../../states.md) — executable, self-contained, standard library only, no shelling back
-into `booping` (the vault carries no `.booping` marker), like groom's `_scripts/_plan_status.py`.
+into `booping` (the vault carries no `.booping` marker), like groom's `_scripts/commit-plan`.
 `booping playbook-transition` runs it with cwd and `BOOPING_WORKDIR` set to
 `{vault}/plans/{primary-slug}`, from which it derives the primary slug (the workdir's name) and
 the vault (two levels up). It reads `plans:` and `goal_verdicts:` out of the workdir's

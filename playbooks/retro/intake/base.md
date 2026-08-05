@@ -13,8 +13,8 @@ Resolve `$ARGUMENTS` to plan paths.
 2. Identify *other* plans in `awaiting-retro` (those in the inlined list but not in `$ARGUMENTS`). If any exist, ask the user per other plan via `AskUserQuestion`:
    - **Include** — add to this retro run alongside the provided plans.
    - **Postpone** — leave in `awaiting-retro` (no-op).
-   - **Skip retro and mark done** — apply the proper transition to the plan now (per the transitions table above) and exclude from this run.
-3. Apply each "skip & mark done" transition before moving to the next step. One commit per plan.
+   - **Skip retro and mark done** — close the plan now and exclude it from this run.
+3. Close each "skip & mark done" plan before moving to the next step, one `_scripts/drop-plan {slug}` invocation per plan — never a hand edit. The script stamps `status: done`, `goal: skipped` and `completed:` and commits the vault, one commit per plan.
 
 ## The report — posted in chat
 

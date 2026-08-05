@@ -34,7 +34,7 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
     p.set_defaults(func=_run)
 
 
-def _interpolate(value: str, repo_dir: Path | None) -> str:
+def interpolate(value: str, repo_dir: Path | None) -> str:
     if value == "@now":
         return datetime.now(UTC).strftime("%Y%m%d %H:%M")
     if value == "@today":
@@ -55,7 +55,7 @@ def _interpolate(value: str, repo_dir: Path | None) -> str:
     return value
 
 
-def _parse_pairs(pairs: list[str]) -> dict[str, str]:
+def parse_pairs(pairs: list[str]) -> dict[str, str]:
     updates: dict[str, str] = {}
     for pair in pairs:
         if "=" not in pair:
@@ -76,7 +76,7 @@ def _run(args: argparse.Namespace) -> None:
         sys.exit(1)
 
     removals: list[str] = list(getattr(args, "removals", None) or [])
-    updates = _parse_pairs(args.pairs)
+    updates = parse_pairs(args.pairs)
 
     if not updates and not removals:
         print("error: nothing to do: provide key=value pairs and/or --remove", file=sys.stderr)
@@ -87,7 +87,7 @@ def _run(args: argparse.Namespace) -> None:
 
     resolved: dict[str, object] = {}
     for key, value in updates.items():
-        resolved[key] = _interpolate(value, repo_dir)
+        resolved[key] = interpolate(value, repo_dir)
 
     try:
         update_frontmatter(plan_path, resolved, removals=removals)

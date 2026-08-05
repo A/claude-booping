@@ -18,7 +18,7 @@ states:
             when: "intake posted the framing brief in chat, created `index.md` with its identity frontmatter, and the user's answers settled the scope questions — clear intent is enough"
             gates:
               - "answers that change the task type, the restated problem or a boundary re-run intake first"
-            hooks: ["script plan-in-spec"]
+            hooks: ["script commit-plan"]
       researching:
         transitions:
           - to: drafting
@@ -37,7 +37,7 @@ states:
             when: "the cross-review pass disposed of every finding, or no `core.groom_playbook.cross_review_agent` is configured and the pass was skipped"
             gates:
               - "every CRITICAL finding folded in or recorded as a deferral — vacuously satisfied with no `core.groom_playbook.cross_review_agent` configured"
-            hooks: ["script plan-awaiting-plan-review"]
+            hooks: ["script commit-plan"]
       presenting:
         transitions:
           - to: awaiting-approval
@@ -46,14 +46,14 @@ states:
         transitions:
           - to: drafting
             when: "the user's change request touches the plan itself — architecture, scope, milestones, tasks or estimates"
-            hooks: ["script plan-in-spec"]
+            hooks: ["script commit-plan"]
           - to: ready-for-dev
             when: 'the user explicitly approves the plan — "looks good" counts, silence never does'
             gates:
               - "explicit user approval captured"
             hooks:
               - "frontmatter-update index.md reviewed_at=@now"
-              - "script plan-ready-for-dev"
+              - "script commit-plan"
       ready-for-dev:
         terminal: true
 

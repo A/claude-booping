@@ -104,15 +104,13 @@ re-open one if it proves wrong:
       cheap part, and a finer run-local status set would break the "bound to the plan lifecycle
       statuses retro owns" decision.
 - [x] ~~How do plans other than the machine's artifact get moved?~~ — the primary plan moves on
-      the playbook machine; plans the user drops at intake, and adopted siblings at save, move
-      with `booping transition`, since the machine's artifact is fixed to the primary plan's
-      `index.md` and no subgraph exists to justify a per-instance machine. The `states` step may
-      instead fold the sibling stamps into file-targeted `frontmatter-update` hooks — its call.
+      the playbook machine; plans the user drops at intake, and adopted siblings at save, move by
+      script, since the machine's artifact is fixed to the primary plan's `index.md` and no
+      subgraph exists to justify a per-instance machine. The `states` step may instead fold the
+      sibling stamps into file-targeted `frontmatter-update` hooks — its call.
       **Settled in [states.md](states.md)** (runner's call): split by move — drops at intake take
-      `booping transition done <plan>`; adopted siblings at save fold into the exit edge's
-      `script close-working-set`, because a file-targeted hook cannot carry a runtime slug and
-      `booping transition` would stamp the shared edge's placeholder `retro=` / `goal=` values
-      literally.
+      `_scripts/drop-plan {slug}`; adopted siblings at save fold into the exit edge's
+      `script close-working-set`, because a file-targeted hook cannot carry a runtime slug.
 - [x] ~~Does the retrospective keep the skill's `retrospectives/` home?~~ — no, settled in the
       brief: `plans/{primary-slug}/retro.md`. The `retro=` frontmatter stamp points there; the
       existing `retro=retrospectives/...` hook in `src/config.yaml` is not rewritten, so the
