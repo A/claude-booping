@@ -8,10 +8,12 @@ from __future__ import annotations
 
 import argparse
 import os
+import shlex
 import subprocess
 import sys
+from collections.abc import Mapping
 from pathlib import Path
-from typing import NoReturn
+from typing import Any, NoReturn
 
 from booping import logger
 from booping.commands.frontmatter_update import interpolate, parse_pairs
@@ -31,17 +33,26 @@ def dispatch_frontmatter_update(
     *,
     file_base: Path,
     instance: str | None = None,
+    config: Mapping[str, Any] | None = None,
 ) -> tuple[str | None, dict[str, str]]:
     """Parse and apply a frontmatter-update hook string against *target*.
 
-    E.g. ``frontmatter-update status=ready-for-dev planned=@now`` or, with a
-    file target, ``frontmatter-update _specs/brief.md reviewed=@today``.
+    E.g. ``frontmatter-update status=ready-for-dev`` or, with a file target,
+    ``frontmatter-update _specs/brief.md reviewed="{{ macro('core.macros.date',
+    '+%Y-%m-%d') }}"``.
 
     Returns ``(file-target rel-path or None, applied key → resolved-value)``.
     """
+    # shlex, not str.split: a value carrying a macro call has spaces in it and is
+    # quoted in the hook string.
+    try:
+        tokens = shlex.split(hook)
+    except ValueError as exc:
+        print(f"error: malformed hook {hook!r}: {exc}", file=sys.stderr)
+        sys.exit(2)
     # First token is the hook name; rest are key=val pairs, optionally
     # preceded by a file target (the only token carrying no "=").
-    pairs = hook.split()[1:]
+    pairs = tokens[1:]
     rel: str | None = None
     if pairs and "=" not in pairs[0]:
         rel, pairs = pairs[0], pairs[1:]
@@ -58,7 +69,7 @@ def dispatch_frontmatter_update(
 
     repo_dir = project.repo_directory if project is not None else None
     resolved = {
-        key: interpolate(value, repo_dir)
+        key: interpolate(value, repo_dir, config)
         for key, value in parse_pairs(pairs).items()
     }
 
@@ -270,7 +281,12 @@ def _run(args: argparse.Namespace) -> None:
         hook_name = hook.split()[0] if hook.split() else ""
         if hook_name == "frontmatter-update":
             rel, resolved = dispatch_frontmatter_update(
-                hook, artifact, project, file_base=workdir, instance=instance
+                hook,
+                artifact,
+                project,
+                file_base=workdir,
+                instance=instance,
+                config=ctx.config,
             )
             report.append(format_frontmatter_line(resolved, rel))
         elif hook_name == "script":

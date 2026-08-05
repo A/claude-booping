@@ -17,19 +17,23 @@ states:
         transitions:
           - to: filed
             when: brief reviewed
-            hooks: ["frontmatter-update brief.md reviewed=@today"]
+            hooks:
+              - frontmatter-update brief.md reviewed="{{ macro('core.macros.date', '+%Y-%m-%d') }}"
           - to: filed-missing
             when: never — exercises a file target that does not exist
-            hooks: ["frontmatter-update nope.md reviewed=@today"]
+            hooks:
+              - frontmatter-update nope.md reviewed="{{ macro('core.macros.date', '+%Y-%m-%d') }}"
           - to: filed-raw
             when: never — exercises a file target without frontmatter
-            hooks: ["frontmatter-update raw.md reviewed=@today"]
+            hooks:
+              - frontmatter-update raw.md reviewed="{{ macro('core.macros.date', '+%Y-%m-%d') }}"
           - to: filed-instance
             when: never — exercises {instance} with no instance in scope
             hooks: ["frontmatter-update steps/{instance}/notes.md seen=recorded"]
           - to: done
             when: never — exercises a no-target hook
-            hooks: ["frontmatter-update noted=@today"]
+            hooks:
+              - frontmatter-update noted="{{ macro('core.macros.date', '+%Y-%m-%d') }}"
       filed: {terminal: true}
       filed-missing: {terminal: true}
       filed-raw: {terminal: true}

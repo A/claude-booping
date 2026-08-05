@@ -24,12 +24,12 @@ status: spec-ing
       exist, and a transitions table `State | To | When | Gates | Hooks` — no transition
       names, terminals `ᵗ`, Hooks cells machine-readable only (`;`-separated when a cell
       carries more than one hook)
-    - every exit from an `awaiting-*-confirm` status stamps `reviewed_at=@now` on what the
+    - every exit from an `awaiting-*-confirm` status stamps `reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"` on what the
       user reviewed, one hook per reviewed file, always the explicit-path form
-      `frontmatter-update <path> reviewed_at=@now` — path relative to the run workdir, even
+      `frontmatter-update <path> reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"` — path relative to the run workdir, even
       when the reviewed file IS the machine's own artifact. No gate is exempt. A reviewed
       subject that cannot legally carry frontmatter — a directory, or a YAML file a loader
-      parses — stamps a subject-keyed `frontmatter-update <path> <subject>_reviewed_at=@now`
+      parses — stamps a subject-keyed `frontmatter-update <path> <subject>_reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"`
       on the machine's own artifact instead; that is the only compromise. No `*_confirmed` /
       `smoke_green` / `completed` stamps — the status transition carries fact and time; keys
       carrying run data are unaffected
@@ -65,7 +65,7 @@ artifact: `index.md`
 | -- | -- | -- | -- | -- |
 | `none` | `sweeping` | run starts | | |
 | `sweeping` | `awaiting-report-confirm` | report composed | every file's findings on disk | |
-| `awaiting-report-confirm` | `done`ᵗ | user confirms the report | explicit confirmation captured | `frontmatter-update report.md reviewed_at=@now` |
+| `awaiting-report-confirm` | `done`ᵗ | user confirms the report | explicit confirmation captured | `frontmatter-update report.md reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"` |
 ```
 
 and the link line the index picks up, right after its graph fence:

@@ -21,7 +21,7 @@ states:
             when: intake step complete
             gates: ["request captured in the artifact"]
             hooks:
-              - frontmatter-update researched=@now
+              - frontmatter-update researched="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
               - script check-findings
           - to: broken
             when: never — exercises a failing hook

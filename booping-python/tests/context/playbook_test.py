@@ -597,7 +597,9 @@ def test_states_raw_preserved_for_resolver() -> None:
         "to": "developing-steps",
         "when": "intake step complete",
         "gates": ["request + scope captured in the artifact"],
-        "hooks": ["frontmatter-update intaken=@now"],
+        "hooks": [
+            "frontmatter-update intaken=\"{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}\""
+        ],
     }
     assert raw["statuses"]["done"] == {"terminal": True}
 

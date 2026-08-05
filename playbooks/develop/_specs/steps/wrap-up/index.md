@@ -44,7 +44,7 @@ suite_reviewed_at: 20260802 09:58
     commits already landed while the loop ran.
   - `[UPDATED] plans/{slug}/index.md` — the machine's write only: the `in-progress` →
     `awaiting-retro` transition, fired once the closing commit exists, which stamps
-    `completed=@now`. The plan body is not edited here — no checkbox flipping, no milestone
+    `completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"`. The plan body is not edited here — no checkbox flipping, no milestone
     status writing, no new sections.
   - the plan committed with `booping vault-commit awaiting-retro <plan-path>`; the playbook
     ships no `_scripts/`, so the vault commit is the step's own call, made after the transition

@@ -646,7 +646,7 @@ def test_state_section_status_rows() -> None:
     )
     assert "| `done` | *(terminal)* | — | — |" in state
     # Hooks are the transition command's business, not the driver's.
-    assert "frontmatter-update intaken=@now" not in state
+    assert "frontmatter-update intaken=" not in state
 
 
 def test_state_section_instance_entry() -> None:

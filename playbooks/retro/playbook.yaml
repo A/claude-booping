@@ -19,7 +19,9 @@ states:
             gates:
               - "explicit user approval of the draft captured at synthesize — \"save it\" counts, silence never does"
               - "`retro.md`'s `plans:` list covers the whole working set and `goal_verdicts:` carries a verdict for each, since the hook script reads both"
-            hooks: ["frontmatter-update retro.md reviewed_at=@now", "script close-working-set"]
+            hooks:
+              - frontmatter-update retro.md reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - script close-working-set
       awaiting-learning:
         terminal: true
 

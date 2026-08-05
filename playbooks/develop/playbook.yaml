@@ -17,7 +17,8 @@ states:
             when: "intake captured the user's explicit approval of the plan it entered on — \"looks good\" counts, silence never does"
             gates:
               - "explicit user approval captured"
-            hooks: ["frontmatter-update reviewed_at=@now"]
+            hooks:
+              - frontmatter-update reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
       ready-for-dev:
         transitions:
           - to: in-progress
@@ -25,7 +26,9 @@ states:
             gates:
               - "the user confirmed the branch name"
               - "no unresolved non-trivial drift — that halts back to grooming instead"
-            hooks: ["frontmatter-update started=@now", "frontmatter-update commit=@head"]
+            hooks:
+              - frontmatter-update started="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - frontmatter-update commit=@head
       in-progress:
         transitions:
           - to: awaiting-retro
@@ -33,13 +36,15 @@ states:
             gates:
               - "every DoD checkbox [x] and every milestone status done"
               - "the project's guardrails and the plan's Final Verification green"
-            hooks: ["frontmatter-update completed=@now"]
+            hooks:
+              - frontmatter-update completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
           - to: fail
             when: "an unrecoverable blocker at any point in the sprint, verification included, after two fix attempts on the same issue"
             gates:
               - "two fix attempts documented in the plan"
               - "the user approved the abort"
-            hooks: ["frontmatter-update completed=@now"]
+            hooks:
+              - frontmatter-update completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
       awaiting-retro:
         terminal: true
       fail:

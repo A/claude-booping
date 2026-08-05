@@ -20,7 +20,7 @@ def machine() -> dict[str, Any]:
                 "transitions": [
                     {
                         "to": "shipped",
-                        "hooks": ["frontmatter-update ship=@now"],
+                        "hooks": ["frontmatter-update ship=stamped"],
                     },
                     {"to": "abandoned"},
                 ]
@@ -34,11 +34,11 @@ def machine() -> dict[str, Any]:
             "open": {
                 "states": ["draft", "shipped"],
                 "transitions": [{"to": "abandoned", "when": "inherited"}],
-                "on_exit": ["frontmatter-update closed=@now"],
+                "on_exit": ["frontmatter-update closed=stamped"],
             },
             "terminal": {
                 "states": ["abandoned"],
-                "on_entry": ["frontmatter-update completed=@now"],
+                "on_entry": ["frontmatter-update completed=stamped"],
             },
         },
         "hooks": {"post": ["script commit"]},
@@ -65,15 +65,15 @@ class TestResolveHooks:
     def test_full_order_crossing_boundary(self, machine: dict[str, Any]) -> None:
         assert resolve_hooks("draft", "abandoned", machine) == [
             "frontmatter-update status=abandoned",
-            "frontmatter-update closed=@now",
-            "frontmatter-update completed=@now",
+            "frontmatter-update closed=stamped",
+            "frontmatter-update completed=stamped",
             "script commit",
         ]
 
     def test_no_boundary_hooks_within_superstate(self, machine: dict[str, Any]) -> None:
         assert resolve_hooks("draft", "shipped", machine) == [
             "frontmatter-update status=shipped",
-            "frontmatter-update ship=@now",
+            "frontmatter-update ship=stamped",
             "script commit",
         ]
 

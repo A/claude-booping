@@ -19,12 +19,14 @@ states:
           - to: developing-steps
             when: intake step complete
             gates: ["request + scope captured in the artifact"]
-            hooks: ["frontmatter-update intaken=@now"]
+            hooks:
+              - frontmatter-update intaken="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
       developing-steps:
         transitions:
           - to: done
             when: every step instance terminal
-            hooks: ["frontmatter-update completed=@now"]
+            hooks:
+              - frontmatter-update completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
       done: {terminal: true}
   step:
     artifact: steps/{instance}/index.md

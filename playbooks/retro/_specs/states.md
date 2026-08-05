@@ -18,7 +18,7 @@ review gate (the draft approval at `synthesize`) gets no status of its own eithe
 guardrail verdict.
 
 **No `review` superstate.** Both of the machine's statuses sit inside the shared lifecycle's
-`review` group, so no boundary is crossed, its `on_entry` stamp (`completed=@now`) already fired on
+`review` group, so no boundary is crossed, its `on_entry` stamp (`completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"`) already fired on
 develop's exit, and the group carries no edge this slice needs. The only group declared is the
 machine's own `terminal`.
 
@@ -33,7 +33,7 @@ machine's own `terminal`.
 | State            | To                  | When                                                                                                                                                                                   | Gates                                                                                                                                                                                                                                        | Hooks                                                                      |
 | ---------------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
 | `none`           | `awaiting-retro`    | declaration only — the preamble resolves an existing plan and the machine attaches at the `status:` already on its `index.md`; retro never creates the artifact, so nothing bootstraps |                                                                                                                                                                                                                                              |                                                                            |
-| `awaiting-retro` | `awaiting-learning` | save wrote the approved `retro.md` into the primary plan's directory and linked the sibling plans to it                                                                                | explicit user approval of the draft captured at synthesize — "save it" counts, silence never does; `retro.md`'s `plans:` list covers the whole working set and `goal_verdicts:` carries a verdict for each, since the hook script reads both | `frontmatter-update retro.md reviewed_at=@now`, `script close-working-set` |
+| `awaiting-retro` | `awaiting-learning` | save wrote the approved `retro.md` into the primary plan's directory and linked the sibling plans to it                                                                                | explicit user approval of the draft captured at synthesize — "save it" counts, silence never does; `retro.md`'s `plans:` list covers the whole working set and `goal_verdicts:` carries a verdict for each, since the hook script reads both | `frontmatter-update retro.md reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"`, `script close-working-set` |
 
 Hook order is load-bearing: `reviewed_at` is stamped on the approved `retro.md` before
 `close-working-set` commits the vault. The file target doubles as a guard — a missing `retro.md`

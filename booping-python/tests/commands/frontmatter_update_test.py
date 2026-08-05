@@ -2,12 +2,18 @@ from __future__ import annotations
 
 import argparse
 import subprocess
-from datetime import UTC, datetime
+from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 import pytest
 
 from booping.commands import frontmatter_update as fu_cmd
+from booping.commands import playbook_transition as pt_cmd
+
+CONFIG: dict[str, Any] = {"core": {"macros": {"date": ["date"]}}}
+NOW_EXPR = "{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+TODAY_EXPR = "{{ macro('core.macros.date', '+%Y-%m-%d') }}"
 
 
 def _make_plan(tmp_path: Path, frontmatter: str, body: str = "# Body\n") -> Path:
@@ -55,15 +61,35 @@ class TestParsePairs:
 
 
 class TestInterpolate:
-    def test_now(self) -> None:
-        result = fu_cmd.interpolate("@now", None)
-        # Should be yyyymmdd hh:mm format
-        parsed = datetime.strptime(result, "%Y%m%d %H:%M")
-        assert parsed is not None
+    def test_datetime_macro(self) -> None:
+        result = fu_cmd.interpolate(NOW_EXPR, None, CONFIG)
+        assert datetime.strptime(result, "%Y-%m-%d %H:%M") is not None  # noqa: DTZ007
 
-    def test_today(self) -> None:
-        result = fu_cmd.interpolate("@today", None)
-        assert result == datetime.now(UTC).strftime("%Y-%m-%d")
+    def test_date_macro(self) -> None:
+        result = fu_cmd.interpolate(TODAY_EXPR, None, CONFIG)
+        assert datetime.strptime(result, "%Y-%m-%d") is not None  # noqa: DTZ007
+
+    def test_stubbed_macro_is_not_executed(self) -> None:
+        config = {**CONFIG, "macro_stubs": {"core.macros.date": "19700101"}}
+        assert fu_cmd.interpolate(NOW_EXPR, None, config) == "19700101"
+
+    def test_unknown_macro_path_exits_non_zero(
+        self, capsys: pytest.CaptureFixture[str]
+    ) -> None:
+        with pytest.raises(SystemExit) as excinfo:
+            fu_cmd.interpolate("{{ macro('core.macros.nope') }}", None, CONFIG)
+        assert excinfo.value.code != 0
+        err = capsys.readouterr().err
+        assert "core.macros.nope" in err
+        assert "Traceback" not in err
+
+    def test_malformed_jinja_exits_non_zero(
+        self, capsys: pytest.CaptureFixture[str]
+    ) -> None:
+        with pytest.raises(SystemExit) as excinfo:
+            fu_cmd.interpolate("{{ macro( }}", None, CONFIG)
+        assert excinfo.value.code != 0
+        assert "macro(" in capsys.readouterr().err
 
     def test_head(self) -> None:
         # Should resolve to a 40-char hex SHA in a git repo
@@ -79,20 +105,66 @@ class TestInterpolate:
         assert len(actual) == 40
 
     def test_literal_value(self) -> None:
-        assert fu_cmd.interpolate("hello", None) == "hello"
+        assert fu_cmd.interpolate("hello", None, CONFIG) == "hello"
+
+    def test_literal_value_with_spaces_untouched(self) -> None:
+        assert fu_cmd.interpolate("a b c", None, CONFIG) == "a b c"
 
     def test_at_sign_prefix_not_interpolated(self) -> None:
-        assert fu_cmd.interpolate("@notatoken", None) == "@notatoken"
+        assert fu_cmd.interpolate("@notatoken", None, CONFIG) == "@notatoken"
+
+    def test_retired_now_token_is_a_literal(self) -> None:
+        assert fu_cmd.interpolate("@now", None, CONFIG) == "@now"
+
+
+# ── hook tokenising ──────────────────────────────────────────────────────
+
+
+class TestHookTokenising:
+    def test_quoted_macro_expression_survives_shlex(self, tmp_path: Path) -> None:
+        artifact = tmp_path / "index.md"
+        artifact.write_text("---\nstatus: drafting\n---\n")
+
+        rel, resolved = pt_cmd.dispatch_frontmatter_update(
+            f'frontmatter-update completed="{NOW_EXPR}"',
+            artifact,
+            None,
+            file_base=tmp_path,
+            config=CONFIG,
+        )
+
+        assert rel is None
+        assert datetime.strptime(resolved["completed"], "%Y-%m-%d %H:%M")  # noqa: DTZ007
+
+    def test_file_target_with_quoted_macro_expression(self, tmp_path: Path) -> None:
+        artifact = tmp_path / "index.md"
+        artifact.write_text("---\nstatus: drafting\n---\n")
+        (tmp_path / "_specs").mkdir()
+        brief = tmp_path / "_specs" / "brief.md"
+        brief.write_text("---\ntitle: Brief\n---\n")
+
+        rel, resolved = pt_cmd.dispatch_frontmatter_update(
+            f'frontmatter-update _specs/brief.md reviewed_at="{TODAY_EXPR}"',
+            artifact,
+            None,
+            file_base=tmp_path,
+            config=CONFIG,
+        )
+
+        assert rel == "_specs/brief.md"
+        assert datetime.strptime(resolved["reviewed_at"], "%Y-%m-%d")  # noqa: DTZ007
+        assert "reviewed_at" in brief.read_text()
+        assert "reviewed_at" not in artifact.read_text()
 
 
 # ── CLI integration ──────────────────────────────────────────────────────
 
 
 class TestFrontmatterUpdateCLI:
-    def test_sets_planned_with_at_now(self, tmp_path: Path) -> None:
+    def test_sets_planned_with_date_macro(self, tmp_path: Path) -> None:
         plan = _make_plan(tmp_path, "title: Foo\nstatus: backlog")
 
-        fu_cmd._run(_ns(plan=plan, pairs=["planned=@now"]))  # type: ignore[reportPrivateUsage]
+        fu_cmd._run(_ns(plan=plan, pairs=[f"planned={NOW_EXPR}"]))  # type: ignore[reportPrivateUsage]
 
         text = plan.read_text()
         assert "planned:" in text
@@ -100,7 +172,7 @@ class TestFrontmatterUpdateCLI:
         import yaml as pyyaml
 
         fm = pyyaml.safe_load(fm_text)
-        datetime.strptime(fm["planned"], "%Y%m%d %H:%M")
+        datetime.strptime(fm["planned"], "%Y-%m-%d %H:%M")  # noqa: DTZ007
 
     def test_sets_commit_with_at_head(self, tmp_path: Path) -> None:
         plan = _make_plan(tmp_path, "title: Foo\nstatus: backlog")
@@ -115,10 +187,10 @@ class TestFrontmatterUpdateCLI:
         fm = pyyaml.safe_load(fm_text)
         assert len(fm["commit"]) == 40
 
-    def test_sets_today(self, tmp_path: Path) -> None:
+    def test_sets_created_with_date_macro(self, tmp_path: Path) -> None:
         plan = _make_plan(tmp_path, "title: Foo\nstatus: backlog")
 
-        fu_cmd._run(_ns(plan=plan, pairs=["created=@today"]))  # type: ignore[reportPrivateUsage]
+        fu_cmd._run(_ns(plan=plan, pairs=[f"created={TODAY_EXPR}"]))  # type: ignore[reportPrivateUsage]
 
         text = plan.read_text()
         assert "created:" in text
@@ -126,7 +198,7 @@ class TestFrontmatterUpdateCLI:
         import yaml as pyyaml
 
         fm = pyyaml.safe_load(fm_text)
-        assert fm["created"] == datetime.now(UTC).strftime("%Y-%m-%d")
+        assert datetime.strptime(str(fm["created"]), "%Y-%m-%d")  # noqa: DTZ007
 
     def test_literal_value(self, tmp_path: Path) -> None:
         plan = _make_plan(tmp_path, "title: Foo\nstatus: backlog")
@@ -176,7 +248,7 @@ class TestFrontmatterUpdateCLI:
         plan = _make_plan(tmp_path, "title: Foo\nstatus: backlog")
 
         fu_cmd._run(  # type: ignore[reportPrivateUsage]
-            _ns(plan=plan, pairs=["planned=@now", "status=in-progress"]),
+            _ns(plan=plan, pairs=[f"planned={NOW_EXPR}", "status=in-progress"]),
         )
 
         text = plan.read_text()

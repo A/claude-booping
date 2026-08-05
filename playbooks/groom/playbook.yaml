@@ -52,7 +52,7 @@ states:
             gates:
               - "explicit user approval captured"
             hooks:
-              - "frontmatter-update index.md reviewed_at=@now"
+              - frontmatter-update index.md reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
               - "script commit-plan"
       ready-for-dev:
         terminal: true

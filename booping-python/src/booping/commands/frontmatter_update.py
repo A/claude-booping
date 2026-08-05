@@ -3,25 +3,33 @@ from __future__ import annotations
 import argparse
 import subprocess
 import sys
-from datetime import UTC, datetime
+from collections.abc import Mapping
 from pathlib import Path
+from typing import Any
+
+from jinja2 import Environment, TemplateError
 
 from booping import logger
+from booping.context import Context
 from booping.context._yaml import update_frontmatter
-from booping.context.project import Project
+from booping.macros import MacroError, make_macro
 
 
 def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:  # type: ignore[type-arg]
     p = subparsers.add_parser(
         "frontmatter-update",
-        help="Update frontmatter keys in a plan file with @now/@today/@head interpolation",
+        help="Update frontmatter keys in a plan file, rendering Jinja macro calls and @head",
     )
     p.add_argument("plan", type=Path, help="Path to the plan markdown file")
     p.add_argument(
         "pairs",
         nargs="*",
         metavar="key=val",
-        help="Frontmatter key=value pairs (@now, @today, @head interpolation)",
+        help=(
+            "Frontmatter key=value pairs; a value is rendered as Jinja with the `macro` "
+            "global (e.g. \"{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}\"), "
+            "and the literal @head resolves to the repo HEAD sha"
+        ),
     )
     p.add_argument(
         "--remove",
@@ -34,11 +42,31 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
     p.set_defaults(func=_run)
 
 
-def interpolate(value: str, repo_dir: Path | None) -> str:
-    if value == "@now":
-        return datetime.now(UTC).strftime("%Y%m%d %H:%M")
-    if value == "@today":
-        return datetime.now(UTC).strftime("%Y-%m-%d")
+def render_value(value: str, config: Mapping[str, Any] | None) -> str:
+    """Render a hook value as Jinja whose only global is `macro`.
+
+    A value carrying no Jinja passes through untouched.
+    """
+    if "{{" not in value and "{%" not in value:
+        return value
+    env = Environment()  # noqa: S701 — frontmatter values, not HTML
+    globals_: dict[str, Any] = env.globals  # type: ignore[assignment]
+    globals_["macro"] = make_macro(dict(config) if config else {})
+    try:
+        return env.from_string(value).render()
+    except MacroError as exc:
+        print(f"error: value {value!r}: {exc}", file=sys.stderr)
+        sys.exit(2)
+    except TemplateError as exc:
+        print(f"error: value {value!r}: {type(exc).__name__}: {exc}", file=sys.stderr)
+        sys.exit(2)
+
+
+def interpolate(
+    value: str, repo_dir: Path | None, config: Mapping[str, Any] | None = None
+) -> str:
+    # @head is not a macro: it resolves against the repo directory, while a macro runs
+    # in the process cwd — the run workdir during a playbook transition, i.e. the vault.
     if value == "@head":
         cwd = repo_dir if repo_dir is not None else Path.cwd()
         result = subprocess.run(
@@ -52,7 +80,7 @@ def interpolate(value: str, repo_dir: Path | None) -> str:
             print(f"error: git rev-parse HEAD failed: {result.stderr.strip()}", file=sys.stderr)
             sys.exit(2)
         return result.stdout.strip()
-    return value
+    return render_value(value, config)
 
 
 def parse_pairs(pairs: list[str]) -> dict[str, str]:
@@ -82,12 +110,13 @@ def _run(args: argparse.Namespace) -> None:
         print("error: nothing to do: provide key=value pairs and/or --remove", file=sys.stderr)
         sys.exit(1)
 
-    project = Project.load_cwd_configured()
+    ctx = Context.assemble()
+    project = ctx.project
     repo_dir = project.repo_directory if project is not None else None
 
     resolved: dict[str, object] = {}
     for key, value in updates.items():
-        resolved[key] = interpolate(value, repo_dir)
+        resolved[key] = interpolate(value, repo_dir, ctx.config)
 
     try:
         update_frontmatter(plan_path, resolved, removals=removals)

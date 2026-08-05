@@ -20,7 +20,7 @@ frontmatter and never write `status:`, `reviewed_at`, or any stamp — `booping
 playbook-transition` is the only writer. There is no `confirmed:` key: confirmation is the
 user's explicit chat signal at a gate, captured as the transition out of an
 `awaiting-*-confirm` status — never run past a gate on silence. The transition's exit hooks
-then stamp `reviewed_at=@now` (or, for a subject that cannot carry frontmatter, the
+then stamp `reviewed_at` with the date macro (or, for a subject that cannot carry frontmatter, the
 `<subject>_reviewed_at` compromise stamp) on the file that was reviewed.
 
 `record-decision` runs once in wave 1 as bootstrap, then OUT of wave order: re-invoke it

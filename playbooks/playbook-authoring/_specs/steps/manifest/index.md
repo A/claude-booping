@@ -61,7 +61,8 @@ states:
           - to: done
             when: user confirms the report
             gates: ["explicit confirmation captured"]
-            hooks: ["frontmatter-update report.md reviewed_at=@now"]
+            hooks:
+              - frontmatter-update report.md reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
       done: {terminal: true}
 ```
 

@@ -32,13 +32,15 @@ status:
 | State | To | When | Gates | Hooks |
 | -- | -- | -- | -- | -- |
 | `none` | `<initial>` | `<what starts the run>` | | |
-| `drafting` | `awaiting-confirm` | draft written | | `frontmatter-update drafted=@now` |
+| `drafting` | `awaiting-confirm` | draft written | | `frontmatter-update drafted="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"` |
 
 - **When** — the concrete trigger: a step outcome, a user action, an ack. Never a bare arrow.
 - **Gates** — only where the condition isn't trivially true; a condition the source state
   already guarantees stays out of the cell.
 - **Hooks** — machine-readable strings ONLY, translated verbatim into playbook.yaml:
-  `frontmatter-update <key>=<val>` (values may use `@now`, `@today`, `@head`) or
+  `frontmatter-update <key>=<val>` (a value is Jinja-rendered with the `macro` global —
+  `"{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"` — or the literal `@head`; quote any value carrying
+  spaces, the hook string is shlex-tokenised) or
   `script <name>` (an executable the playbook ships at `_scripts/<name>`). Prose in a Hooks
   cell is a defect.
 - A terminal carries `ᵗ` everywhere it appears and never has an outgoing row.
@@ -52,7 +54,7 @@ status:
   chain of confirm checkpoints loses that.
 - Confirmation is a status, not a flag: `… → awaiting-<x>-confirm → …`, the edge out gated
   "explicit user confirmation captured — silence never counts", hook
-  `frontmatter-update <path> reviewed_at=@now` on the reviewed file. The harness's
+  `frontmatter-update <path> reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"` on the reviewed file. The harness's
   transition command is the only writer.
 - The author owns granularity: a parallel wave sits inside ONE status; merge waves a resume
   would replay cheaply anyway.

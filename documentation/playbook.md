@@ -290,19 +290,23 @@ states:
           - to: researching
             when: intake step complete
             gates: ["request + scope captured in the artifact"]
-            hooks: ["frontmatter-update intaken=@now"]
+            hooks:
+              - frontmatter-update intaken="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
       researching:
         transitions:
           - to: developing-steps
             when: both research steps returned and design confirmed
             gates: ["research-codebase and research-web done, findings recorded"]
-            hooks: ["frontmatter-update researched=@now commit=@head", "script check-findings"]
+            hooks:
+              - frontmatter-update researched="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}" commit=@head
+              - script check-findings
       developing-steps:
         transitions:
           - to: done
             when: every step instance terminal
             gates: ["every steps/*/index.md status: done"]
-            hooks: ["frontmatter-update completed=@now"]
+            hooks:
+              - frontmatter-update completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
       done: {terminal: true}
   step:
     artifact: steps/{instance}/index.md
@@ -312,13 +316,15 @@ states:
         transitions:
           - to: reviewing
             when: spec written
-            hooks: ["frontmatter-update spec_done=@now"]
+            hooks:
+              - frontmatter-update spec_done="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
       reviewing:
         transitions:
           - to: done
             when: user confirmed the spec
             gates: ["explicit user confirmation captured"]
-            hooks: ["frontmatter-update confirmed=@now"]
+            hooks:
+              - frontmatter-update confirmed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
       done: {terminal: true}
 ```
 
@@ -326,8 +332,12 @@ states:
 
 Two hook forms are available on a transition:
 
-- `frontmatter-update [<file>] <key>=<val> ...` — set frontmatter keys on the artifact, or on `<file>` when a target is given. Values interpolate `@now` (UTC `yyyymmdd hh:mm`), `@today` (`yyyymmdd`) and `@head` (attached repo's HEAD sha).
+- `frontmatter-update [<file>] <key>=<val> ...` — set frontmatter keys on the artifact, or on `<file>` when a target is given.
 - `script <name>` — run `<playbook-dir>/_scripts/<name>`.
+
+A hook value is **Jinja-rendered with the `macro` global**, the same one rendered bodies call — a timestamp is `completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"`, with the format at the call site and no bespoke token vocabulary. Because the clock goes through the macro system, `--stub-macro` pins it, so a transition is reproducible exactly the way a render is. The hook string is tokenised with `shlex`, so quote any value carrying spaces — as above. A value with no Jinja in it passes through untouched, and a macro or Jinja error aborts the transition (exit 2) with the offending value on stderr.
+
+The one literal token left is `@head` (the attached repo's HEAD sha). It is deliberately not a macro: it must resolve against the repo directory, while a macro runs in the process cwd — the run workdir during a transition.
 
 The optional `<file>` target is the first token after the hook name that carries no `=`. It resolves against the **run workdir** — the same anchor as the machine's `artifact` — and may carry `{instance}`, interpolated with the instance slug (legal only when an instance is in scope). The file must exist; a missing file is an error (exit 2) that aborts the transition — nothing is created. A file without a frontmatter block gets one prepended, the existing content becoming the body unchanged. In the mutation report a file-target update prints as `frontmatter <file>: k=v` instead of the plain `frontmatter: k=v`.
 

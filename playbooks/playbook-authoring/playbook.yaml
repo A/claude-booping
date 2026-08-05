@@ -40,7 +40,8 @@ states:
           - to: decomposing
             when: the user confirms the brief
             gates: ["explicit user confirmation captured — silence never counts"]
-            hooks: ["frontmatter-update _specs/brief.md reviewed_at=@now"]
+            hooks:
+              - frontmatter-update _specs/brief.md reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
       decomposing:
         transitions:
           - to: awaiting-decomposition-confirm
@@ -52,7 +53,8 @@ states:
           - to: designing-states
             when: the user confirms the decomposition
             gates: ["explicit user confirmation captured; no open Questions items"]
-            hooks: ["frontmatter-update _specs/index.md reviewed_at=@now"]
+            hooks:
+              - frontmatter-update _specs/index.md reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
       designing-states:
         transitions:
           - to: awaiting-states-confirm
@@ -68,7 +70,9 @@ states:
           - to: manifesting
             when: the user confirms the state chart and re-confirms the index
             gates: ["explicit user confirmation captured"]
-            hooks: ["frontmatter-update _specs/states.md reviewed_at=@now", "frontmatter-update _specs/index.md reviewed_at=@now"]
+            hooks:
+              - frontmatter-update _specs/states.md reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - frontmatter-update _specs/index.md reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
       manifesting:
         transitions:
           - to: awaiting-manifest-confirm
@@ -80,7 +84,9 @@ states:
           - to: building-steps
             when: the user confirms name, trigger, graph, states, model and root
             gates: ["explicit user confirmation captured"]
-            hooks: ["frontmatter-update playbook.md reviewed_at=@now", "frontmatter-update _specs/index.md playbook_yaml_reviewed_at=@now"]
+            hooks:
+              - frontmatter-update playbook.md reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - frontmatter-update _specs/index.md playbook_yaml_reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
       building-steps:
         transitions:
           - to: done
@@ -106,7 +112,8 @@ states:
           - to: test-planning
             when: the user confirms the contract and example
             gates: ["explicit user confirmation captured — silence never counts"]
-            hooks: ["frontmatter-update _specs/steps/{instance}/index.md reviewed_at=@now"]
+            hooks:
+              - frontmatter-update _specs/steps/{instance}/index.md reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
       test-planning:
         transitions:
           - to: awaiting-tests-confirm
@@ -118,7 +125,8 @@ states:
           - to: fixturing
             when: the user confirms the test rows
             gates: ["explicit user confirmation captured"]
-            hooks: ["frontmatter-update _specs/steps/{instance}/test-plan.md reviewed_at=@now"]
+            hooks:
+              - frontmatter-update _specs/steps/{instance}/test-plan.md reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
       fixturing:
         transitions:
           - to: awaiting-fixtures-confirm
@@ -130,7 +138,8 @@ states:
           - to: prompting
             when: the user confirms the fixture set
             gates: ["explicit user confirmation captured"]
-            hooks: ["frontmatter-update _specs/steps/{instance}/index.md fixtures_reviewed_at=@now"]
+            hooks:
+              - frontmatter-update _specs/steps/{instance}/index.md fixtures_reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
       prompting:
         transitions:
           - to: awaiting-prompt-confirm
@@ -142,7 +151,8 @@ states:
           - to: suiting
             when: the user confirms the prompt contract
             gates: ["explicit user confirmation captured"]
-            hooks: ["frontmatter-update {instance}/prompt.md reviewed_at=@now"]
+            hooks:
+              - frontmatter-update {instance}/prompt.md reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
       suiting:
         transitions:
           - to: awaiting-suite-confirm
@@ -154,7 +164,8 @@ states:
           - to: smoke-greening
             when: the user reviewed the tree and triggered the smoke run
             gates: ["explicit user confirmation captured"]
-            hooks: ["frontmatter-update _specs/steps/{instance}/index.md suite_reviewed_at=@now"]
+            hooks:
+              - frontmatter-update _specs/steps/{instance}/index.md suite_reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
       smoke-greening:
         transitions:
           - to: smoke-blocked
