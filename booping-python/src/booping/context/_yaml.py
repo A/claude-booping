@@ -28,6 +28,10 @@ def _rt_yaml() -> _RuamelYAML:
     return ry
 
 
+# Wide enough that round-tripping never re-wraps an untouched long line.
+_MARKER_WIDTH = 4096
+
+
 def _load_dict(raw: Any) -> dict[str, Any]:
     # yaml.safe_load returns Any; the isinstance check narrows to dict[Unknown, Unknown]
     # in basedpyright strict mode. The explicit annotation here bridges the gap.
@@ -93,6 +97,34 @@ def split_frontmatter_md(text: str) -> tuple[str, str, str]:
     after_yaml = text[close_pos:]  # "---\n<body>"
 
     return before_yaml, yaml_text, after_yaml
+
+
+def update_marker(path: Path, updates: dict[str, object]) -> None:
+    """Set top-level keys on a `.booping` marker file, in place.
+
+    The marker is a bare YAML mapping with no `---` delimiters, so
+    :func:`update_frontmatter` cannot serve it: its no-frontmatter fallback
+    prepends a frontmatter block and leaves a two-document stream behind.  Here
+    the whole file is round-tripped — comments, quoting and key order survive,
+    and only the touched lines change.
+
+    Raises :class:`ValueError` when the file is not a YAML mapping.
+    """
+    ry = _rt_yaml()
+    ry.width = _MARKER_WIDTH
+
+    data = ry.load(path.read_text())  # type: ignore[reportUnknownMemberType]
+    if data is None:
+        data = CommentedMap()
+    if not isinstance(data, dict):
+        raise ValueError(f"not a YAML mapping: {path}")
+
+    for key, value in updates.items():
+        data[key] = value  # type: ignore[reportUnknownMemberType]
+
+    stream = StringIO()
+    ry.dump(data, stream)  # type: ignore[reportUnknownMemberType]
+    path.write_text(stream.getvalue())
 
 
 def update_frontmatter(

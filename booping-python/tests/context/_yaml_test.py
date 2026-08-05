@@ -3,8 +3,9 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+import yaml
 
-from booping.context._yaml import split_frontmatter_md, update_frontmatter
+from booping.context._yaml import split_frontmatter_md, update_frontmatter, update_marker
 
 # ── split_frontmatter_md ────────────────────────────────────────────────
 
@@ -226,3 +227,76 @@ class TestUpdateFrontmatter:
         assert "business_goal" not in text
         assert "summary:" in text
         assert "title: Foo" in text
+
+# ── update_marker ───────────────────────────────────────────────────────
+
+
+LONG_VAULT = "vault_path: ../some/quite/deliberately/long/path/that/must/not/be/rewrapped/by/ruamel"
+
+MARKER = (
+    "# booping project marker\n"
+    'project_name: "claude-booping"  # quoted on purpose\n'
+    f"{LONG_VAULT}\n"
+    "latest_migration: 2\n"
+)
+
+
+class TestUpdateMarker:
+    def test_changes_only_the_target_line(self, tmp_path: Path) -> None:
+        marker = tmp_path / ".booping"
+        marker.write_text(MARKER)
+
+        update_marker(marker, {"latest_migration": 3})
+
+        before = MARKER.splitlines()
+        after = marker.read_text().splitlines()
+        assert len(before) == len(after)
+        changed = [(b, a) for b, a in zip(before, after, strict=True) if b != a]
+        assert changed == [("latest_migration: 2", "latest_migration: 3")]
+
+    def test_preserves_comments_quoting_and_order(self, tmp_path: Path) -> None:
+        marker = tmp_path / ".booping"
+        marker.write_text(MARKER)
+
+        update_marker(marker, {"latest_migration": 7})
+
+        text = marker.read_text()
+        assert "# booping project marker" in text
+        assert '"claude-booping"' in text
+        assert "# quoted on purpose" in text
+        assert text.index("project_name") < text.index("vault_path")
+        assert text.index("vault_path") < text.index("latest_migration")
+
+    def test_long_line_is_not_rewrapped(self, tmp_path: Path) -> None:
+        marker = tmp_path / ".booping"
+        marker.write_text(MARKER)
+
+        update_marker(marker, {"latest_migration": 3})
+
+        assert LONG_VAULT in marker.read_text()
+
+    def test_adds_missing_key(self, tmp_path: Path) -> None:
+        marker = tmp_path / ".booping"
+        marker.write_text("project_name: demo\n")
+
+        update_marker(marker, {"latest_migration": 0})
+
+        assert marker.read_text() == "project_name: demo\nlatest_migration: 0\n"
+
+    def test_stays_a_single_yaml_document(self, tmp_path: Path) -> None:
+        marker = tmp_path / ".booping"
+        marker.write_text(MARKER)
+
+        update_marker(marker, {"latest_migration": 3})
+
+        text = marker.read_text()
+        assert "---" not in text
+        assert len(list(yaml.safe_load_all(text))) == 1
+        assert yaml.safe_load(text)["latest_migration"] == 3
+
+    def test_rejects_non_mapping(self, tmp_path: Path) -> None:
+        marker = tmp_path / ".booping"
+        marker.write_text("- one\n- two\n")
+
+        with pytest.raises(ValueError, match="not a YAML mapping"):
+            update_marker(marker, {"latest_migration": 1})
