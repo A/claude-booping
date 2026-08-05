@@ -30,7 +30,7 @@ Four plans are already filed. One of them is parked.
 ---
 title: Retro templates
 type: bug
-status: backlog
+status: null
 sp: null
 split_from: null
 created: 2026-07-15
@@ -43,7 +43,7 @@ summary: "retros come out in a different shape in every project"
 commit: null
 ---
 
-Parked idea, filed from `/chat` — not groomed yet.
+Parked idea, filed by hand — not groomed yet.
 
 `/retro` writes every retrospective from the same built-in shape, so a Rust project and a
 Django project end up with identical headings and neither fits. `/code-review` already picks
@@ -62,44 +62,35 @@ this repo.
 
 ## Plan lifecycle
 
-Statuses and the transitions between them live in `src/config.yaml`. The flow:
+There is no shared status vocabulary. Each playbook owns its own state machine in `playbooks/{name}/playbook.yaml`, and a plan's `status:` is whatever the running playbook's machine last wrote. The two machines that carry a plan through a sprint:
 
-    backlog → in-spec → awaiting-plan-review → ready-for-dev → in-progress → awaiting-retro
-    → awaiting-learning → done
+    groom:   framing → researching → drafting → cross-reviewing → presenting → awaiting-approval → ready-for-dev
+    develop: awaiting-plan-review → ready-for-dev → in-progress → awaiting-retro
 
-with `cancelled` and `fail` as terminal branches.
+- `cancelled` is terminal on both machines and reachable from every non-terminal status of either, whenever the user cancels the run. `fail` is develop's other terminal branch, for an unrecoverable blocker.
+- A plan no run has claimed yet carries no status: a split stub or a filed idea sits at `status: null` until a groom run picks it up.
+- Status moves run through `booping playbook-transition {playbook} {to}`, the only writer of run state. The LLM decides the edge and clears the judgment gates; the command sets the status and runs the edge's hooks — date stamps, commit snapshot, vault commit — in one shot. Hand-editing frontmatter to move a plan is not a supported path.
+- Plans carry a `commit:` field, the repo HEAD at the time of the snapshot, stamped on entry to `in-progress` after the user has confirmed the plan is still valid.
 
-- `backlog` is for parked plans only — split stubs and user-filed ideas not yet in grooming.
-- `in-spec` is where `/groom` works; `awaiting-plan-review` is the user-approval gate;
-  `ready-for-dev` is the queue `/develop` claims from.
-- Status moves run through `booping transition {to} {plan}`, a deterministic hook-runner. The
-  LLM decides the edge and clears the judgment gates; the command applies every mechanical
-  mutation — status set, date stamps, commit snapshot, `sprints.md` re-render, vault commit —
-  in one shot. Hand-editing frontmatter to move a plan is not a supported path.
-- Plans carry a `commit:` field, the repo HEAD at the time of the snapshot. It is set when
-  groom finalises the draft and re-snapshotted on entry to `in-progress`, after the user has
-  confirmed the plan is still valid.
+## The playbooks
 
-## The skills
+Grooming, execution, retrospectives and learning are playbooks, each driven by `/playbook {name}`. Code review is still a skill.
 
-- `/groom` — deep-researches a request and produces a specified, estimated plan with a
-  Definition of Done. Owns `in-spec`.
-- `/develop` — executes a groomed plan milestone by milestone, briefing each milestone group
+- `groom` — deep-researches a request and produces a specified, estimated plan with a Definition of Done. Its machine runs from `framing` to `ready-for-dev`.
+- `develop` — executes a groomed plan milestone by milestone, briefing each milestone group
   into a fresh sub-agent and committing its work before the next. It claims a plan at
   `ready-for-dev` and moves it to `in-progress`.
 - `/code-review` — reviews changed code against layered, stack-aware checklists. It picks a
   review template per plan from the core set under `docs/review_templates/`, and a project's
   own `review_templates/` in the vault override a core template by sharing its name. The
   skill is stateless: chat-only output, no status of its own.
-- `/retro` — writes a project- and plan-specific sprint retrospective into the vault after a
+- `retro` — writes a project- and plan-specific sprint retrospective into the vault after a
   sprint reports done. The retrospective shape is built into the skill body: the same headings
   are emitted for every project, and a project has no way to supply a shape of its own. The
   skill reads the plan, the session logs and the user's feedback, and writes one file under
   `retros/`, then stamps `retro:` and `goal:` on the plan.
-- `/learn` — folds a retrospective's lessons into the project-local skill and agent
+- `learn` — folds a retrospective's lessons into the project-local skill and agent
   extensions under `_booping/`.
-- `/chat` — context-aware chat about the vault, plus chores: frontmatter tweaks, status
-  flips, small inline edits.
 
 ## Skill design
 

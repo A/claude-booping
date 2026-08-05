@@ -56,6 +56,8 @@ states:
               - "script commit-plan"
       ready-for-dev:
         terminal: true
+      cancelled:
+        terminal: true
 
     superstates:
       in-spec:
@@ -64,10 +66,19 @@ states:
           - researching
           - drafting
           - cross-reviewing
+        transitions:
+          - to: cancelled
+            when: "the user cancels the run"
+            hooks: ["script commit-plan"]
       awaiting-plan-review:
         states:
           - presenting
           - awaiting-approval
+        transitions:
+          - to: cancelled
+            when: "the user cancels the run"
+            hooks: ["script commit-plan"]
       terminal:
         states:
           - ready-for-dev
+          - cancelled

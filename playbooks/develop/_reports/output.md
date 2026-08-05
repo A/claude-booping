@@ -71,11 +71,15 @@ booping playbook-state develop --workdir <run workdir>
 | Status | To | When | Gates |
 | --- | --- | --- | --- |
 | `awaiting-plan-review` | `ready-for-dev` | intake captured the user's explicit approval of the plan it entered on — "looks good" counts, silence never does | explicit user approval captured |
+| `awaiting-plan-review` | `cancelled` | the user cancels the run | — |
 | `ready-for-dev` | `in-progress` | provision created the confirmed sprint branch and settled the milestone groups; the first group is about to be delegated | the user confirmed the branch name; no unresolved non-trivial drift — that halts back to grooming instead |
+| `ready-for-dev` | `cancelled` | the user cancels the run | — |
 | `in-progress` | `awaiting-retro` | verify came back green on the project's guardrails and wrap-up made the closing commit and reported the sprint | every DoD checkbox [x] and every milestone status done; the project's guardrails and the plan's Final Verification green |
 | `in-progress` | `fail` | an unrecoverable blocker at any point in the sprint, verification included, after two fix attempts on the same issue | two fix attempts documented in the plan; the user approved the abort |
+| `in-progress` | `cancelled` | the user cancels the run | — |
 | `awaiting-retro` | *(terminal)* | — | — |
 | `fail` | *(terminal)* | — | — |
+| `cancelled` | *(terminal)* | — | — |
 
 ## Step: Intake
 # Adopt the plan
@@ -91,7 +95,7 @@ good" counts, silence never does. That approval is what the `awaiting-plan-revie
 
 ## Plan-validity check
 
-Compare the plan's `commit:` field with the repo's current HEAD, `aa03bbb1c819336070cb50941be968ce9dcffa76`.
+Compare the plan's `commit:` field with the repo's current HEAD, `bea028658449c4679a62ac2aab58a7d7d544cd6b`.
 
 - **Equal**: proceed.
 - **Different**: run the cheap-summary commands first — do **not** load the full `git diff` into

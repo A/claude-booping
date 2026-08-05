@@ -82,9 +82,11 @@ There is no single shared status table. **Each playbook declares its own vocabul
 groom     framing → researching → drafting → cross-reviewing → presenting
           → awaiting-approval → ready-for-dev (terminal)
           (loopbacks: drafting → researching, awaiting-approval → drafting)
+          (any non-terminal status → cancelled (terminal))
 
 develop   awaiting-plan-review → ready-for-dev → in-progress
           → awaiting-retro (terminal) | fail (terminal)
+          (any non-terminal status → cancelled (terminal))
 
 retro     awaiting-retro → awaiting-learning (terminal)
 
@@ -113,6 +115,10 @@ A plan carries one of the following statuses in its frontmatter. The owning play
 - **`in-progress`** — develop has claimed the plan and is executing milestones.
 - **`awaiting-retro`** *(develop's terminal)* — all milestones done and verification green.
 - **`fail`** *(develop's terminal)* — an unrecoverable blocker after two documented fix attempts, with your approval to abort.
+
+**groom / develop**
+
+- **`cancelled`** *(terminal in both machines)* — you called the run off. Reachable from every non-terminal status of either machine, so a plan can be abandoned at any point without inventing a fake outcome. Groom snapshots the plan into the vault on the way out; develop stamps `completed:`.
 
 **retro / learn**
 

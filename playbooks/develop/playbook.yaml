@@ -49,9 +49,22 @@ states:
         terminal: true
       fail:
         terminal: true
+      cancelled:
+        terminal: true
 
     superstates:
+      cancellable:
+        states:
+          - awaiting-plan-review
+          - ready-for-dev
+          - in-progress
+        transitions:
+          - to: cancelled
+            when: "the user cancels the run"
+            hooks:
+              - frontmatter-update completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
       terminal:
         states:
           - awaiting-retro
           - fail
+          - cancelled

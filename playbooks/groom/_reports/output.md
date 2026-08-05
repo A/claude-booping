@@ -65,14 +65,21 @@ booping playbook-state groom --workdir <run workdir>
 | Status | To | When | Gates |
 | --- | --- | --- | --- |
 | `framing` | `researching` | intake posted the framing brief in chat, created `index.md` with its identity frontmatter, and the user's answers settled the scope questions — clear intent is enough | answers that change the task type, the restated problem or a boundary re-run intake first |
+| `framing` | `cancelled` | the user cancels the run | — |
 | `researching` | `drafting` | the blast-radius map and the web-research findings are both posted in chat | — |
+| `researching` | `cancelled` | the user cancels the run | — |
 | `drafting` | `cross-reviewing` | architecture, surface changes and trade-offs are settled with the user in conversation, and draft-plan wrote `index.md`'s body against the template's Plan Body and passed its Quality Checklist | every call that is the user's is answered |
 | `drafting` | `researching` | the design needs blast radius or external practice the research pass missed | — |
+| `drafting` | `cancelled` | the user cancels the run | — |
 | `cross-reviewing` | `presenting` | the cross-review pass disposed of every finding, or no `core.groom_playbook.cross_review_agent` is configured and the pass was skipped | every CRITICAL finding folded in or recorded as a deferral — vacuously satisfied with no `core.groom_playbook.cross_review_agent` configured |
+| `cross-reviewing` | `cancelled` | the user cancels the run | — |
 | `presenting` | `awaiting-approval` | present posted the approval screen in chat — summary, split recommendation if any, handoff to the `develop` playbook | — |
+| `presenting` | `cancelled` | the user cancels the run | — |
 | `awaiting-approval` | `drafting` | the user's change request touches the plan itself — architecture, scope, milestones, tasks or estimates | — |
 | `awaiting-approval` | `ready-for-dev` | the user explicitly approves the plan — "looks good" counts, silence never does | explicit user approval captured |
+| `awaiting-approval` | `cancelled` | the user cancels the run | — |
 | `ready-for-dev` | *(terminal)* | — | — |
+| `cancelled` | *(terminal)* | — | — |
 
 ## Step: Intake
 # Frame the request
