@@ -8,6 +8,15 @@ home_dir: ~/Claude/
 # Agent an assisted playbook step delegates its heavy reads to.
 research_agent: "booping:booping-researcher"
 
+# Shell-outs a template body may call by dotted path: `{{ macro('macros.now') }}`.
+# Each value is an argv list (never a shell string) run with shell=False; stdout is
+# stripped and cached per argv tuple for the process, so a macro must be idempotent
+# within one render. Honoured in the core and global tiers only — a project-tier
+# `macros` block is dropped with a stderr warning. `--stub-macro <path>=<literal>`
+# on `render`, `render-playbook` and `scaffold` returns the literal without executing.
+macros:
+  now: ["date", "+%Y%m%d-%H-%M"]
+
 sprint:
   default_threshold_sp: 35
   redecompose_threshold: 5

@@ -29,7 +29,7 @@ playbook-reports:
         name=$(basename "$(dirname "$manifest")")
         bin/booping render-playbook "$name" \
             --project playbooks/_fixtures/vault \
-            --set now=19700101-00-00 \
+            --stub-macro macros.now=19700101-00-00 \
             --output "playbooks/$name/_reports/output.md"
     done
 

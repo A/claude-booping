@@ -6,6 +6,7 @@ from pathlib import Path
 
 from booping import logger
 from booping.context import Context
+from booping.macros import parse_stub_overrides
 from booping.rendering import get_plugin_root, render
 from booping.utils import deep_merge, parse_set_overrides
 
@@ -26,6 +27,17 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
             " value wins over every config tier"
         ),
     )
+    p.add_argument(
+        "--stub-macro",
+        action="append",
+        dest="stub_macros",
+        default=None,
+        metavar="DOTTED.PATH=LITERAL",
+        help=(
+            "Make a macro return LITERAL without executing it (e.g."
+            " macros.now=19700101-00-00); repeatable, later pairs win"
+        ),
+    )
     p.set_defaults(func=_run)
 
 
@@ -36,6 +48,17 @@ def _run(args: argparse.Namespace) -> None:
     except ValueError as exc:
         print(
             f"error: malformed --set pair (expected KEY=VALUE): {exc}",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    try:
+        overrides = deep_merge(
+            overrides, parse_stub_overrides(args.stub_macros or [])
+        )
+    except ValueError as exc:
+        print(
+            f"error: malformed --stub-macro pair (expected DOTTED.PATH=LITERAL): {exc}",
             file=sys.stderr,
         )
         sys.exit(1)

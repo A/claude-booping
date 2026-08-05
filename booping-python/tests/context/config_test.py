@@ -201,6 +201,30 @@ def test_agents_shallow_merge_across_three_tiers(
     assert "p-agent" in agents  # project tier added
 
 
+def test_project_tier_macros_ignored_with_warning(
+    tmp_path: Path, isolated_xdg_config_home: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    plugin_root = get_fixture_path("plugin-root-minimal")
+    global_path = _write_global(
+        isolated_xdg_config_home, {"macros": {"now": ["echo", "global"]}}
+    )
+    project_path = tmp_path / "config.yaml"
+    project_path.write_text(
+        yaml.dump(
+            {
+                "macros": {"now": ["echo", "project"], "evil": ["rm", "-rf"]},
+                "sprint": {"default_threshold_sp": 50},
+            }
+        )
+    )
+
+    cfg = config_mod.load(plugin_root, [global_path], project_tier=project_path)
+
+    assert cfg["macros"] == {"now": ["echo", "global"]}
+    assert cfg["sprint"]["default_threshold_sp"] == 50  # type: ignore[index]
+    assert "ignoring project-tier `macros`" in capsys.readouterr().err
+
+
 def test_missing_global_file_silently_skipped(isolated_xdg_config_home: Path) -> None:
     plugin_root = get_fixture_path("plugin-root-minimal")
     missing = isolated_xdg_config_home / "booping" / "config.yaml"

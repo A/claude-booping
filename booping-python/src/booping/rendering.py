@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Iterator
-from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
 
 from jinja2 import BaseLoader, ChainableUndefined, Environment, FileSystemLoader, pass_context
+
+from booping.macros import make_macro
 
 if TYPE_CHECKING:
     from jinja2.runtime import Context as JinjaContext
@@ -77,29 +78,6 @@ def get_plugin_root() -> Path:
     return _plugin_root
 
 
-def now(fmt: str = "%Y%m%d-%H-%M") -> str:
-    """Local wall-clock stamp, evaluated at render time."""
-    return datetime.now().strftime(fmt)
-
-
-def make_now(config: object = None) -> Callable[..., str]:
-    """The `now` global a rendering env gets. A `now` key in config pins it: every
-    call returns that value verbatim, whatever format is asked for — which makes a
-    render byte-reproducible. Absent → the live wall-clock stamp.
-    """
-    pinned: object = (
-        cast("dict[str, Any]", config).get("now") if isinstance(config, dict) else None
-    )
-    if pinned is None:
-        return now
-    value = str(pinned)
-
-    def pinned_now(fmt: str = "%Y%m%d-%H-%M") -> str:  # noqa: ARG001
-        return value
-
-    return pinned_now
-
-
 def _vault_of(context: object) -> Path | None:
     """The vault a query runs against: the render's resolved vault, else the project's."""
     vault = getattr(context, "vault", None)
@@ -156,7 +134,7 @@ def _build_env(
         keep_trailing_newline=True,
     )
     globals_: dict[str, Any] = env.globals  # type: ignore[assignment]
-    globals_["now"] = make_now(config)
+    globals_["macro"] = make_macro(config)
     filters: dict[str, Any] = env.filters  # type: ignore[assignment]
     filters["query"] = make_query_filter(config)
     filters["as_table"] = as_table

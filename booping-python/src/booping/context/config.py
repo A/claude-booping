@@ -66,13 +66,39 @@ def validate_skills(cfg: dict[str, Any]) -> None:
             raise ValueError(f"invalid config for skills.{name}: {exc}") from exc
 
 
-def load(plugin_root: Path, override_paths: list[Path]) -> dict[str, Any]:
+# Keys a project-tier config may not contribute. A project tier can arrive with a
+# `git clone` of a repo carrying a local vault, and macros execute during rendering
+# inside an already-approved Bash allowance, with no second permission decision.
+UNTRUSTED_PROJECT_KEYS = ("macros",)
+
+
+def _merge(merged: dict[str, Any], path: Path) -> dict[str, Any]:
+    override = safe_load_path(path)
+    # `agents` is shallow-merged: each agent entry is atomic — an override
+    # flipping one field must restate the rest of that entry.
+    return deep_merge(merged, override, shallow_merge_keys=["agents"])
+
+
+def load(
+    plugin_root: Path,
+    override_paths: list[Path],
+    *,
+    project_tier: Path | None = None,
+) -> dict[str, Any]:
     core_path = plugin_root / "src" / "config.yaml"
     merged: dict[str, Any] = safe_load_str(core_path.read_text())
     for path in override_paths:
         if path.exists():
-            override = safe_load_path(path)
-            # `agents` is shallow-merged: each agent entry is atomic — an override
-            # flipping one field must restate the rest of that entry.
-            merged = deep_merge(merged, override, shallow_merge_keys=["agents"])
+            merged = _merge(merged, path)
+    if project_tier is not None and project_tier.exists():
+        override = safe_load_path(project_tier)
+        for key in UNTRUSTED_PROJECT_KEYS:
+            if key in override:
+                del override[key]
+                print(
+                    f"warning: ignoring project-tier `{key}` in {project_tier} —"
+                    f" `{key}` is honoured in the core and global tiers only",
+                    file=sys.stderr,
+                )
+        merged = deep_merge(merged, override, shallow_merge_keys=["agents"])
     return merged

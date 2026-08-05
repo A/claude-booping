@@ -15,11 +15,11 @@ from booping.context import playbook as playbook_mod
 from booping.context.lesson import Lesson
 from booping.context.lifecycle import resolve_edges
 from booping.context.playbook import GraphProblem, Playbook, Step, resolve_detached
+from booping.macros import make_macro, parse_stub_overrides
 from booping.rendering import (
     LenientUndefined,
     build_source_env,
     get_plugin_root,
-    make_now,
 )
 from booping.utils import deep_merge, parse_set_overrides
 
@@ -168,6 +168,17 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
         ),
     )
     p.add_argument(
+        "--stub-macro",
+        action="append",
+        dest="stub_macros",
+        default=None,
+        metavar="DOTTED.PATH=LITERAL",
+        help=(
+            "Make a macro return LITERAL without executing it (e.g."
+            " macros.now=19700101-00-00); repeatable, later pairs win"
+        ),
+    )
+    p.add_argument(
         "--no-lessons",
         action="store_true",
         help="Suppress the Lessons section on both the composed and --step surfaces",
@@ -236,7 +247,7 @@ def build_env(
         )
     globals_: dict[str, Any] = cast("dict[str, Any]", env.globals)
     globals_["resolve_detached"] = resolve_detached
-    globals_["now"] = make_now(context.config if context is not None else None)
+    globals_["macro"] = make_macro(context.config if context is not None else None)
     return env
 
 
@@ -701,6 +712,17 @@ def _run(args: argparse.Namespace) -> None:
     except ValueError as exc:
         print(
             f"error: malformed --set pair (expected KEY=VALUE): {exc}",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    try:
+        overrides = deep_merge(
+            overrides, parse_stub_overrides(args.stub_macros or [])
+        )
+    except ValueError as exc:
+        print(
+            f"error: malformed --stub-macro pair (expected DOTTED.PATH=LITERAL): {exc}",
             file=sys.stderr,
         )
         sys.exit(1)

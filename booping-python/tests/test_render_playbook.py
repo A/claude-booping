@@ -868,18 +868,22 @@ def test_inline_jinja_body_renders_through_context(tmp_path: Path) -> None:
     assert "for content." not in out
 
 
-def test_jinja_preamble_renders_now_stamp(tmp_path: Path) -> None:
+def test_jinja_preamble_renders_macro_stamp(tmp_path: Path) -> None:
     pb_dir = tmp_path / "_playbooks" / "nw"
     (pb_dir / "one").mkdir(parents=True)
     (pb_dir / "playbook.md").write_text(
         "---\nname: nw\ntitle: NW\njinja: true\ngraph:\n  one: []\n---\n"
-        'Stamp {{ now("%Y%m%d") }}.\n'
+        "Stamp {{ macro('macros.stamp') }}.\n"
     )
     (pb_dir / "one" / "prompt.md").write_text("---\nsummary: one\n---\nOne body.\n")
     pbs = Playbook.load_all(
         vault=tmp_path, home_dir=tmp_path / "nohome", plugin_root=tmp_path / "nocore"
     )
-    out = compose(next(p for p in pbs if p.name == "nw"), context=_ctx())
+    ctx = _ctx()
+    ctx = ctx.model_copy(
+        update={"config": {**ctx.config, "macros": {"stamp": ["date", "+%Y%m%d"]}}}
+    )
+    out = compose(next(p for p in pbs if p.name == "nw"), context=ctx)
     assert f"Stamp {datetime.now().strftime('%Y%m%d')}." in out
 
 
@@ -1746,19 +1750,24 @@ def test_set_override_documented_in_help(tmp_path: Path) -> None:
     assert "KEY=VALUE" in result.stdout
 
 
-# --- pinnable now() ---------------------------------------------------------
+# --- stubbable macro() ------------------------------------------------------
 
 
-def test_pinned_now_reaches_playbook_bodies() -> None:
+def test_stubbed_macro_reaches_playbook_bodies() -> None:
     ctx = _ctx().model_copy(
-        update={"config": {**_ctx().config, "now": "19700101-00-00"}}
+        update={
+            "config": {
+                **_ctx().config,
+                "macro_stubs": {"macros.now": "19700101-00-00"},
+            }
+        }
     )
     env = build_env(context=ctx)
-    assert env.from_string('{{ now() }}|{{ now("%H:%M") }}').render() == (
-        "19700101-00-00|19700101-00-00"
-    )
+    assert env.from_string("{{ macro('macros.now') }}").render() == "19700101-00-00"
 
 
-def test_unpinned_now_in_playbook_bodies_is_time_shaped() -> None:
+def test_unstubbed_macro_in_playbook_bodies_is_time_shaped() -> None:
     env = build_env(context=_ctx())
-    assert re.fullmatch(r"\d{8}-\d{2}-\d{2}", env.from_string("{{ now() }}").render())
+    assert re.fullmatch(
+        r"\d{8}-\d{2}-\d{2}", env.from_string("{{ macro('macros.now') }}").render()
+    )

@@ -11,7 +11,6 @@ from booping.rendering import (
     RenderCycleError,
     RenderDepthExceededError,
     build_source_env,
-    make_now,
     render,
 )
 from booping.tools import Tools
@@ -105,44 +104,46 @@ def test_tools_render_mutual_reference_raises_cycle_error() -> None:
         )
 
 
-def test_now_global_renders_local_stamp() -> None:
+def test_macro_global_runs_a_declared_argv() -> None:
     fixture = get_fixture_path("plugin-root-minimal")
-    env = build_source_env(context={}, config={}, plugin_root=fixture)
+    env = build_source_env(
+        context={},
+        config={"macros": {"now": ["date", "+%Y%m%d"]}},
+        plugin_root=fixture,
+    )
 
-    rendered = env.from_string('{{ now("%Y%m%d") }}').render()
+    rendered = env.from_string("{{ macro('macros.now') }}").render()
 
     assert rendered == datetime.now().strftime("%Y%m%d")
 
 
-def test_now_pinned_by_config_ignores_the_format() -> None:
+def test_macro_stubbed_by_config_returns_the_literal() -> None:
     fixture = get_fixture_path("plugin-root-minimal")
     env = build_source_env(
-        context={}, config={"now": "19700101-00-00"}, plugin_root=fixture
+        context={},
+        config={
+            "macros": {"now": ["date", "+%Y%m%d"]},
+            "macro_stubs": {"macros.now": "19700101-00-00"},
+        },
+        plugin_root=fixture,
     )
 
-    rendered = env.from_string(
-        '{{ now() }}|{{ now("%Y%m%d") }}|{{ now("%H:%M") }}'
-    ).render()
+    rendered = env.from_string("{{ macro('macros.now') }}").render()
 
-    assert rendered == "19700101-00-00|19700101-00-00|19700101-00-00"
+    assert rendered == "19700101-00-00"
 
 
-def test_now_unpinned_keeps_default_shape() -> None:
+def test_macro_default_shape_from_core_config() -> None:
     fixture = get_fixture_path("plugin-root-minimal")
-    env = build_source_env(context={}, config={}, plugin_root=fixture)
+    env = build_source_env(
+        context={},
+        config={"macros": {"now": ["date", "+%Y%m%d-%H-%M"]}},
+        plugin_root=fixture,
+    )
 
-    rendered = env.from_string("{{ now() }}").render()
+    rendered = env.from_string("{{ macro('macros.now') }}").render()
 
     assert re.fullmatch(r"\d{8}-\d{2}-\d{2}", rendered)
-
-
-def test_make_now_pinned_returns_value_verbatim() -> None:
-    assert make_now({"now": "sentinel"})("%Y") == "sentinel"
-
-
-def test_make_now_unpinned_falls_back_to_wall_clock() -> None:
-    assert make_now({})("%Y%m%d") == datetime.now().strftime("%Y%m%d")
-    assert make_now(None)("%Y%m%d") == datetime.now().strftime("%Y%m%d")
 
 
 def test_tools_render_depth_limit() -> None:

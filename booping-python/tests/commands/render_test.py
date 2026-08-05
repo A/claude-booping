@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import subprocess
 from pathlib import Path
 
@@ -72,15 +73,28 @@ def test_render_set_deep_merges_leaving_siblings(tmp_path: Path) -> None:
     assert result.stdout.strip() == "7|True"
 
 
-def test_render_set_pins_now(tmp_path: Path) -> None:
+def test_render_macro_runs_a_core_declared_macro(tmp_path: Path) -> None:
+    result = _render(tmp_path, "{{ macro('macros.now') }}\n")
+    assert result.returncode == 0
+    assert re.fullmatch(r"\d{8}-\d{2}-\d{2}", result.stdout.strip())
+
+
+def test_render_stub_macro_returns_the_literal(tmp_path: Path) -> None:
     result = _render(
         tmp_path,
-        '{{ now("%Y%m%d") }}\n',
-        "--set",
-        "now=19700101-00-00",
+        "{{ macro('macros.now') }}\n",
+        "--stub-macro",
+        "macros.now=19700101-00-00",
     )
     assert result.returncode == 0
     assert result.stdout.strip() == "19700101-00-00"
+
+
+def test_render_stub_macro_malformed_pair_exits_1(tmp_path: Path) -> None:
+    result = _render(tmp_path, "x\n", "--stub-macro", "nope")
+    assert result.returncode == 1
+    assert result.stdout == ""
+    assert "malformed --stub-macro pair" in result.stderr
 
 
 def test_render_set_malformed_pair_exits_1(tmp_path: Path) -> None:

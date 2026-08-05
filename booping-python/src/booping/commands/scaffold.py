@@ -11,8 +11,9 @@ from jinja2 import Environment, TemplateError
 from booping import logger
 from booping.context import Context
 from booping.context.scaffold import DirNode, FileNode, ScaffoldError, load
+from booping.macros import parse_stub_overrides
 from booping.rendering import build_source_env
-from booping.utils import parse_set_overrides
+from booping.utils import deep_merge, parse_set_overrides
 
 
 def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:  # type: ignore[type-arg]
@@ -51,6 +52,17 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
             "Expose a value to seed content as a bare template variable"
             " (--set name=x renders {{ name }}); repeatable, later pairs win,"
             " values stay strings"
+        ),
+    )
+    p.add_argument(
+        "--stub-macro",
+        action="append",
+        dest="stub_macros",
+        default=None,
+        metavar="DOTTED.PATH=LITERAL",
+        help=(
+            "Make a macro return LITERAL without executing it (e.g."
+            " macros.now=19700101-00-00); repeatable, later pairs win"
         ),
     )
     p.set_defaults(func=_run)
@@ -119,6 +131,11 @@ def _run(args: argparse.Namespace) -> None:
     except ValueError as exc:
         _fail(f"malformed --set pair (expected KEY=VALUE): {exc}")
 
+    try:
+        stub_overrides = parse_stub_overrides(args.stub_macros or [])
+    except ValueError as exc:
+        _fail(f"malformed --stub-macro pair (expected DOTTED.PATH=LITERAL): {exc}")
+
     dest: Path = args.dest
     config_path: str = args.config_path
 
@@ -134,7 +151,8 @@ def _run(args: argparse.Namespace) -> None:
     if dest.is_dir() and any(dest.iterdir()) and not args.force:
         _fail(f"destination {dest} is not empty — pass --force to write into it")
 
-    env = build_source_env(context=ctx, config=ctx.config)
+    config = deep_merge(ctx.config, stub_overrides) if stub_overrides else ctx.config
+    env = build_source_env(context=ctx, config=config)
     globals_: dict[str, Any] = env.globals  # type: ignore[assignment]
     globals_.update(variables)
 
