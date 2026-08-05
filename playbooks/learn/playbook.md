@@ -5,8 +5,7 @@ summary: Turn retrospective findings into durable behavior changes routed to
   exactly one target each — extract atomic candidates, sweep for duplicates,
   confirm a review table with the user, write the accepted items, close the
   plans out.
-trigger: absorb lessons from a retrospective after /retro; fold retro findings
-  into lessons and extensions (playbook variant, parallel to /learn)
+trigger: absorb lessons from a retrospective after `/playbook retro`; fold retro findings into lessons and extensions
 jinja: true
 inline_steps: true
 requires_project: true

@@ -47,7 +47,7 @@ How the skill interacts with other skills via shared config (statuses, agents, t
 
 ## Out of scope
 
-Explicit exclusions — e.g. "groom skill only; develop/retro/learn unchanged", "no plan-template changes".
+Explicit exclusions — e.g. "the `code-review` skill only; the `playbook` skill unchanged", "no plan-template changes".
 
 ## CLAUDE.md impact
 

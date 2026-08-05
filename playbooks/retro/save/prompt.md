@@ -5,7 +5,7 @@ summary: >-
   per-plan verdicts — check it covers the working set, then fire the exit
   transition, whose hook stamps the retro reference and goal verdict on every
   plan and moves the siblings; close on the saved-retrospective report and the
-  `/learn` offer, never launched.
+  `/playbook learn` offer, never launched.
 review_gate: null
 ---
 

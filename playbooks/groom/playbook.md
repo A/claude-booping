@@ -3,8 +3,7 @@ name: groom
 title: Groom
 summary: Shape a feature, bug, or refactor into a specified, estimated, 
   user-approved plan.
-trigger: groom a request into a plan — spec out a feature, bug, or refactor 
-  before development (playbook variant, parallel to /groom)
+trigger: groom a request into a plan — spec out a feature, bug, or refactor before development
 jinja: true
 inline_steps: true
 requires_project: true

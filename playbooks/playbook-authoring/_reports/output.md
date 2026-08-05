@@ -2,8 +2,7 @@
 
 Your goal is a new playbook under a playbook root: steps a fresh, context-isolated agent can
 run, review gates that catch drift while review is still cheap, and eval suites that guard
-each step's contract. The method is `_playbooks/docs/evals.md` — when a step's instructions
-and that document disagree, the document wins.
+each step's contract.
 
 Run state is harness-managed. The workdir is the target playbook dir `<root>/<slug>/`
 (created before the first transition); the machine artifacts are `_specs/index.md` and

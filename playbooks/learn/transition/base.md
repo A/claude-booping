@@ -18,7 +18,7 @@ git commit -m "docs(claude-md): {short summary}"
 
 ## 3. Closing report
 
-Post in chat: the plans closed with their new statuses, then a table of the items written — each with its target path and whether it was a new write or an in-place update — and the rejected-row count. No `/learn` re-offer; the working set is done.
+Post in chat: the plans closed with their new statuses, then a table of the items written — each with its target path and whether it was a new write or an in-place update — and the rejected-row count. No `/playbook learn` re-offer; the working set is done.
 
 ## Replay
 

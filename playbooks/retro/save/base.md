@@ -49,7 +49,7 @@ frontmatter.
 
 Post in chat: the retrospective's path, the plans covered with their verdicts and new statuses,
 then a section per plan tabling the issues reported into the retro — each with its root cause and
-its action items — the issue and action-item counts, and the `/learn` offer stated as a command
+its action items — the issue and action-item counts, and the `/playbook learn` offer stated as a command
 the user may run. Offer it; never launch it.
 
 ```markdown
@@ -75,7 +75,7 @@ the user may run. Offer it; never launch it.
 
 3 issues carried, 2 action items. Both plans link to the one shared retrospective.
 
-Next, if you want the lessons absorbed: `/learn plans/20260728-09-15_playbook-run-state/retro.md`
+Next, if you want the lessons absorbed: `/playbook learn plans/20260728-09-15_playbook-run-state/retro.md`
 ```
 
 ## Replay

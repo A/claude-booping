@@ -1,6 +1,6 @@
 Your goal is one finished sprint per run: every milestone `done`, every DoD checkbox `[x]`,
 work committed on the sprint branch in the attached repo, the project's guardrails green, and
-the plan handed off to `/retro`.
+the plan handed off to `/playbook retro`.
 
 **Plan resolution.** Take the plan from the invocation argument; with none given, build a
 candidate table of plans in the vault currently at `ready-for-dev` or `awaiting-plan-review` and
@@ -14,8 +14,6 @@ already on the file; it never bootstraps or creates it.
 - No scope additions: the sprint delivers exactly the plan's milestones and tasks, nothing more.
 - `develop-loop` works one milestone group at a time — brief a worker, close the group, then
   move to the next. Never two workers on one sprint branch at once.
-- `/develop` stays canonical: this playbook runs alongside it as an experiment and does not
-  replace it.
 
 Eval runs are proposed, never launched — the user triggers them.
 
@@ -49,7 +47,7 @@ Execute the steps in the most effective order considering their dependencies.
 | `provision` | `intake` | Set the sprint up — pick the branch from the plan's task type per the branch conventions, propose a kebab-case name and create it off the repo's current branch only after the user confirms; then settle the milestone groups the briefings will cover, within the configured ceiling, and fire the `ready-for-dev` → `in-progress` transition. | The user confirms the branch name before the branch is created — asked through `AskUserQuestion`, never as chat prose; a name the user rewrites is used verbatim, and nothing touches git until the answer arrives. The milestone groups are internal — settled by the step, reported in its return, never put to the user |
 | `develop-loop` | `provision` | Run the sprint group by group — one briefing per group to the worker agent, one worker at a time on the sprint branch; on each report verify against the milestone's DoD and its plan-authored Verify, flip the checkboxes, task rows and milestone status, commit per milestone, refresh and commit the vault snapshot, and report what shipped before the next group. | — |
 | `verify` | `develop-loop` | Run the project's guardrails over the finished sprint once — tests, lint, typecheck, formatter, whatever else must hold for a PR to open without CI failing — plus the plan's own bookkeeping, every DoD checkbox `[x]` and every milestone `done`, read off disk, and return what passed and what failed; no code-quality judgement, no fixes applied here. | — |
-| `wrap-up` | `verify` | Close the run — update the documentation the sprint invalidated, make one closing commit, fire the `in-progress` → `awaiting-retro` transition, refresh and commit the vault snapshot, then report the sprint and hand off to `/retro`. Guardrail results and completeness arrive as verify's evidence and are never re-established here. | — |
+| `wrap-up` | `verify` | Close the run — update the documentation the sprint invalidated, make one closing commit, fire the `in-progress` → `awaiting-retro` transition, refresh and commit the vault snapshot, then report the sprint and hand off to `/playbook retro`. Guardrail results and completeness arrive as verify's evidence and are never re-established here. | — |
 
 ## State
 
@@ -95,7 +93,7 @@ good" counts, silence never does. That approval is what the `awaiting-plan-revie
 
 ## Plan-validity check
 
-Compare the plan's `commit:` field with the repo's current HEAD, `62946f72f48dee1a41e9df52f7fbfe84a6ec87ea`.
+Compare the plan's `commit:` field with the repo's current HEAD, `cabad123ea778e427e738a286c08bf8fab17c8f7`.
 
 - **Equal**: proceed.
 - **Different**: run the cheap-summary commands first — do **not** load the full `git diff` into
@@ -313,7 +311,7 @@ git -C {vault} commit -q -m "develop: {slug} → {new status}"
 
 Post in chat: the branch, the milestones shipped, the guardrail verdict as verify reported it, the
 documentation touched, the closing commit, the plan's new status. Close on the handoff line
-`/retro {plan-path}` — the user runs it, nothing here does.
+`/playbook retro {plan-path}` — the user runs it, nothing here does.
 
 ```markdown
 **Sprint done — {plan title} ({total} SP), branch `{branch}`.**
@@ -326,7 +324,7 @@ Guardrails: {verdict as reported} — {commands}; the plan's Final Verification 
 
 Docs: {what was updated and where}; committed as `{message}`.
 
-The plan is at `{new status}`. Next: `/retro {plan-path}`.
+The plan is at `{new status}`. Next: `/playbook retro {plan-path}`.
 ```
 
 A sprint that invalidated no documentation closes on the same shape, with the docs line reading
@@ -346,7 +344,7 @@ A sprint that invalidated no documentation closes on the same shape, with the do
 - docs: {what was updated and why, or that the sprint invalidated none}
 - transition: {the transition report verbatim}
 - vault commit: {sha}
-- handoff posted: `/retro {plan-path}`
+- handoff posted: `/playbook retro {plan-path}`
 
 ## Questions:
 ```

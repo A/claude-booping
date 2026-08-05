@@ -42,7 +42,7 @@ git -C {vault} commit -q -m "develop: {slug} → {new status}"
 
 Post in chat: the branch, the milestones shipped, the guardrail verdict as verify reported it, the
 documentation touched, the closing commit, the plan's new status. Close on the handoff line
-`/retro {plan-path}` — the user runs it, nothing here does.
+`/playbook retro {plan-path}` — the user runs it, nothing here does.
 
 ```markdown
 **Sprint done — {plan title} ({total} SP), branch `{branch}`.**
@@ -55,7 +55,7 @@ Guardrails: {verdict as reported} — {commands}; the plan's Final Verification 
 
 Docs: {what was updated and where}; committed as `{message}`.
 
-The plan is at `{new status}`. Next: `/retro {plan-path}`.
+The plan is at `{new status}`. Next: `/playbook retro {plan-path}`.
 ```
 
 A sprint that invalidated no documentation closes on the same shape, with the docs line reading
@@ -75,7 +75,7 @@ A sprint that invalidated no documentation closes on the same shape, with the do
 - docs: {what was updated and why, or that the sprint invalidated none}
 - transition: {the transition report verbatim}
 - vault commit: {sha}
-- handoff posted: `/retro {plan-path}`
+- handoff posted: `/playbook retro {plan-path}`
 
 ## Questions:
 ```

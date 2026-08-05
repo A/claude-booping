@@ -13,14 +13,14 @@ Every accepted learning lands in **exactly one** target. If a candidate would ot
 
 ## Routing Matrix
 
-This matrix is the routing contract for /learn candidates. Every accepted learning lands in exactly one target — no duplicates across targets, no multi-target rows.
+This matrix is the routing contract for learn candidates. Every accepted learning lands in exactly one target — no duplicates across targets, no multi-target rows.
 
 | Target | When to use | Lands at | Examples |
 |--------|-------------|----------|----------|
-| **Lesson** | Behavior change reaching one or more playbooks, playbook steps, or agents — design heuristic, test discipline, IA rule. Concrete, short, with one example. | `_lessons/{N}_<kebab>.md`, with a `targets:` list naming what it applies to | "Challenge code design by SOLID principles", "Use AAA in test cases", "Design skill template partials by information hierarchy" |
-| **Skill extra instructions** | Tweak or extend a single skill's method (groom / develop / retro / learn / chat / install / help). | `_booping/skill_<skill>.md` | `skill_groom.md`, `skill_develop.md`, `skill_retro.md`, `skill_learn.md`, `skill_chat.md`, `skill_install.md`, `skill_help.md` |
-| **Agent extra instructions** | Hook a single agent's behavior. Compact list. | `_booping/agent_<full-agent-name>.md` | `agent_booping-researcher.md`, `agent_booping-developer.md` |
-| **Repository CLAUDE.md** | Project-fact aiding fresh-agent project understanding — layout path, CLI command, code-side convention. One-bullet additions; no paragraph rewrites. | `<repo>/CLAUDE.md` (the attached repo's file — **never** the global `~/.claude/CLAUDE.md` or any user-level scope) | (single canonical target — no filename variants) |
+| **Lesson** | Behavior change reaching one or more playbooks, playbook steps, or agents — design heuristic, test discipline, IA rule. Concrete, short, with one example. Carries a `targets:` list; a lesson with no valid target reaches nothing. | `_lessons/{N}_{kebab}.md` | "Challenge code design by SOLID principles", "Use AAA in test cases", "Design skill template partials by information hierarchy" |
+| **Skill extra instructions** | Tweak or extend a single skill's method (code-review / playbook). | `_booping/skill_{skill}.md` | `skill_code-review.md`, `skill_playbook.md` |
+| **Agent extra instructions** | Hook a single agent's behavior. Compact list. | `_booping/agent_{full-agent-name}.md` | `agent_booping-researcher.md`, `agent_booping-developer.md` |
+| **Repository CLAUDE.md** | Project-fact aiding fresh-agent project understanding — layout path, CLI command, code-side convention. One-bullet additions; no paragraph rewrites. | `{repo}/CLAUDE.md` (the attached repo's file — **never** the global `~/.claude/CLAUDE.md` or any user-level scope) | (single canonical target — no filename variants) |
 
 If a candidate would otherwise span two targets, decompose into two distinct rows; never duplicate the same rule across targets. A lesson is the one target that carries its own routing: it lands in this project's `_lessons/` and its `targets:` list wires it to the playbooks, steps and agents it applies to — several entries in one list are one row, not a multi-target row.
 
@@ -183,7 +183,7 @@ Turn a procedure description into a working playbook — an interviewed brief, a
 
 ### retro
 
-Generate a project- and plan-specific sprint retrospective — mine session logs, gather the user's raw feedback, triage issues, then save it and hand off to /learn.
+Generate a project- and plan-specific sprint retrospective — mine session logs, gather the user's raw feedback, triage issues, then save it and hand off to `/playbook learn`.
 
 - Steps: `gather-feedback`, `intake`, `prepare`, `research-issues`, `save`, `synthesize`
 - Targets: `booping render playbooks/_partials/lesson_target_space.md --set targets_for=retro`
@@ -277,7 +277,7 @@ git commit -m "docs(claude-md): {short summary}"
 
 ## 3. Closing report
 
-Post in chat: the plans closed with their new statuses, then a table of the items written — each with its target path and whether it was a new write or an in-place update — and the rejected-row count. No `/learn` re-offer; the working set is done.
+Post in chat: the plans closed with their new statuses, then a table of the items written — each with its target path and whether it was a new write or an in-place update — and the rejected-row count. No `/playbook learn` re-offer; the working set is done.
 
 ## Replay
 

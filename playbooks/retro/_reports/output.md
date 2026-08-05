@@ -46,7 +46,7 @@ Execute the steps in the most effective order considering their dependencies.
 | `gather-feedback` | `prepare` | Take the user's raw open-ended take before any mined finding is mentioned: four questions asked verbatim, one at a time, each with a free-text option; then walk every mined item in batches for accept / dismiss / the user's own wording, and close by asking per plan whether the plan's goal was reached, the goal presented verbatim as written. | — |
 | `research-issues` | `gather-feedback` | Do focused root-cause work on each accepted issue: read only the files the trigger or the user's wording implicates, compare documented project conventions against what the code actually does where the issue is a convention drift, research current best practice for the underlying class of problem, and design concrete process-level prevention moves — for lesson-tagged issues also judge whether the lesson's wording, trigger or placement is what failed. | — |
 | `synthesize` | `research-issues` | Draft the retrospective against the retrospective template — wins, per-issue what-happened / root-cause / impact, lesson gaps, and action items split into one-time tasks and standing heuristics — run the template's self-review checklist and fix every `no`, then show the user a chat summary in the pre-save summary format while holding the full draft in context, unwritten. | The run's single review gate — explicit user approval of the draft, asked for in prose in the same message as the summary, never via `AskUserQuestion`. "Save it" counts, silence never does; the approval is what `save` writes on and what the exit edge's first gate names. A refine request loops in place — adjust framing, wording or which issues land, re-post the summary whole with what changed marked as changed, and re-ask; the loop is unbounded, a refine needing new evidence stays in this step, and the run never advances to `save` on its own. A cancel drops the draft and ends the run: nothing written, no transition, the plan left at its entry status. |
-| `save` | `synthesize` | Write the approved draft to the primary plan's directory as `retro.md` — frontmatter carrying the plans list, date, cross-plan goal summary and the per-plan verdicts — check it covers the working set, then fire the exit transition, whose hook stamps the retro reference and goal verdict on every plan and moves the siblings; close on the saved-retrospective report and the `/learn` offer, never launched. | — |
+| `save` | `synthesize` | Write the approved draft to the primary plan's directory as `retro.md` — frontmatter carrying the plans list, date, cross-plan goal summary and the per-plan verdicts — check it covers the working set, then fire the exit transition, whose hook stamps the retro reference and goal verdict on every plan and moves the siblings; close on the saved-retrospective report and the `/playbook learn` offer, never launched. | — |
 
 ## State
 
@@ -257,7 +257,7 @@ in that order and under ~40 lines. An empty table renders as `_No accepted issue
 `_No action items._`.
 
 No frontmatter, no save path, no commit command, no candidate-lessons section — those are `save`'s
-and `/learn`'s surfaces.
+and `/playbook learn`'s surfaces.
 
 ## 4. Ask for the approval
 
@@ -330,7 +330,7 @@ frontmatter.
 
 Post in chat: the retrospective's path, the plans covered with their verdicts and new statuses,
 then a section per plan tabling the issues reported into the retro — each with its root cause and
-its action items — the issue and action-item counts, and the `/learn` offer stated as a command
+its action items — the issue and action-item counts, and the `/playbook learn` offer stated as a command
 the user may run. Offer it; never launch it.
 
 ```markdown
@@ -356,7 +356,7 @@ the user may run. Offer it; never launch it.
 
 3 issues carried, 2 action items. Both plans link to the one shared retrospective.
 
-Next, if you want the lessons absorbed: `/learn plans/20260728-09-15_playbook-run-state/retro.md`
+Next, if you want the lessons absorbed: `/playbook learn plans/20260728-09-15_playbook-run-state/retro.md`
 ```
 
 ## Replay

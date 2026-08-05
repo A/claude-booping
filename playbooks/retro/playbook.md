@@ -1,11 +1,8 @@
 ---
 name: retro
 title: Retro
-summary: Generate a project- and plan-specific sprint retrospective — mine 
-  session logs, gather the user's raw feedback, triage issues, then save it and 
-  hand off to /learn.
-trigger: retro a plan after /develop reports a sprint done; write a sprint 
-  retrospective (playbook variant, parallel to /retro)
+summary: Generate a project- and plan-specific sprint retrospective — mine session logs, gather the user's raw feedback, triage issues, then save it and hand off to `/playbook learn`.
+trigger: retro a plan after `/playbook develop` reports a sprint done; write a sprint retrospective
 jinja: true
 inline_steps: true
 requires_project: true

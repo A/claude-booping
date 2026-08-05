@@ -41,7 +41,7 @@ in that order and under ~40 lines. An empty table renders as `_No accepted issue
 `_No action items._`.
 
 No frontmatter, no save path, no commit command, no candidate-lessons section — those are `save`'s
-and `/learn`'s surfaces.
+and `/playbook learn`'s surfaces.
 
 ## 4. Ask for the approval
 
