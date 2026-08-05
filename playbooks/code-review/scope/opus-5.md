@@ -5,8 +5,8 @@ whether this session's `develop` run just delivered a plan — its path, title a
 the repo's recent commit history, its current branch, and whether the working tree carries
 uncommitted work; and the plans listed below.
 
-{%- set cr_status = config.skills["code-review"].status %}
-{%- set review_candidates = 'skills.code-review.queries.scope_candidates' | query %}
+{%- set cr_status = config.core.code_review_playbook.status %}
+{%- set review_candidates = 'core.code_review_playbook.queries.scope_candidates' | query %}
 {%- if review_candidates %}
 
 ## Plans at the review status

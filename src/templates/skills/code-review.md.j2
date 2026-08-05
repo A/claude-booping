@@ -17,8 +17,8 @@ This skill is **wide-domain** — it must work across very different stacks. Sta
 
 When `$ARGUMENTS` is empty, pick a plan to drive the diff range. When `$ARGUMENTS` carries a diff range or file list, skip this section entirely and use the existing flow in phase (a).
 
-{%- set cr_status = config.skills["code-review"].status %}
-{%- set review_candidates = ('skills.code-review.queries.review_candidates' | query) if context.vault else [] %}
+{%- set cr_status = config.core.code_review_playbook.status %}
+{%- set review_candidates = ('core.code_review_playbook.queries.review_candidates' | query) if context.vault else [] %}
 {%- if review_candidates %}
 
 Plans currently in `{{ cr_status }}`:

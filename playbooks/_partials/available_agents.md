@@ -1,5 +1,5 @@
 {%- set _skill = agents_skill | default("groom") -%}
-{%- set _cfg = config.skills.get(_skill, {}) or {} -%}
+{%- set _cfg = config.core.get(_skill | replace("-", "_") ~ "_playbook", {}) or {} -%}
 {%- set _agents = _cfg.get("agents", {}) or {} -%}
 {%- set _hide_internal = _cfg.get("disable_internal_agents", False) -%}
 {%- if _agents %}

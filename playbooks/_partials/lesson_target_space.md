@@ -28,7 +28,7 @@
 {%- endif -%}
 {%- set _lts_agents = [] -%}
 {%- set _lts_seen = [] -%}
-{%- for _lts_id, _lts_spec in (config.skills.get(_lts_pb.name, {}) or {}).get("agents", {}).items() -%}
+{%- for _lts_id, _lts_spec in (config.core.get(_lts_pb.name | replace("-", "_") ~ "_playbook", {}) or {}).get("agents", {}).items() -%}
 {%- set _ = _lts_seen.append(_lts_id) -%}
 {%- set _ = _lts_agents.append((_lts_id, (_lts_spec.good_for or []) | join("; "))) -%}
 {%- endfor -%}

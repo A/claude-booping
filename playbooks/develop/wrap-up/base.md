@@ -20,7 +20,7 @@ report.
 ## 2. Closing commit
 
 One commit in the attached repo covering the documentation edits, message format
-`{{ config.git.commit_message }}`. Skip it when there is nothing to commit — the milestone
+`{{ config.core.develop_playbook.git.commit_message }}`. Skip it when there is nothing to commit — the milestone
 commits already landed while the loop ran.
 
 ## 3. Transition

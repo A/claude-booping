@@ -92,16 +92,16 @@ def test_loader_does_not_filter_internal_when_disable_flag_set(tmp_path: Path) -
     plugin_root = Path(__file__).resolve().parents[3]
     override_path = tmp_path / "config.yaml"
     override_path.write_text(
-        yaml.dump({"skills": {"develop": {"disable_internal_agents": True}}})
+        yaml.dump({"core": {"develop_playbook": {"disable_internal_agents": True}}})
     )
     cfg = config_mod.load(plugin_root, [override_path])
-    agents = cfg["skills"]["develop"]["agents"]  # type: ignore[index]
+    agents = cfg["core"]["develop_playbook"]["agents"]  # type: ignore[index]
     assert "booping-developer" in agents
     assert "booping-researcher" in agents
 
 
 def test_agent_entry_replaces_wholesale(tmp_path: Path) -> None:
-    """Project override of `skills.<name>.agents.<id>` replaces the entry, not deep-merges.
+    """Project override of `core.<name>_playbook.agents.<id>` replaces the entry, not deep-merges.
 
     The core entry's `internal: true` must NOT leak into the override.
     """
@@ -110,8 +110,8 @@ def test_agent_entry_replaces_wholesale(tmp_path: Path) -> None:
     override_path.write_text(
         yaml.dump(
             {
-                "skills": {
-                    "develop": {
+                "core": {
+                    "develop_playbook": {
                         "agents": {
                             "booping-developer": {
                                 "good_for": ["overridden"],
@@ -124,13 +124,13 @@ def test_agent_entry_replaces_wholesale(tmp_path: Path) -> None:
         )
     )
     cfg = config_mod.load(plugin_root, [override_path])
-    entry = cfg["skills"]["develop"]["agents"]["booping-developer"]  # type: ignore[index]
+    entry = cfg["core"]["develop_playbook"]["agents"]["booping-developer"]  # type: ignore[index]
     assert entry == {
         "good_for": ["overridden"],
         "bad_for": ["nothing"],
     }
     # Sibling agent stays untouched.
-    assert cfg["skills"]["develop"]["agents"]["booping-researcher"]["internal"] is True  # type: ignore[index]
+    assert cfg["core"]["develop_playbook"]["agents"]["booping-researcher"]["internal"] is True  # type: ignore[index]
 
 
 def test_ordered_override_paths_signature() -> None:
@@ -188,14 +188,16 @@ def test_agents_shallow_merge_across_three_tiers(
     plugin_root = Path(__file__).resolve().parents[3]
     global_path = _write_global(
         isolated_xdg_config_home,
-        {"skills": {"develop": {"agents": {"g-agent": {"good_for": ["g"]}}}}},
+        {"core": {"develop_playbook": {"agents": {"g-agent": {"good_for": ["g"]}}}}},
     )
     project_path = tmp_path / "config.yaml"
     project_path.write_text(
-        yaml.dump({"skills": {"develop": {"agents": {"p-agent": {"good_for": ["p"]}}}}})
+        yaml.dump(
+            {"core": {"develop_playbook": {"agents": {"p-agent": {"good_for": ["p"]}}}}}
+        )
     )
     cfg = config_mod.load(plugin_root, [global_path, project_path])
-    agents = cfg["skills"]["develop"]["agents"]  # type: ignore[index]
+    agents = cfg["core"]["develop_playbook"]["agents"]  # type: ignore[index]
     assert "booping-developer" in agents  # core preserved
     assert "g-agent" in agents  # global tier added
     assert "p-agent" in agents  # project tier added
@@ -234,10 +236,10 @@ def test_missing_global_file_silently_skipped(isolated_xdg_config_home: Path) ->
 
 
 CORE_QUERY_PATHS = [
-    "skills.code-review.queries.review_candidates",
-    "skills.code-review.queries.scope_candidates",
-    "skills.retro.queries.candidates",
-    "skills.learn.queries.candidates",
+    "core.code_review_playbook.queries.review_candidates",
+    "core.code_review_playbook.queries.scope_candidates",
+    "core.retro_playbook.queries.candidates",
+    "core.learn_playbook.queries.candidates",
     "core.groom_playbook.queries.latest_plans",
 ]
 
@@ -247,7 +249,7 @@ def _core_config() -> dict[str, object]:
 
 
 def test_plans_glob_is_the_single_directory_shape() -> None:
-    assert _core_config()["plans"]["glob"] == ["plans/*/index.md"]  # type: ignore[index]
+    assert _core_config()["core"]["plans"]["glob"] == ["plans/*/index.md"]  # type: ignore[index]
 
 
 @pytest.mark.parametrize("dotted", CORE_QUERY_PATHS)
@@ -259,10 +261,10 @@ def test_each_consumer_spec_resolves_to_a_spec_mapping(dotted: str) -> None:
 
 
 @pytest.mark.parametrize("dotted", CORE_QUERY_PATHS)
-def test_a_spec_omitting_glob_falls_back_to_plans_glob(dotted: str) -> None:
+def test_a_spec_omitting_glob_falls_back_to_core_plans_glob(dotted: str) -> None:
     cfg = _core_config()
     spec = build_spec(cfg, resolve_spec(cfg, dotted))
-    assert spec.glob == cfg["plans"]["glob"]  # type: ignore[index]
+    assert spec.glob == cfg["core"]["plans"]["glob"]  # type: ignore[index]
 
 
 def test_a_spec_declaring_glob_keeps_it() -> None:

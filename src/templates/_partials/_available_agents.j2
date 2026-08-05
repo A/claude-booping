@@ -1,5 +1,5 @@
 {% macro render(skill) -%}
-{%- set skill_cfg = config.skills[skill] -%}
+{%- set skill_cfg = config.core.get(skill | replace("-", "_") ~ "_playbook", {}) or {} -%}
 {%- set agents = skill_cfg.get("agents", {}) -%}
 {%- set hide_internal = skill_cfg.get("disable_internal_agents", False) -%}
 {%- if agents -%}

@@ -1,2 +1,3 @@
 core:
-  cross_review_agent: codex
+  groom_playbook:
+    cross_review_agent: codex

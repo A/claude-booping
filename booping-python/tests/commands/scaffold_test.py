@@ -282,7 +282,14 @@ def test_oserror_during_write_exits_2(
 
 def test_core_playbook_scaffold_tree(tmp_path: Path) -> None:
     dest = tmp_path / "demo"
-    result = _run("scaffold", "playbook.scaffold", str(dest), "--set", "name=demo", cwd=tmp_path)
+    result = _run(
+        "scaffold",
+        "core.playbook_authoring_playbook.scaffold",
+        str(dest),
+        "--set",
+        "name=demo",
+        cwd=tmp_path,
+    )
     assert result.returncode == 0, result.stderr
     assert sorted(str(p.relative_to(dest)) for p in dest.rglob("*")) == [
         "_references",
@@ -298,7 +305,7 @@ def test_core_vault_scaffold_seeds_sprints_base_fence(tmp_path: Path) -> None:
     import yaml
 
     dest = tmp_path / "vault"
-    result = _run("scaffold", "vault.scaffold", str(dest), cwd=tmp_path)
+    result = _run("scaffold", "core.setup_playbook.scaffold", str(dest), cwd=tmp_path)
     assert result.returncode == 0, result.stderr
 
     text = (dest / "sprints.md").read_text()
@@ -334,7 +341,7 @@ def test_core_vault_scaffold_non_empty_destination_aborts(tmp_path: Path) -> Non
     dest.mkdir()
     (dest / "stray.md").write_text("x\n")
 
-    result = _run("scaffold", "vault.scaffold", str(dest), cwd=tmp_path)
+    result = _run("scaffold", "core.setup_playbook.scaffold", str(dest), cwd=tmp_path)
     assert result.returncode == 1
     assert not (dest / "sprints.md").exists()
 

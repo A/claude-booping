@@ -15,7 +15,7 @@ Turn retrospective findings into durable behavior changes routed to exactly one 
 
 ## Guidance
 
-- Learn handles plans in `{{ config.skills.learn.status }}` status.
+- Learn handles plans in `{{ config.core.learn_playbook.status }}` status.
 - The retrospective lives at `plans/{primary-slug}/retro.md`; its `plans:` frontmatter lists the working set the run covers, and the plan whose directory holds it is the **primary**.
 - The run workdir is the primary plan's directory `plans/{primary-slug}/` — `index.md` there is the run artifact.
 - Learn writes only to this project's vault (`_lessons/`, `_booping/`) and the attached repo's `CLAUDE.md` — **never** the global `~/.claude/CLAUDE.md` or any user-level scope.
@@ -28,7 +28,7 @@ Every accepted learning lands in **exactly one** target. If a candidate would ot
 
 ## Plans awaiting learning
 
-{% set _learn_plans = 'skills.learn.queries.candidates' | query -%}
+{% set _learn_plans = 'core.learn_playbook.queries.candidates' | query -%}
 {% if _learn_plans -%}
 | Status | SP | Title | Created | Completed | Retro | Path |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -36,12 +36,12 @@ Every accepted learning lands in **exactly one** target. If a candidate would ot
 | {{ plan.status }} | {{ plan.sp if plan.sp is not none else "—" }} | {{ plan.title }} | {{ plan.created if plan.created is not none else "—" }} | {{ plan.completed if plan.completed is not none else "—" }} | {{ plan.retro if plan.retro is not none else "—" }} | {{ plan.path }} |
 {% endfor -%}
 {%- else -%}
-_No plans at `{{ config.skills.learn.status }}`._
+_No plans at `{{ config.core.learn_playbook.status }}`._
 {%- endif %}
 
 ## High-level workflow
 
-1. Intake — resolve the retrospective and its working set; validate `{{ config.skills.learn.status }}` status.
+1. Intake — resolve the retrospective and its working set; validate `{{ config.core.learn_playbook.status }}` status.
 2. Extract candidates — inline, decomposed into atomic rules, routed via the matrix.
 3. Update-vs-create sweep — filtered read of existing lessons and extensions.
 4. Present unified review table — user accepts / rejects / adds rows.

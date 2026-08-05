@@ -912,11 +912,11 @@ def test_jinja_step_summary_renders_through_context(tmp_path: Path) -> None:
 
 def test_jinja_step_detached_renders_through_context(tmp_path: Path) -> None:
     pb = _fm_playbook(
-        tmp_path, "fd", "summary: one\ndetached: '{{ config.research_agent }}'"
+        tmp_path, "fd", "summary: one\ndetached: '{{ config.core.research_agent }}'"
     )
     ctx = _ctx()
     out = compose(pb, context=ctx)
-    assert f"Tell the `{ctx.config['research_agent']}` agent to get its" in out
+    assert f"Tell the `{ctx.config['core']['research_agent']}` agent to get its" in out
 
 
 def test_jinja_step_detached_rendering_empty_falls_back_to_inline(
@@ -1758,16 +1758,16 @@ def test_stubbed_macro_reaches_playbook_bodies() -> None:
         update={
             "config": {
                 **_ctx().config,
-                "macro_stubs": {"macros.date +%Y%m%d%H%M": "197001010000"},
+                "macro_stubs": {"core.macros.date +%Y%m%d%H%M": "197001010000"},
             }
         }
     )
     env = build_env(context=ctx)
-    body = "{{ macro('macros.date', '+%Y%m%d%H%M') }}"
+    body = "{{ macro('core.macros.date', '+%Y%m%d%H%M') }}"
     assert env.from_string(body).render() == "197001010000"
 
 
 def test_unstubbed_macro_in_playbook_bodies_is_time_shaped() -> None:
     env = build_env(context=_ctx())
-    body = "{{ macro('macros.date', '+%Y%m%d%H%M') }}"
+    body = "{{ macro('core.macros.date', '+%Y%m%d%H%M') }}"
     assert re.fullmatch(r"\d{12}", env.from_string(body).render())

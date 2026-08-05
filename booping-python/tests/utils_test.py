@@ -86,10 +86,10 @@ def test_shallow_merge_keys_does_not_affect_other_keys() -> None:
 def test_shallow_merge_keys_works_at_any_nesting_depth() -> None:
     """`shallow_merge_keys` matches by key name anywhere during recursion,
     not by absolute path."""
-    base = {"skills": {"develop": {"agents": {"a": {"internal": True}}}}}
-    override = {"skills": {"develop": {"agents": {"a": {"type": "cli"}}}}}
+    base = {"core": {"develop_playbook": {"agents": {"a": {"internal": True}}}}}
+    override = {"core": {"develop_playbook": {"agents": {"a": {"type": "cli"}}}}}
     merged = deep_merge(base, override, shallow_merge_keys=["agents"])
-    assert merged["skills"]["develop"]["agents"]["a"] == {"type": "cli"}
+    assert merged["core"]["develop_playbook"]["agents"]["a"] == {"type": "cli"}
 
 
 def test_shallow_merge_keys_none_behaves_like_pure_deep_merge() -> None:

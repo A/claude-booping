@@ -18,12 +18,12 @@ Produce a project- and plan-specific retrospective grounded in session logs, cod
 - Retro is based on the plan `plans/{slug}/index.md`
 - Retro statuses are sub-path of the plan state-machine and they live on `plans/{primary-slug}/index.md`
 - Retro is saved to `plans/{primary-slug}/retro.md`
-- Retro handles plans in `{{ config.skills.retro.status }}` status.
+- Retro handles plans in `{{ config.core.retro_playbook.status }}` status.
 - Retro playbook only produces retro files and link them to the plan in frontmatter under `retro` key.
 
 ## Plans awaiting retro
 
-{% set _retro_plans = 'skills.retro.queries.candidates' | query -%}
+{% set _retro_plans = 'core.retro_playbook.queries.candidates' | query -%}
 {% if _retro_plans -%}
 | Status | SP | Title | Created | Completed | Path |
 | --- | --- | --- | --- | --- | --- |
@@ -31,7 +31,7 @@ Produce a project- and plan-specific retrospective grounded in session logs, cod
 | {{ plan.status }} | {{ plan.sp if plan.sp is not none else "—" }} | {{ plan.title }} | {{ plan.created if plan.created is not none else "—" }} | {{ plan.completed if plan.completed is not none else "—" }} | {{ plan.path }} |
 {% endfor -%}
 {%- else -%}
-_No plans at `{{ config.skills.retro.status }}`._
+_No plans at `{{ config.core.retro_playbook.status }}`._
 {%- endif %}
 
 ## High-level workflow

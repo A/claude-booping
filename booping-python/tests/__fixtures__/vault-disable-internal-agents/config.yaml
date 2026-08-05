@@ -1,5 +1,5 @@
-skills:
-  code-review:
+core:
+  code_review_playbook:
     disable_internal_agents: true
     agents:
       test-no-type:

@@ -1,4 +1,4 @@
-{% set pending = 'migrations.pending' | query(where={'id:gt': booping.latest_migration}) -%}
+{% set pending = 'core.migrate_playbook.queries.pending' | query(where={'id:gt': booping.latest_migration}) -%}
 # Open the migration run
 
 ## Ground

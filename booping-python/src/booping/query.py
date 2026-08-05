@@ -31,7 +31,7 @@ ORDER_SUFFIXES = (GT_SUFFIX, LT_SUFFIX)
 # named `x:gt` cannot shadow the operator.
 SUFFIXES = (IN_SUFFIX, GT_SUFFIX, LT_SUFFIX, NE_SUFFIX)
 
-DEFAULT_GLOB_PATH = "plans.glob"
+DEFAULT_GLOB_PATH = "core.plans.glob"
 
 CORE_ROOT = "core"
 ROOTS = (CORE_ROOT,)
@@ -234,7 +234,7 @@ def project(row: Mapping[str, Any], columns: Sequence[str]) -> dict[str, Any]:
 
 
 def default_glob(config: Mapping[str, Any]) -> list[str]:
-    """The `plans.glob` fallback a spec omitting `glob` inherits."""
+    """The `core.plans.glob` fallback a spec omitting `glob` inherits."""
     try:
         value: Any = resolve_path(dict(config), DEFAULT_GLOB_PATH)
     except PathError:
@@ -251,7 +251,7 @@ def build_spec(
 ) -> QuerySpec:
     """Deep-merge *overrides* over *base* (neither is mutated) into a spec.
 
-    A merged spec without a `glob` inherits the `plans.glob` default.
+    A merged spec without a `glob` inherits the `core.plans.glob` default.
     """
     merged = deep_merge(dict(base), dict(overrides or {}))
     if not merged.get("glob"):

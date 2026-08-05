@@ -2,16 +2,61 @@
 # `~` is expanded at vault-resolution time. Override globally at
 # ${XDG_CONFIG_HOME:-~/.config}/booping/config.yaml. A `.booping` `vault_path:`
 # marker still wins over this. Set in the project tier it has no effect (the vault
-# is already resolved by then).
+# is already resolved by then). Top-level because it resolves the vault before any
+# namespace is reachable.
 home_dir: ~/Claude/
 
-# Agent an assisted playbook step delegates its heavy reads to.
-research_agent: "booping:booping-researcher"
-
+# Everything the shipped playbook set owns. Placement rule: a key one playbook
+# owns lives at `core.{name}_playbook`; a key the development loop or several
+# playbooks share sits directly under `core`. A user's own playbook namespace
+# copies this shape.
 core:
-  # Agent that performs the detached second-model review of a drafted plan.
-  # Null → the reviewing step is skipped entirely.
-  cross_review_agent: null
+  # Agent an assisted playbook step delegates its heavy reads to.
+  research_agent: "booping:booping-researcher"
+
+  # Shell-outs a template body may call by dotted path: `{{ macro('core.macros.date', '+%H:%M') }}`.
+  # Each value is an argv list (never a shell string) run with shell=False, and the list is a
+  # prefix — call-site positional arguments append to it. stdout is stripped and cached per
+  # argv tuple for the process, so a macro must be idempotent within one render and two
+  # argument variants are two runs. `--stub-macro <path>[ <args>]=<literal>` on `render`,
+  # `render-playbook` and `scaffold` returns the literal without executing.
+  macros:
+    date: ["date"]
+
+  # A **query spec** is any mapping in the merged config, addressed by its dotted
+  # path — `booping query --config <dotted.path>` and `{{ '<dotted.path>' | query }}`.
+  # Keys, all optional:
+  #
+  #   glob:    ordered list of vault-relative glob patterns. The first pattern to
+  #            claim a slug wins, so precedence is list order. A slug is the parent
+  #            directory name when the pattern's last segment is a literal filename
+  #            (`plans/*/index.md` -> `alpha`), else the file stem. Omitted -> the
+  #            `core.plans.glob` default below.
+  #   root:    which directory the globs resolve against. Omitted -> the vault;
+  #            `core` -> the plugin root, for content the plugin itself ships
+  #            (`core.migrate_playbook.queries.pending` below), which makes the
+  #            spec resolvable outside any project.
+  #   where:   mapping of clause -> value. The clause key carries its operator as a
+  #            suffix: `k` equality, `k!` inequality, `k:in` membership in a list,
+  #            `k:gt` / `k:lt` numeric ordering (both operands must coerce to a
+  #            number; one that does not fails the clause). A row missing the field
+  #            fails every operator.
+  #   sort:    frontmatter field name, `-` prefixed for descending. Rows without a
+  #            value come last. Omitted -> slug order.
+  #   columns: projection, declared order preserved. `path` and `slug` are always
+  #            present. Sorting happens before projection, so a sort field need not
+  #            be listed.
+  #
+  # Each spec lives beside its consumer (`core.{name}_playbook.queries.<id>`),
+  # never in a central registry, and rides the core -> global -> project merge like
+  # any other config value. Inline arguments (`--where`, `| query(where={...})`)
+  # deep-merge over a resolved spec for that call only.
+  plans:
+    # A plan is a directory claimed by its `index.md`. The shape is data rather
+    # than hidden engine logic: a vault with a different one edits this one key,
+    # and the engine still honours list order for a vault declaring several.
+    glob:
+      - plans/*/index.md
 
   sprint:
     default_threshold_sp: 35
@@ -37,6 +82,9 @@ core:
       doc_uri: ${CLAUDE_PLUGIN_ROOT}/docs/task_refactoring.md
 
   groom_playbook:
+    # Agent that performs the detached second-model review of a drafted plan.
+    # Null → the reviewing step is skipped entirely.
+    cross_review_agent: null
     agents:
       booping-researcher:
         internal: true
@@ -69,71 +117,23 @@ core:
         sort: "-created"
         columns: [status, title, summary]
 
-# Shell-outs a template body may call by dotted path: `{{ macro('macros.date', '+%H:%M') }}`.
-# Each value is an argv list (never a shell string) run with shell=False, and the list is a
-# prefix — call-site positional arguments append to it. stdout is stripped and cached per
-# argv tuple for the process, so a macro must be idempotent within one render and two
-# argument variants are two runs. Honoured in the core and global tiers only — a project-tier
-# `macros` block is dropped with a stderr warning. `--stub-macro <path>[ <args>]=<literal>`
-# on `render`, `render-playbook` and `scaffold` returns the literal without executing.
-macros:
-  date: ["date"]
-
-# A **query spec** is any mapping in the merged config, addressed by its dotted
-# path — `booping query --config <dotted.path>` and `{{ '<dotted.path>' | query }}`.
-# Keys, all optional:
-#
-#   glob:    ordered list of vault-relative glob patterns. The first pattern to
-#            claim a slug wins, so precedence is list order. A slug is the parent
-#            directory name when the pattern's last segment is a literal filename
-#            (`plans/*/index.md` -> `alpha`), else the file stem. Omitted -> the
-#            `plans.glob` default below.
-#   root:    which directory the globs resolve against. Omitted -> the vault;
-#            `core` -> the plugin root, for content the plugin itself ships
-#            (`migrations.pending` below), which makes the spec resolvable
-#            outside any project.
-#   where:   mapping of clause -> value. The clause key carries its operator as a
-#            suffix: `k` equality, `k!` inequality, `k:in` membership in a list,
-#            `k:gt` / `k:lt` numeric ordering (both operands must coerce to a
-#            number; one that does not fails the clause). A row missing the field
-#            fails every operator.
-#   sort:    frontmatter field name, `-` prefixed for descending. Rows without a
-#            value come last. Omitted -> slug order.
-#   columns: projection, declared order preserved. `path` and `slug` are always
-#            present. Sorting happens before projection, so a sort field need not
-#            be listed.
-#
-# Each spec lives beside its consumer (`skills.<name>.queries.<id>` for a skill,
-# `core.<playbook>.queries.<id>` for a playbook), never in a
-# central registry, and rides the core -> global -> project merge like any other
-# config value. Inline arguments (`--where`, `| query(where={...})`) deep-merge
-# over a resolved spec for that call only.
-plans:
-  # A plan is a directory claimed by its `index.md`. The shape is data rather
-  # than hidden engine logic: a vault with a different one edits this one key,
-  # and the engine still honours list order for a vault declaring several.
-  glob:
-    - plans/*/index.md
-
-migrations:
-  # Every migration the plugin ships, in id order. The `migrate` playbook narrows
-  # it to the pending set with `where={'id:gt': booping.latest_migration}` — the
-  # marker's watermark, `-1` when nothing has been applied. `root: core` because
-  # migrations ship with the plugin, not with the vault they transform.
-  pending:
-    root: core
-    glob:
-      - migrations/*/migration.md
-    sort: id
-
-# Keyed by skill name, and by playbook name for the playbooks that replaced a
-# skill (`groom`, `develop`, `retro`, `learn`) — `playbooks/_partials/available_agents.md`
-# resolves `config.skills[<playbook name>]`, and the retro / learn playbooks read
-# their owned status from `skills.<name>.status`.
-skills:
-  help: {}
-
-  develop:
+  develop_playbook:
+    git:
+      commit_message: '<agent>: <plan title> <message>'
+      branches:
+        - branch: feat/
+          when:
+            - feature
+        - branch: fix/
+          when:
+            - bug
+        - branch: refactor/
+          when:
+            - refactoring
+        - branch: chore/
+          when:
+            - other
+            - tooling, dependency bumps, formatting
     agents:
       booping-developer:
         internal: true
@@ -147,19 +147,7 @@ skills:
           - "Milestone-diff review — that stays in the skill"
           - "Single-file reads — call Read directly"
 
-  learn:
-    status: awaiting-learning
-    queries:
-      # The playbook's "Plans awaiting learning" table.
-      candidates:
-        where:
-          status: awaiting-learning
-        sort: "-created"
-        columns: [status, sp, title, created, completed, retro]
-
-  playbook: {}
-
-  retro:
+  retro_playbook:
     status: awaiting-retro
     queries:
       # The playbook's "Plans awaiting retro" table.
@@ -178,11 +166,21 @@ skills:
           - "Phase 2 sprint analysis — stays in the orchestrator"
           - "Phase 4 lesson cross-check — stays in the orchestrator using the in-context lesson set"
 
-  code-review:
+  learn_playbook:
+    status: awaiting-learning
+    queries:
+      # The playbook's "Plans awaiting learning" table.
+      candidates:
+        where:
+          status: awaiting-learning
+        sort: "-created"
+        columns: [status, sp, title, created, completed, retro]
+
+  code_review_playbook:
     status: awaiting-retro
     queries:
       # The `/code-review` skill's argument-free plan picker. Kept in step with
-      # `skills.code-review.status`.
+      # `core.code_review_playbook.status`.
       review_candidates:
         where:
           status: awaiting-retro
@@ -207,109 +205,92 @@ skills:
         bad_for:
           - "Trivial inline nits — orchestrator handles those directly"
 
-  chat:
-    agents:
-      booping-researcher:
-        internal: true
-        good_for:
-          - "Vault-wide reads aggregated into a summary (e.g. what plans exist, recurring themes across retros)"
-          - "Plan or retro content extraction across ≥3 files where the results need to be compressed before returning to the skill"
-          - "Web search aggregation when the user asks an open question that requires pulling from multiple sources"
-        bad_for:
-          - "Single-file reads — call Read directly"
-          - "Simple greps or existence checks that fit in a few lines of output"
-          - "Questions answerable with a short `ls` or `grep`"
+  migrate_playbook:
+    queries:
+      # Every migration the plugin ships, in id order. The `migrate` playbook
+      # narrows it to the pending set with `where={'id:gt': booping.latest_migration}`
+      # — the marker's watermark, `-1` when nothing has been applied. `root: core`
+      # because migrations ship with the plugin, not with the vault they transform.
+      pending:
+        root: core
+        glob:
+          - migrations/*/migration.md
+        sort: id
 
-git:
-  commit_message: '<agent>: <plan title> <message>'
-  branches:
-    - branch: feat/
-      when:
-        - feature
-    - branch: fix/
-      when:
-        - bug
-    - branch: refactor/
-      when:
-        - refactoring
-    - branch: chore/
-      when:
-        - other
-        - tooling, dependency bumps, formatting
+  setup_playbook:
+    # Scaffold tree materialised by
+    # `booping scaffold core.setup_playbook.scaffold <vault-dir>`. The vault is a
+    # git repo (see the vault-commit hook), so .gitignore applies to a home-dir
+    # vault and a repo-local one alike.
+    scaffold:
+      plans:
+        type: dir
+      retrospectives:
+        type: dir
+      _lessons:
+        type: dir
+      _booping:
+        type: dir
+      notes:
+        type: dir
+      # Obsidian Bases fence (core plugin, no install needed) — a live view over
+      # plans/, seeded once and never rewritten. Every path in a Bases filter is
+      # resolved against the *Obsidian* vault root, which is not the booping vault
+      # whenever the latter is nested: `this.file.folder` (the folder of the note
+      # embedding the fence — this sprints.md) is what scopes the view to this
+      # booping vault at any depth.
+      sprints.md: |
+        ```base
+        formulas:
+          plan: file.asLink(title)
+        properties:
+          formula.plan:
+            displayName: Title
+        filters:
+          and:
+            - file.inFolder(this.file.folder + "/plans")
+            - file.name == "index"
+        views:
+          - type: table
+            name: Plans
+            order:
+              - status
+              - sp
+              - formula.plan
+              - summary
+              - created
+              - completed
+            sort:
+              - property: created
+                direction: DESC
+        ```
+      .gitignore: |
+        _booping/*.log
 
-# Scaffold tree materialised by
-# `booping scaffold playbook.scaffold <dir> --set name=<name>`: a string is a
-# file's content (Jinja-rendered), a mapping without `type` is a directory's
-# children.
-playbook:
-  scaffold:
-    playbook.md: |
-      ---
-      name: {{ name }}
-      title: {{ name }}
-      summary: One sentence naming what this playbook produces.
-      trigger: the situation a user reaches for this playbook in
-      ---
+  playbook_authoring_playbook:
+    # Scaffold tree materialised by
+    # `booping scaffold core.playbook_authoring_playbook.scaffold <dir> --set name=<name>`:
+    # a string is a file's content (Jinja-rendered), a mapping without `type` is a
+    # directory's children.
+    scaffold:
+      playbook.md: |
+        ---
+        name: {{ name }}
+        title: {{ name }}
+        summary: One sentence naming what this playbook produces.
+        trigger: the situation a user reaches for this playbook in
+        ---
 
-      # {{ name }}
+        # {{ name }}
 
-      Preamble — what the driver needs before the first step: artifact model, hard
-      rules, where the work lands. No step calls here.
-    playbook.yaml: |
-      # Step name -> its dependency step names. Each step is a sibling directory
-      # holding a prompt.md.
-      graph: {}
-    _references:
-      type: dir
-
-# Scaffold tree materialised by `booping scaffold vault.scaffold <vault-dir>`.
-# The vault is a git repo (see the vault-commit hook), so .gitignore applies to
-# a home-dir vault and a repo-local one alike.
-vault:
-  scaffold:
-    plans:
-      type: dir
-    retrospectives:
-      type: dir
-    _lessons:
-      type: dir
-    _booping:
-      type: dir
-    notes:
-      type: dir
-    # Obsidian Bases fence (core plugin, no install needed) — a live view over
-    # plans/, seeded once and never rewritten. Every path in a Bases filter is
-    # resolved against the *Obsidian* vault root, which is not the booping vault
-    # whenever the latter is nested: `this.file.folder` (the folder of the note
-    # embedding the fence — this sprints.md) is what scopes the view to this
-    # booping vault at any depth.
-    sprints.md: |
-      ```base
-      formulas:
-        plan: file.asLink(title)
-      properties:
-        formula.plan:
-          displayName: Title
-      filters:
-        and:
-          - file.inFolder(this.file.folder + "/plans")
-          - file.name == "index"
-      views:
-        - type: table
-          name: Plans
-          order:
-            - status
-            - sp
-            - formula.plan
-            - summary
-            - created
-            - completed
-          sort:
-            - property: created
-              direction: DESC
-      ```
-    .gitignore: |
-      _booping/*.log
+        Preamble — what the driver needs before the first step: artifact model, hard
+        rules, where the work lands. No step calls here.
+      playbook.yaml: |
+        # Step name -> its dependency step names. Each step is a sibling directory
+        # holding a prompt.md.
+        graph: {}
+      _references:
+        type: dir
 
 plan:
   statuses:

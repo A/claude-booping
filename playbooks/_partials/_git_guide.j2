@@ -7,12 +7,12 @@ Branches always live in the attached repo. Always ask the user before switching 
 
 | Branch | When |
 |--------|------|
-{% for entry in config.git.branches -%}
+{% for entry in config.core.develop_playbook.git.branches -%}
 | `{{ entry.branch }}` | {{ entry.when | join("; ") }} |
 {% endfor %}
-{% if config.git.commit_message %}
+{% if config.core.develop_playbook.git.commit_message %}
 ### Commit messages
 
-Format: `{{ config.git.commit_message }}`
+Format: `{{ config.core.develop_playbook.git.commit_message }}`
 {% endif -%}
 {%- endmacro %}

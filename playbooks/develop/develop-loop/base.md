@@ -23,7 +23,7 @@ For each confirmed milestone group, in order:
    - Flip each task row in the milestone's status table: `pending` → `done`.
    - Flip the milestone status to `done`.
    - Commit in the attached repo, one commit per milestone, message format
-     `{{ config.git.commit_message }}`.
+     `{{ config.core.develop_playbook.git.commit_message }}`.
 5. Commit the plan in the vault with `booping vault-commit in-progress {plan-path}`.
 6. Report group completion to the user with a one-paragraph summary (what shipped, anything
    deferred) before starting the next group.

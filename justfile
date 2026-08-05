@@ -32,9 +32,9 @@ playbook-reports which="*":
         out="playbooks/$name/_reports/output.md"
         bin/booping render-playbook "$name" \
             --project playbooks/_fixtures/vault \
-            --stub-macro "macros.date=19700101-00-00" \
-            --stub-macro "macros.date +%Y%m%d%H%M=197001010000" \
-            --stub-macro "macros.date +%Y-%m-%d %H:%M=1970-01-01 00:00" \
+            --stub-macro "core.macros.date=19700101-00-00" \
+            --stub-macro "core.macros.date +%Y%m%d%H%M=197001010000" \
+            --stub-macro "core.macros.date +%Y-%m-%d %H:%M=1970-01-01 00:00" \
             --output "$out"
         grep -q '^\*\*STOP' "$out" && failed+=("$name")
     done

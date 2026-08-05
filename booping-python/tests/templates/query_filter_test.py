@@ -13,15 +13,16 @@ PLUGIN_ROOT = Path(__file__).resolve().parents[3]
 BOOPING_BIN = PLUGIN_ROOT / "bin" / "booping"
 
 VAULT_CONFIG = """
-plans:
-  glob:
-    - plans/*/index.md
-    - plans/*.md
-  all:
-    sort: '-created'
-  done:
-    where:
-      status: done
+core:
+  plans:
+    glob:
+      - plans/*/index.md
+      - plans/*.md
+    all:
+      sort: '-created'
+    done:
+      where:
+        status: done
 """
 
 
@@ -64,9 +65,9 @@ def _render_source(vault: Path, tmp_path: Path, source: str) -> str:
     )
 
 
-SLUGS = "{{ ('plans.all' | query) | map(attribute='slug') | join(',') }}"
+SLUGS = "{{ ('core.plans.all' | query) | map(attribute='slug') | join(',') }}"
 DONE_SLUGS = (
-    "{{ ('plans.all' | query(where={'status': 'done'}))"
+    "{{ ('core.plans.all' | query(where={'status': 'done'}))"
     " | map(attribute='slug') | join(',') }}"
 )
 
@@ -78,7 +79,7 @@ class TestQueryFilterSurfaces:
     def test_rows_expose_frontmatter_as_attributes(
         self, vault: Path, tmp_path: Path
     ) -> None:
-        source = "{% set r = ('plans.all' | query) | first %}{{ r.title }}/{{ r.path }}"
+        source = "{% set r = ('core.plans.all' | query) | first %}{{ r.title }}/{{ r.path }}"
         assert _render_source(vault, tmp_path, source) == "Beta | piped/plans/beta.md"
 
     def test_scaffold_seed_string_gets_rows(self, vault: Path) -> None:
@@ -130,7 +131,9 @@ class TestInlineNarrowing:
     def test_declared_where_survives_a_narrowing_on_another_key(
         self, vault: Path, tmp_path: Path
     ) -> None:
-        source = "{{ ('plans.done' | query(sort='slug')) | map(attribute='slug') | join(',') }}"
+        source = (
+            "{{ ('core.plans.done' | query(sort='slug')) | map(attribute='slug') | join(',') }}"
+        )
         assert _render_source(vault, tmp_path, source).strip() == "beta"
 
 
@@ -138,12 +141,12 @@ class TestAsTableFilter:
     def test_matches_the_command_table_for_the_same_rows(
         self, vault: Path, tmp_path: Path
     ) -> None:
-        source = "{{ ('plans.all' | query) | as_table(columns=['status', 'title']) }}"
+        source = "{{ ('core.plans.all' | query) | as_table(columns=['status', 'title']) }}"
         rendered = _render_source(vault, tmp_path, source)
         command = subprocess.run(
             [
                 str(BOOPING_BIN), "query", "--project", str(vault),
-                "--config", "plans.all", "--columns", "status,title",
+                "--config", "core.plans.all", "--columns", "status,title",
                 "--output", "table",
             ],
             cwd=tmp_path,
@@ -156,7 +159,7 @@ class TestAsTableFilter:
     def test_escapes_pipes_and_keeps_declared_column_order(
         self, vault: Path, tmp_path: Path
     ) -> None:
-        source = "{{ ('plans.all' | query) | as_table(columns=['title', 'status']) }}"
+        source = "{{ ('core.plans.all' | query) | as_table(columns=['title', 'status']) }}"
         lines = _render_source(vault, tmp_path, source).splitlines()
         assert lines[0] == "| title | status | path | slug |"
         assert lines[2].startswith("| Beta \\| piped | done |")
@@ -168,11 +171,11 @@ class TestAsTableFilter:
 
 class TestFailureIsLoud:
     def test_unresolvable_path_raises_naming_it(self, vault: Path, tmp_path: Path) -> None:
-        with pytest.raises(QueryError, match="plans.nope"):
-            _render_source(vault, tmp_path, "{{ 'plans.nope' | query }}")
+        with pytest.raises(QueryError, match="core.plans.nope"):
+            _render_source(vault, tmp_path, "{{ 'core.plans.nope' | query }}")
 
     def test_non_mapping_value_raises_naming_the_path(
         self, vault: Path, tmp_path: Path
     ) -> None:
-        with pytest.raises(QueryError, match="plans.glob"):
-            _render_source(vault, tmp_path, "{{ 'plans.glob' | query }}")
+        with pytest.raises(QueryError, match="core.plans.glob"):
+            _render_source(vault, tmp_path, "{{ 'core.plans.glob' | query }}")

@@ -75,7 +75,7 @@ def test_render_set_deep_merges_leaving_siblings(tmp_path: Path) -> None:
 
 
 def test_render_macro_runs_a_core_declared_macro(tmp_path: Path) -> None:
-    result = _render(tmp_path, "{{ macro('macros.date', '+%Y%m%d-%H-%M') }}\n")
+    result = _render(tmp_path, "{{ macro('core.macros.date', '+%Y%m%d-%H-%M') }}\n")
     assert result.returncode == 0
     assert re.fullmatch(r"\d{8}-\d{2}-\d{2}", result.stdout.strip())
 
@@ -83,9 +83,9 @@ def test_render_macro_runs_a_core_declared_macro(tmp_path: Path) -> None:
 def test_render_stub_macro_returns_the_literal(tmp_path: Path) -> None:
     result = _render(
         tmp_path,
-        "{{ macro('macros.date') }}\n",
+        "{{ macro('core.macros.date') }}\n",
         "--stub-macro",
-        "macros.date=19700101-00-00",
+        "core.macros.date=19700101-00-00",
     )
     assert result.returncode == 0
     assert result.stdout.strip() == "19700101-00-00"
@@ -94,9 +94,9 @@ def test_render_stub_macro_returns_the_literal(tmp_path: Path) -> None:
 def test_render_stub_macro_key_may_carry_the_call_arguments(tmp_path: Path) -> None:
     result = _render(
         tmp_path,
-        "{{ macro('macros.date', '+%Y%m%d%H%M') }}\n",
+        "{{ macro('core.macros.date', '+%Y%m%d%H%M') }}\n",
         "--stub-macro",
-        "macros.date +%Y%m%d%H%M=197001010000",
+        "core.macros.date +%Y%m%d%H%M=197001010000",
     )
     assert result.returncode == 0
     assert result.stdout.strip() == "197001010000"
