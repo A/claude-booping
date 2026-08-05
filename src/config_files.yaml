@@ -1,14 +1,8 @@
 skills:
   chat:        { effort: low }
   code-review: { effort: medium }
-  develop: { effort: medium }
-  groom:   { effort: high }
-  groom-playbook: { effort: high }
   help:    { effort: low }
-  install: { effort: medium }
-  learn:   { effort: high }
   playbook: { effort: medium }
-  retro:   { effort: medium }
 
 agents:
   booping-developer:  { effort: medium }

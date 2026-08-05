@@ -228,3 +228,20 @@ def test_assemble_project_tier_home_dir_has_no_effect(
     assert ctx.project.directory == vault
     # The project-tier value is still merged into config — just inert for resolution.
     assert ctx.config["home_dir"] == "/tmp/should-be-ignored"
+
+
+def test_booping_initialized_false_without_global_config(
+    tmp_path: Path, isolated_xdg_config_home: Path
+) -> None:
+    plugin_root = get_fixture_path("plugin-root-minimal")
+    ctx = Context.assemble(start=tmp_path, plugin_root=plugin_root)
+    assert ctx.booping_initialized is False
+
+
+def test_booping_initialized_true_with_global_config(
+    tmp_path: Path, isolated_xdg_config_home: Path
+) -> None:
+    plugin_root = get_fixture_path("plugin-root-minimal")
+    _write_global(isolated_xdg_config_home, {"home_dir": str(tmp_path / "vaults")})
+    ctx = Context.assemble(start=tmp_path, plugin_root=plugin_root)
+    assert ctx.booping_initialized is True

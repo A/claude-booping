@@ -294,23 +294,23 @@ plan:
 
 ### `sprint`
 
-Sprint sizing thresholds and the story-point scale. Drives `/groom`'s split proposals, the per-task re-decompose gate, and `/develop`'s milestone grouping.
+Sprint sizing thresholds and the story-point scale. Drives the groom playbook's split proposals, the per-task re-decompose gate, and the develop playbook's milestone grouping.
 
-- **`sprint.default_threshold_sp`** — soft cap on total SP per plan. Above this, `/groom` proposes splitting the plan into sibling stubs. Default: `35`.
-- **`sprint.redecompose_threshold`** — per-task SP value at or above which `/groom` must re-decompose the task before the plan can leave `in-spec`. Default: `5`.
-- **`sprint.max_milestones_per_agent`** — cap on consecutive milestones grouped into one `booping-developer` briefing by `/develop`. Default: `2`.
-- **`sprint.scale`** — the 1–5 SP definitions rendered into `/groom`'s body. Each entry is `{sp, meaning}`. Replace wholesale to redefine the scale; do not partial-edit (lists merge by replacement, see below).
+- **`sprint.default_threshold_sp`** — soft cap on total SP per plan. Above this, groom proposes splitting the plan into sibling stubs. Default: `35`.
+- **`sprint.redecompose_threshold`** — per-task SP value at or above which groom must re-decompose the task before the plan can leave `in-spec`. Default: `5`.
+- **`sprint.max_milestones_per_agent`** — cap on consecutive milestones grouped into one `booping-developer` briefing by the develop playbook. Default: `2`.
+- **`sprint.scale`** — the 1–5 SP definitions rendered into groom's body. Each entry is `{sp, meaning}`. Replace wholesale to redefine the scale; do not partial-edit (lists merge by replacement, see below).
 
 ### `git`
 
-Branch and commit conventions consumed by `/develop`.
+Branch and commit conventions consumed by the develop playbook.
 
 - **`git.commit_message`** — the conventional commit format string the orchestrator follows for in-plan commits.
-- **`git.branches`** — list of `{branch, when}` entries. `branch` is the literal prefix (e.g. `feat/`, `fix/`); `when` is a list of short matches against the plan `type` (`feature`, `bug`, `refactoring`) or freeform descriptors. `/develop` walks this list to pick the sprint branch prefix.
+- **`git.branches`** — list of `{branch, when}` entries. `branch` is the literal prefix (e.g. `feat/`, `fix/`); `when` is a list of short matches against the plan `type` (`feature`, `bug`, `refactoring`) or freeform descriptors. The develop playbook walks this list to pick the sprint branch prefix.
 
 ### `tasks`
 
-The task-type taxonomy `/groom` classifies every request against. Each entry is `{type, description, doc_uri}`. The matching `doc_uri` lazy-loads detailed guidance for that task type during grooming. Adding a new task type means adding both a `tasks` entry and the corresponding doc under `docs/`.
+The task-type taxonomy groom classifies every request against. Each entry is `{type, description, doc_uri}`. The matching `doc_uri` lazy-loads detailed guidance for that task type during grooming. Adding a new task type means adding both a `tasks` entry and the corresponding doc under `docs/`.
 
 ### `plan.statuses`
 
@@ -365,7 +365,7 @@ producing `playbook.md` (identity frontmatter carrying the name you passed, plus
 
 ## Plan frontmatter: `summary`
 
-Each plan file carries a `summary` field in its YAML frontmatter — a one-line statement of the plan's intent (≤ ~120 characters). `/groom` writes it when drafting the plan; it is the human-readable label that surfaces in `sprints.md` and makes plans searchable across the vault. (It replaced the older, longer `business_goal` field.)
+Each plan file carries a `summary` field in its YAML frontmatter — a one-line statement of the plan's intent (≤ ~120 characters). Groom writes it when drafting the plan; it is the human-readable label that surfaces in `sprints.md` and makes plans searchable across the vault. (It replaced the older, longer `business_goal` field.)
 
 ### `skills.<name>.agents`
 
@@ -420,7 +420,7 @@ git:
       when: [other, tooling]
 ```
 
-After the next skill load, `/groom` proposes splitting at 25 SP instead of 35, and `/develop` picks `docs/` for plans typed `docs`.
+After the next render, groom proposes splitting at 25 SP instead of 35, and develop picks `docs/` for plans typed `docs`.
 
 Because lists replace wholesale, the project file must include every branch entry it wants to keep — omitting a row removes it. Dict keys behave the opposite way: `sprint.default_threshold_sp: 25` does not affect `sprint.redecompose_threshold` or `sprint.scale`, which fall through from the plugin defaults.
 

@@ -2,7 +2,7 @@
 #
 # Complete expected mutation set per edge: every frontmatter mutation
 # resolve_hooks(from, to) emits — beyond the mechanical status=<to> set — is
-# listed here exactly once. The lone non-frontmatter row is `suggest /retro`.
+# listed here exactly once. The lone non-frontmatter row is `suggest /playbook retro`.
 # TestEquivalence asserts both directions: every listed mutation is present in
 # the new wiring, AND the wiring emits no frontmatter mutation that isn't listed
 # here. Add a row whenever a new mutation is wired in, or the no-extras check
@@ -82,7 +82,7 @@ entries:
     old: "suggest `/retro <plan-path>`"
     new_location: edge_hooks
     new_target: "in-progress → awaiting-retro"
-    new_hook: "suggest /retro"
+    new_hook: "suggest /playbook retro"
 
   # in-progress → fail
   - from: in-progress

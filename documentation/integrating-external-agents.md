@@ -19,14 +19,14 @@ Set `skills.<name>.disable_internal_agents: true` for that skill. This leaves on
 
 ## Level 1 — Connect an external Claude Code agent
 
-The simplest case: a plain global Claude Code agent — same kind booping ships, just yours. Maybe it carries different instructions, or runs on a cheaper model like haiku. You want a skill (say `/develop`) to use it to write code.
+The simplest case: a plain global Claude Code agent — same kind booping ships, just yours. Maybe it carries different instructions, or runs on a cheaper model like haiku. You want a skill or playbook (say `develop`) to use it to write code.
 
 **1. Create the agent** at `~/.claude/agents/haiku-developer.md`:
 
 ```markdown
 ---
 name: haiku-developer
-description: Lightweight developer worker for small, well-scoped coding briefings. Use from /develop when the milestone group is simple enough to run on a cheaper model.
+description: Lightweight developer worker for small, well-scoped coding briefings. Use from the develop playbook when the milestone group is simple enough to run on a cheaper model.
 tools: Read, Write, Edit, Bash
 model: haiku
 ---
@@ -142,14 +142,14 @@ The agent's returned message is the human's feedback — proceed from it directl
 
 ### (b) `pi-developer` — CLI delegation
 
-A headless one-shot CLI worker, wired into [/develop](develop.md). There is no transport script — the agent runs the external CLI (`pi --print …`) directly via its own `Bash`.
+A headless one-shot CLI worker, wired into the [develop playbook](develop.md). There is no transport script — the agent runs the external CLI (`pi --print …`) directly via its own `Bash`.
 
 **Global agent — `~/.claude/agents/pi-developer.md`**
 
 ```markdown
 ---
 name: pi-developer
-description: Developer worker that implements a milestone group by driving the pi headless CLI (one-shot, non-interactive). Use from /develop when delegating a coding briefing to the external pi worker instead of the built-in booping-developer.
+description: Developer worker that implements a milestone group by driving the pi headless CLI (one-shot, non-interactive). Use from the develop playbook when delegating a coding briefing to the external pi worker instead of the built-in booping-developer.
 tools: Read, Bash
 model: sonnet
 ---

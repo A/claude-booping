@@ -30,10 +30,12 @@ tasks:
     description: "Internal structure change with no user-visible behavior change. Needs current-vs-target design, migration steps, and a no-behavior-change DoD."
     doc_uri: ${CLAUDE_PLUGIN_ROOT}/docs/task_refactoring.md
 
+# Keyed by skill name, and by playbook name for the playbooks that replaced a
+# skill (`groom`, `develop`, `retro`, `learn`) — `playbooks/_partials/available_agents.md`
+# resolves `config.skills[<playbook name>]`, and the retro / learn playbooks read
+# their owned status from `skills.<name>.status`.
 skills:
   help: {}
-
-  install: {}
 
   develop:
     agents:
@@ -65,8 +67,6 @@ skills:
           - "When the information cannot be meaningfully compressed without losing signal the caller needs to decide"
           - "When the skill already needs to read the same few files for other reasons"
           - "When the question fits in a few lines of `ls`/`grep` output"
-
-  groom-playbook: {}
 
   learn:
     status: awaiting-learning
@@ -157,6 +157,24 @@ playbook:
     _references:
       type: dir
 
+# Scaffold tree materialised by `booping scaffold vault.scaffold <vault-dir>`.
+# The vault is a git repo (see the vault-commit hook), so .gitignore applies to
+# a home-dir vault and a repo-local one alike.
+vault:
+  scaffold:
+    plans:
+      type: dir
+    retrospectives:
+      type: dir
+    _lessons:
+      type: dir
+    _booping:
+      type: dir
+    notes:
+      type: dir
+    .gitignore: |
+      _booping/*.log
+
 plan:
   statuses:
     backlog:
@@ -229,7 +247,7 @@ plan:
             - "Every DoD checkbox marked [x]"
             - "Final Verification green"
           hooks:
-            - suggest /retro
+            - suggest /playbook retro
 
     awaiting-retro:
       desc: "All milestones done; waiting for /retro to write the retrospective."

@@ -360,6 +360,59 @@ def test_inline_steps_sharing_an_inner_wave_notice(tmp_path: Path) -> None:
     _assert_blocking(out)
 
 
+def test_inline_inner_step_in_a_parallel_outer_wave_notice(tmp_path: Path) -> None:
+    # The subgraph node stands for its whole group: sharing an outer wave puts every
+    # inner step in parallel with `side`, so a runner-performed inner step is a STOP.
+    graph = (
+        "  a: []\n"
+        "  side: [a]\n"
+        "  loop:\n    dependencies: [a]\n"
+        "    graph:\n      one: []\n      two: [one]\n"
+    )
+    out = compose(
+        _build(
+            tmp_path,
+            graph,
+            {"a": "sonnet:medium", "side": "sonnet:medium", "one": "null", "two": "null"},
+        )
+    )
+    for name in ("one", "two"):
+        assert (
+            f"**STOP — tell the user:** step '{name}' is not detached but shares a"
+            " wave with other steps; a step sharing a wave must be `detached:`." in out
+        )
+    _assert_blocking(out)
+
+
+def test_inline_inner_step_alone_in_its_outer_wave_is_fine(tmp_path: Path) -> None:
+    graph = (
+        "  a: []\n"
+        "  loop:\n    dependencies: [a]\n"
+        "    graph:\n      one: []\n      two: [one]\n"
+    )
+    out = compose(
+        _build(tmp_path, graph, {"a": "sonnet:medium", "one": "null", "two": "null"})
+    )
+    assert "**STOP" not in out
+
+
+def test_parallel_wave_notice_is_not_repeated_per_scope(tmp_path: Path) -> None:
+    graph = (
+        "  a: []\n"
+        "  side: [a]\n"
+        "  loop:\n    dependencies: [a]\n"
+        "    graph:\n      one: []\n      two: []\n"
+    )
+    out = compose(
+        _build(
+            tmp_path,
+            graph,
+            {"a": "sonnet:medium", "side": "sonnet:medium", "one": "null", "two": "null"},
+        )
+    )
+    assert out.count("step 'one' is not detached") == 1
+
+
 def test_bad_node_notice(tmp_path: Path) -> None:
     out = compose(_build(tmp_path, "  a: []\n  g:\n    graph:\n      b: []\n", {"a": "null"}))
     assert (
@@ -926,6 +979,50 @@ def test_inline_appends_step_targeted_lessons(tmp_path: Path) -> None:
     assert "Watch the seam." not in compose(
         pb, context=ctx, inline_steps=True, include_lessons=False
     )
+
+
+def test_inline_body_jinja_error_is_blocking(tmp_path: Path) -> None:
+    # Under inline_steps the body is rendered at compose time, so its failure is a
+    # blocking notice like any other — not a STOP buried inside one step's section.
+    pb_dir = tmp_path / "_playbooks" / "ib"
+    (pb_dir / "one").mkdir(parents=True)
+    (pb_dir / "two").mkdir(parents=True)
+    (pb_dir / "playbook.md").write_text(
+        "---\nname: ib\ntitle: IB\njinja: true\ninline_steps: true\n"
+        "graph:\n  one: []\n  two: [one]\n---\nPreamble.\n"
+    )
+    (pb_dir / "one" / "prompt.md").write_text(
+        '---\nsummary: one\n---\n{% include "nope.md" %}\n'
+    )
+    (pb_dir / "two" / "prompt.md").write_text("---\nsummary: two\n---\nTwo body.\n")
+    pbs = Playbook.load_all(
+        vault=tmp_path, home_dir=tmp_path / "nohome", plugin_root=tmp_path / "nocore"
+    )
+    out = compose(next(p for p in pbs if p.name == "ib"), context=_ctx())
+    assert "**STOP — tell the user:** Jinja rendering of step 'one' failed:" in out
+    assert "TemplateNotFound" in out
+    _assert_blocking(out)
+    assert "Two body." not in out
+
+
+def test_inline_body_error_in_an_orphan_step_does_not_block(tmp_path: Path) -> None:
+    pb_dir = tmp_path / "_playbooks" / "io"
+    (pb_dir / "one").mkdir(parents=True)
+    (pb_dir / "stray").mkdir(parents=True)
+    (pb_dir / "playbook.md").write_text(
+        "---\nname: io\ntitle: IO\njinja: true\ninline_steps: true\n"
+        "graph:\n  one: []\n---\nPreamble.\n"
+    )
+    (pb_dir / "one" / "prompt.md").write_text("---\nsummary: one\n---\nOne body.\n")
+    (pb_dir / "stray" / "prompt.md").write_text(
+        '---\nsummary: stray\n---\n{% include "nope.md" %}\n'
+    )
+    pbs = Playbook.load_all(
+        vault=tmp_path, home_dir=tmp_path / "nohome", plugin_root=tmp_path / "nocore"
+    )
+    out = compose(next(p for p in pbs if p.name == "io"), context=_ctx())
+    assert "**STOP" not in out
+    assert "One body." in out
 
 
 def test_jinja_without_context_stops() -> None:

@@ -6,10 +6,10 @@ from booping.context import Context
 from booping.rendering import get_plugin_root, render
 from tests.helpers import get_fixture_path  # noqa: I001
 
-SKILL_TEMPLATE = "src/templates/skills/develop.md.j2"
+SKILL_TEMPLATE = "src/templates/skills/code-review.md.j2"
 
 
-def _render_develop(vault: Path) -> str:
+def _render_skill(vault: Path) -> str:
     plugin_root = get_plugin_root()
     ctx = Context.assemble(start=vault, plugin_root=plugin_root, vault_override=vault)
     return render(
@@ -24,7 +24,7 @@ def _render_develop(vault: Path) -> str:
 
 def test_default_config_renders_native_invocation_lines() -> None:
     vault = get_fixture_path("vault-empty")
-    result = _render_develop(vault)
+    result = _render_skill(vault)
 
     assert (
         'Invoke via the `Agent` tool with `subagent_type="booping:booping-developer"`.'
@@ -50,7 +50,7 @@ def test_non_internal_agent_renders_plain_subagent_type() -> None:
     no `booping:` prefix and no cli wrapper. disable_internal_agents drops
     internal entries, so the native pair is gone here but test-no-type stays."""
     vault = get_fixture_path("vault-disable-internal-agents")
-    result = _render_develop(vault)
+    result = _render_skill(vault)
 
     # disable_internal_agents: true drops native entries
     assert "### `booping-developer`" not in result

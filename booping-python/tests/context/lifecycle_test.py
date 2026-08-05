@@ -140,8 +140,8 @@ class TestResolveHooks:
         assert hooks[0] == "frontmatter-update status=awaiting-retro"
         # closing on_entry fires (completed)
         assert "frontmatter-update completed=@now" in hooks
-        # Edge hook: suggest /retro
-        assert "suggest /retro" in hooks
+        # Edge hook: suggest /playbook retro
+        assert "suggest /playbook retro" in hooks
 
     def test_executing_to_terminal_boundary(self, machine: dict[str, Any]) -> None:
         # in-progress → fail: crosses executing → terminal
@@ -229,7 +229,7 @@ class TestHookOrdering:
         hooks = resolve_hooks("in-progress", "awaiting-retro", machine)
         # executing on_exit is empty, but the ordering still holds:
         # edge hooks come before on_entry
-        suggest_idx = hooks.index("suggest /retro")
+        suggest_idx = hooks.index("suggest /playbook retro")
         completed_idx = hooks.index("frontmatter-update completed=@now")
         assert suggest_idx < completed_idx
 
@@ -318,7 +318,7 @@ class TestEquivalence:
         for entry in equivalence_table:
             new_hook = str(entry["new_hook"])
             if not new_hook.startswith("frontmatter-update "):
-                continue  # non-frontmatter rows (e.g. `suggest /retro`) aren't tracked here
+                continue  # non-frontmatter rows (e.g. `suggest /playbook retro`) aren't tracked here
             key = (str(entry["from"]), str(entry["to"]))
             documented.setdefault(key, set()).add(new_hook)
 

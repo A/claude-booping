@@ -65,14 +65,14 @@ Answer questions, explore the vault (Glob/Grep inside `~/Claude/{project_name}/`
 
 Escalate rather than stretch:
 
-- `/groom <topic>` — new work that needs spec, estimation, or a plan file.
-- `/develop <plan-path>` — a `ready-for-dev` plan the user wants to implement now. (Path is the plan file, not a backlog directory.)
-- `/retro <plan-path>` — a plan just finished (`awaiting-retro`) that needs a retrospective written.
-- `/learn <retro-path>` — a retro just written (`awaiting-learning`) that needs lessons extracted.
+- `/playbook groom` — new work that needs spec, estimation, or a plan file.
+- `/playbook develop` — a `ready-for-dev` plan the user wants to implement now.
+- `/playbook retro` — a plan just finished (`awaiting-retro`) that needs a retrospective written.
+- `/playbook learn` — a retro just written (`awaiting-learning`) that needs lessons extracted.
 
 ## Maintenance-tool boundary
 
-- For routine work owned by another skill (groom, develop, retro, learn), recommend that skill rather than reproducing its workflow inline.
+- For routine work owned by a playbook (groom, develop, retro, learn), recommend it rather than reproducing its workflow inline.
 - When the user explicitly asks for an inline frontmatter tweak, status flip, or small code edit, just do it — no transitions table walk, no `<to-status>: <kebab-title>` commit ceremony.
 - When the user asks about valid statuses, available transitions, or how to flip a plan's status manually, run `bin/booping render src/templates/docs/plan_lifecycle_overview.md.j2` and use that output to ground the answer in the current `config.plan.statuses` shape.
 

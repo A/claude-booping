@@ -33,6 +33,9 @@ class Context(BaseModel):
     playbooks: list[Playbook] = []
     config: dict[str, Any] = {}
     extra_instructions: dict[str, str] = {}
+    # Machine level: a global config tier exists. Distinct from `config["home_dir"]`,
+    # which always resolves (core default) and so cannot answer *whether* booping is set up.
+    booping_initialized: bool = False
 
     @classmethod
     def assemble(
@@ -112,4 +115,5 @@ class Context(BaseModel):
             playbooks=playbooks,
             config=cfg,
             extra_instructions=extra_instructions,
+            booping_initialized=global_path.is_file(),
         )

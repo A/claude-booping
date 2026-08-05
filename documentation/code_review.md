@@ -4,7 +4,7 @@ Run a quality-gate review over the current diff against the active plan, produci
 
 ## Why
 
-`/code-review` is the explicit second pair of eyes between `/develop` and `/retro`. It is most useful when the implementation pass ran on a cheaper or faster model — for example you let `/develop` run under Sonnet or GLM and want Opus to catch what the implementer missed. Even on a single-model loop, a fresh-session review surfaces issues the orchestrator's growing context tends to wave through.
+`/code-review` is the explicit second pair of eyes between the develop and retro playbooks. It is most useful when the implementation pass ran on a cheaper or faster model — for example you let development run under Sonnet or GLM and want Opus to catch what the implementer missed. Even on a single-model loop, a fresh-session review surfaces issues the orchestrator's growing context tends to wave through.
 
 It is a **stateless side-skill**: it does not own a plan-lifecycle status, does not transition the plan, and does not write a persistent report file. The output is a feedback list in the chat session, plus any inline fixes it applies and any follow-up briefings it dispatches.
 
@@ -15,9 +15,9 @@ It is a **stateless side-skill**: it does not own a plan-lifecycle status, does 
 /code-review plans/20260430-user-facing-documentation-site.md
 ```
 
-Bare `/code-review` picks the plan currently in `awaiting-retro` (the queue `/develop` just finished). Pass a plan path to review against a different one — useful when you ran `/develop` in another session and want to review the diff before retro.
+Bare `/code-review` picks the plan currently in `awaiting-retro` (the queue the develop playbook just finished). Pass a plan path to review against a different one — useful when you ran the sprint in another session and want to review the diff before retro.
 
-Run it from a fresh Claude Code session — see [Run code review in a fresh session](develop.md#run-code-review-in-a-fresh-session) on the `/develop` page for why.
+Run it from a fresh Claude Code session — see [Run code review in a fresh session](develop.md#run-code-review-in-a-fresh-session) on the develop playbook page for why.
 
 ## Best practices
 
@@ -41,7 +41,7 @@ Findings are categorised so the post-review triage is mechanical:
 - **SUGGESTION** — apply if the cost is low; defer with an explicit one-liner otherwise.
 - **NIT** — apply or skip on judgment; no record needed.
 
-This is the same triage shape `/develop` uses on the feedback list — see [Review the code-review feedback list](develop.md#review-the-code-review-feedback-list).
+This is the same triage shape the develop playbook uses on the feedback list — see [Review the code-review feedback list](develop.md#review-the-code-review-feedback-list).
 
 ### Trivial inline, non-trivial via agent
 

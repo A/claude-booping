@@ -1,0 +1,5 @@
+graph:
+  scope: []
+  review: [scope]
+  present: [review]
+  resolve: [present]

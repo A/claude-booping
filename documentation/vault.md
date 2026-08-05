@@ -1,28 +1,28 @@
 # Vault
 
-Every booping project gets its own vault, scaffolded by [/install](install.md). By default it lives at `~/Claude/{project}/`; you can instead keep it **inside the repo** (a local vault) by setting the `.booping` marker's `vault_path:` key. The vault is plain markdown with YAML frontmatter — open the directory in Obsidian for graph view and backlinks across plans, retros, and lessons.
+Every booping project gets its own vault, scaffolded by the [setup playbook](install.md). By default it lives at `~/Claude/{project}/`; you can instead keep it **inside the repo** (a local vault) by setting the `.booping` marker's `vault_path:` key. The vault is plain markdown with YAML frontmatter — open the directory in Obsidian for graph view and backlinks across plans, retros, and lessons.
 
 This page is the reference for every file and directory inside the vault. For the lifecycle that ties them together, start at [Quick start](quick_start.md).
 
 ## `plans/`
 
-Sprint plans live here as `{YYYYMMDD}-{kebab-title}.md`. Each plan carries a YAML frontmatter (status, type, story points, a one-line `summary`, etc.) and a body of milestones with tasks. Authored by [/groom](groom.md), executed by [/develop](develop.md).
+Sprint plans live here as a directory `{YYYYMMDD-HH-MM}_{kebab-title}/` holding `index.md` (legacy plans are a flat `{YYYYMMDD}-{kebab-title}.md`). Each plan carries YAML frontmatter (status, type, story points, a one-line `summary`, etc.) and a body of milestones with tasks. Authored by the [groom playbook](groom.md), executed by the [develop playbook](develop.md).
 
 A plan walks the status table from `backlog` / `in-spec` through `awaiting-plan-review`, `ready-for-dev`, `in-progress`, `awaiting-retro`, `awaiting-learning`, to `done`. The owning skill moves a plan by running a `booping transition` command, which performs the status change and every mechanical mutation it entails in one step.
 
-Sibling stubs created by a `/groom`-driven split point at the primary plan via `split_from: plans/...` in their frontmatter.
+Sibling stubs created by a groom-driven split point at the primary plan via `split_from: plans/...` in their frontmatter.
 
 ## `retrospectives/`
 
-Retrospectives written by [/retro](retro.md), one per shipped plan. Same `{YYYYMMDD}-{kebab-title}.md` filename shape as the plan they cover, so files line up alphabetically.
+Legacy retrospectives, one per shipped plan, in the same `{YYYYMMDD}-{kebab-title}.md` shape as the plan they cover. The [retro playbook](retro.md) now writes `retro.md` into the plan's own directory instead; this directory is kept for what earlier runs left behind.
 
-A retro records what actually shipped vs. the original spec, divergences, and the tensions you flagged during `/develop`. It is the input to [/learn](learn.md).
+A retro records what actually shipped vs. the original spec, divergences, and the tensions you flagged during development. It is the input to [learn](learn.md).
 
 ## `lessons/`
 
 Durable, project-wide rules accumulated over many sprints. Files are named `{N}_{title}.md` where `N` is a monotonic counter so the directory stays ordered chronologically.
 
-Authored by [/learn](learn.md) from confirmed retro findings. Loaded by every **skill's** Preflight on every invocation, so lessons accumulate into the active context for `/groom` and `/develop` automatically.
+Legacy lesson surface, authored by the retired `/learn` skill. Still read by the skills and playbook steps that include the lessons partial, but nothing writes it any more — the [learn playbook](learn.md) writes `_lessons/` below.
 
 Scope note: this directory serves the built-in skills only. [Playbooks](playbook.md) and agent bodies do not read it — they read `_lessons/` below, and a render of any playbook emits a non-blocking note while this directory still holds files.
 
@@ -40,23 +40,22 @@ Free-form user notes — plan-review comments, code-review threads, ideas for ne
 
 ## `_booping/skill_<name>.md`
 
-Per-skill extension file. Loaded automatically into the matching skill's context at invocation time, so the project's local conventions reach `/groom`, `/develop`, etc. without you having to restate them. Authored and updated by [/learn](learn.md) — do not hand-edit unless you know what `/learn` would have written.
+Per-skill extension file. Loaded automatically into the matching skill's context at invocation time, so the project's local conventions reach the matching skill without you having to restate them. Authored and updated by the [learn playbook](learn.md) — do not hand-edit unless you know what learn would have written.
 
-[/install](install.md) always seeds `_booping/agent_booping-developer.md`, and seeds the two skill files only when the project carries local signal the repo `CLAUDE.md` does not already own — otherwise it skips them:
+The [setup playbook](install.md) creates `_booping/` but seeds no extension files. Learn writes them as findings accumulate — typically:
 
-- `_booping/agent_booping-developer.md` — stack + conventions for the developer agent (always seeded).
-- `_booping/skill_groom.md` — a project-local groom override the repo `CLAUDE.md` doesn't carry (e.g. a sizing override); seeded only when such signal exists.
-- `_booping/skill_develop.md` — project-local dev signal the repo `CLAUDE.md` lacks (e.g. env / service notes); seeded only when such signal exists.
+- `_booping/agent_booping-developer.md` — stack + conventions for the developer agent.
+- `_booping/skill_<name>.md` — project-local signal the repo `CLAUDE.md` doesn't carry (e.g. a sizing override, env / service notes).
 
-`/learn` keeps whatever is seeded current as the project accumulates lessons; the seeds are just a starting point.
+Nothing here is required: an empty `_booping/` is a valid vault.
 
 ## `_booping/agent_<full-agent-name>.md`
 
-Per-agent extension file. Injected into the matching worker agent's body at agent load time, so subagents inherit project rules without separate reads. The filename uses the agent's full name (which starts with `booping-`) — e.g. `_booping/agent_booping-developer.md`, `_booping/agent_booping-researcher.md`. Authored and updated by [/learn](learn.md).
+Per-agent extension file. Injected into the matching worker agent's body at agent load time, so subagents inherit project rules without separate reads. The filename uses the agent's full name (which starts with `booping-`) — e.g. `_booping/agent_booping-developer.md`, `_booping/agent_booping-researcher.md`. Authored and updated by the [learn playbook](learn.md).
 
 ## `plan_templates/`
 
-Project-local plan templates. Each file has frontmatter (`name`, `description`) plus two top-level sections (`# Plan Body`, `# Quality Checklist`). Discovered by [/groom](groom.md) alongside the core templates that ship with the plugin; can override a core template by sharing its `name`, or add entirely new template flavours suited to the project.
+Project-local plan templates. Each file has frontmatter (`name`, `description`) plus two top-level sections (`# Plan Body`, `# Quality Checklist`). Discovered by the [groom playbook](groom.md) alongside the core templates that ship with the plugin; can override a core template by sharing its `name`, or add entirely new template flavours suited to the project.
 
 ## `review_templates/`
 
@@ -72,7 +71,7 @@ It is a *snapshot*, not a live view: nothing auto-refreshes it on a plan write t
 
 ## `.booping`
 
-The marker that ties a repo to its vault. Unlike everything else on this page, `.booping` lives in the **attached repo's working tree** (its root), not inside the vault. It is written by [/install](install.md) and carries the `project_name: {project}` key — how every skill resolves which vault to operate on. It may also carry an optional `vault_path:` key: when present, the vault resolves to that path (relative paths against the repo root, absolute paths and `~` honoured) instead of `~/Claude/{project}/` — this is how a repo-local vault is wired. Commit `.booping` with the repo so the binding travels with the checkout.
+The marker that ties a repo to its vault. Unlike everything else on this page, `.booping` lives in the **attached repo's working tree** (its root), not inside the vault. It is written by the [setup playbook](install.md) and carries the `project_name: {project}` key — how every skill resolves which vault to operate on. It may also carry an optional `vault_path:` key: when present, the vault resolves to that path (relative paths against the repo root, absolute paths and `~` honoured) instead of `~/Claude/{project}/` — this is how a repo-local vault is wired. Commit `.booping` with the repo so the binding travels with the checkout.
 
 ## `config.yaml`
 

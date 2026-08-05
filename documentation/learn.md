@@ -1,40 +1,47 @@
-# /learn
+# learn playbook
 
-Compress retro findings into durable, actionable rules: global lessons that every skill loads, plus per-skill and per-agent extension files that target a specific surface.
+Compress retro findings into durable, actionable rules: targeted lessons that reach the playbooks, steps and agents they name, plus per-skill and per-agent extension files.
+
+Learning is a **playbook**, not a skill — it is driven by [`/playbook`](playbook.md):
+
+```text
+/playbook learn
+```
 
 ## Why
 
-`/retro` records what happened on one plan. `/learn` is the step that turns those observations into rules booping will obey on every future plan. Without `/learn`, retros pile up unread and the same friction repeats sprint after sprint; with `/learn`, each sprint leaves the project a little better calibrated.
+The [retro playbook](retro.md) records what happened on one plan. Learn is the step that turns those observations into rules booping will obey on every future plan. Without it, retros pile up unread and the same friction repeats sprint after sprint; with it, each sprint leaves the project a little better calibrated.
 
-`/learn` reads the retro file from the plan currently in `awaiting-learning`, proposes a small set of updates (new lesson entries, edits to existing lessons, additions to the relevant `_booping/` extension files), and asks you to review each proposal before writing.
+The run reads `retro.md` from the plan currently in `awaiting-learning`, proposes a small set of updates, and asks you to confirm the whole set before anything is written. It walks the plan from `awaiting-learning → done` once you sign off.
 
-## Command
+## What it does
 
-```text
-/learn
-/learn retrospectives/20260423-skill-refactors-chat-develop-retro.md
-/learn ~/Claude/claude-booping/retrospectives/20260422-plans-as-data-refactor.md
-```
+Six steps, in dependency order:
 
-Bare `/learn` picks the plan currently in `awaiting-learning`. Pass a retro file path to absorb lessons from a specific one.
+| Step | What it does |
+|------|--------------|
+| `intake` | Resolve the retrospective and its working set; validate the entry status |
+| `extract-candidates` | Decompose the retro into atomic rules, each routed through the routing matrix |
+| `dedup-sweep` | Filtered read of existing lessons and extensions — update vs create vs conflict |
+| `review-table` | Present the unified review table; you accept, reject rows, or add your own |
+| `write` | Write the accepted items, one pass per target type |
+| `transition` | Close the plans out and commit |
 
-`/learn` walks the plan from `awaiting-learning → done` once you have signed off on the proposed updates.
+The run workdir is the primary plan's directory, so a stopped run is resumable.
 
 ## What it writes
 
-`/learn` routes every accepted finding to **exactly one** target. Three of the four targets live in the vault; the fourth is the attached repo's own `CLAUDE.md`:
+Every accepted finding lands in **exactly one** target. A candidate that would span two is decomposed into one row per target before writing.
 
-- **Lessons** at `~/Claude/{project}/lessons/{N}_{title}.md` — durable rules every skill picks up via Preflight on every invocation. `N` is a monotonic counter so the directory stays ordered chronologically.
-- **Per-skill and per-agent extension files** at `~/Claude/{project}/_booping/skill_<name>.md` and `~/Claude/{project}/_booping/agent_<full-agent-name>.md` (e.g. `agent_booping-developer.md`) — narrower rules that only reach the matching skill or worker agent, injected at load time. These are the right home for findings too specific to belong in project-wide lessons (e.g. "when running `/develop` on this monorepo, prefer pnpm over npm").
-- **The repo's own `CLAUDE.md`** — when a finding is a project convention the model should follow regardless of booping (a coding standard, a structural rule), `/learn` adds it as a one-line bullet to the attached repo's `CLAUDE.md`. These edits are committed separately, in the repo working tree, not in the vault.
+- **Targeted lessons** at `{vault}/_lessons/{N}_{title}.md` — each carrying a `targets:` frontmatter list naming the playbooks, playbook steps, and agents the rule applies to. `N` is a monotonic counter so the directory stays ordered chronologically.
+- **Per-skill and per-agent extension files** at `{vault}/_booping/skill_<name>.md` and `{vault}/_booping/agent_<full-agent-name>.md` (e.g. `agent_booping-developer.md`) — narrower rules that only reach the matching skill or worker agent, injected at load time.
+- **The repo's own `CLAUDE.md`** — when a finding is a project convention the model should follow regardless of booping (a coding standard, a structural rule), it is added as a one-line bullet to the attached repo's `CLAUDE.md`. Those edits are committed in the repo working tree, not in the vault, and never touch the global `~/.claude/CLAUDE.md`.
 
-A finding never lands in two targets at once. When a candidate would otherwise span two, `/learn` decomposes it into one row per target before writing.
+See [Vault](vault.md#_lessons) for the directory layout and how each file reaches the active context.
 
-See [Vault](vault.md#lessons) for the vault directory layout and how each file reaches the active context.
+### Targets are fetched, never guessed
 
-### The `learn` playbook writes targeted lessons
-
-The same procedure also ships as the core `learn` [playbook](playbook.md) (run it with `/playbook learn`). It routes findings to the same four targets, with one difference in the lesson path: it writes to `{vault}/_lessons/{N}_{title}.md` and gives each file a `targets:` frontmatter list naming the playbooks, playbook steps, and agents the rule applies to.
+A `_lessons/` file with no valid `targets:` reaches nothing, so the routing has to be exact. Before proposing, the run reads the **target space**: a table of contents of every discovered playbook, then a fetch of the exact playbooks the candidates touch, listing their step names and addressable agents. Target entries come from that fetch.
 
 ```markdown
 ---
@@ -48,30 +55,31 @@ created: 2026-08-03
 ---
 ```
 
-That list is what gets the lesson injected — a `_lessons/` file with no valid `targets:` reaches nothing. To keep the routing honest, the playbook reads the **target space** before proposing: a table of contents of every discovered playbook, then a fetch of the exact playbooks the candidates touch, listing their step names and addressable agents. Target entries are never guessed; they come from that fetch. See [Playbooks → Lessons](playbook.md#lessons) for the target forms and where each one surfaces.
+Target forms are `{playbook}`, `{playbook}/{step}`, and `agent:{id}` — exact names only, no globs. See [Playbooks → Lessons](playbook.md#lessons) for where each one surfaces.
 
-The two lesson directories are separate systems and do not migrate into each other: `lessons/` feeds the built-in skills, `_lessons/` feeds playbooks and agent bodies.
+!!! note "Legacy `lessons/`"
+    The older `{vault}/lessons/` directory served the retired built-in skills and is no longer written to. Nothing migrates between the two; a render of any playbook emits a non-blocking note while the legacy directory still holds files.
 
 ### Update-vs-create sweep
 
-Before drafting its proposals, `/learn` reads the existing lessons, extension files, and the repo `CLAUDE.md` to check whether each candidate is genuinely new. A candidate that duplicates or refines an existing rule becomes an **update** to that rule rather than a fresh, near-duplicate entry; a candidate that contradicts an existing rule is flagged as a **conflict** for you to resolve in the review table. This keeps the lesson set from accumulating redundant or self-contradicting rules over many sprints.
+Before drafting proposals, `dedup-sweep` reads the existing lessons, extension files, and the repo `CLAUDE.md` to check whether each candidate is genuinely new. A candidate that duplicates or refines an existing rule becomes an **update** to that rule rather than a fresh near-duplicate; a candidate that contradicts one is flagged as a **conflict** for you to resolve in the review table. This keeps the lesson set from accumulating redundant or self-contradicting rules over many sprints.
 
 ### The review table
 
-Every candidate is presented in a single review table before anything is written — one row per landing site, with columns `#`, `Target`, `Type`, `Rule`, and `Example`. You accept all, or reject individual rows by number (e.g. `2 5`), or append your own row in the same shape. Nothing is written until you respond; table acceptance is the consent for the whole write pass — there are no per-row prompts. (The exact column shape and accept/reject syntax live in the plugin-internal `docs/learn_review_table.md` that the skill loads at runtime.)
+Every candidate is presented in a single review table before anything is written — one row per landing site, with columns `#`, `Target`, `Type`, `Rule`, and `Example`. You accept all, reject individual rows by number (e.g. `2 5`), or append your own row in the same shape. Nothing is written until you respond; table acceptance is the consent for the whole write pass — there are no per-row prompts.
 
 ## Best practices
 
 ### Review every proposed update
 
-`/learn` proposes — you commit. Read each proposed lesson and extension edit before approving. Three things to check:
+The run proposes — you commit. Read each proposed lesson and extension edit before approving. Three things to check:
 
-- **Actionability.** A lesson should tell a future skill what to do, not just describe the past. "Be careful with migrations" is a description; "Run `manage.py migrate --plan` before applying any migration generated this session" is a rule.
-- **Right home.** A rule that only matters for `/develop` belongs in `_booping/skill_develop.md`, not in global `lessons/` where every skill pays the context cost. Conversely, a cross-skill convention belongs in `lessons/`.
+- **Actionability.** A lesson should tell a future run what to do, not just describe the past. "Be careful with migrations" is a description; "Run `manage.py migrate --plan` before applying any migration generated this session" is a rule.
+- **Right home.** A rule that only matters for one step belongs in a lesson targeting that step, not one targeting the whole playbook where every run pays the context cost.
 - **Direction.** A lesson should point forward. If the proposed update is really a complaint about the past plan, send it back — it is retro material, not lesson material.
 
 ### Shit in, shit out
 
-`/learn` proposes updates from whatever the retro file says. Accepting proposals blindly produces conflicting and useless rules: redundant overlaps, contradictions with existing lessons, vague platitudes that fire on every plan and steer none. Review every proposal as if you were the one writing it — because once you approve, you are.
+Proposals come from whatever the retro says. Accepting them blindly produces conflicting and useless rules: redundant overlaps, contradictions with existing lessons, vague platitudes that fire on every plan and steer none. Review every proposal as if you were writing it — because once you approve, you are.
 
-This is the second half of the same warning that applies to [/retro](retro.md#shit-in-shit-out): a sloppy retro produces sloppy lesson proposals, and a rubber-stamped `/learn` writes those sloppy proposals to disk where they will steer every future sprint.
+This is the second half of the same warning that applies to [retro](retro.md#shit-in-shit-out): a sloppy retro produces sloppy lesson proposals, and a rubber-stamped write pass puts those proposals on disk where they steer every future sprint.

@@ -2,6 +2,8 @@
 
 {% if context.project %}
 ```yaml
+booping_initialized: {{ context.booping_initialized | lower }}
+project_initialized: true
 name: {{ context.project.name }}
 directory: {{ context.project.directory }}
 repo_directory: {{ context.project.repo_directory }}
@@ -11,6 +13,11 @@ local_vault: true
 {%- endif %}
 ```
 {% else %}
+```yaml
+booping_initialized: {{ context.booping_initialized | lower }}
+project_initialized: false
+```
+
 Project not initialized — no `.booping` file in the current directory. Before proceeding with the user's request, onboard them per the procedure in `${CLAUDE_PLUGIN_ROOT}/docs/how_to_initialize_project.md`. Read that file, walk the user through it, then retry.
 {% endif %}
 

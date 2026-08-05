@@ -3,7 +3,7 @@
 !!! warning "Unstable — work in progress"
     Playbooks are an experimental feature. The manifest format, step frontmatter, and `/playbook` behaviour may change in breaking ways between releases.
 
-A **playbook** is a multi-step guided procedure driven by the `/playbook` skill. Where the built-in skills (`/groom`, `/develop`, …) are fixed workflows shipped by the plugin, a playbook is yours to write: a set of prompt steps, each optionally detached into a sub-agent, with review gates where you want to inspect the output before continuing. Most playbooks are yours and live in your vault; a few ship with the plugin (see [Scopes](#scopes)).
+A **playbook** is a multi-step guided procedure driven by the `/playbook` skill. Where the built-in skills (`/chat`, `/retro`, `/learn`, `/code-review`) are fixed workflows shipped by the plugin, a playbook is yours to write: a set of prompt steps, each optionally detached into a sub-agent, with review gates where you want to inspect the output before continuing. Most playbooks are yours and live in your vault; a few ship with the plugin (see [Scopes](#scopes)).
 
 A playbook's **structure** lives in `playbook.yaml`: the `graph:` (which steps run, in what order, which in parallel) and the optional `states:` (named state machines that persist run state on disk so a run can be resumed). `playbook.md` keeps **identity and prose** — the manifest frontmatter (`name`, `title`, `summary`, `trigger`, …) and the preamble body. Bodies are plain markdown by default; a playbook can opt into [Jinja rendering](#jinja-bodies) if it needs live project data. Author a playbook by hand and it shows up in `/playbook` immediately.
 
@@ -22,12 +22,17 @@ Playbooks are discovered from three roots:
 
 ### Shipped playbooks
 
-One core playbook ships today: **`groom`** — the grooming workflow expressed as a playbook (intake → codebase and web research in parallel → design → draft → present). It is driven by the experimental **`/groom-playbook`** skill, which does nothing but run that playbook.
+Core playbooks ship with the plugin and own the main workflow — the `/groom`, `/develop`, and `/install` skills they replaced are gone:
 
-!!! warning "Experimental — `/groom` is still the one to use"
-    `/groom-playbook` is a parallel experiment, not a replacement. [`/groom`](groom.md) remains the supported way to spec a sprint and is unaffected by it.
+- **`setup`** — machine config, then vault scaffold and `.booping` marker. See [Install](install.md).
+- **`groom`** — spec a sprint (intake → codebase and web research → draft → cross-review → present). See [groom](groom.md).
+- **`develop`** — execute a plan (intake → provision → develop-loop → verify → wrap-up). See [develop](develop.md).
+- **`retro`**, **`learn`** — playbook variants of the same-named skills.
+- **`playbook-authoring`** — the procedure for writing a new playbook.
 
-A playbook of your own named `groom` would clash with it rather than replace it. To bend the shipped procedure to a project, add [lessons](#lessons) in `{vault}/_lessons/` targeting `groom`; to fork it, copy the directory under a different name.
+Run any of them with `/playbook <name>`.
+
+A playbook of your own sharing a core name would clash with it rather than replace it. To bend a shipped procedure to a project, add [lessons](#lessons) in `{vault}/_lessons/` targeting it; to fork it, copy the directory under a different name.
 
 ## Layout
 
@@ -117,6 +122,7 @@ A subgraph node may carry its own `state:` key, naming the machine that governs 
 - `trigger` — natural-language hint the skill matches the user's request against.
 - `requires_project` — *optional*, default `false`. When `true`, the playbook only runs with a booping project attached: `/playbook` flags it in the listing and refuses to run it without a project, and `booping render-playbook` refuses to render it (stderr + exit 1).
 - `jinja` — *optional*, default `false`. When `true`, the preamble and every step body are rendered as Jinja templates against live project context. See [Jinja bodies](#jinja-bodies).
+- `inline_steps` — *optional*, default `false`. When `true`, each runner-performed step's body is embedded in its section of the composed procedure instead of the fetch command. Detached steps are unaffected. See [How the graph renders](#how-the-graph-renders).
 - `graph` — *legacy fallback only*, same shape as `playbook.yaml`'s `graph:`. Used when the playbook has no `playbook.yaml`.
 
 The manifest **body** is a preamble — a playbook-level instruction inserted above the rendered procedure. No step calls: the graph, not the body, decides what runs.
@@ -201,7 +207,8 @@ A Jinja body is meaningless until rendered — the `booping render-playbook <nam
 
 `/playbook` renders the graph as a **step table** — one row per step, in dependency order, carrying the step name, its dependencies, its summary and its review gate. A step runs once every step in its `Dependencies` cell is done; steps whose dependencies are all satisfied run together.
 
-- **Step bodies are never embedded** — every section ends with the command that fetches the body, the same for plain and `jinja: true` playbooks. A runner-performed step's section is a metadata block (summary, dependencies, review gate) closed by *Run `booping render-playbook <name> --step <step>` for content.* A **detached** step's section is instead one order to the driver — its summary as a paragraph, its review gate when it has one, then *Tell the `<agent>` agent to get its instructions by calling this command: `booping render-playbook <name> --step <step>`.* Its dependencies and wave order are omitted there; the step table above already carries them.
+- **Step bodies are fetched, not embedded** — by default every section ends with the command that fetches the body, the same for plain and `jinja: true` playbooks. A runner-performed step's section is a metadata block (summary, dependencies, review gate) closed by *Run `booping render-playbook <name> --step <step>` for content.* A **detached** step's section is instead one order to the driver — its summary as a paragraph, its review gate when it has one, then *Tell the `<agent>` agent to get its instructions by calling this command: `booping render-playbook <name> --step <step>`.* Its dependencies and wave order are omitted there; the step table above already carries them.
+- **`inline_steps` embeds the runner's bodies** — with `inline_steps: true` in the manifest (or `--inline-steps` on the command), a runner-performed step's section carries its rendered body, with that step's lessons already appended, in place of *both* the metadata block and the fetch command; its summary, dependencies and review gate stay in the step table. Detached steps keep fetch-form, so their agents still fetch their own body. A body that fails to render is a blocking `STOP` notice like any other, not a broken section.
 - **Delegated steps fetch their own body** — the driver never runs the fetch command for a sub-agent step. It spawns the agent with a bootstrap prompt: the fetch command ("treat its stdout as your full instruction"), a `## Run-time context` block (project, specs dir, plus `workdir` / `instance` where they apply), a `## Inputs` block assembled from the run-time context and prior steps' receipts, and a uniform `## Return` contract (`artifacts written + outcome, ≤ 5 lines`) — a richer contract belongs in the step body. A step without `detached:` is the only case where the driver runs the fetch itself and executes the stdout.
 - **Steps that can run together must be `detached:`** — a step the runner performs itself can't run in parallel, so a step whose dependencies are satisfied at the same time as another's must be `detached:`.
 - **Review gates pause after the batch** — once every step running together finishes, each one's gate is presented (labeled by step) and the run waits for your confirmation before the next batch.
@@ -445,12 +452,13 @@ The rendered procedure lists the steps as:
 
 The composed output carries a `## Lessons` section when any [lesson](#lessons) targets the playbook by name.
 
-Four flags help while authoring:
+Five flags help while authoring:
 
 - `--step <step>` — print just that step's body (rendered, for a `jinja: true` playbook), with no heading, instruction bullets, or gate wrapping, followed by the lessons targeting that step. This is the command every composed step section points at: each delegated step runs it itself from its bootstrap prompt, the driver runs it for inline steps, and it is handy for eyeballing one prompt in isolation.
 - `--no-lessons` — drop the `## Lessons` section from the composed output, the step-lesson append from `--step`, and the lesson notices, leaving the bodies alone.
 - `--project <path>` — resolve context against the vault at `<path>` instead of whatever project is attached to the current directory. Lets you render a `requires_project` or `jinja: true` playbook from anywhere. It also **pins discovery to core + that vault** — for playbooks and for [lessons](#lessons) alike, skipping both machine-local global roots (`<home_dir>/_playbooks/`, `<home_dir>/_lessons/`), so the same command renders the same bytes on another machine.
 - `--set <dotted.key>=<value>` — override one config value for this render only (repeatable, later pairs win, values stay strings). The pair wins over every config tier. Templates read it through `config`, which is how a partial can be parameterised from the command line.
+- `--inline-steps` — embed each runner-performed step's body in its section instead of the fetch command, the same as `inline_steps: true` in the manifest. Detached steps keep fetch-form. Handy for reading a whole procedure as one document.
 
 ## Evals and harness
 

@@ -1,6 +1,6 @@
 # booping
 
-A self-learning, project-scoped sprint workflow for Claude Code. booping turns a feature idea into a durable, on-disk loop — **groom → develop → retro → learn** — that effectively utilizes sub-agents to avoid context rot, with optional Gemini cross-validation when `GEMINI_API_KEY` is set. Every artifact (plans, retros, lessons, sprint snapshots) lives in the per-project vault — `~/Claude/{project}/` by default, or a repo-local directory — one folder per codebase, so weeks-long programs stay legible long after the session ends.
+A self-learning, project-scoped sprint workflow for Claude Code. booping turns a feature idea into a durable, on-disk loop — **groom → develop → retro → learn** — that effectively utilizes sub-agents to avoid context rot, with an optional second-model cross-review of every plan. Every artifact (plans, retros, lessons, sprint snapshots) lives in the per-project vault — `~/Claude/{project}/` by default, or a repo-local directory — one folder per codebase, so weeks-long programs stay legible long after the session ends.
 
 The vault is plain markdown with YAML frontmatter, so Obsidian renders it natively as Properties. No proprietary database, no lock-in — just files you can grep, version, and edit by hand.
 
@@ -8,7 +8,7 @@ The vault is plain markdown with YAML frontmatter, so Obsidian renders it native
 
 ```text
         ┌─────────┐
-        │  groom  │  spec → cross-validate → review gate
+        │  groom  │  spec → cross-review → review gate
         └────┬────┘
              │ ready-for-dev
              ▼
@@ -28,7 +28,7 @@ The vault is plain markdown with YAML frontmatter, so Obsidian renders it native
         └────────┘
 ```
 
-Every plan walks this loop once. The next plan inherits the lessons. `/code-review` is an optional side-route off `/develop` — a stateless pass over the in-progress diff that changes no plan status before you continue to `/retro`.
+Every plan walks this loop once. The next plan inherits the lessons. Grooming, development, retro and learn are **playbooks** driven by `/playbook`; chat, code-review, help and playbook itself are skills. `/code-review` is an optional side-route off the develop playbook — a stateless pass over the in-progress diff that changes no plan status before you continue to retro.
 
 ## Why booping
 
@@ -39,15 +39,15 @@ Every plan walks this loop once. The next plan inherits the lessons. `/code-revi
 
 ## Read next
 
-- [Quick start](quick_start.md) — install the plugin, run `/install`, ship your first plan end-to-end.
-- [Install](install.md) — prerequisites and what `/install` scaffolds.
+- [Quick start](quick_start.md) — install the plugin, run `/playbook setup`, ship your first plan end-to-end.
+- [Install](install.md) — prerequisites and what `/playbook setup` scaffolds.
 - [Vault](vault.md) — full tour of `~/Claude/{project}/`: what every file and directory is for.
-- [/groom](groom.md) — spec a sprint, with cross-validation and the user-approval gate.
-- [/develop](develop.md) — claim a ready plan and execute milestones.
+- [groom playbook](groom.md) — spec a sprint, with cross-review and the user-approval gate.
+- [develop playbook](develop.md) — claim a ready plan and execute milestones.
 - [/code-review](code_review.md) — stack-aware review of the in-progress diff.
-- [/retro](retro.md) — capture what actually shipped vs. the spec.
-- [/learn](learn.md) — fold retro findings into durable rules.
+- [retro playbook](retro.md) — capture what actually shipped vs. the spec.
+- [learn playbook](learn.md) — fold retro findings into durable rules.
 - [/chat](chat.md) — orient inside the vault and handle ad-hoc small tasks.
 - [/help](help.md) — command index.
-- [Playbooks](playbook.md) — multi-step procedures driven by `/playbook`, including the experimental `/groom-playbook`. *Unstable — work in progress.*
+- [Playbooks](playbook.md) — multi-step procedures driven by `/playbook`. *Unstable — work in progress.*
 - [Project config](project_config.md) — tour of `src/config.yaml` and the per-project override mechanic.

@@ -33,11 +33,11 @@ See [Vault](vault.md) for the layout `/chat` navigates over.
 
 `/chat` is bounded by what fits inside a single session without producing a durable artefact. When the conversation outgrows that boundary, escalate rather than stretch the skill:
 
-- **Scope grows into real work** → `/groom <topic>`. Anything that needs research, milestones, story-point estimates, or a plan file belongs in `/groom`. The rule of thumb: if you would want a retro on it later, it is `/groom` material now.
-- **A `ready-for-dev` plan is waiting** → `/develop <plan-path>`. `/chat` will route you there rather than trying to implement milestones inline.
-- **A plan just finished** → `/retro <plan-path>` to capture findings; `/learn` afterwards.
+- **Scope grows into real work** → `/playbook groom`. Anything that needs research, milestones, story-point estimates, or a plan belongs in the groom playbook. The rule of thumb: if you would want a retro on it later, it is groom material now.
+- **A `ready-for-dev` plan is waiting** → `/playbook develop`. `/chat` will route you there rather than trying to implement milestones inline.
+- **A plan just finished** → `/playbook retro` to capture findings; `/playbook learn` afterwards.
 
-The hand-off is explicit: `/chat` recommends the next command and stops, rather than reproducing another skill's workflow inline. See [/groom](groom.md), [/develop](develop.md), [/retro](retro.md), and [/learn](learn.md) for what each of those commands owns.
+The hand-off is explicit: `/chat` recommends the next command and stops, rather than reproducing another skill's workflow inline. See [groom](groom.md), [develop](develop.md), [retro](retro.md), and [learn](learn.md) for what each of those owns.
 
 ## Behaviour notes
 

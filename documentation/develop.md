@@ -1,38 +1,57 @@
-# /develop
+# develop playbook
 
-Pick a plan from an interactive candidate list and execute its milestones, delegating coding to `booping-developer` and orchestrating verification, commits, and status transitions on the way to `awaiting-retro`.
+Execute a groomed plan's milestones, delegating coding to `booping-developer` and orchestrating verification, commits, and status transitions on the way to `awaiting-retro`.
+
+Development is a **playbook**, not a skill — it is driven by [`/playbook`](playbook.md):
+
+```text
+/playbook develop
+```
 
 ## What it does
 
-`/develop` walks a plan through `ready-for-dev → in-progress → awaiting-retro`. It works on exactly one plan, picks the right branch from `git.branches`, groups consecutive milestones into agent briefings, runs each briefing through `booping-developer`, verifies milestone DoDs, runs the project's lint / typecheck / test gates at Final Verification, and flips the plan's status when every checkbox is `[x]` and Final Verification is green.
+The playbook walks one plan through `awaiting-plan-review → ready-for-dev → in-progress → awaiting-retro`. Its run state lives in the plan's own `index.md`, so a stopped sprint is **resumable**.
 
-`/develop` does not edit application code from the orchestrator — all coding is delegated. The orchestrator owns reads/writes against the vault, briefing assembly, verification, and commits.
+Five steps, in dependency order:
 
-By default `/develop` runs all milestone groups in **one session**. Stopping after each milestone is a user-prompt-level instruction, not default behaviour (see Best practices).
+| Step | What it does |
+|------|--------------|
+| `intake` | Resolve the plan, capture explicit approval when it entered at `awaiting-plan-review`, and check the plan against the repo's current shape (drift) |
+| `provision` | Pick and confirm the sprint branch, then settle the milestone groups the briefings will cover |
+| `develop-loop` | Brief `booping-developer` per group, verify each milestone's DoD, commit as it goes |
+| `verify` | Run the project's lint / typecheck / test gates plus the plan's Final Verification |
+| `wrap-up` | Closing commit, sprint report, transition to `awaiting-retro` |
 
-## Command
+No application code is edited by the runner — all coding is delegated. The runner owns reads/writes against the vault, briefing assembly, verification, and commits.
+
+By default every milestone group runs in **one session**. Stopping after each milestone is a request you make at invocation time, not default behaviour.
+
+## Starting a run
 
 ```text
-/develop
-/develop plans/20260423-refactor-chat-skill-to-groom-pattern.md
-/develop ~/Claude/claude-booping/plans/20260430-src-files-build-pipeline.md pause after each milestone
-/develop ~/Claude/claude-booping/plans/20260429-skill-runtime-template-rendering.md re-implement from master, don't toggle todos in the plan
-continue to develop plans/20260428-snippet-pre-filter-pipeline.md
+/playbook develop
+/playbook develop — plans/20260430-11-20_src-files-build-pipeline/index.md, pause after each milestone
 ```
 
-Bare `/develop` presents a single-select `AskUserQuestion` candidate list drawn from every plan in `ready-for-dev` and `awaiting-plan-review`; you pick the one to run. When no plan is in either status, the skill reports the empty queue and exits — no silent fallback to `in-progress` plans. Pass a plan path (absolute, `~/Claude/...`, or vault-relative) to skip the picker and target a specific one. Free-text after the path reaches the skill verbatim — useful for stop-after-each-milestone or model-comparison runs.
+Bare invocation resolves the plan from what the session just groomed or from the vault's queue. Name a plan path to target a specific one. Free-text reaches `intake` verbatim — useful for stop-after-each-milestone or model-comparison runs.
 
-To resume a plan already in `in-progress` (e.g. after a stopped session), invoke `/develop` with the explicit path; the skill picks up at the first milestone whose DoDs are not all `[x]`. "continue to develop &lt;plan&gt;" works as a natural-language equivalent.
+To resume a sprint already in `in-progress` (e.g. after a stopped session), invoke the playbook against the same plan: `playbook-state` reports the frontier and the run picks up at the first milestone whose DoDs are not all `[x]`.
+
+## Branch
+
+`provision` picks the branch prefix from `git.branches` using the plan's `type`, proposes a kebab-case name, and asks through `AskUserQuestion` — **nothing touches git until you answer**, and a name you rewrite is used verbatim. A branch that already exists for the sprint is reused rather than recreated. In multi-repo projects the same branch name is reused across repos unless you say otherwise.
+
+That confirmation is the playbook's single review gate.
 
 ## Best practices
 
 ### Run code review in a fresh session
 
-When you want a [/code-review](code_review.md) pass, do it from a **fresh session**, not the same one that ran `/develop`. `/code-review` reads the diff and the plan, which is unaffected by orchestrator context, but the reviewer benefits from a clean slate without any of `/develop`'s execution traces in scope.
+When you want a [/code-review](code_review.md) pass, do it from a **fresh session**, not the one that ran the sprint. `/code-review` reads the diff and the plan, which are unaffected by runner context, but the reviewer benefits from a clean slate without the sprint's execution traces in scope.
 
 ### Try alternative models for implementation
 
-Because plans are reproducible files, you can run the same plan with different models — for example use a cheaper or faster model (Sonnet, GLM) for the implementation pass under `/develop`, and reserve Opus for [/code-review](code_review.md) afterward. The plan file is the controlled input; the diff is the controlled output. Swap models, compare diffs, calibrate which model gives you acceptable quality on your codebase.
+Because plans are reproducible files, you can run the same plan with different models — a cheaper or faster model for the implementation pass, Opus for [/code-review](code_review.md) afterward. The plan is the controlled input; the diff is the controlled output. Swap models, compare diffs, calibrate which model gives acceptable quality on your codebase.
 
 ### Review the code-review feedback list
 
@@ -42,13 +61,13 @@ After `/code-review` produces its findings, work the list explicitly:
 - **SUGGESTION** — apply if the cost is low; defer with an explicit one-liner in the plan otherwise. Do not silently drop.
 - **NIT** — apply or skip on judgment; no record needed.
 
-Treat the feedback list the same way `/groom` treats Gemini's cross-validation output: every BLOCKER must be addressed, deferrals are explicit, no item is silently dropped.
+Treat the feedback list the way the [groom playbook](groom.md) treats cross-review findings: every BLOCKER is addressed, deferrals are explicit, no item is silently dropped.
 
 ## Config
 
-`/develop` reads the following keys from `src/config.yaml`. See [Project config](project_config.md) for the deep-merge override mechanics; per-project tweaks live in `~/Claude/{project}/config.yaml`.
+The playbook reads these keys from `src/config.yaml`. See [Project config](project_config.md) for the deep-merge override mechanics; per-project tweaks live in `~/Claude/{project}/config.yaml`.
 
-- **`sprint.max_milestones_per_agent`** — maximum number of consecutive milestones grouped into a single `booping-developer` briefing. `/develop` only groups when the milestones share enough context that one agent handling them in sequence is cheaper than spinning a fresh agent per milestone; otherwise it stays one milestone per briefing. Default `2`.
-- **`git.branches`** — list of `{branch, when}` entries that map plan `type` (or freeform descriptors) to a branch prefix. `/develop` picks the branch prefix from this list before starting work.
-- **`git.commit_message`** — conventional-commit format string used for in-plan commits. Override per-project to enforce a different commit shape.
-- **`skills.develop.agents`** — the agents `/develop` is allowed to delegate to, with `good_for` / `bad_for` guidance rendered into the skill body. `booping-developer` is the implementation channel; `booping-researcher` is reserved for Phase 0 drift spot-checks across many plan-named files.
+- **`sprint.max_milestones_per_agent`** — maximum number of consecutive milestones grouped into a single `booping-developer` briefing. Grouping only happens when the milestones share enough context that one agent handling them in sequence is cheaper than spinning a fresh agent per milestone. Default `2`.
+- **`git.branches`** — list of `{branch, when}` entries that map plan `type` (or freeform descriptors) to a branch prefix; `provision` picks from this list.
+- **`git.commit_message`** — conventional-commit format string used for in-sprint commits. Override per-project to enforce a different commit shape.
+- **`skills.develop.agents`** — the agents the playbook may delegate to, with `good_for` / `bad_for` guidance. `booping-developer` is the implementation channel; `booping-researcher` is reserved for the intake drift spot-check across many plan-named files.

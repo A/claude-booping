@@ -535,14 +535,25 @@ def compose(
             blocking = True
 
     # Inline steps sharing a parallel wave, per scope (outer waves, then inner waves).
+    # A subgraph node stands for its whole inner group, so a wave carrying one puts
+    # every inner step in parallel with the wave's other members.
+    flagged: set[str] = set()
     for scope_waves in [waves, *inner_waves.values()]:
         for wave in scope_waves:
-            if len(wave) > 1:
-                for name in wave:
-                    step = steps_by_name.get(name)
-                    if step is not None and step.detached is None:
-                        notices.append(_INLINE_PARALLEL.format(name=name))
-                        blocking = True
+            if len(wave) <= 1:
+                continue
+            for name in wave:
+                sub = pb.subgraphs.get(name)
+                members = list(sub.graph) if sub is not None else [name]
+                for member in members:
+                    step = steps_by_name.get(member)
+                    if step is None or step.detached is not None:
+                        continue
+                    if member in flagged:
+                        continue
+                    flagged.add(member)
+                    notices.append(_INLINE_PARALLEL.format(name=member))
+                    blocking = True
 
     # Orphan step dirs (steps order) — non-blocking, emitted in both cases.
     wired = set(pb.executable_step_names) | set(pb.graph)
@@ -564,6 +575,34 @@ def compose(
             if err is not None:
                 notices.append(_JINJA_ERROR.format(where="the preamble", error=err))
                 blocking = True
+
+    # Embedded bodies are rendered before the sections are assembled: a Jinja failure in
+    # one is a blocking notice like any other, never a STOP buried inside a section.
+    inline_bodies: dict[str, str] = {}
+    if inline_steps and not blocking:
+        for name in pb.executable_step_names:
+            step = steps_by_name.get(name)
+            if step is None or step.detached is not None:
+                continue
+            if pb.jinja:
+                # context is present here: jinja without context is blocking above.
+                assert context is not None
+                body, err = render_body(pb, step.body, step, context, plugin_root)
+                if err is not None:
+                    notices.append(_JINJA_ERROR.format(where=f"step '{name}'", error=err))
+                    blocking = True
+                    continue
+            else:
+                body = step.body
+            lessons = (
+                step_lessons(_targeted(context), pb.name, name)
+                if include_lessons
+                else []
+            )
+            section = _render_lessons(lessons, env, step_mode=True)
+            if section:
+                body = body.rstrip("\n") + "\n\n" + section
+            inline_bodies[name] = body.strip()
 
     sections: list[str] = []
     if notices:
@@ -593,43 +632,16 @@ def compose(
         )
         step_tmpl = env.get_template("_partials/_playbook_step.j2")
 
-        def inline_body(step: Step) -> str:
-            if not pb.jinja:
-                body = step.body
-            else:
-                # context is present here: jinja without context is blocking above.
-                assert context is not None
-                rendered, err = render_body(pb, step.body, step, context, plugin_root)
-                if err is not None:
-                    return _JINJA_ERROR.format(
-                        where=f"step '{step.name}'", error=err
-                    )
-                body = rendered
-            lessons = (
-                step_lessons(_targeted(context), pb.name, step.name)
-                if include_lessons
-                else []
-            )
-            section = _render_lessons(lessons, env, step_mode=True)
-            if section:
-                body = body.rstrip("\n") + "\n\n" + section
-            return body.strip()
-
         def render_step(name: str, deps: list[str], part_of: str | None) -> str:
             sub = pb.subgraphs.get(part_of) if part_of is not None else None
             step = steps_by_name[name]
-            body = (
-                inline_body(step)
-                if inline_steps and step.detached is None
-                else None
-            )
             return step_tmpl.render(
                 step=step,
                 deps=deps,
                 playbook=pb.name,
                 part_of=part_of,
                 repeated=sub is not None and sub.repeat is not None,
-                body=body,
+                body=inline_bodies.get(name),
             ).strip()
 
         for wave in waves:

@@ -140,11 +140,18 @@ Nothing is presented to the user yet — the dedup sweep runs first, and the rev
 
 Every lesson targets exactly one entry from the target space, written into its `targets:` frontmatter list. Entry forms — exact names only, no globs, no wildcards, no negation:
 
-- `{playbook}` — the whole playbook, e.g. `develop`
-- `{playbook}/{step}` — one step of it, e.g. `develop/develop-loop`
+- `{playbook}` — the whole playbook, e.g. `code-review`
+- `{playbook}/{step}` — one step of it, e.g. `code-review/present`
 - `agent:{id}` — one agent, e.g. `agent:booping-developer`
 
 The table of contents below is the whole space. Pick the playbooks a candidate actually touches and fetch their targets — step summaries, lessons already targeting them, addressable agents — with the command on each entry. Several names fetch in one call: `--set targets_for=a,b`.
+
+### code-review
+
+Review a confirmed scope — a sprint's plan, the latest commits, or a named target — through a detached findings pass, a human verdict on those findings, and an approved fix pass.
+
+- Steps: `present`, `resolve`, `review`, `scope`
+- Targets: `booping render playbooks/_partials/lesson_target_space.md --set targets_for=code-review`
 
 ### develop
 
@@ -180,6 +187,13 @@ Generate a project- and plan-specific sprint retrospective — mine session logs
 
 - Steps: `gather-feedback`, `intake`, `prepare`, `research-issues`, `save`, `synthesize`
 - Targets: `booping render playbooks/_partials/lesson_target_space.md --set targets_for=retro`
+
+### setup
+
+Take a repo from any starting state to a working booping project — machine-level config, then project-level vault — in one driven conversation.
+
+- Steps: `setup-booping`, `setup-project`
+- Targets: `booping render playbooks/_partials/lesson_target_space.md --set targets_for=setup`
 
 ## Step: Dedup Sweep
 Before drafting the review table, check whether each candidate duplicates or conflicts with existing coverage:

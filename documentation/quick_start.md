@@ -22,10 +22,10 @@ See [Install](install.md) for prerequisites (`uv`, `git`, optional `GEMINI_API_K
 `cd` into the target repository and run:
 
 ```text
-/install
+/playbook setup
 ```
 
-`/install` prompts for the vault location — the default `~/Claude/{project}/` or a repo-local directory (wired via the `.booping` marker's `vault_path:` key). Either way that single step creates the vault with `plans/`, `retrospectives/`, `lessons/`, `notes/`, `_booping/`, and a `.booping` marker file so other skills know the vault is ready. See [Vault](vault.md) for what each directory is for.
+The `setup` playbook settles the machine level (home dir + machine config) and then the project level: it asks for the vault location — the default `<home_dir>/{project}/` or a repo-local directory (wired via the `.booping` marker's `vault_path:` key) — and creates the vault with `plans/`, `retrospectives/`, `_lessons/`, `notes/`, `_booping/`, plus a `.booping` marker file so other skills know the vault is ready. Anything already in place is detected and skipped. See [Vault](vault.md) for what each directory is for.
 
 ## 3. Orient with /chat
 
@@ -35,7 +35,7 @@ Before grooming anything, run:
 /chat
 ```
 
-`/chat` is the orient/working-mode command. It loads the project vault, refreshes the on-disk sprint snapshot at `~/Claude/{project}/sprints.md`, and is the right surface for vault navigation, reading existing plans, and small ad-hoc edits. When scope grows past "small task", `/chat` escalates you into `/groom`.
+`/chat` is the orient/working-mode command. It loads the project vault, refreshes the on-disk sprint snapshot at `~/Claude/{project}/sprints.md`, and is the right surface for vault navigation, reading existing plans, and small ad-hoc edits. When scope grows past "small task", `/chat` escalates you into `/playbook groom`.
 
 ## 4. Read the sprint snapshot
 
@@ -43,33 +43,33 @@ Open `~/Claude/{project}/sprints.md`. It is a regenerated view of every plan in 
 
 `sprints.md` is a build artefact, never hand-edit it (see [Vault](vault.md)). It is a snapshot rather than a live view: nothing auto-refreshes it on a plan write yet, so it can drift between `/chat` orients. Re-run `/chat` (or `bin/booping render-sprints`) for a current picture, and treat the plan files as the source of truth.
 
-## 5. First /groom
+## 5. First groom
 
 Spec your first sprint with a free-text description:
 
 ```text
-/groom Add per-tenant rate limiting to the public API
+/playbook groom — add per-tenant rate limiting to the public API
 ```
 
-`/groom` researches the codebase, drafts a plan under `~/Claude/{project}/plans/{YYYYMMDD}-{kebab-title}.md`, optionally cross-validates it against Gemini (if `GEMINI_API_KEY` is set), and stops at `awaiting-plan-review` for your explicit approval. Sharpen it, push back, ask for splits — the more detailed your initial brief, the sharper the resulting plan.
+The [groom playbook](groom.md) researches the codebase and the web, drafts a plan under `~/Claude/{project}/plans/{YYYYMMDD-HH-MM}_{kebab-title}/index.md`, optionally hands it to a second model for cross-review (when `cross_review.agent` is configured), and stops at `awaiting-plan-review` for your explicit approval. Sharpen it, push back, ask for splits — the more detailed your initial brief, the sharper the resulting plan.
 
-When you approve, `/groom` flips the plan to `ready-for-dev`.
+When you approve, the run flips the plan to `ready-for-dev`.
 
-## 6. First /develop
+## 6. First develop
 
-Either run bare and pick from the candidate list (plans in `ready-for-dev` or `awaiting-plan-review`):
+Run the develop playbook:
 
 ```text
-/develop
+/playbook develop
 ```
 
-or target a specific one:
+or name the plan:
 
 ```text
-/develop plans/20260426-per-tenant-rate-limiting.md
+/playbook develop — plans/20260426-09-30_per-tenant-rate-limiting/index.md
 ```
 
-`/develop` walks the milestones, delegating implementation to the `booping-developer` agent. `booping-researcher` is reserved for the Phase 0 drift spot-check — when a plan touches many files, it confirms the actual file shapes still match the plan's assumptions before execution begins. When all milestones are done, the plan moves to `awaiting-retro`.
+The [develop playbook](develop.md) confirms the sprint branch with you, then walks the milestones, delegating implementation to the `booping-developer` agent. `booping-researcher` is reserved for the intake drift spot-check — when a plan touches many files, it confirms the actual file shapes still match the plan's assumptions before execution begins. When all milestones are done and verification is green, the plan moves to `awaiting-retro`.
 
 ### Optional: /code-review before retro
 
@@ -79,26 +79,26 @@ Once a plan is in `awaiting-retro`, you can run a quality-gate review over the d
 /code-review
 ```
 
-Bare `/code-review` picks the plan in `awaiting-retro` and reviews `<plan commit>..HEAD` against stack-aware checklists, returning severity-labelled findings in chat. It is a **stateless side-skill** — it does not transition the plan, so the next step is still `/retro`. Run it from a fresh session (often under a stronger model than the one that implemented). See [/code-review](code_review.md) for details.
+Bare `/code-review` picks the plan in `awaiting-retro` and reviews `<plan commit>..HEAD` against stack-aware checklists, returning severity-labelled findings in chat. It is a **stateless side-skill** — it does not transition the plan, so the next step is still retro. Run it from a fresh session (often under a stronger model than the one that implemented). See [/code-review](code_review.md) for details.
 
-## 7. First /retro
+## 7. First retro
 
 Capture what actually shipped:
 
 ```text
-/retro plans/20260426-per-tenant-rate-limiting.md
+/playbook retro
 ```
 
-`/retro` reads the plan, scans session logs and `git diff`, and writes a retrospective at `~/Claude/{project}/retrospectives/{YYYYMMDD}-{kebab-title}.md`. It also asks you about tensions you noticed during develop. Review the retrospective file — it is the input to `/learn`, and shit in means shit out.
+The [retro playbook](retro.md) takes your raw feedback first, mines the session logs and `git diff` for tensions you did not flag, and writes `retro.md` into the plan's own directory. Review it — it is the input to learn, and shit in means shit out.
 
-## 8. First /learn
+## 8. First learn
 
 Fold the retro into durable rules:
 
 ```text
-/learn retrospectives/20260426-per-tenant-rate-limiting.md
+/playbook learn
 ```
 
-`/learn` proposes lessons (`~/Claude/{project}/lessons/{N}_{title}.md`) and per-skill / per-agent extension files (`~/Claude/{project}/_booping/skill_<name>.md`, `_booping/agent_<name>.md`) for your confirmation. Approved lessons are loaded by future `/groom` and `/develop` invocations; extensions travel with the matching skill or agent at load time.
+The [learn playbook](learn.md) proposes targeted lessons (`~/Claude/{project}/_lessons/{N}_{title}.md`, each carrying a `targets:` list) and per-skill / per-agent extension files (`~/Claude/{project}/_booping/skill_<name>.md`, `_booping/agent_<name>.md`) in one review table for your confirmation. Approved lessons are injected into the playbooks, steps and agents they name.
 
-When `/learn` finishes, the plan reaches `done` and your first loop is complete. The next `/groom` you run inherits everything you just learned.
+When learn finishes, the plan reaches `done` and your first loop is complete. The next groom run inherits everything you just learned.

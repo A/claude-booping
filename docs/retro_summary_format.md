@@ -46,5 +46,5 @@ Bulleted list, 2–4 items. Each takeaway is a transferable rule of thumb the us
 ## Hard rules
 
 - No frontmatter, no save path, no commit command — those belong in Phase 5, after the user confirms.
-- No candidate lessons section — `/learn` owns that surface.
+- No candidate lessons section — the learn playbook owns that surface.
 - Do not exceed ~40 lines of rendered output. If the body is bigger, the summary is wrong shape.
