@@ -8,7 +8,6 @@ import pytest
 import yaml
 
 from booping.context import config as config_mod
-from booping.context.config import AgentConfig, SkillConfig
 from booping.query import QuerySpec, build_spec, resolve_spec
 from tests.helpers import get_fixture_path
 
@@ -48,44 +47,26 @@ def test_list_replacement() -> None:
     override_path.unlink()
 
 
-def test_agent_config_native_validates() -> None:
-    cfg = AgentConfig.model_validate({"internal": True, "good_for": ["x"]})
-    assert cfg.internal is True
-    assert cfg.good_for == ["x"]
-
-
-def test_agent_config_ignores_unknown_field() -> None:
-    cfg = AgentConfig.model_validate({"tipe": "cli"})
-    assert not hasattr(cfg, "tipe")
-
-
-def test_skill_config_disable_internal_agents_default() -> None:
-    cfg = SkillConfig.model_validate({"agents": {"a": {"internal": True}}})
-    assert cfg.disable_internal_agents is False
-
-
-def test_validate_skills_warns_on_unknown_agent_field(
-    capsys: pytest.CaptureFixture[str],
+def test_unknown_keys_load_without_warning(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    bad = {"skills": {"develop": {"agents": {"x": {"bogus": "field"}}}}}
-    config_mod.validate_skills(bad)
-    err = capsys.readouterr().err
-    assert "bogus" in err
-
-
-def test_validate_skills_passes_on_valid_config() -> None:
-    good = {
-        "skills": {
-            "develop": {
-                "agents": {
-                    "booping-developer": {"internal": True, "good_for": ["coding"]},
-                    "pi-developer": {"good_for": ["coding"], "bad_for": ["exploration"]},
-                },
-                "disable_internal_agents": True,
+    """No key is schema-checked: an invented playbook block loads verbatim."""
+    plugin_root = get_fixture_path("plugin-root-minimal")
+    override_path = tmp_path / "config.yaml"
+    override_path.write_text(
+        yaml.dump(
+            {
+                "core": {
+                    "my_playbook": {
+                        "whatever": {"agents": {"x": {"bogus": "field"}}},
+                    }
+                }
             }
-        }
-    }
-    config_mod.validate_skills(good)
+        )
+    )
+    cfg = config_mod.load(plugin_root, [override_path])
+    assert cfg["core"]["my_playbook"]["whatever"]["agents"]["x"] == {"bogus": "field"}  # type: ignore[index]
+    assert capsys.readouterr().err == ""
 
 
 def test_loader_does_not_filter_internal_when_disable_flag_set(tmp_path: Path) -> None:
@@ -203,28 +184,31 @@ def test_agents_shallow_merge_across_three_tiers(
     assert "p-agent" in agents  # project tier added
 
 
-def test_project_tier_macros_ignored_with_warning(
+def test_project_tier_macros_merge_like_any_other_key(
     tmp_path: Path, isolated_xdg_config_home: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
     plugin_root = get_fixture_path("plugin-root-minimal")
     global_path = _write_global(
-        isolated_xdg_config_home, {"macros": {"now": ["echo", "global"]}}
+        isolated_xdg_config_home, {"core": {"macros": {"now": ["echo", "global"]}}}
     )
     project_path = tmp_path / "config.yaml"
     project_path.write_text(
         yaml.dump(
             {
-                "macros": {"now": ["echo", "project"], "evil": ["rm", "-rf"]},
+                "core": {"macros": {"now": ["echo", "project"], "extra": ["echo", "x"]}},
                 "sprint": {"default_threshold_sp": 50},
             }
         )
     )
 
-    cfg = config_mod.load(plugin_root, [global_path], project_tier=project_path)
+    cfg = config_mod.load(plugin_root, [global_path, project_path])
 
-    assert cfg["macros"] == {"now": ["echo", "global"]}
+    assert cfg["core"]["macros"] == {  # type: ignore[index]
+        "now": ["echo", "project"],
+        "extra": ["echo", "x"],
+    }
     assert cfg["sprint"]["default_threshold_sp"] == 50  # type: ignore[index]
-    assert "ignoring project-tier `macros`" in capsys.readouterr().err
+    assert capsys.readouterr().err == ""
 
 
 def test_missing_global_file_silently_skipped(isolated_xdg_config_home: Path) -> None:

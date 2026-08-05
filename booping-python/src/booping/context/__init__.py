@@ -76,10 +76,7 @@ class Context(BaseModel):
             vault = None
 
         if vault is not None:
-            cfg = config_mod.load(
-                root, [global_path], project_tier=vault / "config.yaml"
-            )
-            config_mod.validate_skills(cfg)
+            cfg = config_mod.load(root, [global_path, vault / "config.yaml"])
             lessons = Lesson.load_all(vault)
             retros = Retro.load_all(vault)
             plan_templates = PlanTemplate.load_all(root, vault)
@@ -87,7 +84,6 @@ class Context(BaseModel):
             extra_instructions = ei_mod.load(vault)
         else:
             cfg = config_mod.load(root, [global_path])
-            config_mod.validate_skills(cfg)
             lessons = []
             retros = []
             plan_templates = PlanTemplate.load_all(root, Path("/dev/null"))
