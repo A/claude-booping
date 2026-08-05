@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 from pathlib import Path
 
@@ -13,12 +14,15 @@ PLUGIN_ROOT = Path(__file__).resolve().parents[3]
 BOOPING_BIN = PLUGIN_ROOT / "bin" / "booping"
 
 
-def _run(*args: str, cwd: Path) -> subprocess.CompletedProcess[str]:
+def _run(
+    *args: str, cwd: Path, env: dict[str, str] | None = None
+) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         [str(BOOPING_BIN), *args],
         cwd=cwd,
         capture_output=True,
         text=True,
+        env={**os.environ, **env} if env else None,
     )
 
 
@@ -226,6 +230,13 @@ class TestUserErrors:
         assert result.returncode == 1
         assert "one of --config or --glob is required" in result.stderr
 
+    def test_a_vault_relative_spec_without_a_project_exits_two(self, tmp_path: Path) -> None:
+        outside = tmp_path / "outside"
+        outside.mkdir()
+        result = _run("query", "--glob", "plans/*/index.md", cwd=outside)
+        assert result.returncode == 2
+        assert "no vault resolved" in result.stderr
+
     def test_unknown_output_format(self, vault: Path, tmp_path: Path) -> None:
         result = _run(
             "query", "--project", str(vault), "--glob", "plans/*/index.md",
@@ -306,3 +317,58 @@ class TestOutputFormats:
         assert result.returncode == 0
         assert "broken" in result.stderr
         assert "broken" not in result.stdout
+
+
+class TestCoreRoot:
+    """`root: core` globs the plugin root, so it runs outside any project."""
+
+    @pytest.fixture
+    def global_config(self, tmp_path: Path) -> dict[str, str]:
+        _write(
+            tmp_path / "xdg" / "booping" / "config.yaml",
+            "queries:\n"
+            "  core_playbooks:\n"
+            "    glob:\n"
+            "      - playbooks/*/playbook.md\n"
+            "    root: core\n"
+            "  bad_root:\n"
+            "    glob:\n"
+            "      - playbooks/*/playbook.md\n"
+            "    root: plguin\n"
+            "  unknown_key:\n"
+            "    glob:\n"
+            "      - playbooks/*/playbook.md\n"
+            "    rooot: core\n",
+        )
+        return {"XDG_CONFIG_HOME": str(tmp_path / "xdg")}
+
+    def test_runs_outside_any_project(
+        self, tmp_path: Path, global_config: dict[str, str]
+    ) -> None:
+        outside = tmp_path / "outside"
+        outside.mkdir()
+        result = _run(
+            "query", "--config", "queries.core_playbooks", "--output", "paths",
+            cwd=outside, env=global_config,
+        )
+        assert result.returncode == 0
+        assert "playbooks/groom/playbook.md\n" in result.stdout
+
+    def test_an_unknown_root_names_the_value_and_the_legal_set(
+        self, tmp_path: Path, global_config: dict[str, str]
+    ) -> None:
+        result = _run(
+            "query", "--config", "queries.bad_root", cwd=tmp_path, env=global_config
+        )
+        assert result.returncode == 1
+        assert "plguin" in result.stderr
+        assert "core" in result.stderr
+
+    def test_an_unknown_key_is_rejected(
+        self, tmp_path: Path, global_config: dict[str, str]
+    ) -> None:
+        result = _run(
+            "query", "--config", "queries.unknown_key", cwd=tmp_path, env=global_config
+        )
+        assert result.returncode == 1
+        assert "rooot" in result.stderr

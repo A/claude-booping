@@ -1,6 +1,7 @@
-"""Frontmatter query engine — a spec into ordered rows over a vault.
+"""Frontmatter query engine — a spec into ordered rows over a vault or the plugin root.
 
-A spec names an ordered list of globs; the first glob to claim a slug wins and
+A spec names an ordered list of globs, resolved against the vault unless it
+declares ``root: core``; the first glob to claim a slug wins and
 later claims on the same slug are skipped, so plan-shape precedence is list
 order rather than hidden engine logic.  Results are sorted by slug before any
 user sort applies, because ``Path.glob`` documents no ordering.
@@ -12,11 +13,12 @@ from __future__ import annotations
 import sys
 from collections.abc import Mapping, Sequence
 from pathlib import Path
-from typing import Any, cast
+from typing import Any, Literal, cast
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, field_validator
 
 from booping.context._yaml import parse_frontmatter
+from booping.rendering import get_plugin_root
 from booping.utils import PathError, deep_merge, resolve_path
 
 _GLOB_MAGIC = frozenset("*?[")
@@ -30,6 +32,9 @@ ORDER_SUFFIXES = (GT_SUFFIX, LT_SUFFIX)
 SUFFIXES = (IN_SUFFIX, GT_SUFFIX, LT_SUFFIX, NE_SUFFIX)
 
 DEFAULT_GLOB_PATH = "plans.glob"
+
+CORE_ROOT = "core"
+ROOTS = (CORE_ROOT,)
 
 
 class QueryError(Exception):
@@ -91,12 +96,26 @@ def _unwrap(value: Any) -> Any:
 
 
 class QuerySpec(BaseModel):
-    """A declared query: what to match, narrow, order and project."""
+    """A declared query: what to match, where to match it, narrow, order and project."""
+
+    model_config = ConfigDict(extra="forbid")
 
     glob: list[str] = []
     where: dict[str, Any] = {}
     sort: str | None = None
     columns: list[str] | None = None
+    root: Literal["core"] | None = None
+
+    @field_validator("root", mode="before")
+    @classmethod
+    def _known_root(cls, value: Any) -> Any:
+        # `mode="before"`: under `mode="after"` the Literal check rejects the value
+        # first and this message is unreachable.
+        if value is None or value in ROOTS:
+            return value
+        raise QueryError(
+            f"unknown query root: {value!r} (expected one of: {', '.join(ROOTS)})"
+        )
 
 
 def slug_for(pattern: str, rel_path: Path) -> str:
@@ -112,28 +131,28 @@ def slug_for(pattern: str, rel_path: Path) -> str:
     return rel_path.stem
 
 
-def discover(vault: Path, globs: Sequence[str]) -> list[tuple[str, Path]]:
+def discover(root: Path, globs: Sequence[str]) -> list[tuple[str, Path]]:
     """Return ``(slug, path)`` pairs for *globs*, de-duplicated by slug and slug-sorted."""
     claimed: dict[str, Path] = {}
     for pattern in globs:
-        for path in sorted(vault.glob(pattern)):
+        for path in sorted(root.glob(pattern)):
             if not path.is_file():
                 continue
-            slug = slug_for(pattern, path.relative_to(vault))
+            slug = slug_for(pattern, path.relative_to(root))
             if slug in claimed:
                 continue
             claimed[slug] = path
     return sorted(claimed.items())
 
 
-def read_row(vault: Path, slug: str, path: Path) -> dict[str, Any] | None:
+def read_row(root: Path, slug: str, path: Path) -> dict[str, Any] | None:
     """Read one file's frontmatter into a row, or ``None`` if it does not parse."""
     try:
         frontmatter, _ = parse_frontmatter(path)
     except Exception as exc:  # noqa: BLE001 — one bad file must not fail the query
         print(f"warning: skipping {path} — unparseable frontmatter ({exc})", file=sys.stderr)
         return None
-    return {**frontmatter, "path": path.relative_to(vault).as_posix(), "slug": slug}
+    return {**frontmatter, "path": path.relative_to(root).as_posix(), "slug": slug}
 
 
 def split_clause(clause: str) -> tuple[str, str]:
@@ -312,11 +331,21 @@ def as_table(
     return "\n".join(lines) + "\n"
 
 
-def run(spec: QuerySpec, vault: Path) -> list[Row]:
-    """Run *spec* against *vault*: discover, filter, sort, project, wrap."""
+def root_for(spec: QuerySpec, vault: Path | None) -> Path:
+    """The directory *spec* globs: the plugin root under `root: core`, else the vault."""
+    if spec.root == CORE_ROOT:
+        return get_plugin_root()
+    if vault is None:
+        raise QueryError("no vault resolved for a vault-relative query")
+    return vault
+
+
+def run(spec: QuerySpec, vault: Path | None) -> list[Row]:
+    """Run *spec* against its root: discover, filter, sort, project, wrap."""
+    root = root_for(spec, vault)
     rows: list[Mapping[str, Any]] = []
-    for slug, path in discover(vault, spec.glob):
-        row = read_row(vault, slug, path)
+    for slug, path in discover(root, spec.glob):
+        row = read_row(root, slug, path)
         if row is not None and matches(row, spec.where):
             rows.append(row)
     if spec.sort:

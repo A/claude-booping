@@ -216,10 +216,14 @@ def _run(args: argparse.Namespace) -> None:
     vault = vault_override
     if vault is None and ctx.project is not None:
         vault = ctx.project.directory
-    if vault is None:
-        _fail("no vault resolved — run inside a booping project or pass --project", code=2)
-    if not vault.is_dir():
-        _fail(f"vault is not a readable directory: {vault}", code=2)
+    # A `root: core` spec globs the plugin root, so it needs no vault at all.
+    if spec.root is None:
+        if vault is None:
+            _fail(
+                "no vault resolved — run inside a booping project or pass --project", code=2
+            )
+        if not vault.is_dir():
+            _fail(f"vault is not a readable directory: {vault}", code=2)
 
     try:
         rows = run(spec, vault)

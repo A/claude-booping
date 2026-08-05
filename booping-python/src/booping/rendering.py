@@ -105,15 +105,16 @@ def make_query_filter(config: object) -> Callable[..., list[Row]]:
         cfg = cast("dict[str, Any]", config) if isinstance(config, dict) else {}
         dotted = str(spec_path)
         base = resolve_spec(cfg, dotted)
-        vault = _vault_of(jinja_ctx.get("context"))
-        if vault is None:
-            raise QueryError(
-                f"cannot run query {dotted}: no vault resolved for this render"
-            )
         try:
             spec = build_spec(cfg, base, overrides)
         except Exception as exc:
             raise QueryError(f"invalid query spec at config path {dotted}: {exc}") from exc
+        vault = _vault_of(jinja_ctx.get("context"))
+        # A `root: core` spec globs the plugin root, so it needs no vault at all.
+        if vault is None and spec.root is None:
+            raise QueryError(
+                f"cannot run query {dotted}: no vault resolved for this render"
+            )
         return run(spec, vault)
 
     return query_filter

@@ -1,12 +1,23 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 import pytest
 from jinja2 import Environment
+from pydantic import ValidationError
 
-from booping.query import QuerySpec, Row, as_dict, discover, matches, run, slug_for
-from booping.rendering import LenientUndefined
+from booping.query import (
+    QueryError,
+    QuerySpec,
+    Row,
+    as_dict,
+    discover,
+    matches,
+    run,
+    slug_for,
+)
+from booping.rendering import LenientUndefined, get_plugin_root, make_query_filter
 
 PLAN_GLOBS = ["plans/*/index.md", "plans/*.md"]
 
@@ -275,6 +286,25 @@ class TestRowUnderJinja:
         assert self._render("{{ row.absent.deeper }}", row) == ""
 
 
+class TestQueryFilterWithoutAVault:
+    """The Jinja face resolves the root before it demands a vault."""
+
+    def _rows(self, spec: dict[str, Any], source: str) -> str:
+        env = Environment(undefined=LenientUndefined, autoescape=False)
+        env.filters["query"] = make_query_filter({"specs": {"one": spec}})
+        return env.from_string(source).render(context=None)
+
+    SLUGS = "{{ ('specs.one' | query) | map(attribute='slug') | join(',') }}"
+
+    def test_a_core_spec_runs(self) -> None:
+        spec = {"glob": ["playbooks/*/playbook.md"], "root": "core"}
+        assert "groom" in self._rows(spec, self.SLUGS).split(",")
+
+    def test_a_vault_relative_spec_raises(self) -> None:
+        with pytest.raises(QueryError, match="no vault resolved"):
+            self._rows({"glob": PLAN_GLOBS}, self.SLUGS)
+
+
 class TestQuerySpec:
     def test_defaults(self) -> None:
         spec = QuerySpec()
@@ -296,3 +326,49 @@ class TestQuerySpec:
         assert spec.where == {"status": "done"}
         assert spec.sort == "-created"
         assert spec.columns == ["status", "title"]
+
+    def test_root_defaults_to_none(self) -> None:
+        assert QuerySpec().root is None
+
+    def test_root_core_is_accepted(self) -> None:
+        assert QuerySpec.model_validate({"root": "core"}).root == "core"
+
+    def test_an_unknown_root_names_the_value_and_the_legal_set(self) -> None:
+        with pytest.raises(QueryError) as exc:
+            QuerySpec.model_validate({"root": "plguin"})
+        assert "plguin" in str(exc.value)
+        assert "core" in str(exc.value)
+
+    def test_an_unknown_key_is_rejected_rather_than_dropped(self) -> None:
+        with pytest.raises(ValidationError) as exc:
+            QuerySpec.model_validate({"glob": ["plans/*.md"], "rooot": "core"})
+        assert "rooot" in str(exc.value)
+
+
+class TestRoot:
+    def test_core_globs_the_plugin_root(self, vault: Path) -> None:
+        rows = run(QuerySpec(glob=["playbooks/*/playbook.md"], root="core"), vault)
+        slugs = [row.slug for row in rows]
+        assert "groom" in slugs
+        assert (get_plugin_root() / "playbooks" / "groom" / "playbook.md").is_file()
+
+    def test_a_core_row_path_is_plugin_root_relative(self, vault: Path) -> None:
+        spec = QuerySpec(glob=["playbooks/*/playbook.md"], root="core")
+        rows = {r.slug: r for r in run(spec, vault)}
+        assert rows["groom"].path == "playbooks/groom/playbook.md"
+
+    def test_core_needs_no_vault(self) -> None:
+        rows = run(QuerySpec(glob=["playbooks/*/playbook.md"], root="core"), None)
+        assert [r.slug for r in rows]
+
+    def test_a_vault_relative_spec_without_a_vault_raises(self) -> None:
+        with pytest.raises(QueryError):
+            run(QuerySpec(glob=PLAN_GLOBS), None)
+
+    def test_omitting_root_keeps_vault_resolution(self, vault: Path) -> None:
+        rows = run(QuerySpec(glob=PLAN_GLOBS), vault)
+        assert [r.path for r in rows] == [
+            "plans/alpha/index.md",
+            "plans/mid.md",
+            "plans/zeta/index.md",
+        ]
