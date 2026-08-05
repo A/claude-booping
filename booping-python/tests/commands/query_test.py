@@ -69,8 +69,19 @@ class TestParseWhere:
     def test_value_may_contain_equals_signs(self) -> None:
         assert parse_where(["k=a=b"]) == {"k": "a=b"}
 
-    @pytest.mark.parametrize("pair", ["status", "=done", "!=done", ":in=a,b"])
+    @pytest.mark.parametrize("pair", ["status", "=done", "!=done", ":in=a,b", ":gt=3", ":lt=3"])
     def test_malformed_pairs_raise(self, pair: str) -> None:
+        with pytest.raises(ValueError, match=".*"):
+            parse_where([pair])
+
+    def test_ordering_keeps_the_operator_suffix(self) -> None:
+        assert parse_where(["id:gt=3", "id:lt=9"]) == {"id:gt": "3", "id:lt": "9"}
+
+    def test_negative_ordering_operand(self) -> None:
+        assert parse_where(["id:gt=-1"]) == {"id:gt": "-1"}
+
+    @pytest.mark.parametrize("pair", ["id:gt=", "id:lt=", "id:gt=  "])
+    def test_an_empty_ordering_operand_raises(self, pair: str) -> None:
         with pytest.raises(ValueError, match=".*"):
             parse_where([pair])
 
@@ -131,6 +142,28 @@ class TestAddressing:
                      "--output", "--project"):
             assert flag in result.stdout
 
+    def test_help_enumerates_the_where_operators(self, tmp_path: Path) -> None:
+        result = _run("query", "--help", cwd=tmp_path)
+        rendered = " ".join(result.stdout.split())
+        for form in ("k=v", "k!=v", "k:in=a,b", "k:gt=n", "k:lt=n"):
+            assert form in rendered
+
+    def test_ordering_clause_reaches_the_engine(self, vault: Path, tmp_path: Path) -> None:
+        result = _run(
+            "query", "--project", str(vault), "--glob", "plans/*/index.md",
+            "--where", "created:gt=20260101", "--output", "paths", cwd=tmp_path,
+        )
+        assert result.returncode == 0
+        assert result.stdout.split() == ["plans/beta/index.md", "plans/gamma/index.md"]
+
+    def test_ordering_clause_with_a_negative_operand(self, vault: Path, tmp_path: Path) -> None:
+        result = _run(
+            "query", "--project", str(vault), "--glob", "plans/*/index.md",
+            "--where", "created:gt=-1", "--output", "paths", cwd=tmp_path,
+        )
+        assert result.returncode == 0
+        assert len(result.stdout.split()) == 3
+
 
 class TestUserErrors:
     def test_malformed_where_pair(self, vault: Path, tmp_path: Path) -> None:
@@ -141,6 +174,15 @@ class TestUserErrors:
         assert result.returncode == 1
         assert result.stdout == ""
         assert "--where" in result.stderr
+
+    def test_empty_ordering_operand_names_the_clause(self, vault: Path, tmp_path: Path) -> None:
+        result = _run(
+            "query", "--project", str(vault), "--glob", "plans/*/index.md",
+            "--where", "id:gt=", cwd=tmp_path,
+        )
+        assert result.returncode == 1
+        assert result.stdout == ""
+        assert "id:gt=" in result.stderr
 
     def test_unknown_config_path(self, vault: Path, tmp_path: Path) -> None:
         result = _run(

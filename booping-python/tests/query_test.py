@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 from jinja2 import Environment
 
-from booping.query import QuerySpec, Row, as_dict, discover, run, slug_for
+from booping.query import QuerySpec, Row, as_dict, discover, matches, run, slug_for
 from booping.rendering import LenientUndefined
 
 PLAN_GLOBS = ["plans/*/index.md", "plans/*.md"]
@@ -136,6 +136,61 @@ class TestWhere:
 
     def test_no_where_keeps_every_row(self, vault: Path) -> None:
         assert _slugs(vault, where={}) == ["alpha", "mid", "zeta"]
+
+
+class TestOrderingOperators:
+    def test_gt_is_strict(self) -> None:
+        assert matches({"id": 10}, {"id:gt": 3})
+        assert not matches({"id": 3}, {"id:gt": 3})
+
+    def test_lt_is_strict(self) -> None:
+        assert matches({"id": 3}, {"id:lt": 10})
+        assert not matches({"id": 3}, {"id:lt": 3})
+
+    def test_negative_operand_matches_every_number(self) -> None:
+        assert matches({"id": 1}, {"id:gt": -1})
+        assert matches({"id": 0}, {"id:gt": -1})
+
+    @pytest.mark.parametrize("value", [10, 10.0, "10"])
+    @pytest.mark.parametrize("operand", [10, "10", 10.0])
+    def test_coercion_is_float_on_both_sides(self, value: object, operand: object) -> None:
+        assert not matches({"id": value}, {"id:gt": operand})
+        assert matches({"id": value}, {"id:gt": 9})
+        assert matches({"id": value}, {"id:lt": 10.5})
+
+    def test_fractional_values_compare_numerically(self) -> None:
+        assert matches({"id": "10.5"}, {"id:gt": 10})
+        assert not matches({"id": 10}, {"id:gt": "10.5"})
+
+    @pytest.mark.parametrize("value", ["abc", None, "", [], {"a": 1}])
+    def test_a_non_numeric_row_value_fails_the_clause(self, value: object) -> None:
+        assert not matches({"id": value}, {"id:gt": 0})
+        assert not matches({"id": value}, {"id:lt": 0})
+
+    @pytest.mark.parametrize("operand", ["abc", None, "", []])
+    def test_a_non_numeric_operand_fails_the_clause(self, operand: object) -> None:
+        assert not matches({"id": 5}, {"id:gt": operand})
+        assert not matches({"id": 5}, {"id:lt": operand})
+
+    def test_a_jinja_undefined_operand_fails_the_clause(self) -> None:
+        undefined = LenientUndefined(name="missing")
+        assert not matches({"id": 5}, {"id:gt": undefined})
+        assert not matches({"id": 5}, {"id:lt": undefined})
+
+    def test_a_row_missing_the_field_fails_the_clause(self) -> None:
+        assert not matches({"other": 5}, {"id:gt": 0})
+        assert not matches({"other": 5}, {"id:lt": 0})
+
+    def test_a_field_named_like_the_operator_cannot_shadow_it(self) -> None:
+        # `x:gt` is dispatched as the operator, so the literal field is unreachable.
+        assert not matches({"x:gt": 1}, {"x:gt": 0})
+        assert matches({"x": 1}, {"x:gt": 0})
+
+    def test_ordering_filters_rows_in_a_run(self, vault: Path) -> None:
+        _plan(vault, "plans/small/index.md", status="done", sp="2")
+        _plan(vault, "plans/large/index.md", status="done", sp="8")
+        assert _slugs(vault, where={"sp:gt": 3}) == ["large"]
+        assert _slugs(vault, where={"sp:lt": 3}) == ["small"]
 
 
 class TestSort:

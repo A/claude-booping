@@ -18,6 +18,8 @@ import yaml
 
 from booping.context import Context
 from booping.query import (
+    IN_SUFFIX,
+    ORDER_SUFFIXES,
     QueryError,
     QuerySpec,
     Row,
@@ -26,12 +28,10 @@ from booping.query import (
     build_spec,
     resolve_spec,
     run,
+    split_clause,
 )
 
 OUTPUTS = ("table", "json", "yaml", "paths")
-
-_IN_SUFFIX = ":in"
-_NE_SUFFIX = "!"
 
 
 class _ValueFriendlyParser(argparse.ArgumentParser):
@@ -88,7 +88,10 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
         dest="where",
         default=None,
         metavar="K=V",
-        help="Filter clause: k=v, k!=v, or k:in=a,b; repeatable, all clauses apply",
+        help=(
+            "Filter clause: k=v, k!=v, k:in=a,b, k:gt=n or k:lt=n"
+            " (:gt / :lt compare numerically); repeatable, all clauses apply"
+        ),
     )
     p.add_argument(
         "--sort",
@@ -123,7 +126,7 @@ def _fail(message: str, code: int = 1) -> NoReturn:
 
 
 def parse_where(pairs: Sequence[str]) -> dict[str, Any]:
-    """`k=v` / `k!=v` / `k:in=a,b` → clause keys `k` / `k!` / `k:in`.
+    """`k=v` / `k!=v` / `k:in=a,b` / `k:gt=n` / `k:lt=n` → clause keys with the suffix kept.
 
     Raises ValueError carrying the offending pair.
     """
@@ -132,16 +135,17 @@ def parse_where(pairs: Sequence[str]) -> dict[str, Any]:
         key, sep, value = pair.partition("=")
         if not sep:
             raise ValueError(pair)
-        if key.endswith(_IN_SUFFIX):
-            field = key[: -len(_IN_SUFFIX)]
-            if not field:
-                raise ValueError(pair)
-            where[key] = [item.strip() for item in value.split(",")]
-            continue
-        field = key[: -len(_NE_SUFFIX)] if key.endswith(_NE_SUFFIX) else key
+        field, op = split_clause(key)
         if not field:
             raise ValueError(pair)
-        where[key] = value
+        if op == IN_SUFFIX:
+            where[key] = [item.strip() for item in value.split(",")]
+        elif op in ORDER_SUFFIXES:
+            if not value.strip():
+                raise ValueError(pair)
+            where[key] = value
+        else:
+            where[key] = value
     return where
 
 
@@ -152,7 +156,10 @@ def _inline_spec(args: argparse.Namespace) -> dict[str, Any]:
     try:
         where = parse_where(args.where or [])
     except ValueError as exc:
-        _fail(f"malformed --where clause (expected k=v, k!=v or k:in=a,b): {exc}")
+        _fail(
+            "malformed --where clause"
+            f" (expected k=v, k!=v, k:in=a,b, k:gt=n or k:lt=n): {exc}"
+        )
     if where:
         inline["where"] = where
     if args.sort is not None:

@@ -20,8 +20,14 @@ from booping.context._yaml import parse_frontmatter
 from booping.utils import PathError, deep_merge, resolve_path
 
 _GLOB_MAGIC = frozenset("*?[")
-_NE_SUFFIX = "!"
-_IN_SUFFIX = ":in"
+NE_SUFFIX = "!"
+IN_SUFFIX = ":in"
+GT_SUFFIX = ":gt"
+LT_SUFFIX = ":lt"
+ORDER_SUFFIXES = (GT_SUFFIX, LT_SUFFIX)
+# Dispatch order: the longer, more specific suffixes first, so a field literally
+# named `x:gt` cannot shadow the operator.
+SUFFIXES = (IN_SUFFIX, GT_SUFFIX, LT_SUFFIX, NE_SUFFIX)
 
 DEFAULT_GLOB_PATH = "plans.glob"
 
@@ -130,28 +136,35 @@ def read_row(vault: Path, slug: str, path: Path) -> dict[str, Any] | None:
     return {**frontmatter, "path": path.relative_to(vault).as_posix(), "slug": slug}
 
 
+def split_clause(clause: str) -> tuple[str, str]:
+    """A clause key split into ``(field, operator-suffix)``; a bare key gets ``""``."""
+    for suffix in SUFFIXES:
+        if clause.endswith(suffix):
+            return clause[: -len(suffix)], suffix
+    return clause, ""
+
+
 def matches(row: Mapping[str, Any], where: Mapping[str, Any]) -> bool:
     """Whether *row* satisfies every clause of *where*.
 
     A clause key carries its operator as a suffix: ``k!`` is ``!=``, ``k:in`` is
-    membership, a bare ``k`` is equality.  A row missing the field fails every
-    operator.
+    membership, ``k:gt`` / ``k:lt`` are numeric ordering, a bare ``k`` is
+    equality.  A row missing the field fails every operator, as does a value or
+    operand that does not coerce to a number under an ordering operator.
     """
     for clause, expected in where.items():
-        if clause.endswith(_IN_SUFFIX):
-            field, op = clause[: -len(_IN_SUFFIX)], _IN_SUFFIX
-        elif clause.endswith(_NE_SUFFIX):
-            field, op = clause[: -len(_NE_SUFFIX)], _NE_SUFFIX
-        else:
-            field, op = clause, ""
+        field, op = split_clause(clause)
         if field not in row:
             return False
         value = row[field]
-        if op == _IN_SUFFIX:
+        if op == IN_SUFFIX:
             options = cast(list[Any], expected) if isinstance(expected, list) else [expected]
             if not any(_eq(value, option) for option in options):
                 return False
-        elif op == _NE_SUFFIX:
+        elif op in ORDER_SUFFIXES:
+            if not _ordered(value, expected, op):
+                return False
+        elif op == NE_SUFFIX:
             if _eq(value, expected):
                 return False
         elif not _eq(value, expected):
@@ -162,6 +175,20 @@ def matches(row: Mapping[str, Any], where: Mapping[str, Any]) -> bool:
 def _eq(value: Any, expected: Any) -> bool:
     # Flag-supplied values are always strings; frontmatter values may be dates or numbers.
     return bool(value == expected) or str(value) == str(expected)
+
+
+def _number(value: Any) -> float | None:
+    try:
+        return float(value)
+    except Exception:  # noqa: BLE001 — a Jinja undefined raises its own error class
+        return None
+
+
+def _ordered(value: Any, expected: Any, op: str) -> bool:
+    left, right = _number(value), _number(expected)
+    if left is None or right is None:
+        return False
+    return left > right if op == GT_SUFFIX else left < right
 
 
 def order(rows: Sequence[Mapping[str, Any]], sort: str) -> list[Mapping[str, Any]]:
