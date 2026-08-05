@@ -26,7 +26,7 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
         metavar="config-path",
         help=(
             "Dotted path into the merged config addressing the tree,"
-            " e.g. playbook.scaffold"
+            " e.g. core.setup_playbook.scaffold"
         ),
     )
     p.add_argument(
@@ -62,7 +62,7 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
         metavar="DOTTED.PATH=LITERAL",
         help=(
             "Make a macro return LITERAL without executing it (e.g."
-            " macros.now=19700101-00-00); repeatable, later pairs win"
+            " core.macros.date=19700101-00-00); repeatable, later pairs win"
         ),
     )
     p.set_defaults(func=_run)

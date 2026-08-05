@@ -1,10 +1,6 @@
 from collections.abc import Sequence
 from typing import Any, cast
 
-# A plan is a directory carrying its body at this filename; the directory name is
-# the slug.
-DIR_PLAN_NAME = "index.md"
-
 
 class PathError(Exception):
     """Raised when a dotted path does not resolve in a mapping.

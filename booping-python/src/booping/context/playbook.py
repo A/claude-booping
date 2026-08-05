@@ -50,8 +50,8 @@ class SubgraphNode(BaseModel):
 
 
 class StateMachine(BaseModel):
-    """One `states:` entry of a playbook.yaml manifest. Shape mirrors `config["plan"]`
-    so the generalized lifecycle resolver consumes `raw` unchanged."""
+    """One `states:` entry of a playbook.yaml manifest. Carries the machine shape the
+    generalized lifecycle resolver consumes from `raw` unchanged."""
 
     name: str
     artifact: str

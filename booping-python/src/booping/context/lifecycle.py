@@ -1,9 +1,9 @@
 """State-machine resolver — superstate-aware edge + hook resolution.
 
 Operates on a *machine dict* carrying ``statuses``, ``superstates``, and
-``hooks`` — the shape of ``config["plan"]`` and of a playbook manifest's
-``states:`` entry alike.  Produces valid edges and ordered hook lists for any
-status transition, without executing them (that is the dispatcher's job).
+``hooks`` — the shape of a playbook manifest's ``states:`` entry.  Produces
+valid edges and ordered hook lists for any status transition, without
+executing them (that is the dispatcher's job).
 """
 from __future__ import annotations
 
@@ -22,26 +22,24 @@ class InvalidTransitionError(Exception):
 class Edge:
     """A single transition edge with metadata."""
 
-    __slots__ = ("to", "skill", "when", "gates", "hooks")
+    __slots__ = ("to", "when", "gates", "hooks")
 
     def __init__(
         self,
         to: str,
-        skill: str,
         when: str = "",
         gates: list[str] | None = None,
         hooks: list[str] | None = None,
     ) -> None:
         self.to = to
-        self.skill = skill
         self.when = when
         self.gates = gates or []
         self.hooks = hooks or []
 
     def __repr__(self) -> str:  # pragma: no cover
         return (
-            f"Edge(to={self.to!r}, skill={self.skill!r}, "
-            f"when={self.when!r}, gates={self.gates!r}, hooks={self.hooks!r})"
+            f"Edge(to={self.to!r}, when={self.when!r}, "
+            f"gates={self.gates!r}, hooks={self.hooks!r})"
         )
 
     def __eq__(self, other: object) -> bool:
@@ -49,14 +47,13 @@ class Edge:
             return NotImplemented
         return (
             self.to == other.to
-            and self.skill == other.skill
             and self.when == other.when
             and self.gates == other.gates
             and self.hooks == other.hooks
         )
 
     def __hash__(self) -> int:
-        return hash((self.to, self.skill, self.when, tuple(self.gates), tuple(self.hooks)))
+        return hash((self.to, self.when, tuple(self.gates), tuple(self.hooks)))
 
 
 # ---------------------------------------------------------------------------
@@ -64,11 +61,9 @@ class Edge:
 # ---------------------------------------------------------------------------
 
 def _parse_transition(t: dict[str, Any]) -> Edge:
-    """Parse a raw transition dict from config into an Edge. `skill` is plan-only —
-    playbook state machines have no owning skill, so it defaults to empty."""
+    """Parse a raw transition dict from config into an Edge."""
     return Edge(
         to=str(t["to"]),
-        skill=str(t.get("skill", "")),
         when=str(t.get("when", "")),
         gates=[str(g) for g in t.get("gates", [])],
         hooks=[str(h) for h in t.get("hooks", [])],

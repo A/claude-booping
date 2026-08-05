@@ -1,11 +1,11 @@
 """Config-declared argv macros, executed at render time.
 
-A macro is an argv list at a dotted config path (`macros.now:
+A macro is an argv list at a dotted config path (`core.macros.date:
 ["date", "+%Y%m%d-%H-%M"]`). It runs through ``subprocess.run`` with
 ``shell=False``, so nothing a template supplies can be shell-interpreted.
 
 The declared list is an argv *prefix*: a call site may append positional
-arguments (`macro('macros.date', '+%H:%M')`), so a macro declared complete
+arguments (`macro('core.macros.date', '+%H:%M')`), so a macro declared complete
 (`["date", "+%Y%m%d-%H-%M"]`) and one declared partial (`["date"]`) are the
 same shape.
 
@@ -38,10 +38,10 @@ def clear_cache() -> None:
 
 
 def parse_stub_macros(pairs: Sequence[str]) -> dict[str, str]:
-    """`macros.now=19700101-00-00` → `{"macros.now": "19700101-00-00"}`.
+    """`core.macros.date=19700101-00-00` → `{"core.macros.date": "19700101-00-00"}`.
 
     The key stays a literal string (unlike `--set`, which nests it) and may
-    carry the call's arguments after the path — `macros.date +%H:%M=00:00`.
+    carry the call's arguments after the path — `core.macros.date +%H:%M=00:00`.
     Split on the first `=`, so an argument containing one cannot be pinned.
     Raises ValueError carrying the offending pair when it has no `=`.
     """
@@ -111,7 +111,7 @@ def make_macro(config: object = None) -> Callable[..., str]:
     A `macro_stubs` mapping in config (written by `--stub-macro`) short-circuits
     the named paths to a literal without executing anything — what makes a render
     byte-reproducible. A stub key is either the path plus its arguments
-    (`macros.date +%H:%M`), pinning one call, or the path alone, pinning every
+    (`core.macros.date +%H:%M`), pinning one call, or the path alone, pinning every
     argument variant of that macro; the specific key wins.
     """
     cfg = cast("dict[str, Any]", config) if isinstance(config, dict) else {}
