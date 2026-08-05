@@ -260,6 +260,11 @@ vault:
     # booping vault at any depth.
     sprints.md: |
       ```base
+      formulas:
+        plan: file.asLink(title)
+      properties:
+        formula.plan:
+          displayName: Title
       filters:
         and:
           - file.inFolder(this.file.folder + "/plans")
@@ -270,7 +275,7 @@ vault:
           order:
             - status
             - sp
-            - title
+            - formula.plan
             - summary
             - created
             - completed

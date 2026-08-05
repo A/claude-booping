@@ -306,6 +306,8 @@ def test_core_vault_scaffold_seeds_sprints_base_fence(tmp_path: Path) -> None:
     fence = text.split("```base\n", 1)[1].split("\n```", 1)[0]
     spec = yaml.safe_load(fence)
 
+    assert spec["formulas"] == {"plan": "file.asLink(title)"}
+    assert spec["properties"] == {"formula.plan": {"displayName": "Title"}}
     # Scoped to the booping vault holding this sprints.md, so it stays correct when
     # the booping vault is nested inside a larger Obsidian vault.
     assert spec["filters"] == {
@@ -319,7 +321,7 @@ def test_core_vault_scaffold_seeds_sprints_base_fence(tmp_path: Path) -> None:
     assert view["order"] == [
         "status",
         "sp",
-        "title",
+        "formula.plan",
         "summary",
         "created",
         "completed",
