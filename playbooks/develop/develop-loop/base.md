@@ -24,7 +24,8 @@ For each confirmed milestone group, in order:
    - Flip the milestone status to `done`.
    - Commit in the attached repo, one commit per milestone, message format
      `{{ config.core.develop_playbook.git.commit_message }}`.
-5. Commit the plan in the vault with `booping vault-commit in-progress {plan-path}`.
+5. Commit the plan in the vault git repo: `git -C {vault} add plans/{slug}`, then
+   `git -C {vault} commit -q -m "develop: {slug} → in-progress"`.
 6. Report group completion to the user with a one-paragraph summary (what shipped, anything
    deferred) before starting the next group.
 

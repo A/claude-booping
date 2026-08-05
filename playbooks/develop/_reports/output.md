@@ -91,7 +91,7 @@ good" counts, silence never does. That approval is what the `awaiting-plan-revie
 
 ## Plan-validity check
 
-Compare the plan's `commit:` field with the repo's current HEAD, `9c59f02b69038f65dea04065107f1db7e10b0d15`.
+Compare the plan's `commit:` field with the repo's current HEAD, `04b19d2ba0063e7ddd8dffa7aa031a02e3fb1912`.
 
 - **Equal**: proceed.
 - **Different**: run the cheap-summary commands first — do **not** load the full `git diff` into
@@ -234,7 +234,8 @@ For each confirmed milestone group, in order:
    - Flip the milestone status to `done`.
    - Commit in the attached repo, one commit per milestone, message format
      `<agent>: <plan title> <message>`.
-5. Commit the plan in the vault with `booping vault-commit in-progress {plan-path}`.
+5. Commit the plan in the vault git repo: `git -C {vault} add plans/{slug}`, then
+   `git -C {vault} commit -q -m "develop: {slug} → in-progress"`.
 6. Report group completion to the user with a one-paragraph summary (what shipped, anything
    deferred) before starting the next group.
 
@@ -314,7 +315,8 @@ sections. A replay that finds the plan already at `awaiting-retro` skips this an
 After the transition, so the commit carries the exit status:
 
 ```bash
-booping vault-commit awaiting-retro {plan-path}
+git -C {vault} add plans/{slug}
+git -C {vault} commit -q -m "develop: {slug} → awaiting-retro"
 ```
 
 ## 5. Sprint report

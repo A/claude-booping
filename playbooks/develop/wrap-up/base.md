@@ -39,7 +39,8 @@ sections. A replay that finds the plan already at `awaiting-retro` skips this an
 After the transition, so the commit carries the exit status:
 
 ```bash
-booping vault-commit awaiting-retro {plan-path}
+git -C {vault} add plans/{slug}
+git -C {vault} commit -q -m "develop: {slug} → awaiting-retro"
 ```
 
 ## 5. Sprint report
