@@ -310,9 +310,8 @@ def test_core_vault_scaffold_seeds_sprints_base_fence(tmp_path: Path) -> None:
     # the booping vault is nested inside a larger Obsidian vault.
     assert spec["filters"] == {
         "and": [
-            "file.inFolder(this.file.folder)",
-            'file.path.contains("plans/")',
-            'file.name == "index.md"',
+            'file.inFolder(this.file.folder + "/plans")',
+            'file.name == "index"',
         ]
     }
     view = spec["views"][0]

@@ -262,9 +262,8 @@ vault:
       ```base
       filters:
         and:
-          - file.inFolder(this.file.folder)
-          - 'file.path.contains("plans/")'
-          - 'file.name == "index.md"'
+          - file.inFolder(this.file.folder + "/plans")
+          - file.name == "index"
       views:
         - type: table
           name: Plans
