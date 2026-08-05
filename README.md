@@ -116,7 +116,7 @@ A plan carries one of the following statuses in its frontmatter. Terminal states
 
 In booping, a **plan is a sprint** — the unit the groom playbook produces and the develop playbook executes end-to-end. Story Points (SP) measure the sprint's **complexity and review burden**, not effort or time. A 20-SP sprint might take a couple of hours on one project, a full session on another, and a full day on a third; what matters is that SPs give you a feel for the size and review weight of the sprint, independent of how fast the underlying work happens.
 
-The 1–5 scale (`src/config.yaml` `sprint.scale`):
+The 1–5 scale (`src/config.yaml` `core.sprint.scale`):
 
 - **1 SP** — Simple text/config change, no risk.
 - **2 SP** — Simple task, predictable, no risk.
@@ -124,7 +124,7 @@ The 1–5 scale (`src/config.yaml` `sprint.scale`):
 - **4 SP** — Complex task, medium risk, may need small research but clear enough.
 - **5 SP** — Research task — developer needs to clarify and decompose further before proceeding.
 
-In practice, sprints over **35 SP** (`sprint.default_threshold_sp`) get hard to keep reviewable, so groom ends up suggesting a split into sibling sprints above that mark. It's a soft cap, **not a velocity** — booping has no fixed cadence and no per-week capacity. Tasks at 5 SP must be re-decomposed; tasks at 1 SP should be grouped into a single agent briefing.
+In practice, sprints over **35 SP** (`core.sprint.default_threshold_sp`) get hard to keep reviewable, so groom ends up suggesting a split into sibling sprints above that mark. It's a soft cap, **not a velocity** — booping has no fixed cadence and no per-week capacity. Tasks at 5 SP must be re-decomposed; tasks at 1 SP should be grouped into a single agent briefing.
 
 ## Extensibility
 

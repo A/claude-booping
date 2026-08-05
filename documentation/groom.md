@@ -104,8 +104,8 @@ booping uses a 1–5 scale for per-task estimates, rendered into the playbook fr
 
 Two thresholds drive the playbook's behaviour, both configurable:
 
-- **`sprint.default_threshold_sp` (default `35`)** — soft cap on plan size. Above this, `present` proposes splitting the plan into sibling stubs rather than shipping one mega-sprint.
-- **`sprint.redecompose_threshold` (default `5`)** — any task estimated at ≥ this value must be re-decomposed before the plan can leave `in-spec`.
+- **`core.sprint.default_threshold_sp` (default `35`)** — soft cap on plan size. Above this, `present` proposes splitting the plan into sibling stubs rather than shipping one mega-sprint.
+- **`core.sprint.redecompose_threshold` (default `5`)** — any task estimated at ≥ this value must be re-decomposed before the plan can leave `in-spec`.
 
 Both thresholds are ceilings, not velocity targets. A 12-SP plan is fine; a 38-SP plan is the trigger to consider a split.
 
@@ -125,10 +125,10 @@ A finding that reopens a settled design call is folded in nowhere — it sends t
 
 The playbook reads these keys from `src/config.yaml`. See [Project config](project_config.md) for the deep-merge override mechanics; per-project tweaks live in `~/Claude/{project}/config.yaml`.
 
-- **`sprint.default_threshold_sp`** — soft cap on total SP per plan; above this the run proposes a split.
-- **`sprint.redecompose_threshold`** — per-task SP value at or above which the task must be re-decomposed.
-- **`sprint.scale`** — the 1–5 SP definitions (each a `{sp, meaning}` entry).
-- **`tasks`** — list of `{type, description, doc_uri}` entries (`feature`, `bug`, `refactoring`). The request is classified against this list; the matching `doc_uri` lazy-loads detailed guidance for that task type.
+- **`core.sprint.default_threshold_sp`** — soft cap on total SP per plan; above this the run proposes a split.
+- **`core.sprint.redecompose_threshold`** — per-task SP value at or above which the task must be re-decomposed.
+- **`core.sprint.scale`** — the 1–5 SP definitions (each a `{sp, meaning}` entry).
+- **`core.task_types`** — list of `{type, description, doc_uri}` entries (`feature`, `bug`, `refactoring`). The request is classified against this list; the matching `doc_uri` lazy-loads detailed guidance for that task type.
 - **`core.cross_review_agent`** — the agent that performs the detached cross-review; absent → the step is skipped.
 - **`research_agent`** — the agent the two research steps delegate their bulk reads to (default `booping:booping-researcher`).
-- **`skills.groom.agents`** — the delegation table rendered into the playbook.
+- **`core.groom_playbook.agents`** — the delegation table rendered into the playbook.

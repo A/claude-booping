@@ -17,8 +17,8 @@ In multi-repo projects, reuse the same branch name across repos unless the user 
 
 ## Milestone groups
 
-{% if config.sprint.max_milestones_per_agent -%}
-Group consecutive milestones into agent briefings: each briefing covers **up to {{ config.sprint.max_milestones_per_agent }} milestone(s)**.
+{% if config.core.sprint.max_milestones_per_agent -%}
+Group consecutive milestones into agent briefings: each briefing covers **up to {{ config.core.sprint.max_milestones_per_agent }} milestone(s)**.
 Group only when the milestones share enough context that one agent handling them in sequence is
 cheaper than spinning a fresh agent per milestone. Otherwise keep them one-per-briefing.
 {%- else -%}

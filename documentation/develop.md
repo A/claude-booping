@@ -67,7 +67,7 @@ Treat the feedback list the way the [groom playbook](groom.md) treats cross-revi
 
 The playbook reads these keys from `src/config.yaml`. See [Project config](project_config.md) for the deep-merge override mechanics; per-project tweaks live in `~/Claude/{project}/config.yaml`.
 
-- **`sprint.max_milestones_per_agent`** — maximum number of consecutive milestones grouped into a single `booping-developer` briefing. Grouping only happens when the milestones share enough context that one agent handling them in sequence is cheaper than spinning a fresh agent per milestone. Default `2`.
+- **`core.sprint.max_milestones_per_agent`** — maximum number of consecutive milestones grouped into a single `booping-developer` briefing. Grouping only happens when the milestones share enough context that one agent handling them in sequence is cheaper than spinning a fresh agent per milestone. Default `2`.
 - **`git.branches`** — list of `{branch, when}` entries that map plan `type` (or freeform descriptors) to a branch prefix; `provision` picks from this list.
 - **`git.commit_message`** — conventional-commit format string used for in-sprint commits. Override per-project to enforce a different commit shape.
 - **`skills.develop.agents`** — the agents the playbook may delegate to, with `good_for` / `bad_for` guidance. `booping-developer` is the implementation channel; `booping-researcher` is reserved for the intake drift spot-check across many plan-named files.

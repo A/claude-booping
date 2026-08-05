@@ -783,7 +783,7 @@ def _ctx() -> Context:
 
 
 def _threshold(ctx: Context) -> str:
-    return str(ctx.config["sprint"]["default_threshold_sp"])
+    return str(ctx.config["core"]["sprint"]["default_threshold_sp"])
 
 
 def test_non_jinja_playbook_output_unchanged() -> None:
@@ -857,7 +857,7 @@ def test_inline_jinja_body_renders_through_context(tmp_path: Path) -> None:
         "---\nname: ij\ntitle: IJ\njinja: true\ngraph:\n  one: []\n---\nPreamble.\n"
     )
     (pb_dir / "one" / "prompt.md").write_text(
-        "---\nsummary: one\n---\nThreshold {{ config.sprint.default_threshold_sp }}.\n"
+        "---\nsummary: one\n---\nThreshold {{ config.core.sprint.default_threshold_sp }}.\n"
     )
     pbs = Playbook.load_all(
         vault=tmp_path, home_dir=tmp_path / "nohome", plugin_root=tmp_path / "nocore"
@@ -905,7 +905,7 @@ def _fm_playbook(tmp_path: Path, name: str, prompt_frontmatter: str) -> Playbook
 def test_jinja_step_summary_renders_through_context(tmp_path: Path) -> None:
     ctx = _ctx()
     pb = _fm_playbook(
-        tmp_path, "fs", "summary: Split past {{ config.sprint.default_threshold_sp }} SP"
+        tmp_path, "fs", "summary: Split past {{ config.core.sprint.default_threshold_sp }} SP"
     )
     assert f"- Summary: Split past {_threshold(ctx)} SP" in compose(pb, context=ctx)
 
@@ -939,13 +939,13 @@ def test_non_jinja_playbook_leaves_frontmatter_verbatim(tmp_path: Path) -> None:
         "---\nname: fv\ntitle: FV\ngraph:\n  one: []\n---\nPreamble.\n"
     )
     (pb_dir / "one" / "prompt.md").write_text(
-        "---\nsummary: Past {{ config.sprint.default_threshold_sp }} SP\n---\nOne body.\n"
+        "---\nsummary: Past {{ config.core.sprint.default_threshold_sp }} SP\n---\nOne body.\n"
     )
     pbs = Playbook.load_all(
         vault=tmp_path, home_dir=tmp_path / "nohome", plugin_root=tmp_path / "nocore"
     )
     out = compose(next(p for p in pbs if p.name == "fv"), context=_ctx())
-    assert "- Summary: Past {{ config.sprint.default_threshold_sp }} SP" in out
+    assert "- Summary: Past {{ config.core.sprint.default_threshold_sp }} SP" in out
 
 
 def test_jinja_step_frontmatter_error_is_in_band_stop(tmp_path: Path) -> None:
@@ -1664,7 +1664,7 @@ def test_set_override_wins_over_core_value(tmp_path: Path) -> None:
         [
             str(BOOPING_BIN), "render-playbook", "jinja-composed",
             "--project", str(vault),
-            "--set", "sprint.default_threshold_sp=7",
+            "--set", "core.sprint.default_threshold_sp=7",
         ],
         cwd=tmp_path,
         capture_output=True,
@@ -1680,8 +1680,8 @@ def test_set_override_repeated_later_wins_on_cli(tmp_path: Path) -> None:
         [
             str(BOOPING_BIN), "render-playbook", "jinja-composed",
             "--project", str(vault),
-            "--set", "sprint.default_threshold_sp=7",
-            "--set", "sprint.default_threshold_sp=9",
+            "--set", "core.sprint.default_threshold_sp=7",
+            "--set", "core.sprint.default_threshold_sp=9",
         ],
         cwd=tmp_path,
         capture_output=True,
@@ -1697,7 +1697,7 @@ def test_set_override_applies_to_step_surface(tmp_path: Path) -> None:
         [
             str(BOOPING_BIN), "render-playbook", "jinja-composed",
             "--step", "first", "--project", str(vault),
-            "--set", "sprint.default_threshold_sp=7",
+            "--set", "core.sprint.default_threshold_sp=7",
         ],
         cwd=tmp_path,
         capture_output=True,

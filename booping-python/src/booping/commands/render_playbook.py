@@ -163,7 +163,7 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
         metavar="KEY=VALUE",
         help=(
             "Override a config value for this render (dotted key, e.g."
-            " sprint.default_threshold_sp=3); repeatable, later pairs win, and the"
+            " core.sprint.default_threshold_sp=3); repeatable, later pairs win, and the"
             " value wins over every config tier"
         ),
     )

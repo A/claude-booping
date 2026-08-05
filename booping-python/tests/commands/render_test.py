@@ -41,9 +41,9 @@ def _render(tmp_path: Path, body: str, *args: str) -> subprocess.CompletedProces
 def test_render_set_override_wins_over_core_value(tmp_path: Path) -> None:
     result = _render(
         tmp_path,
-        "{{ config.sprint.default_threshold_sp }}\n",
+        "{{ config.core.sprint.default_threshold_sp }}\n",
         "--set",
-        "sprint.default_threshold_sp=7",
+        "core.sprint.default_threshold_sp=7",
     )
     assert result.returncode == 0
     assert result.stdout.strip() == "7"
@@ -52,11 +52,11 @@ def test_render_set_override_wins_over_core_value(tmp_path: Path) -> None:
 def test_render_set_override_repeated_pairs_later_wins(tmp_path: Path) -> None:
     result = _render(
         tmp_path,
-        "{{ config.sprint.default_threshold_sp }}\n",
+        "{{ config.core.sprint.default_threshold_sp }}\n",
         "--set",
-        "sprint.default_threshold_sp=7",
+        "core.sprint.default_threshold_sp=7",
         "--set",
-        "sprint.default_threshold_sp=9",
+        "core.sprint.default_threshold_sp=9",
     )
     assert result.returncode == 0
     assert result.stdout.strip() == "9"
@@ -65,9 +65,10 @@ def test_render_set_override_repeated_pairs_later_wins(tmp_path: Path) -> None:
 def test_render_set_deep_merges_leaving_siblings(tmp_path: Path) -> None:
     result = _render(
         tmp_path,
-        "{{ config.sprint.default_threshold_sp }}|{{ config.sprint.scale | length > 0 }}\n",
+        "{{ config.core.sprint.default_threshold_sp }}"
+        "|{{ config.core.sprint.scale | length > 0 }}\n",
         "--set",
-        "sprint.default_threshold_sp=7",
+        "core.sprint.default_threshold_sp=7",
     )
     assert result.returncode == 0
     assert result.stdout.strip() == "7|True"

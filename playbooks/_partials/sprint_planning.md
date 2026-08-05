@@ -11,23 +11,23 @@ the diff demands. AI does implementation cheaply; this is what remains.
 
 | SP | Meaning |
 |----|---------|
-{% for row in config.sprint.scale -%}
+{% for row in config.core.sprint.scale -%}
 | {{ row.sp }} | {{ row.meaning }} |
 {% endfor %}
-{%- if config.sprint.max_milestones_per_agent %}
+{%- if config.core.sprint.max_milestones_per_agent %}
 
-Development bundles **up to {{ config.sprint.max_milestones_per_agent }} consecutive milestone(s)** into a single agent briefing — size
+Development bundles **up to {{ config.core.sprint.max_milestones_per_agent }} consecutive milestone(s)** into a single agent briefing — size
 milestones against that combined review burden.
 {%- endif %}
 
 ### Thresholds
 
-{% if config.sprint.redecompose_threshold -%}
-- **{{ config.sprint.redecompose_threshold }} SP re-decompose threshold** — a task at or over it is split before the plan is
+{% if config.core.sprint.redecompose_threshold -%}
+- **{{ config.core.sprint.redecompose_threshold }} SP re-decompose threshold** — a task at or over it is split before the plan is
   returned. Cut at a seam in its own work, never at its midpoint; each half stands alone with its
   own DoD and Verify, and the milestone and sprint totals are re-summed from the new leaves.
 {% endif -%}
-- **{{ config.sprint.default_threshold_sp }} SP split threshold** — not a velocity: the point past which a sprint is too large to
+- **{{ config.core.sprint.default_threshold_sp }} SP split threshold** — not a velocity: the point past which a sprint is too large to
   hold together as one coherent iteration.
 
 Estimate the work as it honestly stands: never shave a task to land under a threshold, never

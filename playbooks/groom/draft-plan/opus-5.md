@@ -16,7 +16,7 @@ conversation already carries — the blast-radius map and the external ground th
 
 - The orchestrator never edits files outside `{project}/plans/`.
 - Each milestone executable in a fresh session with only the plan as context.
-- Sprint total past **{{ config.sprint.default_threshold_sp }} SP** — offer the user a split at a dependency seam (the first slice
+- Sprint total past **{{ config.core.sprint.default_threshold_sp }} SP** — offer the user a split at a dependency seam (the first slice
   shippable on its own, each later one useless without it), keep only the first slice that fits the
   threshold in this plan, and park the rest as sibling stubs to be groomed in their own runs. They
   may decline and keep one plan.

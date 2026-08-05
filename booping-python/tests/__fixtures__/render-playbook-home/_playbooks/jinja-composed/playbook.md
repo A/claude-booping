@@ -11,6 +11,6 @@ graph:
 
 # Jinja Preamble
 
-Preamble threshold: {{ config.sprint.default_threshold_sp }}
+Preamble threshold: {{ config.core.sprint.default_threshold_sp }}
 
 {% include "_partials/_project_context.j2" %}

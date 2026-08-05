@@ -28,7 +28,7 @@ def test_scalar_string_prints_raw_single_line(tmp_path: Path) -> None:
 
 
 def test_scalar_int_dotted_path(tmp_path: Path) -> None:
-    result = _run("config-get", "sprint.default_threshold_sp", cwd=tmp_path)
+    result = _run("config-get", "core.sprint.default_threshold_sp", cwd=tmp_path)
     assert result.returncode == 0
     assert result.stdout.strip() == "35"
     assert result.stdout.endswith("\n")

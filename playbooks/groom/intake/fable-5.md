@@ -14,11 +14,7 @@ Check for context, in case a request is related to already existing plan.
 Exactly one per plan. Pick the row the request meets, load its guidance before framing, and rule
 the siblings out by name.
 
-| type | fits when | guidance |
-| --- | --- | --- |
-{% for t in config.tasks -%}
-| `{{ t.type }}` | {{ t.description | replace("|", "\|") | replace("\n", " ") }} | [guidance]({{ t.doc_uri }}) |
-{% endfor %}
+{% include "_partials/task_types.md" %}
 ## The brief — written to `request.md`, posted in chat
 
 The framing brief is this step's outcome: it is written to `request.md`, which every later step

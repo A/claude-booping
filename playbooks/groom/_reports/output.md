@@ -14,33 +14,14 @@ a development plan based on it.
 - Write and present the final solution to a user
 
 
-
 ## Available Agents
 
 Delegate heavy reads to the agents below, under the return contract the step states — the step
 itself stays yours. Never delegate to an agent that is not on this list.
 
-
-### `booping-researcher`
-
-Invoke via the `Agent` tool with `subagent_type="booping:booping-researcher"`. Pass the briefing in the `prompt` arg.
-
-
-**Good for:**
-- Wide read or web search where results must be aggregated outside this skill's context and returned as a summary
-- Map blast radius across many files (which modules and integrations a change touches)
-- Extract patterns from a corpus too large to read directly (e.g. 'common shapes across 30 test files')
-- Verify package versions, image tags, API endpoints, CLI flags against current docs when many sources need to be checked
-- Cross-system architecture investigation across multiple repos or services
-- Compare framework/library options with deep tradeoff analysis
-
-
-**Bad for:**
-- Small checks — single-file reads, one-off greps, existence checks
-- When the information cannot be meaningfully compressed without losing signal the caller needs to decide
-- When the skill already needs to read the same few files for other reasons
-- When the question fits in a few lines of `ls`/`grep` output
-
+| agent | good for | bad for |
+| --- | --- | --- |
+| `booping:booping-researcher` | Wide read or web search where results must be aggregated outside this skill's context and returned as a summary; Map blast radius across many files (which modules and integrations a change touches); Extract patterns from a corpus too large to read directly (e.g. 'common shapes across 30 test files'); Verify package versions, image tags, API endpoints, CLI flags against current docs when many sources need to be checked; Cross-system architecture investigation across multiple repos or services; Compare framework/library options with deep tradeoff analysis | Small checks — single-file reads, one-off greps, existence checks; When the information cannot be meaningfully compressed without losing signal the caller needs to decide; When the skill already needs to read the same few files for other reasons; When the question fits in a few lines of `ls`/`grep` output |
 
 
 
@@ -103,14 +84,7 @@ You need to read user request and confirm you have all information to work it ou
 Check for context, in case a request is related to already existing plan.
 
 
-| state | name | summary | path |
-| --- | --- | --- | --- |
-| in-progress | API throttling | Per-client rate limits on the public API. | [plan](plans/19700106-api-throttling/index.md) |
-| awaiting-learning | Session cleanup sweep | Sweep orphaned session rows on expiry. | [plan](plans/19700103-session-cleanup/index.md) |
-| awaiting-retro | Login timeout fix | Session expiry fired one minute early. | [plan](plans/19700102-login-timeout/index.md) |
-| awaiting-retro | Widget search | Full-text search across the widget catalog. | [plan](plans/19700101-widget-search/index.md) |
-| ready-for-dev | Cache warm-up on deploy | Warm the read cache as part of the deploy step. | [plan](plans/19700104-cache-warmup/index.md) |
-
+No plans filed.
 
 
 ## Task Types
@@ -123,6 +97,7 @@ the siblings out by name.
 | `feature` | New user-facing capability. Needs business goal, design, milestones, DoD. | [guidance](${CLAUDE_PLUGIN_ROOT}/docs/task_feature.md) |
 | `bug` | Defect — observed behavior diverges from expected. Needs triage, reproduction, root-cause hypothesis, minimal fix, and a regression test. | [guidance](${CLAUDE_PLUGIN_ROOT}/docs/task_bug.md) |
 | `refactoring` | Internal structure change with no user-visible behavior change. Needs current-vs-target design, migration steps, and a no-behavior-change DoD. | [guidance](${CLAUDE_PLUGIN_ROOT}/docs/task_refactoring.md) |
+
 
 ## The brief — written to `request.md`, posted in chat
 

@@ -138,21 +138,22 @@ aborts the transition. `booping playbook-transition` is the only writer of playb
 </file>
 
 <file path="src/config.yaml">
-tasks:
-  - type: feature
-    description: A new user-facing capability with a business goal.
-    doc_uri: docs/task_feature.md
-  - type: bug
-    description: Behaviour diverges from what is expected.
-    doc_uri: docs/task_bug.md
-  - type: refactoring
-    description: Structure changes, behaviour does not.
-    doc_uri: docs/task_refactoring.md
+core:
+  task_types:
+    - type: feature
+      description: A new user-facing capability with a business goal.
+      doc_uri: docs/task_feature.md
+    - type: bug
+      description: Behaviour diverges from what is expected.
+      doc_uri: docs/task_bug.md
+    - type: refactoring
+      description: Structure changes, behaviour does not.
+      doc_uri: docs/task_refactoring.md
 
-sprint:
-  default_threshold_sp: 21
-  redecompose_threshold: 8
-  group_threshold: 2
+  sprint:
+    default_threshold_sp: 21
+    redecompose_threshold: 8
+    group_threshold: 2
 
 plan:
   statuses:

@@ -10,27 +10,28 @@ For context, the current plugin defaults. Source of truth: [`src/config.yaml`](h
 <summary>Show full config</summary>
 
 ```yaml
-sprint:
-  default_threshold_sp: 35
-  redecompose_threshold: 5
-  max_milestones_per_agent: 2
-  scale:
-    - { sp: 1, meaning: "Simple text/config change, no risk" }
-    - { sp: 2, meaning: "Simple task, predictable, no risk" }
-    - { sp: 3, meaning: "Medium task, minor risks but predictable overall" }
-    - { sp: 4, meaning: "Complex task, medium risk, may need small research but clear enough" }
-    - { sp: 5, meaning: "Research task — developer needs to clarify and decompose further before proceeding" }
+core:
+  sprint:
+    default_threshold_sp: 35
+    redecompose_threshold: 5
+    max_milestones_per_agent: 2
+    scale:
+      - { sp: 1, meaning: "Simple text/config change, no risk" }
+      - { sp: 2, meaning: "Simple task, predictable, no risk" }
+      - { sp: 3, meaning: "Medium task, minor risks but predictable overall" }
+      - { sp: 4, meaning: "Complex task, medium risk, may need small research but clear enough" }
+      - { sp: 5, meaning: "Research task — developer needs to clarify and decompose further before proceeding" }
 
-tasks:
-  - type: feature
-    description: "New user-facing capability. Needs business goal, design, milestones, DoD."
-    doc_uri: ${CLAUDE_PLUGIN_ROOT}/docs/task_feature.md
-  - type: bug
-    description: "Defect — observed behavior diverges from expected. Needs triage, reproduction, root-cause hypothesis, minimal fix, and a regression test."
-    doc_uri: ${CLAUDE_PLUGIN_ROOT}/docs/task_bug.md
-  - type: refactoring
-    description: "Internal structure change with no user-visible behavior change. Needs current-vs-target design, migration steps, and a no-behavior-change DoD."
-    doc_uri: ${CLAUDE_PLUGIN_ROOT}/docs/task_refactoring.md
+  task_types:
+    - type: feature
+      description: "New user-facing capability. Needs business goal, design, milestones, DoD."
+      doc_uri: ${CLAUDE_PLUGIN_ROOT}/docs/task_feature.md
+    - type: bug
+      description: "Defect — observed behavior diverges from expected. Needs triage, reproduction, root-cause hypothesis, minimal fix, and a regression test."
+      doc_uri: ${CLAUDE_PLUGIN_ROOT}/docs/task_bug.md
+    - type: refactoring
+      description: "Internal structure change with no user-visible behavior change. Needs current-vs-target design, migration steps, and a no-behavior-change DoD."
+      doc_uri: ${CLAUDE_PLUGIN_ROOT}/docs/task_refactoring.md
 
 skills:
   help: {}
@@ -296,10 +297,10 @@ plan:
 
 Sprint sizing thresholds and the story-point scale. Drives the groom playbook's split proposals, the per-task re-decompose gate, and the develop playbook's milestone grouping.
 
-- **`sprint.default_threshold_sp`** — soft cap on total SP per plan. Above this, groom proposes splitting the plan into sibling stubs. Default: `35`.
-- **`sprint.redecompose_threshold`** — per-task SP value at or above which groom must re-decompose the task before the plan can leave `in-spec`. Default: `5`.
-- **`sprint.max_milestones_per_agent`** — cap on consecutive milestones grouped into one `booping-developer` briefing by the develop playbook. Default: `2`.
-- **`sprint.scale`** — the 1–5 SP definitions rendered into groom's body. Each entry is `{sp, meaning}`. Replace wholesale to redefine the scale; do not partial-edit (lists merge by replacement, see below).
+- **`core.sprint.default_threshold_sp`** — soft cap on total SP per plan. Above this, groom proposes splitting the plan into sibling stubs. Default: `35`.
+- **`core.sprint.redecompose_threshold`** — per-task SP value at or above which groom must re-decompose the task before the plan can leave `in-spec`. Default: `5`.
+- **`core.sprint.max_milestones_per_agent`** — cap on consecutive milestones grouped into one `booping-developer` briefing by the develop playbook. Default: `2`.
+- **`core.sprint.scale`** — the 1–5 SP definitions rendered into groom's body. Each entry is `{sp, meaning}`. Replace wholesale to redefine the scale; do not partial-edit (lists merge by replacement, see below).
 
 ### `git`
 
@@ -308,7 +309,7 @@ Branch and commit conventions consumed by the develop playbook.
 - **`git.commit_message`** — the conventional commit format string the orchestrator follows for in-plan commits.
 - **`git.branches`** — list of `{branch, when}` entries. `branch` is the literal prefix (e.g. `feat/`, `fix/`); `when` is a list of short matches against the plan `type` (`feature`, `bug`, `refactoring`) or freeform descriptors. The develop playbook walks this list to pick the sprint branch prefix.
 
-### `tasks`
+### `core.task_types`
 
 The task-type taxonomy groom classifies every request against. Each entry is `{type, description, doc_uri}`. The matching `doc_uri` lazy-loads detailed guidance for that task type during grooming. Adding a new task type means adding both a `tasks` entry and the corresponding doc under `docs/`.
 
@@ -393,7 +394,7 @@ Read any resolved value — merged across all three tiers — with `booping conf
 Drop a YAML file at `~/Claude/{project}/config.yaml` to override or extend the plugin's defaults for that project. The override file deep-merges over `src/config.yaml` at render time:
 
 - **Dict keys merge.** A project key is added or replaces the plugin's value; sibling keys the project file does not mention fall through unchanged.
-- **List keys replace wholesale.** If the project file sets `sprint.scale` or `git.branches`, the project list replaces the plugin list entirely — there is no element-level merge.
+- **List keys replace wholesale.** If the project file sets `core.sprint.scale` or `git.branches`, the project list replaces the plugin list entirely — there is no element-level merge.
 - **No rebuild required.** The merge happens at skill-load time, every time. Edit, save, run a skill — the new values are live.
 
 The override takes effect at the next skill load. Nothing in `src/files/` or the build artefacts is touched.
@@ -403,8 +404,9 @@ The override takes effect at the next skill load. Nothing in `src/files/` or the
 `~/Claude/{project}/config.yaml`:
 
 ```yaml
-sprint:
-  default_threshold_sp: 25  # smaller cap for this project's faster cadence
+core:
+  sprint:
+    default_threshold_sp: 25  # smaller cap for this project's faster cadence
 
 git:
   branches:                 # list — replaces the plugin defaults wholesale
@@ -422,7 +424,7 @@ git:
 
 After the next render, groom proposes splitting at 25 SP instead of 35, and develop picks `docs/` for plans typed `docs`.
 
-Because lists replace wholesale, the project file must include every branch entry it wants to keep — omitting a row removes it. Dict keys behave the opposite way: `sprint.default_threshold_sp: 25` does not affect `sprint.redecompose_threshold` or `sprint.scale`, which fall through from the plugin defaults.
+Because lists replace wholesale, the project file must include every branch entry it wants to keep — omitting a row removes it. Dict keys behave the opposite way: `core.sprint.default_threshold_sp: 25` does not affect `core.sprint.redecompose_threshold` or `core.sprint.scale`, which fall through from the plugin defaults.
 
 ## Verifying the merged config
 

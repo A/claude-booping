@@ -13,7 +13,45 @@ core:
   # Null → the reviewing step is skipped entirely.
   cross_review_agent: null
 
+  sprint:
+    default_threshold_sp: 35
+    redecompose_threshold: 5
+    max_milestones_per_agent: 2
+    scale:
+      - { sp: 1, meaning: "Simple text/config change, no risk" }
+      - { sp: 2, meaning: "Simple task, predictable, no risk" }
+      - { sp: 3, meaning: "Medium task, minor risks but predictable overall" }
+      - { sp: 4, meaning: "Complex task, medium risk, may need small research but clear enough" }
+      - { sp: 5, meaning: "Research task — developer needs to clarify and decompose further before proceeding" }
+
+  # Task-type taxonomy every request is classified against — exactly one per plan.
+  task_types:
+    - type: feature
+      description: "New user-facing capability. Needs business goal, design, milestones, DoD."
+      doc_uri: ${CLAUDE_PLUGIN_ROOT}/docs/task_feature.md
+    - type: bug
+      description: "Defect — observed behavior diverges from expected. Needs triage, reproduction, root-cause hypothesis, minimal fix, and a regression test."
+      doc_uri: ${CLAUDE_PLUGIN_ROOT}/docs/task_bug.md
+    - type: refactoring
+      description: "Internal structure change with no user-visible behavior change. Needs current-vs-target design, migration steps, and a no-behavior-change DoD."
+      doc_uri: ${CLAUDE_PLUGIN_ROOT}/docs/task_refactoring.md
+
   groom_playbook:
+    agents:
+      booping-researcher:
+        internal: true
+        good_for:
+          - "Wide read or web search where results must be aggregated outside this skill's context and returned as a summary"
+          - "Map blast radius across many files (which modules and integrations a change touches)"
+          - "Extract patterns from a corpus too large to read directly (e.g. 'common shapes across 30 test files')"
+          - "Verify package versions, image tags, API endpoints, CLI flags against current docs when many sources need to be checked"
+          - "Cross-system architecture investigation across multiple repos or services"
+          - "Compare framework/library options with deep tradeoff analysis"
+        bad_for:
+          - "Small checks — single-file reads, one-off greps, existence checks"
+          - "When the information cannot be meaningfully compressed without losing signal the caller needs to decide"
+          - "When the skill already needs to read the same few files for other reasons"
+          - "When the question fits in a few lines of `ls`/`grep` output"
     queries:
       # The `intake` step's context table: everything past specification, newest
       # first. Stated as the statuses it keeps, because the operator vocabulary
@@ -40,28 +78,6 @@ core:
 # on `render`, `render-playbook` and `scaffold` returns the literal without executing.
 macros:
   date: ["date"]
-
-sprint:
-  default_threshold_sp: 35
-  redecompose_threshold: 5
-  max_milestones_per_agent: 2
-  scale:
-    - { sp: 1, meaning: "Simple text/config change, no risk" }
-    - { sp: 2, meaning: "Simple task, predictable, no risk" }
-    - { sp: 3, meaning: "Medium task, minor risks but predictable overall" }
-    - { sp: 4, meaning: "Complex task, medium risk, may need small research but clear enough" }
-    - { sp: 5, meaning: "Research task — developer needs to clarify and decompose further before proceeding" }
-
-tasks:
-  - type: feature
-    description: "New user-facing capability. Needs business goal, design, milestones, DoD."
-    doc_uri: ${CLAUDE_PLUGIN_ROOT}/docs/task_feature.md
-  - type: bug
-    description: "Defect — observed behavior diverges from expected. Needs triage, reproduction, root-cause hypothesis, minimal fix, and a regression test."
-    doc_uri: ${CLAUDE_PLUGIN_ROOT}/docs/task_bug.md
-  - type: refactoring
-    description: "Internal structure change with no user-visible behavior change. Needs current-vs-target design, migration steps, and a no-behavior-change DoD."
-    doc_uri: ${CLAUDE_PLUGIN_ROOT}/docs/task_refactoring.md
 
 # A **query spec** is any mapping in the merged config, addressed by its dotted
 # path — `booping query --config <dotted.path>` and `{{ '<dotted.path>' | query }}`.
@@ -130,23 +146,6 @@ skills:
         bad_for:
           - "Milestone-diff review — that stays in the skill"
           - "Single-file reads — call Read directly"
-
-  groom:
-    agents:
-      booping-researcher:
-        internal: true
-        good_for:
-          - "Wide read or web search where results must be aggregated outside this skill's context and returned as a summary"
-          - "Map blast radius across many files (which modules and integrations a change touches)"
-          - "Extract patterns from a corpus too large to read directly (e.g. 'common shapes across 30 test files')"
-          - "Verify package versions, image tags, API endpoints, CLI flags against current docs when many sources need to be checked"
-          - "Cross-system architecture investigation across multiple repos or services"
-          - "Compare framework/library options with deep tradeoff analysis"
-        bad_for:
-          - "Small checks — single-file reads, one-off greps, existence checks"
-          - "When the information cannot be meaningfully compressed without losing signal the caller needs to decide"
-          - "When the skill already needs to read the same few files for other reasons"
-          - "When the question fits in a few lines of `ls`/`grep` output"
 
   learn:
     status: awaiting-learning

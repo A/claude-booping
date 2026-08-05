@@ -27,7 +27,7 @@ a development plan based on it.
 - Cross-check the solution
 - Write and present the final solution to a user
 
-{% set agents_skill = "groom" %}
-{% include "_partials/available_agents.md" %}
+{% set playbook_agents = config.core.groom_playbook -%}
+{% include "_partials/playbook_agents.md" %}
 
 {% include "_partials/playbook_shared_instructions.md" %}

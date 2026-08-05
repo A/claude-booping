@@ -155,7 +155,7 @@ def test_seed_can_reference_config_and_context_globals(
         str(dest),
         tree=(
             "demo:\n"
-            '  a.txt: "{{ config.sprint.default_threshold_sp }}|'
+            '  a.txt: "{{ config.core.sprint.default_threshold_sp }}|'
             '{{ context.project is none }}\\n"\n'
         ),
     )
