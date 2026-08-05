@@ -41,7 +41,11 @@ Before grooming anything, run:
 
 Open `~/Claude/{project}/sprints.md` in Obsidian. It is an [Obsidian Bases](https://help.obsidian.md/bases) fence — a live table over every plan in the vault, evaluated on open, so it is never stale. On a fresh project it will be near-empty; that is expected.
 
-The fence is seeded once and yours to edit (see [Vault](vault.md)). Outside Obsidian, `bin/booping query --config plans` prints the same listing.
+The fence is seeded once and yours to edit (see [Vault](vault.md)). Outside Obsidian, `bin/booping query --config plans` prints the same listing, and `--where` narrows it — `k=v`, `k!=v`, `k:in=a,b`, `k:gt=n`, `k:lt=n`, repeatable and all applying at once:
+
+```bash
+bin/booping query --config plans --where status:in=ready-for-dev,in-progress
+```
 
 ## 5. First groom
 
@@ -51,7 +55,7 @@ Spec your first sprint with a free-text description:
 /playbook groom — add per-tenant rate limiting to the public API
 ```
 
-The [groom playbook](groom.md) researches the codebase and the web, drafts a plan under `~/Claude/{project}/plans/{YYYYMMDD-HH-MM}_{kebab-title}/index.md`, optionally hands it to a second model for cross-review (when `cross_review.agent` is configured), and stops at `awaiting-plan-review` for your explicit approval. Sharpen it, push back, ask for splits — the more detailed your initial brief, the sharper the resulting plan.
+The [groom playbook](groom.md) researches the codebase and the web, drafts a plan under `~/Claude/{project}/plans/{YYYYMMDDHHMM}_{kebab-title}/index.md`, optionally hands it to a second model for cross-review (when `cross_review.agent` is configured), and stops at `awaiting-plan-review` for your explicit approval. Sharpen it, push back, ask for splits — the more detailed your initial brief, the sharper the resulting plan.
 
 When you approve, the run flips the plan to `ready-for-dev`.
 

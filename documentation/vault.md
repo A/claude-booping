@@ -6,7 +6,7 @@ This page is the reference for every file and directory inside the vault. For th
 
 ## `plans/`
 
-A plan is a directory: `{YYYYMMDD-HH-MM}_{kebab-title}/` holding `index.md`. That is the only shape booping discovers (the `plans.glob` config key, one entry — `plans/*/index.md`); a legacy flat `{YYYYMMDD}-{kebab-title}.md` has to be moved into a directory of its own to be seen. Each plan carries YAML frontmatter (status, type, story points, a one-line `summary`, etc.) and a body of milestones with tasks. Authored by the [groom playbook](groom.md), executed by the [develop playbook](develop.md).
+A plan is a directory: `{YYYYMMDDHHMM}_{kebab-title}/` holding `index.md`. That is the only shape booping discovers (the `plans.glob` config key, one entry — `plans/*/index.md`); a legacy flat `{YYYYMMDD}-{kebab-title}.md` has to be moved into a directory of its own to be seen. Each plan carries YAML frontmatter (status, type, story points, a one-line `summary`, etc.) and a body of milestones with tasks. Authored by the [groom playbook](groom.md), executed by the [develop playbook](develop.md).
 
 A plan walks the status table from `backlog` / `in-spec` through `awaiting-plan-review`, `ready-for-dev`, `in-progress`, `awaiting-retro`, `awaiting-learning`, to `done`. The owning skill moves a plan by running a `booping transition` command, which performs the status change and every mechanical mutation it entails in one step.
 
@@ -67,11 +67,27 @@ An at-a-glance view of every plan in the vault — an [Obsidian Bases](https://h
 
 **Seeded once by `booping scaffold vault.scaffold`; nothing rewrites it.** Obsidian evaluates the query live against the plan files, so the view is never stale. Edit the fence to change columns, sorting or filters — it is yours from the moment it is written.
 
-Outside Obsidian the file is an inert code block. For a machine-readable listing of the same data, use `bin/booping query`.
+Outside Obsidian the file is an inert code block. For a machine-readable listing of the same data, use `bin/booping query`:
+
+```bash
+bin/booping query --config plans --where status=ready-for-dev --sort -created
+```
+
+`--where` is a fixed operator vocabulary, not an expression language. The clause key carries the operator as a suffix:
+
+| Clause | Meaning |
+|---|---|
+| `k=v` | equals |
+| `k!=v` | does not equal |
+| `k:in=a,b` | is one of |
+| `k:gt=n` | greater than `n`, numerically |
+| `k:lt=n` | less than `n`, numerically |
+
+Clauses are repeatable and all of them apply. A row whose frontmatter lacks the field fails every operator, and so does a value that will not read as a number under `:gt` / `:lt`.
 
 ## `.booping`
 
-The marker that ties a repo to its vault. Unlike everything else on this page, `.booping` lives in the **attached repo's working tree** (its root), not inside the vault. It is written by the [setup playbook](install.md) and carries the `project_name: {project}` key — how every skill resolves which vault to operate on. It may also carry an optional `vault_path:` key: when present, the vault resolves to that path (relative paths against the repo root, absolute paths and `~` honoured) instead of `~/Claude/{project}/` — this is how a repo-local vault is wired. Commit `.booping` with the repo so the binding travels with the checkout.
+The marker that ties a repo to its vault. Unlike everything else on this page, `.booping` lives in the **attached repo's working tree** (its root), not inside the vault. It is written by the [setup playbook](install.md) and carries the `project_name: {project}` key — how every skill resolves which vault to operate on. It may also carry an optional `vault_path:` key: when present, the vault resolves to that path (relative paths against the repo root, absolute paths and `~` honoured) instead of `~/Claude/{project}/` — this is how a repo-local vault is wired. A third key, `latest_migration:`, records which of the plugin's shipped vault migrations this project has already applied — a watermark, written only by `bin/booping marker-set latest_migration=<id>` as the [migrate playbook](playbook.md) finishes one. When it falls behind the plugin, every render stops with a notice telling you to run `/playbook migrate`. Commit `.booping` with the repo so the binding travels with the checkout.
 
 ## `config.yaml`
 
