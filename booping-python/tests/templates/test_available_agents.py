@@ -22,40 +22,34 @@ def _render_skill(vault: Path) -> str:
     )
 
 
-def test_default_config_renders_native_invocation_lines() -> None:
+def test_default_config_renders_native_agent_rows() -> None:
     vault = get_fixture_path("vault-empty")
     result = _render_skill(vault)
 
-    assert (
-        'Invoke via the `Agent` tool with `subagent_type="booping:booping-developer"`.'
-        in result
-    )
-    assert (
-        'Invoke via the `Agent` tool with `subagent_type="booping:booping-researcher"`.'
-        in result
-    )
     # Internal native agents are namespaced; bare forms must not appear.
-    assert 'subagent_type="booping-developer"' not in result
-    assert 'subagent_type="booping-researcher"' not in result
+    assert "| `booping:booping-developer` |" in result
+    assert "| `booping:booping-researcher` |" in result
+    assert "| `booping-developer` |" not in result
+    assert "| `booping-researcher` |" not in result
 
-    # Each native entry still renders its good_for block; researcher carries a bad_for.
-    assert "### `booping-developer`" in result
-    assert "### `booping-researcher`" in result
-    assert "**Good for:**" in result
-    assert "**Bad for:**" in result
+    # Each native row still carries its good_for cell; researcher carries a bad_for.
+    assert (
+        "Applying user-approved non-trivial fixes surfaced by the review "
+        "(BLOCKER or SUGGESTION)" in result
+    )
+    assert "Small greps or existence checks that fit in a few lines of output" in result
 
 
-def test_non_internal_agent_renders_plain_subagent_type() -> None:
-    """A non-internal agent renders plainly as `subagent_type="<agent>"` —
-    no `booping:` prefix and no cli wrapper. disable_internal_agents drops
-    internal entries, so the native pair is gone here but test-no-type stays."""
+def test_non_internal_agent_renders_plain_agent_id() -> None:
+    """A non-internal agent renders plainly as `<agent>` — no `booping:` prefix.
+    disable_internal_agents drops internal entries, so the native pair is gone
+    here but test-no-type stays."""
     vault = get_fixture_path("vault-disable-internal-agents")
     result = _render_skill(vault)
 
     # disable_internal_agents: true drops native entries
-    assert "### `booping-developer`" not in result
-    assert "### `booping-researcher`" not in result
+    assert "booping:booping-developer" not in result
+    assert "booping:booping-researcher" not in result
 
-    assert "### `test-no-type`" in result
-    assert 'subagent_type="test-no-type"' in result
-    assert 'subagent_type="booping:test-no-type"' not in result
+    assert "| `test-no-type` |" in result
+    assert "| `booping:test-no-type` |" not in result

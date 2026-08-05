@@ -20,35 +20,15 @@ already on the file; it never bootstraps or creates it.
 Eval runs are proposed, never launched — the user triggers them.
 
 
-
 ## Available Agents
 
 Delegate heavy reads to the agents below, under the return contract the step states — the step
 itself stays yours. Never delegate to an agent that is not on this list.
 
-
-### `booping-developer`
-
-Invoke via the `Agent` tool with `subagent_type="booping:booping-developer"`. Pass the briefing in the `prompt` arg.
-
-
-**Good for:**
-- All coding tasks — always delegate; never edit application code from the orchestrator
-
-
-### `booping-researcher`
-
-Invoke via the `Agent` tool with `subagent_type="booping:booping-researcher"`. Pass the briefing in the `prompt` arg.
-
-
-**Good for:**
-- Phase 0 drift spot-check: given a large set of plan-named files, determine whether actual file shape matches the plan's assumptions
-
-
-**Bad for:**
-- Milestone-diff review — that stays in the skill
-- Single-file reads — call Read directly
-
+| agent | good for | bad for |
+| --- | --- | --- |
+| `booping:booping-developer` | All coding tasks — always delegate; never edit application code from the orchestrator | — |
+| `booping:booping-researcher` | Phase 0 drift spot-check: given a large set of plan-named files, determine whether actual file shape matches the plan's assumptions | Milestone-diff review — that stays in the skill; Single-file reads — call Read directly |
 
 
 
@@ -111,7 +91,7 @@ good" counts, silence never does. That approval is what the `awaiting-plan-revie
 
 ## Plan-validity check
 
-Compare the plan's `commit:` field with the repo's current HEAD, `20bc76ce30423877fdd651b4b878c26c5676cfed`.
+Compare the plan's `commit:` field with the repo's current HEAD, `b12b87ac47250b092634df9a1a66091278e3f56a`.
 
 - **Equal**: proceed.
 - **Different**: run the cheap-summary commands first — do **not** load the full `git diff` into

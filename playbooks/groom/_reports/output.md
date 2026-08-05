@@ -68,7 +68,7 @@ booping playbook-state groom --workdir <run workdir>
 | `researching` | `drafting` | the blast-radius map and the web-research findings are both posted in chat | — |
 | `drafting` | `cross-reviewing` | architecture, surface changes and trade-offs are settled with the user in conversation, and draft-plan wrote `index.md`'s body against the template's Plan Body and passed its Quality Checklist | every call that is the user's is answered |
 | `drafting` | `researching` | the design needs blast radius or external practice the research pass missed | — |
-| `cross-reviewing` | `presenting` | the cross-review pass disposed of every finding, or no `core.cross_review_agent` is configured and the pass was skipped | every CRITICAL finding folded in or recorded as a deferral — vacuously satisfied with no `core.cross_review_agent` configured |
+| `cross-reviewing` | `presenting` | the cross-review pass disposed of every finding, or no `core.groom_playbook.cross_review_agent` is configured and the pass was skipped | every CRITICAL finding folded in or recorded as a deferral — vacuously satisfied with no `core.groom_playbook.cross_review_agent` configured |
 | `presenting` | `awaiting-approval` | present posted the approval screen in chat — summary, split recommendation if any, handoff to the `develop` playbook | — |
 | `awaiting-approval` | `drafting` | the user's change request touches the plan itself — architecture, scope, milestones, tasks or estimates | — |
 | `awaiting-approval` | `ready-for-dev` | the user explicitly approves the plan — "looks good" counts, silence never does | explicit user approval captured |
@@ -84,7 +84,14 @@ You need to read user request and confirm you have all information to work it ou
 Check for context, in case a request is related to already existing plan.
 
 
-No plans filed.
+| state | name | summary | path |
+| --- | --- | --- | --- |
+| in-progress | API throttling | Per-client rate limits on the public API. | [plan](plans/19700106-api-throttling/index.md) |
+| awaiting-learning | Session cleanup sweep | Sweep orphaned session rows on expiry. | [plan](plans/19700103-session-cleanup/index.md) |
+| awaiting-retro | Login timeout fix | Session expiry fired one minute early. | [plan](plans/19700102-login-timeout/index.md) |
+| awaiting-retro | Widget search | Full-text search across the widget catalog. | [plan](plans/19700101-widget-search/index.md) |
+| ready-for-dev | Cache warm-up on deploy | Warm the read cache as part of the deploy step. | [plan](plans/19700104-cache-warmup/index.md) |
+
 
 
 ## Task Types

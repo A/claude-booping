@@ -31,7 +31,7 @@ already on the file; it never bootstraps or creates it.
 
 Eval runs are proposed, never launched — the user triggers them.
 
-{% set agents_skill = "develop" %}
-{% include "_partials/available_agents.md" %}
+{% set playbook_agents = config.core.develop_playbook -%}
+{% include "_partials/playbook_agents.md" %}
 
 {% include "_partials/playbook_shared_instructions.md" %}

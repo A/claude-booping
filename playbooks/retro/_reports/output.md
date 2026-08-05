@@ -26,27 +26,14 @@ Produce a project- and plan-specific retrospective grounded in session logs, cod
 6. Save & transition — write retrospective; apply transitions per the transitions table above; commit.
 
 
-
 ## Available Agents
 
 Delegate heavy reads to the agents below, under the return contract the step states — the step
 itself stays yours. Never delegate to an agent that is not on this list.
 
-
-### `booping-researcher`
-
-Invoke via the `Agent` tool with `subagent_type="booping:booping-researcher"`. Pass the briefing in the `prompt` arg.
-
-
-**Good for:**
-- Phase 0 session-log search: scan ~/.claude/projects/ across all session logs for the plan's time window and aggregate into a structured summary of user questions, blockers, and detours
-
-
-**Bad for:**
-- Single-file reads — call Read directly
-- Phase 2 sprint analysis — stays in the orchestrator
-- Phase 4 lesson cross-check — stays in the orchestrator using the in-context lesson set
-
+| agent | good for | bad for |
+| --- | --- | --- |
+| `booping:booping-researcher` | Phase 0 session-log search: scan ~/.claude/projects/ across all session logs for the plan's time window and aggregate into a structured summary of user questions, blockers, and detours | Single-file reads — call Read directly; Phase 2 sprint analysis — stays in the orchestrator; Phase 4 lesson cross-check — stays in the orchestrator using the in-context lesson set |
 
 
 

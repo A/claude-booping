@@ -46,7 +46,6 @@ The skill infers the exact filename per candidate; the example lists above are v
 
 
 
-
 ## Shared instructions
 
 - Never write angle-bracket placeholders (`<name>`, `<path>`) into a file or a chat reply. Obsidian

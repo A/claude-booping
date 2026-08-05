@@ -43,7 +43,7 @@ _No plans at `{{ config.core.retro_playbook.status }}`._
 5. Synthesize — draft using the retrospective template; run lesson cross-check.
 6. Save & transition — write retrospective; apply transitions per the transitions table above; commit.
 
-{% set agents_skill = "retro" %}
-{% include "_partials/available_agents.md" %}
+{% set playbook_agents = config.core.retro_playbook -%}
+{% include "_partials/playbook_agents.md" %}
 
 {% include "_partials/playbook_shared_instructions.md" %}

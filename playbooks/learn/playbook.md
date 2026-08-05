@@ -48,7 +48,7 @@ _No plans at `{{ config.core.learn_playbook.status }}`._
 5. Write accepted items — one pass per target type, no per-edit prompts.
 6. Transition and commit.
 
-{% set agents_skill = "learn" %}
-{% include "_partials/available_agents.md" %}
+{% set playbook_agents = config.core.learn_playbook -%}
+{% include "_partials/playbook_agents.md" %}
 
 {% include "_partials/playbook_shared_instructions.md" %}

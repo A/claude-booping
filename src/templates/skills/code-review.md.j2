@@ -1,13 +1,31 @@
 # booping — /code-review
 
-{% import "_partials/_available_agents.j2" as available_agents with context %}
 Review changed code (diff, files, or directory) against layered, stack-aware checklists plus plan- and lesson-aware dynamic checks. Stateless side-skill — output is chat-only, no persistent report, no plan-lifecycle status.
 
 This skill is **wide-domain** — it must work across very different stacks. Stack-specific rules live in checklist templates (core under `docs/review_templates/`, project-local under `~/Claude/{project}/review_templates/`). Project-specific concerns live there or in `_booping/skill_code-review.md`. Do not bake stack details into this skill.
 
 {% include "_partials/_project_context.j2" %}
 
-{{ available_agents.render("code-review") }}
+{%- set cr_cfg = config.core.code_review_playbook -%}
+{%- set cr_agents = cr_cfg.get("agents", {}) or {} -%}
+{%- set cr_hide_internal = cr_cfg.get("disable_internal_agents", False) -%}
+{%- macro cr_cell(items) -%}
+{{ (items or []) | map("replace", "|", "\|") | map("replace", "\n", " ") | join("; ") or "—" }}
+{%- endmacro -%}
+{%- if cr_agents %}
+## Available Agents
+
+Always delegate to one of the agents listed below — never use any other agent
+not on this list, and never do the work directly.
+
+| agent | good for | bad for |
+| --- | --- | --- |
+{% for agent, spec in cr_agents.items() -%}
+{%- if not (cr_hide_internal and spec.get("internal", False)) -%}
+| `{{ "booping:" ~ agent if spec.get("internal", False) else agent }}` | {{ cr_cell(spec.good_for) }} | {{ cr_cell(spec.bad_for) }} |
+{% endif -%}
+{%- endfor -%}
+{%- endif %}
 
 {% include "_partials/_review_template.j2" %}
 

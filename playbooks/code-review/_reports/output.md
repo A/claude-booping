@@ -15,39 +15,15 @@ state, no review artefact — so a second look after fixes is a new run.
 Eval runs are proposed, never launched — the user triggers them.
 
 
-
 ## Available Agents
 
 Delegate heavy reads to the agents below, under the return contract the step states — the step
 itself stays yours. Never delegate to an agent that is not on this list.
 
-
-### `booping-researcher`
-
-Invoke via the `Agent` tool with `subagent_type="booping:booping-researcher"`. Pass the briefing in the `prompt` arg.
-
-
-**Good for:**
-- Blast-radius reads on large diffs (≥ ~5 files) aggregated into a compressed summary of touched modules and integration points
-
-
-**Bad for:**
-- Single-file reads — call Read directly
-- Small greps or existence checks that fit in a few lines of output
-
-
-### `booping-developer`
-
-Invoke via the `Agent` tool with `subagent_type="booping:booping-developer"`. Pass the briefing in the `prompt` arg.
-
-
-**Good for:**
-- Applying user-approved non-trivial fixes surfaced by the review (BLOCKER or SUGGESTION)
-
-
-**Bad for:**
-- Trivial inline nits — orchestrator handles those directly
-
+| agent | good for | bad for |
+| --- | --- | --- |
+| `booping:booping-researcher` | Blast-radius reads on large diffs (≥ ~5 files) aggregated into a compressed summary of touched modules and integration points | Single-file reads — call Read directly; Small greps or existence checks that fit in a few lines of output |
+| `booping:booping-developer` | Applying user-approved non-trivial fixes surfaced by the review (BLOCKER or SUGGESTION) | Trivial inline nits — orchestrator handles those directly |
 
 
 

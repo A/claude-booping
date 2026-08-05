@@ -28,7 +28,7 @@ state, no review artefact — so a second look after fixes is a new run.
 
 Eval runs are proposed, never launched — the user triggers them.
 
-{% set agents_skill = "code-review" %}
-{% include "_partials/available_agents.md" %}
+{% set playbook_agents = config.core.code_review_playbook -%}
+{% include "_partials/playbook_agents.md" %}
 
 {% include "_partials/playbook_shared_instructions.md" %}
