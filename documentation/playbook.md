@@ -333,7 +333,7 @@ states:
 Two hook forms are available on a transition:
 
 - `frontmatter-update [<file>] <key>=<val> ...` — set frontmatter keys on the artifact, or on `<file>` when a target is given.
-- `script <name>` — run `<playbook-dir>/_scripts/<name>`.
+- `script <name> [args...]` — run the executable named `<name>`, passing every token after it as argv.
 
 A hook value is **Jinja-rendered with the `macro` global**, the same one rendered bodies call — a timestamp is `completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"`, with the format at the call site and no bespoke token vocabulary. Because the clock goes through the macro system, `--stub-macro` pins it, so a transition is reproducible exactly the way a render is. The hook string is tokenised with `shlex`, so quote any value carrying spaces — as above. A value with no Jinja in it passes through untouched, and a macro or Jinja error aborts the transition (exit 2) with the offending value on stderr.
 
@@ -345,9 +345,11 @@ The status set itself is implicit — the CLI always writes `status: <to>` befor
 
 ### `_scripts/` contract
 
-A `script <name>` hook runs the executable at `<playbook-dir>/_scripts/<name>`:
+A `script <name>` hook runs an executable found by name:
 
-- it must exist and be executable, or the transition fails (exit 2) without mutating anything further;
+- resolution probes `<playbook-dir>/_scripts/<name>` first, then `<root>/_scripts/<name>` in each discovery root, most specific first — local vault, then global home, then the plugin's own `playbooks/`. The first hit wins; if none exists the transition fails (exit 2) with every probed path named. A script two playbooks share therefore lives once at the root level (`playbooks/_scripts/` for the shipped ones), and a playbook-local file of the same name shadows it;
+- it must be executable, or the transition fails (exit 2) without mutating anything further;
+- the hook line is tokenised with `shlex` and every token after the script name is passed through as argv, which is how one shared script serves several playbooks — `script close-working-set --status done --stage _lessons _booping --prefix learn` reaches the script as those four flags;
 - it runs with the **run workdir** as its cwd;
 - it receives `BOOPING_ARTIFACT` (absolute artifact path), `BOOPING_WORKDIR` (absolute run workdir) and `BOOPING_INSTANCE` (the instance slug, empty for a non-instance machine);
 - a non-zero exit aborts the transition; the script's stderr is relayed.

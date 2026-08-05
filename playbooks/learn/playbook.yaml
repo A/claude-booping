@@ -19,7 +19,7 @@ states:
             gates:
               - "user confirmed the review table — the accept / reject / add response is recorded"
               - "every accepted lesson written to its target file"
-            hooks: ["script close-working-set"]
+            hooks: ["script close-working-set --status done --stage _lessons _booping --prefix learn"]
       done:
         terminal: true
 

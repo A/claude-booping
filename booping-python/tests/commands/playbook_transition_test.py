@@ -23,6 +23,14 @@ def _plant(name: str = "runner") -> None:
     subprocess.run(["cp", "-r", str(src), str(dst)], check=True)
 
 
+def _plant_shared_scripts() -> None:
+    """Copy the fixture's root-level `_scripts/` into the isolated HOME's global root."""
+    src = get_fixture_path("playbook-transition-home") / "_playbooks" / "_scripts"
+    dst = Path(os.environ["HOME"]) / "Claude" / "_playbooks" / "_scripts"
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    subprocess.run(["cp", "-r", str(src), str(dst)], check=True)
+
+
 def _args(
     playbook: str = "runner",
     to: str = "intaking",
@@ -295,6 +303,75 @@ def test_instance_artifact_path_interpolated_and_moved(
     assert lines[:2] == ["spec-ing → done", "frontmatter: status=done"]
     artifact = tmp_path / "steps" / "alpha" / "index.md"
     assert parse_frontmatter_only(artifact)["status"] == "done"
+
+
+# ---------------------------------------------------------------------------
+# Script hook resolution across discovery roots
+# ---------------------------------------------------------------------------
+
+def _scripter(to: str, workdir: Path) -> None:
+    _run(_args(playbook="scripter", to=to, workdir=workdir))
+
+
+def _scripter_start(tmp_path: Path) -> None:
+    _plant("scripter")
+    _plant_shared_scripts()
+    _scripter("start", tmp_path)
+
+
+def test_script_hook_falls_back_to_a_discovery_root(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _scripter_start(tmp_path)
+    capsys.readouterr()
+
+    _scripter("shared", tmp_path)
+
+    assert "script shared-note: ok" in capsys.readouterr().out
+    assert (tmp_path / "shared-note.log").is_file()
+
+
+def test_script_hook_passes_trailing_tokens_as_argv(tmp_path: Path) -> None:
+    _scripter_start(tmp_path)
+
+    _scripter("shared", tmp_path)
+
+    assert (tmp_path / "shared-note.log").read_text() == "shared --tag hello --stage a b\n"
+
+
+def test_playbook_dir_script_shadows_the_root_copy(tmp_path: Path) -> None:
+    _scripter_start(tmp_path)
+
+    _scripter("shadowed", tmp_path)
+
+    assert (tmp_path / "note.log").read_text() == "playbook\n"
+
+
+def test_root_script_used_when_the_playbook_carries_none(tmp_path: Path) -> None:
+    _scripter_start(tmp_path)
+    home = Path(os.environ["HOME"]) / "Claude" / "_playbooks"
+    (home / "scripter" / "_scripts" / "note").unlink()
+
+    _scripter("shadowed", tmp_path)
+
+    assert (tmp_path / "note.log").read_text() == "root\n"
+
+
+def test_missing_script_names_every_probed_path(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _scripter_start(tmp_path)
+    capsys.readouterr()
+
+    with pytest.raises(SystemExit) as exc:
+        _scripter("unfindable", tmp_path)
+    assert exc.value.code == 2
+    err = capsys.readouterr().err
+    home = Path(os.environ["HOME"]) / "Claude" / "_playbooks"
+    assert "script hook 'no-such-script' not found; probed:" in err
+    assert str(home / "scripter" / "_scripts" / "no-such-script") in err
+    assert str(home / "_scripts" / "no-such-script") in err
+    assert str(PLUGIN_ROOT / "playbooks" / "_scripts" / "no-such-script") in err
 
 
 # ---------------------------------------------------------------------------

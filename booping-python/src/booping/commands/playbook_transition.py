@@ -191,17 +191,27 @@ def _bootstrap(artifact: Path, initial: str) -> None:
 def _dispatch_script(
     hook: str,
     playbook_dir: Path,
+    search_roots: list[Path],
     workdir: Path,
     artifact: Path,
     instance: str | None,
 ) -> str:
-    parts = hook.split()
-    if len(parts) != 2:
+    """Run a `script <name> [args...]` hook. The script is looked up in the playbook's
+    own `_scripts/` first, then in each discovery root's `_scripts/` (most specific
+    first); trailing hook tokens are passed through as argv."""
+    try:
+        parts = shlex.split(hook)
+    except ValueError as exc:
+        _fail(f"malformed script hook {hook!r}: {exc}", code=2)
+    if len(parts) < 2:
         _fail(f"malformed script hook: {hook!r}", code=2)
-    name = parts[1]
-    script = playbook_dir / "_scripts" / name
-    if not script.is_file():
-        _fail(f"script hook {name!r} not found at {script}", code=2)
+    name, script_args = parts[1], parts[2:]
+    probed = [playbook_dir / "_scripts" / name]
+    probed += [root / "_scripts" / name for root in search_roots]
+    script = next((p for p in probed if p.is_file()), None)
+    if script is None:
+        paths = ", ".join(str(p) for p in probed)
+        _fail(f"script hook {name!r} not found; probed: {paths}", code=2)
     if not os.access(script, os.X_OK):
         _fail(f"script hook {name!r} is not executable: {script}", code=2)
 
@@ -211,7 +221,7 @@ def _dispatch_script(
     env["BOOPING_WORKDIR"] = str(workdir)
 
     result = subprocess.run(
-        [str(script)],
+        [str(script), *script_args],
         cwd=str(workdir),
         env=env,
         capture_output=True,
@@ -290,7 +300,9 @@ def _run(args: argparse.Namespace) -> None:
             )
             report.append(format_frontmatter_line(resolved, rel))
         elif hook_name == "script":
-            name = _dispatch_script(hook, playbook_dir, workdir, artifact, instance)
+            name = _dispatch_script(
+                hook, playbook_dir, pb.search_roots, workdir, artifact, instance
+            )
             report.append(f"script {name}: ok")
         else:
             _fail(f"unknown hook: {hook_name!r}", code=2)

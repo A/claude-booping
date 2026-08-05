@@ -1,19 +1,32 @@
 #!/usr/bin/env python3
-"""Exit hook for the `retro` playbook's `awaiting-retro → awaiting-learning` edge.
+"""Shared exit hook: close a working set of plans and commit the vault.
+
+Used by the `retro` playbook (`awaiting-retro → awaiting-learning`) and the `learn`
+playbook (`awaiting-learning → done`); the per-playbook differences live in the hook
+line's argv rather than in a second copy of this file.
 
 Environment (set by `booping playbook-transition`): BOOPING_WORKDIR =
 {vault}/plans/{primary-slug}, which is also cwd.
 
-Reads the working set out of the workdir's `retro.md` (`plans:` + `goal_verdicts:`),
-stamps `retro:` and `goal:` on every plan in the list, sets `status: awaiting-learning`
-on every plan other than the primary (the primary's own status is written by
-`playbook-transition` before the hooks run), and commits. Self-contained: the vault carries no `.booping` marker, so nothing here shells
-back into `booping`, and nothing outside the standard library is imported.
+Reads the working set out of the workdir's `retro.md` (`plans:`), stamps `--status` on
+every plan other than the primary (the primary's own status is written by
+`playbook-transition` before the hooks run) and commits as `{prefix}: {slug} → {status}`.
 
-A missing plan file, a plan missing from `goal_verdicts:`, or a `retro.md` without
-either key exits non-zero, which aborts the transition.
+Flags:
+  --status VALUE   status stamped on every sibling plan (required)
+  --prefix WORD    commit-message prefix (required)
+  --verdicts       require a non-empty `goal_verdicts:` mapping in `retro.md` and stamp
+                   `retro:` + `goal:` on every plan in the working set
+  --stage DIR...   extra vault directories staged when they exist
+
+Self-contained: the vault carries no `.booping` marker, so nothing here shells back into
+`booping`, and nothing outside the standard library is imported.
+
+A missing plan file, a plan missing from `goal_verdicts:` under `--verdicts`, or a
+`retro.md` without the keys it needs exits non-zero, which aborts the transition.
 """
 
+import argparse
 import os
 import re
 import subprocess
@@ -83,7 +96,18 @@ def stamp(plan: Path, values: dict[str, str]) -> None:
     plan.write_text(head + sep + body)
 
 
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Close a working set of plans and commit the vault.")
+    parser.add_argument("--status", required=True)
+    parser.add_argument("--prefix", required=True)
+    parser.add_argument("--verdicts", action="store_true")
+    parser.add_argument("--stage", nargs="*", default=[])
+    return parser.parse_args()
+
+
 def main() -> None:
+    args = parse_args()
+
     workdir = Path(os.environ.get("BOOPING_WORKDIR", ".")).resolve()
     primary_slug = workdir.name
     vault = workdir.parent.parent
@@ -94,11 +118,13 @@ def main() -> None:
 
     fm = read_frontmatter(retro)
     plans = fm.get("plans")
-    verdicts = fm.get("goal_verdicts")
     if not isinstance(plans, list) or not plans:
         sys.exit(f"{retro}: frontmatter carries no `plans:` list")
-    if not isinstance(verdicts, dict) or not verdicts:
+
+    raw_verdicts = fm.get("goal_verdicts")
+    if args.verdicts and (not isinstance(raw_verdicts, dict) or not raw_verdicts):
         sys.exit(f"{retro}: frontmatter carries no `goal_verdicts:` mapping")
+    verdicts: dict[str, object] = raw_verdicts if isinstance(raw_verdicts, dict) else {}
 
     retro_rel = f"plans/{primary_slug}/retro.md"
     primary_rel = {f"plans/{primary_slug}/index.md", f"plans/{primary_slug}/plan.md"}
@@ -108,26 +134,35 @@ def main() -> None:
         path = vault / rel
         if not path.is_file():
             sys.exit(f"{retro}: plan listed in `plans:` not found: {path}")
-        if rel not in verdicts:
-            sys.exit(f"{retro}: no `goal_verdicts:` entry for {rel}")
-        values = {"retro": retro_rel, "goal": verdicts[rel]}
+        values: dict[str, str] = {}
+        if args.verdicts:
+            if rel not in verdicts:
+                sys.exit(f"{retro}: no `goal_verdicts:` entry for {rel}")
+            values = {"retro": retro_rel, "goal": str(verdicts[rel])}
         if rel not in primary_rel:
-            values["status"] = "awaiting-learning"
+            values["status"] = args.status
         targets.append((rel, path, values))
 
     for _, path, values in targets:
-        stamp(path, values)
+        if values:
+            stamp(path, values)
 
     moved = [rel for rel, _, values in targets if "status" in values]
-    summary = f"retro/goal stamped on {len(targets)} plans"
+    if args.verdicts:
+        summary = f"retro/goal stamped on {len(targets)} plans"
+    else:
+        summary = f"working set closed, {len(plans)} plans"
     if moved:
-        summary += "; " + ", ".join(f"{rel} → awaiting-learning" for rel in moved)
+        summary += "; " + ", ".join(f"{rel} → {args.status}" for rel in moved)
 
     if (vault / ".git").exists():
-        subprocess.run(
-            ["git", "-C", str(vault), "add", retro_rel, *(rel for rel, _, _ in targets)],
-            check=True,
-        )
+        stage = [rel for rel, _, _ in targets]
+        if args.verdicts:
+            stage.insert(0, retro_rel)
+        for extra in args.stage:
+            if (vault / extra).exists():
+                stage.append(extra)
+        subprocess.run(["git", "-C", str(vault), "add", *stage], check=True)
         result = subprocess.run(
             [
                 "git",
@@ -136,7 +171,7 @@ def main() -> None:
                 "commit",
                 "-q",
                 "-m",
-                f"retro: {primary_slug} → awaiting-learning",
+                f"{args.prefix}: {primary_slug} → {args.status}",
             ],
         )
         summary += "; vault-commit: " + ("ok" if result.returncode == 0 else "nothing to commit")
