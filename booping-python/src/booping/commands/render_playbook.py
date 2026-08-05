@@ -240,6 +240,10 @@ def build_env(
             env_class=PlaybookEnvironment,
         )
     else:
+        # No context — the lesson-rendering path. This env carries neither the
+        # `booping` global nor the `query` filter: a lesson body naming `booping`
+        # renders empty, and one piping through `query` fails to compile (Jinja has
+        # no undefined-filter fallback). Neither is available to lesson authors.
         env = PlaybookEnvironment(
             loader=loader,
             undefined=LenientUndefined,

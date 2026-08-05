@@ -120,12 +120,26 @@ def make_query_filter(config: object) -> Callable[..., list[Row]]:
     return query_filter
 
 
+def make_booping_global(context: object) -> Row:
+    """The `booping` global: framework state a template may branch on.
+
+    A `Row` rather than a dict so `{{ booping.latest_migration }}` is plain attribute
+    access and a key named `items` / `keys` / `get` can never render a bound method.
+    """
+    from booping.query import Row  # local import: see make_query_filter
+
+    project = getattr(context, "project", None)
+    latest = getattr(project, "latest_migration", -1)
+    return Row({"latest_migration": latest if isinstance(latest, int) else -1})
+
+
 def _build_env(
     loader_root: Path,
     *,
     loader: BaseLoader | None = None,
     env_class: type[Environment] = Environment,
     config: object = None,
+    context: object = None,
 ) -> Environment:
     from booping.query import as_table  # local import: see make_query_filter
 
@@ -136,6 +150,10 @@ def _build_env(
     )
     globals_: dict[str, Any] = env.globals  # type: ignore[assignment]
     globals_["macro"] = make_macro(config)
+    # The single site the `booping` global is set: every env a body renders through
+    # (`render`, `build_source_env`, and so `render-playbook` and `scaffold`) comes
+    # from here.
+    globals_["booping"] = make_booping_global(context)
     filters: dict[str, Any] = env.filters  # type: ignore[assignment]
     filters["query"] = make_query_filter(config)
     filters["as_table"] = as_table
@@ -164,6 +182,7 @@ def build_source_env(
         loader=loader,
         env_class=env_class,
         config=config,
+        context=context,
     )
     globals_: dict[str, Any] = env.globals  # type: ignore[assignment]
     globals_["context"] = context
@@ -202,7 +221,7 @@ def render(
         loader_root = root
         template_name = None
 
-    env = _build_env(loader_root, config=config)
+    env = _build_env(loader_root, config=config, context=context)
 
     # Top-level render seeds an empty stack and constructs a real Tools instance.
     real_tools: Tools

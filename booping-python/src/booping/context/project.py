@@ -13,6 +13,8 @@ class Project(BaseModel):
     directory: Path
     repo_directory: Path
     git_commit: str | None = None
+    # Watermark: everything at or below this id has been applied. -1 = nothing yet.
+    latest_migration: int = -1
 
     @property
     def is_local_vault(self) -> bool:
@@ -64,6 +66,7 @@ class Project(BaseModel):
                     ),
                     repo_directory=candidate,
                     git_commit=_resolve_git_commit(candidate),
+                    latest_migration=_resolve_latest_migration(data, marker),
                 )
             parent = candidate.parent
             if parent == candidate:
@@ -87,6 +90,23 @@ def _resolve_vault_dir(
     if path.is_absolute():
         return path
     return (candidate / path).resolve()
+
+
+def _resolve_latest_migration(data: dict[str, object], marker: Path) -> int:
+    """Read `latest_migration` off the marker, defaulting to -1 (nothing applied).
+
+    A forward-compatible subset read: only this key is looked at, so a marker whose
+    schema a later migration changed still loads. A value that is not an integer is
+    a user error naming the marker, raised at load time rather than mid-render.
+    """
+    raw = data.get("latest_migration")
+    if raw is None:
+        return -1
+    if isinstance(raw, bool) or not isinstance(raw, int):
+        raise ValueError(
+            f"invalid latest_migration in {marker}: expected an integer, got {raw!r}"
+        )
+    return raw
 
 
 def _resolve_git_commit(repo_directory: Path) -> str | None:

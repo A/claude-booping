@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 import os
+import re
 import subprocess
 from pathlib import Path
+
+import pytest
 
 from booping.context.project import Project
 from tests.helpers import get_fixture_path
@@ -106,6 +109,38 @@ def test_is_local_vault_false_for_claude_vault() -> None:
     project = Project.load_cwd(start=vault)
     assert project is not None
     assert project.is_local_vault is False
+
+
+def test_latest_migration_defaults_to_minus_one(tmp_path: Path) -> None:
+    (tmp_path / ".booping").write_text("project_name: nomig\n")
+    project = Project.load_cwd(start=tmp_path)
+    assert project is not None
+    assert project.latest_migration == -1
+
+
+def test_latest_migration_read_from_marker(tmp_path: Path) -> None:
+    (tmp_path / ".booping").write_text("project_name: mig\nlatest_migration: 7\n")
+    project = Project.load_cwd(start=tmp_path)
+    assert project is not None
+    assert project.latest_migration == 7
+
+
+def test_unknown_marker_keys_are_ignored(tmp_path: Path) -> None:
+    (tmp_path / ".booping").write_text(
+        "project_name: future\nlatest_migration: 2\nsome_future_key: {a: [1, 2]}\n"
+    )
+    project = Project.load_cwd(start=tmp_path)
+    assert project is not None
+    assert project.latest_migration == 2
+
+
+def test_non_integer_latest_migration_is_a_user_error_naming_the_file(
+    tmp_path: Path,
+) -> None:
+    marker = tmp_path / ".booping"
+    marker.write_text("project_name: bad\nlatest_migration: nope\n")
+    with pytest.raises(ValueError, match=re.escape(str(marker))):
+        Project.load_cwd(start=tmp_path)
 
 
 def test_load_cwd_from_subdirectory_walks_up(tmp_path: Path) -> None:

@@ -6,6 +6,8 @@ from datetime import datetime
 import pytest
 from jinja2 import Environment, FileSystemLoader
 
+from booping.context import Context
+from booping.context.project import Project
 from booping.rendering import (
     LenientUndefined,
     RenderCycleError,
@@ -137,13 +139,87 @@ def test_macro_default_shape_from_core_config() -> None:
     fixture = get_fixture_path("plugin-root-minimal")
     env = build_source_env(
         context={},
-        config={"macros": {"now": ["date", "+%Y%m%d-%H-%M"]}},
+        config={"macros": {"date": ["date"]}},
         plugin_root=fixture,
     )
 
-    rendered = env.from_string("{{ macro('macros.now') }}").render()
+    rendered = env.from_string("{{ macro('macros.date', '+%Y%m%d-%H-%M') }}").render()
 
     assert re.fullmatch(r"\d{8}-\d{2}-\d{2}", rendered)
+
+
+def _project_context(latest_migration: int) -> Context:
+    from pathlib import Path
+
+    return Context(
+        project=Project(
+            name="p",
+            directory=Path("/tmp/vault"),
+            repo_directory=Path("/tmp/repo"),
+            latest_migration=latest_migration,
+        )
+    )
+
+
+def test_booping_global_in_render(tmp_path: object) -> None:
+    from pathlib import Path
+
+    fixture = get_fixture_path("plugin-root-minimal")
+    scratch = Path(str(tmp_path)) / "scratch.j2"
+    scratch.write_text("{{ booping.latest_migration }}")
+
+    result = render(
+        template_path=scratch,
+        context=_project_context(4),
+        config={},
+        tools={},
+        kwargs={},
+        plugin_root=fixture,
+    )
+
+    assert result == "4"
+
+
+def test_booping_global_in_source_env() -> None:
+    """The scaffold seed path: build_source_env + from_string."""
+    fixture = get_fixture_path("plugin-root-minimal")
+    env = build_source_env(
+        context=_project_context(9), config={}, plugin_root=fixture
+    )
+
+    assert env.from_string("{{ booping.latest_migration }}").render() == "9"
+
+
+def test_booping_global_defaults_to_minus_one_without_project() -> None:
+    fixture = get_fixture_path("plugin-root-minimal")
+    env = build_source_env(context=Context(), config={}, plugin_root=fixture)
+
+    assert env.from_string("{{ booping.latest_migration }}").render() == "-1"
+
+
+def test_booping_global_in_playbook_env() -> None:
+    from booping.commands.render_playbook import build_env
+
+    env = build_env(context=_project_context(3))
+
+    assert env.from_string("{{ booping.latest_migration }}").render() == "3"
+
+
+def test_playbook_env_without_context_has_no_booping_global_or_query_filter() -> None:
+    """The lesson-rendering branch: neither surface is wired.
+
+    `booping` is an undefined name and renders empty; `query` is an absent filter and
+    so fails at compile time — Jinja has no undefined-filter fallback.
+    """
+    from jinja2 import TemplateAssertionError
+
+    from booping.commands.render_playbook import build_env
+
+    env = build_env()
+
+    assert env.from_string("[{{ booping.latest_migration }}]").render() == "[]"
+    with pytest.raises(TemplateAssertionError):
+        env.from_string("[{{ 'a.b' | query }}]")
 
 
 def test_tools_render_depth_limit() -> None:
