@@ -6,9 +6,9 @@ This page is the reference for every file and directory inside the vault. For th
 
 ## `plans/`
 
-A plan is a directory: `{YYYYMMDDHHMM}_{kebab-title}/` holding `index.md`. That is the only shape booping discovers (the `plans.glob` config key, one entry — `plans/*/index.md`); a legacy flat `{YYYYMMDD}-{kebab-title}.md` has to be moved into a directory of its own to be seen. Each plan carries YAML frontmatter (status, type, story points, a one-line `summary`, etc.) and a body of milestones with tasks. Authored by the [groom playbook](groom.md), executed by the [develop playbook](develop.md).
+A plan is a directory: `{YYYYMMDDHHMM}_{kebab-title}/` holding `index.md`. That is the only shape booping discovers (the `core.plans.glob` config key, one entry — `plans/*/index.md`); a legacy flat `{YYYYMMDD}-{kebab-title}.md` has to be moved into a directory of its own to be seen. Each plan carries YAML frontmatter (status, type, story points, a one-line `summary`, etc.) and a body of milestones with tasks. Authored by the [groom playbook](groom.md), executed by the [develop playbook](develop.md).
 
-A plan walks the status table from `backlog` / `in-spec` through `awaiting-plan-review`, `ready-for-dev`, `in-progress`, `awaiting-retro`, `awaiting-learning`, to `done`. The owning skill moves a plan by running a `booping transition` command, which performs the status change and every mechanical mutation it entails in one step.
+A plan's `status:` is **run state**, not a shared lifecycle: `index.md` doubles as the run artifact of whichever playbook is operating on the plan, so the status vocabulary is the one that playbook declares in its own `states:` block. The four playbooks are wired so one's terminal status is the next one's entry — groom ends at `ready-for-dev`, develop claims from there and ends at `awaiting-retro`, retro ends at `awaiting-learning`, learn ends at `done`. Only `booping playbook-transition` writes the status, and it refuses any move the machine does not declare. See [Playbooks → Run state](playbook.md#run-state).
 
 Sibling stubs created by a groom-driven split point at the primary plan via `split_from: plans/...` in their frontmatter.
 
@@ -24,7 +24,7 @@ Durable, project-wide rules accumulated over many sprints. Files are named `{N}_
 
 Legacy lesson surface, authored by the retired `/learn` skill. Still read by the skills and playbook steps that include the lessons partial, but nothing writes it any more — the [learn playbook](learn.md) writes `_lessons/` below.
 
-Scope note: this directory serves the built-in skills only. [Playbooks](playbook.md) and agent bodies do not read it — they read `_lessons/` below, and a render of any playbook emits a non-blocking note while this directory still holds files.
+Scope note: this is the *untargeted* surface — everything in it reaches every body that includes the lessons partial (`/code-review`, the researcher agent, and the groom, retro and code-review playbook steps that include it). Targeted lessons live in `_lessons/` below, and a render of any playbook emits a non-blocking note while this directory still holds files.
 
 ## `_lessons/`
 
@@ -40,12 +40,14 @@ Free-form user notes — plan-review comments, code-review threads, ideas for ne
 
 ## `_booping/skill_<name>.md`
 
-Per-skill extension file. Loaded automatically into the matching skill's context at invocation time, so the project's local conventions reach the matching skill without you having to restate them. Authored and updated by the [learn playbook](learn.md) — do not hand-edit unless you know what learn would have written.
+Per-skill extension file. Loaded automatically into the matching skill's context at invocation time, so the project's local conventions reach it without you having to restate them. Two skills ship — `code-review` and `playbook` — so `skill_code-review.md` and `skill_playbook.md` are the files that reach a skill body. Authored and updated by the [learn playbook](learn.md) — do not hand-edit unless you know what learn would have written.
+
+To correct a **playbook** rather than a skill, write a targeted lesson in `_lessons/` instead (see below): playbooks have no extension file.
 
 The [setup playbook](install.md) creates `_booping/` but seeds no extension files. Learn writes them as findings accumulate — typically:
 
 - `_booping/agent_booping-developer.md` — stack + conventions for the developer agent.
-- `_booping/skill_<name>.md` — project-local signal the repo `CLAUDE.md` doesn't carry (e.g. a sizing override, env / service notes).
+- `_booping/skill_code-review.md` — project-local signal the repo `CLAUDE.md` doesn't carry (e.g. house review rules, env / service notes).
 
 Nothing here is required: an empty `_booping/` is a valid vault.
 
@@ -65,12 +67,12 @@ Project-local code-review templates. Loaded by [/code-review](code_review.md) al
 
 An at-a-glance view of every plan in the vault — an [Obsidian Bases](https://help.obsidian.md/bases) fence over the `plans/*/index.md` files, ordered by status and sorted newest-first. Bases resolves every path against the *Obsidian* vault root, so the seeded filter scopes itself with `file.inFolder(this.file.folder)` — the folder of the note holding the fence — which keeps it correct when the booping vault is nested inside a larger Obsidian vault.
 
-**Seeded once by `booping scaffold vault.scaffold`; nothing rewrites it.** Obsidian evaluates the query live against the plan files, so the view is never stale. Edit the fence to change columns, sorting or filters — it is yours from the moment it is written.
+**Seeded once by `booping scaffold core.setup_playbook.scaffold`; nothing rewrites it.** Obsidian evaluates the query live against the plan files, so the view is never stale. Edit the fence to change columns, sorting or filters — it is yours from the moment it is written.
 
 Outside Obsidian the file is an inert code block. For a machine-readable listing of the same data, use `bin/booping query`:
 
 ```bash
-bin/booping query --config plans --where status=ready-for-dev --sort -created
+bin/booping query --config core.plans --where status=ready-for-dev --sort -created
 ```
 
 `--where` is a fixed operator vocabulary, not an expression language. The clause key carries the operator as a suffix:
@@ -91,6 +93,6 @@ The marker that ties a repo to its vault. Unlike everything else on this page, `
 
 ## `config.yaml`
 
-Optional per-project override for the plugin's `src/config.yaml`. Deep-merges over the plugin defaults at render time (no rebuild step): dict keys merge, list keys replace wholesale. The natural targets for per-project tuning are the lifecycle, sprint scale, and agent wiring.
+Optional per-project override for the plugin's `src/config.yaml`. Deep-merges over the plugin defaults at render time (no rebuild step): dict keys merge, list keys replace wholesale. The natural targets for per-project tuning are the sprint scale, task types, branch conventions and agent wiring. Nothing is validated and no key is restricted to a tier, so your own playbooks' config lives here too.
 
 See [Project config](project_config.md) for the full key tour and override mechanics.

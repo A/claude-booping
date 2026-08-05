@@ -2,7 +2,7 @@
 
 This walkthrough takes you from a fresh checkout to a fully shipped first plan. Run the commands in order; the skills will list candidates if you forget an exact filename.
 
-The shortest possible path is the five-command loop in the [README Quick start](https://github.com/A/claude-booping#quick-start). The walkthrough below adds the orient step and the per-command context a new user benefits from.
+The shortest possible path is the five-command loop in the [README Quick start](https://github.com/A/claude-booping#quick-start). The walkthrough below adds the per-command context a new user benefits from.
 
 ## 1. Install the plugin
 
@@ -27,24 +27,24 @@ See [Install](install.md) for prerequisites (`uv`, `git`, optional `GEMINI_API_K
 
 The `setup` playbook settles the machine level (home dir + machine config) and then the project level: it asks for the vault location — the default `<home_dir>/{project}/` or a repo-local directory (wired via the `.booping` marker's `vault_path:` key) — and creates the vault with `plans/`, `retrospectives/`, `_lessons/`, `notes/`, `_booping/`, plus a `.booping` marker file so other skills know the vault is ready. Anything already in place is detected and skipped. See [Vault](vault.md) for what each directory is for.
 
-## 3. Orient with /chat
+## 3. See what is available
 
-Before grooming anything, run:
+Run `/playbook` with no argument to list every playbook booping discovered — the shipped ones plus anything you have written in your vault — with its trigger and scope:
 
 ```text
-/chat
+/playbook
 ```
 
-`/chat` is the orient/working-mode command. It loads the project vault and is the right surface for vault navigation, reading existing plans, and small ad-hoc edits. When scope grows past "small task", `/chat` escalates you into `/playbook groom`.
+Everything below is one of those entries.
 
 ## 4. Read the sprint view
 
 Open `~/Claude/{project}/sprints.md` in Obsidian. It is an [Obsidian Bases](https://help.obsidian.md/bases) fence — a live table over every plan in the vault, evaluated on open, so it is never stale. On a fresh project it will be near-empty; that is expected.
 
-The fence is seeded once and yours to edit (see [Vault](vault.md)). Outside Obsidian, `bin/booping query --config plans` prints the same listing, and `--where` narrows it — `k=v`, `k!=v`, `k:in=a,b`, `k:gt=n`, `k:lt=n`, repeatable and all applying at once:
+The fence is seeded once and yours to edit (see [Vault](vault.md)). Outside Obsidian, `bin/booping query --config core.plans` prints the same listing, and `--where` narrows it — `k=v`, `k!=v`, `k:in=a,b`, `k:gt=n`, `k:lt=n`, repeatable and all applying at once:
 
 ```bash
-bin/booping query --config plans --where status:in=ready-for-dev,in-progress
+bin/booping query --config core.plans --where status:in=ready-for-dev,in-progress
 ```
 
 ## 5. First groom
@@ -55,7 +55,7 @@ Spec your first sprint with a free-text description:
 /playbook groom — add per-tenant rate limiting to the public API
 ```
 
-The [groom playbook](groom.md) researches the codebase and the web, drafts a plan under `~/Claude/{project}/plans/{YYYYMMDDHHMM}_{kebab-title}/index.md`, optionally hands it to a second model for cross-review (when `cross_review.agent` is configured), and stops at `awaiting-plan-review` for your explicit approval. Sharpen it, push back, ask for splits — the more detailed your initial brief, the sharper the resulting plan.
+The [groom playbook](groom.md) researches the codebase and the web, drafts a plan under `~/Claude/{project}/plans/{YYYYMMDDHHMM}_{kebab-title}/index.md`, optionally hands it to a second model for cross-review (when `core.groom_playbook.cross_review_agent` is configured), and stops at `awaiting-plan-review` for your explicit approval. Sharpen it, push back, ask for splits — the more detailed your initial brief, the sharper the resulting plan.
 
 When you approve, the run flips the plan to `ready-for-dev`.
 

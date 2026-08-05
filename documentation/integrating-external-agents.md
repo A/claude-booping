@@ -1,11 +1,11 @@
 # Integrating external agents
 
-booping ships with built-in worker agents (`booping-developer`, `booping-researcher`). You can also wire any skill to delegate to **your own** agent — a plain Claude Code agent with different instructions or a cheaper model, or a Claude Code agent that fronts an external CLI worker or a browser review surface.
+booping ships with built-in worker agents (`booping-developer`, `booping-researcher`). You can also wire any playbook or skill to delegate to **your own** agent — a plain Claude Code agent with different instructions or a cheaper model, or a Claude Code agent that fronts an external CLI worker or a browser review surface.
 
 Every integration comes down to two pieces of project config:
 
-- **`skills.<name>.agents.<id>`** in your vault config (`~/Claude/{project}/config.yaml`) tells the skill which agents are available to it. Each entry carries `good_for` / `bad_for` bullets that guide the skill toward the right choice.
-- **`_booping/skill_<name>.md`** is where you override or extend a skill's behavior — for example, to tell the skill to use your external agent and how to brief it.
+- **`core.{name}_playbook.agents.<id>`** in your vault config (`~/Claude/{project}/config.yaml`) tells that playbook (or the skill reading the same block) which agents are available to it. Each entry carries `good_for` / `bad_for` bullets that guide it toward the right choice. The block name is the playbook name with `-` replaced by `_` — `develop` → `core.develop_playbook`, `code-review` → `core.code_review_playbook`.
+- **`_booping/skill_<name>.md`** is where you override or extend a **skill's** behaviour — for example, to tell it to use your external agent and how to brief it. To shape a **playbook's** briefing instead, write a targeted lesson in `_lessons/` aimed at the step that delegates (`develop/develop-loop`); see [Playbooks → Lessons](playbook.md#lessons).
 
 You invoke an agent by its bare name through the `Agent` tool (`subagent_type="<id>"`). Any agent file you drop into `~/.claude/agents/` is registered for every project automatically; if you add it mid-session, start a new session to pick it up.
 
@@ -15,7 +15,7 @@ See [Project config](project_config.md) for the config-merge rules and [Vault](v
 
 booping's built-in agents (`booping-developer`, `booping-researcher`) stay available to every skill by default. When you want your external agent to be the *only* worker a skill delegates to, the built-ins can compete against it and the skill may pick a built-in when you wanted yours.
 
-Set `skills.<name>.disable_internal_agents: true` for that skill. This leaves only the agents you registered yourself, so the skill always reaches for your external agent. The flag (and the per-agent `internal` marker it filters on) is documented in the [`skills.<name>.agents` key tour](project_config.md#skillsnameagents).
+Set `core.{name}_playbook.disable_internal_agents: true` on that block. This leaves only the agents you registered yourself, so the delegation table always points at your external agent. The flag (and the per-agent `internal` marker it filters on) is documented in the [`agents` key tour](project_config.md#corename_playbookagents).
 
 ## Level 1 — Connect an external Claude Code agent
 
@@ -40,8 +40,8 @@ Stay within the related files listed. Report back in milestone format.
 **2. Register it** in `~/Claude/{project}/config.yaml`:
 
 ```yaml
-skills:
-  develop:
+core:
+  develop_playbook:
     agents:
       haiku-developer:
         good_for:
@@ -50,10 +50,14 @@ skills:
           - "Large or tricky changes that need the stronger built-in worker"
 ```
 
-**3. Tell the skill to use it** in `~/Claude/{project}/_booping/skill_develop.md`:
+**3. Tell the playbook to use it** — write a targeted lesson at `~/Claude/{project}/_lessons/0001_prefer-haiku-developer.md`:
 
 ```markdown
-### Prefer haiku-developer for small groups
+---
+title: Prefer haiku-developer for small groups
+targets:
+  - develop/develop-loop
+---
 
 For small, well-scoped milestone groups, delegate to `haiku-developer`
 (`subagent_type="haiku-developer"`). Brief it with the request, the related
@@ -77,9 +81,9 @@ When the backend needs more orchestration than a single command (a server, a bro
 ### Step by step
 
 1. Create a global agent at `~/.claude/agents/<id>.md` that drives your CLI and reports in milestone format.
-2. Ask Claude to wire the agent into the target skill's config — you should end up with a `skills.<name>.agents.<id>` block like the examples below.
-3. Ask Claude to update the skill's extra instructions (`_booping/skill_<name>.md`) to shape the briefing.
-4. Test it: run the skill and confirm it delegates to your agent.
+2. Ask Claude to wire the agent into the target playbook's config — you should end up with a `core.{name}_playbook.agents.<id>` block like the examples below.
+3. Ask Claude to shape the briefing — a `_booping/skill_<name>.md` extension for a skill, or a targeted lesson in `_lessons/` for a playbook step.
+4. Test it: run the playbook or skill and confirm it delegates to your agent.
 
 ## Level 3 — Go-to examples
 
@@ -114,8 +118,8 @@ The agent body maps booping findings to the annotation contract, writes the batc
 **Vault config — `~/Claude/{project}/config.yaml`**
 
 ```yaml
-skills:
-  code-review:
+core:
+  code_review_playbook:
     agents:
       plannotator-reviewer:
         good_for:
@@ -170,8 +174,8 @@ The agent body writes the briefing to a temp file, runs the pinned `pi` invocati
 **Vault config — `~/Claude/{project}/config.yaml`**
 
 ```yaml
-skills:
-  develop:
+core:
+  develop_playbook:
     agents:
       pi-developer:
         good_for:
@@ -180,10 +184,14 @@ skills:
           - "Drift spot-checks or non-coding reads — those stay in the skill or go to booping-researcher"
 ```
 
-**Skill extension — `~/Claude/{project}/_booping/skill_develop.md`**
+**Targeted lesson — `~/Claude/{project}/_lessons/0002_brief-pi-developer.md`**
 
 ```markdown
-### Briefing the pi-developer worker
+---
+title: Briefing the pi-developer worker
+targets:
+  - develop/develop-loop
+---
 
 For this project, prefer `pi-developer` for milestone-group implementation.
 

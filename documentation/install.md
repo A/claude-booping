@@ -9,7 +9,7 @@ Required:
 
 Optional:
 
-- **A cross-review agent** — set `core.cross_review_agent` in your config and the [groom playbook](groom.md) hands the drafted plan to that agent for a second-model review before presenting it to you. With no agent configured the step is skipped silently — the rest of the loop is unaffected.
+- **A cross-review agent** — set `core.groom_playbook.cross_review_agent` in your config and the [groom playbook](groom.md) hands the drafted plan to that agent for a second-model review before presenting it to you. With no agent configured the step is skipped silently — the rest of the loop is unaffected.
 
 Install the prerequisites:
 
@@ -63,4 +63,4 @@ For the full directory tour (including `plan_templates/`, `review_templates/`, `
 
 ## Verify
 
-After setup, run `/chat` inside the same repo. It should orient against the freshly scaffolded vault and report that it is empty — your signal that you're ready to run your first [groom](groom.md).
+After setup, run `/playbook` inside the same repo. It should list the shipped playbooks — `groom`, `develop`, `retro`, `learn`, `code-review`, `setup`, `migrate`, `playbook-authoring` — with no STOP notice, which is your signal that the vault resolved and you're ready to run your first [groom](groom.md).

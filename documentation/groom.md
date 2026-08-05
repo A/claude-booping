@@ -10,7 +10,7 @@ Grooming is a **playbook**, not a skill — it is driven by [`/playbook`](playbo
 
 ## What it does
 
-The playbook walks a request through the early lifecycle states — `backlog` or fresh request → `in-spec` → `awaiting-plan-review` → `ready-for-dev`. The output is a plan directory whose `index.md` carries YAML frontmatter that the rest of the loop (`develop`, `retro`, `learn`) reads. The plan directory doubles as the playbook's run workdir, so a groom run is **resumable**: its run state lives in the same `index.md`.
+The playbook walks a request through its own run states — `framing` → `researching` → `drafting` → `cross-reviewing` → `presenting` → `awaiting-approval` → `ready-for-dev` — declared in `playbooks/groom/playbook.yaml`'s `states:` block. Two loopbacks exist: `drafting → researching` when the design needs blast radius the research pass missed, and `awaiting-approval → drafting` when your change request touches the plan itself. The output is a plan directory whose `index.md` carries YAML frontmatter that the rest of the loop (`develop`, `retro`, `learn`) reads. The plan directory doubles as the playbook's run workdir, so a groom run is **resumable**: its run state lives in the same `index.md`.
 
 Six steps, in dependency order:
 
@@ -90,7 +90,7 @@ What to check before approving:
 - **Definitions of done are verifiable.** Each task DoD checkbox is something you can mechanically confirm — not "code looks good".
 - **Cross-review findings are addressed.** Every `CRITICAL` finding is folded into the plan or recorded as an explicit deferral in the Risk register.
 
-Approve explicitly ("looks good", "ship it") to move the plan to `ready-for-dev`. A change request loops the run back to the step that owns what it touches — any change to architecture, scope, milestones, tasks or estimates sends it back to `drafting`.
+Approve explicitly ("looks good", "ship it") to move the plan to `ready-for-dev`, groom's terminal status and the queue the [develop playbook](develop.md) claims from. A change request touching architecture, scope, milestones, tasks or estimates sends the run back to `drafting`.
 
 ## Story points
 
@@ -105,13 +105,13 @@ booping uses a 1–5 scale for per-task estimates, rendered into the playbook fr
 Two thresholds drive the playbook's behaviour, both configurable:
 
 - **`core.sprint.default_threshold_sp` (default `35`)** — soft cap on plan size. Above this, `present` proposes splitting the plan into sibling stubs rather than shipping one mega-sprint.
-- **`core.sprint.redecompose_threshold` (default `5`)** — any task estimated at ≥ this value must be re-decomposed before the plan can leave `in-spec`.
+- **`core.sprint.redecompose_threshold` (default `5`)** — any task estimated at ≥ this value must be re-decomposed before the run can leave `drafting`.
 
 Both thresholds are ceilings, not velocity targets. A 12-SP plan is fine; a 38-SP plan is the trigger to consider a split.
 
 ## Cross-review
 
-`cross-review` is a **detached** step: a second model reads the written plan and returns severity findings only — it never writes. The reviewer is whatever agent `core.cross_review_agent.agent` names in config; with no `cross_review` agent configured the step is skipped and the run advances straight past it.
+`cross-review` is a **detached** step: a second model reads the written plan and returns severity findings only — it never writes. The reviewer is whatever agent `core.groom_playbook.cross_review_agent` names in config; with none configured (the plugin default) the step's summary and body both render as skipped and the run advances straight past it.
 
 Disposing of findings is the runner's job, before the run advances:
 
@@ -129,6 +129,6 @@ The playbook reads these keys from `src/config.yaml`. See [Project config](proje
 - **`core.sprint.redecompose_threshold`** — per-task SP value at or above which the task must be re-decomposed.
 - **`core.sprint.scale`** — the 1–5 SP definitions (each a `{sp, meaning}` entry).
 - **`core.task_types`** — list of `{type, description, doc_uri}` entries (`feature`, `bug`, `refactoring`). The request is classified against this list; the matching `doc_uri` lazy-loads detailed guidance for that task type.
-- **`core.cross_review_agent`** — the agent that performs the detached cross-review; absent → the step is skipped.
-- **`research_agent`** — the agent the two research steps delegate their bulk reads to (default `booping:booping-researcher`).
+- **`core.groom_playbook.cross_review_agent`** — the agent that performs the detached cross-review; `null` (the default) → the step is skipped.
+- **`core.research_agent`** — the agent the two research steps delegate their bulk reads to (default `booping:booping-researcher`). Shared across playbooks, so it sits directly under `core`.
 - **`core.groom_playbook.agents`** — the delegation table rendered into the playbook.

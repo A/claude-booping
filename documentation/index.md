@@ -28,7 +28,7 @@ The vault is plain markdown with YAML frontmatter, so Obsidian renders it native
         └────────┘
 ```
 
-Every plan walks this loop once. The next plan inherits the lessons. Grooming, development, retro and learn are **playbooks** driven by `/playbook`; chat, code-review, help and playbook itself are skills. `/code-review` is an optional side-route off the develop playbook — a stateless pass over the in-progress diff that changes no plan status before you continue to retro.
+Every plan walks this loop once. The next plan inherits the lessons. Setup, grooming, development, retro and learn are all **playbooks** driven by `/playbook`; only `/code-review` and `/playbook` itself are skills. `/code-review` is an optional side-route off the develop playbook — a stateless pass over the in-progress diff that changes no plan status before you continue to retro.
 
 ## Why booping
 
@@ -47,6 +47,5 @@ Every plan walks this loop once. The next plan inherits the lessons. Grooming, d
 - [/code-review](code_review.md) — stack-aware review of the in-progress diff.
 - [retro playbook](retro.md) — capture what actually shipped vs. the spec.
 - [learn playbook](learn.md) — fold retro findings into durable rules.
-- [/help](help.md) — command index.
 - [Playbooks](playbook.md) — multi-step procedures driven by `/playbook`. *Unstable — work in progress.*
 - [Project config](project_config.md) — tour of `src/config.yaml` and the per-project override mechanic.

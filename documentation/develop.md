@@ -10,7 +10,7 @@ Development is a **playbook**, not a skill — it is driven by [`/playbook`](pla
 
 ## What it does
 
-The playbook walks one plan through `awaiting-plan-review → ready-for-dev → in-progress → awaiting-retro`. Its run state lives in the plan's own `index.md`, so a stopped sprint is **resumable**.
+The playbook walks one plan through `awaiting-plan-review → ready-for-dev → in-progress → awaiting-retro`, with `fail` as the abort branch. That vocabulary is develop's own — it is declared in `playbooks/develop/playbook.yaml`'s `states:` block, not in a shared lifecycle. Its run state lives in the plan's own `index.md`, so a stopped sprint is **resumable**.
 
 Five steps, in dependency order:
 
@@ -39,7 +39,7 @@ To resume a sprint already in `in-progress` (e.g. after a stopped session), invo
 
 ## Branch
 
-`provision` picks the branch prefix from `git.branches` using the plan's `type`, proposes a kebab-case name, and asks through `AskUserQuestion` — **nothing touches git until you answer**, and a name you rewrite is used verbatim. A branch that already exists for the sprint is reused rather than recreated. In multi-repo projects the same branch name is reused across repos unless you say otherwise.
+`provision` picks the branch prefix from `core.develop_playbook.git.branches` using the plan's `type`, proposes a kebab-case name, and asks through `AskUserQuestion` — **nothing touches git until you answer**, and a name you rewrite is used verbatim. A branch that already exists for the sprint is reused rather than recreated. In multi-repo projects the same branch name is reused across repos unless you say otherwise.
 
 That confirmation is the playbook's single review gate.
 
@@ -68,6 +68,6 @@ Treat the feedback list the way the [groom playbook](groom.md) treats cross-revi
 The playbook reads these keys from `src/config.yaml`. See [Project config](project_config.md) for the deep-merge override mechanics; per-project tweaks live in `~/Claude/{project}/config.yaml`.
 
 - **`core.sprint.max_milestones_per_agent`** — maximum number of consecutive milestones grouped into a single `booping-developer` briefing. Grouping only happens when the milestones share enough context that one agent handling them in sequence is cheaper than spinning a fresh agent per milestone. Default `2`.
-- **`git.branches`** — list of `{branch, when}` entries that map plan `type` (or freeform descriptors) to a branch prefix; `provision` picks from this list.
-- **`git.commit_message`** — conventional-commit format string used for in-sprint commits. Override per-project to enforce a different commit shape.
-- **`skills.develop.agents`** — the agents the playbook may delegate to, with `good_for` / `bad_for` guidance. `booping-developer` is the implementation channel; `booping-researcher` is reserved for the intake drift spot-check across many plan-named files.
+- **`core.develop_playbook.git.branches`** — list of `{branch, when}` entries that map plan `type` (or freeform descriptors) to a branch prefix; `provision` picks from this list.
+- **`core.develop_playbook.git.commit_message`** — conventional-commit format string used for in-sprint commits. Override per-project to enforce a different commit shape.
+- **`core.develop_playbook.agents`** — the agents the playbook may delegate to, with `good_for` / `bad_for` guidance. `booping-developer` is the implementation channel; `booping-researcher` is reserved for the intake drift spot-check across many plan-named files.

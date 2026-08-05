@@ -16,11 +16,11 @@ booping is aimed at **experienced developers and tech leads** — people comfort
 
 It's built for **iterative, agile-style development**: maintenance, incremental features, or growing a project sprint by sprint. It is **not** a waterfall tool — don't hand it a whole-project spec and expect a finished product. One plan is one sprint; the loop compounds across many.
 
-Per-project configuration tunes the framework to each codebase: place a `~/Claude/{project}/config.yaml` file in your vault and it deep-merges over the plugin's `src/config.yaml` at render time — the lifecycle, sprint scale, and agent wiring are the natural targets for per-project tuning. The `/code-review` skill is a side-route for stack-aware review of in-progress diffs against the active plan.
+Per-project configuration tunes the framework to each codebase: place a `~/Claude/{project}/config.yaml` file in your vault and it deep-merges over the plugin's `src/config.yaml` at render time — sprint scale, task types, branch conventions and agent wiring are the natural targets for per-project tuning. No key is validated and no key is restricted to a tier, so your own playbooks' config lives there too. The `/code-review` skill is a side-route for stack-aware review of in-progress diffs against the active plan.
 
 ## Dependencies
 
-Required: `uv` and `git`. Optional: a `core.cross_review_agent` in your config, for a second-model review of every drafted plan.
+Required: `uv` and `git`. Optional: a `core.groom_playbook.cross_review_agent` in your config, for a second-model review of every drafted plan.
 
 ```bash
 # macOS
@@ -76,41 +76,50 @@ Candidates are listed for you if you forget the exact path.
 
 A plan moves through a small set of statuses. The `groom` playbook shapes the spec and waits for explicit user approval before handing off; the `develop` playbook claims the next ready plan and executes milestone by milestone; the `retro` playbook compares what shipped to the original spec; the `learn` playbook distils the retrospective into rules that bind the next sprint.
 
-The status vocabulary below is the canonical set in `src/config.yaml` `plan.statuses`:
+There is no single shared status table. **Each playbook declares its own vocabulary** in its `states:` block (`playbooks/<name>/playbook.yaml`) and advances the plan through it with `booping playbook-transition`. The plan's `index.md` is the run artifact, so its `status:` frontmatter is whatever the running playbook last wrote — and the four playbooks are wired so one's terminal status is the next one's entry:
 
 ```text
-groom     backlog → in-spec → awaiting-plan-review → ready-for-dev
-          (loopback: awaiting-plan-review → in-spec)
-          (parking: in-spec → backlog)
-          (cancellation: backlog/in-spec/awaiting-plan-review → cancelled)
+groom     framing → researching → drafting → cross-reviewing → presenting
+          → awaiting-approval → ready-for-dev (terminal)
+          (loopbacks: drafting → researching, awaiting-approval → drafting)
 
-develop   ready-for-dev → in-progress → awaiting-retro
-          (failure: in-progress → fail)
+develop   awaiting-plan-review → ready-for-dev → in-progress
+          → awaiting-retro (terminal) | fail (terminal)
 
-retro     awaiting-retro → awaiting-learning
-          (skip: awaiting-retro → done)
+retro     awaiting-retro → awaiting-learning (terminal)
 
-learn     awaiting-learning → done
-
-Terminal states: cancelled · done · fail
+learn     awaiting-learning → done (terminal)
 ```
+
+`/code-review` is stateless — it reads a plan and changes no status.
 
 ## Statuses
 
-A plan carries one of the following statuses in its frontmatter. Terminal states are marked.
+A plan carries one of the following statuses in its frontmatter. The owning playbook is the one whose machine writes it.
 
-- **`backlog`** — Parked plan. Split-sibling stubs and user-filed ideas not yet in grooming.
-- **`in-spec`** — the groom playbook is actively researching, designing, and drafting.
-- **`awaiting-plan-review`** — Draft complete; groom is presenting and awaiting explicit user approval, change request, or cancellation.
-- **`ready-for-dev`** — Approved. Queued for the develop playbook to claim.
+**groom**
+
+- **`framing`** — intake is clarifying the request and settling scope.
+- **`researching`** — the blast-radius and web-research passes are running.
+- **`drafting`** — design is being settled with you in conversation and written into the plan body.
+- **`cross-reviewing`** — a second model is reviewing the draft (skipped when no reviewer is configured).
+- **`presenting`** — the approval screen is on the table.
+- **`awaiting-approval`** — waiting for your explicit approval or change request. This is groom's single review gate.
+- **`ready-for-dev`** *(groom's terminal)* — approved. Queued for the develop playbook to claim.
+
+**develop**
+
+- **`awaiting-plan-review`** — develop's entry status when a run starts on a plan you have not yet approved.
 - **`in-progress`** — develop has claimed the plan and is executing milestones.
-- **`awaiting-retro`** — All milestones done; waiting for the retro playbook to write the retrospective.
-- **`awaiting-learning`** — Retro written; waiting for the learn playbook to absorb lessons.
-- **`done`** *(terminal)* — learn has absorbed all lessons.
-- **`cancelled`** *(terminal)* — User shelved the plan.
-- **`fail`** *(terminal)* — develop hit an unrecoverable blocker.
+- **`awaiting-retro`** *(develop's terminal)* — all milestones done and verification green.
+- **`fail`** *(develop's terminal)* — an unrecoverable blocker after two documented fix attempts, with your approval to abort.
 
-`src/config.yaml` `plan.statuses` is the canonical contract for the full transition table — including triggers (`when`), gates, artifacts, and `on_exit` mutations. Read it there if you need the exact rules; this README only narrates them.
+**retro / learn**
+
+- **`awaiting-learning`** *(retro's terminal)* — the retrospective is written and signed off.
+- **`done`** *(learn's terminal)* — every accepted lesson is written to its target. Also stamped `goal: skipped` by retro's `drop-plan` script when you skip a plan's retro outright.
+
+Each playbook's `states:` block is the canonical contract for its own transitions — triggers (`when`), gates and hooks. Read it there if you need the exact rules; this README only narrates them.
 
 ## Sprints & SPs
 

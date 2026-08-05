@@ -13,8 +13,7 @@ reviewed_at: 20260731 19:10
 Groom playbook takes user feature-development request, clarifies it if it's needed and builds
 a development plan based on it.
 
-{% set slug_ts = macro('core.macros.date', '+%Y%m%d%H%M') -%}
-{% set human_ts = macro('core.macros.date', '+%Y-%m-%d %H:%M') -%}
+{% from "_partials/timestamps.md" import slug_ts, human_ts -%}
 **Context:**
 - Date & Time: {{ human_ts }}
 - Plan dir: `plans/{{ slug_ts }}_{kebab-title}/`

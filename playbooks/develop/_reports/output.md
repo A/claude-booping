@@ -91,7 +91,7 @@ good" counts, silence never does. That approval is what the `awaiting-plan-revie
 
 ## Plan-validity check
 
-Compare the plan's `commit:` field with the repo's current HEAD, `b12b87ac47250b092634df9a1a66091278e3f56a`.
+Compare the plan's `commit:` field with the repo's current HEAD, `cf3ba54c396821493190414e411f5da9733d8d21`.
 
 - **Equal**: proceed.
 - **Different**: run the cheap-summary commands first — do **not** load the full `git diff` into

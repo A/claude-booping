@@ -3,7 +3,7 @@
 !!! warning "Unstable — work in progress"
     Playbooks are an experimental feature. The manifest format, step frontmatter, and `/playbook` behaviour may change in breaking ways between releases.
 
-A **playbook** is a multi-step guided procedure driven by the `/playbook` skill. Where the built-in skills (`/chat`, `/retro`, `/learn`, `/code-review`) are fixed workflows shipped by the plugin, a playbook is yours to write: a set of prompt steps, each optionally detached into a sub-agent, with review gates where you want to inspect the output before continuing. Most playbooks are yours and live in your vault; a few ship with the plugin (see [Scopes](#scopes)).
+A **playbook** is a multi-step guided procedure driven by the `/playbook` skill. Where a skill (booping ships two — `/code-review` and `/playbook` itself) is a fixed workflow, a playbook is yours to write: a set of prompt steps, each optionally detached into a sub-agent, with review gates where you want to inspect the output before continuing. Most playbooks are yours and live in your vault; a few ship with the plugin (see [Scopes](#scopes)).
 
 A playbook's **structure** lives in `playbook.yaml`: the `graph:` (which steps run, in what order, which in parallel) and the optional `states:` (named state machines that persist run state on disk so a run can be resumed). `playbook.md` keeps **identity and prose** — the manifest frontmatter (`name`, `title`, `summary`, `trigger`, …) and the preamble body. Bodies are plain markdown by default; a playbook can opt into [Jinja rendering](#jinja-bodies) if it needs live project data. Author a playbook by hand and it shows up in `/playbook` immediately.
 
@@ -22,12 +22,15 @@ Playbooks are discovered from three roots:
 
 ### Shipped playbooks
 
-Core playbooks ship with the plugin and own the main workflow — the `/groom`, `/develop`, and `/install` skills they replaced are gone:
+Core playbooks ship with the plugin and own the main workflow — the `/groom`, `/develop`, `/install`, `/retro` and `/learn` skills they replaced are gone:
 
 - **`setup`** — machine config, then vault scaffold and `.booping` marker. See [Install](install.md).
 - **`groom`** — spec a sprint (intake → codebase and web research → draft → cross-review → present). See [groom](groom.md).
 - **`develop`** — execute a plan (intake → provision → develop-loop → verify → wrap-up). See [develop](develop.md).
-- **`retro`**, **`learn`** — playbook variants of the same-named skills.
+- **`retro`** — capture what shipped versus the spec. See [retro](retro.md).
+- **`learn`** — fold retro findings into durable rules. See [learn](learn.md).
+- **`code-review`** — the playbook form of the review pass. See [/code-review](code_review.md).
+- **`migrate`** — bring a vault up to the plugin's current migration watermark.
 - **`playbook-authoring`** — the procedure for writing a new playbook.
 
 Run any of them with `/playbook <name>`.
@@ -152,7 +155,7 @@ A step runs at one of three levels. Only the third has mechanics; the first two 
 - **assisted** — the runner still performs the step, but delegates the heavy reads or research inside it to the configured researcher agent, which returns a compressed summary. The driver's context holds the summary, not the sources. Expressed as prose in the step body — no frontmatter key.
 - **detached** — an agent fetches and performs the whole step body; the runner sees only the returned receipt. This is the only level with mechanics: the `detached:` frontmatter key.
 
-The researcher an assisted step delegates to is the `research_agent` config key (core default `booping:booping-researcher`), overridable per project like any other config value. A `jinja: true` body reads it as `{{ config.research_agent }}` — the same way an optional key such as `cross_review` is read with `{% if config.get("cross_review") %}`.
+The researcher an assisted step delegates to is the `core.research_agent` config key (core default `booping:booping-researcher`), overridable per project like any other config value. A `jinja: true` body reads it as `{{ config.core.research_agent }}` — the same way an optional key is read defensively with `{% if config.core.get("my_key") %}`.
 
 ### The `detached` grammar
 
@@ -167,7 +170,7 @@ Under `jinja: true` the value is a template like any body, so the agent can come
 ```yaml
 ---
 summary: Second-model review of the written plan
-detached: "{{ config.core.cross_review_agent or '' }}"
+detached: "{{ config.core.groom_playbook.cross_review_agent or '' }}"
 ---
 ```
 
@@ -188,12 +191,12 @@ trigger: run the ship playbook
 jinja: true
 requires_project: true
 ---
-{% import "_partials/_plan_transitions.j2" as plan_transitions with context %}
 # Ship
 
-{{ plan_transitions.render("develop") }}
+{% set playbook_agents = config.core.ship_playbook %}
+{% include "_partials/playbook_agents.md" %}
 
-{% include "_partials/_shared_instructions.j2" %}
+{% include "_partials/_git_guide.j2" %}
 ```
 
 Two things change once you opt in:
@@ -387,7 +390,8 @@ Fill in `playbook.md` with the identity frontmatter and a plain-markdown preambl
 To skip the by-hand part, scaffold the skeleton — `playbook.md`, an empty `playbook.yaml` graph, and `_references/`:
 
 ```
-bin/booping scaffold playbook.scaffold ~/Claude/_playbooks/my-playbook --set name=my-playbook
+bin/booping scaffold core.playbook_authoring_playbook.scaffold ~/Claude/_playbooks/my-playbook \
+  --set name=my-playbook
 ```
 
 See [scaffold trees](project_config.md#scaffold-trees) for the tree itself and how to override or extend it.
@@ -462,4 +466,4 @@ Five flags help while authoring:
 
 ## Evals and harness
 
-Playbook eval suites and their run harness live **vault-side** at `~/Claude/_playbooks/`, with their own `README`. They are not part of this repository — the plugin only discovers, composes, and drives playbooks; authoring, evaluating, and iterating on them happens in the vault.
+The shared eval harness (promptfoo provider, grader, asserts) ships in the plugin at `playbooks/_lib/`, and each core playbook commits its own suites beside its steps (`tests.yaml` + `promptfooconfig.yaml` + `_fixtures/`). Your own playbooks' suites live beside your own playbooks, wherever those are — the plugin only discovers, composes and drives them.

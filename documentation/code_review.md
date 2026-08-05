@@ -53,6 +53,6 @@ When a diff spans roughly five or more files, `/code-review` delegates a blast-r
 
 ## Config
 
-`/code-review` has one config key, `skills.code-review.status` (default `awaiting-retro`). It controls the **argument-free plan picker**: bare `/code-review` lists the plans currently in that status and asks you to pick one, then derives the diff range from the selected plan's `commit:` field. Point it at a different status in your project `config.yaml` if you want bare `/code-review` to pull from another queue. Passing a diff range or file list as `$ARGUMENTS` bypasses the picker entirely.
+`/code-review` has one config key, `core.code_review_playbook.status` (default `awaiting-retro`) — shared with the `code-review` playbook, which is why it lives in that block. It controls the **argument-free plan picker**: bare `/code-review` lists the plans currently in that status and asks you to pick one, then derives the diff range from the selected plan's `commit:` field. Point it at a different status in your project `config.yaml` if you want bare `/code-review` to pull from another queue. Passing a diff range or file list as `$ARGUMENTS` bypasses the picker entirely.
 
 Template selection has no config keys — it is driven by the `description` frontmatter on each review template under `docs/review_templates/` and `~/Claude/{project}/review_templates/`. To make a project-local checklist available to the review pass, drop it under your vault's `review_templates/` with a clear `description` — the skill loads it when the repo's stack matches.
