@@ -3,7 +3,9 @@
 # Installed on PATH automatically when the booping plugin is enabled.
 #
 # Default mode: scaffold the vault at <home_dir>/{project-name} and write a
-#   '.booping' marker (project_name:) in the cwd to attach. The vault-home base
+#   '.booping' marker (project_name:, latest_migration:) in the cwd to attach.
+#   A fresh vault needs no migration, so it is seeded at the highest shipped id.
+#   The vault-home base
 #   (<home_dir>) is resolved via a ladder: `booping config-get home_dir` →
 #   $HOME/Claude if it exists → interactive prompt (seeds the global config).
 # Local mode (--local [dir]): scaffold the vault inside the repo at the given
@@ -160,6 +162,7 @@ if [ "$LOCAL_MODE" -eq 1 ]; then
             echo "project_name: $PROJECT"
             echo "vault_path: $LOCAL_DIR"
         } > "$ATTACH_CWD/.booping"
+        (cd "$ATTACH_CWD" && "$BOOPING" marker-set latest_migration=@latest)
         echo "Wrote marker: $ATTACH_CWD/.booping"
     fi
 
@@ -194,6 +197,7 @@ mkdir -p "$ROOT"/{plans,retrospectives,lessons,_booping,notes}
 if [ "$IS_ABSOLUTE_ROOT" -eq 0 ]; then
     if [ -d "$ATTACH_CWD" ] && [ ! -f "$ATTACH_CWD/.booping" ]; then
         echo "project_name: $PROJECT" > "$ATTACH_CWD/.booping"
+        (cd "$ATTACH_CWD" && "$BOOPING" marker-set latest_migration=@latest)
         echo "Wrote marker: $ATTACH_CWD/.booping"
     fi
 fi

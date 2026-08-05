@@ -6,6 +6,7 @@ import sys
 from booping import logger
 from booping.context._yaml import update_marker
 from booping.context.project import Project
+from booping.migrations import latest_shipped_id
 
 
 def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:  # type: ignore[type-arg]
@@ -16,7 +17,7 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
     p.add_argument(
         "pair",
         metavar="key=value",
-        help="Marker key=value pair (e.g. latest_migration=3)",
+        help="Marker key=value pair (e.g. latest_migration=3, latest_migration=@latest)",
     )
     p.set_defaults(func=_run)
 
@@ -30,6 +31,8 @@ def _parse_pair(pair: str) -> tuple[str, object]:
         print(f"error: empty key in pair: {pair!r}", file=sys.stderr)
         sys.exit(1)
     if key == "latest_migration":
+        if value == "@latest":
+            return key, latest_shipped_id()
         try:
             return key, int(value)
         except ValueError:

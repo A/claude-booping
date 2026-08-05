@@ -71,6 +71,20 @@ def test_runs_from_a_subdirectory(tmp_path: Path) -> None:
     assert yaml.safe_load((repo / ".booping").read_text())["latest_migration"] == 1
 
 
+def test_at_latest_resolves_to_the_highest_shipped_id(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    shipped = max(
+        yaml.safe_load(path.read_text().split("---")[1])["id"]
+        for path in (PLUGIN_ROOT / "migrations").glob("*/migration.md")
+    )
+
+    result = _run("marker-set", "latest_migration=@latest", cwd=repo)
+
+    assert result.returncode == 0
+    assert result.stderr == f"marker: latest_migration={shipped}\n"
+    assert yaml.safe_load((repo / ".booping").read_text())["latest_migration"] == shipped
+
+
 def test_malformed_pair_exits_1(tmp_path: Path) -> None:
     repo = _repo(tmp_path)
 
