@@ -48,9 +48,15 @@ tasks:
 #            directory name when the pattern's last segment is a literal filename
 #            (`plans/*/index.md` -> `alpha`), else the file stem. Omitted -> the
 #            `plans.glob` default below.
+#   root:    which directory the globs resolve against. Omitted -> the vault;
+#            `core` -> the plugin root, for content the plugin itself ships
+#            (`migrations.pending` below), which makes the spec resolvable
+#            outside any project.
 #   where:   mapping of clause -> value. The clause key carries its operator as a
-#            suffix: `k` equality, `k!` inequality, `k:in` membership in a list.
-#            A row missing the field fails every operator.
+#            suffix: `k` equality, `k!` inequality, `k:in` membership in a list,
+#            `k:gt` / `k:lt` numeric ordering (both operands must coerce to a
+#            number; one that does not fails the clause). A row missing the field
+#            fails every operator.
 #   sort:    frontmatter field name, `-` prefixed for descending. Rows without a
 #            value come last. Omitted -> slug order.
 #   columns: projection, declared order preserved. `path` and `slug` are always
@@ -67,6 +73,17 @@ plans:
   # and the engine still honours list order for a vault declaring several.
   glob:
     - plans/*/index.md
+
+migrations:
+  # Every migration the plugin ships, in id order. The `migrate` playbook narrows
+  # it to the pending set with `where={'id:gt': booping.latest_migration}` — the
+  # marker's watermark, `-1` when nothing has been applied. `root: core` because
+  # migrations ship with the plugin, not with the vault they transform.
+  pending:
+    root: core
+    glob:
+      - migrations/*/migration.md
+    sort: id
 
 # Keyed by skill name, and by playbook name for the playbooks that replaced a
 # skill (`groom`, `develop`, `retro`, `learn`) — `playbooks/_partials/available_agents.md`
