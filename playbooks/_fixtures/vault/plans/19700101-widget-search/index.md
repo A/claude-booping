@@ -15,4 +15,4 @@ commit: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 
 # Widget search
 
-Fixture plan — flat shape, parked at `awaiting-retro` so playbook reports render a populated candidate table.
+Fixture plan — parked at `awaiting-retro` so playbook reports render a populated candidate table.

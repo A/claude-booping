@@ -1,9 +1,9 @@
 from collections.abc import Sequence
 from typing import Any, cast
 
-# Directory-plan filenames. Legacy dual-file dirs pair a full `plan.md` with a bare
-# `index.md` run artifact; new-style dirs (groom playbook) carry only `index.md`.
-DIR_PLAN_NAMES = ("plan.md", "index.md")
+# A plan is a directory carrying its body at this filename; the directory name is
+# the slug.
+DIR_PLAN_NAME = "index.md"
 
 
 class PathError(Exception):

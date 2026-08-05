@@ -55,7 +55,7 @@ The scaffolded vault:
 - `_lessons/` — durable, targeted rules authored by the [learn playbook](learn.md).
 - `notes/` — your own free-form notes (untouched by skills).
 - `_booping/` — per-skill / per-agent extension files, kept current by learn. Setup creates the directory; it does not seed extension files or detect your stack.
-- `sprints.md` — an Obsidian Bases fence over `plans/`; seeded once, evaluated live by Obsidian.
+- `sprints.md` — an Obsidian Bases fence over the vault's `plans/*/index.md` files; seeded once, evaluated live by Obsidian.
 - `.gitignore` — vault-level ignores.
 - `.booping` — marker file (written in the repo root, not the vault) telling skills which vault to resolve.
 

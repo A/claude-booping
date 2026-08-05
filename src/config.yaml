@@ -62,13 +62,11 @@ tasks:
 # config value. Inline arguments (`--where`, `| query(where={...})`) deep-merge
 # over a resolved spec for that call only.
 plans:
-  # Plan-shape precedence as data rather than hidden engine logic: a directory
-  # plan is claimed by its `index.md` (then `plan.md`), and a directory shadows a
-  # same-slug flat plan file. A vault with a different mix edits this one key.
+  # A plan is a directory claimed by its `index.md`. The shape is data rather
+  # than hidden engine logic: a vault with a different one edits this one key,
+  # and the engine still honours list order for a vault declaring several.
   glob:
     - plans/*/index.md
-    - plans/*/plan.md
-    - plans/*.md
 
 # Keyed by skill name, and by playbook name for the playbooks that replaced a
 # skill (`groom`, `develop`, `retro`, `learn`) — `playbooks/_partials/available_agents.md`
@@ -255,12 +253,18 @@ vault:
     notes:
       type: dir
     # Obsidian Bases fence (core plugin, no install needed) — a live view over
-    # plans/, seeded once and never rewritten.
+    # plans/, seeded once and never rewritten. Every path in a Bases filter is
+    # resolved against the *Obsidian* vault root, which is not the booping vault
+    # whenever the latter is nested: `this.file.folder` (the folder of the note
+    # embedding the fence — this sprints.md) is what scopes the view to this
+    # booping vault at any depth.
     sprints.md: |
       ```base
       filters:
         and:
-          - file.inFolder("plans")
+          - file.inFolder(this.file.folder)
+          - 'file.path.contains("plans/")'
+          - 'file.name == "index.md"'
       views:
         - type: table
           name: Plans

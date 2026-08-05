@@ -128,12 +128,12 @@ class TestVaultCommitIntegration:
 
     def test_directory_plan_commits_with_slug(self, tmp_path: Path) -> None:
         vault = _init_vault(tmp_path)
-        plan = vault / "plans" / "20250301-dir-plan" / "plan.md"
+        plan = vault / "plans" / "20250301-dir-plan" / "index.md"
         plan.parent.mkdir()
         plan.write_text(
             "---\nstatus: in-spec\ntitle: Dir plan\n---\n\n# Body\n"
         )
-        _git(vault, ["add", "plans/20250301-dir-plan/plan.md"])
+        _git(vault, ["add", "plans/20250301-dir-plan/index.md"])
         _git(vault, ["commit", "-m", "add dir plan"])
 
         plan.write_text(
@@ -151,7 +151,7 @@ class TestVaultCommitIntegration:
         names = _git(vault, ["log", "-1", "--name-only", "--format="])
         committed = [line for line in names.stdout.strip().splitlines() if line]
         assert sorted(committed) == [
-            "plans/20250301-dir-plan/plan.md",
+            "plans/20250301-dir-plan/index.md",
             "sprints.md",
         ]
 
@@ -159,7 +159,7 @@ class TestVaultCommitIntegration:
         self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         vault = tmp_path / "custom-vault"
-        plan = vault / "plans" / "20250301-dir-plan" / "plan.md"
+        plan = vault / "plans" / "20250301-dir-plan" / "index.md"
         plan.parent.mkdir(parents=True)
         plan.write_text("---\n---\n")
 

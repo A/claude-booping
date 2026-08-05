@@ -246,12 +246,8 @@ def _core_config() -> dict[str, object]:
     return config_mod.load(Path(__file__).resolve().parents[3], [])
 
 
-def test_plans_glob_is_an_ordered_list() -> None:
-    assert _core_config()["plans"]["glob"] == [  # type: ignore[index]
-        "plans/*/index.md",
-        "plans/*/plan.md",
-        "plans/*.md",
-    ]
+def test_plans_glob_is_the_single_directory_shape() -> None:
+    assert _core_config()["plans"]["glob"] == ["plans/*/index.md"]  # type: ignore[index]
 
 
 @pytest.mark.parametrize("dotted", CORE_QUERY_PATHS)

@@ -6,7 +6,7 @@ This page is the reference for every file and directory inside the vault. For th
 
 ## `plans/`
 
-Sprint plans live here as a directory `{YYYYMMDD-HH-MM}_{kebab-title}/` holding `index.md` (legacy plans are a flat `{YYYYMMDD}-{kebab-title}.md`). Each plan carries YAML frontmatter (status, type, story points, a one-line `summary`, etc.) and a body of milestones with tasks. Authored by the [groom playbook](groom.md), executed by the [develop playbook](develop.md).
+A plan is a directory: `{YYYYMMDD-HH-MM}_{kebab-title}/` holding `index.md`. That is the only shape booping discovers (the `plans.glob` config key, one entry — `plans/*/index.md`); a legacy flat `{YYYYMMDD}-{kebab-title}.md` has to be moved into a directory of its own to be seen. Each plan carries YAML frontmatter (status, type, story points, a one-line `summary`, etc.) and a body of milestones with tasks. Authored by the [groom playbook](groom.md), executed by the [develop playbook](develop.md).
 
 A plan walks the status table from `backlog` / `in-spec` through `awaiting-plan-review`, `ready-for-dev`, `in-progress`, `awaiting-retro`, `awaiting-learning`, to `done`. The owning skill moves a plan by running a `booping transition` command, which performs the status change and every mechanical mutation it entails in one step.
 
@@ -63,7 +63,7 @@ Project-local code-review templates. Loaded by [/code-review](code_review.md) al
 
 ## `sprints.md`
 
-An at-a-glance view of every plan in the vault — an [Obsidian Bases](https://help.obsidian.md/bases) fence scoped to `plans/`, ordered by status and sorted newest-first.
+An at-a-glance view of every plan in the vault — an [Obsidian Bases](https://help.obsidian.md/bases) fence over the `plans/*/index.md` files, ordered by status and sorted newest-first. Bases resolves every path against the *Obsidian* vault root, so the seeded filter scopes itself with `file.inFolder(this.file.folder)` — the folder of the note holding the fence — which keeps it correct when the booping vault is nested inside a larger Obsidian vault.
 
 **Seeded once by `booping scaffold vault.scaffold`; nothing rewrites it.** Obsidian evaluates the query live against the plan files, so the view is never stale. Edit the fence to change columns, sorting or filters — it is yours from the moment it is written.
 

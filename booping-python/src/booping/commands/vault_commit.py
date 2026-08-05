@@ -7,7 +7,7 @@ from pathlib import Path
 
 from booping import logger
 from booping.context.project import Project
-from booping.utils import DIR_PLAN_NAMES
+from booping.utils import DIR_PLAN_NAME
 
 
 def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:  # type: ignore[type-arg]
@@ -38,7 +38,7 @@ def resolve_vault(plan_path: Path) -> Path:
     project = Project.load_cwd_configured()
     if project is not None:
         return project.directory
-    # Heuristic: plans live at <vault>/plans/<name>.md or <vault>/plans/<slug>/{index,plan}.md
+    # Heuristic: plans live at <vault>/plans/<slug>/index.md
     parent = plan_path.resolve().parent
     if parent.name == "plans":
         return parent.parent
@@ -49,7 +49,7 @@ def resolve_vault(plan_path: Path) -> Path:
 
 
 def plan_slug(plan_path: Path) -> str:
-    if plan_path.name in DIR_PLAN_NAMES:
+    if plan_path.name == DIR_PLAN_NAME:
         return plan_path.resolve().parent.name
     return plan_path.stem
 

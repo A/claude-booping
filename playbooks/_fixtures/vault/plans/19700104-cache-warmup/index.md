@@ -15,4 +15,4 @@ commit: null
 
 # Cache warm-up on deploy
 
-Fixture plan — flat shape with a null `sp` and a null `created`, so every renderer's missing-value branch is exercised.
+Fixture plan — a null `sp` and a null `created`, so every renderer's missing-value branch is exercised.

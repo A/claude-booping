@@ -13,7 +13,7 @@ Produce a project- and plan-specific retrospective grounded in session logs, cod
 | Status | SP | Title | Created | Completed | Path |
 | --- | --- | --- | --- | --- | --- |
 | awaiting-retro | 2 | Login timeout fix | 1970-01-02 | 19700102 10:00 | plans/19700102-login-timeout/index.md |
-| awaiting-retro | 5 | Widget search | 1970-01-01 | 19700101 12:00 | plans/19700101-widget-search.md |
+| awaiting-retro | 5 | Widget search | 1970-01-01 | 19700101 12:00 | plans/19700101-widget-search/index.md |
 
 
 ## High-level workflow

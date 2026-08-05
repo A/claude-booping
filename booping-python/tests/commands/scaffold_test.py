@@ -306,7 +306,15 @@ def test_core_vault_scaffold_seeds_sprints_base_fence(tmp_path: Path) -> None:
     fence = text.split("```base\n", 1)[1].split("\n```", 1)[0]
     spec = yaml.safe_load(fence)
 
-    assert spec["filters"] == {"and": ['file.inFolder("plans")']}
+    # Scoped to the booping vault holding this sprints.md, so it stays correct when
+    # the booping vault is nested inside a larger Obsidian vault.
+    assert spec["filters"] == {
+        "and": [
+            "file.inFolder(this.file.folder)",
+            'file.path.contains("plans/")',
+            'file.name == "index.md"',
+        ]
+    }
     view = spec["views"][0]
     assert view["type"] == "table"
     assert view["order"] == [
