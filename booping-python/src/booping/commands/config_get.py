@@ -2,13 +2,11 @@ from __future__ import annotations
 
 import argparse
 import sys
-from typing import Any, cast
 
 import yaml
 
 from booping.context import Context
-
-_MISSING = object()
+from booping.utils import PathError, resolve_path
 
 
 def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:  # type: ignore[type-arg]
@@ -23,18 +21,6 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
     p.set_defaults(func=_run)
 
 
-def _traverse(config: dict[str, Any], key: str) -> object:
-    value: object = config
-    for part in key.split("."):
-        if not isinstance(value, dict):
-            return _MISSING
-        mapping = cast("dict[str, object]", value)
-        if part not in mapping:
-            return _MISSING
-        value = mapping[part]
-    return value
-
-
 def _run(args: argparse.Namespace) -> None:
     try:
         ctx = Context.assemble()
@@ -42,8 +28,9 @@ def _run(args: argparse.Namespace) -> None:
         print(f"error: could not load config: {exc}", file=sys.stderr)
         sys.exit(2)
 
-    value = _traverse(ctx.config, args.key)
-    if value is _MISSING:
+    try:
+        value: object = resolve_path(ctx.config, args.key)
+    except PathError:
         print(f"error: key not found: {args.key}", file=sys.stderr)
         sys.exit(1)
 

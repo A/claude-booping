@@ -22,6 +22,8 @@ from __future__ import annotations
 
 from typing import Any, cast
 
+from booping.utils import PathError, resolve_path
+
 TYPE_KEY = "type"
 CONTENT_KEY = "content"
 CHILDREN_KEY = "children"
@@ -184,27 +186,21 @@ def resolve(config: dict[str, Any], dotted_path: str) -> Any:
     Raises :class:`ScaffoldError` naming the full path and the first segment
     that does not resolve.
     """
-    if not dotted_path:
-        raise ScaffoldError(dotted_path, "empty config path")
+    try:
+        return resolve_path(config, dotted_path)
+    except PathError as exc:
+        raise ScaffoldError(dotted_path, _resolve_message(exc)) from exc
 
-    current: Any = config
-    walked = ""
-    for segment in dotted_path.split("."):
-        if not isinstance(current, dict):
-            raise ScaffoldError(
-                dotted_path,
-                f"no tree at {dotted_path!r} — {walked!r} is a {_type_name(current)}, "
-                f"not a mapping, so segment {segment!r} cannot resolve",
-            )
-        node = cast("dict[str, Any]", current)
-        if segment not in node:
-            raise ScaffoldError(
-                dotted_path,
-                f"no tree at {dotted_path!r} — segment {segment!r} is missing",
-            )
-        current = node[segment]
-        walked = _join(walked, segment)
-    return current
+
+def _resolve_message(exc: PathError) -> str:
+    if not exc.dotted_path:
+        return "empty config path"
+    if exc.found_type is not None:
+        return (
+            f"no tree at {exc.dotted_path!r} — {exc.walked!r} is a {exc.found_type}, "
+            f"not a mapping, so segment {exc.segment!r} cannot resolve"
+        )
+    return f"no tree at {exc.dotted_path!r} — segment {exc.segment!r} is missing"
 
 
 def load(config: dict[str, Any], dotted_path: str) -> DirNode:
