@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 
 from booping.logger import log
+from booping.migrations import latest_shipped_id
 
 
 def test_log_noop_when_vault_is_none() -> None:
@@ -53,7 +54,9 @@ def test_render_subprocess_integration_log(
 ) -> None:
     repo_dir = tmp_path / "repo"
     repo_dir.mkdir()
-    (repo_dir / ".booping").touch()
+    # A marker behind on migrations is gated before it ever renders (and so before it
+    # logs); this test is about the logging path, so the marker is current.
+    (repo_dir / ".booping").write_text(f"latest_migration: {latest_shipped_id()}\n")
 
     monkeypatch.setenv("HOME", str(tmp_path))
 

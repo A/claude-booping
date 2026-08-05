@@ -4,7 +4,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from booping import logger
+from booping import logger, migrations
 from booping.context import Context
 from booping.macros import parse_stub_overrides
 from booping.rendering import get_plugin_root, render
@@ -63,6 +63,11 @@ def _run(args: argparse.Namespace) -> None:
         )
         sys.exit(1)
 
+    notice = migrations.render_gate()
+    if notice is not None:
+        _emit(notice + "\n", args.output)
+        return
+
     ctx = Context.assemble()
     if overrides:
         ctx = ctx.model_copy(
@@ -92,8 +97,12 @@ def _run(args: argparse.Namespace) -> None:
         tools={},
         kwargs={},
     )
-    if args.output is not None:
-        args.output.parent.mkdir(parents=True, exist_ok=True)
-        args.output.write_text(result)
+    _emit(result, args.output)
+
+
+def _emit(text: str, output: Path | None) -> None:
+    if output is not None:
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(text)
     else:
-        sys.stdout.write(result)
+        sys.stdout.write(text)

@@ -9,7 +9,7 @@ from typing import Any, cast
 
 from jinja2 import BaseLoader, ChoiceLoader, DictLoader, Environment, FileSystemLoader
 
-from booping import logger
+from booping import logger, migrations
 from booping.context import Context
 from booping.context import playbook as playbook_mod
 from booping.context.lesson import Lesson
@@ -735,7 +735,15 @@ def _run(args: argparse.Namespace) -> None:
     vault_override = (
         Path(project_str).expanduser().resolve() if project_str is not None else None
     )
-    ctx = Context.assemble(vault_override=vault_override)
+    notice = migrations.render_gate(args.name, start=vault_override)
+    if notice is not None:
+        _emit(notice + "\n", args.output)
+        return
+
+    # A pinned render resolves the `.booping` marker from the given root too, not from
+    # the developer's cwd: the marker feeds `booping.latest_migration`, so without this
+    # a committed report would carry whatever watermark the renderer's own repo sits at.
+    ctx = Context.assemble(start=vault_override, vault_override=vault_override)
     if overrides:
         ctx = ctx.model_copy(
             update={
@@ -796,9 +804,13 @@ def _run(args: argparse.Namespace) -> None:
             inline_steps=args.inline_steps,
         )
 
-    if output_str is None or output_str == "-":
-        sys.stdout.write(result)
-    else:
-        output_path = Path(output_str)
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        output_path.write_text(result)
+    _emit(result, output_str)
+
+
+def _emit(text: str, output: str | None) -> None:
+    if output is None or output == "-":
+        sys.stdout.write(text)
+        return
+    path = Path(output)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text)
