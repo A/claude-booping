@@ -93,7 +93,7 @@ good" counts, silence never does. That approval is what the `awaiting-plan-revie
 
 ## Plan-validity check
 
-Compare the plan's `commit:` field with the repo's current HEAD, `cabad123ea778e427e738a286c08bf8fab17c8f7`.
+Compare the plan's `commit:` field with the repo's current HEAD, `99eee388de2cb307c7aa37fd968185cacd6f1740`.
 
 - **Equal**: proceed.
 - **Different**: run the cheap-summary commands first — do **not** load the full `git diff` into
@@ -152,7 +152,7 @@ Branches always live in the attached repo. Always ask the user before switching 
 | `feat/` | feature |
 | `fix/` | bug |
 | `refactor/` | refactoring |
-| `chore/` | other; tooling, dependency bumps, formatting |
+| `chore/` | anything not matching a task type; tooling, dependency bumps, formatting |
 
 
 ### Commit messages

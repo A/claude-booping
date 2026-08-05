@@ -132,7 +132,7 @@ core:
             - refactoring
         - branch: chore/
           when:
-            - other
+            - anything not matching a task type
             - tooling, dependency bumps, formatting
     agents:
       booping-developer:

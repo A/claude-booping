@@ -23,7 +23,6 @@ Walk the step table top-down, running each step once every step in its `Dependen
 
    ## Run-time context
    project: {{ context.project.name if context.project else "{project}" }}
-   specs_dir: {{ context.project.directory if context.project else "{vault}" }}/specs
    workdir: <workdir>
    instance: <slug>
 

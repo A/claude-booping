@@ -89,7 +89,7 @@ Project-local templates with the same `name` as a core template override the cor
 
 ### (d) Map blast radius
 
-For diffs spanning roughly five or more files, delegate a blast-radius read to `booping-researcher` with the file list — ask it to summarise which modules / integration points / public APIs the change touches and return a compressed summary.
+For diffs spanning roughly five or more files, delegate a blast-radius read to the researcher agent from the table above with the file list — ask it to summarise which modules / integration points / public APIs the change touches and return a compressed summary.
 
 For smaller changes, read the files directly. Do not delegate single-file reads.
 
@@ -120,7 +120,7 @@ For each finding: file + line, the offending snippet, the proposed fix as an exa
 After presenting findings, ask the user how to handle them:
 
 - Trivial inline `NIT`s that the user approves: apply directly via `Edit`.
-- Non-trivial fixes (`BLOCKER` or `SUGGESTION`) that the user approves: delegate to `booping-developer` with a briefing carrying the finding, the file list, and the proposed fix.
+- Non-trivial fixes (`BLOCKER` or `SUGGESTION`) that the user approves: delegate to the developer agent from the table above with a briefing carrying the finding, the file list, and the proposed fix.
 - No commits, no pushes — the user owns those.
 
 ## Hard rules
@@ -128,7 +128,7 @@ After presenting findings, ask the user how to handle them:
 - **No commits without approval.** Never `git commit` or `git push` from this skill. The user owns commits during a review run.
 - **Linter-handled style is filtered out.** If the project's configured linter or formatter would catch it, do not surface it as a finding.
 - **Lesson violation = `BLOCKER`.** Always. No softening to `SUGGESTION`.
-- **Never edit application code beyond trivial inline nits.** Anything non-trivial routes through `booping-developer`. The orchestrator does not refactor or restructure during review.
+- **Never edit application code beyond trivial inline nits.** Anything non-trivial routes through the developer agent from the table above. The orchestrator does not refactor or restructure during review.
 - **No persistent report.** Output is chat-only unless a project extension directs a different presentation surface. Do not write a review file under `~/Claude/{project}/` or anywhere else.
 
 ## What `/code-review` does NOT do
