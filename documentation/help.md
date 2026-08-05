@@ -7,7 +7,6 @@ For the published documentation site, see [https://A.github.io/claude-booping/](
 ## Commands
 
 - [`/playbook setup`](install.md) — scaffold the per-project vault and drop the `.booping` marker. Run once per repo.
-- [`/chat`](chat.md) — orient inside the project: surface a vault status summary, navigate plans and retros, handle small ad-hoc edits.
 - [`/playbook groom`](groom.md) — spec a sprint: turn a free-text request into a reviewable plan with milestones, story points, and definitions of done.
 - [`/playbook develop`](develop.md) — claim a `ready-for-dev` plan and execute it milestone-by-milestone, delegating coding work to `booping-developer`.
 - [`/code-review`](code_review.md) — stack-aware review of the current diff against the active plan, with severity-labelled findings and inline or agent-dispatched fixes.

@@ -64,7 +64,7 @@ def test_render_subprocess_integration_log(
     booping_bin = plugin_root / "bin" / "booping"
 
     result = subprocess.run(
-        [str(booping_bin), "render", "src/templates/skills/chat.md.j2"],
+        [str(booping_bin), "render", "src/templates/skills/playbook.md.j2"],
         cwd=repo_dir,
         capture_output=True,
         text=True,

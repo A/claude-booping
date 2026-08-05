@@ -1,8 +1,6 @@
 skills:
-  chat:        { effort: low }
   code-review: { effort: medium }
-  help:    { effort: low }
-  playbook: { effort: medium }
+  playbook:    { effort: medium }
 
 agents:
   booping-developer:  { effort: medium }

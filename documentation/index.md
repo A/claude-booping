@@ -47,7 +47,6 @@ Every plan walks this loop once. The next plan inherits the lessons. Grooming, d
 - [/code-review](code_review.md) — stack-aware review of the in-progress diff.
 - [retro playbook](retro.md) — capture what actually shipped vs. the spec.
 - [learn playbook](learn.md) — fold retro findings into durable rules.
-- [/chat](chat.md) — orient inside the vault and handle ad-hoc small tasks.
 - [/help](help.md) — command index.
 - [Playbooks](playbook.md) — multi-step procedures driven by `/playbook`. *Unstable — work in progress.*
 - [Project config](project_config.md) — tour of `src/config.yaml` and the per-project override mechanic.

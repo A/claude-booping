@@ -16,14 +16,14 @@ def test_render_resolves_relative_path_against_plugin_root_not_cwd(
     booping_bin = plugin_root / "bin" / "booping"
 
     result = subprocess.run(
-        [str(booping_bin), "render", "src/templates/skills/chat.md.j2"],
+        [str(booping_bin), "render", "src/templates/skills/playbook.md.j2"],
         cwd=tmp_path,
         capture_output=True,
         text=True,
         check=True,
     )
 
-    assert "# booping — /chat" in result.stdout
+    assert "# booping — /playbook" in result.stdout
 
 
 def _render(tmp_path: Path, body: str, *args: str) -> subprocess.CompletedProcess[str]:
