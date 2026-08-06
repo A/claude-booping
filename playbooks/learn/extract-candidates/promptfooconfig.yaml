@@ -1,4 +1,4 @@
-description: groom intake
+description: learn extract-candidates
 
 prompts:
   - id: file://fable-5.md
@@ -8,7 +8,7 @@ providers:
   - id: file://../../_lib/claude_provider.py
     config:
       mode: step
-      output_mode: files
+      output_mode: text
       model: fable
       effort: high
 

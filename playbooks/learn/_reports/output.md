@@ -240,7 +240,9 @@ Write paths use these templates (resolve each placeholder before writing):
 - `_booping/agent_{name}.md` — per-agent extension in this project's vault.
 - Repo `CLAUDE.md` — the attached repo's `CLAUDE.md`, one-line bullet additions; no paragraph rewrites. **Never** write to the global `~/.claude/CLAUDE.md` or any user-level scope — learn only touches this project's vault and the attached repo.
 
-An `update existing at target X` row edits the file already holding the rule in place — no fresh file at another target.
+An `update existing at target X` row edits the file already holding the rule in place — no fresh file at another target. Extend, don't rewrite: add the row's content in the shape the file already uses, touch only prose the addition makes stale (a count in the title, a sibling reference), and leave everything else — including the existing **Example** — byte-identical.
+
+The retrospective is the backstory, not the lesson: however long the retro finding runs, the persisted lesson body stays a couple of sentences plus its one example. Never copy the retro's narrative, motivation, or timeline into a lesson.
 
 
 ---
