@@ -14,5 +14,5 @@ site/
 # Local runtime vault artifacts at repo root
 _booping/
 
-# Debug playbook renders (just playbook-reports-live) — machine-specific, never committed
+# Debug playbook renders (just snapshots-render) — machine-specific, never committed
 playbooks/*/_reports/local.md

@@ -39,7 +39,8 @@ status:
   already guarantees stays out of the cell.
 - **Hooks** — machine-readable strings ONLY, translated verbatim into playbook.yaml:
   `frontmatter-update <key>=<val>` (a value is Jinja-rendered with the `macro` global —
-  `"{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"` — or the literal `@head`; quote any value carrying
+  `"{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"`, the repo HEAD sha being
+  `"{{ macro('core.macros.git_commit') }}"`; quote any value carrying
   spaces, the hook string is shlex-tokenised) or
   `script <name>` (an executable the playbook ships at `_scripts/<name>`). Prose in a Hooks
   cell is a defect.

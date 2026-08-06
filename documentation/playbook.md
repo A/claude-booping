@@ -298,7 +298,7 @@ states:
             when: both research steps returned and design confirmed
             gates: ["research-codebase and research-web done, findings recorded"]
             hooks:
-              - frontmatter-update researched="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}" commit=@head
+              - frontmatter-update researched="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}" commit="{{ macro('core.macros.git_commit') }}"
               - script check-findings
       developing-steps:
         transitions:
@@ -337,7 +337,7 @@ Two hook forms are available on a transition:
 
 A hook value is **Jinja-rendered with the `macro` global**, the same one rendered bodies call — a timestamp is `completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"`, with the format at the call site and no bespoke token vocabulary. Because the clock goes through the macro system, `--stub-macro` pins it, so a transition is reproducible exactly the way a render is. The hook string is tokenised with `shlex`, so quote any value carrying spaces — as above. A value with no Jinja in it passes through untouched, and a macro or Jinja error aborts the transition (exit 2) with the offending value on stderr.
 
-The one literal token left is `@head` (the attached repo's HEAD sha). It is deliberately not a macro: it must resolve against the repo directory, while a macro runs in the process cwd — the run workdir during a transition.
+There is no bespoke token vocabulary at all — the repo's HEAD sha is the macro `core.macros.git_commit`, which carries `cwd: repo` so it resolves against the repo directory rather than the process cwd (the run workdir during a transition).
 
 The optional `<file>` target is the first token after the hook name that carries no `=`. It resolves against the **run workdir** — the same anchor as the machine's `artifact` — and may carry `{instance}`, interpolated with the instance slug (legal only when an instance is in scope). The file must exist; a missing file is an error (exit 2) that aborts the transition — nothing is created. A file without a frontmatter block gets one prepended, the existing content becoming the body unchanged. In the mutation report a file-target update prints as `frontmatter <file>: k=v` instead of the plain `frontmatter: k=v`.
 
