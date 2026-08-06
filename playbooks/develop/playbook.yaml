@@ -28,7 +28,7 @@ states:
               - "no unresolved non-trivial drift — that halts back to grooming instead"
             hooks:
               - frontmatter-update started="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
-              - frontmatter-update commit=@head
+              - frontmatter-update commit="{{ macro('core.macros.git_commit') }}"
       in-progress:
         transitions:
           - to: awaiting-retro

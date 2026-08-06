@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import subprocess
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -110,6 +111,88 @@ def test_non_list_value_is_rejected() -> None:
         macro("macros.now")
 
     assert "argv list" in str(exc.value)
+
+
+def test_mapping_node_with_cwd_repo_runs_in_the_repo_dir(tmp_path: Path) -> None:
+    macros.clear_cache()
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    macro = macros.make_macro(
+        {"macros": {"here": {"command": ["pwd"], "cwd": "repo"}}}, repo_dir=repo
+    )
+
+    assert macro("macros.here") == str(repo)
+    assert Path.cwd() != repo
+
+
+def test_mapping_node_with_cwd_vault_runs_in_the_vault_dir(tmp_path: Path) -> None:
+    macros.clear_cache()
+    vault = tmp_path / "vault"
+    vault.mkdir()
+    macro = macros.make_macro(
+        {"macros": {"here": {"command": ["pwd"], "cwd": "vault"}}}, vault_dir=vault
+    )
+
+    assert macro("macros.here") == str(vault)
+
+
+def test_mapping_node_without_cwd_runs_in_the_process_cwd() -> None:
+    macros.clear_cache()
+    macro = macros.make_macro({"macros": {"here": {"command": ["pwd"]}}})
+
+    assert macro("macros.here") == str(Path.cwd())
+
+
+def test_unknown_cwd_value_names_it_and_the_legal_set() -> None:
+    macro = macros.make_macro({"macros": {"here": {"command": ["pwd"], "cwd": "plugin"}}})
+
+    with pytest.raises(macros.MacroError) as exc:
+        macro("macros.here")
+
+    assert "'plugin'" in str(exc.value)
+    assert "repo, vault" in str(exc.value)
+
+
+def test_cwd_without_a_resolved_directory_names_the_macro() -> None:
+    macro = macros.make_macro({"macros": {"here": {"command": ["pwd"], "cwd": "repo"}}})
+
+    with pytest.raises(macros.MacroError) as exc:
+        macro("macros.here")
+
+    assert "macros.here" in str(exc.value)
+    assert "no repo directory resolved" in str(exc.value)
+
+
+def test_mapping_node_without_command_names_the_path() -> None:
+    macro = macros.make_macro({"macros": {"here": {"cwd": "repo"}}})
+
+    with pytest.raises(macros.MacroError) as exc:
+        macro("macros.here")
+
+    assert "macros.here" in str(exc.value)
+    assert "command" in str(exc.value)
+
+
+def test_mapping_node_with_unknown_key_names_the_path() -> None:
+    macro = macros.make_macro({"macros": {"here": {"command": ["pwd"], "shell": True}}})
+
+    with pytest.raises(macros.MacroError) as exc:
+        macro("macros.here")
+
+    assert "macros.here" in str(exc.value)
+    assert "shell" in str(exc.value)
+
+
+def test_same_call_in_two_cwds_is_cached_separately(tmp_path: Path) -> None:
+    macros.clear_cache()
+    one = tmp_path / "one"
+    two = tmp_path / "two"
+    one.mkdir()
+    two.mkdir()
+    node = {"macros": {"here": {"command": ["pwd"], "cwd": "repo"}}}
+
+    assert macros.make_macro(node, repo_dir=one)("macros.here") == str(one)
+    assert macros.make_macro(node, repo_dir=two)("macros.here") == str(two)
 
 
 def test_stub_returns_literal_without_executing(

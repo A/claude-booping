@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import re
 import subprocess
 from pathlib import Path
@@ -57,6 +58,20 @@ def test_render_subprocess_integration_log(
     # A marker behind on migrations is gated before it ever renders (and so before it
     # logs); this test is about the logging path, so the marker is current.
     (repo_dir / ".booping").write_text(f"latest_migration: {latest_shipped_id()}\n")
+    # The skill body renders `core.macros.git_commit`, which needs a repo to resolve.
+    subprocess.run(["git", "init", "-q"], cwd=repo_dir, check=True)
+    subprocess.run(
+        ["git", "commit", "-q", "--allow-empty", "-m", "init"],
+        cwd=repo_dir,
+        check=True,
+        env={
+            **os.environ,
+            "GIT_AUTHOR_NAME": "t",
+            "GIT_AUTHOR_EMAIL": "t@t",
+            "GIT_COMMITTER_NAME": "t",
+            "GIT_COMMITTER_EMAIL": "t@t",
+        },
+    )
 
     monkeypatch.setenv("HOME", str(tmp_path))
 

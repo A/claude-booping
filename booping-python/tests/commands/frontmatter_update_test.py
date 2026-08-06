@@ -8,10 +8,14 @@ from typing import Any
 
 import pytest
 
+from booping import macros
 from booping.commands import frontmatter_update as fu_cmd
 from booping.commands import playbook_transition as pt_cmd
 
 CONFIG: dict[str, Any] = {"core": {"macros": {"date": ["date"]}}}
+GIT_CONFIG: dict[str, Any] = {
+    "core": {"macros": {"git_commit": {"command": ["git", "rev-parse", "HEAD"], "cwd": "repo"}}}
+}
 NOW_EXPR = "{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
 TODAY_EXPR = "{{ macro('core.macros.date', '+%Y-%m-%d') }}"
 
@@ -91,18 +95,26 @@ class TestInterpolate:
         assert excinfo.value.code != 0
         assert "macro(" in capsys.readouterr().err
 
-    def test_head(self) -> None:
-        # Should resolve to a 40-char hex SHA in a git repo
-        git_result = subprocess.run(
+    def test_git_commit_macro_runs_against_the_repo_dir(self, tmp_path: Path) -> None:
+        macros.clear_cache()
+        repo = Path(__file__).resolve().parents[3]
+        expected = subprocess.run(
             ["git", "rev-parse", "HEAD"],
+            cwd=repo,
             capture_output=True,
             text=True,
             check=True,
+        ).stdout.strip()
+
+        actual = fu_cmd.interpolate(
+            "{{ macro('core.macros.git_commit') }}", repo, GIT_CONFIG, tmp_path
         )
-        expected = git_result.stdout.strip()
-        actual = fu_cmd.interpolate("@head", Path.cwd())
+
         assert actual == expected
         assert len(actual) == 40
+
+    def test_retired_head_token_is_a_literal(self) -> None:
+        assert fu_cmd.interpolate("@head", None, CONFIG) == "@head"
 
     def test_literal_value(self) -> None:
         assert fu_cmd.interpolate("hello", None, CONFIG) == "hello"
@@ -174,10 +186,13 @@ class TestFrontmatterUpdateCLI:
         fm = pyyaml.safe_load(fm_text)
         datetime.strptime(fm["planned"], "%Y-%m-%d %H:%M")  # noqa: DTZ007
 
-    def test_sets_commit_with_at_head(self, tmp_path: Path) -> None:
+    def test_sets_commit_with_the_git_macro(self, tmp_path: Path) -> None:
+        macros.clear_cache()
         plan = _make_plan(tmp_path, "title: Foo\nstatus: backlog")
 
-        fu_cmd._run(_ns(plan=plan, pairs=["commit=@head"]))  # type: ignore[reportPrivateUsage]
+        fu_cmd._run(  # type: ignore[reportPrivateUsage]
+            _ns(plan=plan, pairs=["commit={{ macro('core.macros.git_commit') }}"])
+        )
 
         text = plan.read_text()
         assert "commit:" in text

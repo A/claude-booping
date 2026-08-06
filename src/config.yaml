@@ -15,13 +15,18 @@ core:
   research_agent: "booping:booping-researcher"
 
   # Shell-outs a template body may call by dotted path: `{{ macro('core.macros.date', '+%H:%M') }}`.
-  # Each value is an argv list (never a shell string) run with shell=False, and the list is a
-  # prefix — call-site positional arguments append to it. stdout is stripped and cached per
-  # argv tuple for the process, so a macro must be idempotent within one render and two
-  # argument variants are two runs. `--stub-macro <path>[ <args>]=<literal>` on `render`,
-  # `render-playbook` and `scaffold` returns the literal without executing.
+  # Each value is an argv list (never a shell string) run with shell=False, or a mapping carrying
+  # that list under `command:` plus an optional `cwd:` of `repo` or `vault` naming the directory
+  # it runs in (omitted → the process cwd). The list is a prefix — call-site positional arguments
+  # append to it. stdout is stripped and cached per argv tuple and resolved cwd for the process,
+  # so a macro must be idempotent within one render and two argument variants are two runs.
+  # `--stub-macro <path>[ <args>]=<literal>` on `render`, `render-playbook` and `scaffold`
+  # returns the literal without executing.
   macros:
     date: ["date"]
+    git_commit:
+      command: ["git", "rev-parse", "HEAD"]
+      cwd: repo
 
   # A **query spec** is any mapping in the merged config, addressed by its dotted
   # path — `booping query --config <dotted.path>` and `{{ '<dotted.path>' | query }}`.

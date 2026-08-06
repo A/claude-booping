@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import subprocess
 from pathlib import Path
 
 from pydantic import BaseModel
@@ -12,7 +11,6 @@ class Project(BaseModel):
     name: str
     directory: Path
     repo_directory: Path
-    git_commit: str | None = None
     # Watermark: everything at or below this id has been applied. -1 = nothing yet.
     latest_migration: int = -1
 
@@ -65,7 +63,6 @@ class Project(BaseModel):
                         data.get("vault_path"), candidate, project_name, home_dir
                     ),
                     repo_directory=candidate,
-                    git_commit=_resolve_git_commit(candidate),
                     latest_migration=_resolve_latest_migration(data, marker),
                 )
             parent = candidate.parent
@@ -107,21 +104,3 @@ def _resolve_latest_migration(data: dict[str, object], marker: Path) -> int:
             f"invalid latest_migration in {marker}: expected an integer, got {raw!r}"
         )
     return raw
-
-
-def _resolve_git_commit(repo_directory: Path) -> str | None:
-    """Return current git HEAD as 40-char hex, or None when git is missing / repo invalid."""
-    try:
-        result = subprocess.run(
-            ["git", "rev-parse", "HEAD"],
-            cwd=repo_directory,
-            check=False,
-            capture_output=True,
-            text=True,
-        )
-    except FileNotFoundError:
-        return None
-    if result.returncode != 0:
-        return None
-    sha = result.stdout.strip()
-    return sha or None

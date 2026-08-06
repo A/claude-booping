@@ -6,7 +6,7 @@ from pathlib import Path
 
 from booping import logger, migrations
 from booping.context import Context
-from booping.macros import parse_stub_overrides
+from booping.macros import MacroError, parse_stub_overrides
 from booping.rendering import get_plugin_root, render
 from booping.utils import deep_merge, parse_set_overrides
 
@@ -90,13 +90,17 @@ def _run(args: argparse.Namespace) -> None:
     template_path: Path = args.path
     if not template_path.is_absolute():
         template_path = get_plugin_root() / template_path
-    result = render(
-        template_path=template_path,
-        context=ctx,
-        config=ctx.config,
-        tools={},
-        kwargs={},
-    )
+    try:
+        result = render(
+            template_path=template_path,
+            context=ctx,
+            config=ctx.config,
+            tools={},
+            kwargs={},
+        )
+    except MacroError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        sys.exit(1)
     _emit(result, args.output)
 
 

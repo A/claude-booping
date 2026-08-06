@@ -133,6 +133,16 @@ def make_booping_global(context: object) -> Row:
     return Row({"latest_migration": latest if isinstance(latest, int) else -1})
 
 
+def macro_dirs(context: object) -> dict[str, Path | None]:
+    """The `repo_dir` / `vault_dir` kwargs `make_macro` resolves `cwd:` against."""
+    project = getattr(context, "project", None)
+    repo_dir = getattr(project, "repo_directory", None)
+    return {
+        "repo_dir": repo_dir if isinstance(repo_dir, Path) else None,
+        "vault_dir": _vault_of(context),
+    }
+
+
 def _build_env(
     loader_root: Path,
     *,
@@ -149,7 +159,7 @@ def _build_env(
         keep_trailing_newline=True,
     )
     globals_: dict[str, Any] = env.globals  # type: ignore[assignment]
-    globals_["macro"] = make_macro(config)
+    globals_["macro"] = make_macro(config, **macro_dirs(context))
     # The single site the `booping` global is set: every env a body renders through
     # (`render`, `build_source_env`, and so `render-playbook` and `scaffold`) comes
     # from here.

@@ -285,6 +285,9 @@ def _run(args: argparse.Namespace) -> None:
             hooks = resolve_hooks(from_status, to_status, machine.raw)
 
     project: Project | None = ctx.project
+    # A `~/Claude` workdir carries no `.booping`, so the workdir-resolved context knows no
+    # repo; a `cwd: repo` macro in a hook resolves it from the process cwd instead.
+    hook_project = project if project is not None else Project.load_cwd_configured()
     playbook_dir = pb.path.parent.resolve()
 
     for hook in hooks:
@@ -293,7 +296,7 @@ def _run(args: argparse.Namespace) -> None:
             rel, resolved = dispatch_frontmatter_update(
                 hook,
                 artifact,
-                project,
+                hook_project,
                 file_base=workdir,
                 instance=instance,
                 config=ctx.config,

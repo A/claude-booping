@@ -36,7 +36,7 @@ suite_reviewed_at: 20260802 09:58
   - `[UPDATED] plans/{slug}/index.md` — only on **trivial** drift the user approved: the
     in-place plan edits that bring a task's file list, a DoD line or a Verify command back in
     line with the code. Frontmatter stays untouched here — `status:` is the machine's, and the
-    baseline re-snapshot (`commit=@head`) is the `ready-for-dev` → `in-progress` edge's hook,
+    baseline re-snapshot (the `commit` hook) is the `ready-for-dev` → `in-progress` edge's hook,
     fired at provision
   - nothing else — no branch, no milestone groups, no research notes
 - **Harness return** — none: the step is runner-performed, so it runs in the driving

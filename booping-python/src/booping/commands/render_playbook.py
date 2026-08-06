@@ -20,6 +20,7 @@ from booping.rendering import (
     LenientUndefined,
     build_source_env,
     get_plugin_root,
+    macro_dirs,
 )
 from booping.utils import deep_merge, parse_set_overrides
 
@@ -251,7 +252,9 @@ def build_env(
         )
     globals_: dict[str, Any] = cast("dict[str, Any]", env.globals)
     globals_["resolve_detached"] = resolve_detached
-    globals_["macro"] = make_macro(context.config if context is not None else None)
+    globals_["macro"] = make_macro(
+        context.config if context is not None else None, **macro_dirs(context)
+    )
     return env
 
 

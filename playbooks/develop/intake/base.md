@@ -11,7 +11,7 @@ good" counts, silence never does. That approval is what the `awaiting-plan-revie
 
 ## Plan-validity check
 
-Compare the plan's `commit:` field with the repo's current HEAD, `{{ context.project.git_commit }}`.
+Compare the plan's `commit:` field with the repo's current HEAD, `{{ macro('core.macros.git_commit') }}`.
 
 - **Equal**: proceed.
 - **Different**: run the cheap-summary commands first — do **not** load the full `git diff` into
