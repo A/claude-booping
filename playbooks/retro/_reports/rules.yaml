@@ -1,0 +1,28 @@
+doc: retro-report
+
+rules:
+  - select: SECTION("Available Agents") > TABLE
+    id: retro.agents-table
+    count: 1
+    columns: [agent, good for, bad for]
+
+  - select: SECTION("Plans awaiting retro") > TABLE
+    id: retro.queue-table
+    count: 1
+    columns: [Status, SP, Title, Created, Completed, Path]
+
+  - select: DOCUMENT H2
+    id: retro.sections
+    ordered:
+      - Guidance
+      - Plans awaiting retro
+      - Available Agents
+      - Shared instructions
+      - Playbook Steps
+      - State
+      - "Step: Intake"
+      - "Step: Prepare"
+      - "Step: Gather Feedback"
+      - "Step: Research Issues"
+      - "Step: Synthesize"
+      - "Step: Save"

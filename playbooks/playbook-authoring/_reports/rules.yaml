@@ -1,0 +1,21 @@
+doc: playbook-authoring-report
+
+rules:
+  - select: DOCUMENT H2
+    id: playbook-authoring.sections
+    ordered:
+      - Playbook Steps
+      - State
+      - "Step: Record Decision"
+      - "Step: Interview"
+      - "Step: Decompose"
+      - "Step: States"
+      - "Step: Manifest"
+      - "Subgraph: step-pipeline"
+      - "Step: Step Spec"
+      - "Step: Llm Tests"
+      - "Step: Fixtures"
+      - "Step: Step Prompt"
+      - "Step: Step Suite"
+      - "Step: Smoke Optimizer"
+      - "Step: Regress Optimizer"

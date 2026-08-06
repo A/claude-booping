@@ -24,9 +24,47 @@ pytest:
 # Every check CI runs, in order, stopping at the first failure.
 ci: lint typecheck pytest snapshots mdcheck
 
-# Structural checks over the rendered reports. Rules land in M4.
+# Shared rules run over every report; a playbook may add playbooks/<name>/_reports/rules.yaml
+# beside its report for its own sections and tables.
+[doc("Structural checks over the rendered reports")]
 mdcheck:
-    @echo "mdcheck: no rules yet"
+    #!/usr/bin/env bash
+    set -uo pipefail
+    if ! command -v mdcheck >/dev/null; then
+        echo "mdcheck: binary not found on PATH — cargo install markdown-checker" >&2
+        exit 127
+    fi
+    findings=()
+    errored=()
+    declare -A seen_error=()
+    run() {
+        local rules="$1" report="$2" status
+        mdcheck "$rules" "$report" || status=$?
+        case "${status:-0}" in
+            0) ;;
+            1) findings+=("$report ($rules)") ;;
+            *)
+                if [[ -z "${seen_error[$rules]:-}" ]]; then
+                    seen_error[$rules]=1
+                    errored+=("$rules: mdcheck exit ${status}")
+                fi
+                ;;
+        esac
+    }
+    for report in playbooks/*/_reports/output.md; do
+        run playbooks/_lib/report.rules.yaml "$report"
+        rules="$(dirname "$report")/rules.yaml"
+        [[ -f "$rules" ]] && run "$rules" "$report"
+    done
+    if (( ${#errored[@]} )); then
+        printf 'mdcheck rule-file or internal error — %s\n' "${errored[@]}" >&2
+    fi
+    if (( ${#findings[@]} )); then
+        printf 'mdcheck findings: %s\n' "${findings[@]}" >&2
+    fi
+    (( ${#errored[@]} )) && exit 2
+    (( ${#findings[@]} )) && exit 1
+    exit 0
 
 # Writes nothing under playbooks/: renders into a temp dir, then diffs against the baselines.
 [doc("Check the committed reports against a fresh hermetic render")]

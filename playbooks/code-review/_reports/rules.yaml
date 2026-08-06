@@ -1,0 +1,18 @@
+doc: code-review-report
+
+rules:
+  - select: SECTION("Available Agents") > TABLE
+    id: code-review.agents-table
+    count: 1
+    columns: [agent, good for, bad for]
+
+  - select: DOCUMENT H2
+    id: code-review.sections
+    ordered:
+      - Available Agents
+      - Shared instructions
+      - Playbook Steps
+      - "Step: Scope"
+      - "Step: Review"
+      - "Step: Present"
+      - "Step: Resolve"

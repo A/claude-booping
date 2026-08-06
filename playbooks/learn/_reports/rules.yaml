@@ -1,0 +1,28 @@
+doc: learn-report
+
+rules:
+  - select: SECTION("Routing Matrix") > TABLE
+    id: learn.routing-table
+    count: 1
+    columns: [Target, When to use, Lands at, Examples]
+
+  - select: SECTION("Plans awaiting learning") > TABLE
+    id: learn.queue-table
+    count: 1
+    columns: [Status, SP, Title, Created, Completed, Retro, Path]
+
+  - select: DOCUMENT H2
+    id: learn.sections
+    ordered:
+      - Guidance
+      - Routing Matrix
+      - Plans awaiting learning
+      - Shared instructions
+      - Playbook Steps
+      - State
+      - "Step: Intake"
+      - "Step: Extract Candidates"
+      - "Step: Dedup Sweep"
+      - "Step: Review Table"
+      - "Step: Write"
+      - "Step: Transition"
