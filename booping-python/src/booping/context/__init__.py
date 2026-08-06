@@ -75,15 +75,19 @@ class Context(BaseModel):
         else:
             vault = None
 
+        # An explicit vault pins the config tiers as well as discovery: the global tier is
+        # machine-local, and a pinned render must be reproducible on another machine.
+        tiers = [] if vault_override is not None else [global_path]
+
         if vault is not None:
-            cfg = config_mod.load(root, [global_path, vault / "config.yaml"])
+            cfg = config_mod.load(root, [*tiers, vault / "config.yaml"])
             lessons = Lesson.load_all(vault)
             retros = Retro.load_all(vault)
             plan_templates = PlanTemplate.load_all(root, vault)
             review_templates = ReviewTemplate.load_all(root, vault)
             extra_instructions = ei_mod.load(vault)
         else:
-            cfg = config_mod.load(root, [global_path])
+            cfg = config_mod.load(root, tiers)
             lessons = []
             retros = []
             plan_templates = PlanTemplate.load_all(root, Path("/dev/null"))

@@ -21,8 +21,9 @@ typecheck:
 test:
     cd booping-python && uv run pytest
 
-# Committed reports: fixture vault + stubbed macros, byte-reproducible. One playbook
-# with `just playbook-reports groom`. A STOP notice in the output fails the recipe.
+# Committed reports: fixture vault, byte-reproducible (the vault's own config declares
+# `macro_stubs:`). One playbook with `just playbook-reports groom`. A STOP notice in the
+# output fails the recipe.
 playbook-reports which="*":
     #!/usr/bin/env bash
     set -euo pipefail
@@ -32,9 +33,6 @@ playbook-reports which="*":
         out="playbooks/$name/_reports/output.md"
         bin/booping render-playbook "$name" \
             --project playbooks/_fixtures/vault \
-            --stub-macro "core.macros.date=19700101-00-00" \
-            --stub-macro "core.macros.date +%Y%m%d%H%M=197001010000" \
-            --stub-macro "core.macros.date +%Y-%m-%d %H:%M=1970-01-01 00:00" \
             --output "$out"
         grep -q '^\*\*STOP' "$out" && failed+=("$name")
     done

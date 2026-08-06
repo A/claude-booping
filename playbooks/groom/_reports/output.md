@@ -231,11 +231,11 @@ most of the milestones land on. A near miss loses on that surface, not on taste.
 
 | Name | Source | Description | Read from |
 | --- | --- | --- | --- |
-| `backend` | core | Backend feature work — APIs, data models, services, migrations, background jobs, protocols. Stack-agnostic. | `/home/anton/Dev/@A/claude-booping/docs/plan_templates/backend.md` |
-| `claude-skill` | core | Authoring or refactoring a Claude Code skill — skill bodies, partials, config schema, rendered outputs, skill-level agents. | `/home/anton/Dev/@A/claude-booping/docs/plan_templates/claude_skill.md` |
-| `cli` | core | CLI tool work — argument parsing, subcommands, I/O, error handling, exit codes. Standalone scripts or larger CLI suites. | `/home/anton/Dev/@A/claude-booping/docs/plan_templates/cli.md` |
-| `documentation` | core | Authoring or restructuring user-facing documentation — multi-page sites, READMEs, cross-linked guides, with optional static-site build pipeline (MkDocs, Jekyll, Docusaurus, etc.). | `/home/anton/Dev/@A/claude-booping/docs/plan_templates/documentation.md` |
-| `frontend` | core | Frontend feature work — UI components, state, routing, styling, accessibility. Stack-agnostic (React, Svelte, Leptos, Vue, vanilla). | `/home/anton/Dev/@A/claude-booping/docs/plan_templates/frontend.md` |
+| `backend` | core | Backend feature work — APIs, data models, services, migrations, background jobs, protocols. Stack-agnostic. | `${CLAUDE_PLUGIN_ROOT}/docs/plan_templates/backend.md` |
+| `claude-skill` | core | Authoring or refactoring a Claude Code skill — skill bodies, partials, config schema, rendered outputs, skill-level agents. | `${CLAUDE_PLUGIN_ROOT}/docs/plan_templates/claude_skill.md` |
+| `cli` | core | CLI tool work — argument parsing, subcommands, I/O, error handling, exit codes. Standalone scripts or larger CLI suites. | `${CLAUDE_PLUGIN_ROOT}/docs/plan_templates/cli.md` |
+| `documentation` | core | Authoring or restructuring user-facing documentation — multi-page sites, READMEs, cross-linked guides, with optional static-site build pipeline (MkDocs, Jekyll, Docusaurus, etc.). | `${CLAUDE_PLUGIN_ROOT}/docs/plan_templates/documentation.md` |
+| `frontend` | core | Frontend feature work — UI components, state, routing, styling, accessibility. Stack-agnostic (React, Svelte, Leptos, Vue, vanilla). | `${CLAUDE_PLUGIN_ROOT}/docs/plan_templates/frontend.md` |
 
 
 

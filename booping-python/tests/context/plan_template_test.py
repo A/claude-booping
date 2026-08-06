@@ -17,6 +17,15 @@ def test_core_only_mode() -> None:
         assert t.source == "core"
 
 
+def test_core_path_is_plugin_root_relative() -> None:
+    plugin_root = get_fixture_path("plugin-root-minimal")
+    vault = get_fixture_path("vault-empty")
+    templates = PlanTemplate.load_all(plugin_root, vault)
+    for t in templates:
+        assert not t.path.is_absolute()
+        assert (plugin_root / t.path).is_file()
+
+
 def test_project_override_replaces_core_entry() -> None:
     plugin_root = get_fixture_path("plugin-root-minimal")
     vault = get_fixture_path("vault-full")

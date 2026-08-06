@@ -6,19 +6,19 @@
 {% if generic %}
 **Generic**:
 {% for t in generic %}
-- `{{ t.name }}` — {{ t.description or "(no description)" }} (`{{ t.path }}`)
+- `{{ t.name }}` — {{ t.description or "(no description)" }} (`{{ "${CLAUDE_PLUGIN_ROOT}/" if t.source == "core" }}{{ t.path }}`)
 {% endfor %}
 {% endif %}
 {% if language %}
 **Language**:
 {% for t in language %}
-- `{{ t.name }}` — {{ t.description or "(no description)" }} (`{{ t.path }}`)
+- `{{ t.name }}` — {{ t.description or "(no description)" }} (`{{ "${CLAUDE_PLUGIN_ROOT}/" if t.source == "core" }}{{ t.path }}`)
 {% endfor %}
 {% endif %}
 {% if framework %}
 **Framework**:
 {% for t in framework %}
-- `{{ t.name }}` — {{ t.description or "(no description)" }} (`{{ t.path }}`)
+- `{{ t.name }}` — {{ t.description or "(no description)" }} (`{{ "${CLAUDE_PLUGIN_ROOT}/" if t.source == "core" }}{{ t.path }}`)
 {% endfor %}
 {% endif %}
 {% if not generic and not language and not framework %}

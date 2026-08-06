@@ -14,13 +14,20 @@ _VALID_LAYERS: tuple[str, ...] = get_args(Layer)
 class ReviewTemplate(BaseModel):
     name: str
     description: str
+    # Core templates carry a plugin-root-relative path so a render is machine-independent;
+    # a reader prefixes ${CLAUDE_PLUGIN_ROOT}. Project templates stay absolute.
     path: Path
     body: str
     source: Literal["core", "project"]
     layer: Layer
 
     @classmethod
-    def _build(cls, path: Path, source: Literal["core", "project"]) -> ReviewTemplate:
+    def _build(
+        cls,
+        path: Path,
+        source: Literal["core", "project"],
+        display: Path | None = None,
+    ) -> ReviewTemplate:
         fm, body = parse_frontmatter(path)
         name = str(fm.get("name", path.stem))
         description = str(fm.get("description", ""))
@@ -33,7 +40,7 @@ class ReviewTemplate(BaseModel):
         return cls(
             name=name,
             description=description,
-            path=path,
+            path=display if display is not None else path,
             body=body,
             source=source,
             layer=cast(Layer, layer_raw),
@@ -47,7 +54,7 @@ class ReviewTemplate(BaseModel):
 
         if core_dir.is_dir():
             for p in sorted(core_dir.glob("*.md")):
-                t = cls._build(p, source="core")
+                t = cls._build(p, source="core", display=p.relative_to(plugin_root))
                 core_by_name[t.name] = len(core_templates)
                 core_templates.append(t)
 

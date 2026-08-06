@@ -11,6 +11,8 @@ from booping.context._yaml import parse_frontmatter
 class PlanTemplate(BaseModel):
     name: str
     description: str
+    # Core templates carry a plugin-root-relative path so a render is machine-independent;
+    # a reader prefixes ${CLAUDE_PLUGIN_ROOT}. Project templates stay absolute.
     path: Path
     body: str
     source: Literal["core", "project"]
@@ -26,7 +28,13 @@ class PlanTemplate(BaseModel):
                 fm, body = parse_frontmatter(p)
                 name = str(fm.get("name", p.stem))
                 description = str(fm.get("description", ""))
-                t = cls(name=name, description=description, path=p, body=body, source="core")
+                t = cls(
+                    name=name,
+                    description=description,
+                    path=p.relative_to(plugin_root),
+                    body=body,
+                    source="core",
+                )
                 core_by_name[name] = len(core_templates)
                 core_templates.append(t)
 
