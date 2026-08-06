@@ -22,7 +22,6 @@ packages = ["src/booping"]
 [dependency-groups]
 dev = [
     "pytest",
-    "pytest-snapshot",
     "ruff",
     "basedpyright",
 ]

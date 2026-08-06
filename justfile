@@ -18,41 +18,97 @@ typecheck:
     cd booping-python && uv run basedpyright
 
 # Run booping-python tests
-test:
+pytest:
     cd booping-python && uv run pytest
 
-# Committed reports: fixture vault, byte-reproducible (the vault's own config declares
-# `macro_stubs:`). One playbook with `just playbook-reports groom`. A STOP notice in the
-# output fails the recipe.
-playbook-reports which="*":
+# Every check CI runs, in order, stopping at the first failure.
+ci: lint typecheck pytest snapshots mdcheck
+
+# Structural checks over the rendered reports. Rules land in M4.
+mdcheck:
+    @echo "mdcheck: no rules yet"
+
+# Writes nothing under playbooks/: renders into a temp dir, then diffs against the baselines.
+[doc("Check the committed reports against a fresh hermetic render")]
+snapshots:
     #!/usr/bin/env bash
     set -euo pipefail
+    tmp=$(mktemp -d)
+    trap 'rm -rf "$tmp"' EXIT
+    {{ just_executable() }} snapshots-render --fixture --dest "$tmp" >/dev/null
+    drifted=()
+    for rendered in "$tmp"/*/_reports/output.md; do
+        name=$(basename "$(dirname "$(dirname "$rendered")")")
+        committed="playbooks/$name/_reports/output.md"
+        if [[ ! -f "$committed" ]]; then
+            echo "missing snapshot: $committed" >&2
+            drifted+=("$name")
+            continue
+        fi
+        if ! diff -u --label "$committed" --label "$committed (rendered)" \
+            "$committed" "$rendered"; then
+            drifted+=("$name")
+        fi
+    done
+    if (( ${#drifted[@]} )); then
+        printf 'snapshot drift: %s\n' "${drifted[*]}" >&2
+        echo "run 'just snapshots-accept' to take the rendered output as the baseline" >&2
+        exit 1
+    fi
+
+# Take the fresh render as the new baseline: rewrite the committed reports.
+snapshots-accept target="":
+    @{{ just_executable() }} snapshots-render --fixture {{ target }}
+
+# Render worker. --fixture renders against playbooks/_fixtures/vault (hermetic, the vault's
+# own config declares `macro_stubs:`) into <dest>/<name>/_reports/output.md and fails on a
+# STOP notice; without it, the attached project's own vault with macros executed for real
+# into <dest>/<name>/_reports/local.md (gitignored), where STOP notices print rather than
+# fail. A trailing argument narrows to one playbook; --dest <dir> moves the destination root
+# (default `playbooks`).
+[doc("Render worker: snapshots-render [--fixture] [--dest <dir>] [playbook]")]
+snapshots-render *args:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    set -- {{ args }}
+    fixture=0
+    dest=playbooks
+    target='*'
+    while (( $# )); do
+        case "$1" in
+            --fixture) fixture=1 ;;
+            --dest) dest="$2"; shift ;;
+            --dest=*) dest="${1#--dest=}" ;;
+            *) target="$1" ;;
+        esac
+        shift
+    done
     failed=()
-    for manifest in playbooks/{{ which }}/playbook.md; do
+    for manifest in playbooks/$target/playbook.md; do
         name=$(basename "$(dirname "$manifest")")
-        out="playbooks/$name/_reports/output.md"
-        bin/booping render-playbook "$name" \
-            --project playbooks/_fixtures/vault \
-            --output "$out"
-        grep -q '^\*\*STOP' "$out" && failed+=("$name")
+        if (( fixture )); then
+            out="$dest/$name/_reports/output.md"
+        else
+            out="$dest/$name/_reports/local.md"
+        fi
+        mkdir -p "$(dirname "$out")"
+        echo "$out"
+        if (( fixture )); then
+            bin/booping render-playbook "$name" \
+                --project playbooks/_fixtures/vault \
+                --output "$out"
+            if grep -q '^\*\*STOP' "$out"; then
+                failed+=("$name")
+            fi
+        else
+            bin/booping render-playbook "$name" --output "$out"
+            grep -h '^\*\*STOP' "$out" || true
+        fi
     done
     if (( ${#failed[@]} )); then
         printf 'STOP notice in report: %s\n' "${failed[@]}" >&2
         exit 1
     fi
-
-# Debug reports: the attached project's own vault, macros executed for real. Written to
-# playbooks/<name>/_reports/local.md, which is gitignored. STOP notices are the point here,
-# so they print rather than fail.
-playbook-reports-live which="*":
-    #!/usr/bin/env bash
-    set -euo pipefail
-    for manifest in playbooks/{{ which }}/playbook.md; do
-        name=$(basename "$(dirname "$manifest")")
-        out="playbooks/$name/_reports/local.md"
-        bin/booping render-playbook "$name" --output "$out"
-        grep -h '^\*\*STOP' "$out" || true
-    done
 
 # Playbook evals — promptfoo over `claude -p` on subscription auth. Suites live at
 # playbooks/<name>/<step>/promptfooconfig.yaml; pass one with -c, e.g.
