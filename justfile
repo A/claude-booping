@@ -149,28 +149,40 @@ snapshots-render *args:
     fi
 
 # Playbook evals — promptfoo over `claude -p` on subscription auth. Suites live at
-# playbooks/<name>/<step>/promptfooconfig.yaml; pass one with -c, e.g.
-#   just smoke -c playbooks/groom/intake/promptfooconfig.yaml
+# playbooks/<name>/<step>/promptfooconfig.yaml and are named <playbook>/<step>:
+#   just smoke groom/intake      one suite
+#   just smoke all               every suite, in sequence
+#   just smoke -c <path>         explicit config, forwarded to promptfoo untouched
+# Naming no suite lists them — promptfoo has no config at the repo root.
+#
+# Every run posts its results to the PR for the current branch: one sticky comment
+# (updated in place) plus an `evals` commit status on HEAD, which is the merge gate —
+# a new commit has no status, so a branch rule requiring `evals` blocks until the suites
+# are re-run. `EVAL_PR=0 just smoke …` opts out; no gh or no PR degrades to printing.
 
-# run promptfoo eval — args pass straight through
+# run promptfoo eval over a suite — see `just suites`
 [no-exit-message]
 eval *args:
-    npx promptfoo@latest eval {{ args }}
+    @JUST_RECIPE=eval bin/eval-run.sh - {{ args }}
 
 # run promptfoo eval, then render a markdown report (status, per-check reasons) in glow
 [no-exit-message]
 eval-md *args:
-    @bin/eval-md.sh {{ args }}
+    @JUST_RECIPE=eval-md bin/eval-md.sh {{ args }}
 
 # run only the deterministic tier — cheap, no judge calls
 [no-exit-message]
 smoke *args:
-    npx promptfoo@latest eval --filter-metadata tier=smoke {{ args }}
+    @JUST_RECIPE=smoke bin/eval-run.sh smoke {{ args }}
 
 # run only the judged tier — the real signal, costs judge calls
 [no-exit-message]
 regress *args:
-    npx promptfoo@latest eval --filter-metadata tier=regress {{ args }}
+    @JUST_RECIPE=regress bin/eval-run.sh regress {{ args }}
+
+# list the eval suites by name
+suites:
+    @bin/eval-target.sh --list
 
 # Build the documentation site (strict)
 docs:
