@@ -1,6 +1,5 @@
 skills:
-  code-review: { effort: medium }
-  playbook:    { effort: medium }
+  playbook: { effort: medium }
 
 agents:
   booping-developer:  { effort: medium }

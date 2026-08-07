@@ -220,7 +220,6 @@ def test_missing_global_file_silently_skipped(isolated_xdg_config_home: Path) ->
 
 
 CORE_QUERY_PATHS = [
-    "core.code_review_playbook.queries.review_candidates",
     "core.code_review_playbook.queries.scope_candidates",
     "core.retro_playbook.queries.candidates",
     "core.learn_playbook.queries.candidates",
