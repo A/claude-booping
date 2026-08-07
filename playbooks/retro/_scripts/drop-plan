@@ -2,22 +2,19 @@
 """Close one plan the `retro` run's intake step drops, invoked as
 `_scripts/drop-plan {slug}` once per skipped sibling.
 
-Environment (set by the step's own invocation): BOOPING_WORKDIR =
-{vault}/plans/{primary-slug}, which is also cwd. The dropped plan is a sibling
-under the same `plans/` directory, which is why the state machine cannot reach
-it — its artifact is fixed to the primary.
+Environment (set by the step's own invocation): BOOPING_WORKDIR = the vault root,
+which is also cwd. The plan is already `done` — dropping it only records that it
+was left out of the retrospective.
 
-Stamps `status: done`, `goal: skipped` and `completed:` on the named plan and
-commits it. Self-contained: the vault carries no `.booping` marker, so nothing
-here shells back into `booping`, and nothing outside the standard library is
-imported.
+Stamps `retro: skipped` and `goal: skipped` on the named plan and commits it.
+Self-contained: the vault carries no `.booping` marker, so nothing here shells
+back into `booping`, and nothing outside the standard library is imported.
 """
 
 import os
 import re
 import subprocess
 import sys
-from datetime import UTC, datetime
 from pathlib import Path
 
 
@@ -40,21 +37,19 @@ def main() -> None:
         sys.exit("usage: drop-plan {slug}")
     slug = sys.argv[1]
 
-    workdir = Path(os.environ.get("BOOPING_WORKDIR", ".")).resolve()
-    vault = workdir.parent.parent
+    vault = Path(os.environ.get("BOOPING_WORKDIR", ".")).resolve()
     rel = f"plans/{slug}/index.md"
     plan = vault / rel
     if not plan.is_file():
         sys.exit(f"plan not found: {plan}")
 
-    completed = datetime.now(UTC).strftime("%Y%m%d %H:%M")
-    stamp(plan, {"status": "done", "goal": "skipped", "completed": completed})
+    stamp(plan, {"retro": "skipped", "goal": "skipped"})
 
-    summary = f"{rel} → done (goal: skipped)"
+    summary = f"{rel} → retro skipped"
     if (vault / ".git").exists():
         subprocess.run(["git", "-C", str(vault), "add", rel], check=True)
         result = subprocess.run(
-            ["git", "-C", str(vault), "commit", "-q", "-m", f"retro: {slug} → done"],
+            ["git", "-C", str(vault), "commit", "-q", "-m", f"retro: {slug} → retro skipped"],
         )
         summary += "; vault-commit: " + (
             "ok" if result.returncode == 0 else "nothing to commit"
