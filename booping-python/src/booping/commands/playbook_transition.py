@@ -192,18 +192,31 @@ def _resolve_artifact(
     return workdir / rel, rel
 
 
-def _read_status(artifact: Path) -> str:
+def read_status(artifact: Path) -> str | None:
+    """The artifact's run status, or None when the run has not started — the file is
+    missing, carries no frontmatter block, or its frontmatter has no `status:` key."""
+    if not artifact.exists():
+        return None
     try:
         fm = parse_frontmatter_only(artifact)
     except ValueError:
         fm = {}
     status = fm.get("status")
     if status is None or str(status) == "":
-        _fail(f"{artifact}: no frontmatter `status:` key; run state is not readable")
+        return None
     return str(status)
 
 
 def _bootstrap(artifact: Path, initial: str) -> None:
+    """Stamp the initial status onto an artifact that carries none. An existing file
+    keeps its other frontmatter keys and their order (ruamel round-trip), and one
+    without a frontmatter block gets it bootstrapped by the same writer."""
+    if artifact.exists():
+        try:
+            update_frontmatter(artifact, {"status": initial})
+        except Exception as exc:
+            _fail(f"cannot stamp status onto {artifact}: {exc}", code=2)
+        return
     artifact.parent.mkdir(parents=True, exist_ok=True)
     try:
         artifact.write_text(f"---\nstatus: {initial}\n---\n")
@@ -280,21 +293,29 @@ def _run(args: argparse.Namespace) -> None:
     artifact, artifact_rel = _resolve_artifact(machine, workdir, instance, target)
 
     report: list[str] = []
-    bootstrap = not artifact.exists()
-    if bootstrap:
+    existing = artifact.exists()
+    current = read_status(artifact)
+    if current is None:
         if to_status != machine.initial:
+            missing = (
+                f"{artifact}: no frontmatter `status:` key"
+                if existing
+                else f"artifact {artifact_rel} does not exist"
+            )
             _fail(
-                f"artifact {artifact_rel} does not exist; the only legal target is "
+                f"{missing}; the only legal target is "
                 f"the initial status {machine.initial!r}"
             )
         _bootstrap(artifact, machine.initial)
         from_status = NOT_STARTED
-        report.append(f"created {artifact_rel}")
+        report.append(
+            f"bootstrapped {artifact_rel}" if existing else f"created {artifact_rel}"
+        )
         report.append(f"{from_status} → {to_status}")
         report.append(format_frontmatter_line({"status": to_status}))
         hooks = [str(h) for h in machine.raw.get("hooks", {}).get("post", [])]
     else:
-        from_status = _read_status(artifact)
+        from_status = current
         if from_status == to_status:
             report.append(f"{to_status} → {to_status} (idempotent)")
             hooks = [str(h) for h in machine.raw.get("hooks", {}).get("post", [])]

@@ -14,9 +14,12 @@ from typing import Any, NoReturn
 import yaml
 
 from booping import logger
-from booping.commands.playbook_transition import NOT_STARTED, resolve_target
+from booping.commands.playbook_transition import (
+    NOT_STARTED,
+    read_status,
+    resolve_target,
+)
 from booping.context import Context
-from booping.context._yaml import parse_frontmatter_only
 from booping.context.lifecycle import resolve_edges
 from booping.context.playbook import Playbook, StateMachine
 
@@ -72,17 +75,6 @@ def _ordered_states(pb: Playbook) -> list[str]:
     return order
 
 
-def _read_status(artifact: Path) -> str:
-    try:
-        fm = parse_frontmatter_only(artifact)
-    except ValueError:
-        fm = {}
-    status = fm.get("status")
-    if status is None or str(status) == "":
-        _fail(f"{artifact}: no frontmatter `status:` key; run state is not readable")
-    return str(status)
-
-
 def _next_edges(status: str, machine: StateMachine) -> list[dict[str, Any]]:
     out: list[dict[str, Any]] = []
     for edge in resolve_edges(status, machine.raw):
@@ -96,12 +88,12 @@ def _next_edges(status: str, machine: StateMachine) -> list[dict[str, Any]]:
 
 
 def _report_status(artifact: Path, machine: StateMachine) -> dict[str, Any]:
-    if not artifact.exists():
+    status = read_status(artifact)
+    if status is None:
         return {
             "status": NOT_STARTED,
             "next": [{"to": machine.initial, "when": BOOTSTRAP_WHEN}],
         }
-    status = _read_status(artifact)
     report: dict[str, Any] = {"status": status}
     edges = _next_edges(status, machine)
     if edges:

@@ -619,3 +619,72 @@ def test_machine_without_artifact_moves_with_target(
     assert parse_frontmatter_only(artifact)["status"] == "reviewed"
     recorded = (tmp_path / "check-findings.env").read_text()
     assert f"artifact={artifact}" in recorded
+
+
+# ---------------------------------------------------------------------------
+# Bootstrap into an existing file that carries no `status:`
+# ---------------------------------------------------------------------------
+
+_NO_STATUS = (
+    "---\n"
+    "plan: plans/202601011200_thing/index.md\n"
+    "plans:\n"
+    "  - plans/202601011200_thing/index.md\n"
+    "title: Retro — Thing\n"
+    "created: 2026-01-01 12:00\n"
+    "goal_verdicts:\n"
+    "  plans/202601011200_thing/index.md: met\n"
+    "---\n"
+    "\n"
+    "## What happened\n"
+)
+
+
+def test_bootstrap_stamps_status_onto_an_existing_file(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _plant()
+    artifact = tmp_path / "retro.md"
+    artifact.write_text(_NO_STATUS)
+
+    _run(_args(to="intaking", target="retro.md", workdir=tmp_path))
+
+    fm = parse_frontmatter_only(artifact)
+    assert fm["status"] == "intaking"
+    # Sibling keys and their declared order survive the ruamel round-trip.
+    assert list(fm)[:6] == [
+        "plan", "plans", "title", "created", "goal_verdicts", "status",
+    ]
+    assert fm["title"] == "Retro — Thing"
+    assert fm["plans"] == ["plans/202601011200_thing/index.md"]
+    assert artifact.read_text().endswith("\n## What happened\n")
+    assert capsys.readouterr().out.splitlines()[0] == f"bootstrapped {artifact}"
+
+
+def test_existing_file_without_status_refuses_a_non_initial_target(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _plant()
+    artifact = tmp_path / "retro.md"
+    artifact.write_text(_NO_STATUS)
+
+    with pytest.raises(SystemExit) as exc:
+        _run(_args(to="researching", target="retro.md", workdir=tmp_path))
+    assert exc.value.code == 1
+    err = capsys.readouterr().err
+    assert "initial status 'intaking'" in err
+    assert "status" not in parse_frontmatter_only(artifact)
+
+
+def test_bootstrap_creates_a_frontmatter_block_when_the_file_has_none(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _plant()
+    artifact = tmp_path / "retro.md"
+    artifact.write_text("no frontmatter here\n")
+
+    _run(_args(to="intaking", target="retro.md", workdir=tmp_path))
+
+    assert parse_frontmatter_only(artifact)["status"] == "intaking"
+    assert artifact.read_text().endswith("no frontmatter here\n")
+    assert capsys.readouterr().out.splitlines()[0] == f"bootstrapped {artifact}"

@@ -155,30 +155,6 @@ def test_instances_keyed_by_slug_and_sorted(
 # Failure modes
 # ---------------------------------------------------------------------------
 
-def test_degenerate_artifact_without_frontmatter_exits_1(
-    tmp_path: Path, capsys: pytest.CaptureFixture[str]
-) -> None:
-    _plant()
-    (tmp_path / "index.md").write_text("no frontmatter here\n")
-    with pytest.raises(SystemExit) as exc:
-        cmd._run(_state(workdir=tmp_path))  # type: ignore[reportPrivateUsage]
-    assert exc.value.code == 1
-    err = capsys.readouterr().err
-    assert str(tmp_path / "index.md") in err
-    assert "status:" in err
-
-
-def test_degenerate_artifact_without_status_key_exits_1(
-    tmp_path: Path, capsys: pytest.CaptureFixture[str]
-) -> None:
-    _plant()
-    (tmp_path / "index.md").write_text("---\ntitle: Run\n---\n\nbody\n")
-    with pytest.raises(SystemExit) as exc:
-        cmd._run(_state(workdir=tmp_path))  # type: ignore[reportPrivateUsage]
-    assert exc.value.code == 1
-    assert "status:" in capsys.readouterr().err
-
-
 def test_unknown_playbook_exits_1(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
@@ -302,3 +278,27 @@ def test_machine_without_artifact_reports_with_target(
     assert main["artifact"] == str(tmp_path / "review.md")
     assert main["status"] == "reviewing"
     assert [e["to"] for e in main["next"]] == ["reviewed"]
+
+
+def test_existing_file_without_status_reports_not_started(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _plant()
+    (tmp_path / "index.md").write_text("---\ntitle: Retro\n---\n\nbody\n")
+
+    report = _report(tmp_path, capsys)
+
+    main = report["states"]["main"]
+    assert main["status"] == "not-started"
+    assert [e["to"] for e in main["next"]] == ["intaking"]
+
+
+def test_file_without_a_frontmatter_block_reports_not_started(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _plant()
+    (tmp_path / "index.md").write_text("no frontmatter here\n")
+
+    report = _report(tmp_path, capsys)
+
+    assert report["states"]["main"]["status"] == "not-started"
