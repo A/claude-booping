@@ -129,13 +129,13 @@ Work the target space in two passes: read the table of contents, shortlist the p
 
 Nothing is presented to the user yet — the dedup sweep runs first, and the review table is the single surface where candidates appear.
 
-## Lesson Target Space
+## Targets
 
-Every lesson targets exactly one entry from the target space, written into its `targets:` frontmatter list. Entry forms — exact names only, no globs, no wildcards, no negation:
+Every lesson names its targets in its `targets:` frontmatter list — exact names only, no globs, no wildcards, no negation:
 
-- `{playbook}` — the whole playbook, e.g. `code-review`
-- `{playbook}/{step}` — one step of it, e.g. `code-review/present`
-- `agent:{id}` — one agent, e.g. `agent:booping-developer`
+1. `{playbook}` — the whole playbook. Target it when a lesson affects several of its steps.
+2. `{playbook}/{step}` — one step. Target it when a lesson concerns that step alone.
+3. `agent:{id}` — a core booping agent (researcher, developer). Target it when a lesson should guide the agent in everything it does.
 
 The table of contents below is the whole space. Pick the playbooks a candidate actually touches and fetch their targets — step summaries, lessons already targeting them, addressable agents — with the command on each entry. Several names fetch in one call: `--set targets_for=a,b`.
 

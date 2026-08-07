@@ -4,7 +4,7 @@ Everything accepted is on disk; nothing here re-drafts or re-opens the table.
 
 ## 1. Transition
 
-Once every accepted item is written, advance the run per the `## State` section, from the workdir. The exit edge's hooks carry the sibling plans and commit them together with the `_lessons/` and `_booping/` files this run wrote; nothing here hand-edits plan frontmatter.
+Once every accepted item is written, advance the run per the `## State` section — from the vault root, passing `--target retrospectives/{slug}.md` for the run's retrospective. The exit edge's hook commits that file together with the `_lessons/` and `_booping/` files this run wrote. Plan frontmatter is never touched: the plans closed at develop and learn leaves them alone.
 
 ## 2. Repo `CLAUDE.md` commit
 
@@ -18,8 +18,8 @@ git commit -m "docs(claude-md): {short summary}"
 
 ## 3. Closing report
 
-Post in chat: the plans closed with their new statuses, then a table of the items written — each with its target path and whether it was a new write or an in-place update — and the rejected-row count. No `/playbook learn` re-offer; the working set is done.
+Post in chat: the retrospective's path and its new status, then a table of the items written — each with its target path and whether it was a new write or an in-place update — and the rejected-row count. No `/playbook learn` re-offer; the retrospective is done.
 
 ## Replay
 
-A replay that finds the accepted items already written re-fires nothing it does not need: a plan still at the entry status takes the transition alone; a plan already past it is only re-reported, with the transition line reading `already at {status} — no transition taken`.
+A replay that finds the accepted items already written re-fires nothing it does not need: a retrospective still at the entry status takes the transition alone; one already past it is only re-reported, with the transition line reading `already at {status} — no transition taken`.

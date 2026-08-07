@@ -1,26 +1,24 @@
-The current set of candidate plans is listed in the **Plans awaiting learning** table of the preamble.
+The current set of candidate retrospectives is listed in the **Retrospectives awaiting learning** table of the preamble.
 
-Resolve `$ARGUMENTS` to a retrospective file path.
+Resolve `$ARGUMENTS` to a retrospective file path under `retrospectives/`.
 
-**No `$ARGUMENTS`**: branch on the plans-list size.
+**`$ARGUMENTS` provided**: treat it as that path — no lookup through any plan.
 
-- **Zero plans**: STOP with `No plans at this run's entry status. Run the retro playbook first to write a retrospective.`
-- **Exactly one plan**: auto-select it (do not call `AskUserQuestion` — it requires ≥2 options).
-- **Multiple plans**: present the list via `AskUserQuestion` (single-select; one option per plan). Plans sharing one `retro:` value are one working set — offer the set as a single option, not one option per sibling.
+**No `$ARGUMENTS`**: branch on the table's size.
 
-Read the selected plan's `retro:` frontmatter to resolve the retrospective file.
+- **Zero rows**: STOP with `No retrospectives at this run's entry status. Run the retro playbook first to write one.`
+- **Exactly one row**: auto-select it (do not call `AskUserQuestion` — it requires ≥2 options).
+- **Multiple rows**: present them via `AskUserQuestion` (single-select; one option per retrospective).
 
-**`$ARGUMENTS` provided**: treat it as the retrospective file path. Read it and follow its `plans:` frontmatter to the associated plans.
+Validate the selected retrospective's `status:` is the status the `## State` section names as this run's entry. On mismatch, STOP with this verbatim error:
 
-## Working set and workdir
+> `learn playbook requires a retrospective in status '{entry-status}'; got '{current-status}' for {retro-path}. Use the list above to pick a candidate.`
 
-The retrospective's `plans:` frontmatter is the **working set** — every plan this run absorbs lessons for. The plan whose directory holds the retrospective is the **primary**, and its directory `plans/{primary-slug}/` is the run workdir. A retrospective without a `plans:` list covers only the plan it was resolved from.
+## Workdir and covered plans
 
-Validate every working-set plan's `status:` is the status the `## State` section names as this run's entry. On mismatch, STOP with this verbatim error:
+The run workdir is the **vault root**, and the retrospective is addressed by `--target retrospectives/{slug}.md` on every state call.
 
-> `learn playbook requires a plan in status '{entry-status}'; got '{current-status}' for {plan-path}. Use the list above to pick a candidate.`
-
-Read the retrospective in full — it is the sole source the run extracts from. Read each working-set plan for context only: scope, decisions on record, what the retro's findings refer to.
+Read the retrospective in full — it is the sole source the run extracts from. Read each plan in its `plans:` list for context only: scope, decisions on record, what the retro's findings refer to. Plan `status:` is neither checked nor written here.
 
 ## The report — posted in chat
 
@@ -28,5 +26,5 @@ Read the retrospective in full — it is the sole source the run extracts from. 
 ## Learn intake
 
 Retrospective: {path}
-Working set: {a table with columns: plan path, status, goal verdict from the retro's `goal_verdicts:` when present}
+Plans covered: {a table with columns: plan path, goal verdict from the retro's `goal_verdicts:` when present}
 ```

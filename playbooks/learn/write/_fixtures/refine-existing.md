@@ -1,6 +1,6 @@
 # Input — refine-existing
 
-Write the accepted row below. The project is `taskflow`; the current working directory is its vault root. The attached repo is checked out at `repo/`. The primary plan is `plans/20260805-notification-center/`; its retrospective sits at `plans/20260805-notification-center/retro.md`. Run date: **2026-08-06**.
+Write the accepted row below. The project is `taskflow`; the current working directory is its vault root. The attached repo is checked out at `repo/`. The run's retrospective is `retrospectives/202608051640_notification-center.md`; it covers the plan `plans/20260805-notification-center/index.md`. Run date: **2026-08-06**.
 
 The user accepted the review table exactly as presented — the single row below is accepted.
 
@@ -12,11 +12,14 @@ The user accepted the review table exactly as presented — the single row below
 
 ## Context files
 
-<file path="plans/20260805-notification-center/retro.md">
+<file path="retrospectives/202608051640_notification-center.md">
 ---
+plan: plans/20260805-notification-center/index.md
 plans:
-  - plans/20260805-notification-center
-sprint: 20260805-notification-center
+  - plans/20260805-notification-center/index.md
+title: Notification center
+created: 2026-08-05 16:40
+status: awaiting-learning
 ---
 
 # Retrospective — notification center
@@ -44,7 +47,7 @@ id: 4
 title: Run every prompt artefact through the four-check information architecture pass
 targets:
   - groom
-retro: plans/20260423-skill-refactors/retro.md
+retro: retrospectives/202604231512_skill-refactors.md
 created: 2026-04-23
 ---
 

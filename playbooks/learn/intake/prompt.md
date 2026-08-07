@@ -1,10 +1,9 @@
 ---
 summary: >-
-  Resolve the run's retrospective — from `$ARGUMENTS` as a retro path, or by
-  picking a plan from the awaiting-learning list and following its `retro:`
-  frontmatter — settle the working set from the retro's `plans:` list with the
-  primary plan's directory as the workdir, validate every plan sits at learn's
-  entry status, then read the retrospective in full and each plan for context.
+  Resolve the run's retrospective — from `$ARGUMENTS` as a `retrospectives/`
+  path, or by picking one from the awaiting-learning list — validate it sits at
+  learn's entry status, then read it in full and each plan in its `plans:` list
+  for context, with the vault root as the workdir.
 review_gate: null
 ---
 

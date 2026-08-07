@@ -49,7 +49,7 @@
           - select: FRONTMATTER
             has:
               id: '^0{0,3}5$'
-              retro: '^plans/20260805-notification-center/retro\.md$'
+              retro: '^retrospectives/202608051640_notification-center\.md$'
               created: '^2026-08-06$'
           - select: H1
             count: 0
@@ -65,7 +65,7 @@
           - select: FRONTMATTER
             has:
               id: '^0{0,3}6$'
-              retro: '^plans/20260805-notification-center/retro\.md$'
+              retro: '^retrospectives/202608051640_notification-center\.md$'
               created: '^2026-08-06$'
           - select: H1
             count: 0
@@ -140,7 +140,7 @@
           - select: FRONTMATTER
             has:
               id: '^0{0,3}4$'
-              retro: '^plans/20260423-skill-refactors/retro\.md$'
+              retro: '^retrospectives/202604231512_skill-refactors\.md$'
               created: '^2026-04-23$'
           - select: H1
             count: 0

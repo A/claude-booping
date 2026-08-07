@@ -227,6 +227,9 @@ CORE_QUERY_PATHS = [
     "core.groom_playbook.queries.latest_plans",
 ]
 
+# Specs whose rows are not plans and so carry a glob of their own.
+CORE_QUERY_PATHS_WITH_OWN_GLOB = ["core.learn_playbook.queries.candidates"]
+
 
 def _core_config() -> dict[str, object]:
     return config_mod.load(Path(__file__).resolve().parents[3], [])
@@ -244,11 +247,21 @@ def test_each_consumer_spec_resolves_to_a_spec_mapping(dotted: str) -> None:
     assert QuerySpec(**spec) is not None
 
 
-@pytest.mark.parametrize("dotted", CORE_QUERY_PATHS)
+@pytest.mark.parametrize(
+    "dotted", [p for p in CORE_QUERY_PATHS if p not in CORE_QUERY_PATHS_WITH_OWN_GLOB]
+)
 def test_a_spec_omitting_glob_falls_back_to_core_plans_glob(dotted: str) -> None:
     cfg = _core_config()
     spec = build_spec(cfg, resolve_spec(cfg, dotted))
     assert spec.glob == cfg["core"]["plans"]["glob"]  # type: ignore[index]
+
+
+@pytest.mark.parametrize("dotted", CORE_QUERY_PATHS_WITH_OWN_GLOB)
+def test_a_spec_declaring_its_own_glob_does_not_fall_back(dotted: str) -> None:
+    cfg = _core_config()
+    declared = resolve_spec(cfg, dotted)
+    assert isinstance(declared, dict)
+    assert build_spec(cfg, declared).glob == declared["glob"]
 
 
 def test_a_spec_declaring_glob_keeps_it() -> None:

@@ -14,9 +14,9 @@ Turn retrospective findings into durable behavior changes routed to exactly one 
 
 ## Guidance
 
-- Learn handles plans in `{{ config.core.learn_playbook.status }}` status.
-- The retrospective lives at `plans/{primary-slug}/retro.md`; its `plans:` frontmatter lists the working set the run covers, and the plan whose directory holds it is the **primary**.
-- The run workdir is the primary plan's directory `plans/{primary-slug}/` — `index.md` there is the run artifact.
+- The run's unit of work is a standalone retrospective, `retrospectives/{slug}.md` in `{{ config.core.learn_playbook.status }}` status; its `plans:` frontmatter lists the plans it covers, for context only.
+- The run workdir is the **vault root**; every `booping playbook-state` / `booping playbook-transition` call passes `--target retrospectives/{slug}.md`, since the machine declares no `artifact:`.
+- Plans are already `done` when learn runs and are never re-read for status or touched by it.
 - Learn writes only to this project's vault (`_lessons/`, `_booping/`) and the attached repo's `CLAUDE.md` — **never** the global `~/.claude/CLAUDE.md` or any user-level scope.
 
 ## Single-location rule
@@ -25,17 +25,17 @@ Every accepted learning lands in **exactly one** target. If a candidate would ot
 
 {% include "_partials/_learn_targets.j2" %}
 
-## Plans awaiting learning
+## Retrospectives awaiting learning
 
-{% set _learn_plans = 'core.learn_playbook.queries.candidates' | query -%}
-{% if _learn_plans -%}
-| Status | SP | Title | Created | Completed | Retro | Path |
-| --- | --- | --- | --- | --- | --- | --- |
-{% for plan in _learn_plans -%}
-| {{ plan.status }} | {{ plan.sp if plan.sp is not none else "—" }} | {{ plan.title }} | {{ plan.created if plan.created is not none else "—" }} | {{ plan.completed if plan.completed is not none else "—" }} | {{ plan.retro if plan.retro is not none else "—" }} | {{ plan.path }} |
+{% set _learn_retros = 'core.learn_playbook.queries.candidates' | query -%}
+{% if _learn_retros -%}
+| Status | Title | Created | Primary plan | Path |
+| --- | --- | --- | --- | --- |
+{% for retro in _learn_retros -%}
+| {{ retro.status }} | {{ retro.title }} | {{ retro.created if retro.created is not none else "—" }} | {{ retro.plan if retro.plan is not none else "—" }} | {{ retro.path }} |
 {% endfor -%}
 {%- else -%}
-_No plans at `{{ config.core.learn_playbook.status }}`._
+_No retrospectives at `{{ config.core.learn_playbook.status }}`._
 {%- endif %}
 
 {% set playbook_agents = config.core.learn_playbook -%}

@@ -175,12 +175,14 @@ core:
   learn_playbook:
     status: awaiting-learning
     queries:
-      # The playbook's "Plans awaiting learning" table.
+      # The playbook's "Retrospectives awaiting learning" table. Learn's unit of
+      # work is the standalone retrospective, never a plan directory.
       candidates:
+        glob: [retrospectives/*.md]
         where:
           status: awaiting-learning
         sort: "-created"
-        columns: [status, sp, title, created, completed, retro]
+        columns: [status, title, created, plan]
 
   code_review_playbook:
     status: awaiting-retro
