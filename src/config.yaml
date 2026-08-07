@@ -173,7 +173,6 @@ core:
           - "Phase 4 lesson cross-check — stays in the orchestrator using the in-context lesson set"
 
   learn_playbook:
-    status: awaiting-learning
     queries:
       # The playbook's "Retrospectives awaiting learning" table. Learn's unit of
       # work is the standalone retrospective, never a plan directory.
