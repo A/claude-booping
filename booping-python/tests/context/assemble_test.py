@@ -29,7 +29,6 @@ def test_assemble_smoke() -> None:
     assert len(ctx.skills) > 0
     assert len(ctx.agents) > 0
     assert ctx.config != {}
-    assert "skill_groom" in ctx.extra_instructions
 
 
 def test_assemble_no_project(tmp_path: Path) -> None:

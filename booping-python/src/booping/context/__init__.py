@@ -6,7 +6,6 @@ from typing import Any
 from pydantic import BaseModel
 
 from booping.context import config as config_mod
-from booping.context import extra_instructions as ei_mod
 from booping.context import lifecycle as lifecycle
 from booping.context.agent import Agent
 from booping.context.lesson import Lesson
@@ -31,7 +30,6 @@ class Context(BaseModel):
     agents: dict[str, Agent] = {}
     playbooks: list[Playbook] = []
     config: dict[str, Any] = {}
-    extra_instructions: dict[str, str] = {}
     # Machine level: a global config tier exists. Distinct from `config["home_dir"]`,
     # which always resolves (core default) and so cannot answer *whether* booping is set up.
     booping_initialized: bool = False
@@ -82,13 +80,11 @@ class Context(BaseModel):
             lessons = Lesson.load_all(vault)
             plan_templates = PlanTemplate.load_all(root, vault)
             review_templates = ReviewTemplate.load_all(root, vault)
-            extra_instructions = ei_mod.load(vault)
         else:
             cfg = config_mod.load(root, tiers)
             lessons = []
             plan_templates = PlanTemplate.load_all(root, Path("/dev/null"))
             review_templates = ReviewTemplate.load_all(root, Path("/dev/null"))
-            extra_instructions = {}
 
         skills = Skill.load_all(root)
         agents = Agent.load_all(root)
@@ -109,6 +105,5 @@ class Context(BaseModel):
             agents=agents,
             playbooks=playbooks,
             config=cfg,
-            extra_instructions=extra_instructions,
             booping_initialized=global_path.is_file(),
         )
