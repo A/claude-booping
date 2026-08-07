@@ -12,13 +12,15 @@ _NAME = r"[A-Za-z0-9][A-Za-z0-9._-]*"
 _PLAYBOOK_RE = re.compile(rf"^{_NAME}$")
 _STEP_RE = re.compile(rf"^({_NAME})/({_NAME})$")
 _AGENT_RE = re.compile(r"^agent:([A-Za-z0-9][A-Za-z0-9._:-]*)$")
+_SKILL_RE = re.compile(r"^skill:([A-Za-z0-9][A-Za-z0-9._:-]*)$")
 
 
 class LessonTarget(BaseModel):
-    kind: Literal["playbook", "step", "agent"]
+    kind: Literal["playbook", "step", "agent", "skill"]
     playbook: str | None = None
     step: str | None = None
     agent: str | None = None
+    skill: str | None = None
 
 
 class TargetRejection(BaseModel):
@@ -27,8 +29,8 @@ class TargetRejection(BaseModel):
 
 
 def parse_target(entry: object) -> LessonTarget | TargetRejection:
-    """Classify one `targets:` entry: `{playbook}`, `{playbook}/{step}` or `agent:{id}`.
-    Exact names only — anything else is rejected."""
+    """Classify one `targets:` entry: `{playbook}`, `{playbook}/{step}`, `agent:{id}` or
+    `skill:{name}`. Exact names only — anything else is rejected."""
     if not isinstance(entry, str):
         return TargetRejection(entry=str(entry), reason="not a string")
     value = entry.strip()
@@ -37,6 +39,9 @@ def parse_target(entry: object) -> LessonTarget | TargetRejection:
     agent = _AGENT_RE.match(value)
     if agent:
         return LessonTarget(kind="agent", agent=agent.group(1))
+    skill = _SKILL_RE.match(value)
+    if skill:
+        return LessonTarget(kind="skill", skill=skill.group(1))
     step = _STEP_RE.match(value)
     if step:
         return LessonTarget(kind="step", playbook=step.group(1), step=step.group(2))

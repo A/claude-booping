@@ -75,6 +75,8 @@ def test_load_dir_frontmatterless_falls_back_to_stem(tmp_path: Path) -> None:
             "agent:booping:booping-researcher",
             LessonTarget(kind="agent", agent="booping:booping-researcher"),
         ),
+        ("skill:playbook", LessonTarget(kind="skill", skill="playbook")),
+        ("skill:code-review", LessonTarget(kind="skill", skill="code-review")),
     ],
 )
 def test_parse_target_legal_forms(entry: str, expected: LessonTarget) -> None:
@@ -95,6 +97,8 @@ def test_parse_target_legal_forms(entry: str, expected: LessonTarget) -> None:
         "groom/",
         "agent:",
         "agent:*",
+        "skill:",
+        "skill:*",
         "some playbook",
         42,
         {"playbook": "groom"},

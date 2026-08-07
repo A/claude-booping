@@ -1,0 +1,24 @@
+{#-
+  Renders the `## Lessons` section for a booping skill body.
+
+  skill_id — matched against the `skill:{name}` targets of `context.targeted_lessons`
+
+  Lesson bodies are inserted as variables, never parsed as Jinja.
+-#}
+{%- set _sl_id = kwargs.skill_id -%}
+{%- set _sl_matched = [] -%}
+{%- for lesson in context.targeted_lessons -%}
+{%- if lesson.parsed_targets | selectattr("kind", "equalto", "skill") | selectattr("skill", "equalto", _sl_id) | list -%}
+{%- set _ = _sl_matched.append(lesson) -%}
+{%- endif -%}
+{%- endfor -%}
+{%- if _sl_matched -%}
+## Lessons
+
+The following {{ _sl_matched | length }} lesson(s) apply to this skill. Never silently violate one.
+{% for lesson in _sl_matched %}
+### {{ lesson.id }} — {{ lesson.title }}
+
+{{ lesson.body.strip() }}
+{% endfor %}
+{% endif -%}
