@@ -13,9 +13,9 @@
     # TABLE-SHAPE — a header row plus at least 7 candidate rows (finding 6 splits)
     - type: javascript
       value: "output.split('\\n').filter(l => /^\\s*\\|/.test(l)).length >= 9"
-    # VOCAB — every routed kind from the matrix shows up at least once
+    # VOCAB — every routed kind from the destinations doc shows up at least once
     - type: regex
-      value: 'agent_booping-developer|agent:booping-developer'
+      value: 'agent:booping-developer'
     - type: regex
       value: 'CLAUDE\.md'
     - type: regex

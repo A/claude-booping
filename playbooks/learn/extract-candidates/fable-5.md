@@ -9,23 +9,21 @@ Each candidate must satisfy:
 - **No bare internal IDs** — when referring to an existing lesson, pair the ID with its title slug (e.g. `lesson 0004 (information-architecture-pattern)`, not just `lesson 0004`). Same for retro-internal codes; restate the underlying mechanic.
 - **One sentence each in the report** — the `Rule` and `Example` cells are one sentence each. The persisted lesson file may elaborate the rule into a compact paragraph after approval.
 
-For each candidate, pick a target from the routing matrix below. When the target is a lesson, pick its `targets:` entries from the target space in the input — the routing matrix decides *which kind of file* the candidate lands in, the target space decides *what the lesson is wired to*.
+For each candidate, pick one of the two destinations below. When the destination is a lesson, pick its `targets:` entries from the target space in the input.
 
 The input carries the target space already fetched: every playbook, its summary, its steps, and the addressable agents. Never guess a step name that the target space does not show.
 
-## Routing Matrix
+## Destinations
 
-This matrix is the routing contract for learn candidates. Every accepted learning lands in exactly one target — no duplicates across targets, no multi-target rows.
+Every accepted learning lands in exactly one destination — no duplicates across destinations, no multi-destination rows. If a candidate would otherwise span both, decompose into two distinct rows.
 
-| Target | When to use | Lands at | Examples |
-|--------|-------------|----------|----------|
-| **Lesson** | Behavior change reaching one or more playbooks, playbook steps, or agents — design heuristic, test discipline, IA rule. Concrete, short, with one example. Carries a `targets:` list; a lesson with no valid target reaches nothing. | `_lessons/{N}_{kebab}.md` | "Challenge code design by SOLID principles", "Use AAA in test cases", "Design skill template partials by information hierarchy" |
-| **Skill extra instructions** | Tweak or extend a single skill's method (code-review / playbook). | `_booping/skill_{skill}.md` | `skill_code-review.md`, `skill_playbook.md` |
-| **Agent extra instructions** | Hook a single agent's behavior. Compact list. | `_booping/agent_{full-agent-name}.md` | `agent_booping-researcher.md`, `agent_booping-developer.md` |
-| **Repository CLAUDE.md** | Project-fact aiding fresh-agent project understanding — layout path, CLI command, code-side convention. One-bullet additions; no paragraph rewrites. | `{repo}/CLAUDE.md` (the attached repo's file — **never** the global `~/.claude/CLAUDE.md` or any user-level scope) | (single canonical target — no filename variants) |
+- **Lesson** — a behavior change reaching playbooks, playbook steps, agents, or a skill. Concrete, short, with one example. Lands at `_lessons/{N}_{kebab}.md` in this project's vault, and carries a `targets:` list; a lesson with no valid target reaches nothing.
+- **Repository CLAUDE.md** — a project fact aiding fresh-agent project understanding: layout path, CLI command, code-side convention. One-bullet additions; no paragraph rewrites. Lands at the attached repo's `CLAUDE.md`.
 
-If a candidate would otherwise span two targets, decompose into two distinct rows; never duplicate the same rule across targets. A lesson is the one target that carries its own routing: it lands in this project's `_lessons/` and its `targets:` list wires it to the playbooks, steps and agents it applies to — several entries in one list are one row, not a multi-target row.
+A lesson's `targets:` entries use exact names only, no globs: `{playbook}`, `{playbook}/{step}`, `agent:{id}`, `skill:{name}` (`playbook` is the only skill). Several entries in one list are one lesson, not a multi-destination row.
+
+Never write `~/.claude/CLAUDE.md` or any user-level scope.
 
 Route by **who must change behavior**, not by which playbook the finding was observed in — a finding surfaced while developing may still belong to the playbook that authors plans.
 
-Return the candidate set as one markdown table and nothing else — columns `#`, `Rule`, `Example`, `Target` (one of: Lesson, Skill extra instructions, Agent extra instructions, Repository CLAUDE.md), `Lands at` (the resolved file path), `Targets` (the lesson's `targets:` wiring, `—` for non-lesson rows) — one row per candidate, no commentary before or after the table.
+Return the candidate set as one markdown table and nothing else — columns `#`, `Rule`, `Example`, `Target` (one of: Lesson, Repository CLAUDE.md), `Lands at` (the resolved file path), `Targets` (the lesson's `targets:` wiring, `—` for a `CLAUDE.md` row) — one row per candidate, no commentary before or after the table.

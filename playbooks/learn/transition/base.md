@@ -4,7 +4,7 @@ Everything accepted is on disk; nothing here re-drafts or re-opens the table.
 
 ## 1. Transition
 
-Once every accepted item is written, advance the run per the `## State` section — from the vault root, passing `--target retrospectives/{slug}.md` for the run's retrospective. The exit edge's hook commits that file together with the `_lessons/` and `_booping/` files this run wrote. Plan frontmatter is never touched: the plans closed at develop and learn leaves them alone.
+Once every accepted item is written, advance the run per the `## State` section — from the vault root, passing `--target retrospectives/{slug}.md` for the run's retrospective. The exit edge's hook commits that file together with the `_lessons/` files this run wrote. Plan frontmatter is never touched: the plans closed at develop and learn leaves them alone.
 
 ## 2. Repo `CLAUDE.md` commit
 
