@@ -31,7 +31,7 @@ states:
               - frontmatter-update commit="{{ macro('core.macros.git_commit') }}"
       in-progress:
         transitions:
-          - to: awaiting-retro
+          - to: done
             when: "verify came back green on the project's guardrails and wrap-up made the closing commit and reported the sprint"
             gates:
               - "every DoD checkbox [x] and every milestone status done"
@@ -45,7 +45,7 @@ states:
               - "the user approved the abort"
             hooks:
               - frontmatter-update completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
-      awaiting-retro:
+      done:
         terminal: true
       fail:
         terminal: true
@@ -65,6 +65,6 @@ states:
               - frontmatter-update completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
       terminal:
         states:
-          - awaiting-retro
+          - done
           - fail
           - cancelled

@@ -185,18 +185,21 @@ core:
         columns: [status, title, created, plan]
 
   code_review_playbook:
-    status: awaiting-retro
+    status: done
     queries:
       # The `/code-review` skill's argument-free plan picker. Kept in step with
-      # `core.code_review_playbook.status`.
+      # `core.code_review_playbook.status`; `code_review: null` narrows it to the
+      # plans no review has closed on yet.
       review_candidates:
         where:
-          status: awaiting-retro
+          status: done
+          code_review: null
         columns: [sp, title]
       # The `code-review` playbook's `scope` step, which also needs the diff base.
       scope_candidates:
         where:
-          status: awaiting-retro
+          status: done
+          code_review: null
         columns: [sp, title, commit]
     agents:
       booping-researcher:

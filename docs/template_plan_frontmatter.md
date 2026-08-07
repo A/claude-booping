@@ -8,6 +8,7 @@ created: YYYY-MM-DD HH:MM        # when this file was first written — the groo
 planned: null                    # date keys — owned by the run machines' edge hooks, same YYYY-MM-DD HH:MM shape
 started: null                    # set by the develop run machine when the sprint starts
 completed: null                  # set by the develop run machine when the sprint ends
+code_review: null                # date of the code review, stamped by the code-review playbook
 retro: null                      # path to retrospective file, set by the retro playbook
 goal: null                       # success | partial | fail — set by the retro playbook
 summary: ""                      # one-line plan intent for search + plan listings (≤ ~120 chars)

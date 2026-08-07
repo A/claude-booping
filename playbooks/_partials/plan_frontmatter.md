@@ -9,6 +9,7 @@ split_from: null                 # sibling stubs only: path to the primary plan 
 planned: null                    # date keys — owned by the run machine's edge hooks, same shape as `created`
 started: null
 completed: null
+code_review: null                # date of the code review, stamped by the code-review playbook
 retro: null
 goal: null
 summary: ""                      # one-line plan intent for search + plan listings (≤ ~120 chars)
