@@ -726,10 +726,11 @@ def test_bad_manifest_notice(tmp_path: Path) -> None:
 
 
 def test_bad_state_notice(tmp_path: Path) -> None:
-    manifest = _ONE_STATE.replace("    artifact: index.md\n", "")
+    manifest = _ONE_STATE.replace("    initial: start\n", "")
     out = compose(_build_yaml(tmp_path, manifest, {"a": "null"}))
     assert (
-        "**STOP — tell the user:** states entry 'main' is malformed: missing `artifact`."
+        "**STOP — tell the user:** states entry 'main' is malformed:"
+        " `initial` '' is not in `statuses`."
         " Do not execute this playbook." in out
     )
     _assert_blocking(out)

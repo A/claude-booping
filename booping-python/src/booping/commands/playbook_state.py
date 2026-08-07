@@ -14,7 +14,7 @@ from typing import Any, NoReturn
 import yaml
 
 from booping import logger
-from booping.commands.playbook_transition import NOT_STARTED
+from booping.commands.playbook_transition import NOT_STARTED, resolve_target
 from booping.context import Context
 from booping.context._yaml import parse_frontmatter_only
 from booping.context.lifecycle import resolve_edges
@@ -29,6 +29,16 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
         help="Report the current status of every playbook run artifact",
     )
     p.add_argument("playbook", help="Playbook name")
+    p.add_argument(
+        "--target",
+        type=str,
+        default=None,
+        metavar="PATH",
+        help=(
+            "Artifact to report instead of each machine's declared `artifact:` "
+            "(relative paths resolve against the workdir)"
+        ),
+    )
     p.add_argument(
         "--workdir",
         type=str,
@@ -127,9 +137,16 @@ def _run(args: argparse.Namespace) -> None:
     if not pb.states:
         _fail(f"playbook '{pb.name}' declares no states")
 
+    target: str | None = args.target
     states: dict[str, Any] = {}
     for name in _ordered_states(pb):
         machine = pb.states[name]
+        if target is not None:
+            resolved = resolve_target(target, workdir)
+            states[name] = {"artifact": str(resolved), **_report_status(resolved, machine)}
+            continue
+        if not machine.artifact:
+            _fail(f"state '{name}' declares no `artifact:`; pass --target PATH")
         entry: dict[str, Any] = {"artifact": machine.artifact}
         if "{instance}" in machine.artifact:
             entry["instances"] = _instances(machine, workdir)

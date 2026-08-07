@@ -643,7 +643,6 @@ def test_orphan_state_only(tmp_path: Path) -> None:
 @pytest.mark.parametrize(
     ("entry", "detail_match"),
     [
-        ("    initial: s\n    statuses:\n      s: {}\n", "artifact"),
         ("    artifact: index.md\n    statuses:\n      s: {}\n", "initial"),
         (
             "    artifact: index.md\n    initial: nope\n    statuses:\n      s: {}\n",
@@ -664,6 +663,18 @@ def test_bad_state_entry(tmp_path: Path, entry: str, detail_match: str) -> None:
     assert prob.node == "main"
     assert detail_match in prob.detail
     assert pb.states == {}
+
+
+def test_state_entry_without_artifact_loads(tmp_path: Path) -> None:
+    """`artifact:` is optional — such a machine is driven by an explicit `--target`."""
+    pb = _load_manifest(
+        tmp_path,
+        "state: main\ngraph:\n  a: []\n"
+        "states:\n  main:\n    initial: s\n    statuses:\n      s: {terminal: true}\n",
+        _NO_GRAPH_MD,
+    )
+    assert pb.graph_problems == []
+    assert pb.states["main"].artifact == ""
 
 
 def test_instance_artifact_rejected_outside_subgraph(tmp_path: Path) -> None:

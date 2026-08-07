@@ -114,6 +114,16 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
         help="Instance slug, required iff the artifact path carries {instance}",
     )
     p.add_argument(
+        "--target",
+        type=str,
+        default=None,
+        metavar="PATH",
+        help=(
+            "Artifact to move instead of the machine's declared `artifact:` "
+            "(relative paths resolve against the workdir)"
+        ),
+    )
+    p.add_argument(
         "--workdir",
         type=str,
         default=None,
@@ -148,11 +158,24 @@ def _resolve_state(pb: Playbook, requested: str | None) -> tuple[str, StateMachi
     return name, pb.states[name]
 
 
+def resolve_target(target: str, workdir: Path) -> Path:
+    """Anchor an explicit `--target` at the workdir; an absolute path is honoured."""
+    path = Path(target).expanduser()
+    return path if path.is_absolute() else workdir / path
+
+
 def _resolve_artifact(
-    machine: StateMachine, workdir: Path, instance: str | None
+    machine: StateMachine, workdir: Path, instance: str | None, target: str | None
 ) -> tuple[Path, str]:
     """Interpolate `{instance}` into the artifact path and anchor it at the workdir.
     Returns (absolute path, path as written relative to the workdir)."""
+    if target is not None:
+        resolved = resolve_target(target, workdir)
+        return resolved, str(resolved)
+    if not machine.artifact:
+        _fail(
+            f"state '{machine.name}' declares no `artifact:`; pass --target PATH"
+        )
     rel = machine.artifact
     if "{instance}" in rel:
         if instance is None:
@@ -238,6 +261,9 @@ def _dispatch_script(
 def _run(args: argparse.Namespace) -> None:
     to_status: str = args.to_status
     instance: str | None = args.instance
+    target: str | None = args.target
+    if target is not None and instance is not None:
+        _fail("--target and --instance are mutually exclusive")
 
     workdir_arg: str | None = args.workdir
     workdir = (
@@ -251,7 +277,7 @@ def _run(args: argparse.Namespace) -> None:
     ctx = Context.assemble(start=workdir)
     pb = _resolve_playbook(ctx, args.playbook)
     state_name, machine = _resolve_state(pb, args.state)
-    artifact, artifact_rel = _resolve_artifact(machine, workdir, instance)
+    artifact, artifact_rel = _resolve_artifact(machine, workdir, instance, target)
 
     report: list[str] = []
     bootstrap = not artifact.exists()

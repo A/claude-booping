@@ -1,0 +1,7 @@
+#!/bin/sh
+{
+  echo "artifact=$BOOPING_ARTIFACT"
+  echo "instance=$BOOPING_INSTANCE"
+  echo "workdir=$BOOPING_WORKDIR"
+  echo "cwd=$(pwd)"
+} > "$BOOPING_WORKDIR/check-findings.env"

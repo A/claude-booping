@@ -54,7 +54,7 @@ class StateMachine(BaseModel):
     generalized lifecycle resolver consumes from `raw` unchanged."""
 
     name: str
-    artifact: str
+    artifact: str = ""
     initial: str
     statuses: dict[str, Any] = {}
     raw: dict[str, Any] = {}
@@ -399,9 +399,6 @@ def _parse_states(
         artifact = str(entry.get("artifact") or "")
         initial = str(entry.get("initial") or "")
         statuses = entry.get("statuses")
-        if not artifact:
-            bad("missing `artifact`")
-            continue
         if not isinstance(statuses, dict) or initial not in statuses:
             bad(f"`initial` '{initial}' is not in `statuses`")
             continue

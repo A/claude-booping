@@ -37,6 +37,7 @@ def _args(
     *,
     state: str | None = None,
     instance: str | None = None,
+    target: str | None = None,
     workdir: Path | None = None,
 ) -> argparse.Namespace:
     return argparse.Namespace(
@@ -44,6 +45,7 @@ def _args(
         to_status=to,
         state=state,
         instance=instance,
+        target=target,
         workdir=str(workdir) if workdir is not None else None,
     )
 
@@ -499,3 +501,121 @@ def test_cli_end_to_end(tmp_path: Path) -> None:
     assert result.returncode == 0, result.stderr
     assert result.stdout.splitlines()[0] == "created index.md"
     assert parse_frontmatter_only(workdir / "index.md")["status"] == "intaking"
+
+
+# ---------------------------------------------------------------------------
+# Explicit --target
+# ---------------------------------------------------------------------------
+
+def test_relative_target_overrides_the_declared_artifact(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _plant()
+    (tmp_path / "review.md").write_text("---\nstatus: intaking\n---\n")
+    capsys.readouterr()
+
+    _run(_args(to="researching", target="review.md", workdir=tmp_path))
+
+    assert parse_frontmatter_only(tmp_path / "review.md")["status"] == "researching"
+    assert not (tmp_path / "index.md").exists()
+    lines = capsys.readouterr().out.splitlines()
+    assert lines[0] == "intaking → researching"
+    assert lines[1] == "frontmatter: status=researching"
+
+
+def test_absolute_target_is_honoured(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _plant()
+    elsewhere = tmp_path / "elsewhere"
+    elsewhere.mkdir()
+    artifact = elsewhere / "review.md"
+    artifact.write_text("---\nstatus: intaking\n---\n")
+    capsys.readouterr()
+
+    _run(_args(to="researching", target=str(artifact), workdir=tmp_path))
+
+    assert parse_frontmatter_only(artifact)["status"] == "researching"
+
+
+def test_target_bootstraps_a_missing_file_at_the_initial_status(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _plant()
+    _run(_args(to="intaking", target="reviews/one.md", workdir=tmp_path))
+
+    artifact = tmp_path / "reviews" / "one.md"
+    assert parse_frontmatter_only(artifact)["status"] == "intaking"
+    assert capsys.readouterr().out.splitlines()[0] == f"created {artifact}"
+
+
+def test_target_bootstrap_rejects_a_non_initial_status(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _plant()
+    with pytest.raises(SystemExit) as exc:
+        _run(_args(to="researching", target="review.md", workdir=tmp_path))
+    assert exc.value.code == 1
+    assert "initial status 'intaking'" in capsys.readouterr().err
+    assert not (tmp_path / "review.md").exists()
+
+
+def test_target_and_instance_together_exit_1(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _plant()
+    with pytest.raises(SystemExit) as exc:
+        _run(
+            _args(
+                to="spec-ing",
+                state="step",
+                instance="alpha",
+                target="review.md",
+                workdir=tmp_path,
+            )
+        )
+    assert exc.value.code == 1
+    assert "--target and --instance are mutually exclusive" in capsys.readouterr().err
+
+
+def test_hooks_receive_the_resolved_target_as_booping_artifact(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _plant()
+    (tmp_path / "review.md").write_text("---\nstatus: intaking\n---\n")
+    capsys.readouterr()
+
+    _run(_args(to="researching", target="review.md", workdir=tmp_path))
+
+    recorded = dict(
+        line.split("=", 1)
+        for line in (tmp_path / "check-findings.env").read_text().splitlines()
+    )
+    assert recorded["artifact"] == str(tmp_path / "review.md")
+    # The file-target-less frontmatter-update hook wrote to the target, not index.md.
+    assert parse_frontmatter_only(tmp_path / "review.md")["researched"]
+
+
+def test_machine_without_artifact_requires_target(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _plant("targetless")
+    with pytest.raises(SystemExit) as exc:
+        _run(_args(playbook="targetless", to="reviewing", workdir=tmp_path))
+    assert exc.value.code == 1
+    assert "--target" in capsys.readouterr().err
+
+
+def test_machine_without_artifact_moves_with_target(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _plant("targetless")
+    _run(_args(playbook="targetless", to="reviewing", target="review.md", workdir=tmp_path))
+    capsys.readouterr()
+
+    _run(_args(playbook="targetless", to="reviewed", target="review.md", workdir=tmp_path))
+
+    artifact = tmp_path / "review.md"
+    assert parse_frontmatter_only(artifact)["status"] == "reviewed"
+    recorded = (tmp_path / "check-findings.env").read_text()
+    assert f"artifact={artifact}" in recorded

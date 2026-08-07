@@ -22,9 +22,14 @@ def _plant(name: str = "runner") -> None:
     subprocess.run(["cp", "-r", str(src), str(dst)], check=True)
 
 
-def _state(playbook: str = "runner", workdir: Path | None = None) -> argparse.Namespace:
+def _state(
+    playbook: str = "runner",
+    workdir: Path | None = None,
+    target: str | None = None,
+) -> argparse.Namespace:
     return argparse.Namespace(
         playbook=playbook,
+        target=target,
         workdir=str(workdir) if workdir is not None else None,
     )
 
@@ -42,15 +47,19 @@ def _move(
             to_status=to,
             state=state,
             instance=instance,
+            target=None,
             workdir=str(workdir),
         )
     )
 
 
 def _report(
-    workdir: Path, capsys: pytest.CaptureFixture[str], playbook: str = "runner"
+    workdir: Path,
+    capsys: pytest.CaptureFixture[str],
+    playbook: str = "runner",
+    target: str | None = None,
 ) -> dict[str, Any]:
-    cmd._run(_state(playbook, workdir))  # type: ignore[reportPrivateUsage]
+    cmd._run(_state(playbook, workdir, target))  # type: ignore[reportPrivateUsage]
     out = capsys.readouterr().out
     parsed = yaml.safe_load(out)
     assert isinstance(parsed, dict)
@@ -224,3 +233,72 @@ def test_workdir_defaults_to_cwd(
     cmd._run(_state())  # type: ignore[reportPrivateUsage]
     report = yaml.safe_load(capsys.readouterr().out)
     assert report["states"]["main"]["status"] == "intaking"
+
+
+# ---------------------------------------------------------------------------
+# Explicit --target
+# ---------------------------------------------------------------------------
+
+def test_target_reports_that_files_frontier(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _plant()
+    (tmp_path / "review.md").write_text("---\nstatus: intaking\n---\n")
+
+    report = _report(tmp_path, capsys, target="review.md")
+
+    main = report["states"]["main"]
+    assert main["artifact"] == str(tmp_path / "review.md")
+    assert main["status"] == "intaking"
+    assert {e["to"] for e in main["next"]} == {"researching", "broken", "weird"}
+
+
+def test_absolute_target_is_honoured(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _plant()
+    elsewhere = tmp_path / "elsewhere"
+    elsewhere.mkdir()
+    artifact = elsewhere / "review.md"
+    artifact.write_text("---\nstatus: researching\n---\n")
+
+    report = _report(tmp_path, capsys, target=str(artifact))
+
+    main = report["states"]["main"]
+    assert main["artifact"] == str(artifact)
+    assert main["status"] == "researching"
+
+
+def test_missing_target_reports_not_started(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _plant()
+    report = _report(tmp_path, capsys, target="review.md")
+
+    main = report["states"]["main"]
+    assert main["status"] == "not-started"
+    assert [e["to"] for e in main["next"]] == ["intaking"]
+
+
+def test_machine_without_artifact_needs_target(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _plant("targetless")
+    with pytest.raises(SystemExit) as exc:
+        cmd._run(_state("targetless", tmp_path))  # type: ignore[reportPrivateUsage]
+    assert exc.value.code == 1
+    assert "--target" in capsys.readouterr().err
+
+
+def test_machine_without_artifact_reports_with_target(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _plant("targetless")
+    (tmp_path / "review.md").write_text("---\nstatus: reviewing\n---\n")
+
+    report = _report(tmp_path, capsys, playbook="targetless", target="review.md")
+
+    main = report["states"]["main"]
+    assert main["artifact"] == str(tmp_path / "review.md")
+    assert main["status"] == "reviewing"
+    assert [e["to"] for e in main["next"]] == ["reviewed"]
