@@ -311,10 +311,9 @@ class TestFrontmatterUpdateCLI:
         assert "nothing to do" in capsys.readouterr().err
 
     def test_logs_to_booping_log(self, tmp_path: Path) -> None:
-        """Log line appended to _booping/.booping.log."""
+        """Log line appended to .booping.log."""
         vault = tmp_path / "vault"
         vault.mkdir()
-        (vault / "_booping").mkdir()
         plan = _make_plan(vault, "title: Foo\nstatus: backlog")
 
         # Log is best-effort if no project resolved from cwd

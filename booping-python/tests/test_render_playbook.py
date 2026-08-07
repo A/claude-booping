@@ -1259,7 +1259,7 @@ def test_step_prints_body_only_and_logs(tmp_path: Path) -> None:
     assert result.returncode == 0
     assert result.stdout == body
     assert "## Step: Draft" not in result.stdout
-    log = (vault / "_booping" / ".booping.log").read_text()
+    log = (vault / ".booping.log").read_text()
     assert "[render-playbook] composed --step draft" in log
 
 

@@ -231,8 +231,6 @@ core:
         type: dir
       _lessons:
         type: dir
-      _booping:
-        type: dir
       notes:
         type: dir
       # Obsidian Bases fence (core plugin, no install needed) — a live view over
@@ -267,7 +265,7 @@ core:
                 direction: DESC
         ```
       .gitignore: |
-        _booping/*.log
+        .booping.log
 
   playbook_authoring_playbook:
     # Scaffold tree materialised by

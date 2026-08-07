@@ -18,7 +18,7 @@ def test_log_noop_when_vault_is_none() -> None:
 def test_log_appends_one_line(tmp_path: Path) -> None:
     message = "foo.j2"
     log(vault=tmp_path, subcommand="render", message=message)
-    log_file = tmp_path / "_booping" / ".booping.log"
+    log_file = tmp_path / ".booping.log"
     assert log_file.exists()
     lines = log_file.read_text().strip().splitlines()
     assert len(lines) == 1
@@ -29,7 +29,7 @@ def test_log_appends_one_line(tmp_path: Path) -> None:
 def test_log_appends_not_overwrites(tmp_path: Path) -> None:
     log(vault=tmp_path, subcommand="render", message="first.j2")
     log(vault=tmp_path, subcommand="query", message="→ 3 rows")
-    log_file = tmp_path / "_booping" / ".booping.log"
+    log_file = tmp_path / ".booping.log"
     lines = log_file.read_text().strip().splitlines()
     assert len(lines) == 2
     assert "[render]" in lines[0] and "first.j2" in lines[0]
@@ -38,7 +38,7 @@ def test_log_appends_not_overwrites(tmp_path: Path) -> None:
 
 def test_log_empty_message_no_trailing_space(tmp_path: Path) -> None:
     log(vault=tmp_path, subcommand="render", message="")
-    log_file = tmp_path / "_booping" / ".booping.log"
+    log_file = tmp_path / ".booping.log"
     lines = log_file.read_text().strip().splitlines()
     assert len(lines) == 1
     assert lines[0].endswith("]")
@@ -47,7 +47,7 @@ def test_log_empty_message_no_trailing_space(tmp_path: Path) -> None:
 
 def test_log_creates_parent_directory(tmp_path: Path) -> None:
     log(vault=tmp_path, subcommand="render", message="foo.j2")
-    assert (tmp_path / "_booping" / ".booping.log").exists()
+    assert (tmp_path / ".booping.log").exists()
 
 
 def test_render_subprocess_integration_log(
@@ -87,7 +87,7 @@ def test_render_subprocess_integration_log(
     )
     assert result.returncode == 0
 
-    log_file = tmp_path / "Claude" / "repo" / "_booping" / ".booping.log"
+    log_file = tmp_path / "Claude" / "repo" / ".booping.log"
     assert log_file.is_file()
     lines = log_file.read_text().strip().splitlines()
     assert len(lines) == 1

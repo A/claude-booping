@@ -358,6 +358,6 @@ def test_logs_one_scaffold_line_when_project_attached(
     dest = repo / "out"
     result = _run("scaffold", "demo", str(dest), cwd=repo)
     assert result.returncode == 0, result.stderr
-    log = (vault / "_booping" / ".booping.log").read_text()
+    log = (vault / ".booping.log").read_text()
     assert log.count("[scaffold]") == 1
     assert "demo" in log

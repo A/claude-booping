@@ -120,6 +120,6 @@ def test_logs_the_invocation(tmp_path: Path) -> None:
 
     assert _run("marker-set", "latest_migration=3", cwd=repo).returncode == 0
 
-    log = (repo / "booping" / "_booping" / ".booping.log").read_text()
+    log = (repo / "booping" / ".booping.log").read_text()
     assert "[marker-set]" in log
     assert "latest_migration=3" in log
