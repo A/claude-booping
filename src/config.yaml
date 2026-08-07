@@ -153,12 +153,13 @@ core:
           - "Single-file reads — call Read directly"
 
   retro_playbook:
-    status: awaiting-retro
+    status: done
     queries:
       # The playbook's "Plans awaiting retro" table.
       candidates:
         where:
-          status: awaiting-retro
+          status: done
+          retro: null
         sort: "-created"
         columns: [status, sp, title, created, completed]
     agents:

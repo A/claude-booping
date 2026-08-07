@@ -9,19 +9,18 @@ graph:
 
 states:
   run:
-    artifact: index.md
     initial: awaiting-retro
     statuses:
       awaiting-retro:
         transitions:
           - to: awaiting-learning
-            when: "save wrote the approved `retro.md` into the primary plan's directory and linked the sibling plans to it"
+            when: "save wrote the approved retrospective to `retrospectives/{slug}.md`, the run's `--target`"
             gates:
               - "explicit user approval of the draft captured at synthesize — \"save it\" counts, silence never does"
-              - "`retro.md`'s `plans:` list covers the whole working set and `goal_verdicts:` carries a verdict for each, since the hook script reads both"
+              - "the retrospective's `plans:` list covers the whole working set and `goal_verdicts:` carries a verdict for each, since the hook script reads both"
             hooks:
-              - frontmatter-update retro.md reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
-              - script close-working-set --verdicts --status awaiting-learning --prefix retro
+              - frontmatter-update reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - script close-working-set --verdicts --prefix retro --stage retrospectives
       awaiting-learning:
         terminal: true
 

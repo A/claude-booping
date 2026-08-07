@@ -51,15 +51,16 @@ Run state is persisted in artifacts under the run workdir. Only `booping playboo
 Read the whole run's frontier before starting or resuming:
 
 ```
-booping playbook-state {{ playbook }} --workdir <run workdir>
+booping playbook-state {{ playbook }} --workdir <run workdir>{% if states | rejectattr('artifact') | list %} --target {path}{% endif %}
 ```
 {% for entry in states %}
 ### State: {{ entry.name }}
 
 - Referenced by: {{ entry.scopes | join(', ') if entry.scopes else "nothing" }}
-- Artifact: `{{ entry.artifact }}` (relative to the run workdir)
-- Initial status: `{{ entry.initial }}`
-- Advance: `booping playbook-transition {{ playbook }} <to>{% if not entry.is_outer %} --state {{ entry.name }}{% endif %}{% if entry.per_instance %} --instance <slug>{% endif %} --workdir <run workdir>`
+{% if entry.artifact %}- Artifact: `{{ entry.artifact }}` (relative to the run workdir)
+{% else %}- Artifact: named per run — pass `--target {path}` (relative to the run workdir) on every call
+{% endif %}- Initial status: `{{ entry.initial }}`
+- Advance: `booping playbook-transition {{ playbook }} <to>{% if not entry.is_outer %} --state {{ entry.name }}{% endif %}{% if entry.per_instance %} --instance <slug>{% endif %}{% if not entry.artifact %} --target {path}{% endif %} --workdir <run workdir>`
 
 | Status | To | When | Gates |
 | --- | --- | --- | --- |
