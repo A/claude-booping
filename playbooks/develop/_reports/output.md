@@ -47,7 +47,7 @@ Execute the steps in the most effective order considering their dependencies.
 | `provision` | `intake` | Set the sprint up — pick the branch from the plan's task type per the branch conventions, propose a kebab-case name and create it off the repo's current branch only after the user confirms; then settle the milestone groups the briefings will cover, within the configured ceiling, and fire the `ready-for-dev` → `in-progress` transition. | The user confirms the branch name before the branch is created — asked through `AskUserQuestion`, never as chat prose; a name the user rewrites is used verbatim, and nothing touches git until the answer arrives. The milestone groups are internal — settled by the step, reported in its return, never put to the user |
 | `develop-loop` | `provision` | Run the sprint group by group — one briefing per group to the worker agent, one worker at a time on the sprint branch; on each report verify against the milestone's DoD and its plan-authored Verify, flip the checkboxes, task rows and milestone status, commit per milestone, refresh and commit the vault snapshot, and report what shipped before the next group. | — |
 | `verify` | `develop-loop` | Run the project's guardrails over the finished sprint once — tests, lint, typecheck, formatter, whatever else must hold for a PR to open without CI failing — plus the plan's own bookkeeping, every DoD checkbox `[x]` and every milestone `done`, read off disk, and return what passed and what failed; no code-quality judgement, no fixes applied here. | — |
-| `wrap-up` | `verify` | Close the run — update the documentation the sprint invalidated, make one closing commit, fire the `in-progress` → `awaiting-retro` transition, refresh and commit the vault snapshot, then report the sprint and hand off to `/playbook retro`. Guardrail results and completeness arrive as verify's evidence and are never re-established here. | — |
+| `wrap-up` | `verify` | Close the run — update the documentation the sprint invalidated, make one closing commit, fire the `in-progress` → `done` transition, refresh and commit the vault snapshot, then report the sprint and offer a retro. Guardrail results and completeness arrive as verify's evidence and are never re-established here. | — |
 
 ## State
 
@@ -72,10 +72,10 @@ booping playbook-state develop --workdir <run workdir>
 | `awaiting-plan-review` | `cancelled` | the user cancels the run | — |
 | `ready-for-dev` | `in-progress` | provision created the confirmed sprint branch and settled the milestone groups; the first group is about to be delegated | the user confirmed the branch name; no unresolved non-trivial drift — that halts back to grooming instead |
 | `ready-for-dev` | `cancelled` | the user cancels the run | — |
-| `in-progress` | `awaiting-retro` | verify came back green on the project's guardrails and wrap-up made the closing commit and reported the sprint | every DoD checkbox [x] and every milestone status done; the project's guardrails and the plan's Final Verification green |
+| `in-progress` | `done` | verify came back green on the project's guardrails and wrap-up made the closing commit and reported the sprint | every DoD checkbox [x] and every milestone status done; the project's guardrails and the plan's Final Verification green |
 | `in-progress` | `fail` | an unrecoverable blocker at any point in the sprint, verification included, after two fix attempts on the same issue | two fix attempts documented in the plan; the user approved the abort |
 | `in-progress` | `cancelled` | the user cancels the run | — |
-| `awaiting-retro` | *(terminal)* | — | — |
+| `done` | *(terminal)* | — | — |
 | `fail` | *(terminal)* | — | — |
 | `cancelled` | *(terminal)* | — | — |
 
@@ -310,8 +310,10 @@ git -C {vault} commit -q -m "develop: {slug} → {new status}"
 ## 5. Sprint report
 
 Post in chat: the branch, the milestones shipped, the guardrail verdict as verify reported it, the
-documentation touched, the closing commit, the plan's new status. Close on the handoff line
-`/playbook retro {plan-path}` — the user runs it, nothing here does.
+documentation touched, the closing commit, the plan's new status. The sprint ends here: the plan is
+`done` and nothing downstream is pending. Close on the offer `/playbook retro {plan-path}` — a
+retrospective is optional, runnable at any time against a `done` plan, and the user runs it, never
+this step.
 
 ```markdown
 **Sprint done — {plan title} ({total} SP), branch `{branch}`.**
@@ -324,7 +326,7 @@ Guardrails: {verdict as reported} — {commands}; the plan's Final Verification 
 
 Docs: {what was updated and where}; committed as `{message}`.
 
-The plan is at `{new status}`. Next: `/playbook retro {plan-path}`.
+The plan is at `{new status}`. Optional: `/playbook retro {plan-path}`.
 ```
 
 A sprint that invalidated no documentation closes on the same shape, with the docs line reading
@@ -344,7 +346,7 @@ A sprint that invalidated no documentation closes on the same shape, with the do
 - docs: {what was updated and why, or that the sprint invalidated none}
 - transition: {the transition report verbatim}
 - vault commit: {sha}
-- handoff posted: `/playbook retro {plan-path}`
+- retro offered: `/playbook retro {plan-path}`
 
 ## Questions:
 ```

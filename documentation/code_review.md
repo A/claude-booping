@@ -15,7 +15,7 @@ It is a **stateless side-skill**: it does not own a plan-lifecycle status, does 
 /code-review plans/20260430-user-facing-documentation-site.md
 ```
 
-Bare `/code-review` picks the plan currently in `awaiting-retro` (the queue the develop playbook just finished). Pass a plan path to review against a different one — useful when you ran the sprint in another session and want to review the diff before retro.
+Bare `/code-review` picks a plan from the review queue — `status: done` with `code_review: null`, the plans the develop playbook has finished and no review has closed on yet. Pass a plan path to review against a different one — useful when you ran the sprint in another session and want to review the diff before retro.
 
 Run it from a fresh Claude Code session — see [Run code review in a fresh session](develop.md#run-code-review-in-a-fresh-session) on the develop playbook page for why.
 
@@ -53,6 +53,8 @@ When a diff spans roughly five or more files, `/code-review` delegates a blast-r
 
 ## Config
 
-`/code-review` has one config key, `core.code_review_playbook.status` (default `awaiting-retro`) — shared with the `code-review` playbook, which is why it lives in that block. It controls the **argument-free plan picker**: bare `/code-review` lists the plans currently in that status and asks you to pick one, then derives the diff range from the selected plan's `commit:` field. Point it at a different status in your project `config.yaml` if you want bare `/code-review` to pull from another queue. Passing a diff range or file list as `$ARGUMENTS` bypasses the picker entirely.
+`/code-review` has one config key, `core.code_review_playbook.status` (default `done`) — shared with the `code-review` playbook, which is why it lives in that block. It controls the **argument-free plan picker**: bare `/code-review` lists the plans at that status whose `code_review:` is still null and asks you to pick one, then derives the diff range from the selected plan's `commit:` field. Point it at a different status in your project `config.yaml` if you want bare `/code-review` to pull from another queue. Passing a diff range or file list as `$ARGUMENTS` bypasses the picker entirely.
+
+A finished review stamps the plan's `code_review:` with the review date, which is what takes it out of the queue. The plan's `status:` is never touched — review is stateless with respect to the plan lifecycle.
 
 Template selection has no config keys — it is driven by the `description` frontmatter on each review template under `docs/review_templates/` and `~/Claude/{project}/review_templates/`. To make a project-local checklist available to the review pass, drop it under your vault's `review_templates/` with a clear `description` — the skill loads it when the repo's stack matches.

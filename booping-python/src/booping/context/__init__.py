@@ -13,7 +13,6 @@ from booping.context.lesson import Lesson
 from booping.context.plan_template import PlanTemplate
 from booping.context.playbook import Playbook
 from booping.context.project import Project
-from booping.context.retro import Retro
 from booping.context.review_template import ReviewTemplate
 from booping.context.skill import Skill
 from booping.rendering import get_plugin_root
@@ -26,7 +25,6 @@ class Context(BaseModel):
     vault: Path | None = None
     lessons: list[Lesson] = []
     targeted_lessons: list[Lesson] = []
-    retros: list[Retro] = []
     plan_templates: list[PlanTemplate] = []
     review_templates: list[ReviewTemplate] = []
     skills: dict[str, Skill] = {}
@@ -82,14 +80,12 @@ class Context(BaseModel):
         if vault is not None:
             cfg = config_mod.load(root, [*tiers, vault / "config.yaml"])
             lessons = Lesson.load_all(vault)
-            retros = Retro.load_all(vault)
             plan_templates = PlanTemplate.load_all(root, vault)
             review_templates = ReviewTemplate.load_all(root, vault)
             extra_instructions = ei_mod.load(vault)
         else:
             cfg = config_mod.load(root, tiers)
             lessons = []
-            retros = []
             plan_templates = PlanTemplate.load_all(root, Path("/dev/null"))
             review_templates = ReviewTemplate.load_all(root, Path("/dev/null"))
             extra_instructions = {}
@@ -107,7 +103,6 @@ class Context(BaseModel):
             vault=vault,
             lessons=lessons,
             targeted_lessons=targeted_lessons,
-            retros=retros,
             plan_templates=plan_templates,
             review_templates=review_templates,
             skills=skills,

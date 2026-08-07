@@ -8,10 +8,9 @@ playbook_yaml_reviewed_at: 20260802 14:43
 Write one project- and plan-specific retrospective per run, grounded in the session record, the
 plan as written and the user's own words — never in vibes, and never in cross-project
 generalization. The **preamble resolves the plan** before the first step — the invocation
-argument, else the candidate table of plans sitting at the status retro owns — so the primary
-plan's directory is the run workdir and the machine is readable on entry. Intake then settles the
-working set: the entry status validated, and every other plan at the same status offered as
-include / postpone / skip-and-mark-done. Prepare runs next — built exactly on the skill's
+argument, else the candidate table of finished plans no retrospective covers yet (`status: done`
+with `retro: null`). Intake then settles the working set: the queue membership validated, and
+every other queued plan offered as include / postpone / skip. Prepare runs next — built exactly on the skill's
 Phase 1 — reading each adopted plan for context only, building the issue list and **withholding**
 it: `gather-feedback` asks the four open-ended questions verbatim before the user has seen a
 single mined item, which is the whole reason the two are separate steps. Issue triage and the
@@ -19,12 +18,12 @@ per-plan goal verdict follow the open-ended round; research does per-issue root-
 prevention work on what survived; synthesize drafts against the retrospective template and holds
 the draft in context; save writes it and takes the exit transition.
 
-The run workdir is the primary plan's own directory in the resolved vault, `plans/{slug}/`, and
-its `index.md` is both the plan document and the machine's artifact — retro continues on the file
-develop left behind. The retrospective is a sibling file, `retro.md`, in that same directory; in a
-multi-plan run it is the single shared artifact and the sibling plans link to it. The machine is
-retro's slice of the shared plan lifecycle, joined to develop's at the entry (develop ends where
-retro picks up) and to `/learn` at the exit, so a run resumes from the plan's own status. The
+The run workdir is the **vault root** and the machine's artifact is a standalone retrospective,
+`retrospectives/{YYYYMMDDHHMM}_{kebab-title}.md` — one file per run, whatever the size of the
+working set, addressed with `--target` because the machine declares no `artifact:`. Retro is a
+**separate track from the plan lifecycle**: the plans it covers are already `done` and stay there,
+joined to the run only by the `retro:` back-link the exit hook stamps on each of them. A run
+resumes from the retrospective's own `status:`, and hands to `/learn` at the exit. The
 canonical `/retro` skill is untouched and remains the default entry point; the step bodies carry
 its existing wording rather than expanded prose, and every surface it loads — the retrospective
 template, the session-log extraction and plan-lesson-check briefs, the pre-save summary format,
@@ -57,19 +56,19 @@ what protects the open-ended answers from anchoring.
 | gather-feedback | take the user's raw open-ended take before any mined finding is mentioned — four questions asked verbatim, one at a time, each with a free-text option — then walk every mined item in batches for accept / dismiss / the user's own wording, and close by asking, per plan, whether the plan's goal was reached, the goal presented verbatim so the verdict is judged against what was actually planned                                                                                     | the user's own experience of the sprint; how closely related the plans in the working set are; the mined issue list and each plan's stated goal, touched only after all four answers are in                                                                                                                                    | the user's open-ended answers, the accepted issues in the wording carried forward, and the per-plan goal verdicts, held in conversation                                                                                                                                         | none — the step is itself the elicitation; its rule is that no mined finding is mentioned before the open-ended round closes                                                                                                                     | inline                                                                                                                         | opus-5:medium | [spec](steps/gather-feedback/index.md) |
 | research-issues | do focused root-cause work on each accepted issue: read only the files the trigger or the user's wording implicates, compare documented project conventions against what the code actually does where the issue is a convention drift, research current best practice for the underlying class of problem, and design concrete process-level prevention moves — for lesson-tagged issues also judge whether the lesson's wording, trigger or placement is what failed | the accepted issues with the user's wording; the files each issue implicates; the project's documented conventions versus what the code does; current external best practice for the underlying class of problem; for lesson-tagged issues, the lesson's rule, trigger and placement                     | per issue: root cause, prevention options and any follow-up, held in conversation                                                                                                           | none — the findings are reviewed as part of the draft                                                                                                                                                              | assisted — researcher agent for wide research that must aggregate many sources; the implicated-file reads stay with the runner | opus-5:medium | [spec](steps/research-issues/index.md) |
 | synthesize      | draft the retrospective against the retrospective template — wins, per-issue what-happened / root-cause / impact, lesson gaps, and action items split into one-time tasks and standing heuristics — run the template's self-review checklist and fix every `no`, then show the user a chat summary in the pre-save summary format while holding the full draft in context, unwritten                                                                                  | the accepted issues with their root causes, prevention options and follow-ups; the user's wins and open-ended answers; the per-plan goal verdicts; the retrospective structure and its self-review checklist; the pre-save summary format                                                                | the retrospective draft, held in context; its summary posted in chat                                                                                                                        | the run's single review gate — the user approves the draft from the summary; a refine request loops the draft and re-presents it, a cancel drops the draft and ends the run with nothing written and no transition | inline                                                                                                                         | opus-5:medium | [spec](steps/synthesize/index.md)      |
-| save            | write the approved draft to the primary plan's directory as `retro.md` — frontmatter carrying the plans list, date, cross-plan goal summary and the per-plan verdicts — link the sibling plans to that one shared file, take the exit transition for every plan in the working set so the retro reference and goal verdict are stamped, then report the saved retrospective and offer `/learn` without launching it                                                   | the approved draft; the retrospective's frontmatter shape — plans list, date, goal summary, per-plan verdicts; the working set and which plan is primary; the exit transition and the stamps it applies                                                                                                  | `plans/{primary-slug}/retro.md`; sibling plans linked to it; every plan in the working set at its exit status with the retro reference and goal verdict stamped; the closing report in chat | none — the writes follow the approval already taken at synthesize                                                                                                                                                  | inline                                                                                                                         | opus-5:medium | [spec](steps/save/index.md)            |
+| save            | write the approved draft to `retrospectives/{YYYYMMDDHHMM}_{kebab-title}.md` — frontmatter carrying the primary plan, the plans list, date, cross-plan goal summary and the per-plan verdicts — then take the exit transition against that file, whose hook stamps the retro reference and goal verdict on every plan in the working set, and report the saved retrospective and offer `/learn` without launching it                                                   | the approved draft; the retrospective's frontmatter shape — primary plan, plans list, date, goal summary, per-plan verdicts; the working set and which plan is primary; the exit transition and the stamps it applies                                                                                                  | `retrospectives/{slug}.md`; every plan in the working set carrying the retro reference and goal verdict, its `status:` untouched; the closing report in chat | none — the writes follow the approval already taken at synthesize                                                                                                                                                  | inline                                                                                                                         | opus-5:medium | [spec](steps/save/index.md)            |
 
-The run edits nothing but the retrospective: every finding lands in `retro.md`, and all plan-file
-mutation is the transition's, never a hand edit.
+The run edits nothing but the retrospective: every finding lands in that one file, and all
+plan-file mutation is the transition's, never a hand edit.
 
 ## States
 
-One machine, `run` — an **artifact lifecycle**, not a procedure tracker: its statuses *are* the
-shared plan-lifecycle names, written onto the `status:` key of the primary plan's own `index.md`,
-so retro's slice is one non-terminal status wide (`awaiting-retro` → `awaiting-learning`ᵗ) and
-joins develop's machine at the entry and `/learn` at the exit. The single exit edge carries the
-run's one review gate, stamps `reviewed_at` on the approved `retro.md`, and closes the whole
-multi-plan working set through a playbook-local `_scripts/close-working-set` hook. Full chart —
+One machine, `run` — an **artifact lifecycle**, not a procedure tracker: its statuses belong to
+the retrospective the run writes, never to a plan, so the machine is one non-terminal status wide
+(`awaiting-retro` → `awaiting-learning`ᵗ) and is addressed with `--target` from the vault root. The
+single exit edge carries the run's one review gate, stamps `reviewed_at` on the approved
+retrospective, and closes the whole multi-plan working set through the shared
+`playbooks/_scripts/close-working-set` hook. Full chart —
 inventory, transitions, script contract, sibling-move call, resume frontier:
 [states](states.md).
 
@@ -98,20 +97,16 @@ re-open one if it proves wrong:
       instead of a sentence a long step body can lose.
 - [x] ~~Does the run persist intermediate findings so a resumed run keeps them?~~ — **no**. The
       issue list, the accepted issues and the draft live in conversation, as groom's research
-      steps do; only `retro.md` and the plan frontmatter are written. Because the machine's
-      statuses are the plan-lifecycle ones, resumption granularity is the whole run — a resumed
-      run re-mines rather than picking up mid-analysis. Accepted deliberately: mining is the
-      cheap part, and a finer run-local status set would break the "bound to the plan lifecycle
-      statuses retro owns" decision.
-- [x] ~~How do plans other than the machine's artifact get moved?~~ — the primary plan moves on
-      the playbook machine; plans the user drops at intake, and adopted siblings at save, move by
-      script, since the machine's artifact is fixed to the primary plan's `index.md` and no
-      subgraph exists to justify a per-instance machine. The `states` step may instead fold the
-      sibling stamps into file-targeted `frontmatter-update` hooks — its call.
+      steps do; only the retrospective and the covered plans' frontmatter are written.
+      Resumption granularity is therefore the whole run — a resumed run re-mines rather than
+      picking up mid-analysis. Accepted deliberately: mining is the cheap part, and a finer
+      run-local status set would name a frontier nothing on disk can be resumed from.
+- [x] ~~How do plans get stamped, given they are not the machine's artifact?~~ — by script.
       **Settled in [states.md](states.md)** (runner's call): split by move — drops at intake take
-      `_scripts/drop-plan {slug}`; adopted siblings at save fold into the exit edge's
+      `_scripts/drop-plan {slug}`; the adopted working set at save folds into the exit edge's
       `script close-working-set`, because a file-targeted hook cannot carry a runtime slug.
-- [x] ~~Does the retrospective keep the skill's `retrospectives/` home?~~ — no, settled in the
-      brief: `plans/{primary-slug}/retro.md`. The `retro=` frontmatter stamp points there; the
-      existing `retro=retrospectives/...` hook in `src/config.yaml` is not rewritten, so the
-      value the playbook stamps is the step's to supply.
+- [x] ~~Does the retrospective keep the skill's `retrospectives/` home?~~ — **yes**, and no plan
+      status moves with it. Superseded the authoring run's `plans/{primary-slug}/retro.md` answer:
+      the retrospective is a standalone `retrospectives/{YYYYMMDDHHMM}_{kebab-title}.md`, the
+      run's `--target`, and the plans it covers stay `done` with only a `retro:` back-link. The
+      queue is `{status: done, retro: null}` rather than a status of its own.

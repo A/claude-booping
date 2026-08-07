@@ -2,18 +2,18 @@ Produce a project- and plan-specific retrospective grounded in session logs, cod
 
 ## Guidance
 
-- Retro is based on the plan `plans/{slug}/index.md`
-- Retro statuses are sub-path of the plan state-machine and they live on `plans/{primary-slug}/index.md`
-- Retro is saved to `plans/{primary-slug}/retro.md`
-- Retro handles plans in `awaiting-retro` status.
-- Retro playbook only produces retro files and link them to the plan in frontmatter under `retro` key.
+- Date & time: 1970-01-01 00:00
+- The run's artifact is a standalone retrospective, `retrospectives/197001010000_{kebab-title}.md` — one file per run, whatever the size of the working set.
+- The run workdir is the **vault root**; every `booping playbook-state` / `booping playbook-transition` call passes `--target retrospectives/{slug}.md`, since the machine declares no `artifact:`.
+- The retrospective carries `plan:` (the primary plan's path); each covered plan is linked back by the `retro:` key the exit hook stamps. Plan `status:` is never touched here.
+- Candidate plans are the ones the table below lists — the `core.retro_playbook.queries.candidates` query.
 
 ## Plans awaiting retro
 
 | Status | SP | Title | Created | Completed | Path |
 | --- | --- | --- | --- | --- | --- |
-| awaiting-retro | 2 | Login timeout fix | 1970-01-02 | 19700102 10:00 | plans/19700102-login-timeout/index.md |
-| awaiting-retro | 5 | Widget search | 1970-01-01 | 19700101 12:00 | plans/19700101-widget-search/index.md |
+| done | 2 | Login timeout fix | 1970-01-02 | 19700102 10:00 | plans/19700102-login-timeout/index.md |
+| done | 5 | Widget search | 1970-01-01 | 19700101 12:00 | plans/19700101-widget-search/index.md |
 
 
 
@@ -41,12 +41,12 @@ Execute the steps in the most effective order considering their dependencies.
 
 | Step | Dependencies | Summary | Review gate |
 | --- | --- | --- | --- |
-| `intake` | — | Settle the working set the run covers — validate that the plan the preamble resolved sits at retro's entry status, offer every other plan at that status as include / postpone / skip-and-mark-done, apply the skip moves via `_scripts/drop-plan`, then read each adopted plan in full for context only: scope, story points, dates and decisions on record, never as a source of runner-derived findings. | — |
+| `intake` | — | Settle the working set the run covers — validate that every named plan is in the preamble's candidate table, offer every other candidate as include / postpone / skip-retro, apply the skips via `_scripts/drop-plan` (which stamps the `retro: skipped` sentinel), then read each adopted plan in full for context only: scope, story points, dates and decisions on record, never as a source of runner-derived findings. | — |
 | `prepare` | `intake` | Read each adopted plan in full for context only, then build the issue list without showing it — session-log mining and a plan-stage lesson check delegated in parallel, the lesson set passed verbatim with each brief — and cross-check both returns against the lesson set and the project-local retro extension; the list is withheld until gather-feedback has the user's raw take. | — |
 | `gather-feedback` | `prepare` | Take the user's raw open-ended take before any mined finding is mentioned: four questions asked verbatim, one at a time, each with a free-text option; then walk every mined item in batches for accept / dismiss / the user's own wording, and close by asking per plan whether the plan's goal was reached, the goal presented verbatim as written. | — |
 | `research-issues` | `gather-feedback` | Do focused root-cause work on each accepted issue: read only the files the trigger or the user's wording implicates, compare documented project conventions against what the code actually does where the issue is a convention drift, research current best practice for the underlying class of problem, and design concrete process-level prevention moves — for lesson-tagged issues also judge whether the lesson's wording, trigger or placement is what failed. | — |
 | `synthesize` | `research-issues` | Draft the retrospective against the retrospective template — wins, per-issue what-happened / root-cause / impact, lesson gaps, and action items split into one-time tasks and standing heuristics — run the template's self-review checklist and fix every `no`, then show the user a chat summary in the pre-save summary format while holding the full draft in context, unwritten. | The run's single review gate — explicit user approval of the draft, asked for in prose in the same message as the summary, never via `AskUserQuestion`. "Save it" counts, silence never does; the approval is what `save` writes on and what the exit edge's first gate names. A refine request loops in place — adjust framing, wording or which issues land, re-post the summary whole with what changed marked as changed, and re-ask; the loop is unbounded, a refine needing new evidence stays in this step, and the run never advances to `save` on its own. A cancel drops the draft and ends the run: nothing written, no transition, the plan left at its entry status. |
-| `save` | `synthesize` | Write the approved draft to the primary plan's directory as `retro.md` — frontmatter carrying the plans list, date, cross-plan goal summary and the per-plan verdicts — check it covers the working set, then fire the exit transition, whose hook stamps the retro reference and goal verdict on every plan and moves the siblings; close on the saved-retrospective report and the `/playbook learn` offer, never launched. | — |
+| `save` | `synthesize` | Write the approved draft to `retrospectives/{YYYYMMDDHHMM}_{kebab-title}.md` — frontmatter carrying `plan:`, `plans:`, `title`, `created` and the per-plan `goal_verdicts:`, no `status:` — check it covers the working set, then fire the exit transition with `--target` on that file, whose hooks stamp the retro back-link and goal verdict on every plan; close on the saved-retrospective report and the `/playbook learn` offer, never launched. | — |
 
 ## State
 
@@ -55,23 +55,23 @@ Run state is persisted in artifacts under the run workdir. Only `booping playboo
 Read the whole run's frontier before starting or resuming:
 
 ```
-booping playbook-state retro --workdir <run workdir>
+booping playbook-state retro --workdir <run workdir> --target {path}
 ```
 
 ### State: run
 
 - Referenced by: outer graph
-- Artifact: `index.md` (relative to the run workdir)
+- Artifact: named per run — pass `--target {path}` (relative to the run workdir) on every call
 - Initial status: `awaiting-retro`
-- Advance: `booping playbook-transition retro <to> --workdir <run workdir>`
+- Advance: `booping playbook-transition retro <to> --target {path} --workdir <run workdir>`
 
 | Status | To | When | Gates |
 | --- | --- | --- | --- |
-| `awaiting-retro` | `awaiting-learning` | save wrote the approved `retro.md` into the primary plan's directory and linked the sibling plans to it | explicit user approval of the draft captured at synthesize — "save it" counts, silence never does; `retro.md`'s `plans:` list covers the whole working set and `goal_verdicts:` carries a verdict for each, since the hook script reads both |
+| `awaiting-retro` | `awaiting-learning` | save wrote the approved retrospective to `retrospectives/{slug}.md`, the run's `--target` | explicit user approval of the draft captured at synthesize — "save it" counts, silence never does; the retrospective's `plans:` list covers the whole working set and `goal_verdicts:` carries a verdict for each, since the hook script reads both |
 | `awaiting-learning` | *(terminal)* | — | — |
 
 ## Step: Intake
-The current set of candidate plans is listed in the **Plans awaiting retro** table of the preamble, SPs included.
+The candidate plans are the **Plans awaiting retro** table of the preamble — the `core.retro_playbook.queries.candidates` query, SPs included.
 
 Resolve `$ARGUMENTS` to plan paths.
 
@@ -79,22 +79,22 @@ Resolve `$ARGUMENTS` to plan paths.
 
 **One or more plans provided**:
 
-1. Validate each provided plan's `status:` is the status the `## State` section names as this run's entry. On mismatch, STOP with this verbatim error:
+1. Validate each provided plan is in the candidate table. A plan that is not there is either already retro'd or not finished; STOP with this verbatim error:
 
-   > `retro playbook requires a plan in status '{entry-status}'; got '{current-status}' for {plan-path}. Use the list above to pick a candidate.`
+   > `retro playbook requires a finished plan with no retrospective yet; {plan-path} is not in the candidate list above. Use the list to pick a candidate.`
 
-2. Identify *other* plans at that same entry status (those in the inlined list but not in `$ARGUMENTS`). If any exist, ask the user per other plan via `AskUserQuestion`:
+2. Identify *other* candidates (those in the table but not in `$ARGUMENTS`). If any exist, ask the user per other plan via `AskUserQuestion`:
    - **Include** — add to this retro run alongside the provided plans.
    - **Postpone** — leave the plan where it is (no-op).
-   - **Skip retro and mark done** — close the plan now and exclude it from this run.
-3. Close each "skip & mark done" plan before moving to the next step, one `_scripts/drop-plan {slug}` invocation per plan — never a hand edit. The script stamps `status: done`, `goal: skipped` and `completed:` and commits the vault, one commit per plan.
+   - **Skip retro** — exclude the plan from this run and from the queue for good.
+3. Close each "skip retro" plan before moving to the next step, one `_scripts/drop-plan {slug}` invocation per plan — never a hand edit. The script stamps `retro: skipped` (the sentinel that drops the plan out of the candidates query) and `goal: skipped`, and commits the vault, one commit per plan.
 
 ## The report — posted in chat
 
 ```markdown
 ## Retro intake
 
-{A table with columns: action (taken | postponed | skipped), plan path, current status, plan description, SPs }
+{A table with columns: action (taken | postponed | skipped), plan path, plan description, SPs }
 ```
 
 ## Step: Prepare
@@ -281,32 +281,32 @@ entry status.
 ## Step: Save
 # Save the retrospective
 
-The approved draft arrives from `synthesize` exactly as the user approved it, together with the
-working set and its primary plan, and the per-plan goal verdicts. Write it as approved — no
-re-drafting, no new findings, no wording the user has not seen.
+The approved draft arrives from `synthesize` exactly as the user approved it, together with the working set, its primary plan, and the per-plan goal verdicts. Write it as approved — no re-drafting, no new findings, no wording the user has not seen.
 
-The order below is fixed: write the file, check its frontmatter covers the working set, advance the
-run, report.
+The order below is fixed: write the file, check its frontmatter covers the working set, advance the run, report.
 
-## 1. Write `retro.md`
+## 1. Write the retrospective
 
-One file per run, whatever the size of the working set: `retro.md` in the primary plan's own
-directory, which is the run workdir. Siblings are never given a copy — they are linked by the
-`retro:` stamp the exit hook applies.
+One file per run, whatever the size of the working set: `retrospectives/197001010000_{kebab-title}.md` under the vault root, which is the run workdir. The title is the run's own, kebab-cased. Plans are never given a copy — they are linked by the `retro:` stamp the exit hook applies.
 
-The approved draft goes in verbatim, under frontmatter carrying the plans list, the date, the
-cross-plan goal summary and the per-plan verdicts. `plans:` is always a YAML list, even for a
-single plan, and every entry is a vault-relative path; `goal_verdicts:` maps those same paths to
-the verdict the user gave at triage. `reviewed_at:` is not written here — the exit edge stamps it.
+The approved draft goes in verbatim, under frontmatter carrying exactly these keys:
+
+- `plan:` — the primary plan's vault-relative path.
+- `plans:` — always a YAML list, even for a single plan; every entry a vault-relative path, the primary included.
+- `title:` — the retrospective's title, the same one the slug is built from.
+- `created:` — `1970-01-01 00:00`.
+- `goal_verdicts:` — those same plan paths mapped to the verdict the user gave at triage.
+
+No `status:` and no `reviewed_at:` are written by hand: the exit transition bootstraps the one and stamps the other.
 
 ```yaml
 ---
+plan: plans/20260728-09-15_playbook-run-state/index.md
 plans:
   - plans/20260728-09-15_playbook-run-state/index.md
   - plans/20260729-11-40_playbook-reports/index.md
-date: 2026-08-02
-goal_summary: Run state shipped and resumable; the reports recipe landed but drifted from the
-  fixture vault it renders against.
+title: Playbook run state and reports
+created: 2026-08-02 14:10
 goal_verdicts:
   plans/20260728-09-15_playbook-run-state/index.md: success
   plans/20260729-11-40_playbook-reports/index.md: partial
@@ -315,31 +315,23 @@ goal_verdicts:
 
 ## 2. Check the frontmatter against the working set
 
-Before firing anything: every plan in the working set appears in `plans:`, and every entry in
-`plans:` has a verdict in `goal_verdicts:`. This is the exit edge's second gate, and it is checked
-against the file just written because the hook script reads both keys and aborts the transition on
-either gap.
+Before firing anything: every plan in the working set appears in `plans:`, and every entry in `plans:` has a verdict in `goal_verdicts:`. This is the exit edge's second gate, and it is checked against the file just written because the hook script reads both keys and aborts the transition on either gap.
 
 ## 3. Transition
 
-Once `retro.md` is on disk, advance the run per the `## State` section, from the workdir. The exit
-edge's hooks carry the sibling plans along with the primary; nothing here hand-edits plan
-frontmatter.
+Once the file is on disk, advance the run per the `## State` section — from the vault root, passing `--target retrospectives/{slug}.md` for the file just written. The exit edge's hooks stamp the `retro:` back-link and the goal verdict on every plan in the working set and commit the vault; nothing here hand-edits plan frontmatter.
 
 ## 4. Closing report
 
-Post in chat: the retrospective's path, the plans covered with their verdicts and new statuses,
-then a section per plan tabling the issues reported into the retro — each with its root cause and
-its action items — the issue and action-item counts, and the `/playbook learn` offer stated as a command
-the user may run. Offer it; never launch it.
+Post in chat: the retrospective's path, the plans covered with their verdicts, then a section per plan tabling the issues reported into the retro — each with its root cause and its action items — the issue and action-item counts, and the `/playbook learn` offer stated as a command the user may run. Offer it; never launch it.
 
 ```markdown
-**Retrospective saved** — `plans/20260728-09-15_playbook-run-state/retro.md`.
+**Retrospective saved** — `retrospectives/202608021410_playbook-run-state.md`.
 
-| Plan | Verdict | Status |
-| ---- | ------- | ------ |
-| `plans/20260728-09-15_playbook-run-state/index.md` | success | `{new status}` |
-| `plans/20260729-11-40_playbook-reports/index.md` | partial | `{new status}` |
+| Plan | Verdict |
+| ---- | ------- |
+| `plans/20260728-09-15_playbook-run-state/index.md` | success |
+| `plans/20260729-11-40_playbook-reports/index.md` | partial |
 
 ### `plans/20260728-09-15_playbook-run-state/index.md`
 
@@ -356,11 +348,9 @@ the user may run. Offer it; never launch it.
 
 3 issues carried, 2 action items. Both plans link to the one shared retrospective.
 
-Next, if you want the lessons absorbed: `/playbook learn plans/20260728-09-15_playbook-run-state/retro.md`
+Next, if you want the lessons absorbed: `/playbook learn retrospectives/202608021410_playbook-run-state.md`
 ```
 
 ## Replay
 
-A replay that finds `retro.md` already written re-fires nothing it does not need: a plan still at
-the entry status takes the transition alone, a plan already past it is only re-reported, with the
-transition line reading `already at {status} — no transition taken`.
+A replay that finds the retrospective already written re-fires nothing it does not need: a run still at the entry status takes the transition alone, a run already past it is only re-reported, with the transition line reading `already at {status} — no transition taken`.

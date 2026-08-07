@@ -51,7 +51,7 @@ It runs in two steps:
 The scaffolded vault:
 
 - `plans/` — sprint plans authored by the [groom playbook](groom.md), executed by the [develop playbook](develop.md).
-- `retrospectives/` — legacy retro files; the retro playbook now writes `retro.md` into the plan's own directory.
+- `retrospectives/` — standalone retrospectives authored by the [retro playbook](retro.md), consumed by the [learn playbook](learn.md).
 - `_lessons/` — durable, targeted rules authored by the [learn playbook](learn.md).
 - `notes/` — your own free-form notes (untouched by skills).
 - `_booping/` — per-skill / per-agent extension files, kept current by learn. Setup creates the directory; it does not seed extension files or detect your stack.

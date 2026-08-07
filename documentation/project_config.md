@@ -82,7 +82,7 @@ core:
     queries:
       latest_plans:
         where:
-          status:in: [ready-for-dev, in-progress, awaiting-retro, awaiting-learning, done, fail, cancelled]
+          status:in: [ready-for-dev, in-progress, done, fail, cancelled]
         sort: "-created"
         columns: [status, title, summary]
 
@@ -108,10 +108,10 @@ core:
           - "Single-file reads — call Read directly"
 
   retro_playbook:
-    status: awaiting-retro
+    status: done
     queries:
       candidates:
-        where: { status: awaiting-retro }
+        where: { status: done, retro: null }
         sort: "-created"
         columns: [status, sp, title, created, completed]
     agents:
@@ -126,18 +126,19 @@ core:
     status: awaiting-learning
     queries:
       candidates:
+        glob: [retrospectives/*.md]
         where: { status: awaiting-learning }
         sort: "-created"
-        columns: [status, sp, title, created, completed, retro]
+        columns: [status, title, created, plan]
 
   code_review_playbook:
-    status: awaiting-retro
+    status: done
     queries:
       review_candidates:
-        where: { status: awaiting-retro }
+        where: { status: done, code_review: null }
         columns: [sp, title]
       scope_candidates:
-        where: { status: awaiting-retro }
+        where: { status: done, code_review: null }
         columns: [sp, title, commit]
     agents:
       booping-researcher:
@@ -237,7 +238,7 @@ Delegation guidance rendered into that playbook's "Available Agents" table (via 
 
 ### `core.{name}_playbook.status`
 
-The single plan status this playbook claims from or reads — `retro` and `code-review` read `awaiting-retro`, `learn` reads `awaiting-learning`. It is a **query key**, not a lifecycle definition: point it at a different status and the playbook's plan picker pulls from another queue. The transitions themselves live in the playbook's `states:` block (see below).
+The single status this playbook claims from or reads — `retro` and `code-review` read `done` (the plan status develop ends at, narrowed by a null `retro:` / `code_review:` in the query beside it), `learn` reads `awaiting-learning` on the retrospective. It is a **query key**, not a lifecycle definition: point it at a different status and the playbook's picker pulls from another queue. The transitions themselves live in the playbook's `states:` block (see below).
 
 ### `core.{name}_playbook.queries.<id>`
 

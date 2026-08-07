@@ -8,15 +8,19 @@ This page is the reference for every file and directory inside the vault. For th
 
 A plan is a directory: `{YYYYMMDDHHMM}_{kebab-title}/` holding `index.md`. That is the only shape booping discovers (the `core.plans.glob` config key, one entry — `plans/*/index.md`); a legacy flat `{YYYYMMDD}-{kebab-title}.md` has to be moved into a directory of its own to be seen. Each plan carries YAML frontmatter (status, type, story points, a one-line `summary`, etc.) and a body of milestones with tasks. Authored by the [groom playbook](groom.md), executed by the [develop playbook](develop.md).
 
-A plan's `status:` is **run state**, not a shared lifecycle: `index.md` doubles as the run artifact of whichever playbook is operating on the plan, so the status vocabulary is the one that playbook declares in its own `states:` block. The four playbooks are wired so one's terminal status is the next one's entry — groom ends at `ready-for-dev`, develop claims from there and ends at `awaiting-retro`, retro ends at `awaiting-learning`, learn ends at `done`. Only `booping playbook-transition` writes the status, and it refuses any move the machine does not declare. See [Playbooks → Run state](playbook.md#run-state).
+A plan's `status:` is **run state**, not a shared lifecycle: `index.md` doubles as the run artifact of whichever playbook is operating on the plan, so the status vocabulary is the one that playbook declares in its own `states:` block. Only groom and develop run on a plan, and they are wired so one's terminal status is the next one's entry — groom ends at `ready-for-dev`, develop claims from there and ends at `done`. `done` is the end of the plan lifecycle. Only `booping playbook-transition` writes the status, and it refuses any move the machine does not declare. See [Playbooks → Run state](playbook.md#run-state).
+
+Two frontmatter keys carry a finished plan into the tracks that run beside the lifecycle rather than inside it. `retro:` is null until a retrospective covers the plan, then holds that file's path (or `skipped`); `code_review:` is null until a review closes on the plan, then holds the review date. Each null is a queue.
 
 Sibling stubs created by a groom-driven split point at the primary plan via `split_from: plans/...` in their frontmatter.
 
 ## `retrospectives/`
 
-Legacy retrospectives, one per shipped plan, in the same `{YYYYMMDD}-{kebab-title}.md` shape as the plan they cover. The [retro playbook](retro.md) now writes `retro.md` into the plan's own directory instead; this directory is kept for what earlier runs left behind.
+Standalone retrospectives written by the [retro playbook](retro.md), named `{YYYYMMDDHHMM}_{kebab-title}.md` — one per retro run, whatever the size of its working set.
 
-A retro records what actually shipped vs. the original spec, divergences, and the tensions you flagged during development. It is the input to [learn](learn.md).
+A retrospective records what actually shipped vs. the original spec, divergences, and the tensions you flagged during development. Its frontmatter carries `plan:` (the primary), `plans:` (every plan covered), `goal_verdicts:` (a verdict per plan) and its own `status:`.
+
+That `status:` is the retro track's run state — `awaiting-retro → awaiting-learning` under retro, then `awaiting-learning → done` under [learn](learn.md). It is the retrospective's status, never a plan's: the plans it covers stay at `done` and only gain a `retro:` back-link. Both playbooks run with the vault root as their workdir and address the file with `--target retrospectives/{slug}.md`.
 
 ## `lessons/`
 

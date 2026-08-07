@@ -1,6 +1,6 @@
 # retro playbook
 
-Capture a project- and plan-specific retrospective for a shipped plan: what diverged, what felt off during development, what the diff and session log reveal — saved next to the plan and ready for the [learn playbook](learn.md) to compress.
+Capture a project- and plan-specific retrospective for a shipped plan: what diverged, what felt off during development, what the diff and session log reveal — saved as a standalone file under `retrospectives/` and ready for the [learn playbook](learn.md) to compress.
 
 Retro is a **playbook**, not a skill — it is driven by [`/playbook`](playbook.md):
 
@@ -17,7 +17,7 @@ The run draws from **two inputs**:
 - **User-asked questions.** `gather-feedback` takes your raw open-ended take first — four questions asked one at a time, before any mined finding is mentioned — then walks the mined items with you for accept / dismiss / your own wording. These are the high-signal sources because you noticed the friction in the moment.
 - **Session-log mining and a plan-stage lesson check.** `prepare` delegates both in parallel, mining the development session transcript for tensions you did not flag explicitly — repeated retries, abandoned approaches, places where the agent did something the plan did not specify — and checking the planning stage against the active lesson set. The code diff is grounding context for these reads, not a separate scan phase. The mined list is **withheld** until your raw take is on record.
 
-The two inputs are stitched into one `retro.md` written into the primary plan's own directory.
+The two inputs are stitched into one `retrospectives/{YYYYMMDDHHMM}_{kebab-title}.md`, a standalone file in the vault — one per run, whatever the size of the working set.
 
 ## What it does
 
@@ -25,24 +25,24 @@ Six steps, in dependency order:
 
 | Step | What it does |
 |------|--------------|
-| `intake` | Settle the working set — validate the plan sits at retro's entry status, offer the others as include / postpone / skip-and-mark-done, then read each adopted plan for context |
+| `intake` | Settle the working set — validate the plan is `done` with no retrospective yet, offer the others as include / postpone / skip, then read each adopted plan for context |
 | `prepare` | Mine the session logs and run the plan-stage lesson check in parallel; build the issue list without showing it |
 | `gather-feedback` | Your raw take first, then the mined items batch by batch; close with a per-plan goal verdict |
 | `research-issues` | Root-cause each accepted issue and design concrete prevention moves |
 | `synthesize` | Draft against the retrospective template, run its self-review checklist, show you a chat summary while holding the draft unwritten |
-| `save` | Write `retro.md`, fire the exit transition, stamp the retro reference and goal verdict on every plan in the working set |
+| `save` | Write `retrospectives/{slug}.md`, fire the exit transition, stamp the `retro:` back-link and goal verdict on every plan in the working set |
 
-The run walks the plan from `awaiting-retro → awaiting-learning` once the retro is written and you have signed off. Its state lives in the plan's `index.md`, so a stopped run is resumable.
+The run walks the **retrospective** from `awaiting-retro → awaiting-learning` once it is written and you have signed off — the covered plans stay at `done` throughout, since retro is a separate track and never moves a plan again. The workdir is the vault root and every `booping playbook-state` / `booping playbook-transition` call passes `--target retrospectives/{slug}.md`; state lives in that file, so a stopped run is resumable.
 
 ### Multiple plans in one run
 
-A retro can cover more than one plan. `intake` offers every other plan at the entry status as **include**, **postpone** (leave it queued), or **skip retro and mark it done**.
+A retro can cover more than one plan. `intake` offers every other queued plan — `status: done` with `retro: null` — as **include**, **postpone** (leave it queued), or **skip**.
 
-The written retro carries `plans:` as a YAML list (even for a single plan) and a `goal_verdicts:` mapping with your per-plan verdict, so a multi-plan retro records each plan's outcome separately.
+The written retrospective carries `plan:` (the primary), `plans:` as a YAML list (even for a single plan) and a `goal_verdicts:` mapping with your per-plan verdict, so a multi-plan retro records each plan's outcome separately. Every covered plan points back through its own `retro:` key.
 
 ### Skipping the retro
 
-Some plans are not worth a retrospective — a stale split stub, a trivial change you already understand. Pick **skip retro and mark it done** in the per-plan prompt: that plan walks straight from `awaiting-retro → done` (bypassing `awaiting-learning`), stamped `goal: skipped`, with no retro file and no learn step. Use it deliberately — a skipped plan contributes nothing to the lesson loop.
+Some plans are not worth a retrospective — a stale split stub, a trivial change you already understand. Pick **skip** in the per-plan prompt: the `drop-plan` script stamps `retro: skipped` on that plan, which takes it out of the queue for good. Its `status:` stays `done` — nothing about the plan lifecycle changes. Use it deliberately: a skipped plan contributes nothing to the lesson loop.
 
 ## Best practices
 
@@ -60,7 +60,7 @@ In practice:
 
 ## Reviewing the retro file
 
-Read `retro.md` before letting [learn](learn.md) act on it. The goal is to separate **durable findings** from **one-off complaints**.
+Read the written retrospective before letting [learn](learn.md) act on it. The goal is to separate **durable findings** from **one-off complaints**.
 
 What to keep:
 

@@ -76,7 +76,7 @@ Candidates are listed for you if you forget the exact path.
 
 A plan moves through a small set of statuses. The `groom` playbook shapes the spec and waits for explicit user approval before handing off; the `develop` playbook claims the next ready plan and executes milestone by milestone; the `retro` playbook compares what shipped to the original spec; the `learn` playbook distils the retrospective into rules that bind the next sprint.
 
-There is no single shared status table. **Each playbook declares its own vocabulary** in its `states:` block (`playbooks/<name>/playbook.yaml`) and advances the plan through it with `booping playbook-transition`. The plan's `index.md` is the run artifact, so its `status:` frontmatter is whatever the running playbook last wrote — and the four playbooks are wired so one's terminal status is the next one's entry:
+There is no single shared status table. **Each playbook declares its own vocabulary** in its `states:` block (`playbooks/<name>/playbook.yaml`) and advances its run artifact through it with `booping playbook-transition`. Groom and develop run on the plan, so a plan's `status:` frontmatter is whatever those two last wrote and the plan lifecycle ends at `done`. Retro and learn are a **separate track**: their artifact is a standalone retrospective under `retrospectives/`, and the statuses they write are the retrospective's, never the plan's.
 
 ```text
 groom     framing → researching → drafting → cross-reviewing → presenting
@@ -85,19 +85,21 @@ groom     framing → researching → drafting → cross-reviewing → presentin
           (any non-terminal status → cancelled (terminal))
 
 develop   awaiting-plan-review → ready-for-dev → in-progress
-          → awaiting-retro (terminal) | fail (terminal)
+          → done (terminal) | fail (terminal)
           (any non-terminal status → cancelled (terminal))
 
-retro     awaiting-retro → awaiting-learning (terminal)
+retro     awaiting-retro → awaiting-learning (terminal)   [on retrospectives/{slug}.md]
 
-learn     awaiting-learning → done (terminal)
+learn     awaiting-learning → done (terminal)             [on retrospectives/{slug}.md]
 ```
 
-`/code-review` is stateless — it reads a plan and changes no status.
+The two tracks are joined by plan frontmatter, not by status. A finished plan carries `retro: null` until a retrospective covers it, at which point retro's exit hook stamps the retrospective's path there (or `skipped` when you skip it) — that null is the retro queue. The same shape drives review: `code_review: null` on a `done` plan is the code-review queue, and a finished review stamps the date.
+
+`/code-review` is stateless — it reads a plan and writes no status.
 
 ## Statuses
 
-A plan carries one of the following statuses in its frontmatter. The owning playbook is the one whose machine writes it.
+A plan carries one of the following statuses in its frontmatter, written by groom or develop. Retro and learn write their own statuses onto the retrospective instead.
 
 **groom**
 
@@ -113,17 +115,20 @@ A plan carries one of the following statuses in its frontmatter. The owning play
 
 - **`awaiting-plan-review`** — develop's entry status when a run starts on a plan you have not yet approved.
 - **`in-progress`** — develop has claimed the plan and is executing milestones.
-- **`awaiting-retro`** *(develop's terminal)* — all milestones done and verification green.
+- **`done`** *(develop's terminal)* — all milestones done and verification green. The end of the plan lifecycle; retro and code-review pick the plan up from here through their own frontmatter seams, without moving it again.
 - **`fail`** *(develop's terminal)* — an unrecoverable blocker after two documented fix attempts, with your approval to abort.
 
 **groom / develop**
 
 - **`cancelled`** *(terminal in both machines)* — you called the run off. Reachable from every non-terminal status of either machine, so a plan can be abandoned at any point without inventing a fake outcome. Groom snapshots the plan into the vault on the way out; develop stamps `completed:`.
 
-**retro / learn**
+**retro / learn** — these sit on the retrospective at `retrospectives/{slug}.md`, not on a plan.
 
-- **`awaiting-learning`** *(retro's terminal)* — the retrospective is written and signed off.
-- **`done`** *(learn's terminal)* — every accepted lesson is written to its target. Also stamped `goal: skipped` by retro's `drop-plan` script when you skip a plan's retro outright.
+- **`awaiting-retro`** — retro's entry status, bootstrapped when the run starts.
+- **`awaiting-learning`** *(retro's terminal)* — the retrospective is written and signed off. Learn claims from here.
+- **`done`** *(learn's terminal)* — every accepted lesson is written to its target.
+
+Skipping a plan's retro outright writes no retrospective at all: retro's `drop-plan` script stamps `retro: skipped` on the plan, taking it out of the queue while leaving its `status: done` alone.
 
 Each playbook's `states:` block is the canonical contract for its own transitions — triggers (`when`), gates and hooks. Read it there if you need the exact rules; this README only narrates them.
 
@@ -155,7 +160,7 @@ Wide-domain skills stay stack-agnostic. Project-specific concerns live entirely 
 
 Retro and learn are the loop that makes booping worth more than the sum of its sprints.
 
-The `retro` playbook reads the plan, mines the session logs and git diff for what actually shipped, takes your raw feedback first, and writes `retro.md` into the plan's own directory — what worked, what didn't, divergences from spec, the goal outcome.
+The `retro` playbook reads the working set of finished plans, mines the session logs and git diff for what actually shipped, takes your raw feedback first, and writes one standalone `~/Claude/{project}/retrospectives/{slug}.md` — what worked, what didn't, divergences from spec, a goal verdict per plan. One retrospective can cover several plans, and each plan it covers gets its `retro:` stamped with the file's path.
 
 The `learn` playbook then reviews the retrospective with the user, picks the durable findings, and routes each to exactly one target: a targeted lesson (`~/Claude/{project}/_lessons/{N}_{title}.md`, carrying a `targets:` list), extra instructions for a skill or agent (`~/Claude/{project}/_booping/skill_<name>.md`, `_booping/agent_<name>.md`), or a one-line bullet in the attached repo's `CLAUDE.md`. Lessons are injected into the playbooks, steps and agents they name; extension files travel with the matching skill or agent at load time. The user confirms the whole review table before anything lands.
 

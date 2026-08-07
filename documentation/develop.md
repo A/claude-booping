@@ -1,6 +1,6 @@
 # develop playbook
 
-Execute a groomed plan's milestones, delegating coding to `booping-developer` and orchestrating verification, commits, and status transitions on the way to `awaiting-retro`.
+Execute a groomed plan's milestones, delegating coding to `booping-developer` and orchestrating verification, commits, and status transitions on the way to `done`.
 
 Development is a **playbook**, not a skill — it is driven by [`/playbook`](playbook.md):
 
@@ -10,7 +10,7 @@ Development is a **playbook**, not a skill — it is driven by [`/playbook`](pla
 
 ## What it does
 
-The playbook walks one plan through `awaiting-plan-review → ready-for-dev → in-progress → awaiting-retro`, with `fail` as the abort branch. That vocabulary is develop's own — it is declared in `playbooks/develop/playbook.yaml`'s `states:` block, not in a shared lifecycle. Its run state lives in the plan's own `index.md`, so a stopped sprint is **resumable**.
+The playbook walks one plan through `awaiting-plan-review → ready-for-dev → in-progress → done`, with `fail` as the abort branch. `done` is the **end of the plan lifecycle** — retro and code-review pick the plan up from there through the `retro:` / `code_review:` frontmatter seams, without moving its status again. That vocabulary is develop's own — it is declared in `playbooks/develop/playbook.yaml`'s `states:` block, not in a shared lifecycle. Its run state lives in the plan's own `index.md`, so a stopped sprint is **resumable**.
 
 Five steps, in dependency order:
 
@@ -20,7 +20,7 @@ Five steps, in dependency order:
 | `provision` | Pick and confirm the sprint branch, then settle the milestone groups the briefings will cover |
 | `develop-loop` | Brief `booping-developer` per group, verify each milestone's DoD, commit as it goes |
 | `verify` | Run the project's lint / typecheck / test gates plus the plan's Final Verification |
-| `wrap-up` | Closing commit, sprint report, transition to `awaiting-retro` |
+| `wrap-up` | Closing commit, sprint report, transition to `done` |
 
 No application code is edited by the runner — all coding is delegated. The runner owns reads/writes against the vault, briefing assembly, verification, and commits.
 

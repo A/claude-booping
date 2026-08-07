@@ -16,12 +16,12 @@ The vault is plain markdown with YAML frontmatter, so Obsidian renders it native
        │  develop │─────▶│  code-review  │  stack-aware review
        │          │◀─────│  (optional)   │  of the in-progress diff
        └────┬─────┘      └───────────────┘
-            │ awaiting-retro
+            │ done + retro: null
             ▼
         ┌────────┐
         │  retro │  what shipped vs spec → durable findings
         └────┬───┘
-             │ awaiting-learning
+             │ retrospectives/{slug}.md
              ▼
         ┌────────┐
         │  learn │  fold findings into lessons + extension files

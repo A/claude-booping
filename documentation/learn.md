@@ -10,9 +10,9 @@ Learning is a **playbook**, not a skill — it is driven by [`/playbook`](playbo
 
 ## Why
 
-The [retro playbook](retro.md) records what happened on one plan. Learn is the step that turns those observations into rules booping will obey on every future plan. Without it, retros pile up unread and the same friction repeats sprint after sprint; with it, each sprint leaves the project a little better calibrated.
+The [retro playbook](retro.md) records what happened on a set of shipped plans. Learn is the step that turns those observations into rules booping will obey on every future plan. Without it, retros pile up unread and the same friction repeats sprint after sprint; with it, each sprint leaves the project a little better calibrated.
 
-The run reads `retro.md` from the plan currently in `awaiting-learning`, proposes a small set of updates, and asks you to confirm the whole set before anything is written. It walks the plan from `awaiting-learning → done` once you sign off.
+The run's unit of work is a standalone retrospective — `retrospectives/{slug}.md` at `awaiting-learning`, never a plan directory. It reads that file and each plan in its `plans:` list for context, proposes a small set of updates, and asks you to confirm the whole set before anything is written. It walks the **retrospective** from `awaiting-learning → done` once you sign off; the plans it covers are already `done` and are not touched.
 
 ## What it does
 
@@ -25,9 +25,9 @@ Six steps, in dependency order:
 | `dedup-sweep` | Filtered read of existing lessons and extensions — update vs create vs conflict |
 | `review-table` | Present the unified review table; you accept, reject rows, or add your own |
 | `write` | Write the accepted items, one pass per target type |
-| `transition` | Close the plans out and commit |
+| `transition` | Close the retrospective out and commit |
 
-The run workdir is the primary plan's directory, so a stopped run is resumable.
+The run workdir is the **vault root** and every `booping playbook-state` / `booping playbook-transition` call passes `--target retrospectives/{slug}.md`, so a stopped run is resumable.
 
 ## What it writes
 
@@ -50,7 +50,7 @@ title: Name every artifact path absolutely
 targets:
   - groom/draft-plan
   - agent:booping-developer
-retro: plans/20260803-11-29_flat-lessons/retro.md
+retro: retrospectives/202608031129_flat-lessons.md
 created: 2026-08-03
 ---
 ```

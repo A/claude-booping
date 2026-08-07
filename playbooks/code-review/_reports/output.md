@@ -43,7 +43,7 @@ Execute the steps in the most effective order considering their dependencies.
 | `scope` | — | Put every scope candidate on one `AskUserQuestion` call — the plan this session delivered, the latest coherent work on this branch, the plans at the review status, and a free-text route — then resolve the answer into a diff range or file list and report it back before any review work is spent. | — |
 | `review` | `scope` | Perform the whole review craft over the confirmed scope in one detached pass — stack discovery, checklist selection, blast radius, every loaded checklist, and the lesson-, DoD- and intent-aware dynamic checks — returning each finding classified `BLOCKER` / `SUGGESTION` / `NIT` with its anchor, snippet, proposed fix and rationale. Nothing is written anywhere. | — |
 | `present` | `review` | Post the findings `review` returned, grouped by severity, and collect the user's verdict on them — nothing is re-derived, re-classified or written here. | — |
-| `resolve` | `present` | Act on the verdict already in hand — approved trivial nits applied inline, approved non-trivial fixes delegated to the worker agent with the finding and its fix, rejected findings dropped without argument — then close on a report of what was applied, delegated and left. | — |
+| `resolve` | `present` | Act on the verdict already in hand — approved trivial nits applied inline, approved non-trivial fixes delegated to the worker agent with the finding and its fix, rejected findings dropped without argument — then stamp `code_review:` on the reviewed plan and close on a report of what was applied, delegated and left. | — |
 
 ## Step: Scope
 # Settle the review scope
@@ -215,6 +215,16 @@ Where the verdict genuinely leaves a finding's disposition open, ask in `## Ques
 
 The step stays yours; only the code change goes out. Brief the worker agent the **Available Agents** table names for applying approved non-trivial fixes — one briefing per fix, or one per file when several land in the same file. Each briefing carries the finding with its anchor, severity and offending snippet, the fix to apply (the user's correction where they gave one), the files it touches, and the project's conventions the change must follow. Take back which files it changed and what it did, and fold that into the report — do not re-read the diff to verify it.
 
+## Stamping the reviewed plan
+
+When a plan was in scope, stamp it once the dispositions are applied — that is what takes it out of the review queue:
+
+```bash
+booping frontmatter-update {plan path} code_review="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+```
+
+The value is rendered by the command, so it is passed through verbatim, quoted exactly as above. A run opened on a bare diff range or file list has no plan and stamps nothing.
+
 ## The closing report
 
 Post it in chat, once, as the last thing the step does — the whole ledger, so the user sees what landed without re-reading the diff. Group by disposition, count each group, name the agent the delegated fixes went to, and close on the standing line that nothing was committed or pushed:
@@ -236,11 +246,11 @@ Post it in chat, once, as the last thing the step does — the whole ledger, so 
 - `src/api/routes.py:33` — SUGGESTION · wider error envelope — you kept the current shape
 ```
 
-A group with no entries is left out. The run ends here: nothing is written to the vault, no review file is produced, no plan status moves, and a second look after these fixes is a new run.
+A group with no entries is left out. The run ends here: the `code_review:` stamp is the only vault write, no review file is produced, no plan status moves, and a second look after these fixes is a new run.
 
 ## Return format
 
-One `[UPDATED]` line per repo file edited, annotated with the finding it closes and who applied it; the ledger counts and the standing no-commit line in `## Notes:`; `## Questions:` only when an approved fix cannot be applied.
+One `[UPDATED]` line per repo file edited, annotated with the finding it closes and who applied it, plus the stamped plan when one was in scope; the ledger counts and the standing no-commit line in `## Notes:`; `## Questions:` only when an approved fix cannot be applied.
 
 ```markdown
 ## Changed:
@@ -248,6 +258,7 @@ One `[UPDATED]` line per repo file edited, annotated with the finding it closes 
 - [UPDATED] src/auth/session.py — NIT `session.py:88` rename, `:141` comment (runner)
 - [UPDATED] src/auth/refresh.py — BLOCKER `refresh.py:52` constant-time compare (booping-developer)
 - [UPDATED] src/api/routes.py — SUGGESTION `routes.py:210` 401 branch extracted (booping-developer)
+- [UPDATED] plans/20260803-14-02_token-refresh/index.md — `code_review:` stamped
 
 ## Notes:
 

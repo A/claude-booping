@@ -73,17 +73,17 @@ or name the plan:
 /playbook develop — plans/20260426-09-30_per-tenant-rate-limiting/index.md
 ```
 
-The [develop playbook](develop.md) confirms the sprint branch with you, then walks the milestones, delegating implementation to the `booping-developer` agent. `booping-researcher` is reserved for the intake drift spot-check — when a plan touches many files, it confirms the actual file shapes still match the plan's assumptions before execution begins. When all milestones are done and verification is green, the plan moves to `awaiting-retro`.
+The [develop playbook](develop.md) confirms the sprint branch with you, then walks the milestones, delegating implementation to the `booping-developer` agent. `booping-researcher` is reserved for the intake drift spot-check — when a plan touches many files, it confirms the actual file shapes still match the plan's assumptions before execution begins. When all milestones are done and verification is green, the plan moves to `done` — the end of its lifecycle.
 
 ### Optional: /code-review before retro
 
-Once a plan is in `awaiting-retro`, you can run a quality-gate review over the diff before capturing the retro:
+Once a plan is `done`, you can run a quality-gate review over the diff before capturing the retro:
 
 ```text
 /code-review
 ```
 
-Bare `/code-review` picks the plan in `awaiting-retro` and reviews `<plan commit>..HEAD` against stack-aware checklists, returning severity-labelled findings in chat. It is a **stateless side-skill** — it does not transition the plan, so the next step is still retro. Run it from a fresh session (often under a stronger model than the one that implemented). See [/code-review](code_review.md) for details.
+Bare `/code-review` picks a plan from the review queue — `done` with `code_review: null` — and reviews `{plan commit}..HEAD` against stack-aware checklists, returning severity-labelled findings in chat. It is a **stateless side-skill** — it does not transition the plan, so the next step is still retro. Run it from a fresh session (often under a stronger model than the one that implemented). See [/code-review](code_review.md) for details.
 
 ## 7. First retro
 
@@ -93,7 +93,7 @@ Capture what actually shipped:
 /playbook retro
 ```
 
-The [retro playbook](retro.md) takes your raw feedback first, mines the session logs and `git diff` for tensions you did not flag, and writes `retro.md` into the plan's own directory. Review it — it is the input to learn, and shit in means shit out.
+The [retro playbook](retro.md) takes your raw feedback first, mines the session logs and `git diff` for tensions you did not flag, and writes a standalone `retrospectives/{slug}.md`, stamping its path onto every plan it covers. Review it — it is the input to learn, and shit in means shit out.
 
 ## 8. First learn
 
@@ -105,4 +105,4 @@ Fold the retro into durable rules:
 
 The [learn playbook](learn.md) proposes targeted lessons (`~/Claude/{project}/_lessons/{N}_{title}.md`, each carrying a `targets:` list) and per-skill / per-agent extension files (`~/Claude/{project}/_booping/skill_<name>.md`, `_booping/agent_<name>.md`) in one review table for your confirmation. Approved lessons are injected into the playbooks, steps and agents they name.
 
-When learn finishes, the plan reaches `done` and your first loop is complete. The next groom run inherits everything you just learned.
+When learn finishes, the retrospective reaches `done` and your first loop is complete. The next groom run inherits everything you just learned.

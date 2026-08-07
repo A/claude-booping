@@ -4,6 +4,8 @@ reviewed_at: 20260802 14:22
 
 # retro — Brief
 
+> **Superseded on the artifact question.** This brief is the authoring run's input, kept as written. Its `plans/{slug}/retro.md` home and its "bound to the plan lifecycle statuses retro owns" wish were both reversed later: the artifact is a standalone `retrospectives/{YYYYMMDDHHMM}_{kebab-title}.md` and retro runs as a track beside the plan lifecycle rather than inside it. See [states](states.md) and the last entry in [DECISIONS](DECISIONS.md).
+
 ## Goal
 
 Convert booping's core `/retro` skill into a playbook, now that the `groom` and `develop`
