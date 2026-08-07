@@ -28,13 +28,13 @@ Durable, project-wide rules accumulated over many sprints. Files are named `{N}_
 
 Legacy lesson surface, authored by the retired `/learn` skill. Still read by the skills and playbook steps that include the lessons partial, but nothing writes it any more — the [learn playbook](learn.md) writes `_lessons/` below.
 
-Scope note: this is the *untargeted* surface — everything in it reaches every body that includes the lessons partial (`/code-review`, the researcher agent, and the groom, retro and code-review playbook steps that include it). Targeted lessons live in `_lessons/` below, and a render of any playbook emits a non-blocking note while this directory still holds files.
+Scope note: this is the *untargeted* surface — everything in it reaches every body that includes the lessons partial. Targeted lessons live in `_lessons/` below, and a render of any playbook emits a non-blocking note while this directory still holds files.
 
 ## `_lessons/`
 
-Targeted lessons — the playbook-side lesson system. Same `{N}_{title}.md` naming, but each file carries a `targets:` frontmatter list saying what it applies to: `{playbook}`, `{playbook}/{step}`, or `agent:{id}`. A file with no valid `targets:` is injected nowhere.
+Targeted lessons — the lesson system, and the only file surface learn writes inside the vault. Same `{N}_{title}.md` naming, but each file carries a `targets:` frontmatter list saying what it applies to: `{playbook}`, `{playbook}/{step}`, `agent:{id}`, or `skill:{name}`. A file with no valid `targets:` is injected nowhere.
 
-Written by the core `learn` [playbook](playbook.md). Injected by `booping render-playbook` into the composed procedure or a step prompt, and into the bodies of booping's own agents at load time.
+Written by the core `learn` [playbook](playbook.md). Injected by `booping render-playbook` into the composed procedure or a step prompt, and into the bodies of booping's own agents and skills at load time.
 
 A machine-wide sibling at `<home_dir>/_lessons/` (default `~/Claude/_lessons/`) applies to every project; a file of the same name here shadows it. See [Playbooks → Lessons](playbook.md#lessons) for the full reference.
 
@@ -42,22 +42,9 @@ A machine-wide sibling at `<home_dir>/_lessons/` (default `~/Claude/_lessons/`) 
 
 Free-form user notes — plan-review comments, code-review threads, ideas for next sprints, anything else. **Skills and agents do not read this directory.** It is purely a scratchpad for you, kept in the same vault for convenience and Obsidian graph visibility.
 
-## `_booping/skill_<name>.md`
+## `.booping.log`
 
-Per-skill extension file. Loaded automatically into the matching skill's context at invocation time, so the project's local conventions reach it without you having to restate them. Two skills ship — `code-review` and `playbook` — so `skill_code-review.md` and `skill_playbook.md` are the files that reach a skill body. Authored and updated by the [learn playbook](learn.md) — do not hand-edit unless you know what learn would have written.
-
-To correct a **playbook** rather than a skill, write a targeted lesson in `_lessons/` instead (see below): playbooks have no extension file.
-
-The [setup playbook](install.md) creates `_booping/` but seeds no extension files. Learn writes them as findings accumulate — typically:
-
-- `_booping/agent_booping-developer.md` — stack + conventions for the developer agent.
-- `_booping/skill_code-review.md` — project-local signal the repo `CLAUDE.md` doesn't carry (e.g. house review rules, env / service notes).
-
-Nothing here is required: an empty `_booping/` is a valid vault.
-
-## `_booping/agent_<full-agent-name>.md`
-
-Per-agent extension file. Injected into the matching worker agent's body at agent load time, so subagents inherit project rules without separate reads. The filename uses the agent's full name (which starts with `booping-`) — e.g. `_booping/agent_booping-developer.md`, `_booping/agent_booping-researcher.md`. Authored and updated by the [learn playbook](learn.md).
+Append-only log of `booping` CLI invocations, at the vault root. Written by the CLI itself, read by nobody — it is there for debugging a render or a transition. The seeded `.gitignore` excludes it, so it never lands in a vault commit.
 
 ## `plan_templates/`
 
@@ -65,7 +52,7 @@ Project-local plan templates. Each file has frontmatter (`name`, `description`) 
 
 ## `review_templates/`
 
-Project-local code-review templates. Loaded by [/code-review](code_review.md) alongside the core templates; the skill picks the matching subset by inspecting the repo's manifests and reading each template's `description` frontmatter. Use this directory to add review checklists specific to your stack or domain.
+Project-local code-review templates. Loaded by the [code-review playbook](code_review.md) alongside the core templates; it picks the matching subset by inspecting the repo's manifests and reading each template's `description` frontmatter. Use this directory to add review checklists specific to your stack or domain.
 
 ## `sprints.md`
 

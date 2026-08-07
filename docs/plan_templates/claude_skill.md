@@ -43,11 +43,11 @@ How the skill interacts with other skills via shared config (statuses, agents, t
 
 - [ ] `just build` renders cleanly (for skill/agent thin-shell changes via `src/files/`) and `bin/booping render src/templates/skills/<name>.md.j2` produces clean output (for skill/agent body changes).
 - [ ] Rendered skill body reviewed (no stale state names, no prose that duplicates rendered tables, no `{{placeholder}}` leaks).
-- [ ] Project-local extension points (`_booping/skill_<name>.md`) still inline correctly.
+- [ ] Targeted lessons (`skill:{name}`, `agent:{id}`) still inline correctly into the rendered body.
 
 ## Out of scope
 
-Explicit exclusions — e.g. "the `code-review` skill only; the `playbook` skill unchanged", "no plan-template changes".
+Explicit exclusions — e.g. "the `playbook` skill body only; its thin shell unchanged", "no plan-template changes".
 
 ## CLAUDE.md impact
 
@@ -76,9 +76,9 @@ Name sections to update, or state "No CLAUDE.md changes required — {justificat
 - [ ] Structured facts (statuses, transitions, task types, agents) go in `src/config.yaml`, not prose.
 - [ ] Single-consumer content lives in the skill body, not config.
 - [ ] Long-form reference content (> a paragraph) is a lazy-load doc under `docs/`, not inlined.
-- [ ] `!`commands`` are used for dynamic content (project context, lessons, extra instructions), not baked facts.
+- [ ] `!`commands`` are used for dynamic content (project context, lessons), not baked facts.
 - [ ] No restated flow / state descriptions — the rendered transitions table is the contract.
-- [ ] No stack-specific details in the skill body (Django, React, etc.) — project specifics belong in `~/Claude/{project}/_booping/`.
+- [ ] No stack-specific details in the skill body (Django, React, etc.) — project specifics belong in `~/Claude/{project}/_lessons/`.
 
 ## Anti-patterns (must be absent)
 

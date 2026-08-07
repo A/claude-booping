@@ -1,6 +1,6 @@
 # learn playbook
 
-Compress retro findings into durable, actionable rules: targeted lessons that reach the playbooks, steps and agents they name, plus per-skill and per-agent extension files.
+Compress retro findings into durable, actionable rules: targeted lessons that reach the playbooks, steps, agents and skills they name, plus one-line project facts in the repo's own `CLAUDE.md`.
 
 Learning is a **playbook**, not a skill — it is driven by [`/playbook`](playbook.md):
 
@@ -21,8 +21,8 @@ Six steps, in dependency order:
 | Step | What it does |
 |------|--------------|
 | `intake` | Resolve the retrospective and its working set; validate the entry status |
-| `extract-candidates` | Decompose the retro into atomic rules, each routed through the routing matrix |
-| `dedup-sweep` | Filtered read of existing lessons and extensions — update vs create vs conflict |
+| `extract-candidates` | Decompose the retro into atomic rules, each routed to a single destination |
+| `dedup-sweep` | Filtered read of existing lessons and the repo `CLAUDE.md` — update vs create vs conflict |
 | `review-table` | Present the unified review table; you accept, reject rows, or add your own |
 | `write` | Write the accepted items, one pass per target type |
 | `transition` | Close the retrospective out and commit |
@@ -31,11 +31,10 @@ The run workdir is the **vault root** and every `booping playbook-state` / `boop
 
 ## What it writes
 
-Every accepted finding lands in **exactly one** target. A candidate that would span two is decomposed into one row per target before writing.
+Two destinations, and every accepted finding lands in **exactly one** of them. A candidate that would span both is decomposed into one row per destination before writing.
 
-- **Targeted lessons** at `{vault}/_lessons/{N}_{title}.md` — each carrying a `targets:` frontmatter list naming the playbooks, playbook steps, and agents the rule applies to. `N` is a monotonic counter so the directory stays ordered chronologically.
-- **Per-skill and per-agent extension files** at `{vault}/_booping/skill_<name>.md` and `{vault}/_booping/agent_<full-agent-name>.md` (e.g. `agent_booping-developer.md`) — narrower rules that only reach the matching skill or worker agent, injected at load time.
-- **The repo's own `CLAUDE.md`** — when a finding is a project convention the model should follow regardless of booping (a coding standard, a structural rule), it is added as a one-line bullet to the attached repo's `CLAUDE.md`. Those edits are committed in the repo working tree, not in the vault, and never touch the global `~/.claude/CLAUDE.md`.
+- **Targeted lessons** at `{vault}/_lessons/{N}_{title}.md` — each carrying a `targets:` frontmatter list naming the playbooks, playbook steps, agents and skills the rule applies to. A rule that should only reach one worker agent or one skill is a lesson targeting it, not a separate file. `N` is a monotonic counter so the directory stays ordered chronologically.
+- **The repo's own `CLAUDE.md`** — when a finding is a project fact that aids fresh-agent project understanding (a layout path, a CLI command, a code-side convention), it is added as a one-line bullet to the attached repo's `CLAUDE.md`. Those edits are committed in the repo working tree, not in the vault, and never touch the global `~/.claude/CLAUDE.md`.
 
 See [Vault](vault.md#_lessons) for the directory layout and how each file reaches the active context.
 
@@ -55,14 +54,14 @@ created: 2026-08-03
 ---
 ```
 
-Target forms are `{playbook}`, `{playbook}/{step}`, and `agent:{id}` — exact names only, no globs. See [Playbooks → Lessons](playbook.md#lessons) for where each one surfaces.
+Target forms are `{playbook}`, `{playbook}/{step}`, `agent:{id}` and `skill:{name}` — exact names only, no globs. See [Playbooks → Lessons](playbook.md#lessons) for where each one surfaces.
 
 !!! note "Legacy `lessons/`"
     The older `{vault}/lessons/` directory served the retired built-in skills and is no longer written to. Nothing migrates between the two; a render of any playbook emits a non-blocking note while the legacy directory still holds files.
 
 ### Update-vs-create sweep
 
-Before drafting proposals, `dedup-sweep` reads the existing lessons, extension files, and the repo `CLAUDE.md` to check whether each candidate is genuinely new. A candidate that duplicates or refines an existing rule becomes an **update** to that rule rather than a fresh near-duplicate; a candidate that contradicts one is flagged as a **conflict** for you to resolve in the review table. This keeps the lesson set from accumulating redundant or self-contradicting rules over many sprints.
+Before drafting proposals, `dedup-sweep` reads the existing lessons and the repo `CLAUDE.md` to check whether each candidate is genuinely new. A candidate that duplicates or refines an existing rule becomes an **update** to that rule rather than a fresh near-duplicate; a candidate that contradicts one is flagged as a **conflict** for you to resolve in the review table. This keeps the lesson set from accumulating redundant or self-contradicting rules over many sprints.
 
 ### The review table
 
@@ -72,7 +71,7 @@ Every candidate is presented in a single review table before anything is written
 
 ### Review every proposed update
 
-The run proposes — you commit. Read each proposed lesson and extension edit before approving. Three things to check:
+The run proposes — you commit. Read each proposed lesson and `CLAUDE.md` bullet before approving. Three things to check:
 
 - **Actionability.** A lesson should tell a future run what to do, not just describe the past. "Be careful with migrations" is a description; "Run `manage.py migrate --plan` before applying any migration generated this session" is a rule.
 - **Right home.** A rule that only matters for one step belongs in a lesson targeting that step, not one targeting the whole playbook where every run pays the context cost.

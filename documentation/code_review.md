@@ -1,60 +1,11 @@
-# /code-review
+# code-review playbook
 
-Run a quality-gate review over the current diff against the active plan, producing a categorised feedback list with inline trivial fixes and `booping-developer` briefings for non-trivial ones.
-
-## Why
-
-`/code-review` is the explicit second pair of eyes between the develop and retro playbooks. It is most useful when the implementation pass ran on a cheaper or faster model — for example you let development run under Sonnet or GLM and want Opus to catch what the implementer missed. Even on a single-model loop, a fresh-session review surfaces issues the orchestrator's growing context tends to wave through.
-
-It is a **stateless side-skill**: it does not own a plan-lifecycle status, does not transition the plan, and does not write a persistent report file. The output is a feedback list in the chat session, plus any inline fixes it applies and any follow-up briefings it dispatches.
-
-## Command
+Code review is a **playbook**, not a skill. Run it with:
 
 ```text
-/code-review
-/code-review plans/20260430-user-facing-documentation-site.md
+/playbook code-review
 ```
 
-Bare `/code-review` picks a plan from the review queue — `status: done` with `code_review: null`, the plans the develop playbook has finished and no review has closed on yet. Pass a plan path to review against a different one — useful when you ran the sprint in another session and want to review the diff before retro.
+A run reviews one confirmed scope end to end — `scope` settles what to look at (a plan from the review queue, the latest commits, or a named target), `review` returns severity-classified findings from a detached pass, `present` collects your verdict, and `resolve` acts on it. The run is ephemeral: no workdir, no persisted state, no review artefact, so a second look after fixes is a new run.
 
-Run it from a fresh Claude Code session — see [Run code review in a fresh session](develop.md#run-code-review-in-a-fresh-session) on the develop playbook page for why.
-
-## Best practices
-
-### Define your own review templates
-
-The plugin ships a small set of stack-agnostic and stack-specific review templates under `docs/review_templates/`. Project-local templates live in `~/Claude/{project}/review_templates/` and are loaded alongside the core ones; a project template with the same name overrides its core counterpart.
-
-Use this directory for checklists specific to your stack or domain — house style, perf budgets, security rules, framework-specific footguns. See [Vault](vault.md#review_templates) for the directory layout.
-
-## Behaviour notes
-
-### Stack auto-detect
-
-`/code-review` inspects the repo's manifest files (`pyproject.toml`, `package.json`, `Cargo.toml`, `go.mod`, etc.) and source code, then picks the review templates whose `description` frontmatter matches the stack it identified. Generic templates always run; language and framework templates load only when a real signal for them exists. You do not pass the stack on the command line — it is inferred from what is actually pinned.
-
-### Severity labels
-
-Findings are categorised so the post-review triage is mechanical:
-
-- **BLOCKER** — must be applied before merge. Bugs, security issues, broken contracts, missed plan DoDs.
-- **SUGGESTION** — apply if the cost is low; defer with an explicit one-liner otherwise.
-- **NIT** — apply or skip on judgment; no record needed.
-
-This is the same triage shape the develop playbook uses on the feedback list — see [Review the code-review feedback list](develop.md#review-the-code-review-feedback-list).
-
-### Trivial inline, non-trivial via agent
-
-`/code-review` applies trivial fixes (typos, obvious dead code, single-line corrections) inline within the review session. Non-trivial fixes are dispatched as a follow-up briefing to `booping-developer` so the orchestrator stays a reviewer and the implementation channel stays consistent with the rest of the loop.
-
-### Blast-radius reads on large diffs
-
-When a diff spans roughly five or more files, `/code-review` delegates a blast-radius read to `booping-researcher` — handing it the file list and asking for a compressed summary of which modules, integration points, and public APIs the change touches. This keeps the review session's context lean on big diffs. Smaller changes are read directly; single-file reads are never delegated.
-
-## Config
-
-`/code-review` has one config key, `core.code_review_playbook.status` (default `done`) — shared with the `code-review` playbook, which is why it lives in that block. It controls the **argument-free plan picker**: bare `/code-review` lists the plans at that status whose `code_review:` is still null and asks you to pick one, then derives the diff range from the selected plan's `commit:` field. Point it at a different status in your project `config.yaml` if you want bare `/code-review` to pull from another queue. Passing a diff range or file list as `$ARGUMENTS` bypasses the picker entirely.
-
-A finished review stamps the plan's `code_review:` with the review date, which is what takes it out of the queue. The plan's `status:` is never touched — review is stateless with respect to the plan lifecycle.
-
-Template selection has no config keys — it is driven by the `description` frontmatter on each review template under `docs/review_templates/` and `~/Claude/{project}/review_templates/`. To make a project-local checklist available to the review pass, drop it under your vault's `review_templates/` with a clear `description` — the skill loads it when the repo's stack matches.
+See [Playbooks → Shipped playbooks](playbook.md#shipped-playbooks) for how playbooks are driven, and [Vault → `review_templates/`](vault.md#review_templates) for project-local review checklists.

@@ -3,7 +3,7 @@
 !!! warning "Unstable — work in progress"
     Playbooks are an experimental feature. The manifest format, step frontmatter, and `/playbook` behaviour may change in breaking ways between releases.
 
-A **playbook** is a multi-step guided procedure driven by the `/playbook` skill. Where a skill (booping ships two — `/code-review` and `/playbook` itself) is a fixed workflow, a playbook is yours to write: a set of prompt steps, each optionally detached into a sub-agent, with review gates where you want to inspect the output before continuing. Most playbooks are yours and live in your vault; a few ship with the plugin (see [Scopes](#scopes)).
+A **playbook** is a multi-step guided procedure driven by the `/playbook` skill — the one skill booping ships. Where a skill is a fixed workflow, a playbook is yours to write: a set of prompt steps, each optionally detached into a sub-agent, with review gates where you want to inspect the output before continuing. Most playbooks are yours and live in your vault; a few ship with the plugin (see [Scopes](#scopes)).
 
 A playbook's **structure** lives in `playbook.yaml`: the `graph:` (which steps run, in what order, which in parallel) and the optional `states:` (named state machines that persist run state on disk so a run can be resumed). `playbook.md` keeps **identity and prose** — the manifest frontmatter (`name`, `title`, `summary`, `trigger`, …) and the preamble body. Bodies are plain markdown by default; a playbook can opt into [Jinja rendering](#jinja-bodies) if it needs live project data. Author a playbook by hand and it shows up in `/playbook` immediately.
 
@@ -29,7 +29,7 @@ Core playbooks ship with the plugin and own the main workflow — the `/groom`, 
 - **`develop`** — execute a plan (intake → provision → develop-loop → verify → wrap-up). See [develop](develop.md).
 - **`retro`** — capture what shipped versus the spec. See [retro](retro.md).
 - **`learn`** — fold retro findings into durable rules. See [learn](learn.md).
-- **`code-review`** — the playbook form of the review pass. See [/code-review](code_review.md).
+- **`code-review`** — review a confirmed scope: findings, verdict, approved fixes. See [code-review](code_review.md).
 - **`migrate`** — bring a vault up to the plugin's current migration watermark.
 - **`playbook-authoring`** — the procedure for writing a new playbook.
 
@@ -349,7 +349,7 @@ A `script <name>` hook runs an executable found by name:
 
 - resolution probes `<playbook-dir>/_scripts/<name>` first, then `<root>/_scripts/<name>` in each discovery root, most specific first — local vault, then global home, then the plugin's own `playbooks/`. The first hit wins; if none exists the transition fails (exit 2) with every probed path named. A script two playbooks share therefore lives once at the root level (`playbooks/_scripts/` for the shipped ones), and a playbook-local file of the same name shadows it;
 - it must be executable, or the transition fails (exit 2) without mutating anything further;
-- the hook line is tokenised with `shlex` and every token after the script name is passed through as argv, which is how one shared script serves several playbooks — `script close-working-set --status done --stage _lessons _booping --prefix learn` reaches the script as those four flags;
+- the hook line is tokenised with `shlex` and every token after the script name is passed through as argv, which is how one shared script serves several playbooks — `script close-working-set --verdicts --prefix retro --stage retrospectives` reaches the script as those three flags;
 - it runs with the **run workdir** as its cwd;
 - it receives `BOOPING_ARTIFACT` (absolute artifact path), `BOOPING_WORKDIR` (absolute run workdir) and `BOOPING_INSTANCE` (the instance slug, empty for a non-instance machine);
 - a non-zero exit aborts the transition; the script's stderr is relayed.

@@ -4,12 +4,16 @@ How the orchestrator handles per-project quality tooling (lint, typecheck, forma
 
 ## Detect
 
-At Phase 0, inspect the attached repo to classify quality tooling into two buckets:
+Walk this ladder and stop at the first rung that answers:
+
+1. **A targeted lesson** on `develop` or `develop/verify` naming the canonical quality commands — already injected into this body, no read needed.
+2. **The repo `CLAUDE.md`** naming the canonical commands for either bucket below.
+3. **Discovery** — inspect the attached repo yourself.
+
+Discovery classifies quality tooling into two buckets:
 
 - **Hook-enforced (automatic)** — tools wired to run on commit/push via `.pre-commit-config.yaml`, `.husky/`, `lefthook.yml`, `.git/hooks/`, or a CI gate that blocks merges. These fire naturally when the skill commits in Phase 3 — do NOT re-run them manually.
 - **Configured but manual** — tools installed and configured in the repo but not wired to a hook. Typical signals: `package.json` scripts, `pyproject.toml` / `ruff.toml` / `pyright` config, `Justfile` / `Makefile` targets, `.eslintrc`, `tsconfig.json`, `cargo.toml` dev-dependencies, etc.
-
-If the repo `CLAUDE.md` names the canonical commands for either bucket, trust it and skip discovery.
 
 ## Decide
 
@@ -18,7 +22,3 @@ Produce one list of manual quality commands to run per milestone. Hook-enforced 
 ## Run
 
 Execute the decided manual commands after the milestone's plan-authored Verify command. A failure here blocks the commit the same way a plan-Verify failure does — delegate the fix to a worker agent, do not patch in the orchestrator.
-
-## Project-local override
-
-If `~/Claude/{project}/_booping/skill_develop.md` (or an equivalent extension) lists explicit quality commands, use those verbatim and skip detection.

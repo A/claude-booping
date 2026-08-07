@@ -5,7 +5,7 @@
 Required:
 
 - **`uv`** — drives the plugin's Python tooling. The `bin/booping` wrapper is `uv run --project booping-python booping ...`, so every skill load goes through uv.
-- **`git`** — the plugin assumes a git working tree for branching, diffs, and commit attribution during the develop playbook and `/code-review`.
+- **`git`** — the plugin assumes a git working tree for branching, diffs, and commit attribution during the develop and code-review playbooks.
 
 Optional:
 
@@ -53,11 +53,10 @@ The scaffolded vault:
 - `plans/` — sprint plans authored by the [groom playbook](groom.md), executed by the [develop playbook](develop.md).
 - `retrospectives/` — standalone retrospectives authored by the [retro playbook](retro.md), consumed by the [learn playbook](learn.md).
 - `_lessons/` — durable, targeted rules authored by the [learn playbook](learn.md).
-- `notes/` — your own free-form notes (untouched by skills).
-- `_booping/` — per-skill / per-agent extension files, kept current by learn. Setup creates the directory; it does not seed extension files or detect your stack.
+- `notes/` — your own free-form notes (untouched by booping).
 - `sprints.md` — an Obsidian Bases fence over the vault's `plans/*/index.md` files; seeded once, evaluated live by Obsidian.
-- `.gitignore` — vault-level ignores.
-- `.booping` — marker file (written in the repo root, not the vault) telling skills which vault to resolve.
+- `.gitignore` — vault-level ignores, including the `.booping.log` the CLI writes at the vault root.
+- `.booping` — marker file (written in the repo root, not the vault) telling booping which vault to resolve.
 
 For the full directory tour (including `plan_templates/`, `review_templates/`, `sprints.md`, and `config.yaml`), see [Vault](vault.md).
 

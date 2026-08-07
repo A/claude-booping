@@ -11,8 +11,5 @@ site/
 !booping-python/tests/__fixtures__/**/.debug_enabled
 !playbooks/_fixtures/vault/.booping
 
-# Local runtime vault artifacts at repo root
-_booping/
-
 # Debug playbook renders (just snapshots-render) — machine-specific, never committed
 playbooks/*/_reports/local.md

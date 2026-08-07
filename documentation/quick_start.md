@@ -25,7 +25,7 @@ See [Install](install.md) for prerequisites (`uv`, `git`, optional `GEMINI_API_K
 /playbook setup
 ```
 
-The `setup` playbook settles the machine level (home dir + machine config) and then the project level: it asks for the vault location — the default `<home_dir>/{project}/` or a repo-local directory (wired via the `.booping` marker's `vault_path:` key) — and creates the vault with `plans/`, `retrospectives/`, `_lessons/`, `notes/`, `_booping/`, plus a `.booping` marker file so other skills know the vault is ready. Anything already in place is detected and skipped. See [Vault](vault.md) for what each directory is for.
+The `setup` playbook settles the machine level (home dir + machine config) and then the project level: it asks for the vault location — the default `<home_dir>/{project}/` or a repo-local directory (wired via the `.booping` marker's `vault_path:` key) — and creates the vault with `plans/`, `retrospectives/`, `_lessons/`, `notes/`, plus a `.booping` marker file in the repo so booping knows the vault is ready. Anything already in place is detected and skipped. See [Vault](vault.md) for what each directory is for.
 
 ## 3. See what is available
 
@@ -75,15 +75,15 @@ or name the plan:
 
 The [develop playbook](develop.md) confirms the sprint branch with you, then walks the milestones, delegating implementation to the `booping-developer` agent. `booping-researcher` is reserved for the intake drift spot-check — when a plan touches many files, it confirms the actual file shapes still match the plan's assumptions before execution begins. When all milestones are done and verification is green, the plan moves to `done` — the end of its lifecycle.
 
-### Optional: /code-review before retro
+### Optional: code review before retro
 
 Once a plan is `done`, you can run a quality-gate review over the diff before capturing the retro:
 
 ```text
-/code-review
+/playbook code-review
 ```
 
-Bare `/code-review` picks a plan from the review queue — `done` with `code_review: null` — and reviews `{plan commit}..HEAD` against stack-aware checklists, returning severity-labelled findings in chat. It is a **stateless side-skill** — it does not transition the plan, so the next step is still retro. Run it from a fresh session (often under a stronger model than the one that implemented). See [/code-review](code_review.md) for details.
+It picks a plan from the review queue — `done` with `code_review: null` — and reviews `{plan commit}..HEAD` against stack-aware checklists, returning severity-labelled findings in chat. The run is **ephemeral** and does not transition the plan, so the next step is still retro. Run it from a fresh session (often under a stronger model than the one that implemented). See [code-review](code_review.md) for details.
 
 ## 7. First retro
 
@@ -103,6 +103,6 @@ Fold the retro into durable rules:
 /playbook learn
 ```
 
-The [learn playbook](learn.md) proposes targeted lessons (`~/Claude/{project}/_lessons/{N}_{title}.md`, each carrying a `targets:` list) and per-skill / per-agent extension files (`~/Claude/{project}/_booping/skill_<name>.md`, `_booping/agent_<name>.md`) in one review table for your confirmation. Approved lessons are injected into the playbooks, steps and agents they name.
+The [learn playbook](learn.md) proposes targeted lessons (`~/Claude/{project}/_lessons/{N}_{title}.md`, each carrying a `targets:` list) and one-line bullets for the repo's own `CLAUDE.md`, in one review table for your confirmation. Approved lessons are injected into the playbooks, steps, agents and skills they name.
 
 When learn finishes, the retrospective reaches `done` and your first loop is complete. The next groom run inherits everything you just learned.

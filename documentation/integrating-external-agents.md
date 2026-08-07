@@ -1,25 +1,27 @@
 # Integrating external agents
 
-booping ships with built-in worker agents (`booping-developer`, `booping-researcher`). You can also wire any playbook or skill to delegate to **your own** agent — a plain Claude Code agent with different instructions or a cheaper model, or a Claude Code agent that fronts an external CLI worker or a browser review surface.
+booping ships with built-in worker agents (`booping-developer`, `booping-researcher`). You can also wire any playbook to delegate to **your own** agent — a plain Claude Code agent with different instructions or a cheaper model, or a Claude Code agent that fronts an external CLI worker or a browser review surface.
 
 Every integration comes down to two pieces of project config:
 
-- **`core.{name}_playbook.agents.<id>`** in your vault config (`~/Claude/{project}/config.yaml`) tells that playbook (or the skill reading the same block) which agents are available to it. Each entry carries `good_for` / `bad_for` bullets that guide it toward the right choice. The block name is the playbook name with `-` replaced by `_` — `develop` → `core.develop_playbook`, `code-review` → `core.code_review_playbook`.
-- **`_booping/skill_<name>.md`** is where you override or extend a **skill's** behaviour — for example, to tell it to use your external agent and how to brief it. To shape a **playbook's** briefing instead, write a targeted lesson in `_lessons/` aimed at the step that delegates (`develop/develop-loop`); see [Playbooks → Lessons](playbook.md#lessons).
+- **`core.{name}_playbook.agents.<id>`** in your vault config (`~/Claude/{project}/config.yaml`) registers the agent with that playbook. Each entry carries `good_for` / `bad_for` bullets that guide it toward the right choice. The block name is the playbook name with `-` replaced by `_` — `develop` → `core.develop_playbook`, `code-review` → `core.code_review_playbook`.
+- **A targeted lesson in `_lessons/`**, aimed at the step that delegates (`develop/develop-loop`), tells that step to use your agent and what to hand it. See [Playbooks → Lessons](playbook.md#lessons).
+
+The agent's own prompt is yours to write — booping never shapes it.
 
 You invoke an agent by its bare name through the `Agent` tool (`subagent_type="<id>"`). Any agent file you drop into `~/.claude/agents/` is registered for every project automatically; if you add it mid-session, start a new session to pick it up.
 
-See [Project config](project_config.md) for the config-merge rules and [Vault](vault.md) for the extension-file conventions.
+See [Project config](project_config.md) for the config-merge rules and [Vault](vault.md) for where lessons live.
 
 ## How to disable internal agents
 
-booping's built-in agents (`booping-developer`, `booping-researcher`) stay available to every skill by default. When you want your external agent to be the *only* worker a skill delegates to, the built-ins can compete against it and the skill may pick a built-in when you wanted yours.
+booping's built-in agents (`booping-developer`, `booping-researcher`) stay available to every playbook by default. When you want your external agent to be the *only* worker a playbook delegates to, the built-ins can compete against it and the playbook may pick a built-in when you wanted yours.
 
 Set `core.{name}_playbook.disable_internal_agents: true` on that block. This leaves only the agents you registered yourself, so the delegation table always points at your external agent. The flag (and the per-agent `internal` marker it filters on) is documented in the [`agents` key tour](project_config.md#corename_playbookagents).
 
 ## Level 1 — Connect an external Claude Code agent
 
-The simplest case: a plain global Claude Code agent — same kind booping ships, just yours. Maybe it carries different instructions, or runs on a cheaper model like haiku. You want a skill or playbook (say `develop`) to use it to write code.
+The simplest case: a plain global Claude Code agent — same kind booping ships, just yours. Maybe it carries different instructions, or runs on a cheaper model like haiku. You want a playbook (say `develop`) to use it to write code.
 
 **1. Create the agent** at `~/.claude/agents/haiku-developer.md`:
 
@@ -73,8 +75,8 @@ To delegate to an external CLI (for example, a headless coding CLI), front it wi
 
 The split is what makes this work:
 
-- **The agent owns the interaction.** It takes the briefing, drives the external CLI, validates the result against the briefing's definition of done, and reports back in milestone format. All CLI trivia (flags, model selection, retries) lives in the agent body.
-- **The skill extension shapes the briefing.** `_booping/skill_<name>.md` tells the skill which fields to pass and how to invoke the agent — the agent itself only knows how to drive its backend, not what a given skill should hand over.
+- **The agent owns the interaction.** It takes the briefing, drives the external CLI, validates the result against the briefing's definition of done, and reports back in milestone format. All CLI trivia (flags, model selection, retries) lives in the agent body, which you author.
+- **A targeted lesson shapes the briefing.** A lesson aimed at the delegating step tells that step which fields to pass and how to invoke the agent — the agent itself only knows how to drive its backend, not what a given step should hand over.
 
 When the backend needs more orchestration than a single command (a server, a browser, readiness checks), put that trivia in a global transport script under `~/.claude/bin/` and have the agent call the script instead of reimplementing it. Case (a) below is that shape; case (b) drives a CLI directly.
 
@@ -82,8 +84,8 @@ When the backend needs more orchestration than a single command (a server, a bro
 
 1. Create a global agent at `~/.claude/agents/<id>.md` that drives your CLI and reports in milestone format.
 2. Ask Claude to wire the agent into the target playbook's config — you should end up with a `core.{name}_playbook.agents.<id>` block like the examples below.
-3. Ask Claude to shape the briefing — a `_booping/skill_<name>.md` extension for a skill, or a targeted lesson in `_lessons/` for a playbook step.
-4. Test it: run the playbook or skill and confirm it delegates to your agent.
+3. Ask Claude to shape the briefing — a targeted lesson in `_lessons/` aimed at the delegating step.
+4. Test it: run the playbook and confirm it delegates to your agent.
 
 ## Level 3 — Go-to examples
 
@@ -91,21 +93,21 @@ Two reference recipes you can adapt.
 
 ### (a) `plannotator-reviewer` — browser code review
 
-A bespoke agent that drives a browser review surface, wired into [/code-review](code_review.md). The agent fronts a global transport script (`~/.claude/bin/booping-plannotator-review`) that launches the review, seeds findings, opens the browser, and blocks until the human submits.
+A bespoke agent that drives a browser review surface, wired into the [code-review playbook](code_review.md). The agent fronts a global transport script (`~/.claude/bin/booping-plannotator-review`) that launches the review, seeds findings, opens the browser, and blocks until the human submits.
 
 **Global agent — `~/.claude/agents/plannotator-reviewer.md`**
 
 ```markdown
 ---
 name: plannotator-reviewer
-description: Seeds booping /code-review findings into a Plannotator browser review, lets a human review code + AI comments together, and returns their feedback.
+description: Seeds booping code-review findings into a Plannotator browser review, lets a human review code + AI comments together, and returns their feedback.
 tools: Read, Write, Bash
 model: sonnet
 ---
 
-You drive the Plannotator browser review surface for booping's `/code-review`.
-You own only the *interaction*: map findings to Plannotator's annotation
-contract, run the transport script, and return the human's feedback.
+You drive the Plannotator browser review surface for booping's code-review
+playbook. You own only the *interaction*: map findings to Plannotator's
+annotation contract, run the transport script, and return the human's feedback.
 
 All transport trivia (port, launch, readiness, curl, exit codes) lives in
 `~/.claude/bin/booping-plannotator-review` — do not reimplement it.
@@ -126,22 +128,6 @@ core:
           - "Interactive browser review of a diff with AI findings pre-seeded; human confirms/dismisses inline and feedback returns to the harness"
         bad_for:
           - "Headless / CI runs, no display available, or a quick chat-only review"
-```
-
-**Skill extension — `~/Claude/{project}/_booping/skill_code-review.md`**
-
-```markdown
-### Plannotator browser review — required surface
-
-This project reviews every diff in Plannotator, never in chat.
-
-After findings are computed, delegate to `plannotator-reviewer`
-(`subagent_type="plannotator-reviewer"`). Brief it with:
-- the resolved diff ref (PR URL, or a non-URL token like `HEAD`),
-- the repo path to run in,
-- every finding as `file:lineStart[-lineEnd] · side · severity · snippet · fix · rationale`.
-
-The agent's returned message is the human's feedback — proceed from it directly.
 ```
 
 ### (b) `pi-developer` — CLI delegation

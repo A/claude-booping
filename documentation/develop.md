@@ -47,15 +47,15 @@ That confirmation is the playbook's single review gate.
 
 ### Run code review in a fresh session
 
-When you want a [/code-review](code_review.md) pass, do it from a **fresh session**, not the one that ran the sprint. `/code-review` reads the diff and the plan, which are unaffected by runner context, but the reviewer benefits from a clean slate without the sprint's execution traces in scope.
+When you want a [code-review](code_review.md) pass, do it from a **fresh session**, not the one that ran the sprint. It reads the diff and the plan, which are unaffected by runner context, but the reviewer benefits from a clean slate without the sprint's execution traces in scope.
 
 ### Try alternative models for implementation
 
-Because plans are reproducible files, you can run the same plan with different models — a cheaper or faster model for the implementation pass, Opus for [/code-review](code_review.md) afterward. The plan is the controlled input; the diff is the controlled output. Swap models, compare diffs, calibrate which model gives acceptable quality on your codebase.
+Because plans are reproducible files, you can run the same plan with different models — a cheaper or faster model for the implementation pass, Opus for [code-review](code_review.md) afterward. The plan is the controlled input; the diff is the controlled output. Swap models, compare diffs, calibrate which model gives acceptable quality on your codebase.
 
 ### Review the code-review feedback list
 
-After `/code-review` produces its findings, work the list explicitly:
+After the [code-review playbook](code_review.md) produces its findings, work the list explicitly:
 
 - **BLOCKER** — must be applied before merge. Trivial fixes happen inline in the review session; non-trivial fixes go back through `booping-developer` via a follow-up briefing.
 - **SUGGESTION** — apply if the cost is low; defer with an explicit one-liner in the plan otherwise. Do not silently drop.

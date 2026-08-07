@@ -123,7 +123,6 @@ core:
           - "Single-file reads — call Read directly"
 
   learn_playbook:
-    status: awaiting-learning
     queries:
       candidates:
         glob: [retrospectives/*.md]
@@ -132,11 +131,7 @@ core:
         columns: [status, title, created, plan]
 
   code_review_playbook:
-    status: done
     queries:
-      review_candidates:
-        where: { status: done, code_review: null }
-        columns: [sp, title]
       scope_candidates:
         where: { status: done, code_review: null }
         columns: [sp, title, commit]
@@ -167,14 +162,13 @@ core:
       plans:   { type: dir }
       retrospectives: { type: dir }
       _lessons: { type: dir }
-      _booping: { type: dir }
       notes:   { type: dir }
       sprints.md: |
         ```base
         ...an Obsidian Bases fence over plans/...
         ```
       .gitignore: |
-        _booping/*.log
+        .booping.log
 
   playbook_authoring_playbook:
     scaffold:
@@ -231,14 +225,14 @@ Each shipped playbook owns one block. What can be in it:
 
 ### `core.{name}_playbook.agents`
 
-Delegation guidance rendered into that playbook's "Available Agents" table (via the shared `playbooks/_partials/playbook_agents.md` partial; the `/code-review` skill renders an equivalent table from the same block). Each agent entry has `good_for` (a list of bullets describing when to delegate) and an optional `bad_for` (when not to). Currently populated for `groom`, `develop`, `retro`, and `code-review`.
+Delegation guidance rendered into that playbook's "Available Agents" table, via the shared `playbooks/_partials/playbook_agents.md` partial. Each agent entry has `good_for` (a list of bullets describing when to delegate) and an optional `bad_for` (when not to). Currently populated for `groom`, `develop`, `retro`, and `code-review`.
 
 - **`core.{name}_playbook.agents.<id>.internal`** — `true` on booping's built-in workers (`booping-developer`, `booping-researcher`). Marks an entry as plugin-owned so it can be hidden when the block opts out of built-ins (see below). Self-contained global agents you register omit this flag.
 - **`core.{name}_playbook.disable_internal_agents`** — when set, every `internal: true` entry is hidden from that table, leaving only the agents you explicitly registered. See [integrating external agents](integrating-external-agents.md).
 
 ### `core.{name}_playbook.status`
 
-The single status this playbook claims from or reads — `retro` and `code-review` read `done` (the plan status develop ends at, narrowed by a null `retro:` / `code_review:` in the query beside it), `learn` reads `awaiting-learning` on the retrospective. It is a **query key**, not a lifecycle definition: point it at a different status and the playbook's picker pulls from another queue. The transitions themselves live in the playbook's `states:` block (see below).
+The single status this playbook claims from or reads — only `retro` declares one today, `done` (the plan status develop ends at, narrowed by a null `retro:` in the query beside it). It is a **query key**, not a lifecycle definition: point it at a different status and the playbook's picker pulls from another queue. The transitions themselves live in the playbook's `states:` block (see below).
 
 ### `core.{name}_playbook.queries.<id>`
 
@@ -328,7 +322,7 @@ Trees ride the same core → global → project merge as everything else on this
     ~/Claude/_playbooks/my-playbook --set name=my-playbook
   ```
 
-- **`core.setup_playbook.scaffold`** — the project vault: `plans/`, `retrospectives/`, `_lessons/`, `_booping/`, `notes/`, plus the seeded `sprints.md` Obsidian Bases fence and a `.gitignore`. Takes no `--set` variables.
+- **`core.setup_playbook.scaffold`** — the project vault: `plans/`, `retrospectives/`, `_lessons/`, `notes/`, plus the seeded `sprints.md` Obsidian Bases fence and a `.gitignore`. Takes no `--set` variables.
 
 ## Plan frontmatter: `summary`
 

@@ -23,6 +23,6 @@ nav:
   - Workflow:
       - groom playbook: groom.md
       - develop playbook: develop.md
-      - /code-review: code_review.md
+      - code-review playbook: code_review.md
       - retro playbook: retro.md
       - learn playbook: learn.md
