@@ -89,29 +89,6 @@ else
     echo "eval comment posted: $url"
 fi
 
-# The merge gate. A commit status is per-sha, so a later push leaves the new head without
-# one and a branch rule requiring `evals` blocks until the suites are re-run — which is why
-# this is a status rather than a workflow (an issue_comment-triggered job attaches its check
-# to the default branch, never to the PR head).
-if (( total_fail + total_err == 0 )); then
-    state=success
-    desc="$summary"
-else
-    state=failure
-    desc="$summary"
-fi
-
-if err=$(gh api -X POST "repos/{owner}/{repo}/statuses/$sha" \
-    -f state="$state" \
-    -f context="evals" \
-    -f description="${desc:0:139}" \
-    -f target_url="$url" 2>&1 >/dev/null); then
-    echo "commit status: evals=$state on ${sha:0:7}"
-else
-    # The common case is an unpushed HEAD: GitHub refuses a status for a sha it has
-    # never seen. Report what it actually said rather than guessing at scopes.
-    echo "commit status not set for ${sha:0:7} — ${err%%$'\n'*}" >&2
-    case "$err" in
-        *"No commit found"*) echo "  push the branch first, then re-run the evals." >&2 ;;
-    esac
-fi
+# No commit status: the suites judge freshly generated artifacts, so a full run lands on a
+# different red set each time and a per-sha gate would block merges on judge variance rather
+# than on source drift. The comment carries the run; reading it is the gate.

@@ -47,10 +47,10 @@ snapshots-render *args:
 #   just smoke -c <path>         explicit config, forwarded to promptfoo untouched
 # Naming no suite lists them — promptfoo has no config at the repo root.
 #
-# Every run posts its results to the PR for the current branch: one sticky comment
-# (updated in place) plus an `evals` commit status on HEAD, which is the merge gate —
-# a new commit has no status, so a branch rule requiring `evals` blocks until the suites
-# are re-run. `EVAL_PR=0 just smoke …` opts out; no gh or no PR degrades to printing.
+# Every run posts its results to the PR for the current branch as one sticky comment,
+# updated in place. Advisory, not a gate: the suites judge freshly generated artifacts,
+# so a full run lands on a different red set each time.
+# `EVAL_PR=0 just smoke …` opts out; no gh or no PR degrades to printing.
 
 # run promptfoo eval over a suite — see `just suites`
 [no-exit-message]
