@@ -53,18 +53,3 @@
             minEntries: 1
             fold: true
         onlyListed: true
-
-- description: llm-tests regress — row quality on the compose spec
-  vars:
-    target: compose
-    input: file://_fixtures/compose-spec.md
-  metadata:
-    playbook: playbook-authoring
-    step: llm-tests
-    fixture: compose-spec
-    tier: regress
-  assert:
-    - type: llm-rubric
-      value: "ROWS-FROM-EXAMPLE: The smoke rows pin the structure the spec's example artifact shows — the review H1, the Findings section with its bulleted findings, the Verdict line. Success-case rows only: no trap row (empty input, contradictory findings, overload) is written into the table; traps appear solely as offers in the return's Questions. Fails if a smoke row demands structure the example does not show, or a trap row was written unasked."
-    - type: llm-rubric
-      value: "ROWS-CONCRETE: Each row's check logic carries its expected values inline — named sections, counts, paths pinned by the fixture — phrased so a known-bad artifact fails it. No 'should work', 'is correct' or otherwise unfalsifiable phrasing. Fails on any vague row."

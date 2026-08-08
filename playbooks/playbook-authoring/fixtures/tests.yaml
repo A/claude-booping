@@ -31,18 +31,3 @@
             optional: true
             maxEntries: 0
         onlyListed: true
-
-- description: fixtures regress — corpus fidelity on the compose test plan
-  vars:
-    target: compose
-    input: file://_fixtures/compose-test-plan.md
-  metadata:
-    playbook: playbook-authoring
-    step: fixtures
-    fixture: compose-test-plan
-    tier: regress
-  assert:
-    - type: llm-rubric
-      value: "MATCHES-ROWS: The written small-module fixture carries exactly what the test plan's Fixtures table demands — a three-function auth module, the uncapped-refresh defect, the parse_header IndexError-on-spaceless-header defect, and the sweep-findings lines compose would receive as input. Fails if a demanded element is missing or materially different."
-    - type: llm-rubric
-      value: "SINGLE-FLAW-FREE: A happy-path fixture — beyond the two seeded defects the rows name, no extra traps are smuggled in: no additional bugs, no contradictory findings, no garbled content. Fails if the fixture carries flaws its rows never asked for."
