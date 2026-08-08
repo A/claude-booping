@@ -1,6 +1,7 @@
 ---
-summary: Post the findings `review` returned, grouped by severity, and collect the user's
-  verdict on them — nothing is re-derived, re-classified or written here.
+summary: Write the findings `review` returned into the artifact's `## Findings`, advance the
+  run to the human-review status, post them grouped by severity, and record the user's verdict
+  under `## Verdict` — nothing is re-derived or re-classified here.
 review_gate: null
 ---
 

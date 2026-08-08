@@ -1,9 +1,10 @@
 # Review the changed code
 
 The scope is already confirmed — a diff range or a file list, plus the plan behind it when there is
-one. Read that code and review it. This pass carries the run's whole review value: the diff, the
-checklists and the lessons never reach the runner, so anything you leave out of the return block is
-lost.
+one, and the run's artifact under `codereviews/`. Read that code and review it. This pass carries
+the run's whole review value: the diff, the checklists and the lessons never reach the runner, so
+anything you leave out of the return block is lost. The runner writes what you return into the
+artifact's `## Findings`; you never touch that file yourself.
 
 ## Craft
 
@@ -37,8 +38,9 @@ Walk these in order.
 
 ## Hard rules
 
-- **Write nothing.** No file in the vault, the repo or a temp path. The return block is the artifact.
-- **Change nothing.** No edit, no commit, no push, no test or lint run, no plan-status move. You
+- **Write nothing.** No file in the vault, the repo or a temp path — the run's artifact included.
+  The return block is your whole output.
+- **Change nothing.** No edit, no commit, no push, no test or lint run, no status move. You
   review; the runner and the user act on it.
 - **A lesson violation is always a `BLOCKER`.** Never softened to `SUGGESTION`.
 - **Judge ambiguity yourself.** A mixed-language repo, two type-checkers configured, an unclear
