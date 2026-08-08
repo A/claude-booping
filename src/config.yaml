@@ -185,12 +185,13 @@ core:
 
   code_review_playbook:
     queries:
-      # The `code-review` playbook's `scope` step, which also needs the diff base.
+      # The `code-review` playbook's `scope` step. Every done plan is a candidate —
+      # `code_reviews` carries the plan's review history, so a reviewed plan stays
+      # listed and can be reviewed again.
       scope_candidates:
         where:
           status: done
-          code_review: null
-        columns: [sp, title, commit]
+        columns: [sp, title, code_reviews]
     agents:
       booping-researcher:
         internal: true
@@ -227,6 +228,8 @@ core:
       plans:
         type: dir
       retrospectives:
+        type: dir
+      codereviews:
         type: dir
       _lessons:
         type: dir

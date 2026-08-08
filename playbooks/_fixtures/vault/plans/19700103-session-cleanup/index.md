@@ -8,7 +8,8 @@ planned: 19700103 08:00
 started: 19700103 09:00
 completed: 19700103 11:00
 retro: retrospectives/197001031100_session-cleanup.md
-code_review: 1970-01-03 13:00
+code_reviews:
+  - codereviews/19700103-session-cleanup/197001031300.md
 goal: Expired sessions leave no rows behind.
 summary: Sweep orphaned session rows on expiry.
 commit: cccccccccccccccccccccccccccccccccccccccc

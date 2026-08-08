@@ -9,7 +9,7 @@ started: 19700102 09:00
 completed: 19700102 10:00
 goal: Sessions survive the documented idle window.
 retro: null
-code_review: null
+code_reviews: null
 summary: Session expiry fired one minute early.
 commit: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
 ---

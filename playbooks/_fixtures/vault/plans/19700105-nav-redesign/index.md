@@ -8,7 +8,7 @@ planned: null
 started: null
 completed: null
 retro: null
-code_review: null
+code_reviews: null
 goal: Primary navigation fits one row on every breakpoint.
 summary: Rework the primary navigation into a single responsive row.
 commit: dddddddddddddddddddddddddddddddddddddddd

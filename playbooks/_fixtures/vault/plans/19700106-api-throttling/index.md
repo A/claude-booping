@@ -8,7 +8,7 @@ planned: 19700106 08:00
 started: 19700106 09:00
 completed: null
 retro: null
-code_review: null
+code_reviews: null
 goal: A noisy client cannot starve the rest.
 summary: Per-client rate limits on the public API.
 commit: eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
