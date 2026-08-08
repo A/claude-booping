@@ -52,7 +52,17 @@ Project-local plan templates. Each file has frontmatter (`name`, `description`) 
 
 ## `review_templates/`
 
-Project-local code-review templates. Loaded by the [code-review playbook](code_review.md) alongside the core templates; it picks the matching subset by inspecting the repo's manifests and reading each template's `description` frontmatter. Use this directory to add review checklists specific to your stack or domain.
+Project-local code-review templates. Loaded by the [code-review playbook](code_review.md); it picks the matching subset by inspecting the repo's manifests and reading each template's `description` frontmatter. Use this directory to add review checklists specific to your stack or domain.
+
+Templates come from three tiers, least → most specific:
+
+| Tier | Location |
+|---|---|
+| core | the plugin's own `docs/review_templates/` |
+| global | `{home_dir}/review_templates/` — every project on the machine |
+| project | `{vault}/review_templates/` — this project only |
+
+A later tier overrides an earlier one by `name`, keeping the earlier entry's position; a name no earlier tier carries is appended. The rendered checklist table labels each entry with its tier.
 
 ## `sprints.md`
 

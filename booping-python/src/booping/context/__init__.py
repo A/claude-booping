@@ -75,22 +75,23 @@ class Context(BaseModel):
         # machine-local, and a pinned render must be reproducible on another machine.
         tiers = [] if vault_override is not None else [global_path]
 
+        # An explicit vault pins discovery to core + that vault: the global roots are
+        # machine-local, and a pinned render must be reproducible on another machine.
+        pinned_home_dir = None if vault_override is not None else home_dir
+
         if vault is not None:
             cfg = config_mod.load(root, [*tiers, vault / "config.yaml"])
             lessons = Lesson.load_all(vault)
             plan_templates = PlanTemplate.load_all(root, vault)
-            review_templates = ReviewTemplate.load_all(root, vault)
+            review_templates = ReviewTemplate.load_all(root, vault, pinned_home_dir)
         else:
             cfg = config_mod.load(root, tiers)
             lessons = []
             plan_templates = PlanTemplate.load_all(root, Path("/dev/null"))
-            review_templates = ReviewTemplate.load_all(root, Path("/dev/null"))
+            review_templates = ReviewTemplate.load_all(root, None, pinned_home_dir)
 
         skills = Skill.load_all(root)
         agents = Agent.load_all(root)
-        # An explicit vault pins discovery to core + that vault: the global roots are
-        # machine-local, and a pinned render must be reproducible on another machine.
-        pinned_home_dir = None if vault_override is not None else home_dir
         playbooks = Playbook.load_all(vault, pinned_home_dir, root)
         targeted_lessons = Lesson.load_targeted(pinned_home_dir, vault)
 
