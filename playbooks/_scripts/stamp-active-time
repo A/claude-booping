@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Shared hook: stamp mined active minutes and model ids onto the run's artifact.
+"""Shared hook: stamp mined active minutes, tokens and model ids onto the run's artifact.
 
 Used by the `develop` playbook on its close edges, after `stamp-session`, so the
 closing session's own minutes are counted.
@@ -24,10 +24,11 @@ def main() -> None:
     if not artifact:
         sys.exit("stamp-active-time: BOOPING_ARTIFACT unset")
 
-    result = subprocess.run([str(BOOPING), "session-time", artifact, "--write"], check=False)
+    plan_dir = str(Path(artifact).resolve().parent)
+    result = subprocess.run([str(BOOPING), "session-stats", plan_dir, "--force"], check=False)
     if result.returncode != 0:
         print(
-            f"stamp-active-time: session-time exited {result.returncode}; nothing stamped",
+            f"stamp-active-time: session-stats exited {result.returncode}; nothing stamped",
             file=sys.stderr,
         )
 

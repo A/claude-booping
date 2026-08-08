@@ -2,7 +2,7 @@
 """Shared hook: stamp the running Claude Code session id onto the run's artifact.
 
 Used by the `groom` and `develop` playbooks on the edges that bound a working
-session, so `booping session-time` can later mine the transcripts.
+session, so `booping session-stats` can later mine the transcripts.
 
 Environment (set by `booping playbook-transition`): BOOPING_ARTIFACT = the run's
 resolved target, the plan's `index.md`. `CLAUDE_CODE_SESSION_ID` comes from the

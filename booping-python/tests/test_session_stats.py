@@ -1,9 +1,15 @@
 from __future__ import annotations
 
+import argparse
+import json
+import shutil
 from pathlib import Path
+from typing import Any
 
 import pytest
 
+from booping.commands import session_stats as cmd
+from booping.context._yaml import parse_frontmatter_only
 from booping.session_stats import (
     SessionStats,
     Tokens,
@@ -17,11 +23,35 @@ FIXTURES = Path(__file__).parent / "fixtures" / "session_stats"
 PROJECTS = FIXTURES / "projects"
 PROJ_A = PROJECTS / "-home-anton-proj-a"
 PROJ_B = PROJECTS / "-home-anton-proj-b"
+VAULT = FIXTURES / "vault"
+
+run = cmd._run  # type: ignore[reportPrivateUsage]
 
 
 def _summary(path: Path) -> SessionStats:
     events, _ = parse_transcript(path)
     return summarize(path.stem, events)
+
+
+def _ns(path: Path, **overrides: object) -> argparse.Namespace:
+    defaults: dict[str, object] = {
+        "path": path,
+        "mask": "index.md",
+        "force": False,
+        "dry_run": False,
+        "projects_root": PROJECTS,
+    }
+    return argparse.Namespace(**{**defaults, **overrides})  # type: ignore[arg-type]
+
+
+def _document(capsys: pytest.CaptureFixture[str]) -> dict[str, Any]:
+    return json.loads(capsys.readouterr().out)
+
+
+def _vault_copy(tmp_path: Path) -> Path:
+    dest = tmp_path / "vault"
+    shutil.copytree(VAULT, dest)
+    return dest
 
 
 # --- locator -----------------------------------------------------------------
@@ -209,3 +239,134 @@ def test_models_are_sorted_deduped_across_sessions() -> None:
 def test_report_tokens_sum_across_sessions() -> None:
     report = build_report(["sess-alpha", "sess-beta"], PROJECTS)
     assert report.tokens == Tokens(input=44, output=21, cache_creation=82, cache_read=116)
+
+
+# --- addressing --------------------------------------------------------------
+
+
+def test_directory_walks_by_mask_in_sorted_path_order(capsys: pytest.CaptureFixture[str]) -> None:
+    run(_ns(VAULT, dry_run=True))
+    document = _document(capsys)
+    assert [a["path"] for a in document["artifacts"]] == ["plan-a/index.md", "plan-b/index.md"]
+
+
+def test_file_path_yields_one_entry_and_ignores_mask(capsys: pytest.CaptureFixture[str]) -> None:
+    plan = VAULT / "plan-a" / "index.md"
+    run(_ns(plan, mask="nothing-matches.md", dry_run=True))
+    document = _document(capsys)
+    assert [a["path"] for a in document["artifacts"]] == [str(plan)]
+
+
+def test_artifact_without_sessions_key_is_skipped_with_a_stderr_note(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    run(_ns(VAULT / "plan-no-sessions" / "index.md", dry_run=True))
+    captured = capsys.readouterr()
+    assert json.loads(captured.out) == {"artifacts": []}
+    assert "no sessions:" in captured.err
+
+
+def test_stdout_is_json_only_while_warnings_go_to_stderr(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    run(_ns(VAULT, dry_run=True))
+    captured = capsys.readouterr()
+    assert json.loads(captured.out)["artifacts"]
+    assert "warning:" in captured.err
+    assert "warning:" not in captured.out
+
+
+def test_missing_path_exits_1(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    with pytest.raises(SystemExit) as exc:
+        run(_ns(tmp_path / "absent"))
+    assert exc.value.code == 1
+    assert "path not found" in capsys.readouterr().err
+
+
+def test_mask_matching_nothing_exits_1(capsys: pytest.CaptureFixture[str]) -> None:
+    with pytest.raises(SystemExit) as exc:
+        run(_ns(VAULT, mask="nothing-matches.md"))
+    assert exc.value.code == 1
+    assert "no artifact matching" in capsys.readouterr().err
+
+
+def test_cli_registers_session_stats_with_contract_defaults() -> None:
+    from booping.cli import build_parser
+
+    args = build_parser().parse_args(["session-stats", str(VAULT)])
+    assert (args.path, args.mask) == (VAULT, "index.md")
+    assert (args.force, args.dry_run, args.projects_root) == (False, False, None)
+
+
+# --- write path --------------------------------------------------------------
+
+
+def test_fresh_artifact_gets_all_six_keys_and_reports_written(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    vault = _vault_copy(tmp_path)
+    run(_ns(vault))
+    entry = _document(capsys)["artifacts"][0]
+    assert entry["written"] is True
+    frontmatter = parse_frontmatter_only(vault / "plan-a" / "index.md")
+    assert {key: frontmatter.get(key) for key in cmd.METRIC_KEYS} == {
+        "metrics_active_minutes": 10,
+        "metrics_models": ["claude-fable-5", "claude-opus-4-8"],
+        "metrics_tokens_input": 44,
+        "metrics_tokens_output": 21,
+        "metrics_tokens_cache_creation": 82,
+        "metrics_tokens_cache_read": 116,
+    }
+
+
+def test_rerun_without_force_is_a_byte_identical_skip(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    vault = _vault_copy(tmp_path)
+    run(_ns(vault))
+    capsys.readouterr()
+    stamped = (vault / "plan-a" / "index.md").read_bytes()
+
+    run(_ns(vault))
+    entry = _document(capsys)["artifacts"][0]
+    assert entry["written"] is False
+    assert entry["skipped"] == cmd.ALREADY_STAMPED
+    assert (entry["sessions"], entry["totals"]) == ([], {})
+    assert (vault / "plan-a" / "index.md").read_bytes() == stamped
+
+
+def test_force_overwrites_existing_values(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    vault = _vault_copy(tmp_path)
+    plan = vault / "plan-a" / "index.md"
+    plan.write_text(plan.read_text().replace("sp: 3", "sp: 3\nmetrics_active_minutes: 999"))
+
+    run(_ns(vault, force=True))
+    capsys.readouterr()
+    assert parse_frontmatter_only(plan)["metrics_active_minutes"] == 10
+
+
+def test_dry_run_matches_a_real_run_and_writes_nothing(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    vault = _vault_copy(tmp_path)
+    before = {p: p.read_bytes() for p in sorted(vault.rglob("*.md"))}
+
+    run(_ns(vault, dry_run=True))
+    dry = _document(capsys)["artifacts"]
+    assert {p: p.read_bytes() for p in sorted(vault.rglob("*.md"))} == before
+
+    run(_ns(vault))
+    wet = _document(capsys)["artifacts"]
+    assert [a["totals"] for a in dry] == [a["totals"] for a in wet]
+    assert [a["written"] for a in dry] == [False, False]
+
+
+def test_session_objects_use_the_frontmatter_key_names_verbatim(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    run(_ns(VAULT, dry_run=True))
+    entry = _document(capsys)["artifacts"][0]
+    assert set(entry["totals"]) == set(cmd.METRIC_KEYS)
+    assert set(entry["sessions"][0]) == {"session", *cmd.METRIC_KEYS}

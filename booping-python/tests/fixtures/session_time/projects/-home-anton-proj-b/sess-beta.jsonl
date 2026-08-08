@@ -1,4 +1,0 @@
-{"type":"user","isSidechain":false,"timestamp":"2026-08-08T12:00:00.000Z","message":{"role":"user","content":"beta prompt"}}
-{"type":"assistant","isSidechain":false,"timestamp":"2026-08-08T12:01:30.000Z","message":{"role":"assistant","model":"claude-opus-4-8","content":[{"type":"text","text":"ok"}]}}
-{"type":"user","isSidechain":false,"timestamp":"2026-08-08T12:10:00.000Z","message":{"role":"user","content":"beta follow-up"}}
-{"type":"assistant","isSidechain":false,"timestamp":"2026-08-08T12:12:30.000Z","message":{"role":"assistant","model":"claude-opus-4-8","content":[{"type":"text","text":"done"}]}}
