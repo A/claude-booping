@@ -1365,12 +1365,10 @@ def test_lessons_section_locked_format(tmp_path: Path) -> None:
         " conflict → stop and flag.\n"
         "\n"
         "### 0001_alpha — Alpha rule\n"
-        "*(scope: project)*\n"
         "\n"
         "Alpha body.\n"
         "\n"
         "### 0002_beta — Beta rule\n"
-        "*(scope: project)*\n"
         "\n"
         "Beta body.\n"
     )

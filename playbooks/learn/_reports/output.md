@@ -86,10 +86,6 @@ Take a repo from any starting state to a working booping project — machine-lev
 
 The one non-lesson destination: the attached repo's `CLAUDE.md`. Route a candidate here when it is a project fact that aids fresh-agent project understanding — a layout path, a CLI command, a code-side convention. One-bullet additions; no paragraph rewrites.
 
-## Global scope
-
-Never write `~/.claude/CLAUDE.md` or any user-level scope. Behavior caused by the project's own `CLAUDE.md` is fixed there, in the attached repo.
-
 
 ## Retrospectives awaiting learning
 

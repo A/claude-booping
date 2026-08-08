@@ -2,7 +2,7 @@
   Renders the `## Lessons` section for both playbook render surfaces.
 
   lessons   — list[booping.context.lesson.Lesson]; empty renders nothing
-  step_mode — True for the `--step` surface: step-scoped wording, no scope line
+  step_mode — True for the `--step` surface: step-scoped wording
 
   Lesson bodies are inserted as variables, never parsed as Jinja.
 -#}
@@ -12,8 +12,7 @@
 The following {{ lessons | length }} lesson(s) apply to this {% if step_mode %}step{% else %}playbook{% endif %}. Never silently violate one{% if not step_mode %}; conflict → stop and flag{% endif %}.
 {% for lesson in lessons %}
 ### {{ lesson.id }} — {{ lesson.title }}
-{% if not step_mode %}*(scope: {{ lesson.scope }})*
-{% endif %}
+
 {{ lesson.body.rstrip() }}
 {% endfor %}
 {%- endif %}

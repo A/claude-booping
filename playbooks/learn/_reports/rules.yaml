@@ -13,7 +13,6 @@ rules:
       - Single-location rule
       - Targets
       - Repo CLAUDE.md
-      - Global scope
       - Retrospectives awaiting learning
       - Shared instructions
       - Playbook Steps
