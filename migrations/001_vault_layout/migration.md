@@ -1,10 +1,66 @@
 ---
-id: 2
-title: Config settings move under `core`
-summary: Rewrite a vault `config.yaml` onto the `core.*` namespace and drop the retired `skills:` and `plan:` blocks.
+id: 1
+title: Pre-1.0 vault layout — plans as directories, config under `core`
+summary: Convert every flat `plans/{slug}.md` into `plans/{slug}/index.md`, and rewrite a vault `config.yaml` onto the `core.*` namespace, dropping the retired `skills:` and `plan:` blocks.
 ---
 
-# Config settings move under `core`
+# Pre-1.0 vault layout — plans as directories, config under `core`
+
+Two independent conversions of a vault laid out before 1.0. Either half can be a no-op on its
+own; run both, in order.
+
+## Part 1 — plans become directories
+
+A plan used to be a single markdown file directly under the vault's `plans/`. It is now a
+directory named by the slug, with the plan document at `index.md` inside it — the directory
+is also the plan's workspace, so anything a run produces beside the document lives next to it.
+
+Convert every flat plan file in this vault, and nothing else:
+
+`plans/20260714-09-12_add-search.md` → `plans/20260714-09-12_add-search/index.md`
+
+The file's content — frontmatter included — is moved verbatim; nothing inside it changes.
+
+### What to convert
+
+- Only markdown files **directly** under `plans/`. Files nested deeper are already converted.
+- A slug that already has a directory with an `index.md` in it is a **conflict**, not a
+  duplicate to overwrite: stop and report it rather than merging or replacing.
+- No `plans/` directory, or no flat files left in it, means there is nothing to do — report
+  that as success. Re-running this part on a converted vault changes nothing.
+
+### Commands
+
+Run from the vault root. First look at what is there:
+
+```bash
+ls -1 plans/*.md 2>/dev/null
+```
+
+Then move each one, refusing any slug whose destination is already taken:
+
+```bash
+for file in plans/*.md; do
+  [ -e "$file" ] || continue
+  dir="plans/$(basename "$file" .md)"
+  if [ -e "$dir/index.md" ]; then
+    echo "CONFLICT: $dir/index.md already exists — $file not moved"
+    continue
+  fi
+  mkdir -p "$dir" && mv "$file" "$dir/index.md" && echo "moved $file -> $dir/index.md"
+done
+```
+
+Confirm the result — this should list one `index.md` per plan and no flat files:
+
+```bash
+ls -1 plans/*.md 2>/dev/null; ls -1 plans/*/index.md 2>/dev/null
+```
+
+Any `CONFLICT:` line, or a flat `plans/*.md` still present at the end, is a failure: report which
+slugs were left behind and what blocked them.
+
+## Part 2 — config settings move under `core`
 
 Every setting the shipped playbook set owns now lives under one top-level `core:` key. `home_dir`
 is the only other top-level key, because it resolves the vault before any namespace is reachable.
@@ -13,9 +69,9 @@ under `core`. The `skills:` block is gone with the skills it configured, and the
 lifecycle is gone with the `transition` command that read it.
 
 A config left on the old paths is not an error — it merges as dead weight, and every key it meant
-to override silently stops overriding. This migration rewrites those paths.
+to override silently stops overriding. This part rewrites those paths.
 
-## What to convert
+### What to convert
 
 Only `config.yaml` at the vault root. Nothing else in the vault carries config paths.
 
@@ -47,14 +103,14 @@ its path changes, e.g. `skills.code-review.agents.plannotator-reviewer` becomes
 `core.code_review_playbook.agents.plannotator-reviewer`.
 
 - No `config.yaml` in the vault, or one already on the new paths, means there is nothing to do —
-  report that as success. Re-running this migration changes nothing.
+  report that as success. Re-running this part changes nothing.
 - A key that already exists at its destination is **kept**, and the old value is reported as
   discarded rather than overwriting it.
 - Values are moved verbatim; only the path and the indentation change. Comments are preserved by
   the round-trip, but one attached to a moved key can end up beside its old neighbour — read the
   rewritten file once and re-place any comment that landed wrong.
 
-## Commands
+### Commands
 
 Run from the vault root. First look at what is there:
 
@@ -178,7 +234,7 @@ grep -nE '^(research_agent|macros|sprint|tasks|plans|git|migrations|playbook|vau
 Any `FAILED:` line, any `STILL OLD:` line, or a `kept existing` line the user has not been told
 about is a failure to report.
 
-## The global config is a manual step
+### The global config is a manual step
 
 A machine-level config at `${XDG_CONFIG_HOME:-~/.config}/booping/config.yaml` uses the same paths
 and needs the same rewrite, but it is not part of any vault — the `.booping` watermark is

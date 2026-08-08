@@ -1,4 +1,4 @@
 # Pins the migration watermark for `--project` renders, so a committed report never
 # picks up the renderer's own repo state. Bump when a new migration ships.
 project_name: booping-fixtures
-latest_migration: 6
+latest_migration: 3

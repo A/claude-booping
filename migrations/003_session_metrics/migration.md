@@ -1,10 +1,10 @@
 ---
-id: 6
-title: Session metrics keys take the metrics_ prefix
+id: 3
+title: Session metrics live in flat `metrics_` frontmatter and the sprints view
 summary: Rename `active_minutes` → `metrics_active_minutes` and `models` → `metrics_models` on every plan, and rewrite the `sprints.md` Bases fence to the six `metrics_*` columns.
 ---
 
-# Session metrics keys take the metrics_ prefix
+# Session metrics live in flat `metrics_` frontmatter and the sprints view
 
 `booping session-stats` replaces `session-time` and records four token totals beside the two keys a
 plan already carried. All six live in flat, `metrics_`-prefixed frontmatter — Obsidian Properties
@@ -25,7 +25,7 @@ Two things, independently:
 | Where | Conversion |
 |---|---|
 | `plans/*/index.md` frontmatter | `active_minutes:` → `metrics_active_minutes:`, `models:` → `metrics_models:`, values preserved verbatim; an old key whose prefixed twin is already present is dropped instead of renamed |
-| `sprints.md`, the `order:` list of each view in the `base` fence | `active_minutes` / `models` renamed in place, then any of the four token columns still missing appended |
+| `sprints.md`, the `order:` list of each view in the `base` fence | `active_minutes` / `models` renamed in place, then any of the six `metrics_*` columns still missing appended |
 
 - A plan already carrying only `metrics_active_minutes` / `metrics_models` is left alone, and so is
   a plan that never carried either. Only the frontmatter block is touched — body prose that happens
@@ -238,6 +238,5 @@ done
 Any `FAILED:`, `STILL OLD:`, `STILL MISSING:`, `DUPLICATE:`, `NO FRONTMATTER:` or `left as is` line
 is a failure to report: name what blocked it so the user can finish by hand. A plan that carried
 both an old key and its prefixed twin ends with exactly one of each prefixed key. A second run of
-both scripts must
-print `no plan carries the old keys - nothing to do` and `every view already lists the six
-metrics_ columns - nothing to do`, writing nothing.
+both scripts must print `no plan carries the old keys - nothing to do` and `every view already
+lists the six metrics_ columns - nothing to do`, writing nothing.

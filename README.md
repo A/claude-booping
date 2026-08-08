@@ -6,9 +6,17 @@ A self-learning, project-scoped sprint workflow for Claude Code. booping turns a
 
 *Each project's vault is a plain Obsidian-friendly folder of markdown files.*
 
+## What it's for
+
+The core use case: take a feature at whatever maturity it arrives — a rough idea over an existing codebase, a half-formed brief, a detailed PRD — and drive it through one loop: groom it into a plan, develop it, review the diff, retro what shipped.
+
+booping is **not** spec-driven development — it doesn't keep specs as a living mirror of the codebase. It's closer to scrum sprints: a plan is a sprint artifact, done and forgotten once it ships; what persists is the vault's history and the lessons the loop distils from it. The core is flexible, though — playbooks are plain markdown procedures, and when the shipped loop doesn't fit, you write your own (see [Extensibility](#extensibility)).
+
 ## Obsidian-ready by design
 
 The vault at `~/Claude/{project}/` is markdown-only with YAML frontmatter that Obsidian renders natively as Properties. One vault per project, side-by-side with whatever else you keep in `~/Claude/`. No proprietary database, no lock-in — just files you can grep, version, and edit by hand.
+
+This repo is developed with booping itself, and its vault is checked in at [`vault/`](vault/) — browse a [finished plan](vault/plans/202608081300_session-time-metrics/index.md), the [targeted lessons](vault/_lessons/) the loop has accumulated, or a [retrospective](vault/retrospectives/20260722-seven-plan-retro.md) to see what the artifacts look like in practice.
 
 ## Disclaimer
 
@@ -17,6 +25,8 @@ booping is aimed at **experienced developers and tech leads** — people comfort
 It's built for **iterative, agile-style development**: maintenance, incremental features, or growing a project sprint by sprint. It is **not** a waterfall tool — don't hand it a whole-project spec and expect a finished product. One plan is one sprint; the loop compounds across many.
 
 Per-project configuration tunes the framework to each codebase: drop a `config.yaml` into your vault and it overrides the defaults — sprint scale, task types, branch conventions and agent wiring are the natural targets. The `code-review` playbook is a side-route for stack-aware review of a finished plan's diff, recorded as its own artifact under `codereviews/`.
+
+**A note on maturity:** v1.0 works — the whole loop is dogfooded on this repo — but it's beta-grade. Expect rough edges (eval suites pending review, some skills-era legacy in the core). Installation trouble? Run `/playbook setup` and discuss the issue with it.
 
 ## Dependencies
 
