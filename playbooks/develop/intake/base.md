@@ -5,9 +5,9 @@ Load the plan the preamble resolved and the repo `CLAUDE.md`.
 **Validate entry status**: the plan's `status:` must match an entry transition of the run machine
 (the `## State` section's table). Otherwise stop and report clearly.
 
-When the plan entered at `awaiting-plan-review`, capture the user's approval explicitly — "looks
-good" counts, silence never does. That approval is what the `awaiting-plan-review` →
-`ready-for-dev` edge gates on.
+When the plan entered at `awaiting-approval`, take the `awaiting-approval` → `ready-for-dev`
+edge immediately — handing the plan to develop is the approval. Do not ask the user to confirm
+the plan.
 
 ## Plan-validity check
 

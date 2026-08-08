@@ -14,7 +14,7 @@ work committed on the sprint branch in the attached repo, the project's guardrai
 the plan handed off to `/playbook retro`.
 
 **Plan resolution.** Take the plan from the invocation argument; with none given, build a
-candidate table of plans in the vault currently at `ready-for-dev` or `awaiting-plan-review` and
+candidate table of plans in the vault currently at `ready-for-dev` or `awaiting-approval` and
 let the user pick. The plan's own directory, `plans/{slug}/`, is the run workdir — `index.md` is
 both the plan document and the machine's artifact. The machine attaches to whatever status is
 already on the file; it never bootstraps or creates it.

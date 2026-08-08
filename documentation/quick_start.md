@@ -55,7 +55,7 @@ Spec your first sprint with a free-text description:
 /playbook groom — add per-tenant rate limiting to the public API
 ```
 
-The [groom playbook](groom.md) researches the codebase and the web, drafts a plan under `~/Claude/{project}/plans/{YYYYMMDDHHMM}_{kebab-title}/index.md`, optionally hands it to a second model for cross-review (when `core.groom_playbook.cross_review_agent` is configured), and stops at `awaiting-plan-review` for your explicit approval. Sharpen it, push back, ask for splits — the more detailed your initial brief, the sharper the resulting plan.
+The [groom playbook](groom.md) researches the codebase and the web, drafts a plan under `~/Claude/{project}/plans/{YYYYMMDDHHMM}_{kebab-title}/index.md`, optionally hands it to a second model for cross-review (when `core.groom_playbook.cross_review_agent` is configured), and stops at `awaiting-approval` for your explicit approval. Sharpen it, push back, ask for splits — the more detailed your initial brief, the sharper the resulting plan.
 
 When you approve, the run flips the plan to `ready-for-dev`.
 

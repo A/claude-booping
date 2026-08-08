@@ -84,7 +84,7 @@ groom     framing → researching → drafting → cross-reviewing → presentin
           (loopbacks: drafting → researching, awaiting-approval → drafting)
           (any non-terminal status → cancelled (terminal))
 
-develop   awaiting-plan-review → ready-for-dev → in-progress
+develop   awaiting-approval → ready-for-dev → in-progress
           → done (terminal) | fail (terminal)
           (any non-terminal status → cancelled (terminal))
 
@@ -113,7 +113,7 @@ A plan carries one of the following statuses in its frontmatter, written by groo
 
 **develop**
 
-- **`awaiting-plan-review`** — develop's entry status when a run starts on a plan you have not yet approved.
+- **`awaiting-approval`** — develop's entry status when a run starts on a plan still parked at groom's approval gate. Handing the plan to develop counts as the approval: intake advances it to `ready-for-dev` without asking.
 - **`in-progress`** — develop has claimed the plan and is executing milestones.
 - **`done`** *(develop's terminal)* — all milestones done and verification green. The end of the plan lifecycle; retro and code-review pick the plan up from here through their own frontmatter seams, without moving it again.
 - **`fail`** *(develop's terminal)* — an unrecoverable blocker after two documented fix attempts, with your approval to abort.
@@ -173,7 +173,7 @@ The `learn` playbook then reviews the retrospective with the user, picks the dur
 
 booping is a feedback loop, not an autopilot. Three things stay your job:
 
-- **Plan review is still on you.** Groom produces a draft and waits at `awaiting-plan-review` for a reason — sharpen it, push back, ask for splits. As lessons accumulate, plans drift toward your style and constraints, but only if you fed the loop honest reviews. Shit in, shit out.
+- **Plan review is still on you.** Groom produces a draft and waits at `awaiting-approval` for a reason — sharpen it, push back, ask for splits. As lessons accumulate, plans drift toward your style and constraints, but only if you fed the loop honest reviews. Shit in, shit out.
 - **Code review is still on you.** Develop ships milestones; you own the quality bar. The `code-review` playbook is a helper that runs stack-aware passes over the diff and records its findings — but reading those findings, deciding what's off, and bringing the feedback into retro so learn can turn it into rules is still your job.
 - **Learning isn't automatic.** Retro and learn are scaffolding for a feedback loop, not a substitute for one. You still need to sit with the retrospective, confirm which findings are durable, and let learn write them down. Skip that step and the loop stalls.
 

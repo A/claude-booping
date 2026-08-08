@@ -9,14 +9,12 @@ graph:
 states:
   run:
     artifact: index.md
-    initial: awaiting-plan-review
+    initial: awaiting-approval
     statuses:
-      awaiting-plan-review:
+      awaiting-approval:
         transitions:
           - to: ready-for-dev
-            when: "intake captured the user's explicit approval of the plan it entered on — \"looks good\" counts, silence never does"
-            gates:
-              - "explicit user approval captured"
+            when: "the user handed the plan to develop — invoking the run on it is the approval; intake takes this edge immediately, no confirmation asked"
             hooks:
               - frontmatter-update reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
       ready-for-dev:
@@ -60,7 +58,7 @@ states:
     superstates:
       cancellable:
         states:
-          - awaiting-plan-review
+          - awaiting-approval
           - ready-for-dev
           - in-progress
         transitions:

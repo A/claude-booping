@@ -3,7 +3,7 @@ work committed on the sprint branch in the attached repo, the project's guardrai
 the plan handed off to `/playbook retro`.
 
 **Plan resolution.** Take the plan from the invocation argument; with none given, build a
-candidate table of plans in the vault currently at `ready-for-dev` or `awaiting-plan-review` and
+candidate table of plans in the vault currently at `ready-for-dev` or `awaiting-approval` and
 let the user pick. The plan's own directory, `plans/{slug}/`, is the run workdir — `index.md` is
 both the plan document and the machine's artifact. The machine attaches to whatever status is
 already on the file; it never bootstraps or creates it.
@@ -43,7 +43,7 @@ Execute the steps in the most effective order considering their dependencies.
 
 | Step | Dependencies | Summary | Review gate |
 | --- | --- | --- | --- |
-| `intake` | — | Adopt the plan the preamble resolved — validate its `status:` against an entry transition, capture the user's approval when it entered at `awaiting-plan-review`, then check plan validity against the repo's current commit: cheap summary first, the plan-named diff only on the user's word; trivial drift patched in place, non-trivial drift halted back to grooming. | — |
+| `intake` | — | Adopt the plan the preamble resolved — validate its `status:` against an entry transition, advance it to `ready-for-dev` without asking when it entered at `awaiting-approval`, then check plan validity against the repo's current commit: cheap summary first, the plan-named diff only on the user's word; trivial drift patched in place, non-trivial drift halted back to grooming. | — |
 | `provision` | `intake` | Set the sprint up — pick the branch from the plan's task type per the branch conventions, propose a kebab-case name and create it off the repo's current branch only after the user confirms; then settle the milestone groups the briefings will cover, within the configured ceiling, and fire the `ready-for-dev` → `in-progress` transition. | The user confirms the branch name before the branch is created — asked through `AskUserQuestion`, never as chat prose; a name the user rewrites is used verbatim, and nothing touches git until the answer arrives. The milestone groups are internal — settled by the step, reported in its return, never put to the user |
 | `develop-loop` | `provision` | Run the sprint group by group — one briefing per group to the worker agent, one worker at a time on the sprint branch; on each report verify against the milestone's DoD and its plan-authored Verify, flip the checkboxes, task rows and milestone status, commit per milestone, refresh and commit the vault snapshot, and report what shipped before the next group. | — |
 | `verify` | `develop-loop` | Run the project's guardrails over the finished sprint once — tests, lint, typecheck, formatter, whatever else must hold for a PR to open without CI failing — plus the plan's own bookkeeping, every DoD checkbox `[x]` and every milestone `done`, read off disk, and return what passed and what failed; no code-quality judgement, no fixes applied here. | — |
@@ -63,13 +63,13 @@ booping playbook-state develop --workdir <run workdir>
 
 - Referenced by: outer graph
 - Artifact: `index.md` (relative to the run workdir)
-- Initial status: `awaiting-plan-review`
+- Initial status: `awaiting-approval`
 - Advance: `booping playbook-transition develop <to> --workdir <run workdir>`
 
 | Status | To | When | Gates |
 | --- | --- | --- | --- |
-| `awaiting-plan-review` | `ready-for-dev` | intake captured the user's explicit approval of the plan it entered on — "looks good" counts, silence never does | explicit user approval captured |
-| `awaiting-plan-review` | `cancelled` | the user cancels the run | — |
+| `awaiting-approval` | `ready-for-dev` | the user handed the plan to develop — invoking the run on it is the approval; intake takes this edge immediately, no confirmation asked | — |
+| `awaiting-approval` | `cancelled` | the user cancels the run | — |
 | `ready-for-dev` | `in-progress` | provision created the confirmed sprint branch and settled the milestone groups; the first group is about to be delegated | the user confirmed the branch name; no unresolved non-trivial drift — that halts back to grooming instead |
 | `ready-for-dev` | `cancelled` | the user cancels the run | — |
 | `in-progress` | `done` | verify came back green on the project's guardrails and wrap-up made the closing commit and reported the sprint | every DoD checkbox [x] and every milestone status done; the project's guardrails and the plan's Final Verification green |
@@ -87,9 +87,9 @@ Load the plan the preamble resolved and the repo `CLAUDE.md`.
 **Validate entry status**: the plan's `status:` must match an entry transition of the run machine
 (the `## State` section's table). Otherwise stop and report clearly.
 
-When the plan entered at `awaiting-plan-review`, capture the user's approval explicitly — "looks
-good" counts, silence never does. That approval is what the `awaiting-plan-review` →
-`ready-for-dev` edge gates on.
+When the plan entered at `awaiting-approval`, take the `awaiting-approval` → `ready-for-dev`
+edge immediately — handing the plan to develop is the approval. Do not ask the user to confirm
+the plan.
 
 ## Plan-validity check
 

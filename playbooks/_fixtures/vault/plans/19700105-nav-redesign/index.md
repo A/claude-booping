@@ -1,7 +1,7 @@
 ---
 title: Navigation redesign
 type: feature
-status: awaiting-plan-review
+status: awaiting-approval
 sp: 8
 created: 1970-01-05
 planned: null
@@ -16,4 +16,4 @@ commit: dddddddddddddddddddddddddddddddddddddddd
 
 # Navigation redesign
 
-Fixture plan — directory shape, parked at `awaiting-plan-review` so the specification-phase filters have something to exclude.
+Fixture plan — directory shape, parked at `awaiting-approval` so the specification-phase filters have something to exclude.

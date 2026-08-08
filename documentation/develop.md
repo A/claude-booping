@@ -10,13 +10,13 @@ Development is a **playbook**, not a skill — it is driven by [`/playbook`](pla
 
 ## What it does
 
-The playbook walks one plan through `awaiting-plan-review → ready-for-dev → in-progress → done`, with `fail` as the abort branch. `done` is the **end of the plan lifecycle** — retro and code-review pick the plan up from there through the `retro:` / `code_reviews:` frontmatter seams, each keeping its own run state in its own artifact, without moving the plan's status again. That vocabulary is develop's own — it is declared in `playbooks/develop/playbook.yaml`'s `states:` block, not in a shared lifecycle. Its run state lives in the plan's own `index.md`, so a stopped sprint is **resumable**.
+The playbook walks one plan through `awaiting-approval → ready-for-dev → in-progress → done`, with `fail` as the abort branch. `done` is the **end of the plan lifecycle** — retro and code-review pick the plan up from there through the `retro:` / `code_reviews:` frontmatter seams, each keeping its own run state in its own artifact, without moving the plan's status again. That vocabulary is develop's own — it is declared in `playbooks/develop/playbook.yaml`'s `states:` block, not in a shared lifecycle. Its run state lives in the plan's own `index.md`, so a stopped sprint is **resumable**.
 
 Five steps, in dependency order:
 
 | Step | What it does |
 |------|--------------|
-| `intake` | Resolve the plan, capture explicit approval when it entered at `awaiting-plan-review`, and check the plan against the repo's current shape (drift) |
+| `intake` | Resolve the plan — one entering at `awaiting-approval` is advanced to `ready-for-dev` without asking, since handing it to develop is the approval — and check the plan against the repo's current shape (drift) |
 | `provision` | Pick and confirm the sprint branch, then settle the milestone groups the briefings will cover |
 | `develop-loop` | Brief `booping-developer` per group, verify each milestone's DoD, commit as it goes |
 | `verify` | Run the project's lint / typecheck / test gates plus the plan's Final Verification |
