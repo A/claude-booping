@@ -87,7 +87,7 @@ Ask first, write after.
 
 Then, in order:
 
-3. `booping scaffold core.setup_playbook.scaffold {vault_dir}` — the vault tree: `plans/`, `retrospectives/`, `_lessons/`, `_booping/`, `notes/`, a `sprints.md` Bases view and a `.gitignore`. It takes no `--set` variables. A non-empty destination exits 1; ask before re-running it with `--force` (0 success, 1 user error, 2 OSError). `booping-create-project` is a different path and is not what this step calls.
+3. `booping scaffold core.setup_playbook.scaffold {vault_dir}` — the vault tree: `plans/`, `retrospectives/`, `_lessons/`, `_booping/`, `notes/`, a `sprints.md` Bases view and a `.gitignore`. It takes no `--set` variables. A non-empty destination exits 1; ask before re-running it with `--force` (0 success, 1 user error, 2 OSError).
 4. `{repo_root}/.booping` — `project_name: {name}` always, plus `vault_path: {dir}` resolved against the repo root when the vault lives in the repo. Then, from the repo root, `booping marker-set latest_migration=@latest` — a fresh vault is already current, and without the key every render reports it behind.
 5. Repo-local vault only: `{home_dir}/{name}` as a symlink to the absolute vault dir. The scaffold tree cannot make it — it declares directories and text files only — so create it here.
 6. The visibility answer: append `.booping` to `{repo_root}/.gitignore` or to `{repo_root}/.git/info/exclude`. Tracked, or the question skipped → neither file is touched.

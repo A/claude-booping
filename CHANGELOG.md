@@ -22,10 +22,11 @@ Everything booping does became a playbook. `/playbook` is now the only skill the
 - A `frontmatter-update` transition hook can write to any workdir-relative file, not only the machine's own artifact.
 - Transition hooks resolve scripts from shared `_scripts/` roots, playbook-local first, and accept arguments — one parameterised script replaces near-duplicates.
 - Review templates layer across the core, global and project levels, later levels overriding by name, matching how lessons already worked.
+- `booping session-stats` mines a plan's stamped sessions for how long the work actually took and what it cost. Active time now excludes every stretch the run spent waiting on you, and four token totals plus the models that ran land beside it as `metrics_`-prefixed frontmatter, surfaced as `sprints.md` columns. Point it at a directory rather than one plan at a time; it prints the same JSON it writes.
 
 ### Changed
 
-- Upgrading a vault now runs `/playbook migrate`: a vault behind the shipped migrations blocks renders with a notice, and the playbook applies each pending migration in order and commits it. This release ships migrations that convert flat plan files into plan directories, relocate `plans/{slug}/retro.md` into `retrospectives/`, and normalise plan statuses.
+- Upgrading a vault now runs `/playbook migrate`: a vault behind the shipped migrations blocks renders with a notice, and the playbook applies each pending migration in order and commits it. This release ships migrations that convert flat plan files into plan directories, relocate `plans/{slug}/retro.md` into `retrospectives/`, normalise plan statuses, and move the session metrics keys onto their `metrics_` prefix.
 - A plan became a directory — `plans/{slug}/` holds its `index.md`, briefing and web research together — and the discovery shape is the `core.plans.glob` config key.
 - Retro became its own track: develop closes a plan at `done` immediately, and retro and learn advance a standalone `retrospectives/{slug}.md` linked back from the plan's `retro:` key.
 - Code review became its own track: every review persists as `codereviews/{plan}/{timestamp}.md` with an `in-agent-review` → `human-review` → `done` machine, while the plan carries the full `code_reviews:` history and stays in the queue, so re-review is first class.
