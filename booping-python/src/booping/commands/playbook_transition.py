@@ -12,7 +12,7 @@ import shlex
 import subprocess
 import sys
 from collections.abc import Mapping
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any, NoReturn
 
 from booping import logger
@@ -120,7 +120,8 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
         metavar="PATH",
         help=(
             "Artifact to move instead of the machine's declared `artifact:` "
-            "(relative paths resolve against the workdir)"
+            "(relative paths resolve against the workdir; an absolute path ending "
+            "in the declared `artifact:` implies the workdir)"
         ),
     )
     p.add_argument(
@@ -128,7 +129,10 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
         type=str,
         default=None,
         metavar="PATH",
-        help="Run workspace the artifact path resolves against (default: cwd)",
+        help=(
+            "Run workspace the artifact path resolves against "
+            "(default: the workdir an absolute --target implies, else cwd)"
+        ),
     )
     p.set_defaults(func=_run)
 
@@ -162,6 +166,19 @@ def resolve_target(target: str, workdir: Path) -> Path:
     """Anchor an explicit `--target` at the workdir; an absolute path is honoured."""
     path = Path(target).expanduser()
     return path if path.is_absolute() else workdir / path
+
+
+def implied_workdir(artifact: Path, rel: str | None) -> Path | None:
+    """The workdir an explicit `--target` implies — the directory the machine's declared
+    `artifact:` hangs off, so `--target {vault}/plans/x/index.md` runs hooks in
+    `{vault}/plans/x` the way `--workdir` would. None when the machine declares no
+    artifact, its path is per-instance, or the target does not end with it."""
+    if not rel or "{instance}" in rel:
+        return None
+    parts = PurePosixPath(rel).parts
+    if len(parts) >= len(artifact.parts) or artifact.parts[-len(parts):] != parts:
+        return None
+    return artifact.parents[len(parts) - 1]
 
 
 def _resolve_artifact(
@@ -290,6 +307,21 @@ def _run(args: argparse.Namespace) -> None:
     ctx = Context.assemble(start=workdir)
     pb = _resolve_playbook(ctx, args.playbook)
     state_name, machine = _resolve_state(pb, args.state)
+
+    # Only an absolute target implies a workdir — a relative one is *defined* against
+    # the workdir, so deriving one from it would re-anchor the path under itself.
+    if workdir_arg is None and target is not None and Path(target).expanduser().is_absolute():
+        implied = implied_workdir(Path(target).expanduser(), machine.artifact)
+        if implied is not None and implied != workdir:
+            if not implied.is_dir():
+                _fail(f"workdir implied by --target not found: {implied}")
+            # Re-assemble: the implied workdir may resolve a different project and a
+            # different playbook root than cwd did.
+            workdir = implied
+            ctx = Context.assemble(start=workdir)
+            pb = _resolve_playbook(ctx, args.playbook)
+            state_name, machine = _resolve_state(pb, args.state)
+
     artifact, artifact_rel = _resolve_artifact(machine, workdir, instance, target)
 
     report: list[str] = []

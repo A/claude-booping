@@ -596,6 +596,75 @@ def test_hooks_receive_the_resolved_target_as_booping_artifact(
     assert parse_frontmatter_only(tmp_path / "review.md")["researched"]
 
 
+def test_absolute_target_implies_the_workdir(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _plant()
+    run = tmp_path / "plans" / "one"
+    run.mkdir(parents=True)
+    (run / "index.md").write_text("---\nstatus: intaking\n---\n")
+    monkeypatch.chdir(tmp_path)
+    capsys.readouterr()
+
+    _run(_args(to="researching", target=str(run / "index.md")))
+
+    assert parse_frontmatter_only(run / "index.md")["status"] == "researching"
+    recorded = dict(
+        line.split("=", 1)
+        for line in (run / "check-findings.env").read_text().splitlines()
+    )
+    assert recorded["workdir"] == str(run)
+    assert recorded["cwd"] == str(run)
+
+
+def test_explicit_workdir_wins_over_the_implied_one(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _plant()
+    run = tmp_path / "plans" / "one"
+    run.mkdir(parents=True)
+    (run / "index.md").write_text("---\nstatus: intaking\n---\n")
+    capsys.readouterr()
+
+    _run(_args(to="researching", target=str(run / "index.md"), workdir=tmp_path))
+
+    recorded = (tmp_path / "check-findings.env").read_text()
+    assert f"workdir={tmp_path}" in recorded
+
+
+def test_absolute_target_off_the_declared_artifact_keeps_cwd(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _plant()
+    elsewhere = tmp_path / "elsewhere"
+    elsewhere.mkdir()
+    (elsewhere / "review.md").write_text("---\nstatus: intaking\n---\n")
+    monkeypatch.chdir(tmp_path)
+    capsys.readouterr()
+
+    _run(_args(to="researching", target=str(elsewhere / "review.md")))
+
+    recorded = (tmp_path / "check-findings.env").read_text()
+    assert f"workdir={tmp_path}" in recorded
+
+
+def test_relative_target_is_not_re_anchored_under_an_implied_workdir(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _plant()
+    run = tmp_path / "plans" / "one"
+    run.mkdir(parents=True)
+    (run / "index.md").write_text("---\nstatus: intaking\n---\n")
+    monkeypatch.chdir(tmp_path)
+    capsys.readouterr()
+
+    _run(_args(to="researching", target="plans/one/index.md"))
+
+    assert parse_frontmatter_only(run / "index.md")["status"] == "researching"
+    recorded = (tmp_path / "check-findings.env").read_text()
+    assert f"workdir={tmp_path}" in recorded
+
+
 def test_machine_without_artifact_requires_target(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
