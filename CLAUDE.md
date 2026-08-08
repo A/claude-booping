@@ -18,13 +18,15 @@ One shipped skill (`/playbook`); everything procedural is a **playbook** it driv
 ## Layout
 
 - `booping-python/` — uv Python project with the `booping` CLI. Source `src/booping/`, tests `tests/`.
-- `bin/booping` — shell wrapper exec'ing `uv run --project booping-python booping "$@"`.
+- `bin/booping` — the only product entry point: a shell wrapper exec'ing `uv run --project booping-python booping "$@"`.
+- `scripts/` — dev tooling behind `just`: `snapshots.py`, `mdcheck.py` (uv inline Python), and the eval harness (`eval-*.sh`, `report-*.jq`). Not shipped to users.
 - `src/config.yaml` — runtime config, single source of truth for structured data (macros, query specs, scaffold trees, task types, sprint scale, per-playbook agents). Heavily commented — read it for key semantics.
 - `src/config_files.yaml` — **build-only** config for `just build` (per-file frontmatter values like `effort`). Not project-overridable.
 - `src/files/<rel>.j2` — build-time templates mirroring the plugin root; each is a thin shell (frontmatter + one `!`booping render …`` line).
 - `src/templates/` — runtime skill/agent templates + `_partials/`, rendered at skill-load time. Edits are **live**, no rebuild.
 - `skills/<name>/SKILL.md`, `agents/<name>.md` — **build artefacts**. Never hand-edit; edit `src/files/` (or `src/config_files.yaml`) and run `just build`.
 - `playbooks/<name>/` — core playbooks. Also: `_partials/` (shared fragments), `_scripts/` (shared hook scripts), `_lib/` (eval harness), `_fixtures/vault/` (hermetic render fixture). Each playbook commits its rendered report at `playbooks/<name>/_reports/output.md`.
+- `playbooks/*/_specs/` — playbook-authoring run artefacts and design history; intentionally stale, not a spec of current behaviour.
 - `migrations/<NNN>_<slug>/migration.md` — plugin-shipped vault migrations. Frontmatter `id` is the authority; a vault's applied watermark is the `.booping` marker's `latest_migration` key, and every render surface gates on it.
 - `docs/` — hand-authored plugin-internal fragments, lazy-loaded by skills via `${CLAUDE_PLUGIN_ROOT}/docs/<name>.md` links. No build step.
 - `documentation/` — public docs site source (MkDocs → gh-pages on push to `master`). Hand-authored.
