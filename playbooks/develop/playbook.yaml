@@ -29,6 +29,7 @@ states:
             hooks:
               - frontmatter-update started="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
               - frontmatter-update commit="{{ macro('core.macros.git_commit') }}"
+              - "script stamp-session"
       in-progress:
         transitions:
           - to: done
@@ -38,6 +39,7 @@ states:
               - "the project's guardrails and the plan's Final Verification green"
             hooks:
               - frontmatter-update completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - "script stamp-session"
           - to: fail
             when: "an unrecoverable blocker at any point in the sprint, verification included, after two fix attempts on the same issue"
             gates:
@@ -45,6 +47,7 @@ states:
               - "the user approved the abort"
             hooks:
               - frontmatter-update completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - "script stamp-session"
       done:
         terminal: true
       fail:

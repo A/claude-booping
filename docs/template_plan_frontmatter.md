@@ -9,6 +9,7 @@ planned: null                    # date keys — owned by the run machines' edge
 started: null                    # set by the develop run machine when the sprint starts
 completed: null                  # set by the develop run machine when the sprint ends
 code_reviews: null               # list of code-review artifact paths, appended by the code-review playbook
+sessions: []                     # Claude Code session ids, appended by the groom and develop edge hooks
 retro: null                      # path to retrospective file, set by the retro playbook
 goal: null                       # success | partial | fail — set by the retro playbook
 summary: ""                      # one-line plan intent for search + plan listings (≤ ~120 chars)

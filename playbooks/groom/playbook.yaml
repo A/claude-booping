@@ -18,7 +18,7 @@ states:
             when: "intake posted the framing brief in chat, created `index.md` with its identity frontmatter, and the user's answers settled the scope questions — clear intent is enough"
             gates:
               - "answers that change the task type, the restated problem or a boundary re-run intake first"
-            hooks: ["script commit-plan"]
+            hooks: ["script stamp-session", "script commit-plan"]
       researching:
         transitions:
           - to: drafting
@@ -53,6 +53,7 @@ states:
               - "explicit user approval captured"
             hooks:
               - frontmatter-update index.md reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - "script stamp-session"
               - "script commit-plan"
       ready-for-dev:
         terminal: true

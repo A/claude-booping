@@ -310,6 +310,87 @@ class TestFrontmatterUpdateCLI:
         assert excinfo.value.code == 1
         assert "nothing to do" in capsys.readouterr().err
 
+    def test_append_creates_list_on_null_key(self, tmp_path: Path) -> None:
+        plan = _make_plan(tmp_path, "title: Foo\nsessions: null")
+
+        fu_cmd._run(_ns(plan=plan, pairs=[], appends=["sessions=abc-123"]))  # type: ignore[reportPrivateUsage]
+
+        import yaml as pyyaml
+
+        _, fm_text, _ = _split_result(plan.read_text())
+        assert pyyaml.safe_load(fm_text)["sessions"] == ["abc-123"]
+
+    def test_append_creates_list_on_absent_key(self, tmp_path: Path) -> None:
+        plan = _make_plan(tmp_path, "title: Foo")
+
+        fu_cmd._run(_ns(plan=plan, pairs=[], appends=["sessions=abc-123"]))  # type: ignore[reportPrivateUsage]
+
+        import yaml as pyyaml
+
+        _, fm_text, _ = _split_result(plan.read_text())
+        assert pyyaml.safe_load(fm_text)["sessions"] == ["abc-123"]
+
+    def test_append_extends_existing_list(self, tmp_path: Path) -> None:
+        plan = _make_plan(tmp_path, "title: Foo\nsessions:\n  - abc-123")
+
+        fu_cmd._run(_ns(plan=plan, pairs=[], appends=["sessions=def-456"]))  # type: ignore[reportPrivateUsage]
+
+        import yaml as pyyaml
+
+        _, fm_text, _ = _split_result(plan.read_text())
+        assert pyyaml.safe_load(fm_text)["sessions"] == ["abc-123", "def-456"]
+
+    def test_append_is_idempotent(self, tmp_path: Path) -> None:
+        plan = _make_plan(tmp_path, "title: Foo\nsessions: null")
+
+        fu_cmd._run(_ns(plan=plan, pairs=[], appends=["sessions=abc-123"]))  # type: ignore[reportPrivateUsage]
+        fu_cmd._run(_ns(plan=plan, pairs=[], appends=["sessions=abc-123"]))  # type: ignore[reportPrivateUsage]
+
+        import yaml as pyyaml
+
+        _, fm_text, _ = _split_result(plan.read_text())
+        assert pyyaml.safe_load(fm_text)["sessions"] == ["abc-123"]
+
+    def test_append_onto_scalar_exits_1(
+        self, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+    ) -> None:
+        plan = _make_plan(tmp_path, "title: Foo\nstatus: backlog")
+
+        with pytest.raises(SystemExit) as excinfo:
+            fu_cmd._run(_ns(plan=plan, pairs=[], appends=["status=done"]))  # type: ignore[reportPrivateUsage]
+        assert excinfo.value.code == 1
+        assert "status" in capsys.readouterr().err
+
+    def test_append_alongside_pairs_and_removals(self, tmp_path: Path) -> None:
+        plan = _make_plan(tmp_path, "title: Foo\nstatus: backlog\nstale: x\nsessions: null")
+
+        fu_cmd._run(  # type: ignore[reportPrivateUsage]
+            _ns(
+                plan=plan,
+                pairs=["status=in-progress"],
+                removals=["stale"],
+                appends=["sessions=abc-123"],
+            )
+        )
+
+        import yaml as pyyaml
+
+        _, fm_text, _ = _split_result(plan.read_text())
+        fm = pyyaml.safe_load(fm_text)
+        assert fm["status"] == "in-progress"
+        assert "stale" not in fm
+        assert fm["sessions"] == ["abc-123"]
+
+    def test_append_only_still_reports_nothing_to_do_when_empty(
+        self, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+    ) -> None:
+        plan = _make_plan(tmp_path, "title: Foo")
+
+        with pytest.raises(SystemExit) as excinfo:
+            fu_cmd._run(_ns(plan=plan, pairs=[], removals=[], appends=[]))  # type: ignore[reportPrivateUsage]
+        assert excinfo.value.code == 1
+        assert "nothing to do" in capsys.readouterr().err
+
     def test_logs_to_booping_log(self, tmp_path: Path) -> None:
         """Log line appended to .booping.log."""
         vault = tmp_path / "vault"
