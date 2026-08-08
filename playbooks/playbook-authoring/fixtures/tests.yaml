@@ -1,0 +1,33 @@
+- description: fixtures smoke — materialization contract on the compose test plan
+  vars:
+    target: compose
+    input: file://_fixtures/compose-test-plan.md
+  metadata:
+    playbook: playbook-authoring
+    step: fixtures
+    fixture: compose-test-plan
+    tier: smoke
+  assert:
+    # FILE-PER-ROW
+    - type: javascript
+      value: file://../../_lib/asserts/files.js
+      config:
+        onTextMode: fail
+        expect:
+          - path: 'mod-review/compose/_fixtures/small-module\.md$'
+            minLines: 8
+        noOthers: true
+    # NO-QUESTIONS
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        sections:
+          - name: Changed
+            entry: '^-\s+\[(CREATED|UPDATED)\]\s+`?([^`\s]+)`?$'
+            matchManifest: true
+            seededVar: input
+          - name: Questions
+            optional: true
+            maxEntries: 0
+        onlyListed: true

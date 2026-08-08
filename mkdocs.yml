@@ -20,11 +20,9 @@ nav:
   - Playbooks (unstable): playbook.md
   - Project config: project_config.md
   - Integrating external agents: integrating-external-agents.md
-  - Commands:
-      - /groom: groom.md
-      - /develop: develop.md
-      - /code-review: code_review.md
-      - /retro: retro.md
-      - /learn: learn.md
-      - /chat: chat.md
-      - /help: help.md
+  - Workflow:
+      - groom playbook: groom.md
+      - develop playbook: develop.md
+      - code-review playbook: code_review.md
+      - retro playbook: retro.md
+      - learn playbook: learn.md

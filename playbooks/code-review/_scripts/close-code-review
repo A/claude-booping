@@ -1,0 +1,122 @@
+#!/usr/bin/env python3
+"""Exit hook: link a finished code review to its plan and commit the vault.
+
+Used by the `code-review` playbook (`human-review → done`).
+
+Environment (set by `booping playbook-transition`): BOOPING_WORKDIR = the vault root,
+which is also cwd, and BOOPING_ARTIFACT = the run's resolved target, the review under
+`codereviews/`.
+
+Reads the artifact's `plan:` key — a vault-relative plan path, or `null` for an ad-hoc
+review — and appends the artifact's own vault-relative path to that plan's
+`code_reviews:` list, then commits the artifact plus the touched plan.
+
+Self-contained: the vault carries no `.booping` marker, so nothing here shells back into
+`booping`, and nothing outside the standard library is imported.
+
+A `plan:` pointing at a missing file exits non-zero, which aborts the transition.
+"""
+
+import os
+import re
+import subprocess
+import sys
+from pathlib import Path
+
+FRONTMATTER = re.compile(r"\A---\n(.*?)\n---\n", re.DOTALL)
+
+
+def _clean(value: str) -> str:
+    return value.split("  #")[0].strip().strip("\"'")
+
+
+def read_plan_key(path: Path) -> str | None:
+    match = FRONTMATTER.match(path.read_text())
+    if not match:
+        return None
+    for line in match.group(1).splitlines():
+        if line.startswith((" ", "\t")) or ":" not in line:
+            continue
+        key, _, value = line.partition(":")
+        if key.strip() != "plan":
+            continue
+        value = _clean(value)
+        return None if value in ("", "null", "~") else value
+    return None
+
+
+def append_review(plan: Path, review: str) -> bool:
+    """Add `review` to the plan's `code_reviews:` block list, creating the key when it
+    is absent and replacing a `null` scalar with a one-element list. Returns whether
+    the plan was rewritten."""
+    text = plan.read_text()
+    if not text.startswith("---\n"):
+        sys.exit(f"plan has no frontmatter: {plan}")
+    head, sep, body = text.partition("\n---\n")
+
+    lines = head.splitlines()
+    start = next(
+        (i for i, line in enumerate(lines) if line.strip().startswith("code_reviews:")),
+        None,
+    )
+    if start is None:
+        lines.append("code_reviews:")
+        lines.append(f"  - {review}")
+        plan.write_text("\n".join(lines) + sep + body)
+        return True
+
+    end = start + 1
+    while end < len(lines) and lines[end].lstrip().startswith("- "):
+        end += 1
+    existing = [_clean(line.lstrip()[2:]) for line in lines[start + 1 : end]]
+    if review in existing:
+        return False
+
+    scalar = _clean(lines[start].partition(":")[2])
+    if scalar and scalar not in ("null", "~"):
+        existing.insert(0, scalar)
+    rewritten = ["code_reviews:"] + [f"  - {item}" for item in [*existing, review]]
+    lines[start:end] = rewritten
+    plan.write_text("\n".join(lines) + sep + body)
+    return True
+
+
+def main() -> None:
+    vault = Path(os.environ.get("BOOPING_WORKDIR", ".")).resolve()
+
+    raw_artifact = os.environ.get("BOOPING_ARTIFACT")
+    if not raw_artifact:
+        sys.exit("BOOPING_ARTIFACT is not set")
+    artifact = Path(raw_artifact).resolve()
+    if not artifact.is_file():
+        sys.exit(f"code review not found: {artifact}")
+    try:
+        artifact_rel = str(artifact.relative_to(vault))
+    except ValueError:
+        sys.exit(f"artifact {artifact} lies outside the vault {vault}")
+
+    plan_rel = read_plan_key(artifact)
+    stage = [artifact_rel]
+    if plan_rel is None:
+        summary = f"{artifact_rel}; no plan linked"
+    else:
+        plan = vault / plan_rel
+        if not plan.is_file():
+            sys.exit(f"{artifact}: plan referenced by `plan:` not found: {plan}")
+        changed = append_review(plan, artifact_rel)
+        stage.append(plan_rel)
+        verb = "linked to" if changed else "already linked to"
+        summary = f"{artifact_rel} {verb} {plan_rel}"
+
+    if (vault / ".git").exists():
+        subprocess.run(["git", "-C", str(vault), "add", *stage], check=True)
+        result = subprocess.run(
+            ["git", "-C", str(vault), "commit", "-q", "-m", f"codereview: {artifact.stem}"],
+        )
+        summary += "; vault-commit: " + ("ok" if result.returncode == 0 else "nothing to commit")
+
+    print(f"close-code-review: {summary}")
+
+
+if __name__ == "__main__":
+    main()

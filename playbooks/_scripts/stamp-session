@@ -1,0 +1,42 @@
+#!/usr/bin/env python3
+"""Shared hook: stamp the running Claude Code session id onto the run's artifact.
+
+Used by the `groom` and `develop` playbooks on the edges that bound a working
+session, so `booping session-stats` can later mine the transcripts.
+
+Environment (set by `booping playbook-transition`): BOOPING_ARTIFACT = the run's
+resolved target, the plan's `index.md`. `CLAUDE_CODE_SESSION_ID` comes from the
+inherited Claude Code environment — it is undocumented, so its absence is a
+warn-to-stderr no-op rather than a failed transition.
+
+Appends via `bin/booping frontmatter-update --append`, which creates the list,
+dedupes, and refuses a scalar `sessions:`.
+"""
+
+import os
+import subprocess
+import sys
+from pathlib import Path
+
+BOOPING = Path(__file__).resolve().parents[2] / "bin" / "booping"
+
+
+def main() -> None:
+    session_id = os.environ.get("CLAUDE_CODE_SESSION_ID", "").strip()
+    if not session_id:
+        print("stamp-session: CLAUDE_CODE_SESSION_ID unset; nothing stamped", file=sys.stderr)
+        return
+
+    artifact = os.environ.get("BOOPING_ARTIFACT", "")
+    if not artifact:
+        sys.exit("stamp-session: BOOPING_ARTIFACT unset")
+
+    subprocess.run(
+        [str(BOOPING), "frontmatter-update", artifact, "--append", f"sessions={session_id}"],
+        check=True,
+    )
+    print(f"stamp-session: sessions += {session_id}")
+
+
+if __name__ == "__main__":
+    main()

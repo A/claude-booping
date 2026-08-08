@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import re
 import subprocess
 from pathlib import Path
@@ -7,6 +8,7 @@ from pathlib import Path
 import pytest
 
 from booping.logger import log
+from booping.migrations import latest_shipped_id
 
 
 def test_log_noop_when_vault_is_none() -> None:
@@ -16,7 +18,7 @@ def test_log_noop_when_vault_is_none() -> None:
 def test_log_appends_one_line(tmp_path: Path) -> None:
     message = "foo.j2"
     log(vault=tmp_path, subcommand="render", message=message)
-    log_file = tmp_path / "_booping" / ".booping.log"
+    log_file = tmp_path / ".booping.log"
     assert log_file.exists()
     lines = log_file.read_text().strip().splitlines()
     assert len(lines) == 1
@@ -26,17 +28,17 @@ def test_log_appends_one_line(tmp_path: Path) -> None:
 
 def test_log_appends_not_overwrites(tmp_path: Path) -> None:
     log(vault=tmp_path, subcommand="render", message="first.j2")
-    log(vault=tmp_path, subcommand="render-sprints", message="→ sprints.md")
-    log_file = tmp_path / "_booping" / ".booping.log"
+    log(vault=tmp_path, subcommand="query", message="→ 3 rows")
+    log_file = tmp_path / ".booping.log"
     lines = log_file.read_text().strip().splitlines()
     assert len(lines) == 2
     assert "[render]" in lines[0] and "first.j2" in lines[0]
-    assert "[render-sprints]" in lines[1] and "→ sprints.md" in lines[1]
+    assert "[query]" in lines[1] and "→ 3 rows" in lines[1]
 
 
 def test_log_empty_message_no_trailing_space(tmp_path: Path) -> None:
     log(vault=tmp_path, subcommand="render", message="")
-    log_file = tmp_path / "_booping" / ".booping.log"
+    log_file = tmp_path / ".booping.log"
     lines = log_file.read_text().strip().splitlines()
     assert len(lines) == 1
     assert lines[0].endswith("]")
@@ -45,7 +47,7 @@ def test_log_empty_message_no_trailing_space(tmp_path: Path) -> None:
 
 def test_log_creates_parent_directory(tmp_path: Path) -> None:
     log(vault=tmp_path, subcommand="render", message="foo.j2")
-    assert (tmp_path / "_booping" / ".booping.log").exists()
+    assert (tmp_path / ".booping.log").exists()
 
 
 def test_render_subprocess_integration_log(
@@ -53,7 +55,23 @@ def test_render_subprocess_integration_log(
 ) -> None:
     repo_dir = tmp_path / "repo"
     repo_dir.mkdir()
-    (repo_dir / ".booping").touch()
+    # A marker behind on migrations is gated before it ever renders (and so before it
+    # logs); this test is about the logging path, so the marker is current.
+    (repo_dir / ".booping").write_text(f"latest_migration: {latest_shipped_id()}\n")
+    # The skill body renders `core.macros.git_commit`, which needs a repo to resolve.
+    subprocess.run(["git", "init", "-q"], cwd=repo_dir, check=True)
+    subprocess.run(
+        ["git", "commit", "-q", "--allow-empty", "-m", "init"],
+        cwd=repo_dir,
+        check=True,
+        env={
+            **os.environ,
+            "GIT_AUTHOR_NAME": "t",
+            "GIT_AUTHOR_EMAIL": "t@t",
+            "GIT_COMMITTER_NAME": "t",
+            "GIT_COMMITTER_EMAIL": "t@t",
+        },
+    )
 
     monkeypatch.setenv("HOME", str(tmp_path))
 
@@ -61,7 +79,7 @@ def test_render_subprocess_integration_log(
     booping_bin = plugin_root / "bin" / "booping"
 
     result = subprocess.run(
-        [str(booping_bin), "render", "src/templates/skills/chat.md.j2"],
+        [str(booping_bin), "render", "src/templates/skills/playbook.md.j2"],
         cwd=repo_dir,
         capture_output=True,
         text=True,
@@ -69,7 +87,7 @@ def test_render_subprocess_integration_log(
     )
     assert result.returncode == 0
 
-    log_file = tmp_path / "Claude" / "repo" / "_booping" / ".booping.log"
+    log_file = tmp_path / "Claude" / "repo" / ".booping.log"
     assert log_file.is_file()
     lines = log_file.read_text().strip().splitlines()
     assert len(lines) == 1

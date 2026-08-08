@@ -1,0 +1,47 @@
+- description: return-contract smoke — schema + CREATED/UPDATED + question surfaced
+  vars:
+    input: file://_fixtures/ambiguous-task.md
+  metadata:
+    playbook: _lib
+    step: return-contract
+    fixture: ambiguous-task
+    tier: smoke
+  assert:
+    - type: javascript
+      value: file://../../asserts/return.js
+      config:
+        requireBlock: true
+        sections:
+          - name: Changed
+            entry: '^-\s+\[(CREATED|UPDATED)\]\s+`?([^`\s]+)`?$'
+            matchManifest: true
+            seededVar: input
+            minEntries: 2
+          - name: Questions
+            entry: '^\d+\.\s+\S'
+            minEntries: 1
+        onlyListed: true
+
+- description: return-contract smoke — empty Questions stays empty, no placeholder
+  vars:
+    input: file://_fixtures/clean-task.md
+  metadata:
+    playbook: _lib
+    step: return-contract
+    fixture: clean-task
+    tier: smoke
+  assert:
+    - type: javascript
+      value: file://../../asserts/return.js
+      config:
+        requireBlock: true
+        sections:
+          - name: Changed
+            entry: '^-\s+\[(CREATED|UPDATED)\]\s+`?([^`\s]+)`?$'
+            matchManifest: true
+            seededVar: input
+            minEntries: 2
+          - name: Questions
+            optional: true
+            maxEntries: 0
+        onlyListed: true

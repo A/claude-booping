@@ -1,0 +1,18 @@
+{% macro render() -%}
+## Git
+
+Branches always live in the attached repo. Always ask the user before switching or creating a branch. Branch names use kebab-case (lowercase, hyphenated).
+
+### Branches
+
+| Branch | When |
+|--------|------|
+{% for entry in config.core.develop_playbook.git.branches -%}
+| `{{ entry.branch }}` | {{ entry.when | join("; ") }} |
+{% endfor %}
+{% if config.core.develop_playbook.git.commit_message %}
+### Commit messages
+
+Format: `{{ config.core.develop_playbook.git.commit_message }}`
+{% endif -%}
+{%- endmacro %}

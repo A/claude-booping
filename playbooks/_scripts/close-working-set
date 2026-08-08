@@ -1,0 +1,182 @@
+#!/usr/bin/env python3
+"""Shared exit hook: close a working set of plans and commit the vault.
+
+Used by the `retro` playbook (`awaiting-retro → awaiting-learning`) and the `learn`
+playbook (`awaiting-learning → done`); the per-playbook differences live in the hook
+line's argv rather than in a second copy of this file.
+
+Environment (set by `booping playbook-transition`): BOOPING_WORKDIR = the vault root,
+which is also cwd, and BOOPING_ARTIFACT = the run's resolved target, the retrospective
+under `retrospectives/`.
+
+Reads the working set out of the artifact's `plans:` list, stamps the requested values
+on every plan in it and commits the artifact plus every touched plan.
+
+Flags:
+  --status VALUE   status stamped on every plan of the working set (optional; the
+                   artifact's own status is written by `playbook-transition` before
+                   the hooks run)
+  --prefix WORD    commit-message prefix (required)
+  --verdicts       require a non-empty `goal_verdicts:` mapping in the artifact and
+                   stamp `retro:` (the vault-relative artifact path) + `goal:` on
+                   every plan in the working set
+  --stage DIR...   extra vault directories staged when they exist
+
+Self-contained: the vault carries no `.booping` marker, so nothing here shells back into
+`booping`, and nothing outside the standard library is imported.
+
+A missing plan file, a plan missing from `goal_verdicts:` under `--verdicts`, or an
+artifact without the keys it needs exits non-zero, which aborts the transition.
+"""
+
+import argparse
+import os
+import re
+import subprocess
+import sys
+from pathlib import Path
+
+FRONTMATTER = re.compile(r"\A---\n(.*?)\n---\n", re.DOTALL)
+
+
+def _clean(value: str) -> str:
+    return value.split("  #")[0].strip().strip("\"'")
+
+
+def read_frontmatter(path: Path) -> dict[str, object]:
+    """Minimal block-style YAML frontmatter reader: scalars, block lists, and
+    one level of nested mapping — the shapes the retrospective and the plans use."""
+    match = FRONTMATTER.match(path.read_text())
+    if not match:
+        return {}
+
+    fm: dict[str, object] = {}
+    key: str | None = None
+    lines = match.group(1).splitlines()
+    for line in lines:
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+        # ruamel round-trip dumps block sequences at column 0, so a list item
+        # under an open key is not necessarily indented.
+        if line.startswith((" ", "\t")) or (key is not None and line.startswith("- ")):
+            if key is None:
+                continue
+            item = line.strip()
+            if item.startswith("- "):
+                fm.setdefault(key, [])
+                target = fm[key]
+                if isinstance(target, list):
+                    target.append(_clean(item[2:]))
+            elif ":" in item:
+                fm.setdefault(key, {})
+                target = fm[key]
+                if isinstance(target, dict):
+                    name, _, value = item.partition(":")
+                    target[name.strip()] = _clean(value)
+            continue
+        if ":" not in line:
+            continue
+        key, _, value = line.partition(":")
+        key = key.strip()
+        value = _clean(value)
+        if value:
+            fm[key] = value
+            key = None
+    return fm
+
+
+def stamp(plan: Path, values: dict[str, str]) -> None:
+    text = plan.read_text()
+    if not text.startswith("---\n"):
+        sys.exit(f"plan has no frontmatter: {plan}")
+    head, sep, body = text.partition("\n---\n")
+    for key, value in values.items():
+        pattern = rf"^{re.escape(key)}:.*$"
+        if re.search(pattern, head, re.MULTILINE):
+            head = re.sub(pattern, f"{key}: {value}", head, count=1, flags=re.MULTILINE)
+        else:
+            head += f"\n{key}: {value}"
+    plan.write_text(head + sep + body)
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Close a working set of plans and commit the vault.")
+    parser.add_argument("--status")
+    parser.add_argument("--prefix", required=True)
+    parser.add_argument("--verdicts", action="store_true")
+    parser.add_argument("--stage", nargs="*", default=[])
+    return parser.parse_args()
+
+
+def main() -> None:
+    args = parse_args()
+
+    vault = Path(os.environ.get("BOOPING_WORKDIR", ".")).resolve()
+
+    raw_artifact = os.environ.get("BOOPING_ARTIFACT")
+    if not raw_artifact:
+        sys.exit("BOOPING_ARTIFACT is not set")
+    artifact = Path(raw_artifact).resolve()
+    if not artifact.is_file():
+        sys.exit(f"retrospective not found: {artifact}")
+    try:
+        artifact_rel = str(artifact.relative_to(vault))
+    except ValueError:
+        sys.exit(f"artifact {artifact} lies outside the vault {vault}")
+
+    fm = read_frontmatter(artifact)
+    plans = fm.get("plans")
+    if not isinstance(plans, list) or not plans:
+        sys.exit(f"{artifact}: frontmatter carries no `plans:` list")
+
+    raw_verdicts = fm.get("goal_verdicts")
+    if args.verdicts and (not isinstance(raw_verdicts, dict) or not raw_verdicts):
+        sys.exit(f"{artifact}: frontmatter carries no `goal_verdicts:` mapping")
+    verdicts: dict[str, object] = raw_verdicts if isinstance(raw_verdicts, dict) else {}
+
+    targets: list[tuple[str, Path, dict[str, str]]] = []
+    for rel in plans:
+        path = vault / rel
+        if not path.is_file():
+            sys.exit(f"{artifact}: plan listed in `plans:` not found: {path}")
+        values: dict[str, str] = {}
+        if args.verdicts:
+            if rel not in verdicts:
+                sys.exit(f"{artifact}: no `goal_verdicts:` entry for {rel}")
+            values = {"retro": artifact_rel, "goal": str(verdicts[rel])}
+        if args.status and rel != artifact_rel:
+            values["status"] = args.status
+        targets.append((rel, path, values))
+
+    for _, path, values in targets:
+        if values:
+            stamp(path, values)
+
+    moved = [rel for rel, _, values in targets if "status" in values]
+    if args.verdicts:
+        summary = f"retro/goal stamped on {len(targets)} plans"
+    else:
+        summary = f"working set closed, {len(plans)} plans"
+    if moved:
+        summary += "; " + ", ".join(f"{rel} → {args.status}" for rel in moved)
+
+    slug = artifact.stem
+    if (vault / ".git").exists():
+        stage = [artifact_rel, *(rel for rel, _, _ in targets)]
+        for extra in args.stage:
+            if (vault / extra).exists():
+                stage.append(extra)
+        subprocess.run(["git", "-C", str(vault), "add", *stage], check=True)
+        message = f"{args.prefix}: {slug}"
+        if args.status:
+            message += f" → {args.status}"
+        result = subprocess.run(
+            ["git", "-C", str(vault), "commit", "-q", "-m", message],
+        )
+        summary += "; vault-commit: " + ("ok" if result.returncode == 0 else "nothing to commit")
+
+    print(f"close-working-set: {summary}")
+
+
+if __name__ == "__main__":
+    main()

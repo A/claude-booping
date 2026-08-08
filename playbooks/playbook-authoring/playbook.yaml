@@ -1,0 +1,189 @@
+state: main
+graph:
+  record-decision: []
+  interview: []
+  decompose: [interview]
+  states: [decompose]
+  manifest: [decompose, states]
+  step-pipeline:
+    dependencies: [manifest]
+    state: step
+    repeat: once per step produced by decompose; instances may run in parallel
+    graph:
+      step-spec: []
+      llm-tests: [step-spec]
+      fixtures: [llm-tests]
+      step-prompt: [fixtures]
+      step-suite: [step-prompt]
+      smoke-optimizer: [step-suite]
+      regress-optimizer: [smoke-optimizer]
+
+states:
+  main:
+    artifact: _specs/index.md
+    initial: interviewing
+    superstates:
+      terminal:
+        states: [done]
+    statuses:
+      interviewing:
+        transitions:
+          - to: awaiting-brief-confirm
+            when: interview wrote _specs/brief.md
+          - to: decomposing
+            when: the user's input already carried the brief, interview was skipped
+            gates: ["the input names goal, success shape and artifact home"]
+      awaiting-brief-confirm:
+        transitions:
+          - to: interviewing
+            when: the user reworks goal, success shape or artifact home
+          - to: decomposing
+            when: the user confirms the brief
+            gates: ["explicit user confirmation captured — silence never counts"]
+            hooks:
+              - frontmatter-update _specs/brief.md reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+      decomposing:
+        transitions:
+          - to: awaiting-decomposition-confirm
+            when: decompose wrote the graph, the Steps table and the open Questions
+      awaiting-decomposition-confirm:
+        transitions:
+          - to: decomposing
+            when: the user's answers or rework request reshape the graph
+          - to: designing-states
+            when: the user confirms the decomposition
+            gates: ["explicit user confirmation captured; no open Questions items"]
+            hooks:
+              - frontmatter-update _specs/index.md reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+      designing-states:
+        transitions:
+          - to: awaiting-states-confirm
+            when: states wrote _specs/states.md and linked it from the index
+          - to: manifesting
+            when: ephemeral verdict — states returned the skip note, nothing to review
+      awaiting-states-confirm:
+        transitions:
+          - to: designing-states
+            when: the user wants different machines, statuses, gates or hooks
+          - to: decomposing
+            when: the user's rework reshapes the graph or the Steps table
+          - to: manifesting
+            when: the user confirms the state chart and re-confirms the index
+            gates: ["explicit user confirmation captured"]
+            hooks:
+              - frontmatter-update _specs/states.md reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - frontmatter-update _specs/index.md reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+      manifesting:
+        transitions:
+          - to: awaiting-manifest-confirm
+            when: manifest wrote playbook.yaml and playbook.md
+      awaiting-manifest-confirm:
+        transitions:
+          - to: manifesting
+            when: the user wants a different name, trigger, model or destination root
+          - to: building-steps
+            when: the user confirms name, trigger, graph, states, model and root
+            gates: ["explicit user confirmation captured"]
+            hooks:
+              - frontmatter-update playbook.md reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - frontmatter-update _specs/index.md playbook_yaml_reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+      building-steps:
+        transitions:
+          - to: done
+            when: every step-pipeline instance reached its terminal
+            gates: ["every _specs/steps/*/index.md carries status: done"]
+      done: {terminal: true}
+
+  step:
+    artifact: _specs/steps/{instance}/index.md
+    initial: spec-ing
+    superstates:
+      terminal:
+        states: [done]
+    statuses:
+      spec-ing:
+        transitions:
+          - to: awaiting-spec-confirm
+            when: step-spec wrote the contract and the example artifact
+      awaiting-spec-confirm:
+        transitions:
+          - to: spec-ing
+            when: the user requests changes
+          - to: test-planning
+            when: the user confirms the contract and example
+            gates: ["explicit user confirmation captured — silence never counts"]
+            hooks:
+              - frontmatter-update _specs/steps/{instance}/index.md reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+      test-planning:
+        transitions:
+          - to: awaiting-tests-confirm
+            when: llm-tests wrote the tiered test rows
+      awaiting-tests-confirm:
+        transitions:
+          - to: test-planning
+            when: the user drops, adds or re-tiers rows
+          - to: fixturing
+            when: the user confirms the test rows
+            gates: ["explicit user confirmation captured"]
+            hooks:
+              - frontmatter-update _specs/steps/{instance}/test-plan.md reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+      fixturing:
+        transitions:
+          - to: awaiting-fixtures-confirm
+            when: fixture files written
+      awaiting-fixtures-confirm:
+        transitions:
+          - to: fixturing
+            when: the user wants fixture edits or additions
+          - to: prompting
+            when: the user confirms the fixture set
+            gates: ["explicit user confirmation captured"]
+            hooks:
+              - frontmatter-update _specs/steps/{instance}/index.md fixtures_reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+      prompting:
+        transitions:
+          - to: awaiting-prompt-confirm
+            when: step-prompt wrote the prompt body and its wrapper
+      awaiting-prompt-confirm:
+        transitions:
+          - to: prompting
+            when: the user reworks the prompt
+          - to: suiting
+            when: the user confirms the prompt contract
+            gates: ["explicit user confirmation captured"]
+            hooks:
+              - frontmatter-update {instance}/prompt.md reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+      suiting:
+        transitions:
+          - to: awaiting-suite-confirm
+            when: step-suite implemented promptfooconfig.yaml and tests.yaml
+      awaiting-suite-confirm:
+        transitions:
+          - to: suiting
+            when: the user wants suite changes after reading the tree
+          - to: smoke-greening
+            when: the user reviewed the tree and triggered the smoke run
+            gates: ["explicit user confirmation captured"]
+            hooks:
+              - frontmatter-update _specs/steps/{instance}/index.md suite_reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+      smoke-greening:
+        transitions:
+          - to: smoke-blocked
+            when: the harness hit the loop bound — 3 reds on one check
+          - to: regressing
+            when: the harness reports the smoke tier green and the run's regress call is run
+            gates: ["latest smoke report green"]
+            hooks: ["frontmatter-update _specs/index.md regress=run"]
+          - to: done
+            when: the harness reports the smoke tier green and the run's regress call is skip
+            gates: ["latest smoke report green"]
+            hooks: ["frontmatter-update _specs/index.md regress=skip"]
+      smoke-blocked:
+        transitions:
+          - to: smoke-greening
+            when: the user resolves the block — guidance, a corrected check or a fixture fix
+      regressing:
+        transitions:
+          - to: done
+            when: regress-optimizer finished the baseline → verify pass, or the user calls the tier off for this instance
+      done: {terminal: true}

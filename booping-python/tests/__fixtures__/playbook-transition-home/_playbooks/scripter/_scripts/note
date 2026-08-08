@@ -1,0 +1,2 @@
+#!/bin/sh
+echo "playbook" >> "$BOOPING_WORKDIR/note.log"

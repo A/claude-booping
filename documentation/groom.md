@@ -1,63 +1,79 @@
-# /groom
+# groom playbook
 
-Spec a sprint: take a rough request and produce a reviewable plan file under `~/Claude/{project}/plans/` with milestones, tasks, story points, and definitions of done.
+Spec a sprint: take a rough request and produce a reviewable plan under `~/Claude/{project}/plans/{slug}/index.md` with milestones, tasks, story points, and definitions of done.
+
+Grooming is a **playbook**, not a skill — it is driven by [`/playbook`](playbook.md):
+
+```text
+/playbook groom
+```
 
 ## What it does
 
-`/groom` walks a request through the early lifecycle states — `backlog` or fresh request → `in-spec` → `awaiting-plan-review` → `ready-for-dev`. The output is a single markdown plan file with YAML frontmatter that subsequent skills (`/develop`, `/retro`, `/learn`) read. As `/groom` clears each gate it fires a `booping transition` command that moves the plan and applies every mechanical mutation the move entails — `/groom` decides the move, the command performs it.
+Run states: `framing` → `researching` → `drafting` → `cross-reviewing` → `presenting` → `awaiting-approval` → `ready-for-dev`. Two loopbacks: `drafting → researching` when the design needs blast radius the research pass missed, and `awaiting-approval → drafting` when your change request touches the plan itself.
 
-`/groom` does the research, drafts the milestones, estimates story points, optionally cross-validates against Gemini, and then hands the plan to you for explicit approval before it can move to `ready-for-dev`. Silence does not count as approval.
+Almost every step runs in your session — inline, or assisted, meaning heavy reads go to the research agent, which returns a bounded summary. The one exception is `cross-review`, which hands the drafted plan to a second-model reviewer and does nothing unless you name one. `present`, near the end of the run, is the run's single approval gate.
 
-## Command
+The output is a plan directory `~/Claude/{project}/plans/{slug}/` whose `index.md` carries the plan and the YAML frontmatter the rest of the loop (`develop`, `retro`, `learn`) reads. The intake briefing and any web-research notes land beside it, so everything the run gathered stays with the plan. The directory also doubles as the run workdir, which makes a groom run **resumable**: its run state lives in the same `index.md`.
+
+A plan is always a directory: `core.plans.glob` resolves `plans/*/index.md` and nothing else. A vault still holding flat `plans/{slug}.md` files from an older release converts them by running `/playbook migrate`.
+
+Six steps, in dependency order:
+
+| Step | What it does |
+|------|--------------|
+| `intake` | Clarify the request, settle scope, create the plan directory with its briefing and identity frontmatter |
+| `research-codebase` | Map the blast radius — files, modules, integrations, prior art (assisted: heavy reads go to the research agent) |
+| `research-web` | Check external practice where the design is uncertain, and verify package versions, image tags, API endpoints and CLI flags against current docs |
+| `draft-plan` | Design with you in conversation, then write the plan body against a plan template |
+| `cross-review` | Hand the drafted plan to a second-model reviewer for severity findings — skipped unless `core.groom_playbook.cross_review_agent` names one (unset by default) |
+| `present` | Present approach, milestones and SP totals; the run's single approval gate |
+
+Design work happens in conversation inside `draft-plan` — refinement and decomposition are part of drafting, not separate steps.
+
+## Starting a run
 
 ```text
-/groom <free-text request, optionally referencing a parked plan>
+/playbook groom
 ```
 
-Examples:
+Bare invocation picks up whatever you have been discussing in the current session. Name a parked plan or an existing draft to keep iterating on it:
 
 ```text
-/groom
-/groom i want to refactor install and help skills to match other skills style
-/groom plans/20260430-user-facing-documentation-site.md — we're continuing to shape this; here's feedback to address
-/groom add current git commit hash to the booping CLI context, then add it to plan files; on /develop start, if the plan commit differs from repo HEAD, check git log between the two
+/playbook groom — continue plans/202604301120_documentation-site/index.md, here's feedback to address
 ```
 
-Bare `/groom` picks up whatever you've been discussing in the current session. Pass a plan path to keep iterating on a draft you've already started.
-
-The free-text body is read verbatim — anything you say there reaches the skill.
+Everything you say in the invocation reaches `intake` verbatim.
 
 ## Best practices
 
 ### More detail in the prompt = sharper plan
 
-`/groom` works from your prompt plus the codebase plus accumulated lessons. The prompt is the only knob fully under your control, so the more concrete it is, the less the skill has to guess.
+The playbook works from your request, the codebase, and accumulated lessons. The request is the only knob fully under your control — the more concrete it is, the less the run has to guess.
 
-Brief prompt — lots of room for misalignment:
+Brief request — lots of room for misalignment:
 
 ```text
-/groom add rate limiting
+/playbook groom — add rate limiting
 ```
 
-Detailed prompt — sharply scoped, fewer rounds of revision:
+Detailed request — sharply scoped, fewer rounds of revision:
 
 ```text
-/groom add per-IP rate limiting to the /api/* routes in apps/api/.
+/playbook groom — add per-IP rate limiting to the /api/* routes in apps/api/.
 Use Redis (already a dep). 100 req/min default; configurable via env.
 Return 429 with Retry-After. No new middleware framework — extend the
 existing one in apps/api/middleware/.
 ```
 
-The detailed version costs you 30 seconds of typing and saves a full revision cycle.
+### Free-text extras
 
-### Free-text prompt extras
+Useful things to mention up front:
 
-Anything you put in the prompt is read by the skill. Useful extras to mention up front:
+- **Stop after each milestone** — tell the develop playbook (later) to pause between milestones for review; groom records this as a plan note.
+- **Reference a template** — "use the bug-investigation template" selects a specific plan template.
 
-- **Branch name** — `branch off feat/oauth-login` overrides the branch convention picked from `git.branches`.
-- **Stop after each milestone** — tell `/develop` (later) to pause between milestones for review. `/groom` records this as a plan note.
-- **Search the web** — ask the skill to verify package versions, image tags, or API endpoints against current docs before drafting.
-- **Reference a template** — `/groom use the bug-investigation template for ...` selects a specific plan template.
+Branch selection is **not** groom's job — the [develop playbook](develop.md)'s `provision` step picks and confirms it.
 
 ### Define your own plan templates
 
@@ -67,7 +83,7 @@ See [Vault](vault.md) for the directory layout.
 
 ## Reviewing the plan
 
-When `/groom` enters `awaiting-plan-review` it presents the plan and waits for your verdict. The plan is not yet ready for development — you are the gate.
+`present` is the run's **only** review gate — the plan is not ready for development until you approve it.
 
 What to check before approving:
 
@@ -75,13 +91,12 @@ What to check before approving:
 - **Milestones cover the goal end-to-end.** No silent gaps, no "and then ..." vagueness in the last milestone.
 - **Tasks are sized honestly.** No 5-SP tasks except deliberate research spikes (see Story points).
 - **Definitions of done are verifiable.** Each task DoD checkbox is something you can mechanically confirm — not "code looks good".
-- **Cross-validation findings are addressed.** If Gemini ran, every **CRITICAL EXECUTION RISK** and **RULE VIOLATION** in its output is either applied or explicitly acknowledged in the Risk register.
 
-Approve explicitly ("looks good", "ship it") to move the plan to `ready-for-dev`. Request changes to bounce back into `in-spec`.
+Approve explicitly ("looks good", "ship it") to move the plan to `ready-for-dev`, groom's terminal status and the queue the [develop playbook](develop.md) claims from. A change request touching architecture, scope, milestones, tasks or estimates sends the run back to `drafting`.
 
 ## Story points
 
-booping uses a 1–5 scale for per-task estimates. The scale is rendered into `/groom` itself from `src/config.yaml`, so the skill always estimates against the same definitions:
+booping uses a 1–5 scale for per-task estimates, set in `src/config.yaml`:
 
 - **1** — Simple text/config change, no risk.
 - **2** — Simple task, predictable, no risk.
@@ -89,31 +104,20 @@ booping uses a 1–5 scale for per-task estimates. The scale is rendered into `/
 - **4** — Complex task, medium risk, may need small research but clear enough.
 - **5** — Research task — the developer needs to clarify and decompose further before proceeding.
 
-Two thresholds drive `/groom`'s behaviour, both configurable in `src/config.yaml`:
+Two thresholds drive the playbook's behaviour, both configurable:
 
-- **`sprint.default_threshold_sp` (default `35`)** — soft cap on plan size. Above this, `/groom` proposes splitting the plan into sibling stubs rather than shipping one mega-sprint.
-- **`sprint.redecompose_threshold` (default `5`)** — any task estimated at ≥ this value must be re-decomposed before the plan can leave `in-spec`. This is the gate that prevents silent research spikes from sliding into development.
+- **`core.sprint.default_threshold_sp` (default `35`)** — soft cap on plan size. Above this, `present` proposes splitting the plan into sibling stubs rather than shipping one mega-sprint.
+- **`core.sprint.redecompose_threshold` (default `5`)** — any task estimated at ≥ this value must be re-decomposed before the run can leave `drafting`.
 
 Both thresholds are ceilings, not velocity targets. A 12-SP plan is fine; a 38-SP plan is the trigger to consider a split.
 
-## Cross-validation
-
-`/groom` can hand the drafted plan to Gemini for an outside review before presenting to you. This is **opt-in**: set `GEMINI_API_KEY` in your environment to enable. Without the key, cross-validation skips silently and the rest of the loop is unaffected.
-
-Behaviour:
-
-- **Runs once per plan**, after the first round of feedback. Iterative wording tweaks do not trigger re-runs; substantive scope changes may.
-- **Advisory, not a CI gate.** The output is pasted to you verbatim under a "Gemini cross-validation" heading. You decide what to address.
-- **Findings are categorised.** **CRITICAL EXECUTION RISK** and **RULE VIOLATION** must be applied before the plan can leave `in-spec`. **ARCHITECTURAL BLIND SPOT** may be deferred with explicit acceptance, recorded in the plan's Risk register.
-
-`/groom` calls the validator blind — it never inspects the environment for the key. If the key is missing the call exits with code `2` and the skill reports "Gemini cross-validation skipped — `GEMINI_API_KEY` not set." and moves on.
-
 ## Config
 
-`/groom` reads the following keys from `src/config.yaml`. See [Project config](project_config.md) for the deep-merge override mechanics; per-project tweaks live in `~/Claude/{project}/config.yaml`.
+The playbook reads these keys from `src/config.yaml`. See [Project config](project_config.md) for the deep-merge override mechanics; per-project tweaks live in `~/Claude/{project}/config.yaml`.
 
-- **`sprint.default_threshold_sp`** — soft cap on total SP per plan; above this `/groom` proposes a split.
-- **`sprint.redecompose_threshold`** — per-task SP value at or above which the task must be re-decomposed before the plan can leave `in-spec`.
-- **`sprint.scale`** — the 1–5 SP definitions (each a `{sp, meaning}` entry) driving the story-point scale prose rendered into `/groom`'s body.
-- **`tasks`** — list of `{type, description, doc_uri}` entries (`feature`, `bug`, `refactoring`). `/groom` classifies the request against this list; the matching `doc_uri` lazy-loads detailed guidance for that task type.
-- **`plan.statuses`** — the lifecycle slice `/groom` owns (`backlog`, `in-spec`, `awaiting-plan-review`) plus its outgoing transitions. The gates and the auto-applied mutations rendered into the skill body come from here.
+- **`core.sprint.default_threshold_sp`** — soft cap on total SP per plan; above this the run proposes a split.
+- **`core.sprint.redecompose_threshold`** — per-task SP value at or above which the task must be re-decomposed.
+- **`core.sprint.scale`** — the 1–5 SP definitions (each a `{sp, meaning}` entry).
+- **`core.task_types`** — list of `{type, description, doc_uri}` entries (`feature`, `bug`, `refactoring`). The request is classified against this list; the matching `doc_uri` lazy-loads detailed guidance for that task type.
+- **`core.groom_playbook.cross_review_agent`** — the agent that cross-reviews the drafted plan. `null` by default, which skips the `cross-reviewing` step entirely.
+- **`core.research_agent`** — the agent assisted steps hand their bulk reads to (default `booping:booping-researcher`). Shared across playbooks, so it sits directly under `core`.

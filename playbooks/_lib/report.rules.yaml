@@ -1,0 +1,41 @@
+doc: playbook-report
+
+# Structure only: presence and order of the sections `render-playbook` guarantees,
+# and the column headers of the tables inside them. Report content is the snapshot
+# check's business.
+
+rules:
+  - select: H2("Playbook Steps")
+    id: report.steps-section
+    count: 1
+
+  - select: SECTION("Playbook Steps") > TABLE
+    id: report.steps-table
+    count: 1
+    columns: [Step, Dependencies, Summary, Review gate]
+
+  # The state table lives under a `### State: <name>` subsection, one per machine.
+  - select: SECTION("State") TABLE
+    id: report.state-table
+    optional: true
+    columns: [Status, To, When, Gates]
+
+  # `ordered:` names members exactly — there is no pattern form — so the two
+  # subgraph titles the shipped playbooks render are listed by name; a subgraph
+  # this list does not name is simply unconstrained here (the rule is not strict).
+  - select: DOCUMENT H2
+    id: report.section-order
+    ordered:
+      - Lessons?
+      - Playbook Steps
+      - State?
+      - "Subgraph: apply?"
+      - "Subgraph: step-pipeline?"
+
+  - select: 'H2(/^Step: /)'
+    id: report.has-steps
+    min: 1
+
+  - select: DOCUMENT
+    id: report.no-stop
+    forbid: '^\*\*STOP — tell the user:\*\*'

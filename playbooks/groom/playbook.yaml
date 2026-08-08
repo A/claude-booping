@@ -1,0 +1,85 @@
+state: run
+graph:
+  intake: []
+  research-codebase: [intake]
+  research-web: [research-codebase]
+  draft-plan: [research-codebase, research-web]
+  cross-review: [draft-plan]
+  present: [cross-review]
+
+states:
+  run:
+    artifact: index.md
+    initial: framing
+    statuses:
+      framing:
+        transitions:
+          - to: researching
+            when: "intake posted the framing brief in chat, created `index.md` with its identity frontmatter, and the user's answers settled the scope questions — clear intent is enough"
+            gates:
+              - "answers that change the task type, the restated problem or a boundary re-run intake first"
+            hooks: ["script stamp-session", "script commit-plan"]
+      researching:
+        transitions:
+          - to: drafting
+            when: "the blast-radius map and the web-research findings are both posted in chat"
+      drafting:
+        transitions:
+          - to: cross-reviewing
+            when: "architecture, surface changes and trade-offs are settled with the user in conversation, and draft-plan wrote `index.md`'s body against the template's Plan Body and passed its Quality Checklist"
+            gates:
+              - "every call that is the user's is answered"
+          - to: researching
+            when: "the design needs blast radius or external practice the research pass missed"
+      cross-reviewing:
+        transitions:
+          - to: presenting
+            when: "the cross-review pass disposed of every finding, or no `core.groom_playbook.cross_review_agent` is configured and the pass was skipped"
+            gates:
+              - "every CRITICAL finding folded in or recorded as a deferral — vacuously satisfied with no `core.groom_playbook.cross_review_agent` configured"
+            hooks: ["script commit-plan"]
+      presenting:
+        transitions:
+          - to: awaiting-approval
+            when: "present posted the approval screen in chat — summary, split recommendation if any, handoff to the `develop` playbook"
+      awaiting-approval:
+        transitions:
+          - to: drafting
+            when: "the user's change request touches the plan itself — architecture, scope, milestones, tasks or estimates"
+            hooks: ["script commit-plan"]
+          - to: ready-for-dev
+            when: 'the user explicitly approves the plan — "looks good" counts, silence never does'
+            gates:
+              - "explicit user approval captured"
+            hooks:
+              - frontmatter-update index.md reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - "script stamp-session"
+              - "script commit-plan"
+      ready-for-dev:
+        terminal: true
+      cancelled:
+        terminal: true
+
+    superstates:
+      in-spec:
+        states:
+          - framing
+          - researching
+          - drafting
+          - cross-reviewing
+        transitions:
+          - to: cancelled
+            when: "the user cancels the run"
+            hooks: ["script commit-plan"]
+      awaiting-plan-review:
+        states:
+          - presenting
+          - awaiting-approval
+        transitions:
+          - to: cancelled
+            when: "the user cancels the run"
+            hooks: ["script commit-plan"]
+      terminal:
+        states:
+          - ready-for-dev
+          - cancelled

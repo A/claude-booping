@@ -1,0 +1,2 @@
+- Research when uncertain: for complex, novel, or non-obvious work, search the web for current best practices, competing approaches, and known pitfalls before locking design decisions.
+- Verify external references: every package version, image tag, API endpoint, CLI flag, or config option named in the plan is checked against current docs. Never assume. 

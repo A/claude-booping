@@ -1,0 +1,12 @@
+# Pins every macro call shape the shipped playbooks make, so a `--project` render of
+# this vault is byte-reproducible. The bare path catches any argument variant not
+# listed; the argument-qualified keys win over it.
+macro_stubs:
+  "core.macros.date": "19700101-00-00"
+  "core.macros.date +%Y%m%d%H%M": "197001010000"
+  "core.macros.date +%Y-%m-%d %H:%M": "1970-01-01 00:00"
+  "core.macros.git_commit": "0000000000000000000000000000000000000000"
+
+core:
+  groom_playbook:
+    cross_review_agent: codex

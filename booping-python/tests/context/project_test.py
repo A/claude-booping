@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-import os
-import subprocess
+import re
 from pathlib import Path
+
+import pytest
 
 from booping.context.project import Project
 from tests.helpers import get_fixture_path
@@ -108,6 +109,38 @@ def test_is_local_vault_false_for_claude_vault() -> None:
     assert project.is_local_vault is False
 
 
+def test_latest_migration_defaults_to_minus_one(tmp_path: Path) -> None:
+    (tmp_path / ".booping").write_text("project_name: nomig\n")
+    project = Project.load_cwd(start=tmp_path)
+    assert project is not None
+    assert project.latest_migration == -1
+
+
+def test_latest_migration_read_from_marker(tmp_path: Path) -> None:
+    (tmp_path / ".booping").write_text("project_name: mig\nlatest_migration: 7\n")
+    project = Project.load_cwd(start=tmp_path)
+    assert project is not None
+    assert project.latest_migration == 7
+
+
+def test_unknown_marker_keys_are_ignored(tmp_path: Path) -> None:
+    (tmp_path / ".booping").write_text(
+        "project_name: future\nlatest_migration: 2\nsome_future_key: {a: [1, 2]}\n"
+    )
+    project = Project.load_cwd(start=tmp_path)
+    assert project is not None
+    assert project.latest_migration == 2
+
+
+def test_non_integer_latest_migration_is_a_user_error_naming_the_file(
+    tmp_path: Path,
+) -> None:
+    marker = tmp_path / ".booping"
+    marker.write_text("project_name: bad\nlatest_migration: nope\n")
+    with pytest.raises(ValueError, match=re.escape(str(marker))):
+        Project.load_cwd(start=tmp_path)
+
+
 def test_load_cwd_from_subdirectory_walks_up(tmp_path: Path) -> None:
     booping = tmp_path / ".booping"
     booping.write_text("project_name: test-project\n")
@@ -125,35 +158,59 @@ def test_load_cwd_missing_booping_returns_none(tmp_path: Path) -> None:
     assert project is None
 
 
-def test_load_cwd_captures_git_commit(tmp_path: Path) -> None:
-    repo = tmp_path / "repo"
-    repo.mkdir()
-    (repo / ".booping").write_text("project_name: gittest\n")
-    env = {
-        **os.environ,
-        "GIT_AUTHOR_NAME": "t",
-        "GIT_AUTHOR_EMAIL": "t@t",
-        "GIT_COMMITTER_NAME": "t",
-        "GIT_COMMITTER_EMAIL": "t@t",
-    }
-    subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
-    subprocess.run(
-        ["git", "commit", "-q", "--allow-empty", "-m", "init"],
-        cwd=repo,
-        check=True,
-        env=env,
-    )
-    project = Project.load_cwd(start=repo)
+def test_containment_resolves_vault_workdir(tmp_path: Path) -> None:
+    vault = tmp_path / "myproj"
+    workdir = vault / "docs"
+    workdir.mkdir(parents=True)
+    project = Project.load_cwd(start=workdir, home_dir=str(tmp_path))
     assert project is not None
-    assert project.git_commit is not None
-    assert len(project.git_commit) == 40
-    assert all(c in "0123456789abcdef" for c in project.git_commit)
+    assert project.name == "myproj"
+    assert project.directory == vault
+    assert project.repo_directory is None
+    assert project.is_local_vault is False
 
 
-def test_load_cwd_no_git_returns_none_commit(tmp_path: Path) -> None:
-    # tmp_path has no .git, so git rev-parse fails — git_commit must be None
+def test_containment_resolves_vault_root_itself(tmp_path: Path) -> None:
+    vault = tmp_path / "myproj"
+    vault.mkdir()
+    project = Project.load_cwd(start=vault, home_dir=str(tmp_path))
+    assert project is not None
+    assert project.name == "myproj"
+    assert project.directory == vault
+
+
+def test_containment_skips_home_dir_itself(tmp_path: Path) -> None:
+    assert Project.load_cwd(start=tmp_path, home_dir=str(tmp_path)) is None
+
+
+def test_containment_skips_underscore_roots(tmp_path: Path) -> None:
+    playbook_dir = tmp_path / "_playbooks" / "docs"
+    playbook_dir.mkdir(parents=True)
+    assert Project.load_cwd(start=playbook_dir, home_dir=str(tmp_path)) is None
+
+
+def test_containment_skips_hidden_dirs(tmp_path: Path) -> None:
+    hidden = tmp_path / ".trash" / "old"
+    hidden.mkdir(parents=True)
+    assert Project.load_cwd(start=hidden, home_dir=str(tmp_path)) is None
+
+
+def test_marker_wins_over_containment(tmp_path: Path) -> None:
+    # A repo-local vault nested under home_dir: the marker walk hits first.
+    repo = tmp_path / "myproj"
+    repo.mkdir()
+    (repo / ".booping").write_text("project_name: marked\nvault_path: ./booping\n")
+    inner = repo / "booping" / "plans"
+    inner.mkdir(parents=True)
+    project = Project.load_cwd(start=inner, home_dir=str(tmp_path))
+    assert project is not None
+    assert project.name == "marked"
+    assert project.repo_directory == repo
+
+
+def test_load_cwd_without_git_still_resolves(tmp_path: Path) -> None:
+    # tmp_path has no .git — the repo directory is the marker's dir regardless.
     (tmp_path / ".booping").write_text("project_name: nogit\n")
     project = Project.load_cwd(start=tmp_path)
     assert project is not None
-    assert project.git_commit is None
     assert project.repo_directory == tmp_path.resolve()

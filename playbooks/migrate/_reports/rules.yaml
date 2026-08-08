@@ -1,0 +1,11 @@
+doc: migrate-report
+
+rules:
+  - select: DOCUMENT H2
+    id: migrate.sections
+    ordered:
+      - Playbook Steps
+      - "Step: Survey"
+      - "Subgraph: apply"
+      - "Step: Apply Migration"
+      - "Step: Summarize"

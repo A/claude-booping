@@ -1,0 +1,17 @@
+description: learn write
+
+prompts:
+  - id: file://fable-5.md
+    label: fable-5
+
+providers:
+  - id: file://../../_lib/claude_provider.py
+    config:
+      mode: step
+      output_mode: files
+      model: fable
+      effort: high
+
+defaultTest: file://../../_lib/grader.yaml
+
+tests: file://tests.yaml

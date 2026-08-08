@@ -1,0 +1,4 @@
+{"type":"user","isSidechain":false,"origin":{"kind":"human"},"timestamp":"2026-08-08T10:00:00.000Z","message":{"role":"user","content":"edit the file"}}
+{"type":"assistant","isSidechain":false,"timestamp":"2026-08-08T10:01:00.000Z","message":{"role":"assistant","model":"claude-fable-5","content":[{"type":"tool_use","id":"toolu_edit","name":"Edit","input":{}}]}}
+{"type":"user","isSidechain":false,"toolDenialKind":"user-rejected","timestamp":"2026-08-08T10:21:00.000Z","message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_edit","content":"The user doesn't want to proceed with this tool use."}]}}
+{"type":"assistant","isSidechain":false,"timestamp":"2026-08-08T10:23:00.000Z","message":{"role":"assistant","model":"claude-fable-5","content":[{"type":"text","text":"understood"}]}}

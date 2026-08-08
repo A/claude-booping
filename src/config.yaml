@@ -2,51 +2,94 @@
 # `~` is expanded at vault-resolution time. Override globally at
 # ${XDG_CONFIG_HOME:-~/.config}/booping/config.yaml. A `.booping` `vault_path:`
 # marker still wins over this. Set in the project tier it has no effect (the vault
-# is already resolved by then).
+# is already resolved by then). Top-level because it resolves the vault before any
+# namespace is reachable.
 home_dir: ~/Claude/
 
-sprint:
-  default_threshold_sp: 35
-  redecompose_threshold: 5
-  max_milestones_per_agent: 2
-  scale:
-    - { sp: 1, meaning: "Simple text/config change, no risk" }
-    - { sp: 2, meaning: "Simple task, predictable, no risk" }
-    - { sp: 3, meaning: "Medium task, minor risks but predictable overall" }
-    - { sp: 4, meaning: "Complex task, medium risk, may need small research but clear enough" }
-    - { sp: 5, meaning: "Research task — developer needs to clarify and decompose further before proceeding" }
+# Everything the shipped playbook set owns. Placement rule: a key one playbook
+# owns lives at `core.{name}_playbook`; a key the development loop or several
+# playbooks share sits directly under `core`. A user's own playbook namespace
+# copies this shape.
+core:
+  # Agent an assisted playbook step delegates its heavy reads to.
+  research_agent: "booping:booping-researcher"
 
-tasks:
-  - type: feature
-    description: "New user-facing capability. Needs business goal, design, milestones, DoD."
-    doc_uri: ${CLAUDE_PLUGIN_ROOT}/docs/task_feature.md
-  - type: bug
-    description: "Defect — observed behavior diverges from expected. Needs triage, reproduction, root-cause hypothesis, minimal fix, and a regression test."
-    doc_uri: ${CLAUDE_PLUGIN_ROOT}/docs/task_bug.md
-  - type: refactoring
-    description: "Internal structure change with no user-visible behavior change. Needs current-vs-target design, migration steps, and a no-behavior-change DoD."
-    doc_uri: ${CLAUDE_PLUGIN_ROOT}/docs/task_refactoring.md
+  # Shell-outs a template body may call by dotted path: `{{ macro('core.macros.date', '+%H:%M') }}`.
+  # Each value is an argv list (never a shell string) run with shell=False, or a mapping carrying
+  # that list under `command:` plus an optional `cwd:` of `repo` or `vault` naming the directory
+  # it runs in (omitted → the process cwd). The list is a prefix — call-site positional arguments
+  # append to it. stdout is stripped and cached per argv tuple and resolved cwd for the process,
+  # so a macro must be idempotent within one render and two argument variants are two runs.
+  # `--stub-macro <path>[ <args>]=<literal>` on `render`, `render-playbook` and `scaffold`
+  # returns the literal without executing.
+  macros:
+    date: ["date"]
+    git_commit:
+      command: ["git", "rev-parse", "HEAD"]
+      cwd: repo
 
-skills:
-  help: {}
+  # A **query spec** is any mapping in the merged config, addressed by its dotted
+  # path — `booping query --config <dotted.path>` and `{{ '<dotted.path>' | query }}`.
+  # Keys, all optional:
+  #
+  #   glob:    ordered list of vault-relative glob patterns. The first pattern to
+  #            claim a slug wins, so precedence is list order. A slug is the parent
+  #            directory name when the pattern's last segment is a literal filename
+  #            (`plans/*/index.md` -> `alpha`), else the file stem. Omitted -> the
+  #            `core.plans.glob` default below.
+  #   root:    which directory the globs resolve against. Omitted -> the vault;
+  #            `core` -> the plugin root, for content the plugin itself ships
+  #            (`core.migrate_playbook.queries.pending` below), which makes the
+  #            spec resolvable outside any project.
+  #   where:   mapping of clause -> value. The clause key carries its operator as a
+  #            suffix: `k` equality, `k!` inequality, `k:in` membership in a list,
+  #            `k:gt` / `k:lt` numeric ordering (both operands must coerce to a
+  #            number; one that does not fails the clause). A row missing the field
+  #            fails every operator.
+  #   sort:    frontmatter field name, `-` prefixed for descending. Rows without a
+  #            value come last. Omitted -> slug order.
+  #   columns: projection, declared order preserved. `path` and `slug` are always
+  #            present. Sorting happens before projection, so a sort field need not
+  #            be listed.
+  #
+  # Each spec lives beside its consumer (`core.{name}_playbook.queries.<id>`),
+  # never in a central registry, and rides the core -> global -> project merge like
+  # any other config value. Inline arguments (`--where`, `| query(where={...})`)
+  # deep-merge over a resolved spec for that call only.
+  plans:
+    # A plan is a directory claimed by its `index.md`. The shape is data rather
+    # than hidden engine logic: a vault with a different one edits this one key,
+    # and the engine still honours list order for a vault declaring several.
+    glob:
+      - plans/*/index.md
 
-  install: {}
+  sprint:
+    default_threshold_sp: 35
+    redecompose_threshold: 5
+    max_milestones_per_agent: 2
+    scale:
+      - { sp: 1, meaning: "Simple text/config change, no risk" }
+      - { sp: 2, meaning: "Simple task, predictable, no risk" }
+      - { sp: 3, meaning: "Medium task, minor risks but predictable overall" }
+      - { sp: 4, meaning: "Complex task, medium risk, may need small research but clear enough" }
+      - { sp: 5, meaning: "Research task — developer needs to clarify and decompose further before proceeding" }
 
-  develop:
-    agents:
-      booping-developer:
-        internal: true
-        good_for:
-          - "All coding tasks — always delegate; never edit application code from the orchestrator"
-      booping-researcher:
-        internal: true
-        good_for:
-          - "Phase 0 drift spot-check: given a large set of plan-named files, determine whether actual file shape matches the plan's assumptions"
-        bad_for:
-          - "Milestone-diff review — that stays in the skill"
-          - "Single-file reads — call Read directly"
+  # Task-type taxonomy every request is classified against — exactly one per plan.
+  task_types:
+    - type: feature
+      description: "New user-facing capability. Needs business goal, design, milestones, DoD."
+      doc_uri: ${CLAUDE_PLUGIN_ROOT}/docs/task_feature.md
+    - type: bug
+      description: "Defect — observed behavior diverges from expected. Needs triage, reproduction, root-cause hypothesis, minimal fix, and a regression test."
+      doc_uri: ${CLAUDE_PLUGIN_ROOT}/docs/task_bug.md
+    - type: refactoring
+      description: "Internal structure change with no user-visible behavior change. Needs current-vs-target design, migration steps, and a no-behavior-change DoD."
+      doc_uri: ${CLAUDE_PLUGIN_ROOT}/docs/task_refactoring.md
 
-  groom:
+  groom_playbook:
+    # Agent that performs the detached second-model review of a drafted plan.
+    # Null → the reviewing step is skipped entirely.
+    cross_review_agent: null
     agents:
       booping-researcher:
         internal: true
@@ -62,14 +105,72 @@ skills:
           - "When the information cannot be meaningfully compressed without losing signal the caller needs to decide"
           - "When the skill already needs to read the same few files for other reasons"
           - "When the question fits in a few lines of `ls`/`grep` output"
+    queries:
+      # The `intake` step's context table: everything past specification, newest
+      # first. Stated as the statuses it keeps, because the operator vocabulary
+      # is `=`, `!=` and `in` only.
+      latest_plans:
+        where:
+          status:in:
+            - ready-for-dev
+            - in-progress
+            - awaiting-retro
+            - awaiting-learning
+            - done
+            - fail
+            - cancelled
+        sort: "-created"
+        columns:
+          - status
+          - title
+          - summary
+          - metrics_active_minutes
+          - metrics_models
+          - metrics_tokens_input
+          - metrics_tokens_output
+          - metrics_tokens_cache_creation
+          - metrics_tokens_cache_read
 
-  learn:
-    status: awaiting-learning
+  develop_playbook:
+    git:
+      commit_message: '<agent>: <plan title> <message>'
+      branches:
+        - branch: feat/
+          when:
+            - feature
+        - branch: fix/
+          when:
+            - bug
+        - branch: refactor/
+          when:
+            - refactoring
+        - branch: chore/
+          when:
+            - anything not matching a task type
+            - tooling, dependency bumps, formatting
+    agents:
+      booping-developer:
+        internal: true
+        good_for:
+          - "All coding tasks — always delegate; never edit application code from the orchestrator"
+      booping-researcher:
+        internal: true
+        good_for:
+          - "Phase 0 drift spot-check: given a large set of plan-named files, determine whether actual file shape matches the plan's assumptions"
+        bad_for:
+          - "Milestone-diff review — that stays in the skill"
+          - "Single-file reads — call Read directly"
 
-  playbook: {}
-
-  retro:
-    status: awaiting-retro
+  retro_playbook:
+    status: done
+    queries:
+      # The playbook's "Plans awaiting retro" table.
+      candidates:
+        where:
+          status: done
+          retro: null
+        sort: "-created"
+        columns: [status, sp, title, created, completed]
     agents:
       booping-researcher:
         internal: true
@@ -80,8 +181,26 @@ skills:
           - "Phase 2 sprint analysis — stays in the orchestrator"
           - "Phase 4 lesson cross-check — stays in the orchestrator using the in-context lesson set"
 
-  code-review:
-    status: awaiting-retro
+  learn_playbook:
+    queries:
+      # The playbook's "Retrospectives awaiting learning" table. Learn's unit of
+      # work is the standalone retrospective, never a plan directory.
+      candidates:
+        glob: [retrospectives/*.md]
+        where:
+          status: awaiting-learning
+        sort: "-created"
+        columns: [status, title, created, plan]
+
+  code_review_playbook:
+    queries:
+      # The `code-review` playbook's `scope` step. Every done plan is a candidate —
+      # `code_reviews` carries the plan's review history, so a reviewed plan stays
+      # listed and can be reviewed again.
+      scope_candidates:
+        where:
+          status: done
+        columns: [sp, title, code_reviews]
     agents:
       booping-researcher:
         internal: true
@@ -97,208 +216,107 @@ skills:
         bad_for:
           - "Trivial inline nits — orchestrator handles those directly"
 
-  chat:
-    agents:
-      booping-researcher:
-        internal: true
-        good_for:
-          - "Vault-wide reads aggregated into a summary (e.g. what plans exist, recurring themes across retros)"
-          - "Plan or retro content extraction across ≥3 files where the results need to be compressed before returning to the skill"
-          - "Web search aggregation when the user asks an open question that requires pulling from multiple sources"
-        bad_for:
-          - "Single-file reads — call Read directly"
-          - "Simple greps or existence checks that fit in a few lines of output"
-          - "Questions answerable with a short `ls` or `grep`"
+  migrate_playbook:
+    queries:
+      # Every migration the plugin ships, in id order. The `migrate` playbook
+      # narrows it to the pending set with `where={'id:gt': booping.latest_migration}`
+      # — the marker's watermark, `-1` when nothing has been applied. `root: core`
+      # because migrations ship with the plugin, not with the vault they transform.
+      pending:
+        root: core
+        glob:
+          - migrations/*/migration.md
+        sort: id
 
-git:
-  commit_message: '<agent>: <plan title> <message>'
-  branches:
-    - branch: feat/
-      when:
-        - feature
-    - branch: fix/
-      when:
-        - bug
-    - branch: refactor/
-      when:
-        - refactoring
-    - branch: chore/
-      when:
-        - other
-        - tooling, dependency bumps, formatting
+  setup_playbook:
+    # Scaffold tree materialised by
+    # `booping scaffold core.setup_playbook.scaffold <vault-dir>`. The vault is a
+    # git repo (see the vault-commit hook), so .gitignore applies to a home-dir
+    # vault and a repo-local one alike.
+    scaffold:
+      plans:
+        type: dir
+      retrospectives:
+        type: dir
+      codereviews:
+        type: dir
+      _lessons:
+        type: dir
+      notes:
+        type: dir
+      # Obsidian Bases fence (core plugin, no install needed) — a live view over
+      # plans/, seeded once and never rewritten. Every path in a Bases filter is
+      # resolved against the *Obsidian* vault root, which is not the booping vault
+      # whenever the latter is nested: `this.file.folder` (the folder of the note
+      # embedding the fence — this sprints.md) is what scopes the view to this
+      # booping vault at any depth.
+      sprints.md: |
+        ```base
+        formulas:
+          plan: file.asLink(title)
+          tokens_in: ((metrics_tokens_input + metrics_tokens_cache_creation + metrics_tokens_cache_read) / 1000000).round(1) + "M"
+          tokens_out: (metrics_tokens_output / 1000).round(0) + "k"
+          cached: (metrics_tokens_cache_read / 1000000).round(1) + "M"
+        properties:
+          formula.plan:
+            displayName: Title
+          formula.tokens_in:
+            displayName: In
+          formula.tokens_out:
+            displayName: Out
+          formula.cached:
+            displayName: Cached
+          note.metrics_active_minutes:
+            displayName: Active min
+          note.metrics_models:
+            displayName: Models
+        filters:
+          and:
+            - file.inFolder(this.file.folder + "/plans")
+            - file.name == "index"
+        views:
+          - type: table
+            name: Plans
+            order:
+              - status
+              - sp
+              - formula.plan
+              - summary
+              - created
+              - completed
+              - metrics_active_minutes
+              - metrics_models
+              - formula.tokens_in
+              - formula.tokens_out
+              - formula.cached
+            sort:
+              - property: created
+                direction: DESC
+        ```
+      .gitignore: |
+        .booping.log
 
-plan:
-  statuses:
-    backlog:
-      desc: "Parked plan — not actively being worked on. Sibling stubs from split sprints and user-filed ideas not yet in grooming live here."
-      owner: groom
-      terminal: false
-      artifacts:
-        - "Plan stub at ~/Claude/{project}/plans/{YYYYMMDD}-{kebab-title}.md (split siblings or parked ideas)"
-      transitions:
-        - to: in-spec
-          skill: groom
-          when: "User asks /groom to shape a parked plan, or /groom is invoked on a fresh request"
+  playbook_authoring_playbook:
+    # Scaffold tree materialised by
+    # `booping scaffold core.playbook_authoring_playbook.scaffold <dir> --set name=<name>`:
+    # a string is a file's content (Jinja-rendered), a mapping without `type` is a
+    # directory's children.
+    scaffold:
+      playbook.md: |
+        ---
+        name: {{ name }}
+        title: {{ name }}
+        summary: One sentence naming what this playbook produces.
+        trigger: the situation a user reaches for this playbook in
+        ---
 
-    in-spec:
-      desc: "/groom is actively specifying — researching, designing, drafting the plan."
-      owner: groom
-      terminal: false
-      artifacts:
-        - "Plan at ~/Claude/{project}/plans/{YYYYMMDD}-{kebab-title}.md with all milestones, SP estimates, and DoDs"
-        - "Sibling stub plans (one per split sprint) under the same plans/ path"
-      transitions:
-        - to: awaiting-plan-review
-          skill: groom
-          when: "Draft is complete and ready to present to the user"
-          gates:
-            - "Cross-validation run (see [cross-validation](${CLAUDE_PLUGIN_ROOT}/docs/cross_validation.md)) — single-file-bug skip acceptable"
-            - "Every task estimated; any task ≥ redecompose_threshold SP has been re-decomposed"
-          hooks:
-            - frontmatter-update planned=@now
-            - frontmatter-update commit=@head
-        - to: backlog
-          skill: groom
-          when: "User parks the work mid-grooming to revisit later"
+        # {{ name }}
 
-    awaiting-plan-review:
-      desc: "Plan drafted; /groom is presenting to the user and awaiting explicit approval, change request, or cancellation."
-      owner: groom
-      terminal: false
-      transitions:
-        - to: ready-for-dev
-          skill: groom
-          when: "User explicitly approves the plan ('looks good', 'ship it'). Silence does not count."
-          gates:
-            - "Explicit user approval captured"
-        - to: in-spec
-          skill: groom
-          when: "User requests changes that require re-research or re-design"
-
-    ready-for-dev:
-      desc: "Approved by user. Queued for /develop to claim."
-      owner: develop
-      terminal: false
-      transitions:
-        - to: in-progress
-          skill: develop
-          when: "/develop claims the plan at the start of its execute phase"
-
-    in-progress:
-      desc: "/develop has claimed the plan and is executing milestones."
-      owner: develop
-      terminal: false
-      artifacts:
-        - "Code changes per milestone on the sprint branch"
-        - "DoD checkboxes flipped to [x] as tasks complete"
-      transitions:
-        - to: awaiting-retro
-          skill: develop
-          when: "All milestones done"
-          gates:
-            - "Every DoD checkbox marked [x]"
-            - "Final Verification green"
-          hooks:
-            - suggest /retro
-
-    awaiting-retro:
-      desc: "All milestones done; waiting for /retro to write the retrospective."
-      owner: retro
-      terminal: false
-      transitions:
-        - to: awaiting-learning
-          skill: retro
-          when: "Retrospective written and saved"
-          gates:
-            - "Retrospective markdown saved to retrospectives/"
-            - "Self-review checklist passed"
-          hooks:
-            - frontmatter-update retro=retrospectives/YYYYMMDD-{kebab-title}.md
-            - frontmatter-update goal=success|partial|fail
-
-    awaiting-learning:
-      desc: "Retro written; waiting for /learn to absorb lessons."
-      owner: learn
-      terminal: false
-      transitions:
-        - to: done
-          skill: learn
-          when: "All accepted learnings written"
-          gates:
-            - "User confirmed the review table"
-            - "Every accepted lesson written to its target file"
-
-    done:
-      desc: "Terminal success. /learn has absorbed all lessons."
-      terminal: true
-
-    fail:
-      desc: "Terminal technical failure. /develop hit an unrecoverable blocker."
-      terminal: true
-
-    cancelled:
-      desc: "Terminal product decision. User shelved the plan."
-      terminal: true
-
-  superstates:
-    specification:
-      states:
-        - backlog
-        - in-spec
-      transitions:
-        - to: cancelled
-          skill: groom
-          when: "User shelves the request"
-      on_exit: []
-      on_entry: []
-    planned:
-      states:
-        - awaiting-plan-review
-        - ready-for-dev
-      transitions:
-        - to: cancelled
-          skill: groom
-          when: "User shelves the plan"
-      on_exit: []
-      on_entry: []
-    executing:
-      states:
-        - in-progress
-      transitions:
-        - to: fail
-          skill: develop
-          when: "Unrecoverable blocker on the same milestone"
-          gates:
-            - "Two fix attempts documented in the plan"
-            - "User has approved the abort"
-      on_exit: []
-      on_entry:
-        - frontmatter-update started=@now
-        - frontmatter-update commit=@head
-    review:
-      states:
-        - awaiting-retro
-        - awaiting-learning
-      transitions:
-        - to: done
-          skill: retro
-          when: "User skips remaining review steps and marks the plan done"
-          hooks:
-            - frontmatter-update goal=skipped
-      on_exit: []
-      on_entry:
-        - frontmatter-update completed=@now
-    terminal:
-      states:
-        - done
-        - fail
-        - cancelled
-      transitions: []
-      on_exit: []
-      on_entry:
-        - frontmatter-update completed=@now
-
-  hooks:
-    post:
-      - render-sprints
-      - vault-commit
+        Preamble — what the driver needs before the first step: artifact model, hard
+        rules, where the work lands. No step calls here.
+      playbook.yaml: |
+        # Step name -> its dependency step names. Each step is a sibling directory
+        # holding a prompt.md.
+        graph: {}
+      _references:
+        type: dir

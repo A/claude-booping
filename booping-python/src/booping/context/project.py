@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import subprocess
 from pathlib import Path
 
 from pydantic import BaseModel
@@ -11,12 +10,17 @@ from booping.context._yaml import safe_load_path
 class Project(BaseModel):
     name: str
     directory: Path
-    repo_directory: Path
-    git_commit: str | None = None
+    # None when the project was resolved by vault containment — a workdir inside
+    # `home_dir/{project}/` identifies the vault but knows no repo.
+    repo_directory: Path | None = None
+    # Watermark: everything at or below this id has been applied. -1 = nothing yet.
+    latest_migration: int = -1
 
     @property
     def is_local_vault(self) -> bool:
         """True when the resolved vault lives under the repo (vs a ~/Claude vault)."""
+        if self.repo_directory is None:
+            return False
         return self.directory.resolve().is_relative_to(self.repo_directory.resolve())
 
     @classmethod
@@ -50,8 +54,13 @@ class Project(BaseModel):
         home_dir is the raw (unexpanded) vault-home string from config; it is the
         default vault base when the marker carries no `vault_path:`. Precedence:
         `.booping` `vault_path:` > `home_dir` > built-in default.
+
+        On a marker miss, a start inside `home_dir/{project}/` resolves that vault
+        by containment (repo unknown): a run workdir inside the vault must assemble
+        the same context — local playbooks included — as a repo workdir does.
         """
-        candidate = (start or Path.cwd()).resolve()
+        origin = (start or Path.cwd()).resolve()
+        candidate = origin
         while True:
             marker = candidate / ".booping"
             if marker.is_file():
@@ -63,12 +72,27 @@ class Project(BaseModel):
                         data.get("vault_path"), candidate, project_name, home_dir
                     ),
                     repo_directory=candidate,
-                    git_commit=_resolve_git_commit(candidate),
+                    latest_migration=_resolve_latest_migration(data, marker),
                 )
             parent = candidate.parent
             if parent == candidate:
-                return None
+                return _from_vault_containment(origin, home_dir)
             candidate = parent
+
+
+def _from_vault_containment(origin: Path, home_dir: str) -> Project | None:
+    """Resolve the project a path inside `home_dir/{project}/` belongs to, or None.
+
+    Underscore- and dot-prefixed first segments are the home_dir's own machinery
+    (`_playbooks/`, `_lessons/`, …), never a vault.
+    """
+    base = Path(home_dir).expanduser().resolve()
+    if not origin.is_relative_to(base) or origin == base:
+        return None
+    name = origin.relative_to(base).parts[0]
+    if name.startswith(("_", ".")) or not (base / name).is_dir():
+        return None
+    return Project(name=name, directory=base / name)
 
 
 def _resolve_vault_dir(
@@ -89,19 +113,18 @@ def _resolve_vault_dir(
     return (candidate / path).resolve()
 
 
-def _resolve_git_commit(repo_directory: Path) -> str | None:
-    """Return current git HEAD as 40-char hex, or None when git is missing / repo invalid."""
-    try:
-        result = subprocess.run(
-            ["git", "rev-parse", "HEAD"],
-            cwd=repo_directory,
-            check=False,
-            capture_output=True,
-            text=True,
+def _resolve_latest_migration(data: dict[str, object], marker: Path) -> int:
+    """Read `latest_migration` off the marker, defaulting to -1 (nothing applied).
+
+    A forward-compatible subset read: only this key is looked at, so a marker whose
+    schema a later migration changed still loads. A value that is not an integer is
+    a user error naming the marker, raised at load time rather than mid-render.
+    """
+    raw = data.get("latest_migration")
+    if raw is None:
+        return -1
+    if isinstance(raw, bool) or not isinstance(raw, int):
+        raise ValueError(
+            f"invalid latest_migration in {marker}: expected an integer, got {raw!r}"
         )
-    except FileNotFoundError:
-        return None
-    if result.returncode != 0:
-        return None
-    sha = result.stdout.strip()
-    return sha or None
+    return raw

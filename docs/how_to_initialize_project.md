@@ -20,4 +20,4 @@ When a skill is invoked but no `.booping` file exists in the current working dir
 ## Notes
 
 - Do not guess the project name silently; always confirm.
-- Do not scaffold any vault subdirectories (`plans/`, `lessons/`, etc.) here — that is the responsibility of `/install` or the first skill that needs them.
+- Do not scaffold any vault subdirectories (`plans/`, `lessons/`, etc.) here — that is the responsibility of the `setup` playbook or the first skill that needs them.

@@ -1,4 +1,37 @@
-from booping.utils import deep_merge
+from typing import Any
+
+import pytest
+
+from booping.utils import PathError, deep_merge, resolve_path
+
+
+class TestResolvePath:
+    def test_returns_the_value_at_a_nested_path(self) -> None:
+        cfg: dict[str, Any] = {"a": {"b": {"c": 42}}}
+        assert resolve_path(cfg, "a.b.c") == 42
+
+    def test_missing_segment_names_segment_and_walked_prefix(self) -> None:
+        cfg: dict[str, Any] = {"a": {"b": {}}}
+        with pytest.raises(PathError) as exc:
+            resolve_path(cfg, "a.b.c")
+        assert exc.value.dotted_path == "a.b.c"
+        assert exc.value.segment == "c"
+        assert exc.value.walked == "a.b"
+        assert exc.value.found_type is None
+        assert "'c'" in str(exc.value)
+        assert "'a.b.c'" in str(exc.value)
+
+    def test_segment_under_a_scalar_reports_the_found_type(self) -> None:
+        cfg: dict[str, Any] = {"a": "scalar"}
+        with pytest.raises(PathError) as exc:
+            resolve_path(cfg, "a.b")
+        assert exc.value.segment == "b"
+        assert exc.value.walked == "a"
+        assert exc.value.found_type == "str"
+
+    def test_empty_path_raises(self) -> None:
+        with pytest.raises(PathError):
+            resolve_path({}, "")
 
 
 def test_deep_merge_recurses_into_nested_dicts() -> None:
@@ -53,10 +86,10 @@ def test_shallow_merge_keys_does_not_affect_other_keys() -> None:
 def test_shallow_merge_keys_works_at_any_nesting_depth() -> None:
     """`shallow_merge_keys` matches by key name anywhere during recursion,
     not by absolute path."""
-    base = {"skills": {"develop": {"agents": {"a": {"internal": True}}}}}
-    override = {"skills": {"develop": {"agents": {"a": {"type": "cli"}}}}}
+    base = {"core": {"develop_playbook": {"agents": {"a": {"internal": True}}}}}
+    override = {"core": {"develop_playbook": {"agents": {"a": {"type": "cli"}}}}}
     merged = deep_merge(base, override, shallow_merge_keys=["agents"])
-    assert merged["skills"]["develop"]["agents"]["a"] == {"type": "cli"}
+    assert merged["core"]["develop_playbook"]["agents"]["a"] == {"type": "cli"}
 
 
 def test_shallow_merge_keys_none_behaves_like_pure_deep_merge() -> None:

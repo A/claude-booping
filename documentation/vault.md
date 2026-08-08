@@ -1,71 +1,101 @@
 # Vault
 
-Every booping project gets its own vault, scaffolded by [/install](install.md). By default it lives at `~/Claude/{project}/`; you can instead keep it **inside the repo** (a local vault) by setting the `.booping` marker's `vault_path:` key. The vault is plain markdown with YAML frontmatter — open the directory in Obsidian for graph view and backlinks across plans, retros, and lessons.
+Every booping project gets its own Project Vault, scaffolded by the [setup playbook](install.md). By default it lives at `~/Claude/{project}/`; set the `.booping` marker's `vault_path:` key to keep it **inside the repo** instead (a local vault). The vault is plain markdown with YAML frontmatter — open the directory in Obsidian for graph view and backlinks across plans, retros, and lessons.
 
 This page is the reference for every file and directory inside the vault. For the lifecycle that ties them together, start at [Quick start](quick_start.md).
 
 ## `plans/`
 
-Sprint plans live here as `{YYYYMMDD}-{kebab-title}.md`. Each plan carries a YAML frontmatter (status, type, story points, a one-line `summary`, etc.) and a body of milestones with tasks. Authored by [/groom](groom.md), executed by [/develop](develop.md).
+A plan is a directory `{YYYYMMDDHHMM}_{kebab-title}/` holding `index.md` — the shape the groom playbook authors. The `core.plans.glob` config key governs discovery: an ordered list of globs, `plans/*/index.md` as shipped, so the plan shape is data rather than engine logic — a vault laying plans out differently edits that one key and every consumer follows. Each plan carries YAML frontmatter (status, type, story points, a one-line `summary`, etc.) and a body of milestones with tasks. Authored by the [groom playbook](groom.md), executed by the [develop playbook](develop.md).
 
-A plan walks the status table from `backlog` / `in-spec` through `awaiting-plan-review`, `ready-for-dev`, `in-progress`, `awaiting-retro`, `awaiting-learning`, to `done`. The owning skill moves a plan by running a `booping transition` command, which performs the status change and every mechanical mutation it entails in one step.
+A plan's `status:` is **run state**, not a shared lifecycle: `index.md` doubles as the run artifact of whichever playbook is operating on the plan, so the status vocabulary is the one that playbook declares in its own `states:` block. Groom ends at `ready-for-dev`; develop claims from there and ends at `done` — or at `fail` when a blocker survives two fix attempts, or `cancelled` when you call the run off. All three are terminal: the end of the plan lifecycle. Only `booping playbook-transition` writes the status, and it refuses any move the machine does not declare. See [Playbooks → Run state](playbook.md#run-state).
 
-Sibling stubs created by a `/groom`-driven split point at the primary plan via `split_from: plans/...` in their frontmatter.
+Two frontmatter keys carry a finished plan into the tracks that run beside the lifecycle rather than inside it. `retro:` is null until a retrospective covers the plan, then holds that file's path (or `skipped`) — that null is the retro queue. `code_reviews:` is a **list**: seeded null, then appended with the vault-relative path of every review that closes on the plan, so it reads as review history rather than a queue flag. The code-review queue is every plan at `done`, reviewed or not.
+
+Seven further keys carry session metrics. `sessions:` is the list of Claude Code session ids that groomed and developed the plan, appended by transition hooks on the groom and develop edges (a run started outside a Claude Code session adds nothing). When develop closes the plan, six flat `metrics_`-prefixed keys are stamped from those transcripts — `metrics_active_minutes:` (whole minutes of active work), `metrics_models:` (the sorted distinct model ids that ran them), and the token totals `metrics_tokens_input:`, `metrics_tokens_output:`, `metrics_tokens_cache_creation:`, `metrics_tokens_cache_read:`. They are flat rather than a nested `metrics:` mapping because Obsidian Properties and Bases cannot address a nested mapping as a column, and all six surface as columns in `sprints.md`. `bin/booping session-stats {vault}/plans --mask index.md` recomputes them at any time — it stamps by default, `--force` overwrites existing values and `--dry-run` prints the same JSON without writing.
+
+Active time is turn time minus every interval the run spent blocked on a human: an `AskUserQuestion` tool call up to its matching `tool_result`, and any span ending in a user rejection. System decisions (`permission-rule`, `automode-blocked`, `automode-unavailable`) are never subtracted. **The metric under-reports wait**: a tool call auto-approved by a permission rule and one a human approved after ten minutes are structurally identical in the transcript — no field distinguishes them — so that wait stays inside active time rather than being guessed at.
+
+Sibling stubs created by a groom-driven split point at the primary plan via `split_from: plans/...` in their frontmatter.
 
 ## `retrospectives/`
 
-Retrospectives written by [/retro](retro.md), one per shipped plan. Same `{YYYYMMDD}-{kebab-title}.md` filename shape as the plan they cover, so files line up alphabetically.
+Standalone retrospectives written by the [retro playbook](retro.md), named `{YYYYMMDDHHMM}_{kebab-title}.md` — one per retro run, whatever the size of its working set.
 
-A retro records what actually shipped vs. the original spec, divergences, and the tensions you flagged during `/develop`. It is the input to [/learn](learn.md).
+A retrospective records what actually shipped vs. the original spec, divergences, and the tensions you flagged during development. Its frontmatter carries `plan:` (the primary), `plans:` (every plan covered), `goal_verdicts:` (a verdict per plan) and its own `status:`.
 
-## `lessons/`
+That `status:` is the retro track's run state — `awaiting-retro → awaiting-learning` under retro, then `awaiting-learning → done` under [learn](learn.md). It is the retrospective's, never a plan's: covered plans stay at `done` and only gain a `retro:` back-link. Both playbooks run with the vault root as their workdir and address the file with `--target retrospectives/{slug}.md`.
 
-Durable, project-wide rules accumulated over many sprints. Files are named `{N}_{title}.md` where `N` is a monotonic counter so the directory stays ordered chronologically.
+## `codereviews/`
 
-Authored by [/learn](learn.md) from confirmed retro findings. Loaded by every skill's Preflight on every invocation, so lessons accumulate into the active context for `/groom` and `/develop` automatically.
+One file per code-review run, written by the [code-review playbook](code_review.md), grouped by what was reviewed: `codereviews/{plan-dirname}/{YYYYMMDDHHmm}.md` when a plan is in scope, `codereviews/{target-slug}/{YYYYMMDDHHmm}.md` for an ad-hoc scope such as the latest commits. Scaffolded for new vaults and created lazily in older ones, so an existing vault needs no migration.
+
+The file records `## Scope`, `## Findings`, `## Verdict` and `## Resolution`. Its frontmatter carries `plan:` — the reviewed plan's vault-relative path, or `null` — and its own `status:`, the code-review track's run state: `in-agent-review → human-review → done`. That status is the review's, never a plan's: the reviewed plan stays at `done` and only gains the review's path in its `code_reviews:` list. The playbook runs with the vault root as its workdir and addresses the file with `--target codereviews/{dir}/{ts}.md`.
+
+## `_lessons/`
+
+Targeted lessons — durable rules accumulated over many sprints, and the only file surface the [learn playbook](learn.md) writes inside the Project Vault. Lessons live in exactly two flat roots: this directory, scoped to the project, and its machine-wide sibling at `<home_dir>/_lessons/` (default `~/Claude/_lessons/`), which applies to every project — a file of the same name here shadows the global one. Files are named `{N}_{title}.md`, `N` a monotonic counter keeping each directory chronologically ordered.
+
+Each file carries a `targets:` frontmatter list saying what it applies to: `{playbook}`, `{playbook}/{step}`, `agent:{id}`, or `skill:{name}`. That list is the only routing there is — a file with no valid `targets:` is injected nowhere.
+
+Injected by `booping render-playbook` into the composed procedure or a step prompt, and into the bodies of booping's own agents and skills at load time. See [Playbooks → Lessons](playbook.md#lessons) for the full reference.
 
 ## `notes/`
 
-Free-form user notes — plan-review comments, code-review threads, ideas for next sprints, anything else. **Skills and agents do not read this directory.** It is purely a scratchpad for you, kept in the same vault for convenience and Obsidian graph visibility.
+Free-form user notes — plan-review comments, code-review threads, ideas for next sprints, anything else. **Skills and agents do not read this directory.** It is a scratchpad for you, kept in the same vault for convenience and Obsidian graph visibility.
 
-## `_booping/skill_<name>.md`
+## `.booping.log`
 
-Per-skill extension file. Loaded automatically into the matching skill's context at invocation time, so the project's local conventions reach `/groom`, `/develop`, etc. without you having to restate them. Authored and updated by [/learn](learn.md) — do not hand-edit unless you know what `/learn` would have written.
-
-[/install](install.md) always seeds `_booping/agent_booping-developer.md`, and seeds the two skill files only when the project carries local signal the repo `CLAUDE.md` does not already own — otherwise it skips them:
-
-- `_booping/agent_booping-developer.md` — stack + conventions for the developer agent (always seeded).
-- `_booping/skill_groom.md` — a project-local groom override the repo `CLAUDE.md` doesn't carry (e.g. a sizing override); seeded only when such signal exists.
-- `_booping/skill_develop.md` — project-local dev signal the repo `CLAUDE.md` lacks (e.g. env / service notes); seeded only when such signal exists.
-
-`/learn` keeps whatever is seeded current as the project accumulates lessons; the seeds are just a starting point.
-
-## `_booping/agent_<full-agent-name>.md`
-
-Per-agent extension file. Injected into the matching worker agent's body at agent load time, so subagents inherit project rules without separate reads. The filename uses the agent's full name (which starts with `booping-`) — e.g. `_booping/agent_booping-developer.md`, `_booping/agent_booping-researcher.md`. Authored and updated by [/learn](learn.md).
+Append-only log of `booping` CLI invocations, at the vault root. Written by the CLI, read by nobody — it is there for debugging a render or a transition. The seeded `.gitignore` excludes it, so it never lands in a vault commit.
 
 ## `plan_templates/`
 
-Project-local plan templates. Each file has frontmatter (`name`, `description`) plus two top-level sections (`# Plan Body`, `# Quality Checklist`). Discovered by [/groom](groom.md) alongside the core templates that ship with the plugin; can override a core template by sharing its `name`, or add entirely new template flavours suited to the project.
+Project-local plan templates. Each file has frontmatter (`name`, `description`) plus two top-level sections (`# Plan Body`, `# Quality Checklist`). Discovered by the [groom playbook](groom.md) alongside the core templates the plugin ships; a file overrides a core template by sharing its `name`, or adds an entirely new template flavour suited to the project.
 
 ## `review_templates/`
 
-Project-local code-review templates. Loaded by [/code-review](code_review.md) alongside the core templates; the skill picks the matching subset by inspecting the repo's manifests and reading each template's `description` frontmatter. Use this directory to add review checklists specific to your stack or domain.
+Project-local code-review templates. Loaded by the [code-review playbook](code_review.md); it picks the matching subset by inspecting the repo's manifests and reading each template's `description` frontmatter. Use this directory for review checklists specific to your stack or domain.
+
+Templates come from three tiers, least → most specific:
+
+| Tier | Location |
+|---|---|
+| core | the plugin's own `docs/review_templates/` |
+| global | `{home_dir}/review_templates/` — every project on the machine |
+| project | `{vault}/review_templates/` — this project only |
+
+A later tier overrides an earlier one by `name`, keeping the earlier entry's position; a name no earlier tier carries is appended. The rendered checklist table labels each entry with its tier.
 
 ## `sprints.md`
 
-A snapshot of every plan in the vault, grouped by status — the at-a-glance view of where the project sits.
+An at-a-glance view of every plan in the vault — an [Obsidian Bases](https://help.obsidian.md/bases) fence over the `plans/*/index.md` files, its columns led by status and its rows sorted newest-first by `created`. Bases resolves every path against the *Obsidian* vault root, so the seeded filter scopes itself with `file.inFolder(this.file.folder + "/plans")` — the folder of the note holding the fence — which keeps it correct when the booping vault is nested inside a larger Obsidian vault.
 
-**Regenerated by the CLI; never hand-edit.** It is rendered by `bin/booping render-sprints` (template `src/templates/sprints.md.j2`) from the live plan files. `/chat` refreshes it on orient. Any manual edit will be overwritten on the next refresh.
+**Seeded once at setup (`booping scaffold core.setup_playbook.scaffold`); no run ever rewrites or regenerates it.** The one thing that touches the fence again is a shipped vault migration, and only to append a new column your existing view predates. Obsidian evaluates the query live against the plan files, so the view is never stale and needs no refresh step. Edit the fence to change columns, sorting or filters — it is yours from the moment it is written.
 
-It is a *snapshot*, not a live view: nothing auto-refreshes it on a plan write today, so it can drift between `/chat` orients as other skills transition plans. Treat the plan files as the source of truth and re-run `/chat` (or `bin/booping render-sprints`) when you need a current picture. An auto-refresh hook is planned but not yet wired.
+Outside Obsidian the file is an inert code block. For a machine-readable listing of the same data, use `bin/booping query`:
+
+```bash
+bin/booping query --config core.plans --where status=ready-for-dev --sort -created
+```
+
+`--where` is a fixed operator vocabulary, not an expression language. The clause key carries the operator as a suffix:
+
+| Clause | Meaning |
+|---|---|
+| `k=v` | equals |
+| `k!=v` | does not equal |
+| `k:in=a,b` | is one of |
+| `k:gt=n` | greater than `n`, numerically |
+| `k:lt=n` | less than `n`, numerically |
+
+Clauses are repeatable and all of them apply. A row whose frontmatter lacks the field fails every operator, and so does a value that will not read as a number under `:gt` / `:lt`.
 
 ## `.booping`
 
-The marker that ties a repo to its vault. Unlike everything else on this page, `.booping` lives in the **attached repo's working tree** (its root), not inside the vault. It is written by [/install](install.md) and carries the `project_name: {project}` key — how every skill resolves which vault to operate on. It may also carry an optional `vault_path:` key: when present, the vault resolves to that path (relative paths against the repo root, absolute paths and `~` honoured) instead of `~/Claude/{project}/` — this is how a repo-local vault is wired. Commit `.booping` with the repo so the binding travels with the checkout.
+The marker that ties a repo to its vault. Unlike everything else on this page, `.booping` lives in the **attached repo's working tree** (its root), not inside the vault. Written by the [setup playbook](install.md), it carries `project_name: {project}` — how every skill resolves which vault to operate on. An optional `vault_path:` key resolves the vault to that path instead of `~/Claude/{project}/` (relative paths against the repo root, absolute paths and `~` honoured) — this is how a repo-local vault is wired. A third key, `latest_migration:`, is the watermark recording which of the plugin's shipped vault migrations this project has already applied, written only by `bin/booping marker-set latest_migration=<id>` as the [migrate playbook](playbook.md) finishes one. When the watermark falls behind the shipped migrations, every render stops with a notice telling you to run `/playbook migrate`; nothing else renders until the vault catches up. Commit `.booping` with the repo so the binding travels with the checkout.
 
 ## `config.yaml`
 
-Optional per-project override for the plugin's `src/config.yaml`. Deep-merges over the plugin defaults at render time (no rebuild step): dict keys merge, list keys replace wholesale. The natural targets for per-project tuning are the lifecycle, sprint scale, and agent wiring.
+Optional per-project override for the plugin's `src/config.yaml`. Deep-merges over the plugin defaults at render time (no rebuild step): dict keys merge, list keys replace wholesale. The natural targets for per-project tuning are the sprint scale, task types, branch conventions and agent wiring. Nothing is validated and no key is restricted to a tier, so your own playbooks' config lives here too.
 
 See [Project config](project_config.md) for the full key tour and override mechanics.

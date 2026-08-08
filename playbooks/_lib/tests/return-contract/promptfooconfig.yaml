@@ -1,0 +1,16 @@
+description: return-contract conformance — the shared return schema holds on a seeded task
+
+prompts:
+  - "{{input}}"
+
+providers:
+  - id: file://../../claude_provider.py
+    config:
+      entry: _lib/return-contract.md
+      output_mode: files
+      model: sonnet
+      effort: low
+
+defaultTest: file://../../grader.yaml
+
+tests: file://tests.yaml

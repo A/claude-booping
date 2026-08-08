@@ -28,6 +28,10 @@ def _rt_yaml() -> _RuamelYAML:
     return ry
 
 
+# Wide enough that round-tripping never re-wraps an untouched long line.
+_MARKER_WIDTH = 4096
+
+
 def _load_dict(raw: Any) -> dict[str, Any]:
     # yaml.safe_load returns Any; the isinstance check narrows to dict[Unknown, Unknown]
     # in basedpyright strict mode. The explicit annotation here bridges the gap.
@@ -95,10 +99,39 @@ def split_frontmatter_md(text: str) -> tuple[str, str, str]:
     return before_yaml, yaml_text, after_yaml
 
 
+def update_marker(path: Path, updates: dict[str, object]) -> None:
+    """Set top-level keys on a `.booping` marker file, in place.
+
+    The marker is a bare YAML mapping with no `---` delimiters, so
+    :func:`update_frontmatter` cannot serve it: its no-frontmatter fallback
+    prepends a frontmatter block and leaves a two-document stream behind.  Here
+    the whole file is round-tripped — comments, quoting and key order survive,
+    and only the touched lines change.
+
+    Raises :class:`ValueError` when the file is not a YAML mapping.
+    """
+    ry = _rt_yaml()
+    ry.width = _MARKER_WIDTH
+
+    data = ry.load(path.read_text())  # type: ignore[reportUnknownMemberType]
+    if data is None:
+        data = CommentedMap()
+    if not isinstance(data, dict):
+        raise ValueError(f"not a YAML mapping: {path}")
+
+    for key, value in updates.items():
+        data[key] = value  # type: ignore[reportUnknownMemberType]
+
+    stream = StringIO()
+    ry.dump(data, stream)  # type: ignore[reportUnknownMemberType]
+    path.write_text(stream.getvalue())
+
+
 def update_frontmatter(
     path: Path,
     updates: dict[str, object],
     removals: list[str] | None = None,
+    appends: dict[str, object] | None = None,
 ) -> None:
     """Update frontmatter keys in a markdown file using ruamel.yaml round-trip mode.
 
@@ -108,9 +141,22 @@ def update_frontmatter(
     ``removals`` lists keys to drop from the frontmatter; missing keys are
     ignored.  Removals are applied before updates so a key may be removed and
     re-added in one call.
+
+    ``appends`` maps a key to a value appended to that key's list, applied
+    after ``updates``.  An absent or null key becomes a one-element list, a
+    value already in the list is a no-op, and an existing scalar raises
+    :class:`ValueError`.
+
+    A file without a frontmatter block gets one prepended; the existing
+    content becomes the body unchanged.
     """
     text = path.read_text()
-    before_yaml, yaml_text, after_yaml = split_frontmatter_md(text)
+    try:
+        before_yaml, yaml_text, after_yaml = split_frontmatter_md(text)
+    except ValueError:
+        body = text.lstrip("\n")
+        before_yaml, yaml_text = "---\n", ""
+        after_yaml = "---\n\n" + body if body else "---\n"
 
     ry = _rt_yaml()
     data = ry.load(yaml_text)  # type: ignore[reportUnknownMemberType]
@@ -123,6 +169,16 @@ def update_frontmatter(
 
     for key, value in updates.items():
         data[key] = value
+
+    for key, value in (appends or {}).items():
+        current: Any = data.get(key)  # type: ignore[reportUnknownMemberType]
+        if current is None:
+            data[key] = [value]
+            continue
+        if not isinstance(current, list):
+            raise ValueError(f"cannot append to scalar key {key!r} in {path}")
+        if value not in current:  # type: ignore[reportUnknownMemberType]
+            current.append(value)  # type: ignore[reportUnknownMemberType]
 
     stream = StringIO()
     ry.dump(data, stream)  # type: ignore[reportUnknownMemberType]

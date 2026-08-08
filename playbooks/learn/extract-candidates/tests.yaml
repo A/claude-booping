@@ -1,0 +1,61 @@
+# The output contract is one markdown table: # | Rule | Example | Target | Lands at | Targets.
+# Finding 6 spans two targets and must split, so 6 findings yield at least 7 rows.
+
+- description: extract smoke — table shape and target vocabulary
+  vars:
+    input: file://_fixtures/retro-findings.md
+  metadata:
+    playbook: learn
+    step: extract-candidates
+    fixture: retro-findings
+    tier: smoke
+  assert:
+    # TABLE-SHAPE — a header row plus at least 7 candidate rows (finding 6 splits)
+    - type: javascript
+      value: "output.split('\\n').filter(l => /^\\s*\\|/.test(l)).length >= 9"
+    # VOCAB — every routed kind from the destinations doc shows up at least once
+    - type: regex
+      value: 'agent:booping-developer'
+    - type: regex
+      value: 'CLAUDE\.md'
+    - type: regex
+      value: '_lessons/'
+    # NO-GLOBAL-SCOPE — never the user-level file
+    - type: not-regex
+      value: '~/\.claude'
+    # NO-INVENTED-STEPS — step-scoped wiring only uses steps the target space lists
+    - type: javascript
+      value: |
+        const known = new Set(['groom','develop','retro','learn']);
+        const steps = {
+          groom: ['intake','research-codebase','research-web','draft-plan','cross-review','present'],
+          develop: ['intake','provision','develop-loop','verify','wrap-up'],
+          retro: ['intake','prepare','gather-feedback','research-issues','synthesize','save'],
+          learn: ['intake','extract-candidates','dedup-sweep','review-table','write','transition'],
+        };
+        const refs = [...output.matchAll(/\b(groom|develop|retro|learn)\/([a-z-]+)/g)];
+        return refs.every(m => steps[m[1]].includes(m[2]));
+
+- description: extract regress — routing judgment on tricky findings
+  vars:
+    input: file://_fixtures/retro-findings.md
+  metadata:
+    playbook: learn
+    step: extract-candidates
+    fixture: retro-findings
+    tier: regress
+  assert:
+    - type: llm-rubric
+      value: "ROUTE-USER-TESTING-TO-GROOM: The candidate from finding 1 (a user-testing step must pass before the sprint closes) is routed to grooming — a lesson whose Targets wiring names `groom` or a groom step (e.g. `groom/draft-plan`) — because grooming owns the plan's content and DoD, even though the finding was observed at develop time. Fails if the candidate is wired to `develop`, its steps, or an agent instead."
+    - type: llm-rubric
+      value: "ROUTE-BRANCHING-TO-DEVELOP: The candidate from finding 2 (commit straight to master, never create branches) reaches develop's branching behavior — a lesson wired to `develop` or `develop/provision`, or a booping-developer agent instruction — because develop owns git mechanics. Fails if it is wired to groom, retro, or the repo CLAUDE.md as the sole target."
+    - type: llm-rubric
+      value: "ROUTE-LESSON-AUDIT-TO-RETRO: The candidate from finding 3 (check which existing lessons were applicable and flag the unused ones) is routed to retro — a lesson wired to `retro` or a retro step such as `retro/research-issues`. Fails if it lands in learn, groom, or develop."
+    - type: llm-rubric
+      value: "ROUTE-REPO-FACTS-TO-CLAUDEMD: Finding 4's project facts (`just api` starts the API, `just e2e` runs the e2e tests) are routed to the Repository CLAUDE.md target as one-bullet project facts, not turned into a lesson or an agent instruction. Fails if they land anywhere else."
+    - type: llm-rubric
+      value: "SPLIT-SPANNING-FINDING: Finding 6 yields two distinct rows — one for plans carrying a rollback note per migration (routed to grooming), one for rehearsing migrations against a database copy (routed to develop's execution side: a develop-wired lesson or a booping-developer agent instruction). Fails if both rules sit in one row, or if the same rule is duplicated across two targets."
+    - type: llm-rubric
+      value: "ATOMIC-IMPERATIVE: Every Rule cell is a single imperative sentence stating one concern — no 'and'-joined double rules, no descriptive 'X happened' phrasing — and every Example cell is one sentence. Fails if any cell breaks these constraints."
+    - type: llm-rubric
+      value: "SINGLE-TARGET-ROWS: Every row lands in exactly one target kind with one resolved path; no row names two files, and no rule appears under two different targets. A lesson row's Targets cell may list several playbook/step/agent entries — that is one lesson, not a violation."

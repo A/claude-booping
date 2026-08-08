@@ -1,0 +1,28 @@
+state: run
+graph:
+  intake: []
+  extract-candidates: [intake]
+  dedup-sweep: [extract-candidates]
+  review-table: [dedup-sweep]
+  write: [review-table]
+  transition: [write]
+
+states:
+  run:
+    initial: awaiting-learning
+    statuses:
+      awaiting-learning:
+        transitions:
+          - to: done
+            when: "every accepted row from the confirmed review table is written to its single target"
+            gates:
+              - "user confirmed the review table — the accept / reject / add response is recorded"
+              - "every accepted lesson written to its target file"
+            hooks: ["script close-working-set --stage _lessons --prefix learn"]
+      done:
+        terminal: true
+
+    superstates:
+      terminal:
+        states:
+          - done

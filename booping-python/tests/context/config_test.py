@@ -8,7 +8,7 @@ import pytest
 import yaml
 
 from booping.context import config as config_mod
-from booping.context.config import AgentConfig, SkillConfig
+from booping.query import QuerySpec, build_spec, resolve_spec
 from tests.helpers import get_fixture_path
 
 
@@ -47,60 +47,42 @@ def test_list_replacement() -> None:
     override_path.unlink()
 
 
-def test_agent_config_native_validates() -> None:
-    cfg = AgentConfig.model_validate({"internal": True, "good_for": ["x"]})
-    assert cfg.internal is True
-    assert cfg.good_for == ["x"]
-
-
-def test_agent_config_ignores_unknown_field() -> None:
-    cfg = AgentConfig.model_validate({"tipe": "cli"})
-    assert not hasattr(cfg, "tipe")
-
-
-def test_skill_config_disable_internal_agents_default() -> None:
-    cfg = SkillConfig.model_validate({"agents": {"a": {"internal": True}}})
-    assert cfg.disable_internal_agents is False
-
-
-def test_validate_skills_warns_on_unknown_agent_field(
-    capsys: pytest.CaptureFixture[str],
+def test_unknown_keys_load_without_warning(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    bad = {"skills": {"develop": {"agents": {"x": {"bogus": "field"}}}}}
-    config_mod.validate_skills(bad)
-    err = capsys.readouterr().err
-    assert "bogus" in err
-
-
-def test_validate_skills_passes_on_valid_config() -> None:
-    good = {
-        "skills": {
-            "develop": {
-                "agents": {
-                    "booping-developer": {"internal": True, "good_for": ["coding"]},
-                    "pi-developer": {"good_for": ["coding"], "bad_for": ["exploration"]},
-                },
-                "disable_internal_agents": True,
+    """No key is schema-checked: an invented playbook block loads verbatim."""
+    plugin_root = get_fixture_path("plugin-root-minimal")
+    override_path = tmp_path / "config.yaml"
+    override_path.write_text(
+        yaml.dump(
+            {
+                "core": {
+                    "my_playbook": {
+                        "whatever": {"agents": {"x": {"bogus": "field"}}},
+                    }
+                }
             }
-        }
-    }
-    config_mod.validate_skills(good)
+        )
+    )
+    cfg = config_mod.load(plugin_root, [override_path])
+    assert cfg["core"]["my_playbook"]["whatever"]["agents"]["x"] == {"bogus": "field"}  # type: ignore[index]
+    assert capsys.readouterr().err == ""
 
 
 def test_loader_does_not_filter_internal_when_disable_flag_set(tmp_path: Path) -> None:
     plugin_root = Path(__file__).resolve().parents[3]
     override_path = tmp_path / "config.yaml"
     override_path.write_text(
-        yaml.dump({"skills": {"develop": {"disable_internal_agents": True}}})
+        yaml.dump({"core": {"develop_playbook": {"disable_internal_agents": True}}})
     )
     cfg = config_mod.load(plugin_root, [override_path])
-    agents = cfg["skills"]["develop"]["agents"]  # type: ignore[index]
+    agents = cfg["core"]["develop_playbook"]["agents"]  # type: ignore[index]
     assert "booping-developer" in agents
     assert "booping-researcher" in agents
 
 
 def test_agent_entry_replaces_wholesale(tmp_path: Path) -> None:
-    """Project override of `skills.<name>.agents.<id>` replaces the entry, not deep-merges.
+    """Project override of `core.<name>_playbook.agents.<id>` replaces the entry, not deep-merges.
 
     The core entry's `internal: true` must NOT leak into the override.
     """
@@ -109,8 +91,8 @@ def test_agent_entry_replaces_wholesale(tmp_path: Path) -> None:
     override_path.write_text(
         yaml.dump(
             {
-                "skills": {
-                    "develop": {
+                "core": {
+                    "develop_playbook": {
                         "agents": {
                             "booping-developer": {
                                 "good_for": ["overridden"],
@@ -123,13 +105,13 @@ def test_agent_entry_replaces_wholesale(tmp_path: Path) -> None:
         )
     )
     cfg = config_mod.load(plugin_root, [override_path])
-    entry = cfg["skills"]["develop"]["agents"]["booping-developer"]  # type: ignore[index]
+    entry = cfg["core"]["develop_playbook"]["agents"]["booping-developer"]  # type: ignore[index]
     assert entry == {
         "good_for": ["overridden"],
         "bad_for": ["nothing"],
     }
     # Sibling agent stays untouched.
-    assert cfg["skills"]["develop"]["agents"]["booping-researcher"]["internal"] is True  # type: ignore[index]
+    assert cfg["core"]["develop_playbook"]["agents"]["booping-researcher"]["internal"] is True  # type: ignore[index]
 
 
 def test_ordered_override_paths_signature() -> None:
@@ -187,17 +169,46 @@ def test_agents_shallow_merge_across_three_tiers(
     plugin_root = Path(__file__).resolve().parents[3]
     global_path = _write_global(
         isolated_xdg_config_home,
-        {"skills": {"develop": {"agents": {"g-agent": {"good_for": ["g"]}}}}},
+        {"core": {"develop_playbook": {"agents": {"g-agent": {"good_for": ["g"]}}}}},
     )
     project_path = tmp_path / "config.yaml"
     project_path.write_text(
-        yaml.dump({"skills": {"develop": {"agents": {"p-agent": {"good_for": ["p"]}}}}})
+        yaml.dump(
+            {"core": {"develop_playbook": {"agents": {"p-agent": {"good_for": ["p"]}}}}}
+        )
     )
     cfg = config_mod.load(plugin_root, [global_path, project_path])
-    agents = cfg["skills"]["develop"]["agents"]  # type: ignore[index]
+    agents = cfg["core"]["develop_playbook"]["agents"]  # type: ignore[index]
     assert "booping-developer" in agents  # core preserved
     assert "g-agent" in agents  # global tier added
     assert "p-agent" in agents  # project tier added
+
+
+def test_project_tier_macros_merge_like_any_other_key(
+    tmp_path: Path, isolated_xdg_config_home: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    plugin_root = get_fixture_path("plugin-root-minimal")
+    global_path = _write_global(
+        isolated_xdg_config_home, {"core": {"macros": {"now": ["echo", "global"]}}}
+    )
+    project_path = tmp_path / "config.yaml"
+    project_path.write_text(
+        yaml.dump(
+            {
+                "core": {"macros": {"now": ["echo", "project"], "extra": ["echo", "x"]}},
+                "sprint": {"default_threshold_sp": 50},
+            }
+        )
+    )
+
+    cfg = config_mod.load(plugin_root, [global_path, project_path])
+
+    assert cfg["core"]["macros"] == {  # type: ignore[index]
+        "now": ["echo", "project"],
+        "extra": ["echo", "x"],
+    }
+    assert cfg["sprint"]["default_threshold_sp"] == 50  # type: ignore[index]
+    assert capsys.readouterr().err == ""
 
 
 def test_missing_global_file_silently_skipped(isolated_xdg_config_home: Path) -> None:
@@ -206,3 +217,53 @@ def test_missing_global_file_silently_skipped(isolated_xdg_config_home: Path) ->
     assert not missing.exists()
     cfg = config_mod.load(plugin_root, [missing])
     assert cfg["sprint"]["default_threshold_sp"] == 35  # type: ignore[index]
+
+
+CORE_QUERY_PATHS = [
+    "core.code_review_playbook.queries.scope_candidates",
+    "core.retro_playbook.queries.candidates",
+    "core.learn_playbook.queries.candidates",
+    "core.groom_playbook.queries.latest_plans",
+]
+
+# Specs whose rows are not plans and so carry a glob of their own.
+CORE_QUERY_PATHS_WITH_OWN_GLOB = ["core.learn_playbook.queries.candidates"]
+
+
+def _core_config() -> dict[str, object]:
+    return config_mod.load(Path(__file__).resolve().parents[3], [])
+
+
+def test_plans_glob_is_the_single_directory_shape() -> None:
+    assert _core_config()["core"]["plans"]["glob"] == ["plans/*/index.md"]  # type: ignore[index]
+
+
+@pytest.mark.parametrize("dotted", CORE_QUERY_PATHS)
+def test_each_consumer_spec_resolves_to_a_spec_mapping(dotted: str) -> None:
+    spec = resolve_spec(_core_config(), dotted)
+    assert isinstance(spec, dict)
+    assert set(spec) <= {"glob", "where", "sort", "columns"}
+    assert QuerySpec(**spec) is not None
+
+
+@pytest.mark.parametrize(
+    "dotted", [p for p in CORE_QUERY_PATHS if p not in CORE_QUERY_PATHS_WITH_OWN_GLOB]
+)
+def test_a_spec_omitting_glob_falls_back_to_core_plans_glob(dotted: str) -> None:
+    cfg = _core_config()
+    spec = build_spec(cfg, resolve_spec(cfg, dotted))
+    assert spec.glob == cfg["core"]["plans"]["glob"]  # type: ignore[index]
+
+
+@pytest.mark.parametrize("dotted", CORE_QUERY_PATHS_WITH_OWN_GLOB)
+def test_a_spec_declaring_its_own_glob_does_not_fall_back(dotted: str) -> None:
+    cfg = _core_config()
+    declared = resolve_spec(cfg, dotted)
+    assert isinstance(declared, dict)
+    assert build_spec(cfg, declared).glob == declared["glob"]
+
+
+def test_a_spec_declaring_glob_keeps_it() -> None:
+    cfg = _core_config()
+    spec = build_spec(cfg, {"glob": ["notes/*.md"]})
+    assert spec.glob == ["notes/*.md"]

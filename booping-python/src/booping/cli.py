@@ -6,11 +6,14 @@ from booping.commands import build as build_cmd
 from booping.commands import config_get as config_get_cmd
 from booping.commands import debug as debug_cmd
 from booping.commands import frontmatter_update as frontmatter_update_cmd
+from booping.commands import marker_set as marker_set_cmd
+from booping.commands import playbook_state as playbook_state_cmd
+from booping.commands import playbook_transition as playbook_transition_cmd
+from booping.commands import query as query_cmd
 from booping.commands import render as render_cmd
 from booping.commands import render_playbook as render_playbook_cmd
-from booping.commands import render_sprints as render_sprints_cmd
-from booping.commands import transition as transition_cmd
-from booping.commands import vault_commit as vault_commit_cmd
+from booping.commands import scaffold as scaffold_cmd
+from booping.commands import session_stats as session_stats_cmd
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -22,14 +25,17 @@ def build_parser() -> argparse.ArgumentParser:
     sub.required = True
 
     render_cmd.add_parser(sub)
-    render_sprints_cmd.add_parser(sub)
     render_playbook_cmd.add_parser(sub)
+    playbook_transition_cmd.add_parser(sub)
+    playbook_state_cmd.add_parser(sub)
     config_get_cmd.add_parser(sub)
+    marker_set_cmd.add_parser(sub)
+    query_cmd.add_parser(sub)
+    scaffold_cmd.add_parser(sub)
     build_cmd.add_parser(sub)
     debug_cmd.add_parser(sub)
     frontmatter_update_cmd.add_parser(sub)
-    transition_cmd.add_parser(sub)
-    vault_commit_cmd.add_parser(sub)
+    session_stats_cmd.add_parser(sub)
 
     return parser
 

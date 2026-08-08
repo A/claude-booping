@@ -5,11 +5,11 @@
 Required:
 
 - **`uv`** — drives the plugin's Python tooling. The `bin/booping` wrapper is `uv run --project booping-python booping ...`, so every skill load goes through uv.
-- **`git`** — the plugin assumes a git working tree for branching, diffs, and commit attribution during `/develop` and `/code-review`.
+- **`git`** — the plugin assumes a git working tree for branching, diffs, and commit attribution during the develop and code-review playbooks.
 
 Optional:
 
-- **`GEMINI_API_KEY`** — when set in your environment, `/groom` cross-validates the drafted plan against Gemini once before handing it to you for review. Without the key, cross-validation skips silently — the rest of the loop is unaffected.
+- **A cross-review agent** — set `core.groom_playbook.cross_review_agent` in your config and the [groom playbook](groom.md) hands the drafted plan to that agent for a second-model review before presenting it to you. With no agent configured the step is skipped silently — the rest of the loop is unaffected.
 
 Install the prerequisites:
 
@@ -38,23 +38,28 @@ Update later with `/plugin update booping` (or from the `/plugin` UI).
 `cd` into the target repository and run:
 
 ```text
-/install
+/playbook setup
 ```
 
-`/install` is idempotent and prompts for where the vault should live — the default `~/Claude/{project}/` (kept outside the repo) or a **repo-local** directory (recorded via the `.booping` marker's `vault_path:` key, with a vault `.gitignore` written for you). Either way it scaffolds the per-project vault:
+The `setup` playbook takes the repo from any starting state to a working booping project in one conversation, and every phase already satisfied on entry is detected and skipped rather than redone — a re-run on a wired-up project reports the state instead of changing it.
 
-- `plans/` — sprint plans authored by `/groom`, executed by `/develop`.
-- `retrospectives/` — retro files authored by `/retro`.
-- `lessons/` — durable rules authored by `/learn`.
-- `notes/` — your own free-form notes (untouched by skills).
-- `_booping/` — per-skill / per-agent extension files. `/install` always seeds `agent_booping-developer.md`; it seeds the two skill files only when the project carries local signal the repo `CLAUDE.md` doesn't already own, and skips them otherwise. `/learn` keeps whatever is seeded current afterwards:
-    - `_booping/agent_booping-developer.md` — stack + conventions for the developer agent (always seeded).
-    - `_booping/skill_groom.md` — seeded only on a real groom override (e.g. a sizing override the repo `CLAUDE.md` doesn't carry); skipped otherwise.
-    - `_booping/skill_develop.md` — seeded only when there's dev/env signal the repo `CLAUDE.md` lacks; skipped otherwise.
-- `.booping` — marker file (written in the repo root, not the vault) telling skills which vault to resolve.
+It runs in two steps:
+
+1. **Machine level** — when booping is not yet initialized, it asks for your preferred home dir (default `~/Claude/`), writes the machine config at `${XDG_CONFIG_HOME:-~/.config}/booping/config.yaml`, and makes the home dir exist as a git repo.
+2. **Project level** — it asks where the vault lives (the default `<home_dir>/{project}/`, kept outside the repo, or a **repo-local** directory recorded via the `.booping` marker's `vault_path:` key), the project name, and marker visibility; then scaffolds the vault tree, writes the `.booping` marker, symlinks a repo-local vault into the home dir, and seeds `sprints.md`.
+
+The scaffolded vault:
+
+- `plans/` — sprint plans authored by the [groom playbook](groom.md), executed by the [develop playbook](develop.md).
+- `retrospectives/` — standalone retrospectives authored by the [retro playbook](retro.md), consumed by the [learn playbook](learn.md).
+- `_lessons/` — durable, targeted rules authored by the [learn playbook](learn.md).
+- `notes/` — your own free-form notes (untouched by booping).
+- `sprints.md` — an Obsidian Bases fence over the vault's `plans/*/index.md` files; seeded once, evaluated live by Obsidian.
+- `.gitignore` — vault-level ignores, including the `.booping.log` the CLI writes at the vault root.
+- `.booping` — marker file (written in the repo root, not the vault) telling booping which vault to resolve.
 
 For the full directory tour (including `plan_templates/`, `review_templates/`, `sprints.md`, and `config.yaml`), see [Vault](vault.md).
 
 ## Verify
 
-After `/install`, run `/chat` inside the same repo. It should orient against the freshly scaffolded vault, regenerate `~/Claude/{project}/sprints.md`, and report that the vault is empty — your signal that you're ready to run your first [/groom](groom.md).
+After setup, run `/playbook` inside the same repo. It should list the shipped playbooks — `groom`, `develop`, `retro`, `learn`, `code-review`, `setup`, `migrate`, `playbook-authoring` — with no STOP notice, which is your signal that the vault resolved and you're ready to run your first [groom](groom.md).

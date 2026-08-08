@@ -3,36 +3,91 @@ name: ci
 on:
   push:
     branches: [master]
-    paths:
-      - booping-python/**
-      - .github/workflows/ci.yml
   pull_request:
-    paths:
-      - booping-python/**
-      - .github/workflows/ci.yml
   workflow_dispatch:
 
-defaults:
-  run:
-    working-directory: booping-python
-
 jobs:
-  check:
+  python:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install just
+        uses: extractions/setup-just@v4
+
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v9.0.0
+        with:
+          enable-cache: true
+          cache-dependency-glob: booping-python/uv.lock
 
       - name: Sync deps
         run: uv sync
+        working-directory: booping-python
 
       - name: Lint
-        run: uv run ruff check .
+        run: just lint
 
       - name: Typecheck
-        run: uv run basedpyright
+        run: just typecheck
 
       - name: Test
-        run: uv run pytest
+        run: just pytest
+
+  snapshots:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install just
+        uses: extractions/setup-just@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v9.0.0
+        with:
+          enable-cache: true
+          cache-dependency-glob: booping-python/uv.lock
+
+      - name: Sync deps
+        run: uv sync
+        working-directory: booping-python
+
+      - name: Check report snapshots
+        run: just snapshots
+
+  mdcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install just
+        uses: extractions/setup-just@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v9.0.0
+        with:
+          enable-cache: true
+          cache-dependency-glob: booping-python/uv.lock
+
+      - name: Sync deps
+        run: uv sync
+        working-directory: booping-python
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      # cache-bin keeps the installed mdcheck binary, so a warm run skips the compile
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: markdown-checker-0.1.1
+          cache-targets: false
+
+      - name: Install mdcheck
+        run: cargo install markdown-checker --version 0.1.1 --locked
+
+      - name: Verify mdcheck is on PATH
+        run: mdcheck --version
+
+      - name: Structural checks over rendered reports
+        run: just mdcheck

@@ -1,0 +1,19 @@
+description: playbook-authoring step-suite
+
+prompts:
+  - id: file://opus-5.md
+    label: opus-5
+
+providers:
+  - id: file://../../_lib/claude_provider.py
+    config:
+      mode: step
+      context:
+        - _lib/return-contract.md
+      output_mode: files
+      model: sonnet
+      effort: medium
+
+defaultTest: file://../../_lib/grader.yaml
+
+tests: file://tests.yaml

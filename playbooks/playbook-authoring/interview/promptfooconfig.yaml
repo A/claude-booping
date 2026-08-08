@@ -1,0 +1,25 @@
+# interview step — turn a user's playbook description into a confirmed-ready brief, asking
+# only about real gaps. output_mode: files — the consumer writes <slug>/_specs/brief.md; the
+# grader reads the file tree plus the trailing <return> block.
+description: playbook-authoring interview
+
+# prompt.md is a Jinja wrapper (`{% include "opus-5.md" %}`) — promptfoo would render it with
+# nunjucks and choke on the include, so the set lists the body the wrapper points at.
+# `just verify-wrapper playbook-authoring interview opus-5.md` proves they agree.
+prompts:
+  - id: file://opus-5.md
+    label: opus-5
+
+providers:
+  - id: file://../../_lib/claude_provider.py
+    config:
+      mode: step
+      context:
+        - _lib/return-contract.md
+      output_mode: files
+      model: sonnet
+      effort: medium
+
+defaultTest: file://../../_lib/grader.yaml
+
+tests: file://tests.yaml

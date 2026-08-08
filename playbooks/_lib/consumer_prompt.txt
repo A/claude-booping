@@ -1,0 +1,22 @@
+===TEMPLATE===
+You are a technical writer producing a document for a software project.
+
+Below: (1) a documentation entry defining what to produce — a skill or guide defining a procedure, or an atom/template defining a document format, possibly followed by the template it fills and the atoms it references; (2) an input describing the source material.
+
+Produce the document(s) from the input following the entry — its steps/Procedure/Template, Terms, rules and Checks. Any human-confirmation gate cannot be satisfied here, so leave such gates in their unconfirmed state. Use only material supported by the input; do not invent. <<OUTPUT_RULES>>
+
+<atom>
+<<ATOM>>
+</atom>
+
+<input>
+<<INPUT>>
+</input>
+===TEXT_RULES===
+When a guide's output is several documents, emit each as a section headed by its file name.
+
+Output the document only: no commentary about the task.
+===FILES_RULES===
+Write each document as a real file in the current working directory — relative paths only, never absolute or outside it. Use the file names the entry prescribes; where it prescribes none, pick short kebab-case `.md` names. Subdirectories are allowed when the entry calls for them.
+
+Reply with what the entry's return contract prescribes (its "Return …" instruction), and nothing else. When the entry prescribes no return, reply with only the manifest of files written: one relative path per line, no commentary.

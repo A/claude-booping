@@ -1,0 +1,204 @@
+state: run
+graph:
+  survey: []
+  briefing: [survey]
+  roles: [briefing]
+  targets: [briefing]
+  feature-index: [briefing]
+  research: [roles, targets, feature-index]
+  sync-specs: [research]
+  targeting: [sync-specs]
+  update:
+    dependencies: [targeting]
+    repeat: once per destination document in the confirmed targeting plan; instances may run in parallel
+    graph:
+      write: []
+      compact: [write]
+      verify: [compact]
+  changelog: [update]
+  record: [changelog]
+
+states:
+  run:
+    initial: surveying
+    statuses:
+      surveying:
+        transitions:
+          - to: awaiting-scope-confirm
+            when: "survey opened the run record with the spec-set state and the undocumented set"
+            hooks:
+              - frontmatter-update started="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - frontmatter-update commit="{{ macro('core.macros.git_commit') }}"
+      awaiting-scope-confirm:
+        transitions:
+          - to: surveying
+            when: "the user's scope answer needs a fresh survey — a different item range, or spec files the survey did not inspect"
+          - to: briefing
+            when: "the user settled which spec files to refresh and which delivered items to cover, and at least one spec file needs work"
+            gates:
+              - "explicit user confirmation captured — silence never counts"
+            hooks:
+              - frontmatter-update scope_reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+          - to: researching
+            when: "the user settled the scope and every spec file is present and current — the spec waves are skipped"
+            gates:
+              - "explicit user confirmation captured"
+              - "the survey found no missing or incomplete spec file"
+            hooks:
+              - frontmatter-update scope_reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - "script commit-docs"
+          - to: done
+            when: "the survey found nothing to do — spec set current, undocumented set empty — and the user closed the run"
+            gates:
+              - "explicit user confirmation captured"
+              - "the undocumented set is empty"
+            hooks:
+              - frontmatter-update scope_reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - frontmatter-update completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - "script commit-docs"
+      briefing:
+        transitions:
+          - to: awaiting-briefing-confirm
+            when: "briefing wrote `_specs/index.md`, naming any vision shift against the previous one"
+      awaiting-briefing-confirm:
+        transitions:
+          - to: briefing
+            when: "the user reworks the briefing — what the project is, who it serves, where it is heading"
+          - to: spec-building
+            when: "the user confirms the briefing"
+            gates:
+              - "explicit user confirmation captured — a vision shift is acknowledged in the answer, silence never counts"
+            hooks:
+              - frontmatter-update _specs/index.md reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+      spec-building:
+        transitions:
+          - to: awaiting-roles-targets-confirm
+            when: "roles, targets and feature-index each wrote their file"
+      awaiting-roles-targets-confirm:
+        transitions:
+          - to: spec-building
+            when: "the user wants roles or surfaces refined"
+          - to: awaiting-features-confirm
+            when: "the user confirms roles and surfaces, presented together"
+            gates:
+              - "explicit user confirmation captured — silence never counts"
+            hooks:
+              - frontmatter-update _specs/roles.md reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - frontmatter-update _specs/targets.md reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+      awaiting-features-confirm:
+        transitions:
+          - to: spec-building
+            when: "the user wants features, capabilities or groups refined"
+          - to: researching
+            when: "the user confirms the feature index"
+            gates:
+              - "explicit user confirmation captured"
+            hooks:
+              - frontmatter-update _specs/features.md reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - "script commit-docs"
+      researching:
+        transitions:
+          - to: awaiting-changes-confirm
+            when: "the per-item sub-agents returned and the typed change table is posted in chat"
+            gates:
+              - "every in-scope delivered item carries a row, each typed"
+      awaiting-changes-confirm:
+        transitions:
+          - to: researching
+            when: "the user adds items that still have to be read"
+          - to: syncing-specs
+            when: "the user confirms the change table, extensions and refinements folded in"
+            gates:
+              - "explicit user confirmation captured — silence never counts"
+            hooks:
+              - frontmatter-update changes_reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+      syncing-specs:
+        transitions:
+          - to: targeting
+            when: "sync-specs folded the confirmed table into briefing, roles, surfaces and feature index"
+      targeting:
+        transitions:
+          - to: awaiting-targeting-confirm
+            when: "targeting wrote the role × surface plan to the run record"
+            gates:
+              - "one row per destination document, no two rows naming the same file"
+      awaiting-targeting-confirm:
+        transitions:
+          - to: targeting
+            when: "the user reworks rows — a destination, its assigned changes, or what each must say"
+          - to: updating
+            when: "the user confirms the targeting plan — this gate always fires"
+            gates:
+              - "explicit user confirmation captured — silence never counts"
+            hooks:
+              - frontmatter-update targeting_reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - "script commit-docs"
+      updating:
+        transitions:
+          - to: writing-changelog
+            when: "every targeting-plan row left the loop"
+            gates:
+              - "each row's progress column reads verified, or dropped with its reason"
+      writing-changelog:
+        transitions:
+          - to: recording
+            when: "the run's entry is written to the repo's `CHANGELOG.md`, seeded if it was absent"
+      recording:
+        transitions:
+          - to: done
+            when: "record closed the run record — what landed where — and listed the work items now documented"
+            gates:
+              - "the run record's `documented:` list names every covered work item, and its landed table every destination written — `close-documented` reads the list"
+            hooks:
+              - frontmatter-update completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - "script close-documented"
+              - "script commit-docs"
+      done:
+        terminal: true
+      cancelled:
+        terminal: true
+
+    superstates:
+      spec-set:
+        states:
+          - surveying
+          - awaiting-scope-confirm
+          - briefing
+          - awaiting-briefing-confirm
+          - spec-building
+          - awaiting-roles-targets-confirm
+          - awaiting-features-confirm
+        transitions:
+          - to: cancelled
+            when: "the user cancels the run"
+            hooks:
+              - frontmatter-update completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - "script commit-docs"
+      change-set:
+        states:
+          - researching
+          - awaiting-changes-confirm
+          - syncing-specs
+          - targeting
+          - awaiting-targeting-confirm
+        transitions:
+          - to: cancelled
+            when: "the user cancels the run"
+            hooks:
+              - frontmatter-update completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - "script commit-docs"
+      producing:
+        states:
+          - updating
+          - writing-changelog
+          - recording
+        transitions:
+          - to: cancelled
+            when: "the user cancels the run"
+            hooks:
+              - frontmatter-update completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - "script commit-docs"
+      terminal:
+        states:
+          - done
+          - cancelled

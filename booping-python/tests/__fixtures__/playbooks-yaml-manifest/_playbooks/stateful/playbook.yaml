@@ -1,0 +1,44 @@
+state: main
+graph:
+  intake: []
+  step-pipeline:
+    dependencies: [intake]
+    state: step
+    repeat: once per item the intake names
+    graph:
+      step-spec: []
+      step-review: [step-spec]
+
+states:
+  main:
+    artifact: index.md
+    initial: intaking
+    statuses:
+      intaking:
+        transitions:
+          - to: developing-steps
+            when: intake step complete
+            gates: ["request + scope captured in the artifact"]
+            hooks:
+              - frontmatter-update intaken="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+      developing-steps:
+        transitions:
+          - to: done
+            when: every step instance terminal
+            hooks:
+              - frontmatter-update completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+      done: {terminal: true}
+  step:
+    artifact: steps/{instance}/index.md
+    initial: spec-ing
+    statuses:
+      spec-ing:
+        transitions:
+          - to: reviewing
+            when: spec written
+      reviewing:
+        transitions:
+          - to: done
+            when: user confirmed the spec
+            gates: ["explicit user confirmation captured"]
+      done: {terminal: true}

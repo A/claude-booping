@@ -1,0 +1,4 @@
+graph:
+  intake: []
+  build: [intake]
+  check: [build]

@@ -1,26 +1,36 @@
 # booping
 
-A self-learning, project-scoped sprint workflow for Claude Code. booping turns a feature idea into a durable, on-disk loop — **groom → develop → retro → learn** — that effectively utilizes sub-agents to avoid context rot, with optional Gemini cross-validation when `GEMINI_API_KEY` is set. Every artifact (plans, retros, lessons, sprint snapshots) lives under `~/Claude/{project}/`, one folder per codebase, so weeks-long programs stay legible long after the session ends.
+A self-learning, project-scoped sprint workflow for Claude Code. booping turns a feature idea into a durable, on-disk loop — **groom → develop → retro → learn** — that uses sub-agents to avoid context rot, with an optional second-model cross-review of every plan. Every artifact (plans, retros, lessons, sprint snapshots) lives under `~/Claude/{project}/`, one folder per codebase, so weeks-long programs stay legible long after the session ends.
 
 ![Vault open in Obsidian](docs/images/vault-in-obsidian.webp)
 
 *Each project's vault is a plain Obsidian-friendly folder of markdown files.*
 
+## What it's for
+
+The core use case: take a feature at whatever maturity it arrives — a rough idea over an existing codebase, a half-formed brief, a detailed PRD — and drive it through one loop: groom it into a plan, develop it, review the diff, retro what shipped.
+
+booping is **not** spec-driven development — it doesn't keep specs as a living mirror of the codebase. It's closer to scrum sprints: a plan is a sprint artifact, done and forgotten once it ships; what persists is the vault's history and the lessons the loop distils from it. The core is flexible, though — playbooks are plain markdown procedures, and when the shipped loop doesn't fit, you write your own (see [Extensibility](#extensibility)).
+
 ## Obsidian-ready by design
 
 The vault at `~/Claude/{project}/` is markdown-only with YAML frontmatter that Obsidian renders natively as Properties. One vault per project, side-by-side with whatever else you keep in `~/Claude/`. No proprietary database, no lock-in — just files you can grep, version, and edit by hand.
 
+This repo is developed with booping itself, and its vault is checked in at [`vault/`](vault/) — browse a [finished plan](vault/plans/202608081300_session-time-metrics/index.md), the [targeted lessons](vault/_lessons/) the loop has accumulated, or a [retrospective](vault/retrospectives/20260722-seven-plan-retro.md) to see what the artifacts look like in practice.
+
 ## Disclaimer
 
-booping is aimed at **experienced developers and tech leads** — people comfortable making architectural calls, decomposing work, and reviewing code critically. The skills assume you can tell a sharp plan from a vague one and a sound diff from a sloppy one.
+booping is aimed at **experienced developers and tech leads** — people comfortable making architectural calls, decomposing work, and telling a sharp plan from a vague one, a sound diff from a sloppy one.
 
 It's built for **iterative, agile-style development**: maintenance, incremental features, or growing a project sprint by sprint. It is **not** a waterfall tool — don't hand it a whole-project spec and expect a finished product. One plan is one sprint; the loop compounds across many.
 
-Per-project configuration tunes the framework to each codebase: place a `~/Claude/{project}/config.yaml` file in your vault and it deep-merges over the plugin's `src/config.yaml` at render time — the lifecycle, sprint scale, and agent wiring are the natural targets for per-project tuning. The `/code-review` skill is a side-route for stack-aware review of in-progress diffs against the active plan.
+Per-project configuration tunes the framework to each codebase: drop a `config.yaml` into your vault and it overrides the defaults — sprint scale, task types, branch conventions and agent wiring are the natural targets. The `code-review` playbook is a side-route for stack-aware review of a finished plan's diff, recorded as its own artifact under `codereviews/`.
+
+**A note on maturity:** v1.0 works — the whole loop is dogfooded on this repo — but it's beta-grade. Expect rough edges (eval suites pending review, some skills-era legacy in the core). Installation trouble? Run `/playbook setup` and discuss the issue with it.
 
 ## Dependencies
 
-Required: `uv` and `git`. Optional: `GEMINI_API_KEY` environment variable for `/groom` cross-validation against Gemini.
+Required: `uv` and `git`. Optional: a cross-review agent named in your config, for a second-model review of every drafted plan.
 
 ```bash
 # macOS
@@ -42,81 +52,107 @@ Inside Claude Code, register the marketplace once, then install the plugin:
 
 Update later via `/plugin update booping` (or from the `/plugin` UI).
 
-After installing, `cd` into the target repo and run `/install`. That single step scaffolds `~/Claude/{project}/` (with `plans/`, `retrospectives/`, `lessons/`, `notes/`, `_booping/`).
+After installing, `cd` into the target repo and run `/playbook setup`. It settles the machine config, then scaffolds the vault (`plans/`, `retrospectives/`, `codereviews/`, `_lessons/`, `notes/`) and writes the `.booping` marker. Anything already in place is detected and skipped.
 
 ## Quick start
 
 For a hand-holding walkthrough and per-command reference, see the [docs site](https://A.github.io/claude-booping/).
 
-The full loop is five commands. Run them in order:
+The full loop is five steps, each a **playbook** driven by `/playbook` — the plugin's single entry point. Run them in order:
 
 ```bash
 # Inside the target repo, once:
-/install
+/playbook setup
 
 # Spec a feature, bug, or refactor — free-text description.
 # The more detailed your brief, the sharper the resulting plan:
-/groom Add per-tenant rate limiting to the public API
+/playbook groom — add per-tenant rate limiting to the public API
 
-# Execute the next ready plan (auto-claims from the queue):
-/develop
-# …or target a specific one (path relative to ~/Claude/{project}/):
-/develop plans/20260426-per-tenant-rate-limiting.md
+# Execute the plan (bare invocation resolves it from the vault queue):
+/playbook develop
+# …or name it:
+/playbook develop — plans/202604260930_per-tenant-rate-limiting/index.md
 
 # Retrospect on what shipped:
-/retro plans/20260426-per-tenant-rate-limiting.md
+/playbook retro
 
 # Fold the retro's findings into durable rules:
-/learn retrospectives/20260426-per-tenant-rate-limiting.md
+/playbook learn
 ```
 
-The skills will list candidates if you forget the exact filename.
+Candidates are listed for you if you forget the exact path.
 
 ## Workflow
 
-A plan moves through a small set of statuses. `/groom` shapes the spec and waits for explicit user approval before handing off; `/develop` claims the next ready plan and executes milestone by milestone; `/retro` compares what shipped to the original spec; `/learn` distils the retrospective into rules that bind the next sprint.
+`groom` shapes the spec and waits for explicit user approval before handing off; `develop` claims the next ready plan and executes milestone by milestone; `retro` compares what shipped to the original spec; `learn` distils the retrospective into rules that bind the next sprint.
 
-The status vocabulary below is the canonical set in `src/config.yaml` `plan.statuses`:
+There is no shared status table — **each playbook has its own status vocabulary** and advances its own run artifact through it. Groom and develop run on the plan, so its `status:` frontmatter is whatever those two last wrote, and the plan track ends when develop closes it — at `done`, or at `fail` or `cancelled`. Retro and learn are a **separate track** over a standalone retrospective under `retrospectives/`; code review is a third, over one file per run under `codereviews/`. The statuses those tracks write are their own artifact's, never the plan's.
 
 ```text
-/groom    backlog → in-spec → awaiting-plan-review → ready-for-dev
-          (loopback: awaiting-plan-review → in-spec)
-          (parking: in-spec → backlog)
-          (cancellation: backlog/in-spec/awaiting-plan-review → cancelled)
+groom     framing → researching → drafting → cross-reviewing → presenting
+          → awaiting-approval → ready-for-dev (terminal)
+          (loopbacks: drafting → researching, awaiting-approval → drafting)
+          (any non-terminal status → cancelled (terminal))
 
-/develop  ready-for-dev → in-progress → awaiting-retro
-          (failure: in-progress → fail)
+develop   awaiting-approval → ready-for-dev → in-progress
+          → done (terminal) | fail (terminal)
+          (any non-terminal status → cancelled (terminal))
 
-/retro    awaiting-retro → awaiting-learning
-          (skip: awaiting-retro → done)
+retro     awaiting-retro → awaiting-learning (terminal)     [on retrospectives/{slug}.md]
 
-/learn    awaiting-learning → done
+learn     awaiting-learning → done (terminal)               [on retrospectives/{slug}.md]
 
-Terminal states: cancelled · done · fail
+review    in-agent-review → human-review → done (terminal)  [on codereviews/{dir}/{ts}.md]
 ```
+
+The tracks join the plan by frontmatter, not by status. A finished plan carries `retro: null` until a retrospective covers it, at which point retro stamps the retrospective's path there (or `skipped` when you skip it) — that null is the retro queue. Review joins by a **list**: `code_reviews:` starts null and every closing review appends its path, so the key reads as history rather than a queue flag, and the review queue is every `done` plan — a second or third pass over the same plan is ordinary, not an exception.
 
 ## Statuses
 
-A plan carries one of the following statuses in its frontmatter. Terminal states are marked.
+A plan's frontmatter status is written by groom or develop. Retro and learn write their own statuses onto the retrospective instead, and code review onto its own review file.
 
-- **`backlog`** — Parked plan. Split-sibling stubs and user-filed ideas not yet in grooming.
-- **`in-spec`** — `/groom` is actively researching, designing, and drafting.
-- **`awaiting-plan-review`** — Draft complete; `/groom` is presenting and awaiting explicit user approval, change request, or cancellation.
-- **`ready-for-dev`** — Approved. Queued for `/develop` to claim.
-- **`in-progress`** — `/develop` has claimed the plan and is executing milestones.
-- **`awaiting-retro`** — All milestones done; waiting for `/retro` to write the retrospective.
-- **`awaiting-learning`** — Retro written; waiting for `/learn` to absorb lessons.
-- **`done`** *(terminal)* — `/learn` has absorbed all lessons.
-- **`cancelled`** *(terminal)* — User shelved the plan.
-- **`fail`** *(terminal)* — `/develop` hit an unrecoverable blocker.
+**groom**
 
-`src/config.yaml` `plan.statuses` is the canonical contract for the full transition table — including triggers (`when`), gates, artifacts, and `on_exit` mutations. Read it there if you need the exact rules; this README only narrates them.
+- **`framing`** — clarifying the request and settling scope.
+- **`researching`** — the blast-radius and web-research passes are running.
+- **`drafting`** — design is being settled with you in conversation and written into the plan body.
+- **`cross-reviewing`** — a second model is reviewing the draft (skipped when no reviewer is configured).
+- **`presenting`** — the approval screen is on the table.
+- **`awaiting-approval`** — waiting for your explicit approval or change request; groom's single review gate.
+- **`ready-for-dev`** *(groom's terminal)* — approved, queued for develop to claim.
+
+**develop**
+
+- **`awaiting-approval`** — develop's entry status when a run starts on a plan still parked at groom's approval gate. Handing the plan to develop counts as the approval: it advances to `ready-for-dev` without asking.
+- **`in-progress`** — develop has claimed the plan and is executing milestones.
+- **`done`** *(develop's terminal)* — all milestones done and verification green. The end of the plan lifecycle; retro and code review pick the plan up from here through frontmatter, without moving it again.
+- **`fail`** *(develop's terminal)* — an unrecoverable blocker after two documented fix attempts, with your approval to abort.
+
+**groom / develop**
+
+- **`cancelled`** *(terminal in both machines)* — you called the run off. Reachable from every non-terminal status of either machine, so a plan can be abandoned at any point without inventing a fake outcome. Groom snapshots the plan into the vault on the way out; develop stamps `completed:`.
+
+**retro / learn** — on the retrospective at `retrospectives/{slug}.md`, not on a plan.
+
+- **`awaiting-retro`** — retro's entry status, set when the run starts.
+- **`awaiting-learning`** *(retro's terminal)* — the retrospective is written and signed off. Learn claims from here.
+- **`done`** *(learn's terminal)* — every accepted lesson is written to its target.
+
+Skipping a plan's retro writes no retrospective at all: the plan is stamped `retro: skipped`, taking it out of the queue while leaving its `status: done` alone.
+
+**code-review** — on the review file at `codereviews/{dir}/{ts}.md`, one per run, not on a plan.
+
+- **`in-agent-review`** — the review file is open on a confirmed scope and the review pass is producing findings.
+- **`human-review`** — the findings are recorded and your verdict on them is pending.
+- **`done`** *(code-review's terminal)* — every finding is applied, delegated or dropped, and the record is closed. Closing stamps `reviewed_at` and appends the review's path to the reviewed plan's `code_reviews:` list; an ad-hoc review (`plan: null`) links to nothing. The plan's own `status:` is never touched.
+
+This README narrates the statuses — each playbook is the authority on its own transition rules and gates.
 
 ## Sprints & SPs
 
-In booping, a **plan is a sprint** — the unit `/groom` produces and `/develop` executes end-to-end. Story Points (SP) measure the sprint's **complexity and review burden**, not effort or time. A 20-SP sprint might take a couple of hours on one project, a full session on another, and a full day on a third; what matters is that SPs give you a feel for the size and review weight of the sprint, independent of how fast the underlying work happens.
+In booping, a **plan is a sprint** — the unit groom produces and develop executes end-to-end. Story Points (SP) measure the sprint's **complexity and review burden**, not effort or time. A 20-SP sprint might take a couple of hours on one project and a full day on another; SPs give you a feel for its size and review weight, independent of how fast the underlying work happens.
 
-The 1–5 scale (`src/config.yaml` `sprint.scale`):
+The 1–5 scale:
 
 - **1 SP** — Simple text/config change, no risk.
 - **2 SP** — Simple task, predictable, no risk.
@@ -124,33 +160,32 @@ The 1–5 scale (`src/config.yaml` `sprint.scale`):
 - **4 SP** — Complex task, medium risk, may need small research but clear enough.
 - **5 SP** — Research task — developer needs to clarify and decompose further before proceeding.
 
-In practice, sprints over **35 SP** (`sprint.default_threshold_sp`) get hard to keep reviewable, so `/groom` ends up suggesting a split into sibling sprints above that mark. It's a soft cap, **not a velocity** — booping has no fixed cadence and no per-week capacity. Tasks at 5 SP must be re-decomposed; tasks at 1 SP should be grouped into a single agent briefing.
+Sprints over **35 SP** get hard to keep reviewable, so groom suggests a split into sibling sprints above that mark. It's a soft cap, **not a velocity** — booping has no fixed cadence and no per-week capacity. Tasks at 5 SP must be re-decomposed; tasks at 1 SP should be grouped into a single agent briefing.
 
 ## Extensibility
 
-Wide-domain skills stay stack-agnostic. Project-specific concerns live entirely in your vault:
+Playbooks stay wide-domain and stack-agnostic. Project-specific concerns live entirely in your vault:
 
-- **`~/Claude/{project}/_booping/skill_<name>.md`** — per-skill extension. Loaded automatically into the skill's context at invocation. Use it to teach `/groom` your codebase's conventions or `/develop` your test runner.
-- **`~/Claude/{project}/_booping/agent_<name>.md`** — per-agent extension. Injected into the matching agent's body at load time so worker agents inherit project rules without separate reads.
-- **`~/Claude/{project}/plan_templates/*.md`** — project-local plan templates. Discovered alongside the core templates (`backend`, `frontend`, `claude-skill`, `cli`, `documentation`); can override a core one by sharing its `name` or add entirely new ones.
-- **`~/Claude/{project}/review_templates/*.md`** — project-local code-review templates. Loaded by `/code-review` alongside the core templates (`coding-architecture`, `python`, `security`); the skill picks the matching subset by inspecting the repo's manifests and reading each template's `description` frontmatter.
-- **`~/Claude/{project}/lessons/`** — accumulated rules from `/learn`. Read by skills' Preflight on every invocation.
+- **`~/Claude/{project}/_lessons/`** — targeted rules from learn. Each carries a `targets:` list naming the playbooks, steps, agents and skills it reaches — that list is how a project teaches groom its conventions, develop its test runner, or a worker agent its house rules.
+- **`~/Claude/{project}/plan_templates/*.md`** — project-local plan templates. Discovered alongside the core templates (`backend`, `frontend`, `claude-skill`, `cli`, `documentation`); can override a core one by sharing its `name`, or add new ones.
+- **`~/Claude/{project}/review_templates/*.md`** — project-local code-review templates. Loaded by `code-review` alongside the core templates (`coding-architecture`, `python`, `security`); it picks the matching subset from the repo's manifests and each template's `description` frontmatter.
+- **`~/Claude/{project}/_playbooks/`** — playbooks of your own, discovered by `/playbook` beside the shipped ones.
 
 ## Learning
 
-`/retro` and `/learn` are the loop that makes booping worth more than the sum of its sprints.
+Retro and learn are the loop that makes booping worth more than the sum of its sprints.
 
-`/retro` reads the plan, scans the session logs and git diff for what actually shipped, and writes a retrospective at `~/Claude/{project}/retrospectives/YYYYMMDD-{kebab-title}.md` — what worked, what didn't, divergences from spec, the business goal outcome.
+`retro` reads the working set of finished plans, mines the session logs and git diff for what actually shipped, takes your raw feedback first, and writes one standalone `~/Claude/{project}/retrospectives/{slug}.md` — what worked, what didn't, divergences from spec, a goal verdict per plan. One retrospective can cover several plans; each gets its `retro:` stamped with the file's path.
 
-`/learn` then reviews the retrospective with the user, picks the durable findings, and writes them into two surfaces: project-wide lessons (`~/Claude/{project}/lessons/{N}_{title}.md`) and extra instructions for the matching skill or agent (`~/Claude/{project}/_booping/skill_<name>.md`, `_booping/agent_<name>.md`). Lessons are loaded by future `/groom` and `/develop` invocations; extension files travel with the matching skill or agent at load time. The user confirms each finding before it lands.
+`learn` then reviews the retrospective with you, picks the durable findings, and routes each to one of two destinations: a targeted lesson (`~/Claude/{project}/_lessons/{N}_{title}.md`, carrying a `targets:` list), or a one-line bullet in the attached repo's `CLAUDE.md`. Lessons are injected into the playbooks, steps, agents and skills they name. You confirm the whole review table before anything lands.
 
 ## What booping doesn't do
 
 booping is a feedback loop, not an autopilot. Three things stay your job:
 
-- **Plan review is still on you.** `/groom` produces a draft and waits at `awaiting-plan-review` for a reason — sharpen it, push back, ask for splits. As lessons accumulate, plans drift toward your style and constraints, but only if you fed the loop honest reviews. Shit in, shit out.
-- **Code review is still on you.** `/develop` ships milestones; you own the quality bar. `/code-review` is a helper that runs stack-aware passes against the in-progress diff and surfaces findings — but reading those findings, deciding what's off, and bringing the feedback into `/retro` so `/learn` can turn it into rules is still your job.
-- **Learning isn't automatic.** `/retro` and `/learn` are scaffolding for a feedback loop, not a substitute for one. You still need to sit with the retrospective, confirm which findings are durable, and let `/learn` write them down. Skip that step and the loop stalls.
+- **Plan review is still on you.** Groom produces a draft and waits at `awaiting-approval` for a reason — sharpen it, push back, ask for splits. As lessons accumulate, plans drift toward your style and constraints, but only if you fed the loop honest reviews. Shit in, shit out.
+- **Code review is still on you.** Develop ships milestones; you own the quality bar. The `code-review` playbook is a helper that runs stack-aware passes over the diff and records its findings — but reading them, deciding what's off, and bringing them into retro so learn can turn them into rules is still your job.
+- **Learning isn't automatic.** Retro and learn are scaffolding for a feedback loop, not a substitute for one. You still need to sit with the retrospective, confirm which findings are durable, and let learn write them down. Skip that step and the loop stalls.
 
 Invest in the loop and it compounds. Treat it as a magic box and you'll get magic-box results.
 

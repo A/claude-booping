@@ -1,0 +1,24 @@
+{#-
+  Renders the `## Lessons` section for an internal booping agent body.
+
+  agent_id — matched against the `agent:{id}` targets of `context.targeted_lessons`
+
+  Lesson bodies are inserted as variables, never parsed as Jinja.
+-#}
+{%- set _al_id = kwargs.agent_id -%}
+{%- set _al_matched = [] -%}
+{%- for lesson in context.targeted_lessons -%}
+{%- if lesson.parsed_targets | selectattr("kind", "equalto", "agent") | selectattr("agent", "equalto", _al_id) | list -%}
+{%- set _ = _al_matched.append(lesson) -%}
+{%- endif -%}
+{%- endfor -%}
+{%- if _al_matched -%}
+## Lessons
+
+The following {{ _al_matched | length }} lesson(s) apply to this agent. Never silently violate one.
+{% for lesson in _al_matched %}
+### {{ lesson.id }} — {{ lesson.title }}
+
+{{ lesson.body.strip() }}
+{% endfor %}
+{% endif -%}

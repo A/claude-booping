@@ -1,0 +1,6 @@
+{"type":"user","isSidechain":false,"origin":{"kind":"human"},"timestamp":"2026-08-08T10:00:00.000Z","message":{"role":"user","content":"do two things"}}
+{"type":"assistant","isSidechain":false,"timestamp":"2026-08-08T10:01:00.000Z","message":{"role":"assistant","model":"claude-fable-5","content":[{"type":"tool_use","id":"toolu_bash","name":"Bash","input":{}}]}}
+{"type":"assistant","isSidechain":false,"timestamp":"2026-08-08T10:02:00.000Z","message":{"role":"assistant","model":"claude-fable-5","content":[{"type":"tool_use","id":"toolu_ask","name":"AskUserQuestion","input":{}}]}}
+{"type":"user","isSidechain":false,"timestamp":"2026-08-08T10:03:00.000Z","message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_bash","content":"ok"}]}}
+{"type":"user","isSidechain":false,"timestamp":"2026-08-08T10:32:00.000Z","message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_ask","content":"answered"}]}}
+{"type":"assistant","isSidechain":false,"timestamp":"2026-08-08T10:34:00.000Z","message":{"role":"assistant","model":"claude-fable-5","content":[{"type":"text","text":"done"}]}}

@@ -1,0 +1,25 @@
+## Targets
+
+A lesson is a markdown file in this project's `_lessons/`; its `targets:` frontmatter list is what wires it to the things it must reach — exact names only, no globs, no wildcards, no negation:
+
+1. `{playbook}` — the whole playbook. Target it when a lesson affects several of its steps.
+2. `{playbook}/{step}` — one step. Target it when a lesson concerns that step alone.
+3. `agent:{id}` — a core booping agent. Target it when a lesson should guide the agent in everything it does.
+4. `skill:{name}` — one skill. Target it when a lesson tweaks or extends that skill's own method.
+
+Several entries in one list are one lesson, not a multi-target row. A lesson with no valid target reaches nothing.
+
+The table of contents below is the whole space. Pick the playbooks a candidate actually touches and fetch their targets — step summaries, lessons already targeting them, addressable agents — with the command on each entry. Several names fetch in one call: `--set targets_for=a,b`.
+
+Skills are not listed per playbook: `skill:playbook` is the only skill target.
+{% for _ltc_pb in context.playbooks %}
+### {{ _ltc_pb.name }}
+
+{{ _ltc_pb.summary | replace("\n", " ") | trim }}
+
+- Steps: {% for _ltc_step in _ltc_pb.steps | sort(attribute="name") %}`{{ _ltc_step.name }}`{{ ", " if not loop.last else "" }}{% else %}—{% endfor %}
+- Targets: `booping render playbooks/_partials/lesson_target_space.md --set targets_for={{ _ltc_pb.name }}`
+{% endfor %}
+## Repo CLAUDE.md
+
+The one non-lesson destination: the attached repo's `CLAUDE.md`. Route a candidate here when it is a project fact that aids fresh-agent project understanding — a layout path, a CLI command, a code-side convention. One-bullet additions; no paragraph rewrites.

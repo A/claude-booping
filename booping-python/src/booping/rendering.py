@@ -1,10 +1,17 @@
 from __future__ import annotations
 
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any, cast
 
-from jinja2 import ChainableUndefined, Environment, FileSystemLoader
+from jinja2 import BaseLoader, ChainableUndefined, Environment, FileSystemLoader, pass_context
+
+from booping.macros import make_macro
+
+if TYPE_CHECKING:
+    from jinja2.runtime import Context as JinjaContext
+
+    from booping.query import Row
 
 
 class RenderCycleError(Exception):
@@ -71,12 +78,133 @@ def get_plugin_root() -> Path:
     return _plugin_root
 
 
-def _build_env(loader_root: Path) -> Environment:
-    return Environment(
-        loader=FileSystemLoader(str(loader_root)),
+def _vault_of(context: object) -> Path | None:
+    """The vault a query runs against: the render's resolved vault, else the project's."""
+    vault = getattr(context, "vault", None)
+    if isinstance(vault, Path):
+        return vault
+    project = getattr(context, "project", None)
+    directory = getattr(project, "directory", None)
+    return directory if isinstance(directory, Path) else None
+
+
+def make_query_filter(config: object) -> Callable[..., list[Row]]:
+    """The `query` filter: `{{ 'a.b.c' | query(where={...}) }}`.
+
+    The left-hand side is a dotted config path whose value is the spec; keyword
+    arguments deep-merge over it for this call only. An unresolvable path raises
+    rather than rendering empty.
+    """
+    # Local import: booping.query pulls in booping.context, which imports this module.
+    from booping.query import QueryError, build_spec, resolve_spec, run
+
+    @pass_context
+    def query_filter(
+        jinja_ctx: JinjaContext, spec_path: object, **overrides: Any
+    ) -> list[Row]:
+        cfg = cast("dict[str, Any]", config) if isinstance(config, dict) else {}
+        dotted = str(spec_path)
+        base = resolve_spec(cfg, dotted)
+        try:
+            spec = build_spec(cfg, base, overrides)
+        except Exception as exc:
+            raise QueryError(f"invalid query spec at config path {dotted}: {exc}") from exc
+        vault = _vault_of(jinja_ctx.get("context"))
+        # A `root: core` spec globs the plugin root, so it needs no vault at all.
+        if vault is None and spec.root is None:
+            raise QueryError(
+                f"cannot run query {dotted}: no vault resolved for this render"
+            )
+        return run(spec, vault)
+
+    return query_filter
+
+
+def make_booping_global(context: object) -> Row:
+    """The `booping` global: framework state a template may branch on.
+
+    A `Row` rather than a dict so `{{ booping.latest_migration }}` is plain attribute
+    access and a key named `items` / `keys` / `get` can never render a bound method.
+    """
+    from booping.query import Row  # local import: see make_query_filter
+
+    project = getattr(context, "project", None)
+    latest = getattr(project, "latest_migration", -1)
+    return Row({"latest_migration": latest if isinstance(latest, int) else -1})
+
+
+def macro_dirs(context: object) -> dict[str, Path | None]:
+    """The `repo_dir` / `vault_dir` kwargs `make_macro` resolves `cwd:` against."""
+    project = getattr(context, "project", None)
+    repo_dir = getattr(project, "repo_directory", None)
+    return {
+        "repo_dir": repo_dir if isinstance(repo_dir, Path) else None,
+        "vault_dir": _vault_of(context),
+    }
+
+
+def _build_env(
+    loader_root: Path,
+    *,
+    loader: BaseLoader | None = None,
+    env_class: type[Environment] = Environment,
+    config: object = None,
+    context: object = None,
+) -> Environment:
+    from booping.query import as_table  # local import: see make_query_filter
+
+    env = env_class(
+        loader=loader if loader is not None else FileSystemLoader(str(loader_root)),
         undefined=LenientUndefined,
         keep_trailing_newline=True,
     )
+    globals_: dict[str, Any] = env.globals  # type: ignore[assignment]
+    globals_["macro"] = make_macro(config, **macro_dirs(context))
+    # The single site the `booping` global is set: every env a body renders through
+    # (`render`, `build_source_env`, and so `render-playbook` and `scaffold`) comes
+    # from here.
+    globals_["booping"] = make_booping_global(context)
+    filters: dict[str, Any] = env.filters  # type: ignore[assignment]
+    filters["query"] = make_query_filter(config)
+    filters["as_table"] = as_table
+    return env
+
+
+def build_source_env(
+    context: object,
+    config: object,
+    plugin_root: Path | None = None,
+    *,
+    loader: BaseLoader | None = None,
+    env_class: type[Environment] = Environment,
+) -> Environment:
+    """Environment for rendering ad-hoc sources (not files under the plugin root).
+
+    Same loader root and globals `render` gives a template under `src/templates/`, but
+    bound as env globals so `env.from_string(...).render()` sees them — and so do the
+    `{% include %}` / `{% import %}` targets the source pulls in.
+    """
+    from booping.tools import Tools  # local import to avoid circular at module level
+
+    root = plugin_root if plugin_root is not None else get_plugin_root()
+    env = _build_env(
+        root / "src" / "templates",
+        loader=loader,
+        env_class=env_class,
+        config=config,
+        context=context,
+    )
+    globals_: dict[str, Any] = env.globals  # type: ignore[assignment]
+    globals_["context"] = context
+    globals_["config"] = config
+    globals_["tools"] = Tools(
+        env=env,
+        context=context,
+        config=config,
+        plugin_root=root,
+        render_stack=[],
+    )
+    return env
 
 
 def render(
@@ -103,7 +231,7 @@ def render(
         loader_root = root
         template_name = None
 
-    env = _build_env(loader_root)
+    env = _build_env(loader_root, config=config, context=context)
 
     # Top-level render seeds an empty stack and constructs a real Tools instance.
     real_tools: Tools

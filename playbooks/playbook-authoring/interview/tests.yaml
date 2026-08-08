@@ -1,0 +1,78 @@
+- description: interview smoke — brief contract on the complete description
+  vars:
+    input: file://_fixtures/complete-description.md
+  metadata:
+    playbook: playbook-authoring
+    step: interview
+    fixture: complete-description
+    tier: smoke
+  assert:
+    # SLUG-PATH — the description names `release-notes`; the brief lands under it
+    - type: javascript
+      value: file://../../_lib/asserts/files.js
+      config:
+        expect:
+          - path: 'release-notes/_specs/brief\.md$'
+            minLines: 8
+    - type: javascript
+      value: file://../../_lib/asserts/mdcheck.js
+      config:
+        file: 'brief\.md$'
+        rules: |
+          # no FRONTMATTER rule: frontmatter is harness-owned, the step never writes one
+          - select: H1
+            count: 1
+            match: 'release-notes — Brief'
+
+          - select: H1 > H2
+            ordered: [Goal, Success result, Artifact home, Wishes?]
+            strict: true
+
+          - select: SECTION("Goal") > P
+            count: 1
+
+          - select: SECTION("Success result") > P
+            count: 1
+
+          # HOME-PATH-ONLY + HOME-VALUE in one rule: a single backticked path, the one the
+          # description names
+          - select: SECTION("Artifact home") > P
+            count: 1
+            match: '^`releases/_work[^`]*`$'
+
+          - select: SECTION("Wishes")
+            optional: true
+            each:
+              - select: UL > LI
+                min: 1
+    # NO-QUESTIONS — complete input: Questions absent or empty, Answers carries the four
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        sections:
+          - name: Changed
+            entry: '^-\s+\[(CREATED|UPDATED)\]\s+`?([^`\s]+)`?$'
+            matchManifest: true
+          - name: Questions
+            optional: true
+            maxEntries: 0
+          - name: Answers
+            entry: '^-\s+(?:slug|goal|success|artifact home):\s+.+$'
+            minEntries: 4
+            maxEntries: 4
+        onlyListed: true
+
+- description: interview regress — inference fidelity on the complete description
+  vars:
+    input: file://_fixtures/complete-description.md
+  metadata:
+    playbook: playbook-authoring
+    step: interview
+    fixture: complete-description
+    tier: regress
+  assert:
+    - type: llm-rubric
+      value: "GOAL-REFLECTS: The brief's Goal paragraph restates the description's ask — drafting release notes from the PRs merged since the last tag, with the user reviewing before anything is committed. No scope absent from the input: no invented channels, tools, automations or publishing steps the description never mentions. Fails if the goal drifts from the ask or adds scope."
+    - type: llm-rubric
+      value: "WISHES-COVER: The Wishes list includes the desires the description states — the user's sign-off before the result is committed, and the house style for the notes (short, user-facing wording, no ticket numbers). Fails if either is missing or replaced by a wish the description never stated."

@@ -1,0 +1,10 @@
+doc: setup-report
+
+rules:
+  - select: DOCUMENT H2
+    id: setup.sections
+    ordered:
+      - Shared instructions
+      - Playbook Steps
+      - "Step: Setup Booping"
+      - "Step: Setup Project"

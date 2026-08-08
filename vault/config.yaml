@@ -1,0 +1,11 @@
+core:
+  sprint:
+    max_milestones_per_agent: 1
+
+  code_review_playbook:
+    agents:
+      plannotator-reviewer:
+        good_for:
+          - "Interactive browser review of a diff with AI findings pre-seeded; human confirms/dismisses inline and feedback returns to the harness"
+        bad_for:
+          - "Headless / CI runs, no display available, or a quick chat-only review"

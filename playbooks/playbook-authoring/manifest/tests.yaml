@@ -1,0 +1,61 @@
+- description: manifest smoke — manifest contract on the mod-review decomposition
+  vars:
+    input: file://_fixtures/mod-review-decomposition.md
+  metadata:
+    playbook: playbook-authoring
+    step: manifest
+    fixture: mod-review-decomposition
+    tier: smoke
+  assert:
+    # FILE-AT-PATH + FRONTMATTER + GRAPH-LINES + BODY-LEAN — two files: playbook.yaml owns
+    # the structure, playbook.md the identity (never graph:)
+    - type: javascript
+      value: file://../../_lib/asserts/files.js
+      config:
+        onTextMode: fail
+        expect:
+          - path: 'mod-review/playbook\.yaml$'
+            contains:
+              - '^graph:$'
+              - '^  sweep: \[\]$'
+              - '^  compose: \[sweep\]$'
+          - path: 'mod-review/playbook\.md$'
+            contains:
+              - '^name: mod-review$'
+              - '^title: .+'
+              - '^summary: .+'
+              - '^trigger: .+'
+              - '^jinja: true$'
+            forbids:
+              - '^graph:'
+              - '## Steps'
+              - '## Execution graph'
+        noOthers: true
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        sections:
+          - name: Changed
+            entry: '^-\s+\[(CREATED|UPDATED)\]\s+`?([^`\s]+)`?$'
+            matchManifest: true
+            seededVar: input
+            minEntries: 2
+            maxEntries: 2
+          - name: Notes
+            optional: true
+        onlyListed: true
+
+- description: manifest regress — fidelity on the mod-review decomposition
+  vars:
+    input: file://_fixtures/mod-review-decomposition.md
+  metadata:
+    playbook: playbook-authoring
+    step: manifest
+    fixture: mod-review-decomposition
+    tier: regress
+  assert:
+    - type: llm-rubric
+      value: "GRAPH-VERBATIM: The manifest's graph mapping is the decomposition's copied exactly — `sweep: []` then `compose: [sweep]`, no step renamed, added, dropped or reordered. Fails on any deviation."
+    - type: llm-rubric
+      value: "BODY-CARRIES: The body holds only the lead (what a run produces), fan-out or ordering instructions, orchestrator decisions, and eval-run rules. It never lists the steps, waves or gates — the renderer injects those. The trigger is phrased in the user's terms with no internal step names. Fails if the body enumerates steps/gates or the trigger leaks step names."

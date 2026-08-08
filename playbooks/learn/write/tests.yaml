@@ -1,0 +1,178 @@
+# Case 1 (accepted-table): three accepted rows, none touching an existing lesson -> two new
+# lessons at the next free numbers (0004 seeded -> 5 and 6) plus one bullet into repo/CLAUDE.md.
+# The seeded retro and _lessons/0004 must stay untouched (seeded files only count as output
+# when modified).
+# Case 2 (refine-existing): a single update-in-place row refining seeded lesson 0004.
+
+- description: write smoke — independent rows land as fresh files, seeds untouched
+  vars:
+    input: file://_fixtures/accepted-table.md
+  metadata:
+    playbook: learn
+    step: write
+    fixture: accepted-table
+    tier: smoke
+  assert:
+    # WRITE-SET — lessons 5 and 6 created, CLAUDE.md updated; 0004 absent from the manifest.
+    # files.js keeps what mdcheck cannot reach: the manifest set, line caps, the targets LIST
+    # value (list frontmatter serializes empty to mdcheck `has:`), and the word bans.
+    - type: javascript
+      value: file://../../_lib/asserts/files.js
+      config:
+        onTextMode: fail
+        expect:
+          - path: '_lessons/0{0,3}5_[a-z0-9-]+\.md$'
+            maxLines: 16
+            contains:
+              - '^\s*-\s*groom\s*$'
+            forbids:
+              - '[Hh]ow to [Aa]pply'
+              - '\*\*[Ww]hy'
+          - path: '_lessons/0{0,3}6_[a-z0-9-]+\.md$'
+            maxLines: 16
+            contains:
+              - '^\s*-\s*groom\s*$'
+            forbids:
+              - '[Hh]ow to [Aa]pply'
+              - '\*\*[Ww]hy'
+          - path: 'repo/CLAUDE\.md$'
+            contains:
+              - 'just api'
+              - 'just e2e'
+        noOthers: true
+    # LESSON-SHAPE — scalar frontmatter, no headings, an Example paragraph; one call per file
+    - type: javascript
+      value: file://../../_lib/asserts/mdcheck.js
+      config:
+        file: '_lessons/0{0,3}5_[a-z0-9-]+\.md$'
+        rules: |
+          - select: FRONTMATTER
+            has:
+              id: '^0{0,3}5$'
+              retro: '^retrospectives/202608051640_notification-center\.md$'
+              created: '^2026-08-06$'
+          - select: H1
+            count: 0
+          - select: H2
+            count: 0
+          - select: P[text=/^\*\*Example\*\*:/]
+            min: 1
+    - type: javascript
+      value: file://../../_lib/asserts/mdcheck.js
+      config:
+        file: '_lessons/0{0,3}6_[a-z0-9-]+\.md$'
+        rules: |
+          - select: FRONTMATTER
+            has:
+              id: '^0{0,3}6$'
+              retro: '^retrospectives/202608051640_notification-center\.md$'
+              created: '^2026-08-06$'
+          - select: H1
+            count: 0
+          - select: H2
+            count: 0
+          - select: P[text=/^\*\*Example\*\*:/]
+            min: 1
+    # RETURN-SHAPE — a Changed section of exactly three CREATED/UPDATED lines matching the manifest
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        sections:
+          - name: Changed
+            entry: '^-\s+\[(CREATED|UPDATED)\]\s+`?([^`\s]+)`?(\s+—\s+.+)?$'
+            matchManifest: true
+            seededVar: input
+            statuses: [CREATED, UPDATED]
+            minEntries: 3
+            maxEntries: 3
+        onlyListed: true
+
+- description: write regress — long findings compacted into independent lessons
+  vars:
+    input: file://_fixtures/accepted-table.md
+  metadata:
+    playbook: learn
+    step: write
+    fixture: accepted-table
+    tier: regress
+  assert:
+    - type: llm-rubric
+      value: "COMPACT-PROSE: The retro's Finding 1 runs three narrative paragraphs, yet the user-testing lesson's body is at most a couple of sentences of imperative rule plus one one-to-two-line **Example** — no retro narrative, no timeline, no motivation paragraphs, no restated backstory. Fails if the body exceeds roughly four sentences outside the Example, or copies retro narrative in."
+    - type: llm-rubric
+      value: "SUBSTANCE-PRESERVED: Despite the compression, the user-testing lesson still carries the operative rule — a user-testing gate belongs in the plan's Definition of Done and the sprint may not close until it is exercised — and its Example concretely reflects the notification-center case. The prose-vs-config lesson carries never-restate-config-in-prose with a concrete example reflecting the drifted channel-matrix narration. Fails if either rule lost its substance or either example went generic."
+    - type: llm-rubric
+      value: "LESSONS-INDEPENDENT: The two accepted lesson rows landed as two separate standalone files with sequential ids continuing from the seeded 0004, and the seeded `_lessons/0004_information-architecture-pass.md` was not modified, extended, or referenced as the landing place for either rule. Fails if the rules were merged into one file, or 0004 was touched."
+    - type: llm-rubric
+      value: "CLAUDEMD-BULLET: `repo/CLAUDE.md` gained the two run commands as bullet-style one-liner(s) in a fitting section, with the file's existing content preserved verbatim — no paragraph rewrites, no restructuring, and nothing written to any path outside the vault and `repo/`. Fails on a rewrite, a lost line, or prose paragraphs instead of bullets."
+
+- description: write smoke — refine-existing edits the one file in place
+  vars:
+    input: file://_fixtures/refine-existing.md
+  metadata:
+    playbook: learn
+    step: write
+    fixture: refine-existing
+    tier: smoke
+  assert:
+    # ONE-FILE — the only manifest entry is 0004, now carrying all five checks and the
+    # original Example case
+    - type: javascript
+      value: file://../../_lib/asserts/files.js
+      config:
+        onTextMode: fail
+        expect:
+          - path: '_lessons/0004_information-architecture-pass\.md$'
+            contains:
+              - '[Cc]ompaction'
+              - '[Ss]coping'
+              - '[Dd]uplication'
+              - '[Cc]onfigurability'
+              - '[Hh]ierarchy'
+              - 'one pass caught all four'
+        noOthers: true
+    # REFINE-SHAPE — seeded scalar frontmatter intact, five checklist bullets, Example kept
+    - type: javascript
+      value: file://../../_lib/asserts/mdcheck.js
+      config:
+        file: '_lessons/0004_information-architecture-pass\.md$'
+        rules: |
+          - select: FRONTMATTER
+            has:
+              id: '^0{0,3}4$'
+              retro: '^retrospectives/202604231512_skill-refactors\.md$'
+              created: '^2026-04-23$'
+          - select: H1
+            count: 0
+          - select: UL > LI
+            min: 5
+          - select: P[text=/^\*\*Example\*\*:/]
+            min: 1
+    # RETURN-SHAPE — exactly one UPDATED line
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        sections:
+          - name: Changed
+            entry: '^-\s+\[(CREATED|UPDATED)\]\s+`?([^`\s]+)`?(\s+—\s+.+)?$'
+            matchManifest: true
+            seededVar: input
+            statuses: [UPDATED]
+            minEntries: 1
+            maxEntries: 1
+        onlyListed: true
+
+- description: write regress — the refinement is surgical
+  vars:
+    input: file://_fixtures/refine-existing.md
+  metadata:
+    playbook: learn
+    step: write
+    fixture: refine-existing
+    tier: regress
+  assert:
+    - type: llm-rubric
+      value: "UPDATE-IN-PLACE-SURGICAL: `_lessons/0004_information-architecture-pass.md` gained the fifth Compaction check as one bullet in the existing checklist, phrased like its siblings, with the original four checks and the original Example's case still present; no new file was created for this rule. The title MAY be refreshed to say five checks instead of four — that is a staleness fix, not a violation. Fails if any of the four original checks or the Example's original case was dropped or rewritten beyond that, or the rule landed in a fresh file."
+    - type: llm-rubric
+      value: "NO-COLLATERAL-CHANGES: Outside the added Compaction bullet and four-to-five count refreshes in prose the addition made stale (the title, the body's opening sentence), the file is unchanged — frontmatter id, targets, retro and created keep their seeded values, the other checks' wording is intact, and no commentary about the update was written into the lesson. Fails on any drift beyond those."

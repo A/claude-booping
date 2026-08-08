@@ -1,0 +1,25 @@
+doc: learn-report
+
+rules:
+  - select: SECTION("Retrospectives awaiting learning") > TABLE
+    id: learn.queue-table
+    count: 1
+    columns: [Status, Title, Created, Primary plan, Path]
+
+  - select: DOCUMENT H2
+    id: learn.sections
+    ordered:
+      - Guidance
+      - Single-location rule
+      - Targets
+      - Repo CLAUDE.md
+      - Retrospectives awaiting learning
+      - Shared instructions
+      - Playbook Steps
+      - State
+      - "Step: Intake"
+      - "Step: Extract Candidates"
+      - "Step: Dedup Sweep"
+      - "Step: Review Table"
+      - "Step: Write"
+      - "Step: Transition"

@@ -1,0 +1,92 @@
+# regress-optimizer — two fixtures: a genuine judge failure the prompt must answer
+# (judge-fail-tree) and a rubric that contradicts the confirmed sources (wrong-rubric-tree).
+# files.js `noOthers` is the untouched-side check: an untouched seeded file never re-enters
+# the manifest, so relaxing a rubric or bending the prompt surfaces as an unexpected file.
+
+- description: regress-optimizer smoke — genuine judge failure on judge-fail-tree
+  vars:
+    target: compose
+    input: file://_fixtures/judge-fail-tree.md
+  metadata:
+    playbook: playbook-authoring
+    step: regress-optimizer
+    fixture: judge-fail-tree
+    tier: smoke
+  assert:
+    # PROMPT-EDITED + SUITE-UNTOUCHED
+    - type: javascript
+      value: file://../../_lib/asserts/files.js
+      config:
+        onTextMode: fail
+        expect:
+          - path: 'mod-review/compose/opus-5\.md$'
+            contains: ['[Cc]oncrete']
+        noOthers: true
+    # RETURN-SECTIONS + CHANGED-NAMES-FAIL + NEXT-RUN + NO-QUESTIONS
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        sections:
+          - name: Changed
+            entry: '^-\s+\[(UPDATED)\]\s+`?([^`\s]+)`?\s+—\s+.*GROUNDED-FIX.*$'
+            statuses: [UPDATED]
+            matchManifest: true
+            seededVar: input
+            fold: true
+          - name: Next
+            entry: '^`?just eval-regress -c mod-review/compose/promptfooconfig\.yaml`?(?:\s.*)?$'
+            fold: true
+          - name: Questions
+            optional: true
+            maxEntries: 0
+        onlyListed: true
+
+# EXPECTED behavior: the rubric contradicts the confirmed example and sits in no confirmed
+# test row — the correct outcome is ZERO edits and a question naming VERDICT-TABLE; the
+# provider's allow_no_files exists for this case.
+- description: regress-optimizer smoke — suspect rubric on wrong-rubric-tree
+  vars:
+    target: compose
+    input: file://_fixtures/wrong-rubric-tree.md
+  metadata:
+    playbook: playbook-authoring
+    step: regress-optimizer
+    fixture: wrong-rubric-tree
+    tier: smoke
+  assert:
+    # NO-EDITS
+    - type: javascript
+      value: file://../../_lib/asserts/files.js
+      config:
+        onTextMode: pass
+        expect: []
+        noOthers: true
+    # QUESTION-RETURNED
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        sections:
+          - name: Changed
+            maxEntries: 0
+          - name: Next
+            optional: true
+          - name: Questions
+            entry: '^\d+\.\s+.*VERDICT-TABLE.*$'
+            minEntries: 1
+            fold: true
+        onlyListed: true
+
+- description: regress-optimizer regress — the edit answers the judge on judge-fail-tree
+  vars:
+    target: compose
+    input: file://_fixtures/judge-fail-tree.md
+  metadata:
+    playbook: playbook-authoring
+    step: regress-optimizer
+    fixture: judge-fail-tree
+    tier: regress
+  assert:
+    - type: llm-rubric
+      value: "TUNE-ANSWERS-JUDGE: The prompt edit answers the judge's stated reason — the fix sketches restated their defects — by demanding that each fix sketch name the concrete change to make, matching the GROUNDED-FIX rubric's own terms. The rest of the prompt body stays intact. Fails if the edit is generic padding ('be thorough', 'write better fixes'), rewrites unrelated parts of the body, or touches the suite's checks instead of the prompt."

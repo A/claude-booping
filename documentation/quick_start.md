@@ -1,8 +1,8 @@
 # Quick start
 
-This walkthrough takes you from a fresh checkout to a fully shipped first plan. Run the commands in order; the skills will list candidates if you forget an exact filename.
+From a fresh checkout to a fully shipped first plan. Run the commands in order; the skills list candidates if you forget an exact filename.
 
-The shortest possible path is the five-command loop in the [README Quick start](https://github.com/A/claude-booping#quick-start). The walkthrough below adds the orient step and the per-command context a new user benefits from.
+The shortest path is the five-command loop in the [README Quick start](https://github.com/A/claude-booping#quick-start). This walkthrough adds the per-command context.
 
 ## 1. Install the plugin
 
@@ -15,90 +15,94 @@ Inside Claude Code, register the marketplace once and install the plugin:
 
 Update later with `/plugin update booping` (or from the `/plugin` UI).
 
-See [Install](install.md) for prerequisites (`uv`, `git`, optional `GEMINI_API_KEY`).
+See [Install](install.md) for prerequisites (`uv`, `git`).
 
 ## 2. Scaffold the project vault
 
 `cd` into the target repository and run:
 
 ```text
-/install
+/playbook setup
 ```
 
-`/install` prompts for the vault location — the default `~/Claude/{project}/` or a repo-local directory (wired via the `.booping` marker's `vault_path:` key). Either way that single step creates the vault with `plans/`, `retrospectives/`, `lessons/`, `notes/`, `_booping/`, and a `.booping` marker file so other skills know the vault is ready. See [Vault](vault.md) for what each directory is for.
+The `setup` playbook settles the machine level (home dir + machine config), then the project level: it asks for the vault location — the default `<home_dir>/{project}/` or a repo-local directory (wired via the `.booping` marker's `vault_path:` key) — and creates the vault with `plans/`, `retrospectives/`, `codereviews/`, `_lessons/`, `notes/`, plus a `.booping` marker file in the repo. Anything already in place is detected and skipped. See [Vault](vault.md) for what each directory is for.
 
-## 3. Orient with /chat
+## 3. See what is available
 
-Before grooming anything, run:
+`/playbook` is the only skill booping ships — every procedure in this walkthrough is a playbook it drives. With no argument it lists every playbook booping discovered, shipped or written in your vault, with its trigger and scope:
 
 ```text
-/chat
+/playbook
 ```
 
-`/chat` is the orient/working-mode command. It loads the project vault, refreshes the on-disk sprint snapshot at `~/Claude/{project}/sprints.md`, and is the right surface for vault navigation, reading existing plans, and small ad-hoc edits. When scope grows past "small task", `/chat` escalates you into `/groom`.
+Everything below is one of those entries.
 
-## 4. Read the sprint snapshot
+## 4. Read the sprint view
 
-Open `~/Claude/{project}/sprints.md`. It is a regenerated view of every plan in the vault grouped by status. On a fresh project it will be near-empty — that is expected.
+Open `~/Claude/{project}/sprints.md` in Obsidian. It is an [Obsidian Bases](https://help.obsidian.md/bases) fence — a live table over every plan in the vault, evaluated on open, so it is never stale. On a fresh project it is near-empty.
 
-`sprints.md` is a build artefact, never hand-edit it (see [Vault](vault.md)). It is a snapshot rather than a live view: nothing auto-refreshes it on a plan write yet, so it can drift between `/chat` orients. Re-run `/chat` (or `bin/booping render-sprints`) for a current picture, and treat the plan files as the source of truth.
+The fence is seeded once and yours to edit (see [Vault](vault.md)). Outside Obsidian, `bin/booping query --config core.plans` prints the same listing, and `--where` narrows it — `k=v`, `k!=v`, `k:in=a,b`, `k:gt=n`, `k:lt=n`, repeatable and all applying at once:
 
-## 5. First /groom
+```bash
+bin/booping query --config core.plans --where status:in=ready-for-dev,in-progress
+```
+
+## 5. First groom
 
 Spec your first sprint with a free-text description:
 
 ```text
-/groom Add per-tenant rate limiting to the public API
+/playbook groom — add per-tenant rate limiting to the public API
 ```
 
-`/groom` researches the codebase, drafts a plan under `~/Claude/{project}/plans/{YYYYMMDD}-{kebab-title}.md`, optionally cross-validates it against Gemini (if `GEMINI_API_KEY` is set), and stops at `awaiting-plan-review` for your explicit approval. Sharpen it, push back, ask for splits — the more detailed your initial brief, the sharper the resulting plan.
+The [groom playbook](groom.md) maps the blast radius in your codebase and checks every external reference the plan names against current docs, working in your conversation — running each step itself and handing only heavy reads to a research agent. It drafts a plan under `~/Claude/{project}/plans/{YYYYMMDDHHMM}_{kebab-title}/index.md`, optionally hands it to a second model for cross-review (when `core.groom_playbook.cross_review_agent` is configured), and stops for approval once, at its single approval gate near the end, with the plan at `awaiting-approval`. Sharpen it there, push back, ask for splits — the more detailed your brief, the sharper the plan.
 
-When you approve, `/groom` flips the plan to `ready-for-dev`.
+When you approve, the run flips the plan to `ready-for-dev`.
 
-## 6. First /develop
+## 6. First develop
 
-Either run bare and pick from the candidate list (plans in `ready-for-dev` or `awaiting-plan-review`):
+Run the develop playbook:
 
 ```text
-/develop
+/playbook develop
 ```
 
-or target a specific one:
+or name the plan:
 
 ```text
-/develop plans/20260426-per-tenant-rate-limiting.md
+/playbook develop — plans/202604260930_per-tenant-rate-limiting/index.md
 ```
 
-`/develop` walks the milestones, delegating implementation to the `booping-developer` agent. `booping-researcher` is reserved for the Phase 0 drift spot-check — when a plan touches many files, it confirms the actual file shapes still match the plan's assumptions before execution begins. When all milestones are done, the plan moves to `awaiting-retro`.
+The [develop playbook](develop.md) confirms the sprint branch with you, then walks the milestones, delegating implementation to the `booping-developer` agent. `booping-researcher` is reserved for the intake drift spot-check — when a plan touches many files, it confirms the actual file shapes still match the plan's assumptions before execution begins. When all milestones are done and verification is green, the plan moves to `done` — the end of its lifecycle. Code review, retro and learn are follow-up `/playbook` invocations that advance their own artifacts; the plan itself never leaves `done`.
 
-### Optional: /code-review before retro
+### Optional: code review before retro
 
-Once a plan is in `awaiting-retro`, you can run a quality-gate review over the diff before capturing the retro:
+Once a plan is `done`, you can run a quality-gate review over the diff before capturing the retro:
 
 ```text
-/code-review
+/playbook code-review
 ```
 
-Bare `/code-review` picks the plan in `awaiting-retro` and reviews `<plan commit>..HEAD` against stack-aware checklists, returning severity-labelled findings in chat. It is a **stateless side-skill** — it does not transition the plan, so the next step is still `/retro`. Run it from a fresh session (often under a stronger model than the one that implemented). See [/code-review](code_review.md) for details.
+It offers every `done` plan — each listed with its review history, so a re-review is as ordinary as a first pass — and reviews `{plan commit}..HEAD` against stack-aware checklists. Findings, your verdict and what came of it land in a persisted review file under `codereviews/`, which carries the run's own `in-agent-review → human-review → done` status; the plan stays at `done` and only gains the review's path in its `code_reviews:` list, so it remains in the review queue and the next step is still retro. Run it from a fresh session, often under a stronger model than the one that implemented. See [code-review](code_review.md) for details.
 
-## 7. First /retro
+## 7. First retro
 
 Capture what actually shipped:
 
 ```text
-/retro plans/20260426-per-tenant-rate-limiting.md
+/playbook retro
 ```
 
-`/retro` reads the plan, scans session logs and `git diff`, and writes a retrospective at `~/Claude/{project}/retrospectives/{YYYYMMDD}-{kebab-title}.md`. It also asks you about tensions you noticed during develop. Review the retrospective file — it is the input to `/learn`, and shit in means shit out.
+The [retro playbook](retro.md) takes your raw feedback first, mines the session logs and `git diff` for tensions you did not flag, and writes a standalone `retrospectives/{slug}.md`, stamping its path onto every plan it covers. That file is the artifact retro and learn advance; the covered plans stay at `done`. Review it — it is the input to learn, and shit in means shit out.
 
-## 8. First /learn
+## 8. First learn
 
 Fold the retro into durable rules:
 
 ```text
-/learn retrospectives/20260426-per-tenant-rate-limiting.md
+/playbook learn
 ```
 
-`/learn` proposes lessons (`~/Claude/{project}/lessons/{N}_{title}.md`) and per-skill / per-agent extension files (`~/Claude/{project}/_booping/skill_<name>.md`, `_booping/agent_<name>.md`) for your confirmation. Approved lessons are loaded by future `/groom` and `/develop` invocations; extensions travel with the matching skill or agent at load time.
+The [learn playbook](learn.md) proposes targeted lessons (`~/Claude/{project}/_lessons/{N}_{kebab-title}.md`, each carrying a `targets:` list) and one-line bullets for the repo's own `CLAUDE.md`, in one review table for your confirmation. Approved lessons are injected into the playbooks, steps, agents and skills they name.
 
-When `/learn` finishes, the plan reaches `done` and your first loop is complete. The next `/groom` you run inherits everything you just learned.
+When learn finishes, the retrospective reaches `done` and your first loop is complete. The next groom run inherits everything you just learned.

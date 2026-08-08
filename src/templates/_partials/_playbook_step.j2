@@ -1,36 +1,66 @@
 {#-
-  Renders one playbook step section to the locked contract. Inputs:
+  Renders one section of the composed procedure — either a subgraph intro or a step.
+
+  Subgraph intro (pass `subgraph`):
+    subgraph  — a booping.context.playbook.SubgraphNode
+    waves     — list[list[str]] its inner wave order
+
+  Step section (pass `step`):
     step      — a booping.context.playbook.Step
-    deps      — list[str] this step's deps in graph order (After: bullets; empty for wave 1)
-    siblings  — list[str] the other members of this step's wave (Parallel with:)
-    embed     — True for wave-1 steps (body embedded); else a Read link replaces the body
-  `resolve_agent` is registered as a Jinja global by the driving command.
+    deps      — list[str] this step's deps in its own scope (After: bullets; empty for wave 1)
+    playbook  — the playbook name (for the --step fetch command)
+    part_of   — subgraph name when this step lives in one, else none
+    repeated  — True when that subgraph sets `repeat`
+  `resolve_detached` is registered as a Jinja global by the driving command.
 -#}
-{%- set title = step.title if step.title else step.name.replace('-', ' ') | title -%}
-{%- set ag = resolve_agent(step.agent) -%}
-## {{ title }}
-{% if step.summary or deps or siblings or step.agent is not none or step.review_gate is not none %}
+{%- if subgraph is defined and subgraph -%}
+## Subgraph: {{ subgraph.name }}
+
 Instructions:
+{% if subgraph.dependencies -%}
+- After: {{ subgraph.dependencies | join(', ') }}
+{% endif -%}
+{% if subgraph.repeat -%}
+- Repeat: {{ subgraph.repeat }}
+{% endif -%}
+- Inner waves: {% for wave in waves %}{{ loop.index }}. {% for name in wave %}`{{ name }}`{% if not loop.last %} ∥ {% endif %}{% endfor %}{% if not loop.last %} {% endif %}{% endfor %}
+{%- else -%}
+{%- set title = step.title if step.title else step.name.replace('-', ' ') | title -%}
+{%- set ag = resolve_detached(step.detached) -%}
+{%- set in_subgraph = part_of is defined and part_of -%}
+## Step: {{ title }}
+{%- if ag.mode != "inline" %}
+{# A delegated step is one order to the driver: who to spawn and what to tell them.
+   Its dependencies and wave order are already in the step table. #}
+{% if step.summary %}{{ step.summary }}
+{% endif %}
+{%- if in_subgraph %}
+Part of: {{ part_of }}{% if repeated %} (repeated){% endif %}
+{% endif -%}
+{% if step.review_gate is not none %}
+Review gate: stop after this step — "{{ step.review_gate }}"; continue only on explicit user confirmation.
+{% endif %}
+Tell {% if ag.mode == "named" %}the `{{ ag.name }}` agent{% else %}a sub-agent — model {{ ag.model }}, effort {{ ag.effort }} —{% endif %} to get its instructions by calling this command: `booping render-playbook {{ playbook }} --step {{ step.name }}`.
+{%- else -%}
+{% if (body is not defined or body is none) and (step.summary or deps or in_subgraph or step.review_gate is not none) %}
+Instructions:
+{% if in_subgraph -%}
+- Part of: {{ part_of }}{% if repeated %} (repeated){% endif %}
+{% endif -%}
 {% if step.summary -%}
 - Summary: {{ step.summary }}
 {% endif -%}
 {% if deps -%}
 - After: {{ deps | join(', ') }}
 {% endif -%}
-{% if siblings -%}
-- Parallel with: {{ siblings | join(', ') }}
-{% endif -%}
-{% if ag.mode == "model" -%}
-- Run in a sub-agent — model {{ ag.model }}, effort {{ ag.effort }}.
-{% elif ag.mode == "named" -%}
-- Run in sub-agent: {{ ag.name }}.
-{% endif -%}
 {% if step.review_gate is not none -%}
 - Review gate: stop after this step — "{{ step.review_gate }}"; continue only on explicit user confirmation.
 {% endif -%}
 {% endif %}
-{% if embed -%}
-{{ step.body }}
+{% if body is defined and body is not none -%}
+{{ body }}
 {%- else -%}
-Read [{{ title }}]({{ step.path }}) for content.
+Run `booping render-playbook {{ playbook }} --step {{ step.name }}` for content.
+{%- endif %}
+{%- endif %}
 {%- endif %}

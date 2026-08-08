@@ -1,0 +1,14 @@
+state: main
+graph:
+  only: []
+
+states:
+  main:
+    initial: reviewing
+    statuses:
+      reviewing:
+        transitions:
+          - to: reviewed
+            when: the review is written
+            hooks: ["script check-findings"]
+      reviewed: {terminal: true}

@@ -1,0 +1,23 @@
+state: main
+graph:
+  only: []
+
+states:
+  main:
+    artifact: index.md
+    initial: start
+    statuses:
+      start:
+        transitions:
+          - to: shared
+            when: exercises a shared-root script hook carrying argv
+            hooks: ["script shared-note --tag hello --stage a b"]
+          - to: shadowed
+            when: exercises a script name both the playbook dir and a root carry
+            hooks: ["script note"]
+          - to: unfindable
+            when: exercises a script hook no root carries
+            hooks: ["script no-such-script"]
+      shared: {terminal: true}
+      shadowed: {terminal: true}
+      unfindable: {terminal: true}

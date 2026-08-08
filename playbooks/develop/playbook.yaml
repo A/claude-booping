@@ -1,0 +1,73 @@
+state: run
+graph:
+  intake: []
+  provision: [intake]
+  develop-loop: [provision]
+  verify: [develop-loop]
+  wrap-up: [verify]
+
+states:
+  run:
+    artifact: index.md
+    initial: awaiting-approval
+    statuses:
+      awaiting-approval:
+        transitions:
+          - to: ready-for-dev
+            when: "the user handed the plan to develop — invoking the run on it is the approval; intake takes this edge immediately, no confirmation asked"
+            hooks:
+              - frontmatter-update reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+      ready-for-dev:
+        transitions:
+          - to: in-progress
+            when: "provision created the confirmed sprint branch and settled the milestone groups; the first group is about to be delegated"
+            gates:
+              - "the user confirmed the branch name"
+              - "no unresolved non-trivial drift — that halts back to grooming instead"
+            hooks:
+              - frontmatter-update started="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - frontmatter-update commit="{{ macro('core.macros.git_commit') }}"
+              - "script stamp-session"
+      in-progress:
+        transitions:
+          - to: done
+            when: "verify came back green on the project's guardrails and wrap-up made the closing commit and reported the sprint"
+            gates:
+              - "every DoD checkbox [x] and every milestone status done"
+              - "the project's guardrails and the plan's Final Verification green"
+            hooks:
+              - frontmatter-update completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - "script stamp-session"
+              - "script stamp-active-time"
+          - to: fail
+            when: "an unrecoverable blocker at any point in the sprint, verification included, after two fix attempts on the same issue"
+            gates:
+              - "two fix attempts documented in the plan"
+              - "the user approved the abort"
+            hooks:
+              - frontmatter-update completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - "script stamp-session"
+              - "script stamp-active-time"
+      done:
+        terminal: true
+      fail:
+        terminal: true
+      cancelled:
+        terminal: true
+
+    superstates:
+      cancellable:
+        states:
+          - awaiting-approval
+          - ready-for-dev
+          - in-progress
+        transitions:
+          - to: cancelled
+            when: "the user cancels the run"
+            hooks:
+              - frontmatter-update completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+      terminal:
+        states:
+          - done
+          - fail
+          - cancelled

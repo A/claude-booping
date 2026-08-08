@@ -1,27 +1,77 @@
 {#-
-  Renders the "## Execution graph" section. Inputs:
-    graph  — dict[str, list[str]] step → deps, insertion order preserved
-    waves  — list[list[str]] resolved wave order (parallel members per wave)
-  Emits a mermaid flowchart (one edge line per dep, isolated nodes as bare ids)
-  followed by a numbered wave list ("∥"-joined members share a wave).
+  Renders the "## Playbook Steps" section, plus "## State" when the playbook declares
+  state machines. Inputs:
+    graph        — dict[str, list[str]] outer node → deps, insertion order preserved
+    waves        — list[list[str]] resolved outer wave order (parallel members per wave)
+    subgraphs    — dict[str, SubgraphNode] outer keys that are subgraph nodes
+    inner_waves  — dict[str, list[list[str]]] resolved wave order per subgraph
+    steps        — dict[str, Step] every loaded step, keyed by name
+    playbook     — the playbook name (for the state command invocations)
+    states       — list of state entries from render_playbook._state_entries (may be empty)
+  Emits one table row per executable step, dependency order: step name, the steps it
+  waits for, its summary and its review gate. A subgraph's own row carries its outer
+  dependencies and its `repeat` prose; its inner rows follow, tagged and carrying
+  inner-scope deps.
 -#}
-{%- set depended = [] -%}
-{%- for step, deps in graph.items() -%}
-{%- for dep in deps -%}
-{%- if dep not in depended -%}{{ depended.append(dep) or "" }}{%- endif -%}
-{%- endfor -%}
-{%- endfor -%}
-## Execution graph
+{%- macro cell(text) -%}
+{{ (text | string | replace("\n", " ") | replace("|", "\\|") | trim) if text else "—" }}
+{%- endmacro -%}
+{%- macro deps_cell(deps) -%}
+{% if deps %}{% for dep in deps %}`{{ dep }}`{% if not loop.last %}, {% endif %}{% endfor %}{% else %}—{% endif %}
+{%- endmacro -%}
+{%- macro step_row(name, note, deps) -%}
+{%- set step = steps.get(name) -%}
+| `{{ name }}`{{ note }} | {{ deps_cell(deps) }} | {{ cell(step.summary if step else none) }} | {{ cell(step.review_gate if step else none) }} |
+{% endmacro -%}
+## Playbook Steps
 
-```mermaid
-flowchart TD
-{% for step, deps in graph.items() %}{% for dep in deps %}  {{ dep }} --> {{ step }}
-{% endfor %}{% endfor %}{% for step, deps in graph.items() %}{% if not deps and step not in depended %}  {{ step }}
-{% endif %}{% endfor %}```
+Execute the steps in the most effective order considering their dependencies.
 
-Steps on one line run in parallel — spawn all their sub-agents in one message,
-wait for all to finish, then start the next wave.
-
+| Step | Dependencies | Summary | Review gate |
+| --- | --- | --- | --- |
 {% for wave in waves -%}
-{{ loop.index }}. {% for name in wave %}`{{ name }}`{% if not loop.last %} ∥ {% endif %}{% endfor %}
+{% for name in wave -%}
+{% if name in subgraphs -%}
+| `{{ name }}` *(subgraph)* | {{ deps_cell(subgraphs[name].dependencies) }} | {{ cell(subgraphs[name].repeat) }} | — |
+{% for inner in inner_waves[name] -%}
+{% for iname in inner -%}
+{{ step_row(iname, " *(in %s)*" | format(name), subgraphs[name].graph.get(iname)) -}}
 {% endfor -%}
+{% endfor -%}
+{% else -%}
+{{ step_row(name, "", graph.get(name)) -}}
+{% endif -%}
+{% endfor -%}
+{% endfor %}
+{%- if states %}
+## State
+
+Run state is persisted in artifacts under the run workdir. Only `booping playbook-transition` writes it — never hand-edit an artifact's `status`.
+
+Read the whole run's frontier before starting or resuming:
+
+```
+booping playbook-state {{ playbook }} --workdir <run workdir>{% if states | rejectattr('artifact') | list %} --target {path}{% endif %}
+```
+{% for entry in states %}
+### State: {{ entry.name }}
+
+- Referenced by: {{ entry.scopes | join(', ') if entry.scopes else "nothing" }}
+{% if entry.artifact %}- Artifact: `{{ entry.artifact }}` (relative to the run workdir)
+{% else %}- Artifact: named per run — pass `--target {path}` (relative to the run workdir) on every call
+{% endif %}- Initial status: `{{ entry.initial }}`
+- Advance: `booping playbook-transition {{ playbook }} <to>{% if not entry.is_outer %} --state {{ entry.name }}{% endif %}{% if entry.per_instance %} --instance <slug>{% endif %}{% if not entry.artifact %} --target {path}{% endif %} --workdir <run workdir>`
+
+| Status | To | When | Gates |
+| --- | --- | --- | --- |
+{% for row in entry.rows -%}
+{% if not row.edges -%}
+| `{{ row.status }}` | {% if row.terminal %}*(terminal)*{% else %}*(no exit edges)*{% endif %} | — | — |
+{% else -%}
+{% for edge in row.edges -%}
+| `{{ row.status }}` | `{{ edge.to }}` | {{ edge.when or "—" }} | {{ edge.gates | join('; ') if edge.gates else "—" }} |
+{% endfor -%}
+{% endif -%}
+{% endfor %}
+{%- endfor %}
+{%- endif %}

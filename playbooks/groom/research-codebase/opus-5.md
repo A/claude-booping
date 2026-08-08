@@ -1,0 +1,1 @@
+Map the blast radius — files, modules, integrations, external surfaces; check prior art.

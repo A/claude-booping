@@ -4,13 +4,13 @@ The review table is the single artifact the orchestrator presents to the user be
 
 | # | Target | Type | Rule | Example |
 |---|--------|------|------|---------|
-| 1 | `lessons/0005_kebab-title.md` | `lesson` | One imperative sentence. | One concrete sentence. |
-| 2 | `_booping/skill_develop.md` | `skill-ext` | One imperative sentence. | One concrete sentence. |
+| 1 | `_lessons/0005_kebab-title.md` | `lesson` | One imperative sentence. | One concrete sentence. |
+| 2 | `CLAUDE.md` | `claude-md` | One imperative sentence. | One concrete sentence. |
 | … | … | … | … | … |
 
 - `#` — stable integer, assigned once; used by the user to reject individual rows.
-- `Target` — exact file path or path-template (e.g. `_booping/skill_<name>.md`). Resolve templates before writing.
-- `Type` — one of the target types from the Routing Matrix inlined in the skill body.
+- `Target` — exact file path. A `_lessons/` row also carries the `targets:` list the written file gets — the playbooks, steps, agents and skills it applies to.
+- `Type` — the destination: `lesson` for a `_lessons/` file, `claude-md` for a bullet in the attached repo's `CLAUDE.md`.
 - `Rule` — one sentence, imperative form (`do X` / `don't Y`). Single concern — if you need "and", "plus", or `;`, decompose into two rows.
 - `Example` — one sentence, concrete; what went wrong or right.
 
