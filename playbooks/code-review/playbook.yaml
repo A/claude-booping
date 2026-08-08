@@ -1,5 +1,34 @@
+state: run
 graph:
   scope: []
   review: [scope]
   present: [review]
   resolve: [present]
+
+states:
+  run:
+    initial: in-agent-review
+    statuses:
+      in-agent-review:
+        transitions:
+          - to: human-review
+            when: "the detached review pass wrote its findings to `codereviews/{dir}/{ts}.md`, the run's `--target`, and the user's verdict is still pending"
+            gates:
+              - "every finding carries its severity, anchor and proposed fix in the artifact"
+      human-review:
+        transitions:
+          - to: done
+            when: "the user's verdict on every finding is resolved — applied, delegated or dropped — and recorded in the artifact"
+            gates:
+              - "explicit user verdict captured at present — silence never counts"
+              - "the artifact's `plan:` key holds the vault-relative plan path or `null`, since the hook script reads it"
+            hooks:
+              - frontmatter-update reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - script close-code-review
+      done:
+        terminal: true
+
+    superstates:
+      terminal:
+        states:
+          - done
