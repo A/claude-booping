@@ -313,8 +313,23 @@ def test_core_vault_scaffold_seeds_sprints_base_fence(tmp_path: Path) -> None:
     fence = text.split("```base\n", 1)[1].split("\n```", 1)[0]
     spec = yaml.safe_load(fence)
 
-    assert spec["formulas"] == {"plan": "file.asLink(title)"}
-    assert spec["properties"] == {"formula.plan": {"displayName": "Title"}}
+    # Token counts span five orders of magnitude, so output and the two cache totals
+    # render through unit formulas; uncached input is small enough to stay a number.
+    assert spec["formulas"] == {
+        "plan": "file.asLink(title)",
+        "tokens_out": '(metrics_tokens_output / 1000).round(0) + "k"',
+        "cache_created": '(metrics_tokens_cache_creation / 1000000).round(1) + "M"',
+        "cache_read": '(metrics_tokens_cache_read / 1000000).round(1) + "M"',
+    }
+    assert spec["properties"] == {
+        "formula.plan": {"displayName": "Title"},
+        "formula.tokens_out": {"displayName": "Tokens out"},
+        "formula.cache_created": {"displayName": "Cache created"},
+        "formula.cache_read": {"displayName": "Cache read"},
+        "note.metrics_active_minutes": {"displayName": "Active min"},
+        "note.metrics_models": {"displayName": "Models"},
+        "note.metrics_tokens_input": {"displayName": "Tokens in"},
+    }
     # Scoped to the booping vault holding this sprints.md, so it stays correct when
     # the booping vault is nested inside a larger Obsidian vault.
     assert spec["filters"] == {
@@ -335,9 +350,9 @@ def test_core_vault_scaffold_seeds_sprints_base_fence(tmp_path: Path) -> None:
         "metrics_active_minutes",
         "metrics_models",
         "metrics_tokens_input",
-        "metrics_tokens_output",
-        "metrics_tokens_cache_creation",
-        "metrics_tokens_cache_read",
+        "formula.tokens_out",
+        "formula.cache_created",
+        "formula.cache_read",
     ]
     assert view["sort"] == [{"property": "created", "direction": "DESC"}]
 
