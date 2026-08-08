@@ -62,33 +62,55 @@
               <ul class="current">
                 <li class="toctree-l1 current"><a class="reference internal current" href="#">Project config</a>
     <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#shape-two-top-level-keys">Shape: two top-level keys</a>
+    </li>
     <li class="toctree-l2"><a class="reference internal" href="#snapshot-srcconfigyaml">Snapshot: src/config.yaml</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#top-level-keys">Top-level keys</a>
+    <li class="toctree-l2"><a class="reference internal" href="#shared-keys-directly-under-core">Shared keys, directly under core</a>
         <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#sprint">sprint</a>
+    <li class="toctree-l3"><a class="reference internal" href="#coresprint">core.sprint</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#git">git</a>
+    <li class="toctree-l3"><a class="reference internal" href="#coretask_types">core.task_types</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#tasks">tasks</a>
+    <li class="toctree-l3"><a class="reference internal" href="#coreresearch_agent">core.research_agent</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#planstatuses">plan.statuses</a>
+    <li class="toctree-l3"><a class="reference internal" href="#coreplansglob">core.plans.glob</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#plansuperstates">plan.superstates</a>
+    <li class="toctree-l3"><a class="reference internal" href="#coremacros">core.macros</a>
     </li>
         </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#per-playbook-keys-under-corename_playbook">Per-playbook keys, under core.{name}_playbook</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#corename_playbookagents">core.{name}_playbook.agents</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#corename_playbookstatus">core.{name}_playbook.status</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#corename_playbookqueriesid">core.{name}_playbook.queries.&lt;id&gt;</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#corename_playbookgit">core.{name}_playbook.git</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#coregroom_playbookcross_review_agent">core.groom_playbook.cross_review_agent</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#where-the-plan-lifecycle-lives">Where the plan lifecycle lives</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#query-specs">Query specs</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#scaffold-trees">Scaffold trees</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#review-templates">Review templates</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#plan-frontmatter-summary">Plan frontmatter: summary</a>
-        <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#skillsnameagents">skills.&lt;name&gt;.agents</a>
-    </li>
-        </ul>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#the-global-tier">The global tier</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#overriding-for-one-project">Overriding for one project</a>
         <ul>
     <li class="toctree-l3"><a class="reference internal" href="#example-tweak-the-sp-threshold-and-add-a-branch-convention">Example: tweak the SP threshold and add a branch convention</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#example-config-for-a-playbook-you-wrote">Example: config for a playbook you wrote</a>
     </li>
         </ul>
     </li>
@@ -101,21 +123,17 @@
                 <li class="toctree-l1"><a class="reference internal" href="../integrating-external-agents/">Integrating external agents</a>
                 </li>
               </ul>
-              <p class="caption"><span class="caption-text">Commands</span></p>
+              <p class="caption"><span class="caption-text">Workflow</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../groom/">/groom</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../groom/">groom playbook</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../develop/">/develop</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../develop/">develop playbook</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../code_review/">/code-review</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../code_review/">code-review playbook</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../retro/">/retro</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../retro/">retro playbook</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../learn/">/learn</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../chat/">/chat</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../help/">/help</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../learn/">learn playbook</a>
                   </li>
               </ul>
       </div>
@@ -143,41 +161,110 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="project-config">Project config</h1>
-<p>booping reads a single structured config — <code>src/config.yaml</code> in the plugin — and deep-merges two override tiers over it at skill-load time: a <strong>global</strong> tier (<code>${XDG_CONFIG_HOME:-~/.config}/booping/config.yaml</code>) and a <strong>project</strong> tier (<code>~/Claude/{project}/config.yaml</code>). The merge order is <strong>core → global → project</strong>, later tiers winning. This page tours every top-level key and explains the override mechanic.</p>
+<p>booping reads a single structured config — <code>src/config.yaml</code> in the plugin — and deep-merges two override tiers over it at skill-load time: a <strong>global</strong> tier (<code>${XDG_CONFIG_HOME:-~/.config}/booping/config.yaml</code>) and a <strong>project</strong> tier (<code>~/Claude/{project}/config.yaml</code>). The merge order is <strong>core → global → project</strong>, later tiers winning.</p>
+<h2 id="shape-two-top-level-keys">Shape: two top-level keys</h2>
+<p>The whole config lives under exactly two top-level keys:</p>
+<ul>
+<li><strong><code>home_dir</code></strong> — the vault-home base. Top-level because it resolves <em>where the vault is</em>, before any namespace inside the config is reachable. See <a href="#the-global-tier">The global tier</a>.</li>
+<li><strong><code>core</code></strong> — everything the shipped playbook set owns.</li>
+</ul>
+<p>Inside <code>core</code> there is one placement rule:</p>
+<table>
+<thead>
+<tr>
+<th>The key is…</th>
+<th>It lives at…</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>owned by exactly one playbook</td>
+<td><code>core.{name}_playbook.…</code></td>
+</tr>
+<tr>
+<td>shared by the development loop or several playbooks</td>
+<td><code>core.…</code> directly</td>
+</tr>
+</tbody>
+</table>
+<p><code>{name}</code> is the playbook's name with <code>-</code> replaced by <code>_</code> — <code>groom</code> → <code>core.groom_playbook</code>, <code>code-review</code> → <code>core.code_review_playbook</code>. The rule applies literally, including to the two scaffold trees.</p>
+<p><strong><code>core</code> is the worked example your own playbooks copy.</strong> A playbook you write declares its own namespace the same way and reads it with <code>{{ config.core.my_playbook.… }}</code> (or <code>{{ config.my_namespace.… }}</code> to sit outside <code>core</code> entirely). The placement rule travels with the copy: a key only your playbook reads sits in its <code>core.{name}_playbook</code> block; a key several of your playbooks share sits directly under <code>core</code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Nothing is validated</p>
+<p>There is no schema gate, no unknown-field warning, and no key restricted to a particular tier. A config declaring an invented <code>core.my_playbook.whatever</code> block loads unchanged from any tier, and a project-tier <code>core.macros</code> entry is as first-class as a shipped one — it resolves at render time like the rest of the merge. Override a <code>core.*</code> key the plugin ships and getting it right is yours.</p>
+</div>
 <h2 id="snapshot-srcconfigyaml">Snapshot: <code>src/config.yaml</code></h2>
-<p>For context, the current plugin defaults. Source of truth: <a href="https://github.com/A/claude-booping/blob/master/src/config.yaml"><code>src/config.yaml</code></a> (this snapshot may lag).</p>
+<p>Current plugin defaults, comments trimmed and the per-agent guidance bullets abridged. Source of truth: <a href="https://github.com/A/claude-booping/blob/master/src/config.yaml"><code>src/config.yaml</code></a> (this snapshot may lag).</p>
 <details>
 <summary>Show full config</summary>
 
 
-<pre><code class="language-yaml">sprint:
-  default_threshold_sp: 35
-  redecompose_threshold: 5
-  max_milestones_per_agent: 2
-  scale:
-    - { sp: 1, meaning: &quot;Simple text/config change, no risk&quot; }
-    - { sp: 2, meaning: &quot;Simple task, predictable, no risk&quot; }
-    - { sp: 3, meaning: &quot;Medium task, minor risks but predictable overall&quot; }
-    - { sp: 4, meaning: &quot;Complex task, medium risk, may need small research but clear enough&quot; }
-    - { sp: 5, meaning: &quot;Research task — developer needs to clarify and decompose further before proceeding&quot; }
+<pre><code class="language-yaml">home_dir: ~/Claude/
 
-tasks:
-  - type: feature
-    description: &quot;New user-facing capability. Needs business goal, design, milestones, DoD.&quot;
-    doc_uri: ${CLAUDE_PLUGIN_ROOT}/docs/task_feature.md
-  - type: bug
-    description: &quot;Defect — observed behavior diverges from expected. Needs triage, reproduction, root-cause hypothesis, minimal fix, and a regression test.&quot;
-    doc_uri: ${CLAUDE_PLUGIN_ROOT}/docs/task_bug.md
-  - type: refactoring
-    description: &quot;Internal structure change with no user-visible behavior change. Needs current-vs-target design, migration steps, and a no-behavior-change DoD.&quot;
-    doc_uri: ${CLAUDE_PLUGIN_ROOT}/docs/task_refactoring.md
+core:
+  research_agent: &quot;booping:booping-researcher&quot;
 
-skills:
-  help: {}
+  macros:
+    date: [&quot;date&quot;]
+    git_commit:
+      command: [&quot;git&quot;, &quot;rev-parse&quot;, &quot;HEAD&quot;]
+      cwd: repo
 
-  install: {}
+  plans:
+    glob:
+      - plans/*/index.md
 
-  develop:
+  sprint:
+    default_threshold_sp: 35
+    redecompose_threshold: 5
+    max_milestones_per_agent: 2
+    scale:
+      - { sp: 1, meaning: &quot;Simple text/config change, no risk&quot; }
+      - { sp: 2, meaning: &quot;Simple task, predictable, no risk&quot; }
+      - { sp: 3, meaning: &quot;Medium task, minor risks but predictable overall&quot; }
+      - { sp: 4, meaning: &quot;Complex task, medium risk, may need small research but clear enough&quot; }
+      - { sp: 5, meaning: &quot;Research task — developer needs to clarify and decompose further before proceeding&quot; }
+
+  task_types:
+    - type: feature
+      description: &quot;New user-facing capability. Needs business goal, design, milestones, DoD.&quot;
+      doc_uri: ${CLAUDE_PLUGIN_ROOT}/docs/task_feature.md
+    - type: bug
+      description: &quot;Defect — observed behavior diverges from expected. Needs triage, reproduction, root-cause hypothesis, minimal fix, and a regression test.&quot;
+      doc_uri: ${CLAUDE_PLUGIN_ROOT}/docs/task_bug.md
+    - type: refactoring
+      description: &quot;Internal structure change with no user-visible behavior change. Needs current-vs-target design, migration steps, and a no-behavior-change DoD.&quot;
+      doc_uri: ${CLAUDE_PLUGIN_ROOT}/docs/task_refactoring.md
+
+  groom_playbook:
+    cross_review_agent: null
+    agents:
+      booping-researcher:
+        internal: true
+        good_for:
+          - &quot;Wide read or web search where results must be aggregated outside this skill's context and returned as a summary&quot;
+          - &quot;Map blast radius across many files (which modules and integrations a change touches)&quot;
+          - &quot;Extract patterns from a corpus too large to read directly&quot;
+          - &quot;Verify package versions, image tags, API endpoints, CLI flags against current docs&quot;
+          - &quot;Cross-system architecture investigation across multiple repos or services&quot;
+        bad_for:
+          - &quot;Small checks — single-file reads, one-off greps, existence checks&quot;
+          - &quot;When the information cannot be meaningfully compressed without losing signal&quot;
+    queries:
+      latest_plans:
+        where:
+          status:in: [ready-for-dev, in-progress, awaiting-retro, awaiting-learning, done, fail, cancelled]
+        sort: &quot;-created&quot;
+        columns: [status, title, summary, active_minutes, models]
+
+  develop_playbook:
+    git:
+      commit_message: '&lt;agent&gt;: &lt;plan title&gt; &lt;message&gt;'
+      branches:
+        - { branch: feat/,     when: [feature] }
+        - { branch: fix/,      when: [bug] }
+        - { branch: refactor/, when: [refactoring] }
+        - { branch: chore/,    when: [&quot;anything not matching a task type&quot;, &quot;tooling, dependency bumps, formatting&quot;] }
     agents:
       booping-developer:
         internal: true
@@ -186,329 +273,306 @@ skills:
       booping-researcher:
         internal: true
         good_for:
-          - &quot;Phase 0 drift spot-check: given a large set of plan-named files, determine whether actual file shape matches the plan's assumptions&quot;
+          - &quot;Phase 0 drift spot-check across a large set of plan-named files&quot;
         bad_for:
           - &quot;Milestone-diff review — that stays in the skill&quot;
           - &quot;Single-file reads — call Read directly&quot;
 
-  groom:
+  retro_playbook:
+    status: done
+    queries:
+      candidates:
+        where: { status: done, retro: null }
+        sort: &quot;-created&quot;
+        columns: [status, sp, title, created, completed]
     agents:
       booping-researcher:
         internal: true
         good_for:
-          - &quot;Wide read or web search where results must be aggregated outside this skill's context and returned as a summary&quot;
-          - &quot;Map blast radius across many files (which modules and integrations a change touches)&quot;
-          - &quot;Extract patterns from a corpus too large to read directly (e.g. 'common shapes across 30 test files')&quot;
-          - &quot;Verify package versions, image tags, API endpoints, CLI flags against current docs when many sources need to be checked&quot;
-          - &quot;Cross-system architecture investigation across multiple repos or services&quot;
-          - &quot;Compare framework/library options with deep tradeoff analysis&quot;
-        bad_for:
-          - &quot;Small checks — single-file reads, one-off greps, existence checks&quot;
-          - &quot;When the information cannot be meaningfully compressed without losing signal the caller needs to decide&quot;
-          - &quot;When the skill already needs to read the same few files for other reasons&quot;
-          - &quot;When the question fits in a few lines of `ls`/`grep` output&quot;
-
-  learn:
-    status: awaiting-learning
-
-  retro:
-    status: awaiting-retro
-    agents:
-      booping-researcher:
-        internal: true
-        good_for:
-          - &quot;Phase 0 session-log search: scan ~/.claude/projects/ across all session logs for the plan's time window and aggregate into a structured summary of user questions, blockers, and detours&quot;
+          - &quot;Phase 0 session-log search across ~/.claude/projects/ for the plan's time window&quot;
         bad_for:
           - &quot;Single-file reads — call Read directly&quot;
-          - &quot;Phase 2 sprint analysis — stays in the orchestrator&quot;
-          - &quot;Phase 4 lesson cross-check — stays in the orchestrator using the in-context lesson set&quot;
 
-  code-review:
-    status: awaiting-retro
+  learn_playbook:
+    queries:
+      candidates:
+        glob: [retrospectives/*.md]
+        where: { status: awaiting-learning }
+        sort: &quot;-created&quot;
+        columns: [status, title, created, plan]
+
+  code_review_playbook:
+    queries:
+      scope_candidates:
+        where: { status: done }
+        columns: [sp, title, code_reviews]
     agents:
       booping-researcher:
         internal: true
         good_for:
-          - &quot;Blast-radius reads on large diffs (≥ ~5 files) aggregated into a compressed summary of touched modules and integration points&quot;
+          - &quot;Blast-radius reads on large diffs (≥ ~5 files) aggregated into a compressed summary&quot;
         bad_for:
           - &quot;Single-file reads — call Read directly&quot;
-          - &quot;Small greps or existence checks that fit in a few lines of output&quot;
       booping-developer:
         internal: true
         good_for:
-          - &quot;Applying user-approved non-trivial fixes surfaced by the review (BLOCKER or SUGGESTION)&quot;
+          - &quot;Applying user-approved non-trivial fixes surfaced by the review&quot;
         bad_for:
           - &quot;Trivial inline nits — orchestrator handles those directly&quot;
 
-  chat:
-    agents:
-      booping-researcher:
-        internal: true
-        good_for:
-          - &quot;Vault-wide reads aggregated into a summary (e.g. what plans exist, recurring themes across retros)&quot;
-          - &quot;Plan or retro content extraction across ≥3 files where the results need to be compressed before returning to the skill&quot;
-          - &quot;Web search aggregation when the user asks an open question that requires pulling from multiple sources&quot;
-        bad_for:
-          - &quot;Single-file reads — call Read directly&quot;
-          - &quot;Simple greps or existence checks that fit in a few lines of output&quot;
-          - &quot;Questions answerable with a short `ls` or `grep`&quot;
+  migrate_playbook:
+    queries:
+      pending:
+        root: core
+        glob:
+          - migrations/*/migration.md
+        sort: id
 
-git:
-  commit_message: '&lt;agent&gt;: &lt;plan title&gt; &lt;message&gt;'
-  branches:
-    - branch: feat/
-      when:
-        - feature
-    - branch: fix/
-      when:
-        - bug
-    - branch: refactor/
-      when:
-        - refactoring
-    - branch: chore/
-      when:
-        - other
-        - tooling, dependency bumps, formatting
+  setup_playbook:
+    scaffold:
+      plans:   { type: dir }
+      retrospectives: { type: dir }
+      codereviews: { type: dir }
+      _lessons: { type: dir }
+      notes:   { type: dir }
+      sprints.md: |
+        ```base
+        ...an Obsidian Bases fence over plans/...
+        ```
+      .gitignore: |
+        .booping.log
 
-plan:
-  statuses:
-    backlog:
-      desc: &quot;Parked plan — not actively being worked on. Sibling stubs from split sprints and user-filed ideas not yet in grooming live here.&quot;
-      owner: groom
-      terminal: false
-      artifacts:
-        - &quot;Plan stub at ~/Claude/{project}/plans/{YYYYMMDD}-{kebab-title}.md (split siblings or parked ideas)&quot;
-      transitions:
-        - to: in-spec
-          skill: groom
-          when: &quot;User asks /groom to shape a parked plan, or /groom is invoked on a fresh request&quot;
-        - to: cancelled
-          skill: groom
-          when: &quot;User shelves the request before grooming&quot;
-
-    in-spec:
-      desc: &quot;/groom is actively specifying — researching, designing, drafting the plan.&quot;
-      owner: groom
-      terminal: false
-      artifacts:
-        - &quot;Plan at ~/Claude/{project}/plans/{YYYYMMDD}-{kebab-title}.md with all milestones, SP estimates, and DoDs&quot;
-        - &quot;Sibling stub plans (one per split sprint) under the same plans/ path&quot;
-      transitions:
-        - to: awaiting-plan-review
-          skill: groom
-          when: &quot;Draft is complete and ready to present to the user&quot;
-          gates:
-            - &quot;Cross-validation run (see [cross-validation](${CLAUDE_PLUGIN_ROOT}/docs/cross_validation.md)) — single-file-bug skip acceptable&quot;
-            - &quot;Every task estimated; any task ≥ redecompose_threshold SP has been re-decomposed&quot;
-        - to: backlog
-          skill: groom
-          when: &quot;User parks the work mid-grooming to revisit later&quot;
-        - to: cancelled
-          skill: groom
-          when: &quot;User shelves the work mid-grooming&quot;
-
-    awaiting-plan-review:
-      desc: &quot;Plan drafted; /groom is presenting to the user and awaiting explicit approval, change request, or cancellation.&quot;
-      owner: groom
-      terminal: false
-      transitions:
-        - to: ready-for-dev
-          skill: groom
-          when: &quot;User explicitly approves the plan ('looks good', 'ship it'). Silence does not count.&quot;
-          gates:
-            - &quot;Explicit user approval captured&quot;
-        - to: in-spec
-          skill: groom
-          when: &quot;User requests changes that require re-research or re-design&quot;
-        - to: cancelled
-          skill: groom
-          when: &quot;User shelves the plan instead of approving&quot;
-
-    ready-for-dev:
-      desc: &quot;Approved by user. Queued for /develop to claim.&quot;
-      owner: develop
-      terminal: false
-      transitions:
-        - to: in-progress
-          skill: develop
-          when: &quot;/develop claims the plan at the start of its execute phase&quot;
-
-    in-progress:
-      desc: &quot;/develop has claimed the plan and is executing milestones.&quot;
-      owner: develop
-      terminal: false
-      artifacts:
-        - &quot;Code changes per milestone on the sprint branch&quot;
-        - &quot;DoD checkboxes flipped to [x] as tasks complete&quot;
-      transitions:
-        - to: awaiting-retro
-          skill: develop
-          when: &quot;All milestones done&quot;
-          gates:
-            - &quot;Every DoD checkbox marked [x]&quot;
-            - &quot;Final Verification green&quot;
-        - to: fail
-          skill: develop
-          when: &quot;Unrecoverable blocker on the same milestone&quot;
-          gates:
-            - &quot;Two fix attempts documented in the plan&quot;
-            - &quot;User has approved the abort&quot;
-
-    awaiting-retro:
-      desc: &quot;All milestones done; waiting for /retro to write the retrospective.&quot;
-      owner: retro
-      terminal: false
-      transitions:
-        - to: awaiting-learning
-          skill: retro
-          when: &quot;Retrospective written and saved&quot;
-          gates:
-            - &quot;Retrospective markdown saved to retrospectives/&quot;
-            - &quot;Self-review checklist passed&quot;
-        - to: done
-          skill: retro
-          when: &quot;User opts to skip retro for a stale plan and mark it done without retrospective or learning&quot;
-
-    awaiting-learning:
-      desc: &quot;Retro written; waiting for /learn to absorb lessons.&quot;
-      owner: learn
-      terminal: false
-      transitions:
-        - to: done
-          skill: learn
-          when: &quot;All accepted learnings written&quot;
-          gates:
-            - &quot;User confirmed the review table&quot;
-            - &quot;Every accepted lesson written to its target file&quot;
-
-    done:
-      desc: &quot;Terminal success. /learn has absorbed all lessons.&quot;
-      terminal: true
-
-    fail:
-      desc: &quot;Terminal technical failure. /develop hit an unrecoverable blocker.&quot;
-      terminal: true
-
-    cancelled:
-      desc: &quot;Terminal product decision. User shelved the plan.&quot;
-      terminal: true
-
-  # Statuses also group into named superstates (additive, overridable).
-  superstates:
-    specification:
-      states: [backlog, in-spec]
-      transitions:
-        - to: cancelled
-          skill: groom
-          when: &quot;User shelves the request&quot;
-    planned:
-      states: [awaiting-plan-review, ready-for-dev]
-      transitions:
-        - to: cancelled
-          skill: groom
-          when: &quot;User shelves the plan&quot;
-    executing:
-      states: [in-progress]
-      transitions:
-        - to: fail
-          skill: develop
-          when: &quot;Unrecoverable blocker on the same milestone&quot;
-          gates:
-            - &quot;Two fix attempts documented in the plan&quot;
-            - &quot;User has approved the abort&quot;
-    review:
-      states: [awaiting-retro, awaiting-learning]
-      transitions:
-        - to: done
-          skill: retro
-          when: &quot;User skips remaining review steps and marks the plan done&quot;
-          hooks:
-            - frontmatter-update goal=skipped
-    terminal:
-      states: [done, fail, cancelled]
+  playbook_authoring_playbook:
+    scaffold:
+      playbook.md: |
+        ...identity frontmatter + preamble stub, seeded with --set name=...
+      playbook.yaml: |
+        graph: {}
+      _references: { type: dir }
 </code></pre>
 
 
 </details>
 
-<h2 id="top-level-keys">Top-level keys</h2>
-<h3 id="sprint"><code>sprint</code></h3>
-<p>Sprint sizing thresholds and the story-point scale. Drives <code>/groom</code>'s split proposals, the per-task re-decompose gate, and <code>/develop</code>'s milestone grouping.</p>
+<h2 id="shared-keys-directly-under-core">Shared keys, directly under <code>core</code></h2>
+<h3 id="coresprint"><code>core.sprint</code></h3>
+<p>Sprint sizing thresholds and the story-point scale. Drives the groom playbook's split proposals, the per-task re-decompose gate, and the develop playbook's milestone grouping.</p>
 <ul>
-<li><strong><code>sprint.default_threshold_sp</code></strong> — soft cap on total SP per plan. Above this, <code>/groom</code> proposes splitting the plan into sibling stubs. Default: <code>35</code>.</li>
-<li><strong><code>sprint.redecompose_threshold</code></strong> — per-task SP value at or above which <code>/groom</code> must re-decompose the task before the plan can leave <code>in-spec</code>. Default: <code>5</code>.</li>
-<li><strong><code>sprint.max_milestones_per_agent</code></strong> — cap on consecutive milestones grouped into one <code>booping-developer</code> briefing by <code>/develop</code>. Default: <code>2</code>.</li>
-<li><strong><code>sprint.scale</code></strong> — the 1–5 SP definitions rendered into <code>/groom</code>'s body. Each entry is <code>{sp, meaning}</code>. Replace wholesale to redefine the scale; do not partial-edit (lists merge by replacement, see below).</li>
+<li><strong><code>core.sprint.default_threshold_sp</code></strong> — soft cap on total SP per plan. Above this, groom proposes splitting the plan into sibling stubs. Default: <code>35</code>.</li>
+<li><strong><code>core.sprint.redecompose_threshold</code></strong> — per-task SP value at or above which groom must re-decompose the task before the run can leave <code>drafting</code>. Default: <code>5</code>.</li>
+<li><strong><code>core.sprint.max_milestones_per_agent</code></strong> — cap on consecutive milestones grouped into one <code>booping-developer</code> briefing by the develop playbook. Default: <code>2</code>.</li>
+<li><strong><code>core.sprint.scale</code></strong> — the 1–5 SP definitions rendered into groom's body. Each entry is <code>{sp, meaning}</code>. Replace wholesale to redefine the scale — lists merge by replacement.</li>
 </ul>
-<h3 id="git"><code>git</code></h3>
-<p>Branch and commit conventions consumed by <code>/develop</code>.</p>
+<h3 id="coretask_types"><code>core.task_types</code></h3>
+<p>The task-type taxonomy groom classifies every request against. Each entry is <code>{type, description, doc_uri}</code>; <code>doc_uri</code> lazy-loads that type's guidance during grooming. A new task type needs both an entry here and the corresponding doc under <code>docs/</code>.</p>
+<h3 id="coreresearch_agent"><code>core.research_agent</code></h3>
+<p>The agent id an <strong>assisted</strong> playbook step delegates its bulk reads to. Default <code>booping:booping-researcher</code>. Point it at any agent id — a shipped worker or an external agent you registered — and every assisted step's delegated reads route there; nothing else about the steps changes. It sits directly under <code>core</code> because more than one playbook reads it (groom's two research steps, retro's session-log mining and issue research).</p>
+<h3 id="coreplansglob"><code>core.plans.glob</code></h3>
+<p>The plan shape as data: an ordered list of vault-relative glob patterns, defaulting to the single entry <code>plans/*/index.md</code>. All plan discovery goes through this list — patterns are tried in order and the first to claim a slug wins, so a vault carrying more than one plan shape lists them all and order decides ties. A vault laid out differently edits this one key. It is also the fallback that every <a href="#query-specs">query spec</a> without its own <code>glob</code> inherits.</p>
+<h3 id="coremacros"><code>core.macros</code></h3>
+<p>Shell-outs a rendered body may call by dotted path. Each entry is an <strong>argv list</strong>, never a shell string, run with <code>shell=False</code> — either the bare list, or a mapping carrying it under <code>command:</code> plus an optional <code>cwd:</code> of <code>repo</code> or <code>vault</code>: the attached repo or the Project Vault. Omit <code>cwd:</code> and the command runs in the process's own working directory.</p>
+<pre><code class="language-yaml">core:
+  macros:
+    date: [&quot;date&quot;]
+    branch:
+      command: [&quot;git&quot;, &quot;rev-parse&quot;, &quot;--abbrev-ref&quot;, &quot;HEAD&quot;]
+      cwd: repo
+</code></pre>
+<p>A body calls one with <code>{{ macro('core.macros.date', '+%H:%M') }}</code>. The <code>command:</code> list is a <strong>prefix</strong> — positional arguments at the call site are appended, so <code>["date"]</code> and <code>["date", "+%Y%m%d"]</code> are the same shape. stdout is stripped and cached per argv tuple and resolved <code>cwd</code> for the process, so a macro must be idempotent within one render, and two argument variants are two separate runs.</p>
+<p>For a reproducible render, pin a macro instead of executing it: <code>--stub-macro DOTTED.PATH=LITERAL</code> on <code>booping render</code>, <code>booping render-playbook</code> and <code>booping scaffold</code> makes the named macro return the literal without running its command (e.g. <code>--stub-macro core.macros.date=19700101-00-00</code>). The flag is repeatable, later pins winning.</p>
+<p>Macros are honoured in every tier, project included — a project-tier entry resolves at render time exactly like a shipped one. A project config arrives with a <code>git clone</code>, so treat an unfamiliar vault's <code>core.macros</code> block the way you would treat any other executable content in a repo.</p>
+<h2 id="per-playbook-keys-under-corename_playbook">Per-playbook keys, under <code>core.{name}_playbook</code></h2>
+<p>Each shipped playbook owns one block:</p>
+<h3 id="corename_playbookagents"><code>core.{name}_playbook.agents</code></h3>
+<p>Delegation guidance rendered into that playbook's "Available Agents" table via the shared <code>playbooks/_partials/playbook_agents.md</code> partial. Each entry has <code>good_for</code> (bullets describing when to delegate) and an optional <code>bad_for</code> (when not to). Populated for <code>groom</code>, <code>develop</code>, <code>retro</code>, and <code>code-review</code>.</p>
 <ul>
-<li><strong><code>git.commit_message</code></strong> — the conventional commit format string the orchestrator follows for in-plan commits.</li>
-<li><strong><code>git.branches</code></strong> — list of <code>{branch, when}</code> entries. <code>branch</code> is the literal prefix (e.g. <code>feat/</code>, <code>fix/</code>); <code>when</code> is a list of short matches against the plan <code>type</code> (<code>feature</code>, <code>bug</code>, <code>refactoring</code>) or freeform descriptors. <code>/develop</code> walks this list to pick the sprint branch prefix.</li>
+<li><strong><code>core.{name}_playbook.agents.&lt;id&gt;.internal</code></strong> — <code>true</code> on booping's built-in workers (<code>booping-developer</code>, <code>booping-researcher</code>), marking an entry plugin-owned so it can be hidden when the block opts out of built-ins. Self-contained global agents you register omit this flag.</li>
+<li><strong><code>core.{name}_playbook.disable_internal_agents</code></strong> — when set, every <code>internal: true</code> entry is hidden from that table, leaving only the agents you explicitly registered. See <a href="../integrating-external-agents/">integrating external agents</a>.</li>
 </ul>
-<h3 id="tasks"><code>tasks</code></h3>
-<p>The task-type taxonomy <code>/groom</code> classifies every request against. Each entry is <code>{type, description, doc_uri}</code>. The matching <code>doc_uri</code> lazy-loads detailed guidance for that task type during grooming. Adding a new task type means adding both a <code>tasks</code> entry and the corresponding doc under <code>docs/</code>.</p>
-<h3 id="planstatuses"><code>plan.statuses</code></h3>
-<p>The full plan-lifecycle definition: every status, who owns it, what it produces, what transitions out of it, and what gates each transition has. Skills render only the slice they own (transitions where <code>skill: &lt;self&gt;</code>), so editing this key reshapes every skill's plan-transitions table at the next skill load.</p>
-<p>Each status carries:</p>
+<h3 id="corename_playbookstatus"><code>core.{name}_playbook.status</code></h3>
+<p>The single status this playbook claims from or reads — only <code>retro</code> declares one today, <code>done</code> (the plan status develop ends at, narrowed by a null <code>retro:</code> in the query beside it). It is a <strong>query key</strong>, not a lifecycle definition: point it at a different status and the playbook's picker pulls from another queue. The transitions live in the playbook's <code>states:</code> block.</p>
+<h3 id="corename_playbookqueriesid"><code>core.{name}_playbook.queries.&lt;id&gt;</code></h3>
+<p>A <a href="#query-specs">query spec</a>, living beside the body that renders it.</p>
+<h3 id="corename_playbookgit"><code>core.{name}_playbook.git</code></h3>
+<p>Develop-only: <code>commit_message</code> (the conventional-commit format string for in-sprint commits) and <code>branches</code>, a list of <code>{branch, when}</code> entries. <code>branch</code> is the literal prefix (e.g. <code>feat/</code>, <code>fix/</code>); <code>when</code> is a list of short matches against the plan <code>type</code> (<code>feature</code>, <code>bug</code>, <code>refactoring</code>) or freeform descriptors. Develop's <code>provision</code> step walks the list to pick the sprint branch prefix.</p>
+<h3 id="coregroom_playbookcross_review_agent"><code>core.groom_playbook.cross_review_agent</code></h3>
+<p>The agent that performs the detached second-model review of a drafted plan. <strong>Default <code>null</code></strong>, so the reviewing step renders as skipped until a global or project config names an agent.</p>
+<h2 id="where-the-plan-lifecycle-lives">Where the plan lifecycle lives</h2>
+<p>Statuses, transitions, gates and hooks are <strong>not</strong> in this config. Each playbook declares its own vocabulary in its <code>states:</code> block in <code>playbooks/&lt;name&gt;/playbook.yaml</code>, and <code>booping playbook-transition</code> is the only thing that writes a plan's <code>status:</code>. See <a href="../playbook/#run-state">Playbooks → Run state</a> for the machine format, and <a href="../vault/#plans">Vault → <code>plans/</code></a> for how the four shipped playbooks chain their vocabularies through one plan.</p>
+<p>To reshape a status flow, edit that playbook's <code>states:</code> — or fork the playbook under a new name. No config key overrides it.</p>
+<h2 id="query-specs">Query specs</h2>
+<p>A <strong>query spec</strong> is any mapping in the merged config, addressed by its dotted path. The value at the path <em>is</em> the spec — no wrapper key:</p>
+<pre><code class="language-bash">bin/booping query --config core.retro_playbook.queries.candidates
+</code></pre>
+<p>In a template, <code>{{ 'core.retro_playbook.queries.candidates' | query }}</code> yields the rows; the sibling <code>as_table</code> filter lays a result out as a markdown table.</p>
+<p>Every key is optional:</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>glob</code></td>
+<td>Ordered vault-relative patterns; the first to claim a slug wins. Omitted → <code>core.plans.glob</code>.</td>
+</tr>
+<tr>
+<td><code>root</code></td>
+<td>What the globs resolve against. Omitted → the vault; <code>core</code> → the plugin root, for content the plugin itself ships (so the spec resolves outside any project).</td>
+</tr>
+<tr>
+<td><code>where</code></td>
+<td>Clause → value; the clause key carries the operator as a suffix (below).</td>
+</tr>
+<tr>
+<td><code>sort</code></td>
+<td>Frontmatter field name, <code>-</code> prefixed for descending. Valueless rows come last. Omitted → slug order.</td>
+</tr>
+<tr>
+<td><code>columns</code></td>
+<td>Projection, declared order preserved. <code>path</code> and <code>slug</code> are always present.</td>
+</tr>
+</tbody>
+</table>
+<p>Any other key is a validation error naming the offending key, so a typo is caught rather than silently ignored.</p>
+<p><code>where</code> and <code>--where</code> share one fixed operator vocabulary — not an expression language:</p>
+<table>
+<thead>
+<tr>
+<th>Clause</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>k=v</code></td>
+<td>equals</td>
+</tr>
+<tr>
+<td><code>k!=v</code></td>
+<td>does not equal</td>
+</tr>
+<tr>
+<td><code>k:in=a,b</code></td>
+<td>is one of</td>
+</tr>
+<tr>
+<td><code>k:gt=n</code></td>
+<td>greater than <code>n</code>, numerically</td>
+</tr>
+<tr>
+<td><code>k:lt=n</code></td>
+<td>less than <code>n</code>, numerically</td>
+</tr>
+</tbody>
+</table>
+<p>Clauses are repeatable and all of them apply. A row whose frontmatter lacks the field fails every operator, and so does a value that will not read as a number under <code>:gt</code> / <code>:lt</code>. Inline arguments (<code>--where</code> on the CLI, <code>query(where={...})</code> in a template) deep-merge over a resolved spec for that call only.</p>
+<p>The CLI mirrors every spec key inline: <code>--where</code> (repeatable), <code>--sort FIELD</code>, and <code>--columns A,B</code> override the resolved spec for that call; <code>--glob PATTERN</code> (repeatable and ordered, mutually exclusive with <code>--config</code>) queries ad hoc without any spec; <code>--output</code> picks the format — <code>table</code> (the default), <code>json</code>, <code>yaml</code>, or <code>paths</code>.</p>
+<p>A spec lives beside its consumer, never in a central registry. Most shipped specs read the vault's plans; <code>core.learn_playbook.queries.candidates</code> overrides <code>glob</code> to read <code>retrospectives/*.md</code> instead, and <code>core.migrate_playbook.queries.pending</code> is the one that reads outside the vault entirely — it declares <code>root: core</code> and lists the migrations the plugin itself ships.</p>
+<h2 id="scaffold-trees">Scaffold trees</h2>
+<p>Any mapping in the merged config — addressed by its dotted path, like a query spec — can describe a <strong>file/dir tree</strong> that <code>bin/booping scaffold</code> materialises on disk:</p>
+<pre><code>bin/booping scaffold &lt;config-path&gt; &lt;dest&gt; [--force] [--set KEY=VALUE]... [--stub-macro DOTTED.PATH=LITERAL]...
+</code></pre>
+<p><code>&lt;config-path&gt;</code> is a dotted path into the merged config — the value there <em>is</em> the destination directory's contents, no wrapper key. <code>&lt;dest&gt;</code> is created with its parents when missing; a non-empty destination aborts unless you pass <code>--force</code>, which overwrites only the files the tree names and never deletes a directory. Exit 0 on success, 1 on a user error (unknown path, malformed tree, non-empty destination without <code>--force</code>, bad <code>--set</code>, Jinja error in seed content), 2 if a write fails at the OS level. The whole tree is rendered in memory first, so an error leaves the filesystem untouched.</p>
+<p>How a node is read:</p>
+<table>
+<thead>
+<tr>
+<th>Config value</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>string</td>
+<td>File; the string is its content</td>
+</tr>
+<tr>
+<td>mapping without <code>type</code></td>
+<td>Directory; each key is a child's name</td>
+</tr>
+<tr>
+<td><code>{type: file}</code></td>
+<td>File; optional <code>content</code> (absent → empty file)</td>
+</tr>
+<tr>
+<td><code>{type: dir}</code></td>
+<td>Directory; optional <code>children</code> (absent → empty dir)</td>
+</tr>
+<tr>
+<td><code>null</code></td>
+<td>Error — write <code>""</code> for an empty file, <code>{}</code> for an empty dir</td>
+</tr>
+<tr>
+<td>list, number, bool</td>
+<td>Error, reported against the node's dotted path</td>
+</tr>
+</tbody>
+</table>
+<p><code>type</code> is reserved: a mapping carrying it is an explicit node descriptor, never a directory named <code>type</code>. A filename containing <code>/</code>, or equal to <code>.</code> or <code>..</code>, is rejected before anything is written.</p>
+<p>File content is Jinja-rendered, so <code>{{ config.… }}</code> and <code>{{ context.… }}</code> resolve. <strong><code>--set</code> here binds a bare variable</strong> — <code>--set name=x</code> fills <code>{{ name }}</code> — unlike <code>booping render</code> and <code>booping render-playbook</code>, where <code>--set</code> merges into the config and you write <code>{{ config.name }}</code>.</p>
+<p>Trees ride the same core → global → project merge as everything else here, so a global or project config can add its own tree or override one leaf of a shipped one. Two ship:</p>
 <ul>
-<li><code>desc</code> — one-line human description.</li>
-<li><code>owner</code> — the skill that owns this state.</li>
-<li><code>terminal</code> — bool; terminal states (<code>done</code>, <code>fail</code>, <code>cancelled</code>) cannot transition out.</li>
-<li><code>artifacts</code> — list of strings describing what the state produces.</li>
-<li><code>transitions</code> — list of <code>{to, skill, when, gates?}</code>.</li>
+<li><strong><code>core.playbook_authoring_playbook.scaffold</code></strong> — a playbook skeleton: <code>playbook.md</code> (identity frontmatter carrying the name you passed, plus a preamble stub), <code>playbook.yaml</code> (an empty <code>graph:</code>), and an empty <code>_references/</code>.</li>
 </ul>
-<p>See <a href="https://github.com/A/claude-booping/blob/main/src/templates/docs/plan_lifecycle_overview.md.j2">Plan lifecycle overview</a> for the rendered status graph; or run <code>bin/booping render src/templates/docs/plan_lifecycle_overview.md.j2</code> locally.</p>
-<h3 id="plansuperstates"><code>plan.superstates</code></h3>
-<p>Statuses also group into named <strong>superstates</strong> forming the lifecycle spine <code>specification</code> → <code>planned</code> → <code>executing</code> → <code>review</code> → <code>terminal</code> — each listing its member statuses and any transitions shared across the whole group. Phase-wide moves live on the superstate instead of being repeated on every member: both <code>specification</code> and <code>planned</code> offer → cancelled, <code>executing</code> offers → fail, and <code>review</code> offers the → done skip-ahead. A status's own edges union with its superstate's, and the substate wins on a <code>to</code> collision (so <code>awaiting-learning</code>'s gated → done overrides the <code>review</code> skip edge). This is an overridable, additive surface: a project override deep-merges over the plugin defaults the same way the rest of the config does, so you can add or adjust a superstate's members or shared transitions without restating the others. Most projects never touch it; it exists so the lifecycle can describe group-level moves once instead of repeating them on every status.</p>
+<p><code>bin/booping scaffold core.playbook_authoring_playbook.scaffold \
+    ~/Claude/_playbooks/my-playbook --set name=my-playbook</code></p>
+<ul>
+<li><strong><code>core.setup_playbook.scaffold</code></strong> — the project vault: <code>plans/</code>, <code>retrospectives/</code>, <code>codereviews/</code>, <code>_lessons/</code>, <code>notes/</code>, plus the seeded <code>sprints.md</code> Obsidian Bases fence and a <code>.gitignore</code>. Takes no <code>--set</code> variables.</li>
+</ul>
+<h2 id="review-templates">Review templates</h2>
+<p>The code-review playbook picks its review template by name, and the template set layers across the same three levels as the config itself: the plugin ships a core set, the global level adds machine-wide templates at <code>&lt;home_dir&gt;/review_templates/</code>, and the Project Vault's <code>review_templates/</code> speaks for one project. Later levels override by name — a global or project template file named like a shipped one replaces it; a new name adds a template to the set.</p>
 <h2 id="plan-frontmatter-summary">Plan frontmatter: <code>summary</code></h2>
-<p>Each plan file carries a <code>summary</code> field in its YAML frontmatter — a one-line statement of the plan's intent (≤ ~120 characters). <code>/groom</code> writes it when drafting the plan; it is the human-readable label that surfaces in <code>sprints.md</code> and makes plans searchable across the vault. (It replaced the older, longer <code>business_goal</code> field.)</p>
-<h3 id="skillsnameagents"><code>skills.&lt;name&gt;.agents</code></h3>
-<p>Per-skill delegation guidance rendered into each skill's "Available agents" table. Each agent entry has <code>good_for</code> (a list of bullets describing when to delegate) and an optional <code>bad_for</code> (when not to). Currently populated for <code>groom</code>, <code>develop</code>, <code>retro</code>, <code>code-review</code>, and <code>chat</code>.</p>
-<ul>
-<li><strong><code>skills.&lt;name&gt;.agents.&lt;id&gt;.internal</code></strong> — <code>true</code> on booping's built-in workers (<code>booping-developer</code>, <code>booping-researcher</code>). Marks an entry as plugin-owned so it can be hidden from a skill's table when that skill opts out of built-ins (see below). Self-contained global agents a project registers omit this flag.</li>
-<li><strong><code>skills.&lt;name&gt;.disable_internal_agents</code></strong> — when set on a skill, <code>_available_agents.j2</code> hides every <code>internal: true</code> entry from that skill's table, leaving only the agents the project explicitly registered (e.g. a self-contained global external agent). See <a href="../integrating-external-agents/">integrating external agents</a>.</li>
-</ul>
-<p>Skills also use <code>skills.&lt;name&gt;.status</code> to declare the single status they own (e.g. <code>learn → awaiting-learning</code>, <code>retro → awaiting-retro</code>).</p>
+<p>Each plan file carries a <code>summary</code> field in its YAML frontmatter — a one-line statement of the plan's intent (≤ ~120 characters). Groom writes it when drafting the plan; it is the label that surfaces in <code>sprints.md</code> and makes plans searchable across the vault.</p>
 <h2 id="the-global-tier">The global tier</h2>
-<p>Machine-wide defaults live at <code>${XDG_CONFIG_HOME:-~/.config}/booping/config.yaml</code> (typically <code>~/.config/booping/config.yaml</code>; <code>XDG_CONFIG_HOME</code> is honoured when set). It deep-merges over the plugin's <code>src/config.yaml</code> and is in turn overridden by the per-project file — the full order is <strong>core → global → project</strong>. Any key valid in <code>src/config.yaml</code> is valid here; the merge rules are identical (dict keys merge, list keys replace wholesale).</p>
+<p>Machine-wide defaults live at <code>${XDG_CONFIG_HOME:-~/.config}/booping/config.yaml</code> (typically <code>~/.config/booping/config.yaml</code>; <code>XDG_CONFIG_HOME</code> is honoured when set). It deep-merges over the plugin's <code>src/config.yaml</code> and is in turn overridden by the per-project file — <strong>core → global → project</strong>. Any key valid in <code>src/config.yaml</code> is valid here; the merge rules are identical (dict keys merge, list keys replace wholesale).</p>
 <p>The global tier's headline key is <strong><code>home_dir</code></strong> — the vault-home base under which per-project vaults are scaffolded and resolved (<code>&lt;home_dir&gt;/&lt;project&gt;/</code>). It is a raw string (<code>~</code> is expanded at vault-resolution time, e.g. <code>~/Claude/</code>).</p>
 <ul>
-<li><strong>Precedence.</strong> A <code>.booping</code> marker carrying a <code>vault_path:</code> key still wins over <code>home_dir</code> — a repo-local vault is resolved directly from the marker, and <code>home_dir</code> is not consulted for it. <code>home_dir</code> only governs the default <code>&lt;home_dir&gt;/&lt;project&gt;/</code> layout.</li>
-<li><strong>Project-tier <code>home_dir</code> is a no-op.</strong> By the time the project tier merges, the vault has already been resolved (its location is what tells booping where to read the project config from). Setting <code>home_dir</code> in <code>~/Claude/{project}/config.yaml</code> therefore has no effect — put it in the global tier.</li>
-<li><strong>First-run seeding.</strong> <code>booping-create-project</code> resolves the vault-home base via a ladder: the global config's <code>home_dir</code> if the file is present → <code>$HOME/Claude</code> if that directory exists → an interactive prompt (default <code>~/Claude</code>). An answer given at the prompt is seeded into the global config file (created if absent; an existing file is never overwritten). Run non-interactively with none of the earlier rungs satisfied, it aborts with instructions rather than scaffolding in an unexpected place.</li>
+<li><strong>Precedence.</strong> A <code>.booping</code> marker carrying a <code>vault_path:</code> key wins over <code>home_dir</code> — a repo-local vault is resolved directly from the marker. <code>home_dir</code> only governs the default <code>&lt;home_dir&gt;/&lt;project&gt;/</code> layout.</li>
+<li><strong>Project-tier <code>home_dir</code> is a no-op.</strong> By the time the project tier merges, the vault has already been resolved — its location is what tells booping where to read the project config from. Set <code>home_dir</code> in the global tier.</li>
+<li><strong>First-run seeding.</strong> <code>/playbook setup</code> settles <code>home_dir</code> before touching the project: if the global config file is absent it asks for the vault-home base (default <code>~/Claude</code>) and writes it there, then scaffolds the vault with <code>booping scaffold core.setup_playbook.scaffold &lt;vault_dir&gt;</code> and records the location in the repo's <code>.booping</code> marker.</li>
 </ul>
-<p>Read any resolved value — merged across all three tiers — with <code>booping config-get &lt;dotted.key&gt;</code> (e.g. <code>booping config-get home_dir</code>). Note that <code>home_dir</code> prints its raw, unexpanded value.</p>
+<p>Read any resolved value — merged across all three tiers — with <code>booping config-get &lt;dotted.key&gt;</code> (e.g. <code>booping config-get home_dir</code>). <code>home_dir</code> prints its raw, unexpanded value.</p>
 <h2 id="overriding-for-one-project">Overriding for one project</h2>
-<p>Drop a YAML file at <code>~/Claude/{project}/config.yaml</code> to override or extend the plugin's defaults for that project. The override file deep-merges over <code>src/config.yaml</code> at render time:</p>
+<p>Drop a YAML file at <code>~/Claude/{project}/config.yaml</code> to override or extend the plugin's defaults for that project. It deep-merges over <code>src/config.yaml</code> at render time:</p>
 <ul>
 <li><strong>Dict keys merge.</strong> A project key is added or replaces the plugin's value; sibling keys the project file does not mention fall through unchanged.</li>
-<li><strong>List keys replace wholesale.</strong> If the project file sets <code>sprint.scale</code> or <code>git.branches</code>, the project list replaces the plugin list entirely — there is no element-level merge.</li>
+<li><strong>List keys replace wholesale.</strong> Set <code>core.sprint.scale</code> or <code>core.develop_playbook.git.branches</code> and the project list replaces the plugin list entirely — there is no element-level merge.</li>
+<li><strong><code>agents</code> is shallow-merged.</strong> Each agent entry is atomic: an override changing one field of an entry must restate the rest of that entry.</li>
 <li><strong>No rebuild required.</strong> The merge happens at skill-load time, every time. Edit, save, run a skill — the new values are live.</li>
 </ul>
-<p>The override takes effect at the next skill load. Nothing in <code>src/files/</code> or the build artefacts is touched.</p>
 <h3 id="example-tweak-the-sp-threshold-and-add-a-branch-convention">Example: tweak the SP threshold and add a branch convention</h3>
 <p><code>~/Claude/{project}/config.yaml</code>:</p>
-<pre><code class="language-yaml">sprint:
-  default_threshold_sp: 25  # smaller cap for this project's faster cadence
+<pre><code class="language-yaml">core:
+  sprint:
+    default_threshold_sp: 25  # smaller cap for this project's faster cadence
 
-git:
-  branches:                 # list — replaces the plugin defaults wholesale
-    - branch: feat/
-      when: [feature]
-    - branch: fix/
-      when: [bug]
-    - branch: refactor/
-      when: [refactoring]
-    - branch: docs/
-      when: [docs, documentation]   # new prefix for doc-only plans
-    - branch: chore/
-      when: [other, tooling]
+  develop_playbook:
+    git:
+      branches:               # list — replaces the plugin defaults wholesale
+        - { branch: feat/,     when: [feature] }
+        - { branch: fix/,      when: [bug] }
+        - { branch: refactor/, when: [refactoring] }
+        - { branch: docs/,     when: [docs, documentation] }   # new prefix
+        - { branch: chore/,    when: [other, tooling] }
 </code></pre>
-<p>After the next skill load, <code>/groom</code> proposes splitting at 25 SP instead of 35, and <code>/develop</code> picks <code>docs/</code> for plans typed <code>docs</code>.</p>
-<p>Because lists replace wholesale, the project file must include every branch entry it wants to keep — omitting a row removes it. Dict keys behave the opposite way: <code>sprint.default_threshold_sp: 25</code> does not affect <code>sprint.redecompose_threshold</code> or <code>sprint.scale</code>, which fall through from the plugin defaults.</p>
+<p>After the next render, groom proposes splitting at 25 SP instead of 35, and develop picks <code>docs/</code> for plans typed <code>docs</code>.</p>
+<p>Because lists replace wholesale, the project file must include every branch entry it wants to keep — omitting a row removes it. Dict keys behave the opposite way: <code>core.sprint.default_threshold_sp: 25</code> does not affect <code>core.sprint.redecompose_threshold</code> or <code>core.sprint.scale</code>, which fall through from the plugin defaults.</p>
+<h3 id="example-config-for-a-playbook-you-wrote">Example: config for a playbook you wrote</h3>
+<p>Nothing is validated, so your own playbook declares its namespace and reads it directly:</p>
+<pre><code class="language-yaml">core:
+  ship_playbook:
+    registry: ghcr.io/acme
+    agents:
+      release-bot:
+        good_for:
+          - &quot;Cutting the tag and pushing the image once the checks are green&quot;
+</code></pre>
+<p>The playbook's <code>jinja: true</code> bodies then read <code>{{ config.core.ship_playbook.registry }}</code> and render the delegation table with <code>{% set playbook_agents = config.core.ship_playbook %}{% include "_partials/playbook_agents.md" %}</code>. No plugin change is needed.</p>
 <h2 id="verifying-the-merged-config">Verifying the merged config</h2>
-<p>Run <code>bin/booping debug-context</code> from the project directory (the one with the <code>.booping</code> marker) to dump the assembled context — including the merged config — as YAML. This is the authoritative answer to "what value is the skill actually seeing?" For a single value, <code>bin/booping config-get &lt;dotted.key&gt;</code> prints just that key resolved across the core → global → project merge (scalars as raw text, mappings/lists as YAML), and works outside any project too (core + global only).</p>
+<p>Run <code>bin/booping debug-context</code> from the project directory (the one with the <code>.booping</code> marker) to dump the assembled context — including the merged config — as YAML: the authoritative answer to what a skill is actually seeing. For a single value, <code>bin/booping config-get &lt;dotted.key&gt;</code> prints that key resolved across the core → global → project merge (scalars as raw text, mappings/lists as YAML), and works outside any project too (core + global only).</p>
               
             </div>
           </div><footer>

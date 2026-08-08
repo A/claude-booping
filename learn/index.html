@@ -5,14 +5,14 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://A.github.io/claude-booping/learn/" />
       <link rel="shortcut icon" href="../img/favicon.ico" />
-    <title>/learn - booping</title>
+    <title>learn playbook - booping</title>
     <link rel="stylesheet" href="../css/theme.css" />
     <link rel="stylesheet" href="../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
     
       <script>
         // Current page data
-        var mkdocs_page_name = "/learn";
+        var mkdocs_page_name = "learn playbook";
         var mkdocs_page_input_path = "learn.md";
         var mkdocs_page_url = "/claude-booping/learn/";
       </script>
@@ -67,24 +67,26 @@
                 <li class="toctree-l1"><a class="reference internal" href="../integrating-external-agents/">Integrating external agents</a>
                 </li>
               </ul>
-              <p class="caption"><span class="caption-text">Commands</span></p>
+              <p class="caption"><span class="caption-text">Workflow</span></p>
               <ul class="current">
-                  <li class="toctree-l1"><a class="reference internal" href="../groom/">/groom</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../groom/">groom playbook</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../develop/">/develop</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../develop/">develop playbook</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../code_review/">/code-review</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../code_review/">code-review playbook</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../retro/">/retro</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../retro/">retro playbook</a>
                   </li>
-                  <li class="toctree-l1 current"><a class="reference internal current" href="#">/learn</a>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">learn playbook</a>
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#why">Why</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#command">Command</a>
+    <li class="toctree-l2"><a class="reference internal" href="#what-it-does">What it does</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#what-it-writes">What it writes</a>
         <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#targets-are-fetched-never-guessed">Targets are fetched, never guessed</a>
+    </li>
     <li class="toctree-l3"><a class="reference internal" href="#update-vs-create-sweep">Update-vs-create sweep</a>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#the-review-table">The review table</a>
@@ -101,10 +103,6 @@
     </li>
     </ul>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../chat/">/chat</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../help/">/help</a>
-                  </li>
               </ul>
       </div>
     </div>
@@ -120,8 +118,8 @@
         <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
-          <li class="breadcrumb-item">Commands</li>
-      <li class="breadcrumb-item active">/learn</li>
+          <li class="breadcrumb-item">Workflow</li>
+      <li class="breadcrumb-item active">learn playbook</li>
     <li class="wy-breadcrumbs-aside">
           <a href="https://github.com/A/claude-booping/edit/master/docs/learn.md">Edit on A/claude-booping</a>
     </li>
@@ -131,48 +129,95 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="learn">/learn</h1>
-<p>Compress retro findings into durable, actionable rules: global lessons that every skill loads, plus per-skill and per-agent extension files that target a specific surface.</p>
-<h2 id="why">Why</h2>
-<p><code>/retro</code> records what happened on one plan. <code>/learn</code> is the step that turns those observations into rules booping will obey on every future plan. Without <code>/learn</code>, retros pile up unread and the same friction repeats sprint after sprint; with <code>/learn</code>, each sprint leaves the project a little better calibrated.</p>
-<p><code>/learn</code> reads the retro file from the plan currently in <code>awaiting-learning</code>, proposes a small set of updates (new lesson entries, edits to existing lessons, additions to the relevant <code>_booping/</code> extension files), and asks you to review each proposal before writing.</p>
-<h2 id="command">Command</h2>
-<pre><code class="language-text">/learn
-/learn retrospectives/20260423-skill-refactors-chat-develop-retro.md
-/learn ~/Claude/claude-booping/retrospectives/20260422-plans-as-data-refactor.md
+                <h1 id="learn-playbook">learn playbook</h1>
+<p>Compress retro findings into durable, actionable rules: targeted lessons that reach the playbooks, steps, agents and skills they name, plus one-line project facts in the repo's own <code>CLAUDE.md</code>.</p>
+<p>Learning is a <strong>playbook</strong>, not a skill — it is driven by <a href="../playbook/"><code>/playbook</code></a>:</p>
+<pre><code class="language-text">/playbook learn
 </code></pre>
-<p>Bare <code>/learn</code> picks the plan currently in <code>awaiting-learning</code>. Pass a retro file path to absorb lessons from a specific one.</p>
-<p><code>/learn</code> walks the plan from <code>awaiting-learning → done</code> once you have signed off on the proposed updates.</p>
+<h2 id="why">Why</h2>
+<p>The <a href="../retro/">retro playbook</a> records what happened on a set of shipped plans. Learn turns those observations into rules booping obeys on every future plan; without it, retros pile up unread and the same friction repeats sprint after sprint.</p>
+<p>The unit of work is a standalone retrospective — <code>retrospectives/{slug}.md</code> at <code>awaiting-learning</code>, never a plan directory. It reads that file and each plan in its <code>plans:</code> list, proposes a small set of updates, and writes nothing until you confirm the whole set. The <strong>retrospective</strong> then walks <code>awaiting-learning → done</code>; the plans it covers are <code>done</code> before the run starts and stay <code>done</code> throughout.</p>
+<h2 id="what-it-does">What it does</h2>
+<p>Six steps, in dependency order:</p>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>intake</code></td>
+<td>Resolve the retrospective and its working set; validate the entry status</td>
+</tr>
+<tr>
+<td><code>extract-candidates</code></td>
+<td>Decompose the retro into atomic rules, each routed to a single destination</td>
+</tr>
+<tr>
+<td><code>dedup-sweep</code></td>
+<td>Filtered read of existing lessons and the repo <code>CLAUDE.md</code> — update vs create vs conflict</td>
+</tr>
+<tr>
+<td><code>review-table</code></td>
+<td>Present the unified review table; you accept, reject rows, or add your own</td>
+</tr>
+<tr>
+<td><code>write</code></td>
+<td>Write the accepted items, one pass per target type</td>
+</tr>
+<tr>
+<td><code>transition</code></td>
+<td>Close the retrospective at <code>done</code> and commit</td>
+</tr>
+</tbody>
+</table>
+<p>The run workdir is the <strong>vault root</strong> and every <code>booping playbook-state</code> / <code>booping playbook-transition</code> call passes <code>--target retrospectives/{slug}.md</code>, so a stopped run is resumable.</p>
 <h2 id="what-it-writes">What it writes</h2>
-<p><code>/learn</code> routes every accepted finding to <strong>exactly one</strong> target. Three of the four targets live in the vault; the fourth is the attached repo's own <code>CLAUDE.md</code>:</p>
+<p>Two destinations, and every accepted finding lands in <strong>exactly one</strong> of them. A candidate that would span both is decomposed into one row per destination before writing.</p>
 <ul>
-<li><strong>Global lessons</strong> at <code>~/Claude/{project}/lessons/{N}_{title}.md</code> — durable rules every skill picks up via Preflight on every invocation. <code>N</code> is a monotonic counter so the directory stays ordered chronologically.</li>
-<li><strong>Per-skill and per-agent extension files</strong> at <code>~/Claude/{project}/_booping/skill_&lt;name&gt;.md</code> and <code>~/Claude/{project}/_booping/agent_&lt;full-agent-name&gt;.md</code> (e.g. <code>agent_booping-developer.md</code>) — narrower rules that only reach the matching skill or worker agent, injected at load time. These are the right home for findings too specific to belong in global lessons (e.g. "when running <code>/develop</code> on this monorepo, prefer pnpm over npm").</li>
-<li><strong>The repo's own <code>CLAUDE.md</code></strong> — when a finding is a project convention the model should follow regardless of booping (a coding standard, a structural rule), <code>/learn</code> adds it as a one-line bullet to the attached repo's <code>CLAUDE.md</code>. These edits are committed separately, in the repo working tree, not in the vault.</li>
+<li><strong>Targeted lessons</strong> at <code>{vault}/_lessons/{N}_{title}.md</code> — each carrying a <code>targets:</code> frontmatter list naming the playbooks, playbook steps, agents and skills the rule applies to. A rule that should only reach one worker agent or one skill is a lesson targeting it, not a separate file. <code>N</code> is a monotonic counter, keeping the directory chronological.</li>
+<li><strong>The repo's own <code>CLAUDE.md</code></strong> — a finding that is a project fact aiding fresh-agent project understanding (a layout path, a CLI command, a code-side convention) becomes a one-line bullet there. Those edits are committed in the repo working tree, not the vault, and never touch the global <code>~/.claude/CLAUDE.md</code>.</li>
 </ul>
-<p>A finding never lands in two targets at once. When a candidate would otherwise span two, <code>/learn</code> decomposes it into one row per target before writing.</p>
-<p>See <a href="../vault/#lessons">Vault</a> for the vault directory layout and how each file reaches the active context.</p>
+<p>See <a href="../vault/#_lessons">Vault</a> for the directory layout and how each file reaches the active context.</p>
+<h3 id="targets-are-fetched-never-guessed">Targets are fetched, never guessed</h3>
+<p>A <code>_lessons/</code> file with no valid <code>targets:</code> reaches nothing, so routing has to be exact. Before proposing, the run reads the <strong>target space</strong>: a table of contents of every discovered playbook, then a targets fetch for only the playbooks a candidate touches, listing their step names and addressable agents. Entries come from that fetch, and the exact <code>targets:</code> entry each lesson carries is assigned in the review table before the lesson is written into the vault's <code>_lessons/</code>.</p>
+<pre><code class="language-markdown">---
+id: 7
+title: Name every artifact path absolutely
+targets:
+  - groom/draft-plan
+  - agent:booping-developer
+retro: retrospectives/202608031129_flat-lessons.md
+created: 2026-08-03
+---
+</code></pre>
+<p>Target forms are <code>{playbook}</code>, <code>{playbook}/{step}</code>, <code>agent:{id}</code> and <code>skill:{name}</code> — exact names only, no globs. See <a href="../playbook/#lessons">Playbooks → Lessons</a> for where each one surfaces.</p>
+<div class="admonition note">
+<p class="admonition-title">Legacy <code>lessons/</code></p>
+<p><code>{vault}/lessons/</code> is read by nothing and written by nothing — only a <code>_lessons/</code> file with a valid <code>targets:</code> list reaches a run. Nothing moves between the two on its own; while the legacy directory still holds files, a render of any playbook emits a non-blocking note asking you to migrate them.</p>
+</div>
 <h3 id="update-vs-create-sweep">Update-vs-create sweep</h3>
-<p>Before drafting its proposals, <code>/learn</code> reads the existing lessons, extension files, and the repo <code>CLAUDE.md</code> to check whether each candidate is genuinely new. A candidate that duplicates or refines an existing rule becomes an <strong>update</strong> to that rule rather than a fresh, near-duplicate entry; a candidate that contradicts an existing rule is flagged as a <strong>conflict</strong> for you to resolve in the review table. This keeps the lesson set from accumulating redundant or self-contradicting rules over many sprints.</p>
+<p>Before drafting proposals, <code>dedup-sweep</code> reads the existing lessons and the repo <code>CLAUDE.md</code> to check whether each candidate is genuinely new. A candidate that duplicates or refines an existing rule becomes an <strong>update</strong> to that rule rather than a near-duplicate; one that contradicts a rule is flagged a <strong>conflict</strong> for you to resolve in the review table — that is what keeps the lesson set from accumulating redundant or self-contradicting rules over many sprints.</p>
 <h3 id="the-review-table">The review table</h3>
-<p>Every candidate is presented in a single review table before anything is written — one row per landing site, with columns <code>#</code>, <code>Target</code>, <code>Type</code>, <code>Rule</code>, and <code>Example</code>. You accept all, or reject individual rows by number (e.g. <code>2 5</code>), or append your own row in the same shape. Nothing is written until you respond; table acceptance is the consent for the whole write pass — there are no per-row prompts. (The exact column shape and accept/reject syntax live in the plugin-internal <code>docs/learn_review_table.md</code> that the skill loads at runtime.)</p>
+<p>Every candidate appears in a single review table before anything is written — one row per landing site, with columns <code>#</code>, <code>Target</code>, <code>Type</code>, <code>Rule</code>, <code>Example</code> and <code>Targets</code>. <code>Target</code> is the exact destination path — a <code>_lessons/</code> file, or the repo's <code>CLAUDE.md</code>. The <code>Targets</code> column carries the exact <code>targets:</code> entries the lesson will be written with — a playbook, a <code>{playbook}/{step}</code>, an <code>agent:{id}</code> or a <code>skill:{name}</code>, drawn from the fetched target space and copied verbatim into the file's <code>targets:</code> list — so the routing is assigned here, before anything lands in <code>_lessons/</code>; a <code>CLAUDE.md</code> row carries <code>—</code>, since its path is its routing. You accept all, reject rows by number (e.g. <code>2 5</code>), or append your own row in the same shape. Nothing is written until you respond; table acceptance is the consent for the whole write pass — there are no per-row prompts.</p>
 <h2 id="best-practices">Best practices</h2>
 <h3 id="review-every-proposed-update">Review every proposed update</h3>
-<p><code>/learn</code> proposes — you commit. Read each proposed lesson and extension edit before approving. Three things to check:</p>
+<p>The run proposes — you commit. Read each proposed lesson and <code>CLAUDE.md</code> bullet before approving. Three things to check:</p>
 <ul>
-<li><strong>Actionability.</strong> A lesson should tell a future skill what to do, not just describe the past. "Be careful with migrations" is a description; "Run <code>manage.py migrate --plan</code> before applying any migration generated this session" is a rule.</li>
-<li><strong>Right home.</strong> A rule that only matters for <code>/develop</code> belongs in <code>_booping/skill_develop.md</code>, not in global <code>lessons/</code> where every skill pays the context cost. Conversely, a cross-skill convention belongs in <code>lessons/</code>.</li>
+<li><strong>Actionability.</strong> A lesson should tell a future run what to do, not just describe the past. "Be careful with migrations" is a description; "Run <code>manage.py migrate --plan</code> before applying any migration generated this session" is a rule.</li>
+<li><strong>Right home.</strong> A rule that only matters for one step belongs in a lesson targeting that step, not one targeting the whole playbook where every run pays the context cost.</li>
 <li><strong>Direction.</strong> A lesson should point forward. If the proposed update is really a complaint about the past plan, send it back — it is retro material, not lesson material.</li>
 </ul>
 <h3 id="shit-in-shit-out">Shit in, shit out</h3>
-<p><code>/learn</code> proposes updates from whatever the retro file says. Accepting proposals blindly produces conflicting and useless rules: redundant overlaps, contradictions with existing lessons, vague platitudes that fire on every plan and steer none. Review every proposal as if you were the one writing it — because once you approve, you are.</p>
-<p>This is the second half of the same warning that applies to <a href="../retro/#shit-in-shit-out">/retro</a>: a sloppy retro produces sloppy lesson proposals, and a rubber-stamped <code>/learn</code> writes those sloppy proposals to disk where they will steer every future sprint.</p>
+<p>Proposals come from whatever the retro says. Accepting them blindly produces conflicting and useless rules: redundant overlaps, contradictions with existing lessons, vague platitudes that fire on every plan and steer none. Review every proposal as if you were writing it — because once you approve, you are.</p>
+<p>The second half of the same warning as <a href="../retro/#shit-in-shit-out">retro</a>: a sloppy retro produces sloppy lesson proposals, and a rubber-stamped write pass puts those proposals on disk where they steer every future sprint.</p>
               
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../retro/" class="btn btn-neutral float-left" title="/retro"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../chat/" class="btn btn-neutral float-right" title="/chat">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../retro/" class="btn btn-neutral float-left" title="retro playbook"><span class="icon icon-circle-arrow-left"></span> Previous</a>
     </div>
 
   <hr/>
@@ -201,8 +246,6 @@
     
       <span><a href="../retro/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
-    
-      <span><a href="../chat/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>

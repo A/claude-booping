@@ -50,21 +50,21 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#2-scaffold-the-project-vault">2. Scaffold the project vault</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#3-orient-with-chat">3. Orient with /chat</a>
+    <li class="toctree-l2"><a class="reference internal" href="#3-see-what-is-available">3. See what is available</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#4-read-the-sprint-snapshot">4. Read the sprint snapshot</a>
+    <li class="toctree-l2"><a class="reference internal" href="#4-read-the-sprint-view">4. Read the sprint view</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#5-first-groom">5. First /groom</a>
+    <li class="toctree-l2"><a class="reference internal" href="#5-first-groom">5. First groom</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#6-first-develop">6. First /develop</a>
+    <li class="toctree-l2"><a class="reference internal" href="#6-first-develop">6. First develop</a>
         <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#optional-code-review-before-retro">Optional: /code-review before retro</a>
+    <li class="toctree-l3"><a class="reference internal" href="#optional-code-review-before-retro">Optional: code review before retro</a>
     </li>
         </ul>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#7-first-retro">7. First /retro</a>
+    <li class="toctree-l2"><a class="reference internal" href="#7-first-retro">7. First retro</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#8-first-learn">8. First /learn</a>
+    <li class="toctree-l2"><a class="reference internal" href="#8-first-learn">8. First learn</a>
     </li>
     </ul>
                 </li>
@@ -89,21 +89,17 @@
                 <li class="toctree-l1"><a class="reference internal" href="../integrating-external-agents/">Integrating external agents</a>
                 </li>
               </ul>
-              <p class="caption"><span class="caption-text">Commands</span></p>
+              <p class="caption"><span class="caption-text">Workflow</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../groom/">/groom</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../groom/">groom playbook</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../develop/">/develop</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../develop/">develop playbook</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../code_review/">/code-review</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../code_review/">code-review playbook</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../retro/">/retro</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../retro/">retro playbook</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../learn/">/learn</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../chat/">/chat</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../help/">/help</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../learn/">learn playbook</a>
                   </li>
               </ul>
       </div>
@@ -131,58 +127,60 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="quick-start">Quick start</h1>
-<p>This walkthrough takes you from a fresh checkout to a fully shipped first plan. Run the commands in order; the skills will list candidates if you forget an exact filename.</p>
-<p>The shortest possible path is the five-command loop in the <a href="https://github.com/A/claude-booping#quick-start">README Quick start</a>. The walkthrough below adds the orient step and the per-command context a new user benefits from.</p>
+<p>From a fresh checkout to a fully shipped first plan. Run the commands in order; the skills list candidates if you forget an exact filename.</p>
+<p>The shortest path is the five-command loop in the <a href="https://github.com/A/claude-booping#quick-start">README Quick start</a>. This walkthrough adds the per-command context.</p>
 <h2 id="1-install-the-plugin">1. Install the plugin</h2>
 <p>Inside Claude Code, register the marketplace once and install the plugin:</p>
 <pre><code class="language-text">/plugin marketplace add A/claude-booping
 /plugin install booping@booping
 </code></pre>
 <p>Update later with <code>/plugin update booping</code> (or from the <code>/plugin</code> UI).</p>
-<p>See <a href="../install/">Install</a> for prerequisites (<code>uv</code>, <code>git</code>, optional <code>GEMINI_API_KEY</code>).</p>
+<p>See <a href="../install/">Install</a> for prerequisites (<code>uv</code>, <code>git</code>).</p>
 <h2 id="2-scaffold-the-project-vault">2. Scaffold the project vault</h2>
 <p><code>cd</code> into the target repository and run:</p>
-<pre><code class="language-text">/install
+<pre><code class="language-text">/playbook setup
 </code></pre>
-<p><code>/install</code> prompts for the vault location — the default <code>~/Claude/{project}/</code> or a repo-local directory (wired via the <code>.booping</code> marker's <code>vault_path:</code> key). Either way that single step creates the vault with <code>plans/</code>, <code>retrospectives/</code>, <code>lessons/</code>, <code>notes/</code>, <code>_booping/</code>, and a <code>.booping</code> marker file so other skills know the vault is ready. See <a href="../vault/">Vault</a> for what each directory is for.</p>
-<h2 id="3-orient-with-chat">3. Orient with /chat</h2>
-<p>Before grooming anything, run:</p>
-<pre><code class="language-text">/chat
+<p>The <code>setup</code> playbook settles the machine level (home dir + machine config), then the project level: it asks for the vault location — the default <code>&lt;home_dir&gt;/{project}/</code> or a repo-local directory (wired via the <code>.booping</code> marker's <code>vault_path:</code> key) — and creates the vault with <code>plans/</code>, <code>retrospectives/</code>, <code>codereviews/</code>, <code>_lessons/</code>, <code>notes/</code>, plus a <code>.booping</code> marker file in the repo. Anything already in place is detected and skipped. See <a href="../vault/">Vault</a> for what each directory is for.</p>
+<h2 id="3-see-what-is-available">3. See what is available</h2>
+<p><code>/playbook</code> is the only skill booping ships — every procedure in this walkthrough is a playbook it drives. With no argument it lists every playbook booping discovered, shipped or written in your vault, with its trigger and scope:</p>
+<pre><code class="language-text">/playbook
 </code></pre>
-<p><code>/chat</code> is the orient/working-mode command. It loads the project vault, refreshes the on-disk sprint snapshot at <code>~/Claude/{project}/sprints.md</code>, and is the right surface for vault navigation, reading existing plans, and small ad-hoc edits. When scope grows past "small task", <code>/chat</code> escalates you into <code>/groom</code>.</p>
-<h2 id="4-read-the-sprint-snapshot">4. Read the sprint snapshot</h2>
-<p>Open <code>~/Claude/{project}/sprints.md</code>. It is a regenerated view of every plan in the vault grouped by status. On a fresh project it will be near-empty — that is expected.</p>
-<p><code>sprints.md</code> is a build artefact, never hand-edit it (see <a href="../vault/">Vault</a>). It is a snapshot rather than a live view: nothing auto-refreshes it on a plan write yet, so it can drift between <code>/chat</code> orients. Re-run <code>/chat</code> (or <code>bin/booping render-sprints</code>) for a current picture, and treat the plan files as the source of truth.</p>
-<h2 id="5-first-groom">5. First /groom</h2>
+<p>Everything below is one of those entries.</p>
+<h2 id="4-read-the-sprint-view">4. Read the sprint view</h2>
+<p>Open <code>~/Claude/{project}/sprints.md</code> in Obsidian. It is an <a href="https://help.obsidian.md/bases">Obsidian Bases</a> fence — a live table over every plan in the vault, evaluated on open, so it is never stale. On a fresh project it is near-empty.</p>
+<p>The fence is seeded once and yours to edit (see <a href="../vault/">Vault</a>). Outside Obsidian, <code>bin/booping query --config core.plans</code> prints the same listing, and <code>--where</code> narrows it — <code>k=v</code>, <code>k!=v</code>, <code>k:in=a,b</code>, <code>k:gt=n</code>, <code>k:lt=n</code>, repeatable and all applying at once:</p>
+<pre><code class="language-bash">bin/booping query --config core.plans --where status:in=ready-for-dev,in-progress
+</code></pre>
+<h2 id="5-first-groom">5. First groom</h2>
 <p>Spec your first sprint with a free-text description:</p>
-<pre><code class="language-text">/groom Add per-tenant rate limiting to the public API
+<pre><code class="language-text">/playbook groom — add per-tenant rate limiting to the public API
 </code></pre>
-<p><code>/groom</code> researches the codebase, drafts a plan under <code>~/Claude/{project}/plans/{YYYYMMDD}-{kebab-title}.md</code>, optionally cross-validates it against Gemini (if <code>GEMINI_API_KEY</code> is set), and stops at <code>awaiting-plan-review</code> for your explicit approval. Sharpen it, push back, ask for splits — the more detailed your initial brief, the sharper the resulting plan.</p>
-<p>When you approve, <code>/groom</code> flips the plan to <code>ready-for-dev</code>.</p>
-<h2 id="6-first-develop">6. First /develop</h2>
-<p>Either run bare and pick from the candidate list (plans in <code>ready-for-dev</code> or <code>awaiting-plan-review</code>):</p>
-<pre><code class="language-text">/develop
+<p>The <a href="../groom/">groom playbook</a> maps the blast radius in your codebase and checks every external reference the plan names against current docs, working in your conversation — running each step itself and handing only heavy reads to a research agent. It drafts a plan under <code>~/Claude/{project}/plans/{YYYYMMDDHHMM}_{kebab-title}/index.md</code>, optionally hands it to a second model for cross-review (when <code>core.groom_playbook.cross_review_agent</code> is configured), and stops for approval once, at its single approval gate near the end, with the plan at <code>awaiting-approval</code>. Sharpen it there, push back, ask for splits — the more detailed your brief, the sharper the plan.</p>
+<p>When you approve, the run flips the plan to <code>ready-for-dev</code>.</p>
+<h2 id="6-first-develop">6. First develop</h2>
+<p>Run the develop playbook:</p>
+<pre><code class="language-text">/playbook develop
 </code></pre>
-<p>or target a specific one:</p>
-<pre><code class="language-text">/develop plans/20260426-per-tenant-rate-limiting.md
+<p>or name the plan:</p>
+<pre><code class="language-text">/playbook develop — plans/202604260930_per-tenant-rate-limiting/index.md
 </code></pre>
-<p><code>/develop</code> walks the milestones, delegating implementation to the <code>booping-developer</code> agent. <code>booping-researcher</code> is reserved for the Phase 0 drift spot-check — when a plan touches many files, it confirms the actual file shapes still match the plan's assumptions before execution begins. When all milestones are done, the plan moves to <code>awaiting-retro</code>.</p>
-<h3 id="optional-code-review-before-retro">Optional: /code-review before retro</h3>
-<p>Once a plan is in <code>awaiting-retro</code>, you can run a quality-gate review over the diff before capturing the retro:</p>
-<pre><code class="language-text">/code-review
+<p>The <a href="../develop/">develop playbook</a> confirms the sprint branch with you, then walks the milestones, delegating implementation to the <code>booping-developer</code> agent. <code>booping-researcher</code> is reserved for the intake drift spot-check — when a plan touches many files, it confirms the actual file shapes still match the plan's assumptions before execution begins. When all milestones are done and verification is green, the plan moves to <code>done</code> — the end of its lifecycle. Code review, retro and learn are follow-up <code>/playbook</code> invocations that advance their own artifacts; the plan itself never leaves <code>done</code>.</p>
+<h3 id="optional-code-review-before-retro">Optional: code review before retro</h3>
+<p>Once a plan is <code>done</code>, you can run a quality-gate review over the diff before capturing the retro:</p>
+<pre><code class="language-text">/playbook code-review
 </code></pre>
-<p>Bare <code>/code-review</code> picks the plan in <code>awaiting-retro</code> and reviews <code>&lt;plan commit&gt;..HEAD</code> against stack-aware checklists, returning severity-labelled findings in chat. It is a <strong>stateless side-skill</strong> — it does not transition the plan, so the next step is still <code>/retro</code>. Run it from a fresh session (often under a stronger model than the one that implemented). See <a href="../code_review/">/code-review</a> for details.</p>
-<h2 id="7-first-retro">7. First /retro</h2>
+<p>It offers every <code>done</code> plan — each listed with its review history, so a re-review is as ordinary as a first pass — and reviews <code>{plan commit}..HEAD</code> against stack-aware checklists. Findings, your verdict and what came of it land in a persisted review file under <code>codereviews/</code>, which carries the run's own <code>in-agent-review → human-review → done</code> status; the plan stays at <code>done</code> and only gains the review's path in its <code>code_reviews:</code> list, so it remains in the review queue and the next step is still retro. Run it from a fresh session, often under a stronger model than the one that implemented. See <a href="../code_review/">code-review</a> for details.</p>
+<h2 id="7-first-retro">7. First retro</h2>
 <p>Capture what actually shipped:</p>
-<pre><code class="language-text">/retro plans/20260426-per-tenant-rate-limiting.md
+<pre><code class="language-text">/playbook retro
 </code></pre>
-<p><code>/retro</code> reads the plan, scans session logs and <code>git diff</code>, and writes a retrospective at <code>~/Claude/{project}/retrospectives/{YYYYMMDD}-{kebab-title}.md</code>. It also asks you about tensions you noticed during develop. Review the retrospective file — it is the input to <code>/learn</code>, and shit in means shit out.</p>
-<h2 id="8-first-learn">8. First /learn</h2>
+<p>The <a href="../retro/">retro playbook</a> takes your raw feedback first, mines the session logs and <code>git diff</code> for tensions you did not flag, and writes a standalone <code>retrospectives/{slug}.md</code>, stamping its path onto every plan it covers. That file is the artifact retro and learn advance; the covered plans stay at <code>done</code>. Review it — it is the input to learn, and shit in means shit out.</p>
+<h2 id="8-first-learn">8. First learn</h2>
 <p>Fold the retro into durable rules:</p>
-<pre><code class="language-text">/learn retrospectives/20260426-per-tenant-rate-limiting.md
+<pre><code class="language-text">/playbook learn
 </code></pre>
-<p><code>/learn</code> proposes lessons (<code>~/Claude/{project}/lessons/{N}_{title}.md</code>) and per-skill / per-agent extension files (<code>~/Claude/{project}/_booping/skill_&lt;name&gt;.md</code>, <code>_booping/agent_&lt;name&gt;.md</code>) for your confirmation. Approved lessons are loaded by future <code>/groom</code> and <code>/develop</code> invocations; extensions travel with the matching skill or agent at load time.</p>
-<p>When <code>/learn</code> finishes, the plan reaches <code>done</code> and your first loop is complete. The next <code>/groom</code> you run inherits everything you just learned.</p>
+<p>The <a href="../learn/">learn playbook</a> proposes targeted lessons (<code>~/Claude/{project}/_lessons/{N}_{kebab-title}.md</code>, each carrying a <code>targets:</code> list) and one-line bullets for the repo's own <code>CLAUDE.md</code>, in one review table for your confirmation. Approved lessons are injected into the playbooks, steps, agents and skills they name.</p>
+<p>When learn finishes, the retrospective reaches <code>done</code> and your first loop is complete. The next groom run inherits everything you just learned.</p>
               
             </div>
           </div><footer>

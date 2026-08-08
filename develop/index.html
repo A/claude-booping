@@ -5,14 +5,14 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://A.github.io/claude-booping/develop/" />
       <link rel="shortcut icon" href="../img/favicon.ico" />
-    <title>/develop - booping</title>
+    <title>develop playbook - booping</title>
     <link rel="stylesheet" href="../css/theme.css" />
     <link rel="stylesheet" href="../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
     
       <script>
         // Current page data
-        var mkdocs_page_name = "/develop";
+        var mkdocs_page_name = "develop playbook";
         var mkdocs_page_input_path = "develop.md";
         var mkdocs_page_url = "/claude-booping/develop/";
       </script>
@@ -67,15 +67,17 @@
                 <li class="toctree-l1"><a class="reference internal" href="../integrating-external-agents/">Integrating external agents</a>
                 </li>
               </ul>
-              <p class="caption"><span class="caption-text">Commands</span></p>
+              <p class="caption"><span class="caption-text">Workflow</span></p>
               <ul class="current">
-                  <li class="toctree-l1"><a class="reference internal" href="../groom/">/groom</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../groom/">groom playbook</a>
                   </li>
-                  <li class="toctree-l1 current"><a class="reference internal current" href="#">/develop</a>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">develop playbook</a>
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#what-it-does">What it does</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#command">Command</a>
+    <li class="toctree-l2"><a class="reference internal" href="#starting-a-run">Starting a run</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#branch">Branch</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#best-practices">Best practices</a>
         <ul>
@@ -91,15 +93,11 @@
     </li>
     </ul>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../code_review/">/code-review</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../code_review/">code-review playbook</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../retro/">/retro</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../retro/">retro playbook</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../learn/">/learn</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../chat/">/chat</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../help/">/help</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../learn/">learn playbook</a>
                   </li>
               </ul>
       </div>
@@ -116,8 +114,8 @@
         <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
-          <li class="breadcrumb-item">Commands</li>
-      <li class="breadcrumb-item active">/develop</li>
+          <li class="breadcrumb-item">Workflow</li>
+      <li class="breadcrumb-item active">develop playbook</li>
     <li class="wy-breadcrumbs-aside">
           <a href="https://github.com/A/claude-booping/edit/master/docs/develop.md">Edit on A/claude-booping</a>
     </li>
@@ -127,48 +125,82 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="develop">/develop</h1>
-<p>Pick a plan from an interactive candidate list and execute its milestones, delegating coding to <code>booping-developer</code> and orchestrating verification, commits, and status transitions on the way to <code>awaiting-retro</code>.</p>
-<h2 id="what-it-does">What it does</h2>
-<p><code>/develop</code> walks a plan through <code>ready-for-dev → in-progress → awaiting-retro</code>. It works on exactly one plan, picks the right branch from <code>git.branches</code>, groups consecutive milestones into agent briefings, runs each briefing through <code>booping-developer</code>, verifies milestone DoDs, runs the project's lint / typecheck / test gates at Final Verification, and flips the plan's status when every checkbox is <code>[x]</code> and Final Verification is green.</p>
-<p><code>/develop</code> does not edit application code from the orchestrator — all coding is delegated. The orchestrator owns reads/writes against the vault, briefing assembly, verification, and commits.</p>
-<p>By default <code>/develop</code> runs all milestone groups in <strong>one session</strong>. Stopping after each milestone is a user-prompt-level instruction, not default behaviour (see Best practices).</p>
-<h2 id="command">Command</h2>
-<pre><code class="language-text">/develop
-/develop plans/20260423-refactor-chat-skill-to-groom-pattern.md
-/develop ~/Claude/claude-booping/plans/20260430-src-files-build-pipeline.md pause after each milestone
-/develop ~/Claude/claude-booping/plans/20260429-skill-runtime-template-rendering.md re-implement from master, don't toggle todos in the plan
-continue to develop plans/20260428-snippet-pre-filter-pipeline.md
+                <h1 id="develop-playbook">develop playbook</h1>
+<p>Execute a groomed plan's milestones, delegating coding to <code>booping-developer</code> and orchestrating verification, commits, and status transitions on the way to <code>done</code>.</p>
+<p>Development is a <strong>playbook</strong>, not a skill — driven by <a href="../playbook/"><code>/playbook</code></a>:</p>
+<pre><code class="language-text">/playbook develop
 </code></pre>
-<p>Bare <code>/develop</code> presents a single-select <code>AskUserQuestion</code> candidate list drawn from every plan in <code>ready-for-dev</code> and <code>awaiting-plan-review</code>; you pick the one to run. When no plan is in either status, the skill reports the empty queue and exits — no silent fallback to <code>in-progress</code> plans. Pass a plan path (absolute, <code>~/Claude/...</code>, or vault-relative) to skip the picker and target a specific one. Free-text after the path reaches the skill verbatim — useful for stop-after-each-milestone or model-comparison runs.</p>
-<p>To resume a plan already in <code>in-progress</code> (e.g. after a stopped session), invoke <code>/develop</code> with the explicit path; the skill picks up at the first milestone whose DoDs are not all <code>[x]</code>. "continue to develop &lt;plan&gt;" works as a natural-language equivalent.</p>
+<h2 id="what-it-does">What it does</h2>
+<p>The playbook walks one plan through <code>awaiting-approval → ready-for-dev → in-progress → done</code>. Three outcomes are terminal: <code>done</code>, <code>fail</code> (the abort branch), and <code>cancelled</code> — a run you call off cancels formally from any non-terminal status, not by being abandoned. <code>done</code> closes the plan <strong>immediately</strong>: the plan track ends there, with no waiting status after it. Retro runs afterwards as its own track — start it with <a href="../retro/"><code>/playbook retro</code></a>; it, like <a href="../code_review/">code-review</a>, picks the plan up through the <code>retro:</code> / <code>code_reviews:</code> frontmatter seams, each keeping its own run state in its own artifact, without moving the plan's status again. That vocabulary is develop's own, declared in <code>playbooks/develop/playbook.yaml</code>'s <code>states:</code> block, not in a shared lifecycle. Run state lives in the plan's own <code>index.md</code>, so a stopped sprint is <strong>resumable</strong>.</p>
+<p>Five steps, in dependency order:</p>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>intake</code></td>
+<td>Resolve the plan — one entering at <code>awaiting-approval</code> is advanced to <code>ready-for-dev</code> without asking, since handing it to develop is the approval — and check the plan against the repo's current shape (drift)</td>
+</tr>
+<tr>
+<td><code>provision</code></td>
+<td>Pick and confirm the sprint branch, then settle the milestone groups the briefings will cover</td>
+</tr>
+<tr>
+<td><code>develop-loop</code></td>
+<td>Brief <code>booping-developer</code> per group, verify each milestone's DoD, commit as it goes</td>
+</tr>
+<tr>
+<td><code>verify</code></td>
+<td>Run the project's lint / typecheck / test gates plus the plan's Final Verification</td>
+</tr>
+<tr>
+<td><code>wrap-up</code></td>
+<td>Closing commit, sprint report, transition to <code>done</code></td>
+</tr>
+</tbody>
+</table>
+<p>The runner edits no application code — all coding is delegated; it owns reads/writes against the vault, briefing assembly, verification, and commits.</p>
+<p>Every milestone group runs in <strong>one session</strong> by default. Stopping after each milestone is a request you make at invocation time.</p>
+<h2 id="starting-a-run">Starting a run</h2>
+<pre><code class="language-text">/playbook develop
+/playbook develop — plans/202604301120_src-files-build-pipeline/index.md, pause after each milestone
+</code></pre>
+<p>Bare invocation resolves the plan from what the session just groomed or from the vault's queue. Name a plan path to target a specific one. Free-text reaches <code>intake</code> verbatim — useful for stop-after-each-milestone or model-comparison runs.</p>
+<p>To resume a sprint already <code>in-progress</code>, invoke the playbook against the same plan: <code>playbook-state</code> reports the frontier and the run picks up at the first milestone whose DoDs are not all <code>[x]</code>.</p>
+<h2 id="branch">Branch</h2>
+<p><code>provision</code> picks the branch prefix from <code>core.develop_playbook.git.branches</code> using the plan's <code>type</code>, proposes a kebab-case name, and asks through <code>AskUserQuestion</code> — <strong>nothing touches git until you answer</strong>, and a name you rewrite is used verbatim. A branch that already exists for the sprint is reused rather than recreated. In multi-repo projects the same branch name is reused across repos unless you say otherwise.</p>
+<p>That confirmation is the playbook's single review gate.</p>
 <h2 id="best-practices">Best practices</h2>
 <h3 id="run-code-review-in-a-fresh-session">Run code review in a fresh session</h3>
-<p>When you want a <a href="../code_review/">/code-review</a> pass, do it from a <strong>fresh session</strong>, not the same one that ran <code>/develop</code>. <code>/code-review</code> reads the diff and the plan, which is unaffected by orchestrator context, but the reviewer benefits from a clean slate without any of <code>/develop</code>'s execution traces in scope.</p>
+<p>Run a <a href="../code_review/">code-review</a> pass from a <strong>fresh session</strong>, not the one that ran the sprint. It reads the diff and the plan, which runner context does not affect, but the reviewer benefits from a slate free of the sprint's execution traces.</p>
 <h3 id="try-alternative-models-for-implementation">Try alternative models for implementation</h3>
-<p>Because plans are reproducible files, you can run the same plan with different models — for example use a cheaper or faster model (Sonnet, GLM) for the implementation pass under <code>/develop</code>, and reserve Opus for <a href="../code_review/">/code-review</a> afterward. The plan file is the controlled input; the diff is the controlled output. Swap models, compare diffs, calibrate which model gives you acceptable quality on your codebase.</p>
+<p>Plans are reproducible files, so the same plan runs with different models — a cheaper or faster model for the implementation pass, Opus for <a href="../code_review/">code-review</a> afterward. The plan is the controlled input, the diff the controlled output: swap models, compare diffs, calibrate which model gives acceptable quality on your codebase.</p>
 <h3 id="review-the-code-review-feedback-list">Review the code-review feedback list</h3>
-<p>After <code>/code-review</code> produces its findings, work the list explicitly:</p>
+<p>The <a href="../code_review/">code-review playbook</a> puts its findings in front of you and asks for a verdict on each one, then applies what you approved. Rule on the list explicitly:</p>
 <ul>
 <li><strong>BLOCKER</strong> — must be applied before merge. Trivial fixes happen inline in the review session; non-trivial fixes go back through <code>booping-developer</code> via a follow-up briefing.</li>
-<li><strong>SUGGESTION</strong> — apply if the cost is low; defer with an explicit one-liner in the plan otherwise. Do not silently drop.</li>
-<li><strong>NIT</strong> — apply or skip on judgment; no record needed.</li>
+<li><strong>SUGGESTION</strong> — apply if the cost is low; drop it explicitly otherwise. Do not silently drop.</li>
+<li><strong>NIT</strong> — apply or skip on judgment.</li>
 </ul>
-<p>Treat the feedback list the same way <code>/groom</code> treats Gemini's cross-validation output: every BLOCKER must be addressed, deferrals are explicit, no item is silently dropped.</p>
+<p>The discipline is the <a href="../groom/">groom playbook</a>'s for cross-review findings: every BLOCKER addressed, deferrals explicit, no item silently dropped.</p>
 <h2 id="config">Config</h2>
-<p><code>/develop</code> reads the following keys from <code>src/config.yaml</code>. See <a href="../project_config/">Project config</a> for the deep-merge override mechanics; per-project tweaks live in <code>~/Claude/{project}/config.yaml</code>.</p>
+<p>The playbook reads these keys from <code>src/config.yaml</code>. See <a href="../project_config/">Project config</a> for the deep-merge override mechanics; per-project tweaks live in <code>~/Claude/{project}/config.yaml</code>.</p>
 <ul>
-<li><strong><code>sprint.max_milestones_per_agent</code></strong> — maximum number of consecutive milestones grouped into a single <code>booping-developer</code> briefing. <code>/develop</code> only groups when the milestones share enough context that one agent handling them in sequence is cheaper than spinning a fresh agent per milestone; otherwise it stays one milestone per briefing. Default <code>2</code>.</li>
-<li><strong><code>git.branches</code></strong> — list of <code>{branch, when}</code> entries that map plan <code>type</code> (or freeform descriptors) to a branch prefix. <code>/develop</code> picks the branch prefix from this list before starting work.</li>
-<li><strong><code>git.commit_message</code></strong> — conventional-commit format string used for in-plan commits. Override per-project to enforce a different commit shape.</li>
-<li><strong><code>skills.develop.agents</code></strong> — the agents <code>/develop</code> is allowed to delegate to, with <code>good_for</code> / <code>bad_for</code> guidance rendered into the skill body. <code>booping-developer</code> is the implementation channel; <code>booping-researcher</code> is reserved for Phase 0 drift spot-checks across many plan-named files.</li>
+<li><strong><code>core.sprint.max_milestones_per_agent</code></strong> — maximum consecutive milestones grouped into a single <code>booping-developer</code> briefing. Grouping happens only when the milestones share enough context that one agent handling them in sequence is cheaper than a fresh agent per milestone. Default <code>2</code>.</li>
+<li><strong><code>core.develop_playbook.git.branches</code></strong> — list of <code>{branch, when}</code> entries that map plan <code>type</code> (or freeform descriptors) to a branch prefix; <code>provision</code> picks from this list.</li>
+<li><strong><code>core.develop_playbook.git.commit_message</code></strong> — message format string used for in-sprint commits. Override per-project to enforce a different commit shape.</li>
+<li><strong><code>core.develop_playbook.agents</code></strong> — the agents the playbook may delegate to, with <code>good_for</code> / <code>bad_for</code> guidance. <code>booping-developer</code> is the implementation channel; <code>booping-researcher</code> is reserved for the intake drift spot-check across many plan-named files.</li>
 </ul>
               
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../groom/" class="btn btn-neutral float-left" title="/groom"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../code_review/" class="btn btn-neutral float-right" title="/code-review">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../groom/" class="btn btn-neutral float-left" title="groom playbook"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../code_review/" class="btn btn-neutral float-right" title="code-review playbook">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>

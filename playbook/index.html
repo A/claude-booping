@@ -58,29 +58,67 @@
               <ul class="current">
                 <li class="toctree-l1 current"><a class="reference internal current" href="#">Playbooks (unstable)</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#scopes-and-shadowing">Scopes and shadowing</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#layout">Layout</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#frontmatter-contract">Frontmatter contract</a>
+    <li class="toctree-l2"><a class="reference internal" href="#levels">Levels</a>
         <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#the-agent-grammar">The agent grammar</a>
+    <li class="toctree-l3"><a class="reference internal" href="#shipped-playbooks">Shipped playbooks</a>
     </li>
         </ul>
     </li>
+    <li class="toctree-l2"><a class="reference internal" href="#layout">Layout</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#lessons">Lessons</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#target-forms">Target forms</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#the-manifest">The manifest</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#playbookyaml">playbook.yaml</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#playbookmd-frontmatter">playbook.md frontmatter</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#delegation-levels">Delegation levels</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#the-detached-grammar">The detached grammar</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#jinja-bodies">Jinja bodies</a>
+    </li>
     <li class="toctree-l2"><a class="reference internal" href="#how-the-graph-renders">How the graph renders</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#subgraphs">Subgraphs</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#run-state">Run state</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#hooks">Hooks</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_scripts-contract">_scripts/ contract</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#run-workspace">Run workspace</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#commands">Commands</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#resume">Resume</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#cancellation">Cancellation</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#how-state-renders">How state renders</a>
+    </li>
+        </ul>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#notices">Notices</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#authoring-a-global-playbook">Authoring a global playbook</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#authoring-a-local-playbook">Authoring a local playbook</a>
+    <li class="toctree-l2"><a class="reference internal" href="#authoring-a-project-playbook">Authoring a project playbook</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#worked-example">Worked example</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#rendering">Rendering</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#evals-and-harness">Evals and harness</a>
     </li>
     </ul>
                 </li>
@@ -93,21 +131,17 @@
                 <li class="toctree-l1"><a class="reference internal" href="../integrating-external-agents/">Integrating external agents</a>
                 </li>
               </ul>
-              <p class="caption"><span class="caption-text">Commands</span></p>
+              <p class="caption"><span class="caption-text">Workflow</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../groom/">/groom</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../groom/">groom playbook</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../develop/">/develop</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../develop/">develop playbook</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../code_review/">/code-review</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../code_review/">code-review playbook</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../retro/">/retro</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../retro/">retro playbook</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../learn/">/learn</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../chat/">/chat</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../help/">/help</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../learn/">learn playbook</a>
                   </li>
               </ul>
       </div>
@@ -139,77 +173,381 @@
 <p class="admonition-title">Unstable — work in progress</p>
 <p>Playbooks are an experimental feature. The manifest format, step frontmatter, and <code>/playbook</code> behaviour may change in breaking ways between releases.</p>
 </div>
-<p>A <strong>playbook</strong> is a user-authored, multi-step guided procedure that lives in the vault and is driven by the <code>/playbook</code> skill. Where the built-in skills (<code>/groom</code>, <code>/develop</code>, …) are fixed workflows shipped by the plugin, a playbook is yours to write: a set of prompt steps, each optionally delegated to a sub-agent, with review gates where you want to inspect the output before continuing.</p>
-<p>A playbook's structure is declared by a <strong><code>graph:</code> frontmatter mapping</strong> — each step lists the steps it depends on. The graph defines which steps run, in what order, and which run in parallel. The individual step files stay plain markdown — no Jinja anywhere. Author a playbook by hand and it shows up in <code>/playbook</code> immediately.</p>
-<h2 id="scopes-and-shadowing">Scopes and shadowing</h2>
-<p>Playbooks are discovered from two roots:</p>
+<p>A <strong>playbook</strong> is a multi-step guided procedure driven by the <code>/playbook</code> skill — the one skill booping ships. Where a skill is a fixed workflow, a playbook is yours to write: prompt steps, each optionally detached into a sub-agent, with review gates that pause for your inspection. Most playbooks are yours and live in your Project Vault; a few ship with the plugin (see <a href="#levels">Levels</a>).</p>
+<p>A playbook's <strong>structure</strong> lives in <code>playbook.yaml</code>: the <code>graph:</code> (which steps run, in what order, which in parallel) and the optional <code>states:</code> (named state machines that persist run state on disk so a run can be resumed). <code>playbook.md</code> keeps <strong>identity and prose</strong> — the manifest frontmatter (<code>name</code>, <code>title</code>, <code>summary</code>, <code>trigger</code>, …) and the preamble body. Bodies are plain markdown by default; a playbook can opt into <a href="#jinja-bodies">Jinja rendering</a> for live project data. Author a playbook by hand and it shows up in <code>/playbook</code> immediately.</p>
+<div class="admonition note">
+<p class="admonition-title">Legacy: <code>graph:</code> in <code>playbook.md</code> frontmatter</p>
+<p>A playbook with no <code>playbook.yaml</code> still works: <code>graph:</code> is read from <code>playbook.md</code> frontmatter. Declaring <code>graph:</code> in <strong>both</strong> places is a blocking STOP — keep exactly one. <code>state:</code> / <code>states:</code> are <code>playbook.yaml</code>-only; there is no frontmatter fallback.</p>
+</div>
+<h2 id="levels">Levels</h2>
+<p>Playbooks are discovered from the core, global and project levels:</p>
 <ul>
+<li><strong>Core</strong> — <code>&lt;plugin-root&gt;/playbooks/&lt;name&gt;/</code>. Shipped with the plugin.</li>
 <li><strong>Global</strong> — <code>&lt;home_dir&gt;/_playbooks/&lt;name&gt;/</code> (default <code>~/Claude/_playbooks/</code>). Shared across every project on the machine.</li>
-<li><strong>Local</strong> — <code>{vault}/_playbooks/&lt;name&gt;/</code>. Specific to one project's vault.</li>
+<li><strong>Project</strong> — <code>{vault}/_playbooks/&lt;name&gt;/</code>. Specific to one Project Vault.</li>
 </ul>
-<p>When the same playbook <code>name</code> exists in both roots, the <strong>local one shadows the global one</strong> — the project-local version wins and the global one is hidden. This lets a project override a shared playbook without touching the global copy. Directories whose name starts with <code>_</code> (e.g. <code>_lib</code>) are skipped, so you can keep shared helper content alongside playbooks without it being picked up as one.</p>
+<p><strong>A playbook <code>name</code> must be unique across the core, global and project levels.</strong> The same name at two levels is a name clash: <code>/playbook</code> marks the entry <code>⚠ clash</code> in its listing, and rendering the playbook returns a blocking STOP notice instead of the procedure — neither copy runs until one of them is renamed. To adapt a playbook you didn't write, copy it under a new name or attach <a href="#lessons">lessons</a> to it. Directories whose name starts with <code>_</code> (e.g. <code>_lib</code>, <code>_partials</code>) are skipped, so shared helper content can sit alongside playbooks.</p>
+<h3 id="shipped-playbooks">Shipped playbooks</h3>
+<p>Core playbooks ship with the plugin and own the main workflow:</p>
+<ul>
+<li><strong><code>setup</code></strong> — machine config, then vault scaffold and <code>.booping</code> marker. See <a href="../install/">Install</a>.</li>
+<li><strong><code>groom</code></strong> — spec a sprint (intake → codebase and web research → draft → cross-review → present). See <a href="../groom/">groom</a>.</li>
+<li><strong><code>develop</code></strong> — execute a plan (intake → provision → develop-loop → verify → wrap-up). See <a href="../develop/">develop</a>.</li>
+<li><strong><code>retro</code></strong> — capture what shipped versus the spec. See <a href="../retro/">retro</a>.</li>
+<li><strong><code>learn</code></strong> — fold retro findings into durable rules. See <a href="../learn/">learn</a>.</li>
+<li><strong><code>code-review</code></strong> — review a confirmed scope: findings, verdict, approved fixes, recorded in the run's own <code>codereviews/</code> artifact. See <a href="../code_review/">code-review</a>.</li>
+<li><strong><code>migrate</code></strong> — bring a vault up to the plugin's current migration watermark.</li>
+<li><strong><code>playbook-authoring</code></strong> — the procedure for writing a new playbook.</li>
+</ul>
+<p>Run any of them with <code>/playbook &lt;name&gt;</code>.</p>
+<p>A playbook of your own sharing a core name clashes with it rather than replaces it. To bend a shipped procedure to a project, add <a href="#lessons">lessons</a> in <code>{vault}/_lessons/</code> targeting it; to fork it, copy the directory under a different name.</p>
 <h2 id="layout">Layout</h2>
 <p>Each playbook is a directory:</p>
 <pre><code>&lt;name&gt;/
-  playbook.md          # manifest: metadata + graph frontmatter, plain-markdown preamble body
-  steps/
-    &lt;step&gt;.md          # one file per step, in any order on disk
+  playbook.md          # identity frontmatter + plain-markdown preamble body
+  playbook.yaml        # structure: graph:, state:, states:
+  &lt;step&gt;/              # one directory per step — the directory name IS the step name
+    prompt.md          #   the step itself; everything else in the dir is yours
+  _scripts/            # executables invoked by `script &lt;name&gt;` transition hooks
+  _references/         # `_`-prefixed dirs are not steps — free workspace
 </code></pre>
-<p>Disk order of <code>steps/*.md</code> is irrelevant to the run — <strong>the <code>graph:</code> frontmatter decides which steps run and in what order</strong>. Step files whose name starts with <code>_</code> are ignored (keep disabled or library steps alongside without wiring them in).</p>
-<h2 id="frontmatter-contract">Frontmatter contract</h2>
-<p><code>playbook.md</code> frontmatter:</p>
+<p><strong>A step is a directory and <code>prompt.md</code> is the step.</strong> Every non-<code>_</code> subdirectory holding a <code>prompt.md</code> is a step, and its directory name is the step name the graph references. Nothing else in the directory is loaded — sibling files (fixtures, test configs, prompt variants like <code>base.md</code>) are invisible to the runner. A non-<code>_</code> subdirectory without a <code>prompt.md</code> is skipped with a warning.</p>
+<p>Directory order on disk is irrelevant — <strong>the <code>graph:</code> decides which steps run and in what order</strong>. <code>_</code>-prefixed directories (<code>_references/</code>, <code>_fixtures/</code>) are never steps, so disabled steps and shared material can sit alongside without being wired in.</p>
+<h2 id="lessons">Lessons</h2>
+<p>A <strong>lesson</strong> is a short standing rule injected into a playbook run — the way to correct a procedure without editing its prompts. Lessons are markdown files (the convention is <code>NNNN_title.md</code>), loaded in filename order from exactly <strong>two</strong> directories:</p>
+<table>
+<thead>
+<tr>
+<th>Level</th>
+<th>Directory</th>
+<th>Reaches</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Global</td>
+<td><code>&lt;home_dir&gt;/_lessons/</code> (default <code>~/Claude/_lessons/</code>)</td>
+<td>every project on the machine</td>
+</tr>
+<tr>
+<td>Project</td>
+<td><code>{vault}/_lessons/</code></td>
+<td>this project only</td>
+</tr>
+</tbody>
+</table>
+<p>Neither directory decides <em>what</em> a lesson binds — the file's own <code>targets:</code> frontmatter does. A lesson with no usable <code>targets:</code> is injected nowhere: <strong>lessons are opt-in.</strong></p>
+<pre><code class="language-markdown">---
+title: Name every artifact path absolutely
+targets:
+  - groom
+  - ship/publish
+  - agent:booping-developer
+---
+
+Receipts must name paths absolutely — a relative path is ambiguous once the run moves between workdirs.
+</code></pre>
 <ul>
-<li><code>name</code> — identifier, unique within a root (used for shadowing).</li>
+<li><code>title</code> — <em>optional</em>, used in the lesson's heading; defaults to the filename without its extension.</li>
+<li><code>targets</code> — the list of things this lesson is injected into. A bare scalar (<code>targets: groom</code>) counts as a one-entry list.</li>
+</ul>
+<h3 id="target-forms">Target forms</h3>
+<p>Exact names only — no globs, no wildcards, no negation:</p>
+<table>
+<thead>
+<tr>
+<th>Form</th>
+<th>Example</th>
+<th>Injected into</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>{playbook}</code></td>
+<td><code>groom</code></td>
+<td>the <code>## Lessons</code> section of that playbook's composed procedure</td>
+</tr>
+<tr>
+<td><code>{playbook}/{step}</code></td>
+<td><code>ship/publish</code></td>
+<td>that one step's prompt, on both the <code>--step</code> and inline surfaces</td>
+</tr>
+<tr>
+<td><code>agent:{id}</code></td>
+<td><code>agent:booping-developer</code></td>
+<td>that agent's body, at agent load time</td>
+</tr>
+<tr>
+<td><code>skill:{name}</code></td>
+<td><code>skill:playbook</code></td>
+<td>that skill's body, at skill load time</td>
+</tr>
+</tbody>
+</table>
+<p>A lesson may carry several entries, of mixed forms. An entry matching none of these forms is ignored (see <a href="#notices">Notices</a>).</p>
+<p><strong>Playbook authors do nothing.</strong> Injection happens in <code>booping render-playbook</code> itself — there is no lessons partial to include, and a playbook cannot opt out.</p>
+<div class="admonition warning">
+<p class="admonition-title">Agent targets reach booping's own agents only</p>
+<p><code>agent:</code> targets are injected into the plugin's internal agents — <code>agent:booping-developer</code> and <code>agent:booping-researcher</code>. An <a href="../integrating-external-agents/">external or global agent</a> at <code>~/.claude/agents/&lt;id&gt;.md</code>, and a sub-agent spawned by model tier (<code>detached: sonnet:high</code>), receive <strong>no</strong> targeted lessons: their bodies are not rendered by booping. To reach one of those, target the step it performs (<code>{playbook}/{step}</code>) — the step prompt is fetched by the agent itself.</p>
+</div>
+<p><strong>Same filename in both directories → the project copy wins.</strong> A <code>0002_receipts.md</code> present in <code>~/Claude/_lessons/</code> and in <code>{vault}/_lessons/</code> loads once, from the vault. Give lessons distinct names unless you mean to shadow one.</p>
+<p><strong>Where they surface.</strong> Playbook-targeted lessons render as a <code>## Lessons</code> section in the composed procedure, between the preamble and <code>## Playbook Steps</code>; they bind the driver for the whole run. Step-targeted lessons are appended to that step's <code>booping render-playbook &lt;name&gt; --step &lt;step&gt;</code> output, so they reach exactly the agent running that step (and the embedded body when the playbook renders steps inline). <code>--no-lessons</code> suppresses both sections <em>and</em> the lesson notices, so the output matches a lesson-free vault byte for byte.</p>
+<div class="admonition note">
+<p class="admonition-title">Retired: playbook-local <code>_lessons/</code> and <code>step:</code></p>
+<p>A <code>_lessons/</code> directory inside a discovery root or inside a playbook directory is not read, and neither is a lesson's <code>step:</code> frontmatter key. Move those files into <code>{vault}/_lessons/</code> (or <code>&lt;home_dir&gt;/_lessons/</code>) and express <code>step: draft</code> as <code>targets: [&lt;playbook&gt;/draft]</code>. While a retired directory still holds markdown, every render of that playbook emits a non-blocking migration note naming it.</p>
+</div>
+<h2 id="the-manifest">The manifest</h2>
+<p>Structure lives in <code>playbook.yaml</code>, identity and prose in <code>playbook.md</code>.</p>
+<h3 id="playbookyaml"><code>playbook.yaml</code></h3>
+<ul>
+<li><code>graph</code> — mapping of <strong>node name → node</strong>. A node whose value is a <strong>list</strong> is a plain step and the list is its dependency step names; a node whose value is a <strong>mapping</strong> is a <a href="#subgraphs">subgraph</a>. This is the whole structure: membership (only mapped steps run), order (a step runs after all its dependencies), and parallelism (steps whose dependencies are all satisfied by earlier waves run together).</li>
+<li><code>state</code> — <em>optional</em>, the name of the <code>states:</code> entry that governs the <strong>outer</strong> graph.</li>
+<li><code>states</code> — <em>optional</em>, mapping of state-machine name → machine. See <a href="#run-state">Run state</a>.</li>
+</ul>
+<p>A subgraph node may carry its own <code>state:</code> key, naming the machine that governs each of its instances.</p>
+<h3 id="playbookmd-frontmatter"><code>playbook.md</code> frontmatter</h3>
+<ul>
+<li><code>name</code> — identifier, unique across the core, global and project levels (a duplicate is a blocking name clash).</li>
 <li><code>title</code> — human-readable name.</li>
 <li><code>summary</code> — one-line description shown in the <code>/playbook</code> listing.</li>
 <li><code>trigger</code> — natural-language hint the skill matches the user's request against.</li>
 <li><code>requires_project</code> — <em>optional</em>, default <code>false</code>. When <code>true</code>, the playbook only runs with a booping project attached: <code>/playbook</code> flags it in the listing and refuses to run it without a project, and <code>booping render-playbook</code> refuses to render it (stderr + exit 1).</li>
-<li><code>graph</code> — mapping of <strong>step name → list of dependency step names</strong>. This is the whole structure: membership (only mapped steps run), order (a step runs after all its dependencies), and parallelism (steps whose dependencies are all satisfied by earlier waves run together).</li>
+<li><code>jinja</code> — <em>optional</em>, default <code>false</code>. When <code>true</code>, the preamble and every step body are rendered as Jinja templates against live project context. See <a href="#jinja-bodies">Jinja bodies</a>.</li>
+<li><code>inline_steps</code> — <em>optional</em>, default <code>false</code>. When <code>true</code>, each runner-performed step's body is embedded in its section of the composed procedure instead of the fetch command. Detached steps are unaffected. See <a href="#how-the-graph-renders">How the graph renders</a>.</li>
+<li><code>graph</code> — <em>legacy fallback only</em>, same shape as <code>playbook.yaml</code>'s <code>graph:</code>. Used when the playbook has no <code>playbook.yaml</code>.</li>
 </ul>
-<p>The manifest <strong>body</strong> is a plain-markdown preamble — a playbook-level instruction inserted verbatim above the rendered procedure. No Jinja, no step calls.</p>
-<p><code>steps/&lt;step&gt;.md</code> frontmatter:</p>
+<p>The manifest <strong>body</strong> is a preamble — a playbook-level instruction inserted above the rendered procedure. No step calls: the graph, not the body, decides what runs.</p>
+<p><code>&lt;step&gt;/prompt.md</code> frontmatter (the step identifier comes from the directory name, not frontmatter):</p>
 <ul>
-<li><code>name</code> — step identifier (referenced from the graph).</li>
-<li><code>summary</code> — one-line description of the step, rendered into the step's section as a <code>Summary:</code> instruction bullet. It is where a step declares execution hints in its own domain words — e.g. <em>"Can be paralleled as one agent per feature"</em> — since the runner knows nothing about a playbook's domain.</li>
-<li><code>agent</code> — how the step runs (see the grammar below).</li>
+<li><code>summary</code> — one-line description of the step, rendered into the step's section as a <code>Summary:</code> instruction bullet. It is where a step declares execution hints in its own domain words — e.g. <em>"Can be paralleled as one agent per feature"</em>.</li>
+<li><code>detached</code> — <em>optional</em>. Present → the step runs inside a sub-agent; absent → the runner performs it. See <a href="#delegation-levels">Delegation levels</a>.</li>
 <li><code>review_gate</code> — when non-null, <code>/playbook</code> stops after the step, presents the output, and continues only on your explicit confirmation. <code>null</code> runs straight through.</li>
-<li><code>title</code> — <em>optional</em> human-readable heading for the step. When absent, the rendered heading is the titleized <code>name</code> (e.g. <code>current-time</code> → <code>Current Time</code>).</li>
+<li><code>title</code> — <em>optional</em> human-readable heading for the step. When absent, the rendered heading is the titleized directory name (e.g. <code>current-time</code> → <code>Current Time</code>).</li>
 </ul>
-<p>The step <strong>body</strong> is the prompt for that step (plain markdown — never Jinja).</p>
-<h3 id="the-agent-grammar">The <code>agent</code> grammar</h3>
-<p>A single <code>agent</code> field decides how the step executes:</p>
+<p>The step <strong>body</strong> is the prompt for that step.</p>
+<pre><code class="language-yaml">---
+summary: Draft the plan against the approved design
+detached: sonnet:high
+review_gate: Plan draft ready — approve before presenting?
+---
+</code></pre>
+<h2 id="delegation-levels">Delegation levels</h2>
+<p>A step runs at one of three levels. Only the third has mechanics; the first two are the same runtime shape and differ in what the step body asks for.</p>
 <ul>
-<li><code>null</code> — run the step <strong>inline</strong> in the driving conversation, no sub-agent. An inline step can never share a parallel wave (see below).</li>
+<li><strong>inline</strong> — the runner fetches the step body and performs the step itself, in the driving conversation. Everything the step reads lands in the driver's context. No frontmatter key.</li>
+<li><strong>assisted</strong> — the runner still performs the step, but delegates the heavy reads or research inside it to the configured researcher agent, which returns a compressed summary. The driver's context holds the summary, not the sources. Expressed as prose in the step body — no frontmatter key. The spawn's agent id comes back with the summary, and a follow-up question is sent to that same agent by id — its context, the sources already read, intact — rather than a fresh spawn re-reading everything.</li>
+<li><strong>detached</strong> — an agent fetches and performs the whole step body; the runner sees only the returned receipt. This is the only level with mechanics: the <code>detached:</code> frontmatter key.</li>
+</ul>
+<p>The researcher an assisted step delegates to is the <code>core.research_agent</code> config key (core default <code>booping:booping-researcher</code>), overridable per project like any other config value. A <code>jinja: true</code> body reads it as <code>{{ config.core.research_agent }}</code> — the same way an optional key is read defensively with <code>{% if config.core.get("my_key") %}</code>.</p>
+<h3 id="the-detached-grammar">The <code>detached</code> grammar</h3>
+<ul>
+<li><strong>key absent</strong> — not detached: the runner performs the step (inline or assisted). Such a step can never share a parallel wave (see below).</li>
 <li><code>&lt;model&gt;:&lt;effort&gt;</code> where <code>model</code> ∈ <code>{opus, sonnet, haiku, fable}</code> (e.g. <code>sonnet:high</code>, <code>haiku:medium</code>) — spawn a <strong>generic sub-agent</strong> with that model and effort.</li>
 <li>any other non-null string — spawn a <strong>named sub-agent</strong> via <code>subagent_type=&lt;value&gt;</code>. The value is used verbatim, so colons are fine for namespaced agents (e.g. <code>booping:booping-researcher</code>, <code>general-purpose</code>).</li>
 </ul>
-<h2 id="how-the-graph-renders">How the graph renders</h2>
-<p><code>/playbook</code> resolves the graph into <strong>waves</strong> — a step joins the earliest wave in which all its dependencies sit in a prior wave. Steps sharing a wave run in parallel.</p>
+<p>There is no <code>null</code> value: <code>agent: null</code> is replaced by omitting the key. <code>agent:</code> is the <strong>legacy name</strong> of this key — a step still carrying it renders a blocking <code>**STOP — tell the user:**</code> notice telling you to rename it to <code>detached:</code>.</p>
+<p>Under <code>jinja: true</code> the value is a template like any body, so the agent can come from config instead of being hard-coded:</p>
+<pre><code class="language-yaml">---
+summary: Second-model review of the written plan
+detached: &quot;{{ config.core.groom_playbook.cross_review_agent or '' }}&quot;
+---
+</code></pre>
+<p>When the key it names is absent from the merged config the value renders empty, and the step degrades to runner-performed rather than spawning an agent with no name — so a playbook can offer an optional reviewer and let the preamble say to skip the step when none is configured.</p>
+<h2 id="jinja-bodies">Jinja bodies</h2>
+<p>By default every body — the manifest preamble and each <code>prompt.md</code> — is passed through <strong>verbatim</strong>. Braces, <code>{{ }}</code>, and template-looking text are just text.</p>
+<p>Set <code>jinja: true</code> in the manifest frontmatter to opt the <strong>whole playbook</strong> in (all-or-nothing — there is no per-step flag). Bodies — plus the <code>summary</code> and <code>detached</code> frontmatter fields of each step — are then rendered as Jinja templates with the same project context the built-in skills get: the attached project, its config, and the shared fragments the plugin ships. Include paths resolve through a chain — the body's own directory, then the playbook directory, then each discovery root (project, global, core), then the plugin's own template root — so a fragment shipped under <code>playbooks/_partials/</code> is reachable as <code>_partials/&lt;file&gt;</code> whatever level your playbook lives at:</p>
+<pre><code class="language-markdown">---
+name: ship
+title: Ship
+summary: Prepare, check in parallel, then publish.
+trigger: run the ship playbook
+jinja: true
+requires_project: true
+---
+# Ship
+
+{% set playbook_agents = config.core.ship_playbook %}
+{% include &quot;_partials/playbook_agents.md&quot; %}
+
+{% include &quot;_partials/_git_guide.j2&quot; %}
+</code></pre>
+<p>Two things change once you opt in:</p>
 <ul>
-<li><strong>First-wave step bodies are embedded</strong> in the rendered procedure, ready to run.</li>
-<li><strong>Later steps are fetched when their wave starts</strong> — the render points at the step file and <code>/playbook</code> reads it then.</li>
-<li><strong>Parallel wave members must set <code>agent</code></strong> — inline steps (<code>agent: null</code>) can't run in parallel, so a step that shares a wave with others must delegate to a sub-agent.</li>
-<li><strong>Review gates pause after the wave</strong> — once every member of a wave finishes, each member's gate is presented (labeled by step) and the run waits for your confirmation before the next wave.</li>
+<li><strong>Project context is required.</strong> Rendering a <code>jinja: true</code> playbook without a project attached produces a blocking <code>STOP</code> notice instead of the procedure. Pair it with <code>requires_project: true</code>.</li>
+<li><strong>A template error is a blocking notice</strong>, not a crash — the failure is reported in-band and the playbook refuses to run.</li>
 </ul>
-<h2 id="notices">Notices</h2>
-<p>Problems in the graph surface as in-band notices when you render (or run) the playbook:</p>
+<p>A Jinja body is meaningless until rendered — the <code>booping render-playbook &lt;name&gt; --step &lt;step&gt;</code> fetch every step body goes through returns it already rendered (see below).</p>
+<h2 id="how-the-graph-renders">How the graph renders</h2>
+<p><code>/playbook</code> renders the graph as a <strong>step table</strong> — one row per step, in dependency order, carrying the step name, its dependencies, its summary and its review gate. A step runs once every step in its <code>Dependencies</code> cell is done; steps whose dependencies are all satisfied run together.</p>
 <ul>
-<li><strong>Blocking <code>STOP</code> notices</strong> — the playbook refuses to run. Causes: a step named in the graph has no <code>steps/&lt;name&gt;.md</code> file; a dependency names a step that isn't in the graph; the graph has a cycle; the graph is missing entirely; an inline step shares a parallel wave.</li>
-<li><strong>Warning notes</strong> — a step file that exists in <code>steps/</code> but isn't wired into the graph produces a note and simply never runs.</li>
+<li><strong>Step bodies are fetched, not embedded</strong> — by default every section ends with the command that fetches the body, the same for plain and <code>jinja: true</code> playbooks. The procedure the driver holds is therefore proportional to the graph — step table plus per-step metadata, never the bodies — and each body enters exactly one context, through the same <code>--step</code> fetch, only when its step runs. A runner-performed step's section is a metadata block (summary, dependencies, review gate) closed by <em>Run <code>booping render-playbook &lt;name&gt; --step &lt;step&gt;</code> for content.</em> A <strong>detached</strong> step's section is instead one order to the driver — its summary as a paragraph, its review gate when it has one, then <em>Tell the <code>&lt;agent&gt;</code> agent to get its instructions by calling this command: <code>booping render-playbook &lt;name&gt; --step &lt;step&gt;</code>.</em> Its dependencies and wave order are omitted there; the step table already carries them.</li>
+<li><strong><code>inline_steps</code> embeds the runner's bodies</strong> — with <code>inline_steps: true</code> in the manifest (or <code>--inline-steps</code> on the command), a runner-performed step's section carries its rendered body, with that step's lessons already appended, in place of <em>both</em> the metadata block and the fetch command; its summary, dependencies and review gate stay in the step table. Detached steps keep fetch-form, so their agents still fetch their own body. A body that fails to render is a blocking <code>STOP</code> notice like any other.</li>
+<li><strong>Delegated steps fetch their own body</strong> — the driver never runs the fetch command for a sub-agent step. It spawns the agent with a bootstrap prompt: the fetch command ("treat its stdout as your full instruction"), a <code>## Run-time context</code> block (project, plus <code>workdir</code> / <code>instance</code> where they apply), a <code>## Inputs</code> block assembled from the run-time context and prior steps' receipts, and a uniform <code>## Return</code> contract (<code>artifacts written + outcome, ≤ 5 lines</code>) — a richer contract belongs in the step body. A step without <code>detached:</code> is the only case where the driver runs the fetch itself and executes the stdout.</li>
+<li><strong>Steps that can run together must be <code>detached:</code></strong> — a step the runner performs itself can't run in parallel, so a step whose dependencies are satisfied at the same time as another's must be <code>detached:</code>.</li>
+<li><strong>Review gates pause after the batch</strong> — once every step running together finishes, each one's gate is presented (labeled by step) and the run waits for your confirmation before the next batch.</li>
+</ul>
+<h2 id="subgraphs">Subgraphs</h2>
+<p>A <code>graph:</code> node whose value is a <strong>mapping</strong> is a <em>subgraph</em>: a named group of steps with its own inner graph, optionally run more than once.</p>
+<pre><code class="language-yaml">graph:
+  manifest: []
+  pipeline:
+    dependencies: [manifest]
+    repeat: once per feature listed by manifest; instances may run in parallel
+    graph:
+      spec: []
+      fixtures: [spec]
+      tests: [spec]
+  publish: [pipeline]
+</code></pre>
+<ul>
+<li><code>dependencies</code> — <em>required</em>, list of <strong>outer</strong> node names the subgraph waits for. Same role as a plain step's dependency list; the whole group joins a wave as one node.</li>
+<li><code>graph</code> — <em>required</em>, non-empty mapping of <strong>inner</strong> step name → inner dependency names. Inner waves are resolved exactly like outer ones.</li>
+<li><code>repeat</code> — <em>optional</em> prose. Its presence means the group runs once per instance the prose describes.</li>
+<li><code>state</code> — <em>optional</em>, the name of the <code>states:</code> entry governing each instance of this subgraph. See <a href="#run-state">Run state</a>.</li>
+</ul>
+<p><strong>Scope rule.</strong> <code>dependencies</code> reference outer names only; inner dependencies reference inner names only. There is no cross-scope edge: an inner step cannot depend on an outer step, and an outer step depends on the subgraph as a whole. Step names are addressed flat and must be unique across the whole playbook — an inner step still lives in its own <code>&lt;step&gt;/prompt.md</code> directory at the playbook root.</p>
+<p><strong>Repeat semantics.</strong> <code>repeat</code> is prose, not a count — the driver reads it against the output of the steps in <code>dependencies</code> and decides how many instances to run. No <code>repeat</code> key means exactly one instance. Each instance walks the inner waves on its own — its own <code>--step</code> fetch per inner step, never a body reused across instances — and each inner step's <code>review_gate</code> fires per instance. Instances run in parallel only when <strong>every</strong> inner step is <code>detached:</code>; if any inner step is runner-performed, instances run one at a time.</p>
+<p><strong>One level only.</strong> A subgraph cannot contain another subgraph.</p>
+<p>Subgraph-specific STOP conditions (on top of the usual <a href="#notices">notices</a>):</p>
+<ul>
+<li>the node mapping has an unknown key, or is missing <code>dependencies</code> or <code>graph</code>;</li>
+<li><code>dependencies</code> is not a list, <code>graph</code> is not a non-empty mapping, or <code>repeat</code> is not a string;</li>
+<li>an inner node's value is a mapping (nested subgraph);</li>
+<li>a step name appears in more than one scope.</li>
+</ul>
+<p>In the rendered procedure the subgraph shows up as its own step-table row tagged <code>*(subgraph)*</code> (carrying its outer dependencies and its <code>repeat</code> prose), followed by its inner steps tagged <code>*(in &lt;name&gt;)*</code>, plus a <code>## Subgraph: &lt;name&gt;</code> intro section (<code>After:</code>, <code>Repeat:</code>, <code>Inner waves:</code>) and its inner step sections, each tagged <code>Part of: &lt;name&gt;</code>.</p>
+<h2 id="run-state">Run state</h2>
+<p>Without <code>states:</code>, a run lives entirely in one conversation — close it and the run is gone. Declare <code>states:</code> and the run's progress is persisted in <strong>artifacts on disk</strong>, so a run can be inspected, resumed later, and advanced only through legal transitions.</p>
+<p>A <code>states:</code> entry is a <strong>named state machine</strong>:</p>
+<ul>
+<li><code>artifact</code> — <em>optional</em>, path to the markdown file holding this machine's status, <strong>relative to the run workdir</strong>. A <code>{instance}</code> placeholder makes the machine per-instance (one artifact per subgraph instance) and is only legal when some subgraph references the machine. A machine may declare no <code>artifact:</code> at all — useful when the file's path is only known at run time — and is then addressed exclusively with <code>--target</code> on every state command.</li>
+<li><code>initial</code> — the status a freshly bootstrapped artifact starts in. Must be a key of <code>statuses</code>.</li>
+<li><code>statuses</code> — mapping of status name → <code>{transitions: [...]}</code> or <code>{terminal: true}</code>. Each transition has <code>to</code>, and optionally <code>when</code> (the trigger prose the driver matches a step outcome against), <code>gates</code> (verifiable preconditions the driver judges before firing), and <code>hooks</code> (mechanical side effects the CLI runs).</li>
+<li><code>superstates</code> — <em>optional</em>, mapping of group name → <code>{states: [...], transitions: [...]}</code>. Every status the group lists inherits its transitions, and a status's own edge to the same <code>to</code> wins over the inherited one. A group may also carry <code>on_exit</code> / <code>on_entry</code> hook lists, run when a transition crosses its boundary.</li>
+</ul>
+<p>A machine is wired to a graph scope by a <code>state:</code> ref: the top-level <code>state:</code> governs the outer graph, a subgraph's <code>state:</code> governs each of its instances.</p>
+<pre><code class="language-yaml">state: main
+graph:
+  intake: []
+  research-codebase: [intake]
+  research-web: [intake]
+  design: [research-codebase, research-web]
+  step-pipeline:
+    dependencies: [design]
+    state: step
+    repeat: once per item the design names
+    graph:
+      step-spec: []
+      step-review: [step-spec]
+
+states:
+  main:
+    artifact: index.md
+    initial: intaking
+    statuses:
+      intaking:
+        transitions:
+          - to: researching
+            when: intake step complete
+            gates: [&quot;request + scope captured in the artifact&quot;]
+            hooks:
+              - frontmatter-update intaken=&quot;{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}&quot;
+      researching:
+        transitions:
+          - to: developing-steps
+            when: both research steps returned and design confirmed
+            gates: [&quot;research-codebase and research-web done, findings recorded&quot;]
+            hooks:
+              - frontmatter-update researched=&quot;{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}&quot; commit=&quot;{{ macro('core.macros.git_commit') }}&quot;
+              - script check-findings
+      developing-steps:
+        transitions:
+          - to: done
+            when: every step instance terminal
+            gates: [&quot;every steps/*/index.md status: done&quot;]
+            hooks:
+              - frontmatter-update completed=&quot;{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}&quot;
+      done: {terminal: true}
+  step:
+    artifact: steps/{instance}/index.md
+    initial: spec-ing
+    statuses:
+      spec-ing:
+        transitions:
+          - to: reviewing
+            when: spec written
+            hooks:
+              - frontmatter-update spec_done=&quot;{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}&quot;
+      reviewing:
+        transitions:
+          - to: done
+            when: user confirmed the spec
+            gates: [&quot;explicit user confirmation captured&quot;]
+            hooks:
+              - frontmatter-update confirmed=&quot;{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}&quot;
+      done: {terminal: true}
+</code></pre>
+<h3 id="hooks">Hooks</h3>
+<p>Two hook forms are available on a transition:</p>
+<ul>
+<li><code>frontmatter-update [&lt;file&gt;] &lt;key&gt;=&lt;val&gt; ...</code> — set frontmatter keys on the artifact, or on <code>&lt;file&gt;</code> when a target is given.</li>
+<li><code>script &lt;name&gt; [args...]</code> — run the executable named <code>&lt;name&gt;</code>, passing every token after it as argv.</li>
+</ul>
+<p>A hook value is <strong>Jinja-rendered with the <code>macro</code> global</strong>, the same one rendered bodies call — a timestamp is <code>completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"</code>, with the format at the call site and no bespoke token vocabulary. Because the clock goes through the macro system, a <code>macro_stubs:</code> mapping in the merged config pins it — the same config fragment <code>--stub-macro</code> merges on a render — so a transition is reproducible the way a render is. The hook string is tokenised with <code>shlex</code>, so quote any value carrying spaces — as above. A value with no Jinja in it passes through untouched, and a macro or Jinja error aborts the transition (exit 2) with the offending value on stderr.</p>
+<p>The repo's HEAD sha is likewise a macro, <code>core.macros.git_commit</code>, which carries <code>cwd: repo</code> so it resolves against the repo directory rather than the process cwd (the run workdir during a transition).</p>
+<p>The optional <code>&lt;file&gt;</code> target is the first token after the hook name that carries no <code>=</code>. It resolves against the <strong>run workdir</strong> — the same anchor as the machine's <code>artifact</code> — and may carry <code>{instance}</code>, interpolated with the instance slug (legal only when an instance is in scope). The file must exist; a missing file is an error (exit 2) that aborts the transition — nothing is created. A file without a frontmatter block gets one prepended, the existing content becoming the body unchanged. In the mutation report a file-target update prints as <code>frontmatter &lt;file&gt;: k=v</code> instead of the plain <code>frontmatter: k=v</code>.</p>
+<p>The status set itself is implicit — the CLI always writes <code>status: &lt;to&gt;</code> before running the transition's hooks.</p>
+<h3 id="_scripts-contract"><code>_scripts/</code> contract</h3>
+<p>A <code>script &lt;name&gt;</code> hook runs an executable found by name:</p>
+<ul>
+<li>resolution probes <code>&lt;playbook-dir&gt;/_scripts/&lt;name&gt;</code> first, then <code>&lt;root&gt;/_scripts/&lt;name&gt;</code> at each level, most specific first — Project Vault, then global home, then the plugin's own <code>playbooks/</code>. The first hit wins; if none exists the transition fails (exit 2) with every probed path named. A script two playbooks share therefore lives once at the root level (<code>playbooks/_scripts/</code> for the shipped ones), and a playbook-local file of the same name shadows it;</li>
+<li>it must be executable, or the transition fails (exit 2) without mutating anything further;</li>
+<li>the hook line is tokenised with <code>shlex</code> and every token after the script name is passed through as argv, which is how one shared script serves several playbooks — <code>script close-working-set --verdicts --prefix retro --stage retrospectives</code> reaches the script as those three flags;</li>
+<li>it runs with the <strong>run workdir</strong> as its cwd;</li>
+<li>it receives <code>BOOPING_ARTIFACT</code> (absolute artifact path), <code>BOOPING_WORKDIR</code> (absolute run workdir) and <code>BOOPING_INSTANCE</code> (the instance slug, empty for a non-instance machine);</li>
+<li>a non-zero exit aborts the transition; the script's stderr is relayed.</li>
+</ul>
+<h3 id="run-workspace">Run workspace</h3>
+<p>A run gets its own workdir; artifact paths resolve against it and the playbook directory stays read-only source. A playbook's preamble names the workdir convention it wants — the plan-track playbooks make the plan's own directory the workdir, and the retro and code-review playbooks use the vault root. Absent one, <code>/playbook</code> falls back to:</p>
+<pre><code>{vault}/_runs/&lt;playbook&gt;/&lt;run-slug&gt;/
+</code></pre>
+<p>with <code>&lt;run-slug&gt;</code> = <code>{YYYYMMDD}-&lt;kebab-topic&gt;</code>. Every state command takes <code>--workdir &lt;path&gt;</code> (default: cwd).</p>
+<h3 id="commands">Commands</h3>
+<p><code>booping playbook-state &lt;playbook&gt; [--target PATH] [--workdir PATH]</code> — read-only. Prints YAML: the playbook name, the resolved workdir, and per <code>states:</code> entry its <code>artifact</code>, its current <code>status</code> and the <code>next:</code> edges leaving it (each with <code>to</code> and, when declared, <code>when</code> / <code>gates</code>). A per-instance entry reports an <code>instances:</code> mapping keyed by slug, discovered by globbing the artifact path. <code>--target PATH</code> names the artifact outright (workdir-relative or absolute) instead of each machine's declared <code>artifact:</code>, and is required for a machine that declares none. An artifact that does not exist yet — or exists without a <code>status:</code> key, as a freshly written retrospective does — reports <code>status: not-started</code> with a single bootstrap edge to the machine's <code>initial</code>. Exits 1 for an unknown playbook, a missing workdir, a playbook with no <code>states:</code>, or a machine without <code>artifact:</code> and no <code>--target</code>.</p>
+<p><code>booping playbook-transition &lt;playbook&gt; &lt;to&gt; [--state NAME] [--target PATH] [--instance SLUG] [--workdir PATH]</code> — the only writer of run state. <code>--state</code> defaults to the outer graph's <code>state:</code> ref; <code>--instance</code> is required exactly when the artifact path carries <code>{instance}</code>; <code>--target PATH</code> names the artifact outright (workdir-relative or absolute), is mutually exclusive with <code>--instance</code>, and is required for a machine that declares no <code>artifact:</code>. With no <code>--workdir</code>, an <strong>absolute</strong> <code>--target</code> ending in the machine's declared <code>artifact:</code> implies the workdir — <code>--target {vault}/plans/x/index.md</code> on a machine declaring <code>artifact: index.md</code> runs hooks in <code>{vault}/plans/x</code>; a relative target, a non-matching absolute one, or a machine declaring no <code>artifact:</code> falls back to cwd. It reads the artifact's current status, checks that <code>&lt;to&gt;</code> is reachable from it, sets <code>status: &lt;to&gt;</code>, then runs the matched transition's hooks in order. A missing artifact — or one whose frontmatter has no <code>status:</code> key yet — is bootstrapped, legal only when <code>&lt;to&gt;</code> is the machine's <code>initial</code>; bootstrapping an existing file writes <code>status:</code> into its frontmatter, keeping the other keys intact. Re-running the same target is idempotent. It prints a <strong>mutation report</strong> (created/<code>from → to</code>/each frontmatter line/each script result) which is the authoritative record — the driver relays it and never re-reads the artifact to verify. Illegal transitions exit 1; hook failures exit 2.</p>
+<h3 id="resume">Resume</h3>
+<p>Everything needed to resume lives on disk. <code>/playbook</code> runs <code>booping playbook-state &lt;name&gt; --workdir &lt;workdir&gt;</code> on entry — first run and every resume — and restarts from the reported frontier: work already past its status is skipped, the first non-terminal status is re-entered, and <code>not-started</code> means bootstrap on the first transition. Nothing hand-edits an artifact's <code>status:</code> or a hook-written key; only <code>playbook-transition</code> mutates run state.</p>
+<h3 id="cancellation">Cancellation</h3>
+<p>A run does not have to reach its success terminal. Declare a <code>cancelled</code> status — terminal like <code>done</code> — and reach it from every status a run may be abandoned in. A <code>superstates:</code> group does that in one place: it lists the non-terminal statuses and the <code>to: cancelled</code> transition they all inherit, so <code>booping playbook-transition &lt;name&gt; cancelled …</code> is legal wherever the run stands without an edge repeated per status. Hooks declared on that transition fire like any other's — stamp the artifact, commit the vault — and the printed mutation report is the record. Once cancelled the run is over: <code>playbook-state</code> reports the terminal status with no edges leaving it.</p>
+<h3 id="how-state-renders">How state renders</h3>
+<p>A playbook with <code>states:</code> renders a <code>## State</code> section right after <code>## Playbook Steps</code>: the <code>playbook-state</code> invocation for that playbook, then per machine its referencing scopes, artifact path, initial status, the exact <code>playbook-transition</code> invocation (with <code>--state</code> / <code>--instance</code> where the machine needs them), and a status → <code>to</code> / <code>when</code> / <code>gates</code> table. A playbook without <code>states:</code> renders no such section.</p>
+<h2 id="notices">Notices</h2>
+<p>Problems in the manifest surface as in-band notices when you render (or run) the playbook:</p>
+<ul>
+<li><strong>Blocking <code>STOP</code> notices</strong> — the playbook refuses to run. Causes: a step named in the graph has no <code>&lt;name&gt;/prompt.md</code> file; a dependency names a step that isn't in the graph; the graph has a cycle; the graph is missing entirely; a step that is not <code>detached:</code> shares a parallel wave; a step carries the legacy <code>agent:</code> key instead of <code>detached:</code>; <code>graph:</code> is declared in both <code>playbook.yaml</code> and <code>playbook.md</code> frontmatter; <code>playbook.yaml</code> is unparseable or is not a mapping; a <code>states:</code> entry is malformed (an <code>initial</code> that is not one of its <code>statuses</code>, or <code>{instance}</code> in the artifact path with no subgraph referencing it); a <code>state:</code> ref names a states entry that does not exist; a <code>jinja: true</code> playbook rendered without project context, or whose body fails to render; the playbook <code>name</code> is defined at more than one level.</li>
+<li><strong>Warning notes</strong> — a step directory that exists on disk but isn't wired into the graph (it never runs), or a <code>states:</code> entry no graph scope references (it is never used), produces a note.</li>
+<li><strong>Lesson notes</strong> — also non-blocking: a <a href="#lessons">lesson</a> carrying no usable <code>targets:</code> entry (it is injected nowhere), a lesson whose <code>{playbook}/{step}</code> target names a step this playbook doesn't have (that entry is ignored), and one note per retired lesson directory still holding markdown on disk — a legacy playbook <code>_lessons/</code> dir, or the vault's legacy <code>lessons/</code> directory. <code>--no-lessons</code> suppresses these along with the lesson sections.</li>
 </ul>
 <h2 id="authoring-a-global-playbook">Authoring a global playbook</h2>
 <p>Create the directory under your home vault root:</p>
 <pre><code>~/Claude/_playbooks/my-playbook/playbook.md
-~/Claude/_playbooks/my-playbook/steps/first.md
-~/Claude/_playbooks/my-playbook/steps/second.md
+~/Claude/_playbooks/my-playbook/playbook.yaml
+~/Claude/_playbooks/my-playbook/first/prompt.md
+~/Claude/_playbooks/my-playbook/second/prompt.md
 </code></pre>
-<p>Fill in <code>playbook.md</code> with the manifest frontmatter (including <code>graph:</code>) and a plain-markdown preamble body. Write each <code>steps/&lt;step&gt;.md</code> with its own frontmatter and prompt body. Run <code>/playbook</code> in any project and it appears in the listing with scope <code>global</code>.</p>
-<h2 id="authoring-a-local-playbook">Authoring a local playbook</h2>
-<p>Same shape, but under the project's vault:</p>
+<p>Fill in <code>playbook.md</code> with the identity frontmatter and a plain-markdown preamble body, and <code>playbook.yaml</code> with the <code>graph:</code> (plus <code>state:</code> / <code>states:</code> if the run should be resumable). Write each <code>&lt;step&gt;/prompt.md</code> with its own frontmatter and prompt body. Run <code>/playbook</code> in any project and it appears in the listing as a global playbook.</p>
+<p>To skip the by-hand part, scaffold the skeleton — <code>playbook.md</code>, an empty <code>playbook.yaml</code> graph, and <code>_references/</code>:</p>
+<pre><code>bin/booping scaffold core.playbook_authoring_playbook.scaffold ~/Claude/_playbooks/my-playbook \
+  --set name=my-playbook
+</code></pre>
+<p>See <a href="../project_config/#scaffold-trees">scaffold trees</a> for the tree itself and how to override or extend it.</p>
+<h2 id="authoring-a-project-playbook">Authoring a project playbook</h2>
+<p>Same shape, but under the Project Vault:</p>
 <pre><code>{vault}/_playbooks/my-playbook/playbook.md
-{vault}/_playbooks/my-playbook/steps/...
+{vault}/_playbooks/my-playbook/playbook.yaml
+{vault}/_playbooks/my-playbook/&lt;step&gt;/prompt.md
 </code></pre>
-<p>It appears in <code>/playbook</code> with scope <code>local</code> and, if it shares a <code>name</code> with a global playbook, shadows it for that project.</p>
+<p>It appears in <code>/playbook</code> as a project playbook. Pick a <code>name</code> no other level already uses — sharing one is a name clash and neither runs until you rename.</p>
 <h2 id="worked-example">Worked example</h2>
 <p>A <strong>diamond</strong>: prepare once, run lint and tests in parallel, then publish after both.</p>
 <p><code>~/Claude/_playbooks/ship/playbook.md</code>:</p>
@@ -218,26 +556,39 @@ name: ship
 title: Ship
 summary: Prepare, check in parallel, then publish.
 trigger: run the ship playbook
-graph:
-  prep: []
-  lint: [prep]
-  tests: [prep]
-  publish: [lint, tests]
 ---
 
 Ship the current change set. Stop at the first hard failure.
 </code></pre>
-<p>Each <code>steps/&lt;name&gt;.md</code> (<code>prep</code>, <code>lint</code>, <code>tests</code>, <code>publish</code>) carries its own frontmatter and prompt body. <code>lint</code> and <code>tests</code> both depend only on <code>prep</code>, so they share a wave; <code>publish</code> waits for both.</p>
-<p>The rendered procedure lists the waves as:</p>
-<pre><code>1. prep
-2. lint ∥ tests
-3. publish
+<p><code>~/Claude/_playbooks/ship/playbook.yaml</code>:</p>
+<pre><code class="language-yaml">graph:
+  prep: []
+  lint: [prep]
+  tests: [prep]
+  publish: [lint, tests]
 </code></pre>
-<p><code>prep</code> runs first (its body embedded). Then <code>lint</code> and <code>tests</code> spawn together in one message and run in parallel — both must set <code>agent</code>. Once both finish (and any review gates are cleared), <code>publish</code> runs.</p>
+<p>Each step directory (<code>prep/</code>, <code>lint/</code>, <code>tests/</code>, <code>publish/</code>) holds a <code>prompt.md</code> with its own frontmatter and prompt body. <code>lint</code> and <code>tests</code> both depend only on <code>prep</code>, so they run together; <code>publish</code> waits for both.</p>
+<p>The rendered procedure lists the steps as:</p>
+<pre><code>| Step | Dependencies | Summary | Review gate |
+| --- | --- | --- | --- |
+| `prep` | — | … | — |
+| `lint` | `prep` | … | — |
+| `tests` | `prep` | … | — |
+| `publish` | `lint`, `tests` | … | — |
+</code></pre>
+<p><code>prep</code> runs first (fetching its own body via <code>booping render-playbook ship --step prep</code>). Then <code>lint</code> and <code>tests</code> spawn together in one message and run in parallel — both must be <code>detached:</code>. Once both finish (and any review gates are cleared), <code>publish</code> runs.</p>
 <h2 id="rendering">Rendering</h2>
 <p><code>booping render-playbook &lt;name&gt;</code> renders the composed procedure to stdout, or to a file with <code>--output PATH</code> (<code>--output -</code> writes to stdout). An unknown playbook name exits 1. Graph problems don't fail the command — they render as the in-band STOP/Note notices described above (exit 0).</p>
-<h2 id="evals-and-harness">Evals and harness</h2>
-<p>Playbook eval suites and their run harness live <strong>vault-side</strong> at <code>~/Claude/_playbooks/</code>, with their own <code>README</code>. They are not part of this repository — the plugin only discovers, composes, and drives playbooks; authoring, evaluating, and iterating on them happens in the vault.</p>
+<p>The composed output carries a <code>## Lessons</code> section when any <a href="#lessons">lesson</a> targets the playbook by name.</p>
+<p>These flags help while authoring:</p>
+<ul>
+<li><code>--step &lt;step&gt;</code> — print just that step's body (rendered, for a <code>jinja: true</code> playbook), with no heading, instruction bullets, or gate wrapping, followed by the lessons targeting that step. This is the command every composed step section points at: each delegated step runs it itself from its bootstrap prompt, the driver runs it for inline steps, and it is handy for eyeballing one prompt in isolation.</li>
+<li><code>--no-lessons</code> — drop the <code>## Lessons</code> section from the composed output, the step-lesson append from <code>--step</code>, and the lesson notices, leaving the bodies alone.</li>
+<li><code>--project &lt;path&gt;</code> — resolve context against the Project Vault at <code>&lt;path&gt;</code> instead of whatever project is attached to the current directory. Lets you render a <code>requires_project</code> or <code>jinja: true</code> playbook from anywhere. It <strong>pins the render to the core and project levels</strong>: the config merge skips the global tier (<code>~/.config/booping/config.yaml</code>), and discovery — for playbooks and <a href="#lessons">lessons</a> alike — skips the global roots (<code>&lt;home_dir&gt;/_playbooks/</code>, <code>&lt;home_dir&gt;/_lessons/</code>), so the same command renders the same bytes on another machine.</li>
+<li><code>--set &lt;dotted.key&gt;=&lt;value&gt;</code> — override one config value for this render only (repeatable, later pairs win, values stay strings). The pair wins over every config tier, which is how a partial is parameterised from the command line — and how a timestamp a template reads from config gets pinned to a fixed value for a reproducible render.</li>
+<li><code>--inline-steps</code> — embed each runner-performed step's body in its section instead of the fetch command, the same as <code>inline_steps: true</code> in the manifest. Detached steps keep fetch-form. Handy for reading a whole procedure as one document.</li>
+</ul>
+<p><code>--project</code> and <code>--set</code> are not playbook-specific: plain <code>booping render</code> accepts both, with the same semantics.</p>
               
             </div>
           </div><footer>
