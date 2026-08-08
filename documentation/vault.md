@@ -12,6 +12,8 @@ A plan's `status:` is **run state**, not a shared lifecycle: `index.md` doubles 
 
 Two frontmatter keys carry a finished plan into the tracks that run beside the lifecycle rather than inside it. `retro:` is null until a retrospective covers the plan, then holds that file's path (or `skipped`) — that null is the retro queue. `code_reviews:` is a **list**: seeded null, then appended to with the vault-relative path of every review that closes on the plan, so it reads as review history rather than a queue flag. The code-review queue is every plan at `done`, reviewed or not.
 
+Three further keys carry the plan's session metrics. `sessions:` is the list of Claude Code session ids that groomed and developed it, appended by transition hooks on the groom and develop edges (a run started outside a Claude Code session simply adds nothing). When develop closes the plan, `active_minutes:` is stamped with the whole minutes of assistant-turn time summed across those transcripts and `models:` with the sorted distinct model ids that ran them. Both surface as columns in `sprints.md`, and `bin/booping session-time {vault}/plans/{slug}/index.md` recomputes them at any time — `--write` stamps the result back.
+
 Sibling stubs created by a groom-driven split point at the primary plan via `split_from: plans/...` in their frontmatter.
 
 ## `retrospectives/`

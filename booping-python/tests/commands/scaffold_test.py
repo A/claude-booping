@@ -332,6 +332,8 @@ def test_core_vault_scaffold_seeds_sprints_base_fence(tmp_path: Path) -> None:
         "summary",
         "created",
         "completed",
+        "active_minutes",
+        "models",
     ]
     assert view["sort"] == [{"property": "created", "direction": "DESC"}]
 

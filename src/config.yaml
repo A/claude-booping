@@ -120,7 +120,7 @@ core:
             - fail
             - cancelled
         sort: "-created"
-        columns: [status, title, summary]
+        columns: [status, title, summary, active_minutes, models]
 
   develop_playbook:
     git:
@@ -262,6 +262,8 @@ core:
               - summary
               - created
               - completed
+              - active_minutes
+              - models
             sort:
               - property: created
                 direction: DESC
