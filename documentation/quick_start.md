@@ -15,7 +15,7 @@ Inside Claude Code, register the marketplace once and install the plugin:
 
 Update later with `/plugin update booping` (or from the `/plugin` UI).
 
-See [Install](install.md) for prerequisites (`uv`, `git`, optional `GEMINI_API_KEY`).
+See [Install](install.md) for prerequisites (`uv`, `git`).
 
 ## 2. Scaffold the project vault
 

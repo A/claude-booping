@@ -336,7 +336,7 @@ The global tier's headline key is **`home_dir`** — the vault-home base under w
 
 - **Precedence.** A `.booping` marker carrying a `vault_path:` key still wins over `home_dir` — a repo-local vault is resolved directly from the marker, and `home_dir` is not consulted for it. `home_dir` only governs the default `<home_dir>/<project>/` layout.
 - **Project-tier `home_dir` is a no-op.** By the time the project tier merges, the vault has already been resolved (its location is what tells booping where to read the project config from). Setting `home_dir` in `~/Claude/{project}/config.yaml` therefore has no effect — put it in the global tier.
-- **First-run seeding.** `booping-create-project` resolves the vault-home base via a ladder: the global config's `home_dir` if the file is present → `$HOME/Claude` if that directory exists → an interactive prompt (default `~/Claude`). An answer given at the prompt is seeded into the global config file (created if absent; an existing file is never overwritten). Run non-interactively with none of the earlier rungs satisfied, it aborts with instructions rather than scaffolding in an unexpected place.
+- **First-run seeding.** `/playbook setup` settles `home_dir` before touching the project: if the global config file is absent it asks for the vault-home base (default `~/Claude`) and writes it there, then scaffolds the vault with `booping scaffold core.setup_playbook.scaffold <vault_dir>` and records the location in the repo's `.booping` marker.
 
 Read any resolved value — merged across all three tiers — with `booping config-get <dotted.key>` (e.g. `booping config-get home_dir`). Note that `home_dir` prints its raw, unexpanded value.
 
