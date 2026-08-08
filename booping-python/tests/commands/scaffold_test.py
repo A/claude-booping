@@ -313,22 +313,25 @@ def test_core_vault_scaffold_seeds_sprints_base_fence(tmp_path: Path) -> None:
     fence = text.split("```base\n", 1)[1].split("\n```", 1)[0]
     spec = yaml.safe_load(fence)
 
-    # Token counts span five orders of magnitude, so output and the two cache totals
-    # render through unit formulas; uncached input is small enough to stay a number.
+    # `In` re-adds both cached forms to `metrics_tokens_input`, which counts only what
+    # was neither served from cache nor written to it — a few hundred tokens per run,
+    # and misleading on its own as "everything sent in".
     assert spec["formulas"] == {
         "plan": "file.asLink(title)",
+        "tokens_in": (
+            "((metrics_tokens_input + metrics_tokens_cache_creation"
+            ' + metrics_tokens_cache_read) / 1000000).round(1) + "M"'
+        ),
         "tokens_out": '(metrics_tokens_output / 1000).round(0) + "k"',
-        "cache_created": '(metrics_tokens_cache_creation / 1000000).round(1) + "M"',
-        "cache_read": '(metrics_tokens_cache_read / 1000000).round(1) + "M"',
+        "cached": '(metrics_tokens_cache_read / 1000000).round(1) + "M"',
     }
     assert spec["properties"] == {
         "formula.plan": {"displayName": "Title"},
-        "formula.tokens_out": {"displayName": "Tokens out"},
-        "formula.cache_created": {"displayName": "Cache created"},
-        "formula.cache_read": {"displayName": "Cache read"},
+        "formula.tokens_in": {"displayName": "In"},
+        "formula.tokens_out": {"displayName": "Out"},
+        "formula.cached": {"displayName": "Cached"},
         "note.metrics_active_minutes": {"displayName": "Active min"},
         "note.metrics_models": {"displayName": "Models"},
-        "note.metrics_tokens_input": {"displayName": "Tokens in"},
     }
     # Scoped to the booping vault holding this sprints.md, so it stays correct when
     # the booping vault is nested inside a larger Obsidian vault.
@@ -349,10 +352,9 @@ def test_core_vault_scaffold_seeds_sprints_base_fence(tmp_path: Path) -> None:
         "completed",
         "metrics_active_minutes",
         "metrics_models",
-        "metrics_tokens_input",
+        "formula.tokens_in",
         "formula.tokens_out",
-        "formula.cache_created",
-        "formula.cache_read",
+        "formula.cached",
     ]
     assert view["sort"] == [{"property": "created", "direction": "DESC"}]
 
