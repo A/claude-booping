@@ -13,6 +13,7 @@ from booping.commands import query as query_cmd
 from booping.commands import render as render_cmd
 from booping.commands import render_playbook as render_playbook_cmd
 from booping.commands import scaffold as scaffold_cmd
+from booping.commands import session_time as session_time_cmd
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -34,6 +35,7 @@ def build_parser() -> argparse.ArgumentParser:
     build_cmd.add_parser(sub)
     debug_cmd.add_parser(sub)
     frontmatter_update_cmd.add_parser(sub)
+    session_time_cmd.add_parser(sub)
 
     return parser
 
