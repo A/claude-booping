@@ -1,0 +1,6 @@
+{"type":"user","isSidechain":false,"origin":{"kind":"human"},"timestamp":"2026-08-08T09:00:00.000Z","message":{"role":"user","content":"/playbook groom"}}
+{"type":"assistant","isSidechain":false,"timestamp":"2026-08-08T09:10:00.000Z","message":{"role":"assistant","model":"claude-fable-5","content":[{"type":"text","text":"loaded"}]}}
+{"type":"user","isSidechain":false,"origin":{"kind":"human"},"timestamp":"2026-08-08T12:00:00.000Z","message":{"role":"user","content":"go on"}}
+{"type":"assistant","isSidechain":false,"timestamp":"2026-08-08T12:02:00.000Z","message":{"role":"assistant","model":"claude-fable-5","content":[{"type":"tool_use","id":"toolu_q1","name":"AskUserQuestion","input":{}}]}}
+{"type":"user","isSidechain":false,"timestamp":"2026-08-08T14:57:00.000Z","message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_q1","content":"answered"}]}}
+{"type":"assistant","isSidechain":false,"timestamp":"2026-08-08T15:19:00.000Z","message":{"role":"assistant","model":"claude-fable-5","content":[{"type":"text","text":"plan written"}]}}

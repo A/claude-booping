@@ -1,0 +1,13 @@
+{"type":"system","subtype":"init","timestamp":"2026-08-08T10:00:00.000Z"}
+{"type":"user","isMeta":true,"isSidechain":false,"timestamp":"2026-08-08T09:59:00.000Z","message":{"role":"user","content":"<command-message>caveat</command-message>"}}
+{"type":"user","isSidechain":false,"origin":{"kind":"human"},"timestamp":"2026-08-08T10:00:00.000Z","message":{"role":"user","content":"first prompt"}}
+{"type":"assistant","isSidechain":false,"timestamp":"2026-08-08T10:00:30.000Z","message":{"role":"assistant","model":"claude-fable-5","content":[{"type":"text","text":"ok"}],"usage":{"input_tokens":10,"output_tokens":5,"cache_creation_input_tokens":20,"cache_read_input_tokens":30}}}
+{"type":"assistant","isSidechain":true,"timestamp":"2026-08-08T10:01:00.000Z","message":{"role":"assistant","model":"claude-sidechain-9","content":[{"type":"text","text":"subagent"}]}}
+{"type":"user","isSidechain":false,"timestamp":"2026-08-08T10:01:00.000Z","message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_read","content":"done"}]}}
+{"type":"assistant","isSidechain":false,"timestamp":"2026-08-08T10:02:00.
+{"type":"assistant","isSidechain":false,"timestamp":"2026-08-08T10:02:00.000Z","message":{"role":"assistant","model":"claude-fable-5","content":[{"type":"text","text":"done"}],"usage":{"input_tokens":10,"output_tokens":5,"cache_creation_input_tokens":20,"cache_read_input_tokens":30}}}
+{"type":"mode","timestamp":"2026-08-08T10:20:00.000Z","mode":"fable"}
+{"type":"queue-operation","timestamp":"2026-08-08T10:29:00.000Z"}
+{"type":"user","isSidechain":false,"origin":{"kind":"human"},"timestamp":"2026-08-08T10:30:00.000Z","message":{"role":"user","content":[{"type":"text","text":"[Request interrupted by user for tool use]"}]}}
+{"type":"user","isSidechain":false,"origin":{"kind":"task-notification"},"timestamp":"2026-08-08T10:31:00.000Z","message":{"role":"user","content":"background task finished"}}
+{"type":"assistant","isSidechain":false,"timestamp":"2026-08-08T10:34:00.000Z","message":{"role":"assistant","model":"claude-fable-5","content":[{"type":"text","text":"finished"}],"usage":{"input_tokens":10,"output_tokens":5,"cache_creation_input_tokens":20,"cache_read_input_tokens":30}}}
