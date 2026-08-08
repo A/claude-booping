@@ -1,0 +1,26 @@
+# Decisions
+
+- `[2026-08-08 05:56]` Destination root: project-local playbook (vault `_playbooks/`), not intended for reuse in other projects as-is.
+- `[2026-08-08 05:56]` Evals out of scope for this run: no eval suites; the user reviews brief, decomposition and prompts only.
+- `[2026-08-08 05:56]` Step size: aim ~50 lines body, max ~100; whole step file not more than 400 lines (secondary metric, may vary with complexity).
+- `[2026-08-08 05:56]` State artifact home: resolved by interview to `{vault}/docs/` — vault `specs/` is empty/unused, no `_specs` collision anywhere in the vault.
+- `[2026-08-08 06:01]` user confirmed the brief (`_specs/brief.md`) as written, no edits — run advances to decompose.
+- `[2026-08-08 06:15]` Documented-work ledger: `_specs/documented.md` table, work item → run record that documented it (as proposed).
+- `[2026-08-08 06:15]` `targeting` review gate: always gate; the severity-level/config-key toggle idea is dropped.
+- `[2026-08-08 06:15]` `changelog` step: create and maintain a repo `CHANGELOG.md` as a new surface.
+- `[2026-08-08 06:15]` Source-code surfaces: markdown only — the `update` loop never edits source files; code-level docs stay with `develop`.
+- `[2026-08-08 06:24]` Decomposition confirmed by the user as presented (13 steps, 9 waves, all four question answers folded in).
+- `[2026-08-08 06:24]` Target model: opus everywhere, except `briefing`, `roles`, `targets`, `feature-index`, `write` which use fable (fable-5). Per-step efforts from the decomposition table kept. Decomposition table Model column updated accordingly by the runner.
+- `[2026-08-08 06:36]` User confirmed the state chart: one `run` machine (procedure tracker, no `artifact:`, addressed via `--target`), 17 statuses / 3 superstates, scripts `commit-docs` + `close-documented` — including the deviation that the `update` subgraph gets no machine; per-row progress lives as a column on the targeting-plan table in the run record.
+- `[2026-08-08 06:36]` User re-confirmed the decomposition index unchanged.
+- `[2026-08-08 06:36]` Runner note: States chart moved from an inline `## States` section into `_specs/states.md` (linked from the index) to satisfy the machine's artifact contract after a transition hook failed on the missing file.
+- `[2026-08-08 06:46]` User confirmed the manifest: name `docs`, trigger, graph (11 nodes incl. `update` subgraph), states translated verbatim, model plan (opus base, fable for briefing/roles/targets/feature-index/write), local root `{vault}/_playbooks/docs/`.
+- `[2026-08-08 06:46]` Step-pipeline runs trimmed per the earlier evals-out-of-scope decision: per instance only step-spec → step-prompt with their gates; llm-tests, fixtures, step-suite and both optimizers are skipped, so step instances will not reach the machine's `done`.
+- `[2026-08-08 06:52]` Runner-made decision (batch mode, pending user veto at the final review): the `docs` run record opens an empty `## Scope` section that the runner fills at the scope gate; survey never writes into it, and a re-survey leaves it as found. Rationale: a run resumed at `briefing`/`researching` in a later session recovers the confirmed scope from the artifact, not runner context.
+- `[2026-08-08 06:56]` runner-made (batch mode, pending user veto at the final review) — `sync-specs` leaves spec-file frontmatter untouched, including `reviewed_at`; the `syncing-specs → targeting` edge stays hook-free. The confirmed change table is the rewrite's authority; restamping would claim a file-level review that did not happen.
+- `[2026-08-08 07:11]` runner-made (batch mode, pending user veto at the final review) — the `compact` step's brief carries its targeting row's Must-say clauses as an uncuttable floor; the runner resolves them from the targeting-plan row. Compaction may never cut what `write` was required to produce.
+- `[2026-08-08 07:21]` `write` keeps a fourth Needs item — the destination surface's format and conventions (from the surfaces file); a created-from-scratch destination has no current content to infer voice from.
+- `[2026-08-08 07:21]` `research`'s Model cell `opus-5:high` binds the per-item reading sub-agents; the runner performs the assisted step itself.
+- `[2026-08-08 07:21]` `verify`'s unresolved findings travel in the step return; the runner writes them to the run record and advances the Progress column — parallel instances never touch the shared file.
+- `[2026-08-08 07:21]` `record`'s outputs are the run record alone (`## Landed` + `documented:` frontmatter); the `_specs/documented.md` ledger write belongs to the `close-documented` hook. The decomposition index's record row updated to match.
+- `[2026-08-08 07:21]` Angle-bracket placeholders swept to `{name}` forms across all prompt bodies and step specs, per the vault's Obsidian rule.

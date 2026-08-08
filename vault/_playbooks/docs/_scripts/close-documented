@@ -1,0 +1,93 @@
+#!/usr/bin/env python3
+"""Exit hook for the docs playbook (`recording -> done`): fold the run record's
+`documented:` frontmatter list into the ledger `_specs/documented.md`, seeding the
+ledger when it does not exist yet.
+
+Environment (set by `booping playbook-transition`): BOOPING_WORKDIR = the run
+workdir `{vault}/docs` (also cwd), BOOPING_ARTIFACT = the run record.
+
+The ledger is what the next survey's undocumented sweep subtracts, so membership
+is by work-item path; rows already present are left untouched. Runs before
+`commit-docs` on the same edge, which stages and commits the ledger with the rest
+of the workdir.
+"""
+
+import os
+import re
+import sys
+from pathlib import Path
+
+FRONTMATTER = re.compile(r"\A---\n(.*?)\n---\n", re.DOTALL)
+
+LEDGER_SEED = [
+    "# Documented work ledger",
+    "",
+    "One row per work item every one of whose changes is documented; the survey's undocumented sweep subtracts these rows.",
+    "",
+    "| Work item | Run record |",
+    "| --- | --- |",
+]
+
+
+def documented_items(head: str) -> list[str]:
+    items: list[str] = []
+    in_list = False
+    for line in head.splitlines():
+        if line.startswith("documented:"):
+            in_list = True
+            continue
+        if in_list:
+            stripped = line.strip()
+            if stripped.startswith("- "):
+                items.append(stripped[2:].strip().strip("\"'"))
+            elif not line.startswith((" ", "\t")):
+                in_list = False
+    return items
+
+
+def main() -> None:
+    workdir = Path(os.environ.get("BOOPING_WORKDIR", ".")).resolve()
+    raw_artifact = os.environ.get("BOOPING_ARTIFACT")
+    if not raw_artifact:
+        sys.exit("BOOPING_ARTIFACT is not set")
+    artifact = Path(raw_artifact).resolve()
+    if not artifact.is_file():
+        sys.exit(f"run record not found: {artifact}")
+
+    match = FRONTMATTER.match(artifact.read_text())
+    if not match:
+        sys.exit(f"{artifact}: no frontmatter")
+    items = documented_items(match.group(1))
+    if not items:
+        sys.exit(f"{artifact}: frontmatter carries no `documented:` list")
+
+    try:
+        record_rel = str(artifact.relative_to(workdir))
+    except ValueError:
+        record_rel = artifact.name
+
+    ledger = workdir / "_specs" / "documented.md"
+    if ledger.is_file():
+        lines = ledger.read_text().rstrip("\n").splitlines()
+    else:
+        lines = list(LEDGER_SEED)
+
+    existing = {
+        row.split("|")[1].strip().strip("`")
+        for row in lines
+        if row.startswith("|") and "---" not in row and "Work item" not in row
+    }
+    added = 0
+    for item in items:
+        if item in existing:
+            continue
+        lines.append(f"| `{item}` | `{record_rel}` |")
+        added += 1
+
+    ledger.parent.mkdir(parents=True, exist_ok=True)
+    ledger.write_text("\n".join(lines) + "\n")
+    print(f"close-documented: {added} rows appended, {len(items) - added} already present")
+
+
+if __name__ == "__main__":
+    main()

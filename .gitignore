@@ -13,3 +13,7 @@ site/
 
 # Debug playbook renders (just snapshots-render) — machine-specific, never committed
 playbooks/*/_reports/local.md
+
+# Vault scratchpad — local working notes, not part of the published vault.
+vault/notes/
+.booping.log

@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# Vault-commit hook for the docs playbook: commit the docs workdir subtree.
+#
+# Environment (set by `booping playbook-transition`): BOOPING_WORKDIR = the run
+# workdir `{vault}/docs` (also cwd), BOOPING_ARTIFACT = the run record.
+#
+# Commits with an explicit pathspec so unrelated staged changes elsewhere in the
+# enclosing repository are never swept into the docs commit.
+set -euo pipefail
+
+workdir="${BOOPING_WORKDIR:?BOOPING_WORKDIR is not set}"
+artifact="${BOOPING_ARTIFACT:?BOOPING_ARTIFACT is not set}"
+
+if ! git -C "$workdir" rev-parse --git-dir >/dev/null 2>&1; then
+  echo "commit-docs: no git repository above $workdir; skipped"
+  exit 0
+fi
+
+if [ -z "$(git -C "$workdir" status --porcelain -- "$workdir")" ]; then
+  echo "commit-docs: nothing to commit"
+  exit 0
+fi
+
+status=$(sed -n 's/^status: *//p' "$artifact" | head -1)
+slug=$(basename "$artifact" .md)
+
+git -C "$workdir" add -A -- "$workdir"
+git -C "$workdir" commit -q -m "docs: ${slug} @ ${status:-unknown}" -- "$workdir"
+echo "commit-docs: committed ${slug} @ ${status:-unknown}"
