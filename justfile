@@ -83,7 +83,7 @@ snapshots:
             drifted+=("$name")
             continue
         fi
-        if ! diff -u --label "$committed" --label "$committed (rendered)" \
+        if ! diff --color -u --label "$committed" --label "$committed (rendered)" \
             "$committed" "$rendered"; then
             drifted+=("$name")
         fi
