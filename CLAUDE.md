@@ -61,7 +61,8 @@ Each playbook owns its own status vocabulary in its `states:` block — there is
 
 - **Plan track** (`groom` + `develop`): the plan is a directory `{vault}/plans/{slug}/` whose `index.md` is both run artifact and plan document; groom ends at `ready-for-dev`, develop at `done` | `fail`. Shape is the `core.plans.glob` config key (`plans/*/index.md`).
 - **Retro track** (`retro` + `learn`): artifact is a standalone `{vault}/retrospectives/{slug}.md` (`awaiting-retro` → `awaiting-learning` → `done`); plans stay at `done` throughout. Addressed with `--target` since the machines declare no `artifact:`.
-- The tracks join through **plan frontmatter, not status**: `retro:` and `code_review:` are null until covered — `{status: done, retro: null}` is the retro queue, `{status: done, code_review: null}` the code-review queue.
+- **Code-review track** (`code-review`): artifact is `{vault}/codereviews/{plan-dirname}/{ts}.md` (ad-hoc scopes: `codereviews/{target-slug}/{ts}.md`, `plan: null`), machine `in-agent-review` → `human-review` → `done`; plans stay at `done`. Addressed with `--target` since the machine declares no `artifact:`.
+- The tracks join through **plan frontmatter, not status**: `retro:` is null until covered, so `{status: done, retro: null}` is the retro queue; `code_reviews:` is a list of every review that closed on the plan — history, not a queue flag — so the review queue is every `{status: done}` plan, re-review included.
 - Vault commits are each playbook's own business, via `script` hooks on its edges.
 
 ## Vault (out of framework scope, authored per project)

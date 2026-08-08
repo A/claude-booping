@@ -133,8 +133,8 @@ core:
   code_review_playbook:
     queries:
       scope_candidates:
-        where: { status: done, code_review: null }
-        columns: [sp, title, commit]
+        where: { status: done }
+        columns: [sp, title, code_reviews]
     agents:
       booping-researcher:
         internal: true

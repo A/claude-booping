@@ -83,7 +83,7 @@ Once a plan is `done`, you can run a quality-gate review over the diff before ca
 /playbook code-review
 ```
 
-It picks a plan from the review queue — `done` with `code_review: null` — and reviews `{plan commit}..HEAD` against stack-aware checklists, returning severity-labelled findings in chat. The run is **ephemeral** and does not transition the plan, so the next step is still retro. Run it from a fresh session (often under a stronger model than the one that implemented). See [code-review](code_review.md) for details.
+It offers every `done` plan — each listed with its review history, so a re-review is as ordinary as a first pass — and reviews `{plan commit}..HEAD` against stack-aware checklists. Findings, your verdict and what came of it land in a review file under `codereviews/`, which carries the run's own `in-agent-review → human-review → done` status; the plan stays at `done` and only gains the review's path in its `code_reviews:` list, so the next step is still retro. Run it from a fresh session (often under a stronger model than the one that implemented). See [code-review](code_review.md) for details.
 
 ## 7. First retro
 

@@ -12,6 +12,7 @@ rules:
       - Available Agents
       - Shared instructions
       - Playbook Steps
+      - State
       - "Step: Scope"
       - "Step: Review"
       - "Step: Present"

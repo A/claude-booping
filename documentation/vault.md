@@ -10,7 +10,7 @@ A plan is a directory: `{YYYYMMDDHHMM}_{kebab-title}/` holding `index.md`. That 
 
 A plan's `status:` is **run state**, not a shared lifecycle: `index.md` doubles as the run artifact of whichever playbook is operating on the plan, so the status vocabulary is the one that playbook declares in its own `states:` block. Only groom and develop run on a plan, and they are wired so one's terminal status is the next one's entry — groom ends at `ready-for-dev`, develop claims from there and ends at `done`. `done` is the end of the plan lifecycle. Only `booping playbook-transition` writes the status, and it refuses any move the machine does not declare. See [Playbooks → Run state](playbook.md#run-state).
 
-Two frontmatter keys carry a finished plan into the tracks that run beside the lifecycle rather than inside it. `retro:` is null until a retrospective covers the plan, then holds that file's path (or `skipped`); `code_review:` is null until a review closes on the plan, then holds the review date. Each null is a queue.
+Two frontmatter keys carry a finished plan into the tracks that run beside the lifecycle rather than inside it. `retro:` is null until a retrospective covers the plan, then holds that file's path (or `skipped`) — that null is the retro queue. `code_reviews:` is a **list**: seeded null, then appended to with the vault-relative path of every review that closes on the plan, so it reads as review history rather than a queue flag. The code-review queue is every plan at `done`, reviewed or not.
 
 Sibling stubs created by a groom-driven split point at the primary plan via `split_from: plans/...` in their frontmatter.
 
@@ -21,6 +21,12 @@ Standalone retrospectives written by the [retro playbook](retro.md), named `{YYY
 A retrospective records what actually shipped vs. the original spec, divergences, and the tensions you flagged during development. Its frontmatter carries `plan:` (the primary), `plans:` (every plan covered), `goal_verdicts:` (a verdict per plan) and its own `status:`.
 
 That `status:` is the retro track's run state — `awaiting-retro → awaiting-learning` under retro, then `awaiting-learning → done` under [learn](learn.md). It is the retrospective's status, never a plan's: the plans it covers stay at `done` and only gain a `retro:` back-link. Both playbooks run with the vault root as their workdir and address the file with `--target retrospectives/{slug}.md`.
+
+## `codereviews/`
+
+One file per code-review run, written by the [code-review playbook](code_review.md), grouped by what was reviewed: `codereviews/{plan-dirname}/{YYYYMMDDHHmm}.md` when a plan is in scope, `codereviews/{target-slug}/{YYYYMMDDHHmm}.md` for an ad-hoc scope such as the latest commits. Scaffolded for new vaults and created lazily in older ones, so an existing vault needs no migration.
+
+The file records `## Scope`, `## Findings`, `## Verdict` and `## Resolution`. Its frontmatter carries `plan:` — the reviewed plan's vault-relative path, or `null` — and its own `status:`, the code-review track's run state: `in-agent-review → human-review → done`. That status is the review's, never a plan's: the reviewed plan stays at `done` and only gains the review's path in its `code_reviews:` list. The playbook runs with the vault root as its workdir and addresses the file with `--target codereviews/{dir}/{ts}.md`.
 
 ## `lessons/`
 

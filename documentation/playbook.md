@@ -29,7 +29,7 @@ Core playbooks ship with the plugin and own the main workflow — the `/groom`, 
 - **`develop`** — execute a plan (intake → provision → develop-loop → verify → wrap-up). See [develop](develop.md).
 - **`retro`** — capture what shipped versus the spec. See [retro](retro.md).
 - **`learn`** — fold retro findings into durable rules. See [learn](learn.md).
-- **`code-review`** — review a confirmed scope: findings, verdict, approved fixes. See [code-review](code_review.md).
+- **`code-review`** — review a confirmed scope: findings, verdict, approved fixes, recorded in the run's own `codereviews/` artifact. See [code-review](code_review.md).
 - **`migrate`** — bring a vault up to the plugin's current migration watermark.
 - **`playbook-authoring`** — the procedure for writing a new playbook.
 

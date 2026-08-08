@@ -121,7 +121,7 @@ created: 1970-01-01 00:00        # when the plan directory was created — the r
 planned: null                    # date keys — owned by the run machine's edge hooks, same shape as `created`
 started: null
 completed: null
-code_review: null                # date of the code review, stamped by the code-review playbook
+code_reviews: null               # list of code-review artifact paths, appended by the code-review playbook
 retro: null
 goal: null
 summary: ""                      # one-line plan intent for search + plan listings (≤ ~120 chars)
@@ -192,7 +192,7 @@ created: 1970-01-01 00:00        # when the plan directory was created — the r
 planned: null                    # date keys — owned by the run machine's edge hooks, same shape as `created`
 started: null
 completed: null
-code_review: null                # date of the code review, stamped by the code-review playbook
+code_reviews: null               # list of code-review artifact paths, appended by the code-review playbook
 retro: null
 goal: null
 summary: ""                      # one-line plan intent for search + plan listings (≤ ~120 chars)

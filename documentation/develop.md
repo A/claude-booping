@@ -10,7 +10,7 @@ Development is a **playbook**, not a skill — it is driven by [`/playbook`](pla
 
 ## What it does
 
-The playbook walks one plan through `awaiting-plan-review → ready-for-dev → in-progress → done`, with `fail` as the abort branch. `done` is the **end of the plan lifecycle** — retro and code-review pick the plan up from there through the `retro:` / `code_review:` frontmatter seams, without moving its status again. That vocabulary is develop's own — it is declared in `playbooks/develop/playbook.yaml`'s `states:` block, not in a shared lifecycle. Its run state lives in the plan's own `index.md`, so a stopped sprint is **resumable**.
+The playbook walks one plan through `awaiting-plan-review → ready-for-dev → in-progress → done`, with `fail` as the abort branch. `done` is the **end of the plan lifecycle** — retro and code-review pick the plan up from there through the `retro:` / `code_reviews:` frontmatter seams, each keeping its own run state in its own artifact, without moving the plan's status again. That vocabulary is develop's own — it is declared in `playbooks/develop/playbook.yaml`'s `states:` block, not in a shared lifecycle. Its run state lives in the plan's own `index.md`, so a stopped sprint is **resumable**.
 
 Five steps, in dependency order:
 

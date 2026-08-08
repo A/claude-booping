@@ -16,7 +16,7 @@ booping is aimed at **experienced developers and tech leads** — people comfort
 
 It's built for **iterative, agile-style development**: maintenance, incremental features, or growing a project sprint by sprint. It is **not** a waterfall tool — don't hand it a whole-project spec and expect a finished product. One plan is one sprint; the loop compounds across many.
 
-Per-project configuration tunes the framework to each codebase: place a `~/Claude/{project}/config.yaml` file in your vault and it deep-merges over the plugin's `src/config.yaml` at render time — sprint scale, task types, branch conventions and agent wiring are the natural targets for per-project tuning. No key is validated and no key is restricted to a tier, so your own playbooks' config lives there too. The `code-review` playbook is a side-route for stack-aware review of in-progress diffs against the active plan.
+Per-project configuration tunes the framework to each codebase: place a `~/Claude/{project}/config.yaml` file in your vault and it deep-merges over the plugin's `src/config.yaml` at render time — sprint scale, task types, branch conventions and agent wiring are the natural targets for per-project tuning. No key is validated and no key is restricted to a tier, so your own playbooks' config lives there too. The `code-review` playbook is a side-route for stack-aware review of a finished plan's diff, recorded as its own artifact under `codereviews/`.
 
 ## Dependencies
 
@@ -42,7 +42,7 @@ Inside Claude Code, register the marketplace once, then install the plugin:
 
 Update later via `/plugin update booping` (or from the `/plugin` UI).
 
-After installing, `cd` into the target repo and run `/playbook setup`. It settles the machine config, then scaffolds the vault (`plans/`, `retrospectives/`, `_lessons/`, `notes/`) and writes the `.booping` marker. Anything already in place is detected and skipped.
+After installing, `cd` into the target repo and run `/playbook setup`. It settles the machine config, then scaffolds the vault (`plans/`, `retrospectives/`, `codereviews/`, `_lessons/`, `notes/`) and writes the `.booping` marker. Anything already in place is detected and skipped.
 
 ## Quick start
 
@@ -76,7 +76,7 @@ Candidates are listed for you if you forget the exact path.
 
 A plan moves through a small set of statuses. The `groom` playbook shapes the spec and waits for explicit user approval before handing off; the `develop` playbook claims the next ready plan and executes milestone by milestone; the `retro` playbook compares what shipped to the original spec; the `learn` playbook distils the retrospective into rules that bind the next sprint.
 
-There is no single shared status table. **Each playbook declares its own vocabulary** in its `states:` block (`playbooks/<name>/playbook.yaml`) and advances its run artifact through it with `booping playbook-transition`. Groom and develop run on the plan, so a plan's `status:` frontmatter is whatever those two last wrote and the plan lifecycle ends at `done`. Retro and learn are a **separate track**: their artifact is a standalone retrospective under `retrospectives/`, and the statuses they write are the retrospective's, never the plan's.
+There is no single shared status table. **Each playbook declares its own vocabulary** in its `states:` block (`playbooks/{name}/playbook.yaml`) and advances its run artifact through it with `booping playbook-transition`. Groom and develop run on the plan, so a plan's `status:` frontmatter is whatever those two last wrote and the plan lifecycle ends at `done`. Retro and learn are a **separate track** whose artifact is a standalone retrospective under `retrospectives/`; code review is a third, whose artifact is one file per run under `codereviews/`. The statuses those tracks write are their own artifact's, never the plan's.
 
 ```text
 groom     framing → researching → drafting → cross-reviewing → presenting
@@ -88,18 +88,18 @@ develop   awaiting-plan-review → ready-for-dev → in-progress
           → done (terminal) | fail (terminal)
           (any non-terminal status → cancelled (terminal))
 
-retro     awaiting-retro → awaiting-learning (terminal)   [on retrospectives/{slug}.md]
+retro     awaiting-retro → awaiting-learning (terminal)     [on retrospectives/{slug}.md]
 
-learn     awaiting-learning → done (terminal)             [on retrospectives/{slug}.md]
+learn     awaiting-learning → done (terminal)               [on retrospectives/{slug}.md]
+
+review    in-agent-review → human-review → done (terminal)  [on codereviews/{dir}/{ts}.md]
 ```
 
-The two tracks are joined by plan frontmatter, not by status. A finished plan carries `retro: null` until a retrospective covers it, at which point retro's exit hook stamps the retrospective's path there (or `skipped` when you skip it) — that null is the retro queue. The same shape drives review: `code_review: null` on a `done` plan is the code-review queue, and a finished review stamps the date.
-
-The `code-review` playbook is ephemeral — it reads a plan and writes no status.
+The tracks are joined to the plan by frontmatter, not by status. A finished plan carries `retro: null` until a retrospective covers it, at which point retro's exit hook stamps the retrospective's path there (or `skipped` when you skip it) — that null is the retro queue. Review joins by a **list**: `code_reviews:` starts null and every closing review appends its own path, so the key reads as history rather than a queue flag, and the review queue is simply every `done` plan — a second or third pass over the same plan is ordinary, not an exception.
 
 ## Statuses
 
-A plan carries one of the following statuses in its frontmatter, written by groom or develop. Retro and learn write their own statuses onto the retrospective instead.
+A plan carries one of the following statuses in its frontmatter, written by groom or develop. Retro and learn write their own statuses onto the retrospective instead, and code review onto its own review file.
 
 **groom**
 
@@ -129,6 +129,12 @@ A plan carries one of the following statuses in its frontmatter, written by groo
 - **`done`** *(learn's terminal)* — every accepted lesson is written to its target.
 
 Skipping a plan's retro outright writes no retrospective at all: retro's `drop-plan` script stamps `retro: skipped` on the plan, taking it out of the queue while leaving its `status: done` alone.
+
+**code-review** — these sit on the review file at `codereviews/{dir}/{ts}.md`, one per run, not on a plan.
+
+- **`in-agent-review`** — the review file is open on a confirmed scope and the detached pass is producing findings.
+- **`human-review`** — the findings are recorded and your verdict on them is pending.
+- **`done`** *(code-review's terminal)* — every finding is applied, delegated or dropped, and the record is closed. The exit hook stamps `reviewed_at` and appends the review's path to the reviewed plan's `code_reviews:` list; an ad-hoc review (`plan: null`) links to nothing. The plan's own `status:` is never touched.
 
 Each playbook's `states:` block is the canonical contract for its own transitions — triggers (`when`), gates and hooks. Read it there if you need the exact rules; this README only narrates them.
 
@@ -168,7 +174,7 @@ The `learn` playbook then reviews the retrospective with the user, picks the dur
 booping is a feedback loop, not an autopilot. Three things stay your job:
 
 - **Plan review is still on you.** Groom produces a draft and waits at `awaiting-plan-review` for a reason — sharpen it, push back, ask for splits. As lessons accumulate, plans drift toward your style and constraints, but only if you fed the loop honest reviews. Shit in, shit out.
-- **Code review is still on you.** Develop ships milestones; you own the quality bar. The `code-review` playbook is a helper that runs stack-aware passes against the in-progress diff and surfaces findings — but reading those findings, deciding what's off, and bringing the feedback into retro so learn can turn it into rules is still your job.
+- **Code review is still on you.** Develop ships milestones; you own the quality bar. The `code-review` playbook is a helper that runs stack-aware passes over the diff and records its findings — but reading those findings, deciding what's off, and bringing the feedback into retro so learn can turn it into rules is still your job.
 - **Learning isn't automatic.** Retro and learn are scaffolding for a feedback loop, not a substitute for one. You still need to sit with the retrospective, confirm which findings are durable, and let learn write them down. Skip that step and the loop stalls.
 
 Invest in the loop and it compounds. Treat it as a magic box and you'll get magic-box results.

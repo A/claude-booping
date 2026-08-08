@@ -28,7 +28,7 @@ The vault is plain markdown with YAML frontmatter, so Obsidian renders it native
         └────────┘
 ```
 
-Every plan walks this loop once. The next plan inherits the lessons. Setup, grooming, development, code review, retro and learn are all **playbooks**; `/playbook` is the one shipped skill that drives them. Code review is an optional side-route off the develop playbook — an ephemeral pass over the in-progress diff that changes no plan status before you continue to retro.
+Every plan walks this loop once. The next plan inherits the lessons. Setup, grooming, development, code review, retro and learn are all **playbooks**; `/playbook` is the one shipped skill that drives them. Code review is an optional side-route off the develop playbook — a pass over a finished plan's diff that records its findings and verdict in its own `codereviews/` artifact and moves no plan status before you continue to retro.
 
 ## Why booping
 
@@ -44,7 +44,7 @@ Every plan walks this loop once. The next plan inherits the lessons. Setup, groo
 - [Vault](vault.md) — full tour of `~/Claude/{project}/`: what every file and directory is for.
 - [groom playbook](groom.md) — spec a sprint, with cross-review and the user-approval gate.
 - [develop playbook](develop.md) — claim a ready plan and execute milestones.
-- [code-review playbook](code_review.md) — stack-aware review of the in-progress diff.
+- [code-review playbook](code_review.md) — stack-aware review of a confirmed scope, recorded under `codereviews/`.
 - [retro playbook](retro.md) — capture what actually shipped vs. the spec.
 - [learn playbook](learn.md) — fold retro findings into durable rules.
 - [Playbooks](playbook.md) — multi-step procedures driven by `/playbook`. *Unstable — work in progress.*

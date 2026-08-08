@@ -1,16 +1,21 @@
-A run reviews one confirmed scope end to end: `scope` settles what to look at, `review` returns
-severity-classified findings from a detached pass, `present` puts them in front of the user and
-collects their verdict, and `resolve` acts on it. The run is ephemeral — no workdir, no persisted
-state, no review artefact — so a second look after fixes is a new run.
+A run reviews one confirmed scope end to end: `scope` settles what to look at and opens the run's artifact, `review` returns severity-classified findings from a detached pass, `present` records them and collects the user's verdict, and `resolve` acts on it and closes.
+
+## Guidance
+
+- Date & time: 1970-01-01 00:00
+- The run's artifact is one code review per run — `codereviews/{plan-dirname}/197001010000.md` when a plan is in scope, `codereviews/{target-slug}/197001010000.md` otherwise.
+- The run workdir is the **vault root**; every `booping playbook-state` / `booping playbook-transition` call passes `--target codereviews/{dir}/{ts}.md`, since the machine declares no `artifact:`.
+- The artifact carries `plan:` — the reviewed plan's vault-relative path, or `null` for an ad-hoc scope. The exit hook reads it and appends the artifact to that plan's `code_reviews:` list. Plan `status:` is never touched here.
+
+**Resuming a run** — read the frontier with `booping playbook-state code-review --workdir {vault} --target codereviews/{dir}/{ts}.md`, then re-enter at the reported status:
+- `in-agent-review` — the artifact exists and the verdict is still pending: re-run `review` over the scope the artifact's `## Scope` records, and continue from `present`.
+- `human-review` — the findings are on record: re-post them from the artifact's `## Findings` and collect the verdict, or continue from `resolve` when `## Verdict` is already written.
 
 **Hard rules — hold for the whole run:**
-- No commits, no pushes. The user owns those.
-- Style the project's linter or formatter already enforces is filtered out — it is noise, not
-  review signal.
+- No hand commits, no pushes. The repo's changes stay for the user; the vault commit is the exit hook's.
+- Style the project's linter or formatter already enforces is filtered out — it is noise, not review signal.
 - A lesson violation is always a `BLOCKER`. Never softened to `SUGGESTION`.
-- No persistent report. Findings and feedback live in this conversation.
-- No edit beyond a user-approved trivial nit. Every non-trivial fix routes through the worker
-  agent named below.
+- No edit beyond a user-approved trivial nit. Every non-trivial fix routes through the worker agent named below.
 
 Eval runs are proposed, never launched — the user triggers them.
 
@@ -40,67 +45,107 @@ Execute the steps in the most effective order considering their dependencies.
 
 | Step | Dependencies | Summary | Review gate |
 | --- | --- | --- | --- |
-| `scope` | — | Put every scope candidate on one `AskUserQuestion` call — the plan this session delivered, the latest coherent work on this branch, the plans at the review status, and a free-text route — then resolve the answer into a diff range or file list and report it back before any review work is spent. | — |
+| `scope` | — | Put every scope candidate on one `AskUserQuestion` call — the plan this session delivered, the latest coherent work on this branch, the eligible plans, and a free-text route — then resolve the answer into a diff range or file list, open the run's artifact on it, and report it back before any review work is spent. | — |
 | `review` | `scope` | Perform the whole review craft over the confirmed scope in one detached pass — stack discovery, checklist selection, blast radius, every loaded checklist, and the lesson-, DoD- and intent-aware dynamic checks — returning each finding classified `BLOCKER` / `SUGGESTION` / `NIT` with its anchor, snippet, proposed fix and rationale. Nothing is written anywhere. | — |
-| `present` | `review` | Post the findings `review` returned, grouped by severity, and collect the user's verdict on them — nothing is re-derived, re-classified or written here. | — |
-| `resolve` | `present` | Act on the verdict already in hand — approved trivial nits applied inline, approved non-trivial fixes delegated to the worker agent with the finding and its fix, rejected findings dropped without argument — then stamp `code_review:` on the reviewed plan and close on a report of what was applied, delegated and left. | — |
+| `present` | `review` | Write the findings `review` returned into the artifact's `## Findings`, advance the run to the human-review status, post them grouped by severity, and record the user's verdict under `## Verdict` — nothing is re-derived or re-classified here. | — |
+| `resolve` | `present` | Act on the verdict already recorded — approved trivial nits applied inline, approved non-trivial fixes delegated to the worker agent with the finding and its fix, rejected findings dropped without argument — then write `## Resolution` to the artifact, close the run, and report what was applied, delegated and left. | — |
+
+## State
+
+Run state is persisted in artifacts under the run workdir. Only `booping playbook-transition` writes it — never hand-edit an artifact's `status`.
+
+Read the whole run's frontier before starting or resuming:
+
+```
+booping playbook-state code-review --workdir <run workdir> --target {path}
+```
+
+### State: run
+
+- Referenced by: outer graph
+- Artifact: named per run — pass `--target {path}` (relative to the run workdir) on every call
+- Initial status: `in-agent-review`
+- Advance: `booping playbook-transition code-review <to> --target {path} --workdir <run workdir>`
+
+| Status | To | When | Gates |
+| --- | --- | --- | --- |
+| `in-agent-review` | `human-review` | the detached review pass wrote its findings to `codereviews/{dir}/{ts}.md`, the run's `--target`, and the user's verdict is still pending | every finding carries its severity, anchor and proposed fix in the artifact |
+| `human-review` | `done` | the user's verdict on every finding is resolved — applied, delegated or dropped — and recorded in the artifact | explicit user verdict captured at present — silence never counts; the artifact's `plan:` key holds the vault-relative plan path or `null`, since the hook script reads it |
+| `done` | *(terminal)* | — | — |
 
 ## Step: Scope
 # Settle the review scope
 
-Nothing is reviewed until the target is named and resolved into something concrete. You receive:
-whether this session's `develop` run just delivered a plan — its path, title and `commit:` baseline;
-the repo's recent commit history, its current branch, and whether the working tree carries
-uncommitted work; and the plans listed below.
+Nothing is reviewed until the target is named, resolved into something concrete, and opened as the run's artifact. You receive: whether this session's `develop` run just delivered a plan — its path, title and `commit:` baseline; the repo's recent commit history, its current branch, and whether the working tree carries uncommitted work; and the plans listed below.
 
-## Plans at the review status
+## Plans eligible for review
 
-Each is a candidate; its `commit:` is the diff base.
+Each is a candidate; its `commit:` is the diff base. **Reviews** counts the code reviews already linked on the plan — a plan that has been reviewed before is still a candidate, since a second look after fixes is a new run over the same plan.
 
-| SP | Title | Baseline |
-| --- | --- | --- |
-| 5 | [Widget search](plans/19700101-widget-search/index.md) | aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa |
-| 2 | [Login timeout fix](plans/19700102-login-timeout/index.md) | bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb |
+| SP | Title | Baseline | Reviews |
+| --- | --- | --- | --- |
+| 5 | [Widget search](plans/19700101-widget-search/index.md) | — none | — |
+| 2 | [Login timeout fix](plans/19700102-login-timeout/index.md) | — none | — |
+| 3 | [Session cleanup sweep](plans/19700103-session-cleanup/index.md) | — none | 1 |
 
 
 ## The question
 
-One `AskUserQuestion` call — single-select, free-text route on — carrying every candidate at once,
-so the user names the right scope outright instead of rejecting a wrong default first:
+One `AskUserQuestion` call — single-select, free-text route on — carrying every candidate at once, so the user names the right scope outright instead of rejecting a wrong default first:
 
-- **This sprint's plan** — the plan `develop` delivered earlier in this session, when there is one.
-  Its slug and its baseline in the description.
-- **Latest work on this branch** — the latest coherent piece of work, judged off `git log --oneline`:
-  the latest plan delivery on this branch, a feature's worth of commits, whatever the commits
-  actually suggest. Never a hardcoded commit count. Say in the description what you judged it to be
-  and how many commits it spans.
-- **One option per plan in the table above** — its slug, its baseline.
+- **This sprint's plan** — the plan `develop` delivered earlier in this session, when there is one. Its slug and its baseline in the description.
+- **Latest work on this branch** — the latest coherent piece of work, judged off `git log --oneline`: the latest plan delivery on this branch, a feature's worth of commits, whatever the commits actually suggest. Never a hardcoded commit count. Say in the description what you judged it to be and how many commits it spans.
+- **One option per plan in the table above** — its slug, its baseline, and how many reviews it already carries.
 - **Other** — free text: a diff range, a file list, or the working tree.
 
-Drop a candidate that does not exist — no plan delivered this session, no plans at the review
-status. Never invent one to fill the call.
+Drop a candidate that does not exist — no plan delivered this session, no plans in the table. Never invent one to fill the call.
 
 ## Resolve the answer
 
-- **A plan** → `<its commit>..HEAD`. `git diff` and `git log --oneline` over the range to enumerate
-  the commits and the changed files.
+- **A plan** → `{its commit}..HEAD`. `git diff` and `git log --oneline` over the range to enumerate the commits and the changed files.
 - **A diff range** (`HEAD~3..HEAD`, `main..feat/x`) → the range as given, same two commands.
 - **A file or directory list** → those paths, no range.
 - **The working tree** → `git status` plus `git diff`, staged and unstaged.
 
-Run `git status` on every route: uncommitted work sitting outside the resolved range belongs in the
-report.
+Run `git status` on every route: uncommitted work sitting outside the resolved range belongs in the report.
+
+## Open the artifact
+
+The run's workdir is the **vault root**, and every `booping playbook-state` / `booping playbook-transition` call passes `--target` — the machine declares no `artifact:`. Paths below are vault-relative.
+
+- **A plan is in scope** → `codereviews/{plan-dirname}/197001010000.md`, where `{plan-dirname}` is the plan's own directory name (the parent of its `index.md`).
+- **No plan** — latest commits, a range, a file list, the working tree → `codereviews/{target-slug}/197001010000.md`, where `{target-slug}` is a kebab-cased name for what was resolved: `latest-commits`, `working-tree`, or the range or path kebabbed.
+
+Create the directory lazily (`mkdir -p`) and write the file with exactly these frontmatter keys:
+
+- `plan:` — the plan's vault-relative path, or `null` on every route that resolved no plan. The exit hook script reads this key.
+- `scope:` — one line describing the resolved diff range or target.
+- `created:` — `1970-01-01 00:00`.
+
+```yaml
+---
+plan: plans/202608081156_token-refresh/index.md
+scope: diff a1f3c02..HEAD on feat/token-refresh — 6 commits, 12 files
+created: 1970-01-01 00:00
+---
+```
+
+The body opens with an H1 naming the review and a `## Scope` section holding the report below verbatim. `## Findings`, `## Verdict` and `## Resolution` are appended by `present` and `resolve` — never stubbed here.
+
+No `status:` is hand-written. Bootstrap the run from the vault root once the file is on disk, which stamps it:
+
+```
+booping playbook-transition code-review in-agent-review --target codereviews/{dir}/197001010000.md --workdir {vault}
+```
 
 ## Report it back — same turn, before any review work is spent
 
-Post the resolved target in chat as `## Review scope`, so a wrong base is caught here and not after
-the review has burned on it:
+The same block goes into the artifact's `## Scope` and into chat, so a wrong base is caught here and not after the review has burned on it:
 
 ```markdown
 ## Review scope
 
-`{plan path}` — {the plan this session's develop run delivered / a plan queued at the review
-status}. Baseline `{sha}`.
+`{plan path}` — {the plan this session's develop run delivered / a plan picked off the candidate table}. Baseline `{sha}`.
     ← both lines omitted when no plan is in scope
 
 Diff range `{base}..HEAD` on `{branch}` — {n} commits, {n} files changed, +{x}/−{y}.
@@ -114,29 +159,23 @@ Diff range `{base}..HEAD` on `{branch}` — {n} commits, {n} files changed, +{x}
 
 Working tree is clean — nothing uncommitted sits outside the range.
     ← or what is uncommitted and whether it is in scope
+
+Artifact `codereviews/{dir}/{ts}.md` — opened at `in-agent-review`.
 ```
 
-Nothing is written to the vault or the repo, and no plan-lifecycle status moves in either
-direction. The confirmed scope lives in this conversation.
+No plan-lifecycle status moves in either direction, here or anywhere in the run.
 
 ## A plan with no `commit:` baseline
 
-Such a plan yields no diff range. Say so and re-ask inside this same step — another plan, or an
-explicit range or file list through the free-text route. Post this in place of the report:
+Such a plan yields no diff range. Say so and re-ask inside this same step — another plan, or an explicit range or file list through the free-text route. No artifact is created, and nothing downstream runs, until the re-ask lands. Post this in place of the report:
 
 ```markdown
-`{plan path}` has no `commit:` baseline, so there is no diff range to review it from. Pick another
-plan, or give me an explicit range or file list.
+`{plan path}` has no `commit:` baseline, so there is no diff range to review it from. Pick another plan, or give me an explicit range or file list.
 ```
-
-No scope is fixed until the re-ask lands, and nothing downstream runs before it.
 
 ## Return
 
-None. This step is runner-performed: it runs in the driving conversation and returns no block to
-the harness. What it leaves behind is the `## Review scope` report above and the facts `review`
-reads out of it — the diff range or file list, the branch, and the plan in scope with its path when
-there is one.
+None. This step is runner-performed: it runs in the driving conversation and returns no block to the harness. What it leaves behind is the artifact at `in-agent-review`, the `## Review scope` report, and the facts `review` reads out of it — the diff range or file list, the branch, the artifact path, and the plan in scope with its path when there is one.
 
 ## Step: Review
 
@@ -145,36 +184,31 @@ Perform the whole review craft over the confirmed scope in one detached pass —
 Tell a sub-agent — model opus, effort high — to get its instructions by calling this command: `booping render-playbook code-review --step review`.
 
 ## Step: Present
+# Record the findings and collect the verdict
+
 Put the findings `review` returned in front of the user and collect their verdict on them.
 
 ## What you receive
 
-- the severity-classified findings — each with its file and line anchor, its severity, the
-  offending snippet, the proposed fix, and the checklist item or lesson id it cites
-- the confirmed review scope, which names the post
+- the severity-classified findings — each with its file and line anchor, its severity, the offending snippet, the proposed fix, and the checklist item or lesson id it cites
+- the confirmed review scope and the run's artifact path under `codereviews/`
 
-Take the findings as they stand. Do not re-read the code, re-derive a finding, re-word a fix, or
-move a finding between severities — a lesson violation stays a `BLOCKER`. Nothing is judged here.
+Take the findings as they stand. Do not re-read the code, re-derive a finding, re-word a fix, or move a finding between severities — a lesson violation stays a `BLOCKER`. Nothing is judged here.
 
-## What you produce
+The order below is fixed: write the findings, advance the run, ask, record the verdict.
 
-Nothing is written: no file in the vault, no file in the repo. The step's output is the post in
-chat and the verdict that comes back, which `resolve` acts on.
+## 1. Write the findings
 
-Post the findings grouped by severity — `BLOCKER`, then `SUGGESTION`, then `NIT` — each group
-headed with its count, an empty group dropped entirely. One entry per finding: file and line, the
-offending snippet, the proposed fix, and the item or lesson it cites. Head the post with the scope.
+Append `## Findings` to the artifact, grouped by severity — `BLOCKER`, then `SUGGESTION`, then `NIT` — each group headed with its count, an empty group dropped entirely. One entry per finding: file and line, the offending snippet, the proposed fix, and the item or lesson it cites. This block is written once and posted verbatim in step 3 — the artifact and the chat post never diverge.
 
 ```markdown
-## Review findings — `a1f3c02..HEAD` (plan `20260803-14-02_token-refresh`)
+## Findings
 
 **BLOCKER (1)**
-- `src/auth/refresh.py:52` — token compared with `==`: `if token == stored:`
-  → `if secrets.compare_digest(token, stored):` — lesson `0007_constant_time_compare`
+- `src/auth/refresh.py:52` — token compared with `==`: `if token == stored:` → `if secrets.compare_digest(token, stored):` — lesson `0007_constant_time_compare`
 
 **SUGGESTION (2)**
-- `src/api/routes.py:210` — the 401 branch is duplicated in three handlers; extract
-  `_unauthorized()` — checklist `python:dry`
+- `src/api/routes.py:210` — the 401 branch is duplicated in three handlers; extract `_unauthorized()` — checklist `python:dry`
 - `src/api/routes.py:33` — error envelope drops the request id — checklist `api:errors`
 
 **NIT (2)**
@@ -182,25 +216,48 @@ offending snippet, the proposed fix, and the item or lesson it cites. Head the p
 - `src/auth/session.py:141` — comment above `_rotate()` no longer matches the code
 ```
 
-Close on the ask — which of these should be applied — in prose, in the same message, never through
-`AskUserQuestion`. Then stop and wait. When `review` returned no findings, say so and say there is
-nothing to rule on; the run still passes through here.
+When `review` returned no findings, the section is written as `_No findings._`.
 
-## The verdict
+## 2. Advance the run — before the user is asked
 
-Read the reply as chat text and carry it forward as the user gave it: which findings they approved,
-which they rejected, and any correction or finding of their own. Do not argue a rejection, do not
-re-open a finding they settled, and do not start fixing anything — `resolve` owns that. Ask a
-follow-up only where the reply leaves a finding genuinely unanswered.
+Once `## Findings` is on disk, transition per the `## State` section, from the vault root, passing the run's `--target`. The verdict is asked for at `human-review`, never at `in-agent-review`.
 
-Where the project has registered an agent for presenting a review, hand the findings to that agent
-instead of posting them yourself and take the verdict back from it — what it does with them is
-carried by its own description, not by this step.
+## 3. Post and ask
+
+Post the block from step 1 in chat, headed with the scope:
+
+```markdown
+## Review findings — `a1f3c02..HEAD` (plan `202608031402_token-refresh`)
+```
+
+Close on the ask — which of these should be applied — in prose, in the same message, never through `AskUserQuestion`. Then stop and wait. With no findings, say so and say there is nothing to rule on; the run still passes through here.
+
+Where the project has registered an agent for presenting a review, hand the findings to that agent instead of posting them yourself and take the verdict back from it — what it does with them is carried by its own description, not by this step.
+
+## 4. Record the verdict
+
+Read the reply as chat text and carry it forward as the user gave it. Do not argue a rejection, do not re-open a finding they settled, and do not start fixing anything — `resolve` owns that. Ask a follow-up only where the reply leaves a finding genuinely unanswered.
+
+Append `## Verdict` to the artifact — one line per finding, its disposition in the user's own terms, their correction quoted where they gave one:
+
+```markdown
+## Verdict
+
+- `src/auth/refresh.py:52` — BLOCKER · approved
+- `src/api/routes.py:210` — SUGGESTION · approved, "extract it but keep the log line"
+- `src/api/routes.py:33` — SUGGESTION · dropped — the current envelope shape stays
+- `src/auth/session.py:88` — NIT · approved
+- `src/auth/session.py:141` — NIT · dropped
+```
+
+`resolve` acts on this section; nothing else in the artifact is touched here, and no plan frontmatter moves.
 
 ## Step: Resolve
 # Act on the verdict and close the run
 
-The user's verdict is already in hand — which findings they approved, which they rejected, and any correction they gave in their own words — together with the findings as they were classified (anchor, severity, offending snippet, proposed fix, rationale) and the scope the run opened on. Act on the verdict; the findings are never re-presented, re-grouped or re-classified here, and the verdict is never asked for again or re-litigated.
+The user's verdict is already recorded in the run's artifact under `## Verdict`, together with the findings as they were classified and the scope the run opened on. Act on it; the findings are never re-presented, re-grouped or re-classified here, and the verdict is never asked for again or re-litigated.
+
+The order below is fixed: apply the dispositions, write `## Resolution`, close the run, report.
 
 ## Each finding's disposition
 
@@ -215,42 +272,64 @@ Where the verdict genuinely leaves a finding's disposition open, ask in `## Ques
 
 The step stays yours; only the code change goes out. Brief the worker agent the **Available Agents** table names for applying approved non-trivial fixes — one briefing per fix, or one per file when several land in the same file. Each briefing carries the finding with its anchor, severity and offending snippet, the fix to apply (the user's correction where they gave one), the files it touches, and the project's conventions the change must follow. Take back which files it changed and what it did, and fold that into the report — do not re-read the diff to verify it.
 
-## Stamping the reviewed plan
+## Write the resolution
 
-When a plan was in scope, stamp it once the dispositions are applied — that is what takes it out of the review queue:
+Once every disposition is applied, append `## Resolution` to the artifact — the ledger of what this step did, grouped the same way the closing report groups it, one line per finding with the files it touched and who applied it:
 
-```bash
-booping frontmatter-update {plan path} code_review="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+```markdown
+## Resolution
+
+**Applied here (2)**
+- `src/auth/session.py:88` — NIT · `tmp` renamed to `refreshed_at`
+- `src/auth/session.py:141` — NIT · stale comment above `_rotate()` dropped
+
+**Delegated to `booping-developer` (2)**
+- `src/auth/refresh.py:52` — BLOCKER · now `secrets.compare_digest` (lesson `0007_constant_time_compare`)
+- `src/api/routes.py:210` — SUGGESTION · duplicated 401 branch extracted into `_unauthorized()`
+
+**Dropped on the user's call (1)**
+- `src/api/routes.py:33` — SUGGESTION · wider error envelope — the current shape stays
 ```
 
-The value is rendered by the command, so it is passed through verbatim, quoted exactly as above. A run opened on a bare diff range or file list has no plan and stamps nothing.
+A group with no entries is left out.
+
+## Close the run
+
+From the vault root, passing the run's `--target`:
+
+```
+booping playbook-transition code-review done --target codereviews/{dir}/{ts}.md --workdir {vault}
+```
+
+The exit edge's hooks stamp `reviewed_at:`, append the artifact's path to the linked plan's `code_reviews:` list, and commit the vault. Nothing here hand-edits plan frontmatter, and nothing here commits — the repo's own changes stay uncommitted for the user.
 
 ## The closing report
 
-Post it in chat, once, as the last thing the step does — the whole ledger, so the user sees what landed without re-reading the diff. Group by disposition, count each group, name the agent the delegated fixes went to, and close on the standing line that nothing was committed or pushed:
+Post it in chat, once, as the last thing the step does — the whole ledger, so the user sees what landed without re-reading the diff. Name the artifact, group by disposition, count each group, name the agent the delegated fixes went to, and close on the standing line that nothing in the repo was committed or pushed:
 
 ```markdown
-## Review closed — `abc1234..HEAD` (plan `20260803-14-02_token-refresh`)
+## Review closed — `abc1234..HEAD` (plan `202608031402_token-refresh`)
+
+Recorded in `codereviews/202608031402_token-refresh/202608041530.md`; the plan's `code_reviews:` list now points at it.
+    ← second clause omitted when the run had no plan in scope
 
 **Applied here (2 nits)**
 - `src/auth/session.py:88` — NIT · `tmp` renamed to `refreshed_at` (checklist `python:naming`)
 - `src/auth/session.py:141` — NIT · stale comment above `_rotate()` dropped
 
 **Delegated to `booping-developer` (1 blocker, 1 suggestion)**
-- `src/auth/refresh.py:52` — BLOCKER · token compared with `==`; now
-  `secrets.compare_digest` (lesson `0007_constant_time_compare`)
-- `src/api/routes.py:210` — SUGGESTION · duplicated 401 branch extracted into
-  `_unauthorized()`
+- `src/auth/refresh.py:52` — BLOCKER · token compared with `==`; now `secrets.compare_digest` (lesson `0007_constant_time_compare`)
+- `src/api/routes.py:210` — SUGGESTION · duplicated 401 branch extracted into `_unauthorized()`
 
 **Dropped on your call (1)**
 - `src/api/routes.py:33` — SUGGESTION · wider error envelope — you kept the current shape
 ```
 
-A group with no entries is left out. The run ends here: the `code_review:` stamp is the only vault write, no review file is produced, no plan status moves, and a second look after these fixes is a new run.
+A group with no entries is left out. The run ends here: no plan status moves, and a second look after these fixes is a new run against the same plan, with its own artifact.
 
 ## Return format
 
-One `[UPDATED]` line per repo file edited, annotated with the finding it closes and who applied it, plus the stamped plan when one was in scope; the ledger counts and the standing no-commit line in `## Notes:`; `## Questions:` only when an approved fix cannot be applied.
+One `[UPDATED]` line per repo file edited, annotated with the finding it closes and who applied it, plus the artifact; the ledger counts and the standing no-commit line in `## Notes:`; `## Questions:` only when an approved fix cannot be applied.
 
 ```markdown
 ## Changed:
@@ -258,12 +337,16 @@ One `[UPDATED]` line per repo file edited, annotated with the finding it closes 
 - [UPDATED] src/auth/session.py — NIT `session.py:88` rename, `:141` comment (runner)
 - [UPDATED] src/auth/refresh.py — BLOCKER `refresh.py:52` constant-time compare (booping-developer)
 - [UPDATED] src/api/routes.py — SUGGESTION `routes.py:210` 401 branch extracted (booping-developer)
-- [UPDATED] plans/20260803-14-02_token-refresh/index.md — `code_review:` stamped
+- [UPDATED] codereviews/202608031402_token-refresh/202608041530.md — `## Resolution`, closed at `done`
 
 ## Notes:
 
 - 2 applied by the runner, 2 delegated to `booping-developer`, 1 dropped on the user's call
-- nothing committed or pushed; no plan status moved
+- the vault commit is the exit hook's; nothing in the repo was committed or pushed
 
 ## Questions:
 ```
+
+## Replay
+
+A replay that finds `## Resolution` already written re-fires nothing it does not need: a run still at `human-review` takes the transition alone, a run already at `done` is only re-reported, with the transition line reading `already at done — no transition taken`.

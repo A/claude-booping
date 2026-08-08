@@ -115,7 +115,7 @@ All transport trivia (port, launch, readiness, curl, exit codes) lives in
 [...mapping table, procedure, report contract...]
 ```
 
-The agent body maps booping findings to the annotation contract, writes the batch to a temp file, runs `~/.claude/bin/booping-plannotator-review <ref> <batch.json>`, and returns the human's feedback verbatim.
+The agent body maps booping findings to the annotation contract, writes the batch to a temp file, runs `~/.claude/bin/booping-plannotator-review {ref} {batch.json}`, and returns the human's feedback verbatim. The playbook, not the agent, owns the vault: it records that verdict in the run's `codereviews/` artifact.
 
 **Vault config — `~/Claude/{project}/config.yaml`**
 
