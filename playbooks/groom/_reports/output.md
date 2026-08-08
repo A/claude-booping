@@ -122,6 +122,7 @@ planned: null                    # date keys — owned by the run machine's edge
 started: null
 completed: null
 code_reviews: null               # list of code-review artifact paths, appended by the code-review playbook
+sessions: []                     # Claude Code session ids, appended by the groom and develop edge hooks
 retro: null
 goal: null
 summary: ""                      # one-line plan intent for search + plan listings (≤ ~120 chars)
@@ -193,6 +194,7 @@ planned: null                    # date keys — owned by the run machine's edge
 started: null
 completed: null
 code_reviews: null               # list of code-review artifact paths, appended by the code-review playbook
+sessions: []                     # Claude Code session ids, appended by the groom and develop edge hooks
 retro: null
 goal: null
 summary: ""                      # one-line plan intent for search + plan listings (≤ ~120 chars)

@@ -10,12 +10,12 @@ Retro is a **playbook**, not a skill — it is driven by [`/playbook`](playbook.
 
 ## Why
 
-Retro is the moment booping turns lived experience into a written record. Without it, every irritation that surfaced during development evaporates the moment the session closes; with it, those irritations become the input to a durable rule.
+Retro turns lived experience into a written record: friction that would otherwise evaporate when the session closes becomes the input to a durable rule.
 
 The run draws from **two inputs**:
 
-- **User-asked questions.** `gather-feedback` takes your raw open-ended take first — four questions asked one at a time, before any mined finding is mentioned — then walks the mined items with you for accept / dismiss / your own wording. These are the high-signal sources because you noticed the friction in the moment.
-- **Session-log mining and a plan-stage lesson check.** `prepare` delegates both in parallel, mining the development session transcript for tensions you did not flag explicitly — repeated retries, abandoned approaches, places where the agent did something the plan did not specify — and checking the planning stage against the active lesson set. The code diff is grounding context for these reads, not a separate scan phase. The mined list is **withheld** until your raw take is on record.
+- **User-asked questions.** `gather-feedback` takes your raw open-ended take first — four questions asked one at a time, before any mined finding is mentioned — then walks the mined items with you for accept / dismiss / your own wording.
+- **Session-log mining and a plan-stage lesson check.** `prepare` delegates both in parallel, mining the development session transcript for what you said at the time but never filed — pushback at the agent's choices, mid-sprint change requests, comments you made on the code itself, and places the session shows a loaded lesson ignored — and checking the plan as written against the active lesson set. The code diff is grounding context for these reads, not a separate scan phase. The mined list is **withheld** until your raw take is on record.
 
 The two inputs are stitched into one `retrospectives/{YYYYMMDDHHMM}_{kebab-title}.md`, a standalone file in the vault — one per run, whatever the size of the working set.
 
@@ -25,42 +25,40 @@ Six steps, in dependency order:
 
 | Step | What it does |
 |------|--------------|
-| `intake` | Settle the working set — validate the plan is `done` with no retrospective yet, offer the others as include / postpone / skip, then read each adopted plan for context |
+| `intake` | Settle the working set — validate the plan is in the retro queue (`status: done`, `retro: null`), offer the others as include / postpone / skip, then read each adopted plan for context |
 | `prepare` | Mine the session logs and run the plan-stage lesson check in parallel; build the issue list without showing it |
 | `gather-feedback` | Your raw take first, then the mined items batch by batch; close with a per-plan goal verdict |
 | `research-issues` | Root-cause each accepted issue and design concrete prevention moves |
 | `synthesize` | Draft against the retrospective template, run its self-review checklist, show you a chat summary while holding the draft unwritten |
 | `save` | Write `retrospectives/{slug}.md`, fire the exit transition, stamp the `retro:` back-link and goal verdict on every plan in the working set |
 
-The run walks the **retrospective** from `awaiting-retro → awaiting-learning` once it is written and you have signed off — the covered plans stay at `done` throughout, since retro is a separate track and never moves a plan again. The workdir is the vault root and every `booping playbook-state` / `booping playbook-transition` call passes `--target retrospectives/{slug}.md`; state lives in that file, so a stopped run is resumable.
+Retro runs as its **own track** over that standalone `retrospectives/{slug}.md` artifact — never another move on the plan. The file is created at `awaiting-retro`, advances to `awaiting-learning` once it is written and you have signed off, and [learn](learn.md) later closes it at `done`. The covered plans stay at `done` throughout; the only mark retro leaves on a plan is the `retro:` back-link in its frontmatter, and the retro queue is exactly the plans still missing that link — every `status: done` plan with `retro: null`. The workdir is the vault root; every `booping playbook-state` / `booping playbook-transition` call passes `--target retrospectives/{slug}.md`, so state lives in that file and a stopped run is resumable.
 
 ### Multiple plans in one run
 
 A retro can cover more than one plan. `intake` offers every other queued plan — `status: done` with `retro: null` — as **include**, **postpone** (leave it queued), or **skip**.
 
-The written retrospective carries `plan:` (the primary), `plans:` as a YAML list (even for a single plan) and a `goal_verdicts:` mapping with your per-plan verdict, so a multi-plan retro records each plan's outcome separately. Every covered plan points back through its own `retro:` key.
+The written retrospective carries `plan:` (the primary), `plans:` as a YAML list (even for a single plan) and a `goal_verdicts:` mapping with your per-plan verdict. Every covered plan points back through its own `retro:` key.
 
 ### Skipping the retro
 
-Some plans are not worth a retrospective — a stale split stub, a trivial change you already understand. Pick **skip** in the per-plan prompt: the `drop-plan` script stamps `retro: skipped` on that plan, which takes it out of the queue for good. Its `status:` stays `done` — nothing about the plan lifecycle changes. Use it deliberately: a skipped plan contributes nothing to the lesson loop.
+Some plans are not worth a retrospective — a stale split stub, a trivial change you already understand. Pick **skip** in the per-plan prompt: the `drop-plan` script stamps `retro: skipped` on that plan, taking it out of the queue for good; its `status:` stays `done`. Use it deliberately — a skipped plan contributes nothing to the lesson loop.
 
 ## Best practices
 
 ### Shit in, shit out
 
-The retro is only as honest as your answers. The run asks targeted questions and gives you a structure to fill, but it cannot invent insight you did not surface. If you breeze through with "fine, fine, ship it", the retro records nothing useful and [learn](learn.md) has nothing to compress into a lesson.
-
-You are responsible for thinking about what should change. The playbook helps you write it down.
+The retro is only as honest as your answers — the run gives you targeted questions and a structure to fill, but it cannot invent insight you did not surface. Breeze through with "fine, fine, ship it" and the retro records nothing useful, leaving [learn](learn.md) nothing to compress into a lesson.
 
 In practice:
 
 - Take the interview seriously even when the plan went well — the durable lessons often come from successful sprints, not just painful ones.
 - If a friction point is hard to name, describe the symptom rather than skip the question. Learn can work from "the agent kept re-reading the same three files before each milestone" — it cannot work from "context was annoying".
-- Distinguish "this plan was unusual" from "this is how I want booping to behave from now on". Only the second category is worth a lesson.
+- Distinguish "this plan was unusual" from "this is how I want booping to behave from now on". Only the second is worth a lesson.
 
 ## Reviewing the retro file
 
-Read the written retrospective before letting [learn](learn.md) act on it. The goal is to separate **durable findings** from **one-off complaints**.
+Read the written retrospective before letting [learn](learn.md) act on it, separating **durable findings** from **one-off complaints**.
 
 What to keep:
 

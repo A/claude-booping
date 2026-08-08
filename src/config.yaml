@@ -120,7 +120,16 @@ core:
             - fail
             - cancelled
         sort: "-created"
-        columns: [status, title, summary, active_minutes, models]
+        columns:
+          - status
+          - title
+          - summary
+          - metrics_active_minutes
+          - metrics_models
+          - metrics_tokens_input
+          - metrics_tokens_output
+          - metrics_tokens_cache_creation
+          - metrics_tokens_cache_read
 
   develop_playbook:
     git:
@@ -262,8 +271,12 @@ core:
               - summary
               - created
               - completed
-              - active_minutes
-              - models
+              - metrics_active_minutes
+              - metrics_models
+              - metrics_tokens_input
+              - metrics_tokens_output
+              - metrics_tokens_cache_creation
+              - metrics_tokens_cache_read
             sort:
               - property: created
                 direction: DESC

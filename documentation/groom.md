@@ -10,18 +10,24 @@ Grooming is a **playbook**, not a skill — it is driven by [`/playbook`](playbo
 
 ## What it does
 
-The playbook walks a request through its own run states — `framing` → `researching` → `drafting` → `cross-reviewing` → `presenting` → `awaiting-approval` → `ready-for-dev` — declared in `playbooks/groom/playbook.yaml`'s `states:` block. Two loopbacks exist: `drafting → researching` when the design needs blast radius the research pass missed, and `awaiting-approval → drafting` when your change request touches the plan itself. The output is a plan directory whose `index.md` carries YAML frontmatter that the rest of the loop (`develop`, `retro`, `learn`) reads. The plan directory doubles as the playbook's run workdir, so a groom run is **resumable**: its run state lives in the same `index.md`.
+Run states: `framing` → `researching` → `drafting` → `cross-reviewing` → `presenting` → `awaiting-approval` → `ready-for-dev`. Two loopbacks: `drafting → researching` when the design needs blast radius the research pass missed, and `awaiting-approval → drafting` when your change request touches the plan itself.
+
+Almost every step runs in your session — inline, or assisted, meaning heavy reads go to the research agent, which returns a bounded summary. The one exception is `cross-review`, which hands the drafted plan to a second-model reviewer and does nothing unless you name one. `present`, near the end of the run, is the run's single approval gate.
+
+The output is a plan directory `~/Claude/{project}/plans/{slug}/` whose `index.md` carries the plan and the YAML frontmatter the rest of the loop (`develop`, `retro`, `learn`) reads. The intake briefing and any web-research notes land beside it, so everything the run gathered stays with the plan. The directory also doubles as the run workdir, which makes a groom run **resumable**: its run state lives in the same `index.md`.
+
+A plan is always a directory: `core.plans.glob` resolves `plans/*/index.md` and nothing else. A vault still holding flat `plans/{slug}.md` files from an older release converts them by running `/playbook migrate`.
 
 Six steps, in dependency order:
 
 | Step | What it does |
 |------|--------------|
-| `intake` | Clarify the request, settle scope, create the plan directory and its identity frontmatter |
-| `research-codebase` | Map the blast radius — files, modules, integrations, prior art (heavy reads delegated to `booping-researcher`) |
-| `research-web` | Verify package versions, image tags, API endpoints and CLI flags against current docs |
+| `intake` | Clarify the request, settle scope, create the plan directory with its briefing and identity frontmatter |
+| `research-codebase` | Map the blast radius — files, modules, integrations, prior art (assisted: heavy reads go to the research agent) |
+| `research-web` | Check external practice where the design is uncertain, and verify package versions, image tags, API endpoints and CLI flags against current docs |
 | `draft-plan` | Design with you in conversation, then write the plan body against a plan template |
-| `cross-review` | Second-model review of the written plan; findings only, no writes (skipped when no reviewer is configured) |
-| `present` | Present approach, milestones and SP totals; the run's single review gate |
+| `cross-review` | Hand the drafted plan to a second-model reviewer for severity findings — skipped unless `core.groom_playbook.cross_review_agent` names one (unset by default) |
+| `present` | Present approach, milestones and SP totals; the run's single approval gate |
 
 Design work happens in conversation inside `draft-plan` — refinement and decomposition are part of drafting, not separate steps.
 
@@ -34,7 +40,7 @@ Design work happens in conversation inside `draft-plan` — refinement and decom
 Bare invocation picks up whatever you have been discussing in the current session. Name a parked plan or an existing draft to keep iterating on it:
 
 ```text
-/playbook groom — continue plans/20260430-11-20_documentation-site/index.md, here's feedback to address
+/playbook groom — continue plans/202604301120_documentation-site/index.md, here's feedback to address
 ```
 
 Everything you say in the invocation reaches `intake` verbatim.
@@ -43,7 +49,7 @@ Everything you say in the invocation reaches `intake` verbatim.
 
 ### More detail in the prompt = sharper plan
 
-The playbook works from your request plus the codebase plus accumulated lessons. The request is the only knob fully under your control, so the more concrete it is, the less the run has to guess.
+The playbook works from your request, the codebase, and accumulated lessons. The request is the only knob fully under your control — the more concrete it is, the less the run has to guess.
 
 Brief request — lots of room for misalignment:
 
@@ -60,17 +66,14 @@ Return 429 with Retry-After. No new middleware framework — extend the
 existing one in apps/api/middleware/.
 ```
 
-The detailed version costs you 30 seconds of typing and saves a full revision cycle.
-
 ### Free-text extras
 
 Useful things to mention up front:
 
 - **Stop after each milestone** — tell the develop playbook (later) to pause between milestones for review; groom records this as a plan note.
-- **Search the web** — ask for package versions, image tags, or API endpoints to be verified against current docs before drafting.
 - **Reference a template** — "use the bug-investigation template" selects a specific plan template.
 
-Branch selection is **not** groom's job: the branch is picked and confirmed by the [develop playbook](develop.md)'s `provision` step.
+Branch selection is **not** groom's job — the [develop playbook](develop.md)'s `provision` step picks and confirms it.
 
 ### Define your own plan templates
 
@@ -80,7 +83,7 @@ See [Vault](vault.md) for the directory layout.
 
 ## Reviewing the plan
 
-`present` is the run's **only** review gate. The plan is not yet ready for development — you are the gate.
+`present` is the run's **only** review gate — the plan is not ready for development until you approve it.
 
 What to check before approving:
 
@@ -88,13 +91,12 @@ What to check before approving:
 - **Milestones cover the goal end-to-end.** No silent gaps, no "and then ..." vagueness in the last milestone.
 - **Tasks are sized honestly.** No 5-SP tasks except deliberate research spikes (see Story points).
 - **Definitions of done are verifiable.** Each task DoD checkbox is something you can mechanically confirm — not "code looks good".
-- **Cross-review findings are addressed.** Every `CRITICAL` finding is folded into the plan or recorded as an explicit deferral in the Risk register.
 
 Approve explicitly ("looks good", "ship it") to move the plan to `ready-for-dev`, groom's terminal status and the queue the [develop playbook](develop.md) claims from. A change request touching architecture, scope, milestones, tasks or estimates sends the run back to `drafting`.
 
 ## Story points
 
-booping uses a 1–5 scale for per-task estimates, rendered into the playbook from `src/config.yaml`:
+booping uses a 1–5 scale for per-task estimates, set in `src/config.yaml`:
 
 - **1** — Simple text/config change, no risk.
 - **2** — Simple task, predictable, no risk.
@@ -109,18 +111,6 @@ Two thresholds drive the playbook's behaviour, both configurable:
 
 Both thresholds are ceilings, not velocity targets. A 12-SP plan is fine; a 38-SP plan is the trigger to consider a split.
 
-## Cross-review
-
-`cross-review` is a **detached** step: a second model reads the written plan and returns severity findings only — it never writes. The reviewer is whatever agent `core.groom_playbook.cross_review_agent` names in config; with none configured (the plugin default) the step's summary and body both render as skipped and the run advances straight past it.
-
-Disposing of findings is the runner's job, before the run advances:
-
-- **`CRITICAL`** — folded into the plan, or recorded as an explicit deferral in `## Risk register`.
-- **`RISK`** — folded in unless it reopens a call you already settled.
-- **`NOTE`** — at the runner's discretion.
-
-A finding that reopens a settled design call is folded in nowhere — it sends the run back to `drafting`.
-
 ## Config
 
 The playbook reads these keys from `src/config.yaml`. See [Project config](project_config.md) for the deep-merge override mechanics; per-project tweaks live in `~/Claude/{project}/config.yaml`.
@@ -129,6 +119,5 @@ The playbook reads these keys from `src/config.yaml`. See [Project config](proje
 - **`core.sprint.redecompose_threshold`** — per-task SP value at or above which the task must be re-decomposed.
 - **`core.sprint.scale`** — the 1–5 SP definitions (each a `{sp, meaning}` entry).
 - **`core.task_types`** — list of `{type, description, doc_uri}` entries (`feature`, `bug`, `refactoring`). The request is classified against this list; the matching `doc_uri` lazy-loads detailed guidance for that task type.
-- **`core.groom_playbook.cross_review_agent`** — the agent that performs the detached cross-review; `null` (the default) → the step is skipped.
-- **`core.research_agent`** — the agent the two research steps delegate their bulk reads to (default `booping:booping-researcher`). Shared across playbooks, so it sits directly under `core`.
-- **`core.groom_playbook.agents`** — the delegation table rendered into the playbook.
+- **`core.groom_playbook.cross_review_agent`** — the agent that cross-reviews the drafted plan. `null` by default, which skips the `cross-reviewing` step entirely.
+- **`core.research_agent`** — the agent assisted steps hand their bulk reads to (default `booping:booping-researcher`). Shared across playbooks, so it sits directly under `core`.
