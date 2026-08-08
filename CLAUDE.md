@@ -11,7 +11,7 @@ One shipped skill (`/playbook`); everything procedural is a **playbook** it driv
 - `just snapshots` — diff committed playbook reports against a fresh hermetic render (writes nothing). `just snapshots-accept [playbook]` — the **only** writer of the committed reports.
 - `just mdcheck` — structural rule checks over the rendered reports. Needs the `mdcheck` binary: `cargo install markdown-checker` (the crate named `mdcheck` is unrelated).
 - `just ci` — everything CI runs, in order: `lint typecheck pytest snapshots mdcheck`. Run before committing.
-- `just eval|smoke|regress <playbook>/<step>` (or `all`) — promptfoo eval suites; `just suites` lists them. Runs on subscription auth (`claude -p`), never in CI; each run posts a sticky PR comment and an `evals` commit status via `bin/eval-pr-comment.sh` (`EVAL_PR=0` opts out).
+- `just eval|smoke|regress <playbook>/<step>` (or `all`) — promptfoo eval suites; `just suites` lists them. Runs on subscription auth (`claude -p`), never in CI; each run posts a sticky PR comment and an `evals` commit status via `scripts/eval-pr-comment.sh` (`EVAL_PR=0` opts out).
 - `just docs` / `just docs-serve` — build / preview the public docs site.
 - `bin/booping <subcommand> --help` — the single runtime CLI: `render`, `render-playbook`, `playbook-state`, `playbook-transition`, `query`, `config-get`, `marker-set`, `scaffold`, `frontmatter-update`, `session-time`, `build`, `debug-context`, `debug-template`.
 - `bin/booping-create-project <name> [--local [dir]]` — scaffold a project vault + `.booping` marker.

@@ -55,26 +55,26 @@ snapshots-render *args:
 # run promptfoo eval over a suite — see `just suites`
 [no-exit-message]
 eval *args:
-    @JUST_RECIPE=eval bin/eval-run.sh - {{ args }}
+    @JUST_RECIPE=eval scripts/eval-run.sh - {{ args }}
 
 # run promptfoo eval, then render a markdown report (status, per-check reasons) in glow
 [no-exit-message]
 eval-md *args:
-    @JUST_RECIPE=eval-md bin/eval-md.sh {{ args }}
+    @JUST_RECIPE=eval-md scripts/eval-md.sh {{ args }}
 
 # run only the deterministic tier — cheap, no judge calls
 [no-exit-message]
 smoke *args:
-    @JUST_RECIPE=smoke bin/eval-run.sh smoke {{ args }}
+    @JUST_RECIPE=smoke scripts/eval-run.sh smoke {{ args }}
 
 # run only the judged tier — the real signal, costs judge calls
 [no-exit-message]
 regress *args:
-    @JUST_RECIPE=regress bin/eval-run.sh regress {{ args }}
+    @JUST_RECIPE=regress scripts/eval-run.sh regress {{ args }}
 
 # list the eval suites by name
 suites:
-    @bin/eval-target.sh --list
+    @scripts/eval-target.sh --list
 
 # Build the documentation site (strict)
 docs:
