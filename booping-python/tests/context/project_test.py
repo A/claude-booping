@@ -158,6 +158,56 @@ def test_load_cwd_missing_booping_returns_none(tmp_path: Path) -> None:
     assert project is None
 
 
+def test_containment_resolves_vault_workdir(tmp_path: Path) -> None:
+    vault = tmp_path / "myproj"
+    workdir = vault / "docs"
+    workdir.mkdir(parents=True)
+    project = Project.load_cwd(start=workdir, home_dir=str(tmp_path))
+    assert project is not None
+    assert project.name == "myproj"
+    assert project.directory == vault
+    assert project.repo_directory is None
+    assert project.is_local_vault is False
+
+
+def test_containment_resolves_vault_root_itself(tmp_path: Path) -> None:
+    vault = tmp_path / "myproj"
+    vault.mkdir()
+    project = Project.load_cwd(start=vault, home_dir=str(tmp_path))
+    assert project is not None
+    assert project.name == "myproj"
+    assert project.directory == vault
+
+
+def test_containment_skips_home_dir_itself(tmp_path: Path) -> None:
+    assert Project.load_cwd(start=tmp_path, home_dir=str(tmp_path)) is None
+
+
+def test_containment_skips_underscore_roots(tmp_path: Path) -> None:
+    playbook_dir = tmp_path / "_playbooks" / "docs"
+    playbook_dir.mkdir(parents=True)
+    assert Project.load_cwd(start=playbook_dir, home_dir=str(tmp_path)) is None
+
+
+def test_containment_skips_hidden_dirs(tmp_path: Path) -> None:
+    hidden = tmp_path / ".trash" / "old"
+    hidden.mkdir(parents=True)
+    assert Project.load_cwd(start=hidden, home_dir=str(tmp_path)) is None
+
+
+def test_marker_wins_over_containment(tmp_path: Path) -> None:
+    # A repo-local vault nested under home_dir: the marker walk hits first.
+    repo = tmp_path / "myproj"
+    repo.mkdir()
+    (repo / ".booping").write_text("project_name: marked\nvault_path: ./booping\n")
+    inner = repo / "booping" / "plans"
+    inner.mkdir(parents=True)
+    project = Project.load_cwd(start=inner, home_dir=str(tmp_path))
+    assert project is not None
+    assert project.name == "marked"
+    assert project.repo_directory == repo
+
+
 def test_load_cwd_without_git_still_resolves(tmp_path: Path) -> None:
     # tmp_path has no .git — the repo directory is the marker's dir regardless.
     (tmp_path / ".booping").write_text("project_name: nogit\n")

@@ -48,7 +48,7 @@ def _run(args: argparse.Namespace) -> None:
     key, value = _parse_pair(args.pair)
 
     project = Project.load_cwd_configured()
-    if project is None:
+    if project is None or project.repo_directory is None:
         print("error: no .booping marker found from the current directory", file=sys.stderr)
         sys.exit(2)
 

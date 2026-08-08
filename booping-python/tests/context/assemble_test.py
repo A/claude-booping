@@ -170,6 +170,27 @@ def test_assemble_vault_override_pins_playbook_discovery(
     assert [pb.name for pb in ctx.playbooks] == ["local-only"]
 
 
+def test_assemble_vault_workdir_resolves_by_containment(
+    tmp_path: Path, isolated_xdg_config_home: Path
+) -> None:
+    """A start inside `home_dir/{project}/` resolves that vault — local playbooks
+    included — even though no `.booping` marker is reachable from it."""
+    plugin_root = get_fixture_path("plugin-root-minimal")
+    vault_base = tmp_path / "vaults"
+    _write_global(isolated_xdg_config_home, {"home_dir": str(vault_base)})
+    vault = vault_base / "myproj"
+    _write_playbook(vault, "local-docs")
+    workdir = vault / "docs"
+    workdir.mkdir()
+
+    ctx = Context.assemble(start=workdir, plugin_root=plugin_root)
+    assert ctx.project is not None
+    assert ctx.project.name == "myproj"
+    assert ctx.project.repo_directory is None
+    assert ctx.vault == vault
+    assert "local-docs" in [pb.name for pb in ctx.playbooks]
+
+
 def test_assemble_without_override_keeps_global_playbooks(
     tmp_path: Path, isolated_xdg_config_home: Path
 ) -> None:

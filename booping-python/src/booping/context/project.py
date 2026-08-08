@@ -10,13 +10,17 @@ from booping.context._yaml import safe_load_path
 class Project(BaseModel):
     name: str
     directory: Path
-    repo_directory: Path
+    # None when the project was resolved by vault containment — a workdir inside
+    # `home_dir/{project}/` identifies the vault but knows no repo.
+    repo_directory: Path | None = None
     # Watermark: everything at or below this id has been applied. -1 = nothing yet.
     latest_migration: int = -1
 
     @property
     def is_local_vault(self) -> bool:
         """True when the resolved vault lives under the repo (vs a ~/Claude vault)."""
+        if self.repo_directory is None:
+            return False
         return self.directory.resolve().is_relative_to(self.repo_directory.resolve())
 
     @classmethod
@@ -50,8 +54,13 @@ class Project(BaseModel):
         home_dir is the raw (unexpanded) vault-home string from config; it is the
         default vault base when the marker carries no `vault_path:`. Precedence:
         `.booping` `vault_path:` > `home_dir` > built-in default.
+
+        On a marker miss, a start inside `home_dir/{project}/` resolves that vault
+        by containment (repo unknown): a run workdir inside the vault must assemble
+        the same context — local playbooks included — as a repo workdir does.
         """
-        candidate = (start or Path.cwd()).resolve()
+        origin = (start or Path.cwd()).resolve()
+        candidate = origin
         while True:
             marker = candidate / ".booping"
             if marker.is_file():
@@ -67,8 +76,23 @@ class Project(BaseModel):
                 )
             parent = candidate.parent
             if parent == candidate:
-                return None
+                return _from_vault_containment(origin, home_dir)
             candidate = parent
+
+
+def _from_vault_containment(origin: Path, home_dir: str) -> Project | None:
+    """Resolve the project a path inside `home_dir/{project}/` belongs to, or None.
+
+    Underscore- and dot-prefixed first segments are the home_dir's own machinery
+    (`_playbooks/`, `_lessons/`, …), never a vault.
+    """
+    base = Path(home_dir).expanduser().resolve()
+    if not origin.is_relative_to(base) or origin == base:
+        return None
+    name = origin.relative_to(base).parts[0]
+    if name.startswith(("_", ".")) or not (base / name).is_dir():
+        return None
+    return Project(name=name, directory=base / name)
 
 
 def _resolve_vault_dir(
