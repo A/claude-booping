@@ -40,6 +40,7 @@ states:
             hooks:
               - frontmatter-update completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
               - "script stamp-session"
+              - "script stamp-active-time"
           - to: fail
             when: "an unrecoverable blocker at any point in the sprint, verification included, after two fix attempts on the same issue"
             gates:
@@ -48,6 +49,7 @@ states:
             hooks:
               - frontmatter-update completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
               - "script stamp-session"
+              - "script stamp-active-time"
       done:
         terminal: true
       fail:
