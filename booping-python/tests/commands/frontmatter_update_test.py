@@ -26,6 +26,22 @@ def _make_plan(tmp_path: Path, frontmatter: str, body: str = "# Body\n") -> Path
     return plan
 
 
+def _make_repo_with_commit(tmp_path: Path) -> Path:
+    """A git repo carrying one commit and a `.booping` marker, so it resolves as a project."""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
+    subprocess.run(
+        # Identity inline: CI runners carry no global git user.
+        ["git", "-c", "user.name=t", "-c", "user.email=t@e"]
+        + ["commit", "-q", "--allow-empty", "-m", "init"],
+        cwd=repo,
+        check=True,
+    )
+    (repo / ".booping").write_text("project_name: fixture-project\n")
+    return repo
+
+
 def _ns(**kwargs: object) -> argparse.Namespace:
     """Create an argparse.Namespace from keyword arguments."""
     return argparse.Namespace(**kwargs)  # type: ignore[arg-type]
@@ -186,9 +202,17 @@ class TestFrontmatterUpdateCLI:
         fm = pyyaml.safe_load(fm_text)
         datetime.strptime(fm["planned"], "%Y-%m-%d %H:%M")  # noqa: DTZ007
 
-    def test_sets_commit_with_the_git_macro(self, tmp_path: Path) -> None:
+    def test_sets_commit_with_the_git_macro(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         macros.clear_cache()
-        plan = _make_plan(tmp_path, "title: Foo\nstatus: backlog")
+        # `cwd: repo` resolves against the attached project, so the test brings its own
+        # repo and marker rather than leaning on pytest's cwd landing inside a checkout
+        # that happens to be an attached booping project — `.booping` is gitignored, so
+        # CI has none.
+        repo = _make_repo_with_commit(tmp_path)
+        monkeypatch.chdir(repo)
+        plan = _make_plan(repo, "title: Foo\nstatus: backlog")
 
         fu_cmd._run(  # type: ignore[reportPrivateUsage]
             _ns(plan=plan, pairs=["commit={{ macro('core.macros.git_commit') }}"])
