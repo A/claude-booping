@@ -188,6 +188,66 @@ class TestHookTokenising:
 # ── CLI integration ──────────────────────────────────────────────────────
 
 
+class TestScalarTyping:
+    def _write(self, tmp_path: Path, pair: str) -> str:
+        plan = _make_plan(tmp_path, "title: Foo")
+        fu_cmd._run(_ns(plan=plan, pairs=[pair]))  # type: ignore[reportPrivateUsage]
+        _, fm_text, _ = _split_result(plan.read_text())
+        return fm_text
+
+    def test_integer_lands_unquoted(self, tmp_path: Path) -> None:
+        assert "sp: 23\n" in self._write(tmp_path, "sp=23")
+
+    def test_integer_round_trips_as_an_integer(self, tmp_path: Path) -> None:
+        import yaml as pyyaml
+
+        assert pyyaml.safe_load(self._write(tmp_path, "sp=23"))["sp"] == 23
+
+    def test_float_lands_unquoted(self, tmp_path: Path) -> None:
+        assert "ratio: 1.5\n" in self._write(tmp_path, "ratio=1.5")
+
+    def test_null_lands_as_yaml_null(self, tmp_path: Path) -> None:
+        assert "retro: null\n" in self._write(tmp_path, "retro=null")
+
+    def test_boolean_lands_unquoted(self, tmp_path: Path) -> None:
+        assert "blocked: true\n" in self._write(tmp_path, "blocked=true")
+
+    def test_partly_numeric_value_stays_a_string(self, tmp_path: Path) -> None:
+        import yaml as pyyaml
+
+        fm_text = self._write(tmp_path, "summary=23 things")
+        assert "summary: 23 things\n" in fm_text
+        assert pyyaml.safe_load(fm_text)["summary"] == "23 things"
+
+    def test_yaml_1_1_boolean_word_keeps_its_quotes(self, tmp_path: Path) -> None:
+        import yaml as pyyaml
+
+        fm_text = self._write(tmp_path, "summary=yes")
+        assert "summary: 'yes'\n" in fm_text
+        assert pyyaml.safe_load(fm_text)["summary"] == "yes"
+
+    @pytest.mark.parametrize(
+        "value",
+        ["@lead", "*star", "&anchor", "!bang", "%pct", "`tick", "a: b", " padded "],
+    )
+    def test_syntax_sensitive_string_keeps_its_quotes(self, tmp_path: Path, value: str) -> None:
+        import yaml as pyyaml
+
+        fm_text = self._write(tmp_path, f"summary={value}")
+        assert pyyaml.safe_load(fm_text)["summary"] == value
+
+    def test_macro_rendered_date_stays_a_string(self, tmp_path: Path) -> None:
+        import yaml as pyyaml
+
+        plan = _make_plan(tmp_path, "title: Foo")
+        fu_cmd._run(_ns(plan=plan, pairs=[f"completed={NOW_EXPR}"]))  # type: ignore[reportPrivateUsage]
+
+        _, fm_text, _ = _split_result(plan.read_text())
+        completed = pyyaml.safe_load(fm_text)["completed"]
+        assert isinstance(completed, str)
+        datetime.strptime(completed, "%Y-%m-%d %H:%M")  # noqa: DTZ007
+
+
 class TestFrontmatterUpdateCLI:
     def test_sets_planned_with_date_macro(self, tmp_path: Path) -> None:
         plan = _make_plan(tmp_path, "title: Foo\nstatus: backlog")
@@ -414,6 +474,72 @@ class TestFrontmatterUpdateCLI:
             fu_cmd._run(_ns(plan=plan, pairs=[], removals=[], appends=[]))  # type: ignore[reportPrivateUsage]
         assert excinfo.value.code == 1
         assert "nothing to do" in capsys.readouterr().err
+
+    def test_prints_a_unified_diff_of_the_change(
+        self, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+    ) -> None:
+        plan = _make_plan(tmp_path, "title: Foo\nstatus: backlog")
+
+        fu_cmd._run(_ns(plan=plan, pairs=["status=in-progress"]))  # type: ignore[reportPrivateUsage]
+
+        lines = capsys.readouterr().out.splitlines()
+        assert lines[0] == f"--- {plan}"
+        assert lines[1] == f"+++ {plan}"
+        assert lines[2].startswith("@@")
+        assert "-status: backlog" in lines
+        assert "+status: in-progress" in lines
+        assert "+title: Foo" not in lines
+
+    def test_unchanged_value_prints_nothing(
+        self, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+    ) -> None:
+        plan = _make_plan(tmp_path, "title: Foo\nstatus: backlog")
+
+        fu_cmd._run(_ns(plan=plan, pairs=["status=backlog"]))  # type: ignore[reportPrivateUsage]
+
+        assert capsys.readouterr().out == ""
+
+    def test_idempotent_append_prints_nothing(
+        self, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+    ) -> None:
+        plan = _make_plan(tmp_path, "title: Foo\nsessions:\n- abc-123")
+
+        fu_cmd._run(_ns(plan=plan, pairs=[], appends=["sessions=abc-123"]))  # type: ignore[reportPrivateUsage]
+
+        assert capsys.readouterr().out == ""
+
+    def test_append_prints_the_added_line(
+        self, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+    ) -> None:
+        plan = _make_plan(tmp_path, "title: Foo\nsessions:\n- abc-123")
+
+        fu_cmd._run(_ns(plan=plan, pairs=[], appends=["sessions=def-456"]))  # type: ignore[reportPrivateUsage]
+
+        lines = capsys.readouterr().out.splitlines()
+        assert lines[0] == f"--- {plan}"
+        assert "+- def-456" in lines
+
+    def test_removal_prints_the_dropped_line(
+        self, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+    ) -> None:
+        plan = _make_plan(tmp_path, "title: Foo\nbusiness_goal: x\nstatus: backlog")
+
+        fu_cmd._run(_ns(plan=plan, pairs=[], removals=["business_goal"]))  # type: ignore[reportPrivateUsage]
+
+        lines = capsys.readouterr().out.splitlines()
+        assert lines[0] == f"--- {plan}"
+        assert "-business_goal: x" in lines
+
+    def test_summary_stays_on_stderr(
+        self, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+    ) -> None:
+        plan = _make_plan(tmp_path, "title: Foo\nstatus: backlog")
+
+        fu_cmd._run(_ns(plan=plan, pairs=["status=in-progress"]))  # type: ignore[reportPrivateUsage]
+
+        captured = capsys.readouterr()
+        assert captured.err == f"updated {plan}: status=in-progress\n"
+        assert "updated" not in captured.out
 
     def test_logs_to_booping_log(self, tmp_path: Path) -> None:
         """Log line appended to .booping.log."""
