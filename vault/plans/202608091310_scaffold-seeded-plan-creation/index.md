@@ -183,7 +183,7 @@ Callers: `groom/intake` (new), `setup/setup-project`, `playbook-authoring/scaffo
 
 ---
 
-### M5: Documentation — 2 SP | pending
+### M5: Documentation — 2 SP | done
 
 **Goal**: the scaffold documentation describes three trees and the stdout contract both writers now share.
 
@@ -191,15 +191,15 @@ Callers: `groom/intake` (new), `setup/setup-project`, `playbook-authoring/scaffo
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 5.1 | Update the scaffold section — the third tree and its `--set` variables, the unified-diff stdout contract shared with `frontmatter-update`, the per-file skip rule and what `--force` now means — and correct the "two scaffold trees" count | `documentation/project_config.md` | 2 | pending |
+| 5.1 | Update the scaffold section — the third tree and its `--set` variables, the unified-diff stdout contract shared with `frontmatter-update`, the per-file skip rule and what `--force` now means — and correct the "two scaffold trees" count | `documentation/project_config.md` | 2 | done |
 
 #### Task 5.1 DoD
 
-- [ ] `core.groom_playbook.scaffold` is listed beside the other two trees with its `--set` variables.
-- [ ] The stdout contract is documented as a unified diff per changed file, silent on unchanged files.
-- [ ] The skip-existing rule and `--force`'s meaning are stated.
-- [ ] The sentence counting "the two scaffold trees" reads three.
-- [ ] `just docs` builds without a broken-link warning on the edited page.
+- [x] `core.groom_playbook.scaffold` is listed beside the other two trees with its `--set` variables.
+- [x] The stdout contract is documented as a unified diff per changed file, silent on unchanged files.
+- [x] The skip-existing rule and `--force`'s meaning are stated.
+- [x] The sentence counting "the two scaffold trees" reads three.
+- [x] `just docs` builds without a broken-link warning on the edited page.
 
 ---
 
