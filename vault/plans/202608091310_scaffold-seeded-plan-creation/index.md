@@ -127,7 +127,7 @@ Callers: `groom/intake` (new), `setup/setup-project`, `playbook-authoring/scaffo
 
 ---
 
-### M3: The groom scaffold tree and intake wiring — 4 SP | pending
+### M3: The groom scaffold tree and intake wiring — 4 SP | done
 
 **Goal**: `groom/intake` creates the plan directory with one `booping scaffold` call, and the created `index.md` carries a real `created` and a real `commit`.
 
@@ -135,24 +135,24 @@ Callers: `groom/intake` (new), `setup/setup-project`, `playbook-authoring/scaffo
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 3.1 | Add `core.groom_playbook.scaffold` — `index.md` carrying the identity frontmatter with `title`/`type` from `--set`, `created` from `core.macros.date`, `commit` from `core.macros.git_commit`, every other key at its documented empty value, plus the H1; and an empty `request.md` | `src/config.yaml` | 2 | pending |
-| 3.2 | Rewrite intake's plan-creation section to invoke the tree and act on the printed receipt, dropping the frontmatter block and its include | `playbooks/groom/intake/fable-5.md` | 2 | pending |
+| 3.1 | Add `core.groom_playbook.scaffold` — `index.md` carrying the identity frontmatter with `title`/`type` from `--set`, `created` from `core.macros.date`, `commit` from `core.macros.git_commit`, every other key at its documented empty value, plus the H1; and an empty `request.md` | `src/config.yaml` | 2 | done |
+| 3.2 | Rewrite intake's plan-creation section to invoke the tree and act on the printed receipt, dropping the frontmatter block and its include | `playbooks/groom/intake/fable-5.md` | 2 | done |
 
 #### Task 3.1 DoD
 
-- [ ] The tree renders with `--set title=` and `--set type=` and no other variables.
-- [ ] `created` and `commit` come from macros; neither is a placeholder.
-- [ ] `status:` is present as `framing`, keeping `playbook-transition`'s initial-status bootstrap satisfied.
-- [ ] `retro:` is `null`, since the retro candidates query filters on it.
-- [ ] `sp`, `related_to`, `planned`, `started`, `completed` are `null`; `code_reviews` and `sessions` are `[]`.
-- [ ] A title containing a colon or a quote renders as valid YAML — the tree is raw text templating with no emitter to lean on, so the value is quoted at the template level (`{{ title | tojson }}`).
+- [x] The tree renders with `--set title=` and `--set type=` and no other variables.
+- [x] `created` and `commit` come from macros; neither is a placeholder.
+- [x] `status:` is present as `framing`, keeping `playbook-transition`'s initial-status bootstrap satisfied.
+- [x] `retro:` is `null`, since the retro candidates query filters on it.
+- [x] `sp`, `related_to`, `planned`, `started`, `completed` are `null`; `code_reviews` and `sessions` are `[]`.
+- [x] A title containing a colon or a quote renders as valid YAML — the tree is raw text templating with no emitter to lean on, so the value is quoted at the template level (`{{ title | tojson }}`).
 
 #### Task 3.2 DoD
 
-- [ ] The step body names the exact invocation, with the plan directory assembled from the preamble's rendered `Plan dir:` line.
-- [ ] The body states that the printed receipt is the confirmation and the created file is not read back.
-- [ ] A target reported as already existing is handled by the step's own judgement, with no branch prescribed in the prompt.
-- [ ] The `{% include "_partials/plan_frontmatter.md" %}` line is gone.
+- [x] The step body names the exact invocation, with the plan directory assembled from the preamble's rendered `Plan dir:` line.
+- [x] The body states that the printed receipt is the confirmation and the created file is not read back.
+- [x] A target reported as already existing is handled by the step's own judgement, with no branch prescribed in the prompt.
+- [x] The `{% include "_partials/plan_frontmatter.md" %}` line is gone.
 
 ---
 
