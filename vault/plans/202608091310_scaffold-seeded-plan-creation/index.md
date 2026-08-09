@@ -1,13 +1,13 @@
 ---
 title: Scaffold-seeded plan creation and a scaffold receipt contract
 type: feature
-status: in-progress
+status: done
 sp: 24
 related_to: null
 created: 2026-08-09 13:10
 planned: null
 started: 2026-08-09 13:46
-completed: null
+completed: 2026-08-09 14:47
 code_reviews: []
 sessions:
 - b1cf1fe7-f86c-4335-9434-c95e92d29a8c
@@ -19,6 +19,13 @@ summary: groom seeds index.md via booping scaffold; scaffold and
   frontmatter-update both answer with a unified diff
 commit: 1bcc6229c7e8e013baec69c28747135663eb23e0
 reviewed_at: 2026-08-09 13:44
+metrics_active_minutes: 60
+metrics_models:
+- claude-opus-5
+metrics_tokens_input: 1467
+metrics_tokens_output: 207632
+metrics_tokens_cache_creation: 1098675
+metrics_tokens_cache_read: 29169559
 ---
 
 # Scaffold-seeded plan creation and a scaffold receipt contract
