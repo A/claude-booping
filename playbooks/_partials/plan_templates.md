@@ -12,3 +12,23 @@ most of the milestones land on. A near miss loses on that surface, not on taste.
 {%- else %}
 _No plan templates found — author one before drafting._
 {%- endif %}
+Each template is one file with two top-level sections:
+
+- `# Plan Body` — the structure the plan is written against, section for section, in its order.
+  None dropped, none extra.
+- `# Quality Checklist` — walked item by item against the plan as written, before the plan is
+  returned. An unsatisfied item is fixed, not reported as satisfied.
+
+Read the chosen file before drafting: neither section can be guessed from its catalogue line.
+
+When no entry fits, author one at `{project}/plan_templates/{name}.md` first, then draft against
+it — frontmatter (`name`, `description`) plus both top-level sections, generic for its surface
+class: placeholders throughout, no path, milestone or story-point value from this run baked in.
+Never draft into a bad-fit template, never improvise a shape and name a template after it.
+
+The plan is the run's `index.md`, already carrying its frontmatter and title — the body goes under
+them. `sp` and `summary` are yours; write them with:
+
+```
+booping frontmatter-update {plan}/index.md sp={total} summary="{one line}"
+```

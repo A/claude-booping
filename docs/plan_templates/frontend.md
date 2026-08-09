@@ -25,7 +25,7 @@ How the new UI fits the component tree, state flow, and data-loading boundaries.
 
 **Goal**: one sentence — what changes in the UI after this milestone.
 
-**Verify**: exact commands (typecheck, tests, visual check) or observable outcomes.
+**Verify**: exact commands (scoped tests, a component's typecheck, visual check) or observable outcomes, limited to what this milestone changed. Whole-repo gates (full test suite, repo-wide lint/typecheck, an aggregate `ci` target) run once in Final Verification, never per milestone.
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
@@ -72,7 +72,7 @@ Name sections to update, or state "No CLAUDE.md changes required — {justificat
 
 ## Frontmatter
 
-- [ ] Frontmatter matches [plan frontmatter](${CLAUDE_PLUGIN_ROOT}/docs/template_plan_frontmatter.md).
+- [ ] `title` matches the plan's H1 and `type` is the task type chosen at intake.
 - [ ] `sp` equals the sum of per-task SP across milestones.
 
 ## Content
@@ -81,7 +81,7 @@ Name sections to update, or state "No CLAUDE.md changes required — {justificat
 - [ ] DoD bullets are observable in the browser or a test runner.
 - [ ] Every task lists exact files.
 - [ ] Every task DoD uses checkboxes, not prose.
-- [ ] Every milestone has a `Verify` step.
+- [ ] Every milestone has a `Verify` step scoped to what it changed — no whole-repo gate (full suite, repo-wide lint/typecheck, aggregate `ci` target); those belong to Final Verification.
 - [ ] Each milestone executable from a fresh session with only the plan as context.
 
 ## Anti-patterns (must be absent)
