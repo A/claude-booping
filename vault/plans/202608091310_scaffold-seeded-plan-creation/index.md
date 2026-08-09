@@ -89,7 +89,7 @@ Callers: `groom/intake` (new), `setup/setup-project`, `playbook-authoring/scaffo
 
 ---
 
-### M2: The same receipt from `frontmatter-update` — 5 SP | pending
+### M2: The same receipt from `frontmatter-update` — 5 SP | done
 
 **Goal**: `booping frontmatter-update` prints the diff of the change it made, in the same shape scaffold prints, on stdout.
 
@@ -97,33 +97,33 @@ Callers: `groom/intake` (new), `setup/setup-project`, `playbook-authoring/scaffo
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 2.1 | Print the file's before/after diff through the shared helper on stdout, keeping the existing `updated {path}: {keys}` summary on stderr | `booping-python/src/booping/commands/frontmatter_update.py` | 2 | pending |
-| 2.2 | Write scalar values with their YAML type — an integer, float, boolean or null value lands unquoted, everything else stays a string | `booping-python/src/booping/commands/frontmatter_update.py` | 2 | pending |
-| 2.3 | Cover the diff, the no-op silence, the scalar typing and the `--remove` / `--append` paths in tests | `booping-python/tests/commands/frontmatter_update_test.py` | 1 | pending |
+| 2.1 | Print the file's before/after diff through the shared helper on stdout, keeping the existing `updated {path}: {keys}` summary on stderr | `booping-python/src/booping/commands/frontmatter_update.py` | 2 | done |
+| 2.2 | Write scalar values with their YAML type — an integer, float, boolean or null value lands unquoted, everything else stays a string | `booping-python/src/booping/commands/frontmatter_update.py` | 2 | done |
+| 2.3 | Cover the diff, the no-op silence, the scalar typing and the `--remove` / `--append` paths in tests | `booping-python/tests/commands/frontmatter_update_test.py` | 1 | done |
 
 #### Task 2.1 DoD
 
-- [ ] A key set to a new value prints a unified diff of the frontmatter lines that changed, and nothing else.
-- [ ] Setting a key to the value it already holds prints nothing on stdout.
-- [ ] An `--append` of an already-present value prints nothing on stdout.
-- [ ] The summary line stays on stderr, so a hook's captured output is unchanged.
-- [ ] Exit codes are unchanged: `1` for a missing plan or a malformed pair, `2` for a write failure.
+- [x] A key set to a new value prints a unified diff of the frontmatter lines that changed, and nothing else.
+- [x] Setting a key to the value it already holds prints nothing on stdout.
+- [x] An `--append` of an already-present value prints nothing on stdout.
+- [x] The summary line stays on stderr, so a hook's captured output is unchanged.
+- [x] Exit codes are unchanged: `1` for a missing plan or a malformed pair, `2` for a write failure.
 
 #### Task 2.2 DoD
 
-- [ ] The rule is round-trip, not de-quoting: the value is parsed into the Python type its plain YAML form would load as, and the emitter is left to decide quoting. No quote-stripping pass, and no value that reloads as a different type than the one it was written with.
-- [ ] `sp=23` writes `sp: 23`, not `sp: '23'`, matching how every existing plan stores it.
-- [ ] `retro=null` writes a YAML null, and a boolean value writes unquoted.
-- [ ] A value that only looks numeric in part (`summary=23 things`) stays a string.
-- [ ] A string whose plain form would reload as another type keeps its quotes — `summary=yes` writes `'yes'`, since bare `yes` reloads as a boolean under the YAML 1.1 resolver ruamel uses.
-- [ ] A string needing quotes for syntax keeps them: a leading `@`, `*`, `&`, `!`, `%` or backtick, a colon-space inside the value, or leading or trailing whitespace.
-- [ ] A macro-rendered value (`completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"`) still writes as a string, so the date keys hooks stamp are unaffected.
+- [x] The rule is round-trip, not de-quoting: the value is parsed into the Python type its plain YAML form would load as, and the emitter is left to decide quoting. No quote-stripping pass, and no value that reloads as a different type than the one it was written with.
+- [x] `sp=23` writes `sp: 23`, not `sp: '23'`, matching how every existing plan stores it.
+- [x] `retro=null` writes a YAML null, and a boolean value writes unquoted.
+- [x] A value that only looks numeric in part (`summary=23 things`) stays a string.
+- [x] A string whose plain form would reload as another type keeps its quotes — `summary=yes` writes `'yes'`, since bare `yes` reloads as a boolean under the YAML 1.1 resolver ruamel uses.
+- [x] A string needing quotes for syntax keeps them: a leading `@`, `*`, `&`, `!`, `%` or backtick, a colon-space inside the value, or leading or trailing whitespace.
+- [x] A macro-rendered value (`completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"`) still writes as a string, so the date keys hooks stamp are unaffected.
 
 #### Task 2.3 DoD
 
-- [ ] Each of the behaviours in 2.1 and 2.2 has its own test.
-- [ ] The tests assert the diff's shape, not just that output is non-empty.
-- [ ] A regression test pins `sp` round-tripping as an integer.
+- [x] Each of the behaviours in 2.1 and 2.2 has its own test.
+- [x] The tests assert the diff's shape, not just that output is non-empty.
+- [x] A regression test pins `sp` round-tripping as an integer.
 
 ---
 
