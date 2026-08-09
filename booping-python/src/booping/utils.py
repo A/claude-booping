@@ -1,5 +1,26 @@
+import difflib
 from collections.abc import Sequence
+from pathlib import Path
 from typing import Any, cast
+
+
+def diff_report(path: Path, previous: str | None, current: str) -> str:
+    """Unified diff of *previous* against *current* for *path*, empty when identical.
+
+    ``previous`` is ``None`` when the file did not exist, which renders the
+    from-file as ``/dev/null``.
+    """
+    if previous == current:
+        return ""
+    before = previous or ""
+    lines = difflib.unified_diff(
+        before.splitlines(),
+        current.splitlines(),
+        fromfile="/dev/null" if previous is None else str(path),
+        tofile=str(path),
+        lineterm="",
+    )
+    return "\n".join(lines)
 
 
 class PathError(Exception):
