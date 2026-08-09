@@ -156,7 +156,7 @@ Callers: `groom/intake` (new), `setup/setup-project`, `playbook-authoring/scaffo
 
 ---
 
-### M4: Retire the frontmatter duplicates — 5 SP | pending
+### M4: Retire the frontmatter duplicates — 5 SP | done
 
 **Goal**: the plan frontmatter shape exists only in `core.groom_playbook.scaffold`, and draft-plan writes its keys through `booping frontmatter-update`.
 
@@ -164,22 +164,22 @@ Callers: `groom/intake` (new), `setup/setup-project`, `playbook-authoring/scaffo
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 4.1 | Delete `_partials/plan_frontmatter.md` and `_partials/plan_structure.md`, folding the surviving template mechanics — the two top-level template sections, and authoring a new template when none fits — into `_partials/plan_templates.md`, which also names the `frontmatter-update` invocation that writes the drafter's keys | `playbooks/_partials/plan_frontmatter.md`, `playbooks/_partials/plan_structure.md`, `playbooks/_partials/plan_templates.md`, `playbooks/groom/draft-plan/opus-5.md` | 3 | pending |
-| 4.2 | Delete `docs/template_plan_frontmatter.md` and repoint the Quality Checklist line in all five plan templates at the observable property instead of the deleted file | `docs/template_plan_frontmatter.md`, `docs/plan_templates/backend.md`, `docs/plan_templates/cli.md`, `docs/plan_templates/claude_skill.md`, `docs/plan_templates/documentation.md`, `docs/plan_templates/frontend.md` | 2 | pending |
+| 4.1 | Delete `_partials/plan_frontmatter.md` and `_partials/plan_structure.md`, folding the surviving template mechanics — the two top-level template sections, and authoring a new template when none fits — into `_partials/plan_templates.md`, which also names the `frontmatter-update` invocation that writes the drafter's keys | `playbooks/_partials/plan_frontmatter.md`, `playbooks/_partials/plan_structure.md`, `playbooks/_partials/plan_templates.md`, `playbooks/groom/draft-plan/opus-5.md` | 3 | done |
+| 4.2 | Delete `docs/template_plan_frontmatter.md` and repoint the Quality Checklist line in all five plan templates at the observable property instead of the deleted file | `docs/template_plan_frontmatter.md`, `docs/plan_templates/backend.md`, `docs/plan_templates/cli.md`, `docs/plan_templates/claude_skill.md`, `docs/plan_templates/documentation.md`, `docs/plan_templates/frontend.md` | 2 | done |
 
 #### Task 4.1 DoD
 
-- [ ] `playbooks/_partials/plan_frontmatter.md` and `playbooks/_partials/plan_structure.md` are deleted, and `draft-plan/opus-5.md` includes only `_partials/plan_templates.md`.
-- [ ] `plan_templates.md` carries the `# Plan Body` / `# Quality Checklist` mechanics and the author-a-new-template rule, unchanged in substance.
-- [ ] `plan_templates.md` states that `sp` and `summary` are the drafter's and are written with `booping frontmatter-update {plan}/index.md sp=… summary="…"`.
-- [ ] No partial contains a frontmatter yaml block or an H1-matching-title rule.
-- [ ] `bin/booping render-playbook groom` exits 0 and its Draft Plan section renders without a template error.
+- [x] `playbooks/_partials/plan_frontmatter.md` and `playbooks/_partials/plan_structure.md` are deleted, and `draft-plan/opus-5.md` includes only `_partials/plan_templates.md`.
+- [x] `plan_templates.md` carries the `# Plan Body` / `# Quality Checklist` mechanics and the author-a-new-template rule, unchanged in substance.
+- [x] `plan_templates.md` states that `sp` and `summary` are the drafter's and are written with `booping frontmatter-update {plan}/index.md sp=… summary="…"`.
+- [x] No partial contains a frontmatter yaml block or an H1-matching-title rule.
+- [x] `bin/booping render-playbook groom` exits 0 and its Draft Plan section renders without a template error.
 
 #### Task 4.2 DoD
 
-- [ ] `docs/template_plan_frontmatter.md` is deleted.
-- [ ] No file references `template_plan_frontmatter`.
-- [ ] Each plan template's frontmatter checklist item asserts a property that can be checked against the plan itself.
+- [x] `docs/template_plan_frontmatter.md` is deleted.
+- [x] No file references `template_plan_frontmatter`.
+- [x] Each plan template's frontmatter checklist item asserts a property that can be checked against the plan itself.
 
 ---
 
