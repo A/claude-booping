@@ -93,10 +93,9 @@ Check for context, in case a request is related to already existing plan.
 
 
 
-## Task Types
+## Task Type
 
-Exactly one per plan. Pick the row the request meets, load its guidance before framing, and rule
-the siblings out by name.
+Exactly one per plan. Pick the row the request meets, load its guidance before framing and pick one.
 
 | type | fits when | guidance |
 | --- | --- | --- |
@@ -105,30 +104,17 @@ the siblings out by name.
 | `refactoring` | Internal structure change with no user-visible behavior change. Needs current-vs-target design, migration steps, and a no-behavior-change DoD. | [guidance](${CLAUDE_PLUGIN_ROOT}/docs/task_refactoring.md) |
 
 
-## The plan's identity frontmatter
+## The plan directory
 
-Create `index.md` carrying the shape below. `created` is the run's clock to the minute, not just
-the date — copy the value verbatim. `status` is the run machine's and is written by
-`booping playbook-transition`, never by hand.
+Create it in one call, with `{plan-dir}` the preamble's `Plan dir:` line resolved against the
+vault and `{title}` the plan's descriptive title:
 
----
-title: {Descriptive Title}
-type: feature | bug | refactoring
-status: framing                  # the run machine's status — written by `booping playbook-transition`, never by hand
-sp: {total}                      # sprint total, summed from milestone totals
-split_from: null                 # sibling stubs only: path to the primary plan this was split from
-created: 1970-01-01 00:00        # when the plan directory was created — the run's clock, to the minute
-planned: null                    # date keys — owned by the run machine's edge hooks, same shape as `created`
-started: null
-completed: null
-code_reviews: null               # list of code-review artifact paths, appended by the code-review playbook
-sessions: []                     # Claude Code session ids, appended by the groom and develop edge hooks
-retro: null
-goal: null
-summary: ""                      # one-line plan intent for search + plan listings (≤ ~120 chars)
-commit: null
----
+```
+booping scaffold core.groom_playbook.scaffold {plan-dir} --set title="{title}" --set type={type}
+```
 
+The printed diff is the confirmation — do not read the created files back. A target reported as
+already existing was not written; decide what that means for this run.
 
 ## The brief — written to `request.md`, posted in chat
 
@@ -160,8 +146,7 @@ conversation already carries — the blast-radius map and the external ground th
 - **Draft design with the user**: architecture, pattern choices, data / API / config surface
   changes, open trade-offs. Iterate until aligned before writing.
 - **Write the plan**: pick a plan template from [Available plan templates](#available-plan-templates)
-  whose name + description matches the work, then produce the plan against its `# Plan Body` — see
-  [Plan Structure](#plan-structure).
+  whose name + description matches the work, then produce the plan against its `# Plan Body`.
 - **Write `summary`**: set the `summary:` frontmatter to a single line of plain plan intent — ≤ ~120
   chars / ~20 words, no prose, no trailing period needed. It feeds search and the `sprints.md`
   snapshot.
@@ -176,58 +161,6 @@ conversation already carries — the blast-radius map and the external ground th
   may decline and keep one plan.
 - User approval is **explicit** — "looks good" is enough; silence is not.
 
-## Plan Structure
-
-The plan is the run's `index.md`: frontmatter, then the title, then the body.
-
-### Frontmatter
-
-```yaml
----
-title: {Descriptive Title}
-type: feature | bug | refactoring
-status: framing                  # the run machine's status — written by `booping playbook-transition`, never by hand
-sp: {total}                      # sprint total, summed from milestone totals
-split_from: null                 # sibling stubs only: path to the primary plan this was split from
-created: 1970-01-01 00:00        # when the plan directory was created — the run's clock, to the minute
-planned: null                    # date keys — owned by the run machine's edge hooks, same shape as `created`
-started: null
-completed: null
-code_reviews: null               # list of code-review artifact paths, appended by the code-review playbook
-sessions: []                     # Claude Code session ids, appended by the groom and develop edge hooks
-retro: null
-goal: null
-summary: ""                      # one-line plan intent for search + plan listings (≤ ~120 chars)
-commit: null
----
-
-```
-
-`sp` and `summary` are yours to write. `title` and `type` are intake's — correct them only where
-the design changed them. `status` and every date and outcome key belong to the run machine and its hooks: whatever intake
-left `null` stays `null`.
-
-### Title
-
-One H1 matching `title:`, and the only H1 in the file.
-
-### Body + Quality Checklist
-
-Each plan template is one file with two top-level sections:
-
-- `# Plan Body` — the structure the plan is written against, section for section, in its order.
-  None dropped, none extra.
-- `# Quality Checklist` — walked item by item against the plan as written, before the plan is
-  returned. An unsatisfied item is fixed, not reported as satisfied.
-
-Read the chosen file before drafting: neither section can be guessed from its catalogue line.
-
-When no entry fits, author one at `{project}/plan_templates/{name}.md` first, then draft against
-it — frontmatter (`name`, `description`) plus both top-level sections, generic for its surface
-class: placeholders throughout, no path, milestone or story-point value from this run baked in.
-Never draft into a bad-fit template, never improvise a shape and name a template after it.
-
-
 ## Available plan templates
 
 Pick the entry whose name and description match the **dominant surface** of the work — the surface
@@ -241,6 +174,26 @@ most of the milestones land on. A near miss loses on that surface, not on taste.
 | `documentation` | core | Authoring or restructuring user-facing documentation — multi-page sites, READMEs, cross-linked guides, with optional static-site build pipeline (MkDocs, Jekyll, Docusaurus, etc.). | `${CLAUDE_PLUGIN_ROOT}/docs/plan_templates/documentation.md` |
 | `frontend` | core | Frontend feature work — UI components, state, routing, styling, accessibility. Stack-agnostic (React, Svelte, Leptos, Vue, vanilla). | `${CLAUDE_PLUGIN_ROOT}/docs/plan_templates/frontend.md` |
 
+Each template is one file with two top-level sections:
+
+- `# Plan Body` — the structure the plan is written against, section for section, in its order.
+  None dropped, none extra.
+- `# Quality Checklist` — walked item by item against the plan as written, before the plan is
+  returned. An unsatisfied item is fixed, not reported as satisfied.
+
+Read the chosen file before drafting: neither section can be guessed from its catalogue line.
+
+When no entry fits, author one at `{project}/plan_templates/{name}.md` first, then draft against
+it — frontmatter (`name`, `description`) plus both top-level sections, generic for its surface
+class: placeholders throughout, no path, milestone or story-point value from this run baked in.
+Never draft into a bad-fit template, never improvise a shape and name a template after it.
+
+The plan is the run's `index.md`, already carrying its frontmatter and title — the body goes under
+them. `sp` and `summary` are yours; write them with:
+
+```
+booping frontmatter-update {plan}/index.md sp={total} summary="{one line}"
+```
 
 
 ## Sprint planning

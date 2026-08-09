@@ -2,6 +2,15 @@
 
 Notable user-visible changes, newest first, in the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format; versions follow [semantic versioning](https://semver.org/).
 
+## Unreleased
+
+### Changed
+
+- `booping scaffold` and `booping frontmatter-update` now answer with a unified diff of every file they changed, and say nothing about a file whose content did not move — a rendered prompt can act on the receipt instead of reading the file back.
+- `booping scaffold` decides per file rather than per destination: an existing target is skipped and named, `--force` overwrites the files the tree names, and a destination that already holds part of the tree no longer aborts the run.
+- `booping frontmatter-update` writes a scalar with its YAML type, so `sp=23` lands as an integer; a string whose plain form would reload as something else keeps its quotes.
+- Groom seeds the plan directory from the new `core.groom_playbook.scaffold` tree, so a plan carries a real `created` and the repo's `commit` from the moment it exists, and the frontmatter shape lives in the config alone.
+
 ## v1.0.0 — 2026-08-08
 
 Everything booping does became a playbook. `/playbook` is now the only skill the plugin ships, procedures carry their own run state and resume across sessions, and retro and code review moved onto tracks of their own.
