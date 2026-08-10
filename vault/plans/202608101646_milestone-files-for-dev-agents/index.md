@@ -70,7 +70,7 @@ The milestone file is the only place a milestone's work is written down. `index.
 | 5 | Milestone state machine and table refresh | 4 | done |
 | 6 | Develop delegates paths, not bodies | 4 | done |
 | 7 | Downstream readers and documentation | 3 | done |
-| 8 | Reports, structure checks and eval fixtures | 2 | pending |
+| 8 | Reports, structure checks and eval fixtures | 2 | done |
 
 ---
 
@@ -281,7 +281,7 @@ The milestone file is the only place a milestone's work is written down. `index.
 
 ---
 
-### M8: Reports, structure checks and eval fixtures — 2 SP | pending
+### M8: Reports, structure checks and eval fixtures — 2 SP | done
 
 **Goal**: the committed playbook reports, structure rules and eval fixtures match the new plan shape.
 
@@ -291,18 +291,22 @@ The milestone file is the only place a milestone's work is written down. `index.
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 8.1 | Update the hermetic render fixture and eval fixtures to the multi-file plan shape, and adjust any `mdcheck` rule that asserts milestone structure inside `index.md`. | `playbooks/_fixtures/vault/`, `playbooks/groom/*/_fixtures/`, `playbooks/develop/*/_fixtures/`, `scripts/mdcheck.py` | 1 | pending |
-| 8.2 | Run `just snapshots`, read the diff for `groom` and `develop`, and report it for the user to accept; run `just ci` minus the snapshot-accept step and fix what it surfaces. | `playbooks/groom/_reports/output.md`, `playbooks/develop/_reports/output.md` (read-only) | 1 | pending |
+| 8.1 | Update the hermetic render fixture and eval fixtures to the multi-file plan shape, and adjust any `mdcheck` rule that asserts milestone structure inside `index.md`. | `playbooks/_fixtures/vault/`, `playbooks/groom/*/_fixtures/`, `playbooks/develop/*/_fixtures/`, `scripts/mdcheck.py` | 1 | done |
+| 8.2 | Run `just snapshots`, read the diff for `groom` and `develop`, and report it for the user to accept; run `just ci` minus the snapshot-accept step and fix what it surfaces. | `playbooks/groom/_reports/output.md`, `playbooks/develop/_reports/output.md` (read-only) | 1 | done |
 
 #### Task 8.1 DoD
 
-- [ ] Fixture plans carry `milestones/` with at least two milestone files and a generated index table.
-- [ ] `just mdcheck` passes against the rendered reports.
+- [x] Fixture plans carry `milestones/` with at least two milestone files and a generated index table.
+- [x] `just mdcheck` passes against the rendered reports.
 
 #### Task 8.2 DoD
 
-- [ ] The snapshot diff is reported to the user; `just snapshots-accept` is **not** run by the worker or the runner.
-- [ ] `just lint`, `just typecheck` and `just pytest` are green.
+- [x] The snapshot diff is reported to the user; `just snapshots-accept` is **not** run by the worker or the runner.
+- [x] `just lint`, `just typecheck` and `just pytest` are green.
+
+---
+
+**Note**: no `mdcheck` rule asserted milestone structure inside `index.md`, so `scripts/mdcheck.py` needed no change; no eval fixtures exist under `playbooks/groom/*/` or `playbooks/develop/*/`. `19700104-cache-warmup` deliberately keeps no `milestones/`, preserving the renderers' missing-`sp` branch.
 
 ---
 
