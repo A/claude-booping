@@ -10,7 +10,7 @@ from jinja2 import Environment, TemplateError
 
 from booping import logger
 from booping.context import Context
-from booping.context.scaffold import DirNode, FileNode, ScaffoldError, load
+from booping.context.scaffold import DirNode, FileNode, Node, ScaffoldError, check_name, load
 from booping.macros import parse_stub_overrides
 from booping.rendering import build_source_env
 from booping.utils import deep_merge, diff_report, parse_set_overrides
@@ -86,6 +86,15 @@ def _render_seed(env: Environment, node: FileNode) -> str:
         raise ScaffoldError(node.path, f"Jinja error in seed content: {exc}") from exc
 
 
+def _render_name(env: Environment, node: Node) -> str:
+    try:
+        name = env.from_string(node.name).render()
+    except TemplateError as exc:
+        raise ScaffoldError(node.path, f"Jinja error in filename: {exc}") from exc
+    check_name(name, node.path)
+    return name
+
+
 def _plan(root: DirNode, dest: Path, env: Environment) -> list[_Write]:
     """The full tree rendered into memory, parents before children — nothing is
     written until every node has parsed and rendered."""
@@ -93,7 +102,7 @@ def _plan(root: DirNode, dest: Path, env: Environment) -> list[_Write]:
 
     def walk(node: DirNode, base: Path) -> None:
         for child in node.children:
-            path = base / child.name
+            path = base / _render_name(env, child)
             if isinstance(child, DirNode):
                 writes.append(_Write(path, None))
                 walk(child, path)

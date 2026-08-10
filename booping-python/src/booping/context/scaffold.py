@@ -115,7 +115,12 @@ def _type_name(value: object) -> str:
     return type(value).__name__
 
 
-def _check_name(name: str, parent_path: str) -> None:
+def check_name(name: str, parent_path: str) -> None:
+    """Reject a filename that would escape the destination directory.
+
+    Public because the command re-runs it on the *rendered* name, which is what
+    finally hits the filesystem.
+    """
     if "/" in name or name in {".", ".."}:
         raise ScaffoldError(parent_path, f"unsafe filename key {name!r}")
 
@@ -124,7 +129,7 @@ def _parse_children(raw: dict[str, Any], path: str) -> list[Node]:
     children: list[Node] = []
     for key, value in raw.items():
         name = str(key)
-        _check_name(name, path)
+        check_name(name, path)
         children.append(parse_node(value, name, _join(path, name)))
     return children
 

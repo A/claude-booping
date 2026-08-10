@@ -323,6 +323,109 @@ def test_receipt_stdout(
         assert len(lines) == case.line_count
 
 
+# --- Task 1.1: filename keys render through the seed env --------------------
+
+
+class KeyCase(NamedTuple):
+    """One scaffold run whose tree names files by template: tree and `--set` in,
+    resulting paths and receipt out.
+
+    `files` maps a path relative to the destination to its expected content.
+    `stderr_contains` empty means the run is expected to succeed.
+    """
+
+    tree: str
+    set_pairs: tuple[str, ...]
+    files: dict[str, str]
+    summary: str | None = None
+    stderr_contains: tuple[str, ...] = ()
+    absent: tuple[str, ...] = ()
+
+
+KEY_CASES = [
+    pytest.param(
+        KeyCase(
+            tree='demo:\n  "{{ slug }}.md": "body\\n"\n',
+            set_pairs=("slug=my-plan",),
+            files={"my-plan.md": "body\n"},
+            summary="scaffolded 2 paths — 1 dirs created, 1 files created, 0 files overwritten",
+        ),
+        id="templated-file-key",
+    ),
+    pytest.param(
+        KeyCase(
+            tree='demo:\n  "{{ slug }}":\n    "{{ slug }}.md": "in {{ slug }}\\n"\n',
+            set_pairs=("slug=nested",),
+            files={"nested/nested.md": "in nested\n"},
+            summary="scaffolded 3 paths — 2 dirs created, 1 files created, 0 files overwritten",
+        ),
+        id="templated-dir-key-nests",
+    ),
+    pytest.param(
+        KeyCase(
+            tree='demo:\n  "index.md": "body\\n"\n',
+            set_pairs=("slug=unused",),
+            files={"index.md": "body\n"},
+            summary="scaffolded 2 paths — 1 dirs created, 1 files created, 0 files overwritten",
+        ),
+        id="literal-key-untouched",
+    ),
+    pytest.param(
+        KeyCase(
+            tree='demo:\n  "{{ slug }}.md": "body\\n"\n',
+            set_pairs=("slug=../escape",),
+            files={},
+            stderr_contains=("demo.{{ slug }}.md", "unsafe filename key", "'../escape.md'"),
+            absent=("../escape.md",),
+        ),
+        id="rendered-slash-is-rejected",
+    ),
+    pytest.param(
+        KeyCase(
+            tree='demo:\n  "{{ dots }}": "body\\n"\n',
+            set_pairs=("dots=..",),
+            files={},
+            stderr_contains=("unsafe filename key", "'..'"),
+        ),
+        id="rendered-dotdot-is-rejected",
+    ),
+    pytest.param(
+        KeyCase(
+            tree='demo:\n  "{{ slug }}.md": "body\\n"\n',
+            set_pairs=(),
+            files={".md": "body\n"},
+            summary="scaffolded 2 paths — 1 dirs created, 1 files created, 0 files overwritten",
+        ),
+        id="missing-set-variable-renders-empty",
+    ),
+]
+
+
+@pytest.mark.parametrize("case", KEY_CASES)
+def test_filename_keys_render(
+    case: KeyCase, tmp_path: Path, isolated_xdg_config_home: Path
+) -> None:
+    dest = tmp_path / "out"
+    args = [arg for pair in case.set_pairs for arg in ("--set", pair)]
+    result = _scaffold(
+        tmp_path, isolated_xdg_config_home, "demo", str(dest), *args, tree=case.tree
+    )
+
+    if case.stderr_contains:
+        assert result.returncode == 1
+        for fragment in case.stderr_contains:
+            assert fragment in result.stderr
+        assert not dest.exists()
+    else:
+        assert result.returncode == 0, result.stderr
+        assert result.stdout.splitlines()[-1] == case.summary
+
+    for rel, content in case.files.items():
+        assert (dest / rel).read_text() == content
+    for rel in case.absent:
+        assert not (dest / rel).exists()
+
+
 def test_unknown_config_path_exits_1(
     tmp_path: Path, isolated_xdg_config_home: Path
 ) -> None:
