@@ -31,8 +31,7 @@ Verification alone.
 
 ## Plan bookkeeping
 
-Read the plan off disk and check what the loop actually wrote, not what it reported: every task
-DoD checkbox `[x]`, every milestone status `done`. Each is its own check.
+Read the milestone files off disk — `plans/{slug}/{{ config.core.plans.milestones.glob }}` — and check what the loop actually wrote, not what it reported: every task DoD checkbox `[x]`, every milestone file's `status:` `done`. Each is its own check. `index.md`'s `## Milestones` table and its `sp` are derived from the milestone files by a transition hook, so neither is evidence of anything.
 
 ## Artifact
 
@@ -42,10 +41,10 @@ artifact.
 ## Return format
 
 ```markdown
-- `<command>`[ (plan Final Verification)] — PASS|FAIL — <evidence>
-- skipped: <tool or config file> — hook-enforced, fired at commit time
-- plan: DoD checkboxes — PASS|FAIL — <n of m [x], else the unticked ones by task>
-- plan: milestone statuses — PASS|FAIL — <all done, else the milestones still open>
-- verdict: green|red — <n> of <m> commands passing|failing, <n> of 2 plan checks passing|failing
+- `{command}`[ (plan Final Verification)] — PASS|FAIL — {evidence}
+- skipped: {tool or config file} — hook-enforced, fired at commit time
+- milestones: DoD checkboxes — PASS|FAIL — {n of m [x], else the unticked ones by milestone file and task}
+- milestones: statuses — PASS|FAIL — {all done, else the milestone files still open}
+- verdict: green|red — {n} of {m} commands passing|failing, {n} of 2 milestone checks passing|failing
 
 ```
