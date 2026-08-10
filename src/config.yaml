@@ -92,14 +92,14 @@ core:
     cross_review_agent: null
     # Scaffold tree materialised by
     # `booping scaffold core.groom_playbook.scaffold {vault}/plans/<slug> --set title=<title> --set type=<type>`.
-    # Sole definition of a plan's identity frontmatter. `title` goes through
-    # `tojson` because seed content is raw text with no YAML emitter behind it, so
-    # a colon or a quote in the title would otherwise break the document.
+    # Sole definition of a plan's identity frontmatter. The `--set` variables go
+    # through `tojson` because seed content is raw text with no YAML emitter behind
+    # it, so a colon, a quote or an omitted value would otherwise break the document.
     scaffold:
       index.md: |
         ---
         title: {{ title | tojson }}
-        type: {{ type }}
+        type: {{ (type | default('')) | tojson }}
         status: framing
         sp: null
         related_to: null
