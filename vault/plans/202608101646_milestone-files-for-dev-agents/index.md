@@ -1,13 +1,13 @@
 ---
 title: "Per-milestone plan files handed straight to dev agents"
 type: "feature"
-status: in-progress
+status: done
 sp: 25
 related_to: null
 created: 2026-08-10 16:47
 planned: null
 started: 2026-08-10 17:36
-completed: null
+completed: 2026-08-10 21:01
 code_reviews: []
 sessions:
 - 230b182a-514b-434f-926c-e4cb0ddab343
@@ -17,6 +17,13 @@ summary: Plans split into plans/{slug}/milestones/*.md — scaffold-seeded,
   state-machine status, develop briefs paths not bodies
 commit: 6da8ccabbf1010dc0d500c10b6620e7f28faf429
 reviewed_at: 2026-08-10 17:32
+metrics_active_minutes: 101
+metrics_models:
+- claude-opus-5
+metrics_tokens_input: 451
+metrics_tokens_output: 224891
+metrics_tokens_cache_creation: 992523
+metrics_tokens_cache_read: 23914940
 ---
 
 # Per-milestone plan files handed straight to dev agents
