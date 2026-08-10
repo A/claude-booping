@@ -6,9 +6,13 @@ Reference for every file and directory inside the vault. For the lifecycle that 
 
 ## `plans/`
 
-A plan is a directory `{YYYYMMDDHHMM}_{kebab-title}/` holding `index.md`, authored by the [groom playbook](groom.md) and executed by the [develop playbook](develop.md). Frontmatter (status, type, story points, a one-line `summary`) plus a body of milestones with tasks. Discovery follows the `core.plans.glob` config key — an ordered list of globs, `plans/*/index.md` as shipped — so a vault laying plans out differently edits that one key and every consumer follows.
+A plan is a directory `{YYYYMMDDHHMM}_{kebab-title}/` holding `index.md` and a `milestones/` subdirectory, authored by the [groom playbook](groom.md) and executed by the [develop playbook](develop.md). `index.md` carries the frontmatter (status, type, story points, a one-line `summary`), the approach and scope, and a `## Milestones` table; each milestone is a file of its own, `milestones/{nn}-{kebab-title}.md`, with frontmatter `id`, `title`, `sp`, `status`, `plan` and a body of tasks, Definition of Done checkboxes and Verify lines. That file is the contract a `booping-developer` agent is handed — develop passes its path, never its text, with `index.md` alongside as context.
+
+Discovery follows the `core.plans.glob` config key — an ordered list of globs, `plans/*/index.md` as shipped; the milestone files follow `core.plans.milestones.glob`, `milestones/*.md` relative to the plan directory. A vault laying plans out differently edits those keys and every consumer follows.
 
 A plan's `status:` is **run state**, not a shared lifecycle: `index.md` doubles as the run artifact of whichever playbook operates on it, so the vocabulary is the one that playbook declares in its own `states:` block. Groom ends at `ready-for-dev`; develop claims from there and ends at `done`, at `fail` when a blocker survives two fix attempts, or at `cancelled` when you call the run off. All three are terminal. Only `booping playbook-transition` writes the status, and it refuses any move the machine does not declare. See [Playbooks → Run state](playbook.md#run-state).
+
+Each milestone file's `status:` is run state as well — `pending → in-progress → done`, plus `blocked` off `in-progress` — written only by develop's transitions. Every such move regenerates `index.md`'s `## Milestones` table and re-sums the plan's story points from the milestone files, so neither is ever hand-kept.
 
 Two frontmatter keys carry a finished plan into the tracks that run beside the lifecycle. `retro:` is null until a retrospective covers the plan, then holds that file's path (or `skipped`) — that null is the retro queue. `code_reviews:` is a **list**: seeded null, then appended with the vault-relative path of every review that closes on the plan — review history, not a queue flag. The code-review queue is every plan at `done`, reviewed or not.
 

@@ -1,4 +1,4 @@
-Read each plan in the working set in full — for **context only**: scope, SP totals, dates, decisions on record. The plan is a reference for understanding issues that surface in the later steps, not a target for orchestrator analysis (no derived "decisions deviated" / "tech debt" / "coverage gap" findings — the user owns issue identification; the step does homework and suggests options).
+Read each plan in the working set in full — `index.md` plus `{{ config.core.plans.milestones.glob }}` beside it — for **context only**: scope, SP totals, dates, decisions on record. The plan is a reference for understanding issues that surface in the later steps, not a target for orchestrator analysis (no derived "decisions deviated" / "tech debt" / "coverage gap" findings — the user owns issue identification; the step does homework and suggests options).
 
 {{ tools.render('src/templates/_partials/_lessons.j2') }}
 

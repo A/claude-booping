@@ -10,7 +10,7 @@ Development is a **playbook**, not a skill — driven by [`/playbook`](playbook.
 
 ## What it does
 
-The playbook walks one plan through `awaiting-approval → ready-for-dev → in-progress → done`. Three outcomes are terminal: `done`, `fail` (the abort branch), and `cancelled` — a run you call off cancels formally from any non-terminal status, not by being abandoned. `done` closes the plan **immediately**, with no waiting status after it. Retro runs afterwards as its own track — start it with [`/playbook retro`](retro.md); it, like [code-review](code_review.md), picks the plan up through the `retro:` / `code_reviews:` frontmatter seams, each keeping its own run state in its own artifact, without moving the plan's status again. That vocabulary is develop's own — every playbook declares its own. Run state lives in the plan's own `index.md`, so a stopped sprint is **resumable**.
+The playbook walks one plan through `awaiting-approval → ready-for-dev → in-progress → done`. Three outcomes are terminal: `done`, `fail` (the abort branch), and `cancelled` — a run you call off cancels formally from any non-terminal status, not by being abandoned. `done` closes the plan **immediately**, with no waiting status after it. Retro runs afterwards as its own track — start it with [`/playbook retro`](retro.md); it, like [code-review](code_review.md), picks the plan up through the `retro:` / `code_reviews:` frontmatter seams, each keeping its own run state in its own artifact, without moving the plan's status again. That vocabulary is develop's own — every playbook declares its own. Run state lives in the plan's own `index.md`, and each milestone's `pending → in-progress → done` state in its own file under `milestones/`, so a stopped sprint is **resumable**.
 
 Five steps, in dependency order:
 
@@ -18,7 +18,7 @@ Five steps, in dependency order:
 |------|--------------|
 | `intake` | Resolve the plan — one entering at `awaiting-approval` is advanced to `ready-for-dev` without asking, since handing it to develop is the approval — and check the plan against the repo's current shape (drift) |
 | `provision` | Pick and confirm the sprint branch, then settle the milestone groups the briefings will cover |
-| `develop-loop` | Brief `booping-developer` per group, verify each milestone's DoD, commit as it goes |
+| `develop-loop` | Brief `booping-developer` per group — milestone files as the contract, `index.md` as context — verify each milestone's DoD, commit as it goes |
 | `verify` | Run the project's lint / typecheck / test gates plus the plan's Final Verification |
 | `wrap-up` | Closing commit, sprint report, transition to `done` |
 
@@ -35,7 +35,7 @@ Every milestone group runs in **one session**.
 
 Bare invocation lists the vault's plans at `ready-for-dev` or `awaiting-approval` and asks you to pick one. Name a plan path to target a specific one.
 
-To resume a sprint already `in-progress`, invoke the playbook against the same plan: `playbook-state` reports the frontier and the run picks up at the first milestone whose DoDs are not all `[x]`.
+To resume a sprint already `in-progress`, invoke the playbook against the same plan: `playbook-state` reports the frontier and the run picks up at the first milestone file whose `status:` is not `done`. Each transition also regenerates `index.md`'s `## Milestones` table and re-sums the plan's story points, so the table is a view, never the source of truth.
 
 ## Branch
 
