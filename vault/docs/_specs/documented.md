@@ -57,3 +57,8 @@ One row per work item every one of whose changes is documented; the survey's und
 | `plans/20260722-jinja-playbooks-composed-step-rendering/index.md` | stale — pre-August, predates the docs process |
 | `plans/20260722-playbooks-framework-pilot/index.md` | stale — pre-August, predates the docs process |
 | `plans/20260724-playbook-frontmatter-graph/index.md` | stale — pre-August, predates the docs process |
+| `plans/202608072133_learn-targets-consolidation/index.md` | `_runs/202608101223-docs-refresh.md` |
+| `plans/202608081300_session-time-metrics/index.md` | `_runs/202608101223-docs-refresh.md` |
+| `plans/202608081419_justfile-scripts-dead-code-cleanup/index.md` | `_runs/202608101223-docs-refresh.md` |
+| `plans/202608081523_session-metrics-idle-and-tokens/index.md` | `_runs/202608101223-docs-refresh.md` |
+| `plans/202608091310_scaffold-seeded-plan-creation/index.md` | `_runs/202608101223-docs-refresh.md` |
