@@ -64,7 +64,7 @@ The milestone file is the only place a milestone's work is written down. `index.
 | id | title | sp | status |
 | --- | --- | --- | --- |
 | 1 | Scaffold renders tree keys | 3 | done |
-| 2 | Milestone file contract in config | 3 | pending |
+| 2 | Milestone file contract in config | 3 | done |
 | 3 | Plan templates carry the milestone file | 3 | pending |
 | 4 | Groom writes milestone files | 3 | pending |
 | 5 | Milestone state machine and table refresh | 4 | pending |
@@ -101,7 +101,7 @@ The milestone file is the only place a milestone's work is written down. `index.
 
 ---
 
-### M2: Milestone file contract in config — 3 SP | pending
+### M2: Milestone file contract in config — 3 SP | done
 
 **Goal**: the milestone file's shape exists as schema — a scaffold tree that seeds it and a shared key describing where milestone files live and which columns project them.
 
@@ -111,21 +111,21 @@ The milestone file is the only place a milestone's work is written down. `index.
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 2.1 | Add `core.groom_playbook.milestone_scaffold` — key `{{ id }}-{{ slug }}.md`, seed body carrying frontmatter `id`, `title` (tojson), `sp`, `status: pending`, `plan` and the `# M{{ id }}: {{ title }}` heading plus the three required headings as empty sections; add `milestones: {type: dir}` to `core.groom_playbook.scaffold`. | `src/config.yaml` | 2 | pending |
-| 2.2 | Add the shared `core.plans.milestones` key — `glob: milestones/*.md`, `table_columns: [id, title, sp, status]` — read by both groom and develop, and a test that scaffolds the tree and queries the result. | `src/config.yaml`, `booping-python/tests/commands/scaffold_test.py` | 1 | pending |
+| 2.1 | Add `core.groom_playbook.milestone_scaffold` — key `{{ id }}-{{ slug }}.md`, seed body carrying frontmatter `id`, `title` (tojson), `sp`, `status: pending`, `plan` and the `# M{{ id }}: {{ title }}` heading plus the three required headings as empty sections; add `milestones: {type: dir}` to `core.groom_playbook.scaffold`. | `src/config.yaml` | 2 | done |
+| 2.2 | Add the shared `core.plans.milestones` key — `glob: milestones/*.md`, `table_columns: [id, title, sp, status]` — read by both groom and develop, and a test that scaffolds the tree and queries the result. | `src/config.yaml`, `booping-python/tests/commands/scaffold_test.py` | 1 | done |
 
 #### Task 2.1 DoD
 
-- [ ] Seeded milestone file frontmatter is exactly `id`, `title`, `sp`, `status`, `plan`, in that order, with `status: pending`.
-- [ ] Seeded body carries `# M{id}: {title}` and the empty `## Tasks`, `## Definition of Done`, `## Verify` headings — nothing else.
-- [ ] `title` goes through `tojson` like the plan scaffold's, so a colon or quote in a title cannot break the document.
-- [ ] A fresh `booping scaffold core.groom_playbook.scaffold` creates `milestones/` alongside `index.md` and `request.md`.
+- [x] Seeded milestone file frontmatter is exactly `id`, `title`, `sp`, `status`, `plan`, in that order, with `status: pending`.
+- [x] Seeded body carries `# M{id}: {title}` and the empty `## Tasks`, `## Definition of Done`, `## Verify` headings — nothing else.
+- [x] `title` goes through `tojson` like the plan scaffold's, so a colon or quote in a title cannot break the document.
+- [x] A fresh `booping scaffold core.groom_playbook.scaffold` creates `milestones/` alongside `index.md` and `request.md`.
 
 #### Task 2.2 DoD
 
-- [ ] `core.plans.milestones` sits directly under `core.plans` (shared by two playbooks, per the config placement rule) and is commented like its neighbours.
-- [ ] No column list, glob or directory name is restated in any prompt body — they render from this key.
-- [ ] The test asserts hand-written expected frontmatter and query row order.
+- [x] `core.plans.milestones` sits directly under `core.plans` (shared by two playbooks, per the config placement rule) and is commented like its neighbours.
+- [x] No column list, glob or directory name is restated in any prompt body — they render from this key.
+- [x] The test asserts hand-written expected frontmatter and query row order.
 
 ---
 
