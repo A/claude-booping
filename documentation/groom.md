@@ -12,24 +12,24 @@ Grooming is a **playbook**, not a skill — it is driven by [`/playbook`](playbo
 
 Run states: `framing` → `researching` → `drafting` → `cross-reviewing` → `presenting` → `awaiting-approval` → `ready-for-dev`. Two loopbacks: `drafting → researching` when the design needs blast radius the research pass missed, and `awaiting-approval → drafting` when your change request touches the plan itself.
 
-Almost every step runs in your session — inline, or assisted, meaning heavy reads go to the research agent, which returns a bounded summary. The one exception is `cross-review`, which hands the drafted plan to a second-model reviewer and does nothing unless you name one. `present`, near the end of the run, is the run's single approval gate.
+Almost every step runs in your session — inline, or assisted (heavy reads go to the research agent, which returns a bounded summary). The exception is `cross-review`, which hands the drafted plan to a second-model reviewer and does nothing unless you name one. `present` is the run's single approval gate.
 
-The output is a plan directory `~/Claude/{project}/plans/{slug}/` whose `index.md` carries the plan and the YAML frontmatter the rest of the loop (`develop`, `retro`, `learn`) reads. The intake briefing and any web-research notes land beside it, so everything the run gathered stays with the plan. The directory also doubles as the run workdir, which makes a groom run **resumable**: its run state lives in the same `index.md`.
+The output is a plan directory `~/Claude/{project}/plans/{slug}/` whose `index.md` carries the plan and the YAML frontmatter the rest of the loop (`develop`, `retro`, `learn`) reads. Groom creates the directory with one `booping scaffold` call from a config-declared tree, so the fresh `index.md` arrives complete — including a real `commit:` stamped with repo HEAD at creation. The intake briefing and any web-research notes land beside it. The directory doubles as the run workdir, so a groom run is **resumable**: its run state lives in the same `index.md`.
 
-A plan is always a directory: `core.plans.glob` resolves `plans/*/index.md` and nothing else. A vault still holding flat `plans/{slug}.md` files from an older release converts them by running `/playbook migrate`.
+A plan is always a directory: `core.plans.glob` resolves `plans/*/index.md` and nothing else. A vault still holding flat `plans/{slug}.md` files converts them with `/playbook migrate`.
 
 Six steps, in dependency order:
 
 | Step | What it does |
 |------|--------------|
-| `intake` | Clarify the request, settle scope, create the plan directory with its briefing and identity frontmatter |
+| `intake` | Clarify the request, settle scope, scaffold the plan directory — briefing, identity frontmatter, `commit:` at repo HEAD — with one `booping scaffold` call |
 | `research-codebase` | Map the blast radius — files, modules, integrations, prior art (assisted: heavy reads go to the research agent) |
 | `research-web` | Check external practice where the design is uncertain, and verify package versions, image tags, API endpoints and CLI flags against current docs |
 | `draft-plan` | Design with you in conversation, then write the plan body against a plan template |
 | `cross-review` | Hand the drafted plan to a second-model reviewer for severity findings — skipped unless `core.groom_playbook.cross_review_agent` names one (unset by default) |
 | `present` | Present approach, milestones and SP totals; the run's single approval gate |
 
-Design work happens in conversation inside `draft-plan` — refinement and decomposition are part of drafting, not separate steps.
+Refinement and decomposition happen inside `draft-plan`.
 
 ## Starting a run
 
@@ -70,7 +70,6 @@ existing one in apps/api/middleware/.
 
 Useful things to mention up front:
 
-- **Stop after each milestone** — tell the develop playbook (later) to pause between milestones for review; groom records this as a plan note.
 - **Reference a template** — "use the bug-investigation template" selects a specific plan template.
 
 Branch selection is **not** groom's job — the [develop playbook](develop.md)'s `provision` step picks and confirms it.
@@ -83,14 +82,12 @@ See [Vault](vault.md) for the directory layout.
 
 ## Reviewing the plan
 
-`present` is the run's **only** review gate — the plan is not ready for development until you approve it.
-
-What to check before approving:
+What to check before approving at `present`, the run's **only** review gate:
 
 - **Goal is sharp.** The `summary` in frontmatter matches the request, with no scope creep.
 - **Milestones cover the goal end-to-end.** No silent gaps, no "and then ..." vagueness in the last milestone.
 - **Tasks are sized honestly.** No 5-SP tasks except deliberate research spikes (see Story points).
-- **Definitions of done are verifiable.** Each task DoD checkbox is something you can mechanically confirm — not "code looks good".
+- **Definitions of done are verifiable.** Each DoD checkbox is mechanically confirmable — not "code looks good".
 
 Approve explicitly ("looks good", "ship it") to move the plan to `ready-for-dev`, groom's terminal status and the queue the [develop playbook](develop.md) claims from. A change request touching architecture, scope, milestones, tasks or estimates sends the run back to `drafting`.
 
