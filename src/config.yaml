@@ -62,6 +62,14 @@ core:
     # and the engine still honours list order for a vault declaring several.
     glob:
       - plans/*/index.md
+    # A milestone is a file inside its plan directory, seeded by
+    # `core.groom_playbook.milestone_scaffold`. Shared by groom (writes them,
+    # renders index.md's table) and develop (groups them, delegates their paths):
+    # `glob` is relative to the plan directory, `table_columns` is the projection
+    # index.md's `## Milestones` table is rendered with.
+    milestones:
+      glob: milestones/*.md
+      table_columns: [id, title, sp, status]
 
   sprint:
     default_threshold_sp: 35
@@ -116,6 +124,33 @@ core:
 
         # {{ title }}
       request.md: ""
+      milestones:
+        type: dir
+    # Scaffold tree materialised once per milestone by
+    # `booping scaffold core.groom_playbook.milestone_scaffold {vault}/plans/<slug>/milestones
+    #  --set id=<nn> --set slug=<kebab> --set title=<title> --set sp=<sp> --set plan=<plan-path>`.
+    # Sole definition of the milestone file's identity frontmatter and required
+    # headings; everything below them is the plan template's business.
+    # `id` is quoted like the rest: bare zero-padded ids are read back as octal
+    # ints (`01` -> 1) except where a digit forbids it (`08` stays a string),
+    # which mixes types in one column and scrambles `--sort id`.
+    milestone_scaffold:
+      "{{ id }}-{{ slug }}.md": |
+        ---
+        id: {{ id | tojson }}
+        title: {{ title | tojson }}
+        sp: {{ sp }}
+        status: pending
+        plan: {{ (plan | default('')) | tojson }}
+        ---
+
+        # M{{ id }}: {{ title }}
+
+        ## Tasks
+
+        ## Definition of Done
+
+        ## Verify
     agents:
       booping-researcher:
         internal: true

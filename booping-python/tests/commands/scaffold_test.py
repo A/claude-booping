@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import json
 import subprocess
 from pathlib import Path
 from typing import NamedTuple
 
 import pytest
+import yaml
 
 PLUGIN_ROOT = Path(__file__).resolve().parents[3]
 BOOPING_BIN = PLUGIN_ROOT / "bin" / "booping"
@@ -514,8 +516,6 @@ def test_core_playbook_scaffold_tree(tmp_path: Path) -> None:
 
 
 def test_core_vault_scaffold_seeds_sprints_base_fence(tmp_path: Path) -> None:
-    import yaml
-
     dest = tmp_path / "vault"
     result = _run("scaffold", "core.setup_playbook.scaffold", str(dest), cwd=tmp_path)
     assert result.returncode == 0, result.stderr
@@ -582,6 +582,82 @@ def test_core_vault_scaffold_non_empty_destination_fills_the_gaps(
     assert result.returncode == 0, result.stderr
     assert (dest / "sprints.md").exists()
     assert (dest / "stray.md").read_text() == "x\n"
+
+
+def test_core_milestone_scaffold_seeds_the_milestone_contract(tmp_path: Path) -> None:
+    plan = tmp_path / "vault" / "plans" / "demo"
+    result = _run(
+        "scaffold",
+        "core.groom_playbook.milestone_scaffold",
+        str(plan / "milestones"),
+        "--set",
+        "id=01",
+        "--set",
+        "slug=cli-surface",
+        "--set",
+        "title=Demo: it's \"fine\"",
+        "--set",
+        "sp=3",
+        "--set",
+        "plan=plans/demo/index.md",
+        cwd=tmp_path,
+    )
+    assert result.returncode == 0, result.stderr
+
+    text = (plan / "milestones" / "01-cli-surface.md").read_text()
+    front, body = text.split("---\n", 2)[1:]
+    assert list(yaml.safe_load(front).items()) == [
+        ("id", "01"),
+        ("title", "Demo: it's \"fine\""),
+        ("sp", 3),
+        ("status", "pending"),
+        ("plan", "plans/demo/index.md"),
+    ]
+    assert body == (
+        '\n# M01: Demo: it\'s "fine"\n'
+        "\n## Tasks\n"
+        "\n## Definition of Done\n"
+        "\n## Verify\n"
+    )
+
+
+def test_scaffolded_milestones_query_by_the_shared_key(tmp_path: Path) -> None:
+    vault = tmp_path / "vault"
+    plan = vault / "plans" / "demo"
+    result = _run(
+        "scaffold", "core.groom_playbook.scaffold", str(plan),
+        "--set", "title=Demo", "--set", "type=feature",
+        "--stub-macro", "core.macros.date=20260810-00-00",
+        "--stub-macro", "core.macros.git_commit=abc1234",
+        cwd=tmp_path,
+    )
+    assert result.returncode == 0, result.stderr
+    assert (plan / "milestones").is_dir()
+
+    # 01 vs 08: unquoted zero-padded ids would land as int and str in one column.
+    for id_, slug, sp in (("10", "third", "1"), ("01", "first", "3"), ("08", "second", "2")):
+        result = _run(
+            "scaffold", "core.groom_playbook.milestone_scaffold", str(plan / "milestones"),
+            "--set", f"id={id_}", "--set", f"slug={slug}", "--set", f"title=M {id_}",
+            "--set", f"sp={sp}", "--set", "plan=plans/demo/index.md", cwd=tmp_path,
+        )
+        assert result.returncode == 0, result.stderr
+
+    result = _run(
+        "query", "--project", str(vault), "--glob", "plans/demo/milestones/*.md",
+        "--columns", "id,title,sp,status", "--sort", "id", "--output", "json",
+        cwd=tmp_path,
+    )
+    assert result.returncode == 0, result.stderr
+    rows = [
+        {k: v for k, v in row.items() if k not in ("path", "slug")}
+        for row in json.loads(result.stdout)
+    ]
+    assert rows == [
+        {"id": "01", "title": "M 01", "sp": 3, "status": "pending"},
+        {"id": "08", "title": "M 08", "sp": 2, "status": "pending"},
+        {"id": "10", "title": "M 10", "sp": 1, "status": "pending"},
+    ]
 
 
 def test_logs_one_scaffold_line_when_project_attached(
