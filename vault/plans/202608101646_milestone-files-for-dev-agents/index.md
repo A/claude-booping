@@ -68,7 +68,7 @@ The milestone file is the only place a milestone's work is written down. `index.
 | 3 | Plan templates carry the milestone file | 3 | done |
 | 4 | Groom writes milestone files | 3 | done |
 | 5 | Milestone state machine and table refresh | 4 | done |
-| 6 | Develop delegates paths, not bodies | 4 | pending |
+| 6 | Develop delegates paths, not bodies | 4 | done |
 | 7 | Downstream readers and documentation | 3 | pending |
 | 8 | Reports, structure checks and eval fixtures | 2 | pending |
 
@@ -218,7 +218,7 @@ The milestone file is the only place a milestone's work is written down. `index.
 
 **Note**: the `{instance}` artifact needed a subgraph to reference the machine (engine gate at `booping-python/src/booping/context/playbook.py:405`), so `develop-loop` now sits in a one-step `milestones` subgraph repeating once per milestone file — user-confirmed. `booping playbook-state` keys instances as `01-demo.md`, `.md` included; cosmetic, left as is.
 
-### M6: Develop delegates paths, not bodies — 4 SP | pending
+### M6: Develop delegates paths, not bodies — 4 SP | done
 
 **Goal**: provision groups from milestone frontmatter, develop-loop briefs the worker with paths, and the worker reads its milestone file itself.
 
@@ -228,29 +228,31 @@ The milestone file is the only place a milestone's work is written down. `index.
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 6.1 | Rewrite `develop-loop`'s briefing composition: the briefing carries the plan `index.md` path, the group's milestone file paths, the branch and project conventions, and a bounded return contract — never a pasted milestone body; bookkeeping becomes flipping DoD checkboxes in the milestone file plus the milestone transition. | `playbooks/develop/develop-loop/base.md` | 2 | pending |
-| 6.2 | Update `provision` to enumerate and group milestones from `booping query` over the milestone files, and `verify` to check every milestone file's DoD checkboxes and `status: done` rather than reading `index.md`'s body. | `playbooks/develop/provision/base.md`, `playbooks/develop/verify/base.md` | 1 | pending |
-| 6.3 | Update the worker agent contract: the briefing names paths, the agent reads the milestone file as its authoritative contract and the plan index for scope boundary, and its report shape stays bounded to what the runner needs. | `src/templates/agents/booping-developer.md.j2` | 1 | pending |
+| 6.1 | Rewrite `develop-loop`'s briefing composition: the briefing carries the plan `index.md` path, the group's milestone file paths, the branch and project conventions, and a bounded return contract — never a pasted milestone body; bookkeeping becomes flipping DoD checkboxes in the milestone file plus the milestone transition. | `playbooks/develop/develop-loop/base.md` | 2 | done |
+| 6.2 | Update `provision` to enumerate and group milestones from `booping query` over the milestone files, and `verify` to check every milestone file's DoD checkboxes and `status: done` rather than reading `index.md`'s body. | `playbooks/develop/provision/base.md`, `playbooks/develop/verify/base.md` | 1 | done |
+| 6.3 | Update the worker agent contract: the briefing names paths, the agent reads the milestone file as its authoritative contract and the plan index for scope boundary, and its report shape stays bounded to what the runner needs. | `src/templates/agents/booping-developer.md.j2` | 1 | done |
 
 #### Task 6.1 DoD
 
-- [ ] The briefing spec lists exactly: plan index path, milestone file paths, branch, conventions, return contract — written out as the literal briefing block the loop composes, so the shape is fixed rather than described.
-- [ ] No instruction to inline goal, tasks, DoD or Verify text into the briefing survives.
-- [ ] Milestone status flips are stated as the transition invocation with `--state milestone --instance`, and checkbox flips are stated against the milestone file.
-- [ ] The one-worker-at-a-time and fresh-agent-per-group rules survive unchanged.
+- [x] The briefing spec lists exactly: plan index path, milestone file paths, branch, conventions, return contract — written out as the literal briefing block the loop composes, so the shape is fixed rather than described.
+- [x] No instruction to inline goal, tasks, DoD or Verify text into the briefing survives.
+- [x] Milestone status flips are stated as the transition invocation with `--state milestone --instance`, and checkbox flips are stated against the milestone file.
+- [x] The one-worker-at-a-time and fresh-agent-per-group rules survive unchanged.
 
 #### Task 6.2 DoD
 
-- [ ] Provision's grouping table is fed by the query, and `core.sprint.max_milestones_per_agent` still bounds a group.
-- [ ] Verify reads the milestone files and treats `index.md`'s table as derived.
+- [x] Provision's grouping table is fed by the query, and `core.sprint.max_milestones_per_agent` still bounds a group.
+- [x] Verify reads the milestone files and treats `index.md`'s table as derived.
 
 #### Task 6.3 DoD
 
-- [ ] The rendered agent body tells the worker which path is the contract and which is context, against the same briefing block M6.1 fixes — no new invocation flag or YAML key is introduced, only the briefing's `## Inputs` lines change.
-- [ ] The worker is still barred from vault writes — checkbox and status writes stay the runner's.
-- [ ] The report format stays a bounded per-milestone block.
+- [x] The rendered agent body tells the worker which path is the contract and which is context, against the same briefing block M6.1 fixes — no new invocation flag or YAML key is introduced, only the briefing's `## Inputs` lines change.
+- [x] The worker is still barred from vault writes — checkbox and status writes stay the runner's.
+- [x] The report format stays a bounded per-milestone block.
 
 ---
+
+**Note**: 6.3 landed in `src/templates/_partials/_developer_body.j2`, the only body `agents/booping-developer.md.j2` includes.
 
 ### M7: Downstream readers and documentation — 3 SP | pending
 
