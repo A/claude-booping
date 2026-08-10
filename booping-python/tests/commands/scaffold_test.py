@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import subprocess
 from pathlib import Path
+from typing import NamedTuple
+
+import pytest
 
 PLUGIN_ROOT = Path(__file__).resolve().parents[3]
 BOOPING_BIN = PLUGIN_ROOT / "bin" / "booping"
@@ -76,16 +79,29 @@ def test_existing_empty_destination_written_without_force(
     assert (dest / "README.md").exists()
 
 
-def test_non_empty_destination_without_force_exits_1_writing_nothing(
+def test_non_empty_destination_without_force_fills_the_gaps(
     tmp_path: Path, isolated_xdg_config_home: Path
 ) -> None:
     dest = tmp_path / "out"
     dest.mkdir()
     (dest / "keep.txt").write_text("keep\n")
     result = _scaffold(tmp_path, isolated_xdg_config_home, "demo", str(dest))
-    assert result.returncode == 1
-    assert str(dest) in result.stderr
-    assert sorted(p.name for p in dest.iterdir()) == ["keep.txt"]
+    assert result.returncode == 0, result.stderr
+    assert (dest / "README.md").read_text() == "hello \n"
+    assert (dest / "keep.txt").read_text() == "keep\n"
+
+
+def test_existing_file_without_force_is_skipped_and_reported(
+    tmp_path: Path, isolated_xdg_config_home: Path
+) -> None:
+    dest = tmp_path / "out"
+    dest.mkdir()
+    (dest / "README.md").write_text("old\n")
+    result = _scaffold(tmp_path, isolated_xdg_config_home, "demo", str(dest))
+    assert result.returncode == 0, result.stderr
+    assert (dest / "README.md").read_text() == "old\n"
+    assert f"skipped existing file {dest / 'README.md'}" in result.stdout.splitlines()
+    assert f"+++ {dest / 'README.md'}" not in result.stdout
 
 
 def test_force_overwrites_named_files_and_leaves_others(
@@ -196,22 +212,115 @@ def test_malformed_set_pair_exits_1_matching_render_message(
 # --- Task 2.3: report, exit codes, logging ---------------------------------
 
 
-def test_report_lines_and_summary(
-    tmp_path: Path, isolated_xdg_config_home: Path
+class ReceiptCase(NamedTuple):
+    """One scaffold receipt: destination state and flags in, stdout lines out.
+
+    Expected lines carry `{dest}`, formatted with the run's destination.
+    """
+
+    existing: dict[str, str]
+    args: tuple[str, ...]
+    head: tuple[str, ...]
+    contains: tuple[str, ...]
+    summary: str
+    tree: str = TREE
+    line_count: int | None = None
+
+
+RECEIPT_CASES = [
+    pytest.param(
+        ReceiptCase(
+            existing={"README.md": "old\n"},
+            args=("--force",),
+            head=(),
+            contains=(
+                "--- {dest}/README.md",
+                "+++ {dest}/README.md",
+                "-old",
+                "+hello ",
+                "--- /dev/null",
+                "+++ {dest}/src/main.py",
+                "+print(1)",
+                "created dir {dest}/_references",
+            ),
+            summary="scaffolded 4 paths — 2 dirs created, 1 files created, 1 files overwritten",
+        ),
+        id="diffs-dirs-and-summary",
+    ),
+    pytest.param(
+        ReceiptCase(
+            existing={},
+            args=(),
+            head=(
+                "--- /dev/null",
+                "+++ {dest}/a.txt",
+                "@@ -0,0 +1,2 @@",
+                "+one",
+                "+two",
+            ),
+            contains=(),
+            summary="scaffolded 1 paths — 0 dirs created, 1 files created, 0 files overwritten",
+            tree='demo:\n  a.txt: "one\\ntwo\\n"\n',
+        ),
+        id="new-file-is-all-additions-from-dev-null",
+    ),
+    pytest.param(
+        ReceiptCase(
+            existing={"a.txt": "one\nold\nthree\n"},
+            args=("--force",),
+            head=(
+                "--- {dest}/a.txt",
+                "+++ {dest}/a.txt",
+                "@@ -1,3 +1,3 @@",
+                " one",
+                "-old",
+                "+two",
+                " three",
+            ),
+            contains=(),
+            summary="scaffolded 1 paths — 0 dirs created, 0 files created, 1 files overwritten",
+            tree='demo:\n  a.txt: "one\\ntwo\\nthree\\n"\n',
+        ),
+        id="overwrite-carries-context-lines",
+    ),
+    pytest.param(
+        ReceiptCase(
+            existing={"a.txt": "same\n"},
+            args=("--force",),
+            head=(),
+            contains=(),
+            summary="scaffolded 0 paths — 0 dirs created, 0 files created, 0 files overwritten",
+            tree='demo:\n  a.txt: "same\\n"\n',
+            line_count=1,
+        ),
+        id="unchanged-file-prints-no-diff",
+    ),
+]
+
+
+@pytest.mark.parametrize("case", RECEIPT_CASES)
+def test_receipt_stdout(
+    case: ReceiptCase, tmp_path: Path, isolated_xdg_config_home: Path
 ) -> None:
     dest = tmp_path / "out"
     dest.mkdir()
-    (dest / "README.md").write_text("old\n")
-    result = _scaffold(tmp_path, isolated_xdg_config_home, "demo", str(dest), "--force")
-    assert result.returncode == 0, result.stderr
-    lines = result.stdout.splitlines()
-    assert f"overwrote file {dest / 'README.md'}" in lines
-    assert f"created file {dest / 'src' / 'main.py'}" in lines
-    assert f"created dir {dest / '_references'}" in lines
-    assert lines[-1] == (
-        "scaffolded 4 paths — 2 dirs created, 1 files created, 1 files overwritten"
+    for rel, body in case.existing.items():
+        (dest / rel).write_text(body)
+
+    result = _scaffold(
+        tmp_path, isolated_xdg_config_home, "demo", str(dest), *case.args, tree=case.tree
     )
+    assert result.returncode == 0, result.stderr
     assert result.stderr == ""
+
+    lines = result.stdout.splitlines()
+    head = [line.format(dest=dest) for line in case.head]
+    assert lines[: len(head)] == head
+    for line in case.contains:
+        assert line.format(dest=dest) in lines
+    assert lines[-1] == case.summary
+    if case.line_count is not None:
+        assert len(lines) == case.line_count
 
 
 def test_unknown_config_path_exits_1(
@@ -359,14 +468,17 @@ def test_core_vault_scaffold_seeds_sprints_base_fence(tmp_path: Path) -> None:
     assert view["sort"] == [{"property": "created", "direction": "DESC"}]
 
 
-def test_core_vault_scaffold_non_empty_destination_aborts(tmp_path: Path) -> None:
+def test_core_vault_scaffold_non_empty_destination_fills_the_gaps(
+    tmp_path: Path,
+) -> None:
     dest = tmp_path / "vault"
     dest.mkdir()
     (dest / "stray.md").write_text("x\n")
 
     result = _run("scaffold", "core.setup_playbook.scaffold", str(dest), cwd=tmp_path)
-    assert result.returncode == 1
-    assert not (dest / "sprints.md").exists()
+    assert result.returncode == 0, result.stderr
+    assert (dest / "sprints.md").exists()
+    assert (dest / "stray.md").read_text() == "x\n"
 
 
 def test_logs_one_scaffold_line_when_project_attached(

@@ -28,7 +28,7 @@ How this change fits the existing system. Integration points. Reference concrete
 
 **Goal**: one sentence — what changes after this milestone.
 
-**Verify**: exact commands (or observable outcomes) to confirm this milestone is done.
+**Verify**: exact commands (or observable outcomes) to confirm this milestone is done, scoped to what this milestone changed — a targeted test path, one invocation, a diff. Whole-repo gates (full test suite, repo-wide lint/typecheck, an aggregate `ci` target) run once in Final Verification, never per milestone.
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
@@ -123,7 +123,7 @@ Verify before leaving `in-spec`. Every item must be satisfiable by reading the p
 
 ## Frontmatter
 
-- [ ] Frontmatter matches [plan frontmatter](${CLAUDE_PLUGIN_ROOT}/docs/template_plan_frontmatter.md) — every required field present and shaped correctly.
+- [ ] `title` matches the plan's H1 and `type` is the task type chosen at intake.
 - [ ] `sp` equals the sum of per-task SP across milestones.
 - [ ] `summary` is set (non-empty, single line, ≤ ~120 chars) for `feature` and `refactoring` plans.
 
@@ -133,7 +133,7 @@ Verify before leaving `in-spec`. Every item must be satisfiable by reading the p
 - [ ] For features and refactorings: `summary` is phrased as the user/internal-visible outcome, not engineering output.
 - [ ] Definition of Done bullets are testable (verifiable by command or inspectable output).
 - [ ] Decisions table lists real alternatives — no empty "Alternative considered" rows.
-- [ ] Every milestone has a `Verify` command or verifiable outcome.
+- [ ] Every milestone has a `Verify` command or verifiable outcome, scoped to what that milestone changed — no whole-repo gate (full suite, repo-wide lint/typecheck, aggregate `ci` target); those belong to Final Verification.
 - [ ] Every task lists exact file paths, not "related files" or "somewhere in X".
 - [ ] Every task DoD uses checkboxes, not prose.
 - [ ] Code sketches use `...` in method bodies — agents implement from interfaces, not by copying literal code.

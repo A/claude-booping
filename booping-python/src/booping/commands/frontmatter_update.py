@@ -6,12 +6,19 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
+import yaml
 from jinja2 import Environment, TemplateError
+from ruamel.yaml import YAML as RuamelYAML
+from ruamel.yaml.error import YAMLError as RuamelYAMLError
+from ruamel.yaml.scalarstring import SingleQuotedScalarString
 
 from booping import logger
 from booping.context import Context
 from booping.context._yaml import update_frontmatter
 from booping.macros import MacroError, make_macro
+from booping.utils import diff_report
+
+_NULL_FORMS = {"null", "Null", "NULL", "~"}
 
 
 def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:  # type: ignore[type-arg]
@@ -80,6 +87,41 @@ def interpolate(
         sys.exit(2)
 
 
+def coerce_scalar(value: str) -> object:
+    """Return *value* as the Python type its plain YAML form loads as.
+
+    An integer, float, boolean or null form becomes that type, so the emitter
+    writes it unquoted.  Everything else stays a string; a string whose plain
+    form would reload as another type under the YAML 1.1 resolver the readers
+    use is marked single-quoted, so it reloads as the string it was written as.
+    """
+    if not value.strip():
+        return value
+
+    try:
+        loaded: object = RuamelYAML(typ="rt").load(value)  # type: ignore[reportUnknownMemberType]
+    except RuamelYAMLError:
+        loaded = value
+
+    if loaded is None:
+        # An anchor or an empty tag also loads as None; only the null spellings
+        # are a real null.
+        return None if value.strip() in _NULL_FORMS else _quote_if_ambiguous(value)
+    if isinstance(loaded, bool | int | float):
+        return loaded
+    return _quote_if_ambiguous(value)
+
+
+def _quote_if_ambiguous(value: str) -> str:
+    try:
+        reloaded: object = yaml.safe_load(value)
+    except yaml.YAMLError:
+        return value
+    if isinstance(reloaded, str) and reloaded == value:
+        return value
+    return SingleQuotedScalarString(value)
+
+
 def parse_pairs(pairs: list[str]) -> dict[str, str]:
     updates: dict[str, str] = {}
     for pair in pairs:
@@ -117,12 +159,19 @@ def _run(args: argparse.Namespace) -> None:
     vault_dir = project.directory if project is not None else None
 
     resolved: dict[str, object] = {}
+    # The summary echoes the interpolated text, not the coerced value, so the
+    # stderr line reads the same as before the typing rule.
+    summary_values: dict[str, str] = {}
     for key, value in updates.items():
-        resolved[key] = interpolate(value, repo_dir, ctx.config, vault_dir)
+        rendered = interpolate(value, repo_dir, ctx.config, vault_dir)
+        summary_values[key] = rendered
+        resolved[key] = coerce_scalar(rendered)
 
     resolved_appends: dict[str, object] = {}
     for key, value in appends.items():
         resolved_appends[key] = interpolate(value, repo_dir, ctx.config, vault_dir)
+
+    previous = plan_path.read_text()
 
     try:
         update_frontmatter(plan_path, resolved, removals=removals, appends=resolved_appends)
@@ -133,6 +182,10 @@ def _run(args: argparse.Namespace) -> None:
         print(f"error: {exc}", file=sys.stderr)
         sys.exit(2)
 
+    report = diff_report(plan_path, previous, plan_path.read_text())
+    if report:
+        print(report)
+
     vault = project.directory if project is not None else None
     changed = [f"-{k}" for k in removals] + list(resolved.keys()) + list(resolved_appends.keys())
     logger.log(
@@ -141,7 +194,7 @@ def _run(args: argparse.Namespace) -> None:
 
     parts = (
         [f"-{k}" for k in removals]
-        + [f"{k}={v}" for k, v in resolved.items()]
+        + [f"{k}={v}" for k, v in summary_values.items()]
         + [f"{k}+={v}" for k, v in resolved_appends.items()]
     )
     print(f"updated {plan_path}: {', '.join(parts)}", file=sys.stderr)

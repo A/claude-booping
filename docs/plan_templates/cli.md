@@ -25,7 +25,7 @@ How the CLI fits the surrounding toolchain. Input sources, output sinks, side ef
 
 **Goal**: one sentence — the observable change in CLI behavior.
 
-**Verify**: exact invocation + expected output (e.g. `./bin/mytool --flag arg 2>&1 | diff - tests/fixtures/expected.txt`).
+**Verify**: exact invocation + expected output (e.g. `./bin/mytool --flag arg 2>&1 | diff - tests/fixtures/expected.txt`). Scoped to this milestone — whole-repo gates (full test suite, repo-wide lint/typecheck, an aggregate `ci` target) run once in Final Verification, never per milestone.
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
@@ -70,7 +70,7 @@ Name sections to update (new CLI in the `CLI` section, new inlining point in a s
 
 ## Frontmatter
 
-- [ ] Frontmatter matches [plan frontmatter](${CLAUDE_PLUGIN_ROOT}/docs/template_plan_frontmatter.md).
+- [ ] `title` matches the plan's H1 and `type` is the task type chosen at intake.
 - [ ] `sp` equals the sum of per-task SP across milestones.
 
 ## Content
@@ -79,7 +79,7 @@ Name sections to update (new CLI in the `CLI` section, new inlining point in a s
 - [ ] DoD bullets are verifiable by invocation + output diff.
 - [ ] Every task lists exact files.
 - [ ] Every task DoD uses checkboxes, not prose.
-- [ ] Every milestone has a `Verify` invocation.
+- [ ] Every milestone has a `Verify` invocation scoped to what it changed — no whole-repo gate (full suite, repo-wide lint/typecheck, aggregate `ci` target); those belong to Final Verification.
 - [ ] Each milestone executable from a fresh session with only the plan as context.
 
 ## I/O contract

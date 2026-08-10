@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+import yaml as pyyaml
 
 from booping import macros
 from booping.commands import frontmatter_update as fu_cmd
@@ -188,6 +189,54 @@ class TestHookTokenising:
 # ── CLI integration ──────────────────────────────────────────────────────
 
 
+class TestScalarTyping:
+    def _write(self, tmp_path: Path, pair: str) -> str:
+        plan = _make_plan(tmp_path, "title: Foo")
+        fu_cmd._run(_ns(plan=plan, pairs=[pair]))  # type: ignore[reportPrivateUsage]
+        _, fm_text, _ = _split_result(plan.read_text())
+        return fm_text
+
+    @pytest.mark.parametrize(
+        ("pair", "expected_line", "expected_value"),
+        [
+            ("sp=23", "sp: 23\n", 23),
+            ("ratio=1.5", "ratio: 1.5\n", 1.5),
+            ("retro=null", "retro: null\n", None),
+            ("blocked=true", "blocked: true\n", True),
+            ("summary=23 things", "summary: 23 things\n", "23 things"),
+            ("summary=yes", "summary: 'yes'\n", "yes"),
+        ],
+        ids=["integer", "float", "null", "boolean", "partly-numeric", "yaml-1-1-boolean-word"],
+    )
+    def test_scalar_lands_typed(
+        self, tmp_path: Path, pair: str, expected_line: str, expected_value: object
+    ) -> None:
+        fm_text = self._write(tmp_path, pair)
+
+        assert expected_line in fm_text
+        key = pair.split("=", 1)[0]
+        loaded = pyyaml.safe_load(fm_text)[key]
+        assert loaded == expected_value
+        assert type(loaded) is type(expected_value)
+
+    @pytest.mark.parametrize(
+        "value",
+        ["@lead", "*star", "&anchor", "!bang", "%pct", "`tick", "a: b", " padded "],
+    )
+    def test_syntax_sensitive_string_keeps_its_quotes(self, tmp_path: Path, value: str) -> None:
+        fm_text = self._write(tmp_path, f"summary={value}")
+        assert pyyaml.safe_load(fm_text)["summary"] == value
+
+    def test_macro_rendered_date_stays_a_string(self, tmp_path: Path) -> None:
+        plan = _make_plan(tmp_path, "title: Foo")
+        fu_cmd._run(_ns(plan=plan, pairs=[f"completed={NOW_EXPR}"]))  # type: ignore[reportPrivateUsage]
+
+        _, fm_text, _ = _split_result(plan.read_text())
+        completed = pyyaml.safe_load(fm_text)["completed"]
+        assert isinstance(completed, str)
+        datetime.strptime(completed, "%Y-%m-%d %H:%M")  # noqa: DTZ007
+
+
 class TestFrontmatterUpdateCLI:
     def test_sets_planned_with_date_macro(self, tmp_path: Path) -> None:
         plan = _make_plan(tmp_path, "title: Foo\nstatus: backlog")
@@ -197,8 +246,6 @@ class TestFrontmatterUpdateCLI:
         text = plan.read_text()
         assert "planned:" in text
         _, fm_text, _ = _split_result(text)
-        import yaml as pyyaml
-
         fm = pyyaml.safe_load(fm_text)
         datetime.strptime(fm["planned"], "%Y-%m-%d %H:%M")  # noqa: DTZ007
 
@@ -221,8 +268,6 @@ class TestFrontmatterUpdateCLI:
         text = plan.read_text()
         assert "commit:" in text
         _, fm_text, _ = _split_result(text)
-        import yaml as pyyaml
-
         fm = pyyaml.safe_load(fm_text)
         assert len(fm["commit"]) == 40
 
@@ -234,8 +279,6 @@ class TestFrontmatterUpdateCLI:
         text = plan.read_text()
         assert "created:" in text
         _, fm_text, _ = _split_result(text)
-        import yaml as pyyaml
-
         fm = pyyaml.safe_load(fm_text)
         assert datetime.strptime(str(fm["created"]), "%Y-%m-%d")  # noqa: DTZ007
 
@@ -339,8 +382,6 @@ class TestFrontmatterUpdateCLI:
 
         fu_cmd._run(_ns(plan=plan, pairs=[], appends=["sessions=abc-123"]))  # type: ignore[reportPrivateUsage]
 
-        import yaml as pyyaml
-
         _, fm_text, _ = _split_result(plan.read_text())
         assert pyyaml.safe_load(fm_text)["sessions"] == ["abc-123"]
 
@@ -348,8 +389,6 @@ class TestFrontmatterUpdateCLI:
         plan = _make_plan(tmp_path, "title: Foo")
 
         fu_cmd._run(_ns(plan=plan, pairs=[], appends=["sessions=abc-123"]))  # type: ignore[reportPrivateUsage]
-
-        import yaml as pyyaml
 
         _, fm_text, _ = _split_result(plan.read_text())
         assert pyyaml.safe_load(fm_text)["sessions"] == ["abc-123"]
@@ -359,8 +398,6 @@ class TestFrontmatterUpdateCLI:
 
         fu_cmd._run(_ns(plan=plan, pairs=[], appends=["sessions=def-456"]))  # type: ignore[reportPrivateUsage]
 
-        import yaml as pyyaml
-
         _, fm_text, _ = _split_result(plan.read_text())
         assert pyyaml.safe_load(fm_text)["sessions"] == ["abc-123", "def-456"]
 
@@ -369,8 +406,6 @@ class TestFrontmatterUpdateCLI:
 
         fu_cmd._run(_ns(plan=plan, pairs=[], appends=["sessions=abc-123"]))  # type: ignore[reportPrivateUsage]
         fu_cmd._run(_ns(plan=plan, pairs=[], appends=["sessions=abc-123"]))  # type: ignore[reportPrivateUsage]
-
-        import yaml as pyyaml
 
         _, fm_text, _ = _split_result(plan.read_text())
         assert pyyaml.safe_load(fm_text)["sessions"] == ["abc-123"]
@@ -397,8 +432,6 @@ class TestFrontmatterUpdateCLI:
             )
         )
 
-        import yaml as pyyaml
-
         _, fm_text, _ = _split_result(plan.read_text())
         fm = pyyaml.safe_load(fm_text)
         assert fm["status"] == "in-progress"
@@ -414,6 +447,79 @@ class TestFrontmatterUpdateCLI:
             fu_cmd._run(_ns(plan=plan, pairs=[], removals=[], appends=[]))  # type: ignore[reportPrivateUsage]
         assert excinfo.value.code == 1
         assert "nothing to do" in capsys.readouterr().err
+
+    @pytest.mark.parametrize(
+        ("frontmatter", "args", "expected", "unexpected"),
+        [
+            (
+                "title: Foo\nstatus: backlog",
+                {"pairs": ["status=in-progress"]},
+                ["-status: backlog", "+status: in-progress"],
+                ["+title: Foo"],
+            ),
+            (
+                "title: Foo\nsessions:\n- abc-123",
+                {"pairs": [], "appends": ["sessions=def-456"]},
+                ["+- def-456"],
+                [],
+            ),
+            (
+                "title: Foo\nbusiness_goal: x\nstatus: backlog",
+                {"pairs": [], "removals": ["business_goal"]},
+                ["-business_goal: x"],
+                [],
+            ),
+            ("title: Foo\nstatus: backlog", {"pairs": ["status=backlog"]}, [], []),
+            (
+                "title: Foo\nsessions:\n- abc-123",
+                {"pairs": [], "appends": ["sessions=abc-123"]},
+                [],
+                [],
+            ),
+        ],
+        ids=[
+            "changed-value",
+            "append",
+            "removal",
+            "unchanged-value-prints-nothing",
+            "idempotent-append-prints-nothing",
+        ],
+    )
+    def test_prints_a_unified_diff_of_the_change(
+        self,
+        tmp_path: Path,
+        capsys: pytest.CaptureFixture[str],
+        frontmatter: str,
+        args: dict[str, list[str]],
+        expected: list[str],
+        unexpected: list[str],
+    ) -> None:
+        plan = _make_plan(tmp_path, frontmatter)
+
+        fu_cmd._run(_ns(plan=plan, **args))  # type: ignore[reportPrivateUsage]
+
+        out = capsys.readouterr().out
+        if not expected:
+            assert out == ""
+            return
+
+        lines = out.splitlines()
+        assert lines[0] == f"--- {plan}"
+        assert lines[1] == f"+++ {plan}"
+        assert lines[2].startswith("@@")
+        assert all(line in lines for line in expected)
+        assert all(line not in lines for line in unexpected)
+
+    def test_summary_stays_on_stderr(
+        self, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+    ) -> None:
+        plan = _make_plan(tmp_path, "title: Foo\nstatus: backlog")
+
+        fu_cmd._run(_ns(plan=plan, pairs=["status=in-progress"]))  # type: ignore[reportPrivateUsage]
+
+        captured = capsys.readouterr()
+        assert captured.err == f"updated {plan}: status=in-progress\n"
+        assert "updated" not in captured.out
 
     def test_logs_to_booping_log(self, tmp_path: Path) -> None:
         """Log line appended to .booping.log."""

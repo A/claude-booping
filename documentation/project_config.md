@@ -16,7 +16,7 @@ Inside `core` there is one placement rule:
 | owned by exactly one playbook | `core.{name}_playbook.…` |
 | shared by the development loop or several playbooks | `core.…` directly |
 
-`{name}` is the playbook's name with `-` replaced by `_` — `groom` → `core.groom_playbook`, `code-review` → `core.code_review_playbook`. The rule applies literally, including to the two scaffold trees.
+`{name}` is the playbook's name with `-` replaced by `_` — `groom` → `core.groom_playbook`, `code-review` → `core.code_review_playbook`. The rule applies literally, including to the three scaffold trees.
 
 **`core` is the worked example your own playbooks copy.** A playbook you write declares its own namespace the same way and reads it with `{{ config.core.my_playbook.… }}` (or `{{ config.my_namespace.… }}` to sit outside `core` entirely). The placement rule travels with the copy: a key only your playbook reads sits in its `core.{name}_playbook` block; a key several of your playbooks share sits directly under `core`.
 
@@ -306,7 +306,9 @@ Any mapping in the merged config — addressed by its dotted path, like a query 
 bin/booping scaffold <config-path> <dest> [--force] [--set KEY=VALUE]... [--stub-macro DOTTED.PATH=LITERAL]...
 ```
 
-`<config-path>` is a dotted path into the merged config — the value there *is* the destination directory's contents, no wrapper key. `<dest>` is created with its parents when missing; a non-empty destination aborts unless you pass `--force`, which overwrites only the files the tree names and never deletes a directory. Exit 0 on success, 1 on a user error (unknown path, malformed tree, non-empty destination without `--force`, bad `--set`, Jinja error in seed content), 2 if a write fails at the OS level. The whole tree is rendered in memory first, so an error leaves the filesystem untouched.
+`<config-path>` is a dotted path into the merged config — the value there *is* the destination directory's contents, no wrapper key. `<dest>` is created with its parents when missing, and a destination that already holds some of the tree's files is fine: **a file that exists is skipped**, reported as `skipped existing file {path}` and left byte-for-byte alone. `--force` turns that skip into an overwrite of the files the tree names; it never deletes a directory and never touches a path the tree does not name. Exit 0 on success, 1 on a user error (unknown path, malformed tree, bad `--set`, Jinja error in seed content), 2 if a write fails at the OS level. The whole tree is rendered in memory first, so an error leaves the filesystem untouched.
+
+**Stdout contract.** For every file the run actually wrote, scaffold prints a unified diff — `--- /dev/null` (a new file) or `--- {path}` (an overwrite), then `+++ {path}` and the hunks. A file whose rendered content matches what is already on disk, and a file skipped because it exists, produce no diff; created directories keep their one-line `created dir {path}` report, and the run still ends with the `scaffolded N paths — …` count line. `booping frontmatter-update` shares this contract: the diff of the change it made on stdout, nothing at all when the file did not change, its `updated {path}: {keys}` summary and any errors on stderr. Its arguments, flags and exit codes are unchanged; it writes scalars with their YAML type, so ints, floats, booleans and `null` land unquoted and everything else lands as a string.
 
 How a node is read:
 
@@ -323,7 +325,7 @@ How a node is read:
 
 File content is Jinja-rendered, so `{{ config.… }}` and `{{ context.… }}` resolve. **`--set` here binds a bare variable** — `--set name=x` fills `{{ name }}` — unlike `booping render` and `booping render-playbook`, where `--set` merges into the config and you write `{{ config.name }}`.
 
-Trees ride the same core → global → project merge as everything else here, so a global or project config can add its own tree or override one leaf of a shipped one. Two ship:
+Trees ride the same core → global → project merge as everything else here, so a global or project config can add its own tree or override one leaf of a shipped one. Three ship:
 
 - **`core.playbook_authoring_playbook.scaffold`** — a playbook skeleton: `playbook.md` (identity frontmatter carrying the name you passed, plus a preamble stub), `playbook.yaml` (an empty `graph:`), and an empty `_references/`.
 
@@ -333,6 +335,14 @@ Trees ride the same core → global → project merge as everything else here, s
   ```
 
 - **`core.setup_playbook.scaffold`** — the project vault: `plans/`, `retrospectives/`, `codereviews/`, `_lessons/`, `notes/`, plus the seeded `sprints.md` Obsidian Bases fence and a `.gitignore`. Takes no `--set` variables.
+
+- **`core.groom_playbook.scaffold`** — one plan directory: `index.md` seeded with the plan's identity frontmatter (the sole definition of that frontmatter) plus the title as an `#` heading, and an empty `request.md`. Takes `--set title=` and `--set type=`.
+
+  ```
+  bin/booping scaffold core.groom_playbook.scaffold \
+    ~/Claude/my-project/plans/202608091310_my-plan \
+    --set title="My plan" --set type=feature
+  ```
 
 ## Review templates
 

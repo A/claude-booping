@@ -39,7 +39,7 @@ Order pages so each milestone produces something reviewable in isolation. A typi
 
 **Goal**: one sentence — what page(s) or pipeline component lands.
 
-**Verify**: build/serve the site locally and load the affected pages in a browser; check cross-links resolve; on CI changes, push a branch and confirm the workflow runs green.
+**Verify**: build/serve the site locally and load the pages this milestone changed; check their cross-links resolve. Whole-repo gates — a strict full-site build, a pushed branch confirming the CI workflow green, an aggregate `ci` target — run once in Final Verification, never per milestone.
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
@@ -75,7 +75,7 @@ Name sections to update (e.g. add `documentation/` to the layout section, distin
 
 ## Frontmatter
 
-- [ ] Frontmatter matches [plan frontmatter](${CLAUDE_PLUGIN_ROOT}/docs/template_plan_frontmatter.md).
+- [ ] `title` matches the plan's H1 and `type` is the task type chosen at intake.
 - [ ] `sp` equals the sum of per-task SP across milestones.
 
 ## Content
@@ -85,7 +85,7 @@ Name sections to update (e.g. add `documentation/` to the layout section, distin
 - [ ] Each page is a milestone task or grouped with siblings under one milestone — no orphan pages.
 - [ ] DoD bullets are verifiable by loading the rendered page or running the build.
 - [ ] Every task lists exact file paths.
-- [ ] Every milestone has a `Verify` step that includes a build or local-serve check.
+- [ ] Every milestone has a `Verify` step that includes a build or local-serve check of the pages it changed — no whole-repo gate (strict full-site build, CI-workflow run, aggregate `ci` target); those belong to Final Verification.
 - [ ] Each milestone executable from a fresh session with only the plan as context.
 
 ## Documentation hygiene
