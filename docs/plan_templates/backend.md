@@ -24,35 +24,30 @@ How this change fits the existing system. Integration points. Reference concrete
 
 ## Milestones
 
-### M1: {Milestone name} — {SP} SP | pending
+Generated table — one row per milestone file, projected with `core.plans.milestones.table_columns` by `booping query`. Derived output: no hand-written rows, no milestone bodies in this file.
 
-**Goal**: one sentence — what changes after this milestone.
+## Milestone files
 
-**Verify**: exact commands (or observable outcomes) to confirm this milestone is done, scoped to what this milestone changed — a targeted test path, one invocation, a diff. Whole-repo gates (full test suite, repo-wide lint/typecheck, an aggregate `ci` target) run once in Final Verification, never per milestone.
+One file per milestone in the plan directory's `milestones/`, seeded by `booping scaffold core.groom_playbook.milestone_scaffold` — the seed owns the file's frontmatter keys and its required headings. Write the body into that skeleton:
 
-| Task | Description | Files | SP | Status |
-|------|-------------|-------|----|--------|
-| 1.1 | ... | `path/to/file.ext` | 2 | pending |
-| 1.2 | ... | `path/to/other.ext` | 1 | pending |
+- **Goal** — one sentence directly under the H1: what changes in the system after this milestone.
+- **Scope** — the modules, endpoints or tables in play and the files this milestone touches, so it executes without reading another milestone.
+- `## Tasks` — one row per task:
 
-#### Task 1.1 DoD
+  | Task | Description | Files | SP | Status |
+  |------|-------------|-------|----|--------|
+  | 1.1 | ... | `path/to/file.ext` | 2 | pending |
+  | 1.2 | ... | `path/to/other.ext` | 1 | pending |
 
-- [ ] Specific, verifiable criterion.
-- [ ] Test / verification command passes.
+- `## Definition of Done` — one `### Task {n}.{m}` block per task, checkbox bullets only: a specific verifiable criterion, the test / verification command that proves it. A code sketch belongs here when the shape is non-obvious — interface only, `...` in method bodies:
 
-#### Task 1.1 Code sketch *(only when the shape is non-obvious)*
+  ```
+  class NewThing:
+      def method(self):
+          ...
+  ```
 
-```
-class NewThing:
-    def method(self):
-        ...  # interface only — implementers flesh out
-```
-
----
-
-### M2: ...
-
----
+- `## Verify` — exact commands (or observable outcomes) confirming this milestone: a targeted test path, one invocation, a diff. Scoped to what this milestone changed — whole-repo gates (full test suite, repo-wide lint/typecheck, an aggregate `ci` target) run once in `index.md`'s Final Verification, never per milestone.
 
 ## Implementation Order *(when milestones have dependencies)*
 
@@ -119,12 +114,12 @@ Either name specific sections to update with an owning task, or state "No CLAUDE
 
 # Quality Checklist
 
-Verify before leaving `in-spec`. Every item must be satisfiable by reading the plan file alone.
+Verify before leaving `in-spec`. Every item must be satisfiable by reading the plan directory alone.
 
 ## Frontmatter
 
 - [ ] `title` matches the plan's H1 and `type` is the task type chosen at intake.
-- [ ] `sp` equals the sum of per-task SP across milestones.
+- [ ] `sp` equals the sum of the milestone files' `sp`.
 - [ ] `summary` is set (non-empty, single line, ≤ ~120 chars) for `feature` and `refactoring` plans.
 
 ## Content
@@ -133,7 +128,9 @@ Verify before leaving `in-spec`. Every item must be satisfiable by reading the p
 - [ ] For features and refactorings: `summary` is phrased as the user/internal-visible outcome, not engineering output.
 - [ ] Definition of Done bullets are testable (verifiable by command or inspectable output).
 - [ ] Decisions table lists real alternatives — no empty "Alternative considered" rows.
-- [ ] Every milestone has a `Verify` command or verifiable outcome, scoped to what that milestone changed — no whole-repo gate (full suite, repo-wide lint/typecheck, aggregate `ci` target); those belong to Final Verification.
+- [ ] Every milestone is a file in `milestones/` carrying its own goal, tasks, DoD and Verify — no milestone body in `index.md`.
+- [ ] `index.md`'s milestone table has one row per milestone file and matches their frontmatter.
+- [ ] Every milestone file's `## Verify` is a command or verifiable outcome scoped to what that milestone changed — no whole-repo gate (full suite, repo-wide lint/typecheck, aggregate `ci` target); those belong to `index.md`'s Final Verification.
 - [ ] Every task lists exact file paths, not "related files" or "somewhere in X".
 - [ ] Every task DoD uses checkboxes, not prose.
 - [ ] Code sketches use `...` in method bodies — agents implement from interfaces, not by copying literal code.
@@ -145,7 +142,7 @@ Verify before leaving `in-spec`. Every item must be satisfiable by reading the p
 - [ ] No "handle edge cases", "add error handling", "clean up" as standalone tasks.
 - [ ] No "either X or Y" unresolved — pick one, justify in Decisions.
 - [ ] No task spanning unrelated concerns (model + API + frontend in one row).
-- [ ] No milestone that requires reading more than the plan file to execute.
+- [ ] No milestone that requires reading more than its own file and `index.md` to execute.
 
 ## External references validated
 

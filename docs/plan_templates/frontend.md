@@ -21,23 +21,22 @@ How the new UI fits the component tree, state flow, and data-loading boundaries.
 
 ## Milestones
 
-### M1: {Milestone name} — {SP} SP | pending
+Generated table — one row per milestone file, projected with `core.plans.milestones.table_columns` by `booping query`. Derived output: no hand-written rows, no milestone bodies in this file.
 
-**Goal**: one sentence — what changes in the UI after this milestone.
+## Milestone files
 
-**Verify**: exact commands (scoped tests, a component's typecheck, visual check) or observable outcomes, limited to what this milestone changed. Whole-repo gates (full test suite, repo-wide lint/typecheck, an aggregate `ci` target) run once in Final Verification, never per milestone.
+One file per milestone in the plan directory's `milestones/`, seeded by `booping scaffold core.groom_playbook.milestone_scaffold` — the seed owns the file's frontmatter keys and its required headings. Write the body into that skeleton:
 
-| Task | Description | Files | SP | Status |
-|------|-------------|-------|----|--------|
-| 1.1 | ... | `src/components/Foo.tsx` | 2 | pending |
+- **Goal** — one sentence directly under the H1: what changes in the UI after this milestone.
+- **Scope** — the components, routes and state owners in play and the files this milestone touches, plus where new components mount.
+- `## Tasks` — one row per task:
 
-#### Task 1.1 DoD
+  | Task | Description | Files | SP | Status |
+  |------|-------------|-------|----|--------|
+  | 1.1 | ... | `src/components/Foo.tsx` | 2 | pending |
 
-- [ ] Component renders with all documented props.
-- [ ] States: loading / empty / error / success covered.
-- [ ] Typecheck + test commands pass.
-
----
+- `## Definition of Done` — one `### Task {n}.{m}` block per task, checkbox bullets only: component renders with all documented props, loading / empty / error / success states covered, typecheck + test commands pass.
+- `## Verify` — exact commands (scoped tests, a component's typecheck, a visual check) or observable outcomes, limited to what this milestone changed. Whole-repo gates (full test suite, repo-wide lint/typecheck, an aggregate `ci` target) run once in `index.md`'s Final Verification, never per milestone.
 
 ## Final Verification
 
@@ -73,7 +72,7 @@ Name sections to update, or state "No CLAUDE.md changes required — {justificat
 ## Frontmatter
 
 - [ ] `title` matches the plan's H1 and `type` is the task type chosen at intake.
-- [ ] `sp` equals the sum of per-task SP across milestones.
+- [ ] `sp` equals the sum of the milestone files' `sp`.
 
 ## Content
 
@@ -81,8 +80,10 @@ Name sections to update, or state "No CLAUDE.md changes required — {justificat
 - [ ] DoD bullets are observable in the browser or a test runner.
 - [ ] Every task lists exact files.
 - [ ] Every task DoD uses checkboxes, not prose.
-- [ ] Every milestone has a `Verify` step scoped to what it changed — no whole-repo gate (full suite, repo-wide lint/typecheck, aggregate `ci` target); those belong to Final Verification.
-- [ ] Each milestone executable from a fresh session with only the plan as context.
+- [ ] Every milestone is a file in `milestones/` carrying its own goal, tasks, DoD and Verify — no milestone body in `index.md`.
+- [ ] `index.md`'s milestone table has one row per milestone file and matches their frontmatter.
+- [ ] Every milestone file's `## Verify` is scoped to what that milestone changed — no whole-repo gate (full suite, repo-wide lint/typecheck, aggregate `ci` target); those belong to `index.md`'s Final Verification.
+- [ ] Each milestone file executable from a fresh session with only it and `index.md` as context.
 
 ## Anti-patterns (must be absent)
 

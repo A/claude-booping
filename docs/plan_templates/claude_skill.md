@@ -21,23 +21,22 @@ How the skill interacts with other skills via shared config (statuses, agents, t
 
 ## Milestones
 
-### M1: {Milestone name} — {SP} SP | pending
+Generated table — one row per milestone file, projected with `core.plans.milestones.table_columns` by `booping query`. Derived output: no hand-written rows, no milestone bodies in this file.
 
-**Goal**: one sentence — the observable change in the rendered skill or shared config.
+## Milestone files
 
-**Verify**: render and sanity check (e.g. `bin/booping render src/templates/skills/<name>.md.j2` and review output) — the rebuild plus the surfaces this milestone touched. Whole-repo gates (full test suite, repo-wide lint/typecheck, an aggregate `ci` target) run once in Final Verification, never per milestone.
+One file per milestone in the plan directory's `milestones/`, seeded by `booping scaffold core.groom_playbook.milestone_scaffold` — the seed owns the file's frontmatter keys and its required headings. Write the body into that skeleton:
 
-| Task | Description | Files | SP | Status |
-|------|-------------|-------|----|--------|
-| 1.1 | ... | `src/templates/skills/<name>.md.j2`, `src/config.yaml` | 2 | pending |
+- **Goal** — one sentence directly under the H1: the observable change in the rendered skill or shared config.
+- **Scope** — the templates, partials, config keys and rendered artefacts this milestone touches, and which other skills read the same config.
+- `## Tasks` — one row per task:
 
-#### Task 1.1 DoD
+  | Task | Description | Files | SP | Status |
+  |------|-------------|-------|----|--------|
+  | 1.1 | ... | `src/templates/skills/{name}.md.j2`, `src/config.yaml` | 2 | pending |
 
-- [ ] Rendered skill diff matches intended shape.
-- [ ] No hardcoded values that duplicate config.
-- [ ] Lazy-load links resolve.
-
----
+- `## Definition of Done` — one `### Task {n}.{m}` block per task, checkbox bullets only: rendered diff matches the intended shape, no hardcoded values that duplicate config, lazy-load links resolve.
+- `## Verify` — render and sanity check (e.g. `bin/booping render src/templates/skills/{name}.md.j2` and review output) — the rebuild plus the surfaces this milestone touched. Whole-repo gates (full test suite, repo-wide lint/typecheck, an aggregate `ci` target) run once in `index.md`'s Final Verification, never per milestone.
 
 ## Final Verification
 
@@ -60,7 +59,7 @@ Name sections to update, or state "No CLAUDE.md changes required — {justificat
 ## Frontmatter
 
 - [ ] `title` matches the plan's H1 and `type` is the task type chosen at intake.
-- [ ] `sp` equals the sum of per-task SP across milestones.
+- [ ] `sp` equals the sum of the milestone files' `sp`.
 
 ## Content
 
@@ -68,8 +67,10 @@ Name sections to update, or state "No CLAUDE.md changes required — {justificat
 - [ ] DoD bullets are verifiable by reading the rendered output or a diff.
 - [ ] Every task lists exact template / partial / config paths.
 - [ ] Every task DoD uses checkboxes, not prose.
-- [ ] Every milestone has a `Verify` step that includes a rebuild and stays scoped to the surfaces it touched — no whole-repo gate (full suite, repo-wide lint/typecheck, aggregate `ci` target); those belong to Final Verification.
-- [ ] Each milestone executable from a fresh session with only the plan as context.
+- [ ] Every milestone is a file in `milestones/` carrying its own goal, tasks, DoD and Verify — no milestone body in `index.md`.
+- [ ] `index.md`'s milestone table has one row per milestone file and matches their frontmatter.
+- [ ] Every milestone file's `## Verify` includes a rebuild and stays scoped to the surfaces that milestone touched — no whole-repo gate (full suite, repo-wide lint/typecheck, aggregate `ci` target); those belong to `index.md`'s Final Verification.
+- [ ] Each milestone file executable from a fresh session with only it and `index.md` as context.
 
 ## Skill-design hygiene
 
