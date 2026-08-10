@@ -8,7 +8,8 @@ created: 2026-08-09 13:10
 planned: null
 started: 2026-08-09 13:46
 completed: 2026-08-09 14:47
-code_reviews: []
+code_reviews:
+  - codereviews/202608091310_scaffold-seeded-plan-creation/202608091453.md
 sessions:
 - b1cf1fe7-f86c-4335-9434-c95e92d29a8c
 - b74396a9-b99a-442d-9be4-9c58e6c11d5c
