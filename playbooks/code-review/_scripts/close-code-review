@@ -30,6 +30,21 @@ def _clean(value: str) -> str:
     return value.split("  #")[0].strip().strip("\"'")
 
 
+def _inline_items(value: str) -> list[str]:
+    """The items a key already carries on its own line.
+
+    A flow list yields its elements, so an empty `[]` yields nothing rather than an
+    item literally named `[]`. `null` and `~` mean the key is unset; anything else is
+    a lone scalar item.
+    """
+    value = _clean(value)
+    if value.startswith("[") and value.endswith("]"):
+        return [_clean(item) for item in value[1:-1].split(",") if item.strip()]
+    if value in ("", "null", "~"):
+        return []
+    return [value]
+
+
 def read_plan_key(path: Path) -> str | None:
     match = FRONTMATTER.match(path.read_text())
     if not match:
@@ -47,8 +62,8 @@ def read_plan_key(path: Path) -> str | None:
 
 def append_review(plan: Path, review: str) -> bool:
     """Add `review` to the plan's `code_reviews:` block list, creating the key when it
-    is absent and replacing a `null` scalar with a one-element list. Returns whether
-    the plan was rewritten."""
+    is absent and replacing a `null` scalar or an empty `[]` with a one-element list.
+    Returns whether the plan was rewritten."""
     text = plan.read_text()
     if not text.startswith("---\n"):
         sys.exit(f"plan has no frontmatter: {plan}")
@@ -68,13 +83,10 @@ def append_review(plan: Path, review: str) -> bool:
     end = start + 1
     while end < len(lines) and lines[end].lstrip().startswith("- "):
         end += 1
-    existing = [_clean(line.lstrip()[2:]) for line in lines[start + 1 : end]]
+    existing = _inline_items(lines[start].partition(":")[2])
+    existing += [_clean(line.lstrip()[2:]) for line in lines[start + 1 : end]]
     if review in existing:
         return False
-
-    scalar = _clean(lines[start].partition(":")[2])
-    if scalar and scalar not in ("null", "~"):
-        existing.insert(0, scalar)
     rewritten = ["code_reviews:"] + [f"  - {item}" for item in [*existing, review]]
     lines[start:end] = rewritten
     plan.write_text("\n".join(lines) + sep + body)
