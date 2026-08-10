@@ -17,3 +17,11 @@ commit: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 # Widget search
 
 Fixture plan — `done` with a null `retro`, so the retro playbook renders a populated candidate table.
+
+## Milestones
+
+| id | title | sp | status |
+| --- | --- | --- | --- |
+| 01 | Keyword index | 3 | done |
+| 02 | Search endpoint | 2 | done |
+

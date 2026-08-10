@@ -18,3 +18,11 @@ commit: cccccccccccccccccccccccccccccccccccccccc
 # Session cleanup sweep
 
 Fixture plan — directory shape, already covered by a retrospective, so the retro queue skips it and the learn queue has a retrospective to pick up.
+
+## Milestones
+
+| id | title | sp | status |
+| --- | --- | --- | --- |
+| 01 | Orphan sweep on expiry | 2 | done |
+| 02 | Backfill existing orphans | 1 | done |
+

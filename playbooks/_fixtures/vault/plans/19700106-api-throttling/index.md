@@ -17,3 +17,11 @@ commit: eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 # API throttling
 
 Fixture plan — directory shape, parked at `in-progress` so the executing phase is represented.
+
+## Milestones
+
+| id | title | sp | status |
+| --- | --- | --- | --- |
+| 01 | Rate limit store | 8 | done |
+| 02 | Throttle middleware | 5 | in-progress |
+
