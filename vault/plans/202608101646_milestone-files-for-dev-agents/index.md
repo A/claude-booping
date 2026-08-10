@@ -69,7 +69,7 @@ The milestone file is the only place a milestone's work is written down. `index.
 | 4 | Groom writes milestone files | 3 | done |
 | 5 | Milestone state machine and table refresh | 4 | done |
 | 6 | Develop delegates paths, not bodies | 4 | done |
-| 7 | Downstream readers and documentation | 3 | pending |
+| 7 | Downstream readers and documentation | 3 | done |
 | 8 | Reports, structure checks and eval fixtures | 2 | pending |
 
 ---
@@ -254,7 +254,7 @@ The milestone file is the only place a milestone's work is written down. `index.
 
 **Note**: 6.3 landed in `src/templates/_partials/_developer_body.j2`, the only body `agents/booping-developer.md.j2` includes.
 
-### M7: Downstream readers and documentation — 3 SP | pending
+### M7: Downstream readers and documentation — 3 SP | done
 
 **Goal**: every surface that reads a plan "in full" follows the milestone files, and the hand-authored docs describe the new shape.
 
@@ -264,20 +264,20 @@ The milestone file is the only place a milestone's work is written down. `index.
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 7.1 | Extend the plan read set in retro and code-review: `prepare`'s full-plan read, the lesson-check partial's "frontmatter, milestones, tasks, DoDs, Verify" instruction, and the review pass's DoD-checkbox cross-reference all name `index.md` plus `milestones/*.md`. | `playbooks/retro/prepare/base.md`, `src/templates/_partials/_plan_lesson_check.j2`, `playbooks/code-review/review/opus-5.md` | 1 | pending |
-| 7.2 | Update the public docs and the repo guide: plan shape in the vault doc, develop's resume description, groom's plan description, README's plan-track narrative, and the CLAUDE.md Lifecycle bullet that defines a plan directory. | `documentation/vault.md`, `documentation/develop.md`, `documentation/groom.md`, `README.md`, `CLAUDE.md` | 2 | pending |
+| 7.1 | Extend the plan read set in retro and code-review: `prepare`'s full-plan read, the lesson-check partial's "frontmatter, milestones, tasks, DoDs, Verify" instruction, and the review pass's DoD-checkbox cross-reference all name `index.md` plus `milestones/*.md`. | `playbooks/retro/prepare/base.md`, `src/templates/_partials/_plan_lesson_check.j2`, `playbooks/code-review/review/opus-5.md` | 1 | done |
+| 7.2 | Update the public docs and the repo guide: plan shape in the vault doc, develop's resume description, groom's plan description, README's plan-track narrative, and the CLAUDE.md Lifecycle bullet that defines a plan directory. | `documentation/vault.md`, `documentation/develop.md`, `documentation/groom.md`, `README.md`, `CLAUDE.md` | 2 | done |
 
 #### Task 7.1 DoD
 
-- [ ] No surface still assumes milestone bodies live in `index.md`.
-- [ ] Each read set is stated once, as a path pair, with no restated milestone anatomy.
+- [x] No surface still assumes milestone bodies live in `index.md`.
+- [x] Each read set is stated once, as a path pair, with no restated milestone anatomy.
 
 #### Task 7.2 DoD
 
-- [ ] `documentation/vault.md` describes the plan directory including `milestones/`.
-- [ ] `documentation/develop.md`'s resume prose points at milestone status, not checkbox scanning in the index.
-- [ ] CLAUDE.md's Lifecycle and Config sections name the milestone file contract and `core.plans.milestones`.
-- [ ] No stale reference to the single-file plan survives in `README.md`.
+- [x] `documentation/vault.md` describes the plan directory including `milestones/`.
+- [x] `documentation/develop.md`'s resume prose points at milestone status, not checkbox scanning in the index.
+- [x] CLAUDE.md's Lifecycle and Config sections name the milestone file contract and `core.plans.milestones`.
+- [x] No stale reference to the single-file plan survives in `README.md`.
 
 ---
 
