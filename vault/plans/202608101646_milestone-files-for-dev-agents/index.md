@@ -67,7 +67,7 @@ The milestone file is the only place a milestone's work is written down. `index.
 | 2 | Milestone file contract in config | 3 | done |
 | 3 | Plan templates carry the milestone file | 3 | done |
 | 4 | Groom writes milestone files | 3 | done |
-| 5 | Milestone state machine and table refresh | 4 | pending |
+| 5 | Milestone state machine and table refresh | 4 | done |
 | 6 | Develop delegates paths, not bodies | 4 | pending |
 | 7 | Downstream readers and documentation | 3 | pending |
 | 8 | Reports, structure checks and eval fixtures | 2 | pending |
@@ -185,7 +185,7 @@ The milestone file is the only place a milestone's work is written down. `index.
 
 ---
 
-### M5: Milestone state machine and table refresh — 4 SP | pending
+### M5: Milestone state machine and table refresh — 4 SP | done
 
 **Goal**: milestone status is persisted run state written only by `booping playbook-transition`, and every transition refreshes `index.md`'s milestone table.
 
@@ -195,26 +195,28 @@ The milestone file is the only place a milestone's work is written down. `index.
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 5.1 | Add the `milestone` states entry to develop — artifact `milestones/{instance}.md`, initial `pending`, transitions `pending → in-progress → done`, `in-progress → blocked`, `blocked → in-progress`, each carrying the table-refresh hook. The `blocked` edge's `when` names the `**Blocked (n/2)**` attempt line develop-loop already writes, relocated into the milestone file's `## Notes`; the two-attempt abort rule stays develop-loop's prose and does not become a gate. | `playbooks/develop/playbook.yaml` | 2 | pending |
-| 5.2 | Write `refresh-milestone-table` — a uv-inline Python hook script taking the plan dir, querying `core.plans.milestones`, replacing the `## Milestones` table in `index.md` in place and re-stamping the plan's `sp` frontmatter to the sum of milestone-file `sp` — with tests run by `just pytest` that invoke the script as a subprocess against a tmp plan dir. | `playbooks/develop/_scripts/refresh-milestone-table`, `booping-python/tests/scripts/refresh_milestone_table_test.py` | 2 | pending |
+| 5.1 | Add the `milestone` states entry to develop — artifact `milestones/{instance}.md`, initial `pending`, transitions `pending → in-progress → done`, `in-progress → blocked`, `blocked → in-progress`, each carrying the table-refresh hook. The `blocked` edge's `when` names the `**Blocked (n/2)**` attempt line develop-loop already writes, relocated into the milestone file's `## Notes`; the two-attempt abort rule stays develop-loop's prose and does not become a gate. | `playbooks/develop/playbook.yaml` | 2 | done |
+| 5.2 | Write `refresh-milestone-table` — a uv-inline Python hook script taking the plan dir, querying `core.plans.milestones`, replacing the `## Milestones` table in `index.md` in place and re-stamping the plan's `sp` frontmatter to the sum of milestone-file `sp` — with tests run by `just pytest` that invoke the script as a subprocess against a tmp plan dir. | `playbooks/develop/_scripts/refresh-milestone-table`, `booping-python/tests/scripts/refresh_milestone_table_test.py` | 2 | done |
 
 #### Task 5.1 DoD
 
-- [ ] `status:` on a milestone file is written by `booping playbook-transition` only — no prompt instructs a hand-edit.
-- [ ] Each transition's `when` is stated against observable milestone-file content, and `blocked` records the attempt count the loop already tracks.
-- [ ] `booping playbook-state develop --workdir {plan}` reports one row per milestone instance alongside the run machine.
-- [ ] The existing `run` machine's statuses and hooks are untouched.
+- [x] `status:` on a milestone file is written by `booping playbook-transition` only — no prompt instructs a hand-edit.
+- [x] Each transition's `when` is stated against observable milestone-file content, and `blocked` records the attempt count the loop already tracks.
+- [x] `booping playbook-state develop --workdir {plan}` reports one row per milestone instance alongside the run machine.
+- [x] The existing `run` machine's statuses and hooks are untouched.
 
 #### Task 5.2 DoD
 
-- [ ] The script rewrites only the block between the `## Milestones` heading and the next heading; surrounding prose is byte-identical.
-- [ ] The plan's `sp` frontmatter equals the sum of milestone-file `sp` after every run — this is the only writer of `sp` after grooming.
-- [ ] Running it twice in a row produces no diff the second time.
-- [ ] Columns and glob come from `core.plans.milestones`, never hard-coded.
-- [ ] A plan with no `milestones/` directory exits non-zero with a message naming the plan dir, and writes nothing.
-- [ ] Tests run under `just pytest` and drive the script as a subprocess against a tmp plan dir.
+- [x] The script rewrites only the block between the `## Milestones` heading and the next heading; surrounding prose is byte-identical.
+- [x] The plan's `sp` frontmatter equals the sum of milestone-file `sp` after every run — this is the only writer of `sp` after grooming.
+- [x] Running it twice in a row produces no diff the second time.
+- [x] Columns and glob come from `core.plans.milestones`, never hard-coded.
+- [x] A plan with no `milestones/` directory exits non-zero with a message naming the plan dir, and writes nothing.
+- [x] Tests run under `just pytest` and drive the script as a subprocess against a tmp plan dir.
 
 ---
+
+**Note**: the `{instance}` artifact needed a subgraph to reference the machine (engine gate at `booping-python/src/booping/context/playbook.py:405`), so `develop-loop` now sits in a one-step `milestones` subgraph repeating once per milestone file — user-confirmed. `booping playbook-state` keys instances as `01-demo.md`, `.md` included; cosmetic, left as is.
 
 ### M6: Develop delegates paths, not bodies — 4 SP | pending
 
