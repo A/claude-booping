@@ -26,9 +26,12 @@ it — frontmatter (`name`, `description`) plus both top-level sections, generic
 class: placeholders throughout, no path, milestone or story-point value from this run baked in.
 Never draft into a bad-fit template, never improvise a shape and name a template after it.
 
-The plan is the run's `index.md`, already carrying its frontmatter and title — the body goes under
-them. `sp` and `summary` are yours; write them with:
+A plan is two surfaces: the run's `index.md`, already carrying its frontmatter and title, holding the template's top-level sections under them; and one file per milestone, written as [Write the milestone files](#write-the-milestone-files) describes, against the template's milestone-file section.
+
+`summary` is yours:
 
 ```
-booping frontmatter-update {plan}/index.md sp={total} summary="{one line}"
+booping frontmatter-update {plan-dir}/index.md summary="{one line}"
 ```
+
+`sp` is not — develop's `refresh-milestone-table` script re-sums it from the milestone files. Never hand-write it.
