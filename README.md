@@ -86,7 +86,7 @@ Candidates are listed for you if you forget the exact path.
 
 `groom` shapes the spec and waits for explicit user approval before handing off; `develop` claims the next ready plan and executes milestone by milestone; `retro` compares what shipped to the original spec; `learn` distils the retrospective into rules that bind the next sprint.
 
-A plan is a directory, not a file: `plans/{slug}/index.md` carries the frontmatter, the approach and a generated `## Milestones` table, while each milestone is its own file under `milestones/` holding that milestone's tasks, definition of done and verification. That milestone file is what develop hands a coding agent as its contract, with `index.md` alongside as context.
+A plan is a directory, not a file: `plans/{slug}/index.md` carries the frontmatter, the approach and a generated `## Milestones` table, while each milestone gets a directory of its own under `milestones/`. Inside it sits the milestone file — same name as the directory — holding that milestone's tasks, definition of done and verification, joined during the sprint by whatever that milestone accumulates, currently a `feedback.md` written when an attempt is sent back. That milestone file is what develop hands a coding agent as its contract, with `index.md` alongside as context; the agent implements it, runs its verification and commits, and develop validates the commit against the definition of done before moving the milestone on.
 
 There is no shared status table — **each playbook has its own status vocabulary** and advances its own run artifact through it. Groom and develop run on the plan, so its `status:` frontmatter is whatever those two last wrote, and the plan track ends when develop closes it — at `done`, or at `fail` or `cancelled`. Retro and learn are a **separate track** over a standalone retrospective under `retrospectives/`; code review is a third, over one file per run under `codereviews/`. The statuses those tracks write are their own artifact's, never the plan's.
 
@@ -117,7 +117,7 @@ A plan's frontmatter status is written by groom or develop. Retro and learn writ
 
 - **`framing`** — clarifying the request and settling scope.
 - **`researching`** — the blast-radius and web-research passes are running.
-- **`drafting`** — design is being settled with you in conversation and written into `index.md` and one file per milestone.
+- **`drafting`** — design is being settled with you in conversation and written into `index.md` and one milestone directory per milestone.
 - **`cross-reviewing`** — a second model is reviewing the draft (skipped when no reviewer is configured).
 - **`presenting`** — the approval screen is on the table.
 - **`awaiting-approval`** — waiting for your explicit approval or change request; groom's single review gate.

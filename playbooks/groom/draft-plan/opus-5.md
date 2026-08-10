@@ -26,13 +26,13 @@ conversation already carries — the blast-radius map and the external ground th
 
 Yours to write, here, one milestone at a time — no sub-step, no worker agent, no batched pass. `{plan-dir}` is the preamble's `Plan dir:` line. In execution order, per milestone:
 
-1. Seed the file:
+1. Seed the milestone's directory and the file inside it:
 
    ```
    booping scaffold core.groom_playbook.milestone_scaffold {plan-dir}/milestones --set id={nn} --set slug={kebab} --set title="{title}" --set sp={sp} --set plan={plan-dir}/index.md
    ```
 
-   `{nn}` is the milestone's position in execution order, zero-padded to two digits; `{kebab}` is its title kebab-cased — the two make the filename. The seed owns everything it writes; never retype it into the body.
+   `{nn}` is the milestone's position in execution order, zero-padded to two digits; `{kebab}` is its title kebab-cased — the two name the directory `M{nn}-{kebab}` and the file `M{nn}-{kebab}.md` inside it, identically. The seed owns everything it writes; never retype it into the body.
 
 2. Write that milestone's body into the seeded file with a normal file edit, against the chosen template's milestone-file section. Then move to the next milestone.
 

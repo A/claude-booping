@@ -25,7 +25,7 @@ Generated table — one row per milestone file, projected with `core.plans.miles
 
 ## Milestone files
 
-One file per milestone in the plan directory's `milestones/`, seeded by `booping scaffold core.groom_playbook.milestone_scaffold` — the seed owns the file's frontmatter keys and its required headings. Write the body into that skeleton:
+One file per milestone directory under the plan directory's `milestones/`, named after that directory and seeded by `booping scaffold core.groom_playbook.milestone_scaffold` — the seed owns the file's frontmatter keys and its required headings. Write the body into that skeleton:
 
 - **Goal** — one sentence directly under the H1: the observable change in the rendered skill or shared config.
 - **Scope** — the templates, partials, config keys and rendered artefacts this milestone touches, and which other skills read the same config.

@@ -1,6 +1,6 @@
 # groom playbook
 
-Spec a sprint: take a rough request and produce a reviewable plan under `~/Claude/{project}/plans/{slug}/` — an `index.md` plus one file per milestone under `milestones/`, carrying tasks, story points, and definitions of done.
+Spec a sprint: take a rough request and produce a reviewable plan under `~/Claude/{project}/plans/{slug}/` — an `index.md` plus one directory per milestone under `milestones/`, each holding that milestone's tasks, story points, and definition of done.
 
 Grooming is a **playbook**, not a skill — it is driven by [`/playbook`](playbook.md):
 
@@ -14,9 +14,9 @@ Run states: `framing` → `researching` → `drafting` → `cross-reviewing` →
 
 Almost every step runs in your session — inline, or assisted (heavy reads go to the research agent, which returns a bounded summary). The exception is `cross-review`, which hands the drafted plan to a second-model reviewer and does nothing unless you name one. `present` is the run's single approval gate.
 
-The output is a plan directory `~/Claude/{project}/plans/{slug}/`. Its `index.md` carries the approach, the scope and the YAML frontmatter the rest of the loop (`develop`, `retro`, `learn`) reads; each milestone is a file of its own under `milestones/`, and that file — not a section of the index — is what develop hands a coding agent as its contract. `index.md`'s `## Milestones` table and the plan's total story points are generated from those files, never hand-kept. Groom creates the directory with one `booping scaffold` call from a config-declared tree, so the fresh `index.md` arrives complete — including a real `commit:` stamped with repo HEAD at creation, and `draft-plan` scaffolds each milestone file the same way. The intake briefing and any web-research notes land beside it. The directory doubles as the run workdir, so a groom run is **resumable**: its run state lives in the same `index.md`.
+The output is a plan directory `~/Claude/{project}/plans/{slug}/`. Its `index.md` carries the approach, the scope and the YAML frontmatter the rest of the loop (`develop`, `retro`, `learn`) reads; each milestone gets a directory of its own under `milestones/`, holding a milestone file that repeats the directory's name, and that file — not a section of the index — is what develop hands a coding agent as its contract, with room beside it for what the sprint later writes about that milestone. `index.md`'s `## Milestones` table and the plan's total story points are generated from those files, never hand-kept. Groom creates the directory with one `booping scaffold` call from a config-declared tree, so the fresh `index.md` arrives complete — including a real `commit:` stamped with repo HEAD at creation, and `draft-plan` scaffolds each milestone directory and its file the same way. The intake briefing and any web-research notes land beside it. The directory doubles as the run workdir, so a groom run is **resumable**: its run state lives in the same `index.md`.
 
-A plan is always a directory: `core.plans.glob` resolves `plans/*/index.md` and nothing else, and `core.plans.milestones.glob` resolves the milestone files inside it. A vault still holding flat `plans/{slug}.md` files converts them with `/playbook migrate`.
+A plan is always a directory: `core.plans.glob` resolves `plans/*/index.md` and nothing else, and `core.plans.milestones.glob` resolves the milestone file inside each milestone directory. A vault still holding flat `plans/{slug}.md` files converts them with `/playbook migrate`.
 
 Six steps, in dependency order:
 
@@ -25,7 +25,7 @@ Six steps, in dependency order:
 | `intake` | Clarify the request, settle scope, scaffold the plan directory — briefing, identity frontmatter, `commit:` at repo HEAD — with one `booping scaffold` call |
 | `research-codebase` | Map the blast radius — files, modules, integrations, prior art (assisted: heavy reads go to the research agent) |
 | `research-web` | Check external practice where the design is uncertain, and verify package versions, image tags, API endpoints and CLI flags against current docs |
-| `draft-plan` | Design with you in conversation, then write the plan against a plan template — `index.md` plus one milestone file each |
+| `draft-plan` | Design with you in conversation, then write the plan against a plan template — `index.md` plus one milestone directory each |
 | `cross-review` | Hand the drafted plan to a second-model reviewer for severity findings — skipped unless `core.groom_playbook.cross_review_agent` names one (unset by default) |
 | `present` | Present approach, milestones and SP totals; the run's single approval gate |
 

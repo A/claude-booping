@@ -78,7 +78,7 @@ states:
           - cancelled
 
   milestone:
-    artifact: milestones/{instance}.md
+    artifact: milestones/{instance}/{instance}.md
     initial: pending
     statuses:
       pending:
@@ -94,7 +94,7 @@ states:
             hooks:
               - "script refresh-milestone-table"
           - to: blocked
-            when: "a `**Blocked (n/2)**` line under the milestone file's `## Notes` records a failed attempt"
+            when: "a failed attempt is recorded in `feedback.md` beside the milestone file"
             hooks:
               - "script refresh-milestone-table"
       blocked:

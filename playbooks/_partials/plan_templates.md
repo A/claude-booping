@@ -34,4 +34,4 @@ A plan is two surfaces: the run's `index.md`, already carrying its frontmatter a
 booping frontmatter-update {plan-dir}/index.md summary="{one line}"
 ```
 
-`sp` is not — develop's `refresh-milestone-table` script re-sums it from the milestone files. Never hand-write it.
+`sp` is not — never hand-write it.

@@ -25,7 +25,7 @@ Generated table — one row per milestone file, projected with `core.plans.miles
 
 ## Milestone files
 
-One file per milestone in the plan directory's `milestones/`, seeded by `booping scaffold core.groom_playbook.milestone_scaffold` — the seed owns the file's frontmatter keys and its required headings. Write the body into that skeleton:
+One file per milestone directory under the plan directory's `milestones/`, named after that directory and seeded by `booping scaffold core.groom_playbook.milestone_scaffold` — the seed owns the file's frontmatter keys and its required headings. Write the body into that skeleton:
 
 - **Goal** — one sentence directly under the H1: the observable change in CLI behavior.
 - **Scope** — the subcommands and flags in play, the files this milestone touches, and any caller (skill, script) whose expected output shape it affects.

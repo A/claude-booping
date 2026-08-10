@@ -45,8 +45,8 @@ Prose that must survive | pipes and all.
 """
 
 MILESTONES = {
-    "01-first-thing.md": ('"01"', "First thing", 3, "pending"),
-    "02-second.md": ('"02"', "Second", 2, "done"),
+    "M01-first-thing": ('"01"', "First thing", 3, "pending"),
+    "M02-second": ('"02"', "Second", 2, "done"),
 }
 
 
@@ -61,10 +61,13 @@ def _project(tmp_path: Path, *, config: str = "", milestone_dir: str = "mileston
     (plan / milestone_dir).mkdir(parents=True)
     (plan / "index.md").write_text(INDEX)
     for name, (ident, title, sp, status) in MILESTONES.items():
-        (plan / milestone_dir / name).write_text(
+        milestone = plan / milestone_dir / name
+        milestone.mkdir()
+        (milestone / f"{name}.md").write_text(
             f"---\nid: {ident}\ntitle: {title}\nsp: {sp}\nstatus: {status}\n"
             f"plan: plans/demo/index.md\n---\n\n# {title}\n"
         )
+        (milestone / "feedback.md").write_text("---\nsp: 100\n---\n\nsidecar\n")
     return plan
 
 
@@ -137,7 +140,7 @@ def test_follows_the_glob_and_columns_the_config_declares(tmp_path: Path) -> Non
         tmp_path,
         milestone_dir="stages",
         config="core:\n  plans:\n    milestones:\n"
-        "      glob: stages/*.md\n      table_columns: [title, status]\n",
+        "      glob: stages/*/M*.md\n      table_columns: [title, status]\n",
     )
     result = _run(plan, tmp_path)
 

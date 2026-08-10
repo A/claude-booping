@@ -6,9 +6,24 @@ Reference for every file and directory inside the vault. For the lifecycle that 
 
 ## `plans/`
 
-A plan is a directory `{YYYYMMDDHHMM}_{kebab-title}/` holding `index.md` and a `milestones/` subdirectory, authored by the [groom playbook](groom.md) and executed by the [develop playbook](develop.md). `index.md` carries the frontmatter (status, type, story points, a one-line `summary`), the approach and scope, and a `## Milestones` table; each milestone is a file of its own, `milestones/{nn}-{kebab-title}.md`, with frontmatter `id`, `title`, `sp`, `status`, `plan` and a body of tasks, Definition of Done checkboxes and Verify lines. That file is the contract a `booping-developer` agent is handed — develop passes its path, never its text, with `index.md` alongside as context.
+A plan is a directory `{YYYYMMDDHHMM}_{kebab-title}/` holding `index.md` and a `milestones/` subdirectory, authored by the [groom playbook](groom.md) and executed by the [develop playbook](develop.md). `index.md` carries the frontmatter (status, type, story points, a one-line `summary`), the approach and scope, and a `## Milestones` table.
 
-Discovery follows the `core.plans.glob` config key — an ordered list of globs, `plans/*/index.md` as shipped; the milestone files follow `core.plans.milestones.glob`, `milestones/*.md` relative to the plan directory. A vault laying plans out differently edits those keys and every consumer follows.
+Each milestone gets a directory of its own, `milestones/M{nn}-{kebab-title}/`, and the milestone file inside repeats that name:
+
+```text
+plans/197001010800_widget-search/
+├── index.md
+└── milestones/
+    ├── M01-keyword-index/
+    │   └── M01-keyword-index.md
+    └── M02-search-endpoint/
+        ├── M02-search-endpoint.md
+        └── feedback.md
+```
+
+The milestone file is the contract a `booping-developer` agent is handed — develop passes its path, never its text, with `index.md` alongside as context. It states the goal, the tasks, the Definition of Done and the command that verifies the work. Because the file is named after its directory, a bare wikilink to the milestone resolves to it in Obsidian, and the directory stays free for whatever the sprint accumulates around that milestone. Today that is one sidecar: `feedback.md`, written by develop when it sends an attempt back, carrying what it checked, what was wrong and what the next attempt must do. It is absent on a milestone that landed first time.
+
+Discovery follows the `core.plans.glob` config key — an ordered list of globs, `plans/*/index.md` as shipped; milestones follow `core.plans.milestones.glob`, which matches only the milestone file inside each milestone directory, never a sidecar beside it. A vault laying plans out differently edits those keys and every consumer follows.
 
 A plan's `status:` is **run state**, not a shared lifecycle: `index.md` doubles as the run artifact of whichever playbook operates on it, so the vocabulary is the one that playbook declares in its own `states:` block. Groom ends at `ready-for-dev`; develop claims from there and ends at `done`, at `fail` when a blocker survives two fix attempts, or at `cancelled` when you call the run off. All three are terminal. Only `booping playbook-transition` writes the status, and it refuses any move the machine does not declare. See [Playbooks → Run state](playbook.md#run-state).
 

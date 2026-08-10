@@ -604,7 +604,7 @@ def test_core_milestone_scaffold_seeds_the_milestone_contract(tmp_path: Path) ->
     )
     assert result.returncode == 0, result.stderr
 
-    text = (plan / "milestones" / "01-cli-surface.md").read_text()
+    text = (plan / "milestones" / "M01-cli-surface" / "M01-cli-surface.md").read_text()
     front, body = text.split("---\n", 2)[1:]
     assert list(yaml.safe_load(front).items()) == [
         ("id", "01"),
@@ -644,7 +644,7 @@ def test_scaffolded_milestones_query_by_the_shared_key(tmp_path: Path) -> None:
         assert result.returncode == 0, result.stderr
 
     result = _run(
-        "query", "--project", str(vault), "--glob", "plans/demo/milestones/*.md",
+        "query", "--project", str(vault), "--glob", "plans/demo/milestones/*/M*.md",
         "--columns", "id,title,sp,status", "--sort", "id", "--output", "json",
         cwd=tmp_path,
     )

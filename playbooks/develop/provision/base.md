@@ -5,7 +5,7 @@ Set the sprint up in one step: a confirmed branch to commit on, and the mileston
 briefing in `develop-loop` will cover.
 
 You get the plan — its type, title and slug — the repo's current branch, and the drift findings
-intake raised. The milestones come off disk, one file each.
+intake raised. The milestones come off disk, one directory each.
 
 ## Branch
 
@@ -34,10 +34,10 @@ keep them one-per-briefing.
 {%- endif %}
 
 The groups are yours to settle — reported in the return, never put to the user for confirmation.
-Settle them as a table you keep for the return, milestones named by file so `develop-loop` briefs
-paths:
+Settle them as a table you keep for the return, milestones named by their directory so
+`develop-loop` briefs paths:
 
-| Group | Milestone files | SP | Grouped because |
+| Group | Milestone dirs | SP | Grouped because |
 | --- | --- | --- | --- |
 
 Carry intake's outstanding drift alongside them, so `develop-loop` briefs against it.
@@ -57,7 +57,7 @@ With the branch created and the groups settled, advance the run per the `## Stat
 
 - branch: `{name}` created off the current branch `{base}`, name confirmed by the user
 - transition: {the transition report verbatim}
-- groups: {n} briefings over {m} milestones (ceiling {c}) — G1 `01-{kebab}`+`02-{kebab}`, G2 `03-{kebab}`
+- groups: {n} briefings over {m} milestones (ceiling {c}) — G1 `M01-{kebab}`+`M02-{kebab}`, G2 `M03-{kebab}`
 - drift: {what intake raised and whether anything is outstanding}
 
 ```

@@ -28,7 +28,7 @@ Generated table — one row per milestone file, projected with `core.plans.miles
 
 ## Milestone files
 
-One file per milestone in the plan directory's `milestones/`, seeded by `booping scaffold core.groom_playbook.milestone_scaffold` — the seed owns the file's frontmatter keys and its required headings. Write the body into that skeleton:
+One file per milestone directory under the plan directory's `milestones/`, named after that directory and seeded by `booping scaffold core.groom_playbook.milestone_scaffold` — the seed owns the file's frontmatter keys and its required headings. Write the body into that skeleton:
 
 - **Goal** — one sentence directly under the H1: what changes in the system after this milestone.
 - **Scope** — the modules, endpoints or tables in play and the files this milestone touches, so it executes without reading another milestone.

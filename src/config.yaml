@@ -62,13 +62,16 @@ core:
     # and the engine still honours list order for a vault declaring several.
     glob:
       - plans/*/index.md
-    # A milestone is a file inside its plan directory, seeded by
-    # `core.groom_playbook.milestone_scaffold`. Shared by groom (writes them,
-    # renders index.md's table) and develop (groups them, delegates their paths):
-    # `glob` is relative to the plan directory, `table_columns` is the projection
-    # index.md's `## Milestones` table is rendered with.
+    # A milestone is a directory inside its plan's `milestones/`, seeded by
+    # `core.groom_playbook.milestone_scaffold`, holding the milestone file plus any
+    # sidecars written during the sprint. The milestone file is named after its own
+    # directory, so a bare wikilink to the directory name resolves to it and `glob`
+    # never claims a sidecar. Shared by groom (writes them, renders index.md's
+    # table) and develop (groups them, delegates their paths): `glob` is relative to
+    # the plan directory, `table_columns` is the projection index.md's
+    # `## Milestones` table is rendered with.
     milestones:
-      glob: milestones/*.md
+      glob: milestones/*/M*.md
       table_columns: [id, title, sp, status]
 
   sprint:
@@ -135,22 +138,23 @@ core:
     # ints (`01` -> 1) except where a digit forbids it (`08` stays a string),
     # which mixes types in one column and scrambles `--sort id`.
     milestone_scaffold:
-      "{{ id }}-{{ slug }}.md": |
-        ---
-        id: {{ id | tojson }}
-        title: {{ title | tojson }}
-        sp: {{ sp }}
-        status: pending
-        plan: {{ (plan | default('')) | tojson }}
-        ---
+      "M{{ id }}-{{ slug }}":
+        "M{{ id }}-{{ slug }}.md": |
+          ---
+          id: {{ id | tojson }}
+          title: {{ title | tojson }}
+          sp: {{ sp }}
+          status: pending
+          plan: {{ (plan | default('')) | tojson }}
+          ---
 
-        # M{{ id }}: {{ title }}
+          # M{{ id }}: {{ title }}
 
-        ## Tasks
+          ## Tasks
 
-        ## Definition of Done
+          ## Definition of Done
 
-        ## Verify
+          ## Verify
     agents:
       booping-researcher:
         internal: true
@@ -193,6 +197,9 @@ core:
           - metrics_tokens_cache_read
 
   develop_playbook:
+    # Agent a fix briefing is routed to when the milestone's own builder is not this
+    # agent — an externally built milestone still gets its fixes done in-house.
+    fallback_agent: "booping:booping-developer"
     git:
       commit_message: '<agent>: <plan title> <message>'
       branches:
