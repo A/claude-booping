@@ -65,7 +65,7 @@ The milestone file is the only place a milestone's work is written down. `index.
 | --- | --- | --- | --- |
 | 1 | Scaffold renders tree keys | 3 | done |
 | 2 | Milestone file contract in config | 3 | done |
-| 3 | Plan templates carry the milestone file | 3 | pending |
+| 3 | Plan templates carry the milestone file | 3 | done |
 | 4 | Groom writes milestone files | 3 | pending |
 | 5 | Milestone state machine and table refresh | 4 | pending |
 | 6 | Develop delegates paths, not bodies | 4 | pending |
@@ -129,7 +129,7 @@ The milestone file is the only place a milestone's work is written down. `index.
 
 ---
 
-### M3: Plan templates carry the milestone file — 3 SP | pending
+### M3: Plan templates carry the milestone file — 3 SP | done
 
 **Goal**: all five plan templates specify a plan as `index.md` plus milestone files, so a drafted plan is written into the new shape by construction.
 
@@ -139,20 +139,20 @@ The milestone file is the only place a milestone's work is written down. `index.
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 3.1 | In each template's `# Plan Body`, replace the inline `### M1: …` skeleton under `## Milestones` with the generated milestone table, and add a `## Milestone files` section specifying the per-file body shape for that surface (goal, scope and related files, tasks table, per-task DoD, Verify). | `docs/plan_templates/backend.md`, `docs/plan_templates/frontend.md`, `docs/plan_templates/cli.md`, `docs/plan_templates/claude_skill.md`, `docs/plan_templates/documentation.md` | 2 | pending |
-| 3.2 | Update each `# Quality Checklist`: milestone-shape items point at the milestone file, add an item that the index table matches the milestone files, keep the `sp` rollup item true against per-file `sp`. | same five files | 1 | pending |
+| 3.1 | In each template's `# Plan Body`, replace the inline `### M1: …` skeleton under `## Milestones` with the generated milestone table, and add a `## Milestone files` section specifying the per-file body shape for that surface (goal, scope and related files, tasks table, per-task DoD, Verify). | `docs/plan_templates/backend.md`, `docs/plan_templates/frontend.md`, `docs/plan_templates/cli.md`, `docs/plan_templates/claude_skill.md`, `docs/plan_templates/documentation.md` | 2 | done |
+| 3.2 | Update each `# Quality Checklist`: milestone-shape items point at the milestone file, add an item that the index table matches the milestone files, keep the `sp` rollup item true against per-file `sp`. | same five files | 1 | done |
 
 #### Task 3.1 DoD
 
-- [ ] Every template names the same required frontmatter keys and the same three required headings; surface-specific guidance lives only in the free part of the body.
-- [ ] No template still instructs that milestone bodies live in `index.md`.
-- [ ] `documentation.md`'s milestone ordering rubric and each template's surface inserts survive the edit.
-- [ ] The per-milestone `Verify` rule (scoped, no whole-repo gates) is stated once per template, in the milestone-file section.
+- [x] Every template names the same required frontmatter keys and the same three required headings; surface-specific guidance lives only in the free part of the body.
+- [x] No template still instructs that milestone bodies live in `index.md`.
+- [x] `documentation.md`'s milestone ordering rubric and each template's surface inserts survive the edit.
+- [x] The per-milestone `Verify` rule (scoped, no whole-repo gates) is stated once per template, in the milestone-file section.
 
 #### Task 3.2 DoD
 
-- [ ] Checklist items are verifiable by reading a plan directory, not by intent.
-- [ ] `sp` item reads as the sum of milestone-file `sp` values.
+- [x] Checklist items are verifiable by reading a plan directory, not by intent.
+- [x] `sp` item reads as the sum of milestone-file `sp` values.
 
 ---
 
