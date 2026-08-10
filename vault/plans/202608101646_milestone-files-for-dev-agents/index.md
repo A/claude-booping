@@ -310,6 +310,17 @@ The milestone file is the only place a milestone's work is written down. `index.
 
 ---
 
+## Post-plan amendments
+
+Applied on the user's explicit instruction after M8 closed, waiving the sprint's no-scope-additions rule. Recorded here because they change decisions this plan made.
+
+- **A milestone is a directory**, `milestones/M{nn}-{kebab}/M{nn}-{kebab}.md`, reversing the Decisions entry that rejected a directory per milestone — the runner-written `feedback.md` sidecar needs a home, and naming the file after its dir keeps a bare `[[wikilink]]` resolvable, which also settles the link-cell question. `core.plans.milestones.glob` is `milestones/*/M*.md`, so sidecars are excluded by construction.
+- **Milestone status artifact** is `milestones/{instance}/{instance}.md`. `booping playbook-state` gained a fix: the matched segment's prefix and suffix are stripped, so instances key as `M01-cli-surface` in both filename and directory positions.
+- **The worker runs its `## Verify` and makes the repo commit**; the runner validates the commit diff against the DoD, flips bookkeeping and takes transitions, and never re-runs a per-milestone Verify.
+- **Failed attempts are recorded in `feedback.md`** beside the milestone, `**Blocked (n/2)**` counted only there — the `## Notes` block the milestone machine originally referenced is gone.
+- **`core.develop_playbook.fallback_agent`** names the agent a fix briefing routes to when the milestone's builder is not it.
+- **`sp` mechanism prose trimmed** from `plan_templates.md` to the ban alone, and retro's `prepare` reads `index.md` only — the milestone glob stays in the delegated lesson-check brief.
+
 ## Final Verification
 
 - [ ] `just ci` green (`lint typecheck pytest snapshots mdcheck`), with the snapshot step's diff reported for user acceptance rather than accepted automatically.
