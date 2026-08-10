@@ -66,7 +66,7 @@ The milestone file is the only place a milestone's work is written down. `index.
 | 1 | Scaffold renders tree keys | 3 | done |
 | 2 | Milestone file contract in config | 3 | done |
 | 3 | Plan templates carry the milestone file | 3 | done |
-| 4 | Groom writes milestone files | 3 | pending |
+| 4 | Groom writes milestone files | 3 | done |
 | 5 | Milestone state machine and table refresh | 4 | pending |
 | 6 | Develop delegates paths, not bodies | 4 | pending |
 | 7 | Downstream readers and documentation | 3 | pending |
@@ -156,7 +156,7 @@ The milestone file is the only place a milestone's work is written down. `index.
 
 ---
 
-### M4: Groom writes milestone files — 3 SP | pending
+### M4: Groom writes milestone files — 3 SP | done
 
 **Goal**: `draft-plan` seeds and writes one file per milestone and renders `index.md`'s table from them; `present` summarizes from the same source.
 
@@ -166,22 +166,22 @@ The milestone file is the only place a milestone's work is written down. `index.
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 4.1 | Rewrite `draft-plan`'s body: after design alignment, the step itself — no sub-step, no delegation — runs one `booping scaffold` call per milestone to seed the file, then writes that milestone's body into the seeded file with a normal file edit, authored by the step against the chosen template's milestone-file section; then it writes `index.md`'s `## Milestones` table from `booping query`. | `playbooks/groom/draft-plan/prompt.md`, `playbooks/groom/draft-plan/opus-5.md`, `playbooks/_partials/plan_templates.md` | 2 | pending |
-| 4.2 | Update `present` and `cross-review` for the multi-file plan: the approval screen's milestone table comes from the same query, and the cross-review briefing names `index.md` plus the milestone files as its read set. | `playbooks/groom/present/sonnet-5.md`, `playbooks/groom/cross-review/opus-5.md` | 1 | pending |
+| 4.1 | Rewrite `draft-plan`'s body: after design alignment, the step itself — no sub-step, no delegation — runs one `booping scaffold` call per milestone to seed the file, then writes that milestone's body into the seeded file with a normal file edit, authored by the step against the chosen template's milestone-file section; then it writes `index.md`'s `## Milestones` table from `booping query`. | `playbooks/groom/draft-plan/prompt.md`, `playbooks/groom/draft-plan/opus-5.md`, `playbooks/_partials/plan_templates.md` | 2 | done |
+| 4.2 | Update `present` and `cross-review` for the multi-file plan: the approval screen's milestone table comes from the same query, and the cross-review briefing names `index.md` plus the milestone files as its read set. | `playbooks/groom/present/sonnet-5.md`, `playbooks/groom/cross-review/opus-5.md` | 1 | done |
 
 #### Task 4.1 DoD
 
-- [ ] The step body states the scaffold invocation once, with `--set` values, and never restates the seeded frontmatter keys.
-- [ ] The body-writing mechanism is stated explicitly: scaffold seeds the file, the step writes the body into it, one milestone at a time, with no sub-step and no worker agent involved.
-- [ ] `plan_templates.md` no longer says the whole body goes under `index.md`.
-- [ ] The index table is described as generated output, with the query invocation given verbatim.
-- [ ] The plan's `sp` frontmatter is stated as owned by the refresh script (M5.2), not hand-summed by the step.
-- [ ] Milestone filenames are specified as `{nn}-{kebab}.md`, zero-padded, ordered by execution order.
+- [x] The step body states the scaffold invocation once, with `--set` values, and never restates the seeded frontmatter keys.
+- [x] The body-writing mechanism is stated explicitly: scaffold seeds the file, the step writes the body into it, one milestone at a time, with no sub-step and no worker agent involved.
+- [x] `plan_templates.md` no longer says the whole body goes under `index.md`.
+- [x] The index table is described as generated output, with the query invocation given verbatim.
+- [x] The plan's `sp` frontmatter is stated as owned by the refresh script (M5.2), not hand-summed by the step.
+- [x] Milestone filenames are specified as `{nn}-{kebab}.md`, zero-padded, ordered by execution order.
 
 #### Task 4.2 DoD
 
-- [ ] `present`'s screen reads milestone rows from the query, not from a hand-kept list.
-- [ ] The cross-review briefing's read set names both the index and the milestone files, and its return contract is unchanged.
+- [x] `present`'s screen reads milestone rows from the query, not from a hand-kept list.
+- [x] The cross-review briefing's read set names both the index and the milestone files, and its return contract is unchanged.
 
 ---
 
