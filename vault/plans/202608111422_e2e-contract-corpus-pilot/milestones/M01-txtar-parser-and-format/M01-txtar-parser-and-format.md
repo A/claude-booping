@@ -2,7 +2,7 @@
 id: "01"
 title: "txtar parser and case-format spec"
 sp: 3
-status: pending
+status: done
 plan: "plans/202608111422_e2e-contract-corpus-pilot/index.md"
 ---
 
@@ -16,22 +16,22 @@ plan: "plans/202608111422_e2e-contract-corpus-pilot/index.md"
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 1.1 | Vendor a txtar module: `parse(text) -> Archive` (leading comment + ordered `(name, content)` sections, `-- name --` markers, trailing-newline rules per Go's spec) and `serialize(archive) -> str`, byte-exact roundtrip for any well-formed archive. Plain functions + a small dataclass, stdlib only. | `booping-python/e2e/_txtar.py` | 2 | pending |
-| 1.2 | Write the case-format spec: section vocabulary (`cmd`, `exit`, `stdout`, `stderr`, `fixtures/{home\|xdg\|cwd}/**`, `expected/{home\|xdg\|cwd}/**`), sandbox mapping and env (`HOME`, `XDG_CONFIG_HOME`, cwd), multi-line `cmd` semantics (all lines but last must exit 0, `stdout` = concatenation), normalization tokens `{CWD}`/`{HOME}`/`{XDG}` and the `[..]` in-line wildcard, absent-section-not-asserted rule, runner exit codes, and the `--update` authoring loop. Content mirrors `index.md`'s Decisions/I/O contract — no new rules invented here. | `booping-python/e2e/README.md` | 1 | pending |
+| 1.1 | Vendor a txtar module: `parse(text) -> Archive` (leading comment + ordered `(name, content)` sections, `-- name --` markers, trailing-newline rules per Go's spec) and `serialize(archive) -> str`, byte-exact roundtrip for any well-formed archive. Plain functions + a small dataclass, stdlib only. | `booping-python/e2e/_txtar.py` | 2 | done |
+| 1.2 | Write the case-format spec: section vocabulary (`cmd`, `exit`, `stdout`, `stderr`, `fixtures/{home\|xdg\|cwd}/**`, `expected/{home\|xdg\|cwd}/**`), sandbox mapping and env (`HOME`, `XDG_CONFIG_HOME`, cwd), multi-line `cmd` semantics (all lines but last must exit 0, `stdout` = concatenation), normalization tokens `{CWD}`/`{HOME}`/`{XDG}` and the `[..]` in-line wildcard, absent-section-not-asserted rule, runner exit codes, and the `--update` authoring loop. Content mirrors `index.md`'s Decisions/I/O contract — no new rules invented here. | `booping-python/e2e/README.md` | 1 | done |
 
 ## Definition of Done
 
 ### Task 1.1
 
-- [ ] `parse(serialize(a))` and `serialize(parse(t))` are byte-exact roundtrips, including leading comment, section order, and files with no trailing newline.
-- [ ] A section name may contain `/` (paths like `fixtures/cwd/a/b.md`); duplicate section names are a `ValueError` naming the section.
-- [ ] Module is stdlib-only and passes `ruff` and `basedpyright` under the project config.
+- [x] `parse(serialize(a))` and `serialize(parse(t))` are byte-exact roundtrips, including leading comment, section order, and files with no trailing newline.
+- [x] A section name may contain `/` (paths like `fixtures/cwd/a/b.md`); duplicate section names are a `ValueError` naming the section.
+- [x] Module is stdlib-only and passes `ruff` and `basedpyright` under the project config.
 
 ### Task 1.2
 
-- [ ] Every section name the runner accepts is specified with its assert semantics; unknown sections are specified as a hard error, not ignored.
-- [ ] A complete worked example case (fixture + cmd + expected) is included and is copy-paste runnable once M02 lands.
-- [ ] Spec states the language-neutrality contract: the file defines behavior, `run.py` is the reference implementation.
+- [x] Every section name the runner accepts is specified with its assert semantics; unknown sections are specified as a hard error, not ignored.
+- [x] A complete worked example case (fixture + cmd + expected) is included and is copy-paste runnable once M02 lands.
+- [x] Spec states the language-neutrality contract: the file defines behavior, `run.py` is the reference implementation.
 
 ## Verify
 
