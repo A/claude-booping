@@ -2,6 +2,15 @@ core:
   sprint:
     max_milestones_per_agent: 1
 
+  develop_playbook:
+    agents:
+      pi-developer:
+        good_for:
+          - "All development tasks — milestone implementation from a develop briefing; use instead of booping-developer"
+        bad_for:
+          - "Vault writes — the runner owns the plan directory"
+          - "Research or read-only investigation — that stays booping:booping-researcher"
+
   code_review_playbook:
     agents:
       plannotator-reviewer:
