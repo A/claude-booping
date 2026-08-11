@@ -63,7 +63,7 @@ Load-time inputs: `core.develop_playbook.agents` (vault tier) feeds the develop 
 | --- | --- | --- | --- |
 | 01 | [Rewrite the pi-developer proxy agent](milestones/M01-proxy-agent-rewrite/M01-proxy-agent-rewrite.md) | 3 | done |
 | 02 | [Wire pi-developer into develop via vault config](milestones/M02-vault-config-wiring/M02-vault-config-wiring.md) | 2 | done |
-| 03 | [End-to-end smoke through the proxy path](milestones/M03-e2e-smoke/M03-e2e-smoke.md) | 2 | pending |
+| 03 | [End-to-end smoke through the proxy path](milestones/M03-e2e-smoke/M03-e2e-smoke.md) | 2 | done |
 
 ## Final Verification
 
