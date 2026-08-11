@@ -52,12 +52,20 @@ def cell(value: Any) -> str:
     return str(value).replace("|", "\\|").replace("\n", " ")
 
 
+def render(row: dict[str, Any], col: str) -> str:
+    # `title` links to the milestone file so the table navigates; `path` is
+    # plan-dir-relative, which is exactly where index.md lives.
+    if col == "title" and row.get("path"):
+        return f"[{cell(row.get(col))}]({row['path']})"
+    return cell(row.get(col))
+
+
 def table(rows: list[dict[str, Any]], columns: list[str]) -> str:
     lines = [
         "| " + " | ".join(columns) + " |",
         "| " + " | ".join("---" for _ in columns) + " |",
     ]
-    lines += ["| " + " | ".join(cell(row.get(col)) for col in columns) + " |" for row in rows]
+    lines += ["| " + " | ".join(render(row, col) for col in columns) + " |" for row in rows]
     return "\n".join(lines) + "\n"
 
 
