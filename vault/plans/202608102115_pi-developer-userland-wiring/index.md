@@ -1,13 +1,13 @@
 ---
 title: "Userland pi-developer wiring — develop milestones via local pi worker"
 type: "feature"
-status: in-progress
+status: done
 sp: 7
 related_to: null
 created: 2026-08-10 21:16
 planned: null
 started: 2026-08-11 11:39
-completed: null
+completed: 2026-08-11 13:24
 code_reviews: []
 sessions:
 - b5e708f2-eefd-4d33-a843-4ce4194817fa
@@ -17,6 +17,13 @@ summary: pi-developer proxy agent drives ~/.bin/pi-developer (Qwen3-Coder-Next)
   as develop's milestone worker via vault config
 commit: 6f7f781f26ac8002f8d6f6e498453409690f21ac
 reviewed_at: 2026-08-11 11:34
+metrics_active_minutes: 116
+metrics_models:
+- claude-fable-5
+metrics_tokens_input: 282
+metrics_tokens_output: 129943
+metrics_tokens_cache_creation: 696885
+metrics_tokens_cache_read: 11453333
 ---
 
 # Userland pi-developer wiring — develop milestones via local pi worker
