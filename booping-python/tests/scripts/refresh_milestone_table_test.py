@@ -91,8 +91,8 @@ def test_renders_one_row_per_milestone_file(tmp_path: Path) -> None:
     assert _section((plan / "index.md").read_text(), "## Milestones") == (
         "| id | title | sp | status |\n"
         "| --- | --- | --- | --- |\n"
-        "| 01 | First thing | 3 | pending |\n"
-        "| 02 | Second | 2 | done |"
+        "| 01 | [First thing](milestones/M01-first-thing/M01-first-thing.md) | 3 | pending |\n"
+        "| 02 | [Second](milestones/M02-second/M02-second.md) | 2 | done |"
     )
 
 
@@ -121,9 +121,8 @@ def test_writes_the_table_into_a_section_that_has_none(tmp_path: Path) -> None:
     result = _run(plan, tmp_path)
 
     assert result.returncode == 0, result.stderr
-    assert "| 01 | First thing | 3 | pending |" in _section(
-        (plan / "index.md").read_text(), "## Milestones"
-    )
+    row = "| 01 | [First thing](milestones/M01-first-thing/M01-first-thing.md) | 3 | pending |"
+    assert row in _section((plan / "index.md").read_text(), "## Milestones")
 
 
 def test_second_run_changes_nothing(tmp_path: Path) -> None:
@@ -148,8 +147,8 @@ def test_follows_the_glob_and_columns_the_config_declares(tmp_path: Path) -> Non
     assert _section((plan / "index.md").read_text(), "## Milestones") == (
         "| title | status |\n"
         "| --- | --- |\n"
-        "| First thing | pending |\n"
-        "| Second | done |"
+        "| [First thing](stages/M01-first-thing/M01-first-thing.md) | pending |\n"
+        "| [Second](stages/M02-second/M02-second.md) | done |"
     )
 
 
