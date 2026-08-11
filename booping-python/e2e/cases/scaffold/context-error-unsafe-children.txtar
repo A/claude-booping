@@ -1,4 +1,4 @@
-Unsafe filename key under explicit children: stderr carries nested path (from context/scaffold_test.py).
+Unsafe filename key under explicit children: stderr carries nested path.
 
 -- cmd --
 booping scaffold demo out

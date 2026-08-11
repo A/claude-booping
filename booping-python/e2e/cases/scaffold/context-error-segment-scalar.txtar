@@ -1,4 +1,4 @@
-Segment under scalar config value: stderr names the path and the scalar type (from context/scaffold_test.py).
+Segment under scalar config value: stderr names the path and the scalar type.
 
 -- cmd --
 booping scaffold demo.deep out

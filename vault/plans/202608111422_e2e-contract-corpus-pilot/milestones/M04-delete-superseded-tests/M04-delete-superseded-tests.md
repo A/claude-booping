@@ -2,7 +2,7 @@
 id: "04"
 title: "Delete superseded tests, wire docs"
 sp: 2
-status: pending
+status: in-progress
 plan: "plans/202608111422_e2e-contract-corpus-pilot/index.md"
 ---
 
