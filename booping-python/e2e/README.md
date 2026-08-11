@@ -98,6 +98,8 @@ in `cmd` or `fixtures/`, which are taken literally.
 - An absent `exit` asserts exit `0`.
 - An `expected/` section for a file that does not exist fails the case.
 - Files created beyond those named by `expected/` are not flagged.
+- A command whose failure needs an unwritable path or another OS-level fault (`booping` exit `2`) is
+  not expressible — fixtures carry content, not permissions. That coverage is an accepted gap.
 
 ## Runner
 
