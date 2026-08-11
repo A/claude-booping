@@ -22,7 +22,11 @@ pytest:
     cd booping-python && uv run pytest
 
 # Every check CI runs, in order, stopping at the first failure.
-ci: lint typecheck pytest snapshots mdcheck
+ci: lint typecheck pytest e2e snapshots mdcheck
+
+# Run e2e contract corpus (`just e2e [pattern...]` or `just e2e --update`)
+e2e *args:
+	cd booping-python && uv run python e2e/run.py {{ args }}
 
 [doc("Structural checks over the rendered reports")]
 mdcheck:
