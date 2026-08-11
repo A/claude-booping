@@ -26,8 +26,9 @@ Walk these in order.
 6. **Run the three dynamic checks** no static checklist can carry.
    - **Lesson compliance** — every lesson loaded below, against the change. A contradiction is a
      `BLOCKER`; cite the lesson id.
-   - **Plan-DoD alignment**, when a plan is in scope — cross-reference each `[x]` DoD checkbox
-     against the diff. A DoD item marked done that the diff does not deliver is a finding.
+   - **Plan-DoD alignment**, when a plan is in scope — read `index.md` plus
+     `{{ config.core.plans.milestones.glob }}` beside it, and cross-reference each `[x]` DoD
+     checkbox against the diff. A DoD item marked done that the diff does not deliver is a finding.
    - **Plan-intent match**, when a plan is in scope — the mandated test methodology, structural
      pattern and architectural decisions. A diff that solves the problem a different way than the
      plan specified is a finding, not silently-accepted variation.

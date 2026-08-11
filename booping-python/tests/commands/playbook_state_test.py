@@ -40,10 +40,11 @@ def _move(
     state: str | None = None,
     instance: str | None = None,
     workdir: Path,
+    playbook: str = "runner",
 ) -> None:
     transition_cmd._run(  # type: ignore[reportPrivateUsage]
         argparse.Namespace(
-            playbook="runner",
+            playbook=playbook,
             to_status=to,
             state=state,
             instance=instance,
@@ -149,6 +150,29 @@ def test_instances_keyed_by_slug_and_sorted(
     assert instances["mike"] == {"status": "done"}
     assert instances["alpha"]["status"] == "spec-ing"
     assert instances["alpha"]["next"] == [{"to": "done", "when": "spec written"}]
+
+
+@pytest.mark.parametrize(
+    ("state", "artifact"),
+    [
+        ("flat", "notes/alpha.md"),
+        ("nested", "parts/alpha/alpha.md"),
+    ],
+)
+def test_instance_key_is_what_the_placeholder_matched(
+    state: str,
+    artifact: str,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    _plant("sharded")
+    _move("drafting", state=state, instance="alpha", workdir=tmp_path, playbook="sharded")
+    capsys.readouterr()
+
+    assert (tmp_path / artifact).is_file()
+    instances = _report(tmp_path, capsys, playbook="sharded")["states"][state]["instances"]
+    assert list(instances) == ["alpha"]
+    assert instances["alpha"]["status"] == "drafting"
 
 
 # ---------------------------------------------------------------------------

@@ -17,3 +17,11 @@ commit: dddddddddddddddddddddddddddddddddddddddd
 # Navigation redesign
 
 Fixture plan — directory shape, parked at `awaiting-approval` so the specification-phase filters have something to exclude.
+
+## Milestones
+
+| id | title | sp | status |
+| --- | --- | --- | --- |
+| 01 | Navigation inventory | 5 | pending |
+| 02 | Single-row layout | 3 | pending |
+

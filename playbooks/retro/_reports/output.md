@@ -98,7 +98,7 @@ Resolve `$ARGUMENTS` to plan paths.
 ```
 
 ## Step: Prepare
-Read each plan in the working set in full — for **context only**: scope, SP totals, dates, decisions on record. The plan is a reference for understanding issues that surface in the later steps, not a target for orchestrator analysis (no derived "decisions deviated" / "tech debt" / "coverage gap" findings — the user owns issue identification; the step does homework and suggests options).
+Read each plan in the working set — its `index.md` — for **context only**: scope, SP totals, dates, decisions on record. The plan is a reference for understanding issues that surface in the later steps, not a target for orchestrator analysis (no derived "decisions deviated" / "tech debt" / "coverage gap" findings — the user owns issue identification; the step does homework and suggests options).
 
 
 
@@ -122,7 +122,7 @@ Drop items with low value for the retrospective. Do not copy raw logs into the s
 
 **B. Plan-stage lesson check** — separate brief, run in parallel with A:
 
-1. Read the plan file(s) listed in the brief in full — frontmatter, milestones, tasks, DoDs, Verify lines.
+1. Read each plan listed in the brief in full — `index.md` plus `milestones/*/M*.md` beside it.
 2. Cross-check the plan against the lesson set included verbatim in the brief.
 3. Return a structured summary per plan with one section:
    - **Plan-stage lesson gaps** — places where the plan as written contradicts or omits a loaded lesson. Per item: lesson path, the rule, where in the plan it should have shown up (milestone / task / DoD / Verify), and what is there instead (or what is missing).

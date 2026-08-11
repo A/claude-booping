@@ -17,7 +17,7 @@ nav:
   - Quick start: quick_start.md
   - Install: install.md
   - Vault: vault.md
-  - Playbooks (unstable): playbook.md
+  - Playbooks: playbook.md
   - Project config: project_config.md
   - Integrating external agents: integrating-external-agents.md
   - Workflow:

@@ -35,24 +35,22 @@ Order pages so each milestone produces something reviewable in isolation. A typi
 4. **Cross-references and stale-reference cleanup** — README link, skill lazy-load wiring, project-conventions doc updates.
 5. **Reshape** — pause for user IA review against the rendered site; apply prose/structure changes uncovered by reading the built output.
 
-### M1: {Milestone name} — {SP} SP | pending
+The table below is generated — one row per milestone file, projected with `core.plans.milestones.table_columns` by `booping query`. Derived output: no hand-written rows, no milestone bodies in this file.
 
-**Goal**: one sentence — what page(s) or pipeline component lands.
+## Milestone files
 
-**Verify**: build/serve the site locally and load the pages this milestone changed; check their cross-links resolve. Whole-repo gates — a strict full-site build, a pushed branch confirming the CI workflow green, an aggregate `ci` target — run once in Final Verification, never per milestone.
+One file per milestone directory under the plan directory's `milestones/`, named after that directory and seeded by `booping scaffold core.groom_playbook.milestone_scaffold` — the seed owns the file's frontmatter keys and its required headings. Write the body into that skeleton:
 
-| Task | Description | Files | SP | Status |
-|------|-------------|-------|----|--------|
-| 1.1 | ... | `documentation/<page>.md`, `mkdocs.yml` | 2 | pending |
+- **Goal** — one sentence directly under the H1: what page(s) or pipeline component lands.
+- **Scope** — the pages this milestone writes or touches, their place in the page tree, and the surfaces that link to them.
+- `## Tasks` — one row per task:
 
-#### Task 1.1 DoD
+  | Task | Description | Files | SP | Status |
+  |------|-------------|-------|----|--------|
+  | 1.1 | ... | `documentation/{page}.md`, `mkdocs.yml` | 2 | pending |
 
-- [ ] Page renders in the local build with no broken links.
-- [ ] Cross-links to/from sibling pages resolve.
-- [ ] Code blocks lint cleanly (correct language tags, runnable where applicable).
-- [ ] No prose that duplicates content already covered by another page — link instead.
-
----
+- `## Definition of Done` — one `### Task {n}.{m}` block per task, checkbox bullets only: page renders in the local build with no broken links, cross-links to/from sibling pages resolve, code blocks lint cleanly (correct language tags, runnable where applicable), no prose duplicating another page — link instead.
+- `## Verify` — build/serve the site locally and load the pages this milestone changed; check their cross-links resolve. Whole-repo gates — a strict full-site build, a pushed branch confirming the CI workflow green, an aggregate `ci` target — run once in `index.md`'s Final Verification, never per milestone.
 
 ## Final Verification
 
@@ -76,7 +74,7 @@ Name sections to update (e.g. add `documentation/` to the layout section, distin
 ## Frontmatter
 
 - [ ] `title` matches the plan's H1 and `type` is the task type chosen at intake.
-- [ ] `sp` equals the sum of per-task SP across milestones.
+- [ ] `sp` equals the sum of the milestone files' `sp`.
 
 ## Content
 
@@ -85,8 +83,10 @@ Name sections to update (e.g. add `documentation/` to the layout section, distin
 - [ ] Each page is a milestone task or grouped with siblings under one milestone — no orphan pages.
 - [ ] DoD bullets are verifiable by loading the rendered page or running the build.
 - [ ] Every task lists exact file paths.
-- [ ] Every milestone has a `Verify` step that includes a build or local-serve check of the pages it changed — no whole-repo gate (strict full-site build, CI-workflow run, aggregate `ci` target); those belong to Final Verification.
-- [ ] Each milestone executable from a fresh session with only the plan as context.
+- [ ] Every milestone is a file in `milestones/` carrying its own goal, tasks, DoD and Verify — no milestone body in `index.md`.
+- [ ] `index.md`'s milestone table has one row per milestone file and matches their frontmatter.
+- [ ] Every milestone file's `## Verify` includes a build or local-serve check of the pages that milestone changed — no whole-repo gate (strict full-site build, CI-workflow run, aggregate `ci` target); those belong to `index.md`'s Final Verification.
+- [ ] Each milestone file executable from a fresh session with only it and `index.md` as context.
 
 ## Documentation hygiene
 

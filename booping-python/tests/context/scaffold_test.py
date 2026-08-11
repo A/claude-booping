@@ -8,10 +8,27 @@ from booping.context.scaffold import (
     DirNode,
     FileNode,
     ScaffoldError,
+    check_name,
     load,
     parse_node,
     resolve,
 )
+
+# ---------------------------------------------------------------------------
+# check_name — the safety gate the command re-runs on rendered names
+# ---------------------------------------------------------------------------
+
+class TestCheckName:
+    @pytest.mark.parametrize("name", ["a.md", "_references", "...", "a.b.c", "..hidden"])
+    def test_accepts_a_plain_filename(self, name: str) -> None:
+        check_name(name, "t.d")
+
+    @pytest.mark.parametrize("name", ["a/b", "/abs", "trailing/", ".", ".."])
+    def test_rejects_an_escaping_name(self, name: str) -> None:
+        with pytest.raises(ScaffoldError) as exc:
+            check_name(name, "t.d")
+        assert exc.value.path == "t.d"
+        assert repr(name) in str(exc.value)
 
 # ---------------------------------------------------------------------------
 # parse_node — valid shapes

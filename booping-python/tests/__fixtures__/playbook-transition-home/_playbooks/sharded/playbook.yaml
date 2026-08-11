@@ -1,0 +1,42 @@
+state: main
+graph:
+  intake: []
+  flat-pipeline:
+    dependencies: [intake]
+    state: flat
+    graph:
+      flat-step: []
+  nested-pipeline:
+    dependencies: [flat-pipeline]
+    state: nested
+    graph:
+      nested-step: []
+
+states:
+  main:
+    artifact: index.md
+    initial: intaking
+    statuses:
+      intaking:
+        transitions:
+          - to: done
+            when: intake complete
+      done: {terminal: true}
+  flat:
+    artifact: notes/{instance}.md
+    initial: drafting
+    statuses:
+      drafting:
+        transitions:
+          - to: done
+            when: note written
+      done: {terminal: true}
+  nested:
+    artifact: parts/{instance}/{instance}.md
+    initial: drafting
+    statuses:
+      drafting:
+        transitions:
+          - to: done
+            when: part written
+      done: {terminal: true}
