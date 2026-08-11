@@ -1,20 +1,21 @@
 ---
 title: "E2E contract-corpus pilot — convert one command's tests"
 type: "refactoring"
-status: ready-for-dev
-sp: null
+status: in-progress
+sp: 18
 related_to: null
 created: 2026-08-11 14:23
 planned: null
-started: null
+started: 2026-08-11 22:52
 completed: null
 code_reviews: []
 sessions:
 - c9c22604-b390-4be3-a830-639a07421c2e
+- e66fa4c0-63c9-4bfa-b39d-02d184284826
 retro: null
 summary: scaffold tests become a txtar contract corpus under booping-python/e2e/
   with a standalone runner; units deleted
-commit: a6ae79cab14a693425f42b64f202c06f696320a5
+commit: 5e3840e80ce06dc2731b4d204104f24bb08a7cdf
 agents.research-codebase: a95aa90fffd2c764d
 agents.research-web: a430d69c5f1cfa4e4
 agents.cross-review: ae3c8b5f6f3703a7e
@@ -60,7 +61,7 @@ Callers: `just e2e` (dev), `just ci` (gate), `.github/workflows/ci.yml` python j
 
 | id | title | sp | status |
 | --- | --- | --- | --- |
-| 01 | [txtar parser and case-format spec](milestones/M01-txtar-parser-and-format/M01-txtar-parser-and-format.md) | 3 | pending |
+| 01 | [txtar parser and case-format spec](milestones/M01-txtar-parser-and-format/M01-txtar-parser-and-format.md) | 3 | done |
 | 02 | [Standalone corpus runner](milestones/M02-corpus-runner/M02-corpus-runner.md) | 6 | pending |
 | 03 | [Port scaffold behaviors to corpus cases](milestones/M03-scaffold-case-port/M03-scaffold-case-port.md) | 7 | pending |
 | 04 | [Delete superseded tests, wire docs](milestones/M04-delete-superseded-tests/M04-delete-superseded-tests.md) | 2 | pending |
