@@ -1,13 +1,13 @@
 ---
 title: "E2E contract-corpus pilot — convert one command's tests"
 type: "refactoring"
-status: in-progress
+status: done
 sp: 18
 related_to: null
 created: 2026-08-11 14:23
 planned: null
 started: 2026-08-11 20:54
-completed: null
+completed: 2026-08-11 21:31
 code_reviews: []
 sessions:
 - c9c22604-b390-4be3-a830-639a07421c2e
@@ -24,6 +24,14 @@ agents.develop-loop-M01: ab402b07026d67523
 agents.develop-loop-M02: acf93a809b39c64f5
 agents.develop-loop-M03: a62f3f7f4632b9173
 agents.develop-loop-M04: afea11248c691ee72
+metrics_active_minutes: 53
+metrics_models:
+- claude-fable-5
+- claude-opus-5
+metrics_tokens_input: 954
+metrics_tokens_output: 152651
+metrics_tokens_cache_creation: 685826
+metrics_tokens_cache_read: 17112642
 ---
 
 # E2E contract-corpus pilot — convert one command's tests
