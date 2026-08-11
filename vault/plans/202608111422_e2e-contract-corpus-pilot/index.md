@@ -62,7 +62,7 @@ Callers: `just e2e` (dev), `just ci` (gate), `.github/workflows/ci.yml` python j
 | id | title | sp | status |
 | --- | --- | --- | --- |
 | 01 | [txtar parser and case-format spec](milestones/M01-txtar-parser-and-format/M01-txtar-parser-and-format.md) | 3 | done |
-| 02 | [Standalone corpus runner](milestones/M02-corpus-runner/M02-corpus-runner.md) | 6 | pending |
+| 02 | [Standalone corpus runner](milestones/M02-corpus-runner/M02-corpus-runner.md) | 6 | done |
 | 03 | [Port scaffold behaviors to corpus cases](milestones/M03-scaffold-case-port/M03-scaffold-case-port.md) | 7 | pending |
 | 04 | [Delete superseded tests, wire docs](milestones/M04-delete-superseded-tests/M04-delete-superseded-tests.md) | 2 | pending |
 
