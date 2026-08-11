@@ -22,6 +22,7 @@ agents.cross-review: ae3c8b5f6f3703a7e
 reviewed_at: 2026-08-11 14:59
 agents.develop-loop-M01: ab402b07026d67523
 agents.develop-loop-M02: acf93a809b39c64f5
+agents.develop-loop-M03: a62f3f7f4632b9173
 ---
 
 # E2E contract-corpus pilot — convert one command's tests
@@ -65,7 +66,7 @@ Callers: `just e2e` (dev), `just ci` (gate), `.github/workflows/ci.yml` python j
 | --- | --- | --- | --- |
 | 01 | [txtar parser and case-format spec](milestones/M01-txtar-parser-and-format/M01-txtar-parser-and-format.md) | 3 | done |
 | 02 | [Standalone corpus runner](milestones/M02-corpus-runner/M02-corpus-runner.md) | 6 | done |
-| 03 | [Port scaffold behaviors to corpus cases](milestones/M03-scaffold-case-port/M03-scaffold-case-port.md) | 7 | pending |
+| 03 | [Port scaffold behaviors to corpus cases](milestones/M03-scaffold-case-port/M03-scaffold-case-port.md) | 7 | done |
 | 04 | [Delete superseded tests, wire docs](milestones/M04-delete-superseded-tests/M04-delete-superseded-tests.md) | 2 | pending |
 
 ## I/O contract
