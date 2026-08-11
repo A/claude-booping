@@ -1,0 +1,21 @@
+A filename key whose variable no --set defines renders that part away, leaving the rest of
+the key as the name.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  e2e_demo:
+    tree:
+      "{{ slug }}.md": "body\n"
+-- cmd --
+booping scaffold core.e2e_demo.tree out
+-- exit --
+0
+-- stdout --
+created dir out
+--- /dev/null
++++ out/.md
+@@ -0,0 +1 @@
++body
+scaffolded 2 paths — 1 dirs created, 1 files created, 0 files overwritten
+-- expected/cwd/out/.md --
+body

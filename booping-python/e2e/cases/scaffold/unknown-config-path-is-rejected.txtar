@@ -1,0 +1,10 @@
+A config path that resolves to nothing fails the run, naming the whole path and the segment
+that was missing.
+
+-- cmd --
+booping scaffold no.such.tree out
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: no.such.tree: no tree at 'no.such.tree' — segment 'no' is missing

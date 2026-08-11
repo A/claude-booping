@@ -1,0 +1,16 @@
+A key that renders into a path rather than a name is refused: the error names the config
+path and the rendered name, and the empty receipt shows nothing was written — the
+destination is never even created.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  e2e_demo:
+    tree:
+      "{{ slug }}.md": "body\n"
+-- cmd --
+booping scaffold core.e2e_demo.tree out --set slug=../escape
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: core.e2e_demo.tree.{{ slug }}.md: unsafe filename key '../escape.md'

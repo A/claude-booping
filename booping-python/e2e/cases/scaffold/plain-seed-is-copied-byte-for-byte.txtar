@@ -1,0 +1,22 @@
+A seed with no template syntax lands byte-identical, multiple lines and trailing newline
+included.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  e2e_demo:
+    tree:
+      a.txt: "line one\nline two\n"
+-- cmd --
+booping scaffold core.e2e_demo.tree .
+-- exit --
+0
+-- stdout --
+--- /dev/null
++++ a.txt
+@@ -0,0 +1,2 @@
++line one
++line two
+scaffolded 1 paths — 0 dirs created, 1 files created, 0 files overwritten
+-- expected/cwd/a.txt --
+line one
+line two

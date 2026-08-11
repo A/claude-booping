@@ -1,0 +1,36 @@
+The whole receipt shape in one run: a diff per written file, a `created dir` line per new
+directory, and a summary whose counters split dirs created, files created and files
+overwritten.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  e2e_demo:
+    tree:
+      README.md: "hello {{ name }}\n"
+      src:
+        main.py: "print(1)\n"
+      _references:
+        type: dir
+-- fixtures/cwd/out/README.md --
+old
+-- cmd --
+booping scaffold core.e2e_demo.tree out --set name=world --force
+-- exit --
+0
+-- stdout --
+--- out/README.md
++++ out/README.md
+@@ -1 +1 @@
+-old
++hello world
+created dir out/src
+--- /dev/null
++++ out/src/main.py
+@@ -0,0 +1 @@
++print(1)
+created dir out/_references
+scaffolded 4 paths — 2 dirs created, 1 files created, 1 files overwritten
+-- expected/cwd/out/README.md --
+hello world
+-- expected/cwd/out/src/main.py --
+print(1)

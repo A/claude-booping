@@ -1,0 +1,14 @@
+A --stub-macro argument without `=` fails the run the same way.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  e2e_demo:
+    tree:
+      a.txt: "body\n"
+-- cmd --
+booping scaffold core.e2e_demo.tree out --stub-macro nope
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: malformed --stub-macro pair (expected DOTTED.PATH=LITERAL): nope

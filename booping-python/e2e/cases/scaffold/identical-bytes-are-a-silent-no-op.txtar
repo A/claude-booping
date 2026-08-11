@@ -1,0 +1,18 @@
+A file whose bytes already equal the rendered seed is not rewritten under --force: no diff
+hunk, and the overwrite counter stays at zero, so the receipt is the summary line alone.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  e2e_demo:
+    tree:
+      a.txt: "same\n"
+-- fixtures/cwd/a.txt --
+same
+-- cmd --
+booping scaffold core.e2e_demo.tree . --force
+-- exit --
+0
+-- stdout --
+scaffolded 0 paths — 0 dirs created, 0 files created, 0 files overwritten
+-- expected/cwd/a.txt --
+same

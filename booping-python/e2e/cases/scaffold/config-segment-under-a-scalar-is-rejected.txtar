@@ -1,0 +1,10 @@
+A config path that walks into a scalar fails while resolving, naming both the full path and
+the segment that had nowhere to go.
+
+-- cmd --
+booping scaffold home_dir.deep out
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: home_dir.deep: no tree at 'home_dir.deep' — 'home_dir' is a str, not a mapping, so segment 'deep' cannot resolve

@@ -1,0 +1,22 @@
+A file created where none existed is reported as a unified diff against /dev/null — all
+additions, no context lines.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  e2e_demo:
+    tree:
+      a.txt: "one\ntwo\n"
+-- cmd --
+booping scaffold core.e2e_demo.tree .
+-- exit --
+0
+-- stdout --
+--- /dev/null
++++ a.txt
+@@ -0,0 +1,2 @@
++one
++two
+scaffolded 1 paths — 0 dirs created, 1 files created, 0 files overwritten
+-- expected/cwd/a.txt --
+one
+two

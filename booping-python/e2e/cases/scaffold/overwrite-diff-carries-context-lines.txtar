@@ -1,0 +1,29 @@
+Overwriting an existing file reports a diff of old against new, with unchanged lines as
+context and the path on both sides of the header.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  e2e_demo:
+    tree:
+      a.txt: "one\ntwo\nthree\n"
+-- fixtures/cwd/a.txt --
+one
+old
+three
+-- cmd --
+booping scaffold core.e2e_demo.tree . --force
+-- exit --
+0
+-- stdout --
+--- a.txt
++++ a.txt
+@@ -1,3 +1,3 @@
+ one
+-old
++two
+ three
+scaffolded 1 paths — 0 dirs created, 0 files created, 1 files overwritten
+-- expected/cwd/a.txt --
+one
+two
+three

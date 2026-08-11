@@ -1,0 +1,24 @@
+With a .booping marker above the cwd the run appends exactly one [scaffold] line, naming
+the tree and the destination, to the attached vault's log.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+-- fixtures/cwd/vault/config.yaml --
+core:
+  e2e_demo:
+    tree:
+      README.md: "hello world\n"
+-- cmd --
+booping scaffold core.e2e_demo.tree out
+-- exit --
+0
+-- stdout --
+created dir out
+--- /dev/null
++++ out/README.md
+@@ -0,0 +1 @@
++hello world
+scaffolded 2 paths — 1 dirs created, 1 files created, 0 files overwritten
+-- expected/cwd/vault/.booping.log --
+[..]Z: [scaffold] core.e2e_demo.tree → out
