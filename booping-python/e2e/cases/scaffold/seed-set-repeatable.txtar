@@ -1,0 +1,21 @@
+--set is repeatable; later pairs win over earlier ones.
+
+-- cmd --
+booping scaffold demo out --set a=first --set b=second --set a=override
+-- fixtures/xdg/booping/config.yaml --
+demo:
+  a.txt: "a={{ a }}, b={{ b }}\n"
+-- exit --
+0
+-- stdout --
+created dir out
+--- /dev/null
++++ out/a.txt
+@@ -0,0 +1 @@
++a=override, b=second
+scaffolded 2 paths — 1 dirs created, 1 files created, 0 files overwritten
+
+-- stderr --
+
+-- expected/cwd/out/a.txt --
+a=override, b=second

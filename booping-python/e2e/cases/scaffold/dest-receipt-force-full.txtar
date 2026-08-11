@@ -1,0 +1,30 @@
+Full receipt with --force: diffs, dir lines, and summary counters.
+
+-- cmd --
+booping scaffold demo out --force
+-- fixtures/xdg/booping/config.yaml --
+demo:
+  README.md: "hello {{ name }}\n"
+  src:
+    main.py: "print(1)\n"
+  _references:
+    type: dir
+-- fixtures/cwd/out/README.md --
+old
+-- exit --
+0
+-- stdout --
+--- out/README.md
++++ out/README.md
+@@ -1 +1 @@
+-old
++hello 
+created dir out/src
+--- /dev/null
++++ out/src/main.py
+@@ -0,0 +1 @@
++print(1)
+created dir out/_references
+scaffolded 4 paths — 2 dirs created, 1 files created, 1 files overwritten
+
+-- stderr --

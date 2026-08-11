@@ -1,0 +1,23 @@
+Templated directory key nests with templated file key.
+
+-- cmd --
+booping scaffold demo out --set slug=nested
+-- fixtures/xdg/booping/config.yaml --
+demo:
+  "{{ slug }}":
+    "{{ slug }}.md": "in {{ slug }}\n"
+-- exit --
+0
+-- stdout --
+created dir out
+created dir out/nested
+--- /dev/null
++++ out/nested/nested.md
+@@ -0,0 +1 @@
++in nested
+scaffolded 3 paths — 2 dirs created, 1 files created, 0 files overwritten
+
+-- stderr --
+
+-- expected/cwd/out/nested/nested.md --
+in nested

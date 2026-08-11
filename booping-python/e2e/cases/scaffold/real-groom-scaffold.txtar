@@ -1,0 +1,55 @@
+Real config tree: core.groom_playbook.scaffold renders plan structure with stub-macros.
+
+-- cmd --
+booping scaffold core.groom_playbook.scaffold plans/demo --set title=Demo --set type=feature --stub-macro core.macros.date=20260810-00-00 --stub-macro core.macros.git_commit=abc1234
+-- exit --
+0
+-- stdout --
+created dir plans/demo
+--- /dev/null
++++ plans/demo/index.md
+@@ -0,0 +1,18 @@
++---
++title: "Demo"
++type: "feature"
++status: framing
++sp: null
++related_to: null
++created: 20260810-00-00
++planned: null
++started: null
++completed: null
++code_reviews: []
++sessions: []
++retro: null
++summary: null
++commit: abc1234
++---
++
++# Demo
+created dir plans/demo/milestones
+scaffolded 4 paths — 2 dirs created, 2 files created, 0 files overwritten
+
+-- stderr --
+
+-- expected/cwd/plans/demo/index.md --
+---
+title: "Demo"
+type: "feature"
+status: framing
+sp: null
+related_to: null
+created: 20260810-00-00
+planned: null
+started: null
+completed: null
+code_reviews: []
+sessions: []
+retro: null
+summary: null
+commit: abc1234
+---
+
+# Demo
+
+-- expected/cwd/plans/demo/request.md --

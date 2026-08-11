@@ -1,0 +1,13 @@
+Malformed --stub-macro pair (no =): exit 1.
+
+-- cmd --
+booping scaffold demo out --stub-macro nope
+-- fixtures/xdg/booping/config.yaml --
+demo:
+  a.txt: "x\n"
+-- exit --
+1
+-- stdout --
+
+-- stderr --
+error: malformed --stub-macro pair (expected DOTTED.PATH=LITERAL): nope

@@ -1,0 +1,13 @@
+Unsafe rendered filename containing /: exit 1, no files written.
+
+-- cmd --
+booping scaffold demo out --set slug=../escape
+-- fixtures/xdg/booping/config.yaml --
+demo:
+  "{{ slug }}.md": "body\n"
+-- exit --
+1
+-- stdout --
+
+-- stderr --
+error: demo.{{ slug }}.md: unsafe filename key '../escape.md'

@@ -1,0 +1,32 @@
+Declaration-order preservation: receipt prints files in declared YAML order (z, a, m), not sorted (a, m, z).
+
+-- cmd --
+booping scaffold demo out
+-- fixtures/xdg/booping/config.yaml --
+demo:
+  d:
+    type: dir
+    children:
+      z.md: "z\n"
+      a.md: "a\n"
+      m.md: "m\n"
+-- exit --
+0
+-- stdout --
+created dir out
+created dir out/d
+--- /dev/null
++++ out/d/z.md
+@@ -0,0 +1 @@
++z
+--- /dev/null
++++ out/d/a.md
+@@ -0,0 +1 @@
++a
+--- /dev/null
++++ out/d/m.md
+@@ -0,0 +1 @@
++m
+scaffolded 5 paths — 2 dirs created, 3 files created, 0 files overwritten
+
+-- stderr --

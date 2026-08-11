@@ -1,0 +1,13 @@
+Unsafe static filename key (../escape.txt): exit 1, no files written.
+
+-- cmd --
+booping scaffold demo out
+-- fixtures/xdg/booping/config.yaml --
+demo:
+  "../escape.txt": "x\n"
+-- exit --
+1
+-- stdout --
+
+-- stderr --
+error: demo: unsafe filename key '../escape.txt'

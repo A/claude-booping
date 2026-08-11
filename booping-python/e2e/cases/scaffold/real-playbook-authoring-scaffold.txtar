@@ -1,0 +1,51 @@
+Real config tree: core.playbook_authoring_playbook.scaffold renders playbook structure.
+
+-- cmd --
+booping scaffold core.playbook_authoring_playbook.scaffold pb --set name=demo
+-- exit --
+0
+-- stdout --
+created dir pb
+--- /dev/null
++++ pb/playbook.md
+@@ -0,0 +1,11 @@
++---
++name: demo
++title: demo
++summary: One sentence naming what this playbook produces.
++trigger: the situation a user reaches for this playbook in
++---
++
++# demo
++
++Preamble — what the driver needs before the first step: artifact model, hard
++rules, where the work lands. No step calls here.
+--- /dev/null
++++ pb/playbook.yaml
+@@ -0,0 +1,3 @@
++# Step name -> its dependency step names. Each step is a sibling directory
++# holding a prompt.md.
++graph: {}
+created dir pb/_references
+scaffolded 4 paths — 2 dirs created, 2 files created, 0 files overwritten
+
+-- stderr --
+
+-- expected/cwd/pb/playbook.md --
+---
+name: demo
+title: demo
+summary: One sentence naming what this playbook produces.
+trigger: the situation a user reaches for this playbook in
+---
+
+# demo
+
+Preamble — what the driver needs before the first step: artifact model, hard
+rules, where the work lands. No step calls here.
+
+-- expected/cwd/pb/playbook.yaml --
+# Step name -> its dependency step names. Each step is a sibling directory
+# holding a prompt.md.
+graph: {}
+

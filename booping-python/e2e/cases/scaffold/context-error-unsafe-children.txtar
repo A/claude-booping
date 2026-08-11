@@ -1,0 +1,16 @@
+Unsafe filename key under explicit children: stderr carries nested path (from context/scaffold_test.py).
+
+-- cmd --
+booping scaffold demo out
+-- fixtures/xdg/booping/config.yaml --
+demo:
+  d:
+    type: dir
+    children:
+      "../x": "x\n"
+-- exit --
+1
+-- stdout --
+
+-- stderr --
+error: demo.d.children: unsafe filename key '../x'

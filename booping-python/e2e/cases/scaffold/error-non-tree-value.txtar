@@ -1,0 +1,10 @@
+Non-tree config value (scalar): exit 1, "not a tree" in stderr.
+
+-- cmd --
+booping scaffold home_dir out
+-- exit --
+1
+-- stdout --
+
+-- stderr --
+error: home_dir: value at 'home_dir' is not a tree — expected a mapping, found str

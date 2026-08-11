@@ -1,0 +1,12 @@
+Segment under scalar config value: stderr names the path and the scalar type (from context/scaffold_test.py).
+
+-- cmd --
+booping scaffold demo.deep out
+-- fixtures/xdg/booping/config.yaml --
+demo: "not a tree"
+-- exit --
+1
+-- stdout --
+
+-- stderr --
+error: demo.deep: no tree at 'demo.deep' — 'demo' is a str, not a mapping, so segment 'deep' cannot resolve

@@ -1,0 +1,47 @@
+Real config tree: core.groom_playbook.milestone_scaffold renders milestone contract.
+
+-- cmd --
+booping scaffold core.groom_playbook.milestone_scaffold milestones --set id=01 --set slug=cli-surface --set title=Demo-sprint --set sp=3 --set plan=plans/demo/index.md
+-- exit --
+0
+-- stdout --
+created dir milestones
+created dir milestones/M01-cli-surface
+--- /dev/null
++++ milestones/M01-cli-surface/M01-cli-surface.md
+@@ -0,0 +1,15 @@
++---
++id: "01"
++title: "Demo-sprint"
++sp: 3
++status: pending
++plan: "plans/demo/index.md"
++---
++
++# M01: Demo-sprint
++
++## Tasks
++
++## Definition of Done
++
++## Verify
+scaffolded 3 paths — 2 dirs created, 1 files created, 0 files overwritten
+
+-- stderr --
+
+-- expected/cwd/milestones/M01-cli-surface/M01-cli-surface.md --
+---
+id: "01"
+title: "Demo-sprint"
+sp: 3
+status: pending
+plan: "plans/demo/index.md"
+---
+
+# M01: Demo-sprint
+
+## Tasks
+
+## Definition of Done
+
+## Verify

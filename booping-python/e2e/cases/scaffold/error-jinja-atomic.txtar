@@ -1,0 +1,14 @@
+Jinja render error: atomic abort (exit 1, zero writes including earlier files).
+
+-- cmd --
+booping scaffold demo out
+-- fixtures/xdg/booping/config.yaml --
+demo:
+  ok.txt: "fine\n"
+  bad.txt: "{% if %}"
+-- exit --
+1
+-- stdout --
+
+-- stderr --
+error: demo.bad.txt: Jinja error in seed content: Expected an expression, got 'end of statement block'

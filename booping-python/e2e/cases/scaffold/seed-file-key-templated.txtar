@@ -1,0 +1,21 @@
+Templated filename key rendered via --set.
+
+-- cmd --
+booping scaffold demo out --set slug=my-plan
+-- fixtures/xdg/booping/config.yaml --
+demo:
+  "{{ slug }}.md": "body\n"
+-- exit --
+0
+-- stdout --
+created dir out
+--- /dev/null
++++ out/my-plan.md
+@@ -0,0 +1 @@
++body
+scaffolded 2 paths — 1 dirs created, 1 files created, 0 files overwritten
+
+-- stderr --
+
+-- expected/cwd/out/my-plan.md --
+body

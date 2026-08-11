@@ -1,0 +1,13 @@
+Unresolved config path: exit 1, config path in stderr.
+
+-- cmd --
+booping scaffold no.such.tree out
+-- fixtures/xdg/booping/config.yaml --
+demo:
+  a.txt: "x\n"
+-- exit --
+1
+-- stdout --
+
+-- stderr --
+error: no.such.tree: no tree at 'no.such.tree' — segment 'no' is missing

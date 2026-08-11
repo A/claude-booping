@@ -1,0 +1,34 @@
+Missing destination: parents created, tree scaffolded.
+
+-- cmd --
+booping scaffold demo a/b/out
+-- fixtures/xdg/booping/config.yaml --
+demo:
+  README.md: "hello {{ name }}\n"
+  src:
+    main.py: "print(1)\n"
+  _references:
+    type: dir
+-- exit --
+0
+-- stdout --
+created dir a/b/out
+--- /dev/null
++++ a/b/out/README.md
+@@ -0,0 +1 @@
++hello 
+created dir a/b/out/src
+--- /dev/null
++++ a/b/out/src/main.py
+@@ -0,0 +1 @@
++print(1)
+created dir a/b/out/_references
+scaffolded 5 paths — 3 dirs created, 2 files created, 0 files overwritten
+
+-- stderr --
+
+-- expected/cwd/a/b/out/README.md --
+hello 
+
+-- expected/cwd/a/b/out/src/main.py --
+print(1)

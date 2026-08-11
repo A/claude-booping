@@ -1,0 +1,24 @@
+Receipt shape for --force overwrite: unified diff with context lines.
+
+-- cmd --
+booping scaffold demo out --force
+-- fixtures/xdg/booping/config.yaml --
+demo:
+  a.txt: "one\ntwo\nthree\n"
+-- fixtures/cwd/out/a.txt --
+one
+old
+three
+-- exit --
+0
+-- stdout --
+--- out/a.txt
++++ out/a.txt
+@@ -1,3 +1,3 @@
+ one
+-old
++two
+ three
+scaffolded 1 paths — 0 dirs created, 0 files created, 1 files overwritten
+
+-- stderr --

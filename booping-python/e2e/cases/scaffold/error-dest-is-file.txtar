@@ -1,0 +1,15 @@
+Destination exists as a file: exit 1, pre-flight error.
+
+-- cmd --
+booping scaffold demo out
+-- fixtures/xdg/booping/config.yaml --
+demo:
+  a.txt: "x\n"
+-- fixtures/cwd/out --
+existing-file
+-- exit --
+1
+-- stdout --
+
+-- stderr --
+error: destination out exists and is not a directory

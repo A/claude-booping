@@ -1,0 +1,35 @@
+Non-empty destination without --force: fills gaps, keeps existing files.
+
+-- cmd --
+booping scaffold demo out
+-- fixtures/xdg/booping/config.yaml --
+demo:
+  README.md: "hello {{ name }}\n"
+  src:
+    main.py: "print(1)\n"
+  _references:
+    type: dir
+-- fixtures/cwd/out/keep.txt --
+keep
+-- exit --
+0
+-- stdout --
+--- /dev/null
++++ out/README.md
+@@ -0,0 +1 @@
++hello 
+created dir out/src
+--- /dev/null
++++ out/src/main.py
+@@ -0,0 +1 @@
++print(1)
+created dir out/_references
+scaffolded 4 paths — 2 dirs created, 2 files created, 0 files overwritten
+
+-- stderr --
+
+-- expected/cwd/out/README.md --
+hello 
+
+-- expected/cwd/out/keep.txt --
+keep

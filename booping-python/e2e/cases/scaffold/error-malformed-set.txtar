@@ -1,0 +1,13 @@
+Malformed --set pair (no =): exit 1, nothing created.
+
+-- cmd --
+booping scaffold demo out --set nope
+-- fixtures/xdg/booping/config.yaml --
+demo:
+  a.txt: "x\n"
+-- exit --
+1
+-- stdout --
+
+-- stderr --
+error: malformed --set pair (expected KEY=VALUE): nope

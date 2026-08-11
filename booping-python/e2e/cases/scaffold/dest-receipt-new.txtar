@@ -1,0 +1,19 @@
+Receipt shape for new files: /dev/null source, created dir lines, summary.
+
+-- cmd --
+booping scaffold demo out
+-- fixtures/xdg/booping/config.yaml --
+demo:
+  a.txt: "one\ntwo\n"
+-- exit --
+0
+-- stdout --
+created dir out
+--- /dev/null
++++ out/a.txt
+@@ -0,0 +1,2 @@
++one
++two
+scaffolded 2 paths — 1 dirs created, 1 files created, 0 files overwritten
+
+-- stderr --

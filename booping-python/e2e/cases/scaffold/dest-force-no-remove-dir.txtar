@@ -1,0 +1,35 @@
+--force never removes a directory or touches unrelated directories.
+
+-- cmd --
+booping scaffold demo out --force
+-- fixtures/xdg/booping/config.yaml --
+demo:
+  README.md: "hello {{ name }}\n"
+  src:
+    main.py: "print(1)\n"
+  _references:
+    type: dir
+-- fixtures/cwd/out/src/other.py --
+other
+-- fixtures/cwd/out/unrelated/f.txt --
+f
+-- exit --
+0
+-- stdout --
+--- /dev/null
++++ out/README.md
+@@ -0,0 +1 @@
++hello 
+--- /dev/null
++++ out/src/main.py
+@@ -0,0 +1 @@
++print(1)
+created dir out/_references
+scaffolded 3 paths — 1 dirs created, 2 files created, 0 files overwritten
+
+-- stderr --
+
+-- expected/cwd/out/src/other.py --
+other
+-- expected/cwd/out/unrelated/f.txt --
+f

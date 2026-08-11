@@ -1,0 +1,15 @@
+Identical-bytes file with --force: silent no-op, no diff hunk, zero overwrite counter.
+
+-- cmd --
+booping scaffold demo out --force
+-- fixtures/xdg/booping/config.yaml --
+demo:
+  a.txt: "same\n"
+-- fixtures/cwd/out/a.txt --
+same
+-- exit --
+0
+-- stdout --
+scaffolded 1 paths — 0 dirs created, 0 files created, 1 files overwritten
+
+-- stderr --

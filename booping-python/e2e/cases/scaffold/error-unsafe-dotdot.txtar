@@ -1,0 +1,13 @@
+Unsafe rendered filename ".." (parent escape): exit 1.
+
+-- cmd --
+booping scaffold demo out --set dots=..
+-- fixtures/xdg/booping/config.yaml --
+demo:
+  "{{ dots }}": "body\n"
+-- exit --
+1
+-- stdout --
+
+-- stderr --
+error: demo.{{ dots }}: unsafe filename key '..'

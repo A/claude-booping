@@ -1,0 +1,13 @@
+Invalid node shape (null value): exit 1, dotted path in stderr.
+
+-- cmd --
+booping scaffold demo out
+-- fixtures/xdg/booping/config.yaml --
+demo:
+  a.txt: null
+-- exit --
+1
+-- stdout --
+
+-- stderr --
+error: demo.a.txt: node is null — use "" for an empty file or {} for an empty dir
