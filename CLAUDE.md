@@ -18,7 +18,7 @@ One shipped skill (`/playbook`); everything procedural is a **playbook** it driv
 
 ## Layout
 
-- `booping-python/` — uv Python project with the `booping` CLI. Source `src/booping/`, tests `tests/`, contract corpus `e2e/` — cases plus a `conftest.py` configuring the `pytest-txtar` plugin, which owns the runner and the case-format spec (`pytest-txtar/README.md`); `scaffold` is verified there, not by the unit tests.
+- `booping-python/` — uv Python project with the `booping` CLI. Source `src/booping/`, tests `tests/`, contract corpus `e2e/` — cases plus a `conftest.py` configuring the `pytest-txtar` plugin, which owns the runner and the case-format spec (https://github.com/A/pytest-txtar); `scaffold` is verified there, not by the unit tests.
 - `bin/booping` — the only product entry point: a shell wrapper exec'ing `uv run --project booping-python booping "$@"`.
 - `scripts/` — dev tooling behind `just`: `snapshots.py`, `mdcheck.py` (uv inline Python), and the eval harness (`eval-*.sh`, `report-*.jq`). Not shipped to users.
 - `src/config.yaml` — runtime config, single source of truth for structured data (macros, query specs, scaffold trees, task types, sprint scale, per-playbook agents). Heavily commented — read it for key semantics.

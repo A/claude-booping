@@ -1,7 +1,7 @@
 # Contract corpus
 
 One txtar case per file under `cases/<command>/`, run by the
-[pytest-txtar](../../pytest-txtar/README.md) plugin — that README is the case-format specification
+[pytest-txtar](https://github.com/A/pytest-txtar) plugin — that README is the case-format specification
 (sections, sandbox, normalization, `[..]` wildcard, authoring flow).
 
 `conftest.py` supplies booping's configuration:

@@ -57,7 +57,7 @@ requires-dist = [
 dev = [
     { name = "basedpyright" },
     { name = "pytest" },
-    { name = "pytest-txtar", editable = "../pytest-txtar" },
+    { name = "pytest-txtar", specifier = ">=0.1.0" },
     { name = "ruff" },
 ]
 docs = [{ name = "mkdocs" }]
@@ -405,18 +405,13 @@ wheels = [
 [[package]]
 name = "pytest-txtar"
 version = "0.1.0"
-source = { editable = "../pytest-txtar" }
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pytest" },
 ]
-
-[package.metadata]
-requires-dist = [{ name = "pytest", specifier = ">=8" }]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "basedpyright" },
-    { name = "ruff" },
+sdist = { url = "https://files.pythonhosted.org/packages/52/44/b5da02178a2b033f4a8225b3d1349ca85b0c25acc51eeb4641f20df8af62/pytest_txtar-0.1.0.tar.gz", hash = "sha256:3fc0b9ba2742d27a85896447a8fcaf05f0f967478fc4f64b93bb449da511a975", size = 21244, upload-time = "2026-08-12T06:38:31.148Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ca/bd/408ec8c65d227cf08418fccc17363f3885a1c331d5b356b31e27be2ea53c/pytest_txtar-0.1.0-py3-none-any.whl", hash = "sha256:dfa4fa231051713a107410a8843da3d27753e387cbf037df2f5c589c74202291", size = 14703, upload-time = "2026-08-12T06:38:29.935Z" },
 ]
 
 [[package]]
