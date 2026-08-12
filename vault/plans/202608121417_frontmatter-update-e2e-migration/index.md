@@ -1,13 +1,13 @@
 ---
 title: "Migrate frontmatter-update tests from units to txtar e2e corpus"
 type: "refactoring"
-status: in-progress
+status: done
 sp: 8
 related_to: null
 created: 2026-08-12 14:17
 planned: null
 started: 2026-08-12 15:01
-completed: null
+completed: 2026-08-12 15:33
 code_reviews: []
 sessions:
 - 74d0d09f-c620-44da-a2e5-ee30fc87e079
@@ -17,6 +17,14 @@ summary: frontmatter-update units become txtar e2e cases; stub + real echo macro
   coverage; unit file deleted after cross-check
 commit: e0d1796ff568c6b4a0d242069e6102e1a294e00a
 reviewed_at: 2026-08-12 15:01
+metrics_active_minutes: 44
+metrics_models:
+- claude-fable-5
+- claude-opus-5
+metrics_tokens_input: 234
+metrics_tokens_output: 66813
+metrics_tokens_cache_creation: 575021
+metrics_tokens_cache_read: 8832329
 ---
 
 # Migrate frontmatter-update tests from units to txtar e2e corpus
