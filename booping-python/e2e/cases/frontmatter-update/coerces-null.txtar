@@ -1,0 +1,26 @@
+The value "null" lands in the frontmatter as a YAML null, not a quoted string.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md retro=null
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,4 +1,5 @@
+ ---
+ title: Foo
++retro: null
+ ---
+ # Body
+-- expected/cwd/plan.md --
+---
+title: Foo
+retro: null
+---
+# Body

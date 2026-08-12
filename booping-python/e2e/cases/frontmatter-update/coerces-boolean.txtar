@@ -1,0 +1,26 @@
+The value "true" lands in the frontmatter as a YAML boolean, not a quoted string.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md blocked=true
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,4 +1,5 @@
+ ---
+ title: Foo
++blocked: true
+ ---
+ # Body
+-- expected/cwd/plan.md --
+---
+title: Foo
+blocked: true
+---
+# Body

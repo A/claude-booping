@@ -1,0 +1,37 @@
+A value containing a newline round-trips through the file as a YAML literal block scalar.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+# Body
+-- fixtures/cwd/run.sh --
+#!/bin/sh
+booping frontmatter-update plan.md "summary=line1
+line2"
+-- cmd --
+sh run.sh
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,4 +1,7 @@
+ ---
+ title: Foo
++summary: 'line1
++
++  line2'
+ ---
+ # Body
+-- stderr --
+updated plan.md: summary=line1
+line2
+-- expected/cwd/plan.md --
+---
+title: Foo
+summary: 'line1
+
+  line2'
+---
+# Body

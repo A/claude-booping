@@ -1,0 +1,26 @@
+The value "yes" would reload as a boolean under YAML 1.1, so the emitter writes it single-quoted to preserve it as a string.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md summary=yes
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,4 +1,5 @@
+ ---
+ title: Foo
++summary: 'yes'
+ ---
+ # Body
+-- expected/cwd/plan.md --
+---
+title: Foo
+summary: 'yes'
+---
+# Body

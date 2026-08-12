@@ -1,0 +1,16 @@
+Calling with no key=value pairs, no --remove, and no --append exits 1 with a "nothing to do"
+error on stderr.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+status: backlog
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: nothing to do: provide key=value pairs, --append and/or --remove

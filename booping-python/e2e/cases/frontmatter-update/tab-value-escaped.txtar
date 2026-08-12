@@ -1,0 +1,26 @@
+A value containing a tab is written as a double-quoted YAML string with the tab escaped as \t.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md 'summary=before	after'
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,4 +1,5 @@
+ ---
+ title: Foo
++summary: "before\tafter"
+ ---
+ # Body
+-- expected/cwd/plan.md --
+---
+title: Foo
+summary: "before\tafter"
+---
+# Body

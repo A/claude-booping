@@ -1,0 +1,40 @@
+Updating one key preserves all other frontmatter keys and the document body.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+type: feature
+status: backlog
+sp: 5
+---
+# My Plan
+
+- [ ] 3 SP: Task one
+- [ ] 2 SP: Task two
+-- cmd --
+booping frontmatter-update plan.md status=in-progress
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,7 +1,7 @@
+ ---
+ title: Foo
+ type: feature
+-status: backlog
++status: in-progress
+ sp: 5
+ ---
+ # My Plan
+-- expected/cwd/plan.md --
+---
+title: Foo
+type: feature
+status: in-progress
+sp: 5
+---
+# My Plan
+
+- [ ] 3 SP: Task one
+- [ ] 2 SP: Task two

@@ -1,0 +1,9 @@
+Referencing a plan file that does not exist exits 1 with an error on stderr.
+
+-- cmd --
+booping frontmatter-update nonexistent.md status=in-progress
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: plan not found: nonexistent.md

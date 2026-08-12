@@ -1,0 +1,28 @@
+The stdout output is a unified diff with ---, +++, and @@ header lines before the hunk body.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+status: backlog
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md status=in-progress
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,5 +1,5 @@
+ ---
+ title: Foo
+-status: backlog
++status: in-progress
+ ---
+ # Body
+-- expected/cwd/plan.md --
+---
+title: Foo
+status: in-progress
+---
+# Body
