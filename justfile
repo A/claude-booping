@@ -21,10 +21,10 @@ typecheck:
 pytest:
     cd booping-python && uv run pytest
 
-# Run the contract corpus — `just e2e [pattern...]`; `e2e/run.py --update` rebaselines
+# Run the contract corpus — `just e2e [-k expression]`; `pytest e2e --txtar-update` rebaselines
 [no-exit-message]
 e2e *patterns:
-    cd booping-python && uv run python e2e/run.py {{ patterns }}
+    cd booping-python && uv run pytest e2e {{ if patterns == '' { '' } else { '-k ' + quote(patterns) } }}
 
 # Every check CI runs, in order, stopping at the first failure.
 ci: lint typecheck pytest snapshots mdcheck e2e

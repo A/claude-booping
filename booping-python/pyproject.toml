@@ -22,12 +22,17 @@ packages = ["src/booping"]
 [dependency-groups]
 dev = [
     "pytest",
+    "pytest-txtar>=0.1.0",
     "ruff",
     "basedpyright",
 ]
 docs = [
     "mkdocs",
 ]
+
+# `just pytest` is the unit suite; the txtar corpus under e2e/ is `just e2e`'s job.
+[tool.pytest.ini_options]
+testpaths = ["tests"]
 
 [tool.ruff]
 line-length = 100

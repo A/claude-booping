@@ -10,7 +10,7 @@ One shipped skill (`/playbook`); everything procedural is a **playbook** it driv
 - `just lint` / `just typecheck` / `just pytest` — ruff / basedpyright / pytest over `booping-python/`.
 - `just snapshots` — diff committed playbook reports against a fresh hermetic render (writes nothing). `just snapshots-accept [playbook]` — the **only** writer of the committed reports.
 - `just mdcheck` — structural rule checks over the rendered reports. Needs the `mdcheck` binary: `cargo install markdown-checker` (the crate named `mdcheck` is unrelated).
-- `just e2e [pattern…]` — run the txtar contract corpus; `cd booping-python && uv run python e2e/run.py --update [pattern…]` rebaselines the selected cases.
+- `just e2e ['-k expr']` — run the txtar contract corpus through pytest; `cd booping-python && uv run pytest e2e --txtar-update [-k expr]` rebaselines the selected cases.
 - `just ci` — everything CI runs, in order: `lint typecheck pytest snapshots mdcheck e2e`. Run before committing.
 - `just eval|smoke|regress <playbook>/<step>` (or `all`) — promptfoo eval suites; `just suites` lists them. Runs on subscription auth (`claude -p`), never in CI; each run posts a sticky, advisory PR comment via `scripts/eval-pr-comment.sh` (`EVAL_PR=0` opts out) — no commit status, no merge gate.
 - `just docs` / `just docs-serve` — build / preview the public docs site.
@@ -18,7 +18,7 @@ One shipped skill (`/playbook`); everything procedural is a **playbook** it driv
 
 ## Layout
 
-- `booping-python/` — uv Python project with the `booping` CLI. Source `src/booping/`, tests `tests/`, contract corpus + standalone runner `e2e/` (case format spec at `e2e/README.md`; `scaffold` is verified there, not by pytest).
+- `booping-python/` — uv Python project with the `booping` CLI. Source `src/booping/`, tests `tests/`, contract corpus `e2e/` — cases plus a `conftest.py` configuring the `pytest-txtar` plugin, which owns the runner and the case-format spec (https://github.com/A/pytest-txtar); `scaffold` is verified there, not by the unit tests.
 - `bin/booping` — the only product entry point: a shell wrapper exec'ing `uv run --project booping-python booping "$@"`.
 - `scripts/` — dev tooling behind `just`: `snapshots.py`, `mdcheck.py` (uv inline Python), and the eval harness (`eval-*.sh`, `report-*.jq`). Not shipped to users.
 - `src/config.yaml` — runtime config, single source of truth for structured data (macros, query specs, scaffold trees, task types, sprint scale, per-playbook agents). Heavily commented — read it for key semantics.
