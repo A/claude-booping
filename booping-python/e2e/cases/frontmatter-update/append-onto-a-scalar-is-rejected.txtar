@@ -1,0 +1,22 @@
+A key already holding a scalar is not silently promoted to a list: the run fails naming the
+key and the file, and writes nothing.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+status: backlog
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md --append status=done
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: cannot append to scalar key 'status' in plan.md
+-- expected/cwd/plan.md --
+---
+title: Foo
+status: backlog
+---
+# Body

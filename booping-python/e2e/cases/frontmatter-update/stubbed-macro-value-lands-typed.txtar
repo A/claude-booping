@@ -1,0 +1,36 @@
+A value carrying a macro call is rendered before it is typed: with the macro pinned by a
+`macro_stubs:` mapping in fixture config nothing is executed, and the literal it resolves to
+is coerced like any other value — a bare integer lands unquoted.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  macros:
+    build: ["false"]
+macro_stubs:
+  core.macros.build: "42"
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md build="{{ macro('core.macros.build') }}"
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,4 +1,5 @@
+ ---
+ title: Foo
++build: 42
+ ---
+ # Body
+-- stderr --
+updated plan.md: build=42
+-- expected/cwd/plan.md --
+---
+title: Foo
+build: 42
+---
+# Body

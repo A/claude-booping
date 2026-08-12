@@ -1,0 +1,19 @@
+An --append argument carrying no `=` is a user error, rejected before the file is touched.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md --append nope
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: malformed key=value pair: 'nope'
+-- expected/cwd/plan.md --
+---
+title: Foo
+---
+# Body

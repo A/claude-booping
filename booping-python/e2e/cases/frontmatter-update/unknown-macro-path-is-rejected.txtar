@@ -1,0 +1,24 @@
+A macro call naming a config path that declares no macro fails the run with the macro exit
+code, echoing the offending value and the path it could not resolve, and writes nothing.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  macros:
+    build: ["false"]
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md x="{{ macro('core.macros.nope') }}"
+-- exit --
+2
+-- stdout --
+-- stderr --
+error: value "{{ macro('core.macros.nope') }}": no macro declared at config path: core.macros.nope
+-- expected/cwd/plan.md --
+---
+title: Foo
+---
+# Body

@@ -1,0 +1,34 @@
+An unstubbed macro is genuinely executed through the CLI's own subprocess boundary: the
+config declares `echo 1` as the argv, and the only way the key can read `1` is that the
+command ran and its stdout was captured.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  macros:
+    probe: ["echo", "1"]
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md probe="{{ macro('core.macros.probe') }}"
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,4 +1,5 @@
+ ---
+ title: Foo
++probe: 1
+ ---
+ # Body
+-- stderr --
+updated plan.md: probe=1
+-- expected/cwd/plan.md --
+---
+title: Foo
+probe: 1
+---
+# Body
