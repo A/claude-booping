@@ -2,7 +2,7 @@
 id: "01"
 title: "Core CLI corpus cases — set, coercion, errors, diff, stderr, log"
 sp: 3
-status: in-progress
+status: done
 plan: "vault/plans/202608121417_frontmatter-update-e2e-migration/index.md"
 ---
 
