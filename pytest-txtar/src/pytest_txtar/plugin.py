@@ -115,12 +115,15 @@ class TxtarItem(pytest.Item):
 
     def runtest(self) -> None:
         outcome = run_case(self.case, self.spec)
+        mismatches = compare(self.case, outcome)
+        if not mismatches:
+            # A holding assertion is left alone even when it is not byte-identical
+            # to the run: wildcards and hand-written matches survive an update.
+            return
         if cast(bool, self.config.getoption("--txtar-update")):
             self.rewrite(outcome)
             return
-        mismatches = compare(self.case, outcome)
-        if mismatches:
-            raise Mismatched(mismatches)
+        raise Mismatched(mismatches)
 
     def rewrite(self, outcome: Outcome) -> None:
         text = txtar.serialize(updated_archive(self.case, outcome))

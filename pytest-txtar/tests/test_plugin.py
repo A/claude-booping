@@ -124,6 +124,17 @@ def test_update_leaves_a_passing_case_untouched(pytester: pytest.Pytester):
     assert case.stat().st_mtime_ns == before
 
 
+def test_update_keeps_a_wildcard_that_still_matches(pytester: pytest.Pytester):
+    wildcarded = '-- cmd --\npy -c "print(\'actual\')"\n-- exit --\n0\n-- stdout --\nact[..]\n'
+    write_corpus(pytester, greet=wildcarded)
+    case = pytester.path / "cases" / "greet.txtar"
+
+    result = pytester.runpytest("--txtar-update")
+
+    result.assert_outcomes(passed=1)
+    assert case.read_text(encoding="utf-8") == wildcarded
+
+
 def test_a_session_without_the_spec_hook_aborts_naming_it(pytester: pytest.Pytester):
     write_cases(pytester, greet=PASSING)
 
