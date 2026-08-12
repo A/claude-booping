@@ -95,20 +95,22 @@ wheels = [
 name = "pytest-txtar"
 version = "0.1.0"
 source = { editable = "." }
+dependencies = [
+    { name = "pytest" },
+]
 
 [package.dev-dependencies]
 dev = [
     { name = "basedpyright" },
-    { name = "pytest" },
     { name = "ruff" },
 ]
 
 [package.metadata]
+requires-dist = [{ name = "pytest", specifier = ">=8" }]
 
 [package.metadata.requires-dev]
 dev = [
     { name = "basedpyright" },
-    { name = "pytest" },
     { name = "ruff" },
 ]
 

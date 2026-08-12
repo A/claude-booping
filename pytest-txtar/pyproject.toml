@@ -6,7 +6,10 @@ readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
 requires-python = ">=3.12"
-dependencies = []
+dependencies = ["pytest>=8"]
+
+[project.entry-points.pytest11]
+pytest_txtar = "pytest_txtar.plugin"
 
 [build-system]
 requires = ["hatchling"]
@@ -17,7 +20,6 @@ packages = ["src/pytest_txtar"]
 
 [dependency-groups]
 dev = [
-    "pytest",
     "ruff",
     "basedpyright",
 ]
