@@ -22,6 +22,7 @@ agents.cross-review: ac9039959537468ef
 reviewed_at: 2026-08-12 12:28
 agents.develop-loop-M01: a3928f420b347d470
 agents.develop-loop-M02: a2f47a174ffac150f
+agents.develop-loop-M03: a4d908051f175d7dd
 ---
 
 # Extract txtar contract runner into a standalone reusable module
@@ -67,7 +68,7 @@ Booping integration points: `justfile` `e2e` recipe (`uv run pytest e2e`, patter
 | --- | --- | --- | --- |
 | 01 | [Package core — txtar parser and pytest-free runner core](milestones/M01-package-core/M01-package-core.md) | 8 | done |
 | 02 | [Pytest plugin layer](milestones/M02-pytest-plugin/M02-pytest-plugin.md) | 8 | done |
-| 03 | [Booping e2e rewire onto pytest-txtar](milestones/M03-booping-rewire/M03-booping-rewire.md) | 5 | pending |
+| 03 | [Booping e2e rewire onto pytest-txtar](milestones/M03-booping-rewire/M03-booping-rewire.md) | 5 | done |
 | 04 | [Repo split and PyPI publish](milestones/M04-repo-split-publish/M04-repo-split-publish.md) | 7 | pending |
 
 ## Implementation Order
