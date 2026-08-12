@@ -1,0 +1,15 @@
+A --set argument without `=` fails the run before the config is even read, naming the
+offending argument.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  e2e_demo:
+    tree:
+      a.txt: "body\n"
+-- cmd --
+booping scaffold core.e2e_demo.tree out --set nope
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: malformed --set pair (expected KEY=VALUE): nope

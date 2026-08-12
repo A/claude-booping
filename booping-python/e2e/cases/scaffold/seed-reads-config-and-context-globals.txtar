@@ -1,0 +1,21 @@
+Seed content renders through the source env, so the merged config and the assembled context
+are readable as globals. With no .booping marker anywhere above the cwd, no project is
+attached.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  e2e_demo:
+    tree:
+      a.txt: "{{ config.core.sprint.default_threshold_sp }}|{{ context.project is none }}\n"
+-- cmd --
+booping scaffold core.e2e_demo.tree .
+-- exit --
+0
+-- stdout --
+--- /dev/null
++++ a.txt
+@@ -0,0 +1 @@
++35|True
+scaffolded 1 paths — 0 dirs created, 1 files created, 0 files overwritten
+-- expected/cwd/a.txt --
+35|True

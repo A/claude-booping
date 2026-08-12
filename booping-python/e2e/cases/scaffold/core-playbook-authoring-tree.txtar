@@ -1,0 +1,47 @@
+The playbook-authoring tree from the plugin's config: a manifest pair seeded with the
+playbook's name and an empty _references directory.
+
+-- cmd --
+booping scaffold core.playbook_authoring_playbook.scaffold demo --set name=demo
+-- exit --
+0
+-- stdout --
+created dir demo
+--- /dev/null
++++ demo/playbook.md
+@@ -0,0 +1,11 @@
++---
++name: demo
++title: demo
++summary: One sentence naming what this playbook produces.
++trigger: the situation a user reaches for this playbook in
++---
++
++# demo
++
++Preamble — what the driver needs before the first step: artifact model, hard
++rules, where the work lands. No step calls here.
+--- /dev/null
++++ demo/playbook.yaml
+@@ -0,0 +1,3 @@
++# Step name -> its dependency step names. Each step is a sibling directory
++# holding a prompt.md.
++graph: {}
+created dir demo/_references
+scaffolded 4 paths — 2 dirs created, 2 files created, 0 files overwritten
+-- expected/cwd/demo/playbook.md --
+---
+name: demo
+title: demo
+summary: One sentence naming what this playbook produces.
+trigger: the situation a user reaches for this playbook in
+---
+
+# demo
+
+Preamble — what the driver needs before the first step: artifact model, hard
+rules, where the work lands. No step calls here.
+-- expected/cwd/demo/playbook.yaml --
+# Step name -> its dependency step names. Each step is a sibling directory
+# holding a prompt.md.
+graph: {}

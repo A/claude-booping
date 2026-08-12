@@ -1,0 +1,27 @@
+An existing empty destination is written without --force and is not counted as a created
+dir. The first command makes the empty destination with scaffold itself.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  e2e_pre:
+    tree:
+      out:
+        type: dir
+  e2e_demo:
+    tree:
+      README.md: "hello world\n"
+-- cmd --
+booping scaffold core.e2e_pre.tree .
+booping scaffold core.e2e_demo.tree out
+-- exit --
+0
+-- stdout --
+created dir out
+scaffolded 1 paths — 1 dirs created, 0 files created, 0 files overwritten
+--- /dev/null
++++ out/README.md
+@@ -0,0 +1 @@
++hello world
+scaffolded 1 paths — 0 dirs created, 1 files created, 0 files overwritten
+-- expected/cwd/out/README.md --
+hello world

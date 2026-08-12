@@ -1,0 +1,123 @@
+A plan scaffolded, three milestones scaffolded into it out of id order, then queried: the
+two trees agree on frontmatter keys, and quoted zero-padded ids sort as strings instead of
+mixing int and str in one column.
+
+-- cmd --
+booping scaffold core.groom_playbook.scaffold vault/plans/demo --set title=Demo --set type=feature --stub-macro core.macros.date=20260810-00-00 --stub-macro core.macros.git_commit=abc1234
+booping scaffold core.groom_playbook.milestone_scaffold vault/plans/demo/milestones --set id=10 --set slug=third --set "title=M 10" --set sp=1 --set plan=plans/demo/index.md
+booping scaffold core.groom_playbook.milestone_scaffold vault/plans/demo/milestones --set id=01 --set slug=first --set "title=M 01" --set sp=3 --set plan=plans/demo/index.md
+booping scaffold core.groom_playbook.milestone_scaffold vault/plans/demo/milestones --set id=08 --set slug=second --set "title=M 08" --set sp=2 --set plan=plans/demo/index.md
+booping query --project vault --glob plans/demo/milestones/*/M*.md --columns id,title,sp,status --sort id --output json
+-- exit --
+0
+-- stdout --
+created dir vault/plans/demo
+--- /dev/null
++++ vault/plans/demo/index.md
+@@ -0,0 +1,18 @@
++---
++title: "Demo"
++type: "feature"
++status: framing
++sp: null
++related_to: null
++created: 20260810-00-00
++planned: null
++started: null
++completed: null
++code_reviews: []
++sessions: []
++retro: null
++summary: null
++commit: abc1234
++---
++
++# Demo
+created dir vault/plans/demo/milestones
+scaffolded 4 paths — 2 dirs created, 2 files created, 0 files overwritten
+created dir vault/plans/demo/milestones/M10-third
+--- /dev/null
++++ vault/plans/demo/milestones/M10-third/M10-third.md
+@@ -0,0 +1,15 @@
++---
++id: "10"
++title: "M 10"
++sp: 1
++status: pending
++plan: "plans/demo/index.md"
++---
++
++# M10: M 10
++
++## Tasks
++
++## Definition of Done
++
++## Verify
+scaffolded 2 paths — 1 dirs created, 1 files created, 0 files overwritten
+created dir vault/plans/demo/milestones/M01-first
+--- /dev/null
++++ vault/plans/demo/milestones/M01-first/M01-first.md
+@@ -0,0 +1,15 @@
++---
++id: "01"
++title: "M 01"
++sp: 3
++status: pending
++plan: "plans/demo/index.md"
++---
++
++# M01: M 01
++
++## Tasks
++
++## Definition of Done
++
++## Verify
+scaffolded 2 paths — 1 dirs created, 1 files created, 0 files overwritten
+created dir vault/plans/demo/milestones/M08-second
+--- /dev/null
++++ vault/plans/demo/milestones/M08-second/M08-second.md
+@@ -0,0 +1,15 @@
++---
++id: "08"
++title: "M 08"
++sp: 2
++status: pending
++plan: "plans/demo/index.md"
++---
++
++# M08: M 08
++
++## Tasks
++
++## Definition of Done
++
++## Verify
+scaffolded 2 paths — 1 dirs created, 1 files created, 0 files overwritten
+[
+  {
+    "id": "01",
+    "title": "M 01",
+    "sp": 3,
+    "status": "pending",
+    "path": "plans/demo/milestones/M01-first/M01-first.md",
+    "slug": "M01-first"
+  },
+  {
+    "id": "08",
+    "title": "M 08",
+    "sp": 2,
+    "status": "pending",
+    "path": "plans/demo/milestones/M08-second/M08-second.md",
+    "slug": "M08-second"
+  },
+  {
+    "id": "10",
+    "title": "M 10",
+    "sp": 1,
+    "status": "pending",
+    "path": "plans/demo/milestones/M10-third/M10-third.md",
+    "slug": "M10-third"
+  }
+]

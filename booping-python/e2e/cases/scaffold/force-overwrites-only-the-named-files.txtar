@@ -1,0 +1,27 @@
+--force overwrites the files the tree names and nothing else: a sibling the tree never
+mentions survives untouched.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  e2e_demo:
+    tree:
+      README.md: "hello world\n"
+-- fixtures/cwd/out/README.md --
+old
+-- fixtures/cwd/out/keep.txt --
+keep
+-- cmd --
+booping scaffold core.e2e_demo.tree out --force
+-- exit --
+0
+-- stdout --
+--- out/README.md
++++ out/README.md
+@@ -1 +1 @@
+-old
++hello world
+scaffolded 1 paths — 0 dirs created, 0 files created, 1 files overwritten
+-- expected/cwd/out/README.md --
+hello world
+-- expected/cwd/out/keep.txt --
+keep

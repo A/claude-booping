@@ -1,0 +1,19 @@
+A variable no --set defines renders as nothing rather than failing the run.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  e2e_demo:
+    tree:
+      a.txt: "hello:{{ name }}:done\n"
+-- cmd --
+booping scaffold core.e2e_demo.tree .
+-- exit --
+0
+-- stdout --
+--- /dev/null
++++ a.txt
+@@ -0,0 +1 @@
++hello::done
+scaffolded 1 paths — 0 dirs created, 1 files created, 0 files overwritten
+-- expected/cwd/a.txt --
+hello::done

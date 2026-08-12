@@ -1,0 +1,33 @@
+A destination that does not exist is created together with its missing parents, and every
+node of the tree — nested dirs, seeded files and an explicit empty dir — lands under it.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  e2e_demo:
+    tree:
+      README.md: "hello {{ name }}\n"
+      src:
+        main.py: "print(1)\n"
+      _references:
+        type: dir
+-- cmd --
+booping scaffold core.e2e_demo.tree a/b/out --set name=world
+-- exit --
+0
+-- stdout --
+created dir a/b/out
+--- /dev/null
++++ a/b/out/README.md
+@@ -0,0 +1 @@
++hello world
+created dir a/b/out/src
+--- /dev/null
++++ a/b/out/src/main.py
+@@ -0,0 +1 @@
++print(1)
+created dir a/b/out/_references
+scaffolded 5 paths — 3 dirs created, 2 files created, 0 files overwritten
+-- expected/cwd/a/b/out/README.md --
+hello world
+-- expected/cwd/a/b/out/src/main.py --
+print(1)

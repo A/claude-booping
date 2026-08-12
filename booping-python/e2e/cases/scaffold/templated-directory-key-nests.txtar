@@ -1,0 +1,23 @@
+A templated key naming a directory renders too, and its children land inside the rendered
+directory name.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  e2e_demo:
+    tree:
+      "{{ slug }}":
+        "{{ slug }}.md": "in {{ slug }}\n"
+-- cmd --
+booping scaffold core.e2e_demo.tree out --set slug=nested
+-- exit --
+0
+-- stdout --
+created dir out
+created dir out/nested
+--- /dev/null
++++ out/nested/nested.md
+@@ -0,0 +1 @@
++in nested
+scaffolded 3 paths — 2 dirs created, 1 files created, 0 files overwritten
+-- expected/cwd/out/nested/nested.md --
+in nested

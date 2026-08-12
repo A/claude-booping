@@ -1,0 +1,18 @@
+A destination that exists as a file is refused up front, before the tree is loaded.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  e2e_demo:
+    tree:
+      a.txt: "body\n"
+-- fixtures/cwd/out --
+not a directory
+-- cmd --
+booping scaffold core.e2e_demo.tree out
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: destination out exists and is not a directory
+-- expected/cwd/out --
+not a directory

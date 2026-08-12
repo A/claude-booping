@@ -1,0 +1,20 @@
+--set is repeatable and each pair is a bare template variable in seed content; when a key
+is given twice the later pair wins.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  e2e_demo:
+    tree:
+      a.txt: "{{ one }}-{{ two }}\n"
+-- cmd --
+booping scaffold core.e2e_demo.tree . --set one=first --set two=second --set one=last
+-- exit --
+0
+-- stdout --
+--- /dev/null
++++ a.txt
+@@ -0,0 +1 @@
++last-second
+scaffolded 1 paths — 0 dirs created, 1 files created, 0 files overwritten
+-- expected/cwd/a.txt --
+last-second

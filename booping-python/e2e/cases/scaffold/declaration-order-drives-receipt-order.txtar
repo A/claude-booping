@@ -1,0 +1,28 @@
+Children are walked in declaration order, not sorted order: the tree declares z, a, m and
+the receipt reports them in that order.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  e2e_demo:
+    tree:
+      z.txt: "z\n"
+      a.txt: "a\n"
+      m.txt: "m\n"
+-- cmd --
+booping scaffold core.e2e_demo.tree .
+-- exit --
+0
+-- stdout --
+--- /dev/null
++++ z.txt
+@@ -0,0 +1 @@
++z
+--- /dev/null
++++ a.txt
+@@ -0,0 +1 @@
++a
+--- /dev/null
++++ m.txt
+@@ -0,0 +1 @@
++m
+scaffolded 3 paths — 0 dirs created, 3 files created, 0 files overwritten
