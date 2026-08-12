@@ -1,0 +1,31 @@
+Removing a key drops it from the frontmatter; other keys and body are preserved.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+business_goal: Users find widgets faster.
+status: backlog
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md --remove business_goal
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,6 +1,5 @@
+ ---
+ title: Foo
+-business_goal: Users find widgets faster.
+ status: backlog
+ ---
+ # Body
+-- stderr --
+updated plan.md: -business_goal
+-- expected/cwd/plan.md --
+---
+title: Foo
+status: backlog
+---
+# Body

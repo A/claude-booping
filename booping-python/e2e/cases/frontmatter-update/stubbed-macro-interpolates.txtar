@@ -1,0 +1,35 @@
+A value carrying a Jinja macro call is resolved from a stubbed macro (fixture config
+``macro_stubs:``) and lands typed in the frontmatter.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  macros:
+    mydate: ["date"]
+macro_stubs:
+  core.macros.mydate: "2026-01-15"
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md 'completed={{ macro("core.macros.mydate") }}'
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,4 +1,5 @@
+ ---
+ title: Foo
++completed: '2026-01-15'
+ ---
+ # Body
+-- stderr --
+updated plan.md: completed=2026-01-15
+-- expected/cwd/plan.md --
+---
+title: Foo
+completed: '2026-01-15'
+---
+# Body
