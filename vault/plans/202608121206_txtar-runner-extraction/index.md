@@ -1,13 +1,13 @@
 ---
 title: "Extract txtar contract runner into a standalone reusable module"
 type: "refactoring"
-status: in-progress
+status: done
 sp: 28
 related_to: null
 created: 2026-08-12 12:06
 planned: null
 started: 2026-08-12 12:29
-completed: null
+completed: 2026-08-12 13:56
 code_reviews: []
 sessions:
 - 34ff9ec3-9d14-4743-9821-7332f1d30d6d
@@ -24,6 +24,14 @@ agents.develop-loop-M01: a3928f420b347d470
 agents.develop-loop-M02: a2f47a174ffac150f
 agents.develop-loop-M03: a4d908051f175d7dd
 agents.develop-loop-M04: a08df103bc1fcbdbc
+agents.verify: a7c322fe39eec6ba4
+metrics_active_minutes: 73
+metrics_models:
+- claude-fable-5
+metrics_tokens_input: 389
+metrics_tokens_output: 137246
+metrics_tokens_cache_creation: 850039
+metrics_tokens_cache_read: 16849424
 ---
 
 # Extract txtar contract runner into a standalone reusable module
@@ -88,10 +96,10 @@ Strictly linear: M01 → M02 → M03 → M04. No parallel milestones.
 
 ## Final Verification
 
-- [ ] `just ci` green (lint, typecheck, pytest, snapshots, mdcheck, e2e) with e2e running through pytest-txtar.
-- [ ] All 38 corpus cases pass unmodified; `uv run pytest e2e --txtar-update` rewrites nothing on the green corpus.
-- [ ] `pytest-txtar` 0.1.0 live on PyPI; booping resolves it from PyPI with no `[tool.uv.sources]` entry and no in-repo package copy.
-- [ ] External repo CI green; publish workflow uses trusted publishing with no stored secret.
+- [x] `just ci` green (lint, typecheck, pytest, snapshots, mdcheck, e2e) with e2e running through pytest-txtar.
+- [x] All 38 corpus cases pass unmodified; `uv run pytest e2e --txtar-update` rewrites nothing on the green corpus.
+- [x] `pytest-txtar` 0.1.0 live on PyPI; booping resolves it from PyPI with no `[tool.uv.sources]` entry and no in-repo package copy.
+- [x] External repo CI green; publish workflow authenticates with the `PYPI_TOKEN` repo secret (user decision 2026-08-12 superseding the trusted-publishing line).
 
 ## Testing Strategy
 
