@@ -1,20 +1,22 @@
 ---
 title: "Migrate frontmatter-update tests from units to txtar e2e corpus"
 type: "refactoring"
-status: awaiting-approval
-sp: null
+status: in-progress
+sp: 8
 related_to: null
 created: 2026-08-12 14:17
 planned: null
-started: null
+started: 2026-08-12 14:37
 completed: null
 code_reviews: []
 sessions:
 - 74d0d09f-c620-44da-a2e5-ee30fc87e079
+- 07f92faa-63c3-4b72-acac-434a41369dbb
 retro: null
 summary: frontmatter-update units become txtar e2e cases; stub + real echo macro
   coverage; unit file deleted after cross-check
-commit: 5369612a59d61d7e6374119c0b66f5e85a463e55
+commit: e0d1796ff568c6b4a0d242069e6102e1a294e00a
+reviewed_at: 2026-08-12 14:36
 ---
 
 # Migrate frontmatter-update tests from units to txtar e2e corpus
@@ -37,11 +39,11 @@ Cases live in `booping-python/e2e/cases/frontmatter-update/*.txtar`, discovered 
 
 ## Milestones
 
-| id | title | sp | status | path | slug |
-| --- | --- | --- | --- | --- | --- |
-| 01 | Core CLI corpus cases — set, coercion, errors, diff, stderr, log | 3 | pending | plans/202608121417_frontmatter-update-e2e-migration/milestones/M01-core-cli-cases/M01-core-cli-cases.md | M01-core-cli-cases |
-| 02 | List-op and macro corpus cases — remove, append, stubbed and real macros, gap cases | 3 | pending | plans/202608121417_frontmatter-update-e2e-migration/milestones/M02-list-ops-and-macro-cases/M02-list-ops-and-macro-cases.md | M02-list-ops-and-macro-cases |
-| 03 | Delete superseded unit tests after coverage cross-check | 2 | pending | plans/202608121417_frontmatter-update-e2e-migration/milestones/M03-delete-superseded-units/M03-delete-superseded-units.md | M03-delete-superseded-units |
+| id | title | sp | status |
+| --- | --- | --- | --- |
+| 01 | [Core CLI corpus cases — set, coercion, errors, diff, stderr, log](milestones/M01-core-cli-cases/M01-core-cli-cases.md) | 3 | in-progress |
+| 02 | [List-op and macro corpus cases — remove, append, stubbed and real macros, gap cases](milestones/M02-list-ops-and-macro-cases/M02-list-ops-and-macro-cases.md) | 3 | pending |
+| 03 | [Delete superseded unit tests after coverage cross-check](milestones/M03-delete-superseded-units/M03-delete-superseded-units.md) | 2 | pending |
 
 ## I/O contract
 
