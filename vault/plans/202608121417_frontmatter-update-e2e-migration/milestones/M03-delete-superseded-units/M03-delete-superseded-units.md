@@ -2,7 +2,7 @@
 id: "03"
 title: "Delete superseded unit tests after coverage cross-check"
 sp: 2
-status: in-progress
+status: done
 plan: "vault/plans/202608121417_frontmatter-update-e2e-migration/index.md"
 ---
 
@@ -16,20 +16,20 @@ Scope: deletion of the unit file; a coverage cross-check table appended to this 
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 3.1 | Cross-check: list every test in `frontmatter_update_test.py`, map each to its corpus case filename or to a recorded drop rationale (hook-tokenising → playbook_transition coverage; live-git → M02/2.3); append the mapping table under `## Coverage cross-check` in this file | this milestone file | 1 | pending |
-| 3.2 | Delete `booping-python/tests/commands/frontmatter_update_test.py`; sweep stale references (`grep -rn frontmatter_update_test` over the repo) and fix any hit; confirm unit suite still green | `booping-python/tests/commands/frontmatter_update_test.py` | 1 | pending |
+| 3.1 | Cross-check: list every test in `frontmatter_update_test.py`, map each to its corpus case filename or to a recorded drop rationale (hook-tokenising → playbook_transition coverage; live-git → M02/2.3); append the mapping table under `## Coverage cross-check` in this file | this milestone file | 1 | done |
+| 3.2 | Delete `booping-python/tests/commands/frontmatter_update_test.py`; sweep stale references (`grep -rn frontmatter_update_test` over the repo) and fix any hit; confirm unit suite still green | `booping-python/tests/commands/frontmatter_update_test.py` | 1 | done |
 
 ## Definition of Done
 
 ### Task 3.1
 
-- [ ] Every test function/parametrization in the unit file appears in the mapping table with a case filename or drop rationale.
-- [ ] No mapping row says "TODO" or "covered somewhere".
+- [x] Every test function/parametrization in the unit file appears in the mapping table with a case filename or drop rationale.
+- [x] No mapping row says "TODO" or "covered somewhere".
 
 ### Task 3.2
 
-- [ ] File deleted; `grep -rn frontmatter_update_test` over the repo returns nothing.
-- [ ] `uv run pytest tests` and `uv run pytest e2e -k frontmatter` both green after deletion.
+- [x] File deleted; `grep -rn frontmatter_update_test` over the repo returns nothing.
+- [x] `uv run pytest tests` and `uv run pytest e2e -k frontmatter` both green after deletion.
 
 ## Verify
 
