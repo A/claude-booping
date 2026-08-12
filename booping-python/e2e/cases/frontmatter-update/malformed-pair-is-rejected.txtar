@@ -1,0 +1,20 @@
+An argument without `=` is not a pair: the run fails naming the offending argument and the
+plan is left untouched.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md noequals
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: malformed key=value pair: 'noequals'
+-- expected/cwd/plan.md --
+---
+title: Foo
+---
+# Body

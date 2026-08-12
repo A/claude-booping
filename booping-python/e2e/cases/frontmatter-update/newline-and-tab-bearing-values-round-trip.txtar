@@ -1,0 +1,26 @@
+Whitespace-bearing values round-trip rather than being mangled or rejected: a tab lands as a
+double-quoted escape and a newline as a folded single-quoted block, each reloading as the
+text that was given. The newline arrives through a Jinja string literal — a command line
+cannot carry a raw one.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md 'tabbed=a	b' 'lined={{ "x\ny" }}'
+-- exit --
+0
+-- stderr --
+updated plan.md: tabbed=a	b, lined=x
+y
+-- expected/cwd/plan.md --
+---
+title: Foo
+tabbed: "a\tb"
+lined: 'x
+
+  y'
+---
+# Body

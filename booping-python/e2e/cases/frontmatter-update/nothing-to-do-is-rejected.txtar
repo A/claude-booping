@@ -1,0 +1,20 @@
+A call carrying no pair, no --append and no --remove is a user error, not a silent no-op:
+the message names all three ways to ask for a change.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: nothing to do: provide key=value pairs, --append and/or --remove
+-- expected/cwd/plan.md --
+---
+title: Foo
+---
+# Body

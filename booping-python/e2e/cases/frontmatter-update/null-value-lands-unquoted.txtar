@@ -1,0 +1,22 @@
+Each null spelling — `null` and `~` — is written as the bare word `null`, so the key reloads
+as a real null and stays a clearable queue marker.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+retro: 2026-01-01
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md retro=null planned=~
+-- exit --
+0
+-- stderr --
+updated plan.md: retro=null, planned=~
+-- expected/cwd/plan.md --
+---
+title: Foo
+retro: null
+planned: null
+---
+# Body

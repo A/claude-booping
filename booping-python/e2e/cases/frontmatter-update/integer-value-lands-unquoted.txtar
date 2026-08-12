@@ -1,0 +1,20 @@
+A value whose plain YAML form is an integer is written unquoted, so a reader loads it as a
+number and not as text.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md sp=23
+-- exit --
+0
+-- stderr --
+updated plan.md: sp=23
+-- expected/cwd/plan.md --
+---
+title: Foo
+sp: 23
+---
+# Body
