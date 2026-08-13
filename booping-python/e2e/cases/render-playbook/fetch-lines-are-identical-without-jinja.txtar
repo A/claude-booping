@@ -1,0 +1,63 @@
+The fetch line's shape does not depend on the Jinja mode. Twin of
+`fetch-lines-are-identical-with-jinja.txtar`: the same playbook without `jinja: true`, and the
+pinned stdout below is byte-identical to that case's.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  fx_label: hermetic label
+-- fixtures/home/Claude/_playbooks/fx-fetch/playbook.md --
+---
+name: fx-fetch
+title: Fetch
+summary: Two waves of detached steps.
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-fetch/playbook.yaml --
+graph:
+  first: []
+  second: [first]
+-- fixtures/home/Claude/_playbooks/fx-fetch/first/prompt.md --
+---
+name: first
+summary: First summary.
+detached: sonnet:medium
+---
+
+Wave-one body, label {{ config.core.fx_label }}.
+-- fixtures/home/Claude/_playbooks/fx-fetch/second/prompt.md --
+---
+name: second
+summary: Second summary.
+detached: sonnet:medium
+---
+
+Wave-two body, label {{ config.core.fx_label }}.
+-- cmd --
+booping render-playbook fx-fetch
+-- exit --
+0
+-- stdout --
+Preamble.
+
+## Playbook Steps
+
+Execute the steps in the most effective order considering their dependencies.
+
+| Step | Dependencies | Summary | Review gate |
+| --- | --- | --- | --- |
+| `first` | — | First summary. | — |
+| `second` | `first` | Second summary. | — |
+
+## Step: First
+
+First summary.
+
+Tell a sub-agent — model sonnet, effort medium — to get its instructions by calling this command: `booping render-playbook fx-fetch --step first`.
+
+## Step: Second
+
+Second summary.
+
+Tell a sub-agent — model sonnet, effort medium — to get its instructions by calling this command: `booping render-playbook fx-fetch --step second`.
+-- stderr --

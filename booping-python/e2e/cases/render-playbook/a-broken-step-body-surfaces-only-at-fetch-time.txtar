@@ -1,0 +1,47 @@
+Without `inline_steps` a step body is never rendered at compose time: the composed render of a
+playbook whose only step body is broken Jinja is healthy, table and section included. The failure
+waits for the `--step` fetch, where it prints as an in-band `**STOP` notice — no traceback — and the
+process still exits 0.
+
+-- fixtures/home/Claude/_playbooks/fx-broken-body/playbook.md --
+---
+name: fx-broken-body
+title: Broken Body
+summary: The step body cannot render.
+jinja: true
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-broken-body/playbook.yaml --
+graph:
+  only: []
+-- fixtures/home/Claude/_playbooks/fx-broken-body/only/prompt.md --
+---
+name: only
+summary: Only step.
+---
+
+{% include "nope.md" %}
+-- cmd --
+booping render-playbook fx-broken-body
+booping render-playbook fx-broken-body --step only
+-- exit --
+0
+-- stdout --
+Preamble.
+
+## Playbook Steps
+
+Execute the steps in the most effective order considering their dependencies.
+
+| Step | Dependencies | Summary | Review gate |
+| --- | --- | --- | --- |
+| `only` | — | Only step. | — |
+
+## Step: Only
+Instructions:
+- Summary: Only step.
+
+Run `booping render-playbook fx-broken-body --step only` for content.
+**STOP — tell the user:** Jinja rendering of step 'only' failed: TemplateNotFound: nope.md. Do not execute this playbook.
+-- stderr --
