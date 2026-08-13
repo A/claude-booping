@@ -2,7 +2,7 @@
 id: "02"
 title: "playbook-state report shape and ordering"
 sp: 3
-status: pending
+status: done
 plan: "vault/plans/202608131522_final-cli-commands-to-e2e/index.md"
 ---
 
@@ -16,23 +16,23 @@ The frontier report's YAML shape — statuses, edge sets, state ordering and per
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 2.1 | Write the outer-state cases: a missing artifact reporting `not-started` with the synthetic bootstrap edge and no gates, a mid-run status carrying its full `next` edge set with `when` and `gates`, a terminal status omitting `next` entirely, and the outer state appearing before inner states in the document | `booping-python/e2e/cases/playbook-state/*.txtar` | 2 | pending |
-| 2.2 | Write the instance-state cases: a per-instance machine reporting `instances: {}` before any instance exists, instances keyed by slug and sorted, and the instance key being exactly what the `{instance}` placeholder matched — one case for a flat artifact path, one for a nested one | `booping-python/e2e/cases/playbook-state/*.txtar` | 1 | pending |
+| 2.1 | Write the outer-state cases: a missing artifact reporting `not-started` with the synthetic bootstrap edge and no gates, a mid-run status carrying its full `next` edge set with `when` and `gates`, a terminal status omitting `next` entirely, and the outer state appearing before inner states in the document | `booping-python/e2e/cases/playbook-state/*.txtar` | 2 | done |
+| 2.2 | Write the instance-state cases: a per-instance machine reporting `instances: {}` before any instance exists, instances keyed by slug and sorted, and the instance key being exactly what the `{instance}` placeholder matched — one case for a flat artifact path, one for a nested one | `booping-python/e2e/cases/playbook-state/*.txtar` | 1 | done |
 
 ## Definition of Done
 
 ### Task 2.1
 
-- [ ] A case with a seeded workdir and no artifact file reports `status: not-started` and a `next` list holding exactly the synthetic bootstrap edge, whose `when` is the run-not-started text and which carries no `gates` key.
-- [ ] A case advances the run with `booping playbook-transition` on a preceding cmd line, then pins the reported status and every outgoing edge's `to`, `when` and `gates`.
-- [ ] A case advances to a terminal status and its pinned YAML has no `next` key at all.
-- [ ] A case on a playbook declaring both an outer and an inner state pins the two in outer-first document order.
+- [x] A case with a seeded workdir and no artifact file reports `status: not-started` and a `next` list holding exactly the synthetic bootstrap edge, whose `when` is the run-not-started text and which carries no `gates` key.
+- [x] A case advances the run with `booping playbook-transition` on a preceding cmd line, then pins the reported status and every outgoing edge's `to`, `when` and `gates`.
+- [x] A case advances to a terminal status and its pinned YAML has no `next` key at all.
+- [x] A case on a playbook declaring both an outer and an inner state pins the two in outer-first document order.
 
 ### Task 2.2
 
-- [ ] A case on a per-instance machine with no instance yet pins `instances: {}`.
-- [ ] A case that bootstraps two instances out of alphabetical order pins them sorted by slug, each with its own status and edges.
-- [ ] Two cases differing only in the machine's `artifact:` path shape — one flat, one nested — pin the instance key as the segment the `{instance}` placeholder matched.
+- [x] A case on a per-instance machine with no instance yet pins `instances: {}`.
+- [x] A case that bootstraps two instances out of alphabetical order pins them sorted by slug, each with its own status and edges.
+- [x] Two cases differing only in the machine's `artifact:` path shape — one flat, one nested — pin the instance key as the segment the `{instance}` placeholder matched.
 
 ## Verify
 
