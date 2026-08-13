@@ -1,0 +1,50 @@
+A hook whose first token is neither `script` nor `frontmatter-update` exits 2 naming the verb. The
+status set runs as the edge's first hook, so the artifact already carries the target status when the
+unknown verb aborts the run.
+
+-- fixtures/home/Claude/_playbooks/fx-hooks/playbook.md --
+---
+name: fx-hooks
+title: Hooks
+summary: Hook-bearing fixture for playbook-transition.
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-hooks/playbook.yaml --
+state: main
+graph:
+  only: []
+
+states:
+  main:
+    artifact: index.md
+    initial: intaking
+    statuses:
+      intaking:
+        transitions:
+          - to: noted
+            when: never — the hook verb is unknown
+            hooks: ["teleport somewhere"]
+      noted: {terminal: true}
+-- fixtures/home/Claude/_playbooks/fx-hooks/only/prompt.md --
+---
+summary: Only step.
+---
+
+Only body.
+-- fixtures/cwd/run/.keep --
+-- cmd --
+booping playbook-transition fx-hooks intaking --workdir run
+booping playbook-transition fx-hooks noted --workdir run
+-- exit --
+2
+-- stdout --
+created index.md
+not-started → intaking
+frontmatter: status=intaking
+-- stderr --
+error: unknown hook: 'teleport'
+-- expected/cwd/run/index.md --
+---
+status: noted
+---

@@ -1,0 +1,59 @@
+An edge carrying a `script` hook runs it and reports `script {name}: ok` after the status line. The
+fixture script is written by the case but `pytest-txtar` cannot express its mode, so the first `cmd`
+line chmods it — see README. The script's side effect lands in the workdir and is asserted through
+`expected/`.
+
+-- fixtures/home/Claude/_playbooks/fx-hooks/playbook.md --
+---
+name: fx-hooks
+title: Hooks
+summary: Hook-bearing fixture for playbook-transition.
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-hooks/playbook.yaml --
+state: main
+graph:
+  only: []
+
+states:
+  main:
+    artifact: index.md
+    initial: intaking
+    statuses:
+      intaking:
+        transitions:
+          - to: noted
+            when: the note is written
+            hooks: ["script note"]
+      noted: {terminal: true}
+-- fixtures/home/Claude/_playbooks/fx-hooks/only/prompt.md --
+---
+summary: Only step.
+---
+
+Only body.
+-- fixtures/home/Claude/_playbooks/fx-hooks/_scripts/note --
+#!/bin/sh
+echo "playbook" >> "$BOOPING_WORKDIR/note.log"
+-- fixtures/cwd/run/.keep --
+-- cmd --
+chmod +x ../home/Claude/_playbooks/fx-hooks/_scripts/note
+booping playbook-transition fx-hooks intaking --workdir run
+booping playbook-transition fx-hooks noted --workdir run
+-- exit --
+0
+-- stdout --
+created index.md
+not-started → intaking
+frontmatter: status=intaking
+intaking → noted
+frontmatter: status=noted
+script note: ok
+-- stderr --
+-- expected/cwd/run/note.log --
+playbook
+-- expected/cwd/run/index.md --
+---
+status: noted
+---

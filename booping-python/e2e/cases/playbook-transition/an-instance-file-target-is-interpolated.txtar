@@ -1,0 +1,79 @@
+A file target carrying `{instance}` is interpolated from `--instance` before the write, so the hook
+lands on the slug's own sidecar and the report names the interpolated path.
+
+-- fixtures/home/Claude/_playbooks/fx-hooks/playbook.md --
+---
+name: fx-hooks
+title: Hooks
+summary: Hook-bearing fixture for playbook-transition.
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-hooks/playbook.yaml --
+state: main
+graph:
+  only: []
+  step-pipeline:
+    dependencies: [only]
+    state: step
+    graph:
+      spec: []
+
+states:
+  main:
+    artifact: index.md
+    initial: intaking
+    statuses:
+      intaking:
+        transitions:
+          - to: noted
+            when: nothing runs here
+      noted: {terminal: true}
+  step:
+    artifact: steps/{instance}/index.md
+    initial: spec-ing
+    statuses:
+      spec-ing:
+        transitions:
+          - to: done
+            when: the instance notes are reviewed
+            hooks: ["frontmatter-update steps/{instance}/notes.md seen=recorded"]
+      done: {terminal: true}
+-- fixtures/home/Claude/_playbooks/fx-hooks/only/prompt.md --
+---
+summary: Only step.
+---
+
+Only body.
+-- fixtures/home/Claude/_playbooks/fx-hooks/spec/prompt.md --
+---
+summary: Write the spec.
+---
+
+Spec body.
+-- fixtures/cwd/run/steps/alpha/notes.md --
+---
+title: Alpha notes
+---
+
+Notes body.
+-- cmd --
+booping playbook-transition fx-hooks spec-ing --state step --instance alpha --workdir run
+booping playbook-transition fx-hooks done --state step --instance alpha --workdir run
+-- exit --
+0
+-- stdout --
+created steps/alpha/index.md
+not-started → spec-ing
+frontmatter: status=spec-ing
+spec-ing → done
+frontmatter: status=done
+frontmatter steps/alpha/notes.md: seen=recorded
+-- stderr --
+-- expected/cwd/run/steps/alpha/notes.md --
+---
+title: Alpha notes
+seen: recorded
+---
+
+Notes body.
