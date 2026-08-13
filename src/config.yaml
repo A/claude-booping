@@ -97,6 +97,54 @@ core:
       description: "Internal structure change with no user-visible behavior change. Needs current-vs-target design, migration steps, and a no-behavior-change DoD."
       doc_uri: ${CLAUDE_PLUGIN_ROOT}/docs/task_refactoring.md
 
+  # Task-tracker surface. Directly under `core` rather than in a playbook
+  # namespace because several playbooks mirror their run outward through it.
+  # `bin/booping-tracker` resolves this block by shelling to
+  # `booping config-get core.tracker`, so the three-tier merge stays single-sourced.
+  tracker:
+    # Provider the tracker CLI dispatches to: `cli` (receipts-only no-ops, every
+    # interactive run behaves exactly as it does today) or `linear`. Overridable
+    # per invocation with `--driver`. An unknown name is a hard error rather than
+    # a silent degrade to no-op, because the config merge has no schema gate.
+    driver: cli
+
+    # Settings the `linear` provider reads. Inert while `driver: cli`.
+    linear:
+      # Name of the environment variable carrying the personal API key. The value
+      # is a variable *name*, never a token: no config value anywhere is
+      # env-interpolated, and secrets stay out of every config tier.
+      api_key_env: LINEAR_API_KEY
+      # GraphQL endpoint every operation posts to.
+      api_url: https://api.linear.app/graphql
+      # Team key new issues are created under (e.g. `ENG`). Null until a project
+      # tier sets it; the `linear` provider errors without one.
+      team: null
+      # Per-playbook mirroring rules, keyed by playbook name. A playbook absent
+      # here is never mirrored.
+      playbooks:
+        groom:
+          # Playbook status -> Linear workflow-state name. Linear states are
+          # presentational: pushed on every transition, never read back to decide
+          # one. Covers every status in `playbooks/groom/playbook.yaml` — an
+          # unmapped status is an error, not a skipped push. Values are Linear's
+          # default team states; a team with its own workflow overrides them.
+          statuses:
+            framing: In Progress
+            researching: In Progress
+            drafting: In Progress
+            awaiting-clarification: Todo
+            cross-reviewing: In Review
+            presenting: In Review
+            awaiting-approval: In Review
+            ready-for-dev: Done
+            cancelled: Canceled
+          # Linear has no issue-type concept, so the kind of an issue is a label:
+          # `request` is the inbound issue a run is driven from, `plan` the issue
+          # the finished plan is written into.
+          labels:
+            request: request
+            plan: plan
+
   groom_playbook:
     # Agent that performs the detached second-model review of a drafted plan.
     # Null → the reviewing step is skipped entirely.
@@ -123,6 +171,10 @@ core:
         retro: null
         summary: null
         commit: {{ macro('core.macros.git_commit') }}
+        tracker_provider: null
+        tracker_request: null
+        tracker_issue: null
+        return_to: null
         ---
 
         # {{ title }}

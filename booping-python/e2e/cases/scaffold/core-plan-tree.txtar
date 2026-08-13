@@ -10,7 +10,7 @@ booping scaffold core.groom_playbook.scaffold plans/demo --set title=Demo --set 
 created dir plans/demo
 --- /dev/null
 +++ plans/demo/index.md
-@@ -0,0 +1,18 @@
+@@ -0,0 +1,22 @@
 +---
 +title: "Demo"
 +type: "feature"
@@ -26,6 +26,10 @@ created dir plans/demo
 +retro: null
 +summary: null
 +commit: abc1234
++tracker_provider: null
++tracker_request: null
++tracker_issue: null
++return_to: null
 +---
 +
 +# Demo
@@ -47,6 +51,10 @@ sessions: []
 retro: null
 summary: null
 commit: abc1234
+tracker_provider: null
+tracker_request: null
+tracker_issue: null
+return_to: null
 ---
 
 # Demo

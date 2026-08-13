@@ -14,7 +14,7 @@ booping query --project vault --glob plans/demo/milestones/*/M*.md --columns id,
 created dir vault/plans/demo
 --- /dev/null
 +++ vault/plans/demo/index.md
-@@ -0,0 +1,18 @@
+@@ -0,0 +1,22 @@
 +---
 +title: "Demo"
 +type: "feature"
@@ -30,6 +30,10 @@ created dir vault/plans/demo
 +retro: null
 +summary: null
 +commit: abc1234
++tracker_provider: null
++tracker_request: null
++tracker_issue: null
++return_to: null
 +---
 +
 +# Demo
