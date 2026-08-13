@@ -1,0 +1,47 @@
+A machine whose `artifact:` sits under a subdirectory gets those directories created on bootstrap.
+The report names the path as written in the manifest; that the parents were made is what the
+expected artifact proves.
+
+-- fixtures/home/Claude/_playbooks/fx-nested/playbook.md --
+---
+name: fx-nested
+title: Nested
+summary: Artifact under a subdirectory.
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-nested/playbook.yaml --
+state: main
+graph:
+  intake: []
+
+states:
+  main:
+    artifact: reports/deep/index.md
+    initial: open
+    statuses:
+      open:
+        transitions:
+          - to: closed
+            when: report filed
+      closed: {terminal: true}
+-- fixtures/home/Claude/_playbooks/fx-nested/intake/prompt.md --
+---
+summary: Intake the request.
+---
+
+Intake body.
+-- fixtures/cwd/run/.keep --
+-- cmd --
+booping playbook-transition fx-nested open --workdir run
+-- exit --
+0
+-- stdout --
+created reports/deep/index.md
+not-started → open
+frontmatter: status=open
+-- stderr --
+-- expected/cwd/run/reports/deep/index.md --
+---
+status: open
+---

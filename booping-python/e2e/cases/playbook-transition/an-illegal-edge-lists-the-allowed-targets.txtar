@@ -1,0 +1,75 @@
+A target the current status has no edge to is refused with every target it does have, sorted.
+The artifact keeps the status it had.
+
+-- fixtures/home/Claude/_playbooks/fx-run/playbook.md --
+---
+name: fx-run
+title: Run
+summary: Hookless states-bearing fixture for playbook-transition.
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-run/playbook.yaml --
+state: main
+graph:
+  intake: []
+  step-pipeline:
+    dependencies: [intake]
+    state: step
+    graph:
+      spec: []
+
+states:
+  main:
+    artifact: index.md
+    initial: intaking
+    statuses:
+      intaking:
+        transitions:
+          - to: researching
+            when: intake complete
+          - to: parked
+            when: the run is shelved
+      researching:
+        transitions:
+          - to: done
+            when: research complete
+      parked: {terminal: true}
+      done: {terminal: true}
+  step:
+    artifact: steps/{instance}/index.md
+    initial: spec-ing
+    statuses:
+      spec-ing:
+        transitions:
+          - to: done
+            when: spec written
+      done: {terminal: true}
+-- fixtures/home/Claude/_playbooks/fx-run/intake/prompt.md --
+---
+summary: Intake the request.
+---
+
+Intake body.
+-- fixtures/home/Claude/_playbooks/fx-run/spec/prompt.md --
+---
+summary: Write the spec.
+---
+
+Spec body.
+-- fixtures/cwd/run/.keep --
+-- cmd --
+booping playbook-transition fx-run intaking --workdir run
+booping playbook-transition fx-run done --workdir run
+-- exit --
+1
+-- stdout --
+created index.md
+not-started → intaking
+frontmatter: status=intaking
+-- stderr --
+error: cannot transition from 'intaking' to 'done' in state 'main'; allowed targets: parked, researching
+-- expected/cwd/run/index.md --
+---
+status: intaking
+---
