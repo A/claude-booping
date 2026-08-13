@@ -1,0 +1,20 @@
+Overwriting a key the marker already carries rewrites that line where it stands: the key
+order holds, the value keeps its quoting and the trailing comment survives.
+
+-- fixtures/cwd/.booping --
+# booping project marker
+project_name: "demo"  # quoted on purpose
+vault_path: ./vault
+latest_migration: 1
+-- cmd --
+booping marker-set project_name=renamed
+-- exit --
+0
+-- stdout --
+-- stderr --
+marker: project_name=renamed
+-- expected/cwd/.booping --
+# booping project marker
+project_name: "renamed" # quoted on purpose
+vault_path: ./vault
+latest_migration: 1

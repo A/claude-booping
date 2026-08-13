@@ -1,0 +1,20 @@
+Setting a key appends it to the marker, says nothing on stdout, and reports the pair on
+stderr. The marker's leading comment, its quoted project_name and its key order come back
+byte-for-byte: only the appended line is new.
+
+-- fixtures/cwd/.booping --
+# booping project marker
+project_name: "demo"  # quoted on purpose
+vault_path: ./vault
+-- cmd --
+booping marker-set latest_migration=3
+-- exit --
+0
+-- stdout --
+-- stderr --
+marker: latest_migration=3
+-- expected/cwd/.booping --
+# booping project marker
+project_name: "demo"  # quoted on purpose
+vault_path: ./vault
+latest_migration: 3
