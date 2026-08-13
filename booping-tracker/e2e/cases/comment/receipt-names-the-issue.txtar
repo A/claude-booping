@@ -1,0 +1,9 @@
+`comment` takes its body inline; the `cli` driver posts nothing.
+
+-- cmd --
+booping-tracker comment --issue LIN-1 --body hi
+-- exit --
+0
+-- stdout --
+comment LIN-1: cli driver, no-op
+-- stderr --

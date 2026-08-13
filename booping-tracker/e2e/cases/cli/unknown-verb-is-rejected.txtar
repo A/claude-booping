@@ -1,0 +1,10 @@
+An unrecognised verb is a user error at exit 1; stdout stays empty so a caller piping receipts
+never mistakes an error for a result.
+
+-- cmd --
+booping-tracker bogus
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: argument <verb>: invalid choice: 'bogus' (choose from states, show, comment, issue-create, issue-update, relate, sync)

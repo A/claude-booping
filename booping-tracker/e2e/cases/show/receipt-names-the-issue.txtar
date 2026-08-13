@@ -1,0 +1,9 @@
+`show` reads one issue; the `cli` driver reads nothing and says so.
+
+-- cmd --
+booping-tracker show --issue LIN-1
+-- exit --
+0
+-- stdout --
+show LIN-1: cli driver, no-op
+-- stderr --

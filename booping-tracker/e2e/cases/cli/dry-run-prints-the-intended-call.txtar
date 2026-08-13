@@ -1,0 +1,10 @@
+`--dry-run` resolves config and arguments, prints the call it would make, and never reaches
+the provider.
+
+-- cmd --
+booping-tracker --dry-run relate --issue LIN-1 --to LIN-2
+-- exit --
+0
+-- stdout --
+dry-run relate LIN-1: cli driver, would call issue='LIN-1' relation='related' to='LIN-2'
+-- stderr --

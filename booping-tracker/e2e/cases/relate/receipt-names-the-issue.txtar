@@ -1,0 +1,9 @@
+`relate` cross-links two issues; the receipt names the issue the relation hangs off.
+
+-- cmd --
+booping-tracker relate --issue LIN-1 --to LIN-2 --type blocks
+-- exit --
+0
+-- stdout --
+relate LIN-1: cli driver, no-op
+-- stderr --

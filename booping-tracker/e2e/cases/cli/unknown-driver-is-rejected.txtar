@@ -1,0 +1,10 @@
+The config merge has no schema gate, so a misspelled driver would otherwise degrade silently
+to the no-op provider. It is a hard error naming the driver instead.
+
+-- cmd --
+booping-tracker --driver linaer states --team ENG
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: unknown driver: linaer (known: cli, linear)
