@@ -1,0 +1,60 @@
+An inner step can be flagged from two scopes at once — its subgraph shares an outer wave with
+`side`, and it also shares its inner wave with `two`. The whole stdout is pinned so the notice is
+proven to appear exactly once per step rather than once per scope.
+
+-- fixtures/home/Claude/_playbooks/fx-parallel-both-scopes/playbook.md --
+---
+name: fx-parallel-both-scopes
+title: Parallel In Both Scopes
+---
+
+Preamble prose for the parallel-both-scopes playbook.
+-- fixtures/home/Claude/_playbooks/fx-parallel-both-scopes/playbook.yaml --
+graph:
+  a: []
+  side: [a]
+  loop:
+    dependencies: [a]
+    graph:
+      one: []
+      two: []
+-- fixtures/home/Claude/_playbooks/fx-parallel-both-scopes/a/prompt.md --
+---
+name: a
+summary: a summary
+detached: sonnet:medium
+---
+
+a body
+-- fixtures/home/Claude/_playbooks/fx-parallel-both-scopes/side/prompt.md --
+---
+name: side
+summary: side summary
+detached: sonnet:medium
+---
+
+side body
+-- fixtures/home/Claude/_playbooks/fx-parallel-both-scopes/one/prompt.md --
+---
+name: one
+summary: one summary
+---
+
+one body
+-- fixtures/home/Claude/_playbooks/fx-parallel-both-scopes/two/prompt.md --
+---
+name: two
+summary: two summary
+---
+
+two body
+-- cmd --
+booping render-playbook fx-parallel-both-scopes
+-- exit --
+0
+-- stdout --
+**STOP — tell the user:** step 'one' is not detached but shares a wave with other steps; a step sharing a wave must be `detached:`. Do not execute this playbook.
+**STOP — tell the user:** step 'two' is not detached but shares a wave with other steps; a step sharing a wave must be `detached:`. Do not execute this playbook.
+
+Preamble prose for the parallel-both-scopes playbook.
+-- stderr --

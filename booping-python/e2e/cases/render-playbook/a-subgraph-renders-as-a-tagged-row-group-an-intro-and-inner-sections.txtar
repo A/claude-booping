@@ -1,0 +1,131 @@
+A `graph:` mapping node is a subgraph. Its own row is tagged `*(subgraph)*` and carries its outer
+dependencies with its `repeat:` prose as the summary; the rows of its inner steps follow, tagged
+`*(in pipeline)*` and carrying inner-scope dependencies. Sections render in outer wave order with
+the `## Subgraph:` intro standing in front of its inner `## Step:` sections, and the intro lists
+`After:`, `Repeat:` and the inner waves.
+
+The subgraph key `pipeline` is a grouping node with no step directory of its own and is never
+reported as a missing step: a healthy subgraph playbook carries no notice line at all.
+
+-- fixtures/home/Claude/_playbooks/fx-subgraph/playbook.md --
+---
+name: fx-subgraph
+title: Subgraph Playbook
+summary: Fixture exercising a one-level subgraph.
+---
+
+Preamble prose for the subgraph playbook.
+-- fixtures/home/Claude/_playbooks/fx-subgraph/playbook.yaml --
+graph:
+  manifest: []
+  pipeline:
+    dependencies: [manifest]
+    repeat: once per step produced by manifest; instances may run in parallel
+    graph:
+      spec: []
+      fixtures: [spec]
+      tests: [spec]
+  publish: [pipeline]
+-- fixtures/home/Claude/_playbooks/fx-subgraph/manifest/prompt.md --
+---
+name: manifest
+summary: manifest summary
+detached: sonnet:medium
+---
+
+manifest body
+-- fixtures/home/Claude/_playbooks/fx-subgraph/spec/prompt.md --
+---
+name: spec
+summary: spec summary
+detached: sonnet:medium
+---
+
+spec body
+-- fixtures/home/Claude/_playbooks/fx-subgraph/fixtures/prompt.md --
+---
+name: fixtures
+summary: fixtures summary
+detached: haiku:low
+---
+
+fixtures body
+-- fixtures/home/Claude/_playbooks/fx-subgraph/tests/prompt.md --
+---
+name: tests
+summary: tests summary
+detached: booping-researcher
+---
+
+tests body
+-- fixtures/home/Claude/_playbooks/fx-subgraph/publish/prompt.md --
+---
+name: publish
+summary: publish summary
+detached: sonnet:medium
+---
+
+publish body
+-- cmd --
+booping render-playbook fx-subgraph
+-- exit --
+0
+-- stdout --
+Preamble prose for the subgraph playbook.
+
+## Playbook Steps
+
+Execute the steps in the most effective order considering their dependencies.
+
+| Step | Dependencies | Summary | Review gate |
+| --- | --- | --- | --- |
+| `manifest` | — | manifest summary | — |
+| `pipeline` *(subgraph)* | `manifest` | once per step produced by manifest; instances may run in parallel | — |
+| `spec` *(in pipeline)* | — | spec summary | — |
+| `fixtures` *(in pipeline)* | `spec` | fixtures summary | — |
+| `tests` *(in pipeline)* | `spec` | tests summary | — |
+| `publish` | `pipeline` | publish summary | — |
+
+## Step: Manifest
+
+manifest summary
+
+Tell a sub-agent — model sonnet, effort medium — to get its instructions by calling this command: `booping render-playbook fx-subgraph --step manifest`.
+
+## Subgraph: pipeline
+
+Instructions:
+- After: manifest
+- Repeat: once per step produced by manifest; instances may run in parallel
+- Inner waves: 1. `spec` 2. `fixtures` ∥ `tests`
+
+## Step: Spec
+
+spec summary
+
+Part of: pipeline (repeated)
+
+Tell a sub-agent — model sonnet, effort medium — to get its instructions by calling this command: `booping render-playbook fx-subgraph --step spec`.
+
+## Step: Fixtures
+
+fixtures summary
+
+Part of: pipeline (repeated)
+
+Tell a sub-agent — model haiku, effort low — to get its instructions by calling this command: `booping render-playbook fx-subgraph --step fixtures`.
+
+## Step: Tests
+
+tests summary
+
+Part of: pipeline (repeated)
+
+Tell the `booping-researcher` agent to get its instructions by calling this command: `booping render-playbook fx-subgraph --step tests`.
+
+## Step: Publish
+
+publish summary
+
+Tell a sub-agent — model sonnet, effort medium — to get its instructions by calling this command: `booping render-playbook fx-subgraph --step publish`.
+-- stderr --

@@ -1,0 +1,32 @@
+A mapping node that omits `dependencies:` is not a subgraph and not a step — it is malformed, and
+the notice names the node and what is missing.
+
+-- fixtures/home/Claude/_playbooks/fx-bad-node/playbook.md --
+---
+name: fx-bad-node
+title: Bad Node
+---
+
+Preamble prose for the bad-node playbook.
+-- fixtures/home/Claude/_playbooks/fx-bad-node/playbook.yaml --
+graph:
+  a: []
+  g:
+    graph:
+      b: []
+-- fixtures/home/Claude/_playbooks/fx-bad-node/a/prompt.md --
+---
+name: a
+summary: a summary
+---
+
+a body
+-- cmd --
+booping render-playbook fx-bad-node
+-- exit --
+0
+-- stdout --
+**STOP — tell the user:** graph node 'g' is malformed: missing `dependencies`. Do not execute this playbook.
+
+Preamble prose for the bad-node playbook.
+-- stderr --

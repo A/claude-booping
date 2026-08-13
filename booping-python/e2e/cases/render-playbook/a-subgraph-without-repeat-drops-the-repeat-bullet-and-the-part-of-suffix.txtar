@@ -1,0 +1,68 @@
+A subgraph node that declares no `repeat:` renders neither the `- Repeat:` intro bullet nor the
+`(repeated)` suffix on its inner step's `Part of:` bullet, and its table row's summary cell falls
+back to `—`. The outer step `a` carries no `Part of:` bullet at all.
+
+-- fixtures/home/Claude/_playbooks/fx-subgraph-no-repeat/playbook.md --
+---
+name: fx-subgraph-no-repeat
+title: Subgraph Without Repeat
+---
+
+Preamble prose for the no-repeat subgraph playbook.
+-- fixtures/home/Claude/_playbooks/fx-subgraph-no-repeat/playbook.yaml --
+graph:
+  a: []
+  group:
+    dependencies: [a]
+    graph:
+      b: []
+-- fixtures/home/Claude/_playbooks/fx-subgraph-no-repeat/a/prompt.md --
+---
+name: a
+summary: a summary
+---
+
+a body
+-- fixtures/home/Claude/_playbooks/fx-subgraph-no-repeat/b/prompt.md --
+---
+name: b
+summary: b summary
+---
+
+b body
+-- cmd --
+booping render-playbook fx-subgraph-no-repeat
+-- exit --
+0
+-- stdout --
+Preamble prose for the no-repeat subgraph playbook.
+
+## Playbook Steps
+
+Execute the steps in the most effective order considering their dependencies.
+
+| Step | Dependencies | Summary | Review gate |
+| --- | --- | --- | --- |
+| `a` | — | a summary | — |
+| `group` *(subgraph)* | `a` | — | — |
+| `b` *(in group)* | — | b summary | — |
+
+## Step: A
+Instructions:
+- Summary: a summary
+
+Run `booping render-playbook fx-subgraph-no-repeat --step a` for content.
+
+## Subgraph: group
+
+Instructions:
+- After: a
+- Inner waves: 1. `b`
+
+## Step: B
+Instructions:
+- Part of: group
+- Summary: b summary
+
+Run `booping render-playbook fx-subgraph-no-repeat --step b` for content.
+-- stderr --

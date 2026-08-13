@@ -1,0 +1,35 @@
+Step names are unique across the whole playbook, subgraphs included. A name that appears both in
+the outer graph and inside a subgraph blocks the render, and the notice names the step and the
+subgraph it collides with.
+
+-- fixtures/home/Claude/_playbooks/fx-duplicate-step/playbook.md --
+---
+name: fx-duplicate-step
+title: Duplicate Step
+---
+
+Preamble prose for the duplicate-step playbook.
+-- fixtures/home/Claude/_playbooks/fx-duplicate-step/playbook.yaml --
+graph:
+  draft: []
+  loop:
+    dependencies: []
+    graph:
+      draft: []
+-- fixtures/home/Claude/_playbooks/fx-duplicate-step/draft/prompt.md --
+---
+name: draft
+summary: draft summary
+detached: sonnet:medium
+---
+
+draft body
+-- cmd --
+booping render-playbook fx-duplicate-step
+-- exit --
+0
+-- stdout --
+**STOP — tell the user:** step 'draft' appears in more than one scope (subgraph 'loop'); step names must be unique across the playbook. Do not execute this playbook.
+
+Preamble prose for the duplicate-step playbook.
+-- stderr --

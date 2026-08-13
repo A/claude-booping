@@ -1,0 +1,50 @@
+`--step` on a step that lives inside a subgraph fetches the same bare body as any other step — no
+`Part of:` bullet, no `## Step:` heading, no subgraph intro.
+
+-- fixtures/home/Claude/_playbooks/fx-inner-step-fetch/playbook.md --
+---
+name: fx-inner-step-fetch
+title: Inner Step Fetch
+---
+
+Preamble that must not appear.
+-- fixtures/home/Claude/_playbooks/fx-inner-step-fetch/playbook.yaml --
+graph:
+  manifest: []
+  pipeline:
+    dependencies: [manifest]
+    repeat: once per manifest entry
+    graph:
+      spec: []
+      fixtures: [spec]
+-- fixtures/home/Claude/_playbooks/fx-inner-step-fetch/manifest/prompt.md --
+---
+name: manifest
+summary: manifest summary
+detached: sonnet:medium
+---
+
+manifest body
+-- fixtures/home/Claude/_playbooks/fx-inner-step-fetch/spec/prompt.md --
+---
+name: spec
+summary: spec summary
+detached: sonnet:medium
+---
+
+spec body
+-- fixtures/home/Claude/_playbooks/fx-inner-step-fetch/fixtures/prompt.md --
+---
+name: fixtures
+summary: fixtures summary
+detached: haiku:low
+---
+
+fixtures body
+-- cmd --
+booping render-playbook fx-inner-step-fetch --step fixtures
+-- exit --
+0
+-- stdout --
+fixtures body
+-- stderr --

@@ -1,0 +1,50 @@
+The parallel rule holds inside a subgraph too: two runner-performed inner steps in the same inner
+wave each draw their own STOP.
+
+-- fixtures/home/Claude/_playbooks/fx-inner-parallel/playbook.md --
+---
+name: fx-inner-parallel
+title: Inner Parallel
+---
+
+Preamble prose for the inner-parallel playbook.
+-- fixtures/home/Claude/_playbooks/fx-inner-parallel/playbook.yaml --
+graph:
+  a: []
+  loop:
+    dependencies: [a]
+    graph:
+      one: []
+      two: []
+-- fixtures/home/Claude/_playbooks/fx-inner-parallel/a/prompt.md --
+---
+name: a
+summary: a summary
+detached: sonnet:medium
+---
+
+a body
+-- fixtures/home/Claude/_playbooks/fx-inner-parallel/one/prompt.md --
+---
+name: one
+summary: one summary
+---
+
+one body
+-- fixtures/home/Claude/_playbooks/fx-inner-parallel/two/prompt.md --
+---
+name: two
+summary: two summary
+---
+
+two body
+-- cmd --
+booping render-playbook fx-inner-parallel
+-- exit --
+0
+-- stdout --
+**STOP — tell the user:** step 'one' is not detached but shares a wave with other steps; a step sharing a wave must be `detached:`. Do not execute this playbook.
+**STOP — tell the user:** step 'two' is not detached but shares a wave with other steps; a step sharing a wave must be `detached:`. Do not execute this playbook.
+
+Preamble prose for the inner-parallel playbook.
+-- stderr --
