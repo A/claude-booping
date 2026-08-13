@@ -71,7 +71,7 @@ New frontmatter on `index.md`, seeded by the groom scaffold and written only thr
 | id | title | sp | status |
 | --- | --- | --- | --- |
 | 01 | [Tracker config surface](milestones/M01-tracker-config-surface/M01-tracker-config-surface.md) | 2 | done |
-| 02 | [booping-tracker project and cli provider](milestones/M02-tracker-project-skeleton/M02-tracker-project-skeleton.md) | 3 | pending |
+| 02 | [booping-tracker project and cli provider](milestones/M02-tracker-project-skeleton/M02-tracker-project-skeleton.md) | 3 | done |
 | 03 | [Linear provider over GraphQL](milestones/M03-linear-provider/M03-linear-provider.md) | 4 | pending |
 | 04 | [Mirror hooks on groom transitions](milestones/M04-mirror-hooks/M04-mirror-hooks.md) | 3 | pending |
 | 05 | [awaiting-clarification status and clarifications sidecar](milestones/M05-clarifications-status/M05-clarifications-status.md) | 3 | pending |
