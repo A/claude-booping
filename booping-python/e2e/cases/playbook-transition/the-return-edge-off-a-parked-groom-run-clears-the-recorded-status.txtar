@@ -1,7 +1,6 @@
 Answers came back, so the run returns to the status `return_to` names and the edge's own hook clears
-the key. The clearing hook writes the bare word `null`, but the hook dispatcher hands hook values to
-the writer as plain strings — unlike the `frontmatter-update` CLI, which coerces null spellings — so
-today the key lands quoted rather than as a real null.
+the key by writing an empty value. The key survives as a falsy placeholder that matches no status, so
+the return gates on a re-park read it the same way they read the seeded value.
 
 -- fixtures/xdg/booping/config.yaml --
 core:
@@ -34,14 +33,14 @@ booping playbook-transition groom framing --workdir run
 -- stdout --
 awaiting-clarification → framing
 frontmatter: status=framing
-frontmatter index.md: return_to=null
+frontmatter index.md: return_to=
 script tracker-sync: ok
 -- stderr --
 -- expected/cwd/run/index.md --
 ---
 title: "Demo"
 status: framing
-return_to: 'null'
+return_to: ''
 ---
 
 # Demo

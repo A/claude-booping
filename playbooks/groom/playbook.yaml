@@ -61,7 +61,7 @@ states:
               - "every question in `clarifications.md` carries an answer"
               - "`return_to` is `framing` — any other value picks the other return edge"
             hooks:
-              - frontmatter-update index.md return_to=null
+              - "frontmatter-update index.md return_to=''"
               - "script tracker-sync"
           - to: drafting
             when: "the answers came back and `return_to` names `drafting`"
@@ -69,7 +69,7 @@ states:
               - "every question in `clarifications.md` carries an answer"
               - "`return_to` is `drafting` — any other value picks the other return edge"
             hooks:
-              - frontmatter-update index.md return_to=null
+              - "frontmatter-update index.md return_to=''"
               - "script tracker-sync"
       cross-reviewing:
         transitions:
