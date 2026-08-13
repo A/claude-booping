@@ -1,0 +1,67 @@
+A status with no declared transitions leaves the machine with no frontier at all: the report drops
+the `next` key rather than carrying an empty list.
+
+-- fixtures/home/Claude/_playbooks/fx-run/playbook.md --
+---
+name: fx-run
+title: Run
+summary: Single-machine fixture for playbook-state.
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-run/playbook.yaml --
+state: main
+graph:
+  intake: []
+  research: [intake]
+
+states:
+  main:
+    artifact: index.md
+    initial: intaking
+    statuses:
+      intaking:
+        transitions:
+          - to: researching
+            when: intake complete
+            gates: ["request captured in the artifact"]
+          - to: parked
+            when: the run is shelved
+      researching:
+        transitions:
+          - to: done
+            when: research complete
+      parked: {terminal: true}
+      done: {terminal: true}
+-- fixtures/home/Claude/_playbooks/fx-run/intake/prompt.md --
+---
+summary: Intake the request.
+---
+
+Intake body.
+-- fixtures/home/Claude/_playbooks/fx-run/research/prompt.md --
+---
+summary: Research the request.
+---
+
+Research body.
+-- fixtures/cwd/run/.keep --
+-- cmd --
+booping playbook-transition fx-run intaking --workdir run
+booping playbook-transition fx-run parked --workdir run
+booping playbook-state fx-run --workdir run
+-- exit --
+0
+-- stdout --
+created index.md
+not-started → intaking
+frontmatter: status=intaking
+intaking → parked
+frontmatter: status=parked
+playbook: fx-run
+workdir: {CWD}/run
+states:
+  main:
+    artifact: index.md
+    status: parked
+-- stderr --

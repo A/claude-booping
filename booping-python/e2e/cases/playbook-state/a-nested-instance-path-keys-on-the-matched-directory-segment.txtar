@@ -1,0 +1,70 @@
+With `{instance}` in directory position — twice over, `parts/{instance}/{instance}.md` — the artifact
+is `parts/alpha/alpha.md` and the reported key is still the bare slug, taken from the segment the
+placeholder occupies. Paired with `a-flat-instance-path-keys-on-the-matched-filename-segment.txtar`,
+which differs only in the machine's `artifact:` shape.
+
+-- fixtures/home/Claude/_playbooks/fx-nested/playbook.md --
+---
+name: fx-nested
+title: Nested
+summary: Directory-position {instance} fixture for playbook-state.
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-nested/playbook.yaml --
+graph:
+  intake: []
+  part-pipeline:
+    dependencies: [intake]
+    state: part
+    graph:
+      draft: []
+
+states:
+  part:
+    artifact: parts/{instance}/{instance}.md
+    initial: drafting
+    statuses:
+      drafting:
+        transitions:
+          - to: done
+            when: part written
+      done: {terminal: true}
+-- fixtures/home/Claude/_playbooks/fx-nested/intake/prompt.md --
+---
+summary: Intake the request.
+---
+
+Intake body.
+-- fixtures/home/Claude/_playbooks/fx-nested/draft/prompt.md --
+---
+summary: Draft the part.
+---
+
+Draft body.
+-- fixtures/cwd/run/.keep --
+-- cmd --
+booping playbook-transition fx-nested drafting --state part --instance alpha --workdir run
+booping playbook-state fx-nested --workdir run
+-- exit --
+0
+-- stdout --
+created parts/alpha/alpha.md
+not-started → drafting
+frontmatter: status=drafting
+playbook: fx-nested
+workdir: {CWD}/run
+states:
+  part:
+    artifact: parts/{instance}/{instance}.md
+    instances:
+      alpha:
+        status: drafting
+        next:
+        - to: done
+          when: part written
+-- stderr --
+-- expected/cwd/run/parts/alpha/alpha.md --
+---
+status: drafting
+---
