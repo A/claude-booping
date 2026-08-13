@@ -51,7 +51,7 @@ Volatile spans use the `[..]` wildcard (log timestamps); sandbox absolute paths 
 | id | title | sp | status |
 | --- | --- | --- | --- |
 | 01 | [config-get corpus — three config tiers, value shapes, errors](milestones/M01-config-get-corpus/M01-config-get-corpus.md) | 3 | done |
-| 02 | [marker-set corpus — writes, @latest, formatting preservation, log](milestones/M02-marker-set-corpus/M02-marker-set-corpus.md) | 3 | pending |
+| 02 | [marker-set corpus — writes, @latest, formatting preservation, log](milestones/M02-marker-set-corpus/M02-marker-set-corpus.md) | 3 | done |
 | 03 | [query corpus — spec addressing, flag errors, exit codes](milestones/M03-query-addressing-and-errors/M03-query-addressing-and-errors.md) | 4 | pending |
 | 04 | [query corpus — output formats, projection, frontmatter warnings](milestones/M04-query-output-and-projection/M04-query-output-and-projection.md) | 3 | pending |
 | 05 | [query corpus — where clauses, ordering operators, sort](milestones/M05-query-filtering-semantics/M05-query-filtering-semantics.md) | 5 | pending |
