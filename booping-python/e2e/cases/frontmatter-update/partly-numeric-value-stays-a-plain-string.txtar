@@ -1,0 +1,20 @@
+A value that merely starts with digits is not a number, and its plain form reloads as the
+same text, so it is written bare — no quotes added.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md "summary=23 things"
+-- exit --
+0
+-- stderr --
+updated plan.md: summary=23 things
+-- expected/cwd/plan.md --
+---
+title: Foo
+summary: 23 things
+---
+# Body

@@ -1,0 +1,46 @@
+The receipt on stdout is a unified diff of the whole file: the plan path on both the `--- `
+and `+++ ` headers, an `@@` hunk header offset to the change, and three lines of context
+either side — so an untouched body never reaches the diff.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+type: feature
+status: backlog
+sp: 5
+owner: nobody
+retro: null
+---
+# My Plan
+
+Body text.
+-- cmd --
+booping frontmatter-update plan.md sp=8
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -2,7 +2,7 @@
+ title: Foo
+ type: feature
+ status: backlog
+-sp: 5
++sp: 8
+ owner: nobody
+ retro: null
+ ---
+-- stderr --
+updated plan.md: sp=8
+-- expected/cwd/plan.md --
+---
+title: Foo
+type: feature
+status: backlog
+sp: 8
+owner: nobody
+retro: null
+---
+# My Plan
+
+Body text.

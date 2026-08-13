@@ -1,0 +1,20 @@
+A pair with nothing after the `=` sets the key to an explicitly empty string rather than to
+null or to a bare key.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md summary=
+-- exit --
+0
+-- stderr --
+updated plan.md: summary=
+-- expected/cwd/plan.md --
+---
+title: Foo
+summary: ''
+---
+# Body

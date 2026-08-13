@@ -1,8 +1,9 @@
 ---
 id: "02"
-title: "List-op and macro corpus cases \u2014 remove, append, stubbed and real macros, gap cases"
+title: "List-op and macro corpus cases — remove, append, stubbed and real macros,
+  gap cases"
 sp: 3
-status: pending
+status: done
 plan: "vault/plans/202608121417_frontmatter-update-e2e-migration/index.md"
 ---
 
@@ -16,26 +17,26 @@ Scope: new `.txtar` files under `booping-python/e2e/cases/frontmatter-update/`, 
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 2.1 | List-op cases: `--append` creates a list on a null key and on an absent key; extends an existing list; identical append twice is idempotent (second run no diff); `--append` onto a scalar exits 1 with stderr message; `--remove` drops a key; combined pairs + removals + appends in one call; append-only call with nothing to change exits 1 | `booping-python/e2e/cases/frontmatter-update/*.txtar` | 1 | pending |
-| 2.2 | Stubbed-macro interpolation cases: value `{{ macro('...') }}` resolved from a stubbed macro (fixture `macro_stubs:` / `--stub-macro`) lands typed in the file; unknown macro name exits 2 with stderr; malformed Jinja exits 2; macro-rendered date-like value stays a string | `booping-python/e2e/cases/frontmatter-update/*.txtar` | 1 | pending |
-| 2.3 | Real macro execution case (gap case): fixture config defines a macro as a real shell command (`echo 1`); `booping frontmatter-update plan.md key="{{ macro('...') }}"` writes the command's actual output into the frontmatter — proving live macro execution through the CLI subprocess boundary, replacing the abandoned live-git unit test | `booping-python/e2e/cases/frontmatter-update/*.txtar` | 1 | pending |
+| 2.1 | List-op cases: `--append` creates a list on a null key and on an absent key; extends an existing list; identical append twice is idempotent (second run no diff); `--append` onto a scalar exits 1 with stderr message; `--remove` drops a key; combined pairs + removals + appends in one call; append-only call with nothing to change exits 1 | `booping-python/e2e/cases/frontmatter-update/*.txtar` | 1 | done |
+| 2.2 | Stubbed-macro interpolation cases: value `{{ macro('...') }}` resolved from a stubbed macro (fixture `macro_stubs:` / `--stub-macro`) lands typed in the file; unknown macro name exits 2 with stderr; malformed Jinja exits 2; macro-rendered date-like value stays a string | `booping-python/e2e/cases/frontmatter-update/*.txtar` | 1 | done |
+| 2.3 | Real macro execution case (gap case): fixture config defines a macro as a real shell command (`echo 1`); `booping frontmatter-update plan.md key="{{ macro('...') }}"` writes the command's actual output into the frontmatter — proving live macro execution through the CLI subprocess boundary, replacing the abandoned live-git unit test | `booping-python/e2e/cases/frontmatter-update/*.txtar` | 1 | done |
 
 ## Definition of Done
 
 ### Task 2.1
 
-- [ ] Every `--remove`/`--append` behavior from the unit suite has a corpus case asserting diff, resulting file bytes, stderr summary, and exit code.
-- [ ] Idempotency case runs the command twice via sequential `cmd` lines and asserts the second produces no diff.
+- [x] Every `--remove`/`--append` behavior from the unit suite has a corpus case asserting diff, resulting file bytes, stderr summary, and exit code.
+- [x] Idempotency case runs the command twice via sequential `cmd` lines and asserts the second produces no diff.
 
 ### Task 2.2
 
-- [ ] Stub source (fixture `macro_stubs:` vs `--stub-macro` flag) chosen to match existing corpus/scaffold convention and used consistently across cases.
-- [ ] Exit-2 macro failure cases assert stderr content, not just the code.
+- [x] Stub source (fixture `macro_stubs:` vs `--stub-macro` flag) chosen to match existing corpus/scaffold convention and used consistently across cases.
+- [x] Exit-2 macro failure cases assert stderr content, not just the code.
 
 ### Task 2.3
 
-- [ ] The macro in fixture config is a genuine argv command (`echo`), not a stub — the asserted frontmatter value (`1`) can only come from executing it.
-- [ ] Case is deterministic: no clock, git, or network in the macro.
+- [x] The macro in fixture config is a genuine argv command (`echo`), not a stub — the asserted frontmatter value (`1`) can only come from executing it.
+- [x] Case is deterministic: no clock, git, or network in the macro.
 
 ## Verify
 
