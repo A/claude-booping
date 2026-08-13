@@ -2,7 +2,7 @@
 id: "04"
 title: "the run walk and the fixture-home retirement"
 sp: 3
-status: pending
+status: done
 plan: "vault/plans/202608131522_final-cli-commands-to-e2e/index.md"
 ---
 
@@ -20,25 +20,25 @@ Deleting the fixture home is safe only if nothing else reads it: `filer/`, `scri
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 4.1 | Write the run-walk case: bootstrap the outer machine, snapshot the frontier mid-run, advance both instances of the subgraph machine, advance the outer machine, then snapshot the all-done frontier — one case, consecutive `cmd` lines, with a leading `chmod +x` for every seeded hook script | `booping-python/e2e/cases/playbook-state/run-walk.txtar` | 2 | pending |
-| 4.2 | Move `test_report_writes_nothing` into its own file under `tests/commands/`, then delete `playbook_state_test.py`, `playbook_run_integration_test.py` and `tests/__fixtures__/playbook-transition-home/`, confirming by grep that no other test reads that tree | `booping-python/tests/commands/*`, `booping-python/tests/__fixtures__/playbook-transition-home/` | 1 | pending |
+| 4.1 | Write the run-walk case: bootstrap the outer machine, snapshot the frontier mid-run, advance both instances of the subgraph machine, advance the outer machine, then snapshot the all-done frontier — one case, consecutive `cmd` lines, with a leading `chmod +x` for every seeded hook script | `booping-python/e2e/cases/playbook-state/run-walk.txtar` | 2 | done |
+| 4.2 | Move `test_report_writes_nothing` into its own file under `tests/commands/`, then delete `playbook_state_test.py`, `playbook_run_integration_test.py` and `tests/__fixtures__/playbook-transition-home/`, confirming by grep that no other test reads that tree | `booping-python/tests/commands/*`, `booping-python/tests/__fixtures__/playbook-transition-home/` | 1 | done |
 
 ## Definition of Done
 
 ### Task 4.1
 
-- [ ] One case file carries the whole walk as consecutive `cmd` lines whose stdout concatenates in order; a non-final line exiting non-zero fails the case.
-- [ ] Every seeded `_scripts/` file is made executable by a leading `chmod +x` cmd line. The set is read off the fixture playbook's own manifest — every name appearing in a `script <name>` hook entry on any edge the walk takes, plus any bootstrap `hooks.post` entry — not discovered by running the case and watching it fail.
-- [ ] The mid-run snapshot pins the outer status, its edge set, and the instance map as it stands with one instance advanced.
-- [ ] The final snapshot pins every machine at its terminal status with no `next` key.
-- [ ] Macro-rendered dates in any hook-written frontmatter are covered by `[..]` or pinned with `--stub-macro`.
+- [x] One case file carries the whole walk as consecutive `cmd` lines whose stdout concatenates in order; a non-final line exiting non-zero fails the case.
+- [x] Every seeded `_scripts/` file is made executable by a leading `chmod +x` cmd line. The set is read off the fixture playbook's own manifest — every name appearing in a `script <name>` hook entry on any edge the walk takes, plus any bootstrap `hooks.post` entry — not discovered by running the case and watching it fail.
+- [x] The mid-run snapshot pins the outer status, its edge set, and the instance map as it stands with one instance advanced.
+- [x] The final snapshot pins every machine at its terminal status with no `next` key.
+- [x] Macro-rendered dates in any hook-written frontmatter are covered by `[..]` or pinned with `--stub-macro`.
 
 ### Task 4.2
 
-- [ ] `test_report_writes_nothing` survives verbatim in intent in its own file, still asserting `st_mtime` and `st_size` are unchanged across a report.
-- [ ] `tests/commands/playbook_state_test.py` and `tests/commands/playbook_run_integration_test.py` no longer exist.
-- [ ] `tests/__fixtures__/playbook-transition-home/` no longer exists, and `rg -n "playbook-transition-home|get_fixture_path" booping-python/tests` returns no reference to it.
-- [ ] `uv run pytest tests` is green.
+- [x] `test_report_writes_nothing` survives verbatim in intent in its own file, still asserting `st_mtime` and `st_size` are unchanged across a report.
+- [x] `tests/commands/playbook_state_test.py` and `tests/commands/playbook_run_integration_test.py` no longer exist.
+- [x] `tests/__fixtures__/playbook-transition-home/` no longer exists, and `rg -n "playbook-transition-home|get_fixture_path" booping-python/tests` returns no reference to it.
+- [x] `uv run pytest tests` is green.
 
 ## Verify
 
