@@ -1,0 +1,48 @@
+The `--step` surface of a `jinja: true` playbook renders the body through the context and then
+appends the step lesson, whose own braces stay literal.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  fx_label: hermetic label
+-- fixtures/home/Claude/_lessons/0002_step.md --
+---
+title: Step rule
+targets: [fx-step-lesson-jinja/s1]
+---
+
+{{ raw }} kept.
+-- fixtures/home/Claude/_playbooks/fx-step-lesson-jinja/playbook.md --
+---
+name: fx-step-lesson-jinja
+title: Step Lesson Jinja
+summary: A step lesson on a Jinja playbook.
+jinja: true
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-step-lesson-jinja/playbook.yaml --
+graph:
+  s1: []
+-- fixtures/home/Claude/_playbooks/fx-step-lesson-jinja/s1/prompt.md --
+---
+name: s1
+summary: Only step.
+detached: sonnet:medium
+---
+
+Step body sees {{ config.core.fx_label }}.
+-- cmd --
+booping render-playbook fx-step-lesson-jinja --step s1
+-- exit --
+0
+-- stdout --
+Step body sees hermetic label.
+
+## Lessons
+
+The following 1 lesson(s) apply to this step. Never silently violate one.
+
+### 0002_step — Step rule
+
+{{ raw }} kept.
+-- stderr --

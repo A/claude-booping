@@ -1,0 +1,52 @@
+A lesson whose targets name a different playbook — both as `{playbook}` and as `{playbook}/{step}`
+— reaches neither surface and raises no notice: its targets are valid, they just do not match.
+
+-- fixtures/home/Claude/_lessons/0001_other.md --
+---
+title: Other rule
+targets: [fx-elsewhere, fx-elsewhere/s1]
+---
+
+Other body.
+-- fixtures/home/Claude/_playbooks/fx-lesson-miss/playbook.md --
+---
+name: fx-lesson-miss
+title: Lesson Miss
+summary: A lesson aimed at another playbook.
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-lesson-miss/playbook.yaml --
+graph:
+  s1: []
+-- fixtures/home/Claude/_playbooks/fx-lesson-miss/s1/prompt.md --
+---
+name: s1
+summary: Only step.
+detached: sonnet:medium
+---
+
+Step body.
+-- cmd --
+booping render-playbook fx-lesson-miss
+booping render-playbook fx-lesson-miss --step s1
+-- exit --
+0
+-- stdout --
+Preamble.
+
+## Playbook Steps
+
+Execute the steps in the most effective order considering their dependencies.
+
+| Step | Dependencies | Summary | Review gate |
+| --- | --- | --- | --- |
+| `s1` | — | Only step. | — |
+
+## Step: S1
+
+Only step.
+
+Tell a sub-agent — model sonnet, effort medium — to get its instructions by calling this command: `booping render-playbook fx-lesson-miss --step s1`.
+Step body.
+-- stderr --

@@ -1,0 +1,62 @@
+Lesson bodies are inserted as values, never parsed as templates: on a `jinja: true` playbook whose
+preamble does evaluate an expression, the lesson's `{{ … }}` token survives verbatim.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  fx_label: hermetic label
+-- fixtures/home/Claude/_lessons/0001_raw.md --
+---
+title: Raw rule
+targets: [fx-lesson-jinja]
+---
+
+Token {{ leftover }} kept.
+-- fixtures/home/Claude/_playbooks/fx-lesson-jinja/playbook.md --
+---
+name: fx-lesson-jinja
+title: Lesson Jinja
+summary: A lesson body on a Jinja playbook.
+jinja: true
+---
+
+Preamble sees {{ config.core.fx_label }}.
+-- fixtures/home/Claude/_playbooks/fx-lesson-jinja/playbook.yaml --
+graph:
+  s1: []
+-- fixtures/home/Claude/_playbooks/fx-lesson-jinja/s1/prompt.md --
+---
+name: s1
+summary: Only step.
+detached: sonnet:medium
+---
+
+Step body.
+-- cmd --
+booping render-playbook fx-lesson-jinja
+-- exit --
+0
+-- stdout --
+Preamble sees hermetic label.
+
+## Lessons
+
+The following 1 lesson(s) apply to this playbook. Never silently violate one; conflict → stop and flag.
+
+### 0001_raw — Raw rule
+
+Token {{ leftover }} kept.
+
+## Playbook Steps
+
+Execute the steps in the most effective order considering their dependencies.
+
+| Step | Dependencies | Summary | Review gate |
+| --- | --- | --- | --- |
+| `s1` | — | Only step. | — |
+
+## Step: S1
+
+Only step.
+
+Tell a sub-agent — model sonnet, effort medium — to get its instructions by calling this command: `booping render-playbook fx-lesson-jinja --step s1`.
+-- stderr --
