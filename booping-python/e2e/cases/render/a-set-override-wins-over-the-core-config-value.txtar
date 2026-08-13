@@ -1,0 +1,12 @@
+`--set` beats every config tier for this render only: the same template that shows the core default
+in its sibling case shows the overridden value here.
+
+-- fixtures/cwd/probe.md.j2 --
+threshold {{ config.core.sprint.default_threshold_sp }}
+-- cmd --
+booping render /proc/self/cwd/probe.md.j2 --set core.sprint.default_threshold_sp=7
+-- exit --
+0
+-- stdout --
+threshold 7
+-- stderr --

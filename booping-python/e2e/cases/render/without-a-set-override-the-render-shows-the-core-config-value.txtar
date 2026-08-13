@@ -1,0 +1,12 @@
+Without `--set` the template reads the config as merged from the tiers, so the shipped core default
+reaches the body. This is the baseline its `--set` sibling moves.
+
+-- fixtures/cwd/probe.md.j2 --
+threshold {{ config.core.sprint.default_threshold_sp }}
+-- cmd --
+booping render /proc/self/cwd/probe.md.j2
+-- exit --
+0
+-- stdout --
+threshold 35
+-- stderr --

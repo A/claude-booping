@@ -1,0 +1,12 @@
+`--stub-macro` pins a macro to a literal for this render: the value is the one from the flag, and it
+is not a clock reading, so `date` never ran.
+
+-- fixtures/cwd/probe.md.j2 --
+stamp {{ macro('core.macros.date') }}
+-- cmd --
+booping render /proc/self/cwd/probe.md.j2 --stub-macro core.macros.date=19700101-00-00
+-- exit --
+0
+-- stdout --
+stamp 19700101-00-00
+-- stderr --

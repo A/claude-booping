@@ -1,0 +1,13 @@
+Without a stub the declared argv is genuinely executed and its stdout is spliced into the render: the
+literal prefix can only appear because the format argument reached `date`, and the year behind it is
+wildcarded because it is a clock reading, not a contract.
+
+-- fixtures/cwd/probe.md.j2 --
+stamp {{ macro('core.macros.date', '+booped-%Y') }}
+-- cmd --
+booping render /proc/self/cwd/probe.md.j2
+-- exit --
+0
+-- stdout --
+stamp booped-[..]
+-- stderr --
