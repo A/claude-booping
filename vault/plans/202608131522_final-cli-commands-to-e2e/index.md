@@ -90,7 +90,7 @@ M01, M08 and M09 are independent of everything else and may run in any position.
 | 07 | [the session-stats tier split](milestones/M07-session-stats-tier-split/M07-session-stats-tier-split.md) | 2 | done |
 | 08 | [debug-context cases](milestones/M08-debug-context-cases/M08-debug-context-cases.md) | 1 | done |
 | 09 | [retiring build and debug-template](milestones/M09-retire-build-and-debug-template/M09-retire-build-and-debug-template.md) | 4 | done |
-| 10 | [corpus cross-check and tier audit](milestones/M10-cross-check-and-tier-audit/M10-cross-check-and-tier-audit.md) | 2 | pending |
+| 10 | [corpus cross-check and tier audit](milestones/M10-cross-check-and-tier-audit/M10-cross-check-and-tier-audit.md) | 2 | done |
 
 ## I/O contract
 
