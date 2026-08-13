@@ -1,0 +1,170 @@
+A manifest carrying `states:` renders a `## State` section between the `## Playbook Steps` table
+and the first `## Step:` section, holding one `### State:` entry per machine, ordered by the
+execution graph rather than by manifest order — this manifest declares `step` before `main`, and
+the render puts the outer machine first.
+
+Each entry names the scope that references it, its artifact path relative to the run workdir, its
+initial status and the `booping playbook-transition` invocation that advances it: the outer entry
+plain, the subgraph entry carrying `--state` and `--instance` with its `{instance}` placeholder
+left unexpanded. The status table pins every edge — the em-dash cell where a transition declares
+no gates, and the `*(terminal)*` row for a status with no exits. Hook lines are the transition
+command's business and never reach the render.
+
+-- fixtures/home/Claude/_playbooks/fx-stateful/playbook.md --
+---
+name: fx-stateful
+title: Stateful Playbook
+summary: Fixture with two state machines in playbook.yaml.
+---
+
+Preamble prose for the stateful playbook.
+-- fixtures/home/Claude/_playbooks/fx-stateful/playbook.yaml --
+state: main
+graph:
+  intake: []
+  step-pipeline:
+    dependencies: [intake]
+    state: step
+    repeat: once per item the intake names
+    graph:
+      spec: []
+      review: [spec]
+
+states:
+  step:
+    artifact: steps/{instance}/index.md
+    initial: spec-ing
+    statuses:
+      spec-ing:
+        transitions:
+          - to: reviewing
+            when: spec written
+      reviewing:
+        transitions:
+          - to: done
+            when: user confirmed the spec
+            gates: ["explicit user confirmation captured"]
+      done: {terminal: true}
+  main:
+    artifact: index.md
+    initial: intaking
+    statuses:
+      intaking:
+        transitions:
+          - to: developing-steps
+            when: intake step complete
+            gates: ["request + scope captured in the artifact"]
+            hooks:
+              - frontmatter-update intaken=yes
+      developing-steps:
+        transitions:
+          - to: done
+            when: every step instance terminal
+      done: {terminal: true}
+-- fixtures/home/Claude/_playbooks/fx-stateful/intake/prompt.md --
+---
+name: intake
+summary: intake summary
+detached: sonnet:medium
+---
+
+intake body
+-- fixtures/home/Claude/_playbooks/fx-stateful/spec/prompt.md --
+---
+name: spec
+summary: spec summary
+detached: sonnet:medium
+---
+
+spec body
+-- fixtures/home/Claude/_playbooks/fx-stateful/review/prompt.md --
+---
+name: review
+summary: review summary
+detached: sonnet:medium
+---
+
+review body
+-- cmd --
+booping render-playbook fx-stateful
+-- exit --
+0
+-- stdout --
+Preamble prose for the stateful playbook.
+
+## Playbook Steps
+
+Execute the steps in the most effective order considering their dependencies.
+
+| Step | Dependencies | Summary | Review gate |
+| --- | --- | --- | --- |
+| `intake` | — | intake summary | — |
+| `step-pipeline` *(subgraph)* | `intake` | once per item the intake names | — |
+| `spec` *(in step-pipeline)* | — | spec summary | — |
+| `review` *(in step-pipeline)* | `spec` | review summary | — |
+
+## State
+
+Run state is persisted in artifacts under the run workdir. Only `booping playbook-transition` writes it — never hand-edit an artifact's `status`.
+
+Read the whole run's frontier before starting or resuming:
+
+```
+booping playbook-state fx-stateful --workdir <run workdir>
+```
+
+### State: main
+
+- Referenced by: outer graph
+- Artifact: `index.md` (relative to the run workdir)
+- Initial status: `intaking`
+- Advance: `booping playbook-transition fx-stateful <to> --workdir <run workdir>`
+
+| Status | To | When | Gates |
+| --- | --- | --- | --- |
+| `intaking` | `developing-steps` | intake step complete | request + scope captured in the artifact |
+| `developing-steps` | `done` | every step instance terminal | — |
+| `done` | *(terminal)* | — | — |
+
+### State: step
+
+- Referenced by: subgraph `step-pipeline`
+- Artifact: `steps/{instance}/index.md` (relative to the run workdir)
+- Initial status: `spec-ing`
+- Advance: `booping playbook-transition fx-stateful <to> --state step --instance <slug> --workdir <run workdir>`
+
+| Status | To | When | Gates |
+| --- | --- | --- | --- |
+| `spec-ing` | `reviewing` | spec written | — |
+| `reviewing` | `done` | user confirmed the spec | explicit user confirmation captured |
+| `done` | *(terminal)* | — | — |
+
+## Step: Intake
+
+intake summary
+
+Tell a sub-agent — model sonnet, effort medium — to get its instructions by calling this command: `booping render-playbook fx-stateful --step intake`.
+
+## Subgraph: step-pipeline
+
+Instructions:
+- After: intake
+- Repeat: once per item the intake names
+- Inner waves: 1. `spec` 2. `review`
+
+## Step: Spec
+
+spec summary
+
+Part of: step-pipeline (repeated)
+
+Tell a sub-agent — model sonnet, effort medium — to get its instructions by calling this command: `booping render-playbook fx-stateful --step spec`.
+
+## Step: Review
+
+review summary
+
+Part of: step-pipeline (repeated)
+
+Tell a sub-agent — model sonnet, effort medium — to get its instructions by calling this command: `booping render-playbook fx-stateful --step review`.
+-- stderr --

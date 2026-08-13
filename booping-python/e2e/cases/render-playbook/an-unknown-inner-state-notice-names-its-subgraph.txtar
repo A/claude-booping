@@ -1,0 +1,41 @@
+A subgraph whose `state:` names an undeclared entry blocks the render, and the notice names the
+subgraph rather than the outer graph, so the operator knows which scope to look in.
+
+-- fixtures/home/Claude/_playbooks/fx-unknown-inner-state/playbook.md --
+---
+name: fx-unknown-inner-state
+title: Unknown Inner State
+---
+
+Preamble prose for the unknown-inner-state playbook.
+-- fixtures/home/Claude/_playbooks/fx-unknown-inner-state/playbook.yaml --
+graph:
+  a: []
+  loop:
+    dependencies: [a]
+    state: nope
+    graph:
+      b: []
+-- fixtures/home/Claude/_playbooks/fx-unknown-inner-state/a/prompt.md --
+---
+name: a
+summary: a summary
+---
+
+a body
+-- fixtures/home/Claude/_playbooks/fx-unknown-inner-state/b/prompt.md --
+---
+name: b
+summary: b summary
+---
+
+b body
+-- cmd --
+booping render-playbook fx-unknown-inner-state
+-- exit --
+0
+-- stdout --
+**STOP — tell the user:** subgraph 'loop' references state 'nope' but playbook.yaml declares no such states entry. Do not execute this playbook.
+
+Preamble prose for the unknown-inner-state playbook.
+-- stderr --

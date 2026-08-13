@@ -1,0 +1,59 @@
+A playbook whose manifest declares no `states:` renders steps only — the `## State` section, its
+`booping playbook-state` read-back line and the per-machine entries are absent entirely.
+
+-- fixtures/home/Claude/_playbooks/fx-stateless/playbook.md --
+---
+name: fx-stateless
+title: Stateless Playbook
+summary: Fixture with a graph and no state machines.
+---
+
+Preamble prose for the stateless playbook.
+-- fixtures/home/Claude/_playbooks/fx-stateless/playbook.yaml --
+graph:
+  intake: []
+  wrap: [intake]
+-- fixtures/home/Claude/_playbooks/fx-stateless/intake/prompt.md --
+---
+name: intake
+summary: intake summary
+detached: sonnet:medium
+---
+
+intake body
+-- fixtures/home/Claude/_playbooks/fx-stateless/wrap/prompt.md --
+---
+name: wrap
+summary: wrap summary
+detached: sonnet:medium
+---
+
+wrap body
+-- cmd --
+booping render-playbook fx-stateless
+-- exit --
+0
+-- stdout --
+Preamble prose for the stateless playbook.
+
+## Playbook Steps
+
+Execute the steps in the most effective order considering their dependencies.
+
+| Step | Dependencies | Summary | Review gate |
+| --- | --- | --- | --- |
+| `intake` | — | intake summary | — |
+| `wrap` | `intake` | wrap summary | — |
+
+## Step: Intake
+
+intake summary
+
+Tell a sub-agent — model sonnet, effort medium — to get its instructions by calling this command: `booping render-playbook fx-stateless --step intake`.
+
+## Step: Wrap
+
+wrap summary
+
+Tell a sub-agent — model sonnet, effort medium — to get its instructions by calling this command: `booping render-playbook fx-stateless --step wrap`.
+-- stderr --
