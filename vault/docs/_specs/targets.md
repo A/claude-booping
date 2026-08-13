@@ -19,8 +19,8 @@ that is rendered, executed, or seeded elsewhere is out of the set.
 
 - `playbooks/**` (manifests, step `prompt.md`, `_partials/`, `_specs/`, `_fixtures/`, `_lib/`, `_scripts/`) — playbook source: prose that is executed as instructions, not read as documentation; owned by the playbook editing loop.
 - `playbooks/*/_reports/*.md` — generated render snapshots, written only by `just snapshots-accept`.
-- `skills/**/SKILL.md`, `agents/*.md` — build artifacts of `just build`; the source lives in `src/files/` and `src/templates/`.
-- `src/files/**`, `src/templates/**` — Jinja sources of rendered surfaces, not destinations.
+- `skills/**/SKILL.md`, `agents/*.md` — hand-authored thin shells; each pulls its body from `src/templates/` at load time.
+- `src/templates/**` — Jinja sources of rendered surfaces, not destinations.
 - `migrations/*/migration.md` — executable vault-migration procedures driven by the `migrate` playbook; frontmatter `id` is machinery, not prose for readers.
 - `docs/plan_templates/`, `docs/review_templates/` — vault seed templates copied into user projects, not read in place.
 - `docs/images/` — non-markdown assets.
