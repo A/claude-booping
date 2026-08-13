@@ -1,0 +1,34 @@
+The fixture of `overlapping-globs-yield-one-row-per-slug` with the two globs swapped: `alpha`
+now comes back as the flat file, so glob order alone decides which file claims a slug.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+-- fixtures/cwd/vault/plans/alpha/index.md --
+---
+title: Alpha directory
+---
+
+body
+-- fixtures/cwd/vault/plans/alpha.md --
+---
+title: Alpha flat
+---
+
+body
+-- fixtures/cwd/vault/plans/mid.md --
+---
+title: Mid
+---
+
+body
+-- cmd --
+booping query --glob 'plans/*.md' --glob 'plans/*/index.md' --columns title
+-- exit --
+0
+-- stdout --
+| title | path | slug |
+| --- | --- | --- |
+| Alpha flat | plans/alpha.md | alpha |
+| Mid | plans/mid.md | mid |
+-- stderr --

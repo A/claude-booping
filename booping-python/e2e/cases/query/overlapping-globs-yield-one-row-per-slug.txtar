@@ -1,0 +1,35 @@
+A directory plan and a flat file that share the slug `alpha` collapse into one row, and the
+row comes from the earlier glob — `reversing-the-globs-flips-the-winner` runs the same fixture
+the other way round.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+-- fixtures/cwd/vault/plans/alpha/index.md --
+---
+title: Alpha directory
+---
+
+body
+-- fixtures/cwd/vault/plans/alpha.md --
+---
+title: Alpha flat
+---
+
+body
+-- fixtures/cwd/vault/plans/mid.md --
+---
+title: Mid
+---
+
+body
+-- cmd --
+booping query --glob 'plans/*/index.md' --glob 'plans/*.md' --columns title
+-- exit --
+0
+-- stdout --
+| title | path | slug |
+| --- | --- | --- |
+| Alpha directory | plans/alpha/index.md | alpha |
+| Mid | plans/mid.md | mid |
+-- stderr --

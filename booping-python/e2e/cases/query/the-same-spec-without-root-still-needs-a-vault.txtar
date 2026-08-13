@@ -1,0 +1,20 @@
+The spec of `root-core-globs-the-plugin-root-without-a-vault` with `root` dropped: the same
+globs now resolve against a vault, and outside any project the run exits 2 instead of reaching
+the plugin tree — `root: core` is what lifts the requirement.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  probe_playbook:
+    queries:
+      shipped_playbooks:
+        glob:
+          - playbooks/*/playbook.md
+        where:
+          name: groom
+-- cmd --
+booping query --config core.probe_playbook.queries.shipped_playbooks --output paths
+-- exit --
+2
+-- stdout --
+-- stderr --
+error: no vault resolved — run inside a booping project or pass --project

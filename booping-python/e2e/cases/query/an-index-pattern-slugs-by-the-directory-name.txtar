@@ -1,0 +1,28 @@
+A pattern whose final segment is a literal filename addresses a directory's index, so the
+identity of the row is the directory it sits in — `alpha`, never `index`.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+-- fixtures/cwd/vault/plans/alpha/index.md --
+---
+title: Alpha
+---
+
+body
+-- fixtures/cwd/vault/plans/zeta/index.md --
+---
+title: Zeta
+---
+
+body
+-- cmd --
+booping query --glob 'plans/*/index.md' --columns slug
+-- exit --
+0
+-- stdout --
+| slug | path |
+| --- | --- |
+| alpha | plans/alpha/index.md |
+| zeta | plans/zeta/index.md |
+-- stderr --
