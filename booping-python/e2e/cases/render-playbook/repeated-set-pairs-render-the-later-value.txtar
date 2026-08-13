@@ -1,0 +1,28 @@
+`--set` is repeatable and later pairs win, so the last value for a key is the one that renders.
+
+-- fixtures/home/Claude/_playbooks/fx-set-override/playbook.md --
+---
+name: fx-set-override
+title: Set Override
+summary: Renders a config value the --set flag can move.
+jinja: true
+---
+
+Preamble threshold: {{ config.core.sprint.default_threshold_sp }}.
+-- fixtures/home/Claude/_playbooks/fx-set-override/playbook.yaml --
+graph:
+  first: []
+-- fixtures/home/Claude/_playbooks/fx-set-override/first/prompt.md --
+---
+name: first
+summary: Only step.
+---
+
+Wave-one body, threshold {{ config.core.sprint.default_threshold_sp }}.
+-- cmd --
+booping render-playbook fx-set-override --set core.sprint.default_threshold_sp=7 --set core.sprint.default_threshold_sp=9 --step first
+-- exit --
+0
+-- stdout --
+Wave-one body, threshold 9.
+-- stderr --

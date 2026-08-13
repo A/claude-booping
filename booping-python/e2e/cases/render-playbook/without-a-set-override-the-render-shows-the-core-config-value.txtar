@@ -1,0 +1,43 @@
+Without `--set` the render reads the config as merged from the tiers, so the shipped core default is
+what reaches the body. This is the baseline its `--set` sibling moves.
+
+-- fixtures/home/Claude/_playbooks/fx-set-override/playbook.md --
+---
+name: fx-set-override
+title: Set Override
+summary: Renders a config value the --set flag can move.
+jinja: true
+---
+
+Preamble threshold: {{ config.core.sprint.default_threshold_sp }}.
+-- fixtures/home/Claude/_playbooks/fx-set-override/playbook.yaml --
+graph:
+  first: []
+-- fixtures/home/Claude/_playbooks/fx-set-override/first/prompt.md --
+---
+name: first
+summary: Only step.
+---
+
+Wave-one body, threshold {{ config.core.sprint.default_threshold_sp }}.
+-- cmd --
+booping render-playbook fx-set-override
+-- exit --
+0
+-- stdout --
+Preamble threshold: 35.
+
+## Playbook Steps
+
+Execute the steps in the most effective order considering their dependencies.
+
+| Step | Dependencies | Summary | Review gate |
+| --- | --- | --- | --- |
+| `first` | — | Only step. | — |
+
+## Step: First
+Instructions:
+- Summary: Only step.
+
+Run `booping render-playbook fx-set-override --step first` for content.
+-- stderr --
