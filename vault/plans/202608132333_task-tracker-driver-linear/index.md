@@ -1,13 +1,13 @@
 ---
 title: "Task-tracker driver layer and Linear-driven plan track"
 type: "feature"
-status: in-progress
+status: done
 sp: 21
 related_to: null
 created: 2026-08-13 23:33
 planned: null
 started: 2026-08-14 00:38
-completed: null
+completed: 2026-08-14 02:35
 code_reviews: []
 sessions:
 - d742465f-44ab-45dd-b135-b0cf799b6857
@@ -17,6 +17,13 @@ summary: Tracker driver layer (cli + linear) so groom runs one-shot from Linear
   issues with a persisted clarification surface
 commit: f1df61c42d7c1126f43944758fc56525f2e68cef
 reviewed_at: 2026-08-14 00:37
+metrics_active_minutes: 119
+metrics_models:
+- claude-opus-5
+metrics_tokens_input: 407
+metrics_tokens_output: 176275
+metrics_tokens_cache_creation: 1083761
+metrics_tokens_cache_read: 21563522
 ---
 
 # Task-tracker driver layer and Linear-driven plan track
