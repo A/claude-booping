@@ -1,0 +1,49 @@
+A row missing the sort field and a row whose value is `null` are both valueless: they trail the
+sorted rows ascending and descending alike, rather than leading one direction as a smallest
+value would.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+-- fixtures/cwd/vault/plans/alpha/index.md --
+---
+title: Alpha
+created: 2026-03-03
+---
+
+body
+-- fixtures/cwd/vault/plans/mid/index.md --
+---
+title: Mid
+created: 2026-01-01
+---
+
+body
+-- fixtures/cwd/vault/plans/nulled/index.md --
+---
+title: Nulled
+created: null
+---
+
+body
+-- fixtures/cwd/vault/plans/undated/index.md --
+---
+title: Undated
+---
+
+body
+-- cmd --
+booping query --glob 'plans/*/index.md' --sort created --output paths
+booping query --glob 'plans/*/index.md' --sort -created --output paths
+-- exit --
+0
+-- stdout --
+plans/mid/index.md
+plans/alpha/index.md
+plans/nulled/index.md
+plans/undated/index.md
+plans/alpha/index.md
+plans/mid/index.md
+plans/nulled/index.md
+plans/undated/index.md
+-- stderr --

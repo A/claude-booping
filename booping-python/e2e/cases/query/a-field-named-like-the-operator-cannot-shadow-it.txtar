@@ -1,0 +1,31 @@
+A frontmatter key literally spelled `sp:gt` is not reachable by an `sp:gt=` clause — the suffix
+is always dispatched as the ordering operator — so only the row carrying a plain `sp` matches,
+even though both rows are discovered.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+-- fixtures/cwd/vault/plans/plain/index.md --
+---
+title: Plain
+sp: 5
+---
+
+body
+-- fixtures/cwd/vault/plans/shadow/index.md --
+---
+title: Shadow
+"sp:gt": 5
+---
+
+body
+-- cmd --
+booping query --glob 'plans/*/index.md' --output paths
+booping query --glob 'plans/*/index.md' --where sp:gt=1 --output paths
+-- exit --
+0
+-- stdout --
+plans/plain/index.md
+plans/shadow/index.md
+plans/plain/index.md
+-- stderr --

@@ -1,0 +1,40 @@
+`--sort created` orders by the field rather than by slug, and the `-` prefix returns the same
+rows in exactly the opposite order.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+-- fixtures/cwd/vault/plans/alpha/index.md --
+---
+title: Alpha
+created: 2026-03-03
+---
+
+body
+-- fixtures/cwd/vault/plans/mid/index.md --
+---
+title: Mid
+created: 2026-01-01
+---
+
+body
+-- fixtures/cwd/vault/plans/zeta/index.md --
+---
+title: Zeta
+created: 2026-02-02
+---
+
+body
+-- cmd --
+booping query --glob 'plans/*/index.md' --sort created --output paths
+booping query --glob 'plans/*/index.md' --sort -created --output paths
+-- exit --
+0
+-- stdout --
+plans/mid/index.md
+plans/zeta/index.md
+plans/alpha/index.md
+plans/alpha/index.md
+plans/zeta/index.md
+plans/mid/index.md
+-- stderr --
