@@ -1,0 +1,19 @@
+The tiers deep-merge rather than replacing one another: a key only the project tier declares
+resolves, and its core-declared siblings under the same mapping survive.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+-- fixtures/cwd/vault/config.yaml --
+core:
+  sprint:
+    review_gate: strict
+-- cmd --
+booping config-get core.sprint.review_gate
+booping config-get core.sprint.default_threshold_sp
+-- exit --
+0
+-- stdout --
+strict
+35
+-- stderr --
