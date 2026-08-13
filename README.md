@@ -118,6 +118,7 @@ A plan's frontmatter status is written by groom or develop. Retro and learn writ
 - **`framing`** — clarifying the request and settling scope.
 - **`researching`** — the blast-radius and web-research passes are running.
 - **`drafting`** — design is being settled with you in conversation and written into `index.md` and one milestone directory per milestone.
+- **`awaiting-clarification`** — the run hit a question it can't answer itself, wrote it into a `clarifications.md` file beside the plan, and ended. It's a parking status, not a dead end: answer the questions in that file and the next groom run on the plan picks up where it left off, returning to whichever status parked it (`framing` or `drafting`). Reached only when a run has no live conversation to ask in — a task-tracker-driven run; in chat, groom just asks you.
 - **`cross-reviewing`** — a second model is reviewing the draft (skipped when no reviewer is configured).
 - **`presenting`** — the approval screen is on the table.
 - **`awaiting-approval`** — waiting for your explicit approval or change request; groom's single review gate.
