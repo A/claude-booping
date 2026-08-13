@@ -1,0 +1,33 @@
+The two streams carry different things: stdout is the diff alone, so it can be piped, and
+the `updated …` summary is stderr's only line.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+status: backlog
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md status=done owner=ann
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,5 +1,6 @@
+ ---
+ title: Foo
+-status: backlog
++status: done
++owner: ann
+ ---
+ # Body
+-- stderr --
+updated plan.md: status=done, owner=ann
+-- expected/cwd/plan.md --
+---
+title: Foo
+status: done
+owner: ann
+---
+# Body

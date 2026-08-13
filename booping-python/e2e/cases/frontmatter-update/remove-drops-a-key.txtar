@@ -1,0 +1,32 @@
+--remove deletes the key's whole line, leaving the surrounding keys — and a trailing comment
+on one of them — exactly where they were.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo  # keep
+business_goal: x
+status: backlog
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md --remove business_goal
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,6 +1,5 @@
+ ---
+ title: Foo  # keep
+-business_goal: x
+ status: backlog
+ ---
+ # Body
+-- stderr --
+updated plan.md: -business_goal
+-- expected/cwd/plan.md --
+---
+title: Foo  # keep
+status: backlog
+---
+# Body

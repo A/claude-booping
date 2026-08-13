@@ -1,0 +1,20 @@
+A pair whose key side is empty is rejected separately from a missing `=`, so the message
+points at the empty key rather than at the syntax.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md =value
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: empty key in pair: '=value'
+-- expected/cwd/plan.md --
+---
+title: Foo
+---
+# Body

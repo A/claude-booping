@@ -1,0 +1,35 @@
+Appending a value the list already carries is a no-op: the second run succeeds and still
+reports its summary, but contributes no diff and leaves the member unduplicated.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+sessions: null
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md --append sessions=abc-123
+booping frontmatter-update plan.md --append sessions=abc-123
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,5 +1,6 @@
+ ---
+ title: Foo
+-sessions: null
++sessions:
++- abc-123
+ ---
+ # Body
+-- stderr --
+updated plan.md: sessions+=abc-123
+updated plan.md: sessions+=abc-123
+-- expected/cwd/plan.md --
+---
+title: Foo
+sessions:
+- abc-123
+---
+# Body
