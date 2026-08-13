@@ -1,0 +1,9 @@
+A single-segment key that no tier declares fails the same way as a nested one.
+
+-- cmd --
+booping config-get nope
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: key not found: nope

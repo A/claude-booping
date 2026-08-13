@@ -1,0 +1,38 @@
+The same rows come back from inline flags alone: the vault declares no config.yaml at all, so
+`--glob`, `--where` and `--sort` carry the whole spec.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+-- fixtures/cwd/vault/plans/alpha/index.md --
+---
+title: Alpha
+status: ready-for-dev
+created: 20260101
+---
+
+body
+-- fixtures/cwd/vault/plans/beta/index.md --
+---
+title: Beta
+status: done
+created: 20260303
+---
+
+body
+-- fixtures/cwd/vault/plans/gamma/index.md --
+---
+title: Gamma
+status: done
+created: 20260202
+---
+
+body
+-- cmd --
+booping query --glob 'plans/*/index.md' --where status=done --sort -created --output paths
+-- exit --
+0
+-- stdout --
+plans/beta/index.md
+plans/gamma/index.md
+-- stderr --

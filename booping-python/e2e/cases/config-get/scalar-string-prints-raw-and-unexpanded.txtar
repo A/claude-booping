@@ -1,0 +1,10 @@
+A scalar string is written out as-is plus a newline: no quoting, and `~` stays a tilde rather
+than expanding to the sandbox home.
+
+-- cmd --
+booping config-get home_dir
+-- exit --
+0
+-- stdout --
+~/Claude/
+-- stderr --

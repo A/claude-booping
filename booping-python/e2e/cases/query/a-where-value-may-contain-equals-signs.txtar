@@ -1,0 +1,27 @@
+A clause splits on its first `=` only: everything after it is the value, so a frontmatter
+value that itself carries an `=` is addressable.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+-- fixtures/cwd/vault/plans/alpha/index.md --
+---
+title: Alpha
+k: a=b
+---
+
+body
+-- fixtures/cwd/vault/plans/beta/index.md --
+---
+title: Beta
+k: a
+---
+
+body
+-- cmd --
+booping query --glob 'plans/*/index.md' --where 'k=a=b' --output paths
+-- exit --
+0
+-- stdout --
+plans/alpha/index.md
+-- stderr --

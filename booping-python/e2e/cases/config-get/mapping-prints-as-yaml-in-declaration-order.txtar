@@ -1,0 +1,15 @@
+A mapping value prints as YAML, keeping the keys in the order the config declares them rather
+than sorting them.
+
+-- cmd --
+booping config-get core.plans.milestones
+-- exit --
+0
+-- stdout --
+glob: milestones/*/M*.md
+table_columns:
+- id
+- title
+- sp
+- status
+-- stderr --

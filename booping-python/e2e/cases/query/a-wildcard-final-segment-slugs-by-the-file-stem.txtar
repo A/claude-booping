@@ -1,0 +1,29 @@
+A wildcard final segment addresses the files themselves, so each row is slugged by its own
+stem — the very same `index.md` that `an-index-pattern-slugs-by-the-directory-name` slugs
+`alpha` comes back as `index` here.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+-- fixtures/cwd/vault/plans/alpha/index.md --
+---
+title: Alpha
+---
+
+body
+-- fixtures/cwd/vault/plans/alpha/roadmap.md --
+---
+title: Roadmap
+---
+
+body
+-- cmd --
+booping query --glob 'plans/*/*.md' --columns slug
+-- exit --
+0
+-- stdout --
+| slug | path |
+| --- | --- |
+| index | plans/alpha/index.md |
+| roadmap | plans/alpha/roadmap.md |
+-- stderr --

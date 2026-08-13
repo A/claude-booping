@@ -1,0 +1,21 @@
+`root: core` points the globs at the plugin's own tree, so the run needs no project at all —
+outside any vault it still exits 0 and returns paths relative to the plugin root.
+`the-same-spec-without-root-still-needs-a-vault` runs the identical spec with `root` dropped.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  probe_playbook:
+    queries:
+      shipped_playbooks:
+        glob:
+          - playbooks/*/playbook.md
+        where:
+          name: groom
+        root: core
+-- cmd --
+booping query --config core.probe_playbook.queries.shipped_playbooks --output paths
+-- exit --
+0
+-- stdout --
+playbooks/groom/playbook.md
+-- stderr --

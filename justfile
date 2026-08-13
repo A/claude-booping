@@ -23,8 +23,8 @@ pytest:
 
 # Run the contract corpus — `just e2e [-k expression]`; `pytest e2e --txtar-update` rebaselines
 [no-exit-message]
-e2e *patterns:
-    cd booping-python && uv run pytest e2e {{ if patterns == '' { '' } else { '-k ' + quote(patterns) } }}
+e2e *args:
+    cd booping-python && uv run pytest e2e {{ args }}
 
 # Every check CI runs, in order, stopping at the first failure.
 ci: lint typecheck pytest snapshots mdcheck e2e

@@ -1,0 +1,10 @@
+Whitespace is not an operand: a clause whose comparison value is only spaces is rejected like
+an empty one, and the message quotes the pair as written, trailing spaces included.
+
+-- cmd --
+booping query --glob 'plans/*/index.md' --where 'id:gt=  '
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: malformed --where clause (expected k=v, k!=v, k:in=a,b, k:gt=n or k:lt=n): id:gt=  

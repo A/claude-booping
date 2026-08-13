@@ -1,0 +1,30 @@
+A spec key nobody declares — here `rooot` for `root` — fails the spec instead of being dropped
+silently, so the typo surfaces named rather than running the query with the key ignored.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+-- fixtures/cwd/vault/config.yaml --
+core:
+  probe_playbook:
+    queries:
+      plans:
+        glob:
+          - plans/*/index.md
+        rooot: core
+-- fixtures/cwd/vault/plans/alpha/index.md --
+---
+title: Alpha
+---
+
+body
+-- cmd --
+booping query --config core.probe_playbook.queries.plans
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: invalid query spec from config path core.probe_playbook.queries.plans: 1 validation error for QuerySpec
+rooot
+  Extra inputs are not permitted [type=extra_forbidden, input_value='core', input_type=str]
+[..]

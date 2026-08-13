@@ -1,0 +1,21 @@
+The written id is absolute, not a step: setting 3 and then 9 leaves 9 on one line, neither
+incremented nor accumulated into a second entry.
+
+-- fixtures/cwd/.booping --
+# booping project marker
+project_name: "demo"  # quoted on purpose
+vault_path: ./vault
+-- cmd --
+booping marker-set latest_migration=3
+booping marker-set latest_migration=9
+-- exit --
+0
+-- stdout --
+-- stderr --
+marker: latest_migration=3
+marker: latest_migration=9
+-- expected/cwd/.booping --
+# booping project marker
+project_name: "demo"  # quoted on purpose
+vault_path: ./vault
+latest_migration: 9

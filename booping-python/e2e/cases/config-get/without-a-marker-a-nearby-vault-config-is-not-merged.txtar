@@ -1,0 +1,14 @@
+The project tier needs a `.booping` marker to attach: with no marker in the cwd the run still
+succeeds, resolving core plus global while a config.yaml sitting in a would-be vault is ignored.
+
+-- fixtures/cwd/vault/config.yaml --
+core:
+  sprint:
+    default_threshold_sp: 3
+-- cmd --
+booping config-get core.sprint.default_threshold_sp
+-- exit --
+0
+-- stdout --
+35
+-- stderr --

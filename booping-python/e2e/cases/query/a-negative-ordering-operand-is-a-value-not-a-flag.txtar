@@ -1,0 +1,33 @@
+A negative operand is read as the clause's value rather than as an unknown option, so the run
+succeeds and every row with a numeric id passes `id:gt=-1`.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+-- fixtures/cwd/vault/plans/p3/index.md --
+---
+id: 3
+---
+
+body
+-- fixtures/cwd/vault/plans/p5/index.md --
+---
+id: 5
+---
+
+body
+-- fixtures/cwd/vault/plans/p10/index.md --
+---
+id: 10
+---
+
+body
+-- cmd --
+booping query --glob 'plans/*/index.md' --where id:gt=-1 --output paths
+-- exit --
+0
+-- stdout --
+plans/p10/index.md
+plans/p3/index.md
+plans/p5/index.md
+-- stderr --

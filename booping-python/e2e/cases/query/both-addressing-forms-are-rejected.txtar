@@ -1,0 +1,10 @@
+The two addressing forms cannot be combined: naming a config spec and an inline glob at once
+exits 1 before either is resolved.
+
+-- cmd --
+booping query --config core.probe_playbook.queries.done_plans --glob 'plans/*/index.md'
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: --config and --glob are mutually exclusive

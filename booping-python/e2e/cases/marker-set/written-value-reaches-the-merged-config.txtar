@@ -1,0 +1,22 @@
+The write lands in the config merge, not just on disk: the key lives only in the vault
+beside the marker, so it resolves at all only because marker-set pointed vault_path at that
+vault a line earlier.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+-- fixtures/cwd/vault/config.yaml --
+core:
+  probe_playbook:
+    threshold: 8
+-- cmd --
+booping marker-set vault_path=./vault
+booping config-get core.probe_playbook.threshold
+-- exit --
+0
+-- stdout --
+8
+-- stderr --
+marker: vault_path=./vault
+-- expected/cwd/.booping --
+project_name: probe
+vault_path: ./vault

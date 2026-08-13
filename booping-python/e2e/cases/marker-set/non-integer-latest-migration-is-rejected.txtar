@@ -1,0 +1,18 @@
+latest_migration is a migration id, so a word is refused before anything is written: the
+marker on disk still carries no watermark.
+
+-- fixtures/cwd/.booping --
+# booping project marker
+project_name: "demo"  # quoted on purpose
+vault_path: ./vault
+-- cmd --
+booping marker-set latest_migration=three
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: latest_migration must be an integer, got 'three'
+-- expected/cwd/.booping --
+# booping project marker
+project_name: "demo"  # quoted on purpose
+vault_path: ./vault

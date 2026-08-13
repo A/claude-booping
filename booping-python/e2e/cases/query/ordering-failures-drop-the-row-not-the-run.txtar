@@ -1,0 +1,36 @@
+Every way an ordering clause can fail to compare — a value that is not a number, a field the row
+never declares, an operand that is not a number — excludes the row and leaves the run
+successful: the numeric row still comes back, and the unusable operand returns nothing rather
+than an error.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+-- fixtures/cwd/vault/plans/numeric/index.md --
+---
+title: Numeric
+sp: 5
+---
+
+body
+-- fixtures/cwd/vault/plans/texty/index.md --
+---
+title: Texty
+sp: soon
+---
+
+body
+-- fixtures/cwd/vault/plans/bare/index.md --
+---
+title: Bare
+---
+
+body
+-- cmd --
+booping query --glob 'plans/*/index.md' --where sp:gt=0 --output paths
+booping query --glob 'plans/*/index.md' --where sp:gt=soon --output paths
+-- exit --
+0
+-- stdout --
+plans/numeric/index.md
+-- stderr --

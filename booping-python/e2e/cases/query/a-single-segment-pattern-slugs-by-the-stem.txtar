@@ -1,0 +1,28 @@
+A pattern with no directory segment at all matches at the vault root, and those rows are
+slugged by stem too — the directory-name rule needs a parent segment to apply.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+-- fixtures/cwd/vault/notes.md --
+---
+title: Notes
+---
+
+body
+-- fixtures/cwd/vault/sprints.md --
+---
+title: Sprints
+---
+
+body
+-- cmd --
+booping query --glob '*.md' --columns slug
+-- exit --
+0
+-- stdout --
+| slug | path |
+| --- | --- |
+| notes | notes.md |
+| sprints | sprints.md |
+-- stderr --

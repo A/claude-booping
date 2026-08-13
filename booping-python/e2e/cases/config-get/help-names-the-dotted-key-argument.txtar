@@ -1,0 +1,16 @@
+`--help` succeeds and documents the single positional argument as a dot-separated key path.
+
+-- cmd --
+booping config-get --help
+-- exit --
+0
+-- stdout --
+usage: booping config-get [-h] key
+
+positional arguments:
+  key         Dot-separated key path into the merged config (e.g.
+              core.sprint.default_threshold_sp)
+
+options:
+  -h, --help  show this help message and exit
+-- stderr --

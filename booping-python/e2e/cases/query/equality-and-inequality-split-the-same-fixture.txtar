@@ -1,0 +1,38 @@
+`k=v` and `k!=v` partition the same vault: the two runs return disjoint sets whose union is
+every plan, so the `!` suffix reaches the engine as a negated clause rather than as part of
+the field name.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+-- fixtures/cwd/vault/plans/alpha/index.md --
+---
+title: Alpha
+status: ready-for-dev
+---
+
+body
+-- fixtures/cwd/vault/plans/beta/index.md --
+---
+title: Beta
+status: done
+---
+
+body
+-- fixtures/cwd/vault/plans/gamma/index.md --
+---
+title: Gamma
+status: done
+---
+
+body
+-- cmd --
+booping query --glob 'plans/*/index.md' --where status=done --output paths
+booping query --glob 'plans/*/index.md' --where 'status!=done' --output paths
+-- exit --
+0
+-- stdout --
+plans/beta/index.md
+plans/gamma/index.md
+plans/alpha/index.md
+-- stderr --

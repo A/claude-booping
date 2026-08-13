@@ -1,0 +1,42 @@
+An integer, a float and a quoted numeric string carry the same value to an ordering clause, and
+the operand is coerced the same way: all three rows answer `4` alike, whichever spelling the
+frontmatter and the operand use.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+-- fixtures/cwd/vault/plans/int/index.md --
+---
+title: Int
+sp: 4
+---
+
+body
+-- fixtures/cwd/vault/plans/float/index.md --
+---
+title: Float
+sp: 4.0
+---
+
+body
+-- fixtures/cwd/vault/plans/str/index.md --
+---
+title: Str
+sp: "4"
+---
+
+body
+-- cmd --
+booping query --glob 'plans/*/index.md' --where sp:gt=3 --output paths
+booping query --glob 'plans/*/index.md' --where sp:lt=4.5 --output paths
+booping query --glob 'plans/*/index.md' --where sp:gt=4.0 --output paths
+-- exit --
+0
+-- stdout --
+plans/float/index.md
+plans/int/index.md
+plans/str/index.md
+plans/float/index.md
+plans/int/index.md
+plans/str/index.md
+-- stderr --

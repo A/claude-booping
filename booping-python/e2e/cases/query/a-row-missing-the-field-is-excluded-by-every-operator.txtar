@@ -1,0 +1,35 @@
+A row whose frontmatter never mentions the queried field satisfies no clause at all: equality,
+inequality, membership and both ordering operators each drop it, so a missing field is never
+read as an empty or unequal value.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+-- fixtures/cwd/vault/plans/sized/index.md --
+---
+title: Sized
+sp: 3
+---
+
+body
+-- fixtures/cwd/vault/plans/bare/index.md --
+---
+title: Bare
+---
+
+body
+-- cmd --
+booping query --glob 'plans/*/index.md' --where sp=3 --output paths
+booping query --glob 'plans/*/index.md' --where 'sp!=5' --output paths
+booping query --glob 'plans/*/index.md' --where 'sp:in=3' --output paths
+booping query --glob 'plans/*/index.md' --where sp:gt=0 --output paths
+booping query --glob 'plans/*/index.md' --where sp:lt=99 --output paths
+-- exit --
+0
+-- stdout --
+plans/sized/index.md
+plans/sized/index.md
+plans/sized/index.md
+plans/sized/index.md
+plans/sized/index.md
+-- stderr --
