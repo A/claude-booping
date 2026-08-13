@@ -22,6 +22,14 @@ states:
             gates:
               - "answers that change the task type, the restated problem or a boundary re-run intake first"
             hooks: ["script stamp-session", "script commit-plan", "script tracker-sync"]
+          - to: awaiting-clarification
+            when: "the run raised questions it cannot answer itself and wrote them to `clarifications.md`"
+            gates:
+              - "every question in `clarifications.md` is open and attributed — an id, a topic, the date and the step that raised it"
+            hooks:
+              - frontmatter-update index.md return_to=framing
+              - "script tracker-comment clarifications.md"
+              - "script tracker-sync"
       researching:
         transitions:
           - to: drafting
@@ -37,6 +45,32 @@ states:
           - to: researching
             when: "the design needs blast radius or external practice the research pass missed"
             hooks: ["script tracker-sync"]
+          - to: awaiting-clarification
+            when: "the run raised questions it cannot answer itself and wrote them to `clarifications.md`"
+            gates:
+              - "every question in `clarifications.md` is open and attributed — an id, a topic, the date and the step that raised it"
+            hooks:
+              - frontmatter-update index.md return_to=drafting
+              - "script tracker-comment clarifications.md"
+              - "script tracker-sync"
+      awaiting-clarification:
+        transitions:
+          - to: framing
+            when: "the answers came back and `return_to` names `framing`"
+            gates:
+              - "every question in `clarifications.md` carries an answer"
+              - "`return_to` is `framing` — any other value picks the other return edge"
+            hooks:
+              - frontmatter-update index.md return_to=null
+              - "script tracker-sync"
+          - to: drafting
+            when: "the answers came back and `return_to` names `drafting`"
+            gates:
+              - "every question in `clarifications.md` carries an answer"
+              - "`return_to` is `drafting` — any other value picks the other return edge"
+            hooks:
+              - frontmatter-update index.md return_to=null
+              - "script tracker-sync"
       cross-reviewing:
         transitions:
           - to: presenting
@@ -75,6 +109,7 @@ states:
           - researching
           - drafting
           - cross-reviewing
+          - awaiting-clarification
         transitions:
           - to: cancelled
             when: "the user cancels the run"

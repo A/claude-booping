@@ -37,8 +37,12 @@ created dir vault/plans/demo
 +---
 +
 +# Demo
+--- /dev/null
++++ vault/plans/demo/clarifications.md
+@@ -0,0 +1 @@
++# Clarifications
 created dir vault/plans/demo/milestones
-scaffolded 4 paths — 2 dirs created, 2 files created, 0 files overwritten
+scaffolded 5 paths — 2 dirs created, 3 files created, 0 files overwritten
 created dir vault/plans/demo/milestones/M10-third
 --- /dev/null
 +++ vault/plans/demo/milestones/M10-third/M10-third.md

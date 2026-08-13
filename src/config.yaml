@@ -179,6 +179,11 @@ core:
 
         # {{ title }}
       request.md: ""
+      # Sidecar the run parks its open questions in on `awaiting-clarification`;
+      # seeded empty so the file is postable to the tracker verbatim from the
+      # first question on. Format: ${CLAUDE_PLUGIN_ROOT}/docs/clarifications.md.
+      clarifications.md: |
+        # Clarifications
       milestones:
         type: dir
     # Scaffold tree materialised once per milestone by

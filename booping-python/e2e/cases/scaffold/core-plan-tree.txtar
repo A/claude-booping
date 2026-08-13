@@ -33,8 +33,12 @@ created dir plans/demo
 +---
 +
 +# Demo
+--- /dev/null
++++ plans/demo/clarifications.md
+@@ -0,0 +1 @@
++# Clarifications
 created dir plans/demo/milestones
-scaffolded 4 paths — 2 dirs created, 2 files created, 0 files overwritten
+scaffolded 5 paths — 2 dirs created, 3 files created, 0 files overwritten
 -- expected/cwd/plans/demo/index.md --
 ---
 title: "Demo"
@@ -58,4 +62,6 @@ return_to: null
 ---
 
 # Demo
+-- expected/cwd/plans/demo/clarifications.md --
+# Clarifications
 -- expected/cwd/plans/demo/request.md --
