@@ -56,7 +56,7 @@
                 </li>
               </ul>
               <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../playbook/">Playbooks (unstable)</a>
+                <li class="toctree-l1"><a class="reference internal" href="../playbook/">Playbooks</a>
                 </li>
               </ul>
               <ul>
@@ -128,15 +128,15 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="groom-playbook">groom playbook</h1>
-<p>Spec a sprint: take a rough request and produce a reviewable plan under <code>~/Claude/{project}/plans/{slug}/index.md</code> with milestones, tasks, story points, and definitions of done.</p>
+<p>Spec a sprint: take a rough request and produce a reviewable plan under <code>~/Claude/{project}/plans/{slug}/</code> — an <code>index.md</code> plus one directory per milestone under <code>milestones/</code>, each holding that milestone's tasks, story points, and definition of done.</p>
 <p>Grooming is a <strong>playbook</strong>, not a skill — it is driven by <a href="../playbook/"><code>/playbook</code></a>:</p>
 <pre><code class="language-text">/playbook groom
 </code></pre>
 <h2 id="what-it-does">What it does</h2>
 <p>Run states: <code>framing</code> → <code>researching</code> → <code>drafting</code> → <code>cross-reviewing</code> → <code>presenting</code> → <code>awaiting-approval</code> → <code>ready-for-dev</code>. Two loopbacks: <code>drafting → researching</code> when the design needs blast radius the research pass missed, and <code>awaiting-approval → drafting</code> when your change request touches the plan itself.</p>
-<p>Almost every step runs in your session — inline, or assisted, meaning heavy reads go to the research agent, which returns a bounded summary. The one exception is <code>cross-review</code>, which hands the drafted plan to a second-model reviewer and does nothing unless you name one. <code>present</code>, near the end of the run, is the run's single approval gate.</p>
-<p>The output is a plan directory <code>~/Claude/{project}/plans/{slug}/</code> whose <code>index.md</code> carries the plan and the YAML frontmatter the rest of the loop (<code>develop</code>, <code>retro</code>, <code>learn</code>) reads. The intake briefing and any web-research notes land beside it, so everything the run gathered stays with the plan. The directory also doubles as the run workdir, which makes a groom run <strong>resumable</strong>: its run state lives in the same <code>index.md</code>.</p>
-<p>A plan is always a directory: <code>core.plans.glob</code> resolves <code>plans/*/index.md</code> and nothing else. A vault still holding flat <code>plans/{slug}.md</code> files from an older release converts them by running <code>/playbook migrate</code>.</p>
+<p>Almost every step runs in your session — inline, or assisted (heavy reads go to the research agent, which returns a bounded summary). The exception is <code>cross-review</code>, which hands the drafted plan to a second-model reviewer and does nothing unless you name one. <code>present</code> is the run's single approval gate.</p>
+<p>The output is a plan directory <code>~/Claude/{project}/plans/{slug}/</code>. Its <code>index.md</code> carries the approach, the scope and the YAML frontmatter the rest of the loop (<code>develop</code>, <code>retro</code>, <code>learn</code>) reads; each milestone gets a directory of its own under <code>milestones/</code>, holding a milestone file that repeats the directory's name, and that file — not a section of the index — is what develop hands a coding agent as its contract, with room beside it for what the sprint later writes about that milestone. <code>index.md</code>'s <code>## Milestones</code> table and the plan's total story points are generated from those files, never hand-kept. Groom creates the directory with one <code>booping scaffold</code> call from a config-declared tree, so the fresh <code>index.md</code> arrives complete — including a real <code>commit:</code> stamped with repo HEAD at creation, and <code>draft-plan</code> scaffolds each milestone directory and its file the same way. The intake briefing and any web-research notes land beside it. The directory doubles as the run workdir, so a groom run is <strong>resumable</strong>: its run state lives in the same <code>index.md</code>.</p>
+<p>A plan is always a directory: <code>core.plans.glob</code> resolves <code>plans/*/index.md</code> and nothing else, and <code>core.plans.milestones.glob</code> resolves the milestone file inside each milestone directory. A vault still holding flat <code>plans/{slug}.md</code> files converts them with <code>/playbook migrate</code>.</p>
 <p>Six steps, in dependency order:</p>
 <table>
 <thead>
@@ -148,7 +148,7 @@
 <tbody>
 <tr>
 <td><code>intake</code></td>
-<td>Clarify the request, settle scope, create the plan directory with its briefing and identity frontmatter</td>
+<td>Clarify the request, settle scope, scaffold the plan directory — briefing, identity frontmatter, <code>commit:</code> at repo HEAD — with one <code>booping scaffold</code> call</td>
 </tr>
 <tr>
 <td><code>research-codebase</code></td>
@@ -160,7 +160,7 @@
 </tr>
 <tr>
 <td><code>draft-plan</code></td>
-<td>Design with you in conversation, then write the plan body against a plan template</td>
+<td>Design with you in conversation, then write the plan against a plan template — <code>index.md</code> plus one milestone directory each</td>
 </tr>
 <tr>
 <td><code>cross-review</code></td>
@@ -172,7 +172,7 @@
 </tr>
 </tbody>
 </table>
-<p>Design work happens in conversation inside <code>draft-plan</code> — refinement and decomposition are part of drafting, not separate steps.</p>
+<p>Refinement and decomposition happen inside <code>draft-plan</code>.</p>
 <h2 id="starting-a-run">Starting a run</h2>
 <pre><code class="language-text">/playbook groom
 </code></pre>
@@ -195,7 +195,6 @@ existing one in apps/api/middleware/.
 <h3 id="free-text-extras">Free-text extras</h3>
 <p>Useful things to mention up front:</p>
 <ul>
-<li><strong>Stop after each milestone</strong> — tell the develop playbook (later) to pause between milestones for review; groom records this as a plan note.</li>
 <li><strong>Reference a template</strong> — "use the bug-investigation template" selects a specific plan template.</li>
 </ul>
 <p>Branch selection is <strong>not</strong> groom's job — the <a href="../develop/">develop playbook</a>'s <code>provision</code> step picks and confirms it.</p>
@@ -203,13 +202,12 @@ existing one in apps/api/middleware/.
 <p>Drop <code>*.md</code> files into <code>~/Claude/{project}/plan_templates/</code> to extend or override the templates that ship with the plugin. Each template needs frontmatter (<code>name</code>, <code>description</code>) and two top-level sections (<code># Plan Body</code>, <code># Quality Checklist</code>). A project-local template with the same <code>name</code> as a core template overrides it.</p>
 <p>See <a href="../vault/">Vault</a> for the directory layout.</p>
 <h2 id="reviewing-the-plan">Reviewing the plan</h2>
-<p><code>present</code> is the run's <strong>only</strong> review gate — the plan is not ready for development until you approve it.</p>
-<p>What to check before approving:</p>
+<p>What to check before approving at <code>present</code>, the run's <strong>only</strong> review gate:</p>
 <ul>
 <li><strong>Goal is sharp.</strong> The <code>summary</code> in frontmatter matches the request, with no scope creep.</li>
 <li><strong>Milestones cover the goal end-to-end.</strong> No silent gaps, no "and then ..." vagueness in the last milestone.</li>
 <li><strong>Tasks are sized honestly.</strong> No 5-SP tasks except deliberate research spikes (see Story points).</li>
-<li><strong>Definitions of done are verifiable.</strong> Each task DoD checkbox is something you can mechanically confirm — not "code looks good".</li>
+<li><strong>Definitions of done are verifiable.</strong> Each DoD checkbox is mechanically confirmable — not "code looks good".</li>
 </ul>
 <p>Approve explicitly ("looks good", "ship it") to move the plan to <code>ready-for-dev</code>, groom's terminal status and the queue the <a href="../develop/">develop playbook</a> claims from. A change request touching architecture, scope, milestones, tasks or estimates sends the run back to <code>drafting</code>.</p>
 <h2 id="story-points">Story points</h2>

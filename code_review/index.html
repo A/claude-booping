@@ -56,7 +56,7 @@
                 </li>
               </ul>
               <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../playbook/">Playbooks (unstable)</a>
+                <li class="toctree-l1"><a class="reference internal" href="../playbook/">Playbooks</a>
                 </li>
               </ul>
               <ul>
@@ -116,26 +116,26 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="code-review-playbook">code-review playbook</h1>
-<p>Code review is a <strong>playbook</strong>, not a skill:</p>
+<p>Code review is a playbook driven by <code>/playbook</code>, the plugin's single skill and the only way to start a review:</p>
 <pre><code class="language-text">/playbook code-review
 </code></pre>
-<p>A run reviews one confirmed scope end to end — <code>scope</code> settles what to look at (any <code>done</code> plan, the latest commits, or a named target) and opens the run's artifact, <code>review</code> returns severity-classified findings from a detached pass, <code>present</code> writes them to the artifact and collects your verdict, <code>resolve</code> acts on that verdict and closes the run.</p>
+<p>A run reviews one confirmed scope end to end: <code>scope</code> settles what to look at (any <code>done</code> plan, the latest commits, or a named target) and opens the artifact, <code>review</code> returns severity-classified findings from a detached pass, <code>present</code> writes them and collects your verdict, <code>resolve</code> acts on it and closes the run.</p>
 <h2 id="the-review-artifact">The review artifact</h2>
 <p>Every run writes one file under the vault's <code>codereviews/</code>: <code>codereviews/{plan-dirname}/{YYYYMMDDHHmm}.md</code> when a plan is in scope, <code>codereviews/{target-slug}/{YYYYMMDDHHmm}.md</code> for an ad-hoc scope. It holds <code>## Scope</code>, <code>## Findings</code>, <code>## Verdict</code> and <code>## Resolution</code>, and its frontmatter carries <code>plan:</code> — the reviewed plan's vault-relative path, or <code>null</code> when nothing was in scope.</p>
 <p>The artifact is the run's own state: a stopped review is <strong>resumable</strong>, and a second look after fixes is a new, separately recorded run.</p>
 <h2 id="statuses">Statuses</h2>
-<p>Declared in <code>playbooks/code-review/playbook.yaml</code>'s <code>states:</code> block; the status lives in the artifact, never in the reviewed plan:</p>
+<p>The status lives in the artifact, never in the reviewed plan:</p>
 <ul>
 <li><strong><code>in-agent-review</code></strong> — the artifact is open and the detached pass is producing findings.</li>
 <li><strong><code>human-review</code></strong> — the findings are on record, your verdict is pending.</li>
 <li><strong><code>done</code></strong> — every finding is resolved (applied, delegated or dropped) and recorded.</li>
 </ul>
-<p>The run works from the vault root and addresses the review file explicitly, so a stopped run resumes with <code>booping playbook-state code-review --workdir {vault} --target codereviews/{dir}/{ts}.md</code>.</p>
-<p>Closing the run stamps <code>reviewed_at</code> on the artifact and runs the <code>close-code-review</code> hook, which appends the artifact's path to the reviewed plan's <code>code_reviews:</code> list and commits the vault. An ad-hoc review (<code>plan: null</code>) skips the append and only commits. The plan's <code>status:</code> is never touched.</p>
+<p>The run works from the vault root and addresses the review file explicitly; a stopped run resumes with <code>booping playbook-state code-review --workdir {vault} --target codereviews/{dir}/{ts}.md</code>.</p>
+<p>Closing the run stamps <code>reviewed_at</code> on the artifact, appends the artifact's path to the reviewed plan's <code>code_reviews:</code> list, and commits the vault. An ad-hoc review (<code>plan: null</code>) skips the append and only commits. The plan's <code>status:</code> is never touched.</p>
 <h2 id="the-queue">The queue</h2>
 <p><code>scope</code> offers every plan at <code>status: done</code>, listed with its <code>code_reviews:</code> history — a reviewed plan stays on the list, so re-reviewing is first-class. See <code>core.code_review_playbook.queries.scope_candidates</code> in <a href="../project_config/">Project config</a>.</p>
 <h2 id="review-templates">Review templates</h2>
-<p>Review checklists are markdown files in a <code>review_templates/</code> directory, layered core → global → project: the plugin ships a core set, your global home directory adds machine-wide templates, your vault's <code>review_templates/</code> holds the project's own. A later level overrides an earlier one by name. See <a href="../vault/#review_templates">Vault → <code>review_templates/</code></a> for the project-level directory.</p>
+<p>Review checklists are markdown files in <code>review_templates/</code>, layered core → global → project: the plugin ships a core set, your global home directory adds machine-wide ones, your vault's <code>review_templates/</code> holds the project's own. A later level overrides an earlier one by name. See <a href="../vault/#review_templates">Vault → <code>review_templates/</code></a> for the project-level directory.</p>
 <p>See <a href="../playbook/#shipped-playbooks">Playbooks → Shipped playbooks</a> for how playbooks are driven.</p>
               
             </div>

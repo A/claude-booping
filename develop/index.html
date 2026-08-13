@@ -56,7 +56,7 @@
                 </li>
               </ul>
               <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../playbook/">Playbooks (unstable)</a>
+                <li class="toctree-l1"><a class="reference internal" href="../playbook/">Playbooks</a>
                 </li>
               </ul>
               <ul>
@@ -78,6 +78,8 @@
     <li class="toctree-l2"><a class="reference internal" href="#starting-a-run">Starting a run</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#branch">Branch</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#session-metrics">Session metrics</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#best-practices">Best practices</a>
         <ul>
@@ -126,12 +128,12 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="develop-playbook">develop playbook</h1>
-<p>Execute a groomed plan's milestones, delegating coding to <code>booping-developer</code> and orchestrating verification, commits, and status transitions on the way to <code>done</code>.</p>
+<p>Execute a groomed plan's milestones, delegating coding to <code>booping-developer</code> and orchestrating the checks, the feedback and the status transitions on the way to <code>done</code>.</p>
 <p>Development is a <strong>playbook</strong>, not a skill — driven by <a href="../playbook/"><code>/playbook</code></a>:</p>
 <pre><code class="language-text">/playbook develop
 </code></pre>
 <h2 id="what-it-does">What it does</h2>
-<p>The playbook walks one plan through <code>awaiting-approval → ready-for-dev → in-progress → done</code>. Three outcomes are terminal: <code>done</code>, <code>fail</code> (the abort branch), and <code>cancelled</code> — a run you call off cancels formally from any non-terminal status, not by being abandoned. <code>done</code> closes the plan <strong>immediately</strong>: the plan track ends there, with no waiting status after it. Retro runs afterwards as its own track — start it with <a href="../retro/"><code>/playbook retro</code></a>; it, like <a href="../code_review/">code-review</a>, picks the plan up through the <code>retro:</code> / <code>code_reviews:</code> frontmatter seams, each keeping its own run state in its own artifact, without moving the plan's status again. That vocabulary is develop's own, declared in <code>playbooks/develop/playbook.yaml</code>'s <code>states:</code> block, not in a shared lifecycle. Run state lives in the plan's own <code>index.md</code>, so a stopped sprint is <strong>resumable</strong>.</p>
+<p>The playbook walks one plan through <code>awaiting-approval → ready-for-dev → in-progress → done</code>. Three outcomes are terminal: <code>done</code>, <code>fail</code> (the abort branch), and <code>cancelled</code> — a run you call off cancels formally from any non-terminal status, not by being abandoned. <code>done</code> closes the plan <strong>immediately</strong>, with no waiting status after it. Retro runs afterwards as its own track — start it with <a href="../retro/"><code>/playbook retro</code></a>; it, like <a href="../code_review/">code-review</a>, picks the plan up through the <code>retro:</code> / <code>code_reviews:</code> frontmatter seams, each keeping its own run state in its own artifact, without moving the plan's status again. That vocabulary is develop's own — every playbook declares its own. Run state lives in the plan's own <code>index.md</code>, and each milestone's <code>pending → in-progress → done</code> state in its own milestone file under <code>milestones/</code>, so a stopped sprint is <strong>resumable</strong>.</p>
 <p>Five steps, in dependency order:</p>
 <table>
 <thead>
@@ -151,7 +153,7 @@
 </tr>
 <tr>
 <td><code>develop-loop</code></td>
-<td>Brief <code>booping-developer</code> per group, verify each milestone's DoD, commit as it goes</td>
+<td>Brief <code>booping-developer</code> per group — milestone files as the contract, <code>index.md</code> as context — then check each returned commit against the milestone's DoD</td>
 </tr>
 <tr>
 <td><code>verify</code></td>
@@ -163,24 +165,29 @@
 </tr>
 </tbody>
 </table>
-<p>The runner edits no application code — all coding is delegated; it owns reads/writes against the vault, briefing assembly, verification, and commits.</p>
-<p>Every milestone group runs in <strong>one session</strong> by default. Stopping after each milestone is a request you make at invocation time.</p>
+<p>The runner edits no application code — all coding is delegated; it owns reads/writes against the vault, briefing assembly and the plan's own bookkeeping.</p>
+<p>The split at each milestone is deliberate. The <strong>agent</strong> implements the contract, runs the milestone's own verification command until it is green, and makes the repo commit — one commit per milestone, a fix always a new commit. The <strong>runner</strong> never re-runs that command and never commits repo code: it reads the returned commit's diff against the Definition of Done, ticks the checkboxes the diff earns, takes the milestone's transition, and commits the plan in the vault. Whoever ran the command is the one who saw it run.</p>
+<p>When a diff falls short of the DoD, or the agent reports its verification red, the runner writes what it found into a <code>feedback.md</code> beside that milestone file — what it checked, what was wrong, what the next attempt must do — and briefs a <strong>fresh</strong> agent with both paths. That file is also where attempts are counted; after two the blocker is unrecoverable, and the run asks you to approve the abort. A milestone the runner has sent back keeps its feedback on disk, so the record survives the session.</p>
+<p>Every milestone group runs in <strong>one session</strong>.</p>
 <h2 id="starting-a-run">Starting a run</h2>
 <pre><code class="language-text">/playbook develop
-/playbook develop — plans/202604301120_src-files-build-pipeline/index.md, pause after each milestone
+/playbook develop — plans/202604301120_src-files-build-pipeline/index.md
 </code></pre>
-<p>Bare invocation resolves the plan from what the session just groomed or from the vault's queue. Name a plan path to target a specific one. Free-text reaches <code>intake</code> verbatim — useful for stop-after-each-milestone or model-comparison runs.</p>
-<p>To resume a sprint already <code>in-progress</code>, invoke the playbook against the same plan: <code>playbook-state</code> reports the frontier and the run picks up at the first milestone whose DoDs are not all <code>[x]</code>.</p>
+<p>Bare invocation lists the vault's plans at <code>ready-for-dev</code> or <code>awaiting-approval</code> and asks you to pick one. Name a plan path to target a specific one.</p>
+<p>To resume a sprint already <code>in-progress</code>, invoke the playbook against the same plan: <code>playbook-state</code> reports the frontier and the run picks up at the first milestone whose <code>status:</code> is not <code>done</code> — including a blocked one, whose <code>feedback.md</code> carries the previous attempt's findings into the next briefing. Each transition also regenerates <code>index.md</code>'s <code>## Milestones</code> table and re-sums the plan's story points, so the table is a view, never the source of truth.</p>
 <h2 id="branch">Branch</h2>
 <p><code>provision</code> picks the branch prefix from <code>core.develop_playbook.git.branches</code> using the plan's <code>type</code>, proposes a kebab-case name, and asks through <code>AskUserQuestion</code> — <strong>nothing touches git until you answer</strong>, and a name you rewrite is used verbatim. A branch that already exists for the sprint is reused rather than recreated. In multi-repo projects the same branch name is reused across repos unless you say otherwise.</p>
 <p>That confirmation is the playbook's single review gate.</p>
+<h2 id="session-metrics">Session metrics</h2>
+<p><a href="../groom/">groom</a> and develop transitions record the plan's Claude Code session ids as they go; when develop closes the plan, <code>booping session-stats</code> mines those session logs and stamps the plan's frontmatter with <code>metrics_*</code> keys: active work minutes, the models that ran the sessions, and token counts (input, output, cache creation, cache read) totalled over the plan's sessions — the command's own output breaks the same numbers down per session. Active time is idle-aware — minutes spent waiting on you, a question unanswered or a tool call rejected, are excluded.</p>
+<p><code>booping session-stats</code> is the one metrics surface. The stamped numbers roll up into the vault's <code>sprints.md</code> columns, so a sprint's cost is visible without opening each plan — see <a href="../vault/">Vault</a>.</p>
 <h2 id="best-practices">Best practices</h2>
 <h3 id="run-code-review-in-a-fresh-session">Run code review in a fresh session</h3>
 <p>Run a <a href="../code_review/">code-review</a> pass from a <strong>fresh session</strong>, not the one that ran the sprint. It reads the diff and the plan, which runner context does not affect, but the reviewer benefits from a slate free of the sprint's execution traces.</p>
 <h3 id="try-alternative-models-for-implementation">Try alternative models for implementation</h3>
-<p>Plans are reproducible files, so the same plan runs with different models — a cheaper or faster model for the implementation pass, Opus for <a href="../code_review/">code-review</a> afterward. The plan is the controlled input, the diff the controlled output: swap models, compare diffs, calibrate which model gives acceptable quality on your codebase.</p>
+<p>Plans are reproducible files, so the same plan runs with different models — a cheaper or faster model for the implementation pass, Opus for <a href="../code_review/">code-review</a> afterward. Swap models, compare diffs, calibrate which model gives acceptable quality on your codebase.</p>
 <h3 id="review-the-code-review-feedback-list">Review the code-review feedback list</h3>
-<p>The <a href="../code_review/">code-review playbook</a> puts its findings in front of you and asks for a verdict on each one, then applies what you approved. Rule on the list explicitly:</p>
+<p>The <a href="../code_review/">code-review playbook</a> puts its findings in front of you and asks for a verdict on each one, then applies what you approved. Rule explicitly:</p>
 <ul>
 <li><strong>BLOCKER</strong> — must be applied before merge. Trivial fixes happen inline in the review session; non-trivial fixes go back through <code>booping-developer</code> via a follow-up briefing.</li>
 <li><strong>SUGGESTION</strong> — apply if the cost is low; drop it explicitly otherwise. Do not silently drop.</li>
@@ -190,7 +197,8 @@
 <h2 id="config">Config</h2>
 <p>The playbook reads these keys from <code>src/config.yaml</code>. See <a href="../project_config/">Project config</a> for the deep-merge override mechanics; per-project tweaks live in <code>~/Claude/{project}/config.yaml</code>.</p>
 <ul>
-<li><strong><code>core.sprint.max_milestones_per_agent</code></strong> — maximum consecutive milestones grouped into a single <code>booping-developer</code> briefing. Grouping happens only when the milestones share enough context that one agent handling them in sequence is cheaper than a fresh agent per milestone. Default <code>2</code>.</li>
+<li><strong><code>core.sprint.max_milestones_per_agent</code></strong> — maximum consecutive milestones grouped into a single <code>booping-developer</code> briefing; grouping happens only when the milestones share enough context that one agent in sequence beats a fresh agent per milestone. Default <code>2</code>.</li>
+<li><strong><code>core.develop_playbook.fallback_agent</code></strong> — the agent a fix briefing is routed to when the milestone was built by some other agent, so an externally built milestone still gets its fixes done in-house. Default <code>booping:booping-developer</code>.</li>
 <li><strong><code>core.develop_playbook.git.branches</code></strong> — list of <code>{branch, when}</code> entries that map plan <code>type</code> (or freeform descriptors) to a branch prefix; <code>provision</code> picks from this list.</li>
 <li><strong><code>core.develop_playbook.git.commit_message</code></strong> — message format string used for in-sprint commits. Override per-project to enforce a different commit shape.</li>
 <li><strong><code>core.develop_playbook.agents</code></strong> — the agents the playbook may delegate to, with <code>good_for</code> / <code>bad_for</code> guidance. <code>booping-developer</code> is the implementation channel; <code>booping-researcher</code> is reserved for the intake drift spot-check across many plan-named files.</li>
