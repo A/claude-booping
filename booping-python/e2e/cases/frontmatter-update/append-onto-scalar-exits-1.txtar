@@ -1,0 +1,16 @@
+Appending onto a key that is not a list fails with exit 1 and a stderr message
+naming the key, before the file changes.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+status: backlog
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md --append status=done
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: cannot append to scalar key 'status' in plan.md

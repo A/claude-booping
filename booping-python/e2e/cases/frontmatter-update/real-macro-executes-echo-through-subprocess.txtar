@@ -1,0 +1,33 @@
+A macro declared as a real argv command runs it and writes its output into the
+frontmatter — the value can only come from executing the command, not a stub.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  macros:
+    one: ["echo", "1"]
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md "x={{ macro('core.macros.one') }}"
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,4 +1,5 @@
+ ---
+ title: Foo
++x: 1
+ ---
+ # Body
+-- stderr --
+updated plan.md: x=1
+-- expected/cwd/plan.md --
+---
+title: Foo
+x: 1
+---
+# Body

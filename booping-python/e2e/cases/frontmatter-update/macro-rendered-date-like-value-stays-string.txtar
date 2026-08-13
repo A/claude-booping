@@ -1,0 +1,35 @@
+A macro producing a date-like string lands unquoted and reloads as a string,
+not a date.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+-- fixtures/cwd/vault/config.yaml --
+macro_stubs:
+  core.macros.date: "1970-01-01 00:00"
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md "planned={{ macro('core.macros.date') }}"
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,4 +1,5 @@
+ ---
+ title: Foo
++planned: 1970-01-01 00:00
+ ---
+ # Body
+-- stderr --
+updated plan.md: planned=1970-01-01 00:00
+-- expected/cwd/plan.md --
+---
+title: Foo
+planned: 1970-01-01 00:00
+---
+# Body

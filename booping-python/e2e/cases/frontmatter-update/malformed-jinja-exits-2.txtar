@@ -1,0 +1,15 @@
+A value whose Jinja does not parse fails with exit 2 and a stderr message
+naming the syntax error.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md "x={{ macro( }}"
+-- exit --
+2
+-- stdout --
+-- stderr --
+error: value '{{ macro( }}': TemplateSyntaxError: unexpected '}', expected ')'

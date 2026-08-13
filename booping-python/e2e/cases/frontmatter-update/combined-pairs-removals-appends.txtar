@@ -1,0 +1,39 @@
+One call applies removals, then sets, then appends; the summary lists them in
+that order.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+status: backlog
+stale: x
+sessions: null
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md status=in-progress --remove stale --append sessions=abc-123
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,7 +1,7 @@
+ ---
+ title: Foo
+-status: backlog
+-stale: x
+-sessions: null
++status: in-progress
++sessions:
++- abc-123
+ ---
+ # Body
+-- stderr --
+updated plan.md: -stale, status=in-progress, sessions+=abc-123
+-- expected/cwd/plan.md --
+---
+title: Foo
+status: in-progress
+sessions:
+- abc-123
+---
+# Body
