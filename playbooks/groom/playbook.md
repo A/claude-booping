@@ -21,3 +21,7 @@ a development plan based on it.
 {% include "_partials/playbook_agents.md" %}
 
 {% include "_partials/playbook_shared_instructions.md" %}
+{%- if config.core.tracker.driver == 'linear' %}
+{% set tracker_playbook = 'groom' -%}
+{% include "_partials/tracker_driver.md" %}
+{%- endif %}

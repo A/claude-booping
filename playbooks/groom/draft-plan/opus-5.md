@@ -5,6 +5,12 @@ conversation already carries — the blast-radius map and the external ground th
 
 - **Draft design with the user**: architecture, pattern choices, data / API / config surface
   changes, open trade-offs. Iterate until aligned before writing.
+{%- if config.core.tracker.driver == 'linear' %}
+  There is no conversation to iterate in: a design call this step cannot settle from the framing
+  and the research goes to `{plan-dir}/clarifications.md` — with the candidate answers as
+  `**Options:**` — and parks the run, per the preamble's `Tracker driver` rules. A call settled that
+  way is written into the plan on the resumed invocation, never guessed here.
+{%- endif %}
 - **Write the plan**: pick a plan template from [Available plan templates](#available-plan-templates) whose name + description matches the work, then produce the plan against its `# Plan Body` — `index.md` from the template's top-level sections, plus one file per milestone.
 - **Write `summary`**: set the `summary:` frontmatter to a single line of plain plan intent — ≤ ~120
   chars / ~20 words, no prose, no trailing period needed. It feeds search and the `sprints.md`
