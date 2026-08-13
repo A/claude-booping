@@ -1,0 +1,10 @@
+A spec without `root: core` globs a vault, so run outside any project — no marker anywhere
+above the working directory — it exits 2, the environment code, and says how to supply one.
+
+-- cmd --
+booping query --glob 'plans/*/index.md'
+-- exit --
+2
+-- stdout --
+-- stderr --
+error: no vault resolved — run inside a booping project or pass --project

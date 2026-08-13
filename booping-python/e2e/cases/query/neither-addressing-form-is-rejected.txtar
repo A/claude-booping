@@ -1,0 +1,10 @@
+Neither addressing form is an error too: without `--config` or `--glob` there is no spec to
+run, and the narrowing flags alone do not imply one.
+
+-- cmd --
+booping query --where status=done
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: one of --config or --glob is required
