@@ -1,0 +1,23 @@
+An artifact carrying no `sessions:` key is not an error: a note names it on stderr, the run exits 0,
+and the artifacts array comes back empty.
+
+Contract note: the plan's I/O sketch expected such an artifact to appear in the array with a
+`skipped` reason and empty `sessions` / `totals`. It does not — the entry is omitted entirely, and
+`skipped` is reserved for the already-stamped case. This case pins the behaviour as shipped.
+
+-- fixtures/cwd/vault/plan/index.md --
+---
+title: No sessions here
+---
+
+Body.
+-- cmd --
+booping session-stats vault/plan/index.md --dry-run
+-- exit --
+0
+-- stdout --
+{
+  "artifacts": []
+}
+-- stderr --
+note: no sessions: key in vault/plan/index.md; skipped

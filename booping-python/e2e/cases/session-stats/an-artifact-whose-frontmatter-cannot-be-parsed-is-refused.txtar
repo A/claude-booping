@@ -1,0 +1,15 @@
+An artifact opening a frontmatter block it never closes cannot be parsed, and the run refuses rather
+than treating the file as body-only. The parser's own wording after the colon is wildcarded — the
+contract is the refusal and the file it names, not the exception text.
+
+-- fixtures/cwd/vault/plan/index.md --
+---
+sessions:
+- s-one
+-- cmd --
+booping session-stats vault/plan/index.md --dry-run
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: cannot read frontmatter of vault/plan/index.md: [..]

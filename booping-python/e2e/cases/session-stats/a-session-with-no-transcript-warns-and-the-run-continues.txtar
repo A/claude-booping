@@ -1,0 +1,58 @@
+A session id with nothing under the projects root is warned about and dropped; the ids after it are
+still mined and the run exits 0. The projects root exists and holds an unrelated project directory,
+so the miss is a lookup failure rather than a missing root.
+
+Arithmetic, `s-present`: one turn, 09:00:00 → 09:05:00 = 300s = 5 minutes. Tokens are the single
+assistant line's `usage`: input 8, output 6, cache creation 1, cache read 2. `s-absent` contributes
+nothing, so the totals equal that one session.
+
+-- fixtures/home/.claude/projects/proj/s-present.jsonl --
+{"type":"system","subtype":"init","timestamp":"2026-08-01T08:59:00.000Z"}
+{"type":"user","isSidechain":false,"origin":{"kind":"human"},"timestamp":"2026-08-01T09:00:00.000Z","message":{"role":"user","content":"go"}}
+{"type":"assistant","isSidechain":false,"timestamp":"2026-08-01T09:05:00.000Z","message":{"role":"assistant","model":"claude-fable-5","content":[{"type":"text","text":"ok"}],"usage":{"input_tokens":8,"output_tokens":6,"cache_creation_input_tokens":1,"cache_read_input_tokens":2}}}
+-- fixtures/cwd/vault/plan/index.md --
+---
+sessions:
+- s-absent
+- s-present
+---
+
+Body.
+-- cmd --
+booping session-stats vault/plan/index.md --dry-run
+-- exit --
+0
+-- stdout --
+{
+  "artifacts": [
+    {
+      "path": "vault/plan/index.md",
+      "written": false,
+      "sessions": [
+        {
+          "session": "s-present",
+          "metrics_active_minutes": 5,
+          "metrics_models": [
+            "claude-fable-5"
+          ],
+          "metrics_tokens_input": 8,
+          "metrics_tokens_output": 6,
+          "metrics_tokens_cache_creation": 1,
+          "metrics_tokens_cache_read": 2
+        }
+      ],
+      "totals": {
+        "metrics_active_minutes": 5,
+        "metrics_models": [
+          "claude-fable-5"
+        ],
+        "metrics_tokens_input": 8,
+        "metrics_tokens_output": 6,
+        "metrics_tokens_cache_creation": 1,
+        "metrics_tokens_cache_read": 2
+      }
+    }
+  ]
+}
+-- stderr --
+warning: no transcript found for session s-absent

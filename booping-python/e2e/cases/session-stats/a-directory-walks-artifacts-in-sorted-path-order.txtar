@@ -1,0 +1,73 @@
+A directory argument is walked recursively by the mask, and the entries are emitted in sorted path
+order — the seeding order below is zeta, alpha, mid, so an unsorted walk would show it.
+
+The artifacts carry an empty `sessions:` list on purpose: this case is about discovery order only,
+so every metric is the zero of its type and nothing has to be derived from a transcript.
+
+-- fixtures/cwd/vault/zeta/index.md --
+---
+sessions: []
+---
+
+Body.
+-- fixtures/cwd/vault/alpha/index.md --
+---
+sessions: []
+---
+
+Body.
+-- fixtures/cwd/vault/mid/index.md --
+---
+sessions: []
+---
+
+Body.
+-- cmd --
+booping session-stats vault --dry-run
+-- exit --
+0
+-- stdout --
+{
+  "artifacts": [
+    {
+      "path": "alpha/index.md",
+      "written": false,
+      "sessions": [],
+      "totals": {
+        "metrics_active_minutes": 0,
+        "metrics_models": [],
+        "metrics_tokens_input": 0,
+        "metrics_tokens_output": 0,
+        "metrics_tokens_cache_creation": 0,
+        "metrics_tokens_cache_read": 0
+      }
+    },
+    {
+      "path": "mid/index.md",
+      "written": false,
+      "sessions": [],
+      "totals": {
+        "metrics_active_minutes": 0,
+        "metrics_models": [],
+        "metrics_tokens_input": 0,
+        "metrics_tokens_output": 0,
+        "metrics_tokens_cache_creation": 0,
+        "metrics_tokens_cache_read": 0
+      }
+    },
+    {
+      "path": "zeta/index.md",
+      "written": false,
+      "sessions": [],
+      "totals": {
+        "metrics_active_minutes": 0,
+        "metrics_models": [],
+        "metrics_tokens_input": 0,
+        "metrics_tokens_output": 0,
+        "metrics_tokens_cache_creation": 0,
+        "metrics_tokens_cache_read": 0
+      }
+    }
+  ]
+}
+-- stderr --

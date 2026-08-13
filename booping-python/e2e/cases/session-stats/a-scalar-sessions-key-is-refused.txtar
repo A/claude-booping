@@ -1,0 +1,16 @@
+`sessions:` must be a list. A scalar is a malformed artifact rather than a single-element shorthand,
+and it gets its own message naming the file, distinct from the missing-key note.
+
+-- fixtures/cwd/vault/plan/index.md --
+---
+sessions: d26525cc-dca0-4570-bfd5-a097daef66a1
+---
+
+Body.
+-- cmd --
+booping session-stats vault/plan/index.md --dry-run
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: sessions: is not a list in vault/plan/index.md
