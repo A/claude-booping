@@ -2,7 +2,7 @@
 id: "06"
 title: "session-stats write path"
 sp: 3
-status: pending
+status: done
 plan: "vault/plans/202608131522_final-cli-commands-to-e2e/index.md"
 ---
 
@@ -18,28 +18,28 @@ Transcripts are seeded as in M05, and every stamped total is derived by hand fro
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 6.1 | Write the stamping cases: a fresh artifact gaining all six `metrics_*` keys with `written` true in stdout and the keys pinned in an `expected/` section, and a per-session JSON object whose keys are the `metrics_*` names verbatim | `booping-python/e2e/cases/session-stats/*.txtar` | 1 | pending |
-| 6.2 | Write the idempotence cases: a rerun over an already-stamped artifact reported as not written with the file byte-identical, and `--force` overwriting stale values with the fresh ones | `booping-python/e2e/cases/session-stats/*.txtar` | 1 | pending |
-| 6.3 | Write the `--dry-run` case as two consecutive `cmd` lines — a dry run then a wet run over the same seeded artifact — pinning identical totals across both and the artifact unchanged after the first | `booping-python/e2e/cases/session-stats/*.txtar` | 1 | pending |
+| 6.1 | Write the stamping cases: a fresh artifact gaining all six `metrics_*` keys with `written` true in stdout and the keys pinned in an `expected/` section, and a per-session JSON object whose keys are the `metrics_*` names verbatim | `booping-python/e2e/cases/session-stats/*.txtar` | 1 | done |
+| 6.2 | Write the idempotence cases: a rerun over an already-stamped artifact reported as not written with the file byte-identical, and `--force` overwriting stale values with the fresh ones | `booping-python/e2e/cases/session-stats/*.txtar` | 1 | done |
+| 6.3 | Write the `--dry-run` case as two consecutive `cmd` lines — a dry run then a wet run over the same seeded artifact — pinning identical totals across both and the artifact unchanged after the first | `booping-python/e2e/cases/session-stats/*.txtar` | 1 | done |
 
 ## Definition of Done
 
 ### Task 6.1
 
-- [ ] A fresh artifact case pins all six `metrics_*` keys in an `expected/` section with hand-derived values, and `written: true` in the JSON.
-- [ ] The per-session objects in stdout use the `metrics_*` names verbatim as their keys, not a shortened alias.
-- [ ] The stamped artifact's non-metrics frontmatter keys and its body survive the write unchanged.
+- [x] A fresh artifact case pins all six `metrics_*` keys in an `expected/` section with hand-derived values, and `written: true` in the JSON.
+- [x] The per-session objects in stdout use the `metrics_*` names verbatim as their keys, not a shortened alias.
+- [x] The stamped artifact's non-metrics frontmatter keys and its body survive the write unchanged.
 
 ### Task 6.2
 
-- [ ] A rerun over an artifact already carrying the six keys reports `written: false` and its `expected/` section is byte-identical to the seeded fixture.
-- [ ] A `--force` case seeds deliberately wrong values and pins the corrected ones after the run.
+- [x] A rerun over an artifact already carrying the six keys reports `written: false` and its `expected/` section is byte-identical to the seeded fixture.
+- [x] A `--force` case seeds deliberately wrong values and pins the corrected ones after the run.
 
 ### Task 6.3
 
-- [ ] The dry-run cmd line and the wet cmd line print the same totals, visible in the concatenated stdout.
-- [ ] The case's `expected/` section shows the artifact carrying the keys — written by the second invocation, since the first must not write.
-- [ ] A sibling case runs `--dry-run` alone and its `expected/` section shows the artifact still without any `metrics_*` key.
+- [x] The dry-run cmd line and the wet cmd line print the same totals, visible in the concatenated stdout.
+- [x] The case's `expected/` section shows the artifact carrying the keys — written by the second invocation, since the first must not write.
+- [x] A sibling case runs `--dry-run` alone and its `expected/` section shows the artifact still without any `metrics_*` key.
 
 ## Verify
 
