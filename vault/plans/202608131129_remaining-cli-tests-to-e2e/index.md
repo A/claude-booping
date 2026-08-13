@@ -68,7 +68,7 @@ Rebaseline flow, from `booping-python/`: `uv run pytest e2e --txtar-update -k <e
 | 03 | [render-playbook state machines](milestones/M03-render-playbook-state-machines/M03-render-playbook-state-machines.md) | 3 | done |
 | 04 | [render-playbook Jinja modes and inline steps](milestones/M04-render-playbook-jinja-and-inline-steps/M04-render-playbook-jinja-and-inline-steps.md) | 4 | done |
 | 05 | [render-playbook include chain and macro stubs](milestones/M05-render-playbook-includes-and-macros/M05-render-playbook-includes-and-macros.md) | 2 | done |
-| 06 | [render-playbook lessons surfaces](milestones/M06-render-playbook-lessons/M06-render-playbook-lessons.md) | 3 | pending |
+| 06 | [render-playbook lessons surfaces](milestones/M06-render-playbook-lessons/M06-render-playbook-lessons.md) | 3 | done |
 | 07 | [render-playbook --set overrides and the parse_set_overrides move](milestones/M07-render-playbook-set-overrides/M07-render-playbook-set-overrides.md) | 2 | pending |
 | 08 | [render-playbook cross-check and unit deletion](milestones/M08-render-playbook-cross-check/M08-render-playbook-cross-check.md) | 3 | pending |
 | 09 | [playbook-transition bootstrap, edges and the report](milestones/M09-transition-bootstrap-and-edges/M09-transition-bootstrap-and-edges.md) | 3 | pending |
