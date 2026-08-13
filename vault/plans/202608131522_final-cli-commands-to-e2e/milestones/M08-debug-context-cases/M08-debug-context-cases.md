@@ -2,7 +2,7 @@
 id: "08"
 title: "debug-context cases"
 sp: 1
-status: pending
+status: done
 plan: "vault/plans/202608131522_final-cli-commands-to-e2e/index.md"
 ---
 
@@ -20,16 +20,16 @@ Asserting the dump is valid YAML is explicitly not in scope — `yaml.dump` cann
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 8.1 | Write the assembly-guard cases — one over a cwd-rooted vault with a `.booping` marker, plans, lessons and a local playbook seeded, one with no marker anywhere — each asserting exit 0 and empty stderr with no `stdout` section, and each opening with a comment naming what it does not pin and why | `booping-python/e2e/cases/debug-context/*.txtar` | 1 | pending |
+| 8.1 | Write the assembly-guard cases — one over a cwd-rooted vault with a `.booping` marker, plans, lessons and a local playbook seeded, one with no marker anywhere — each asserting exit 0 and empty stderr with no `stdout` section, and each opening with a comment naming what it does not pin and why | `booping-python/e2e/cases/debug-context/*.txtar` | 1 | done |
 
 ## Definition of Done
 
 ### Task 8.1
 
-- [ ] The attached-vault case seeds a `.booping` marker, at least one plan, one lesson and one `fx-`-prefixed local playbook, and asserts exit 0 with an empty `stderr` section.
-- [ ] The detached case runs from a `cwd` root with no marker on any parent and likewise asserts exit 0 and empty stderr.
-- [ ] Neither case carries a `stdout` section.
-- [ ] Each case file opens with a comment stating that stdout is unasserted because the dump's line count tracks the shipped playbook, skill and agent lists, and that the case guards assembly rather than output content.
+- [x] The attached-vault case seeds a `.booping` marker, at least one plan, one lesson and one `fx-`-prefixed local playbook, and asserts exit 0 with an empty `stderr` section.
+- [x] The detached case runs from a `cwd` root with no marker on any parent and likewise asserts exit 0 and empty stderr.
+- [x] Neither case carries a `stdout` section.
+- [x] Each case file opens with a comment stating that stdout is unasserted because the dump's line count tracks the shipped playbook, skill and agent lists, and that the case guards assembly rather than output content.
 
 ## Verify
 
