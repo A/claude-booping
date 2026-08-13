@@ -56,7 +56,7 @@ Volatile spans use the `[..]` wildcard (log timestamps); sandbox absolute paths 
 | 04 | [query corpus — output formats, projection, frontmatter warnings](milestones/M04-query-output-and-projection/M04-query-output-and-projection.md) | 3 | done |
 | 05 | [query corpus — where clauses, ordering operators, sort](milestones/M05-query-filtering-semantics/M05-query-filtering-semantics.md) | 5 | done |
 | 06 | [query corpus — discovery, slug identity, spec validation, root](milestones/M06-query-discovery-and-spec-validation/M06-query-discovery-and-spec-validation.md) | 4 | done |
-| 07 | [Cross-check, delete the CLI query units, shrink the library file](milestones/M07-cross-check-and-unit-deletion/M07-cross-check-and-unit-deletion.md) | 3 | pending |
+| 07 | [Cross-check, delete the CLI query units, shrink the library file](milestones/M07-cross-check-and-unit-deletion/M07-cross-check-and-unit-deletion.md) | 3 | done |
 
 ## I/O contract
 
