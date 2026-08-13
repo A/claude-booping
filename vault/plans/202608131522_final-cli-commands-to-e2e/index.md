@@ -83,7 +83,7 @@ M01, M08 and M09 are independent of everything else and may run in any position.
 | --- | --- | --- | --- |
 | 01 | [render cases and the render-playbook gate](milestones/M01-render-and-gate-cases/M01-render-and-gate-cases.md) | 4 | done |
 | 02 | [playbook-state report shape and ordering](milestones/M02-playbook-state-report/M02-playbook-state-report.md) | 3 | done |
-| 03 | [playbook-state target addressing and error exits](milestones/M03-playbook-state-addressing/M03-playbook-state-addressing.md) | 3 | pending |
+| 03 | [playbook-state target addressing and error exits](milestones/M03-playbook-state-addressing/M03-playbook-state-addressing.md) | 3 | done |
 | 04 | [the run walk and the fixture-home retirement](milestones/M04-run-walk-and-fixture-retirement/M04-run-walk-and-fixture-retirement.md) | 3 | pending |
 | 05 | [session-stats read path](milestones/M05-session-stats-read-path/M05-session-stats-read-path.md) | 3 | pending |
 | 06 | [session-stats write path](milestones/M06-session-stats-write-path/M06-session-stats-write-path.md) | 3 | pending |
