@@ -74,7 +74,7 @@ Rebaseline flow, from `booping-python/`: `uv run pytest e2e --txtar-update -k <e
 | 09 | [playbook-transition bootstrap, edges and the report](milestones/M09-transition-bootstrap-and-edges/M09-transition-bootstrap-and-edges.md) | 3 | done |
 | 10 | [playbook-transition hooks](milestones/M10-transition-hooks/M10-transition-hooks.md) | 4 | done |
 | 11 | [playbook-transition --target addressing](milestones/M11-transition-target-addressing/M11-transition-target-addressing.md) | 3 | done |
-| 12 | [playbook-transition cross-check and unit deletion](milestones/M12-transition-cross-check/M12-transition-cross-check.md) | 2 | pending |
+| 12 | [playbook-transition cross-check and unit deletion](milestones/M12-transition-cross-check/M12-transition-cross-check.md) | 2 | done |
 
 ## I/O contract
 
