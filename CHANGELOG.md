@@ -4,6 +4,23 @@ Notable user-visible changes, newest first, in the [Keep a Changelog](https://ke
 
 ## Unreleased
 
+## v1.1.0 — 2026-08-14
+
+A grooming run no longer needs you sitting in the conversation. Point booping at a task tracker and a plan can be shaped from an issue, with its open questions posted back and answered whenever you get to them.
+
+### Added
+
+- A second CLI, `bin/booping-tracker`, carries every tracker interaction: read an issue, comment on it, create issues and sub-issues, cross-link them, and push a plan's status onto its issue. It ships with two drivers — `cli`, which does nothing and keeps today's behaviour exactly as it was, and `linear`, which talks to Linear.
+- `core.tracker` in the config picks the driver and holds the connection settings, the label names and the map from a groom status to the workflow state it shows as. Secrets are never config values: the config names an environment variable and the tracker reads the token from there.
+- Groom gained an `awaiting-clarification` status. A run that hits a question it cannot answer writes it to a `clarifications.md` beside the plan, posts it to the tracker, records where to come back to, and ends — a later run reads the answers off the file and picks up where it stopped.
+- With the `linear` driver, groom reads its request from the issue it was given, publishes the finished plan as its own issue with one sub-issue per milestone linked back to the request, and parks for approval instead of asking in chat.
+
+### Changed
+
+- Every groom transition now mirrors the plan's status onto its tracker issue. A tracker that is unreachable never fails the transition — the vault stays authoritative, the mirror warns, and re-running `booping-tracker sync` reconciles it.
+
+Nothing changes for an interactive run. With no `core.tracker` configured, groom renders and behaves exactly as it did in 1.0.1, and the new status is unreachable.
+
 ## v1.0.1 — 2026-08-13
 
 Milestones became real files. Each one lives in a directory of its own under the plan, and that file — not a slice of the plan — is what develop hands a coding agent.
