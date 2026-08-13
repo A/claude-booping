@@ -1,13 +1,13 @@
 ---
 title: "Migrate render-playbook and playbook-transition tests to the txtar e2e corpus"
 type: "refactoring"
-status: in-progress
+status: done
 sp: 37
 related_to: null
 created: 2026-08-13 11:30
 planned: null
 started: 2026-08-13 13:17
-completed: null
+completed: 2026-08-13 15:02
 code_reviews: []
 sessions:
 - 086d1f82-966e-4ba7-ae16-b89491381d25
@@ -18,6 +18,13 @@ summary: render-playbook and playbook-transition units become txtar e2e cases;
 commit: 54ecd6967f2f7015a698810a295697326167c7db
 agents.cross-review: a9556762c74fc37da
 reviewed_at: 2026-08-13 12:48
+metrics_active_minutes: 125
+metrics_models:
+- claude-opus-5
+metrics_tokens_input: 537
+metrics_tokens_output: 167604
+metrics_tokens_cache_creation: 722967
+metrics_tokens_cache_read: 29915454
 ---
 
 # Migrate render-playbook and playbook-transition tests to the txtar e2e corpus
