@@ -35,7 +35,7 @@ Deleting the fixture home is safe only if nothing else reads it: `filer/`, `scri
 
 ### Task 4.2
 
-- [x] `test_report_writes_nothing` survives verbatim in intent in its own file, still asserting `st_mtime` and `st_size` are unchanged across a report.
+- [x] `test_report_writes_nothing` survived M04 in its own file, still asserting `st_mtime` and `st_size` are unchanged across a report. Superseded at sprint close: the user chose to delete it along with `tests/commands/` rather than keep the directory alive for one test, so the read-only-reporter guard is dropped — the txtar corpus provably cannot express it, since `compare` cannot distinguish an unwritten file from a byte-identical rewrite.
 - [x] `tests/commands/playbook_state_test.py` and `tests/commands/playbook_run_integration_test.py` no longer exist.
 - [x] `tests/__fixtures__/playbook-transition-home/` no longer exists, and `rg -n "playbook-transition-home|get_fixture_path" booping-python/tests` returns no reference to it.
 - [x] `uv run pytest tests` is green.

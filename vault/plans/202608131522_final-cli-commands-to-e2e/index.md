@@ -1,13 +1,13 @@
 ---
 title: "Migrate the last CLI commands to the txtar e2e corpus"
 type: "refactoring"
-status: in-progress
+status: done
 sp: 28
 related_to: null
 created: 2026-08-13 15:22
 planned: null
 started: 2026-08-13 16:15
-completed: null
+completed: 2026-08-13 17:20
 code_reviews: []
 sessions:
 - d26525cc-dca0-4570-bfd5-a097daef66a1
@@ -17,6 +17,13 @@ summary: Last CLI commands reach the txtar corpus; build and debug-template
   retired, tests/commands emptied
 commit: 67853c9b4ec7cb1c84320bb87f52107bd01e91a8
 reviewed_at: 2026-08-13 16:06
+metrics_active_minutes: 87
+metrics_models:
+- claude-opus-5
+metrics_tokens_input: 3022
+metrics_tokens_output: 220334
+metrics_tokens_cache_creation: 816764
+metrics_tokens_cache_read: 29392949
 ---
 
 # Migrate the last CLI commands to the txtar e2e corpus
@@ -116,7 +123,7 @@ Every surviving command is pinned as it stands today — this plan documents the
 
 - Arguments / flags: `booping session-stats <path> [--mask GLOB] [--force] [--dry-run] [--projects-root PATH]`. `<path>` is an artifact file, or a directory walked by `--mask` (default `index.md`). `--projects-root` defaults to `~/.claude/projects`.
 - stdin: not read.
-- stdout: exactly one JSON document, `{"artifacts": [...]}`, `indent=2`, printed once at the end. Each entry carries `path`, `written`, and either `skipped` with empty `sessions` / `totals`, or full `sessions` and `totals` keyed by the six `metrics_*` frontmatter names verbatim.
+- stdout: exactly one JSON document, `{"artifacts": [...]}`, `indent=2`, printed once at the end. Each entry carries `path`, `written`, and either `skipped` with empty `sessions` / `totals`, or full `sessions` and `totals` keyed by the six `metrics_*` frontmatter names verbatim. Corrected during the sprint (M05): `skipped` marks only the already-stamped path; an artifact with no `sessions:` key is omitted from the `artifacts` array entirely, so a lone such artifact yields `{"artifacts": []}`.
 - stderr: `note: no sessions: key in {path}; skipped`; `warning: no transcript found for session {id}`; `warning: skipped {n} malformed line(s) in {path}`; an `error: …` line before every non-zero exit. Warnings and notes are non-fatal.
 - Exit codes: `0` on completion, including runs where every artifact skipped or warned. `1` for `path not found`, `no artifact matching {mask} under {root}`, unreadable frontmatter, and a `sessions:` key that is not a list. `2` for a write failure.
 
@@ -132,13 +139,13 @@ Every surviving command is pinned as it stands today — this plan documents the
 
 ## Final Verification
 
-- [ ] `just e2e` green, with `cases/render/`, `cases/playbook-state/`, `cases/session-stats/` and `cases/debug-context/` collected.
-- [ ] `just pytest` green with `booping-python/tests/commands/` and `tests/__fixtures__/playbook-transition-home/` both gone.
-- [ ] `just ci` green end to end.
-- [ ] `bin/booping --help` lists eleven subcommands, with no `build` and no `debug-template`.
-- [ ] `rg -n "booping build|src/files|config_files" --glob '!vault/**'` returns nothing outside this plan's own artefacts.
-- [ ] `git diff --stat -- skills/ agents/` is empty across the whole sprint — the retirement changes no rendered surface.
-- [ ] Every deleted test has a named corpus case, a named surviving unit, or a recorded drop rationale in M10's cross-check table.
+- [x] `just e2e` green, with `cases/render/`, `cases/playbook-state/`, `cases/session-stats/` and `cases/debug-context/` collected.
+- [x] `just pytest` green with `booping-python/tests/commands/` and `tests/__fixtures__/playbook-transition-home/` both gone.
+- [x] `just ci` green end to end.
+- [x] `bin/booping --help` lists eleven subcommands, with no `build` and no `debug-template`.
+- [x] `rg -n "booping build|src/files|config_files" --glob '!vault/**' --glob '!playbooks/*/_specs/**'` returns nothing outside this plan's own artefacts. Amended at sprint close: one match survives at `playbooks/groom/_specs/steps/research-codebase/index.md:70`, in a tree CLAUDE.md declares intentionally stale design history, so the sweep excludes those trees rather than rewriting history.
+- [x] `git diff --stat -- skills/ agents/` is empty across the whole sprint — the retirement changes no rendered surface.
+- [x] Every deleted test has a named corpus case, a named surviving unit, or a recorded drop rationale in M10's cross-check table.
 
 ## Out of scope
 
