@@ -1,0 +1,14 @@
+A call with no key=value pairs and no --append/--remove has nothing to do and
+fails with exit 1.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+-- cmd --
+booping frontmatter-update plan.md
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: nothing to do: provide key=value pairs, --append and/or --remove

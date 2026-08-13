@@ -1,0 +1,14 @@
+A key=value argument without `=` fails with exit 1, naming the offending
+argument.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+-- cmd --
+booping frontmatter-update plan.md noequals
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: malformed key=value pair: 'noequals'

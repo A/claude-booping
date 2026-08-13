@@ -1,0 +1,29 @@
+Setting a key to a literal string writes it into the frontmatter and reports a
+one-line addition diff.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md status=in-progress
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,4 +1,5 @@
+ ---
+ title: Foo
++status: in-progress
+ ---
+ # Body
+-- stderr --
+updated plan.md: status=in-progress
+-- expected/cwd/plan.md --
+---
+title: Foo
+status: in-progress
+---
+# Body

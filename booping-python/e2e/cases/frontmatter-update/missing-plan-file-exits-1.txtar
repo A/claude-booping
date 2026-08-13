@@ -1,0 +1,10 @@
+A plan path that does not exist fails with exit 1 and a stderr message naming
+the path, before any other work.
+
+-- cmd --
+booping frontmatter-update nope.md status=in-progress
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: plan not found: nope.md

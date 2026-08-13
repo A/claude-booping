@@ -1,0 +1,41 @@
+With a .booping marker above the cwd the run appends exactly one
+[frontmatter-update] line, naming the plan and the changed key, to the attached
+vault's log.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+-- fixtures/cwd/vault/config.yaml --
+core:
+  e2e_demo:
+    x: 1
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+status: backlog
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md status=in-progress
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,5 +1,5 @@
+ ---
+ title: Foo
+-status: backlog
++status: in-progress
+ ---
+ # Body
+-- stderr --
+updated plan.md: status=in-progress
+-- expected/cwd/plan.md --
+---
+title: Foo
+status: in-progress
+---
+# Body
+-- expected/cwd/vault/.booping.log --
+[..]Z: [frontmatter-update] plan.md status
