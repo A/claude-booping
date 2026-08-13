@@ -1,0 +1,46 @@
+`--stub-macro` pins a config-declared macro to a literal for the whole render — preamble and step
+body alike — and short-circuits it before any subprocess starts. The declared argv is `false`, which
+exits 1: had the command run, the render would carry the macro's failure instead of the stamp.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  macros:
+    build: ["false"]
+-- fixtures/home/Claude/_playbooks/fx-macro-stub/playbook.md --
+---
+name: fx-macro-stub
+title: Macro Stub
+summary: Macro pinned by --stub-macro.
+jinja: true
+inline_steps: true
+---
+
+Preamble stamp {{ macro('core.macros.build') }}.
+-- fixtures/home/Claude/_playbooks/fx-macro-stub/playbook.yaml --
+graph:
+  one: []
+-- fixtures/home/Claude/_playbooks/fx-macro-stub/one/prompt.md --
+---
+name: one
+summary: Only step.
+---
+
+Body stamp {{ macro('core.macros.build') }}.
+-- cmd --
+booping render-playbook fx-macro-stub --stub-macro core.macros.build=19700101
+-- exit --
+0
+-- stdout --
+Preamble stamp 19700101.
+
+## Playbook Steps
+
+Execute the steps in the most effective order considering their dependencies.
+
+| Step | Dependencies | Summary | Review gate |
+| --- | --- | --- | --- |
+| `one` | — | Only step. | — |
+
+## Step: One
+Body stamp 19700101.
+-- stderr --

@@ -2,7 +2,7 @@ from typing import Any
 
 import pytest
 
-from booping.utils import PathError, deep_merge, resolve_path
+from booping.utils import PathError, deep_merge, parse_set_overrides, resolve_path
 
 
 class TestResolvePath:
@@ -98,3 +98,25 @@ def test_shallow_merge_keys_none_behaves_like_pure_deep_merge() -> None:
     merged = deep_merge(base, override)
     # Without shallow flag, the agent entry deep-merges — internal survives.
     assert merged["agents"]["a"] == {"internal": True, "good_for": ["one"], "type": "cli"}
+
+
+def test_set_override_parses_dotted_key_into_nested_mapping() -> None:
+    assert parse_set_overrides(["a.b.c=x"]) == {"a": {"b": {"c": "x"}}}
+
+
+def test_set_override_parses_flat_key_and_keeps_value_a_string() -> None:
+    assert parse_set_overrides(["threshold=3"]) == {"threshold": "3"}
+
+
+def test_set_override_parses_value_containing_equals() -> None:
+    assert parse_set_overrides(["a.b=x=y"]) == {"a": {"b": "x=y"}}
+
+
+def test_set_override_repeated_pairs_later_wins() -> None:
+    parsed = parse_set_overrides(["a.b=1", "a.c=2", "a.b=3"])
+    assert parsed == {"a": {"b": "3", "c": "2"}}
+
+
+def test_set_override_malformed_pair_raises() -> None:
+    with pytest.raises(ValueError, match="nope"):
+        parse_set_overrides(["nope"])

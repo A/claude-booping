@@ -1,0 +1,37 @@
+`--help` succeeds and documents the full flag set, `--no-lessons` among it.
+
+-- cmd --
+booping render-playbook --help
+-- exit --
+0
+-- stdout --
+usage: booping render-playbook [-h] [--step NAME] [--project PATH]
+                               [--output PATH] [--set KEY=VALUE]
+                               [--stub-macro DOTTED.PATH=LITERAL]
+                               [--no-lessons] [--inline-steps]
+                               name
+
+positional arguments:
+  name                  Playbook name to render
+
+options:
+  -h, --help            show this help message and exit
+  --step NAME           Print only this step's body (no surrounding sections)
+  --project PATH        Resolve context against this vault instead of the
+                        attached project
+  --output PATH         Output path (default: stdout); use - for stdout
+  --set KEY=VALUE       Override a config value for this render (dotted key,
+                        e.g. core.sprint.default_threshold_sp=3); repeatable,
+                        later pairs win, and the value wins over every config
+                        tier
+  --stub-macro DOTTED.PATH=LITERAL
+                        Make a macro return LITERAL without executing it (e.g.
+                        core.macros.date=19700101-00-00); repeatable, later
+                        pairs win
+  --no-lessons          Suppress the Lessons section on both the composed and
+                        --step surfaces
+  --inline-steps        Embed each non-detached step's body in its composed
+                        section instead of the fetch command (detached steps
+                        keep fetch-form); implied by `inline_steps: true` in
+                        the playbook's manifest frontmatter
+-- stderr --

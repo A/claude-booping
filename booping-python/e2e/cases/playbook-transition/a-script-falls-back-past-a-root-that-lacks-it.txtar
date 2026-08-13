@@ -1,0 +1,60 @@
+Discovery roots are probed most-specific first. A vault-local playbook whose own `_scripts/` and
+whose vault root's `_scripts/` both lack the name falls back to the global root's copy.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/_playbooks/fx-hooks/playbook.md --
+---
+name: fx-hooks
+title: Hooks
+summary: Hook-bearing fixture for playbook-transition.
+---
+
+Preamble.
+-- fixtures/cwd/vault/_playbooks/fx-hooks/playbook.yaml --
+state: main
+graph:
+  only: []
+
+states:
+  main:
+    artifact: index.md
+    initial: intaking
+    statuses:
+      intaking:
+        transitions:
+          - to: noted
+            when: the note is written
+            hooks: ["script shared-note"]
+      noted: {terminal: true}
+-- fixtures/cwd/vault/_playbooks/fx-hooks/only/prompt.md --
+---
+summary: Only step.
+---
+
+Only body.
+-- fixtures/cwd/vault/_playbooks/_scripts/other-note --
+#!/bin/sh
+echo "vault" >> "$BOOPING_WORKDIR/note.log"
+-- fixtures/home/Claude/_playbooks/_scripts/shared-note --
+#!/bin/sh
+echo "global" >> "$BOOPING_WORKDIR/note.log"
+-- fixtures/cwd/run/.keep --
+-- cmd --
+chmod +x ../home/Claude/_playbooks/_scripts/shared-note
+booping playbook-transition fx-hooks intaking --workdir run
+booping playbook-transition fx-hooks noted --workdir run
+-- exit --
+0
+-- stdout --
+created index.md
+not-started → intaking
+frontmatter: status=intaking
+intaking → noted
+frontmatter: status=noted
+script shared-note: ok
+-- stderr --
+-- expected/cwd/run/note.log --
+global

@@ -1,0 +1,67 @@
+The mirror refusal: a machine whose artifact path carries no `{instance}` has nowhere to put the
+slug, so `--instance` is rejected rather than ignored.
+
+-- fixtures/home/Claude/_playbooks/fx-run/playbook.md --
+---
+name: fx-run
+title: Run
+summary: Hookless states-bearing fixture for playbook-transition.
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-run/playbook.yaml --
+state: main
+graph:
+  intake: []
+  step-pipeline:
+    dependencies: [intake]
+    state: step
+    graph:
+      spec: []
+
+states:
+  main:
+    artifact: index.md
+    initial: intaking
+    statuses:
+      intaking:
+        transitions:
+          - to: researching
+            when: intake complete
+          - to: parked
+            when: the run is shelved
+      researching:
+        transitions:
+          - to: done
+            when: research complete
+      parked: {terminal: true}
+      done: {terminal: true}
+  step:
+    artifact: steps/{instance}/index.md
+    initial: spec-ing
+    statuses:
+      spec-ing:
+        transitions:
+          - to: done
+            when: spec written
+      done: {terminal: true}
+-- fixtures/home/Claude/_playbooks/fx-run/intake/prompt.md --
+---
+summary: Intake the request.
+---
+
+Intake body.
+-- fixtures/home/Claude/_playbooks/fx-run/spec/prompt.md --
+---
+summary: Write the spec.
+---
+
+Spec body.
+-- fixtures/cwd/run/.keep --
+-- cmd --
+booping playbook-transition fx-run intaking --instance alpha --workdir run
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: state 'main' has no {instance} in its artifact path (index.md); --instance is not accepted

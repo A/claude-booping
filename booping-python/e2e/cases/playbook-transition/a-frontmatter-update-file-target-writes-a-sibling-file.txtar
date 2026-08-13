@@ -1,0 +1,64 @@
+The one token in a `frontmatter-update` hook carrying no `=` is a file target, resolved against the
+workdir rather than the artifact. The report names it, the artifact keeps only its status, and the
+target's existing keys and body survive the write.
+
+-- fixtures/home/Claude/_playbooks/fx-hooks/playbook.md --
+---
+name: fx-hooks
+title: Hooks
+summary: Hook-bearing fixture for playbook-transition.
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-hooks/playbook.yaml --
+state: main
+graph:
+  only: []
+
+states:
+  main:
+    artifact: index.md
+    initial: intaking
+    statuses:
+      intaking:
+        transitions:
+          - to: noted
+            when: the brief is reviewed
+            hooks: ["frontmatter-update brief.md reviewed=recorded"]
+      noted: {terminal: true}
+-- fixtures/home/Claude/_playbooks/fx-hooks/only/prompt.md --
+---
+summary: Only step.
+---
+
+Only body.
+-- fixtures/cwd/run/brief.md --
+---
+title: Brief
+---
+
+Brief body.
+-- cmd --
+booping playbook-transition fx-hooks intaking --workdir run
+booping playbook-transition fx-hooks noted --workdir run
+-- exit --
+0
+-- stdout --
+created index.md
+not-started → intaking
+frontmatter: status=intaking
+intaking → noted
+frontmatter: status=noted
+frontmatter brief.md: reviewed=recorded
+-- stderr --
+-- expected/cwd/run/brief.md --
+---
+title: Brief
+reviewed: recorded
+---
+
+Brief body.
+-- expected/cwd/run/index.md --
+---
+status: noted
+---

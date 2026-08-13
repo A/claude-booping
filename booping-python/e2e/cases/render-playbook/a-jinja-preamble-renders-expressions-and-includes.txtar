@@ -1,0 +1,54 @@
+With `jinja: true` the preamble goes through the full context env: a `{{ … }}` expression resolves
+against the merged config, and `{% include %}` pulls a partial from the playbook's own directory —
+the first link of the body's loader chain. The step section is unaffected: opting into Jinja does
+not embed any body.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  fx_label: hermetic label
+-- fixtures/home/Claude/_playbooks/fx-jinja-preamble/playbook.md --
+---
+name: fx-jinja-preamble
+title: Jinja Preamble
+summary: Preamble rendered through the context.
+jinja: true
+---
+
+Preamble label {{ config.core.fx_label }}.
+
+{% include "shared.md" %}
+-- fixtures/home/Claude/_playbooks/fx-jinja-preamble/shared.md --
+Included partial content.
+-- fixtures/home/Claude/_playbooks/fx-jinja-preamble/playbook.yaml --
+graph:
+  one: []
+-- fixtures/home/Claude/_playbooks/fx-jinja-preamble/one/prompt.md --
+---
+name: one
+summary: Only step.
+---
+
+Only body.
+-- cmd --
+booping render-playbook fx-jinja-preamble
+-- exit --
+0
+-- stdout --
+Preamble label hermetic label.
+
+Included partial content.
+
+## Playbook Steps
+
+Execute the steps in the most effective order considering their dependencies.
+
+| Step | Dependencies | Summary | Review gate |
+| --- | --- | --- | --- |
+| `one` | — | Only step. | — |
+
+## Step: One
+Instructions:
+- Summary: Only step.
+
+Run `booping render-playbook fx-jinja-preamble --step one` for content.
+-- stderr --

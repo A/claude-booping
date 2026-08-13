@@ -1,0 +1,71 @@
+A file that exists but carries no frontmatter reads as a run that has not started, so a non-initial
+target is refused — and the degenerate file is left exactly as it was.
+
+-- fixtures/home/Claude/_playbooks/fx-run/playbook.md --
+---
+name: fx-run
+title: Run
+summary: Hookless states-bearing fixture for playbook-transition.
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-run/playbook.yaml --
+state: main
+graph:
+  intake: []
+  step-pipeline:
+    dependencies: [intake]
+    state: step
+    graph:
+      spec: []
+
+states:
+  main:
+    artifact: index.md
+    initial: intaking
+    statuses:
+      intaking:
+        transitions:
+          - to: researching
+            when: intake complete
+          - to: parked
+            when: the run is shelved
+      researching:
+        transitions:
+          - to: done
+            when: research complete
+      parked: {terminal: true}
+      done: {terminal: true}
+  step:
+    artifact: steps/{instance}/index.md
+    initial: spec-ing
+    statuses:
+      spec-ing:
+        transitions:
+          - to: done
+            when: spec written
+      done: {terminal: true}
+-- fixtures/home/Claude/_playbooks/fx-run/intake/prompt.md --
+---
+summary: Intake the request.
+---
+
+Intake body.
+-- fixtures/home/Claude/_playbooks/fx-run/spec/prompt.md --
+---
+summary: Write the spec.
+---
+
+Spec body.
+-- fixtures/cwd/run/.keep --
+-- fixtures/cwd/run/index.md --
+no frontmatter here
+-- cmd --
+booping playbook-transition fx-run researching --workdir run
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: {CWD}/run/index.md: no frontmatter `status:` key; the only legal target is the initial status 'intaking'
+-- expected/cwd/run/index.md --
+no frontmatter here

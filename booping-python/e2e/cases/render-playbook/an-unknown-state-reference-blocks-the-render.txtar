@@ -1,0 +1,42 @@
+The outer graph's `state:` naming an entry `states:` never declares blocks the render, and the
+notice names both the missing entry and the scope that referenced it.
+
+-- fixtures/home/Claude/_playbooks/fx-unknown-state/playbook.md --
+---
+name: fx-unknown-state
+title: Unknown State
+---
+
+Preamble prose for the unknown-state playbook.
+-- fixtures/home/Claude/_playbooks/fx-unknown-state/playbook.yaml --
+state: nope
+graph:
+  a: []
+
+states:
+  main:
+    artifact: index.md
+    initial: start
+    statuses:
+      start:
+        transitions:
+          - to: done
+            when: a returned
+      done: {terminal: true}
+-- fixtures/home/Claude/_playbooks/fx-unknown-state/a/prompt.md --
+---
+name: a
+summary: a summary
+---
+
+a body
+-- cmd --
+booping render-playbook fx-unknown-state
+-- exit --
+0
+-- stdout --
+**STOP — tell the user:** the outer graph references state 'nope' but playbook.yaml declares no such states entry. Do not execute this playbook.
+**Note — tell the user:** states entry 'main' is declared but no graph scope references it; it will never be used.
+
+Preamble prose for the unknown-state playbook.
+-- stderr --

@@ -1,0 +1,45 @@
+A `{instance}` file target on an edge of a machine that takes no instance has nothing to interpolate
+from, so the hook exits 2 naming the uninterpolated target.
+
+-- fixtures/home/Claude/_playbooks/fx-hooks/playbook.md --
+---
+name: fx-hooks
+title: Hooks
+summary: Hook-bearing fixture for playbook-transition.
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-hooks/playbook.yaml --
+state: main
+graph:
+  only: []
+
+states:
+  main:
+    artifact: index.md
+    initial: intaking
+    statuses:
+      intaking:
+        transitions:
+          - to: noted
+            when: never — the target needs an instance
+            hooks: ["frontmatter-update steps/{instance}/notes.md seen=recorded"]
+      noted: {terminal: true}
+-- fixtures/home/Claude/_playbooks/fx-hooks/only/prompt.md --
+---
+summary: Only step.
+---
+
+Only body.
+-- fixtures/cwd/run/.keep --
+-- cmd --
+booping playbook-transition fx-hooks intaking --workdir run
+booping playbook-transition fx-hooks noted --workdir run
+-- exit --
+2
+-- stdout --
+created index.md
+not-started → intaking
+frontmatter: status=intaking
+-- stderr --
+error: frontmatter-update target steps/{instance}/notes.md carries {instance} but no instance is in scope

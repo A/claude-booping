@@ -1,0 +1,70 @@
+Under `jinja: true` the two templatable step frontmatter fields — `summary:` and `detached:` — are
+rendered through the context before the sections are built, so `one`'s evaluated summary shows in
+both the step table and its section, and its evaluated `detached:` picks the named agent.
+
+`two` names a config key that does not exist: `detached:` renders to the empty string and the step
+degrades to runner-performed — instruction bullets and a fetch line, no delegation sentence and no
+agent with an empty name.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  fx_agent: fx-runner
+  fx_threshold: 7
+-- fixtures/home/Claude/_playbooks/fx-jinja-fields/playbook.md --
+---
+name: fx-jinja-fields
+title: Jinja Fields
+summary: Step frontmatter rendered through the context.
+jinja: true
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-jinja-fields/playbook.yaml --
+graph:
+  one: []
+  two: [one]
+-- fixtures/home/Claude/_playbooks/fx-jinja-fields/one/prompt.md --
+---
+name: one
+summary: Split past {{ config.core.fx_threshold }} SP
+detached: '{{ config.core.fx_agent }}'
+---
+
+One body.
+-- fixtures/home/Claude/_playbooks/fx-jinja-fields/two/prompt.md --
+---
+name: two
+summary: Plain summary.
+detached: '{{ config.core.no_such_key }}'
+---
+
+Two body.
+-- cmd --
+booping render-playbook fx-jinja-fields
+-- exit --
+0
+-- stdout --
+Preamble.
+
+## Playbook Steps
+
+Execute the steps in the most effective order considering their dependencies.
+
+| Step | Dependencies | Summary | Review gate |
+| --- | --- | --- | --- |
+| `one` | — | Split past 7 SP | — |
+| `two` | `one` | Plain summary. | — |
+
+## Step: One
+
+Split past 7 SP
+
+Tell the `fx-runner` agent to get its instructions by calling this command: `booping render-playbook fx-jinja-fields --step one`.
+
+## Step: Two
+Instructions:
+- Summary: Plain summary.
+- After: one
+
+Run `booping render-playbook fx-jinja-fields --step two` for content.
+-- stderr --

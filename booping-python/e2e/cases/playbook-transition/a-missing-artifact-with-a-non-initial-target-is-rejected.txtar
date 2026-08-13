@@ -1,0 +1,67 @@
+With no artifact on disk the run has not started, so the only legal target is the machine's
+initial status. Any other target is refused, naming the artifact path it looked for.
+
+-- fixtures/home/Claude/_playbooks/fx-run/playbook.md --
+---
+name: fx-run
+title: Run
+summary: Hookless states-bearing fixture for playbook-transition.
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-run/playbook.yaml --
+state: main
+graph:
+  intake: []
+  step-pipeline:
+    dependencies: [intake]
+    state: step
+    graph:
+      spec: []
+
+states:
+  main:
+    artifact: index.md
+    initial: intaking
+    statuses:
+      intaking:
+        transitions:
+          - to: researching
+            when: intake complete
+          - to: parked
+            when: the run is shelved
+      researching:
+        transitions:
+          - to: done
+            when: research complete
+      parked: {terminal: true}
+      done: {terminal: true}
+  step:
+    artifact: steps/{instance}/index.md
+    initial: spec-ing
+    statuses:
+      spec-ing:
+        transitions:
+          - to: done
+            when: spec written
+      done: {terminal: true}
+-- fixtures/home/Claude/_playbooks/fx-run/intake/prompt.md --
+---
+summary: Intake the request.
+---
+
+Intake body.
+-- fixtures/home/Claude/_playbooks/fx-run/spec/prompt.md --
+---
+summary: Write the spec.
+---
+
+Spec body.
+-- fixtures/cwd/run/.keep --
+-- cmd --
+booping playbook-transition fx-run researching --workdir run
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: artifact index.md does not exist; the only legal target is the initial status 'intaking'

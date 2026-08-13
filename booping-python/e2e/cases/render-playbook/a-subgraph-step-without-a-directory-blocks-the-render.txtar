@@ -1,0 +1,43 @@
+Inner steps need step directories just like outer ones: a subgraph naming a step with no
+`prompt.md` blocks the render.
+
+-- fixtures/home/Claude/_playbooks/fx-missing-inner-step/playbook.md --
+---
+name: fx-missing-inner-step
+title: Missing Inner Step
+---
+
+Preamble prose for the missing-inner-step playbook.
+-- fixtures/home/Claude/_playbooks/fx-missing-inner-step/playbook.yaml --
+graph:
+  manifest: []
+  pipeline:
+    dependencies: [manifest]
+    graph:
+      spec: []
+      fixtures: [spec]
+-- fixtures/home/Claude/_playbooks/fx-missing-inner-step/manifest/prompt.md --
+---
+name: manifest
+summary: manifest summary
+detached: sonnet:medium
+---
+
+manifest body
+-- fixtures/home/Claude/_playbooks/fx-missing-inner-step/spec/prompt.md --
+---
+name: spec
+summary: spec summary
+detached: sonnet:medium
+---
+
+spec body
+-- cmd --
+booping render-playbook fx-missing-inner-step
+-- exit --
+0
+-- stdout --
+**STOP — tell the user:** step 'fixtures' is referenced in the graph but fixtures/prompt.md does not exist. Do not execute this playbook.
+
+Preamble prose for the missing-inner-step playbook.
+-- stderr --

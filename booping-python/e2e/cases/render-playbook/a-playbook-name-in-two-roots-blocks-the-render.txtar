@@ -1,0 +1,62 @@
+Playbook names are unique across the three discovery roots. The same name in the global root and in
+the vault-local one blocks the render with a `**STOP` naming both scopes; the preamble still prints
+and no lesson section is composed.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/home/Claude/_lessons/0001_alpha.md --
+---
+title: Alpha rule
+targets: [fx-dup]
+---
+
+Alpha body.
+-- fixtures/home/Claude/_playbooks/fx-dup/playbook.md --
+---
+name: fx-dup
+title: Dup Global
+summary: Defined in the global root.
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-dup/playbook.yaml --
+graph:
+  s1: []
+-- fixtures/home/Claude/_playbooks/fx-dup/s1/prompt.md --
+---
+name: s1
+summary: Only step.
+detached: sonnet:medium
+---
+
+Step body.
+-- fixtures/cwd/vault/_playbooks/fx-dup/playbook.md --
+---
+name: fx-dup
+title: Dup Local
+summary: Defined in the vault root.
+---
+
+Preamble.
+-- fixtures/cwd/vault/_playbooks/fx-dup/playbook.yaml --
+graph:
+  s1: []
+-- fixtures/cwd/vault/_playbooks/fx-dup/s1/prompt.md --
+---
+name: s1
+summary: Only step.
+detached: sonnet:medium
+---
+
+Step body.
+-- cmd --
+booping render-playbook fx-dup
+-- exit --
+0
+-- stdout --
+**STOP — tell the user:** playbook 'fx-dup' is defined in more than one root (global, local) — playbook names must be unique; rename one.
+
+Preamble.
+-- stderr --

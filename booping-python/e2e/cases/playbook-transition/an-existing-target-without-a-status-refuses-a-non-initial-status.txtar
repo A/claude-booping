@@ -1,0 +1,60 @@
+A `--target` that exists and carries a frontmatter block but no `status:` is treated as a run that
+has not started, so only the initial status may be written to it. A non-initial target is refused
+naming the resolved target path, and the file keeps its keys and body with no `status:` added.
+
+-- fixtures/home/Claude/_playbooks/fx-run/playbook.md --
+---
+name: fx-run
+title: Run
+summary: Hookless states-bearing fixture for playbook-transition.
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-run/playbook.yaml --
+state: main
+graph:
+  intake: []
+
+states:
+  main:
+    artifact: index.md
+    initial: intaking
+    statuses:
+      intaking:
+        transitions:
+          - to: researching
+            when: intake complete
+      researching:
+        transitions:
+          - to: done
+            when: research complete
+      done: {terminal: true}
+-- fixtures/home/Claude/_playbooks/fx-run/intake/prompt.md --
+---
+summary: Intake the request.
+---
+
+Intake body.
+-- fixtures/cwd/run/retro.md --
+---
+plan: plans/202601011200_thing/index.md
+title: Retro — Thing
+created: 2026-01-01 12:00
+---
+
+## What happened
+-- cmd --
+booping playbook-transition fx-run researching --target retro.md --workdir run
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: {CWD}/run/retro.md: no frontmatter `status:` key; the only legal target is the initial status 'intaking'
+-- expected/cwd/run/retro.md --
+---
+plan: plans/202601011200_thing/index.md
+title: Retro — Thing
+created: 2026-01-01 12:00
+---
+
+## What happened

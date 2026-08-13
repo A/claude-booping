@@ -1,0 +1,49 @@
+Jinja is opt-in. A playbook without `jinja: true` never evaluates a `{{ … }}` token: the preamble,
+the step's `summary:` frontmatter (in the table and in the section) and the step body fetched with
+`--step` all keep their braces, even though the global config tier defines the very keys they name.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  fx_label: hermetic label
+  fx_threshold: 7
+-- fixtures/home/Claude/_playbooks/fx-verbatim/playbook.md --
+---
+name: fx-verbatim
+title: Verbatim
+summary: Non-Jinja playbook carrying Jinja tokens.
+---
+
+Preamble label {{ config.core.fx_label }}.
+-- fixtures/home/Claude/_playbooks/fx-verbatim/playbook.yaml --
+graph:
+  one: []
+-- fixtures/home/Claude/_playbooks/fx-verbatim/one/prompt.md --
+---
+name: one
+summary: Past {{ config.core.fx_threshold }} SP
+---
+
+Body label {{ config.core.fx_label }}.
+-- cmd --
+booping render-playbook fx-verbatim
+booping render-playbook fx-verbatim --step one
+-- exit --
+0
+-- stdout --
+Preamble label {{ config.core.fx_label }}.
+
+## Playbook Steps
+
+Execute the steps in the most effective order considering their dependencies.
+
+| Step | Dependencies | Summary | Review gate |
+| --- | --- | --- | --- |
+| `one` | — | Past {{ config.core.fx_threshold }} SP | — |
+
+## Step: One
+Instructions:
+- Summary: Past {{ config.core.fx_threshold }} SP
+
+Run `booping render-playbook fx-verbatim --step one` for content.
+Body label {{ config.core.fx_label }}.
+-- stderr --

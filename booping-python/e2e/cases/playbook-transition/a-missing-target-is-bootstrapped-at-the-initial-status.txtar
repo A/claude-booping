@@ -1,0 +1,50 @@
+A `--target` that does not exist is created, parent directories included, when the requested status
+is the machine's initial one. The report names the resolved path.
+
+-- fixtures/home/Claude/_playbooks/fx-run/playbook.md --
+---
+name: fx-run
+title: Run
+summary: Hookless states-bearing fixture for playbook-transition.
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-run/playbook.yaml --
+state: main
+graph:
+  intake: []
+
+states:
+  main:
+    artifact: index.md
+    initial: intaking
+    statuses:
+      intaking:
+        transitions:
+          - to: researching
+            when: intake complete
+      researching:
+        transitions:
+          - to: done
+            when: research complete
+      done: {terminal: true}
+-- fixtures/home/Claude/_playbooks/fx-run/intake/prompt.md --
+---
+summary: Intake the request.
+---
+
+Intake body.
+-- fixtures/cwd/run/.keep --
+-- cmd --
+booping playbook-transition fx-run intaking --target reviews/one.md --workdir run
+-- exit --
+0
+-- stdout --
+created {CWD}/run/reviews/one.md
+not-started → intaking
+frontmatter: status=intaking
+-- stderr --
+-- expected/cwd/run/reviews/one.md --
+---
+status: intaking
+---

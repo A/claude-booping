@@ -1,0 +1,53 @@
+A `frontmatter-update` hook carrying only key=value pairs writes them onto the run artifact itself.
+Its report line has no target prefix, and it follows the status line the edge always sets first.
+
+-- fixtures/home/Claude/_playbooks/fx-hooks/playbook.md --
+---
+name: fx-hooks
+title: Hooks
+summary: Hook-bearing fixture for playbook-transition.
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-hooks/playbook.yaml --
+state: main
+graph:
+  only: []
+
+states:
+  main:
+    artifact: index.md
+    initial: intaking
+    statuses:
+      intaking:
+        transitions:
+          - to: noted
+            when: the keys are recorded
+            hooks: ["frontmatter-update noted=recorded reviewer=alpha"]
+      noted: {terminal: true}
+-- fixtures/home/Claude/_playbooks/fx-hooks/only/prompt.md --
+---
+summary: Only step.
+---
+
+Only body.
+-- fixtures/cwd/run/.keep --
+-- cmd --
+booping playbook-transition fx-hooks intaking --workdir run
+booping playbook-transition fx-hooks noted --workdir run
+-- exit --
+0
+-- stdout --
+created index.md
+not-started → intaking
+frontmatter: status=intaking
+intaking → noted
+frontmatter: status=noted
+frontmatter: noted=recorded reviewer=alpha
+-- stderr --
+-- expected/cwd/run/index.md --
+---
+status: noted
+noted: recorded
+reviewer: alpha
+---

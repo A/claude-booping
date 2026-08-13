@@ -1,0 +1,48 @@
+Parallel co-members must be `detached:`. A runner-performed step that shares a wave with another
+step blocks the render and the notice names it.
+
+-- fixtures/home/Claude/_playbooks/fx-inline-in-parallel/playbook.md --
+---
+name: fx-inline-in-parallel
+title: Inline In Parallel
+summary: An inline step shares a wave with another.
+---
+
+Preamble prose for the inline-in-parallel playbook.
+-- fixtures/home/Claude/_playbooks/fx-inline-in-parallel/playbook.yaml --
+graph:
+  root: []
+  one: [root]
+  two: [root]
+-- fixtures/home/Claude/_playbooks/fx-inline-in-parallel/root/prompt.md --
+---
+name: root
+summary: Root step.
+detached: sonnet:medium
+---
+
+Root step body.
+-- fixtures/home/Claude/_playbooks/fx-inline-in-parallel/one/prompt.md --
+---
+name: one
+summary: Inline step in a parallel wave.
+---
+
+One step body.
+-- fixtures/home/Claude/_playbooks/fx-inline-in-parallel/two/prompt.md --
+---
+name: two
+summary: Sub-agent step in the same wave.
+detached: sonnet:medium
+---
+
+Two step body.
+-- cmd --
+booping render-playbook fx-inline-in-parallel
+-- exit --
+0
+-- stdout --
+**STOP — tell the user:** step 'one' is not detached but shares a wave with other steps; a step sharing a wave must be `detached:`. Do not execute this playbook.
+
+Preamble prose for the inline-in-parallel playbook.
+-- stderr --

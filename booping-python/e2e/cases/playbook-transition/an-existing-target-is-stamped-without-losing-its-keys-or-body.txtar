@@ -1,0 +1,72 @@
+A `--target` that already exists but carries no `status:` is stamped with the initial one, reported
+as `bootstrapped` rather than `created`. Its other frontmatter keys keep their declared order and
+values, and the body is untouched — the writer re-emits sequence items at the mapping's own indent,
+which the expected section pins as written.
+
+-- fixtures/home/Claude/_playbooks/fx-run/playbook.md --
+---
+name: fx-run
+title: Run
+summary: Hookless states-bearing fixture for playbook-transition.
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-run/playbook.yaml --
+state: main
+graph:
+  intake: []
+
+states:
+  main:
+    artifact: index.md
+    initial: intaking
+    statuses:
+      intaking:
+        transitions:
+          - to: researching
+            when: intake complete
+      researching:
+        transitions:
+          - to: done
+            when: research complete
+      done: {terminal: true}
+-- fixtures/home/Claude/_playbooks/fx-run/intake/prompt.md --
+---
+summary: Intake the request.
+---
+
+Intake body.
+-- fixtures/cwd/run/retro.md --
+---
+plan: plans/202601011200_thing/index.md
+plans:
+  - plans/202601011200_thing/index.md
+title: Retro — Thing
+created: 2026-01-01 12:00
+goal_verdicts:
+  plans/202601011200_thing/index.md: met
+---
+
+## What happened
+-- cmd --
+booping playbook-transition fx-run intaking --target retro.md --workdir run
+-- exit --
+0
+-- stdout --
+bootstrapped {CWD}/run/retro.md
+not-started → intaking
+frontmatter: status=intaking
+-- stderr --
+-- expected/cwd/run/retro.md --
+---
+plan: plans/202601011200_thing/index.md
+plans:
+- plans/202601011200_thing/index.md
+title: Retro — Thing
+created: 2026-01-01 12:00
+goal_verdicts:
+  plans/202601011200_thing/index.md: met
+status: intaking
+---
+
+## What happened

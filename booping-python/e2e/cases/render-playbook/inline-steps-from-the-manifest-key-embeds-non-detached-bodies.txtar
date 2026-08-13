@@ -1,0 +1,61 @@
+`inline_steps: true` in the manifest embeds every non-detached step's body in its own section and
+drops that step's `Run … for content.` fetch line. A detached step keeps fetch form — its agent
+fetches its own body.
+
+Twin of `inline-steps-from-the-flag-embeds-non-detached-bodies.txtar`, which plants the same
+playbook without the manifest key and passes `--inline-steps`; the two pinned stdouts are
+byte-identical.
+
+-- fixtures/home/Claude/_playbooks/fx-inline/playbook.md --
+---
+name: fx-inline
+title: Inline
+summary: Bodies embedded in the composed render.
+inline_steps: true
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-inline/playbook.yaml --
+graph:
+  plain: []
+  agent: [plain]
+-- fixtures/home/Claude/_playbooks/fx-inline/plain/prompt.md --
+---
+name: plain
+summary: Plain summary.
+---
+
+Just do the plain thing directly.
+-- fixtures/home/Claude/_playbooks/fx-inline/agent/prompt.md --
+---
+name: agent
+summary: Agent summary.
+detached: sonnet:medium
+---
+
+Delegated body that must not be embedded.
+-- cmd --
+booping render-playbook fx-inline
+-- exit --
+0
+-- stdout --
+Preamble.
+
+## Playbook Steps
+
+Execute the steps in the most effective order considering their dependencies.
+
+| Step | Dependencies | Summary | Review gate |
+| --- | --- | --- | --- |
+| `plain` | — | Plain summary. | — |
+| `agent` | `plain` | Agent summary. | — |
+
+## Step: Plain
+Just do the plain thing directly.
+
+## Step: Agent
+
+Agent summary.
+
+Tell a sub-agent — model sonnet, effort medium — to get its instructions by calling this command: `booping render-playbook fx-inline --step agent`.
+-- stderr --

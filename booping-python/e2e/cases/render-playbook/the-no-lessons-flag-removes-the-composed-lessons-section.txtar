@@ -1,0 +1,89 @@
+`--no-lessons` drops the `## Lessons` section from the composed render, leaving the output a
+lesson-free playbook would produce. The fixture is vault-attached and spreads its lessons across
+both discovery roots — the global `{home_dir}/_lessons/` and the project `{vault}/_lessons/` — so
+the flag is shown suppressing both.
+
+Twin of `the-no-lessons-flag-removes-the-step-lesson-block.txtar`, same fixture tree.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/home/Claude/_lessons/0002_step.md --
+---
+title: Step rule
+targets: [fx-no-lessons/s1]
+---
+
+Step-scoped body.
+-- fixtures/cwd/vault/_lessons/0001_alpha.md --
+---
+title: Alpha rule
+targets: [fx-no-lessons]
+---
+
+Alpha body.
+-- fixtures/cwd/vault/_playbooks/fx-no-lessons/playbook.md --
+---
+name: fx-no-lessons
+title: No Lessons
+summary: Lesson suppression on both surfaces.
+---
+
+Preamble.
+-- fixtures/cwd/vault/_playbooks/fx-no-lessons/playbook.yaml --
+graph:
+  s1: []
+-- fixtures/cwd/vault/_playbooks/fx-no-lessons/s1/prompt.md --
+---
+name: s1
+summary: Only step.
+detached: sonnet:medium
+---
+
+Step body.
+-- cmd --
+booping render-playbook fx-no-lessons
+booping render-playbook fx-no-lessons --no-lessons
+-- exit --
+0
+-- stdout --
+Preamble.
+
+## Lessons
+
+The following 1 lesson(s) apply to this playbook. Never silently violate one; conflict → stop and flag.
+
+### 0001_alpha — Alpha rule
+
+Alpha body.
+
+## Playbook Steps
+
+Execute the steps in the most effective order considering their dependencies.
+
+| Step | Dependencies | Summary | Review gate |
+| --- | --- | --- | --- |
+| `s1` | — | Only step. | — |
+
+## Step: S1
+
+Only step.
+
+Tell a sub-agent — model sonnet, effort medium — to get its instructions by calling this command: `booping render-playbook fx-no-lessons --step s1`.
+Preamble.
+
+## Playbook Steps
+
+Execute the steps in the most effective order considering their dependencies.
+
+| Step | Dependencies | Summary | Review gate |
+| --- | --- | --- | --- |
+| `s1` | — | Only step. | — |
+
+## Step: S1
+
+Only step.
+
+Tell a sub-agent — model sonnet, effort medium — to get its instructions by calling this command: `booping render-playbook fx-no-lessons --step s1`.
+-- stderr --

@@ -1,0 +1,54 @@
+An absolute `--target` is used as written rather than anchored at the workdir. A case cannot spell
+the sandbox path out, so the target is written `~/…`: `--target` expands a leading tilde, and `HOME`
+is the sandbox's `home` root. The bootstrap line prints the resolved path, normalized to `{HOME}`.
+
+-- fixtures/home/Claude/_playbooks/fx-run/playbook.md --
+---
+name: fx-run
+title: Run
+summary: Hookless states-bearing fixture for playbook-transition.
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-run/playbook.yaml --
+state: main
+graph:
+  intake: []
+
+states:
+  main:
+    artifact: index.md
+    initial: intaking
+    statuses:
+      intaking:
+        transitions:
+          - to: researching
+            when: intake complete
+      researching:
+        transitions:
+          - to: done
+            when: research complete
+      done: {terminal: true}
+-- fixtures/home/Claude/_playbooks/fx-run/intake/prompt.md --
+---
+summary: Intake the request.
+---
+
+Intake body.
+-- fixtures/cwd/run/.keep --
+-- cmd --
+booping playbook-transition fx-run intaking --target ~/elsewhere/review.md --workdir run
+booping playbook-transition fx-run researching --target ~/elsewhere/review.md --workdir run
+-- exit --
+0
+-- stdout --
+created {HOME}/elsewhere/review.md
+not-started → intaking
+frontmatter: status=intaking
+intaking → researching
+frontmatter: status=researching
+-- stderr --
+-- expected/home/elsewhere/review.md --
+---
+status: researching
+---

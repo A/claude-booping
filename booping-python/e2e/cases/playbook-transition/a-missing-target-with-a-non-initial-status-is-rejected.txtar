@@ -1,0 +1,44 @@
+Bootstrapping a `--target` only happens at the initial status; any other target status is refused
+before the file is created, naming the path it looked for.
+
+-- fixtures/home/Claude/_playbooks/fx-run/playbook.md --
+---
+name: fx-run
+title: Run
+summary: Hookless states-bearing fixture for playbook-transition.
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-run/playbook.yaml --
+state: main
+graph:
+  intake: []
+
+states:
+  main:
+    artifact: index.md
+    initial: intaking
+    statuses:
+      intaking:
+        transitions:
+          - to: researching
+            when: intake complete
+      researching:
+        transitions:
+          - to: done
+            when: research complete
+      done: {terminal: true}
+-- fixtures/home/Claude/_playbooks/fx-run/intake/prompt.md --
+---
+summary: Intake the request.
+---
+
+Intake body.
+-- fixtures/cwd/run/.keep --
+-- cmd --
+booping playbook-transition fx-run researching --target review.md --workdir run
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: artifact {CWD}/run/review.md does not exist; the only legal target is the initial status 'intaking'

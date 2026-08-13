@@ -1,0 +1,114 @@
+A multi-wave playbook renders as its verbatim preamble, then the `## Playbook Steps` table with
+rows in topological rather than manifest order, then one `## Step:` section per step in the same
+order. The preamble's literal Jinja token survives untouched — a non-Jinja playbook body is
+inserted, never evaluated — and a healthy graph carries no notice line.
+
+Each section also pins the delegation bullets: `gather` and `draft` are detached by
+`<model>:<effort>` and name both model and effort, `named-step` is detached to a named agent,
+`plain` is runner-performed and gets the instruction bullets. A detached section carries no
+`After:` or `Parallel with:` bullet; `plain`, alone in the last wave, carries `After:` and no
+`Parallel with:`. Review gate text is relayed verbatim.
+
+-- fixtures/home/Claude/_playbooks/fx-composed/playbook.md --
+---
+name: fx-composed
+title: Composed Playbook
+summary: Fixture exercising graph-driven step rendering.
+trigger: when the user says composed
+---
+
+# Composed Procedure
+
+Plain prose preamble that must pass through verbatim, including this literal
+token: {{ leftover }} — no Jinja evaluation happens here.
+-- fixtures/home/Claude/_playbooks/fx-composed/playbook.yaml --
+graph:
+  gather: []
+  draft: [gather]
+  named-step: [gather]
+  plain: [draft, named-step]
+-- fixtures/home/Claude/_playbooks/fx-composed/gather/prompt.md --
+---
+name: gather
+summary: Gather inputs.
+detached: sonnet:medium
+review_gate: null
+---
+
+Gather the raw model-agent inputs and return a bulleted list.
+-- fixtures/home/Claude/_playbooks/fx-composed/draft/prompt.md --
+---
+name: draft
+summary: Draft the artifact.
+detached: opus:high
+review_gate: confirm the draft before continuing
+---
+
+Draft the artifact from the gathered inputs.
+-- fixtures/home/Claude/_playbooks/fx-composed/named-step/prompt.md --
+---
+name: named-step
+summary: A step delegated to a named agent.
+detached: booping-researcher
+review_gate: sign off the research
+---
+
+Research the topic with the named agent.
+-- fixtures/home/Claude/_playbooks/fx-composed/plain/prompt.md --
+---
+name: plain
+summary: A plain step with no delegation and no gate.
+review_gate: null
+---
+
+Just do the plain thing directly.
+-- cmd --
+booping render-playbook fx-composed
+-- exit --
+0
+-- stdout --
+# Composed Procedure
+
+Plain prose preamble that must pass through verbatim, including this literal
+token: {{ leftover }} — no Jinja evaluation happens here.
+
+## Playbook Steps
+
+Execute the steps in the most effective order considering their dependencies.
+
+| Step | Dependencies | Summary | Review gate |
+| --- | --- | --- | --- |
+| `gather` | — | Gather inputs. | — |
+| `draft` | `gather` | Draft the artifact. | confirm the draft before continuing |
+| `named-step` | `gather` | A step delegated to a named agent. | sign off the research |
+| `plain` | `draft`, `named-step` | A plain step with no delegation and no gate. | — |
+
+## Step: Gather
+
+Gather inputs.
+
+Tell a sub-agent — model sonnet, effort medium — to get its instructions by calling this command: `booping render-playbook fx-composed --step gather`.
+
+## Step: Draft
+
+Draft the artifact.
+
+Review gate: stop after this step — "confirm the draft before continuing"; continue only on explicit user confirmation.
+
+Tell a sub-agent — model opus, effort high — to get its instructions by calling this command: `booping render-playbook fx-composed --step draft`.
+
+## Step: Named Step
+
+A step delegated to a named agent.
+
+Review gate: stop after this step — "sign off the research"; continue only on explicit user confirmation.
+
+Tell the `booping-researcher` agent to get its instructions by calling this command: `booping render-playbook fx-composed --step named-step`.
+
+## Step: Plain
+Instructions:
+- Summary: A plain step with no delegation and no gate.
+- After: draft, named-step
+
+Run `booping render-playbook fx-composed --step plain` for content.
+-- stderr --

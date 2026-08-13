@@ -1,0 +1,27 @@
+A playbook that declares only a graph has no run state to move, so any transition against it is
+refused.
+
+-- fixtures/home/Claude/_playbooks/fx-graph-only/playbook.md --
+---
+name: fx-graph-only
+title: Graph Only
+summary: No states declared.
+graph:
+  only: []
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-graph-only/only/prompt.md --
+---
+summary: The only step.
+---
+
+Only body.
+-- fixtures/cwd/run/.keep --
+-- cmd --
+booping playbook-transition fx-graph-only whatever --workdir run
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: playbook 'fx-graph-only' declares no states

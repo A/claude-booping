@@ -1,0 +1,28 @@
+Only one level of nesting is supported: a subgraph inside a subgraph blocks the render, and the
+notice names both the inner node and the subgraph holding it.
+
+-- fixtures/home/Claude/_playbooks/fx-nested-subgraph/playbook.md --
+---
+name: fx-nested-subgraph
+title: Nested Subgraph
+---
+
+Preamble prose for the nested-subgraph playbook.
+-- fixtures/home/Claude/_playbooks/fx-nested-subgraph/playbook.yaml --
+graph:
+  outer:
+    dependencies: []
+    graph:
+      inner:
+        dependencies: []
+        graph:
+          deep: []
+-- cmd --
+booping render-playbook fx-nested-subgraph
+-- exit --
+0
+-- stdout --
+**STOP — tell the user:** node 'inner' inside subgraph 'outer' is itself a subgraph; only one level of nesting is supported. Do not execute this playbook.
+
+Preamble prose for the nested-subgraph playbook.
+-- stderr --

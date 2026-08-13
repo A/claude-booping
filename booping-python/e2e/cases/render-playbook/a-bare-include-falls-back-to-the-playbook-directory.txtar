@@ -1,0 +1,33 @@
+With no copy beside the step, a bare include falls through to the second link of the chain — the
+playbook's own directory, where a `_`-prefixed helper directory is reachable by its relative name.
+
+-- fixtures/home/Claude/_playbooks/fx-inc-playbook-dir/playbook.md --
+---
+name: fx-inc-playbook-dir
+title: Include Playbook Dir
+summary: Bare include resolved from the playbook directory.
+jinja: true
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-inc-playbook-dir/playbook.yaml --
+graph:
+  one: []
+-- fixtures/home/Claude/_playbooks/fx-inc-playbook-dir/_references/rules.md --
+PLAYBOOK-DIR-RULES
+-- fixtures/home/Claude/_playbooks/fx-inc-playbook-dir/one/prompt.md --
+---
+name: one
+summary: Only step.
+detached: sonnet:medium
+---
+
+Body says: {% include "_references/rules.md" %}
+-- cmd --
+booping render-playbook fx-inc-playbook-dir --step one
+-- exit --
+0
+-- stdout --
+Body says: PLAYBOOK-DIR-RULES
+
+-- stderr --

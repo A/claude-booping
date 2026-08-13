@@ -1,0 +1,32 @@
+A step still carrying the pre-rename `agent:` frontmatter key blocks the render with a notice that
+names the step and the key it became. The playbook is otherwise healthy — one wired step, a graph on
+the manifest — so the stop comes from the key alone.
+
+-- fixtures/home/Claude/_playbooks/fx-legacy-agent-key/playbook.md --
+---
+name: fx-legacy-agent-key
+title: Legacy Agent Key
+summary: Step frontmatter still using the renamed key.
+---
+
+Preamble prose for the legacy-agent-key playbook.
+-- fixtures/home/Claude/_playbooks/fx-legacy-agent-key/playbook.yaml --
+graph:
+  one: []
+-- fixtures/home/Claude/_playbooks/fx-legacy-agent-key/one/prompt.md --
+---
+name: one
+summary: The only step.
+agent: opus:low
+---
+
+The only step body.
+-- cmd --
+booping render-playbook fx-legacy-agent-key
+-- exit --
+0
+-- stdout --
+**STOP — tell the user:** step 'one' declares `agent:` in its frontmatter; that key was renamed to `detached:`. Do not execute this playbook.
+
+Preamble prose for the legacy-agent-key playbook.
+-- stderr --
