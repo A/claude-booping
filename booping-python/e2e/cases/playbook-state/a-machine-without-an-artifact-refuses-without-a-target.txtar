@@ -1,0 +1,40 @@
+A state machine that declares no `artifact:` has nothing to address, so the report cannot be
+produced from the workdir alone: the command names the state and tells the caller to pass `--target`.
+Paired with `a-machine-without-an-artifact-reports-with-a-target.txtar`.
+
+-- fixtures/home/Claude/_playbooks/fx-targetless/playbook.md --
+---
+name: fx-targetless
+title: Targetless
+summary: Machine with no declared artifact, addressed by --target.
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-targetless/playbook.yaml --
+state: main
+graph:
+  review: []
+
+states:
+  main:
+    initial: reviewing
+    statuses:
+      reviewing:
+        transitions:
+          - to: reviewed
+            when: the review is written
+      reviewed: {terminal: true}
+-- fixtures/home/Claude/_playbooks/fx-targetless/review/prompt.md --
+---
+summary: Review the work.
+---
+
+Review body.
+-- fixtures/cwd/run/.keep --
+-- cmd --
+booping playbook-state fx-targetless --workdir run
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: state 'main' declares no `artifact:`; pass --target PATH

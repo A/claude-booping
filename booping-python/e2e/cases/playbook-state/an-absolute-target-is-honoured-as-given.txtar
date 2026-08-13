@@ -1,0 +1,72 @@
+An absolute `--target` is taken verbatim rather than joined onto the workdir: the file sits outside
+the `run` workdir, so joining would miss it and report `not-started`.
+
+`/proc/self/cwd` is how a case names a file it seeded — the sandbox path is generated per run and
+cannot be spelled in a `cmd` line.
+
+-- fixtures/home/Claude/_playbooks/fx-run/playbook.md --
+---
+name: fx-run
+title: Run
+summary: Single-machine fixture for playbook-state.
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-run/playbook.yaml --
+state: main
+graph:
+  intake: []
+  research: [intake]
+
+states:
+  main:
+    artifact: index.md
+    initial: intaking
+    statuses:
+      intaking:
+        transitions:
+          - to: researching
+            when: intake complete
+            gates: ["request captured in the artifact"]
+          - to: parked
+            when: the run is shelved
+      researching:
+        transitions:
+          - to: done
+            when: research complete
+      parked: {terminal: true}
+      done: {terminal: true}
+-- fixtures/home/Claude/_playbooks/fx-run/intake/prompt.md --
+---
+summary: Intake the request.
+---
+
+Intake body.
+-- fixtures/home/Claude/_playbooks/fx-run/research/prompt.md --
+---
+summary: Research the request.
+---
+
+Research body.
+-- fixtures/cwd/run/.keep --
+-- fixtures/cwd/elsewhere/review.md --
+---
+status: researching
+---
+
+Body.
+-- cmd --
+booping playbook-state fx-run --workdir run --target /proc/self/cwd/elsewhere/review.md
+-- exit --
+0
+-- stdout --
+playbook: fx-run
+workdir: {CWD}/run
+states:
+  main:
+    artifact: /proc/self/cwd/elsewhere/review.md
+    status: researching
+    next:
+    - to: done
+      when: research complete
+-- stderr --
