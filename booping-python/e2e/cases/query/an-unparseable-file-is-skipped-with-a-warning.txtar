@@ -1,6 +1,6 @@
 A file whose frontmatter block never closes cannot be read into a row: the run keeps going,
 returns the other two files, exits 0, and names the skipped file in a single stderr warning
-that never reaches stdout.
+that never reaches stdout — in any output format, the skipped slug is absent from the rows.
 
 -- fixtures/cwd/.booping --
 project_name: probe
@@ -26,10 +26,34 @@ title: Broken
 body
 -- cmd --
 booping query --glob 'plans/*/index.md' --output paths
+booping query --glob 'plans/*/index.md' --columns slug
+booping query --glob 'plans/*/index.md' --columns slug --output json
+booping query --glob 'plans/*/index.md' --columns slug --output yaml
 -- exit --
 0
 -- stdout --
 plans/alpha/index.md
 plans/beta/index.md
+| slug | path |
+| --- | --- |
+| alpha | plans/alpha/index.md |
+| beta | plans/beta/index.md |
+[
+  {
+    "slug": "alpha",
+    "path": "plans/alpha/index.md"
+  },
+  {
+    "slug": "beta",
+    "path": "plans/beta/index.md"
+  }
+]
+- slug: alpha
+  path: plans/alpha/index.md
+- slug: beta
+  path: plans/beta/index.md
 -- stderr --
+warning: skipping {CWD}/vault/plans/broken/index.md — unparseable frontmatter ([..])
+warning: skipping {CWD}/vault/plans/broken/index.md — unparseable frontmatter ([..])
+warning: skipping {CWD}/vault/plans/broken/index.md — unparseable frontmatter ([..])
 warning: skipping {CWD}/vault/plans/broken/index.md — unparseable frontmatter ([..])
