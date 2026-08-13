@@ -1,0 +1,22 @@
+A frontmatter value carrying `|` is escaped in its cell, so the rendered row still splits into
+the four columns the header declares instead of five.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+-- fixtures/cwd/vault/plans/one/index.md --
+---
+title: "A | B"
+status: done
+---
+
+body
+-- cmd --
+booping query --glob 'plans/*/index.md'
+-- exit --
+0
+-- stdout --
+| title | status | path | slug |
+| --- | --- | --- | --- |
+| A \| B | done | plans/one/index.md | one |
+-- stderr --

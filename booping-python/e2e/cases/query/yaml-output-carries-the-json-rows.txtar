@@ -1,0 +1,35 @@
+`--output yaml` prints a block sequence over the same fixture as
+`json-output-is-an-array-of-objects`, carrying the same keys in the same order with the same
+values — the format changes, the row shape does not.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+-- fixtures/cwd/vault/plans/alpha/index.md --
+---
+title: Alpha
+status: ready-for-dev
+---
+
+body
+-- fixtures/cwd/vault/plans/beta/index.md --
+---
+title: Beta
+status: done
+---
+
+body
+-- cmd --
+booping query --glob 'plans/*/index.md' --output yaml
+-- exit --
+0
+-- stdout --
+- title: Alpha
+  status: ready-for-dev
+  path: plans/alpha/index.md
+  slug: alpha
+- title: Beta
+  status: done
+  path: plans/beta/index.md
+  slug: beta
+-- stderr --

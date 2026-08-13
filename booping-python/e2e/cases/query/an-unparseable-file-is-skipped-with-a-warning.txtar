@@ -1,0 +1,35 @@
+A file whose frontmatter block never closes cannot be read into a row: the run keeps going,
+returns the other two files, exits 0, and names the skipped file in a single stderr warning
+that never reaches stdout.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+-- fixtures/cwd/vault/plans/alpha/index.md --
+---
+title: Alpha
+status: ready-for-dev
+---
+
+body
+-- fixtures/cwd/vault/plans/beta/index.md --
+---
+title: Beta
+status: done
+---
+
+body
+-- fixtures/cwd/vault/plans/broken/index.md --
+---
+title: Broken
+
+body
+-- cmd --
+booping query --glob 'plans/*/index.md' --output paths
+-- exit --
+0
+-- stdout --
+plans/alpha/index.md
+plans/beta/index.md
+-- stderr --
+warning: skipping {CWD}/vault/plans/broken/index.md — unparseable frontmatter ([..])

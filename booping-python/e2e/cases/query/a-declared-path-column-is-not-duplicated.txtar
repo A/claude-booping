@@ -1,0 +1,26 @@
+Declaring `path` in `--columns` keeps it at the position it was declared in and does not add a
+second copy behind the projection.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+-- fixtures/cwd/vault/plans/alpha/index.md --
+---
+title: Alpha
+status: ready-for-dev
+---
+
+body
+-- cmd --
+booping query --glob 'plans/*/index.md' --columns path,status --output json
+-- exit --
+0
+-- stdout --
+[
+  {
+    "path": "plans/alpha/index.md",
+    "status": "ready-for-dev",
+    "slug": "alpha"
+  }
+]
+-- stderr --

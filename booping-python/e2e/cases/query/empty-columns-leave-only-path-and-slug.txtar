@@ -1,0 +1,33 @@
+A spec declaring an empty `columns` list still projects — it is not read as "no projection" —
+so the rows come back carrying `path` and `slug` and none of the frontmatter.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+-- fixtures/cwd/vault/config.yaml --
+core:
+  probe_playbook:
+    queries:
+      bare_plans:
+        glob:
+          - plans/*/index.md
+        columns: []
+-- fixtures/cwd/vault/plans/alpha/index.md --
+---
+title: Alpha
+status: ready-for-dev
+---
+
+body
+-- cmd --
+booping query --config core.probe_playbook.queries.bare_plans --output json
+-- exit --
+0
+-- stdout --
+[
+  {
+    "path": "plans/alpha/index.md",
+    "slug": "alpha"
+  }
+]
+-- stderr --
