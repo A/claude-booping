@@ -1,13 +1,13 @@
 ---
 title: "Migrate config-get, marker-set and query tests to the txtar e2e corpus"
 type: "refactoring"
-status: in-progress
+status: done
 sp: 25
 related_to: null
 created: 2026-08-13 09:21
 planned: null
 started: 2026-08-13 10:13
-completed: null
+completed: 2026-08-13 11:15
 code_reviews: []
 sessions:
 - 6508e2be-210f-48b1-8d27-38655f5cc56a
@@ -18,6 +18,13 @@ summary: config-get, marker-set and query units become txtar e2e cases; units
 commit: 849d82a42dd675d94c39b96f1e977f2e411774bf
 agents.cross-review: ab9126cf4287fa199
 reviewed_at: 2026-08-13 09:47
+metrics_active_minutes: 99
+metrics_models:
+- claude-opus-5
+metrics_tokens_input: 435
+metrics_tokens_output: 149824
+metrics_tokens_cache_creation: 743857
+metrics_tokens_cache_read: 23278881
 ---
 
 # Migrate config-get, marker-set and query tests to the txtar e2e corpus
