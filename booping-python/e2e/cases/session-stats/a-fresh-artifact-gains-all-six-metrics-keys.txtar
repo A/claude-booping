@@ -1,0 +1,102 @@
+A wet run over an artifact carrying no `metrics_*` key stamps all six of them and reports `written`
+true. The `expected/` section is the real assertion — stdout's flag says a write happened, not that
+the right numbers landed — and it also pins that the pre-existing keys, their order, and the body
+survive the round trip.
+
+Arithmetic, two seeded sessions:
+  s-alpha — one turn, 10:00:00 → 10:08:00 = 480s; tokens input 100, output 20, cache creation 300,
+    cache read 50; model claude-fx-sonnet.
+  s-beta  — one turn, 11:00:00 → 11:03:00 = 180s; tokens input 7, output 3, no cache fields = 0;
+    model claude-fx-opus.
+  totals  — (480 + 180) / 60 = 11 minutes; input 107, output 23, cache creation 300, cache read 50;
+    models sorted, so opus precedes sonnet.
+Per-session minutes are 8 and 3, which sum to the same 11 here only by luck — the total is rounded
+from summed seconds, never from summed minutes.
+
+-- fixtures/home/.claude/projects/proj/s-alpha.jsonl --
+{"type":"user","isSidechain":false,"origin":{"kind":"human"},"timestamp":"2026-08-01T10:00:00.000Z","message":{"role":"user","content":"go"}}
+{"type":"assistant","isSidechain":false,"timestamp":"2026-08-01T10:08:00.000Z","message":{"role":"assistant","model":"claude-fx-sonnet","content":[{"type":"text","text":"ok"}],"usage":{"input_tokens":100,"output_tokens":20,"cache_creation_input_tokens":300,"cache_read_input_tokens":50}}}
+-- fixtures/home/.claude/projects/proj/s-beta.jsonl --
+{"type":"user","isSidechain":false,"origin":{"kind":"human"},"timestamp":"2026-08-01T11:00:00.000Z","message":{"role":"user","content":"again"}}
+{"type":"assistant","isSidechain":false,"timestamp":"2026-08-01T11:03:00.000Z","message":{"role":"assistant","model":"claude-fx-opus","content":[{"type":"text","text":"ok"}],"usage":{"input_tokens":7,"output_tokens":3}}}
+-- fixtures/cwd/plan/index.md --
+---
+title: Alpha plan
+status: done
+sessions:
+- s-alpha
+- s-beta
+---
+
+Body line one.
+
+Body line two.
+-- cmd --
+booping session-stats plan/index.md
+-- exit --
+0
+-- stdout --
+{
+  "artifacts": [
+    {
+      "path": "plan/index.md",
+      "written": true,
+      "sessions": [
+        {
+          "session": "s-alpha",
+          "metrics_active_minutes": 8,
+          "metrics_models": [
+            "claude-fx-sonnet"
+          ],
+          "metrics_tokens_input": 100,
+          "metrics_tokens_output": 20,
+          "metrics_tokens_cache_creation": 300,
+          "metrics_tokens_cache_read": 50
+        },
+        {
+          "session": "s-beta",
+          "metrics_active_minutes": 3,
+          "metrics_models": [
+            "claude-fx-opus"
+          ],
+          "metrics_tokens_input": 7,
+          "metrics_tokens_output": 3,
+          "metrics_tokens_cache_creation": 0,
+          "metrics_tokens_cache_read": 0
+        }
+      ],
+      "totals": {
+        "metrics_active_minutes": 11,
+        "metrics_models": [
+          "claude-fx-opus",
+          "claude-fx-sonnet"
+        ],
+        "metrics_tokens_input": 107,
+        "metrics_tokens_output": 23,
+        "metrics_tokens_cache_creation": 300,
+        "metrics_tokens_cache_read": 50
+      }
+    }
+  ]
+}
+-- stderr --
+-- expected/cwd/plan/index.md --
+---
+title: Alpha plan
+status: done
+sessions:
+- s-alpha
+- s-beta
+metrics_active_minutes: 11
+metrics_models:
+- claude-fx-opus
+- claude-fx-sonnet
+metrics_tokens_input: 107
+metrics_tokens_output: 23
+metrics_tokens_cache_creation: 300
+metrics_tokens_cache_read: 50
+---
+
+Body line one.
+
+Body line two.
