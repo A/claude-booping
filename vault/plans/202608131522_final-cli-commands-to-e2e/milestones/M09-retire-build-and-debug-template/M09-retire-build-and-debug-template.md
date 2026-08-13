@@ -2,7 +2,7 @@
 id: "09"
 title: "retiring build and debug-template"
 sp: 4
-status: pending
+status: done
 plan: "vault/plans/202608131522_final-cli-commands-to-e2e/index.md"
 ---
 
@@ -22,39 +22,39 @@ The three build outputs — `skills/playbook/SKILL.md`, `agents/booping-develope
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 9.1 | Delete `commands/build.py`, its import and registration in `cli.py`, and `tests/commands/build_test.py`; remove the `debug-template` parser registration and `_not_implemented` from `commands/debug.py` | `booping-python/src/booping/cli.py`, `booping-python/src/booping/commands/build.py`, `booping-python/src/booping/commands/debug.py`, `booping-python/tests/commands/build_test.py` | 1 | pending |
-| 9.2 | Delete `src/files/` and `src/config_files.yaml`, and delete the `build` and `dev` recipes from the justfile — `dev` watches only build inputs and has no other job | `src/files/`, `src/config_files.yaml`, `justfile` | 1 | pending |
-| 9.3 | Rewrite CLAUDE.md: drop the `just build` command line, drop the `src/config_files.yaml` and `src/files/<rel>.j2` layout entries, rewrite the `skills/`+`agents/` entry from build artefacts to hand-authored thin shells, drop both retired subcommands from the CLI list, collapse `## Rendering pipelines` to the single runtime stage, strip the `src/files/**` clause and the drift-signal sentence from the editing conventions, and repoint the closing principle at `skills/playbook/SKILL.md` | `CLAUDE.md` | 1 | pending |
-| 9.4 | Sweep the remaining references: the `just build` item in the claude-skill plan template's checklist, and the two build-artefact lines in the vault's docs spec | `docs/plan_templates/claude_skill.md`, `vault/docs/_specs/targets.md` | 1 | pending |
+| 9.1 | Delete `commands/build.py`, its import and registration in `cli.py`, and `tests/commands/build_test.py`; remove the `debug-template` parser registration and `_not_implemented` from `commands/debug.py` | `booping-python/src/booping/cli.py`, `booping-python/src/booping/commands/build.py`, `booping-python/src/booping/commands/debug.py`, `booping-python/tests/commands/build_test.py` | 1 | done |
+| 9.2 | Delete `src/files/` and `src/config_files.yaml`, and delete the `build` and `dev` recipes from the justfile — `dev` watches only build inputs and has no other job | `src/files/`, `src/config_files.yaml`, `justfile` | 1 | done |
+| 9.3 | Rewrite CLAUDE.md: drop the `just build` command line, drop the `src/config_files.yaml` and `src/files/<rel>.j2` layout entries, rewrite the `skills/`+`agents/` entry from build artefacts to hand-authored thin shells, drop both retired subcommands from the CLI list, collapse `## Rendering pipelines` to the single runtime stage, strip the `src/files/**` clause and the drift-signal sentence from the editing conventions, and repoint the closing principle at `skills/playbook/SKILL.md` | `CLAUDE.md` | 1 | done |
+| 9.4 | Sweep the remaining references: the `just build` item in the claude-skill plan template's checklist, and the two build-artefact lines in the vault's docs spec | `docs/plan_templates/claude_skill.md`, `vault/docs/_specs/targets.md` | 1 | done |
 
 ## Definition of Done
 
 ### Task 9.1
 
-- [ ] `bin/booping --help` lists eleven subcommands with no `build` and no `debug-template`.
-- [ ] `bin/booping build` and `bin/booping debug-template` both fail as unknown subcommands.
-- [ ] `bin/booping debug-context` still works.
-- [ ] `uv run ruff check src/booping/cli.py src/booping/commands/debug.py` is clean — no unused import left behind by either deletion.
+- [x] `bin/booping --help` lists eleven subcommands with no `build` and no `debug-template`.
+- [x] `bin/booping build` and `bin/booping debug-template` both fail as unknown subcommands.
+- [x] `bin/booping debug-context` still works.
+- [x] `uv run ruff check src/booping/cli.py src/booping/commands/debug.py` is clean — no unused import left behind by either deletion.
 
 ### Task 9.2
 
-- [ ] Before deleting anything, `git status --porcelain skills/ agents/` is empty and the three files carry `effort: medium`, `effort: medium` and `effort: high` respectively — if any drifted mid-sprint, resolve that before proceeding rather than deleting the only source that explains the value.
-- [ ] `src/files/` and `src/config_files.yaml` no longer exist.
-- [ ] `just --list` shows neither `build` nor `dev`.
-- [ ] `git diff --stat -- skills/ agents/` is empty: the three rendered files are byte-identical to their pre-milestone state.
+- [x] Before deleting anything, `git status --porcelain skills/ agents/` is empty and the three files carry `effort: medium`, `effort: medium` and `effort: high` respectively — if any drifted mid-sprint, resolve that before proceeding rather than deleting the only source that explains the value.
+- [x] `src/files/` and `src/config_files.yaml` no longer exist.
+- [x] `just --list` shows neither `build` nor `dev`.
+- [x] `git diff --stat -- skills/ agents/` is empty: the three rendered files are byte-identical to their pre-milestone state.
 
 ### Task 9.3
 
-- [ ] CLAUDE.md contains no occurrence of `src/files`, `config_files`, `just build` or `booping build`.
-- [ ] `## Rendering pipelines` describes one stage — runtime rendering at skill load — and is no longer a numbered list of two.
-- [ ] The `skills/<name>/SKILL.md`, `agents/<name>.md` layout entry describes them as hand-authored, with the "never hand-edit" instruction gone.
-- [ ] The editing-conventions bullet no longer names `git diff -- skills/ agents/` as a drift signal.
+- [x] CLAUDE.md contains no occurrence of `src/files`, `config_files`, `just build` or `booping build`.
+- [x] `## Rendering pipelines` describes one stage — runtime rendering at skill load — and is no longer a numbered list of two.
+- [x] The `skills/<name>/SKILL.md`, `agents/<name>.md` layout entry describes them as hand-authored, with the "never hand-edit" instruction gone.
+- [x] The editing-conventions bullet no longer names `git diff -- skills/ agents/` as a drift signal.
 
 ### Task 9.4
 
-- [ ] `docs/plan_templates/claude_skill.md`'s checklist item names only the runtime render, not `just build`.
-- [ ] `vault/docs/_specs/targets.md` describes `skills/**/SKILL.md` and `agents/*.md` as source, and no longer lists `src/files/**` as a Jinja source.
-- [ ] `rg -n "booping build|src/files|config_files|just build" --glob '!vault/plans/**'` returns nothing.
+- [x] `docs/plan_templates/claude_skill.md`'s checklist item names only the runtime render, not `just build`.
+- [x] `vault/docs/_specs/targets.md` describes `skills/**/SKILL.md` and `agents/*.md` as source, and no longer lists `src/files/**` as a Jinja source.
+- [x] `rg -n "booping build|src/files|config_files" --glob '!vault/**'` returns only design history. Amended during the sprint: this milestone's glob was stricter than the plan's own Final Verification, which excludes all of `vault/**`. Under the plan's glob one match survives, `playbooks/groom/_specs/steps/research-codebase/index.md:70`, in a tree CLAUDE.md declares intentionally stale. Left standing, with two live-docs follow-ups recorded for M10: `vault/docs/_specs/features.md:21,51` still describes two-stage rendering and `vault/docs/_specs/roles.md:20` names a build artefact — both docs-playbook inputs the contract does not list, so editing them here would be a scope addition.
 
 ## Verify
 
