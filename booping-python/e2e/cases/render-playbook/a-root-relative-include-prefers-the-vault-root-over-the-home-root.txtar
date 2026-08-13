@@ -1,0 +1,39 @@
+The three discovery roots are searched most-specific-first, so when the attached vault and the home
+directory both ship `_lib/shared.md` the vault's copy answers.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/home/Claude/_playbooks/_lib/shared.md --
+MARKER-global
+-- fixtures/cwd/vault/_playbooks/_lib/shared.md --
+MARKER-local
+-- fixtures/cwd/vault/_playbooks/fx-inc-scope/playbook.md --
+---
+name: fx-inc-scope
+title: Include Scope
+summary: Root-relative include resolved across discovery roots.
+jinja: true
+---
+
+Preamble.
+-- fixtures/cwd/vault/_playbooks/fx-inc-scope/playbook.yaml --
+graph:
+  one: []
+-- fixtures/cwd/vault/_playbooks/fx-inc-scope/one/prompt.md --
+---
+name: one
+summary: Only step.
+detached: sonnet:medium
+---
+
+Body says: {% include "_lib/shared.md" %}
+-- cmd --
+booping render-playbook fx-inc-scope --step one
+-- exit --
+0
+-- stdout --
+Body says: MARKER-local
+
+-- stderr --

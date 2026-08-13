@@ -1,0 +1,39 @@
+The last discovery link is the plugin's own `playbooks/` root, so a user playbook can pull a shipped
+partial by root-relative name. This is the one case in the corpus that reads shipped repository
+content: `get_plugin_root()` resolves from the installed module path and takes no override, so no
+fixture can plant the core tier — the assertion is the real text of
+`playbooks/_partials/playbook_shared_instructions.md`.
+
+-- fixtures/home/Claude/_playbooks/fx-inc-core/playbook.md --
+---
+name: fx-inc-core
+title: Include Core
+summary: Root-relative include resolved from the shipped core root.
+jinja: true
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-inc-core/playbook.yaml --
+graph:
+  one: []
+-- fixtures/home/Claude/_playbooks/fx-inc-core/one/prompt.md --
+---
+name: one
+summary: Only step.
+detached: sonnet:medium
+---
+
+{% include "_partials/playbook_shared_instructions.md" %}
+-- cmd --
+booping render-playbook fx-inc-core --step one
+-- exit --
+0
+-- stdout --
+## Shared instructions
+
+- Never write angle-bracket placeholders (`<name>`, `<path>`) into a file or a chat reply. Obsidian
+  reads them as HTML tags and stops rendering the block that holds them. Write `{name}`, `{path}`.
+- Never manually break markdown lines. Write each paragraph, bullet, or table row as one line and
+  let the renderer wrap it — hard line breaks turn into mid-sentence breaks after any later edit.
+
+-- stderr --

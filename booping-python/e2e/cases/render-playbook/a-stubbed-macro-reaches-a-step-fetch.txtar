@@ -1,0 +1,34 @@
+The stub is a property of the render environment, not of the composed surface, so a sub-agent
+fetching its step with `--step` carries the same pinned literal.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  macros:
+    build: ["false"]
+-- fixtures/home/Claude/_playbooks/fx-macro-stub-step/playbook.md --
+---
+name: fx-macro-stub-step
+title: Macro Stub Step
+summary: Macro pinned on the step surface.
+jinja: true
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-macro-stub-step/playbook.yaml --
+graph:
+  one: []
+-- fixtures/home/Claude/_playbooks/fx-macro-stub-step/one/prompt.md --
+---
+name: one
+summary: Only step.
+detached: sonnet:medium
+---
+
+Body stamp {{ macro('core.macros.build') }}.
+-- cmd --
+booping render-playbook fx-macro-stub-step --step one --stub-macro core.macros.build=19700101
+-- exit --
+0
+-- stdout --
+Body stamp 19700101.
+-- stderr --

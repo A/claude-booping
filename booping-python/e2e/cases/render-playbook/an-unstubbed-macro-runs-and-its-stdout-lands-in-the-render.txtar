@@ -1,0 +1,49 @@
+Without a stub the macro is genuinely executed through the render's subprocess boundary: the config
+declares `echo 1` as the argv, and the only way the preamble can read `1` is that the command ran
+and its stdout was captured.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  macros:
+    probe: ["echo", "1"]
+-- fixtures/home/Claude/_playbooks/fx-macro-real/playbook.md --
+---
+name: fx-macro-real
+title: Macro Real
+summary: Macro executed for real.
+jinja: true
+---
+
+Preamble probe {{ macro('core.macros.probe') }}.
+-- fixtures/home/Claude/_playbooks/fx-macro-real/playbook.yaml --
+graph:
+  one: []
+-- fixtures/home/Claude/_playbooks/fx-macro-real/one/prompt.md --
+---
+name: one
+summary: Only step.
+detached: sonnet:medium
+---
+
+Only body.
+-- cmd --
+booping render-playbook fx-macro-real
+-- exit --
+0
+-- stdout --
+Preamble probe 1.
+
+## Playbook Steps
+
+Execute the steps in the most effective order considering their dependencies.
+
+| Step | Dependencies | Summary | Review gate |
+| --- | --- | --- | --- |
+| `one` | — | Only step. | — |
+
+## Step: One
+
+Only step.
+
+Tell a sub-agent — model sonnet, effort medium — to get its instructions by calling this command: `booping render-playbook fx-macro-real --step one`.
+-- stderr --
