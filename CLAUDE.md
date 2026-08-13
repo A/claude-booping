@@ -10,7 +10,7 @@ One shipped skill (`/playbook`); everything procedural is a **playbook** it driv
 - `just lint` / `just typecheck` / `just pytest` — ruff / basedpyright / pytest over `booping-python/`.
 - `just snapshots` — diff committed playbook reports against a fresh hermetic render (writes nothing). `just snapshots-accept [playbook]` — the **only** writer of the committed reports.
 - `just mdcheck` — structural rule checks over the rendered reports. Needs the `mdcheck` binary: `cargo install markdown-checker` (the crate named `mdcheck` is unrelated).
-- `just e2e ['-k expr']` — run the txtar contract corpus through pytest; `cd booping-python && uv run pytest e2e --txtar-update [-k expr]` rebaselines the selected cases.
+- `just e2e [pytest args…]` — run the txtar contract corpus through pytest, passing any arguments straight to it (`just e2e -k config-get`, `just e2e --txtar-update`); `--txtar-update` rebaselines the selected cases.
 - `just ci` — everything CI runs, in order: `lint typecheck pytest snapshots mdcheck e2e`. Run before committing.
 - `just eval|smoke|regress <playbook>/<step>` (or `all`) — promptfoo eval suites; `just suites` lists them. Runs on subscription auth (`claude -p`), never in CI; each run posts a sticky, advisory PR comment via `scripts/eval-pr-comment.sh` (`EVAL_PR=0` opts out) — no commit status, no merge gate.
 - `just docs` / `just docs-serve` — build / preview the public docs site.
