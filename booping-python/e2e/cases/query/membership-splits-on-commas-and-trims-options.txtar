@@ -1,0 +1,35 @@
+`k:in=a, b` splits its operand on the comma and trims each option, so the space-prefixed
+second option still matches a row; the status neither option names stays out.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+-- fixtures/cwd/vault/plans/alpha/index.md --
+---
+title: Alpha
+status: ready-for-dev
+---
+
+body
+-- fixtures/cwd/vault/plans/beta/index.md --
+---
+title: Beta
+status: done
+---
+
+body
+-- fixtures/cwd/vault/plans/gamma/index.md --
+---
+title: Gamma
+status: cancelled
+---
+
+body
+-- cmd --
+booping query --glob 'plans/*/index.md' --where 'status:in=done, ready-for-dev' --output paths
+-- exit --
+0
+-- stdout --
+plans/alpha/index.md
+plans/beta/index.md
+-- stderr --

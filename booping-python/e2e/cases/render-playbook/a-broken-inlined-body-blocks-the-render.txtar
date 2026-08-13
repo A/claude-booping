@@ -1,0 +1,42 @@
+Under `inline_steps` the bodies are rendered at compose time, so a Jinja failure in one is a
+blocking notice like any other rather than a `**STOP` buried inside a single step's section: the
+step table and every section — including the healthy step's — are withheld, and the exit code stays
+0.
+
+-- fixtures/home/Claude/_playbooks/fx-inline-broken/playbook.md --
+---
+name: fx-inline-broken
+title: Inline Broken
+summary: An embedded body that cannot render.
+jinja: true
+inline_steps: true
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-inline-broken/playbook.yaml --
+graph:
+  one: []
+  two: [one]
+-- fixtures/home/Claude/_playbooks/fx-inline-broken/one/prompt.md --
+---
+name: one
+summary: Broken step.
+---
+
+{% include "nope.md" %}
+-- fixtures/home/Claude/_playbooks/fx-inline-broken/two/prompt.md --
+---
+name: two
+summary: Healthy step.
+---
+
+Two body.
+-- cmd --
+booping render-playbook fx-inline-broken
+-- exit --
+0
+-- stdout --
+**STOP — tell the user:** Jinja rendering of step 'one' failed: TemplateNotFound: nope.md. Do not execute this playbook.
+
+Preamble.
+-- stderr --

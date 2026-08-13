@@ -1,0 +1,48 @@
+Given a `--target`, a machine that declares no `artifact:` bootstraps and moves that file like any
+other run artifact.
+
+-- fixtures/home/Claude/_playbooks/fx-targetless/playbook.md --
+---
+name: fx-targetless
+title: Targetless
+summary: States-bearing fixture whose machine declares no artifact.
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-targetless/playbook.yaml --
+state: main
+graph:
+  only: []
+
+states:
+  main:
+    initial: reviewing
+    statuses:
+      reviewing:
+        transitions:
+          - to: reviewed
+            when: the review is written
+      reviewed: {terminal: true}
+-- fixtures/home/Claude/_playbooks/fx-targetless/only/prompt.md --
+---
+summary: Only step.
+---
+
+Only body.
+-- fixtures/cwd/run/.keep --
+-- cmd --
+booping playbook-transition fx-targetless reviewing --target review.md --workdir run
+booping playbook-transition fx-targetless reviewed --target review.md --workdir run
+-- exit --
+0
+-- stdout --
+created {CWD}/run/review.md
+not-started → reviewing
+frontmatter: status=reviewing
+reviewing → reviewed
+frontmatter: status=reviewed
+-- stderr --
+-- expected/cwd/run/review.md --
+---
+status: reviewed
+---

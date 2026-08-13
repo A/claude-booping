@@ -1,0 +1,163 @@
+A whole run walked through both entry points: the outer machine is bootstrapped and advanced, the
+per-instance subgraph machine is bootstrapped twice and one instance driven to terminal, and the
+frontier is snapshotted mid-run and again at the end. The mid-run snapshot pins the outer status
+with its remaining edge beside a half-finished instance map; the final one pins every machine
+terminal with no `next`. The outer machine's `hooks.post` entry runs after every one of its own
+edges, bootstrap included, and never for the subgraph machine — `hooks.log` records the order. The
+date the edge's `frontmatter-update` hook writes is pinned by a `macro_stubs:` entry so the walk is
+reproducible.
+
+-- fixtures/xdg/booping/config.yaml --
+macro_stubs:
+  core.macros.date: "2026-01-01 12:00"
+-- fixtures/home/Claude/_playbooks/fx-walk/playbook.md --
+---
+name: fx-walk
+title: Walk
+summary: Outer-plus-instance fixture for the playbook-state run walk.
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-walk/playbook.yaml --
+state: main
+graph:
+  intake: []
+  step-pipeline:
+    dependencies: [intake]
+    state: step
+    graph:
+      step-spec: []
+
+states:
+  main:
+    artifact: index.md
+    initial: intaking
+    hooks:
+      post: ["script post-note"]
+    statuses:
+      intaking:
+        transitions:
+          - to: researching
+            when: intake step complete
+            gates: ["request captured in the artifact"]
+            hooks:
+              - frontmatter-update researched="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - script check-findings
+      researching:
+        transitions:
+          - to: done
+            when: research complete
+      done: {terminal: true}
+  step:
+    artifact: steps/{instance}/index.md
+    initial: spec-ing
+    statuses:
+      spec-ing:
+        transitions:
+          - to: done
+            when: spec written
+            hooks: ["script check-findings"]
+      done: {terminal: true}
+-- fixtures/home/Claude/_playbooks/fx-walk/intake/prompt.md --
+---
+summary: Intake the request.
+---
+
+Intake body.
+-- fixtures/home/Claude/_playbooks/fx-walk/step-spec/prompt.md --
+---
+summary: Write the spec.
+---
+
+Spec body.
+-- fixtures/home/Claude/_playbooks/fx-walk/_scripts/post-note --
+#!/bin/sh
+echo "post" >> "$BOOPING_WORKDIR/hooks.log"
+-- fixtures/home/Claude/_playbooks/fx-walk/_scripts/check-findings --
+#!/bin/sh
+echo "check [$BOOPING_INSTANCE]" >> "$BOOPING_WORKDIR/hooks.log"
+-- fixtures/cwd/run/.keep --
+-- cmd --
+chmod +x ../home/Claude/_playbooks/fx-walk/_scripts/post-note
+chmod +x ../home/Claude/_playbooks/fx-walk/_scripts/check-findings
+booping playbook-transition fx-walk intaking --workdir run
+booping playbook-transition fx-walk researching --workdir run
+booping playbook-transition fx-walk spec-ing --state step --instance beta --workdir run
+booping playbook-transition fx-walk spec-ing --state step --instance alpha --workdir run
+booping playbook-transition fx-walk done --state step --instance alpha --workdir run
+booping playbook-state fx-walk --workdir run
+booping playbook-transition fx-walk done --state step --instance beta --workdir run
+booping playbook-transition fx-walk done --workdir run
+booping playbook-state fx-walk --workdir run
+-- exit --
+0
+-- stdout --
+created index.md
+not-started → intaking
+frontmatter: status=intaking
+script post-note: ok
+intaking → researching
+frontmatter: status=researching
+frontmatter: researched="2026-01-01 12:00"
+script check-findings: ok
+script post-note: ok
+created steps/beta/index.md
+not-started → spec-ing
+frontmatter: status=spec-ing
+created steps/alpha/index.md
+not-started → spec-ing
+frontmatter: status=spec-ing
+spec-ing → done
+frontmatter: status=done
+script check-findings: ok
+playbook: fx-walk
+workdir: {CWD}/run
+states:
+  main:
+    artifact: index.md
+    status: researching
+    next:
+    - to: done
+      when: research complete
+  step:
+    artifact: steps/{instance}/index.md
+    instances:
+      alpha:
+        status: done
+      beta:
+        status: spec-ing
+        next:
+        - to: done
+          when: spec written
+spec-ing → done
+frontmatter: status=done
+script check-findings: ok
+researching → done
+frontmatter: status=done
+script post-note: ok
+playbook: fx-walk
+workdir: {CWD}/run
+states:
+  main:
+    artifact: index.md
+    status: done
+  step:
+    artifact: steps/{instance}/index.md
+    instances:
+      alpha:
+        status: done
+      beta:
+        status: done
+-- stderr --
+-- expected/cwd/run/index.md --
+---
+status: done
+researched: 2026-01-01 12:00
+---
+-- expected/cwd/run/hooks.log --
+post
+check []
+post
+check [alpha]
+check [beta]
+post

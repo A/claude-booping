@@ -1,0 +1,21 @@
+A filename key goes through the same seed env as content: --set drives the name of the
+file that gets created.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  e2e_demo:
+    tree:
+      "{{ slug }}.md": "body\n"
+-- cmd --
+booping scaffold core.e2e_demo.tree out --set slug=my-plan
+-- exit --
+0
+-- stdout --
+created dir out
+--- /dev/null
++++ out/my-plan.md
+@@ -0,0 +1 @@
++body
+scaffolded 2 paths — 1 dirs created, 1 files created, 0 files overwritten
+-- expected/cwd/out/my-plan.md --
+body

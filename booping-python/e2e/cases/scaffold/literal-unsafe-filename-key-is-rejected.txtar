@@ -1,0 +1,15 @@
+An unsafe key needs no rendering to be caught: a literal `../escape.txt` in the tree fails
+the run before any write.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  e2e_demo:
+    tree:
+      "../escape.txt": "x\n"
+-- cmd --
+booping scaffold core.e2e_demo.tree out
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: core.e2e_demo.tree: unsafe filename key '../escape.txt'

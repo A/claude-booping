@@ -1,0 +1,33 @@
+A file argument bypasses the walk entirely: the mask below matches nothing anywhere in the tree, yet
+the run still yields exactly one entry, whose `path` is the argument verbatim rather than a path
+relative to a root.
+
+-- fixtures/cwd/vault/plan/index.md --
+---
+sessions: []
+---
+
+Body.
+-- cmd --
+booping session-stats vault/plan/index.md --mask nothing-matches.md --dry-run
+-- exit --
+0
+-- stdout --
+{
+  "artifacts": [
+    {
+      "path": "vault/plan/index.md",
+      "written": false,
+      "sessions": [],
+      "totals": {
+        "metrics_active_minutes": 0,
+        "metrics_models": [],
+        "metrics_tokens_input": 0,
+        "metrics_tokens_output": 0,
+        "metrics_tokens_cache_creation": 0,
+        "metrics_tokens_cache_read": 0
+      }
+    }
+  ]
+}
+-- stderr --

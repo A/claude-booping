@@ -1,0 +1,68 @@
+Every step section — first wave and later wave alike — hands its agent one fetch command,
+`booping render-playbook {name} --step {step}`, never a link to read. The step bodies name a config
+key and stay out of the composed render entirely: `jinja: true` renders the preamble, not the
+bodies.
+
+Twin of `fetch-lines-are-identical-without-jinja.txtar`, which plants the same playbook without
+`jinja: true`; the two pinned stdouts are byte-identical.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  fx_label: hermetic label
+-- fixtures/home/Claude/_playbooks/fx-fetch/playbook.md --
+---
+name: fx-fetch
+title: Fetch
+summary: Two waves of detached steps.
+jinja: true
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-fetch/playbook.yaml --
+graph:
+  first: []
+  second: [first]
+-- fixtures/home/Claude/_playbooks/fx-fetch/first/prompt.md --
+---
+name: first
+summary: First summary.
+detached: sonnet:medium
+---
+
+Wave-one body, label {{ config.core.fx_label }}.
+-- fixtures/home/Claude/_playbooks/fx-fetch/second/prompt.md --
+---
+name: second
+summary: Second summary.
+detached: sonnet:medium
+---
+
+Wave-two body, label {{ config.core.fx_label }}.
+-- cmd --
+booping render-playbook fx-fetch
+-- exit --
+0
+-- stdout --
+Preamble.
+
+## Playbook Steps
+
+Execute the steps in the most effective order considering their dependencies.
+
+| Step | Dependencies | Summary | Review gate |
+| --- | --- | --- | --- |
+| `first` | — | First summary. | — |
+| `second` | `first` | Second summary. | — |
+
+## Step: First
+
+First summary.
+
+Tell a sub-agent — model sonnet, effort medium — to get its instructions by calling this command: `booping render-playbook fx-fetch --step first`.
+
+## Step: Second
+
+Second summary.
+
+Tell a sub-agent — model sonnet, effort medium — to get its instructions by calling this command: `booping render-playbook fx-fetch --step second`.
+-- stderr --

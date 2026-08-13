@@ -1,0 +1,35 @@
+The first link of a body's loader chain is the step's own directory. Both the step directory and
+the playbook directory carry a `note.md`; the bare name resolves to the step's copy.
+
+-- fixtures/home/Claude/_playbooks/fx-inc-step-dir/playbook.md --
+---
+name: fx-inc-step-dir
+title: Include Step Dir
+summary: Bare include resolved from the step directory.
+jinja: true
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-inc-step-dir/playbook.yaml --
+graph:
+  one: []
+-- fixtures/home/Claude/_playbooks/fx-inc-step-dir/note.md --
+PLAYBOOK-DIR-NOTE
+-- fixtures/home/Claude/_playbooks/fx-inc-step-dir/one/note.md --
+STEP-DIR-NOTE
+-- fixtures/home/Claude/_playbooks/fx-inc-step-dir/one/prompt.md --
+---
+name: one
+summary: Only step.
+detached: sonnet:medium
+---
+
+Body says: {% include "note.md" %}
+-- cmd --
+booping render-playbook fx-inc-step-dir --step one
+-- exit --
+0
+-- stdout --
+Body says: STEP-DIR-NOTE
+
+-- stderr --

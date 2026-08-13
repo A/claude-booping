@@ -1,0 +1,24 @@
+A multi-line frontmatter value renders with its newline collapsed to a space, so one row stays
+one line and the table keeps exactly three lines for one match.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+-- fixtures/cwd/vault/plans/one/index.md --
+---
+title: One
+summary: |-
+  first
+  second
+---
+
+body
+-- cmd --
+booping query --glob 'plans/*/index.md'
+-- exit --
+0
+-- stdout --
+| title | summary | path | slug |
+| --- | --- | --- | --- |
+| One | first second | plans/one/index.md | one |
+-- stderr --

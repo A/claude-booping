@@ -6,41 +6,39 @@ One shipped skill (`/playbook`); everything procedural is a **playbook** it driv
 
 ## Commands
 
-- `just build` — render `src/files/**/*.j2` → `skills/`, `agents/`. `just dev` watches and rebuilds.
 - `just lint` / `just typecheck` / `just pytest` — ruff / basedpyright / pytest over `booping-python/`.
 - `just snapshots` — diff committed playbook reports against a fresh hermetic render (writes nothing). `just snapshots-accept [playbook]` — the **only** writer of the committed reports.
 - `just mdcheck` — structural rule checks over the rendered reports. Needs the `mdcheck` binary: `cargo install markdown-checker` (the crate named `mdcheck` is unrelated).
-- `just ci` — everything CI runs, in order: `lint typecheck pytest snapshots mdcheck`. Run before committing.
+- `just e2e [pytest args…]` — run the txtar contract corpus through pytest, passing any arguments straight to it (`just e2e -k config-get`, `just e2e --txtar-update`); `--txtar-update` rebaselines the selected cases.
+- `just ci` — everything CI runs, in order: `lint typecheck pytest snapshots mdcheck e2e`. Run before committing.
 - `just eval|smoke|regress <playbook>/<step>` (or `all`) — promptfoo eval suites; `just suites` lists them. Runs on subscription auth (`claude -p`), never in CI; each run posts a sticky, advisory PR comment via `scripts/eval-pr-comment.sh` (`EVAL_PR=0` opts out) — no commit status, no merge gate.
 - `just docs` / `just docs-serve` — build / preview the public docs site.
-- `bin/booping <subcommand> --help` — the single runtime CLI: `render`, `render-playbook`, `playbook-state`, `playbook-transition`, `query`, `config-get`, `marker-set`, `scaffold`, `frontmatter-update`, `session-stats`, `build`, `debug-context`, `debug-template`.
+- `bin/booping <subcommand> --help` — the single runtime CLI: `render`, `render-playbook`, `playbook-state`, `playbook-transition`, `query`, `config-get`, `marker-set`, `scaffold`, `frontmatter-update`, `session-stats`, `debug-context`.
 
 ## Layout
 
-- `booping-python/` — uv Python project with the `booping` CLI. Source `src/booping/`, tests `tests/`.
+- `booping-python/` — uv Python project with the `booping` CLI. Source `src/booping/`, tests `tests/`, contract corpus `e2e/` — cases plus a `conftest.py` configuring the `pytest-txtar` plugin, which owns the runner and the case-format spec (https://github.com/A/pytest-txtar); `scaffold` is verified there, not by the unit tests.
 - `bin/booping` — the only product entry point: a shell wrapper exec'ing `uv run --project booping-python booping "$@"`.
 - `scripts/` — dev tooling behind `just`: `snapshots.py`, `mdcheck.py` (uv inline Python), and the eval harness (`eval-*.sh`, `report-*.jq`). Not shipped to users.
 - `src/config.yaml` — runtime config, single source of truth for structured data (macros, query specs, scaffold trees, task types, sprint scale, per-playbook agents). Heavily commented — read it for key semantics.
-- `src/config_files.yaml` — **build-only** config for `just build` (per-file frontmatter values like `effort`). Not project-overridable.
-- `src/files/<rel>.j2` — build-time templates mirroring the plugin root; each is a thin shell (frontmatter + one `!`booping render …`` line).
 - `src/templates/` — runtime skill/agent templates + `_partials/`, rendered at skill-load time. Edits are **live**, no rebuild.
-- `skills/<name>/SKILL.md`, `agents/<name>.md` — **build artefacts**. Never hand-edit; edit `src/files/` (or `src/config_files.yaml`) and run `just build`.
+- `skills/<name>/SKILL.md`, `agents/<name>.md` — hand-authored thin shells: frontmatter (including `effort:`) plus one `!`booping render src/templates/…`` line that pulls in the body at load time.
 - `playbooks/<name>/` — core playbooks. Also: `_partials/` (shared fragments), `_scripts/` (shared hook scripts), `_lib/` (eval harness), `_fixtures/vault/` (hermetic render fixture). Each playbook commits its rendered report at `playbooks/<name>/_reports/output.md`.
 - `playbooks/*/_specs/` — playbook-authoring run artefacts and design history; intentionally stale, not a spec of current behaviour.
 - `migrations/<NNN>_<slug>/migration.md` — plugin-shipped vault migrations. Frontmatter `id` is the authority; a vault's applied watermark is the `.booping` marker's `latest_migration` key, and every render surface gates on it. Authoring primitives: query specs with `root: core` scan plugin-shipped files, numeric `--where` ordering (`gt`/`lt`), `{{ booping.latest_migration }}` in templates, marker writes via `booping marker-set`.
 - `docs/` — hand-authored plugin-internal fragments, lazy-loaded by skills via `${CLAUDE_PLUGIN_ROOT}/docs/<name>.md` links. No build step.
 - `documentation/` — public docs site source (MkDocs → gh-pages on push to `master`). Hand-authored.
 
-## Rendering pipelines
+## Rendering pipeline
 
-1. **Build-time** (`just build`): `src/files/**/*.j2` + `src/config_files.yaml` → committed `skills/` and `agents/` thin shells.
-2. **Runtime** (skill load): the thin shell's `!`booping render src/templates/…`` line renders the body with full project context — config merge, vault, lessons, playbooks.
+One stage, at **runtime** (skill load): a thin shell's `!`booping render src/templates/…`` line renders the body with full project context — config merge, vault, lessons, playbooks.
 
 ## Config
 
 - Three-tier deep merge, **core → global → project**: `src/config.yaml` ← `${XDG_CONFIG_HOME:-~/.config}/booping/config.yaml` ← `{vault}/config.yaml`. Later tiers win; lists replace wholesale. No schema gate and no tier restriction — any key loads in any tier.
 - Top level is exactly `home_dir` + `core`. **Placement rule** under `core`: a key one playbook owns lives at `core.{name}_playbook`; a shared key sits directly under `core`. A user's own playbook namespace copies this shape.
 - Any mapping in the merged config can be a **query spec** (`booping query --config <dotted.path>`, `| query` filter) or a **scaffold tree** (`booping scaffold <dotted.path> <dest>`) — the value at the dotted path is the spec/tree, no wrapper key. Specs live beside their consumer (`core.{name}_playbook.queries.<id>`), never in a central registry.
+- `core.plans` — plan shape shared by groom and develop: `glob` (plan discovery) and `milestones` (`glob` relative to the plan dir, matching the milestone file inside each milestone directory and never a sidecar beside it, + `table_columns` for the generated table). Never restate either literal in prose.
 - `core.macros.<name>` — an argv list, or a mapping with `command:` plus `cwd: repo|vault` scoping; rendered bodies call them via the `macro()` global; `--stub-macro` (or a vault `macro_stubs:` mapping) pins them for reproducible renders.
 - Full reference: [documentation/project_config.md](documentation/project_config.md).
 
@@ -61,6 +59,7 @@ Multi-step guided procedures discovered from three roots — core `playbooks/`, 
 Each playbook owns its own status vocabulary in its `states:` block — there is no shared lifecycle, and those blocks are the authoritative sets.
 
 - **Plan track** (`groom` + `develop`): the plan is a directory `{vault}/plans/{slug}/` whose `index.md` is both run artifact and plan document; groom ends at `ready-for-dev`, develop at `done` | `fail`, both also `cancelled`. Shape is the `core.plans.glob` config key (`plans/*/index.md`).
+- **Milestone directories**: each milestone is a directory `milestones/M{nn}-{kebab}/` under the plan directory, holding the milestone file named after it (`core.plans.milestones.glob`, `milestones/*/M*.md`) — frontmatter `id`/`title`/`sp`/`status`/`plan` plus tasks, DoD and Verify — and any sidecar the sprint writes beside it, currently `feedback.md`, the runner's findings on a rejected attempt and the only place attempts are counted. The milestone file is the contract handed to a worker by path — `index.md` is context only, its `## Milestones` table (`core.plans.milestones.table_columns`) and the plan's `sp` are generated. Milestone `status:` is develop's per-instance run state (`pending` → `in-progress` → `done`, `blocked` off in-progress), instance `M{nn}-{kebab}`; every edge runs the `refresh-milestone-table` hook. The worker runs its milestone's `## Verify` and makes the repo commit; the runner validates that commit against the DoD, flips the checkboxes and takes the transitions.
 - **Retro track** (`retro` + `learn`): artifact is a standalone `{vault}/retrospectives/{slug}.md` (`awaiting-retro` → `awaiting-learning` → `done`); plans stay at `done` throughout. Addressed with `--target` since the machines declare no `artifact:`.
 - **Code-review track** (`code-review`): artifact is `{vault}/codereviews/{plan-dirname}/{ts}.md` (ad-hoc scopes: `codereviews/{target-slug}/{ts}.md`, `plan: null`), machine `in-agent-review` → `human-review` → `done`; plans stay at `done`. Addressed with `--target` since the machine declares no `artifact:`.
 - The tracks join through **plan frontmatter, not status**: `retro:` is null until covered, so `{status: done, retro: null}` is the retro queue; `code_reviews:` is a list of every review that closed on the plan — history, not a queue flag — so the review queue is every `{status: done}` plan, re-review included.
@@ -81,10 +80,10 @@ Each playbook owns its own status vocabulary in its `states:` block — there is
 
 ## Editing conventions
 
-- `src/templates/**` edits are live. `src/files/**` or `src/config_files.yaml` edits need `just build`; `git diff -- skills/ agents/` is the drift signal.
+- `src/templates/**` edits are live — no rebuild step anywhere in the repo.
 - Playbook source edits (manifests, step `prompt.md`, shared partials) drift the committed reports. Loop: edit → `just snapshots` (read the diff) → `just snapshots-accept` → commit source and report together.
 - Eval suites sit beside their step (`tests.yaml` + `promptfooconfig.yaml` + `_fixtures/`); two tiers per fixture, `smoke` (deterministic) and `regress` (llm-rubric judges). Shared asserts, graders and rubric prompts live in `playbooks/_lib/`.
 - No comments that restate code — only WHY for non-obvious bits.
 - Conventional commits with scope: `feat(booping): …`, `fix(groom): …`.
 - README's Statuses section is hand-maintained narrative over the per-playbook `states:` blocks — revisit it when one changes.
-- New procedures should be playbooks, not skills; a skill is only for a surface `/playbook` cannot drive. Reference for the rare new skill: `src/templates/skills/playbook.md.j2` + its thin shell at `src/files/skills/playbook/SKILL.md.j2`.
+- New procedures should be playbooks, not skills; a skill is only for a surface `/playbook` cannot drive. Reference for the rare new skill: `src/templates/skills/playbook.md.j2` + its thin shell at `skills/playbook/SKILL.md`.

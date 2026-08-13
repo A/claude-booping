@@ -1,0 +1,11 @@
+Skill-load shells invoke `booping render src/templates/...` with cwd anywhere — the user's repo or
+vault. The sandbox cwd holds no `src/` at all, so the render can only succeed by resolving the
+relative path against the plugin root; a cwd-resolution regression finds nothing and exits 1.
+
+The rendered text is a live template and is deliberately not asserted: the property under test is
+which root the path resolves against, not what that template says today.
+
+-- cmd --
+booping render src/templates/skills/playbook.md.j2
+-- exit --
+0

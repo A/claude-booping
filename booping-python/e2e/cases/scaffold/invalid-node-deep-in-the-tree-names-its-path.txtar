@@ -1,0 +1,16 @@
+A node that is neither a string nor a mapping fails the run, and the error addresses it by
+its full dotted path through the tree, not by the tree's root.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  e2e_demo:
+    tree:
+      one:
+        two: null
+-- cmd --
+booping scaffold core.e2e_demo.tree out
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: core.e2e_demo.tree.one.two: node is null — use "" for an empty file or {} for an empty dir

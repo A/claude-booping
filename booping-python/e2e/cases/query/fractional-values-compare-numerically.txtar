@@ -1,0 +1,37 @@
+Fractional values are compared as numbers, not as text: `1.75` clears `1.5` while `1.25` does
+not, and `10.5` clears `9.5` — the last of which a lexicographic comparison would reject.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+-- fixtures/cwd/vault/plans/low/index.md --
+---
+title: Low
+sp: 1.25
+---
+
+body
+-- fixtures/cwd/vault/plans/mid/index.md --
+---
+title: Mid
+sp: 1.75
+---
+
+body
+-- fixtures/cwd/vault/plans/high/index.md --
+---
+title: High
+sp: 10.5
+---
+
+body
+-- cmd --
+booping query --glob 'plans/*/index.md' --where sp:gt=1.5 --output paths
+booping query --glob 'plans/*/index.md' --where sp:gt=9.5 --output paths
+-- exit --
+0
+-- stdout --
+plans/high/index.md
+plans/mid/index.md
+plans/high/index.md
+-- stderr --

@@ -1,0 +1,37 @@
+A cycle in the graph blocks the render and the notice spells out the cycle path step by step.
+
+-- fixtures/home/Claude/_playbooks/fx-cycle/playbook.md --
+---
+name: fx-cycle
+title: Cycle
+summary: Graph has a cycle.
+---
+
+Preamble prose for the cycle playbook.
+-- fixtures/home/Claude/_playbooks/fx-cycle/playbook.yaml --
+graph:
+  a: [b]
+  b: [a]
+-- fixtures/home/Claude/_playbooks/fx-cycle/a/prompt.md --
+---
+name: a
+summary: Step a.
+---
+
+Step a body.
+-- fixtures/home/Claude/_playbooks/fx-cycle/b/prompt.md --
+---
+name: b
+summary: Step b.
+---
+
+Step b body.
+-- cmd --
+booping render-playbook fx-cycle
+-- exit --
+0
+-- stdout --
+**STOP — tell the user:** the graph has a cycle: a → b → a. Do not execute this playbook.
+
+Preamble prose for the cycle playbook.
+-- stderr --

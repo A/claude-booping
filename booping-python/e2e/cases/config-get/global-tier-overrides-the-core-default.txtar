@@ -1,0 +1,12 @@
+A key set in the global tier wins over the core default, and the raw value still prints
+unexpanded.
+
+-- fixtures/xdg/booping/config.yaml --
+home_dir: ~/Vaults/
+-- cmd --
+booping config-get home_dir
+-- exit --
+0
+-- stdout --
+~/Vaults/
+-- stderr --

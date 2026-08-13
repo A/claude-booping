@@ -1,0 +1,71 @@
+When a step body is embedded by `inline_steps`, its step-targeted lessons come with it — the
+`## Lessons` block follows the inlined body inside the `## Step:` section, while the playbook-level
+lesson keeps its own section above the step table.
+
+-- fixtures/home/Claude/_lessons/0001_alpha.md --
+---
+title: Alpha rule
+targets: [fx-lesson-inline]
+---
+
+Alpha body.
+-- fixtures/home/Claude/_lessons/0002_step.md --
+---
+title: Step rule
+targets: [fx-lesson-inline/s1]
+---
+
+Step-scoped body.
+-- fixtures/home/Claude/_playbooks/fx-lesson-inline/playbook.md --
+---
+name: fx-lesson-inline
+title: Lesson Inline
+summary: Step lessons on the inline surface.
+inline_steps: true
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-lesson-inline/playbook.yaml --
+graph:
+  s1: []
+-- fixtures/home/Claude/_playbooks/fx-lesson-inline/s1/prompt.md --
+---
+name: s1
+summary: Only step.
+---
+
+Step body.
+-- cmd --
+booping render-playbook fx-lesson-inline
+-- exit --
+0
+-- stdout --
+Preamble.
+
+## Lessons
+
+The following 1 lesson(s) apply to this playbook. Never silently violate one; conflict → stop and flag.
+
+### 0001_alpha — Alpha rule
+
+Alpha body.
+
+## Playbook Steps
+
+Execute the steps in the most effective order considering their dependencies.
+
+| Step | Dependencies | Summary | Review gate |
+| --- | --- | --- | --- |
+| `s1` | — | Only step. | — |
+
+## Step: S1
+Step body.
+
+## Lessons
+
+The following 1 lesson(s) apply to this step. Never silently violate one.
+
+### 0002_step — Step rule
+
+Step-scoped body.
+-- stderr --

@@ -1,0 +1,70 @@
+With `{instance}` in filename position the artifact is `notes/alpha.md`, and the reported key is the
+slug the placeholder matched — the segment's `.md` suffix is stripped back off. Paired with
+`a-nested-instance-path-keys-on-the-matched-directory-segment.txtar`, which differs only in the
+machine's `artifact:` shape.
+
+-- fixtures/home/Claude/_playbooks/fx-flat/playbook.md --
+---
+name: fx-flat
+title: Flat
+summary: Filename-position {instance} fixture for playbook-state.
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-flat/playbook.yaml --
+graph:
+  intake: []
+  note-pipeline:
+    dependencies: [intake]
+    state: note
+    graph:
+      draft: []
+
+states:
+  note:
+    artifact: notes/{instance}.md
+    initial: drafting
+    statuses:
+      drafting:
+        transitions:
+          - to: done
+            when: note written
+      done: {terminal: true}
+-- fixtures/home/Claude/_playbooks/fx-flat/intake/prompt.md --
+---
+summary: Intake the request.
+---
+
+Intake body.
+-- fixtures/home/Claude/_playbooks/fx-flat/draft/prompt.md --
+---
+summary: Draft the note.
+---
+
+Draft body.
+-- fixtures/cwd/run/.keep --
+-- cmd --
+booping playbook-transition fx-flat drafting --state note --instance alpha --workdir run
+booping playbook-state fx-flat --workdir run
+-- exit --
+0
+-- stdout --
+created notes/alpha.md
+not-started → drafting
+frontmatter: status=drafting
+playbook: fx-flat
+workdir: {CWD}/run
+states:
+  note:
+    artifact: notes/{instance}.md
+    instances:
+      alpha:
+        status: drafting
+        next:
+        - to: done
+          when: note written
+-- stderr --
+-- expected/cwd/run/notes/alpha.md --
+---
+status: drafting
+---

@@ -1,0 +1,10 @@
+A dotted key path descends into nested mappings and a non-string scalar prints as a bare
+number, unquoted.
+
+-- cmd --
+booping config-get core.sprint.default_threshold_sp
+-- exit --
+0
+-- stdout --
+35
+-- stderr --

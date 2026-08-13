@@ -1,0 +1,15 @@
+A `--config` path that resolves to a scalar exits 1 with its own message — distinct from the
+one an unresolvable path gets — naming the type it found.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  probe_playbook:
+    queries:
+      not_a_spec: 7
+-- cmd --
+booping query --config core.probe_playbook.queries.not_a_spec
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: config path core.probe_playbook.queries.not_a_spec is a int, not a query spec mapping

@@ -1,0 +1,20 @@
+A plan path that is not a file fails before anything is parsed, naming the path it looked
+for, and writes nothing.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+# Body
+-- cmd --
+booping frontmatter-update nope.md status=in-progress
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: plan not found: nope.md
+-- expected/cwd/plan.md --
+---
+title: Foo
+---
+# Body

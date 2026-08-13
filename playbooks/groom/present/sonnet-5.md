@@ -1,14 +1,18 @@
+Read the plan's milestone rows — never a hand-kept list — with `{plan-dir}` the preamble's `Plan dir:` line:
+
+```
+booping query --glob {plan-dir}/{{ config.core.plans.milestones.glob }} --columns {{ config.core.plans.milestones.table_columns | join(',') }}
+```
+
 Present user the resulting plan as:
 
 ```
 Request: {path}
 Plan: {path}
 Status: {status}
-SPs: {SP total}
+SPs: {sum of the rows' sp}
 
-| # | Summary | SP |
-| - | ------- | -- |
-{one row per milestone — its id, what it delivers, its SP}
+{the table the query printed}
 
 ## Next Steps
 

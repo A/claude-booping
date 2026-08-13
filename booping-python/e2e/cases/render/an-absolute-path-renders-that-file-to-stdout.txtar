@@ -1,0 +1,18 @@
+An absolute path is taken verbatim — no plugin-root join — and its render is written to stdout,
+frontmatter and all, with the config values substituted.
+
+`/proc/self/cwd` is how a case names a file it seeded: the sandbox path is generated per run, so it
+cannot be spelled in a `cmd` line, and a relative path would resolve against the plugin root instead
+of here. Every other case in this directory names its own template the same way.
+
+-- fixtures/cwd/probe.md.j2 --
+threshold {{ config.core.sprint.default_threshold_sp }}
+redecompose {{ config.core.sprint.redecompose_threshold }}
+-- cmd --
+booping render /proc/self/cwd/probe.md.j2
+-- exit --
+0
+-- stdout --
+threshold 35
+redecompose 5
+-- stderr --

@@ -1,0 +1,72 @@
+With no `--workdir` the reporter resolves every artifact against the process cwd, so the run seeded
+in the `cwd` root is the one reported and `workdir` echoes that directory.
+
+-- fixtures/home/Claude/_playbooks/fx-run/playbook.md --
+---
+name: fx-run
+title: Run
+summary: Single-machine fixture for playbook-state.
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-run/playbook.yaml --
+state: main
+graph:
+  intake: []
+  research: [intake]
+
+states:
+  main:
+    artifact: index.md
+    initial: intaking
+    statuses:
+      intaking:
+        transitions:
+          - to: researching
+            when: intake complete
+            gates: ["request captured in the artifact"]
+          - to: parked
+            when: the run is shelved
+      researching:
+        transitions:
+          - to: done
+            when: research complete
+      parked: {terminal: true}
+      done: {terminal: true}
+-- fixtures/home/Claude/_playbooks/fx-run/intake/prompt.md --
+---
+summary: Intake the request.
+---
+
+Intake body.
+-- fixtures/home/Claude/_playbooks/fx-run/research/prompt.md --
+---
+summary: Research the request.
+---
+
+Research body.
+-- fixtures/cwd/index.md --
+---
+status: intaking
+---
+
+Body.
+-- cmd --
+booping playbook-state fx-run
+-- exit --
+0
+-- stdout --
+playbook: fx-run
+workdir: {CWD}
+states:
+  main:
+    artifact: index.md
+    status: intaking
+    next:
+    - to: researching
+      when: intake complete
+      gates:
+      - request captured in the artifact
+    - to: parked
+      when: the run is shelved
+-- stderr --

@@ -1,2 +1,0 @@
-#!/bin/sh
-echo "shared $*" >> "$BOOPING_WORKDIR/shared-note.log"

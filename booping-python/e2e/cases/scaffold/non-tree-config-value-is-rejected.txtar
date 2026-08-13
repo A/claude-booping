@@ -1,0 +1,10 @@
+A config path that resolves to a scalar is not a tree: the run fails naming the path and
+the type found there.
+
+-- cmd --
+booping scaffold home_dir out
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: home_dir: value at 'home_dir' is not a tree — expected a mapping, found str

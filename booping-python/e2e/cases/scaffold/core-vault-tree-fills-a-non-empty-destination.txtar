@@ -1,0 +1,67 @@
+Pointing the vault tree at a directory that already holds unrelated files fills in what is
+missing and leaves the stray file alone.
+
+-- fixtures/cwd/vault/stray.md --
+x
+-- cmd --
+booping scaffold core.setup_playbook.scaffold vault
+-- exit --
+0
+-- stdout --
+created dir vault/plans
+created dir vault/retrospectives
+created dir vault/codereviews
+created dir vault/_lessons
+created dir vault/notes
+--- /dev/null
++++ vault/sprints.md
+@@ -0,0 +1,42 @@
++```base
++formulas:
++  plan: file.asLink(title)
++  tokens_in: ((metrics_tokens_input + metrics_tokens_cache_creation + metrics_tokens_cache_read) / 1000000).round(1) + "M"
++  tokens_out: (metrics_tokens_output / 1000).round(0) + "k"
++  cached: (metrics_tokens_cache_read / 1000000).round(1) + "M"
++properties:
++  formula.plan:
++    displayName: Title
++  formula.tokens_in:
++    displayName: In
++  formula.tokens_out:
++    displayName: Out
++  formula.cached:
++    displayName: Cached
++  note.metrics_active_minutes:
++    displayName: Active min
++  note.metrics_models:
++    displayName: Models
++filters:
++  and:
++    - file.inFolder(this.file.folder + "/plans")
++    - file.name == "index"
++views:
++  - type: table
++    name: Plans
++    order:
++      - status
++      - sp
++      - formula.plan
++      - summary
++      - created
++      - completed
++      - metrics_active_minutes
++      - metrics_models
++      - formula.tokens_in
++      - formula.tokens_out
++      - formula.cached
++    sort:
++      - property: created
++        direction: DESC
++```
+--- /dev/null
++++ vault/.gitignore
+@@ -0,0 +1 @@
++.booping.log
+scaffolded 7 paths — 5 dirs created, 2 files created, 0 files overwritten
+-- expected/cwd/vault/stray.md --
+x

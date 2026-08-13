@@ -1,0 +1,14 @@
+A key rendering to `..` is refused as a name, and nothing is written.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  e2e_demo:
+    tree:
+      "{{ dots }}": "body\n"
+-- cmd --
+booping scaffold core.e2e_demo.tree out --set dots=..
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: core.e2e_demo.tree.{{ dots }}: unsafe filename key '..'

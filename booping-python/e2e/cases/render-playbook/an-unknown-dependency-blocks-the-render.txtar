@@ -1,0 +1,38 @@
+A dependency that is not itself a graph node blocks the render; the notice names both the unknown
+dependency and the step that lists it.
+
+-- fixtures/home/Claude/_playbooks/fx-unknown-dep/playbook.md --
+---
+name: fx-unknown-dep
+title: Unknown Dep
+summary: Graph lists a dep that is not a step.
+---
+
+Preamble prose for the unknown-dep playbook.
+-- fixtures/home/Claude/_playbooks/fx-unknown-dep/playbook.yaml --
+graph:
+  a: []
+  b: [a, ghost]
+-- fixtures/home/Claude/_playbooks/fx-unknown-dep/a/prompt.md --
+---
+name: a
+summary: Step a.
+---
+
+Step a body.
+-- fixtures/home/Claude/_playbooks/fx-unknown-dep/b/prompt.md --
+---
+name: b
+summary: Step b.
+---
+
+Step b body.
+-- cmd --
+booping render-playbook fx-unknown-dep
+-- exit --
+0
+-- stdout --
+**STOP — tell the user:** 'ghost' is listed as a dependency of 'b' but is not a step in the graph. Do not execute this playbook.
+
+Preamble prose for the unknown-dep playbook.
+-- stderr --

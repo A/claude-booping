@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import argparse
 
-from booping.commands import build as build_cmd
 from booping.commands import config_get as config_get_cmd
 from booping.commands import debug as debug_cmd
 from booping.commands import frontmatter_update as frontmatter_update_cmd
@@ -32,7 +31,6 @@ def build_parser() -> argparse.ArgumentParser:
     marker_set_cmd.add_parser(sub)
     query_cmd.add_parser(sub)
     scaffold_cmd.add_parser(sub)
-    build_cmd.add_parser(sub)
     debug_cmd.add_parser(sub)
     frontmatter_update_cmd.add_parser(sub)
     session_stats_cmd.add_parser(sub)

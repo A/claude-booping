@@ -16,4 +16,4 @@ commit: null
 
 # Cache warm-up on deploy
 
-Fixture plan — a null `sp` and a null `created`, so every renderer's missing-value branch is exercised.
+Fixture plan — no `milestones/` yet, hence a null `sp` (it is summed from milestone files) and a null `created`, so every renderer's missing-value branch is exercised.

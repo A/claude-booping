@@ -103,12 +103,16 @@ def _report_status(artifact: Path, machine: StateMachine) -> dict[str, Any]:
 
 def _instances(machine: StateMachine, workdir: Path) -> dict[str, Any]:
     """Enumerate on-disk instances of a `{instance}` artifact path, keyed by slug —
-    the path component the placeholder occupies, sorted."""
+    what the placeholder itself matched, sorted. The segment carrying it may add a
+    prefix or suffix (`{instance}.md`); both are stripped off the matched segment."""
     parts = machine.artifact.split("/")
     slug_index = next(i for i, part in enumerate(parts) if "{instance}" in part)
+    prefix, _, suffix = parts[slug_index].partition("{instance}")
     found: dict[str, Path] = {}
     for match in workdir.glob(machine.artifact.replace("{instance}", "*")):
-        found[match.relative_to(workdir).parts[slug_index]] = match
+        segment = match.relative_to(workdir).parts[slug_index]
+        slug = segment[len(prefix) :]
+        found[slug[: -len(suffix)] if suffix else slug] = match
     return {
         slug: _report_status(found[slug], machine) for slug in sorted(found)
     }

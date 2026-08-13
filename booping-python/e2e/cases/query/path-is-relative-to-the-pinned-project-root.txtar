@@ -1,0 +1,27 @@
+`--project` pins the query root, and every row carries its whole frontmatter plus a `path`
+relative to that root — `plans/alpha/index.md`, not the `elsewhere/`-prefixed path the working
+directory would give.
+
+-- fixtures/cwd/elsewhere/plans/alpha/index.md --
+---
+title: Alpha
+status: ready-for-dev
+sp: 5
+---
+
+body
+-- cmd --
+booping query --project elsewhere --glob 'plans/*/index.md' --output json
+-- exit --
+0
+-- stdout --
+[
+  {
+    "title": "Alpha",
+    "status": "ready-for-dev",
+    "sp": 5,
+    "path": "plans/alpha/index.md",
+    "slug": "alpha"
+  }
+]
+-- stderr --

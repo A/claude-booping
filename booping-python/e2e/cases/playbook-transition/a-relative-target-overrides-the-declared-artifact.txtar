@@ -1,0 +1,61 @@
+A relative `--target` resolves against the workdir and stands in for the machine's declared
+`artifact:`. The declared path is seeded here too, and stays at its own status: the move lands on
+the target only.
+
+-- fixtures/home/Claude/_playbooks/fx-run/playbook.md --
+---
+name: fx-run
+title: Run
+summary: Hookless states-bearing fixture for playbook-transition.
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-run/playbook.yaml --
+state: main
+graph:
+  intake: []
+
+states:
+  main:
+    artifact: index.md
+    initial: intaking
+    statuses:
+      intaking:
+        transitions:
+          - to: researching
+            when: intake complete
+      researching:
+        transitions:
+          - to: done
+            when: research complete
+      done: {terminal: true}
+-- fixtures/home/Claude/_playbooks/fx-run/intake/prompt.md --
+---
+summary: Intake the request.
+---
+
+Intake body.
+-- fixtures/cwd/run/index.md --
+---
+status: intaking
+---
+-- fixtures/cwd/run/review.md --
+---
+status: intaking
+---
+-- cmd --
+booping playbook-transition fx-run researching --target review.md --workdir run
+-- exit --
+0
+-- stdout --
+intaking → researching
+frontmatter: status=researching
+-- stderr --
+-- expected/cwd/run/review.md --
+---
+status: researching
+---
+-- expected/cwd/run/index.md --
+---
+status: intaking
+---

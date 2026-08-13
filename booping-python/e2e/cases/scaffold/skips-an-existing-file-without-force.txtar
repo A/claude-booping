@@ -1,0 +1,19 @@
+Without --force an existing file the tree names is left byte-for-byte alone and reported on
+its own receipt line; no diff hunk is printed for it and it counts towards nothing.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  e2e_demo:
+    tree:
+      README.md: "hello world\n"
+-- fixtures/cwd/out/README.md --
+old
+-- cmd --
+booping scaffold core.e2e_demo.tree out
+-- exit --
+0
+-- stdout --
+skipped existing file out/README.md
+scaffolded 0 paths — 0 dirs created, 0 files created, 0 files overwritten
+-- expected/cwd/out/README.md --
+old

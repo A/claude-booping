@@ -2,8 +2,13 @@ state: run
 graph:
   intake: []
   provision: [intake]
-  develop-loop: [provision]
-  verify: [develop-loop]
+  milestones:
+    dependencies: [provision]
+    state: milestone
+    repeat: once per milestone file in the plan's `milestones/`, in `id` order
+    graph:
+      develop-loop: []
+  verify: [milestones]
   wrap-up: [verify]
 
 states:
@@ -71,3 +76,32 @@ states:
           - done
           - fail
           - cancelled
+
+  milestone:
+    artifact: milestones/{instance}/{instance}.md
+    initial: pending
+    statuses:
+      pending:
+        transitions:
+          - to: in-progress
+            when: "the milestone's group is being handed to a worker"
+            hooks:
+              - "script refresh-milestone-table"
+      in-progress:
+        transitions:
+          - to: done
+            when: "the worker reported and every checkbox under the milestone file's `## Definition of Done` is `[x]`"
+            hooks:
+              - "script refresh-milestone-table"
+          - to: blocked
+            when: "a failed attempt is recorded in `feedback.md` beside the milestone file"
+            hooks:
+              - "script refresh-milestone-table"
+      blocked:
+        transitions:
+          - to: in-progress
+            when: "the next attempt on the same milestone starts"
+            hooks:
+              - "script refresh-milestone-table"
+      done:
+        terminal: true

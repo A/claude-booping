@@ -1,0 +1,30 @@
+A run naming no `--output` prints a markdown table: a header row over the union of the rows'
+keys, a separator row, then one row per match.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+-- fixtures/cwd/vault/plans/alpha/index.md --
+---
+title: Alpha
+status: ready-for-dev
+---
+
+body
+-- fixtures/cwd/vault/plans/beta/index.md --
+---
+title: Beta
+status: done
+---
+
+body
+-- cmd --
+booping query --glob 'plans/*/index.md'
+-- exit --
+0
+-- stdout --
+| title | status | path | slug |
+| --- | --- | --- | --- |
+| Alpha | ready-for-dev | plans/alpha/index.md | alpha |
+| Beta | done | plans/beta/index.md | beta |
+-- stderr --

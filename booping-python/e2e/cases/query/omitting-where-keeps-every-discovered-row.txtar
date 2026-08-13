@@ -1,0 +1,38 @@
+A spec carrying no `where` filters nothing: the same glob that returns one row under a clause
+returns every discovered row without it.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+-- fixtures/cwd/vault/plans/alpha/index.md --
+---
+title: Alpha
+status: ready-for-dev
+---
+
+body
+-- fixtures/cwd/vault/plans/beta/index.md --
+---
+title: Beta
+status: done
+---
+
+body
+-- fixtures/cwd/vault/plans/gamma/index.md --
+---
+title: Gamma
+status: cancelled
+---
+
+body
+-- cmd --
+booping query --glob 'plans/*/index.md' --where status=done --output paths
+booping query --glob 'plans/*/index.md' --output paths
+-- exit --
+0
+-- stdout --
+plans/beta/index.md
+plans/alpha/index.md
+plans/beta/index.md
+plans/gamma/index.md
+-- stderr --

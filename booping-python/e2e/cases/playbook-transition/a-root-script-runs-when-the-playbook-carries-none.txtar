@@ -1,0 +1,54 @@
+With no playbook-local `_scripts/note`, the same hook resolves to the discovery root's copy — the
+counterpart of `a-playbook-local-script-shadows-the-root-copy`, distinguished by the marker the
+script writes.
+
+-- fixtures/home/Claude/_playbooks/fx-hooks/playbook.md --
+---
+name: fx-hooks
+title: Hooks
+summary: Hook-bearing fixture for playbook-transition.
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-hooks/playbook.yaml --
+state: main
+graph:
+  only: []
+
+states:
+  main:
+    artifact: index.md
+    initial: intaking
+    statuses:
+      intaking:
+        transitions:
+          - to: noted
+            when: the note is written
+            hooks: ["script note"]
+      noted: {terminal: true}
+-- fixtures/home/Claude/_playbooks/fx-hooks/only/prompt.md --
+---
+summary: Only step.
+---
+
+Only body.
+-- fixtures/home/Claude/_playbooks/_scripts/note --
+#!/bin/sh
+echo "root" >> "$BOOPING_WORKDIR/note.log"
+-- fixtures/cwd/run/.keep --
+-- cmd --
+chmod +x ../home/Claude/_playbooks/_scripts/note
+booping playbook-transition fx-hooks intaking --workdir run
+booping playbook-transition fx-hooks noted --workdir run
+-- exit --
+0
+-- stdout --
+created index.md
+not-started → intaking
+frontmatter: status=intaking
+intaking → noted
+frontmatter: status=noted
+script note: ok
+-- stderr --
+-- expected/cwd/run/note.log --
+root

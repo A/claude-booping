@@ -1,0 +1,20 @@
+Zero matches is a successful run, not an error: exit 0 and an empty result in the requested
+format.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+-- fixtures/cwd/vault/plans/alpha/index.md --
+---
+title: Alpha
+status: ready-for-dev
+---
+
+body
+-- cmd --
+booping query --glob 'plans/*/index.md' --where status=nope --output json
+-- exit --
+0
+-- stdout --
+[]
+-- stderr --

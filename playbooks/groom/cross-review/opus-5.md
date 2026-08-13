@@ -1,9 +1,6 @@
 # Cross-review the plan
 
-You are a strict staff engineer reviewing a sprint plan that an AI coding agent will execute from
-the plan file alone. Read the plan named in your run-time context — `plans/{slug}/index.md` — and
-review it. Find execution gaps, architectural blind spots and rule violations. No generic software
-engineering advice: every finding references a specific part of the plan.
+You are a strict staff engineer reviewing a sprint plan that an AI coding agent will execute from the plan files alone. Read the plan named in your run-time context — `plans/{slug}/index.md` and every milestone file beside it, `plans/{slug}/{{ config.core.plans.milestones.glob }}` — and review it. Find execution gaps, architectural blind spots and rule violations. No generic software engineering advice: every finding references a specific part of the plan.
 
 ## Dimensions
 
@@ -14,7 +11,7 @@ engineering advice: every finding references a specific part of the plan.
   frameworks or I/O; unclear test boundaries and utility placement.
 - **Architectural blind spots** — concurrency, state, coupling or data-integrity issues specific to
   this plan that it does not address.
-- **Plan mechanics** — a milestone not executable in a fresh session with only the plan as context;
+- **Plan mechanics** — a milestone not executable in a fresh session with only its file and `index.md` as context;
   a DoD checkbox or `**Verify**` that names nothing observable; a `Files` path that does not exist
   and is not created by the plan; an out-of-scope item some task targets anyway.
 

@@ -1,0 +1,51 @@
+Only executable steps are embedded, so a step directory wired into no graph node never has its body
+rendered: its broken Jinja costs nothing more than the usual orphan `**Note`, and the wired step's
+body still lands in the render.
+
+-- fixtures/home/Claude/_playbooks/fx-inline-orphan/playbook.md --
+---
+name: fx-inline-orphan
+title: Inline Orphan
+summary: The broken body belongs to an unwired step.
+jinja: true
+inline_steps: true
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-inline-orphan/playbook.yaml --
+graph:
+  one: []
+-- fixtures/home/Claude/_playbooks/fx-inline-orphan/one/prompt.md --
+---
+name: one
+summary: Wired step.
+---
+
+One body.
+-- fixtures/home/Claude/_playbooks/fx-inline-orphan/stray/prompt.md --
+---
+name: stray
+summary: Not wired into the graph.
+---
+
+{% include "nope.md" %}
+-- cmd --
+booping render-playbook fx-inline-orphan
+-- exit --
+0
+-- stdout --
+**Note — tell the user:** step 'stray' exists on disk but is not wired into the graph; it will not run.
+
+Preamble.
+
+## Playbook Steps
+
+Execute the steps in the most effective order considering their dependencies.
+
+| Step | Dependencies | Summary | Review gate |
+| --- | --- | --- | --- |
+| `one` | — | Wired step. | — |
+
+## Step: One
+One body.
+-- stderr --

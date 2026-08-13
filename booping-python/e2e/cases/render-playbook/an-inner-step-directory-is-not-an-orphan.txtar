@@ -1,0 +1,68 @@
+A step directory wired only from inside a subgraph is wired: it renders its section and draws no
+orphan note. Paired with `a-step-directory-wired-nowhere-is-an-orphan`, whose tree differs only by
+one extra step directory.
+
+-- fixtures/home/Claude/_playbooks/fx-inner-orphan/playbook.md --
+---
+name: fx-inner-orphan
+title: Inner Orphan
+---
+
+Preamble prose for the inner-orphan playbook.
+-- fixtures/home/Claude/_playbooks/fx-inner-orphan/playbook.yaml --
+graph:
+  a: []
+  loop:
+    dependencies: [a]
+    graph:
+      b: []
+-- fixtures/home/Claude/_playbooks/fx-inner-orphan/a/prompt.md --
+---
+name: a
+summary: a summary
+---
+
+a body
+-- fixtures/home/Claude/_playbooks/fx-inner-orphan/b/prompt.md --
+---
+name: b
+summary: b summary
+---
+
+b body
+-- cmd --
+booping render-playbook fx-inner-orphan
+-- exit --
+0
+-- stdout --
+Preamble prose for the inner-orphan playbook.
+
+## Playbook Steps
+
+Execute the steps in the most effective order considering their dependencies.
+
+| Step | Dependencies | Summary | Review gate |
+| --- | --- | --- | --- |
+| `a` | — | a summary | — |
+| `loop` *(subgraph)* | `a` | — | — |
+| `b` *(in loop)* | — | b summary | — |
+
+## Step: A
+Instructions:
+- Summary: a summary
+
+Run `booping render-playbook fx-inner-orphan --step a` for content.
+
+## Subgraph: loop
+
+Instructions:
+- After: a
+- Inner waves: 1. `b`
+
+## Step: B
+Instructions:
+- Part of: loop
+- Summary: b summary
+
+Run `booping render-playbook fx-inner-orphan --step b` for content.
+-- stderr --

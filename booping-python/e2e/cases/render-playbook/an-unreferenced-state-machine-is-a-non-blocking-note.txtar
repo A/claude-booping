@@ -1,0 +1,93 @@
+A declared `states:` entry no graph scope references is a `**Note` line, not a `**STOP` — the
+render carries on and still holds the `## State` section for the machine that is referenced.
+
+-- fixtures/home/Claude/_playbooks/fx-orphan-state/playbook.md --
+---
+name: fx-orphan-state
+title: Orphan State
+---
+
+Preamble prose for the orphan-state playbook.
+-- fixtures/home/Claude/_playbooks/fx-orphan-state/playbook.yaml --
+state: main
+graph:
+  a: []
+
+states:
+  main:
+    artifact: index.md
+    initial: start
+    statuses:
+      start:
+        transitions:
+          - to: done
+            when: a returned
+      done: {terminal: true}
+  stray:
+    artifact: stray.md
+    initial: x
+    statuses:
+      x: {terminal: true}
+-- fixtures/home/Claude/_playbooks/fx-orphan-state/a/prompt.md --
+---
+name: a
+summary: a summary
+---
+
+a body
+-- cmd --
+booping render-playbook fx-orphan-state
+-- exit --
+0
+-- stdout --
+**Note — tell the user:** states entry 'stray' is declared but no graph scope references it; it will never be used.
+
+Preamble prose for the orphan-state playbook.
+
+## Playbook Steps
+
+Execute the steps in the most effective order considering their dependencies.
+
+| Step | Dependencies | Summary | Review gate |
+| --- | --- | --- | --- |
+| `a` | — | a summary | — |
+
+## State
+
+Run state is persisted in artifacts under the run workdir. Only `booping playbook-transition` writes it — never hand-edit an artifact's `status`.
+
+Read the whole run's frontier before starting or resuming:
+
+```
+booping playbook-state fx-orphan-state --workdir <run workdir>
+```
+
+### State: main
+
+- Referenced by: outer graph
+- Artifact: `index.md` (relative to the run workdir)
+- Initial status: `start`
+- Advance: `booping playbook-transition fx-orphan-state <to> --workdir <run workdir>`
+
+| Status | To | When | Gates |
+| --- | --- | --- | --- |
+| `start` | `done` | a returned | — |
+| `done` | *(terminal)* | — | — |
+
+### State: stray
+
+- Referenced by: nothing
+- Artifact: `stray.md` (relative to the run workdir)
+- Initial status: `x`
+- Advance: `booping playbook-transition fx-orphan-state <to> --state stray --workdir <run workdir>`
+
+| Status | To | When | Gates |
+| --- | --- | --- | --- |
+| `x` | *(terminal)* | — | — |
+
+## Step: A
+Instructions:
+- Summary: a summary
+
+Run `booping render-playbook fx-orphan-state --step a` for content.
+-- stderr --

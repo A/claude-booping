@@ -1,0 +1,48 @@
+A dotted `--config` path addresses a spec declared by the attached vault's config.yaml, and
+the run returns the rows that spec's glob, filter and sort produce.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+-- fixtures/cwd/vault/config.yaml --
+core:
+  probe_playbook:
+    queries:
+      done_plans:
+        glob:
+          - plans/*/index.md
+        where:
+          status: done
+        sort: '-created'
+-- fixtures/cwd/vault/plans/alpha/index.md --
+---
+title: Alpha
+status: ready-for-dev
+created: 20260101
+---
+
+body
+-- fixtures/cwd/vault/plans/beta/index.md --
+---
+title: Beta
+status: done
+created: 20260303
+---
+
+body
+-- fixtures/cwd/vault/plans/gamma/index.md --
+---
+title: Gamma
+status: done
+created: 20260202
+---
+
+body
+-- cmd --
+booping query --config core.probe_playbook.queries.done_plans --output paths
+-- exit --
+0
+-- stdout --
+plans/beta/index.md
+plans/gamma/index.md
+-- stderr --

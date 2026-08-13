@@ -1,0 +1,32 @@
+--force never clears a directory: files inside a directory the tree declares, and a whole
+directory the tree does not mention, both survive.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  e2e_demo:
+    tree:
+      src:
+        main.py: "print(1)\n"
+      _references:
+        type: dir
+-- fixtures/cwd/out/src/other.py --
+other
+-- fixtures/cwd/out/unrelated/f.txt --
+f
+-- cmd --
+booping scaffold core.e2e_demo.tree out --force
+-- exit --
+0
+-- stdout --
+--- /dev/null
++++ out/src/main.py
+@@ -0,0 +1 @@
++print(1)
+created dir out/_references
+scaffolded 2 paths — 1 dirs created, 1 files created, 0 files overwritten
+-- expected/cwd/out/src/other.py --
+other
+-- expected/cwd/out/src/main.py --
+print(1)
+-- expected/cwd/out/unrelated/f.txt --
+f

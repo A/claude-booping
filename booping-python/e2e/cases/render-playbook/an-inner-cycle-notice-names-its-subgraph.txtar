@@ -1,0 +1,40 @@
+A cycle among a subgraph's inner steps blocks the render; the notice traces the cycle and names
+the subgraph it lives in.
+
+-- fixtures/home/Claude/_playbooks/fx-inner-cycle/playbook.md --
+---
+name: fx-inner-cycle
+title: Inner Cycle
+---
+
+Preamble prose for the inner-cycle playbook.
+-- fixtures/home/Claude/_playbooks/fx-inner-cycle/playbook.yaml --
+graph:
+  loop:
+    dependencies: []
+    graph:
+      b: [c]
+      c: [b]
+-- fixtures/home/Claude/_playbooks/fx-inner-cycle/b/prompt.md --
+---
+name: b
+summary: b summary
+---
+
+b body
+-- fixtures/home/Claude/_playbooks/fx-inner-cycle/c/prompt.md --
+---
+name: c
+summary: c summary
+---
+
+c body
+-- cmd --
+booping render-playbook fx-inner-cycle
+-- exit --
+0
+-- stdout --
+**STOP — tell the user:** in subgraph 'loop': the graph has a cycle: b → c → b. Do not execute this playbook.
+
+Preamble prose for the inner-cycle playbook.
+-- stderr --

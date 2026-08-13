@@ -1,0 +1,12 @@
+A `--stub-macro` argument with no `=` is rejected on its own message, distinct from the `--set` one,
+and nothing renders.
+
+-- fixtures/cwd/probe.md.j2 --
+threshold {{ config.core.sprint.default_threshold_sp }}
+-- cmd --
+booping render /proc/self/cwd/probe.md.j2 --stub-macro nope
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: malformed --stub-macro pair (expected DOTTED.PATH=LITERAL): nope

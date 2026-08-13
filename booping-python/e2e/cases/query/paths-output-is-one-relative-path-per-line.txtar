@@ -1,0 +1,28 @@
+`--output paths` prints nothing but the matched paths, one per line, each relative to the
+query root — no header, no frontmatter, no absolute prefix.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+-- fixtures/cwd/vault/plans/alpha/index.md --
+---
+title: Alpha
+status: ready-for-dev
+---
+
+body
+-- fixtures/cwd/vault/plans/beta/index.md --
+---
+title: Beta
+status: done
+---
+
+body
+-- cmd --
+booping query --glob 'plans/*/index.md' --output paths
+-- exit --
+0
+-- stdout --
+plans/alpha/index.md
+plans/beta/index.md
+-- stderr --

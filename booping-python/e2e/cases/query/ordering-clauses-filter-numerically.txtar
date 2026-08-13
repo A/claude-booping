@@ -1,0 +1,36 @@
+`:gt` and `:lt` compare numerically, not lexicographically: id 10 sorts above 3 and is not
+below 10, both of which a string comparison would get backwards. Each operator also excludes
+the row equal to its operand.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+-- fixtures/cwd/vault/plans/p3/index.md --
+---
+id: 3
+---
+
+body
+-- fixtures/cwd/vault/plans/p5/index.md --
+---
+id: 5
+---
+
+body
+-- fixtures/cwd/vault/plans/p10/index.md --
+---
+id: 10
+---
+
+body
+-- cmd --
+booping query --glob 'plans/*/index.md' --where id:gt=3 --output paths
+booping query --glob 'plans/*/index.md' --where id:lt=10 --output paths
+-- exit --
+0
+-- stdout --
+plans/p10/index.md
+plans/p5/index.md
+plans/p3/index.md
+plans/p5/index.md
+-- stderr --

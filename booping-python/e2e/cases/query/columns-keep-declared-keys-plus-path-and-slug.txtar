@@ -1,0 +1,28 @@
+`--columns` projects each row down to the declared keys in declared order, always followed by
+`path` and `slug`; keys the file carries but the projection omits — here `created` — are gone.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+-- fixtures/cwd/vault/plans/alpha/index.md --
+---
+title: Alpha
+status: ready-for-dev
+created: 20260101
+---
+
+body
+-- cmd --
+booping query --glob 'plans/*/index.md' --columns status,title --output json
+-- exit --
+0
+-- stdout --
+[
+  {
+    "status": "ready-for-dev",
+    "title": "Alpha",
+    "path": "plans/alpha/index.md",
+    "slug": "alpha"
+  }
+]
+-- stderr --

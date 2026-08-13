@@ -1,0 +1,48 @@
+A script found but lacking the executable bit exits 2 naming the path. This is the one script case
+that deliberately omits the `chmod` `cmd` line — a fixture file is written non-executable.
+
+-- fixtures/home/Claude/_playbooks/fx-hooks/playbook.md --
+---
+name: fx-hooks
+title: Hooks
+summary: Hook-bearing fixture for playbook-transition.
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-hooks/playbook.yaml --
+state: main
+graph:
+  only: []
+
+states:
+  main:
+    artifact: index.md
+    initial: intaking
+    statuses:
+      intaking:
+        transitions:
+          - to: noted
+            when: never — the script is not executable
+            hooks: ["script note"]
+      noted: {terminal: true}
+-- fixtures/home/Claude/_playbooks/fx-hooks/only/prompt.md --
+---
+summary: Only step.
+---
+
+Only body.
+-- fixtures/home/Claude/_playbooks/fx-hooks/_scripts/note --
+#!/bin/sh
+echo "playbook" >> "$BOOPING_WORKDIR/note.log"
+-- fixtures/cwd/run/.keep --
+-- cmd --
+booping playbook-transition fx-hooks intaking --workdir run
+booping playbook-transition fx-hooks noted --workdir run
+-- exit --
+2
+-- stdout --
+created index.md
+not-started → intaking
+frontmatter: status=intaking
+-- stderr --
+error: script hook 'note' is not executable: {HOME}/Claude/_playbooks/fx-hooks/_scripts/note

@@ -1,0 +1,40 @@
+A macro resolving to a date or a timestamp is still a string: both forms would reload as
+YAML date types unquoted, so both are written single-quoted and reload as the text the macro
+produced.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  macros:
+    day: ["false"]
+    stamp: ["false"]
+macro_stubs:
+  core.macros.day: "2026-01-01"
+  core.macros.stamp: "2026-01-01 12:00:00"
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md created="{{ macro('core.macros.day') }}" completed="{{ macro('core.macros.stamp') }}"
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,4 +1,6 @@
+ ---
+ title: Foo
++created: '2026-01-01'
++completed: '2026-01-01 12:00:00'
+ ---
+ # Body
+-- stderr --
+updated plan.md: created=2026-01-01, completed=2026-01-01 12:00:00
+-- expected/cwd/plan.md --
+---
+title: Foo
+created: '2026-01-01'
+completed: '2026-01-01 12:00:00'
+---
+# Body

@@ -1,0 +1,86 @@
+Three artifacts in one run, each producing a different diagnostic: a malformed transcript line, an
+artifact with no `sessions:` key, and a session id with no transcript. stdout stays exactly one JSON
+document — no note and no warning leaks onto it — and stderr carries all three lines and nothing
+else. Both sections are asserted in full, so a line appearing on both streams fails the case.
+
+Arithmetic, `s-good`: one turn, 10:00:00 → 10:03:00 = 180s = 3 minutes. Tokens are the single
+assistant line's `usage`: input 4, output 2, no cache fields = 0. One unparseable line = 1 malformed.
+
+-- fixtures/home/.claude/projects/proj/s-good.jsonl --
+{"type":"system","subtype":"init","timestamp":"2026-08-01T09:59:00.000Z"}
+{"type":"user","isSidechain":false,"origin":{"kind":"human"},"timestamp":"2026-08-01T10:00:00.000Z","message":{"role":"user","content":"go"}}
+{"type":"user","timestamp":
+{"type":"assistant","isSidechain":false,"timestamp":"2026-08-01T10:03:00.000Z","message":{"role":"assistant","model":"claude-fable-5","content":[{"type":"text","text":"ok"}],"usage":{"input_tokens":4,"output_tokens":2}}}
+-- fixtures/cwd/vault/a-plain/index.md --
+---
+sessions:
+- s-good
+---
+
+Body.
+-- fixtures/cwd/vault/b-no-key/index.md --
+---
+title: No sessions here
+---
+
+Body.
+-- fixtures/cwd/vault/c-missing/index.md --
+---
+sessions:
+- s-absent
+---
+
+Body.
+-- cmd --
+booping session-stats vault --dry-run
+-- exit --
+0
+-- stdout --
+{
+  "artifacts": [
+    {
+      "path": "a-plain/index.md",
+      "written": false,
+      "sessions": [
+        {
+          "session": "s-good",
+          "metrics_active_minutes": 3,
+          "metrics_models": [
+            "claude-fable-5"
+          ],
+          "metrics_tokens_input": 4,
+          "metrics_tokens_output": 2,
+          "metrics_tokens_cache_creation": 0,
+          "metrics_tokens_cache_read": 0
+        }
+      ],
+      "totals": {
+        "metrics_active_minutes": 3,
+        "metrics_models": [
+          "claude-fable-5"
+        ],
+        "metrics_tokens_input": 4,
+        "metrics_tokens_output": 2,
+        "metrics_tokens_cache_creation": 0,
+        "metrics_tokens_cache_read": 0
+      }
+    },
+    {
+      "path": "c-missing/index.md",
+      "written": false,
+      "sessions": [],
+      "totals": {
+        "metrics_active_minutes": 0,
+        "metrics_models": [],
+        "metrics_tokens_input": 0,
+        "metrics_tokens_output": 0,
+        "metrics_tokens_cache_creation": 0,
+        "metrics_tokens_cache_read": 0
+      }
+    }
+  ]
+}
+-- stderr --
+warning: skipped 1 malformed line(s) in {HOME}/.claude/projects/proj/s-good.jsonl
+note: no sessions: key in vault/b-no-key/index.md; skipped
+warning: no transcript found for session s-absent

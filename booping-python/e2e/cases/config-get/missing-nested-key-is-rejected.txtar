@@ -1,0 +1,10 @@
+A dotted path whose first segment does not exist is a user error: nothing on stdout, the whole
+key echoed back on stderr, exit 1.
+
+-- cmd --
+booping config-get no.such.key
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: key not found: no.such.key

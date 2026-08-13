@@ -1,0 +1,32 @@
+Inner dependencies resolve inside the subgraph's own scope: a name that is not a step of that
+subgraph is unknown, and the notice says which subgraph it was looked up in.
+
+-- fixtures/home/Claude/_playbooks/fx-inner-unknown-dep/playbook.md --
+---
+name: fx-inner-unknown-dep
+title: Inner Unknown Dependency
+---
+
+Preamble prose for the inner-unknown-dep playbook.
+-- fixtures/home/Claude/_playbooks/fx-inner-unknown-dep/playbook.yaml --
+graph:
+  loop:
+    dependencies: []
+    graph:
+      b: [ghost]
+-- fixtures/home/Claude/_playbooks/fx-inner-unknown-dep/b/prompt.md --
+---
+name: b
+summary: b summary
+---
+
+b body
+-- cmd --
+booping render-playbook fx-inner-unknown-dep
+-- exit --
+0
+-- stdout --
+**STOP — tell the user:** in subgraph 'loop': 'ghost' is listed as a dependency of 'b' but is not a step in that subgraph. Do not execute this playbook.
+
+Preamble prose for the inner-unknown-dep playbook.
+-- stderr --

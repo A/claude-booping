@@ -1,0 +1,17 @@
+The whole tree renders before anything is written, so a broken seed anywhere aborts the run
+with no partial result: the error names the offending node and the receipt is empty, which
+is what a run that wrote a file could never produce — every write prints a line.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  e2e_demo:
+    tree:
+      ok.txt: "fine\n"
+      bad.txt: "{% if %}"
+-- cmd --
+booping scaffold core.e2e_demo.tree out
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: core.e2e_demo.tree.bad.txt: Jinja error in seed content: [..]

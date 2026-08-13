@@ -1,0 +1,40 @@
+A `states:` entry whose `initial` names no status in its own `statuses` map blocks the render, and
+the notice names the entry and what was wrong with it.
+
+-- fixtures/home/Claude/_playbooks/fx-bad-state/playbook.md --
+---
+name: fx-bad-state
+title: Bad State
+---
+
+Preamble prose for the bad-state playbook.
+-- fixtures/home/Claude/_playbooks/fx-bad-state/playbook.yaml --
+state: main
+graph:
+  a: []
+
+states:
+  main:
+    artifact: index.md
+    statuses:
+      start:
+        transitions:
+          - to: done
+            when: a returned
+      done: {terminal: true}
+-- fixtures/home/Claude/_playbooks/fx-bad-state/a/prompt.md --
+---
+name: a
+summary: a summary
+---
+
+a body
+-- cmd --
+booping render-playbook fx-bad-state
+-- exit --
+0
+-- stdout --
+**STOP — tell the user:** states entry 'main' is malformed: `initial` '' is not in `statuses`. Do not execute this playbook.
+
+Preamble prose for the bad-state playbook.
+-- stderr --

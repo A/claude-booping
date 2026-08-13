@@ -1,0 +1,31 @@
+A step named in the graph with no `{step}/prompt.md` on disk is a blocking fault: the notice names
+the step and the path it looked for, and nothing else renders — no step table, no step sections.
+
+-- fixtures/home/Claude/_playbooks/fx-missing-step/playbook.md --
+---
+name: fx-missing-step
+title: Missing Step
+summary: Graph references a step with no file.
+---
+
+Preamble prose for the missing-step playbook.
+-- fixtures/home/Claude/_playbooks/fx-missing-step/playbook.yaml --
+graph:
+  present: []
+  ghost: [present]
+-- fixtures/home/Claude/_playbooks/fx-missing-step/present/prompt.md --
+---
+name: present
+summary: A present step.
+---
+
+The present step body.
+-- cmd --
+booping render-playbook fx-missing-step
+-- exit --
+0
+-- stdout --
+**STOP — tell the user:** step 'ghost' is referenced in the graph but ghost/prompt.md does not exist. Do not execute this playbook.
+
+Preamble prose for the missing-step playbook.
+-- stderr --

@@ -1,0 +1,27 @@
+A `.md` directory matches the pattern as a path but is no file, so it is skipped rather than
+read: only the real file comes back, and the run stays quiet.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+-- fixtures/cwd/vault/plans/notes.md/kept.md --
+---
+title: Inside the directory
+---
+
+body
+-- fixtures/cwd/vault/plans/mid.md --
+---
+title: Mid
+---
+
+body
+-- cmd --
+booping query --glob 'plans/*.md' --columns slug
+-- exit --
+0
+-- stdout --
+| slug | path |
+| --- | --- |
+| mid | plans/mid.md |
+-- stderr --

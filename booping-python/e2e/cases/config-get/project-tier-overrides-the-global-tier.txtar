@@ -1,0 +1,21 @@
+With all three tiers carrying the same key, the attached vault's config.yaml wins over the
+global tier, which in turn beat the core default.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  sprint:
+    default_threshold_sp: 21
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+-- fixtures/cwd/vault/config.yaml --
+core:
+  sprint:
+    default_threshold_sp: 8
+-- cmd --
+booping config-get core.sprint.default_threshold_sp
+-- exit --
+0
+-- stdout --
+8
+-- stderr --

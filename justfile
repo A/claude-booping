@@ -1,14 +1,6 @@
 default:
     @just --list
 
-# Render src/files/**/*.j2 to plugin-root destinations (skills/, agents/)
-build:
-    bin/booping build
-
-# Watch src/files/ and src/config_files.yaml; rebuild on change (requires watchexec)
-dev:
-    watchexec -w src/files -w src/config_files.yaml -- bin/booping build
-
 # Lint booping-python
 lint:
     cd booping-python && uv run ruff check .
@@ -21,8 +13,13 @@ typecheck:
 pytest:
     cd booping-python && uv run pytest
 
+# Run the contract corpus — `just e2e [-k expression]`; `pytest e2e --txtar-update` rebaselines
+[no-exit-message]
+e2e *args:
+    cd booping-python && uv run pytest e2e {{ args }}
+
 # Every check CI runs, in order, stopping at the first failure.
-ci: lint typecheck pytest snapshots mdcheck
+ci: lint typecheck pytest snapshots mdcheck e2e
 
 [doc("Structural checks over the rendered reports")]
 mdcheck:

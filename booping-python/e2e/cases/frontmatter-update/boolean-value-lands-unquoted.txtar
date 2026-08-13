@@ -1,0 +1,20 @@
+A `true`/`false` value is written unquoted, so a reader loads it as a boolean.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md blocked=true reviewed=false
+-- exit --
+0
+-- stderr --
+updated plan.md: blocked=true, reviewed=false
+-- expected/cwd/plan.md --
+---
+title: Foo
+blocked: true
+reviewed: false
+---
+# Body

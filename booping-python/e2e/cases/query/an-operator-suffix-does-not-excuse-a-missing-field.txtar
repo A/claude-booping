@@ -1,0 +1,11 @@
+A clause whose key is nothing but an operator suffix is still a missing field: the suffix is
+stripped before the field is checked, so `:gt=3` is rejected rather than read as a clause on
+a field literally named `:gt`.
+
+-- cmd --
+booping query --glob 'plans/*/index.md' --where ':gt=3'
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: malformed --where clause (expected k=v, k!=v, k:in=a,b, k:gt=n or k:lt=n): :gt=3

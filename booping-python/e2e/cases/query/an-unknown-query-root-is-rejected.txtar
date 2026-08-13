@@ -1,0 +1,27 @@
+`root:` takes one legal value, and an unknown one is named alongside the set it had to come
+from rather than falling back to the vault.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+-- fixtures/cwd/vault/config.yaml --
+core:
+  probe_playbook:
+    queries:
+      plans:
+        glob:
+          - plans/*/index.md
+        root: bogus
+-- fixtures/cwd/vault/plans/alpha/index.md --
+---
+title: Alpha
+---
+
+body
+-- cmd --
+booping query --config core.probe_playbook.queries.plans
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: invalid query spec from config path core.probe_playbook.queries.plans: unknown query root: 'bogus' (expected one of: core)

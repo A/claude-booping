@@ -1,0 +1,27 @@
+A string whose plain form would reload as something else — an alias, an anchor, a tag, a
+mapping, or padded text — is written single-quoted so it reloads as the text it was given.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md 'a=@lead' 'b=*star' 'c=&anchor' 'd=!bang' 'e=%pct' 'f=`tick' 'h= padded ' 'g=a: b'
+-- exit --
+0
+-- stderr --
+updated plan.md: a=@lead, b=*star, c=&anchor, d=!bang, e=%pct, f=`tick, h= padded , g=a: b
+-- expected/cwd/plan.md --
+---
+title: Foo
+a: '@lead'
+b: '*star'
+c: '&anchor'
+d: '!bang'
+e: '%pct'
+f: '`tick'
+h: ' padded '
+g: 'a: b'
+---
+# Body

@@ -1,0 +1,76 @@
+A machine whose `artifact:` carries `{instance}` resolves it from `--instance`, so the run writes
+one artifact per slug under the interpolated path.
+
+-- fixtures/home/Claude/_playbooks/fx-run/playbook.md --
+---
+name: fx-run
+title: Run
+summary: Hookless states-bearing fixture for playbook-transition.
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-run/playbook.yaml --
+state: main
+graph:
+  intake: []
+  step-pipeline:
+    dependencies: [intake]
+    state: step
+    graph:
+      spec: []
+
+states:
+  main:
+    artifact: index.md
+    initial: intaking
+    statuses:
+      intaking:
+        transitions:
+          - to: researching
+            when: intake complete
+          - to: parked
+            when: the run is shelved
+      researching:
+        transitions:
+          - to: done
+            when: research complete
+      parked: {terminal: true}
+      done: {terminal: true}
+  step:
+    artifact: steps/{instance}/index.md
+    initial: spec-ing
+    statuses:
+      spec-ing:
+        transitions:
+          - to: done
+            when: spec written
+      done: {terminal: true}
+-- fixtures/home/Claude/_playbooks/fx-run/intake/prompt.md --
+---
+summary: Intake the request.
+---
+
+Intake body.
+-- fixtures/home/Claude/_playbooks/fx-run/spec/prompt.md --
+---
+summary: Write the spec.
+---
+
+Spec body.
+-- fixtures/cwd/run/.keep --
+-- cmd --
+booping playbook-transition fx-run spec-ing --state step --instance alpha --workdir run
+booping playbook-transition fx-run done --state step --instance alpha --workdir run
+-- exit --
+0
+-- stdout --
+created steps/alpha/index.md
+not-started → spec-ing
+frontmatter: status=spec-ing
+spec-ing → done
+frontmatter: status=done
+-- stderr --
+-- expected/cwd/run/steps/alpha/index.md --
+---
+status: done
+---

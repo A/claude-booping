@@ -1,0 +1,118 @@
+#!/usr/bin/env -S uv run --script --quiet
+# /// script
+# requires-python = ">=3.11"
+# dependencies = ["pyyaml"]
+# ///
+"""Hook: regenerate a plan's `## Milestones` table from its milestone files.
+
+Used by the `develop` playbook on every `milestone` transition, so `index.md`'s table
+and the plan's `sp` are projections of the milestone files rather than hand-kept prose.
+
+Usage: `refresh-milestone-table [PLAN_DIR]` — the plan directory defaults to
+`BOOPING_WORKDIR`, which `booping playbook-transition` sets to the run workdir.
+
+The glob and the table's columns come from `core.plans.milestones`; the rows come from
+`booping query` over the plan directory. Only the block between the `## Milestones`
+heading and the next heading is rewritten, plus the `sp:` frontmatter line — after
+grooming this script is the only writer of the plan's `sp`.
+"""
+
+from __future__ import annotations
+
+import json
+import os
+import re
+import subprocess
+import sys
+from pathlib import Path
+from typing import Any
+
+import yaml
+
+BOOPING = Path(__file__).resolve().parents[3] / "bin" / "booping"
+CONFIG_PATH = "core.plans.milestones"
+FRONTMATTER = re.compile(r"\A(---\n)(.*?)(\n---\n)", re.DOTALL)
+SECTION = re.compile(r"^## Milestones[ \t]*$", re.MULTILINE)
+HEADING = re.compile(r"^#{1,6} ", re.MULTILINE)
+SP_LINE = re.compile(r"^sp:.*$", re.MULTILINE)
+
+
+def _booping(args: list[str], cwd: Path) -> str:
+    result = subprocess.run(
+        [str(BOOPING), *args], cwd=cwd, capture_output=True, text=True, check=False
+    )
+    if result.returncode != 0:
+        sys.exit(f"refresh-milestone-table: booping {args[0]} failed: {result.stderr.strip()}")
+    return result.stdout
+
+
+def cell(value: Any) -> str:
+    if value is None:
+        return ""
+    return str(value).replace("|", "\\|").replace("\n", " ")
+
+
+def render(row: dict[str, Any], col: str) -> str:
+    # `title` links to the milestone file so the table navigates; `path` is
+    # plan-dir-relative, which is exactly where index.md lives.
+    if col == "title" and row.get("path"):
+        return f"[{cell(row.get(col))}]({row['path']})"
+    return cell(row.get(col))
+
+
+def table(rows: list[dict[str, Any]], columns: list[str]) -> str:
+    lines = [
+        "| " + " | ".join(columns) + " |",
+        "| " + " | ".join("---" for _ in columns) + " |",
+    ]
+    lines += ["| " + " | ".join(render(row, col) for col in columns) + " |" for row in rows]
+    return "\n".join(lines) + "\n"
+
+
+def replace_section(text: str, rendered: str, index: Path) -> str:
+    match = SECTION.search(text)
+    if match is None:
+        sys.exit(f"refresh-milestone-table: no `## Milestones` heading in {index}")
+    body_start = match.end()
+    nxt = HEADING.search(text, body_start + 1)
+    body_end = nxt.start() if nxt else len(text)
+    return text[:body_start] + f"\n\n{rendered}\n" + text[body_end:]
+
+
+def restamp_sp(text: str, total: int, index: Path) -> str:
+    match = FRONTMATTER.match(text)
+    if match is None or not SP_LINE.search(match.group(2)):
+        sys.exit(f"refresh-milestone-table: no `sp:` frontmatter key in {index}")
+    head = SP_LINE.sub(f"sp: {total}", match.group(2), count=1)
+    return match.group(1) + head + match.group(3) + text[match.end() :]
+
+
+def main() -> None:
+    raw = sys.argv[1] if len(sys.argv) > 1 else os.environ.get("BOOPING_WORKDIR", ".")
+    plan = Path(raw).expanduser().resolve()
+    index = plan / "index.md"
+    if not index.is_file():
+        sys.exit(f"refresh-milestone-table: no index.md in {plan}")
+
+    spec = yaml.safe_load(_booping(["config-get", CONFIG_PATH], plan)) or {}
+    globs = spec["glob"]
+    globs = globs if isinstance(globs, list) else [globs]
+    columns = [str(col) for col in spec["table_columns"]]
+
+    query = ["query", "--project", str(plan), "--columns", ",".join(columns), "--output", "json"]
+    for pattern in globs:
+        query += ["--glob", str(pattern)]
+    rows: list[dict[str, Any]] = json.loads(_booping(query, plan))
+    if not rows:
+        sys.exit(f"refresh-milestone-table: no milestone files in {plan}")
+
+    total = sum(row["sp"] for row in rows if isinstance(row.get("sp"), int))
+    text = index.read_text()
+    updated = restamp_sp(replace_section(text, table(rows, columns), index), total, index)
+    if updated != text:
+        index.write_text(updated)
+    print(f"refresh-milestone-table: {len(rows)} milestones, sp={total} → {index}")
+
+
+if __name__ == "__main__":
+    main()

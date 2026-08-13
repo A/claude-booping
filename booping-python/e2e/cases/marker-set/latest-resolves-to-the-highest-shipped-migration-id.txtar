@@ -1,0 +1,23 @@
+The @latest sentinel is resolved before the write: the marker lands the id of the plugin's
+newest shipped migration, which moves whenever a migration ships — hence the wildcard. The
+follow-up config-get pins it down as a real integer id: a marker still carrying the literal
+sentinel fails to load and would exit non-zero there.
+
+-- fixtures/cwd/.booping --
+# booping project marker
+project_name: "demo"  # quoted on purpose
+vault_path: ./vault
+-- cmd --
+booping marker-set latest_migration=@latest
+booping config-get home_dir
+-- exit --
+0
+-- stdout --
+~/Claude/
+-- stderr --
+marker: latest_migration=[..]
+-- expected/cwd/.booping --
+# booping project marker
+project_name: "demo"  # quoted on purpose
+vault_path: ./vault
+latest_migration: [..]

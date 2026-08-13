@@ -1,0 +1,10 @@
+A name that resolves in none of the three discovery roots exits 1 with the name in the error and
+nothing on stdout. The `known:` list spans the repository's shipped playbooks, so it is wildcarded.
+
+-- cmd --
+booping render-playbook fx-definitely-nonexistent
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: playbook not found: fx-definitely-nonexistent (known: [..])

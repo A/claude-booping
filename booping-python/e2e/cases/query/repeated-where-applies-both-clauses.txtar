@@ -1,0 +1,41 @@
+Two `--where` flags in one invocation are conjunctive: only the row satisfying both survives,
+though each clause alone would return two.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+-- fixtures/cwd/vault/plans/alpha/index.md --
+---
+title: Alpha
+status: ready-for-dev
+---
+
+body
+-- fixtures/cwd/vault/plans/beta/index.md --
+---
+title: Beta
+status: done
+---
+
+body
+-- fixtures/cwd/vault/plans/gamma/index.md --
+---
+title: Gamma
+status: done
+---
+
+body
+-- fixtures/cwd/vault/plans/delta/index.md --
+---
+title: Gamma
+status: ready-for-dev
+---
+
+body
+-- cmd --
+booping query --glob 'plans/*/index.md' --where status=done --where title=Gamma --output paths
+-- exit --
+0
+-- stdout --
+plans/gamma/index.md
+-- stderr --

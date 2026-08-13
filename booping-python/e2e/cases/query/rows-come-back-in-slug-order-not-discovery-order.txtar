@@ -1,0 +1,35 @@
+With no `sort` declared the rows are ordered by slug, not by the order the globs walked them:
+the second glob's `mid` lands between the first glob's `alpha` and `zeta`.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+-- fixtures/cwd/vault/plans/alpha/index.md --
+---
+title: Alpha
+---
+
+body
+-- fixtures/cwd/vault/plans/zeta/index.md --
+---
+title: Zeta
+---
+
+body
+-- fixtures/cwd/vault/plans/mid.md --
+---
+title: Mid
+---
+
+body
+-- cmd --
+booping query --glob 'plans/*/index.md' --glob 'plans/*.md' --columns slug
+-- exit --
+0
+-- stdout --
+| slug | path |
+| --- | --- |
+| alpha | plans/alpha/index.md |
+| mid | plans/mid.md |
+| zeta | plans/zeta/index.md |
+-- stderr --

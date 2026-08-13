@@ -1,0 +1,9 @@
+A list value prints as a YAML sequence, one `- ` item per line, not as a Python repr.
+
+-- cmd --
+booping config-get core.plans.glob
+-- exit --
+0
+-- stdout --
+- plans/*/index.md
+-- stderr --

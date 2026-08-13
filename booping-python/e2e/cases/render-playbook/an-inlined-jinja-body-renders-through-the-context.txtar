@@ -1,0 +1,44 @@
+An embedded body of a `jinja: true` playbook is rendered before it is embedded — the composed
+output carries the evaluated value, not the raw expression.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  fx_label: hermetic label
+-- fixtures/home/Claude/_playbooks/fx-inline-jinja/playbook.md --
+---
+name: fx-inline-jinja
+title: Inline Jinja
+summary: Jinja bodies embedded in the composed render.
+jinja: true
+inline_steps: true
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-inline-jinja/playbook.yaml --
+graph:
+  one: []
+-- fixtures/home/Claude/_playbooks/fx-inline-jinja/one/prompt.md --
+---
+name: one
+summary: Only step.
+---
+
+Body sees {{ config.core.fx_label }}.
+-- cmd --
+booping render-playbook fx-inline-jinja
+-- exit --
+0
+-- stdout --
+Preamble.
+
+## Playbook Steps
+
+Execute the steps in the most effective order considering their dependencies.
+
+| Step | Dependencies | Summary | Review gate |
+| --- | --- | --- | --- |
+| `one` | — | Only step. | — |
+
+## Step: One
+Body sees hermetic label.
+-- stderr --

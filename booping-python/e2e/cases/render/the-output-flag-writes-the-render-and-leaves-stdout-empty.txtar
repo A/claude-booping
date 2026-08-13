@@ -1,0 +1,12 @@
+`--output PATH` diverts the render into the file, relative to cwd, and stdout stays empty.
+
+-- fixtures/cwd/probe.md.j2 --
+threshold {{ config.core.sprint.default_threshold_sp }}
+-- cmd --
+booping render /proc/self/cwd/probe.md.j2 --output out.md
+-- exit --
+0
+-- stdout --
+-- stderr --
+-- expected/cwd/out.md --
+threshold 35

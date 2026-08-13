@@ -1,0 +1,41 @@
+`--output PATH` diverts the whole composed render into the file; stdout stays empty.
+
+-- fixtures/home/Claude/_playbooks/fx-to-file/playbook.md --
+---
+name: fx-to-file
+title: To File
+---
+
+Preamble that must land in the file, including this literal token: {{ leftover }}.
+-- fixtures/home/Claude/_playbooks/fx-to-file/playbook.yaml --
+graph:
+  only: []
+-- fixtures/home/Claude/_playbooks/fx-to-file/only/prompt.md --
+---
+name: only
+summary: Only step.
+---
+
+Only body.
+-- cmd --
+booping render-playbook fx-to-file --output out.md
+-- exit --
+0
+-- stdout --
+-- stderr --
+-- expected/cwd/out.md --
+Preamble that must land in the file, including this literal token: {{ leftover }}.
+
+## Playbook Steps
+
+Execute the steps in the most effective order considering their dependencies.
+
+| Step | Dependencies | Summary | Review gate |
+| --- | --- | --- | --- |
+| `only` | — | Only step. | — |
+
+## Step: Only
+Instructions:
+- Summary: Only step.
+
+Run `booping render-playbook fx-to-file --step only` for content.

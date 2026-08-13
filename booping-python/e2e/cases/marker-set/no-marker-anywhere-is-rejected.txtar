@@ -1,0 +1,10 @@
+With no .booping anywhere up from the working directory there is nothing to write to, and
+the pair itself is well-formed — so the failure is the missing marker, not the argument.
+
+-- cmd --
+booping marker-set latest_migration=3
+-- exit --
+2
+-- stdout --
+-- stderr --
+error: no .booping marker found from the current directory

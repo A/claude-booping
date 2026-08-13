@@ -17,3 +17,11 @@ commit: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
 # Login timeout fix
 
 Fixture plan — directory shape (`index.md`), `done` with a null `retro`, so the retro playbook renders a populated candidate table.
+
+## Milestones
+
+| id | title | sp | status |
+| --- | --- | --- | --- |
+| 01 | Reproduce the early expiry | 1 | done |
+| 02 | Fix the idle window | 1 | done |
+

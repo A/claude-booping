@@ -1,0 +1,41 @@
+`--output json` prints one indented array of objects, one object per row, each carrying the
+file's frontmatter keys plus `path` and `slug`. Same fixture as
+`yaml-output-carries-the-json-rows`, so the two formats are readable side by side.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+-- fixtures/cwd/vault/plans/alpha/index.md --
+---
+title: Alpha
+status: ready-for-dev
+---
+
+body
+-- fixtures/cwd/vault/plans/beta/index.md --
+---
+title: Beta
+status: done
+---
+
+body
+-- cmd --
+booping query --glob 'plans/*/index.md' --output json
+-- exit --
+0
+-- stdout --
+[
+  {
+    "title": "Alpha",
+    "status": "ready-for-dev",
+    "path": "plans/alpha/index.md",
+    "slug": "alpha"
+  },
+  {
+    "title": "Beta",
+    "status": "done",
+    "path": "plans/beta/index.md",
+    "slug": "beta"
+  }
+]
+-- stderr --

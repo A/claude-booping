@@ -1,0 +1,34 @@
+The third link of the chain is the discovery root the playbook was found under, so a shared library
+kept beside the playbooks — `_playbooks/_lib/` — is reachable from any of them by a root-relative
+name. `_`-prefixed entries are skipped by discovery, so `_lib` is never mistaken for a playbook.
+
+-- fixtures/home/Claude/_playbooks/_lib/shared.md --
+HOME-ROOT-SHARED
+-- fixtures/home/Claude/_playbooks/fx-inc-root/playbook.md --
+---
+name: fx-inc-root
+title: Include Root
+summary: Root-relative include resolved from the discovery root.
+jinja: true
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-inc-root/playbook.yaml --
+graph:
+  one: []
+-- fixtures/home/Claude/_playbooks/fx-inc-root/one/prompt.md --
+---
+name: one
+summary: Only step.
+detached: sonnet:medium
+---
+
+Body says: {% include "_lib/shared.md" %}
+-- cmd --
+booping render-playbook fx-inc-root --step one
+-- exit --
+0
+-- stdout --
+Body says: HOME-ROOT-SHARED
+
+-- stderr --

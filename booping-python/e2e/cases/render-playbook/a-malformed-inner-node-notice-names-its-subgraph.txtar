@@ -1,0 +1,25 @@
+A malformed node inside a subgraph is reported with an `in subgraph '{name}':` prefix, so the
+operator knows which scope to look in.
+
+-- fixtures/home/Claude/_playbooks/fx-bad-inner-node/playbook.md --
+---
+name: fx-bad-inner-node
+title: Bad Inner Node
+---
+
+Preamble prose for the bad-inner-node playbook.
+-- fixtures/home/Claude/_playbooks/fx-bad-inner-node/playbook.yaml --
+graph:
+  g:
+    dependencies: []
+    graph:
+      b: nope
+-- cmd --
+booping render-playbook fx-bad-inner-node
+-- exit --
+0
+-- stdout --
+**STOP — tell the user:** in subgraph 'g': graph node 'b' is malformed: deps must be a list. Do not execute this playbook.
+
+Preamble prose for the bad-inner-node playbook.
+-- stderr --

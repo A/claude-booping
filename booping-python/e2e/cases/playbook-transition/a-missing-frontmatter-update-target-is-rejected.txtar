@@ -1,0 +1,45 @@
+A file target that does not exist is not created — the hook exits 2 and relays the writer's own
+failure.
+
+-- fixtures/home/Claude/_playbooks/fx-hooks/playbook.md --
+---
+name: fx-hooks
+title: Hooks
+summary: Hook-bearing fixture for playbook-transition.
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-hooks/playbook.yaml --
+state: main
+graph:
+  only: []
+
+states:
+  main:
+    artifact: index.md
+    initial: intaking
+    statuses:
+      intaking:
+        transitions:
+          - to: noted
+            when: never — the target does not exist
+            hooks: ["frontmatter-update nope.md reviewed=recorded"]
+      noted: {terminal: true}
+-- fixtures/home/Claude/_playbooks/fx-hooks/only/prompt.md --
+---
+summary: Only step.
+---
+
+Only body.
+-- fixtures/cwd/run/.keep --
+-- cmd --
+booping playbook-transition fx-hooks intaking --workdir run
+booping playbook-transition fx-hooks noted --workdir run
+-- exit --
+2
+-- stdout --
+created index.md
+not-started → intaking
+frontmatter: status=intaking
+-- stderr --
+error: frontmatter-update failed: [Errno 2] No such file or directory: '{CWD}/run/nope.md'

@@ -1,0 +1,31 @@
+A destination holding unrelated files is filled in without --force: the tree's files are
+written, the pre-existing file is left alone.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  e2e_demo:
+    tree:
+      README.md: "hello world\n"
+      src:
+        main.py: "print(1)\n"
+-- fixtures/cwd/out/keep.txt --
+keep
+-- cmd --
+booping scaffold core.e2e_demo.tree out
+-- exit --
+0
+-- stdout --
+--- /dev/null
++++ out/README.md
+@@ -0,0 +1 @@
++hello world
+created dir out/src
+--- /dev/null
++++ out/src/main.py
+@@ -0,0 +1 @@
++print(1)
+scaffolded 3 paths — 1 dirs created, 2 files created, 0 files overwritten
+-- expected/cwd/out/README.md --
+hello world
+-- expected/cwd/out/keep.txt --
+keep

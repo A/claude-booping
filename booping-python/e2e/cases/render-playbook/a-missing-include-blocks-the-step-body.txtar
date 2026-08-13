@@ -1,0 +1,31 @@
+An include that no link of the chain answers is a render fault, surfaced in band as a blocking
+notice naming the step, with Jinja's own `TemplateNotFound` as the reason and no traceback, at
+exit 0.
+
+-- fixtures/home/Claude/_playbooks/fx-inc-missing/playbook.md --
+---
+name: fx-inc-missing
+title: Include Missing
+summary: Include that no root answers.
+jinja: true
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-inc-missing/playbook.yaml --
+graph:
+  only: []
+-- fixtures/home/Claude/_playbooks/fx-inc-missing/only/prompt.md --
+---
+name: only
+summary: Only step.
+detached: sonnet:medium
+---
+
+{% include "_lib/shared.md" %}
+-- cmd --
+booping render-playbook fx-inc-missing --step only
+-- exit --
+0
+-- stdout --
+**STOP — tell the user:** Jinja rendering of step 'only' failed: TemplateNotFound: _lib/shared.md. Do not execute this playbook.
+-- stderr --

@@ -10,10 +10,10 @@ from jinja2 import Environment, TemplateError
 
 from booping import logger
 from booping.context import Context
-from booping.context.scaffold import DirNode, FileNode, ScaffoldError, load
+from booping.context.scaffold import DirNode, FileNode, Node, ScaffoldError, check_name, load
 from booping.macros import parse_stub_overrides
 from booping.rendering import build_source_env
-from booping.utils import deep_merge, parse_set_overrides
+from booping.utils import deep_merge, diff_report, parse_set_overrides
 
 
 def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:  # type: ignore[type-arg]
@@ -38,7 +38,7 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
         "--force",
         action="store_true",
         help=(
-            "Write into a non-empty destination, overwriting the files the tree names;"
+            "Overwrite the files the tree names when they already exist;"
             " never deletes a directory"
         ),
     )
@@ -86,6 +86,15 @@ def _render_seed(env: Environment, node: FileNode) -> str:
         raise ScaffoldError(node.path, f"Jinja error in seed content: {exc}") from exc
 
 
+def _render_name(env: Environment, node: Node) -> str:
+    try:
+        name = env.from_string(node.name).render()
+    except TemplateError as exc:
+        raise ScaffoldError(node.path, f"Jinja error in filename: {exc}") from exc
+    check_name(name, node.path)
+    return name
+
+
 def _plan(root: DirNode, dest: Path, env: Environment) -> list[_Write]:
     """The full tree rendered into memory, parents before children — nothing is
     written until every node has parsed and rendered."""
@@ -93,7 +102,7 @@ def _plan(root: DirNode, dest: Path, env: Environment) -> list[_Write]:
 
     def walk(node: DirNode, base: Path) -> None:
         for child in node.children:
-            path = base / child.name
+            path = base / _render_name(env, child)
             if isinstance(child, DirNode):
                 writes.append(_Write(path, None))
                 walk(child, path)
@@ -104,7 +113,7 @@ def _plan(root: DirNode, dest: Path, env: Environment) -> list[_Write]:
     return writes
 
 
-def _apply(writes: list[_Write]) -> tuple[int, int, int]:
+def _apply(writes: list[_Write], force: bool) -> tuple[int, int, int]:
     created_dirs = created_files = overwritten = 0
     for write in writes:
         existed = write.path.exists()
@@ -113,14 +122,24 @@ def _apply(writes: list[_Write]) -> tuple[int, int, int]:
             if not existed:
                 print(f"created dir {write.path}")
                 created_dirs += 1
+            continue
+
+        if existed and not force:
+            print(f"skipped existing file {write.path}")
+            continue
+
+        previous = write.path.read_text(encoding="utf-8") if existed else None
+        if previous == write.content:
+            continue
+
+        write.path.write_text(write.content, encoding="utf-8")
+        diff = diff_report(write.path, previous, write.content)
+        if diff:
+            print(diff)
+        if existed:
+            overwritten += 1
         else:
-            write.path.write_text(write.content, encoding="utf-8")
-            if existed:
-                print(f"overwrote file {write.path}")
-                overwritten += 1
-            else:
-                print(f"created file {write.path}")
-                created_files += 1
+            created_files += 1
     return created_dirs, created_files, overwritten
 
 
@@ -148,8 +167,6 @@ def _run(args: argparse.Namespace) -> None:
 
     if dest.exists() and not dest.is_dir():
         _fail(f"destination {dest} exists and is not a directory")
-    if dest.is_dir() and any(dest.iterdir()) and not args.force:
-        _fail(f"destination {dest} is not empty — pass --force to write into it")
 
     config = deep_merge(ctx.config, stub_overrides) if stub_overrides else ctx.config
     env = build_source_env(context=ctx, config=config)
@@ -162,7 +179,7 @@ def _run(args: argparse.Namespace) -> None:
         _fail(str(exc))
 
     try:
-        created_dirs, created_files, overwritten = _apply(writes)
+        created_dirs, created_files, overwritten = _apply(writes, args.force)
     except OSError as exc:
         _fail(f"failed to write scaffold into {dest}: {exc}", code=2)
 

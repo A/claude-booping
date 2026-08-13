@@ -1,0 +1,86 @@
+The same subgraph as `an-inline-inner-step-in-a-parallel-outer-wave-blocks-the-render` without the
+outer sibling: the subgraph owns its outer wave alone, its inner waves are one step each, and the
+runner-performed inner steps are fine.
+
+-- fixtures/home/Claude/_playbooks/fx-inner-sequential/playbook.md --
+---
+name: fx-inner-sequential
+title: Inner Sequential
+---
+
+Preamble prose for the inner-sequential playbook.
+-- fixtures/home/Claude/_playbooks/fx-inner-sequential/playbook.yaml --
+graph:
+  a: []
+  loop:
+    dependencies: [a]
+    graph:
+      one: []
+      two: [one]
+-- fixtures/home/Claude/_playbooks/fx-inner-sequential/a/prompt.md --
+---
+name: a
+summary: a summary
+detached: sonnet:medium
+---
+
+a body
+-- fixtures/home/Claude/_playbooks/fx-inner-sequential/one/prompt.md --
+---
+name: one
+summary: one summary
+---
+
+one body
+-- fixtures/home/Claude/_playbooks/fx-inner-sequential/two/prompt.md --
+---
+name: two
+summary: two summary
+---
+
+two body
+-- cmd --
+booping render-playbook fx-inner-sequential
+-- exit --
+0
+-- stdout --
+Preamble prose for the inner-sequential playbook.
+
+## Playbook Steps
+
+Execute the steps in the most effective order considering their dependencies.
+
+| Step | Dependencies | Summary | Review gate |
+| --- | --- | --- | --- |
+| `a` | — | a summary | — |
+| `loop` *(subgraph)* | `a` | — | — |
+| `one` *(in loop)* | — | one summary | — |
+| `two` *(in loop)* | `one` | two summary | — |
+
+## Step: A
+
+a summary
+
+Tell a sub-agent — model sonnet, effort medium — to get its instructions by calling this command: `booping render-playbook fx-inner-sequential --step a`.
+
+## Subgraph: loop
+
+Instructions:
+- After: a
+- Inner waves: 1. `one` 2. `two`
+
+## Step: One
+Instructions:
+- Part of: loop
+- Summary: one summary
+
+Run `booping render-playbook fx-inner-sequential --step one` for content.
+
+## Step: Two
+Instructions:
+- Part of: loop
+- Summary: two summary
+- After: one
+
+Run `booping render-playbook fx-inner-sequential --step two` for content.
+-- stderr --

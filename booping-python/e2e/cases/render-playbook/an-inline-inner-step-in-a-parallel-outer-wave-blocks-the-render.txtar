@@ -1,0 +1,60 @@
+A subgraph node stands for its whole inner group: when it shares an outer wave with another step,
+every inner step runs in parallel with that step, so each runner-performed inner step draws a STOP
+even though the inner waves are sequential.
+
+-- fixtures/home/Claude/_playbooks/fx-inner-outer-parallel/playbook.md --
+---
+name: fx-inner-outer-parallel
+title: Inner Outer Parallel
+---
+
+Preamble prose for the inner-outer-parallel playbook.
+-- fixtures/home/Claude/_playbooks/fx-inner-outer-parallel/playbook.yaml --
+graph:
+  a: []
+  side: [a]
+  loop:
+    dependencies: [a]
+    graph:
+      one: []
+      two: [one]
+-- fixtures/home/Claude/_playbooks/fx-inner-outer-parallel/a/prompt.md --
+---
+name: a
+summary: a summary
+detached: sonnet:medium
+---
+
+a body
+-- fixtures/home/Claude/_playbooks/fx-inner-outer-parallel/side/prompt.md --
+---
+name: side
+summary: side summary
+detached: sonnet:medium
+---
+
+side body
+-- fixtures/home/Claude/_playbooks/fx-inner-outer-parallel/one/prompt.md --
+---
+name: one
+summary: one summary
+---
+
+one body
+-- fixtures/home/Claude/_playbooks/fx-inner-outer-parallel/two/prompt.md --
+---
+name: two
+summary: two summary
+---
+
+two body
+-- cmd --
+booping render-playbook fx-inner-outer-parallel
+-- exit --
+0
+-- stdout --
+**STOP — tell the user:** step 'one' is not detached but shares a wave with other steps; a step sharing a wave must be `detached:`. Do not execute this playbook.
+**STOP — tell the user:** step 'two' is not detached but shares a wave with other steps; a step sharing a wave must be `detached:`. Do not execute this playbook.
+
+Preamble prose for the inner-outer-parallel playbook.
+-- stderr --

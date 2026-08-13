@@ -1,0 +1,61 @@
+Broken lines never abort a transcript: they are counted, reported once per transcript, and the
+surrounding events still produce metrics.
+
+Arithmetic, `s-broken`, three malformed lines: an unterminated JSON object (1), a line that is not
+JSON at all (2), and a well-formed conversational record whose timestamp cannot be parsed (3) —
+1 + 1 + 1 = 3. The `system` header line is not conversational, so it is skipped without being
+counted. One turn survives, 10:00:00 → 10:04:00 = 240s = 4 minutes, with the surviving assistant
+line's `usage`: input 12, output 9, no cache fields = 0.
+
+-- fixtures/home/.claude/projects/proj/s-broken.jsonl --
+{"type":"system","subtype":"init","timestamp":"2026-08-01T09:59:00.000Z"}
+{"type":"user","isSidechain":false,"origin":{"kind":"human"},"timestamp":"2026-08-01T10:00:00.000Z","message":{"role":"user","content":"go"}}
+{"type":"user","timestamp":
+garbage, not json at all
+{"type":"assistant","isSidechain":false,"timestamp":"not-a-timestamp","message":{"role":"assistant","model":"claude-fable-5"}}
+{"type":"assistant","isSidechain":false,"timestamp":"2026-08-01T10:04:00.000Z","message":{"role":"assistant","model":"claude-fable-5","content":[{"type":"text","text":"ok"}],"usage":{"input_tokens":12,"output_tokens":9}}}
+-- fixtures/cwd/vault/plan/index.md --
+---
+sessions:
+- s-broken
+---
+
+Body.
+-- cmd --
+booping session-stats vault/plan/index.md --dry-run
+-- exit --
+0
+-- stdout --
+{
+  "artifacts": [
+    {
+      "path": "vault/plan/index.md",
+      "written": false,
+      "sessions": [
+        {
+          "session": "s-broken",
+          "metrics_active_minutes": 4,
+          "metrics_models": [
+            "claude-fable-5"
+          ],
+          "metrics_tokens_input": 12,
+          "metrics_tokens_output": 9,
+          "metrics_tokens_cache_creation": 0,
+          "metrics_tokens_cache_read": 0
+        }
+      ],
+      "totals": {
+        "metrics_active_minutes": 4,
+        "metrics_models": [
+          "claude-fable-5"
+        ],
+        "metrics_tokens_input": 12,
+        "metrics_tokens_output": 9,
+        "metrics_tokens_cache_creation": 0,
+        "metrics_tokens_cache_read": 0
+      }
+    }
+  ]
+}
+-- stderr --
+warning: skipped 3 malformed line(s) in {HOME}/.claude/projects/proj/s-broken.jsonl

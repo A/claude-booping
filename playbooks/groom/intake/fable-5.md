@@ -9,19 +9,22 @@ Check for context, in case a request is related to already existing plan.
 {% set query_plans = 'core.groom_playbook.queries.latest_plans' -%}
 {% include "_partials/plans_table.md" %}
 
-## Task Types
+## Task Type
 
-Exactly one per plan. Pick the row the request meets, load its guidance before framing, and rule
-the siblings out by name.
+Exactly one per plan. Pick the row the request meets, load its guidance before framing and pick one.
 
 {% include "_partials/task_types.md" %}
-## The plan's identity frontmatter
+## The plan directory
 
-Create `index.md` carrying the shape below. `created` is the run's clock to the minute, not just
-the date — copy the value verbatim. `status` is the run machine's and is written by
-`booping playbook-transition`, never by hand.
+Create it in one call, with `{plan-dir}` the preamble's `Plan dir:` line resolved against the
+vault and `{title}` the plan's descriptive title:
 
-{% include "_partials/plan_frontmatter.md" %}
+```
+booping scaffold core.groom_playbook.scaffold {plan-dir} --set title="{title}" --set type={type}
+```
+
+The printed diff is the confirmation — do not read the created files back. A target reported as
+already existing was not written; decide what that means for this run.
 
 ## The brief — written to `request.md`, posted in chat
 

@@ -1,0 +1,10 @@
+An unsupported `--output` value exits 1 and the message lists every format the command does
+emit.
+
+-- cmd --
+booping query --glob 'plans/*/index.md' --output csv
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: unknown --output format: csv (expected table, json, yaml, paths)

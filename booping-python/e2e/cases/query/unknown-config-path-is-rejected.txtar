@@ -1,0 +1,17 @@
+A `--config` path no tier declares exits 1 naming the path; the spec is resolved before any
+vault is, so the global tier alone is enough to reach the error.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  probe_playbook:
+    queries:
+      done_plans:
+        glob:
+          - plans/*/index.md
+-- cmd --
+booping query --config core.probe_playbook.queries.nope
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: no query spec at config path: core.probe_playbook.queries.nope

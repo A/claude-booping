@@ -1,0 +1,46 @@
+The milestone tree from the plugin's config names its directory and file after the same
+id/slug pair, and puts every --set value through tojson — a title carrying a colon, an
+apostrophe and quotes stays one readable YAML scalar, and a zero-padded id stays a string.
+
+-- cmd --
+booping scaffold core.groom_playbook.milestone_scaffold plans/demo/milestones --set id=01 --set slug=cli-surface --set "title=Demo: it's \"fine\"" --set sp=3 --set plan=plans/demo/index.md
+-- exit --
+0
+-- stdout --
+created dir plans/demo/milestones
+created dir plans/demo/milestones/M01-cli-surface
+--- /dev/null
++++ plans/demo/milestones/M01-cli-surface/M01-cli-surface.md
+@@ -0,0 +1,15 @@
++---
++id: "01"
++title: "Demo: it\u0027s \"fine\""
++sp: 3
++status: pending
++plan: "plans/demo/index.md"
++---
++
++# M01: Demo: it's "fine"
++
++## Tasks
++
++## Definition of Done
++
++## Verify
+scaffolded 3 paths — 2 dirs created, 1 files created, 0 files overwritten
+-- expected/cwd/plans/demo/milestones/M01-cli-surface/M01-cli-surface.md --
+---
+id: "01"
+title: "Demo: it\u0027s \"fine\""
+sp: 3
+status: pending
+plan: "plans/demo/index.md"
+---
+
+# M01: Demo: it's "fine"
+
+## Tasks
+
+## Definition of Done
+
+## Verify

@@ -1,0 +1,22 @@
+A file carrying no frontmatter at all is a valid match, not a parse failure: it comes back as a
+row with `path` and `slug` and no other key, and stderr stays empty.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+-- fixtures/cwd/vault/plans/plain/index.md --
+# Plain
+
+body
+-- cmd --
+booping query --glob 'plans/*/index.md' --output json
+-- exit --
+0
+-- stdout --
+[
+  {
+    "path": "plans/plain/index.md",
+    "slug": "plain"
+  }
+]
+-- stderr --

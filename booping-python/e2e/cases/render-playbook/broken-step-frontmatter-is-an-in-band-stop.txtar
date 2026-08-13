@@ -1,0 +1,32 @@
+A templatable step frontmatter field that will not compile blocks the render with an in-band
+`**STOP` naming the step, at exit 0 — no table, no sections, no traceback.
+
+-- fixtures/home/Claude/_playbooks/fx-broken-fields/playbook.md --
+---
+name: fx-broken-fields
+title: Broken Fields
+summary: A step frontmatter field that cannot render.
+jinja: true
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-broken-fields/playbook.yaml --
+graph:
+  one: []
+-- fixtures/home/Claude/_playbooks/fx-broken-fields/one/prompt.md --
+---
+name: one
+summary: Only step.
+detached: '{{ oops('
+---
+
+One body.
+-- cmd --
+booping render-playbook fx-broken-fields
+-- exit --
+0
+-- stdout --
+**STOP — tell the user:** Jinja rendering of step 'one' frontmatter failed: TemplateSyntaxError: unexpected 'end of template'. Do not execute this playbook.
+
+Preamble.
+-- stderr --

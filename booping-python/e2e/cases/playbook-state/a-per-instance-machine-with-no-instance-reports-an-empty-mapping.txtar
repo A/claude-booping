@@ -1,0 +1,55 @@
+A machine whose `artifact:` carries `{instance}` reports `instances:` instead of a status, and with
+nothing on disk that mapping is empty — never a `not-started` status of its own.
+
+-- fixtures/home/Claude/_playbooks/fx-steps/playbook.md --
+---
+name: fx-steps
+title: Steps
+summary: Per-instance fixture for playbook-state.
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-steps/playbook.yaml --
+graph:
+  intake: []
+  step-pipeline:
+    dependencies: [intake]
+    state: step
+    graph:
+      spec: []
+
+states:
+  step:
+    artifact: steps/{instance}/index.md
+    initial: spec-ing
+    statuses:
+      spec-ing:
+        transitions:
+          - to: done
+            when: spec written
+      done: {terminal: true}
+-- fixtures/home/Claude/_playbooks/fx-steps/intake/prompt.md --
+---
+summary: Intake the request.
+---
+
+Intake body.
+-- fixtures/home/Claude/_playbooks/fx-steps/spec/prompt.md --
+---
+summary: Write the spec.
+---
+
+Spec body.
+-- fixtures/cwd/run/.keep --
+-- cmd --
+booping playbook-state fx-steps --workdir run
+-- exit --
+0
+-- stdout --
+playbook: fx-steps
+workdir: {CWD}/run
+states:
+  step:
+    artifact: steps/{instance}/index.md
+    instances: {}
+-- stderr --
