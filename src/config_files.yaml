@@ -1,6 +1,0 @@
-skills:
-  playbook: { effort: medium }
-
-agents:
-  booping-developer:  { effort: medium }
-  booping-researcher: { effort: high }

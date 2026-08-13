@@ -1,0 +1,60 @@
+The same session id is seeded twice — once under the `$HOME`-derived default root, once under a
+cwd-rooted tree — with different numbers in each. Asserting the cwd numbers is what proves
+`--projects-root` overrides the default rather than merely supplementing it.
+
+Arithmetic, cwd transcript: one turn, 10:00:00 → 10:11:00 = 660s = 11 minutes. Tokens are the single
+assistant line's `usage`: input 7, output 3, no cache fields = 0.
+The home transcript would have given 6 minutes and input 10 / output 5, and must not appear.
+
+-- fixtures/home/.claude/projects/proj-home/s-dual.jsonl --
+{"type":"system","subtype":"init","timestamp":"2026-08-01T09:59:00.000Z"}
+{"type":"user","isSidechain":false,"origin":{"kind":"human"},"timestamp":"2026-08-01T10:00:00.000Z","message":{"role":"user","content":"go"}}
+{"type":"assistant","isSidechain":false,"timestamp":"2026-08-01T10:06:00.000Z","message":{"role":"assistant","model":"claude-home-1","content":[{"type":"text","text":"ok"}],"usage":{"input_tokens":10,"output_tokens":5}}}
+-- fixtures/cwd/transcripts/proj-cwd/s-dual.jsonl --
+{"type":"system","subtype":"init","timestamp":"2026-08-01T09:59:00.000Z"}
+{"type":"user","isSidechain":false,"origin":{"kind":"human"},"timestamp":"2026-08-01T10:00:00.000Z","message":{"role":"user","content":"go"}}
+{"type":"assistant","isSidechain":false,"timestamp":"2026-08-01T10:11:00.000Z","message":{"role":"assistant","model":"claude-cwd-1","content":[{"type":"text","text":"ok"}],"usage":{"input_tokens":7,"output_tokens":3}}}
+-- fixtures/cwd/plan/index.md --
+---
+sessions:
+- s-dual
+---
+
+Body.
+-- cmd --
+booping session-stats plan/index.md --projects-root transcripts --dry-run
+-- exit --
+0
+-- stdout --
+{
+  "artifacts": [
+    {
+      "path": "plan/index.md",
+      "written": false,
+      "sessions": [
+        {
+          "session": "s-dual",
+          "metrics_active_minutes": 11,
+          "metrics_models": [
+            "claude-cwd-1"
+          ],
+          "metrics_tokens_input": 7,
+          "metrics_tokens_output": 3,
+          "metrics_tokens_cache_creation": 0,
+          "metrics_tokens_cache_read": 0
+        }
+      ],
+      "totals": {
+        "metrics_active_minutes": 11,
+        "metrics_models": [
+          "claude-cwd-1"
+        ],
+        "metrics_tokens_input": 7,
+        "metrics_tokens_output": 3,
+        "metrics_tokens_cache_creation": 0,
+        "metrics_tokens_cache_read": 0
+      }
+    }
+  ]
+}
+-- stderr --

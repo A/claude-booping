@@ -1,0 +1,19 @@
+A marker with no `latest_migration` records watermark -1, which is behind whatever the plugin ships,
+so `booping render` prints the remedy notice in place of the render — and still exits 0, because the
+caller is a skill-load shell whose only channel is stdout.
+
+The shipped id is wildcarded: the case depends on at least one migration shipping, never on how many.
+The template is a real one under cwd, named absolutely because a relative path would resolve against
+the plugin root, so a gate regression renders its body and fails on stdout.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+-- fixtures/cwd/probe.md.j2 --
+rendered body
+-- cmd --
+booping render /proc/self/cwd/probe.md.j2
+-- exit --
+0
+-- stdout --
+**STOP — tell the user:** this project is behind on booping migrations (recorded id -1, latest shipped [..]). Run `/playbook migrate` to bring the vault current, then retry.
+-- stderr --

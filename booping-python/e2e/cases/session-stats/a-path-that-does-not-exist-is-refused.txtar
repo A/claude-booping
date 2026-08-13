@@ -1,0 +1,10 @@
+Existence is checked before anything else, and the refusal echoes the path as given on argv. Nothing
+reaches stdout — the JSON document is only printed once the whole walk has succeeded.
+
+-- cmd --
+booping session-stats nope
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: path not found: nope

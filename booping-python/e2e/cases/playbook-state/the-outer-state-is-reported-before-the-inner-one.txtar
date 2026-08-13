@@ -1,0 +1,72 @@
+The report orders `states:` outer-graph-first, not by the manifest's own key order — the fixture
+declares the subgraph's `step` machine ahead of the outer `main` one, and the report still puts
+`main` first.
+
+-- fixtures/home/Claude/_playbooks/fx-order/playbook.md --
+---
+name: fx-order
+title: Order
+summary: Outer-plus-subgraph fixture for playbook-state.
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-order/playbook.yaml --
+state: main
+graph:
+  intake: []
+  step-pipeline:
+    dependencies: [intake]
+    state: step
+    graph:
+      spec: []
+
+states:
+  step:
+    artifact: steps/{instance}/index.md
+    initial: spec-ing
+    statuses:
+      spec-ing:
+        transitions:
+          - to: done
+            when: spec written
+      done: {terminal: true}
+  main:
+    artifact: index.md
+    initial: intaking
+    statuses:
+      intaking:
+        transitions:
+          - to: done
+            when: intake complete
+      done: {terminal: true}
+-- fixtures/home/Claude/_playbooks/fx-order/intake/prompt.md --
+---
+summary: Intake the request.
+---
+
+Intake body.
+-- fixtures/home/Claude/_playbooks/fx-order/spec/prompt.md --
+---
+summary: Write the spec.
+---
+
+Spec body.
+-- fixtures/cwd/run/.keep --
+-- cmd --
+booping playbook-state fx-order --workdir run
+-- exit --
+0
+-- stdout --
+playbook: fx-order
+workdir: {CWD}/run
+states:
+  main:
+    artifact: index.md
+    status: not-started
+    next:
+    - to: intaking
+      when: run not started — bootstrap the artifact
+  step:
+    artifact: steps/{instance}/index.md
+    instances: {}
+-- stderr --

@@ -1,0 +1,83 @@
+Instances are bootstrapped in the order `zulu`, `alpha`, `mike` and reported sorted by slug, each
+carrying its own status and frontier — `mike` sits on the terminal status and so has no `next`,
+while the two still mid-run keep theirs.
+
+-- fixtures/home/Claude/_playbooks/fx-steps/playbook.md --
+---
+name: fx-steps
+title: Steps
+summary: Per-instance fixture for playbook-state.
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-steps/playbook.yaml --
+graph:
+  intake: []
+  step-pipeline:
+    dependencies: [intake]
+    state: step
+    graph:
+      spec: []
+
+states:
+  step:
+    artifact: steps/{instance}/index.md
+    initial: spec-ing
+    statuses:
+      spec-ing:
+        transitions:
+          - to: done
+            when: spec written
+      done: {terminal: true}
+-- fixtures/home/Claude/_playbooks/fx-steps/intake/prompt.md --
+---
+summary: Intake the request.
+---
+
+Intake body.
+-- fixtures/home/Claude/_playbooks/fx-steps/spec/prompt.md --
+---
+summary: Write the spec.
+---
+
+Spec body.
+-- fixtures/cwd/run/.keep --
+-- cmd --
+booping playbook-transition fx-steps spec-ing --state step --instance zulu --workdir run
+booping playbook-transition fx-steps spec-ing --state step --instance alpha --workdir run
+booping playbook-transition fx-steps spec-ing --state step --instance mike --workdir run
+booping playbook-transition fx-steps done --state step --instance mike --workdir run
+booping playbook-state fx-steps --workdir run
+-- exit --
+0
+-- stdout --
+created steps/zulu/index.md
+not-started → spec-ing
+frontmatter: status=spec-ing
+created steps/alpha/index.md
+not-started → spec-ing
+frontmatter: status=spec-ing
+created steps/mike/index.md
+not-started → spec-ing
+frontmatter: status=spec-ing
+spec-ing → done
+frontmatter: status=done
+playbook: fx-steps
+workdir: {CWD}/run
+states:
+  step:
+    artifact: steps/{instance}/index.md
+    instances:
+      alpha:
+        status: spec-ing
+        next:
+        - to: done
+          when: spec written
+      mike:
+        status: done
+      zulu:
+        status: spec-ing
+        next:
+        - to: done
+          when: spec written
+-- stderr --

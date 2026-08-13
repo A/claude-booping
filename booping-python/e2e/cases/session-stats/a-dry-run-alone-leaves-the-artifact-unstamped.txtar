@@ -1,0 +1,62 @@
+The sibling of the dry-then-wet case, isolating the negative half: after a lone `--dry-run` the
+artifact still carries no `metrics_*` key, even though stdout reports a full set of numbers for it.
+
+Arithmetic, s-hotel: one turn, 07:00:00 → 07:02:00 = 120s = 2 minutes; tokens input 5, output 1, no
+cache fields = 0; model claude-fx-haiku.
+
+-- fixtures/home/.claude/projects/proj/s-hotel.jsonl --
+{"type":"user","isSidechain":false,"origin":{"kind":"human"},"timestamp":"2026-08-01T07:00:00.000Z","message":{"role":"user","content":"go"}}
+{"type":"assistant","isSidechain":false,"timestamp":"2026-08-01T07:02:00.000Z","message":{"role":"assistant","model":"claude-fx-haiku","content":[{"type":"text","text":"ok"}],"usage":{"input_tokens":5,"output_tokens":1}}}
+-- fixtures/cwd/plan/index.md --
+---
+title: Hotel plan
+sessions:
+- s-hotel
+---
+
+Body.
+-- cmd --
+booping session-stats plan/index.md --dry-run
+-- exit --
+0
+-- stdout --
+{
+  "artifacts": [
+    {
+      "path": "plan/index.md",
+      "written": false,
+      "sessions": [
+        {
+          "session": "s-hotel",
+          "metrics_active_minutes": 2,
+          "metrics_models": [
+            "claude-fx-haiku"
+          ],
+          "metrics_tokens_input": 5,
+          "metrics_tokens_output": 1,
+          "metrics_tokens_cache_creation": 0,
+          "metrics_tokens_cache_read": 0
+        }
+      ],
+      "totals": {
+        "metrics_active_minutes": 2,
+        "metrics_models": [
+          "claude-fx-haiku"
+        ],
+        "metrics_tokens_input": 5,
+        "metrics_tokens_output": 1,
+        "metrics_tokens_cache_creation": 0,
+        "metrics_tokens_cache_read": 0
+      }
+    }
+  ]
+}
+-- stderr --
+-- expected/cwd/plan/index.md --
+---
+title: Hotel plan
+sessions:
+- s-hotel
+---
+
+Body.

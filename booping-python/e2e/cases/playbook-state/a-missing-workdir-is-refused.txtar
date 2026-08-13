@@ -1,0 +1,10 @@
+The workdir is checked before anything else — the playbook is never even resolved — and the refusal
+echoes the path already expanded to absolute.
+
+-- cmd --
+booping playbook-state fx-run --workdir nope
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: workdir not found: {CWD}/nope

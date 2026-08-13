@@ -40,7 +40,7 @@ One file per milestone directory under the plan directory's `milestones/`, named
 
 ## Final Verification
 
-- [ ] `just build` renders cleanly (for skill/agent thin-shell changes via `src/files/`) and `bin/booping render src/templates/skills/<name>.md.j2` produces clean output (for skill/agent body changes).
+- [ ] `bin/booping render src/templates/skills/<name>.md.j2` produces clean output (for skill/agent body changes).
 - [ ] Rendered skill body reviewed (no stale state names, no prose that duplicates rendered tables, no `{{placeholder}}` leaks).
 - [ ] Targeted lessons (`skill:{name}`, `agent:{id}`) still inline correctly into the rendered body.
 

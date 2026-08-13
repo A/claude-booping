@@ -1,0 +1,18 @@
+`migrate` is the remedy the notice points at, so it never traverses its own gate: behind the same
+marker that gates every other name, it renders.
+
+The render is diverted to a file and left unasserted — it is shipped content whose text drifts. What
+proves the gate did not fire is the vault log line, which is appended after the gate and only on the
+render path.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+-- cmd --
+booping render-playbook migrate --output out.md
+-- exit --
+0
+-- stdout --
+-- stderr --
+-- expected/cwd/vault/.booping.log --
+[..]Z: [render-playbook] migrate → out.md

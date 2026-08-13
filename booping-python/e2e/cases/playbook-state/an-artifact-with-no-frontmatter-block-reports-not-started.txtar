@@ -1,0 +1,64 @@
+Bare body text with no frontmatter block at all is read as an unstarted run too — the same
+`not-started` report as a missing file, and no parse error.
+
+-- fixtures/home/Claude/_playbooks/fx-run/playbook.md --
+---
+name: fx-run
+title: Run
+summary: Single-machine fixture for playbook-state.
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-run/playbook.yaml --
+state: main
+graph:
+  intake: []
+  research: [intake]
+
+states:
+  main:
+    artifact: index.md
+    initial: intaking
+    statuses:
+      intaking:
+        transitions:
+          - to: researching
+            when: intake complete
+            gates: ["request captured in the artifact"]
+          - to: parked
+            when: the run is shelved
+      researching:
+        transitions:
+          - to: done
+            when: research complete
+      parked: {terminal: true}
+      done: {terminal: true}
+-- fixtures/home/Claude/_playbooks/fx-run/intake/prompt.md --
+---
+summary: Intake the request.
+---
+
+Intake body.
+-- fixtures/home/Claude/_playbooks/fx-run/research/prompt.md --
+---
+summary: Research the request.
+---
+
+Research body.
+-- fixtures/cwd/run/index.md --
+no frontmatter here
+-- cmd --
+booping playbook-state fx-run --workdir run
+-- exit --
+0
+-- stdout --
+playbook: fx-run
+workdir: {CWD}/run
+states:
+  main:
+    artifact: index.md
+    status: not-started
+    next:
+    - to: intaking
+      when: run not started — bootstrap the artifact
+-- stderr --

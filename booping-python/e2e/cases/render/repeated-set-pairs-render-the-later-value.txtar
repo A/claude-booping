@@ -1,0 +1,12 @@
+`--set` is repeatable and the pairs are applied in argv order, so the last one on the same key is the
+one that renders.
+
+-- fixtures/cwd/probe.md.j2 --
+threshold {{ config.core.sprint.default_threshold_sp }}
+-- cmd --
+booping render /proc/self/cwd/probe.md.j2 --set core.sprint.default_threshold_sp=7 --set core.sprint.default_threshold_sp=9
+-- exit --
+0
+-- stdout --
+threshold 9
+-- stderr --

@@ -1,0 +1,27 @@
+A playbook may declare a graph and no run state at all. There is nothing to report, so the command
+refuses rather than printing an empty `states:` mapping.
+
+-- fixtures/home/Claude/_playbooks/fx-graphonly/playbook.md --
+---
+name: fx-graphonly
+title: Graph Only
+summary: No states declared.
+graph:
+  only: []
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-graphonly/only/prompt.md --
+---
+summary: Do the only step.
+---
+
+Only body.
+-- fixtures/cwd/run/.keep --
+-- cmd --
+booping playbook-state fx-graphonly --workdir run
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: playbook 'fx-graphonly' declares no states

@@ -1,0 +1,63 @@
+A `--target` that names nothing on disk is not an error: the machine reports `not-started` with the
+synthetic bootstrap edge, exactly as a missing declared artifact does, at exit 0.
+
+-- fixtures/home/Claude/_playbooks/fx-run/playbook.md --
+---
+name: fx-run
+title: Run
+summary: Single-machine fixture for playbook-state.
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-run/playbook.yaml --
+state: main
+graph:
+  intake: []
+  research: [intake]
+
+states:
+  main:
+    artifact: index.md
+    initial: intaking
+    statuses:
+      intaking:
+        transitions:
+          - to: researching
+            when: intake complete
+            gates: ["request captured in the artifact"]
+          - to: parked
+            when: the run is shelved
+      researching:
+        transitions:
+          - to: done
+            when: research complete
+      parked: {terminal: true}
+      done: {terminal: true}
+-- fixtures/home/Claude/_playbooks/fx-run/intake/prompt.md --
+---
+summary: Intake the request.
+---
+
+Intake body.
+-- fixtures/home/Claude/_playbooks/fx-run/research/prompt.md --
+---
+summary: Research the request.
+---
+
+Research body.
+-- fixtures/cwd/run/.keep --
+-- cmd --
+booping playbook-state fx-run --workdir run --target review.md
+-- exit --
+0
+-- stdout --
+playbook: fx-run
+workdir: {CWD}/run
+states:
+  main:
+    artifact: {CWD}/run/review.md
+    status: not-started
+    next:
+    - to: intaking
+      when: run not started — bootstrap the artifact
+-- stderr --

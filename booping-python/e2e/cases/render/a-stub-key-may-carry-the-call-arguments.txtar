@@ -1,0 +1,15 @@
+A stub key can be the dotted path plus the call arguments, so one macro can be stubbed per argument
+list: the call carrying those arguments takes the stub, and the bare call falls through to the real
+`date`, whose reading is wildcarded.
+
+-- fixtures/cwd/probe.md.j2 --
+pinned {{ macro('core.macros.date', '+%Y%m%d%H%M') }}
+live {{ macro('core.macros.date', '+booped-%Y') }}
+-- cmd --
+booping render /proc/self/cwd/probe.md.j2 --stub-macro "core.macros.date +%Y%m%d%H%M=197001010000"
+-- exit --
+0
+-- stdout --
+pinned 197001010000
+live booped-[..]
+-- stderr --

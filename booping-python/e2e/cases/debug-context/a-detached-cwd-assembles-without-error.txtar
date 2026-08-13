@@ -1,0 +1,16 @@
+stdout is deliberately unasserted: the dump enumerates every shipped playbook, skill and agent, and
+the runner rejects on unequal line counts before any wildcard applies, so adding a core playbook
+would break the case. What is pinned here is assembly — with no `.booping` marker on the cwd or any
+parent, the vault-less branch of every loader still completes and the process exits clean. That
+guards the class of loader regression that only shows up detached; it is not a contract on the
+dump's content.
+
+Twin of `an-attached-vault-assembles-without-error.txtar`, which covers the attached branch.
+
+-- fixtures/cwd/notes.md --
+No marker anywhere above this file.
+-- cmd --
+booping debug-context
+-- exit --
+0
+-- stderr --

@@ -12,10 +12,6 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
     p = subparsers.add_parser("debug-context", help="Dump assembled context as YAML")
     p.set_defaults(func=_run_context)
 
-    subparsers.add_parser("debug-template", help="Not implemented yet").set_defaults(
-        func=_not_implemented
-    )
-
 
 def _summarize_body(text: str) -> str:
     return f"<{text.count(chr(10)) + 1 if text else 0} lines>"
@@ -31,8 +27,3 @@ def _run_context(args: argparse.Namespace) -> None:
             if "body" in item:
                 item["body"] = _summarize_body(item["body"])
     sys.stdout.write(yaml.dump(data, allow_unicode=True, sort_keys=True))
-
-
-def _not_implemented(args: argparse.Namespace) -> None:
-    print("not implemented: debug-template", file=sys.stderr)
-    sys.exit(1)

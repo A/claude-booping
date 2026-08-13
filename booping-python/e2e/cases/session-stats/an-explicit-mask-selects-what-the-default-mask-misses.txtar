@@ -1,0 +1,39 @@
+`--mask` replaces the `index.md` default outright. The tree holds both an `index.md` and a
+milestone file; the explicit mask selects only the milestone, which the default mask cannot match,
+and drops the `index.md` the default mask would have taken.
+
+-- fixtures/cwd/vault/plan/index.md --
+---
+sessions: []
+---
+
+Body.
+-- fixtures/cwd/vault/plan/M01-alpha.md --
+---
+sessions: []
+---
+
+Body.
+-- cmd --
+booping session-stats vault --mask 'M*.md' --dry-run
+-- exit --
+0
+-- stdout --
+{
+  "artifacts": [
+    {
+      "path": "plan/M01-alpha.md",
+      "written": false,
+      "sessions": [],
+      "totals": {
+        "metrics_active_minutes": 0,
+        "metrics_models": [],
+        "metrics_tokens_input": 0,
+        "metrics_tokens_output": 0,
+        "metrics_tokens_cache_creation": 0,
+        "metrics_tokens_cache_read": 0
+      }
+    }
+  ]
+}
+-- stderr --

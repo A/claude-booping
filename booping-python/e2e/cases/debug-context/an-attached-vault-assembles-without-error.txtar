@@ -1,0 +1,53 @@
+stdout is deliberately unasserted: the dump enumerates every shipped playbook, skill and agent, and
+the runner rejects on unequal line counts before any wildcard applies, so adding a core playbook
+would break the case. What is pinned here is assembly — over a vault carrying a marker, a plan, a
+lesson and a local playbook, `Context.assemble()` completes and the process exits clean. That guards
+the class of loader regression where one context field blows up under a given vault shape; it is not
+a contract on the dump's content.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+core:
+  probe_playbook:
+    label: probe
+-- fixtures/cwd/vault/plans/alpha/index.md --
+---
+title: Alpha
+status: done
+created: 20260101
+---
+
+Plan body.
+-- fixtures/cwd/vault/_lessons/0001_alpha.md --
+---
+title: Alpha rule
+targets: [fx-assembly]
+---
+
+Alpha body.
+-- fixtures/cwd/vault/_playbooks/fx-assembly/playbook.md --
+---
+name: fx-assembly
+title: Assembly
+summary: Local playbook seeded for the assembly guard.
+---
+
+Preamble.
+-- fixtures/cwd/vault/_playbooks/fx-assembly/playbook.yaml --
+graph:
+  s1: []
+-- fixtures/cwd/vault/_playbooks/fx-assembly/s1/prompt.md --
+---
+name: s1
+summary: Only step.
+---
+
+Step body.
+-- cmd --
+booping debug-context
+-- exit --
+0
+-- stderr --

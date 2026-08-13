@@ -1,0 +1,15 @@
+A step fetch is a separate process issued by a spawned sub-agent, so the exemption has to hold for it
+too: `migrate --step survey` behind the same marker reaches the render path, evidenced by the vault
+log line the gate would have short-circuited.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+-- cmd --
+booping render-playbook migrate --step survey --output out.md
+-- exit --
+0
+-- stdout --
+-- stderr --
+-- expected/cwd/vault/.booping.log --
+[..]Z: [render-playbook] migrate --step survey → out.md

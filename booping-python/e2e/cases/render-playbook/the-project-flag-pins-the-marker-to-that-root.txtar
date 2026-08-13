@@ -1,0 +1,53 @@
+`--project` moves marker resolution to the named root: the pinned vault records a current watermark
+and renders, even though cwd's own marker is behind and would gate this playbook without the flag.
+The second invocation is the same playbook from the same cwd with the flag dropped.
+
+Discovery is pinned along with the marker, so the fixture playbook lives in the pinned vault's
+`_playbooks` root.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+-- fixtures/cwd/pinned/.booping --
+project_name: pinned
+latest_migration: 999
+-- fixtures/cwd/pinned/_playbooks/fx-pinned/playbook.md --
+---
+name: fx-pinned
+title: Pinned
+summary: Renders only when the marker comes from the pinned root.
+---
+
+Preamble from the pinned vault.
+-- fixtures/cwd/pinned/_playbooks/fx-pinned/playbook.yaml --
+graph:
+  only: []
+-- fixtures/cwd/pinned/_playbooks/fx-pinned/only/prompt.md --
+---
+name: only
+summary: Only step.
+---
+
+Only body.
+-- cmd --
+booping render-playbook fx-pinned --project pinned
+booping render-playbook fx-pinned
+-- exit --
+0
+-- stdout --
+Preamble from the pinned vault.
+
+## Playbook Steps
+
+Execute the steps in the most effective order considering their dependencies.
+
+| Step | Dependencies | Summary | Review gate |
+| --- | --- | --- | --- |
+| `only` | — | Only step. | — |
+
+## Step: Only
+Instructions:
+- Summary: Only step.
+
+Run `booping render-playbook fx-pinned --step only` for content.
+**STOP — tell the user:** this project is behind on booping migrations (recorded id -1, latest shipped [..]). Run `/playbook migrate` to bring the vault current, then retry.
+-- stderr --

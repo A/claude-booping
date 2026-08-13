@@ -1,0 +1,17 @@
+A `--set` on a nested key merges into its mapping rather than replacing it: the overridden key moves
+and its siblings under `core.sprint` are still there to render. The sibling is probed for
+non-emptiness, not for its size, so growing the scale table does not touch this case.
+
+-- fixtures/cwd/probe.md.j2 --
+threshold {{ config.core.sprint.default_threshold_sp }}
+scale populated {{ config.core.sprint.scale | length > 0 }}
+redecompose {{ config.core.sprint.redecompose_threshold }}
+-- cmd --
+booping render /proc/self/cwd/probe.md.j2 --set core.sprint.default_threshold_sp=7
+-- exit --
+0
+-- stdout --
+threshold 7
+scale populated True
+redecompose 5
+-- stderr --

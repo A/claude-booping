@@ -1,0 +1,16 @@
+An existing directory whose mask matches no file is an error, not an empty report, and the message
+names both the mask and the root that was walked.
+
+-- fixtures/cwd/vault/plan/index.md --
+---
+sessions: []
+---
+
+Body.
+-- cmd --
+booping session-stats vault --mask 'M*.md'
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: no artifact matching 'M*.md' under vault

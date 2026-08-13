@@ -1,0 +1,12 @@
+A `--set` argument with no `=` is user error: nothing renders and the message names the offending
+pair.
+
+-- fixtures/cwd/probe.md.j2 --
+threshold {{ config.core.sprint.default_threshold_sp }}
+-- cmd --
+booping render /proc/self/cwd/probe.md.j2 --set nope
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: malformed --set pair (expected KEY=VALUE): nope

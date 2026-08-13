@@ -1,0 +1,56 @@
+Stamping is idempotent: an artifact already carrying `metrics_*` keys is reported as skipped with
+`written` false and no numbers at all — the transcript is never even read. The seeded values are
+deliberately nothing like what the seeded transcript would produce (one turn, 12:00:00 → 12:09:00 =
+540s = 9 minutes, input 42 / output 8), so dropping the guard would change both stdout and the file;
+the `expected/` section below is byte-identical to the fixture above it.
+
+-- fixtures/home/.claude/projects/proj/s-echo.jsonl --
+{"type":"user","isSidechain":false,"origin":{"kind":"human"},"timestamp":"2026-08-01T12:00:00.000Z","message":{"role":"user","content":"go"}}
+{"type":"assistant","isSidechain":false,"timestamp":"2026-08-01T12:09:00.000Z","message":{"role":"assistant","model":"claude-fx-sonnet","content":[{"type":"text","text":"ok"}],"usage":{"input_tokens":42,"output_tokens":8}}}
+-- fixtures/cwd/plan/index.md --
+---
+title: Echo plan
+sessions:
+- s-echo
+metrics_active_minutes: 1
+metrics_models:
+- claude-fx-ancient
+metrics_tokens_input: 2
+metrics_tokens_output: 3
+metrics_tokens_cache_creation: 4
+metrics_tokens_cache_read: 5
+---
+
+Body.
+-- cmd --
+booping session-stats plan/index.md
+-- exit --
+0
+-- stdout --
+{
+  "artifacts": [
+    {
+      "path": "plan/index.md",
+      "written": false,
+      "skipped": "already stamped; --force to override",
+      "sessions": [],
+      "totals": {}
+    }
+  ]
+}
+-- stderr --
+-- expected/cwd/plan/index.md --
+---
+title: Echo plan
+sessions:
+- s-echo
+metrics_active_minutes: 1
+metrics_models:
+- claude-fx-ancient
+metrics_tokens_input: 2
+metrics_tokens_output: 3
+metrics_tokens_cache_creation: 4
+metrics_tokens_cache_read: 5
+---
+
+Body.

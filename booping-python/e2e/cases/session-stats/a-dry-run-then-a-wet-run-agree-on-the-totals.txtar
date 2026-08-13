@@ -1,0 +1,103 @@
+`--dry-run` changes only whether the file is written, never what is computed. The same artifact is
+run twice — dry, then wet — and the two JSON documents below differ in exactly one character, the
+`written` flag. The second run stamping at all is itself the proof that the first did not: the
+already-stamped guard would have skipped it otherwise, and no `--force` is passed.
+
+Arithmetic, s-golf: one turn, 08:00:00 → 08:05:00 = 300s = 5 minutes; tokens input 9, output 4, no
+cache fields = 0; model claude-fx-haiku.
+
+-- fixtures/home/.claude/projects/proj/s-golf.jsonl --
+{"type":"user","isSidechain":false,"origin":{"kind":"human"},"timestamp":"2026-08-01T08:00:00.000Z","message":{"role":"user","content":"go"}}
+{"type":"assistant","isSidechain":false,"timestamp":"2026-08-01T08:05:00.000Z","message":{"role":"assistant","model":"claude-fx-haiku","content":[{"type":"text","text":"ok"}],"usage":{"input_tokens":9,"output_tokens":4}}}
+-- fixtures/cwd/plan/index.md --
+---
+title: Golf plan
+sessions:
+- s-golf
+---
+
+Body.
+-- cmd --
+booping session-stats plan/index.md --dry-run
+booping session-stats plan/index.md
+-- exit --
+0
+-- stdout --
+{
+  "artifacts": [
+    {
+      "path": "plan/index.md",
+      "written": false,
+      "sessions": [
+        {
+          "session": "s-golf",
+          "metrics_active_minutes": 5,
+          "metrics_models": [
+            "claude-fx-haiku"
+          ],
+          "metrics_tokens_input": 9,
+          "metrics_tokens_output": 4,
+          "metrics_tokens_cache_creation": 0,
+          "metrics_tokens_cache_read": 0
+        }
+      ],
+      "totals": {
+        "metrics_active_minutes": 5,
+        "metrics_models": [
+          "claude-fx-haiku"
+        ],
+        "metrics_tokens_input": 9,
+        "metrics_tokens_output": 4,
+        "metrics_tokens_cache_creation": 0,
+        "metrics_tokens_cache_read": 0
+      }
+    }
+  ]
+}
+{
+  "artifacts": [
+    {
+      "path": "plan/index.md",
+      "written": true,
+      "sessions": [
+        {
+          "session": "s-golf",
+          "metrics_active_minutes": 5,
+          "metrics_models": [
+            "claude-fx-haiku"
+          ],
+          "metrics_tokens_input": 9,
+          "metrics_tokens_output": 4,
+          "metrics_tokens_cache_creation": 0,
+          "metrics_tokens_cache_read": 0
+        }
+      ],
+      "totals": {
+        "metrics_active_minutes": 5,
+        "metrics_models": [
+          "claude-fx-haiku"
+        ],
+        "metrics_tokens_input": 9,
+        "metrics_tokens_output": 4,
+        "metrics_tokens_cache_creation": 0,
+        "metrics_tokens_cache_read": 0
+      }
+    }
+  ]
+}
+-- stderr --
+-- expected/cwd/plan/index.md --
+---
+title: Golf plan
+sessions:
+- s-golf
+metrics_active_minutes: 5
+metrics_models:
+- claude-fx-haiku
+metrics_tokens_input: 9
+metrics_tokens_output: 4
+metrics_tokens_cache_creation: 0
+metrics_tokens_cache_read: 0
+---
+
+Body.
