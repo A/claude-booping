@@ -4,12 +4,29 @@ Notable user-visible changes, newest first, in the [Keep a Changelog](https://ke
 
 ## Unreleased
 
+## v1.0.1 — 2026-08-13
+
+Milestones became real files. Each one lives in a directory of its own under the plan, and that file — not a slice of the plan — is what develop hands a coding agent.
+
+### Added
+
+- A plan directory now holds `milestones/M{nn}-{title}/M{nn}-{title}.md`, one file per milestone, carrying that milestone's tasks, definition of done and verification command. Groom writes them as it drafts, and `index.md`'s `## Milestones` table and story-point total are generated from them rather than hand-kept, with each title linking to its file.
+- Each milestone carries its own status — `pending → in-progress → done`, plus `blocked` — as run state, so a stopped sprint resumes at the first milestone that is not done instead of at the top of the plan.
+- A milestone develop sends back keeps a `feedback.md` beside its file: what was checked, what was wrong and what the next attempt must do. It counts the attempts and survives the session.
+
 ### Changed
 
+- Develop briefs a worker with its milestone file's path and `index.md` as context, never the plan body. The agent implements the milestone, runs its verification until green and makes the repo commit; develop then checks that diff against the definition of done before moving the milestone on.
+- Groom seeds the plan directory from the new `core.groom_playbook.scaffold` tree, so a plan carries a real `created` and the repo's `commit` from the moment it exists, and the frontmatter shape lives in the config alone.
 - `booping scaffold` and `booping frontmatter-update` now answer with a unified diff of every file they changed, and say nothing about a file whose content did not move — a rendered prompt can act on the receipt instead of reading the file back.
 - `booping scaffold` decides per file rather than per destination: an existing target is skipped and named, `--force` overwrites the files the tree names, and a destination that already holds part of the tree no longer aborts the run.
 - `booping frontmatter-update` writes a scalar with its YAML type, so `sp=23` lands as an integer; a string whose plain form would reload as something else keeps its quotes.
-- Groom seeds the plan directory from the new `core.groom_playbook.scaffold` tree, so a plan carries a real `created` and the repo's `commit` from the moment it exists, and the frontmatter shape lives in the config alone.
+
+### Fixed
+
+- Closing a code review no longer drops the plan's review history when `code_reviews:` was written as an inline list.
+
+Upgrading needs no migration and no vault changes. Plans groomed before 1.0.1 have no milestone files, so develop finds nothing to execute — finish an in-flight sprint before upgrading, or re-groom the plan afterwards.
 
 ## v1.0.0 — 2026-08-08
 
