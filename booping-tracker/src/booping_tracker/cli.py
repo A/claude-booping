@@ -12,13 +12,10 @@ from typing import Any, NoReturn
 
 from booping_tracker.config import ConfigError
 from booping_tracker.config import load as load_config
+from booping_tracker.errors import ProviderError, UserError
 from booping_tracker.facade import OperationResult, TrackerProvider
 from booping_tracker.logging import log, resolve_vault
 from booping_tracker.providers import PROVIDERS
-
-
-class UserError(Exception):
-    pass
 
 
 @dataclass(frozen=True)
@@ -261,9 +258,9 @@ def _emit(result: OperationResult, output: str) -> None:
         print(result.receipt)
 
 
-def _fail(message: str) -> NoReturn:
+def _fail(message: str, code: int) -> NoReturn:
     print(f"error: {message}", file=sys.stderr)
-    sys.exit(1)
+    sys.exit(code)
 
 
 def main() -> None:
@@ -274,14 +271,18 @@ def main() -> None:
         config = load_config(
             config_file=Path(args.config_file) if args.config_file else None,
             driver_override=args.driver,
+            # A dry run reaches no provider, so it needs no API key.
+            require_api_key=not args.dry_run,
         )
         factory = PROVIDERS.get(config.driver)
         if factory is None:
             raise UserError(f"driver not implemented: {config.driver}")
         call = _plan(args)
-        result = _dry_run(call, config.driver) if args.dry_run else call.invoke(factory())
+        result = _dry_run(call, config.driver) if args.dry_run else call.invoke(factory(config))
     except (ConfigError, UserError) as exc:
-        _fail(str(exc))
+        _fail(str(exc), 1)
+    except ProviderError as exc:
+        _fail(str(exc), 2)
 
     _emit(result, args.output)
     log(resolve_vault(), result.verb, result.receipt)

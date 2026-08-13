@@ -54,6 +54,7 @@ def load(
     config_file: Path | None = None,
     driver_override: str | None = None,
     cwd: Path | None = None,
+    require_api_key: bool = True,
 ) -> TrackerConfig:
     if config_file is not None:
         raw = _read_config_file(config_file)
@@ -77,7 +78,8 @@ def load(
         raise ConfigError(f"unknown driver: {driver} (known: {', '.join(KNOWN_DRIVERS)})")
 
     config = TrackerConfig(driver=driver, settings=settings)
-    _check_api_key(config)
+    if require_api_key:
+        _check_api_key(config)
     return config
 
 
