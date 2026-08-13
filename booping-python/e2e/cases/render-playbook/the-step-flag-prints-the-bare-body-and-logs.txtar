@@ -1,0 +1,39 @@
+`--step` is the sub-agent's fetch surface: it prints that step's body alone — no preamble, no step
+table, no `## Step:` heading — and records the invocation in the attached vault's log.
+
+-- fixtures/cwd/vault/_playbooks/fx-step-fetch/playbook.md --
+---
+name: fx-step-fetch
+title: Step Fetch
+---
+
+Preamble that must not appear.
+-- fixtures/cwd/vault/_playbooks/fx-step-fetch/playbook.yaml --
+graph:
+  gather: []
+  draft: [gather]
+-- fixtures/cwd/vault/_playbooks/fx-step-fetch/gather/prompt.md --
+---
+name: gather
+summary: Gather inputs.
+detached: sonnet:medium
+---
+
+Gather body.
+-- fixtures/cwd/vault/_playbooks/fx-step-fetch/draft/prompt.md --
+---
+name: draft
+summary: Draft the artifact.
+detached: opus:high
+---
+
+Draft the artifact from the gathered inputs.
+-- cmd --
+booping render-playbook fx-step-fetch --step draft --project vault
+-- exit --
+0
+-- stdout --
+Draft the artifact from the gathered inputs.
+-- stderr --
+-- expected/cwd/vault/.booping.log --
+[..]Z: [render-playbook] fx-step-fetch --step draft

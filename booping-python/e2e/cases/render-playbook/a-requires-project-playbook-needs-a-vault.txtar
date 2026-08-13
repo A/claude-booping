@@ -1,0 +1,77 @@
+`requires_project: true` is enforced at the CLI boundary. Pointing `--project` at a vault satisfies
+it and the playbook renders; the same playbook invoked from a directory with no marker and no
+`--project` exits 1 before any render happens.
+
+`--project` pins discovery to the named vault and drops the global `~/Claude/_playbooks` root, so
+the fixture is planted in both roots — the vault copy answers the first invocation, the global copy
+the second.
+
+-- fixtures/home/Claude/_playbooks/fx-requires-project/playbook.md --
+---
+name: fx-requires-project
+title: Requires Project
+summary: Fixture that only runs with a vault attached.
+requires_project: true
+---
+
+# Requires Project
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-requires-project/playbook.yaml --
+graph:
+  only: []
+-- fixtures/home/Claude/_playbooks/fx-requires-project/only/prompt.md --
+---
+name: only
+summary: Only step.
+detached: sonnet:medium
+---
+
+Only body.
+-- fixtures/cwd/vault/_playbooks/fx-requires-project/playbook.md --
+---
+name: fx-requires-project
+title: Requires Project
+summary: Fixture that only runs with a vault attached.
+requires_project: true
+---
+
+# Requires Project
+
+Preamble.
+-- fixtures/cwd/vault/_playbooks/fx-requires-project/playbook.yaml --
+graph:
+  only: []
+-- fixtures/cwd/vault/_playbooks/fx-requires-project/only/prompt.md --
+---
+name: only
+summary: Only step.
+detached: sonnet:medium
+---
+
+Only body.
+-- cmd --
+booping render-playbook fx-requires-project --project vault
+booping render-playbook fx-requires-project
+-- exit --
+1
+-- stdout --
+# Requires Project
+
+Preamble.
+
+## Playbook Steps
+
+Execute the steps in the most effective order considering their dependencies.
+
+| Step | Dependencies | Summary | Review gate |
+| --- | --- | --- | --- |
+| `only` | — | Only step. | — |
+
+## Step: Only
+
+Only step.
+
+Tell a sub-agent — model sonnet, effort medium — to get its instructions by calling this command: `booping render-playbook fx-requires-project --step only`.
+-- stderr --
+error: playbook 'fx-requires-project' requires a booping project; none attached here

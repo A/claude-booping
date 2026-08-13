@@ -1,0 +1,27 @@
+A `--step` naming no step of the playbook exits 1 with the step name and the known steps in the
+error, and nothing on stdout.
+
+-- fixtures/home/Claude/_playbooks/fx-unknown-step/playbook.md --
+---
+name: fx-unknown-step
+title: Unknown Step
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-unknown-step/playbook.yaml --
+graph:
+  gather: []
+-- fixtures/home/Claude/_playbooks/fx-unknown-step/gather/prompt.md --
+---
+name: gather
+summary: Gather inputs.
+---
+
+Gather body.
+-- cmd --
+booping render-playbook fx-unknown-step --step nope
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: step not found in playbook 'fx-unknown-step': nope (known: gather)

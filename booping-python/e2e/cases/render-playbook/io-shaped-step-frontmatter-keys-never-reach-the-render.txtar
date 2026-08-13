@@ -1,0 +1,48 @@
+`inputs:` and `outputs:` are not part of the step contract. A step declaring them renders exactly
+as one that does not — no `Inputs:` or `Outputs:` bullet anywhere in the composed output.
+
+-- fixtures/home/Claude/_playbooks/fx-io-keys/playbook.md --
+---
+name: fx-io-keys
+title: IO Keys
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-io-keys/playbook.yaml --
+graph:
+  one: []
+-- fixtures/home/Claude/_playbooks/fx-io-keys/one/prompt.md --
+---
+name: one
+summary: one summary
+inputs:
+  - what: the brief
+    from: intake
+  - a bare input
+outputs:
+  - a draft
+  - a summary line
+---
+
+one body
+-- cmd --
+booping render-playbook fx-io-keys
+-- exit --
+0
+-- stdout --
+Preamble.
+
+## Playbook Steps
+
+Execute the steps in the most effective order considering their dependencies.
+
+| Step | Dependencies | Summary | Review gate |
+| --- | --- | --- | --- |
+| `one` | — | one summary | — |
+
+## Step: One
+Instructions:
+- Summary: one summary
+
+Run `booping render-playbook fx-io-keys --step one` for content.
+-- stderr --

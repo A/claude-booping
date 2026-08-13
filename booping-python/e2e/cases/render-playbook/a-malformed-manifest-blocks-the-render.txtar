@@ -1,0 +1,23 @@
+A `playbook.yaml` that parses but is not a mapping blocks the render, and the notice says what was
+wrong with it.
+
+-- fixtures/home/Claude/_playbooks/fx-bad-manifest/playbook.md --
+---
+name: fx-bad-manifest
+title: Bad Manifest
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-bad-manifest/playbook.yaml --
+- just
+- a list
+-- cmd --
+booping render-playbook fx-bad-manifest
+-- exit --
+0
+-- stdout --
+**STOP — tell the user:** playbook 'fx-bad-manifest' has no graph: in its frontmatter. Do not execute this playbook.
+**STOP — tell the user:** playbook.yaml of playbook 'fx-bad-manifest' is malformed: not a YAML mapping. Do not execute this playbook.
+
+Preamble.
+-- stderr --

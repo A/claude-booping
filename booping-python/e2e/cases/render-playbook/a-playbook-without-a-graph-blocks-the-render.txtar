@@ -1,0 +1,28 @@
+A playbook declaring no `graph:` on either manifest surface blocks the render, even though a step
+directory exists on disk.
+
+-- fixtures/home/Claude/_playbooks/fx-no-graph/playbook.md --
+---
+name: fx-no-graph
+title: No Graph
+summary: Missing graph frontmatter.
+---
+
+Preamble prose for the no-graph playbook.
+-- fixtures/home/Claude/_playbooks/fx-no-graph/only/prompt.md --
+---
+name: only
+summary: The only step.
+---
+
+The only step body.
+-- cmd --
+booping render-playbook fx-no-graph
+-- exit --
+0
+-- stdout --
+**STOP — tell the user:** playbook 'fx-no-graph' has no graph: in its frontmatter. Do not execute this playbook.
+**Note — tell the user:** step 'only' exists on disk but is not wired into the graph; it will not run.
+
+Preamble prose for the no-graph playbook.
+-- stderr --

@@ -1,0 +1,31 @@
+`graph:` belongs to exactly one manifest surface. Declaring it in both `playbook.yaml` and
+`playbook.md` frontmatter blocks the render rather than picking a winner.
+
+-- fixtures/home/Claude/_playbooks/fx-graph-in-both/playbook.md --
+---
+name: fx-graph-in-both
+title: Graph In Both
+graph:
+  a: []
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-graph-in-both/playbook.yaml --
+graph:
+  a: []
+-- fixtures/home/Claude/_playbooks/fx-graph-in-both/a/prompt.md --
+---
+name: a
+summary: a summary
+---
+
+a body
+-- cmd --
+booping render-playbook fx-graph-in-both
+-- exit --
+0
+-- stdout --
+**STOP — tell the user:** playbook 'fx-graph-in-both' declares graph: in both playbook.yaml and playbook.md frontmatter; keep exactly one. Do not execute this playbook.
+
+Preamble.
+-- stderr --

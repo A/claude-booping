@@ -1,0 +1,51 @@
+A step directory that no graph node references produces a `**Note` rather than a `**STOP`: the
+render continues with its table and step sections, and only the wired step is rendered.
+
+-- fixtures/home/Claude/_playbooks/fx-orphan/playbook.md --
+---
+name: fx-orphan
+title: Orphan
+summary: A step file is not wired into the graph.
+---
+
+Preamble prose for the orphan playbook.
+-- fixtures/home/Claude/_playbooks/fx-orphan/playbook.yaml --
+graph:
+  a: []
+-- fixtures/home/Claude/_playbooks/fx-orphan/a/prompt.md --
+---
+name: a
+summary: Wired step.
+---
+
+Wired step body.
+-- fixtures/home/Claude/_playbooks/fx-orphan/extra/prompt.md --
+---
+name: extra
+summary: Not wired into the graph.
+---
+
+Extra step body.
+-- cmd --
+booping render-playbook fx-orphan
+-- exit --
+0
+-- stdout --
+**Note — tell the user:** step 'extra' exists on disk but is not wired into the graph; it will not run.
+
+Preamble prose for the orphan playbook.
+
+## Playbook Steps
+
+Execute the steps in the most effective order considering their dependencies.
+
+| Step | Dependencies | Summary | Review gate |
+| --- | --- | --- | --- |
+| `a` | — | Wired step. | — |
+
+## Step: A
+Instructions:
+- Summary: Wired step.
+
+Run `booping render-playbook fx-orphan --step a` for content.
+-- stderr --
