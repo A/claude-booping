@@ -43,7 +43,7 @@ Cases live in `booping-python/e2e/cases/frontmatter-update/*.txtar`, discovered 
 | --- | --- | --- | --- |
 | 01 | [Core CLI corpus cases — set, coercion, errors, diff, stderr, log](milestones/M01-core-cli-cases/M01-core-cli-cases.md) | 3 | done |
 | 02 | [List-op and macro corpus cases — remove, append, stubbed and real macros, gap cases](milestones/M02-list-ops-and-macro-cases/M02-list-ops-and-macro-cases.md) | 3 | done |
-| 03 | [Delete superseded unit tests after coverage cross-check](milestones/M03-delete-superseded-units/M03-delete-superseded-units.md) | 2 | in-progress |
+| 03 | [Delete superseded unit tests after coverage cross-check](milestones/M03-delete-superseded-units/M03-delete-superseded-units.md) | 2 | done |
 
 ## I/O contract
 
