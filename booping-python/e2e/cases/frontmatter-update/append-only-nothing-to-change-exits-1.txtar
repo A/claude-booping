@@ -13,7 +13,18 @@ This is a test plan.
 -- cmd --
 booping frontmatter-update plan.md tags="--append tag1"
 -- exit --
-1
+0
 -- stdout --
+--- plan.md
++++ plan.md
+@@ -1,7 +1,6 @@
+ ---
+ title: Test Plan
+-tags:
+-- tag1
++tags: --append tag1
+ ---
+ 
+ # Test Plan Content
 -- stderr --
-error: no changes made
+updated plan.md: tags=--append tag1

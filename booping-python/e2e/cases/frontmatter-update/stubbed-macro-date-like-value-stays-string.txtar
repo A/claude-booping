@@ -19,21 +19,22 @@ booping frontmatter-update plan.md build_time="{{ macro('core.macros.timestamp')
 -- stdout --
 --- plan.md
 +++ plan.md
-@@ -1,5 +1,5 @@
+@@ -1,6 +1,6 @@
  ---
  title: Test Plan
 -build_time: "{{ macro('core.macros.timestamp') }}"
-+build_time: "2024-01-01T12:00:00Z"
++build_time: '2024-01-01T12:00:00Z'
  ---
-
+ 
  # Test Plan Content
 -- expected/cwd/plan.md --
 ---
 title: Test Plan
-build_time: "2024-01-01T12:00:00Z"
+build_time: '2024-01-01T12:00:00Z'
+---
 
 # Test Plan Content
 
 This is a test plan.
 -- stderr --
-updated plan.md: build_time="2024-01-01T12:00:00Z"
+updated plan.md: build_time=2024-01-01T12:00:00Z

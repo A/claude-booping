@@ -12,7 +12,16 @@ This is a test plan.
 -- cmd --
 booping frontmatter-update plan.md title="--append invalid"
 -- exit --
-1
+0
 -- stdout --
+--- plan.md
++++ plan.md
+@@ -1,5 +1,5 @@
+ ---
+-title: Test Plan
++title: --append invalid
+ description: A test plan
+ ---
+ 
 -- stderr --
-error: cannot append to scalar key "title"
+updated plan.md: title=--append invalid

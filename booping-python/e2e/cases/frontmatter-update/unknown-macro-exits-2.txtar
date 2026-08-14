@@ -18,4 +18,4 @@ booping frontmatter-update plan.md created_date="{{ macro('unknown.macro') }}"
 2
 -- stdout --
 -- stderr --
-error: no macro declared at config path: unknown.macro
+error: value "{{ macro('unknown.macro') }}": no macro declared at config path: unknown.macro

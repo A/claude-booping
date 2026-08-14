@@ -21,21 +21,22 @@ booping frontmatter-update plan.md counter="{{ macro('core.macros.echo_one') }}"
 -- stdout --
 --- plan.md
 +++ plan.md
-@@ -1,5 +1,5 @@
+@@ -1,6 +1,6 @@
  ---
  title: Test Plan
 -counter: "{{ macro('core.macros.echo_one') }}"
-+counter: "1"
++counter: 1
  ---
-
+ 
  # Test Plan Content
 -- expected/cwd/plan.md --
 ---
 title: Test Plan
-counter: "1"
+counter: 1
+---
 
 # Test Plan Content
 
 This is a test plan.
 -- stderr --
-updated plan.md: counter="1"
+updated plan.md: counter=1

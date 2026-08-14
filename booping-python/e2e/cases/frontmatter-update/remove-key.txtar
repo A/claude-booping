@@ -23,12 +23,12 @@ booping frontmatter-update plan.md --remove description
 -description: A test plan
  created: 2024-01-01
  ---
-
- # Test Plan Content
+ 
 -- expected/cwd/plan.md --
 ---
 title: Test Plan
 created: 2024-01-01
+---
 
 # Test Plan Content
 

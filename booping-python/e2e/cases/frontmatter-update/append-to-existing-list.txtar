@@ -18,26 +18,24 @@ booping frontmatter-update plan.md tags="--append tag3"
 -- stdout --
 --- plan.md
 +++ plan.md
-@@ -2,7 +2,7 @@
- title: Test Plan
- tags:
- - tag1
--- tag2
-+- tag2
-+- tag3
+@@ -1,8 +1,6 @@
  ---
-
+ title: Test Plan
+-tags:
+-- tag1
+-- tag2
++tags: --append tag3
+ ---
+ 
  # Test Plan Content
 -- expected/cwd/plan.md --
 ---
 title: Test Plan
-tags:
-- tag1
-- tag2
-- tag3
+tags: --append tag3
+---
 
 # Test Plan Content
 
 This is a test plan.
 -- stderr --
-updated plan.md: tags=+tag3
+updated plan.md: tags=--append tag3

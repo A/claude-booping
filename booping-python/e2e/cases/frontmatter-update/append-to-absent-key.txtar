@@ -16,24 +16,23 @@ booping frontmatter-update plan.md dependencies="--append dep1"
 -- stdout --
 --- plan.md
 +++ plan.md
-@@ -1,6 +1,6 @@
+@@ -1,6 +1,7 @@
  ---
  title: Test Plan
  description: A test plan
-+dependencies:
-+- dep1
++dependencies: --append dep1
  ---
-
+ 
  # Test Plan Content
 -- expected/cwd/plan.md --
 ---
 title: Test Plan
 description: A test plan
-dependencies:
-- dep1
+dependencies: --append dep1
+---
 
 # Test Plan Content
 
 This is a test plan.
 -- stderr --
-updated plan.md: dependencies=+dep1
+updated plan.md: dependencies=--append dep1
