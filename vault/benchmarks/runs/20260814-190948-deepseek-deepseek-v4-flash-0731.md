@@ -8,7 +8,7 @@ outcome: fail@M01
 code: 65.0
 agentic: 40.0
 review: 1.75
-status: publishing
+status: done
 ---
 
 # Benchmark run — deepseek/deepseek-v4-flash-0731
