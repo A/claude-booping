@@ -1,0 +1,21 @@
+A call with no pairs, --append, or --remove exits 1.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+status: backlog
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md
+-- expected/cwd/plan.md --
+---
+title: Foo
+status: backlog
+---
+# Body
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: nothing to do: provide key=value pairs, --append and/or --remove

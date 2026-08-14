@@ -1,0 +1,28 @@
+A value carrying a newline and a tab is written unmangled or rejected cleanly.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md "summary=line1\nline2	indented"
+-- expected/cwd/plan.md --
+---
+title: Foo
+summary: "line1\\nline2\tindented"
+---
+# Body
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,4 +1,5 @@
+ ---
+ title: Foo
++summary: "line1\\nline2\tindented"
+ ---
+ # Body
+-- stderr --
+updated plan.md: summary=line1\nline2	indented

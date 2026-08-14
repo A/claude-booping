@@ -1,0 +1,28 @@
+A null-shaped value is written as a YAML null.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md retro=null
+-- expected/cwd/plan.md --
+---
+title: Foo
+retro: null
+---
+# Body
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,4 +1,5 @@
+ ---
+ title: Foo
++retro: null
+ ---
+ # Body
+-- stderr --
+updated plan.md: retro=null

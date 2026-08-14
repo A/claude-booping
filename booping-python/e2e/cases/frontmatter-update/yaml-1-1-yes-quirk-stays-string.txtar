@@ -1,0 +1,28 @@
+YAML 1.1 yes is written quoted so it reloads as the string, not a boolean.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md summary=yes
+-- expected/cwd/plan.md --
+---
+title: Foo
+summary: 'yes'
+---
+# Body
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,4 +1,5 @@
+ ---
+ title: Foo
++summary: 'yes'
+ ---
+ # Body
+-- stderr --
+updated plan.md: summary=yes

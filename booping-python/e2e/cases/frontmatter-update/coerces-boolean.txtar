@@ -1,0 +1,28 @@
+A bool-shaped value is written as a YAML boolean.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md blocked=true
+-- expected/cwd/plan.md --
+---
+title: Foo
+blocked: true
+---
+# Body
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,4 +1,5 @@
+ ---
+ title: Foo
++blocked: true
+ ---
+ # Body
+-- stderr --
+updated plan.md: blocked=true

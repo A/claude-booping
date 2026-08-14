@@ -1,0 +1,28 @@
+An integer-shaped value is written as a YAML integer.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md sp=23
+-- expected/cwd/plan.md --
+---
+title: Foo
+sp: 23
+---
+# Body
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,4 +1,5 @@
+ ---
+ title: Foo
++sp: 23
+ ---
+ # Body
+-- stderr --
+updated plan.md: sp=23

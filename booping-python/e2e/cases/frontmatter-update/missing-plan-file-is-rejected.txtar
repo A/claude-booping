@@ -1,0 +1,9 @@
+A missing plan file exits 1 and names the path on stderr.
+
+-- cmd --
+booping frontmatter-update missing.md status=in-progress
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: plan not found: missing.md

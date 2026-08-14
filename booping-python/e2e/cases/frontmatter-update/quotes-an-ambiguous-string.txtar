@@ -1,0 +1,28 @@
+A string whose plain YAML form would reload as another type is written quoted.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md summary=@lead
+-- expected/cwd/plan.md --
+---
+title: Foo
+summary: '@lead'
+---
+# Body
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,4 +1,5 @@
+ ---
+ title: Foo
++summary: '@lead'
+ ---
+ # Body
+-- stderr --
+updated plan.md: summary=@lead

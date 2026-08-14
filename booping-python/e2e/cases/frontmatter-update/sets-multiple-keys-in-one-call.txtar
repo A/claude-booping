@@ -1,0 +1,32 @@
+One invocation can set several keys; each lands in the resulting frontmatter.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+status: backlog
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md status=in-progress type=feature
+-- expected/cwd/plan.md --
+---
+title: Foo
+status: in-progress
+type: feature
+---
+# Body
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,5 +1,6 @@
+ ---
+ title: Foo
+-status: backlog
++status: in-progress
++type: feature
+ ---
+ # Body
+-- stderr --
+updated plan.md: status=in-progress, type=feature
