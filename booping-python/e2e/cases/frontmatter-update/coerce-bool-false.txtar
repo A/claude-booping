@@ -1,0 +1,28 @@
+Coerces a value to a boolean False.
+
+-- fixtures/cwd/plan.md --
+---
+---
+# Plan
+Body content.
+-- cmd --
+booping frontmatter-update plan.md key=false
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,4 +1,5 @@
+ ---
++key: false
+ ---
+ # Plan
+ Body content.
+-- stderr --
+updated plan.md: key=false
+-- expected/cwd/plan.md --
+---
+key: false
+---
+# Plan
+Body content.

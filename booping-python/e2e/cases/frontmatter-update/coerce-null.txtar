@@ -1,0 +1,28 @@
+Coerces a value to null.
+
+-- fixtures/cwd/plan.md --
+---
+---
+# Plan
+Body content.
+-- cmd --
+booping frontmatter-update plan.md key=null
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,4 +1,5 @@
+ ---
++key: null
+ ---
+ # Plan
+ Body content.
+-- stderr --
+updated plan.md: key=null
+-- expected/cwd/plan.md --
+---
+key: null
+---
+# Plan
+Body content.

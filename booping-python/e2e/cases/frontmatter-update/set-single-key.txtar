@@ -1,0 +1,31 @@
+Sets a single frontmatter key and preserves existing keys and body.
+
+-- fixtures/cwd/plan.md --
+---
+existing: old
+---
+# Plan
+Body content.
+-- cmd --
+booping frontmatter-update plan.md key=value
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,5 +1,6 @@
+ ---
+ existing: old
++key: value
+ ---
+ # Plan
+ Body content.
+-- stderr --
+updated plan.md: key=value
+-- expected/cwd/plan.md --
+---
+existing: old
+key: value
+---
+# Plan
+Body content.

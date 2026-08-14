@@ -1,0 +1,11 @@
+Errors when the plan file is missing.
+
+-- fixtures/cwd/none.md --
+this is not the plan
+-- cmd --
+booping frontmatter-update plan.md key=value
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: plan not found: plan.md

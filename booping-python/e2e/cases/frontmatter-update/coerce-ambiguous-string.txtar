@@ -1,0 +1,19 @@
+Coerces a value that looks like a YAML structure to a quoted string.
+
+-- fixtures/cwd/plan.md --
+---
+---
+# Plan
+Body content.
+-- cmd --
+booping frontmatter-update plan.md key=[1, 2]
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: malformed key=value pair: '2]'
+-- expected/cwd/plan.md --
+---
+---
+# Plan
+Body content.

@@ -1,0 +1,21 @@
+Calling frontmatter-update with values already present in the file prints no diff and exits 0.
+
+-- fixtures/cwd/plan.md --
+---
+key: value
+---
+# Plan
+Body content.
+-- cmd --
+booping frontmatter-update plan.md key=value
+-- exit --
+0
+-- stdout --
+-- stderr --
+updated plan.md: key=value
+-- expected/cwd/plan.md --
+---
+key: value
+---
+# Plan
+Body content.

@@ -1,0 +1,19 @@
+Errors when a key=value pair is malformed (missing equals).
+
+-- fixtures/cwd/plan.md --
+---
+---
+# Plan
+Body content.
+-- cmd --
+booping frontmatter-update plan.md malformedpair
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: malformed key=value pair: 'malformedpair'
+-- expected/cwd/plan.md --
+---
+---
+# Plan
+Body content.
