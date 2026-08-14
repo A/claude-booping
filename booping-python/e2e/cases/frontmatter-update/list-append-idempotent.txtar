@@ -1,0 +1,39 @@
+Appending a value that is already in the list is a no-op; running the same
+append twice produces a diff only on the first invocation.
+
+-- fixtures/cwd/plan.md --
+---
+title: Test Plan
+tags:
+- a
+---
+# Body
+
+-- cmd --
+booping frontmatter-update plan.md --append tags=b
+booping frontmatter-update plan.md --append tags=b
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -2,6 +2,7 @@
+ title: Test Plan
+ tags:
+ - a
++- b
+ ---
+ # Body
+ 
+-- stderr --
+updated plan.md: tags+=b
+updated plan.md: tags+=b
+-- expected/cwd/plan.md --
+---
+title: Test Plan
+tags:
+- a
+- b
+---
+# Body
+

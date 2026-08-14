@@ -1,0 +1,43 @@
+Removals, key-value sets, and appends can all be combined in a single invocation.
+
+-- fixtures/cwd/plan.md --
+---
+title: Test Plan
+old_key: remove-me
+tags:
+- a
+status: backlog
+---
+# Body
+
+-- cmd --
+booping frontmatter-update plan.md --remove old_key --append tags=b status=in-progress
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,9 +1,9 @@
+ ---
+ title: Test Plan
+-old_key: remove-me
+ tags:
+ - a
+-status: backlog
++- b
++status: in-progress
+ ---
+ # Body
+ 
+-- stderr --
+updated plan.md: -old_key, status=in-progress, tags+=b
+-- expected/cwd/plan.md --
+---
+title: Test Plan
+tags:
+- a
+- b
+status: in-progress
+---
+# Body
+

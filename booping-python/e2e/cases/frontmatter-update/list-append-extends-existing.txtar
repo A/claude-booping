@@ -1,0 +1,38 @@
+Appending to an existing list adds the new value at the end.
+
+-- fixtures/cwd/plan.md --
+---
+title: Test Plan
+tags:
+- a
+- b
+---
+# Body
+
+-- cmd --
+booping frontmatter-update plan.md --append tags=c
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -3,6 +3,7 @@
+ tags:
+ - a
+ - b
++- c
+ ---
+ # Body
+ 
+-- stderr --
+updated plan.md: tags+=c
+-- expected/cwd/plan.md --
+---
+title: Test Plan
+tags:
+- a
+- b
+- c
+---
+# Body
+

@@ -1,0 +1,35 @@
+A value carrying a Jinja macro call resolved from a fixture `macro_stubs:` mapping
+lands in the file as the coerced type of the resolved value.
+
+-- fixtures/xdg/booping/config.yaml --
+macro_stubs:
+  core.macros.greeting: hello-from-stub
+-- fixtures/cwd/plan.md --
+---
+title: Test Plan
+---
+# Body
+
+-- cmd --
+booping frontmatter-update plan.md 'greeting={{ macro("core.macros.greeting") }}'
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,5 +1,6 @@
+ ---
+ title: Test Plan
++greeting: hello-from-stub
+ ---
+ # Body
+ 
+-- stderr --
+updated plan.md: greeting=hello-from-stub
+-- expected/cwd/plan.md --
+---
+title: Test Plan
+greeting: hello-from-stub
+---
+# Body
+

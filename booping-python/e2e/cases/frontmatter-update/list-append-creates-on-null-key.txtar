@@ -1,0 +1,35 @@
+Appending to a null key replaces the null with a one-element list.
+
+-- fixtures/cwd/plan.md --
+---
+title: Test Plan
+tags: null
+---
+# Body
+
+-- cmd --
+booping frontmatter-update plan.md --append tags=first
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,6 +1,7 @@
+ ---
+ title: Test Plan
+-tags: null
++tags:
++- first
+ ---
+ # Body
+ 
+-- stderr --
+updated plan.md: tags+=first
+-- expected/cwd/plan.md --
+---
+title: Test Plan
+tags:
+- first
+---
+# Body
+

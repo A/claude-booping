@@ -1,0 +1,36 @@
+A macro declared as a genuine shell command executes through the subprocess boundary,
+and its actual output ends up in the frontmatter.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  macros:
+    my_echo: ["echo", "1"]
+-- fixtures/cwd/plan.md --
+---
+title: Test Plan
+---
+# Body
+
+-- cmd --
+booping frontmatter-update plan.md 'result={{ macro("core.macros.my_echo") }}'
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,5 +1,6 @@
+ ---
+ title: Test Plan
++result: 1
+ ---
+ # Body
+ 
+-- stderr --
+updated plan.md: result=1
+-- expected/cwd/plan.md --
+---
+title: Test Plan
+result: 1
+---
+# Body
+

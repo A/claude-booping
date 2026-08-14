@@ -1,0 +1,16 @@
+Appending to a key that holds a scalar value exits 1 with an error naming the key.
+
+-- fixtures/cwd/plan.md --
+---
+title: Test Plan
+count: 5
+---
+# Body
+
+-- cmd --
+booping frontmatter-update plan.md --append count=6
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: cannot append to scalar key 'count' in plan.md

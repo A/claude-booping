@@ -1,0 +1,31 @@
+Removing a key drops it from the frontmatter.
+
+-- fixtures/cwd/plan.md --
+---
+title: Test Plan
+old_key: remove-me
+---
+# Body
+
+-- cmd --
+booping frontmatter-update plan.md --remove old_key
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,6 +1,5 @@
+ ---
+ title: Test Plan
+-old_key: remove-me
+ ---
+ # Body
+ 
+-- stderr --
+updated plan.md: -old_key
+-- expected/cwd/plan.md --
+---
+title: Test Plan
+---
+# Body
+

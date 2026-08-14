@@ -1,0 +1,34 @@
+A macro-rendered date-like value is single-quoted so it stays a string, not a YAML date.
+
+-- fixtures/xdg/booping/config.yaml --
+macro_stubs:
+  core.macros.date: "2025-01-15"
+-- fixtures/cwd/plan.md --
+---
+title: Test Plan
+---
+# Body
+
+-- cmd --
+booping frontmatter-update plan.md 'created={{ macro("core.macros.date") }}'
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,5 +1,6 @@
+ ---
+ title: Test Plan
++created: '2025-01-15'
+ ---
+ # Body
+ 
+-- stderr --
+updated plan.md: created=2025-01-15
+-- expected/cwd/plan.md --
+---
+title: Test Plan
+created: '2025-01-15'
+---
+# Body
+
