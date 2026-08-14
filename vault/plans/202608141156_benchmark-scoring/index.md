@@ -52,7 +52,7 @@ Assets live under `vault/benchmarks/`: `index.md` (registry, frontmatter = data)
 | id | title | sp | status |
 | --- | --- | --- | --- |
 | 01 | [Benchmark registry, guide updates and history seed](milestones/M01-registry-guide-history/M01-registry-guide-history.md) | 2 | done |
-| 02 | [bench-score: gates and corpus quality](milestones/M02-bench-score-gates-corpus/M02-bench-score-gates-corpus.md) | 3 | pending |
+| 02 | [bench-score: gates and corpus quality](milestones/M02-bench-score-gates-corpus/M02-bench-score-gates-corpus.md) | 3 | done |
 | 03 | [bench-score: process profile, cost and scorecard emit](milestones/M03-bench-score-process-cost/M03-bench-score-process-cost.md) | 3 | pending |
 | 04 | [Fixed mutation set and kill-rate scoring](milestones/M04-mutation-set/M04-mutation-set.md) | 3 | pending |
 | 05 | [model-benchmark playbook, reviews and docs](milestones/M05-model-benchmark-playbook/M05-model-benchmark-playbook.md) | 5 | pending |
@@ -70,7 +70,7 @@ Assets live under `vault/benchmarks/`: `index.md` (registry, frontmatter = data)
 - No merging, deleting or pushing of `bench/*` branches; publish opens a PR against `bench/reference` and stops.
 - No changes to the develop playbook, the openrouter-developer agent, or `~/.claude/bin/openrouter-milestone`.
 - No second benchmark entry in the registry — schema supports it, only `frontmatter-update-e2e` ships.
-- No LLM-judge beyond the two diff reviews; the M03 cross-check table gets mechanical prechecks only.
+- No LLM-judge beyond the two diff reviews and measure's case-mapping judge (a detached sub-agent mapping renamed branch cases onto etalon/gap names from programmatic lists; recall and gap scores use its mapped counts); the M03 cross-check table gets mechanical prechecks only.
 
 ## CLAUDE.md impact
 
