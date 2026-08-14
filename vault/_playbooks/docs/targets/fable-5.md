@@ -30,6 +30,15 @@ targeting.
   - **Depth** — how much detail belongs there, and what is out of place on it
 - a `CHANGELOG.md` row always, marked as introduced by this playbook; when the repo carries no
   `CHANGELOG.md` yet, say so in the row, so the changelog step knows it seeds rather than appends
+- a `docs/_specs/` row always, written vault-relative and marked as such — the spec set is a
+  surface, not only this playbook's scratch space. Its audience is **Claude itself**, which reads
+  the set to learn the product vision, the audiences and the feature inventory before writing any
+  other destination, so a stale spec set mis-aims everything downstream. Its depth is the
+  project's model of itself — vision, roles, features, surfaces — and its format is one file per
+  question: `glossary.md` canonical terms, `index.md` the briefing, `roles.md` the audience map,
+  `features.md` the feature index of groups, features and capabilities, `targets.md` this set,
+  `documented.md` the ledger. Describe it in the surface's own terms like any other row; you
+  still never edit a sibling `_specs/` file from here.
 - a closing `## Not surfaces` section naming what was considered and excluded, each with its
   reason — source files, module headers and inline comments (owned by `develop`), build
   artefacts, generated reports, non-markdown assets — so no later wave re-litigates the boundary

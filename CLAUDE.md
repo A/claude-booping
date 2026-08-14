@@ -75,6 +75,8 @@ Each playbook owns its own status vocabulary in its `states:` block — there is
 
 `plans/`, `retrospectives/`, `codereviews/`, `_lessons/` (targeted), `_playbooks/` (user playbooks), `benchmarks/` (`index.md` the machine-readable benchmark registry, `guide.md` its runbook, `history.md` the scorecard table, `runs/` the per-run detail reports, `mutations/` the frozen patch sets, `_scripts/bench-score` computing every metric), `plan_templates/`, `review_templates/`, `notes/`, `sprints.md` (Obsidian Bases fence, seeded once, written by nothing), `.booping.log` (CLI log at the vault root, gitignored there). Obsidian-ready: markdown + YAML frontmatter only. See [documentation/vault.md](documentation/vault.md).
 
+This repo's own vault is checked in at `vault/`. Its `docs/_specs/` is the product-vision spec set — read it before writing any documentation surface, and treat it as the authority on what this project ships and for whom: `index.md` the briefing (what it is, who it serves, where it is heading), `roles.md` the audience map, `features.md` the feature index of groups, features and capabilities, `targets.md` the documentation surfaces and their depth ceilings, `glossary.md` the canonical terms, `documented.md` the ledger of documented work. The `docs` playbook maintains it; it is stale exactly as often as that playbook is skipped.
+
 ## Principles
 
 - **Minimum useful context**: a skill or step body carries only what it needs; lazy-link route-specific detail via `docs/` instead of inlining.
