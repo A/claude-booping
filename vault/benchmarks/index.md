@@ -12,6 +12,20 @@ benchmarks:
       - booping-python/e2e/cases/frontmatter-update/*.txtar
       - booping-python/tests/commands/frontmatter_update_test.py
       - vault/plans/202608121417_frontmatter-update-e2e-migration/**
+    milestones_glob: milestones/*/M*.md
+    cases_dir: booping-python/e2e/cases/frontmatter-update
+    unit_file: booping-python/tests/commands/frontmatter_update_test.py
+    unit_grep: frontmatter_update_test
+    unit_grep_exclude:
+      - vault
+    commands:
+      ci:
+        argv: [just, ci]
+      e2e:
+        argv: [just, e2e]
+      e2e_update:
+        argv: [uv, run, pytest, e2e, --txtar-update]
+        cwd: booping-python
     etalon_cases:
       - append-creates-a-list-on-an-absent-key.txtar
       - append-creates-a-list-on-a-null-key.txtar
@@ -85,7 +99,9 @@ Scoring assets sit beside this file: [history.md](history.md) is the append-only
 
 ## Entry keys
 
-- `baseline` — the commit every run branches from; `plan` and `scope_allowlist` are paths relative to `repo`.
+- `baseline` — the commit every run branches from; `plan`, `scope_allowlist`, `cases_dir` and `unit_file` are paths relative to `repo`; `milestones_glob` is relative to the plan's directory.
+- `commands` — every command `bench-score` runs inside the scored worktree, as `argv` plus an optional worktree-relative `cwd`. The script hardcodes none of them, so a benchmark on a differently-built repo only needs a different entry here.
+- `unit_grep` — the token whose absence from the repo proves the superseded unit file left no stale reference. `unit_grep_exclude` lists directories the sweep skips: the plan documents under `vault/` name the deleted file on purpose, so a hit there is not a stale reference.
 - `etalon_cases` — the reference corpus frozen from the opus run (`dc0be24` + `0648787`); `gap_cases` are the subset with no pre-existing unit-test counterpart, the cases a model only writes by reading the CLI rather than by translating tests.
 - `weights` — composite scoring weights as data. Each composite sums to 100: `code` splits 40 gates / 60 corpus, `agentic` splits across the four process signals.
 - `api_key_env` names the environment variable holding the OpenRouter token. The token itself is never config.

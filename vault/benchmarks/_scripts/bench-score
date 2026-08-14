@@ -1,0 +1,339 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.12"
+# dependencies = ["pyyaml"]
+# ///
+"""Score a benchmark branch against a registry entry.
+
+Subcommands:
+  gates   — layer-1 pass/fail checks, re-run mechanically in a throwaway worktree
+  corpus  — corpus-quality metrics parsed out of the branch's .txtar cases
+
+Every command run against the branch, and every path it touches, comes from the
+registry entry; only the metric logic lives here.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+from collections.abc import Iterator
+from contextlib import contextmanager
+from pathlib import Path
+from typing import Any
+
+import yaml
+
+DEFAULT_REGISTRY = "vault/benchmarks/index.md"
+FRONTMATTER = re.compile(r"\A---\n(.*?)\n---\n", re.DOTALL)
+TXTAR_SECTION = re.compile(r"^-- (.+?) --$")
+WILDCARD = "[..]"
+TERMINAL_MILESTONE = re.compile(r"\Adone\Z|\Afail@M\d+\Z")
+
+
+def log(message: str) -> None:
+    print(message, file=sys.stderr)
+
+
+def frontmatter(text: str) -> dict[str, Any]:
+    match = FRONTMATTER.match(text)
+    if not match:
+        return {}
+    loaded = yaml.safe_load(match.group(1))
+    return loaded if isinstance(loaded, dict) else {}
+
+
+def load_entry(registry: Path, benchmark: str) -> dict[str, Any]:
+    entries = frontmatter(registry.read_text()).get("benchmarks") or []
+    for entry in entries:
+        if entry.get("id") == benchmark:
+            return entry
+    raise SystemExit(f"bench-score: no benchmark {benchmark!r} in {registry}")
+
+
+def glob_to_re(pattern: str) -> re.Pattern[str]:
+    out: list[str] = []
+    i = 0
+    while i < len(pattern):
+        if pattern.startswith("**", i):
+            out.append(".*")
+            i += 2
+        elif pattern[i] == "*":
+            out.append("[^/]*")
+            i += 1
+        elif pattern[i] == "?":
+            out.append("[^/]")
+            i += 1
+        else:
+            out.append(re.escape(pattern[i]))
+            i += 1
+    return re.compile("".join(out) + r"\Z")
+
+
+@contextmanager
+def worktree(repo: Path, branch: str) -> Iterator[Path]:
+    slug = re.sub(r"[^A-Za-z0-9]+", "-", branch).strip("-")
+    parent = Path(tempfile.mkdtemp(prefix=f"bench-score-{slug}-"))
+    tree = parent / "worktree"
+    log(f"worktree: adding {branch} at {tree}")
+    try:
+        # Detached: the branch may be checked out in the bench repo already, and a
+        # scoring run must never disturb what the user has checked out there.
+        subprocess.run(
+            ["git", "worktree", "add", "--detach", str(tree), branch],
+            cwd=repo,
+            check=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        yield tree
+    finally:
+        log(f"worktree: pruning {tree}")
+        subprocess.run(
+            ["git", "worktree", "remove", "--force", str(tree)],
+            cwd=repo,
+            check=False,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        subprocess.run(
+            ["git", "worktree", "prune"],
+            cwd=repo,
+            check=False,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        shutil.rmtree(parent, ignore_errors=True)
+
+
+def run_command(tree: Path, spec: dict[str, Any], name: str) -> int:
+    argv = spec["argv"]
+    cwd = tree / spec["cwd"] if spec.get("cwd") else tree
+    log(f"{name}: running {' '.join(argv)} in {cwd}")
+    status = subprocess.call(argv, cwd=cwd, stdout=sys.stderr, stderr=sys.stderr)
+    log(f"{name}: exit {status}")
+    return status
+
+
+def git_out(tree: Path, *args: str) -> str:
+    return subprocess.run(
+        ["git", *args], cwd=tree, check=True, capture_output=True, text=True
+    ).stdout
+
+
+# --- gates ------------------------------------------------------------------
+
+
+def gate_milestones(tree: Path, entry: dict[str, Any]) -> dict[str, Any]:
+    plan_dir = (tree / entry["plan"]).parent
+    files = sorted(plan_dir.glob(entry["milestones_glob"]))
+    if not files:
+        return {"pass": False, "evidence": f"no milestone files under {plan_dir}"}
+    seen = {
+        path.stem: str(frontmatter(path.read_text()).get("status", ""))
+        for path in files
+    }
+    bad = {
+        name: status
+        for name, status in seen.items()
+        if not TERMINAL_MILESTONE.match(status)
+    }
+    shown = ", ".join(
+        f"{name}={status or 'none'}" for name, status in sorted(seen.items())
+    )
+    return {
+        "pass": not bad,
+        "evidence": f"{len(seen) - len(bad)}/{len(seen)} milestones terminal: {shown}",
+    }
+
+
+def gate_command(tree: Path, entry: dict[str, Any], key: str) -> dict[str, Any]:
+    spec = entry["commands"][key]
+    status = run_command(tree, spec, key)
+    return {"pass": status == 0, "evidence": f"{' '.join(spec['argv'])} exit {status}"}
+
+
+def gate_determinism(tree: Path, entry: dict[str, Any]) -> dict[str, Any]:
+    spec = entry["commands"]["e2e_update"]
+    status = run_command(tree, spec, "determinism")
+    dirty = subprocess.call(
+        ["git", "diff", "--quiet"], cwd=tree, stdout=subprocess.DEVNULL
+    )
+    changed = git_out(tree, "diff", "--name-only").split() if dirty else []
+    evidence = f"{' '.join(spec['argv'])} exit {status}; git diff --quiet after: "
+    evidence += (
+        "clean"
+        if not dirty
+        else f"{len(changed)} file(s) rewritten: {' '.join(changed)}"
+    )
+    return {"pass": status == 0 and not dirty, "evidence": evidence}
+
+
+def gate_unit_deleted(tree: Path, entry: dict[str, Any]) -> dict[str, Any]:
+    unit = tree / entry["unit_file"]
+    token = entry["unit_grep"]
+    excluded = [f":!{path}" for path in entry.get("unit_grep_exclude") or []]
+    hits = subprocess.run(
+        ["git", "grep", "-l", "-e", token, "--", *excluded],
+        cwd=tree,
+        capture_output=True,
+        text=True,
+    ).stdout.split()
+    absent = not unit.exists()
+    evidence = f"{entry['unit_file']} {'absent' if absent else 'still present'}; "
+    evidence += f"git grep {token}: " + (
+        f"{len(hits)} hit(s): {' '.join(hits)}" if hits else "0 hits"
+    )
+    return {"pass": absent and not hits, "evidence": evidence}
+
+
+def gate_scope(tree: Path, entry: dict[str, Any]) -> dict[str, Any]:
+    changed = git_out(tree, "diff", entry["baseline"], "--name-only").split()
+    allowed = [glob_to_re(p) for p in entry["scope_allowlist"]]
+    stray = [path for path in changed if not any(rx.match(path) for rx in allowed)]
+    evidence = f"{len(changed)} changed path(s) vs {entry['baseline']}; "
+    evidence += (
+        "all within allowlist"
+        if not stray
+        else f"{len(stray)} outside: {' '.join(stray)}"
+    )
+    return {"pass": not stray, "evidence": evidence}
+
+
+def cmd_gates(entry: dict[str, Any], branch: str) -> dict[str, Any]:
+    with worktree(Path(entry["repo"]), branch) as tree:
+        return {
+            "milestones": gate_milestones(tree, entry),
+            "ci": gate_command(tree, entry, "ci"),
+            "e2e": gate_command(tree, entry, "e2e"),
+            "determinism": gate_determinism(tree, entry),
+            "unit_deleted": gate_unit_deleted(tree, entry),
+            "scope": gate_scope(tree, entry),
+        }
+
+
+# --- corpus -----------------------------------------------------------------
+
+ASSERTED_CHANNELS = ("exit", "stdout", "stderr", "expected")
+
+
+def parse_txtar(text: str) -> dict[str, list[str]]:
+    sections: dict[str, list[str]] = {}
+    current: str | None = None
+    for line in text.splitlines():
+        header = TXTAR_SECTION.match(line)
+        if header:
+            current = header.group(1).strip()
+            sections[current] = []
+        elif current is not None:
+            sections[current].append(line)
+    return sections
+
+
+def channel_of(section: str) -> str | None:
+    if section in ("exit", "stdout", "stderr"):
+        return section
+    if section == "expected" or section.startswith("expected/"):
+        return "expected"
+    return None
+
+
+def score_case(path: Path) -> dict[str, Any]:
+    sections = parse_txtar(path.read_text())
+    channels: set[str] = set()
+    asserted_lines = 0
+    wildcard_lines = 0
+    wildcards = 0
+    for name, lines in sections.items():
+        channel = channel_of(name)
+        if channel is None:
+            continue
+        channels.add(channel)
+        for line in lines:
+            asserted_lines += 1
+            hits = line.count(WILDCARD)
+            wildcards += hits
+            if hits:
+                wildcard_lines += 1
+    return {
+        "channels": sorted(channels),
+        "four_channel": len(channels) == len(ASSERTED_CHANNELS),
+        "asserted_lines": asserted_lines,
+        "wildcards": wildcards,
+        "wildcard_lines": wildcard_lines,
+        "wildcard_line_ratio": round(wildcard_lines / asserted_lines, 4)
+        if asserted_lines
+        else 0.0,
+    }
+
+
+def pct(part: int, whole: int) -> float:
+    return round(100.0 * part / whole, 2) if whole else 0.0
+
+
+def cmd_corpus(entry: dict[str, Any], branch: str) -> dict[str, Any]:
+    with worktree(Path(entry["repo"]), branch) as tree:
+        cases_dir = tree / entry["cases_dir"]
+        files = sorted(cases_dir.glob("*.txtar")) if cases_dir.is_dir() else []
+        log(f"corpus: {len(files)} case file(s) under {entry['cases_dir']}")
+        cases = {path.name: score_case(path) for path in files}
+
+    names = set(cases)
+    etalon = set(entry["etalon_cases"])
+    gaps = set(entry["gap_cases"])
+    four = sum(1 for case in cases.values() if case["four_channel"])
+    asserted_lines = sum(case["asserted_lines"] for case in cases.values())
+    wildcard_lines = sum(case["wildcard_lines"] for case in cases.values())
+
+    return {
+        "cases": cases,
+        "aggregate": {
+            "case_count": len(cases),
+            "four_channel_cases": four,
+            "four_channel_pct": pct(four, len(cases)),
+            "wildcards": sum(case["wildcards"] for case in cases.values()),
+            "wildcard_lines": wildcard_lines,
+            "asserted_lines": asserted_lines,
+            "wildcard_line_ratio": round(wildcard_lines / asserted_lines, 4)
+            if asserted_lines
+            else 0.0,
+            "recall": {
+                "matched": len(names & etalon),
+                "total": len(etalon),
+                "pct": pct(len(names & etalon), len(etalon)),
+                "unmatched_etalon": sorted(etalon - names),
+                "unmatched_branch": sorted(names - etalon),
+            },
+            "gaps": {
+                "matched": len(names & gaps),
+                "total": len(gaps),
+                "unmatched": sorted(gaps - names),
+            },
+        },
+    }
+
+
+# --- entry point ------------------------------------------------------------
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(prog="bench-score")
+    parser.add_argument("subcommand", choices=["gates", "corpus"])
+    parser.add_argument("--benchmark", required=True)
+    parser.add_argument("--branch", required=True)
+    parser.add_argument("--registry", default=DEFAULT_REGISTRY, type=Path)
+    args = parser.parse_args()
+
+    entry = load_entry(args.registry, args.benchmark)
+    runner = {"gates": cmd_gates, "corpus": cmd_corpus}[args.subcommand]
+    json.dump(runner(entry, args.branch), sys.stdout, indent=2)
+    sys.stdout.write("\n")
+
+
+if __name__ == "__main__":
+    main()
