@@ -1,0 +1,19 @@
+Setting a key to the value it already has produces no diff and exits 0.
+
+-- fixtures/cwd/plan.md --
+---
+status: in-progress
+---
+# Plan
+-- cmd --
+booping frontmatter-update plan.md status=in-progress
+-- exit --
+0
+-- stdout --
+-- stderr --
+updated plan.md: status=in-progress
+-- expected/cwd/plan.md --
+---
+status: in-progress
+---
+# Plan

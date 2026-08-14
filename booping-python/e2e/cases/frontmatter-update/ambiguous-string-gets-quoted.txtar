@@ -1,0 +1,28 @@
+A string whose YAML plain form would reload as a different type is written single-quoted.
+
+-- fixtures/cwd/plan.md --
+---
+title: My Plan
+---
+# My Plan
+-- cmd --
+booping frontmatter-update plan.md note="hello: world"
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,4 +1,5 @@
+ ---
+ title: My Plan
++note: 'hello: world'
+ ---
+ # My Plan
+-- stderr --
+updated plan.md: note=hello: world
+-- expected/cwd/plan.md --
+---
+title: My Plan
+note: 'hello: world'
+---
+# My Plan

@@ -1,0 +1,9 @@
+A plan path that does not exist fails with exit 1 and an error message on stderr.
+
+-- cmd --
+booping frontmatter-update nosuch.md key=value
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: plan not found: nosuch.md

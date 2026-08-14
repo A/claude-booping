@@ -1,0 +1,30 @@
+A null string value is coerced to None and written as bare null in the frontmatter.
+
+-- fixtures/cwd/plan.md --
+---
+title: My Plan
+retro: done
+---
+# My Plan
+-- cmd --
+booping frontmatter-update plan.md retro=null
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,5 +1,5 @@
+ ---
+ title: My Plan
+-retro: done
++retro: null
+ ---
+ # My Plan
+-- stderr --
+updated plan.md: retro=null
+-- expected/cwd/plan.md --
+---
+title: My Plan
+retro: null
+---
+# My Plan

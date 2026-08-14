@@ -1,0 +1,28 @@
+A float string value is coerced to a float and written unquoted in the frontmatter.
+
+-- fixtures/cwd/plan.md --
+---
+title: My Plan
+---
+# My Plan
+-- cmd --
+booping frontmatter-update plan.md ratio=3.14
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,4 +1,5 @@
+ ---
+ title: My Plan
++ratio: 3.14
+ ---
+ # My Plan
+-- stderr --
+updated plan.md: ratio=3.14
+-- expected/cwd/plan.md --
+---
+title: My Plan
+ratio: 3.14
+---
+# My Plan

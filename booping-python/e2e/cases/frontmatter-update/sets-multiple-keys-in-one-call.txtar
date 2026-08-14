@@ -1,0 +1,30 @@
+Sets multiple keys in a single invocation; the expected file shows all of them.
+
+-- fixtures/cwd/plan.md --
+---
+title: My Plan
+---
+# My Plan
+-- cmd --
+booping frontmatter-update plan.md status=in-progress sp=8
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,4 +1,6 @@
+ ---
+ title: My Plan
++status: in-progress
++sp: 8
+ ---
+ # My Plan
+-- stderr --
+updated plan.md: status=in-progress, sp=8
+-- expected/cwd/plan.md --
+---
+title: My Plan
+status: in-progress
+sp: 8
+---
+# My Plan

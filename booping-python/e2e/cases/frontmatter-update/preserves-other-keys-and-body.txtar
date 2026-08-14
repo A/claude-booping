@@ -1,0 +1,37 @@
+Sets one key while preserving existing frontmatter keys and the body text intact.
+
+-- fixtures/cwd/plan.md --
+---
+title: My Plan
+status: pending
+sp: 5
+---
+# My Plan
+
+Some body text here that must survive.
+-- cmd --
+booping frontmatter-update plan.md status=in-progress
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,6 +1,6 @@
+ ---
+ title: My Plan
+-status: pending
++status: in-progress
+ sp: 5
+ ---
+ # My Plan
+-- stderr --
+updated plan.md: status=in-progress
+-- expected/cwd/plan.md --
+---
+title: My Plan
+status: in-progress
+sp: 5
+---
+# My Plan
+
+Some body text here that must survive.

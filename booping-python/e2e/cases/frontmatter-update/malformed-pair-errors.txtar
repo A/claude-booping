@@ -1,0 +1,14 @@
+A pair argument without '=' fails with exit 1 and an error message naming the pair on stderr.
+
+-- fixtures/cwd/plan.md --
+---
+title: My Plan
+---
+# My Plan
+-- cmd --
+booping frontmatter-update plan.md nope
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: malformed key=value pair: 'nope'
