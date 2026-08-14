@@ -4,6 +4,12 @@ Notable user-visible changes, newest first, in the [Keep a Changelog](https://ke
 
 ## Unreleased
 
+### Changed
+
+- A milestone now carries a `## References` section: the one or two existing files a worker copies the shape of, and the spec it should not go hunting for. Groom fills it in as it drafts, and the plan templates' checklists gate on it.
+- Groom holds milestones to four rules it did not before: one way to do a thing rather than a choice of two, one verification command scoped to what that milestone changed, and any table or write-up the worker must produce named as a file path rather than asked for in its report.
+- A coding worker is briefed to plan its file list before the first edit, read narrowly rather than sweeping a directory, verify a file before moving to the next, and treat its milestone's verification command as the whole gate — the runner owns the repo-wide suites. Together these cut what a run pulls into its context, which is most of what a run costs.
+
 ## v1.0.1 — 2026-08-13
 
 Milestones became real files. Each one lives in a directory of its own under the plan, and that file — not a slice of the plan — is what develop hands a coding agent.

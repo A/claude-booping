@@ -211,6 +211,8 @@ core:
 
           ## Definition of Done
 
+          ## References
+
           ## Verify
     agents:
       booping-researcher:
