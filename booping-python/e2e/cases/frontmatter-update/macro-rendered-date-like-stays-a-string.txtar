@@ -1,0 +1,32 @@
+A macro-rendered date-like value is coerced only as far as YAML typing allows and
+stays a string in the file (it is not collapsed to a bare integer).
+
+-- fixtures/xdg/booping/config.yaml --
+macro_stubs:
+  core.macros.date: "1970-01-01 00:00"
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md 'key={{ macro("core.macros.date", "+%Y-%m-%d %H:%M") }}'
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,4 +1,5 @@
+ ---
+ title: Foo
++key: 1970-01-01 00:00
+ ---
+ # Body
+-- stderr --
+updated plan.md: key=1970-01-01 00:00
+-- expected/cwd/plan.md --
+---
+title: Foo
+key: 1970-01-01 00:00
+---
+# Body

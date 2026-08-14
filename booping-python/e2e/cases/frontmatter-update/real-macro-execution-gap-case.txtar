@@ -1,0 +1,36 @@
+A macro declared as a real argv command under `core.macros` (not a `macro_stubs`
+entry) executes through the CLI subprocess boundary: `echo 1` writes its actual
+output `1` into the frontmatter, proving live macro execution.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  macros:
+    echo_one:
+      - echo
+      - "1"
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md 'key={{ macro("core.macros.echo_one") }}'
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,4 +1,5 @@
+ ---
+ title: Foo
++key: 1
+ ---
+ # Body
+-- stderr --
+updated plan.md: key=1
+-- expected/cwd/plan.md --
+---
+title: Foo
+key: 1
+---
+# Body
