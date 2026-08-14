@@ -1,0 +1,33 @@
+A fixture-declared echo macro is executed through the CLI subprocess boundary.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  macros:
+    echo:
+      command: ["echo", "1"]
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md "key={{ macro('core.macros.echo') }}"
+-- expected/cwd/plan.md --
+---
+title: Foo
+key: 1
+---
+# Body
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,4 +1,5 @@
+ ---
+ title: Foo
++key: 1
+ ---
+ # Body
+-- stderr --
+updated plan.md: key=1

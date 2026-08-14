@@ -1,0 +1,30 @@
+--append on an absent key creates a one-element list.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md --append sessions=abc-123
+-- expected/cwd/plan.md --
+---
+title: Foo
+sessions:
+- abc-123
+---
+# Body
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,4 +1,6 @@
+ ---
+ title: Foo
++sessions:
++- abc-123
+ ---
+ # Body
+-- stderr --
+updated plan.md: sessions+=abc-123

@@ -1,0 +1,31 @@
+A stubbed date-like macro value is written as a string, not coerced to a YAML timestamp.
+
+-- fixtures/xdg/booping/config.yaml --
+macro_stubs:
+  core.macros.date: "1970-01-01 00:00"
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md "completed={{ macro('core.macros.date') }}"
+-- expected/cwd/plan.md --
+---
+title: Foo
+completed: 1970-01-01 00:00
+---
+# Body
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,4 +1,5 @@
+ ---
+ title: Foo
++completed: 1970-01-01 00:00
+ ---
+ # Body
+-- stderr --
+updated plan.md: completed=1970-01-01 00:00

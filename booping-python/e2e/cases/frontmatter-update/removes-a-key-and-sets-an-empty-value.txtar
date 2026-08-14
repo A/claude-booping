@@ -1,0 +1,41 @@
+--remove drops a key while a pair can add an empty value in the same call.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo  # keep
+type: feature
+business_goal: Users find widgets faster.
+status: backlog
+---
+# My Plan
+
+- [ ] 3 SP: Task one
+-- cmd --
+booping frontmatter-update plan.md summary= --remove business_goal
+-- expected/cwd/plan.md --
+---
+title: Foo  # keep
+type: feature
+status: backlog
+summary: ''
+---
+# My Plan
+
+- [ ] 3 SP: Task one
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,8 +1,8 @@
+ ---
+ title: Foo  # keep
+ type: feature
+-business_goal: Users find widgets faster.
+ status: backlog
++summary: ''
+ ---
+ # My Plan
+ 
+-- stderr --
+updated plan.md: -business_goal, summary=

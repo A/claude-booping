@@ -1,0 +1,22 @@
+Malformed Jinja in a value exits 2 and names the syntax error on stderr.
+
+-- fixtures/xdg/booping/config.yaml --
+macro_stubs:
+  core.macros.date: "19700101"
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md "planned={{ macro( }}"
+-- expected/cwd/plan.md --
+---
+title: Foo
+---
+# Body
+-- exit --
+2
+-- stdout --
+-- stderr --
+error: value '{{ macro( }}': TemplateSyntaxError: unexpected '}', expected ')'
