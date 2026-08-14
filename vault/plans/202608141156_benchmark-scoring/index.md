@@ -53,14 +53,14 @@ Assets live under `vault/benchmarks/`: `index.md` (registry, frontmatter = data)
 | --- | --- | --- | --- |
 | 01 | [Benchmark registry, guide updates and history seed](milestones/M01-registry-guide-history/M01-registry-guide-history.md) | 2 | done |
 | 02 | [bench-score: gates and corpus quality](milestones/M02-bench-score-gates-corpus/M02-bench-score-gates-corpus.md) | 3 | done |
-| 03 | [bench-score: process profile, cost and scorecard emit](milestones/M03-bench-score-process-cost/M03-bench-score-process-cost.md) | 3 | pending |
+| 03 | [bench-score: process profile, cost and scorecard emit](milestones/M03-bench-score-process-cost/M03-bench-score-process-cost.md) | 3 | done |
 | 04 | [Fixed mutation set and kill-rate scoring](milestones/M04-mutation-set/M04-mutation-set.md) | 3 | pending |
 | 05 | [model-benchmark playbook, reviews and docs](milestones/M05-model-benchmark-playbook/M05-model-benchmark-playbook.md) | 5 | pending |
 
 ## Final Verification
 
 - [ ] `bin/booping render-playbook model-benchmark` renders clean — steps table shows prepare/run/measure/publish, no STOP notices, no placeholder leaks.
-- [ ] `bench-score report --benchmark frontmatter-update-e2e --branch bench/deepseek-deepseek-v4-pro-0813` produces a full history row + detail file from the existing PR #35 branch, with cost within a few percent of the hand-computed $6.82.
+- [ ] `bench-score report --benchmark frontmatter-update-e2e --branch bench/deepseek-deepseek-v4-pro-0813` produces a full history row + detail file from the existing PR #35 branch, with cost $7.20 — the exact per-generation sum (PR #35's hand-computed $6.82 was a dashboard-share estimate) — and wall as `claude -p` time only.
 - [ ] Every mutation patch applies clean on baseline `e0d1796` and is killed by the opus etalon corpus.
 - [ ] `history.md` and `runs/{…}.md` render as tables in Obsidian — no angle-bracket placeholders, no hand-broken lines.
 
