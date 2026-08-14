@@ -22,19 +22,30 @@ Run the benchmark in ~/Claude/notes/claude_booping_benchmark.md with qwen/qwen3-
 | Branch | `bench/{model_slug}` |
 | Worker agent | `openrouter-developer`, driven with `{model}` |
 
+These are the `frontmatter-update-e2e` entry in [index.md](index.md)'s registry frontmatter, which is also where the scoring weights and the etalon corpus live. The registry is authoritative; this table is its readable form.
+
 ## Steps
 
 1. `cd /home/anton/Dev/@A/claude-booping-local-bench`.
 2. Confirm the tree is clean (`git status --short`). Dirty → stop and report; never stash or discard the user's work.
 3. Cut the benchmark branch off the baseline: `git checkout -b bench/{model_slug} e0d1796`. The branch already exists → stop and report, so an earlier run is never overwritten.
-4. Run the develop playbook against the plan:
+4. Prepare the virtualenvs, before any development starts:
+
+   ```
+   uv sync --project booping-python && uv sync --project booping-tracker
+   head -1 booping-python/.venv/bin/pytest booping-tracker/.venv/bin/pytest
+   ```
+
+   The bench repo is a copy directory, so it ships `.venv/` trees whose console-script shebangs still point at the source checkout. Both shebangs must name a path under the bench repo; if either still points elsewhere, delete that `.venv/` and re-sync. Get this green now — the model under test never fixes venvs itself, and a run where it spends attempts on broken tooling measures the copy, not the model.
+
+5. Run the develop playbook against the plan:
 
    ```
    /playbook develop ./vault/plans/202608121417_frontmatter-update-e2e-migration/index.md
    ```
 
-5. Drive the whole sprint to its end without asking the user anything — see **Autonomy** below.
-6. Report the result — see **Report**.
+6. Drive the whole sprint to its end without asking the user anything — see **Autonomy** below.
+7. Report the result — see **Report**.
 
 ## Autonomy
 
@@ -43,10 +54,16 @@ The user is not available during a benchmark run. Every decision the playbook wo
 - **Branch**: `bench/{model_slug}`, already created in step 3. Do not call `AskUserQuestion` for it; do not create another branch; do not switch branches mid-run.
 - **Plan validity / drift**: the baseline commit is the plan's own groom commit, so there is no drift. Any drift check answers "proceed".
 - **Review gates**: answer them yourself with the option that continues the run, and record in the report that the gate was auto-answered.
-- **Abort approval**: after two recorded attempts on the same milestone the playbook needs approval to abort. Approve it yourself, take the `fail` edge, and carry that into the report as a benchmark result — a failed sprint is a valid measurement, not a reason to intervene.
+- **Abort approval**: after two recorded attempts on the same milestone the playbook needs approval to abort. Approve it yourself — a failed sprint is a valid measurement, not a reason to intervene. See **Failed sprints** below.
 - Never call `AskUserQuestion` at any point in the run. Never wait for a chat reply.
 
 Everything else about the playbook is unchanged: the runner never writes application code, every milestone goes to a worker agent, milestones run one at a time on the branch, and the plan's own bookkeeping (DoD checkboxes, milestone statuses, transitions) is done exactly as the playbook prescribes.
+
+## Failed sprints
+
+A model that exhausts its attempts on a milestone produces a result, not an aborted run. When the playbook asks for abort approval, approve it, take the `fail` edge, and record the outcome as `fail@Mnn` — `Mnn` being the milestone it died on. That string is what lands in the scorecard's `outcome` column.
+
+Then continue exactly as for a passing run: leave the branch in place with whatever work it carries, and run measure and publish over it. Partial work still scores — gates, corpus quality and the process profile are all computed on what the branch actually holds, and a `fail@Mnn` row with real numbers is the comparison being made. Never delete the branch, re-run the sprint from scratch, or finish the milestone by hand.
 
 ## Worker delegation
 
