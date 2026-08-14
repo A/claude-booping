@@ -2,7 +2,7 @@
 id: "03"
 title: "Delete superseded unit tests after coverage cross-check"
 sp: 2
-status: pending
+status: done
 plan: "vault/plans/202608121417_frontmatter-update-e2e-migration/index.md"
 ---
 
@@ -16,20 +16,20 @@ Scope: deletion of the unit file; a coverage cross-check table created at `vault
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 3.1 | Cross-check: list every test in `frontmatter_update_test.py`, map each to its corpus case filename or to a recorded drop rationale (hook-tokenising → playbook_transition coverage; live-git → M02/2.3). Create the file below, holding a `# Coverage cross-check` heading and that one table — nothing else, and nothing in the run report | `vault/plans/202608121417_frontmatter-update-e2e-migration/milestones/M03-delete-superseded-units/coverage-cross-check.md` | 1 | pending |
-| 3.2 | Delete `booping-python/tests/commands/frontmatter_update_test.py`; sweep stale references (`grep -rn frontmatter_update_test` from the repo root) and fix any hit; confirm the command-unit suite still green | `booping-python/tests/commands/frontmatter_update_test.py` | 1 | pending |
+| 3.1 | Cross-check: list every test in `frontmatter_update_test.py`, map each to its corpus case filename or to a recorded drop rationale (hook-tokenising → playbook_transition coverage; live-git → M02/2.3). Create the file below, holding a `# Coverage cross-check` heading and that one table — nothing else, and nothing in the run report | `vault/plans/202608121417_frontmatter-update-e2e-migration/milestones/M03-delete-superseded-units/coverage-cross-check.md` | 1 | done |
+| 3.2 | Delete `booping-python/tests/commands/frontmatter_update_test.py`; sweep stale references (`grep -rn frontmatter_update_test` from the repo root) and fix any hit; confirm the command-unit suite still green | `booping-python/tests/commands/frontmatter_update_test.py` | 1 | done |
 
 ## Definition of Done
 
 ### Task 3.1
 
-- [ ] `coverage-cross-check.md` exists at the path named in the task row and holds every test function/parametrization in the unit file, each with a case filename or a drop rationale.
-- [ ] No mapping row says "TODO" or "covered somewhere".
+- [x] `coverage-cross-check.md` exists at the path named in the task row and holds every test function/parametrization in the unit file, each with a case filename or a drop rationale.
+- [x] No mapping row says "TODO" or "covered somewhere".
 
 ### Task 3.2
 
-- [ ] File deleted; the stale-reference grep returns nothing.
-- [ ] `uv run pytest tests/commands` and `uv run pytest e2e -k frontmatter` both green after deletion.
+- [x] File deleted; the stale-reference grep returns nothing.
+- [x] `uv run pytest tests/commands` and `uv run pytest e2e -k frontmatter` both green after deletion.
 
 ## References
 
