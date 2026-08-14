@@ -1,0 +1,55 @@
+Setting one key leaves every other frontmatter key and the whole body untouched.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+status: draft
+sp: 5
+tags:
+- alpha
+- beta
+---
+
+# Foo
+
+First paragraph.
+
+## Section
+
+- a list item
+- another one
+-- cmd --
+booping frontmatter-update plan.md status=ready-for-dev
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,6 +1,6 @@
+ ---
+ title: Foo
+-status: draft
++status: ready-for-dev
+ sp: 5
+ tags:
+ - alpha
+-- stderr --
+updated plan.md: status=ready-for-dev
+-- expected/cwd/plan.md --
+---
+title: Foo
+status: ready-for-dev
+sp: 5
+tags:
+- alpha
+- beta
+---
+
+# Foo
+
+First paragraph.
+
+## Section
+
+- a list item
+- another one

@@ -1,0 +1,35 @@
+A null spelling lands as a YAML null, unquoted.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+
+# Foo
+
+Body paragraph.
+-- cmd --
+booping frontmatter-update plan.md retro=null
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,5 +1,6 @@
+ ---
+ title: Foo
++retro: null
+ ---
+ 
+ # Foo
+-- stderr --
+updated plan.md: retro=null
+-- expected/cwd/plan.md --
+---
+title: Foo
+retro: null
+---
+
+# Foo
+
+Body paragraph.

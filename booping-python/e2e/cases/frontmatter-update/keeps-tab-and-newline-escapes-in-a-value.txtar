@@ -1,0 +1,35 @@
+A value carrying a literal tab and a backslash-n escape round-trips through the file (a real newline cannot cross the argv boundary).
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+
+# Foo
+
+Body paragraph.
+-- cmd --
+booping frontmatter-update plan.md "summary=one	two\nthree"
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,5 +1,6 @@
+ ---
+ title: Foo
++summary: "one\ttwo\\nthree"
+ ---
+ 
+ # Foo
+-- stderr --
+updated plan.md: summary=one	two\nthree
+-- expected/cwd/plan.md --
+---
+title: Foo
+summary: "one\ttwo\\nthree"
+---
+
+# Foo
+
+Body paragraph.

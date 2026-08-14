@@ -1,0 +1,39 @@
+A repeated identical call is a no-op: only the first run prints a diff, and both exit 0.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+status: draft
+---
+
+# Foo
+
+Body paragraph.
+-- cmd --
+booping frontmatter-update plan.md status=ready-for-dev
+booping frontmatter-update plan.md status=ready-for-dev
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,6 +1,6 @@
+ ---
+ title: Foo
+-status: draft
++status: ready-for-dev
+ ---
+ 
+ # Foo
+-- stderr --
+updated plan.md: status=ready-for-dev
+updated plan.md: status=ready-for-dev
+-- expected/cwd/plan.md --
+---
+title: Foo
+status: ready-for-dev
+---
+
+# Foo
+
+Body paragraph.

@@ -1,0 +1,39 @@
+Changing an existing key prints a unified diff of the file on stdout, with --- / +++ / @@ headers.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+status: draft
+sp: 5
+---
+
+# Foo
+
+Body paragraph.
+-- cmd --
+booping frontmatter-update plan.md status=ready-for-dev
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,6 +1,6 @@
+ ---
+ title: Foo
+-status: draft
++status: ready-for-dev
+ sp: 5
+ ---
+ 
+-- stderr --
+updated plan.md: status=ready-for-dev
+-- expected/cwd/plan.md --
+---
+title: Foo
+status: ready-for-dev
+sp: 5
+---
+
+# Foo
+
+Body paragraph.

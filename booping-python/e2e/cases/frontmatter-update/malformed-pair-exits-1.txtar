@@ -1,0 +1,27 @@
+An argument carrying no "=" fails with a named error on stderr and exit 1, leaving the plan untouched.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+status: draft
+---
+
+# Foo
+
+Body paragraph.
+-- cmd --
+booping frontmatter-update plan.md status
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: malformed key=value pair: 'status'
+-- expected/cwd/plan.md --
+---
+title: Foo
+status: draft
+---
+
+# Foo
+
+Body paragraph.

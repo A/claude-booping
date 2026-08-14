@@ -1,0 +1,41 @@
+Several key=value pairs in one call all land, and the summary lists them in order.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+status: draft
+---
+
+# Foo
+
+Body paragraph.
+-- cmd --
+booping frontmatter-update plan.md status=ready-for-dev sp=5 "summary=short note"
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,6 +1,8 @@
+ ---
+ title: Foo
+-status: draft
++status: ready-for-dev
++sp: 5
++summary: short note
+ ---
+ 
+ # Foo
+-- stderr --
+updated plan.md: status=ready-for-dev, sp=5, summary=short note
+-- expected/cwd/plan.md --
+---
+title: Foo
+status: ready-for-dev
+sp: 5
+summary: short note
+---
+
+# Foo
+
+Body paragraph.

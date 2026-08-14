@@ -1,0 +1,35 @@
+An integer-looking value lands as a YAML integer, unquoted.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+
+# Foo
+
+Body paragraph.
+-- cmd --
+booping frontmatter-update plan.md sp=23
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,5 +1,6 @@
+ ---
+ title: Foo
++sp: 23
+ ---
+ 
+ # Foo
+-- stderr --
+updated plan.md: sp=23
+-- expected/cwd/plan.md --
+---
+title: Foo
+sp: 23
+---
+
+# Foo
+
+Body paragraph.

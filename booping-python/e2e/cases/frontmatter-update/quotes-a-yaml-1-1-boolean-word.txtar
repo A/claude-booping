@@ -1,0 +1,35 @@
+A YAML-1.1 boolean word is quoted so it reloads as the string it was written as.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+
+# Foo
+
+Body paragraph.
+-- cmd --
+booping frontmatter-update plan.md summary=yes
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,5 +1,6 @@
+ ---
+ title: Foo
++summary: 'yes'
+ ---
+ 
+ # Foo
+-- stderr --
+updated plan.md: summary=yes
+-- expected/cwd/plan.md --
+---
+title: Foo
+summary: 'yes'
+---
+
+# Foo
+
+Body paragraph.

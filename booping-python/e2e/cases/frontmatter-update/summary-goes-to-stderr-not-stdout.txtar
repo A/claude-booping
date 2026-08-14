@@ -1,0 +1,39 @@
+The "updated" summary line is written to stderr; stdout carries the diff alone.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+status: draft
+---
+
+# Foo
+
+Body paragraph.
+-- cmd --
+booping frontmatter-update plan.md status=ready-for-dev sp=5
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,6 +1,7 @@
+ ---
+ title: Foo
+-status: draft
++status: ready-for-dev
++sp: 5
+ ---
+ 
+ # Foo
+-- stderr --
+updated plan.md: status=ready-for-dev, sp=5
+-- expected/cwd/plan.md --
+---
+title: Foo
+status: ready-for-dev
+sp: 5
+---
+
+# Foo
+
+Body paragraph.

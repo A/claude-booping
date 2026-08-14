@@ -1,0 +1,49 @@
+Values opening with a YAML indicator, carrying a colon, or padded with spaces are quoted so they reload unchanged.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+
+# Foo
+
+Body paragraph.
+-- cmd --
+booping frontmatter-update plan.md lead=@lead star=*star anchor=&anchor bang=!bang pct=%pct tick=`tick "colon=a: b" "padded= padded "
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,5 +1,13 @@
+ ---
+ title: Foo
++lead: '@lead'
++star: '*star'
++anchor: '&anchor'
++bang: '!bang'
++pct: '%pct'
++tick: '`tick'
++colon: 'a: b'
++padded: ' padded '
+ ---
+ 
+ # Foo
+-- stderr --
+updated plan.md: lead=@lead, star=*star, anchor=&anchor, bang=!bang, pct=%pct, tick=`tick, colon=a: b, padded= padded 
+-- expected/cwd/plan.md --
+---
+title: Foo
+lead: '@lead'
+star: '*star'
+anchor: '&anchor'
+bang: '!bang'
+pct: '%pct'
+tick: '`tick'
+colon: 'a: b'
+padded: ' padded '
+---
+
+# Foo
+
+Body paragraph.
