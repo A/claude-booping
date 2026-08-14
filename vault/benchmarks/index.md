@@ -2,7 +2,7 @@
 benchmarks:
   - id: frontmatter-update-e2e
     repo: /home/anton/Dev/@A/claude-booping-local-bench
-    baseline: e0d1796
+    baseline: 6fd0f38
     plan: vault/plans/202608121417_frontmatter-update-e2e-migration/index.md
     branch_scheme: bench/{model_slug}
     worker: openrouter-developer

@@ -17,7 +17,7 @@ Run the benchmark in ~/Claude/notes/claude_booping_benchmark.md with qwen/qwen3-
 | Parameter | Value |
 | --- | --- |
 | Repo | `/home/anton/Dev/@A/claude-booping-local-bench` |
-| Baseline commit | `e0d1796` — `groom: plan frontmatter-update unit→txtar e2e migration`, the last state before that plan was developed |
+| Baseline commit | `6fd0f38` — `groom: milestone contracts for frontmatter-update e2e migration`, head of `bench/reference`: the plan as groomed, before any of it was developed |
 | Plan | `./vault/plans/202608121417_frontmatter-update-e2e-migration/index.md` (3 milestones, `type: refactoring`, status `awaiting-approval`) |
 | Branch | `bench/{model_slug}` |
 | Worker agent | `openrouter-developer`, driven with `{model}` |
@@ -28,7 +28,7 @@ These are the `frontmatter-update-e2e` entry in [index.md](index.md)'s registry 
 
 1. `cd /home/anton/Dev/@A/claude-booping-local-bench`.
 2. Confirm the tree is clean (`git status --short`). Dirty → stop and report; never stash or discard the user's work.
-3. Cut the benchmark branch off the baseline: `git checkout -b bench/{model_slug} e0d1796`. The branch already exists → stop and report, so an earlier run is never overwritten.
+3. Cut the benchmark branch off the baseline: `git checkout -b bench/{model_slug} 6fd0f38`. The branch already exists → stop and report, so an earlier run is never overwritten.
 4. Prepare the virtualenvs, before any development starts:
 
    ```
