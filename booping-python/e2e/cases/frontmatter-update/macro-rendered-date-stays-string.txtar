@@ -1,0 +1,31 @@
+A date-like value resolved from a stubbed macro stays a string in the frontmatter, not a typed date.
+
+-- fixtures/xdg/booping/config.yaml --
+macro_stubs:
+  core.macros.completed: "2026-01-15"
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+# Plan
+-- cmd --
+booping frontmatter-update plan.md "completed={{ macro('core.macros.completed') }}"
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,4 +1,5 @@
+ ---
+ title: Foo
++completed: '2026-01-15'
+ ---
+ # Plan
+-- stderr --
+updated plan.md: completed=2026-01-15
+-- expected/cwd/plan.md --
+---
+title: Foo
+completed: '2026-01-15'
+---
+# Plan

@@ -1,0 +1,31 @@
+A value rendered from a stubbed macro lands in the file with the correct type.
+
+-- fixtures/xdg/booping/config.yaml --
+macro_stubs:
+  core.macros.plan_slug: my-plan-slug
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+# Plan
+-- cmd --
+booping frontmatter-update plan.md "slug={{ macro('core.macros.plan_slug') }}"
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,4 +1,5 @@
+ ---
+ title: Foo
++slug: my-plan-slug
+ ---
+ # Plan
+-- stderr --
+updated plan.md: slug=my-plan-slug
+-- expected/cwd/plan.md --
+---
+title: Foo
+slug: my-plan-slug
+---
+# Plan

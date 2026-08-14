@@ -1,0 +1,38 @@
+Setting pairs, removing keys, and appending to lists can all run in a single call.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+status: backlog
+stale: x
+sessions: null
+---
+# Plan
+-- cmd --
+booping frontmatter-update plan.md status=in-progress --remove stale --append sessions=abc-123
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,7 +1,7 @@
+ ---
+ title: Foo
+-status: backlog
+-stale: x
+-sessions: null
++status: in-progress
++sessions:
++- abc-123
+ ---
+ # Plan
+-- stderr --
+updated plan.md: -stale, status=in-progress, sessions+=abc-123
+-- expected/cwd/plan.md --
+---
+title: Foo
+status: in-progress
+sessions:
+- abc-123
+---
+# Plan

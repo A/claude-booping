@@ -1,0 +1,14 @@
+A malformed Jinja expression exits 2 with a stderr message naming the error type.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+# Plan
+-- cmd --
+booping frontmatter-update plan.md 'key={{ macro( }}'
+-- exit --
+2
+-- stdout --
+-- stderr --
+error: value '{{ macro( }}': TemplateSyntaxError: unexpected '}', expected ')'

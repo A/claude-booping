@@ -1,0 +1,34 @@
+A macro declared as a real shell command executes through the CLI subprocess boundary and
+writes the command's actual output into the frontmatter — the value `1` can only come from
+executing `echo 1`.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  macros:
+    echo_one: ["echo", "1"]
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+# Plan
+-- cmd --
+booping frontmatter-update plan.md "result={{ macro('core.macros.echo_one') }}"
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,4 +1,5 @@
+ ---
+ title: Foo
++result: 1
+ ---
+ # Plan
+-- stderr --
+updated plan.md: result=1
+-- expected/cwd/plan.md --
+---
+title: Foo
+result: 1
+---
+# Plan
