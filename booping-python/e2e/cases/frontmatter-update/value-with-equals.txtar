@@ -1,0 +1,38 @@
+Value containing = signs parses as one pair.
+
+-- fixtures/cwd/plan.md --
+---
+title: Test Plan
+status: backlog
+---
+
+# Test Plan Content
+
+This is a test plan.
+-- cmd --
+booping frontmatter-update plan.md key="value=with=equals"
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,6 +1,7 @@
+ ---
+ title: Test Plan
+ status: backlog
++key: value=with=equals
+ ---
+ 
+ # Test Plan Content
+-- expected/cwd/plan.md --
+---
+title: Test Plan
+status: backlog
+key: value=with=equals
+---
+
+# Test Plan Content
+
+This is a test plan.
+-- stderr --
+updated plan.md: key=value=with=equals

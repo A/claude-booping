@@ -3,7 +3,7 @@
 | Unit test | Corpus case filename | Rationale |
 |-----------|-------------------|-----------|
 | `TestParsePairs.test_valid_pairs` | `malformed-pair.txtar` | Tests valid parsing (complement to malformed case) |
-| `TestParsePairs.test_value_with_equals_sign` | (no direct case) | Value parsing with `=` not covered in corpus |
+| `TestParsePairs.test_value_with_equals_sign` | `value-with-equals.txtar` | Tests value parsing with `=` signs |
 | `TestParsePairs.test_empty_key_exits_1` | `malformed-pair.txtar` | Tests empty key error handling |
 | `TestParsePairs.test_no_equals_exits_1` | `malformed-pair.txtar` | Tests missing `=` error handling |
 | `TestInterpolate.test_datetime_macro` | `stubbed-macro-date-like-value-stays-string.txtar` | Tests datetime macro interpolation with stubbed config |
@@ -42,5 +42,5 @@
 | `TestFrontmatterUpdateCLI.test_append_only_still_reports_nothing_to_do_when_empty` | `append-only-nothing-to-change-exits-1.txtar` | Tests append nothing-to-do error |
 | `TestFrontmatterUpdateCLI.test_prints_a_unified_diff_of_the_change.*` | `unified-diff-shape.txtar` | Tests unified diff output |
 | `TestFrontmatterUpdateCLI.test_summary_stays_on_stderr` | `success-summary-on-stderr.txtar` | Tests stderr summary output |
-| `TestFrontmatterUpdateCLI.test_logs_to_booping_log` | (no direct case) | Logging behavior not covered in corpus |
-| `TestFrontmatterUpdateCLI.test_does_not_write_to_real_home` | (no direct case) | Home isolation test not covered in corpus |
+| `TestFrontmatterUpdateCLI.test_logs_to_booping_log` | `log-when-vault-attached.txtar` | Tests logging to .booping.log when vault is attached |
+| `TestFrontmatterUpdateCLI.test_does_not_write_to_real_home` | (no direct case) | Home isolation enforced by pytest-txtar harness sandbox |
