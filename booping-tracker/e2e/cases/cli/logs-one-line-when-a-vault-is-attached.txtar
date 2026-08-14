@@ -1,0 +1,15 @@
+With a .booping marker in the cwd the run appends exactly one [tracker {verb}] line, carrying
+the receipt, to the attached vault's log.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+-- cmd --
+booping-tracker states --team ENG
+-- exit --
+0
+-- stdout --
+states ENG: cli driver, no-op
+-- stderr --
+-- expected/cwd/vault/.booping.log --
+[..]Z: [tracker states] states ENG: cli driver, no-op

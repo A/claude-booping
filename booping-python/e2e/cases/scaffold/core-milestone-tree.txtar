@@ -11,7 +11,7 @@ created dir plans/demo/milestones
 created dir plans/demo/milestones/M01-cli-surface
 --- /dev/null
 +++ plans/demo/milestones/M01-cli-surface/M01-cli-surface.md
-@@ -0,0 +1,15 @@
+@@ -0,0 +1,17 @@
 +---
 +id: "01"
 +title: "Demo: it\u0027s \"fine\""
@@ -25,6 +25,8 @@ created dir plans/demo/milestones/M01-cli-surface
 +## Tasks
 +
 +## Definition of Done
++
++## References
 +
 +## Verify
 scaffolded 3 paths — 2 dirs created, 1 files created, 0 files overwritten
@@ -42,5 +44,7 @@ plan: "plans/demo/index.md"
 ## Tasks
 
 ## Definition of Done
+
+## References
 
 ## Verify

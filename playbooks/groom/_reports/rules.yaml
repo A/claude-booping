@@ -11,6 +11,9 @@ rules:
     ordered:
       - Available Agents
       - Shared instructions
+      # Rendered only under `core.tracker.driver: linear`; the hermetic fixture
+      # configures no tracker, so the committed report carries no such section.
+      - "Tracker driver: `linear`?"
       - Playbook Steps
       - State
       - "Step: Intake"

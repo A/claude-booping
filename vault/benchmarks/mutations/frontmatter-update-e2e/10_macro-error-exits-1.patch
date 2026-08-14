@@ -1,0 +1,17 @@
+diff --git a/booping-python/src/booping/commands/frontmatter_update.py b/booping-python/src/booping/commands/frontmatter_update.py
+index db3dacc..4d52e74 100644
+--- a/booping-python/src/booping/commands/frontmatter_update.py
++++ b/booping-python/src/booping/commands/frontmatter_update.py
+@@ -81,10 +81,10 @@ def interpolate(
+         return env.from_string(value).render()
+     except MacroError as exc:
+         print(f"error: value {value!r}: {exc}", file=sys.stderr)
+-        sys.exit(2)
++        sys.exit(1)
+     except TemplateError as exc:
+         print(f"error: value {value!r}: {type(exc).__name__}: {exc}", file=sys.stderr)
+-        sys.exit(2)
++        sys.exit(1)
+ 
+ 
+ def coerce_scalar(value: str) -> object:

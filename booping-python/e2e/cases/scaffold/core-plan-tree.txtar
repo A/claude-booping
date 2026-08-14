@@ -10,7 +10,7 @@ booping scaffold core.groom_playbook.scaffold plans/demo --set title=Demo --set 
 created dir plans/demo
 --- /dev/null
 +++ plans/demo/index.md
-@@ -0,0 +1,18 @@
+@@ -0,0 +1,22 @@
 +---
 +title: "Demo"
 +type: "feature"
@@ -26,11 +26,19 @@ created dir plans/demo
 +retro: null
 +summary: null
 +commit: abc1234
++tracker_provider: null
++tracker_request: null
++tracker_issue: null
++return_to: null
 +---
 +
 +# Demo
+--- /dev/null
++++ plans/demo/clarifications.md
+@@ -0,0 +1 @@
++# Clarifications
 created dir plans/demo/milestones
-scaffolded 4 paths — 2 dirs created, 2 files created, 0 files overwritten
+scaffolded 5 paths — 2 dirs created, 3 files created, 0 files overwritten
 -- expected/cwd/plans/demo/index.md --
 ---
 title: "Demo"
@@ -47,7 +55,13 @@ sessions: []
 retro: null
 summary: null
 commit: abc1234
+tracker_provider: null
+tracker_request: null
+tracker_issue: null
+return_to: null
 ---
 
 # Demo
+-- expected/cwd/plans/demo/clarifications.md --
+# Clarifications
 -- expected/cwd/plans/demo/request.md --

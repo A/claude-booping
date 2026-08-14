@@ -14,7 +14,7 @@ booping query --project vault --glob plans/demo/milestones/*/M*.md --columns id,
 created dir vault/plans/demo
 --- /dev/null
 +++ vault/plans/demo/index.md
-@@ -0,0 +1,18 @@
+@@ -0,0 +1,22 @@
 +---
 +title: "Demo"
 +type: "feature"
@@ -30,15 +30,23 @@ created dir vault/plans/demo
 +retro: null
 +summary: null
 +commit: abc1234
++tracker_provider: null
++tracker_request: null
++tracker_issue: null
++return_to: null
 +---
 +
 +# Demo
+--- /dev/null
++++ vault/plans/demo/clarifications.md
+@@ -0,0 +1 @@
++# Clarifications
 created dir vault/plans/demo/milestones
-scaffolded 4 paths — 2 dirs created, 2 files created, 0 files overwritten
+scaffolded 5 paths — 2 dirs created, 3 files created, 0 files overwritten
 created dir vault/plans/demo/milestones/M10-third
 --- /dev/null
 +++ vault/plans/demo/milestones/M10-third/M10-third.md
-@@ -0,0 +1,15 @@
+@@ -0,0 +1,17 @@
 +---
 +id: "10"
 +title: "M 10"
@@ -53,12 +61,14 @@ created dir vault/plans/demo/milestones/M10-third
 +
 +## Definition of Done
 +
++## References
++
 +## Verify
 scaffolded 2 paths — 1 dirs created, 1 files created, 0 files overwritten
 created dir vault/plans/demo/milestones/M01-first
 --- /dev/null
 +++ vault/plans/demo/milestones/M01-first/M01-first.md
-@@ -0,0 +1,15 @@
+@@ -0,0 +1,17 @@
 +---
 +id: "01"
 +title: "M 01"
@@ -73,12 +83,14 @@ created dir vault/plans/demo/milestones/M01-first
 +
 +## Definition of Done
 +
++## References
++
 +## Verify
 scaffolded 2 paths — 1 dirs created, 1 files created, 0 files overwritten
 created dir vault/plans/demo/milestones/M08-second
 --- /dev/null
 +++ vault/plans/demo/milestones/M08-second/M08-second.md
-@@ -0,0 +1,15 @@
+@@ -0,0 +1,17 @@
 +---
 +id: "08"
 +title: "M 08"
@@ -92,6 +104,8 @@ created dir vault/plans/demo/milestones/M08-second
 +## Tasks
 +
 +## Definition of Done
++
++## References
 +
 +## Verify
 scaffolded 2 paths — 1 dirs created, 1 files created, 0 files overwritten

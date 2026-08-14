@@ -1,0 +1,15 @@
+`sync` is addressed by artifact path, so that is what its receipt names.
+
+-- fixtures/cwd/plans/demo/index.md --
+---
+title: Demo
+status: ready-for-dev
+---
+# Demo
+-- cmd --
+booping-tracker sync --artifact plans/demo/index.md --playbook groom
+-- exit --
+0
+-- stdout --
+sync plans/demo/index.md: cli driver, no-op
+-- stderr --

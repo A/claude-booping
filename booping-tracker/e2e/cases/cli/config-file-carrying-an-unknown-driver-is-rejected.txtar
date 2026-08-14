@@ -1,0 +1,11 @@
+The driver is validated wherever it comes from, not only when `--driver` names it.
+
+-- fixtures/cwd/tracker.yaml --
+driver: jira
+-- cmd --
+booping-tracker --config-file tracker.yaml states --team ENG
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: unknown driver: jira (known: cli, linear)

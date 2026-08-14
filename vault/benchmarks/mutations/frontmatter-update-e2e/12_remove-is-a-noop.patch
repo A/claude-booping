@@ -1,0 +1,13 @@
+diff --git a/booping-python/src/booping/commands/frontmatter_update.py b/booping-python/src/booping/commands/frontmatter_update.py
+index db3dacc..38eca27 100644
+--- a/booping-python/src/booping/commands/frontmatter_update.py
++++ b/booping-python/src/booping/commands/frontmatter_update.py
+@@ -174,7 +174,7 @@ def _run(args: argparse.Namespace) -> None:
+     previous = plan_path.read_text()
+ 
+     try:
+-        update_frontmatter(plan_path, resolved, removals=removals, appends=resolved_appends)
++        update_frontmatter(plan_path, resolved, removals=[], appends=resolved_appends)
+     except ValueError as exc:
+         print(f"error: {exc}", file=sys.stderr)
+         sys.exit(1)

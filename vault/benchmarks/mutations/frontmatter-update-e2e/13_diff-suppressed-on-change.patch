@@ -1,0 +1,15 @@
+diff --git a/booping-python/src/booping/commands/frontmatter_update.py b/booping-python/src/booping/commands/frontmatter_update.py
+index db3dacc..078afd5 100644
+--- a/booping-python/src/booping/commands/frontmatter_update.py
++++ b/booping-python/src/booping/commands/frontmatter_update.py
+@@ -182,9 +182,7 @@ def _run(args: argparse.Namespace) -> None:
+         print(f"error: {exc}", file=sys.stderr)
+         sys.exit(2)
+ 
+-    report = diff_report(plan_path, previous, plan_path.read_text())
+-    if report:
+-        print(report)
++    diff_report(plan_path, previous, plan_path.read_text())
+ 
+     vault = project.directory if project is not None else None
+     changed = [f"-{k}" for k in removals] + list(resolved.keys()) + list(resolved_appends.keys())

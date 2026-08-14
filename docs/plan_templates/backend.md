@@ -47,6 +47,7 @@ One file per milestone directory under the plan directory's `milestones/`, named
           ...
   ```
 
+- `## References` — where such files exist, 1–3 existing modules, migrations or tests whose shape this milestone copies, by path, plus the path of any schema or contract it must not go looking for.
 - `## Verify` — exact commands (or observable outcomes) confirming this milestone: a targeted test path, one invocation, a diff. Scoped to what this milestone changed — whole-repo gates (full test suite, repo-wide lint/typecheck, an aggregate `ci` target) run once in `index.md`'s Final Verification, never per milestone.
 
 ## Implementation Order *(when milestones have dependencies)*
@@ -131,6 +132,9 @@ Verify before leaving `in-spec`. Every item must be satisfiable by reading the p
 - [ ] Every milestone is a file in `milestones/` carrying its own goal, tasks, DoD and Verify — no milestone body in `index.md`.
 - [ ] `index.md`'s milestone table has one row per milestone file and matches their frontmatter.
 - [ ] Every milestone file's `## Verify` is a command or verifiable outcome scoped to what that milestone changed — no whole-repo gate (full suite, repo-wide lint/typecheck, aggregate `ci` target); those belong to `index.md`'s Final Verification.
+- [ ] Every milestone file's `## References` names 1–3 existing files to copy the shape of where such files exist, or states that none applies.
+- [ ] No milestone's Scope or Tasks offers two ways to do the same thing ("by hand or via X").
+- [ ] No milestone asks for a deliverable in the worker's report — each is named as a path plus "Create" or "Append to", relative to the repo root or the plan directory.
 - [ ] Every task lists exact file paths, not "related files" or "somewhere in X".
 - [ ] Every task DoD uses checkboxes, not prose.
 - [ ] Code sketches use `...` in method bodies — agents implement from interfaces, not by copying literal code.

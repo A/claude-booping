@@ -1,0 +1,13 @@
+driver: linear
+linear:
+  api_key_env: LINEAR_API_KEY
+  api_url: https://api.linear.app/graphql
+  team: ENG
+  playbooks:
+    groom:
+      statuses:
+        framing: In Progress
+        ready-for-dev: Done
+      labels:
+        request: request
+        plan: plan

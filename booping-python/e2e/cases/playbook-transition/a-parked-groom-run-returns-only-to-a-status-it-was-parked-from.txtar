@@ -1,0 +1,28 @@
+`awaiting-clarification` returns only to the two statuses it can be entered from; every other status
+of the run is unreachable from it, so a mis-aimed resume is refused with the reachable set — which,
+through the `in-spec` superstate, also includes `cancelled`. Which of the two returns is the legal
+one is `return_to`'s business and the edge's prose gate, not the manifest's.
+
+-- fixtures/cwd/run/index.md --
+---
+title: "Demo"
+status: awaiting-clarification
+return_to: framing
+---
+
+# Demo
+-- cmd --
+booping playbook-transition groom cross-reviewing --workdir run
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: cannot transition from 'awaiting-clarification' to 'cross-reviewing' in state 'run'; allowed targets: cancelled, drafting, framing
+-- expected/cwd/run/index.md --
+---
+title: "Demo"
+status: awaiting-clarification
+return_to: framing
+---
+
+# Demo

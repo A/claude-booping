@@ -1,0 +1,14 @@
+`--body-file` is the multi-line alternative to `--body`; the file is read before the provider
+is reached, so an unreadable one fails the same way under every driver.
+
+-- fixtures/cwd/body.md --
+## Question
+
+Which one?
+-- cmd --
+booping-tracker comment --issue LIN-1 --body-file body.md
+-- exit --
+0
+-- stdout --
+comment LIN-1: cli driver, no-op
+-- stderr --

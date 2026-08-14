@@ -1,0 +1,12 @@
+`--config-file` reads the tracker block straight from a file, which is what lets a caller
+outside any vault — no .booping marker anywhere above the cwd — run the tracker at all.
+
+-- fixtures/cwd/tracker.yaml --
+driver: cli
+-- cmd --
+booping-tracker --config-file tracker.yaml states --team ENG
+-- exit --
+0
+-- stdout --
+states ENG: cli driver, no-op
+-- stderr --

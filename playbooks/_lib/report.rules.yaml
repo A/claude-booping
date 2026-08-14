@@ -27,6 +27,10 @@ rules:
     id: report.section-order
     ordered:
       - Lessons?
+      # Contributed by `playbooks/_partials/tracker_driver.md` to the preamble of any
+      # playbook that includes it, and only under `core.tracker.driver: linear` — every
+      # report rendered against the driverless hermetic fixture omits it.
+      - "Tracker driver: `linear`?"
       - Playbook Steps
       - State?
       - "Subgraph: apply?"
