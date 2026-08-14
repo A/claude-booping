@@ -1,0 +1,15 @@
+A key=value argument without an equals sign exits 1 with a malformed-pair error on stderr.
+
+-- fixtures/cwd/plan.md --
+---
+title: Test Plan
+---
+# Plan body
+
+-- cmd --
+booping frontmatter-update plan.md noequals
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: malformed key=value pair: 'noequals'

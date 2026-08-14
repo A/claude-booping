@@ -1,0 +1,31 @@
+A null string value is coerced to YAML null and written as the bare null literal.
+
+-- fixtures/cwd/plan.md --
+---
+title: Test Plan
+---
+# Plan body
+
+-- cmd --
+booping frontmatter-update plan.md retro=null
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,5 +1,6 @@
+ ---
+ title: Test Plan
++retro: null
+ ---
+ # Plan body
+ 
+-- stderr --
+updated plan.md: retro=null
+-- expected/cwd/plan.md --
+---
+title: Test Plan
+retro: null
+---
+# Plan body
+

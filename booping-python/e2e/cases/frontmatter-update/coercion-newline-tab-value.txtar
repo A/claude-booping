@@ -1,0 +1,31 @@
+A value bearing a tab character is quoted in the shell so it reaches the CLI as a single argument, then round-trips through the file.
+
+-- fixtures/cwd/plan.md --
+---
+title: Test Plan
+---
+# Plan body
+
+-- cmd --
+booping frontmatter-update plan.md 'note=hello	world'
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,5 +1,6 @@
+ ---
+ title: Test Plan
++note: "hello\tworld"
+ ---
+ # Plan body
+ 
+-- stderr --
+updated plan.md: note=hello	world
+-- expected/cwd/plan.md --
+---
+title: Test Plan
+note: "hello\tworld"
+---
+# Plan body
+

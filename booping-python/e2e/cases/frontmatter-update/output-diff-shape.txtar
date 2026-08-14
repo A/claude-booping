@@ -1,0 +1,33 @@
+A successful update emits a unified diff on stdout with ---, +++, and @@ header lines.
+
+-- fixtures/cwd/plan.md --
+---
+title: Test Plan
+status: backlog
+---
+# Plan body
+
+-- cmd --
+booping frontmatter-update plan.md status=in-progress
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,6 +1,6 @@
+ ---
+ title: Test Plan
+-status: backlog
++status: in-progress
+ ---
+ # Plan body
+ 
+-- stderr --
+updated plan.md: status=in-progress
+-- expected/cwd/plan.md --
+---
+title: Test Plan
+status: in-progress
+---
+# Plan body
+

@@ -1,0 +1,9 @@
+A plan file path that does not exist exits 1 with a stderr message naming the missing path.
+
+-- cmd --
+booping frontmatter-update nonexistent.md status=in-progress
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: plan not found: nonexistent.md

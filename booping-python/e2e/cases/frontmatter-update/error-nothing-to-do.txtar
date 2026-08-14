@@ -1,0 +1,15 @@
+No key=value pairs, no removals, no appends exits 1 with a nothing-to-do error on stderr.
+
+-- fixtures/cwd/plan.md --
+---
+title: Test Plan
+---
+# Plan body
+
+-- cmd --
+booping frontmatter-update plan.md
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: nothing to do: provide key=value pairs, --append and/or --remove

@@ -1,0 +1,33 @@
+Sets multiple keys in a single invocation, each appearing in the updated frontmatter.
+
+-- fixtures/cwd/plan.md --
+---
+title: Test Plan
+---
+# Plan body
+
+-- cmd --
+booping frontmatter-update plan.md status=in-progress sp=8
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,5 +1,7 @@
+ ---
+ title: Test Plan
++status: in-progress
++sp: 8
+ ---
+ # Plan body
+ 
+-- stderr --
+updated plan.md: status=in-progress, sp=8
+-- expected/cwd/plan.md --
+---
+title: Test Plan
+status: in-progress
+sp: 8
+---
+# Plan body
+

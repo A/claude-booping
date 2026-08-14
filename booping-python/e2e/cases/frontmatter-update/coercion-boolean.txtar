@@ -1,0 +1,31 @@
+A boolean string value is coerced to a YAML boolean and written unquoted.
+
+-- fixtures/cwd/plan.md --
+---
+title: Test Plan
+---
+# Plan body
+
+-- cmd --
+booping frontmatter-update plan.md blocked=true
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,5 +1,6 @@
+ ---
+ title: Test Plan
++blocked: true
+ ---
+ # Plan body
+ 
+-- stderr --
+updated plan.md: blocked=true
+-- expected/cwd/plan.md --
+---
+title: Test Plan
+blocked: true
+---
+# Plan body
+

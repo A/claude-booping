@@ -1,0 +1,31 @@
+Sets a new key with a literal string value on an existing plan file.
+
+-- fixtures/cwd/plan.md --
+---
+title: Test Plan
+---
+# Plan body
+
+-- cmd --
+booping frontmatter-update plan.md status=in-progress
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,5 +1,6 @@
+ ---
+ title: Test Plan
++status: in-progress
+ ---
+ # Plan body
+ 
+-- stderr --
+updated plan.md: status=in-progress
+-- expected/cwd/plan.md --
+---
+title: Test Plan
+status: in-progress
+---
+# Plan body
+

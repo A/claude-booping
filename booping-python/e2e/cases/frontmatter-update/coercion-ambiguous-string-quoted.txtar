@@ -1,0 +1,31 @@
+An ambiguous string that would reload as a different type under the YAML 1.1 resolver is written single-quoted.
+
+-- fixtures/cwd/plan.md --
+---
+title: Test Plan
+---
+# Plan body
+
+-- cmd --
+booping frontmatter-update plan.md summary=yes
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,5 +1,6 @@
+ ---
+ title: Test Plan
++summary: 'yes'
+ ---
+ # Plan body
+ 
+-- stderr --
+updated plan.md: summary=yes
+-- expected/cwd/plan.md --
+---
+title: Test Plan
+summary: 'yes'
+---
+# Plan body
+

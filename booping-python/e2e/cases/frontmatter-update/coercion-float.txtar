@@ -1,0 +1,31 @@
+A float string value is coerced to a YAML float and written unquoted.
+
+-- fixtures/cwd/plan.md --
+---
+title: Test Plan
+---
+# Plan body
+
+-- cmd --
+booping frontmatter-update plan.md ratio=1.5
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,5 +1,6 @@
+ ---
+ title: Test Plan
++ratio: 1.5
+ ---
+ # Plan body
+ 
+-- stderr --
+updated plan.md: ratio=1.5
+-- expected/cwd/plan.md --
+---
+title: Test Plan
+ratio: 1.5
+---
+# Plan body
+

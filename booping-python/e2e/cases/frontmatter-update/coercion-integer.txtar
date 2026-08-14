@@ -1,0 +1,31 @@
+An integer string value is coerced to a YAML integer and written unquoted.
+
+-- fixtures/cwd/plan.md --
+---
+title: Test Plan
+---
+# Plan body
+
+-- cmd --
+booping frontmatter-update plan.md sp=23
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,5 +1,6 @@
+ ---
+ title: Test Plan
++sp: 23
+ ---
+ # Plan body
+ 
+-- stderr --
+updated plan.md: sp=23
+-- expected/cwd/plan.md --
+---
+title: Test Plan
+sp: 23
+---
+# Plan body
+
