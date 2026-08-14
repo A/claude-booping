@@ -1,0 +1,5 @@
+**Blocked (1/2)**: Task 1.2's DoD requires the newline/tab gap case to assert a value bearing a newline round-trips or errors cleanly. The commit `a1fd2d3` adds `set-with-tab-bearing-value.txtar`, which covers a tab character only — no case in the corpus exercises a newline-bearing value.
+
+What was checked: all 16 new cases in `booping-python/e2e/cases/frontmatter-update/` against M01's DoD. Everything else holds — scalar sets, coercion families, error paths, diff shape, stderr summary, vault log case.
+
+What the next attempt must do: add (or extend the existing case into) a case whose value carries a newline — e.g. `summary=$'hello\nworld'` — hand-authoring only description, fixtures and cmd, then recording the contract with `cd booping-python && uv run pytest e2e --txtar-update -k frontmatter`, and confirm the recorded expected block captures whatever the CLI actually does. Commit as a new commit, never an amend. Then `cd booping-python && uv run pytest e2e -k frontmatter -q` must pass without `--txtar-update`.
