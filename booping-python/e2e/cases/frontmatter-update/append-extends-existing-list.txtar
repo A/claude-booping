@@ -1,0 +1,33 @@
+Appends a new value to an existing list in frontmatter.
+
+-- fixtures/cwd/plan.md --
+---
+title: Demo
+sessions:
+- abc-123
+---
+# Demo
+-- cmd --
+booping frontmatter-update plan.md --append sessions=def-456
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -2,5 +2,6 @@
+ title: Demo
+ sessions:
+ - abc-123
++- def-456
+ ---
+ # Demo
+-- stderr --
+updated plan.md: sessions+=def-456
+-- expected/cwd/plan.md --
+---
+title: Demo
+sessions:
+- abc-123
+- def-456
+---
+# Demo

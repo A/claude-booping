@@ -1,0 +1,37 @@
+Executes a real shell macro defined in config across the subprocess boundary.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  macros:
+    echo_one:
+      command:
+        - echo
+        - "1"
+-- fixtures/cwd/plan.md --
+---
+title: Demo
+result: null
+---
+# Demo
+-- cmd --
+booping frontmatter-update plan.md "result={{ macro('core.macros.echo_one') }}"
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,5 +1,5 @@
+ ---
+ title: Demo
+-result: null
++result: 1
+ ---
+ # Demo
+-- stderr --
+updated plan.md: result=1
+-- expected/cwd/plan.md --
+---
+title: Demo
+result: 1
+---
+# Demo

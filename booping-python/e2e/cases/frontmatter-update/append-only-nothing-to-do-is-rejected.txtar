@@ -1,0 +1,14 @@
+An append-only call with no appends specified fails with nothing to do.
+
+-- fixtures/cwd/plan.md --
+---
+title: Demo
+---
+# Demo
+-- cmd --
+booping frontmatter-update plan.md
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: nothing to do: provide key=value pairs, --append and/or --remove

@@ -1,0 +1,33 @@
+A macro-rendered date-like value (e.g. 2026-08-12 14:17) stays a string in frontmatter and is not converted to another type.
+
+-- fixtures/xdg/booping/config.yaml --
+macro_stubs:
+  core.macros.date: "2026-08-12 14:17"
+-- fixtures/cwd/plan.md --
+---
+title: Demo
+completed: null
+---
+# Demo
+-- cmd --
+booping frontmatter-update plan.md "completed={{ macro('core.macros.date') }}"
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,5 +1,5 @@
+ ---
+ title: Demo
+-completed: null
++completed: 2026-08-12 14:17
+ ---
+ # Demo
+-- stderr --
+updated plan.md: completed=2026-08-12 14:17
+-- expected/cwd/plan.md --
+---
+title: Demo
+completed: 2026-08-12 14:17
+---
+# Demo

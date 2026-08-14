@@ -1,0 +1,32 @@
+Appends a value to a null frontmatter key, converting it to a one-element list.
+
+-- fixtures/cwd/plan.md --
+---
+title: Demo
+sessions: null
+---
+# Demo
+-- cmd --
+booping frontmatter-update plan.md --append sessions=abc-123
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,5 +1,6 @@
+ ---
+ title: Demo
+-sessions: null
++sessions:
++- abc-123
+ ---
+ # Demo
+-- stderr --
+updated plan.md: sessions+=abc-123
+-- expected/cwd/plan.md --
+---
+title: Demo
+sessions:
+- abc-123
+---
+# Demo

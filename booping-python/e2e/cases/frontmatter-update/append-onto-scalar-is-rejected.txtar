@@ -1,0 +1,15 @@
+Appending onto a scalar key fails with exit 1 and an error message on stderr.
+
+-- fixtures/cwd/plan.md --
+---
+title: Demo
+status: backlog
+---
+# Demo
+-- cmd --
+booping frontmatter-update plan.md --append status=done
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: cannot append to scalar key 'status' in plan.md

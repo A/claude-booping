@@ -1,0 +1,33 @@
+Value resolved from a stubbed macro in config is interpolated and typed in frontmatter.
+
+-- fixtures/xdg/booping/config.yaml --
+macro_stubs:
+  core.macros.date: "19700101"
+-- fixtures/cwd/plan.md --
+---
+title: Demo
+planned: null
+---
+# Demo
+-- cmd --
+booping frontmatter-update plan.md "planned={{ macro('core.macros.date') }}"
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,5 +1,5 @@
+ ---
+ title: Demo
+-planned: null
++planned: 19700101
+ ---
+ # Demo
+-- stderr --
+updated plan.md: planned=19700101
+-- expected/cwd/plan.md --
+---
+title: Demo
+planned: 19700101
+---
+# Demo

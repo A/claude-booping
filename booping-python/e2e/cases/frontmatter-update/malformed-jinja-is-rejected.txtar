@@ -1,0 +1,14 @@
+Malformed Jinja template expression exits 2 with an error message on stderr.
+
+-- fixtures/cwd/plan.md --
+---
+title: Demo
+---
+# Demo
+-- cmd --
+booping frontmatter-update plan.md "planned={{ macro( }}"
+-- exit --
+2
+-- stdout --
+-- stderr --
+error: value '{{ macro( }}': TemplateSyntaxError: unexpected '}', expected ')'

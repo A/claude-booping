@@ -1,0 +1,30 @@
+Appends a value to an absent frontmatter key, creating a one-element list.
+
+-- fixtures/cwd/plan.md --
+---
+title: Demo
+---
+# Demo
+-- cmd --
+booping frontmatter-update plan.md --append sessions=abc-123
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,4 +1,6 @@
+ ---
+ title: Demo
++sessions:
++- abc-123
+ ---
+ # Demo
+-- stderr --
+updated plan.md: sessions+=abc-123
+-- expected/cwd/plan.md --
+---
+title: Demo
+sessions:
+- abc-123
+---
+# Demo

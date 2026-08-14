@@ -1,0 +1,31 @@
+Removes a key from frontmatter via --remove.
+
+-- fixtures/cwd/plan.md --
+---
+title: Demo
+business_goal: x
+status: backlog
+---
+# Demo
+-- cmd --
+booping frontmatter-update plan.md --remove business_goal
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,6 +1,5 @@
+ ---
+ title: Demo
+-business_goal: x
+ status: backlog
+ ---
+ # Demo
+-- stderr --
+updated plan.md: -business_goal
+-- expected/cwd/plan.md --
+---
+title: Demo
+status: backlog
+---
+# Demo
