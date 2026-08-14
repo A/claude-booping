@@ -66,6 +66,37 @@ benchmarks:
       - malformed-append-pair-is-rejected.txtar
       - a-real-macro-runs-and-its-output-lands.txtar
     mutations_dir: vault/benchmarks/mutations/frontmatter-update-e2e
+    runs_dir: runs
+    history_columns:
+      [date, model, outcome, att, code, agentic, review, diff, tokens, cost, wall, run]
+    process:
+      loop_threshold: 3
+      edit_tools: [Write, Edit, NotebookEdit]
+      edit_input_keys: [content, new_string, new_source]
+      shell_tool: Bash
+      shell_input_key: command
+      rebaseline_pattern: "--txtar-update"
+      e2e_pattern: "just e2e|pytest[^\n]*\\be2e\\b"
+      green_pattern: "\\b\\d+ passed\\b"
+      red_pattern: "\\b\\d+ (failed|error)"
+      malformed_patterns:
+        - "InputValidationError"
+        - "did not match the expected schema"
+        - "Invalid tool parameter"
+        - "missing required parameter"
+        - "String to replace not found"
+        - "has not been read yet"
+      context_death_patterns:
+        - "context (window |length )?(limit )?exceeded"
+        - "prompt is too long"
+        - "exceeds the maximum"
+      context_death_stop_reasons: [max_tokens, context_overflow, length]
+    cost:
+      endpoint: https://openrouter.ai/api/v1/generation
+      retries: 3
+      backoff_seconds: 1.0
+      concurrency: 8
+      timeout_seconds: 30
     weights:
       code:
         gates:
@@ -85,6 +116,17 @@ benchmarks:
         rebaseline: 20
         tool_discipline: 30
         churn: 20
+      penalties:
+        retry: 10
+        rebaseline: 10
+        malformed: 2
+        loop: 5
+        death: 10
+      thresholds:
+        wildcard_full_max: 0.05
+        wildcard_zero_min: 0.3
+        churn_full_max: 1.5
+        churn_zero_min: 4.0
 ---
 
 # Benchmark registry
@@ -95,7 +137,7 @@ This frontmatter is the machine-readable registry `bench-score` reads. Every ben
 | --- | --- | --- | --- |
 | `frontmatter-update-e2e` | `202608121417_frontmatter-update-e2e-migration` | `bench/{model_slug}` | [guide.md](guide.md) |
 
-Scoring assets sit beside this file: [history.md](history.md) is the append-only scorecard table, `runs/` holds one detail report per run, `mutations/{id}/` holds the fixed patch set a corpus must kill.
+Scoring assets sit beside this file: [history.md](history.md) is the append-only scorecard table, `runs/` holds one detail report per run, `mutations/{id}/` holds the fixed patch set a corpus must kill, and `_fixtures/ndjson/` holds one hand-written synthetic log per process detector — a clean benchmark run never trips them, so they are how the detectors stay demonstrable. Run one with `bench-score process --benchmark {id} --ndjson _fixtures/ndjson/degenerate-loop.ndjson`: `degenerate-loop.ndjson` yields 1 loop and 0 malformed, `malformed-tool-inputs.ndjson` yields 2 malformed and 0 loops, the third tool error in it being an ordinary non-zero shell exit that must not count.
 
 ## Entry keys
 
@@ -103,5 +145,8 @@ Scoring assets sit beside this file: [history.md](history.md) is the append-only
 - `commands` — every command `bench-score` runs inside the scored worktree, as `argv` plus an optional worktree-relative `cwd`. The script hardcodes none of them, so a benchmark on a differently-built repo only needs a different entry here.
 - `unit_grep` — the token whose absence from the repo proves the superseded unit file left no stale reference. `unit_grep_exclude` lists directories the sweep skips: the plan documents under `vault/` name the deleted file on purpose, so a hit there is not a stale reference.
 - `etalon_cases` — the reference corpus frozen from the opus run (`dc0be24` + `0648787`); `gap_cases` are the subset with no pre-existing unit-test counterpart, the cases a model only writes by reading the CLI rather than by translating tests.
-- `weights` — composite scoring weights as data. Each composite sums to 100: `code` splits 40 gates / 60 corpus, `agentic` splits across the four process signals.
+- `weights` — composite scoring weights as data. Each composite sums to 100: `code` splits 40 gates / 60 corpus, `agentic` splits across the four process signals. `penalties` are the per-incident deductions inside `attempts`, `rebaseline` and `tool_discipline`; `thresholds` are the ratio bands where `wildcard` and `churn` earn their full weight or nothing, interpolated linearly between. A layer that was not measured (no mutation run yet) drops out of the composite's denominator and is named in the run detail.
+- `process` — how the worker's ndjson logs are read: which tools count as edits and where their payload sits, the regexes that recognise an e2e invocation and its green/red verdict, the `--txtar-update` marker, and the payload signatures that classify a tool error as a malformed input or a context death. `loop_threshold` is how many consecutive identical tool+input calls make a degenerate loop.
+- `cost` — the OpenRouter generation endpoint plus the retry, concurrency and timeout budget for querying it. `--endpoint` overrides the URL per invocation.
+- `runs_dir` and `history_columns` — where run detail reports land (relative to this file) and the exact column order of [history.md](history.md)'s table, so the emitted row cannot drift from its header.
 - `api_key_env` names the environment variable holding the OpenRouter token. The token itself is never config.

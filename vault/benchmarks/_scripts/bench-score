@@ -8,22 +8,33 @@
 Subcommands:
   gates   — layer-1 pass/fail checks, re-run mechanically in a throwaway worktree
   corpus  — corpus-quality metrics parsed out of the branch's .txtar cases
+  process — process profile read out of the worker's ndjson attempt logs
+  cost    — exact spend and native token counts from OpenRouter's generation API
+  report  — the two scorecard surfaces: history row + per-run detail markdown
 
-Every command run against the branch, and every path it touches, comes from the
-registry entry; only the metric logic lives here.
+Every command run against the branch, every path it touches, every pattern it
+matches and every weight it scores with comes from the registry entry; only the
+metric logic lives here.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import shutil
 import subprocess
 import sys
 import tempfile
+import time
+import urllib.error
+import urllib.request
+from collections import Counter
 from collections.abc import Iterator
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -148,6 +159,7 @@ def gate_milestones(tree: Path, entry: dict[str, Any]) -> dict[str, Any]:
     )
     return {
         "pass": not bad,
+        "statuses": dict(sorted(seen.items())),
         "evidence": f"{len(seen) - len(bad)}/{len(seen)} milestones terminal: {shown}",
     }
 
@@ -318,20 +330,961 @@ def cmd_corpus(entry: dict[str, Any], branch: str) -> dict[str, Any]:
     }
 
 
+# --- process ----------------------------------------------------------------
+
+LOG_STEM = re.compile(r"\A(\d{8}-\d{6})-(.+)\Z")
+TS_FMT = "%Y%m%d-%H%M%S"
+
+
+@dataclass
+class Attempt:
+    path: Path
+    milestone: str
+    ts: str
+    model: str = ""
+    calls: list[tuple[str, dict[str, Any], str]] = field(default_factory=list)
+    results: dict[str, tuple[bool, str]] = field(default_factory=dict)
+    final: dict[str, Any] = field(default_factory=dict)
+
+
+def slugify(text: str) -> str:
+    return re.sub(r"[^A-Za-z0-9]+", "-", text).strip("-").lower()
+
+
+def model_slug_from_branch(entry: dict[str, Any], branch: str) -> str:
+    scheme = entry["branch_scheme"]
+    pattern = re.escape(scheme).replace(re.escape("{model_slug}"), "(.+)")
+    match = re.match(pattern + r"\Z", branch)
+    if not match:
+        raise SystemExit(f"bench-score: branch {branch!r} does not match {scheme!r}")
+    return slugify(match.group(1))
+
+
+def milestone_names(tree: Path, entry: dict[str, Any]) -> list[str]:
+    plan_dir = (tree / entry["plan"]).parent
+    return sorted(path.stem for path in plan_dir.glob(entry["milestones_glob"]))
+
+
+def feedback_counts(tree: Path, entry: dict[str, Any]) -> dict[str, int]:
+    plan_dir = (tree / entry["plan"]).parent
+    counts: dict[str, int] = {}
+    for path in plan_dir.glob(entry["milestones_glob"]):
+        counts[path.stem] = len(list(path.parent.glob("feedback*.md")))
+    return counts
+
+
+def select_logs(
+    entry: dict[str, Any],
+    model_slug: str,
+    milestones: list[str],
+    since: str | None,
+    until: str | None,
+) -> dict[str, list[Path]]:
+    logs_dir = Path(entry["logs_dir"]).expanduser()
+    picked: dict[str, list[Path]] = {name: [] for name in milestones}
+    for path in sorted(logs_dir.glob("*.ndjson")):
+        stem = LOG_STEM.match(path.stem)
+        if not stem:
+            continue
+        ts, rest = stem.groups()
+        if (since and ts < since) or (until and ts > until):
+            continue
+        for name in milestones:
+            suffix = f"-{name}"
+            if rest.endswith(suffix) and slugify(rest[: -len(suffix)]) == model_slug:
+                picked[name].append(path)
+                break
+    for name, paths in picked.items():
+        log(f"process: {name}: {len(paths)} attempt log(s)")
+    return picked
+
+
+def result_text(content: Any) -> str:
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        return "".join(
+            block.get("text", "") for block in content if isinstance(block, dict)
+        )
+    return ""
+
+
+def load_attempt(path: Path, milestone: str, ts: str) -> Attempt:
+    attempt = Attempt(path=path, milestone=milestone, ts=ts)
+    for line in path.read_text(errors="replace").splitlines():
+        if not line.startswith("{"):
+            continue
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        kind = event.get("type")
+        if kind == "system" and event.get("subtype") == "init":
+            attempt.model = str(event.get("model") or "")
+        elif kind == "assistant":
+            for block in event.get("message", {}).get("content") or []:
+                if block.get("type") == "tool_use":
+                    attempt.calls.append(
+                        (block.get("name", ""), block.get("input") or {}, block["id"])
+                    )
+        elif kind == "user":
+            for block in event.get("message", {}).get("content") or []:
+                if block.get("type") == "tool_result":
+                    attempt.results[block.get("tool_use_id", "")] = (
+                        bool(block.get("is_error")),
+                        result_text(block.get("content")),
+                    )
+        elif kind == "result":
+            attempt.final = event
+    return attempt
+
+
+def gen_ids(attempt: Attempt) -> list[str]:
+    """Every generation id mention, duplicates kept — the caller dedupes."""
+    found: list[str] = []
+    for line in attempt.path.read_text(errors="replace").splitlines():
+        if '"assistant"' not in line:
+            continue
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if event.get("type") == "assistant":
+            ident = event.get("message", {}).get("id")
+            if ident:
+                found.append(str(ident))
+    return found
+
+
+def count_loops(keys: list[str], threshold: int) -> int:
+    loops = 0
+    run = 0
+    previous: str | None = None
+    for key in keys:
+        run = run + 1 if key == previous else 1
+        if run == threshold:
+            loops += 1
+        previous = key
+    return loops
+
+
+def matches_any(patterns: list[re.Pattern[str]], text: str) -> bool:
+    return any(pattern.search(text) for pattern in patterns)
+
+
+def compile_all(proc: dict[str, Any], key: str) -> list[re.Pattern[str]]:
+    return [re.compile(p, re.IGNORECASE) for p in proc.get(key) or []]
+
+
+def profile_attempt(attempt: Attempt, proc: dict[str, Any]) -> dict[str, Any]:
+    malformed_rx = compile_all(proc, "malformed_patterns")
+    death_rx = compile_all(proc, "context_death_patterns")
+    edit_tools = set(proc["edit_tools"])
+    edit_keys = proc["edit_input_keys"]
+
+    tools = Counter(name for name, _, _ in attempt.calls)
+    malformed = 0
+    deaths = 0
+    pushed = 0
+    for name, payload, ident in attempt.calls:
+        is_error, text = attempt.results.get(ident, (False, ""))
+        if is_error and matches_any(malformed_rx, text):
+            malformed += 1
+        if is_error and matches_any(death_rx, text):
+            deaths += 1
+        if name in edit_tools:
+            for key in edit_keys:
+                if isinstance(payload.get(key), str):
+                    pushed += len(payload[key].splitlines())
+                    break
+
+    stop = str(attempt.final.get("stop_reason") or "")
+    if stop in set(proc["context_death_stop_reasons"]):
+        deaths += 1
+    usage = attempt.final.get("usage") or {}
+
+    keys = [
+        f"{name}\0{json.dumps(payload, sort_keys=True)}"
+        for name, payload, _ in attempt.calls
+    ]
+    return {
+        "log": attempt.path.name,
+        "ts": attempt.ts,
+        "duration_ms": attempt.final.get("duration_ms"),
+        "num_turns": attempt.final.get("num_turns"),
+        "stop_reason": stop,
+        "result_cost_usd": attempt.final.get("total_cost_usd"),
+        "result_tokens": {
+            "prompt": int(usage.get("input_tokens") or 0),
+            "completion": int(usage.get("output_tokens") or 0),
+            "cached": int(usage.get("cache_read_input_tokens") or 0),
+        },
+        "tool_calls": sum(tools.values()),
+        "tools": dict(sorted(tools.items())),
+        "malformed": malformed,
+        "loops": count_loops(keys, proc["loop_threshold"]),
+        "deaths": deaths,
+        "pushed_lines": pushed,
+    }
+
+
+def blind_rebaselines(attempts: list[Attempt], proc: dict[str, Any]) -> dict[str, int]:
+    """`--txtar-update` calls made before any e2e run has been seen green.
+
+    A `--txtar-update` run rewrites the expectations it then reports as passing,
+    so it can never be the green run that ends the blind window.
+    """
+    shell = proc["shell_tool"]
+    key = proc["shell_input_key"]
+    rebaseline = re.compile(proc["rebaseline_pattern"])
+    e2e = re.compile(proc["e2e_pattern"])
+    green = re.compile(proc["green_pattern"])
+    red = re.compile(proc["red_pattern"])
+
+    counts = {attempt.milestone: 0 for attempt in attempts}
+    seen_green = False
+    for attempt in attempts:
+        for name, payload, ident in attempt.calls:
+            if name != shell:
+                continue
+            command = str(payload.get(key) or "")
+            if not e2e.search(command):
+                continue
+            if rebaseline.search(command):
+                if not seen_green:
+                    counts[attempt.milestone] += 1
+                continue
+            _, text = attempt.results.get(ident, (False, ""))
+            if green.search(text) and not red.search(text):
+                seen_green = True
+    return counts
+
+
+def diff_lines(tree: Path, entry: dict[str, Any]) -> int:
+    total = 0
+    for row in git_out(tree, "diff", entry["baseline"], "--numstat").splitlines():
+        added, removed, *_ = row.split("\t")
+        if added.isdigit():
+            total += int(added) + int(removed)
+    return total
+
+
+def human_ms(milliseconds: int) -> str:
+    hours, rest = divmod(int(milliseconds) // 1000, 3600)
+    minutes, seconds = divmod(rest, 60)
+    if hours:
+        return f"{hours}h{minutes:02d}m{seconds:02d}s"
+    return f"{minutes}m{seconds:02d}s"
+
+
+def collect_attempts(
+    entry: dict[str, Any], args: argparse.Namespace
+) -> tuple[list[Attempt], dict[str, list[Path]], dict[str, int], int | None]:
+    if args.ndjson:
+        attempts = [
+            load_attempt(Path(path), Path(path).stem, "") for path in args.ndjson
+        ]
+        selected = {attempt.milestone: [attempt.path] for attempt in attempts}
+        return attempts, selected, {}, None
+
+    slug = model_slug_from_branch(entry, args.branch)
+    with worktree(Path(entry["repo"]), args.branch) as tree:
+        names = milestone_names(tree, entry)
+        feedback = feedback_counts(tree, entry)
+        changed = diff_lines(tree, entry)
+    selected = select_logs(entry, slug, names, args.since, args.until)
+    attempts = [
+        load_attempt(path, name, LOG_STEM.match(path.stem).group(1))  # type: ignore[union-attr]
+        for name in names
+        for path in selected[name]
+    ]
+    return attempts, selected, feedback, changed
+
+
+def cmd_process(entry: dict[str, Any], args: argparse.Namespace) -> dict[str, Any]:
+    proc = entry["process"]
+    attempts, selected, feedback, changed = collect_attempts(entry, args)
+    if not attempts:
+        raise SystemExit("bench-score: no attempt logs matched the slug + window")
+
+    ordered = sorted(attempts, key=lambda a: (a.ts, a.path.name))
+    rebaselines = blind_rebaselines(ordered, proc)
+
+    milestones: dict[str, Any] = {}
+    for name in selected:
+        own = [a for a in attempts if a.milestone == name]
+        profiles = [profile_attempt(a, proc) for a in own]
+        if not profiles:
+            continue
+        mentions = [ident for a in own for ident in gen_ids(a)]
+        milestones[name] = {
+            "attempts": len(profiles),
+            "feedback_files": feedback.get(name, 0),
+            "attempts_consistent": len(profiles) == feedback.get(name, 0) + 1,
+            "wall_ms": sum(p["duration_ms"] or 0 for p in profiles),
+            "tool_calls": sum(p["tool_calls"] for p in profiles),
+            "malformed": sum(p["malformed"] for p in profiles),
+            "loops": sum(p["loops"] for p in profiles),
+            "deaths": sum(p["deaths"] for p in profiles),
+            "blind_rebaselines": rebaselines.get(name, 0),
+            "pushed_lines": sum(p["pushed_lines"] for p in profiles),
+            "result_cost_usd": sum(p["result_cost_usd"] or 0.0 for p in profiles),
+            "result_tokens": {
+                channel: sum(p["result_tokens"][channel] for p in profiles)
+                for channel in ("prompt", "completion", "cached")
+            },
+            "gen_ids": sorted(set(mentions)),
+            "gen_id_mentions": len(mentions),
+            "log_attempts": profiles,
+        }
+
+    tools: Counter[str] = Counter()
+    for attempt in attempts:
+        tools.update(name for name, _, _ in attempt.calls)
+    wall_ms = sum(m["wall_ms"] for m in milestones.values())
+    pushed = sum(m["pushed_lines"] for m in milestones.values())
+    first, last = ordered[0], ordered[-1]
+    span_ms = None
+    if first.ts and last.ts:
+        # Log stamps are local wall clock with no zone; the span is their difference.
+        start = time.mktime(time.strptime(first.ts, TS_FMT))
+        end = time.mktime(time.strptime(last.ts, TS_FMT))
+        span_ms = int((end - start) * 1000) + (last.final.get("duration_ms") or 0)
+
+    return {
+        "run": {
+            "model": first.model,
+            "run_id": first.ts,
+            "date": f"{first.ts[:4]}-{first.ts[4:6]}-{first.ts[6:8]}"
+            if first.ts
+            else "",
+            "wall_ms": wall_ms,
+            "wall": human_ms(wall_ms),
+            "span_ms": span_ms,
+            "span": human_ms(span_ms) if span_ms else None,
+            "milestone_count": len(milestones),
+            "attempts_total": len(attempts),
+            "attempts_per_milestone": "/".join(
+                str(milestones[name]["attempts"]) for name in sorted(milestones)
+            ),
+            "retries": len(attempts) - len(milestones),
+            "logs": [attempt.path.name for attempt in ordered],
+        },
+        "totals": {
+            "tool_calls": sum(tools.values()),
+            "tools": dict(sorted(tools.items())),
+            "malformed": sum(m["malformed"] for m in milestones.values()),
+            "loops": sum(m["loops"] for m in milestones.values()),
+            "deaths": sum(m["deaths"] for m in milestones.values()),
+            "blind_rebaselines": sum(rebaselines.values()),
+            "churn": {
+                "pushed_lines": pushed,
+                "diff_lines": changed,
+                "ratio": round(pushed / changed, 4) if changed else None,
+            },
+            "result_cost_usd": round(
+                sum(m["result_cost_usd"] for m in milestones.values()), 6
+            ),
+        },
+        "milestones": milestones,
+    }
+
+
+# --- cost -------------------------------------------------------------------
+
+TRANSIENT_STATUS = {408, 409, 425, 429, 500, 502, 503, 504}
+
+
+def classify(error: Exception) -> str:
+    if isinstance(error, urllib.error.HTTPError):
+        if error.code in (401, 403):
+            return "auth"
+        if error.code == 404:
+            return "expired"
+        if error.code in TRANSIENT_STATUS:
+            return "transient"
+        return "other"
+    if isinstance(error, urllib.error.URLError | TimeoutError):
+        return "transient"
+    return "other"
+
+
+def fetch_generation(
+    endpoint: str, token: str, ident: str, budget: dict[str, Any]
+) -> tuple[str, dict[str, Any] | None, str | None]:
+    request = urllib.request.Request(
+        f"{endpoint}?id={ident}", headers={"Authorization": f"Bearer {token}"}
+    )
+    failure = "other"
+    for attempt in range(int(budget["retries"]) + 1):
+        try:
+            with urllib.request.urlopen(
+                request, timeout=float(budget["timeout_seconds"])
+            ) as response:
+                return ident, json.loads(response.read()).get("data") or {}, None
+        except Exception as error:  # noqa: BLE001 - every class is reported, none fatal
+            failure = classify(error)
+            if failure != "transient" or attempt == int(budget["retries"]):
+                return ident, None, failure
+            time.sleep(float(budget["backoff_seconds"]) * (2**attempt))
+    return ident, None, failure
+
+
+def cmd_cost(entry: dict[str, Any], args: argparse.Namespace) -> dict[str, Any]:
+    variable = entry["api_key_env"]
+    token = os.environ.get(variable)
+    if not token:
+        log(f"bench-score: environment variable {variable} is unset or empty")
+        raise SystemExit(2)
+
+    budget = dict(entry["cost"])
+    endpoint = args.endpoint or budget["endpoint"]
+    profile = (
+        json.loads(Path(args.process_json).read_text())
+        if args.process_json
+        else cmd_process(entry, args)
+    )
+
+    owner: dict[str, str] = {}
+    mentions = 0
+    for name in sorted(profile["milestones"]):
+        mentions += profile["milestones"][name]["gen_id_mentions"]
+        for ident in profile["milestones"][name]["gen_ids"]:
+            owner.setdefault(ident, name)
+
+    log(f"cost: {len(owner)} unique generation id(s) from {mentions} mention(s)")
+    with ThreadPoolExecutor(max_workers=int(budget["concurrency"])) as pool:
+        fetched = list(
+            pool.map(lambda i: fetch_generation(endpoint, token, i, budget), owner)
+        )
+
+    failures: Counter[str] = Counter()
+    per_milestone: dict[str, dict[str, float]] = {
+        name: {"cost": 0.0, "prompt": 0, "completion": 0, "cached": 0, "ids": 0}
+        for name in profile["milestones"]
+    }
+    for ident, data, failure in fetched:
+        if data is None:
+            failures[failure or "other"] += 1
+            continue
+        bucket = per_milestone[owner[ident]]
+        bucket["cost"] += float(data.get("total_cost") or 0.0)
+        bucket["prompt"] += int(data.get("native_tokens_prompt") or 0)
+        bucket["completion"] += int(data.get("native_tokens_completion") or 0)
+        bucket["cached"] += int(data.get("native_tokens_cached") or 0)
+        bucket["ids"] += 1
+
+    for bucket in per_milestone.values():
+        bucket["cost"] = round(bucket["cost"], 6)
+
+    total_cost = round(sum(b["cost"] for b in per_milestone.values()), 6)
+    fallback = round(profile["totals"]["result_cost_usd"], 6)
+    degraded = bool(sum(failures.values()))
+    if degraded:
+        for name, bucket in per_milestone.items():
+            for channel in ("prompt", "completion", "cached"):
+                bucket[channel] = profile["milestones"][name]["result_tokens"][channel]
+    return {
+        "source": "ndjson-fallback" if degraded else "openrouter",
+        "endpoint": endpoint,
+        "total_cost_usd": fallback if degraded else total_cost,
+        "openrouter_cost_usd": total_cost,
+        "fallback_cost_usd": fallback,
+        "fallback_label": "Claude Code's own pricing, not OpenRouter billing"
+        if degraded
+        else None,
+        "unique_ids": len(owner),
+        "id_mentions": mentions,
+        "fetched": sum(1 for _, data, _ in fetched if data is not None),
+        "failures": dict(sorted(failures.items())),
+        "tokens": {
+            "prompt": sum(int(b["prompt"]) for b in per_milestone.values()),
+            "completion": sum(int(b["completion"]) for b in per_milestone.values()),
+            "cached": sum(int(b["cached"]) for b in per_milestone.values()),
+        },
+        "milestones": per_milestone,
+    }
+
+
+# --- scoring ----------------------------------------------------------------
+
+
+def band(value: float, full_max: float, zero_min: float) -> float:
+    if value <= full_max:
+        return 1.0
+    if value >= zero_min:
+        return 0.0
+    return (zero_min - value) / (zero_min - full_max)
+
+
+def component(
+    name: str, weight: float, share: float, arithmetic: str
+) -> dict[str, Any]:
+    return {
+        "id": name,
+        "weight": weight,
+        "earned": round(weight * share, 2),
+        "arithmetic": arithmetic,
+    }
+
+
+def score_code(
+    entry: dict[str, Any],
+    gates: dict[str, Any],
+    corpus: dict[str, Any],
+    mutations: dict[str, Any] | None,
+) -> dict[str, Any]:
+    weights = entry["weights"]["code"]
+    limits = entry["weights"]["thresholds"]
+    parts: list[dict[str, Any]] = []
+    for name, weight in weights["gates"].items():
+        passed = bool(gates[name]["pass"])
+        parts.append(
+            component(
+                f"gates.{name}",
+                weight,
+                1.0 if passed else 0.0,
+                f"{'pass' if passed else 'fail'} → {weight if passed else 0}",
+            )
+        )
+
+    aggregate = corpus["aggregate"]
+    recall = aggregate["recall"]
+    gaps = aggregate["gaps"]
+    ratio = aggregate["wildcard_line_ratio"]
+    quality = weights["corpus"]
+    parts.append(
+        component(
+            "corpus.recall",
+            quality["recall"],
+            recall["matched"] / recall["total"] if recall["total"] else 0.0,
+            f"{recall['matched']}/{recall['total']} etalon names × {quality['recall']}",
+        )
+    )
+    parts.append(
+        component(
+            "corpus.four_channel",
+            quality["four_channel"],
+            aggregate["four_channel_pct"] / 100.0,
+            f"{aggregate['four_channel_cases']}/{aggregate['case_count']} cases × {quality['four_channel']}",
+        )
+    )
+    parts.append(
+        component(
+            "corpus.gaps",
+            quality["gaps"],
+            gaps["matched"] / gaps["total"] if gaps["total"] else 0.0,
+            f"{gaps['matched']}/{gaps['total']} gap names × {quality['gaps']}",
+        )
+    )
+    parts.append(
+        component(
+            "corpus.wildcard",
+            quality["wildcard"],
+            band(ratio, limits["wildcard_full_max"], limits["wildcard_zero_min"]),
+            f"wildcard line ratio {ratio} against band {limits['wildcard_full_max']}–{limits['wildcard_zero_min']}",
+        )
+    )
+
+    excluded: list[str] = []
+    if mutations is None:
+        excluded.append("corpus.mutation")
+    else:
+        killed, total = mutations["killed"], mutations["total"]
+        parts.append(
+            component(
+                "corpus.mutation",
+                quality["mutation"],
+                killed / total if total else 0.0,
+                f"{killed}/{total} mutants killed × {quality['mutation']}",
+            )
+        )
+    return finish(parts, excluded)
+
+
+def score_agentic(
+    entry: dict[str, Any], profile: dict[str, Any], outcome: str
+) -> dict[str, Any]:
+    weights = entry["weights"]["agentic"]
+    penalties = entry["weights"]["penalties"]
+    limits = entry["weights"]["thresholds"]
+    totals = profile["totals"]
+    run = profile["run"]
+    parts: list[dict[str, Any]] = []
+
+    retries = run["retries"]
+    if outcome == "pass":
+        lost = penalties["retry"] * retries
+        earned = max(weights["attempts"] - lost, 0)
+        arithmetic = f"{weights['attempts']} − {penalties['retry']}×{retries} retries"
+    else:
+        earned = 0
+        arithmetic = f"{outcome} → 0"
+    parts.append(
+        component(
+            "attempts", weights["attempts"], earned / weights["attempts"], arithmetic
+        )
+    )
+
+    blind = totals["blind_rebaselines"]
+    earned = max(weights["rebaseline"] - penalties["rebaseline"] * blind, 0)
+    parts.append(
+        component(
+            "rebaseline",
+            weights["rebaseline"],
+            earned / weights["rebaseline"],
+            f"{weights['rebaseline']} − {penalties['rebaseline']}×{blind} blind rebaselines",
+        )
+    )
+
+    lost = (
+        penalties["malformed"] * totals["malformed"]
+        + penalties["loop"] * totals["loops"]
+        + penalties["death"] * totals["deaths"]
+    )
+    earned = max(weights["tool_discipline"] - lost, 0)
+    parts.append(
+        component(
+            "tool_discipline",
+            weights["tool_discipline"],
+            earned / weights["tool_discipline"],
+            f"{weights['tool_discipline']} − {penalties['malformed']}×{totals['malformed']} malformed"
+            f" − {penalties['loop']}×{totals['loops']} loops − {penalties['death']}×{totals['deaths']} deaths",
+        )
+    )
+
+    churn = totals["churn"]["ratio"]
+    excluded: list[str] = []
+    if churn is None:
+        excluded.append("churn")
+    else:
+        parts.append(
+            component(
+                "churn",
+                weights["churn"],
+                band(churn, limits["churn_full_max"], limits["churn_zero_min"]),
+                f"{totals['churn']['pushed_lines']} pushed ÷ {totals['churn']['diff_lines']} diff"
+                f" = {churn}× against band {limits['churn_full_max']}–{limits['churn_zero_min']}",
+            )
+        )
+    return finish(parts, excluded)
+
+
+def finish(parts: list[dict[str, Any]], excluded: list[str]) -> dict[str, Any]:
+    available = sum(part["weight"] for part in parts)
+    earned = round(sum(part["earned"] for part in parts), 2)
+    return {
+        "components": parts,
+        "earned": earned,
+        "available": available,
+        "excluded": excluded,
+        "score": round(100.0 * earned / available, 2) if available else 0.0,
+    }
+
+
+def outcome_of(gates: dict[str, Any]) -> str:
+    statuses = gates.get("milestones", {}).get("statuses") or {}
+    for name in sorted(statuses):
+        status = statuses[name]
+        if status != "done":
+            return (
+                status if status.startswith("fail@") else f"fail@{name.split('-')[0]}"
+            )
+    return "pass"
+
+
+# --- report -----------------------------------------------------------------
+
+
+def table(headers: list[str], rows: list[list[str]]) -> str:
+    lines = ["| " + " | ".join(headers) + " |"]
+    lines.append("| " + " | ".join("---" for _ in headers) + " |")
+    lines += ["| " + " | ".join(row) + " |" for row in rows]
+    return "\n".join(lines)
+
+
+def compact(count: int) -> str:
+    if count >= 1_000_000:
+        return f"{count / 1_000_000:.1f}M"
+    if count >= 1_000:
+        return f"{count / 1_000:.1f}k"
+    return str(count)
+
+
+def layer(args: argparse.Namespace, name: str, compute) -> dict[str, Any]:
+    supplied = getattr(args, f"{name}_json")
+    if supplied:
+        log(f"report: {name} taken from {supplied}")
+        return json.loads(Path(supplied).read_text())
+    return compute()
+
+
+def render_detail(
+    entry: dict[str, Any],
+    args: argparse.Namespace,
+    row: dict[str, str],
+    gates: dict[str, Any],
+    corpus: dict[str, Any],
+    profile: dict[str, Any],
+    cost: dict[str, Any],
+    code: dict[str, Any],
+    agentic: dict[str, Any],
+) -> str:
+    run = profile["run"]
+    aggregate = corpus["aggregate"]
+    front = {
+        "benchmark": entry["id"],
+        "model": run["model"],
+        "branch": args.branch,
+        "run_id": run["run_id"],
+        "date": run["date"],
+        "outcome": row["outcome"],
+        "code": code["score"],
+        "agentic": agentic["score"],
+        "review": None,
+        "status": "measuring",
+    }
+    blocks = [
+        "---\n" + yaml.safe_dump(front, sort_keys=False).strip() + "\n---",
+        f"# Benchmark run — {run['model']}",
+        f"Branch `{args.branch}` scored against the `{entry['id']}` registry entry, baseline `{entry['baseline']}`. Every number below is computed by `bench-score`; the history row in [history.md](../history.md) is this file's summary.",
+        "## Summary",
+        table(
+            ["field", "value"],
+            [[key, row[key]] for key in entry["history_columns"] if key != "run"],
+        ),
+        "## Gates",
+        table(
+            ["check", "verdict", "evidence"],
+            [
+                [
+                    name,
+                    "pass" if gates[name]["pass"] else "**fail**",
+                    gates[name]["evidence"],
+                ]
+                for name in sorted(gates)
+            ],
+        ),
+        "## Corpus quality",
+        table(
+            ["metric", "value", "evidence"],
+            [
+                ["cases", str(aggregate["case_count"]), f"`{entry['cases_dir']}`"],
+                [
+                    "etalon recall",
+                    f"{aggregate['recall']['matched']}/{aggregate['recall']['total']} ({aggregate['recall']['pct']}%)",
+                    "exact case-name matches against the frozen etalon list",
+                ],
+                [
+                    "gap cases",
+                    f"{aggregate['gaps']['matched']}/{aggregate['gaps']['total']}",
+                    "cases with no unit-test counterpart",
+                ],
+                [
+                    "four-channel cases",
+                    f"{aggregate['four_channel_cases']}/{aggregate['case_count']} ({aggregate['four_channel_pct']}%)",
+                    "exit + stdout + stderr + expected all asserted",
+                ],
+                [
+                    "wildcard line ratio",
+                    str(aggregate["wildcard_line_ratio"]),
+                    f"{aggregate['wildcard_lines']} wildcarded of {aggregate['asserted_lines']} asserted lines",
+                ],
+            ],
+        ),
+        "## Process profile",
+        table(
+            [
+                "milestone",
+                "attempts",
+                "feedback files",
+                "wall",
+                "tool calls",
+                "malformed",
+                "loops",
+                "deaths",
+                "blind rebaselines",
+                "pushed lines",
+            ],
+            [
+                [
+                    name,
+                    str(entry_["attempts"]),
+                    str(entry_["feedback_files"]),
+                    human_ms(entry_["wall_ms"]),
+                    str(entry_["tool_calls"]),
+                    str(entry_["malformed"]),
+                    str(entry_["loops"]),
+                    str(entry_["deaths"]),
+                    str(entry_["blind_rebaselines"]),
+                    str(entry_["pushed_lines"]),
+                ]
+                for name, entry_ in sorted(profile["milestones"].items())
+            ],
+        ),
+        f"Tool mix: {', '.join(f'{name} {count}' for name, count in profile['totals']['tools'].items())}. Worker wall clock {run['wall']} across {run['attempts_total']} attempt log(s); first log start to last log end spans {run['span']}.",
+        "## Cost",
+        table(
+            [
+                "milestone",
+                "generations",
+                "cost USD",
+                "native prompt",
+                "native completion",
+                "of which cached",
+            ],
+            [
+                [
+                    name,
+                    str(int(bucket["ids"])),
+                    f"{bucket['cost']:.4f}",
+                    compact(int(bucket["prompt"])),
+                    compact(int(bucket["completion"])),
+                    compact(int(bucket["cached"])),
+                ]
+                for name, bucket in sorted(cost["milestones"].items())
+            ],
+        ),
+        f"Source `{cost['source']}` via `{cost['endpoint']}`: {cost['fetched']}/{cost['unique_ids']} unique generation ids fetched from {cost['id_mentions']} id mentions, failures {cost['failures'] or 'none'}. OpenRouter total ${cost['openrouter_cost_usd']:.4f}; the ndjson fallback figure — {cost['fallback_label'] or "Claude Code's own pricing, not OpenRouter billing"} — is ${cost['fallback_cost_usd']:.4f}.",
+        "## Composites",
+        f"`code` scores {code['earned']} of {code['available']} available weight"
+        + (
+            f", with {', '.join(code['excluded'])} not measured and dropped from the denominator"
+            if code["excluded"]
+            else ""
+        )
+        + f" → **{code['score']}/100**.",
+        table(
+            ["component", "weight", "earned", "arithmetic"],
+            [
+                [p["id"], str(p["weight"]), str(p["earned"]), p["arithmetic"]]
+                for p in code["components"]
+            ],
+        ),
+        f"`agentic` scores {agentic['earned']} of {agentic['available']} available weight"
+        + (
+            f", with {', '.join(agentic['excluded'])} not measured and dropped from the denominator"
+            if agentic["excluded"]
+            else ""
+        )
+        + f" → **{agentic['score']}/100**.",
+        table(
+            ["component", "weight", "earned", "arithmetic"],
+            [
+                [p["id"], str(p["weight"]), str(p["earned"]), p["arithmetic"]]
+                for p in agentic["components"]
+            ],
+        ),
+        "## Review",
+        "Placeholder — the `model-benchmark` playbook's measure step replaces this section with one row per diff reviewer and its findings, and writes the mean grade into the `review` column of the history row.",
+        table(
+            ["reviewer", "grade /5", "findings"],
+            [["_pending_", "_pending_", "_pending_"]],
+        ),
+        "## History row",
+        table(
+            entry["history_columns"], [[row[key] for key in entry["history_columns"]]]
+        ),
+    ]
+    return "\n\n".join(blocks) + "\n"
+
+
+def cmd_report(entry: dict[str, Any], args: argparse.Namespace) -> str:
+    gates = layer(args, "gates", lambda: cmd_gates(entry, args.branch))
+    corpus = layer(args, "corpus", lambda: cmd_corpus(entry, args.branch))
+    profile = layer(args, "process", lambda: cmd_process(entry, args))
+    cost = layer(args, "cost", lambda: cmd_cost(entry, args))
+    mutations = (
+        json.loads(Path(args.mutations_json).read_text())
+        if args.mutations_json
+        else None
+    )
+
+    outcome = outcome_of(gates)
+    code = score_code(entry, gates, corpus, mutations)
+    agentic = score_agentic(entry, profile, outcome)
+    run = profile["run"]
+    slug = model_slug_from_branch(entry, args.branch)
+    detail = f"{run['run_id']}-{slug}.md"
+    tokens = cost["tokens"]["prompt"] + cost["tokens"]["completion"]
+
+    row = {
+        "date": run["date"],
+        "model": f"`{run['model']}`",
+        "outcome": outcome,
+        "att": run["attempts_per_milestone"],
+        "code": f"{code['score']:.1f}",
+        "agentic": f"{agentic['score']:.1f}",
+        "review": "_pending_",
+        "diff": str(profile["totals"]["churn"]["diff_lines"]),
+        "tokens": compact(tokens),
+        "cost": f"${cost['total_cost_usd']:.2f}",
+        "wall": run["wall"],
+        "run": f"[{run['run_id']}](runs/{detail})",
+    }
+    body = render_detail(entry, args, row, gates, corpus, profile, cost, code, agentic)
+    line = "| " + " | ".join(row[key] for key in entry["history_columns"]) + " |"
+
+    target = args.registry.parent / entry["runs_dir"] / detail
+    if args.dry_run:
+        log(f"report: --dry-run, would write {target}")
+        return f"{line}\n\n{body}"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(body)
+    log(f"report: wrote {target}")
+    return line
+
+
 # --- entry point ------------------------------------------------------------
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(prog="bench-score")
-    parser.add_argument("subcommand", choices=["gates", "corpus"])
-    parser.add_argument("--benchmark", required=True)
-    parser.add_argument("--branch", required=True)
-    parser.add_argument("--registry", default=DEFAULT_REGISTRY, type=Path)
-    args = parser.parse_args()
+    subparsers = parser.add_subparsers(dest="subcommand", required=True)
 
+    def add(name: str, branch_required: bool = True) -> argparse.ArgumentParser:
+        sub = subparsers.add_parser(name)
+        sub.add_argument("--benchmark", required=True)
+        sub.add_argument("--branch", required=branch_required)
+        sub.add_argument("--registry", default=DEFAULT_REGISTRY, type=Path)
+        return sub
+
+    add("gates")
+    add("corpus")
+    for name in ("process", "cost", "report"):
+        sub = add(name, branch_required=name == "report")
+        sub.add_argument("--ndjson", action="append", default=[])
+        sub.add_argument("--since")
+        sub.add_argument("--until")
+        if name != "process":
+            sub.add_argument("--process-json")
+            sub.add_argument("--endpoint")
+
+    report = subparsers.choices["report"]
+    for name in ("gates", "corpus", "cost", "mutations"):
+        report.add_argument(f"--{name}-json")
+    report.add_argument("--dry-run", action="store_true")
+
+    args = parser.parse_args()
+    supplied = args.subcommand == "cost" and args.process_json
+    if args.subcommand in ("process", "cost") and not (
+        args.branch or args.ndjson or supplied
+    ):
+        parser.error(f"{args.subcommand}: one of --branch or --ndjson is required")
     entry = load_entry(args.registry, args.benchmark)
-    runner = {"gates": cmd_gates, "corpus": cmd_corpus}[args.subcommand]
-    json.dump(runner(entry, args.branch), sys.stdout, indent=2)
+
+    if args.subcommand == "report":
+        sys.stdout.write(cmd_report(entry, args) + "\n")
+        return
+    if args.subcommand == "gates":
+        payload = cmd_gates(entry, args.branch)
+    elif args.subcommand == "corpus":
+        payload = cmd_corpus(entry, args.branch)
+    elif args.subcommand == "process":
+        payload = cmd_process(entry, args)
+    else:
+        payload = cmd_cost(entry, args)
+    json.dump(payload, sys.stdout, indent=2)
     sys.stdout.write("\n")
 
 

@@ -1,0 +1,12 @@
+{"type":"system","subtype":"init","session_id":"fixture-malformed","model":"fixture/malformed-model"}
+{"type":"assistant","message":{"id":"gen-fixture-malformed-1","content":[{"type":"tool_use","id":"t1","name":"Edit","input":{"file_path":"/repo/a.py","old_string":"def gone():","new_string":"def here():"}}]}}
+{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"t1","is_error":true,"content":"Error: String to replace not found in file."}]}}
+{"type":"assistant","message":{"id":"gen-fixture-malformed-2","content":[{"type":"tool_use","id":"t2","name":"Write","input":{"file_path":"/repo/b.py"}}]}}
+{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"t2","is_error":true,"content":"InputValidationError: content: Field required"}]}}
+{"type":"assistant","message":{"id":"gen-fixture-malformed-3","content":[{"type":"tool_use","id":"t3","name":"Bash","input":{"command":"just e2e"}}]}}
+{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"t3","is_error":true,"content":"Exit code 1\n1 failed, 5 passed in 3.20s"}]}}
+{"type":"assistant","message":{"id":"gen-fixture-malformed-4","content":[{"type":"tool_use","id":"t4","name":"Write","input":{"file_path":"/repo/b.py","content":"def here():\n    return 1\n"}}]}}
+{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"t4","is_error":false,"content":"File created successfully at: /repo/b.py"}]}}
+{"type":"assistant","message":{"id":"gen-fixture-malformed-5","content":[{"type":"tool_use","id":"t5","name":"Bash","input":{"command":"just e2e"}}]}}
+{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"t5","is_error":false,"content":"6 passed in 3.40s"}]}}
+{"type":"result","subtype":"success","is_error":false,"duration_ms":300000,"num_turns":5,"stop_reason":"end_turn","total_cost_usd":0.75,"session_id":"fixture-malformed"}
