@@ -55,7 +55,7 @@ Assets live under `vault/benchmarks/`: `index.md` (registry, frontmatter = data)
 | 02 | [bench-score: gates and corpus quality](milestones/M02-bench-score-gates-corpus/M02-bench-score-gates-corpus.md) | 3 | done |
 | 03 | [bench-score: process profile, cost and scorecard emit](milestones/M03-bench-score-process-cost/M03-bench-score-process-cost.md) | 3 | done |
 | 04 | [Fixed mutation set and kill-rate scoring](milestones/M04-mutation-set/M04-mutation-set.md) | 3 | done |
-| 05 | [model-benchmark playbook, reviews and docs](milestones/M05-model-benchmark-playbook/M05-model-benchmark-playbook.md) | 5 | pending |
+| 05 | [model-benchmark playbook, reviews and docs](milestones/M05-model-benchmark-playbook/M05-model-benchmark-playbook.md) | 5 | done |
 
 ## Final Verification
 
