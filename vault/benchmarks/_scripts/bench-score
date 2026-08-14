@@ -6,11 +6,12 @@
 """Score a benchmark branch against a registry entry.
 
 Subcommands:
-  gates   — layer-1 pass/fail checks, re-run mechanically in a throwaway worktree
-  corpus  — corpus-quality metrics parsed out of the branch's .txtar cases
-  process — process profile read out of the worker's ndjson attempt logs
-  cost    — exact spend and native token counts from OpenRouter's generation API
-  report  — the two scorecard surfaces: history row + per-run detail markdown
+  gates     — layer-1 pass/fail checks, re-run mechanically in a throwaway worktree
+  corpus    — corpus-quality metrics parsed out of the branch's .txtar cases
+  mutations — kill rate of the frozen mutation set against the branch's corpus
+  process   — process profile read out of the worker's ndjson attempt logs
+  cost      — exact spend and native token counts from OpenRouter's generation API
+  report    — the two scorecard surfaces: history row + per-run detail markdown
 
 Every command run against the branch, every path it touches, every pattern it
 matches and every weight it scores with comes from the registry entry; only the
@@ -129,6 +130,16 @@ def run_command(tree: Path, spec: dict[str, Any], name: str) -> int:
     status = subprocess.call(argv, cwd=cwd, stdout=sys.stderr, stderr=sys.stderr)
     log(f"{name}: exit {status}")
     return status
+
+
+def capture_command(tree: Path, spec: dict[str, Any], name: str) -> tuple[int, str]:
+    """Run a registry command and return its exit code with stdout+stderr merged."""
+    argv = spec["argv"]
+    cwd = tree / spec["cwd"] if spec.get("cwd") else tree
+    log(f"{name}: running {' '.join(argv)} in {cwd}")
+    done = subprocess.run(argv, cwd=cwd, capture_output=True, text=True)
+    log(f"{name}: exit {done.returncode}")
+    return done.returncode, done.stdout + done.stderr
 
 
 def git_out(tree: Path, *args: str) -> str:
@@ -327,6 +338,90 @@ def cmd_corpus(entry: dict[str, Any], branch: str) -> dict[str, Any]:
                 "unmatched": sorted(gaps - names),
             },
         },
+    }
+
+
+# --- mutations --------------------------------------------------------------
+
+
+def git_apply(tree: Path, patch: Path, *flags: str) -> int:
+    return subprocess.call(
+        ["git", "apply", *flags, str(patch)],
+        cwd=tree,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+
+
+def run_mutant(
+    tree: Path,
+    spec: dict[str, Any],
+    failure_rx: re.Pattern[str],
+    patch: Path,
+) -> dict[str, Any]:
+    if git_apply(tree, patch, "--check") != 0:
+        log(f"mutations: {patch.name}: does not apply — not-applicable")
+        return {
+            "patch": patch.name,
+            "verdict": "not-applicable",
+            "exit": None,
+            "killed_by": [],
+            "evidence": "patch does not apply to the branch — the model changed the "
+            "mutated source, which is already a scope violation",
+        }
+
+    git_apply(tree, patch)
+    try:
+        status, output = capture_command(tree, spec, f"mutations: {patch.name}")
+    finally:
+        # Revert before anything else can fail, so no two patches are ever live at once.
+        git_apply(tree, patch, "-R")
+
+    killed_by = sorted({Path(m).name for m in failure_rx.findall(output)})
+    verdict = "killed" if status != 0 else "survived"
+    log(f"mutations: {patch.name}: {verdict} ({len(killed_by)} failing case(s))")
+    return {
+        "patch": patch.name,
+        "verdict": verdict,
+        "exit": status,
+        "killed_by": killed_by,
+        "evidence": ", ".join(killed_by)
+        if killed_by
+        else f"corpus exit {status} with no case named",
+    }
+
+
+def cmd_mutations(entry: dict[str, Any], branch: str) -> dict[str, Any]:
+    settings = entry["mutations"]
+    spec = entry["commands"][settings["command"]]
+    failure_rx = re.compile(settings["failure_pattern"], re.MULTILINE)
+    # Absolute: git apply runs with the worktree as cwd, not the registry's repo.
+    patches = sorted(p.resolve() for p in Path(entry["mutations_dir"]).glob("*.patch"))
+    if not patches:
+        raise SystemExit(f"bench-score: no patches under {entry['mutations_dir']}")
+    log(f"mutations: {len(patches)} patch(es) from {entry['mutations_dir']}")
+
+    with worktree(Path(entry["repo"]), branch) as tree:
+        results = [run_mutant(tree, spec, failure_rx, patch) for patch in patches]
+        dirty = git_out(tree, "status", "--short").split("\n")
+
+    killed = [r for r in results if r["verdict"] == "killed"]
+    survived = [r for r in results if r["verdict"] == "survived"]
+    inapplicable = [r for r in results if r["verdict"] == "not-applicable"]
+    total = len(killed) + len(survived)
+    return {
+        "command": " ".join(spec["argv"]),
+        "patch_count": len(patches),
+        "killed": len(killed),
+        "survived": len(survived),
+        "not_applicable": len(inapplicable),
+        "total": total,
+        "kill_rate": f"{len(killed)}/{total}",
+        "kill_rate_pct": pct(len(killed), total),
+        "survivors": [r["patch"] for r in survived],
+        "inapplicable": [r["patch"] for r in inapplicable],
+        "worktree_clean": not any(line.strip() for line in dirty),
+        "patches": results,
     }
 
 
@@ -1025,6 +1120,7 @@ def render_detail(
     row: dict[str, str],
     gates: dict[str, Any],
     corpus: dict[str, Any],
+    mutations: dict[str, Any],
     profile: dict[str, Any],
     cost: dict[str, Any],
     code: dict[str, Any],
@@ -1090,6 +1186,25 @@ def render_detail(
                     str(aggregate["wildcard_line_ratio"]),
                     f"{aggregate['wildcard_lines']} wildcarded of {aggregate['asserted_lines']} asserted lines",
                 ],
+            ],
+        ),
+        "## Mutation kills",
+        f"The frozen set at `{entry['mutations_dir']}` applied one patch at a time over the branch's corpus via `{mutations['command']}`: **{mutations['kill_rate']} killed** ({mutations['kill_rate_pct']}%)"
+        + (
+            f", {mutations['not_applicable']} not applicable and out of the denominator"
+            if mutations["not_applicable"]
+            else ""
+        )
+        + ".",
+        table(
+            ["patch", "verdict", "evidence"],
+            [
+                [
+                    f"`{result['patch']}`",
+                    "killed" if result["verdict"] == "killed" else f"**{result['verdict']}**",
+                    result["evidence"],
+                ]
+                for result in mutations["patches"]
             ],
         ),
         "## Process profile",
@@ -1192,13 +1307,9 @@ def render_detail(
 def cmd_report(entry: dict[str, Any], args: argparse.Namespace) -> str:
     gates = layer(args, "gates", lambda: cmd_gates(entry, args.branch))
     corpus = layer(args, "corpus", lambda: cmd_corpus(entry, args.branch))
+    mutations = layer(args, "mutations", lambda: cmd_mutations(entry, args.branch))
     profile = layer(args, "process", lambda: cmd_process(entry, args))
     cost = layer(args, "cost", lambda: cmd_cost(entry, args))
-    mutations = (
-        json.loads(Path(args.mutations_json).read_text())
-        if args.mutations_json
-        else None
-    )
 
     outcome = outcome_of(gates)
     code = score_code(entry, gates, corpus, mutations)
@@ -1222,7 +1333,9 @@ def cmd_report(entry: dict[str, Any], args: argparse.Namespace) -> str:
         "wall": run["wall"],
         "run": f"[{run['run_id']}](runs/{detail})",
     }
-    body = render_detail(entry, args, row, gates, corpus, profile, cost, code, agentic)
+    body = render_detail(
+        entry, args, row, gates, corpus, mutations, profile, cost, code, agentic
+    )
     line = "| " + " | ".join(row[key] for key in entry["history_columns"]) + " |"
 
     target = args.registry.parent / entry["runs_dir"] / detail
@@ -1251,6 +1364,7 @@ def main() -> None:
 
     add("gates")
     add("corpus")
+    add("mutations")
     for name in ("process", "cost", "report"):
         sub = add(name, branch_required=name == "report")
         sub.add_argument("--ndjson", action="append", default=[])
@@ -1280,6 +1394,8 @@ def main() -> None:
         payload = cmd_gates(entry, args.branch)
     elif args.subcommand == "corpus":
         payload = cmd_corpus(entry, args.branch)
+    elif args.subcommand == "mutations":
+        payload = cmd_mutations(entry, args.branch)
     elif args.subcommand == "process":
         payload = cmd_process(entry, args)
     else:

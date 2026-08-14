@@ -1,0 +1,12 @@
+diff --git a/booping-python/src/booping/commands/frontmatter_update.py b/booping-python/src/booping/commands/frontmatter_update.py
+index db3dacc..aab7e27 100644
+--- a/booping-python/src/booping/commands/frontmatter_update.py
++++ b/booping-python/src/booping/commands/frontmatter_update.py
+@@ -197,4 +197,4 @@ def _run(args: argparse.Namespace) -> None:
+         + [f"{k}={v}" for k, v in summary_values.items()]
+         + [f"{k}+={v}" for k, v in resolved_appends.items()]
+     )
+-    print(f"updated {plan_path}: {', '.join(parts)}", file=sys.stderr)
+\ No newline at end of file
++    print(f"updated {plan_path}: {', '.join(parts)}")
+\ No newline at end of file

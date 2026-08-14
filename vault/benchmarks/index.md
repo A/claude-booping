@@ -26,6 +26,9 @@ benchmarks:
       e2e_update:
         argv: [uv, run, pytest, e2e, --txtar-update]
         cwd: booping-python
+      mutation_e2e:
+        argv: [uv, run, pytest, e2e/cases/frontmatter-update, -q, --tb=no]
+        cwd: booping-python
     etalon_cases:
       - append-creates-a-list-on-an-absent-key.txtar
       - append-creates-a-list-on-a-null-key.txtar
@@ -66,6 +69,9 @@ benchmarks:
       - malformed-append-pair-is-rejected.txtar
       - a-real-macro-runs-and-its-output-lands.txtar
     mutations_dir: vault/benchmarks/mutations/frontmatter-update-e2e
+    mutations:
+      command: mutation_e2e
+      failure_pattern: "^FAILED\\s+(\\S+\\.txtar)"
     runs_dir: runs
     history_columns:
       [date, model, outcome, att, code, agentic, review, diff, tokens, cost, wall, run]
@@ -147,6 +153,7 @@ Scoring assets sit beside this file: [history.md](history.md) is the append-only
 - `etalon_cases` — the reference corpus frozen from the opus run (`dc0be24` + `0648787`); `gap_cases` are the subset with no pre-existing unit-test counterpart, the cases a model only writes by reading the CLI rather than by translating tests.
 - `weights` — composite scoring weights as data. Each composite sums to 100: `code` splits 40 gates / 60 corpus, `agentic` splits across the four process signals. `penalties` are the per-incident deductions inside `attempts`, `rebaseline` and `tool_discipline`; `thresholds` are the ratio bands where `wildcard` and `churn` earn their full weight or nothing, interpolated linearly between. A layer that was not measured (no mutation run yet) drops out of the composite's denominator and is named in the run detail.
 - `process` — how the worker's ndjson logs are read: which tools count as edits and where their payload sits, the regexes that recognise an e2e invocation and its green/red verdict, the `--txtar-update` marker, and the payload signatures that classify a tool error as a malformed input or a context death. `loop_threshold` is how many consecutive identical tool+input calls make a degenerate loop.
+- `mutations_dir` and `mutations` — where the frozen patch set lives (relative to the repo holding this registry) and how a mutant is judged: `command` names the `commands` entry re-run once per patch, narrowed to the corpus under test, and `failure_pattern` is the regex whose first group pulls a failing case name out of that command's output, so a kill carries the names that caught it. The set is frozen per benchmark id — a new baseline is a new entry with its own directory, never a regeneration in place.
 - `cost` — the OpenRouter generation endpoint plus the retry, concurrency and timeout budget for querying it. `--endpoint` overrides the URL per invocation.
 - `runs_dir` and `history_columns` — where run detail reports land (relative to this file) and the exact column order of [history.md](history.md)'s table, so the emitted row cannot drift from its header.
 - `api_key_env` names the environment variable holding the OpenRouter token. The token itself is never config.
