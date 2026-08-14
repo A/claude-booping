@@ -1,0 +1,39 @@
+Whitespace-bearing values round-trip through the file rather than being mangled or
+rejected: a tab lands as a double-quoted escape and a newline as a folded single-quoted
+block, each reloading as the text that was given. The newline arrives through a Jinja string
+literal since a command line cannot carry a raw one.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md summary='hello	world' 'lined={{ "x\ny" }}'
+
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,4 +1,8 @@
+ ---
+ title: Foo
++summary: "hello\tworld"
++lined: 'x
++
++  y'
+ ---
+ # Body
+-- stderr --
+updated plan.md: summary=hello	world, lined=x
+y
+-- expected/cwd/plan.md --
+---
+title: Foo
+summary: "hello\tworld"
+lined: 'x
+
+  y'
+---
+# Body
