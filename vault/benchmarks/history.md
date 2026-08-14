@@ -12,6 +12,7 @@ Columns: `date` run date · `model` OpenRouter model id · `outcome` `pass` or `
 | 2026-08-14 | `x-ai/grok-4.6`                   | pass          | 1/1/1 | 91.3 | 80.0    | 3.1    | 1634 | 4.9M   | $3.68 | 46m23s | [20260814-195257](runs/20260814-195257-x-ai-grok-4-6.md)                   |
 | 2026-08-14 | `claude-opus-5` [^2]              | pass          | 1/1/1 | 91.2 | 90.0    | 4.63   | 1832 | 5.1M   | n/a   | 13m19s | [20260814-210820](runs/20260814-210820-claude-opus-5-medium-booping-developer.md) |
 | 2026-08-14 | `google/gemini-3.7-flash` | pass | 1/1/1 | 76.7 | 80.0 | 2.75 | 1564 | 9.4M | $1.13 | 21m45s | [20260814-211700](runs/20260814-211700-google-gemini-3-7-flash.md) |
+| 2026-08-14 | `qwen/qwen3.6-27b` | pass | 2/1/1 | 87.4 | 63.0 | 3.25 | 1514 | 5.4M | $2.54 | 29m13s | [20260814-211257](runs/20260814-211257-qwen-qwen3-6-27b.md) |
 
 [^1]: Both M01 attempts were terminated by an OpenRouter `400 Provider returned error`, not by the model; the `deaths` detector does not recognise a provider abort, so `agentic` carries no death penalty. Not a clean read on the model — re-run to score it.
 
