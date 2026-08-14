@@ -1,0 +1,18 @@
+Nothing to do exits 1 with stderr message.
+
+-- fixtures/cwd/plan.md ---
+---
+title: Test Plan
+status: backlog
+---
+
+# Test Plan Content
+
+This is a test plan.
+-- cmd --
+booping frontmatter-update plan.md
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: plan not found: plan.md

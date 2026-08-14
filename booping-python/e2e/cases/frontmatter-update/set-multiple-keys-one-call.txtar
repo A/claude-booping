@@ -1,0 +1,44 @@
+Sets multiple keys in one call, preserving existing keys and body.
+
+-- fixtures/cwd/plan.md --
+---
+title: Test Plan
+description: A test plan
+created: 2024-01-01
+---
+
+# Test Plan Content
+
+This is a test plan.
+-- cmd --
+booping frontmatter-update plan.md title="Updated Title" status="in-progress" priority="high"
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,7 +1,9 @@
+ ---
+-title: Test Plan
++title: Updated Title
+ description: A test plan
+ created: 2024-01-01
++status: in-progress
++priority: high
+ ---
+ 
+ # Test Plan Content
+-- expected/cwd/plan.md --
+---
+title: Updated Title
+description: A test plan
+created: 2024-01-01
+status: in-progress
+priority: high
+---
+
+# Test Plan Content
+
+This is a test plan.
+-- stderr --
+updated plan.md: title=Updated Title, status=in-progress, priority=high

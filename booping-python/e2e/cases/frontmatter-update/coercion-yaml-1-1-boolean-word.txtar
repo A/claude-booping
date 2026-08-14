@@ -1,0 +1,17 @@
+YAML-1.1 boolean word stays quoted string.
+
+-- fixtures/cwd/plan.md ---
+---
+title: Test Plan
+---
+
+# Test Plan Content
+
+This is a test plan.
+-- cmd --
+booping frontmatter-update plan.md summary=yes
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: plan not found: plan.md

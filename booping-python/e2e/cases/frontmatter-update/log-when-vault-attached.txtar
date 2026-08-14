@@ -1,0 +1,27 @@
+.booping.log gains one [..]-wildcarded line when a vault is attached.
+
+-- fixtures/cwd/.booping --
+project_name: test-project
+vault_path: ./vault
+-- fixtures/cwd/vault/config.yaml --
+core:
+  test_macro:
+    command: ["echo", "test"]
+-- fixtures/cwd/vault/plan.md ---
+---
+title: Test Plan
+status: backlog
+---
+
+# Test Plan Content
+
+This is a test plan.
+-- cmd --
+booping frontmatter-update vault/plan.md status=in-progress
+-- exit --
+1
+-- stdout --
+-- expected/cwd/vault/.booping.log --
+[..]Z: [frontmatter-update] vault/plan.md -status
+-- stderr --
+error: plan not found: vault/plan.md

@@ -1,0 +1,17 @@
+Newline/tab-bearing value round-trips through the file unmangled.
+
+-- fixtures/cwd/plan.md ---
+---
+title: Test Plan
+---
+
+# Test Plan Content
+
+This is a test plan.
+-- cmd --
+booping frontmatter-update plan.md description="Multi-line description with tabs"
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: plan not found: plan.md

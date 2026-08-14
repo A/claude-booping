@@ -1,0 +1,19 @@
+Unified diff shape on stdout with ---/+++/@@ header lines.
+
+-- fixtures/cwd/plan.md ---
+---
+title: Test Plan
+status: backlog
+sp: 5
+---
+
+# Test Plan Content
+
+This is a test plan.
+-- cmd --
+booping frontmatter-update plan.md status=in-progress planned=2024-01-15
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: plan not found: plan.md

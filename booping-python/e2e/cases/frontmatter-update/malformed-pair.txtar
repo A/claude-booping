@@ -1,0 +1,17 @@
+Malformed pair exits 1 with stderr message.
+
+-- fixtures/cwd/plan.md ---
+---
+title: Test Plan
+---
+
+# Test Plan Content
+
+This is a test plan.
+-- cmd --
+booping frontmatter-update plan.md noequals
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: plan not found: plan.md

@@ -1,0 +1,17 @@
+Coerces boolean value to unquoted YAML.
+
+-- fixtures/cwd/plan.md ---
+---
+title: Test Plan
+---
+
+# Test Plan Content
+
+This is a test plan.
+-- cmd --
+booping frontmatter-update plan.md blocked=true
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: plan not found: plan.md

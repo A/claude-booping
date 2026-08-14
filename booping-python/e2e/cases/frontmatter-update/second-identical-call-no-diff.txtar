@@ -1,0 +1,38 @@
+Second identical call prints no diff and exits 0.
+
+-- fixtures/cwd/plan.md --
+---
+title: Test Plan
+description: A test plan
+created: 2024-01-01
+---
+
+# Test Plan Content
+
+This is a test plan.
+-- cmd --
+booping frontmatter-update plan.md title="Updated Title"
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,5 +1,5 @@
+ ---
+-title: Test Plan
++title: Updated Title
+ description: A test plan
+ created: 2024-01-01
+ ---
+-- expected/cwd/plan.md --
+---
+title: Updated Title
+description: A test plan
+created: 2024-01-01
+---
+
+# Test Plan Content
+
+This is a test plan.
+-- stderr --
+updated plan.md: title=Updated Title

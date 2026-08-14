@@ -1,0 +1,35 @@
+Coerces integer value to unquoted YAML.
+
+-- fixtures/cwd/plan.md --
+---
+title: Test Plan
+---
+
+# Test Plan Content
+
+This is a test plan.
+-- cmd --
+booping frontmatter-update plan.md sp=23
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,5 +1,6 @@
+ ---
+ title: Test Plan
++sp: 23
+ ---
+ 
+ # Test Plan Content
+-- expected/cwd/plan.md --
+---
+title: Test Plan
+sp: 23
+---
+
+# Test Plan Content
+
+This is a test plan.
+-- stderr --
+updated plan.md: sp=23

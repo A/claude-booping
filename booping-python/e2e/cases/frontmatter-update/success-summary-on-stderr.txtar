@@ -1,0 +1,18 @@
+Success summary line on stderr, not stdout.
+
+-- fixtures/cwd/plan.md ---
+---
+title: Test Plan
+status: backlog
+---
+
+# Test Plan Content
+
+This is a test plan.
+-- cmd --
+booping frontmatter-update plan.md status=in-progress
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: plan not found: plan.md
