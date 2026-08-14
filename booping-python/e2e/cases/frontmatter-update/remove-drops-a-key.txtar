@@ -1,0 +1,38 @@
+A --remove drops the named key from the frontmatter, leaving the other keys and the body
+untouched.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+business_goal: Users find widgets faster.
+status: backlog
+---
+# My Plan
+
+- [ ] 3 SP: Task one
+- [ ] 2 SP: Task two
+-- cmd --
+booping frontmatter-update plan.md --remove business_goal
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,6 +1,5 @@
+ ---
+ title: Foo
+-business_goal: Users find widgets faster.
+ status: backlog
+ ---
+ # My Plan
+-- stderr --
+updated plan.md: -business_goal
+-- expected/cwd/plan.md --
+---
+title: Foo
+status: backlog
+---
+# My Plan
+
+- [ ] 3 SP: Task one
+- [ ] 2 SP: Task two

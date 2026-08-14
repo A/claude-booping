@@ -1,0 +1,45 @@
+Appending a value already in the list changes no bytes, so a second identical call prints
+no diff and exits 0.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+status: backlog
+sessions: null
+---
+# My Plan
+
+- [ ] 3 SP: Task one
+- [ ] 2 SP: Task two
+-- cmd --
+booping frontmatter-update plan.md --append sessions=abc-123
+booping frontmatter-update plan.md --append sessions=abc-123
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,7 +1,8 @@
+ ---
+ title: Foo
+ status: backlog
+-sessions: null
++sessions:
++- abc-123
+ ---
+ # My Plan
+ 
+-- stderr --
+updated plan.md: sessions+=abc-123
+updated plan.md: sessions+=abc-123
+-- expected/cwd/plan.md --
+---
+title: Foo
+status: backlog
+sessions:
+- abc-123
+---
+# My Plan
+
+- [ ] 3 SP: Task one
+- [ ] 2 SP: Task two

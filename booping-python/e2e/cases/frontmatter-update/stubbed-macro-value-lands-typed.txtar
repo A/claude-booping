@@ -1,0 +1,42 @@
+A macro call resolved from a stubbed config lands its pinned value in the file through the
+same typed write as a literal — the stub short-circuits, so nothing executes.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+status: backlog
+---
+# My Plan
+
+- [ ] 3 SP: Task one
+- [ ] 2 SP: Task two
+-- fixtures/xdg/booping/config.yaml --
+macro_stubs:
+  core.macros.date: 19700101-00-00
+-- cmd --
+booping frontmatter-update plan.md created="{{ macro('core.macros.date') }}"
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,6 +1,7 @@
+ ---
+ title: Foo
+ status: backlog
++created: 19700101-00-00
+ ---
+ # My Plan
+ 
+-- stderr --
+updated plan.md: created=19700101-00-00
+-- expected/cwd/plan.md --
+---
+title: Foo
+status: backlog
+created: 19700101-00-00
+---
+# My Plan
+
+- [ ] 3 SP: Task one
+- [ ] 2 SP: Task two

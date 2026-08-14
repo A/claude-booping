@@ -1,0 +1,44 @@
+A macro declared as a real argv command in the global config executes through the CLI
+subprocess: the command's own output lands in the frontmatter, and nothing could have
+produced it but the run.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+status: backlog
+---
+# My Plan
+
+- [ ] 3 SP: Task one
+- [ ] 2 SP: Task two
+-- fixtures/xdg/booping/config.yaml --
+core:
+  macros:
+    count: ["echo", "1"]
+-- cmd --
+booping frontmatter-update plan.md attempts="{{ macro('core.macros.count') }}"
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,6 +1,7 @@
+ ---
+ title: Foo
+ status: backlog
++attempts: 1
+ ---
+ # My Plan
+ 
+-- stderr --
+updated plan.md: attempts=1
+-- expected/cwd/plan.md --
+---
+title: Foo
+status: backlog
+attempts: 1
+---
+# My Plan
+
+- [ ] 3 SP: Task one
+- [ ] 2 SP: Task two

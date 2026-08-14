@@ -1,0 +1,28 @@
+A value that is not valid Jinja fails with exit 2, naming the broken value on stderr, and
+writes nothing.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+status: backlog
+---
+# My Plan
+
+- [ ] 3 SP: Task one
+- [ ] 2 SP: Task two
+-- cmd --
+booping frontmatter-update plan.md value="{{ macro( }}"
+-- exit --
+2
+-- stdout --
+-- stderr --
+error: value '{{ macro( }}': TemplateSyntaxError: unexpected '}', expected ')'
+-- expected/cwd/plan.md --
+---
+title: Foo
+status: backlog
+---
+# My Plan
+
+- [ ] 3 SP: Task one
+- [ ] 2 SP: Task two

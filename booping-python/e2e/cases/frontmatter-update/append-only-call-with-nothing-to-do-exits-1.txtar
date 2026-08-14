@@ -1,0 +1,31 @@
+Naming no pairs, no --remove and no --append value is still nothing to do: the append
+path does not make an empty call a success, so it fails with exit 1, saying what to
+provide.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+status: backlog
+sessions: null
+---
+# My Plan
+
+- [ ] 3 SP: Task one
+- [ ] 2 SP: Task two
+-- cmd --
+booping frontmatter-update plan.md
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: nothing to do: provide key=value pairs, --append and/or --remove
+-- expected/cwd/plan.md --
+---
+title: Foo
+status: backlog
+sessions: null
+---
+# My Plan
+
+- [ ] 3 SP: Task one
+- [ ] 2 SP: Task two

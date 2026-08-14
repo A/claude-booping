@@ -1,0 +1,40 @@
+A --append onto an existing list adds the value as a new item, keeping the existing ones.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+sessions:
+- abc-123
+---
+# My Plan
+
+- [ ] 3 SP: Task one
+- [ ] 2 SP: Task two
+-- cmd --
+booping frontmatter-update plan.md --append sessions=def-456
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -2,6 +2,7 @@
+ title: Foo
+ sessions:
+ - abc-123
++- def-456
+ ---
+ # My Plan
+ 
+-- stderr --
+updated plan.md: sessions+=def-456
+-- expected/cwd/plan.md --
+---
+title: Foo
+sessions:
+- abc-123
+- def-456
+---
+# My Plan
+
+- [ ] 3 SP: Task one
+- [ ] 2 SP: Task two

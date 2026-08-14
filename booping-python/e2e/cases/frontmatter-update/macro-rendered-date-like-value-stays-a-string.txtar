@@ -1,0 +1,42 @@
+A macro-rendered value that would reload as a timestamp lands single-quoted, so the
+frontmatter keeps the string the stubbed macro produced.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+status: backlog
+---
+# My Plan
+
+- [ ] 3 SP: Task one
+- [ ] 2 SP: Task two
+-- fixtures/xdg/booping/config.yaml --
+macro_stubs:
+  core.macros.date: "1970-01-01 00:00:00"
+-- cmd --
+booping frontmatter-update plan.md completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M:%S') }}"
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,6 +1,7 @@
+ ---
+ title: Foo
+ status: backlog
++completed: '1970-01-01 00:00:00'
+ ---
+ # My Plan
+ 
+-- stderr --
+updated plan.md: completed=1970-01-01 00:00:00
+-- expected/cwd/plan.md --
+---
+title: Foo
+status: backlog
+completed: '1970-01-01 00:00:00'
+---
+# My Plan
+
+- [ ] 3 SP: Task one
+- [ ] 2 SP: Task two

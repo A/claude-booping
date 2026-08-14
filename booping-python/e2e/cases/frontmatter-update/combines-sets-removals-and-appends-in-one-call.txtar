@@ -1,0 +1,46 @@
+A set, a --remove and a --append in one call all apply, and the summary lists removals
+first, then sets, then appends.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+status: backlog
+stale: x
+sessions: null
+---
+# My Plan
+
+- [ ] 3 SP: Task one
+- [ ] 2 SP: Task two
+-- cmd --
+booping frontmatter-update plan.md status=in-progress --remove stale --append sessions=abc-123
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,8 +1,8 @@
+ ---
+ title: Foo
+-status: backlog
+-stale: x
+-sessions: null
++status: in-progress
++sessions:
++- abc-123
+ ---
+ # My Plan
+ 
+-- stderr --
+updated plan.md: -stale, status=in-progress, sessions+=abc-123
+-- expected/cwd/plan.md --
+---
+title: Foo
+status: in-progress
+sessions:
+- abc-123
+---
+# My Plan
+
+- [ ] 3 SP: Task one
+- [ ] 2 SP: Task two
