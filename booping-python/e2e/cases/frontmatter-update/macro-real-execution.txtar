@@ -1,0 +1,32 @@
+Proving live macro execution through the CLI subprocess boundary.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  macros:
+    echo: ["echo", "1"]
+-- fixtures/cwd/plan.md --
+---
+---
+# Plan
+Body.
+-- cmd --
+booping frontmatter-update plan.md res="{{ macro('core.macros.echo') }}"
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,4 +1,5 @@
+ ---
++res: 1
+ ---
+ # Plan
+ Body.
+-- stderr --
+updated plan.md: res=1
+-- expected/cwd/plan.md --
+---
+res: 1
+---
+# Plan
+Body.

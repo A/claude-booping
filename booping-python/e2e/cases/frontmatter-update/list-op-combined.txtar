@@ -1,0 +1,32 @@
+Combined pairs of removals and appends in one call.
+
+-- fixtures/cwd/plan.md --
+---
+list: [a]
+key: val
+---
+# Plan
+Body.
+-- cmd --
+booping frontmatter-update plan.md --append list=b --remove key
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,6 +1,5 @@
+ ---
+-list: [a]
+-key: val
++list: [a, b]
+ ---
+ # Plan
+ Body.
+-- stderr --
+updated plan.md: -key, list+=b
+-- expected/cwd/plan.md --
+---
+list: [a, b]
+---
+# Plan
+Body.

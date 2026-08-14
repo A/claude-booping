@@ -1,0 +1,14 @@
+Malformed Jinja exits 2.
+
+-- fixtures/cwd/plan.md --
+---
+---
+# Plan
+Body.
+-- cmd --
+booping frontmatter-update plan.md key="{{ macro('core.macros.date' }}"
+-- exit --
+2
+-- stdout --
+-- stderr --
+error: value "{{ macro('core.macros.date' }}": TemplateSyntaxError: unexpected '}', expected ')'

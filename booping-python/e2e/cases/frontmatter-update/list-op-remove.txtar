@@ -1,0 +1,30 @@
+Remove drops a key.
+
+-- fixtures/cwd/plan.md --
+---
+key: val
+---
+# Plan
+Body.
+-- cmd --
+booping frontmatter-update plan.md --remove key
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,5 +1,5 @@
+ ---
+-key: val
++{}
+ ---
+ # Plan
+ Body.
+-- stderr --
+updated plan.md: -key
+-- expected/cwd/plan.md --
+---
+{}
+---
+# Plan
+Body.

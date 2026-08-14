@@ -1,0 +1,30 @@
+Append to an absent key creates a list.
+
+-- fixtures/cwd/plan.md --
+---
+---
+# Plan
+Body.
+-- cmd --
+booping frontmatter-update plan.md --append list=val
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,4 +1,6 @@
+ ---
++list:
++- val
+ ---
+ # Plan
+ Body.
+-- stderr --
+updated plan.md: list+=val
+-- expected/cwd/plan.md --
+---
+list:
+- val
+---
+# Plan
+Body.

@@ -1,0 +1,30 @@
+Append to an existing list extends it.
+
+-- fixtures/cwd/plan.md --
+---
+list: [old]
+---
+# Plan
+Body.
+-- cmd --
+booping frontmatter-update plan.md --append list=new
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,5 +1,5 @@
+ ---
+-list: [old]
++list: [old, new]
+ ---
+ # Plan
+ Body.
+-- stderr --
+updated plan.md: list+=new
+-- expected/cwd/plan.md --
+---
+list: [old, new]
+---
+# Plan
+Body.

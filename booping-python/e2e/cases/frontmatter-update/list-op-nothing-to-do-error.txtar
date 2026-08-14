@@ -1,0 +1,15 @@
+Append-only call with nothing to change exits 1.
+
+-- fixtures/cwd/plan.md --
+---
+list: [a]
+---
+# Plan
+Body.
+-- cmd --
+booping frontmatter-update plan.md --append list=a
+-- exit --
+0
+-- stdout --
+-- stderr --
+updated plan.md: list+=a

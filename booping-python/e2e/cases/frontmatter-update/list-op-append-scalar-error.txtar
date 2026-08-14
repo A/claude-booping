@@ -1,0 +1,15 @@
+Append onto a scalar exits 1 with stderr message.
+
+-- fixtures/cwd/plan.md --
+---
+list: scalar
+---
+# Plan
+Body.
+-- cmd --
+booping frontmatter-update plan.md --append list=val
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: cannot append to scalar key 'list' in plan.md
