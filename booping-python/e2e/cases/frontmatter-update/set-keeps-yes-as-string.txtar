@@ -1,0 +1,29 @@
+The YAML-1.1 boolean word yes is kept as a string by single-quoting it in the file.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md summary=yes
+
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,4 +1,5 @@
+ ---
+ title: Foo
++summary: 'yes'
+ ---
+ # Body
+-- stderr --
+updated plan.md: summary=yes
+-- expected/cwd/plan.md --
+---
+title: Foo
+summary: 'yes'
+---
+# Body

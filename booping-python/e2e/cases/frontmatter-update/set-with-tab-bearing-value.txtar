@@ -1,0 +1,29 @@
+A value bearing a tab character round-trips through the file or errors cleanly, captured as the contract.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md summary='hello	world'
+
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,4 +1,5 @@
+ ---
+ title: Foo
++summary: "hello\tworld"
+ ---
+ # Body
+-- stderr --
+updated plan.md: summary=hello	world
+-- expected/cwd/plan.md --
+---
+title: Foo
+summary: "hello\tworld"
+---
+# Body

@@ -1,0 +1,31 @@
+The success summary line is printed on stderr, never on stdout.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+status: backlog
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md status=in-progress
+
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,5 +1,5 @@
+ ---
+ title: Foo
+-status: backlog
++status: in-progress
+ ---
+ # Body
+-- stderr --
+updated plan.md: status=in-progress
+-- expected/cwd/plan.md --
+---
+title: Foo
+status: in-progress
+---
+# Body

@@ -1,0 +1,29 @@
+A value YAML would parse as a non-string mapping is single-quoted in the file.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+---
+# Body
+-- cmd --
+booping frontmatter-update plan.md summary='a: b'
+
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,4 +1,5 @@
+ ---
+ title: Foo
++summary: 'a: b'
+ ---
+ # Body
+-- stderr --
+updated plan.md: summary=a: b
+-- expected/cwd/plan.md --
+---
+title: Foo
+summary: 'a: b'
+---
+# Body
