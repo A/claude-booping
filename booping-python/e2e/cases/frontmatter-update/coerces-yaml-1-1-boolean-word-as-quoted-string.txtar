@@ -1,0 +1,30 @@
+The YAML 1.1 boolean word yes is single-quoted so that it remains a string and does not reload as True.
+
+-- fixtures/cwd/plan.md --
+---
+title: Demo
+summary: null
+---
+# Demo
+-- cmd --
+booping frontmatter-update plan.md summary=yes
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,5 +1,5 @@
+ ---
+ title: Demo
+-summary: null
++summary: 'yes'
+ ---
+ # Demo
+-- stderr --
+updated plan.md: summary=yes
+-- expected/cwd/plan.md --
+---
+title: Demo
+summary: 'yes'
+---
+# Demo

@@ -1,0 +1,30 @@
+Float-formatted values are coerced and emitted as plain float literals in YAML.
+
+-- fixtures/cwd/plan.md --
+---
+title: Demo
+ratio: null
+---
+# Demo
+-- cmd --
+booping frontmatter-update plan.md ratio=1.5
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,5 +1,5 @@
+ ---
+ title: Demo
+-ratio: null
++ratio: 1.5
+ ---
+ # Demo
+-- stderr --
+updated plan.md: ratio=1.5
+-- expected/cwd/plan.md --
+---
+title: Demo
+ratio: 1.5
+---
+# Demo

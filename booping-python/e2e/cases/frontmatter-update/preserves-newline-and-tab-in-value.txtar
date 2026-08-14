@@ -1,0 +1,30 @@
+Values with tabs or literal escape sequences round-trip cleanly into the frontmatter.
+
+-- fixtures/cwd/plan.md --
+---
+title: Demo
+summary: null
+---
+# Demo
+-- cmd --
+booping frontmatter-update plan.md "summary=line 1\tline 2"
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,5 +1,5 @@
+ ---
+ title: Demo
+-summary: null
++summary: line 1\tline 2
+ ---
+ # Demo
+-- stderr --
+updated plan.md: summary=line 1\tline 2
+-- expected/cwd/plan.md --
+---
+title: Demo
+summary: line 1\tline 2
+---
+# Demo

@@ -1,0 +1,30 @@
+Integer-formatted values are coerced and emitted as plain integer literals in YAML.
+
+-- fixtures/cwd/plan.md --
+---
+title: Demo
+sp: null
+---
+# Demo
+-- cmd --
+booping frontmatter-update plan.md sp=23
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,5 +1,5 @@
+ ---
+ title: Demo
+-sp: null
++sp: 23
+ ---
+ # Demo
+-- stderr --
+updated plan.md: sp=23
+-- expected/cwd/plan.md --
+---
+title: Demo
+sp: 23
+---
+# Demo

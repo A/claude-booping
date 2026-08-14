@@ -1,0 +1,15 @@
+Fails with exit 1 and an error message when no updates, removals, or appends are provided.
+
+-- fixtures/cwd/plan.md --
+---
+title: Demo
+status: backlog
+---
+# Demo
+-- cmd --
+booping frontmatter-update plan.md
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: nothing to do: provide key=value pairs, --append and/or --remove

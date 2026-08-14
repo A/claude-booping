@@ -1,0 +1,30 @@
+A string value that starts with syntax-sensitive characters or looks like YAML structure is single-quoted to protect its string type.
+
+-- fixtures/cwd/plan.md --
+---
+title: Demo
+summary: null
+---
+# Demo
+-- cmd --
+booping frontmatter-update plan.md "summary=@lead: 23 things"
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,5 +1,5 @@
+ ---
+ title: Demo
+-summary: null
++summary: '@lead: 23 things'
+ ---
+ # Demo
+-- stderr --
+updated plan.md: summary=@lead: 23 things
+-- expected/cwd/plan.md --
+---
+title: Demo
+summary: '@lead: 23 things'
+---
+# Demo

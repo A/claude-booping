@@ -1,0 +1,30 @@
+Null-formatted values are coerced and emitted as plain null literals in YAML.
+
+-- fixtures/cwd/plan.md --
+---
+title: Demo
+retro: "2026-01-01"
+---
+# Demo
+-- cmd --
+booping frontmatter-update plan.md retro=null
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,5 +1,5 @@
+ ---
+ title: Demo
+-retro: "2026-01-01"
++retro: null
+ ---
+ # Demo
+-- stderr --
+updated plan.md: retro=null
+-- expected/cwd/plan.md --
+---
+title: Demo
+retro: null
+---
+# Demo
