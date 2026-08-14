@@ -1,13 +1,13 @@
 ---
 title: "Benchmark scoring — per-model scorecard for the fixed develop-sprint benchmark"
 type: "feature"
-status: in-progress
+status: done
 sp: 16
 related_to: null
 created: 2026-08-14 11:56
 planned: null
 started: 2026-08-14 12:40
-completed: null
+completed: 2026-08-14 15:23
 code_reviews: []
 sessions:
 - ae7739d5-fb40-4389-b0a9-37b87b6acc6a
@@ -24,6 +24,13 @@ agents:
   research-codebase: a075d8d3a7c392512
   cross-review: a99335e13c68d04ac
 reviewed_at: 2026-08-14 12:39
+metrics_active_minutes: 130
+metrics_models:
+- claude-fable-5
+metrics_tokens_input: 5600
+metrics_tokens_output: 227448
+metrics_tokens_cache_creation: 961072
+metrics_tokens_cache_read: 24150017
 ---
 
 # Benchmark scoring — per-model scorecard for the fixed develop-sprint benchmark
