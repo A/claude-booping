@@ -10,7 +10,9 @@ plan: "vault/plans/202608121417_frontmatter-update-e2e-migration/index.md"
 
 Goal: `booping frontmatter-update`'s scalar-set behaviors, error paths, diff/stderr output contract, and log side effect are each asserted by a named txtar case under `booping-python/e2e/cases/frontmatter-update/`, green via `pytest e2e`.
 
-Scope: new `.txtar` files only, under `booping-python/e2e/cases/frontmatter-update/`. No changes to `e2e/conftest.py`, the `pytest-txtar` plugin, or `src/booping/commands/frontmatter_update.py`. Follow the existing scaffold corpus conventions (`e2e/cases/scaffold/*.txtar`): kebab-case behavior filename, description line at top, sections `fixtures/{home|xdg|cwd}/**`, `cmd`, `exit`, `stdout`, `stderr`, `expected/{home|xdg|cwd}/**`, `[..]` wildcards for volatile spans. Author expected sections by hand or via `uv run pytest e2e --txtar-update -k frontmatter` after eyeballing actual output.
+Scope: new `.txtar` files only, under `booping-python/e2e/cases/frontmatter-update/`. No changes to `e2e/conftest.py`, the `pytest-txtar` plugin, or `src/booping/commands/frontmatter_update.py`. Follow the existing scaffold corpus conventions (`e2e/cases/scaffold/*.txtar`): kebab-case behavior filename, description line at top, sections `fixtures/{home|xdg|cwd}/**`, `cmd`, `exit`, `stdout`, `stderr`, `expected/{home|xdg|cwd}/**`, `[..]` wildcards for volatile spans.
+
+Authoring procedure, the only one: hand-write each case's description, `fixtures/**` and `cmd` sections, leave `exit`, `stdout`, `stderr` and `expected/**` empty, then fill them with `cd booping-python && uv run pytest e2e --txtar-update -k frontmatter` and read the rewritten file to confirm the recorded contract is the intended one. Never hand-derive an expected block, and never probe the CLI in a scratch directory to predict one.
 
 ## Tasks
 
@@ -30,7 +32,7 @@ Scope: new `.txtar` files only, under `booping-python/e2e/cases/frontmatter-upda
 
 ### Task 1.2
 
-- [ ] Every coercion family from the unit suite's scalar-typing tests has a corpus case with the hand-derived expected literal.
+- [ ] Every coercion family from the unit suite's scalar-typing tests has a corpus case with the recorded expected literal.
 - [ ] Newline/tab gap case asserts the value round-trips through the file unmangled or errors cleanly — whichever the CLI actually does, captured as the contract.
 
 ### Task 1.3
@@ -39,10 +41,17 @@ Scope: new `.txtar` files only, under `booping-python/e2e/cases/frontmatter-upda
 - [ ] Diff-shape case asserts `--- `/`+++ `/`@@` header lines on stdout.
 - [ ] Log case wildcards the timestamp with `[..]` and asserts exactly one appended line.
 
+## References
+
+- `booping-python/e2e/README.md` — the case-format spec. It is in the repo; do not go looking for the `pytest-txtar` plugin's own documentation.
+- `booping-python/e2e/cases/scaffold/smoke.txtar` — minimal case shape to copy.
+- `booping-python/e2e/cases/scaffold/logs-one-line-when-a-vault-is-attached.txtar` — vault-attached `.booping.log` assertion with a `[..]` wildcard.
+- `booping-python/src/booping/commands/frontmatter_update.py` — the implementation. Read it for behavior questions instead of probing the CLI.
+
 ## Verify
 
 ```
-cd booping-python && uv run pytest e2e -k frontmatter -v
+cd booping-python && uv run pytest e2e -k frontmatter -q
 ```
 
-All new cases listed and passing; zero cases rewritten when run again with `--txtar-update` (clean baseline).
+All new cases pass with no case rewritten.

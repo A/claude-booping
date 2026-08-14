@@ -10,7 +10,7 @@ plan: "vault/plans/202608121417_frontmatter-update-e2e-migration/index.md"
 
 Goal: `--remove`/`--append` list operations and Jinja macro interpolation are asserted by named txtar cases under `booping-python/e2e/cases/frontmatter-update/`, including one case proving real macro shell execution across the subprocess boundary.
 
-Scope: new `.txtar` files under `booping-python/e2e/cases/frontmatter-update/`, plus per-case fixture config files inside those txtars (`fixtures/xdg/booping/config.yaml` defining `core.macros.*`, or a vault `macro_stubs:` mapping in `fixtures/cwd/.../config.yaml` — mirror how the scaffold corpus seeds config). No changes to `e2e/conftest.py`, `pytest-txtar`, or command source. Conventions as in M01 (see `e2e/cases/scaffold/*.txtar`).
+Scope: new `.txtar` files under `booping-python/e2e/cases/frontmatter-update/`, plus one fixture config per case at `fixtures/xdg/booping/config.yaml` — the single place both macro forms are seeded: a top-level `macro_stubs:` mapping for the stubbed cases, `core.macros.*` for the real-execution case. `frontmatter-update` has no `--stub-macro` flag, so the flag is not an option here. No changes to `e2e/conftest.py`, `pytest-txtar`, or command source. Conventions and authoring procedure as in M01 (see `e2e/cases/scaffold/*.txtar`).
 
 ## Tasks
 
@@ -29,7 +29,7 @@ Scope: new `.txtar` files under `booping-python/e2e/cases/frontmatter-update/`, 
 
 ### Task 2.2
 
-- [ ] Stub source (fixture `macro_stubs:` vs `--stub-macro` flag) chosen to match existing corpus/scaffold convention and used consistently across cases.
+- [ ] Every stubbed case seeds its stub as a top-level `macro_stubs:` mapping in `fixtures/xdg/booping/config.yaml`.
 - [ ] Exit-2 macro failure cases assert stderr content, not just the code.
 
 ### Task 2.3
@@ -37,10 +37,17 @@ Scope: new `.txtar` files under `booping-python/e2e/cases/frontmatter-update/`, 
 - [ ] The macro in fixture config is a genuine argv command (`echo`), not a stub — the asserted frontmatter value (`1`) can only come from executing it.
 - [ ] Case is deterministic: no clock, git, or network in the macro.
 
+## References
+
+- `booping-python/e2e/README.md` — the case-format spec. It is in the repo; do not go looking for the `pytest-txtar` plugin's own documentation.
+- `booping-python/e2e/cases/scaffold/malformed-stub-macro-pair-is-rejected.txtar` — how a case seeds `fixtures/xdg/booping/config.yaml`.
+- `booping-python/src/booping/macros.py` — `macro_stubs` resolution and real macro execution. Read it for behavior questions instead of probing the CLI.
+- The M01 cases already in `booping-python/e2e/cases/frontmatter-update/` — the shape this milestone extends.
+
 ## Verify
 
 ```
-cd booping-python && uv run pytest e2e -k frontmatter -v
+cd booping-python && uv run pytest e2e -k frontmatter -q
 ```
 
-All M02 cases listed and passing; re-run with `--txtar-update` rewrites nothing.
+All M01 and M02 cases pass with no case rewritten.

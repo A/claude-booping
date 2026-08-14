@@ -58,7 +58,7 @@ The CLI surface under test — unchanged by this plan, restated as the corpus co
 - [ ] `just ci` green (lint, typecheck, pytest, snapshots, mdcheck, e2e).
 - [ ] `uv run pytest e2e -k frontmatter` passes with no `--txtar-update` needed on a clean run.
 - [ ] `frontmatter_update_test.py` deleted; `grep -rn frontmatter_update_test` returns nothing.
-- [ ] Unit-vs-corpus coverage cross-check recorded in the deletion milestone's DoD — every CLI-observable unit behavior maps to a named case.
+- [ ] Unit-vs-corpus coverage cross-check recorded at `milestones/M03-delete-superseded-units/coverage-cross-check.md` — every CLI-observable unit behavior maps to a named case.
 
 ## Out of scope
 
