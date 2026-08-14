@@ -1,0 +1,39 @@
+Appends to a null key, creating a new list.
+
+-- fixtures/cwd/plan.md --
+---
+title: Test Plan
+description: A test plan
+---
+
+# Test Plan Content
+
+This is a test plan.
+-- cmd --
+booping frontmatter-update plan.md tags="--append tag1"
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,6 +1,6 @@
+ ---
+ title: Test Plan
+ description: A test plan
++tags:
++- tag1
+ ---
+
+ # Test Plan Content
+-- expected/cwd/plan.md --
+---
+title: Test Plan
+description: A test plan
+tags:
+- tag1
+
+# Test Plan Content
+
+This is a test plan.
+-- stderr --
+updated plan.md: tags=+tag1

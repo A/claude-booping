@@ -1,0 +1,18 @@
+Appends to a scalar key, exits 1 with stderr.
+
+-- fixtures/cwd/plan.md --
+---
+title: Test Plan
+description: A test plan
+---
+
+# Test Plan Content
+
+This is a test plan.
+-- cmd --
+booping frontmatter-update plan.md title="--append invalid"
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: cannot append to scalar key "title"

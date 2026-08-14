@@ -1,8 +1,9 @@
 ---
 id: "02"
-title: "List-op and macro corpus cases \u2014 remove, append, stubbed and real macros, gap cases"
+title: "List-op and macro corpus cases — remove, append, stubbed and real macros,
+  gap cases"
 sp: 3
-status: pending
+status: in-progress
 plan: "vault/plans/202608121417_frontmatter-update-e2e-migration/index.md"
 ---
 

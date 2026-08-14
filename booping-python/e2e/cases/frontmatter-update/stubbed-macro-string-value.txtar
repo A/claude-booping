@@ -1,0 +1,39 @@
+Stubbed macro resolves to string value in file.
+
+-- fixtures/xdg/booping/config.yaml --
+macro_stubs:
+  core.macros.date: "2024-01-01"
+-- fixtures/cwd/plan.md --
+---
+title: Test Plan
+created_date: "{{ macro('core.macros.date') }}"
+---
+
+# Test Plan Content
+
+This is a test plan.
+-- cmd --
+booping frontmatter-update plan.md created_date="{{ macro('core.macros.date') }}"
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,5 +1,5 @@
+ ---
+ title: Test Plan
+-created_date: "{{ macro('core.macros.date') }}"
++created_date: "2024-01-01"
+ ---
+
+ # Test Plan Content
+-- expected/cwd/plan.md --
+---
+title: Test Plan
+created_date: "2024-01-01"
+
+# Test Plan Content
+
+This is a test plan.
+-- stderr --
+updated plan.md: created_date="2024-01-01"

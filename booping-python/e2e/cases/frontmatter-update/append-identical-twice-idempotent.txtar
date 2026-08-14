@@ -1,0 +1,52 @@
+Appends identical value twice, second run produces no diff.
+
+-- fixtures/cwd/plan.md --
+---
+title: Test Plan
+tags:
+- tag1
+---
+
+# Test Plan Content
+
+This is a test plan.
+-- cmd --
+booping frontmatter-update plan.md tags="--append tag2"
+booping frontmatter-update plan.md tags="--append tag2"
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -2,5 +2,5 @@
+ title: Test Plan
+ tags:
+ - tag1
++- tag2
+ ---
+
+ # Test Plan Content
+--- plan.md
++++ plan.md
+@@ -1,5 +1,5 @@
+ ---
+ title: Test Plan
+ tags:
+ - tag1
++- tag2
+ ---
+
+ # Test Plan Content
+-- expected/cwd/plan.md --
+---
+title: Test Plan
+tags:
+- tag1
+- tag2
+
+# Test Plan Content
+
+This is a test plan.
+-- stderr --
+updated plan.md: tags=+tag2
+updated plan.md: tags=+tag2

@@ -1,0 +1,19 @@
+Append-only call with nothing to change exits 1.
+
+-- fixtures/cwd/plan.md --
+---
+title: Test Plan
+tags:
+- tag1
+---
+
+# Test Plan Content
+
+This is a test plan.
+-- cmd --
+booping frontmatter-update plan.md tags="--append tag1"
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: no changes made

@@ -1,0 +1,43 @@
+Appends to an existing list.
+
+-- fixtures/cwd/plan.md --
+---
+title: Test Plan
+tags:
+- tag1
+- tag2
+---
+
+# Test Plan Content
+
+This is a test plan.
+-- cmd --
+booping frontmatter-update plan.md tags="--append tag3"
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -2,7 +2,7 @@
+ title: Test Plan
+ tags:
+ - tag1
+-- tag2
++- tag2
++- tag3
+ ---
+
+ # Test Plan Content
+-- expected/cwd/plan.md --
+---
+title: Test Plan
+tags:
+- tag1
+- tag2
+- tag3
+
+# Test Plan Content
+
+This is a test plan.
+-- stderr --
+updated plan.md: tags=+tag3

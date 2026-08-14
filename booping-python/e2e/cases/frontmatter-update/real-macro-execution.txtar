@@ -1,0 +1,41 @@
+Real macro execution through CLI subprocess boundary.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  macros:
+    echo_one:
+      command: ["echo", "1"]
+-- fixtures/cwd/plan.md --
+---
+title: Test Plan
+counter: "{{ macro('core.macros.echo_one') }}"
+---
+
+# Test Plan Content
+
+This is a test plan.
+-- cmd --
+booping frontmatter-update plan.md counter="{{ macro('core.macros.echo_one') }}"
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,5 +1,5 @@
+ ---
+ title: Test Plan
+-counter: "{{ macro('core.macros.echo_one') }}"
++counter: "1"
+ ---
+
+ # Test Plan Content
+-- expected/cwd/plan.md --
+---
+title: Test Plan
+counter: "1"
+
+# Test Plan Content
+
+This is a test plan.
+-- stderr --
+updated plan.md: counter="1"

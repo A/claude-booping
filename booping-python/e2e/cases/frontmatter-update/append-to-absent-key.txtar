@@ -1,0 +1,39 @@
+Appends to an absent key, creating a new list.
+
+-- fixtures/cwd/plan.md --
+---
+title: Test Plan
+description: A test plan
+---
+
+# Test Plan Content
+
+This is a test plan.
+-- cmd --
+booping frontmatter-update plan.md dependencies="--append dep1"
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,6 +1,6 @@
+ ---
+ title: Test Plan
+ description: A test plan
++dependencies:
++- dep1
+ ---
+
+ # Test Plan Content
+-- expected/cwd/plan.md --
+---
+title: Test Plan
+description: A test plan
+dependencies:
+- dep1
+
+# Test Plan Content
+
+This is a test plan.
+-- stderr --
+updated plan.md: dependencies=+dep1
