@@ -2,7 +2,7 @@
 id: "03"
 title: "Delete superseded unit tests after coverage cross-check"
 sp: 2
-status: pending
+status: in-progress
 plan: "vault/plans/202608121417_frontmatter-update-e2e-migration/index.md"
 ---
 
