@@ -1,0 +1,40 @@
+Setting a key to the value it already holds changes no bytes, so a second identical call
+prints no diff and exits 0.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+status: backlog
+---
+# My Plan
+
+- [ ] 3 SP: Task one
+- [ ] 2 SP: Task two
+-- cmd --
+booping frontmatter-update plan.md status=in-progress
+booping frontmatter-update plan.md status=in-progress
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,6 +1,6 @@
+ ---
+ title: Foo
+-status: backlog
++status: in-progress
+ ---
+ # My Plan
+ 
+-- stderr --
+updated plan.md: status=in-progress
+updated plan.md: status=in-progress
+-- expected/cwd/plan.md --
+---
+title: Foo
+status: in-progress
+---
+# My Plan
+
+- [ ] 3 SP: Task one
+- [ ] 2 SP: Task two

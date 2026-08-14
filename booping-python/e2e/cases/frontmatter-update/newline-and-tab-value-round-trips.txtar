@@ -1,0 +1,40 @@
+A value bearing a newline and a tab, carried through the Jinja renderer, is written as an
+escaped double-quoted scalar that reloads as the exact same string.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+status: backlog
+---
+# My Plan
+
+- [ ] 3 SP: Task one
+- [ ] 2 SP: Task two
+-- cmd --
+booping frontmatter-update plan.md note='{{"line one\tline two\nline three"}}'
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,6 +1,7 @@
+ ---
+ title: Foo
+ status: backlog
++note: "line one\tline two\nline three"
+ ---
+ # My Plan
+ 
+-- stderr --
+updated plan.md: note=line one	line two
+line three
+-- expected/cwd/plan.md --
+---
+title: Foo
+status: backlog
+note: "line one\tline two\nline three"
+---
+# My Plan
+
+- [ ] 3 SP: Task one
+- [ ] 2 SP: Task two

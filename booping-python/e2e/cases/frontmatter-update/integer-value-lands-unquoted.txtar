@@ -1,0 +1,39 @@
+An integer-valued pair lands as a plain, unquoted scalar, so the frontmatter reloads it
+as a number.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+status: backlog
+---
+# My Plan
+
+- [ ] 3 SP: Task one
+- [ ] 2 SP: Task two
+-- cmd --
+booping frontmatter-update plan.md sp=23
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,6 +1,7 @@
+ ---
+ title: Foo
+ status: backlog
++sp: 23
+ ---
+ # My Plan
+ 
+-- stderr --
+updated plan.md: sp=23
+-- expected/cwd/plan.md --
+---
+title: Foo
+status: backlog
+sp: 23
+---
+# My Plan
+
+- [ ] 3 SP: Task one
+- [ ] 2 SP: Task two

@@ -1,0 +1,38 @@
+A null-valued pair lands as the literal null, not an empty value.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+status: backlog
+---
+# My Plan
+
+- [ ] 3 SP: Task one
+- [ ] 2 SP: Task two
+-- cmd --
+booping frontmatter-update plan.md retro=null
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,6 +1,7 @@
+ ---
+ title: Foo
+ status: backlog
++retro: null
+ ---
+ # My Plan
+ 
+-- stderr --
+updated plan.md: retro=null
+-- expected/cwd/plan.md --
+---
+title: Foo
+status: backlog
+retro: null
+---
+# My Plan
+
+- [ ] 3 SP: Task one
+- [ ] 2 SP: Task two

@@ -1,0 +1,39 @@
+The YAML 1.1 boolean word yes is written single-quoted, so readers reload it as the
+string yes rather than a boolean.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+status: backlog
+---
+# My Plan
+
+- [ ] 3 SP: Task one
+- [ ] 2 SP: Task two
+-- cmd --
+booping frontmatter-update plan.md summary=yes
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,6 +1,7 @@
+ ---
+ title: Foo
+ status: backlog
++summary: 'yes'
+ ---
+ # My Plan
+ 
+-- stderr --
+updated plan.md: summary=yes
+-- expected/cwd/plan.md --
+---
+title: Foo
+status: backlog
+summary: 'yes'
+---
+# My Plan
+
+- [ ] 3 SP: Task one
+- [ ] 2 SP: Task two

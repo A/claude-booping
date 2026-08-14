@@ -1,0 +1,38 @@
+A changed value is reported on stdout as a unified diff: the plan named on both sides
+of the header, with @@ hunks around the changed lines.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+status: backlog
+---
+# My Plan
+
+- [ ] 3 SP: Task one
+- [ ] 2 SP: Task two
+-- cmd --
+booping frontmatter-update plan.md status=in-progress
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,6 +1,6 @@
+ ---
+ title: Foo
+-status: backlog
++status: in-progress
+ ---
+ # My Plan
+ 
+-- stderr --
+updated plan.md: status=in-progress
+-- expected/cwd/plan.md --
+---
+title: Foo
+status: in-progress
+---
+# My Plan
+
+- [ ] 3 SP: Task one
+- [ ] 2 SP: Task two

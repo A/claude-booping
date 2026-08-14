@@ -1,0 +1,39 @@
+A float-valued pair lands as a plain, unquoted scalar, so the frontmatter reloads it as
+a number.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+status: backlog
+---
+# My Plan
+
+- [ ] 3 SP: Task one
+- [ ] 2 SP: Task two
+-- cmd --
+booping frontmatter-update plan.md ratio=1.5
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,6 +1,7 @@
+ ---
+ title: Foo
+ status: backlog
++ratio: 1.5
+ ---
+ # My Plan
+ 
+-- stderr --
+updated plan.md: ratio=1.5
+-- expected/cwd/plan.md --
+---
+title: Foo
+status: backlog
+ratio: 1.5
+---
+# My Plan
+
+- [ ] 3 SP: Task one
+- [ ] 2 SP: Task two
