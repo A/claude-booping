@@ -19,6 +19,7 @@ commit: a025189793786effa99aec0a5166a8b58f3a9adf
 reviewed_at: 2026-08-14 21:15
 agents.develop-loop-M01: aed1439c8fd089ee1
 agents.develop-loop-M02: a37085298e4ee7403
+agents.develop-loop-M03: ae57e9dfadc10a829
 ---
 
 # Migrate frontmatter-update tests from units to txtar e2e corpus
@@ -45,7 +46,7 @@ Cases live in `booping-python/e2e/cases/frontmatter-update/*.txtar`, discovered 
 | --- | --- | --- | --- |
 | 01 | [Core CLI corpus cases — set, coercion, errors, diff, stderr, log](milestones/M01-core-cli-cases/M01-core-cli-cases.md) | 3 | done |
 | 02 | [List-op and macro corpus cases — remove, append, stubbed and real macros, gap cases](milestones/M02-list-ops-and-macro-cases/M02-list-ops-and-macro-cases.md) | 3 | done |
-| 03 | [Delete superseded unit tests after coverage cross-check](milestones/M03-delete-superseded-units/M03-delete-superseded-units.md) | 2 | pending |
+| 03 | [Delete superseded unit tests after coverage cross-check](milestones/M03-delete-superseded-units/M03-delete-superseded-units.md) | 2 | done |
 
 ## I/O contract
 
