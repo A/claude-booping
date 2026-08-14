@@ -1,0 +1,42 @@
+A stubbed macro short-circuits execution and its literal goes through scalar coercion: the
+numeric stub lands as an unquoted integer.
+
+-- fixtures/xdg/booping/config.yaml --
+macro_stubs:
+  core.macros.e2e_sp: "42"
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+status: draft
+---
+
+# Foo
+
+Body paragraph.
+-- cmd --
+booping frontmatter-update plan.md "sp={{ macro('core.macros.e2e_sp') }}"
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,6 +1,7 @@
+ ---
+ title: Foo
+ status: draft
++sp: 42
+ ---
+ 
+ # Foo
+-- stderr --
+updated plan.md: sp=42
+-- expected/cwd/plan.md --
+---
+title: Foo
+status: draft
+sp: 42
+---
+
+# Foo
+
+Body paragraph.

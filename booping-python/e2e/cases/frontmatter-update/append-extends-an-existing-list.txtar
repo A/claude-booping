@@ -1,0 +1,40 @@
+--append onto a populated list adds the new value after the ones already there.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+sessions:
+- abc-123
+---
+
+# Foo
+
+Body paragraph.
+-- cmd --
+booping frontmatter-update plan.md --append sessions=def-456
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -2,6 +2,7 @@
+ title: Foo
+ sessions:
+ - abc-123
++- def-456
+ ---
+ 
+ # Foo
+-- stderr --
+updated plan.md: sessions+=def-456
+-- expected/cwd/plan.md --
+---
+title: Foo
+sessions:
+- abc-123
+- def-456
+---
+
+# Foo
+
+Body paragraph.

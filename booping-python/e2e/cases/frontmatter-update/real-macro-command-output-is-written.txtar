@@ -1,0 +1,45 @@
+A macro declared as a genuine argv command runs through the CLI's subprocess boundary: the
+frontmatter carries what `echo 1` printed, coerced like any other scalar.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  macros:
+    e2e_echo:
+    - echo
+    - "1"
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+status: draft
+---
+
+# Foo
+
+Body paragraph.
+-- cmd --
+booping frontmatter-update plan.md "count={{ macro('core.macros.e2e_echo') }}"
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,6 +1,7 @@
+ ---
+ title: Foo
+ status: draft
++count: 1
+ ---
+ 
+ # Foo
+-- stderr --
+updated plan.md: count=1
+-- expected/cwd/plan.md --
+---
+title: Foo
+status: draft
+count: 1
+---
+
+# Foo
+
+Body paragraph.

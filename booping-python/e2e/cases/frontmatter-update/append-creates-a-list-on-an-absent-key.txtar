@@ -1,0 +1,40 @@
+--append onto a key that is not in the frontmatter adds it as a one-element list at the end.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+status: draft
+---
+
+# Foo
+
+Body paragraph.
+-- cmd --
+booping frontmatter-update plan.md --append sessions=abc-123
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,6 +1,8 @@
+ ---
+ title: Foo
+ status: draft
++sessions:
++- abc-123
+ ---
+ 
+ # Foo
+-- stderr --
+updated plan.md: sessions+=abc-123
+-- expected/cwd/plan.md --
+---
+title: Foo
+status: draft
+sessions:
+- abc-123
+---
+
+# Foo
+
+Body paragraph.

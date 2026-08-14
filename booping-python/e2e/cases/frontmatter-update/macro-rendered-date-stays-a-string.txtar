@@ -1,0 +1,42 @@
+A macro rendering a date form is written single-quoted, so it reloads as the string it was
+written as rather than a YAML date. The stderr summary echoes the interpolated text, unquoted.
+
+-- fixtures/xdg/booping/config.yaml --
+macro_stubs:
+  core.macros.date: "2026-08-14"
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+status: draft
+---
+
+# Foo
+
+Body paragraph.
+-- cmd --
+booping frontmatter-update plan.md "created={{ macro('core.macros.date') }}"
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,6 +1,7 @@
+ ---
+ title: Foo
+ status: draft
++created: '2026-08-14'
+ ---
+ 
+ # Foo
+-- stderr --
+updated plan.md: created=2026-08-14
+-- expected/cwd/plan.md --
+---
+title: Foo
+status: draft
+created: '2026-08-14'
+---
+
+# Foo
+
+Body paragraph.

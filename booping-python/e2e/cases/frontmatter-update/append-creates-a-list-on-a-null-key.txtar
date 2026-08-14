@@ -1,0 +1,39 @@
+--append onto a key whose value is null replaces the null with a one-element list.
+
+-- fixtures/cwd/plan.md --
+---
+title: Foo
+sessions: null
+---
+
+# Foo
+
+Body paragraph.
+-- cmd --
+booping frontmatter-update plan.md --append sessions=abc-123
+-- exit --
+0
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,6 +1,7 @@
+ ---
+ title: Foo
+-sessions: null
++sessions:
++- abc-123
+ ---
+ 
+ # Foo
+-- stderr --
+updated plan.md: sessions+=abc-123
+-- expected/cwd/plan.md --
+---
+title: Foo
+sessions:
+- abc-123
+---
+
+# Foo
+
+Body paragraph.
