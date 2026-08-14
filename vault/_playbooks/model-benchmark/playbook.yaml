@@ -1,0 +1,51 @@
+state: run
+graph:
+  prepare: []
+  run: [prepare]
+  measure: [run]
+  publish: [measure]
+
+states:
+  run:
+    initial: preparing
+    statuses:
+      preparing:
+        transitions:
+          - to: running
+            when: "preflight passed and the benchmark branch is cut off the registry entry's baseline; the sprint is about to start"
+      running:
+        transitions:
+          - to: measuring
+            when: "the sprint ended — finished, or gave up on a milestone after its attempts were exhausted; either way the branch is now what gets scored"
+      measuring:
+        transitions:
+          - to: publishing
+            when: "the detail report holds every measured layer, the case-mapping table and the review section, and the history row is in hand"
+            gates:
+              - "no placeholder cell left in the detail report — every reviewer row carries a grade, or the run recorded why a reviewer returned none"
+              - "recall and gap counts in the report are the mapped counts the case-mapping judge returned"
+      publishing:
+        transitions:
+          - to: done
+            when: "the history row is appended, the vault artifacts are committed, and the pull request against the reference branch is open or updated"
+            gates:
+              - "the appended row's cells sit in the registry's `history_columns` order"
+      done:
+        terminal: true
+      cancelled:
+        terminal: true
+
+    superstates:
+      cancellable:
+        states:
+          - preparing
+          - running
+          - measuring
+          - publishing
+        transitions:
+          - to: cancelled
+            when: "the user cancels the run"
+      terminal:
+        states:
+          - done
+          - cancelled

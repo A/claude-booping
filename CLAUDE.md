@@ -73,7 +73,7 @@ Each playbook owns its own status vocabulary in its `states:` block — there is
 
 ## Vault (out of framework scope, authored per project)
 
-`plans/`, `retrospectives/`, `codereviews/`, `_lessons/` (targeted), `_playbooks/` (user playbooks), `plan_templates/`, `review_templates/`, `notes/`, `sprints.md` (Obsidian Bases fence, seeded once, written by nothing), `.booping.log` (CLI log at the vault root, gitignored there). Obsidian-ready: markdown + YAML frontmatter only. See [documentation/vault.md](documentation/vault.md).
+`plans/`, `retrospectives/`, `codereviews/`, `_lessons/` (targeted), `_playbooks/` (user playbooks), `benchmarks/` (`index.md` the machine-readable benchmark registry, `guide.md` its runbook, `history.md` the scorecard table, `runs/` the per-run detail reports, `mutations/` the frozen patch sets, `_scripts/bench-score` computing every metric), `plan_templates/`, `review_templates/`, `notes/`, `sprints.md` (Obsidian Bases fence, seeded once, written by nothing), `.booping.log` (CLI log at the vault root, gitignored there). Obsidian-ready: markdown + YAML frontmatter only. See [documentation/vault.md](documentation/vault.md).
 
 ## Principles
 

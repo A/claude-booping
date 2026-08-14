@@ -139,6 +139,8 @@ benchmarks:
 
 This frontmatter is the machine-readable registry `bench-score` reads. Every benchmark run scores against one entry below; the runbook linked from each row is what a human follows.
 
+A run is driven by `/playbook model-benchmark` ([`_playbooks/model-benchmark`](../_playbooks/model-benchmark/playbook.md)) — prepare, run, measure, publish — which resolves the model and the entry here and calls `bench-score` for every number it publishes. Driving a run by hand instead means following [guide.md](guide.md) step by step.
+
 | id | plan under test | branch scheme | runbook |
 | --- | --- | --- | --- |
 | `frontmatter-update-e2e` | `202608121417_frontmatter-update-e2e-migration` | `bench/{model_slug}` | [guide.md](guide.md) |
