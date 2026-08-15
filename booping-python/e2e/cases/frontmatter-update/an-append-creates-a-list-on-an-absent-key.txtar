@@ -1,0 +1,33 @@
+An append onto an absent key adds a new one-element list and prints the diff.
+
+-- fixtures/cwd/plan.md --
+---
+title: Probe plan
+---
+
+Body.
+-- cmd --
+booping frontmatter-update plan.md --append sessions=abc-123
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,5 +1,7 @@
+ ---
+ title: Probe plan
++sessions:
++- abc-123
+ ---
+ 
+ Body.
+-- stderr --
+updated plan.md: sessions+=abc-123
+-- expected/cwd/plan.md --
+---
+title: Probe plan
+sessions:
+- abc-123
+---
+
+Body.
+-- exit --
+0

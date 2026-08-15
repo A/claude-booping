@@ -1,0 +1,42 @@
+Removals, key=value pairs, and appends all apply in one call; the summary lists
+them in that order.
+
+-- fixtures/cwd/plan.md --
+---
+title: Probe plan
+status: backlog
+stale: x
+sessions: null
+---
+
+Body.
+-- cmd --
+booping frontmatter-update plan.md --remove stale status=in-progress --append sessions=abc-123
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,8 +1,8 @@
+ ---
+ title: Probe plan
+-status: backlog
+-stale: x
+-sessions: null
++status: in-progress
++sessions:
++- abc-123
+ ---
+ 
+ Body.
+-- stderr --
+updated plan.md: -stale, status=in-progress, sessions+=abc-123
+-- expected/cwd/plan.md --
+---
+title: Probe plan
+status: in-progress
+sessions:
+- abc-123
+---
+
+Body.
+-- exit --
+0

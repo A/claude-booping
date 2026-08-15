@@ -1,0 +1,15 @@
+A macro call to a path with no declaration fails with exit 2, naming the path on stderr; the file is untouched.
+
+-- fixtures/cwd/plan.md --
+---
+title: Probe plan
+---
+
+Body.
+-- cmd --
+booping frontmatter-update plan.md note="{{ macro('core.macros.nope') }}"
+-- stdout --
+-- stderr --
+error: value "{{ macro('core.macros.nope') }}": no macro declared at config path: core.macros.nope
+-- exit --
+2

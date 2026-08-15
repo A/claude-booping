@@ -1,0 +1,38 @@
+An append whose value is already in the list is a no-op: the second run prints no
+diff and exits 0, but the success summary still goes to stderr.
+
+-- fixtures/cwd/plan.md --
+---
+title: Probe plan
+sessions: null
+---
+
+Body.
+-- cmd --
+booping frontmatter-update plan.md --append sessions=abc-123
+booping frontmatter-update plan.md --append sessions=abc-123
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,6 +1,7 @@
+ ---
+ title: Probe plan
+-sessions: null
++sessions:
++- abc-123
+ ---
+ 
+ Body.
+-- stderr --
+updated plan.md: sessions+=abc-123
+updated plan.md: sessions+=abc-123
+-- expected/cwd/plan.md --
+---
+title: Probe plan
+sessions:
+- abc-123
+---
+
+Body.
+-- exit --
+0

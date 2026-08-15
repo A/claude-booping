@@ -1,0 +1,35 @@
+A macro-rendered date-like value is written single-quoted so it reloads as the
+string it was, not a parsed date.
+
+-- fixtures/cwd/plan.md --
+---
+title: Probe plan
+---
+
+Body.
+-- fixtures/xdg/booping/config.yaml --
+macro_stubs:
+  core.macros.date: "1970-01-02"
+-- cmd --
+booping frontmatter-update plan.md completed="{{ macro('core.macros.date') }}"
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,5 +1,6 @@
+ ---
+ title: Probe plan
++completed: '1970-01-02'
+ ---
+ 
+ Body.
+-- stderr --
+updated plan.md: completed=1970-01-02
+-- expected/cwd/plan.md --
+---
+title: Probe plan
+completed: '1970-01-02'
+---
+
+Body.
+-- exit --
+0

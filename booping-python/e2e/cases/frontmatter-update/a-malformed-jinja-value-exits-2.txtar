@@ -1,0 +1,16 @@
+A value whose Jinja does not parse fails with exit 2, quoting the value and the
+template error on stderr; the file is untouched.
+
+-- fixtures/cwd/plan.md --
+---
+title: Probe plan
+---
+
+Body.
+-- cmd --
+booping frontmatter-update plan.md note="{{ macro( }}"
+-- stdout --
+-- stderr --
+error: value '{{ macro( }}': TemplateSyntaxError: unexpected '}', expected ')'
+-- exit --
+2

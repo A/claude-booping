@@ -1,0 +1,36 @@
+An append onto an existing list adds its value at the end and prints the diff.
+
+-- fixtures/cwd/plan.md --
+---
+title: Probe plan
+sessions:
+- abc-123
+---
+
+Body.
+-- cmd --
+booping frontmatter-update plan.md --append sessions=def-456
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -2,6 +2,7 @@
+ title: Probe plan
+ sessions:
+ - abc-123
++- def-456
+ ---
+ 
+ Body.
+-- stderr --
+updated plan.md: sessions+=def-456
+-- expected/cwd/plan.md --
+---
+title: Probe plan
+sessions:
+- abc-123
+- def-456
+---
+
+Body.
+-- exit --
+0

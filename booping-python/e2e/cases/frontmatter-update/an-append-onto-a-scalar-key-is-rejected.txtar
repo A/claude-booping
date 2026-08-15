@@ -1,0 +1,15 @@
+An append onto a scalar key fails the run with exit 1, naming the key on stderr; the file is untouched.
+
+-- fixtures/cwd/plan.md --
+---
+title: Probe plan
+---
+
+Body.
+-- cmd --
+booping frontmatter-update plan.md --append title=other
+-- stdout --
+-- stderr --
+error: cannot append to scalar key 'title' in plan.md
+-- exit --
+1
