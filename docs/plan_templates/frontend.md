@@ -36,6 +36,7 @@ One file per milestone directory under the plan directory's `milestones/`, named
   | 1.1 | ... | `src/components/Foo.tsx` | 2 | pending |
 
 - `## Definition of Done` — one `### Task {n}.{m}` block per task, checkbox bullets only: component renders with all documented props, loading / empty / error / success states covered, typecheck + test commands pass.
+- `## References` — where such files exist, 1–3 existing components, stories or tests whose shape this milestone copies, by path, plus the path of any design token or API contract it must not go looking for.
 - `## Verify` — exact commands (scoped tests, a component's typecheck, a visual check) or observable outcomes, limited to what this milestone changed. Whole-repo gates (full test suite, repo-wide lint/typecheck, an aggregate `ci` target) run once in `index.md`'s Final Verification, never per milestone.
 
 ## Final Verification
@@ -83,6 +84,9 @@ Name sections to update, or state "No CLAUDE.md changes required — {justificat
 - [ ] Every milestone is a file in `milestones/` carrying its own goal, tasks, DoD and Verify — no milestone body in `index.md`.
 - [ ] `index.md`'s milestone table has one row per milestone file and matches their frontmatter.
 - [ ] Every milestone file's `## Verify` is scoped to what that milestone changed — no whole-repo gate (full suite, repo-wide lint/typecheck, aggregate `ci` target); those belong to `index.md`'s Final Verification.
+- [ ] Every milestone file's `## References` names 1–3 existing files to copy the shape of where such files exist, or states that none applies.
+- [ ] No milestone's Scope or Tasks offers two ways to do the same thing ("by hand or via X").
+- [ ] No milestone asks for a deliverable in the worker's report — each is named as a path plus "Create" or "Append to", relative to the repo root or the plan directory.
 - [ ] Each milestone file executable from a fresh session with only it and `index.md` as context.
 
 ## Anti-patterns (must be absent)

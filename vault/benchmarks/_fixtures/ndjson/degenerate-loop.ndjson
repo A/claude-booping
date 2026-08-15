@@ -1,0 +1,16 @@
+{"type":"system","subtype":"init","session_id":"fixture-loop","model":"fixture/loop-model"}
+{"type":"assistant","message":{"id":"gen-fixture-loop-1","content":[{"type":"tool_use","id":"t1","name":"Read","input":{"file_path":"/repo/a.py"}}]}}
+{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"t1","is_error":false,"content":"1\tprint(1)"}]}}
+{"type":"assistant","message":{"id":"gen-fixture-loop-2","content":[{"type":"tool_use","id":"t2","name":"Bash","input":{"command":"just e2e"}}]}}
+{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"t2","is_error":false,"content":"3 failed, 1 passed in 2.10s"}]}}
+{"type":"assistant","message":{"id":"gen-fixture-loop-3","content":[{"type":"tool_use","id":"t3","name":"Bash","input":{"command":"just e2e"}}]}}
+{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"t3","is_error":false,"content":"3 failed, 1 passed in 2.08s"}]}}
+{"type":"assistant","message":{"id":"gen-fixture-loop-4","content":[{"type":"tool_use","id":"t4","name":"Bash","input":{"command":"just e2e"}}]}}
+{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"t4","is_error":false,"content":"3 failed, 1 passed in 2.11s"}]}}
+{"type":"assistant","message":{"id":"gen-fixture-loop-5","content":[{"type":"tool_use","id":"t5","name":"Bash","input":{"command":"just e2e"}}]}}
+{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"t5","is_error":false,"content":"3 failed, 1 passed in 2.09s"}]}}
+{"type":"assistant","message":{"id":"gen-fixture-loop-6","content":[{"type":"tool_use","id":"t6","name":"Bash","input":{"command":"git status --short"}}]}}
+{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"t6","is_error":false,"content":" M a.py"}]}}
+{"type":"assistant","message":{"id":"gen-fixture-loop-7","content":[{"type":"tool_use","id":"t7","name":"Bash","input":{"command":"git status --short"}}]}}
+{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"t7","is_error":false,"content":" M a.py"}]}}
+{"type":"result","subtype":"success","is_error":false,"duration_ms":600000,"num_turns":7,"stop_reason":"end_turn","total_cost_usd":1.5,"session_id":"fixture-loop"}

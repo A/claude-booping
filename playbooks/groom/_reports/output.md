@@ -57,12 +57,17 @@ booping playbook-state groom --workdir <run workdir>
 | Status | To | When | Gates |
 | --- | --- | --- | --- |
 | `framing` | `researching` | intake posted the framing brief in chat, created `index.md` with its identity frontmatter, and the user's answers settled the scope questions — clear intent is enough | answers that change the task type, the restated problem or a boundary re-run intake first |
+| `framing` | `awaiting-clarification` | the run raised questions it cannot answer itself and wrote them to `clarifications.md` | every question in `clarifications.md` is open and attributed — an id, a topic, the date and the step that raised it |
 | `framing` | `cancelled` | the user cancels the run | — |
 | `researching` | `drafting` | the blast-radius map and the web-research findings are both posted in chat | — |
 | `researching` | `cancelled` | the user cancels the run | — |
 | `drafting` | `cross-reviewing` | architecture, surface changes and trade-offs are settled with the user in conversation, and draft-plan wrote `index.md`'s body against the template's Plan Body and passed its Quality Checklist | every call that is the user's is answered |
 | `drafting` | `researching` | the design needs blast radius or external practice the research pass missed | — |
+| `drafting` | `awaiting-clarification` | the run raised questions it cannot answer itself and wrote them to `clarifications.md` | every question in `clarifications.md` is open and attributed — an id, a topic, the date and the step that raised it |
 | `drafting` | `cancelled` | the user cancels the run | — |
+| `awaiting-clarification` | `framing` | the answers came back and `return_to` names `framing` | every question in `clarifications.md` carries an answer; `return_to` is `framing` — any other value picks the other return edge |
+| `awaiting-clarification` | `drafting` | the answers came back and `return_to` names `drafting` | every question in `clarifications.md` carries an answer; `return_to` is `drafting` — any other value picks the other return edge |
+| `awaiting-clarification` | `cancelled` | the user cancels the run | — |
 | `cross-reviewing` | `presenting` | the cross-review pass disposed of every finding, or no `core.groom_playbook.cross_review_agent` is configured and the pass was skipped | every CRITICAL finding folded in or recorded as a deferral — vacuously satisfied with no `core.groom_playbook.cross_review_agent` configured |
 | `cross-reviewing` | `cancelled` | the user cancels the run | — |
 | `presenting` | `awaiting-approval` | present posted the approval screen in chat — summary, split recommendation if any, handoff to the `develop` playbook | — |
@@ -219,6 +224,24 @@ booping query --glob {plan-dir}/milestones/*/M*.md --columns id,title,sp,status
 ```
 
 A milestone that changes after that is edited in its own file, and the query re-run.
+
+## Milestone contract rules
+
+Every milestone file is read by a worker holding only it, `index.md` and the repo. Write it so that
+worker never has to decide *how* to work.
+
+- **One procedure, never a choice.** Scope prose states the single way to produce the artifact. A
+  sentence shaped "by hand **or** via `{tool}`" makes the worker do both — hand-derive, then run the
+  tool anyway. Pick the cheaper one and name only it.
+- **`## References`** names, where such files exist, 1–3 existing files the worker copies the shape
+  of, by path, plus the path of any format spec it must not go looking for. A milestone producing an
+  artifact in an unfamiliar format and naming no reference sends the worker searching the filesystem.
+- **`## Verify` is one command, scoped to this milestone's changes.** No alternatives, no "and also
+  run". Whole-repo gates belong to `index.md`'s Final Verification; the runner owns them.
+- **No report-only deliverables.** A table, cross-check or rationale the worker must produce is
+  named as a path plus a verb — "Create `{path}`" or "Append to `{path}`" — relative to the repo
+  root or to the plan directory, never absolute. The worker's checkout is not this one.
+
 
 ## Sprint planning
 

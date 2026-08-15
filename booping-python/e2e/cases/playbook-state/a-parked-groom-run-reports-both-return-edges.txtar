@@ -1,0 +1,37 @@
+A later invocation resumes a parked groom run off the frontier report alone: it names
+`awaiting-clarification`, both return edges with the gate that picks between them, and the cancel the
+`in-spec` superstate contributes. `return_to` is the artifact's own key, not the report's.
+
+-- fixtures/cwd/run/index.md --
+---
+title: "Demo"
+status: awaiting-clarification
+return_to: framing
+---
+
+# Demo
+-- cmd --
+booping playbook-state groom --workdir run
+-- exit --
+0
+-- stdout --
+playbook: groom
+workdir: {CWD}/run
+states:
+  run:
+    artifact: index.md
+    status: awaiting-clarification
+    next:
+    - to: framing
+      when: the answers came back and `return_to` names `framing`
+      gates:
+      - every question in `clarifications.md` carries an answer
+      - '`return_to` is `framing` — any other value picks the other return edge'
+    - to: drafting
+      when: the answers came back and `return_to` names `drafting`
+      gates:
+      - every question in `clarifications.md` carries an answer
+      - '`return_to` is `drafting` — any other value picks the other return edge'
+    - to: cancelled
+      when: the user cancels the run
+-- stderr --

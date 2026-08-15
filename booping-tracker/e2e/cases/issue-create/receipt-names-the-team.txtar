@@ -1,0 +1,9 @@
+A created issue has no identifier yet, so its receipt names the team it would be created under.
+
+-- cmd --
+booping-tracker issue-create --team ENG --title Plan --body Body --label plan
+-- exit --
+0
+-- stdout --
+issue-create ENG: cli driver, no-op
+-- stderr --

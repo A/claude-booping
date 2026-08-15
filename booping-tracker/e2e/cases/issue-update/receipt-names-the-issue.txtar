@@ -1,0 +1,10 @@
+Labels are added and removed discretely rather than replaced wholesale; the `cli` driver
+accepts every flag and changes nothing.
+
+-- cmd --
+booping-tracker issue-update --issue LIN-1 --state Done --add-label plan --remove-label request
+-- exit --
+0
+-- stdout --
+issue-update LIN-1: cli driver, no-op
+-- stderr --

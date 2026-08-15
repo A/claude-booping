@@ -1,0 +1,46 @@
+Answers came back, so the run returns to the status `return_to` names and the edge's own hook clears
+the key by writing an empty value. The key survives as a falsy placeholder that matches no status, so
+the return gates on a re-park read it the same way they read the seeded value.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  tracker:
+    driver: cli
+-- fixtures/cwd/run/index.md --
+---
+title: "Demo"
+status: awaiting-clarification
+return_to: framing
+---
+
+# Demo
+-- fixtures/cwd/run/clarifications.md --
+# Clarifications
+
+## C1 — retention window — answered
+
+**Asked:** 2026-08-14 — intake
+
+**Question:** How long are archives retained?
+
+**Answer:**
+
+30 days.
+-- cmd --
+booping playbook-transition groom framing --workdir run
+-- exit --
+0
+-- stdout --
+awaiting-clarification → framing
+frontmatter: status=framing
+frontmatter index.md: return_to=
+script tracker-sync: ok
+-- stderr --
+-- expected/cwd/run/index.md --
+---
+title: "Demo"
+status: framing
+return_to: ''
+---
+
+# Demo

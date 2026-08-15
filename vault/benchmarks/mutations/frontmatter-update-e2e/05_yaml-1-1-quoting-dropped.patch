@@ -1,0 +1,13 @@
+diff --git a/booping-python/src/booping/commands/frontmatter_update.py b/booping-python/src/booping/commands/frontmatter_update.py
+index db3dacc..38ec95d 100644
+--- a/booping-python/src/booping/commands/frontmatter_update.py
++++ b/booping-python/src/booping/commands/frontmatter_update.py
+@@ -119,7 +119,7 @@ def _quote_if_ambiguous(value: str) -> str:
+         return value
+     if isinstance(reloaded, str) and reloaded == value:
+         return value
+-    return SingleQuotedScalarString(value)
++    return value
+ 
+ 
+ def parse_pairs(pairs: list[str]) -> dict[str, str]:

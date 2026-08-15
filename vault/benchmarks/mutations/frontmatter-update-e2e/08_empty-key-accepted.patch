@@ -1,0 +1,14 @@
+diff --git a/booping-python/src/booping/commands/frontmatter_update.py b/booping-python/src/booping/commands/frontmatter_update.py
+index db3dacc..4bad88b 100644
+--- a/booping-python/src/booping/commands/frontmatter_update.py
++++ b/booping-python/src/booping/commands/frontmatter_update.py
+@@ -129,9 +129,6 @@ def parse_pairs(pairs: list[str]) -> dict[str, str]:
+             print(f"error: malformed key=value pair: {pair!r}", file=sys.stderr)
+             sys.exit(1)
+         key, _, value = pair.partition("=")
+-        if not key:
+-            print(f"error: empty key in pair: {pair!r}", file=sys.stderr)
+-            sys.exit(1)
+         updates[key] = value
+     return updates
+ 

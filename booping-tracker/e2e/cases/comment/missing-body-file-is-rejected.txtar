@@ -1,0 +1,9 @@
+A `--body-file` that does not exist is a user error, named on stderr with nothing on stdout.
+
+-- cmd --
+booping-tracker comment --issue LIN-1 --body-file absent.md
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: body file not found: absent.md

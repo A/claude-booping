@@ -1,0 +1,25 @@
+#!/bin/sh
+# Shared hook: mirror the run's status onto its tracker issue.
+#
+# Wired onto every transition of the `groom` playbook's `run` machine.
+# Environment (set by `booping playbook-transition`): BOOPING_ARTIFACT = the run's
+# resolved target, the plan's `index.md`; cwd is the plan directory.
+#
+# The tracker's exit code is absorbed on purpose: a hook exiting non-zero aborts
+# `playbook-transition` *after* `status:` is already written, which would leave the
+# vault advanced and the tracker behind with no way back. A failed mirror is a
+# warning; `booping-tracker sync --artifact …` by hand is the reconcile.
+#
+# The binary is resolved from this script's own location — cwd is the plan
+# directory, so a relative path would miss.
+set -u
+
+TRACKER="${BOOPING_TRACKER_BIN:-$(cd "$(dirname "$0")/../.." && pwd)/bin/booping-tracker}"
+
+"$TRACKER" sync --artifact "${BOOPING_ARTIFACT:-}" --playbook groom
+status=$?
+if [ "$status" -ne 0 ]; then
+    echo "warning: tracker sync failed (exit $status)" >&2
+fi
+
+exit 0
