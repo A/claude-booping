@@ -29,7 +29,7 @@ The source repo's own tree is never inspected and never touched: a clone carries
 
 ## Clone the workspace
 
-Follow `guide.md`'s **Steps** 2 and 3 as written: clone `source_repo` into the workspace, add the entry's `push_remote`, cut the branch off `baseline` there, restore the gitignored `.booping` marker from the source repo, sync both virtualenvs, and get `just ci` green. Every command from here to the end of the run has the workspace as its cwd.
+Follow `guide.md`'s **Steps** 2 and 3 as written: clone `source_repo` into the workspace, add the entry's `push_remote`, cut the branch off `baseline` there, restore the gitignored `.booping` marker from the source repo, sync the uv projects the workspace actually holds — the baseline is an older commit and carries fewer than the source repo does today — and get `just ci` green. Every command from here to the end of the run has the workspace as its cwd.
 
 A red `just ci` stops the run — a sprint on a broken workspace measures the workspace, not the model. Report what failed and leave the clone in place for inspection.
 
@@ -47,6 +47,6 @@ Nothing is written to the vault and no transition is taken: the run artifact is 
 - workspace: `{workspace path}` — clone of `{source_repo}`, remote `{push_remote.name}` added
 - branch: `{branch}` created off `{baseline}` in the workspace
 - preflight: baseline resolves; workspace path fresh; `{api_key_env}` present (or not required — local provider); logs dir `{logs_dir}` writable
-- setup: `.booping` restored; venvs synced; `just ci` {verdict}
+- setup: `.booping` restored; venvs synced ({which projects}); `just ci` {verdict}
 - started: {YYYY-MM-DD HH:MM}
 ```

@@ -47,9 +47,11 @@ These are the `frontmatter-update-e2e` entry in [index.md](index.md)'s registry 
 
    ```
    cp /home/anton/Dev/@A/claude-booping/.booping .booping
-   uv sync --project booping-python && uv sync --project booping-tracker
+   uv sync --project booping-python
    just ci
    ```
+
+   Sync every uv project the **workspace** holds, not every project the source repo holds today: the baseline is an older commit, and at `a025189` that is `booping-python` alone — `booping-tracker` does not exist there, and `uv sync --project booping-tracker` fails with `Project directory 'booping-tracker' does not exist`. `ls */pyproject.toml` in the clone is the list to sync.
 
    `.booping` is the vault marker and is gitignored, so a fresh clone has none and every `booping` call in the workspace would resolve no vault. `just ci` green here is the precondition for the run: the model under test never fixes tooling itself, and a run where it spends attempts on a broken workspace measures the workspace, not the model. Red → stop and report; do not start the sprint.
 
@@ -93,7 +95,7 @@ Use model id `{model}` for this milestone (pass it as `--model`), and log the ru
 
 No other agent writes code — not `booping:booping-developer`, not the runner. That holds for fix attempts too: a retry after a failed milestone goes back to `pi-developer` with the same `{model}`, so the benchmark measures one model end to end.
 
-The scorecard's `provider` column is the provider half of pi's model id — `llama-local/…` → `local`, `openrouter/…` → `openrouter`, `ollama-cloud/…` → `local`. Pass it to `bench-score report` as `--provider` (default `openrouter`). Rows from before pi was the worker are keyed by their own worker agent instead; see [method.md](method.md).
+The scorecard's `provider` column is the provider half of pi's model id — `llama-local/…` → `local`, `openrouter/…` → `openrouter`, `ollama-cloud/…` → `local`. Pass it to `bench-score report` as `--provider` (default `openrouter`). `pi-developer` is the only worker there is: the `openrouter-developer` and `llama-developer` agents it replaced were retired on 2026-08-16, and rows they produced are keyed by their own agent; see [method.md](method.md).
 
 ## Report
 

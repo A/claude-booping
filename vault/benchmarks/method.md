@@ -12,7 +12,7 @@ Every model runs the same groomed plan from the same baseline commit (`a025189`)
 
 ## The worker
 
-The worker agent is the registry entry's `worker`. Runs from 2026-08-16 use `pi-developer`, which hands each milestone to a headless **pi** session as `/orchestrate` and lets pi do its own planning, delegation and validation — one harness reaching every provider pi has (`llama-local/…`, `ollama-cloud/…`, `openrouter/…`), so the model id in the briefing is what selects both model and provider. Earlier rows used `openrouter-developer`, `llama-developer` or the in-process `booping:booping-developer`, each driving a Claude Code session instead; their footnotes say so.
+The worker agent is the registry entry's `worker`, and it is `pi-developer`: it hands each milestone to a headless **pi** session as `/orchestrate` and lets pi do its own planning, delegation and validation — one harness reaching every provider pi has (`llama-local/…`, `ollama-cloud/…`, `openrouter/…`), so the model id in the briefing selects both model and provider. It is the only worker. `openrouter-developer` and `llama-developer` were retired on 2026-08-16, pi covering both their providers through one code path; rows they produced keep their footnotes, since a published row records the harness that actually ran it.
 
 `bench-score` reads either log schema — Claude Code's `assistant`/`user`/`result` stream, or pi's `tool_execution_*` / `message_end` events — and normalises them, so a row's process figures mean the same thing whichever harness produced them. pi tags every event a sub-agent raises with `agent`/`agentRun`, and the run detail's process profile breaks the tool calls down by agent; a pi log written before that tagging existed carries orchestrator traffic only, and a run scored from such logs says so in its detail rather than reporting the gap as clean process.
 
@@ -20,7 +20,7 @@ The worker agent is the registry entry's `worker`. Runs from 2026-08-16 use `pi-
 
 - `date` — run start, `YYYY-MM-DD hh:mm`, taken from the first attempt log's stamp (the same stamp as the `run` link's id)
 - `model` — model id as the worker's provider spells it
-- `provider` — where the worker ran, keyed by the worker agent: `openrouter-developer` → `openrouter`, `llama-developer` → `local`, `booping:booping-developer` → `anthropic`, `pi-developer` → whichever provider its model id names (`llama-local/…` → `local`, `openrouter/…` → `openrouter`)
+- `provider` — where the worker ran: the provider half of pi's model id (`llama-local/…` → `local`, `ollama-cloud/…` → `local`, `openrouter/…` → `openrouter`). Rows predating pi are keyed by their own retired worker instead — `openrouter-developer` → `openrouter`, `llama-developer` → `local`, `booping:booping-developer` → `anthropic`
 - `outcome` — `pass`, or `fail@Mnn` naming the milestone the run died on
 - `att` — attempts spent per milestone
 - `code` — code-quality composite, %, grading the artifact: CI/scope/determinism gates plus corpus quality against the frozen etalon and mutation set
