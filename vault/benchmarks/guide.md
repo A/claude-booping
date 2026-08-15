@@ -7,10 +7,10 @@ A fixed develop-sprint benchmark: every model runs the same groomed plan from th
 The user hands you this file's path plus a model name, e.g.
 
 ```
-Run the benchmark in ~/Claude/notes/claude_booping_benchmark.md with qwen/qwen3-next-80b-a3b-instruct
+Run the benchmark in ~/Claude/notes/claude_booping_benchmark.md with llama-local/Qwen3.8-27B
 ```
 
-`{model}` is that model name, verbatim, as OpenRouter spells it. No model name given → ask for one and stop; never pick one yourself. `{model_slug}` is `{model}` with `/` and any other non-alphanumeric character replaced by `-`.
+`{model}` is that model name, verbatim, as pi spells it — `provider/model`, listed by `pi-developer --list-models [search]`. No model name given → ask for one and stop; never pick one yourself. `{model_slug}` is the model half of that id with every non-alphanumeric character replaced by `-`, lowercased; the provider prefix stays out of the slug and out of the branch name.
 
 ## Fixed parameters
 
@@ -22,11 +22,11 @@ Run the benchmark in ~/Claude/notes/claude_booping_benchmark.md with qwen/qwen3-
 | Plan | `./vault/plans/202608121417_frontmatter-update-e2e-migration/index.md`, inside the workspace (3 milestones, `type: refactoring`, status `awaiting-approval`) |
 | Branch | `bench/{model_slug}`, cut inside the workspace |
 | Push remote | `gh` → `git@github.com:A/claude-booping.git`, added to the clone |
-| Worker agent | `openrouter-developer`, driven with `{model}` |
+| Worker agent | `pi-developer`, driven with `{model}` |
 
 These are the `frontmatter-update-e2e` entry in [index.md](index.md)'s registry frontmatter, which is also where the scoring weights and the etalon corpus live. The registry is authoritative; this table is its readable form.
 
-`.benchmarks/` is gitignored in the source repo, so a workspace is invisible to it. Two vaults are in play and must not be confused: the workspace's own `vault/` is the sprint's scratch copy — the plan under test, its milestone statuses, the checkboxes the sprint flips — and dies with the clone, while the scorecard, the run details and the registry live in the source repo's vault and are the only thing committed. Workspaces are disposable: prune them with `rm -rf .benchmarks/{dir}` once a run's branch is pushed.
+`.benchmarks/` is gitignored in the source repo, so a workspace is invisible to it. Two vaults are in play and must not be confused: the workspace's own `vault/` is the sprint's scratch copy — the plan under test, its milestone statuses, the checkboxes the sprint flips — and dies with the clone, while the scorecard, the run details and the registry live in the source repo's vault and are the only thing committed. Prune a workspace with `rm -rf .benchmarks/{dir}` once you no longer want its branch — nothing pushes it for you.
 
 ## Steps
 
@@ -82,15 +82,18 @@ Then continue exactly as for a passing run: leave the workspace and its branch i
 
 ## Worker delegation
 
-Every milestone briefing goes to the `openrouter-developer` agent, and the briefing's first line pins the model:
+Every milestone briefing goes to the `pi-developer` agent, and the briefing's first line pins the model and the log path:
 
 ```
-Use OpenRouter model `{model}` for this milestone.
+Use model id `{model}` for this milestone (pass it as `--model`), and log the run to
+`~/.tmp/pi-developer/{ts}-{model_slug}-{milestone}.ndjson` (pass it as `-L`).
 ```
 
-No other agent writes code — not `booping:booping-developer`, not the runner. That holds for fix attempts too: a retry after a failed milestone goes back to `openrouter-developer` with the same `{model}`, so the benchmark measures one model end to end.
+`{ts}` is the launch stamp, `date +%Y%m%d-%H%M%S`. That naming is what `bench-score` selects logs by; a run logged under pi-developer's default `{ts}-{pid}` name has to be renamed before it can be scored.
 
-The scorecard's `provider` column is keyed by the worker agent that ran the milestones: `openrouter-developer` → `openrouter`, `llama-developer` → `local`, `booping:booping-developer` → `anthropic`. Pass it to `bench-score report` as `--provider` (default `openrouter`).
+No other agent writes code — not `booping:booping-developer`, not the runner. That holds for fix attempts too: a retry after a failed milestone goes back to `pi-developer` with the same `{model}`, so the benchmark measures one model end to end.
+
+The scorecard's `provider` column is the provider half of pi's model id — `llama-local/…` → `local`, `openrouter/…` → `openrouter`, `ollama-cloud/…` → `local`. Pass it to `bench-score report` as `--provider` (default `openrouter`). Rows from before pi was the worker are keyed by their own worker agent instead; see [method.md](method.md).
 
 ## Report
 
@@ -100,6 +103,6 @@ Post the sprint report the playbook asks for, then add the benchmark scorecard:
 - per milestone: attempts spent (1, 2, or failed), the commit sha, whether the DoD held on the first attempt
 - guardrails: the `just ci` verdict at the end of the run
 - failures worth naming: context-limit deaths, degenerate tool-call loops, malformed tool inputs, milestones abandoned
-- the worker's run logs — `~/.tmp/openrouter-developer/*.ndjson`, one per attempt
+- the worker's run logs — `~/.tmp/pi-developer/*.ndjson`, one per attempt
 
-Leave the branch in place when the run ends; it is the artifact being compared. Do not merge it, do not delete it, do not rebase it. Publish is what pushes it to `gh`; nothing before publish pushes anything. The workspace stays until you prune it — measure and the diff reviewers read it, and a pruned workspace is only recoverable by cloning again from the pushed branch.
+Leave the branch in place when the run ends; it is the artifact being compared. Do not merge it, do not delete it, do not rebase it. Nothing in the run pushes it anywhere and no pull request is opened — publish commits the scorecard and the run detail, and stops there. The workspace therefore holds the only copy of the branch: it stays until you prune it, and pruning it before pushing the branch by hand throws the artifact away.

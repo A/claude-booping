@@ -21,6 +21,7 @@ metric logic lives here.
 from __future__ import annotations
 
 import argparse
+import calendar
 import json
 import os
 import re
@@ -46,6 +47,8 @@ FRONTMATTER = re.compile(r"\A---\n(.*?)\n---\n", re.DOTALL)
 TXTAR_SECTION = re.compile(r"^-- (.+?) --$")
 WILDCARD = "[..]"
 TERMINAL_MILESTONE = re.compile(r"\Adone\Z|\Afail@M\d+\Z")
+# in/out are the work; cache read/write is context replay and is never folded into them.
+TOKEN_CHANNELS = ("prompt", "completion", "cached", "cache_write")
 
 
 def log(message: str) -> None:
@@ -440,6 +443,16 @@ class Attempt:
     calls: list[tuple[str, dict[str, Any], str]] = field(default_factory=list)
     results: dict[str, tuple[bool, str]] = field(default_factory=dict)
     final: dict[str, Any] = field(default_factory=dict)
+    # Normalised across log schemas, so the metric code never asks which one it read.
+    schema: str = "claude-code"
+    tokens: dict[str, int] = field(
+        default_factory=lambda: {"prompt": 0, "completion": 0, "cached": 0, "cache_write": 0}
+    )
+    cost_usd: float = 0.0
+    duration_ms: int | None = None
+    stop_reason: str = ""
+    generations: list[str] = field(default_factory=list)
+    agents: Counter[str] = field(default_factory=Counter)
 
 
 def slugify(text: str) -> str:
@@ -504,8 +517,105 @@ def result_text(content: Any) -> str:
     return ""
 
 
+PI_EVENTS = {"session", "message_end", "tool_execution_start", "tool_execution_end"}
+ISO_TS = "%Y-%m-%dT%H:%M:%S"
+
+
+def stamp_ms(stamp: Any) -> int | None:
+    """Epoch milliseconds for either stamp shape pi writes.
+
+    Messages carry epoch milliseconds; the session header carries an ISO-8601
+    string in UTC. Both have to land on the same axis or a duration is nonsense.
+    """
+    if isinstance(stamp, int | float):
+        return int(stamp)
+    head = str(stamp or "")[:19]
+    try:
+        parsed = time.strptime(head, ISO_TS)
+    except (ValueError, TypeError):
+        return None
+    return int(calendar.timegm(parsed) * 1000)
+
+
+def load_claude_code(attempt: Attempt, event: dict[str, Any]) -> None:
+    kind = event.get("type")
+    if kind == "system" and event.get("subtype") == "init":
+        attempt.model = str(event.get("model") or "")
+    elif kind == "assistant":
+        message = event.get("message") or {}
+        ident = message.get("id")
+        if ident:
+            attempt.generations.append(str(ident))
+        for block in message.get("content") or []:
+            if block.get("type") == "tool_use":
+                attempt.calls.append(
+                    (block.get("name", ""), block.get("input") or {}, block["id"])
+                )
+                attempt.agents["worker"] += 1
+    elif kind == "user":
+        for block in event.get("message", {}).get("content") or []:
+            if block.get("type") == "tool_result":
+                attempt.results[block.get("tool_use_id", "")] = (
+                    bool(block.get("is_error")),
+                    result_text(block.get("content")),
+                )
+    elif kind == "result":
+        attempt.final = event
+
+
+def load_pi(attempt: Attempt, event: dict[str, Any], clock: dict[str, int]) -> None:
+    """pi's own stream: agent-tagged tool events plus per-message usage.
+
+    Every event a sub-agent raises carries `agent`/`agentRun`; the orchestrator's
+    own carry neither, which is the only way the two are told apart.
+    """
+    kind = event.get("type")
+    agent = str(event.get("agent") or "orchestrator")
+    if kind == "session":
+        stamp = stamp_ms(event.get("timestamp"))
+        if stamp is not None:
+            clock.setdefault("start", stamp)
+    elif kind == "orch_agent_start":
+        attempt.model = attempt.model or str(event.get("model") or "")
+    elif kind == "tool_execution_start":
+        attempt.calls.append(
+            (
+                str(event.get("toolName") or ""),
+                event.get("args") or {},
+                str(event.get("toolCallId") or ""),
+            )
+        )
+        attempt.agents[agent] += 1
+    elif kind == "tool_execution_end":
+        attempt.results[str(event.get("toolCallId") or "")] = (
+            bool(event.get("isError")),
+            result_text((event.get("result") or {}).get("content")),
+        )
+    elif kind == "message_end":
+        message = event.get("message") or {}
+        if message.get("role") != "assistant":
+            return
+        attempt.model = attempt.model or str(message.get("model") or "")
+        # An OpenRouter-backed pi run carries the generation id here; a local one does not.
+        ident = message.get("responseId")
+        if ident and str(ident).startswith("gen-"):
+            attempt.generations.append(str(ident))
+        usage = message.get("usage") or {}
+        attempt.tokens["prompt"] += int(usage.get("input") or 0)
+        attempt.tokens["completion"] += int(usage.get("output") or 0)
+        attempt.tokens["cached"] += int(usage.get("cacheRead") or 0)
+        attempt.tokens["cache_write"] += int(usage.get("cacheWrite") or 0)
+        attempt.cost_usd += float((usage.get("cost") or {}).get("total") or 0.0)
+        attempt.stop_reason = str(message.get("stopReason") or attempt.stop_reason)
+        stamp = stamp_ms(message.get("timestamp"))
+        if stamp is not None:
+            clock["end"] = stamp
+            clock.setdefault("start", stamp)
+
+
 def load_attempt(path: Path, milestone: str, ts: str) -> Attempt:
     attempt = Attempt(path=path, milestone=milestone, ts=ts)
+    clock: dict[str, int] = {}
     for line in path.read_text(errors="replace").splitlines():
         if not line.startswith("{"):
             continue
@@ -513,42 +623,33 @@ def load_attempt(path: Path, milestone: str, ts: str) -> Attempt:
             event = json.loads(line)
         except json.JSONDecodeError:
             continue
-        kind = event.get("type")
-        if kind == "system" and event.get("subtype") == "init":
-            attempt.model = str(event.get("model") or "")
-        elif kind == "assistant":
-            for block in event.get("message", {}).get("content") or []:
-                if block.get("type") == "tool_use":
-                    attempt.calls.append(
-                        (block.get("name", ""), block.get("input") or {}, block["id"])
-                    )
-        elif kind == "user":
-            for block in event.get("message", {}).get("content") or []:
-                if block.get("type") == "tool_result":
-                    attempt.results[block.get("tool_use_id", "")] = (
-                        bool(block.get("is_error")),
-                        result_text(block.get("content")),
-                    )
-        elif kind == "result":
-            attempt.final = event
+        if event.get("type") in PI_EVENTS or event.get("type", "").startswith("orch_"):
+            attempt.schema = "pi"
+            load_pi(attempt, event, clock)
+        else:
+            load_claude_code(attempt, event)
+
+    if attempt.schema == "pi":
+        if "start" in clock and "end" in clock:
+            attempt.duration_ms = max(clock["end"] - clock["start"], 0)
+        return attempt
+
+    usage = attempt.final.get("usage") or {}
+    attempt.tokens = {
+        "prompt": int(usage.get("input_tokens") or 0),
+        "completion": int(usage.get("output_tokens") or 0),
+        "cached": int(usage.get("cache_read_input_tokens") or 0),
+        "cache_write": int(usage.get("cache_creation_input_tokens") or 0),
+    }
+    attempt.cost_usd = float(attempt.final.get("total_cost_usd") or 0.0)
+    attempt.duration_ms = attempt.final.get("duration_ms")
+    attempt.stop_reason = str(attempt.final.get("stop_reason") or "")
     return attempt
 
 
 def gen_ids(attempt: Attempt) -> list[str]:
     """Every generation id mention, duplicates kept — the caller dedupes."""
-    found: list[str] = []
-    for line in attempt.path.read_text(errors="replace").splitlines():
-        if '"assistant"' not in line:
-            continue
-        try:
-            event = json.loads(line)
-        except json.JSONDecodeError:
-            continue
-        if event.get("type") == "assistant":
-            ident = event.get("message", {}).get("id")
-            if ident:
-                found.append(str(ident))
-    return found
+    return attempt.generations
 
 
 def count_loops(keys: list[str], threshold: int) -> int:
@@ -571,6 +672,29 @@ def compile_all(proc: dict[str, Any], key: str) -> list[re.Pattern[str]]:
     return [re.compile(p, re.IGNORECASE) for p in proc.get(key) or []]
 
 
+def pushed_lines(payload: dict[str, Any], edit_keys: list[str]) -> int:
+    """Lines an edit call pushed, whichever shape the harness spells them in.
+
+    Claude Code carries the new text as a string under one key; pi carries a list
+    of `{oldText, newText}` replacements under `edits`.
+    """
+    for key in edit_keys:
+        value = payload.get(key)
+        if isinstance(value, str):
+            return len(value.splitlines())
+        if isinstance(value, list):
+            written = 0
+            for item in value:
+                if not isinstance(item, dict):
+                    continue
+                for inner in ("newText", "new_string", "new_source", "content"):
+                    if isinstance(item.get(inner), str):
+                        written += len(item[inner].splitlines())
+                        break
+            return written
+    return 0
+
+
 def profile_attempt(attempt: Attempt, proc: dict[str, Any]) -> dict[str, Any]:
     malformed_rx = compile_all(proc, "malformed_patterns")
     death_rx = compile_all(proc, "context_death_patterns")
@@ -588,15 +712,10 @@ def profile_attempt(attempt: Attempt, proc: dict[str, Any]) -> dict[str, Any]:
         if is_error and matches_any(death_rx, text):
             deaths += 1
         if name in edit_tools:
-            for key in edit_keys:
-                if isinstance(payload.get(key), str):
-                    pushed += len(payload[key].splitlines())
-                    break
+            pushed += pushed_lines(payload, edit_keys)
 
-    stop = str(attempt.final.get("stop_reason") or "")
-    if stop in set(proc["context_death_stop_reasons"]):
+    if attempt.stop_reason in set(proc["context_death_stop_reasons"]):
         deaths += 1
-    usage = attempt.final.get("usage") or {}
 
     keys = [
         f"{name}\0{json.dumps(payload, sort_keys=True)}"
@@ -605,17 +724,15 @@ def profile_attempt(attempt: Attempt, proc: dict[str, Any]) -> dict[str, Any]:
     return {
         "log": attempt.path.name,
         "ts": attempt.ts,
-        "duration_ms": attempt.final.get("duration_ms"),
+        "schema": attempt.schema,
+        "duration_ms": attempt.duration_ms,
         "num_turns": attempt.final.get("num_turns"),
-        "stop_reason": stop,
-        "result_cost_usd": attempt.final.get("total_cost_usd"),
-        "result_tokens": {
-            "prompt": int(usage.get("input_tokens") or 0),
-            "completion": int(usage.get("output_tokens") or 0),
-            "cached": int(usage.get("cache_read_input_tokens") or 0),
-        },
+        "stop_reason": attempt.stop_reason,
+        "result_cost_usd": attempt.cost_usd,
+        "result_tokens": dict(attempt.tokens),
         "tool_calls": sum(tools.values()),
         "tools": dict(sorted(tools.items())),
+        "agents": dict(sorted(attempt.agents.items())),
         "malformed": malformed,
         "loops": count_loops(keys, proc["loop_threshold"]),
         "deaths": deaths,
@@ -629,7 +746,7 @@ def blind_rebaselines(attempts: list[Attempt], proc: dict[str, Any]) -> dict[str
     A `--txtar-update` run rewrites the expectations it then reports as passing,
     so it can never be the green run that ends the blind window.
     """
-    shell = proc["shell_tool"]
+    shells = set(proc.get("shell_tools") or [proc["shell_tool"]])
     key = proc["shell_input_key"]
     rebaseline = re.compile(proc["rebaseline_pattern"])
     e2e = re.compile(proc["e2e_pattern"])
@@ -640,7 +757,7 @@ def blind_rebaselines(attempts: list[Attempt], proc: dict[str, Any]) -> dict[str
     seen_green = False
     for attempt in attempts:
         for name, payload, ident in attempt.calls:
-            if name != shell:
+            if name not in shells:
                 continue
             command = str(payload.get(key) or "")
             if not e2e.search(command):
@@ -726,7 +843,7 @@ def cmd_process(entry: dict[str, Any], args: argparse.Namespace) -> dict[str, An
             "result_cost_usd": sum(p["result_cost_usd"] or 0.0 for p in profiles),
             "result_tokens": {
                 channel: sum(p["result_tokens"][channel] for p in profiles)
-                for channel in ("prompt", "completion", "cached")
+                for channel in TOKEN_CHANNELS
             },
             "gen_ids": sorted(set(mentions)),
             "gen_id_mentions": len(mentions),
@@ -744,15 +861,20 @@ def cmd_process(entry: dict[str, Any], args: argparse.Namespace) -> dict[str, An
         # Log stamps are local wall clock with no zone; the span is their difference.
         start = time.mktime(time.strptime(first.ts, TS_FMT))
         end = time.mktime(time.strptime(last.ts, TS_FMT))
-        span_ms = int((end - start) * 1000) + (last.final.get("duration_ms") or 0)
+        span_ms = int((end - start) * 1000) + (last.duration_ms or 0)
+
+    agents: Counter[str] = Counter()
+    for attempt in attempts:
+        agents.update(attempt.agents)
 
     return {
         "run": {
             "model": first.model,
             "run_id": first.ts,
-            "date": f"{first.ts[:4]}-{first.ts[4:6]}-{first.ts[6:8]}"
+            "date": f"{first.ts[:4]}-{first.ts[4:6]}-{first.ts[6:8]} {first.ts[9:11]}:{first.ts[11:13]}"
             if first.ts
             else "",
+            "schemas": sorted({attempt.schema for attempt in attempts}),
             "wall_ms": wall_ms,
             "wall": human_ms(wall_ms),
             "span_ms": span_ms,
@@ -768,6 +890,7 @@ def cmd_process(entry: dict[str, Any], args: argparse.Namespace) -> dict[str, An
         "totals": {
             "tool_calls": sum(tools.values()),
             "tools": dict(sorted(tools.items())),
+            "agents": dict(sorted(agents.items())),
             "malformed": sum(m["malformed"] for m in milestones.values()),
             "loops": sum(m["loops"] for m in milestones.values()),
             "deaths": sum(m["deaths"] for m in milestones.values()),
@@ -825,13 +948,42 @@ def fetch_generation(
     return ident, None, failure
 
 
-def cmd_cost(entry: dict[str, Any], args: argparse.Namespace) -> dict[str, Any]:
-    variable = entry["api_key_env"]
-    token = os.environ.get(variable)
-    if not token:
-        log(f"bench-score: environment variable {variable} is unset or empty")
-        raise SystemExit(2)
+def worker_usage_cost(profile: dict[str, Any], endpoint: str) -> dict[str, Any]:
+    """Cost and tokens straight from the worker's own logs.
 
+    The path for a run whose logs carry no OpenRouter generation id at all — a
+    local model behind pi, say — where there is nothing to look up and the
+    worker's own accounting is the only measurement there is.
+    """
+    per_milestone = {
+        name: {
+            "cost": round(float(bucket["result_cost_usd"]), 6),
+            **{channel: bucket["result_tokens"][channel] for channel in TOKEN_CHANNELS},
+            "ids": 0,
+        }
+        for name, bucket in profile["milestones"].items()
+    }
+    total = round(sum(float(b["cost"]) for b in per_milestone.values()), 6)
+    return {
+        "source": "worker-usage",
+        "endpoint": endpoint,
+        "total_cost_usd": total,
+        "openrouter_cost_usd": 0.0,
+        "fallback_cost_usd": total,
+        "fallback_label": "the worker's own usage accounting, not billing",
+        "unique_ids": 0,
+        "id_mentions": 0,
+        "fetched": 0,
+        "failures": {},
+        "tokens": {
+            channel: sum(int(b[channel]) for b in per_milestone.values())
+            for channel in TOKEN_CHANNELS
+        },
+        "milestones": per_milestone,
+    }
+
+
+def cmd_cost(entry: dict[str, Any], args: argparse.Namespace) -> dict[str, Any]:
     budget = dict(entry["cost"])
     endpoint = args.endpoint or budget["endpoint"]
     profile = (
@@ -847,6 +999,16 @@ def cmd_cost(entry: dict[str, Any], args: argparse.Namespace) -> dict[str, Any]:
         for ident in profile["milestones"][name]["gen_ids"]:
             owner.setdefault(ident, name)
 
+    if not owner:
+        log("cost: no generation ids in the logs — reading the worker's own usage")
+        return worker_usage_cost(profile, endpoint)
+
+    variable = entry["api_key_env"]
+    token = os.environ.get(variable)
+    if not token:
+        log(f"bench-score: environment variable {variable} is unset or empty")
+        raise SystemExit(2)
+
     log(f"cost: {len(owner)} unique generation id(s) from {mentions} mention(s)")
     with ThreadPoolExecutor(max_workers=int(budget["concurrency"])) as pool:
         fetched = list(
@@ -855,7 +1017,7 @@ def cmd_cost(entry: dict[str, Any], args: argparse.Namespace) -> dict[str, Any]:
 
     failures: Counter[str] = Counter()
     per_milestone: dict[str, dict[str, float]] = {
-        name: {"cost": 0.0, "prompt": 0, "completion": 0, "cached": 0, "ids": 0}
+        name: {"cost": 0.0, "prompt": 0, "completion": 0, "cached": 0, "cache_write": 0, "ids": 0}
         for name in profile["milestones"]
     }
     for ident, data, failure in fetched:
@@ -867,6 +1029,7 @@ def cmd_cost(entry: dict[str, Any], args: argparse.Namespace) -> dict[str, Any]:
         bucket["prompt"] += int(data.get("native_tokens_prompt") or 0)
         bucket["completion"] += int(data.get("native_tokens_completion") or 0)
         bucket["cached"] += int(data.get("native_tokens_cached") or 0)
+        bucket["cache_write"] += int(data.get("native_tokens_cache_write") or 0)
         bucket["ids"] += 1
 
     for bucket in per_milestone.values():
@@ -877,7 +1040,7 @@ def cmd_cost(entry: dict[str, Any], args: argparse.Namespace) -> dict[str, Any]:
     degraded = bool(sum(failures.values()))
     if degraded:
         for name, bucket in per_milestone.items():
-            for channel in ("prompt", "completion", "cached"):
+            for channel in TOKEN_CHANNELS:
                 bucket[channel] = profile["milestones"][name]["result_tokens"][channel]
     return {
         "source": "ndjson-fallback" if degraded else "openrouter",
@@ -893,9 +1056,8 @@ def cmd_cost(entry: dict[str, Any], args: argparse.Namespace) -> dict[str, Any]:
         "fetched": sum(1 for _, data, _ in fetched if data is not None),
         "failures": dict(sorted(failures.items())),
         "tokens": {
-            "prompt": sum(int(b["prompt"]) for b in per_milestone.values()),
-            "completion": sum(int(b["completion"]) for b in per_milestone.values()),
-            "cached": sum(int(b["cached"]) for b in per_milestone.values()),
+            channel: sum(int(b[channel]) for b in per_milestone.values())
+            for channel in TOKEN_CHANNELS
         },
         "milestones": per_milestone,
     }
@@ -1237,16 +1399,20 @@ def render_detail(
                 for name, entry_ in sorted(profile["milestones"].items())
             ],
         ),
-        f"Tool mix: {', '.join(f'{name} {count}' for name, count in profile['totals']['tools'].items())}. Worker wall clock {run['wall']} across {run['attempts_total']} attempt log(s); first log start to last log end spans {run['span']}.",
+        f"Tool mix: {', '.join(f'{name} {count}' for name, count in profile['totals']['tools'].items())}. "
+        + f"Calls by agent: {', '.join(f'{name} {count}' for name, count in profile['totals']['agents'].items())}. "
+        + f"Log schema: {', '.join(run['schemas'])}. "
+        + f"Worker wall clock {run['wall']} across {run['attempts_total']} attempt log(s); first log start to last log end spans {run['span']}.",
         "## Cost",
         table(
             [
                 "milestone",
                 "generations",
                 "cost USD",
-                "native prompt",
-                "native completion",
-                "of which cached",
+                "in",
+                "out",
+                "cache read",
+                "cache write",
             ],
             [
                 [
@@ -1256,11 +1422,16 @@ def render_detail(
                     compact(int(bucket["prompt"])),
                     compact(int(bucket["completion"])),
                     compact(int(bucket["cached"])),
+                    compact(int(bucket["cache_write"])),
                 ]
                 for name, bucket in sorted(cost["milestones"].items())
             ],
         ),
-        f"Source `{cost['source']}` via `{cost['endpoint']}`: {cost['fetched']}/{cost['unique_ids']} unique generation ids fetched from {cost['id_mentions']} id mentions, failures {cost['failures'] or 'none'}. OpenRouter total ${cost['openrouter_cost_usd']:.4f}; the ndjson fallback figure — {cost['fallback_label'] or "Claude Code's own pricing, not OpenRouter billing"} — is ${cost['fallback_cost_usd']:.4f}.",
+        (
+            f"Source `{cost['source']}`: no OpenRouter generation id appears in the logs, so the figures above are {cost['fallback_label']}, totalling ${cost['fallback_cost_usd']:.4f}."
+            if cost["source"] == "worker-usage"
+            else f"Source `{cost['source']}` via `{cost['endpoint']}`: {cost['fetched']}/{cost['unique_ids']} unique generation ids fetched from {cost['id_mentions']} id mentions, failures {cost['failures'] or 'none'}. OpenRouter total ${cost['openrouter_cost_usd']:.4f}; the ndjson fallback figure — {cost['fallback_label'] or "the worker's own pricing, not OpenRouter billing"} — is ${cost['fallback_cost_usd']:.4f}."
+        ),
         "## Composites",
         f"`code` scores {code['earned']} of {code['available']} available weight"
         + (
@@ -1317,7 +1488,7 @@ def cmd_report(entry: dict[str, Any], args: argparse.Namespace) -> str:
     run = profile["run"]
     slug = model_slug_from_branch(entry, args.branch)
     detail = f"{run['run_id']}-{slug}.md"
-    tokens = cost["tokens"]["prompt"] + cost["tokens"]["completion"]
+    tokens = cost["tokens"]
 
     row = {
         "date": run["date"],
@@ -1329,7 +1500,8 @@ def cmd_report(entry: dict[str, Any], args: argparse.Namespace) -> str:
         "agentic": f"{agentic['score']:.1f}",
         "review": "_pending_",
         "diff": str(profile["totals"]["churn"]["diff_lines"]),
-        "tokens": compact(tokens),
+        "tokens": f"in {compact(tokens['prompt'])} out {compact(tokens['completion'])}",
+        "cache": f"r {compact(tokens['cached'])} w {compact(tokens['cache_write'])}",
         "cost": f"${cost['total_cost_usd']:.2f}",
         "time": run["wall"],
         "run": f"[{run['run_id']}](runs/{detail})",

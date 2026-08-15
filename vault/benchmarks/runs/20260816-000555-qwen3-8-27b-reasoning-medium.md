@@ -19,7 +19,7 @@ Branch `bench/qwen3-8-27b-reasoning-medium` scored against the `frontmatter-upda
 
 | field | value |
 | --- | --- |
-| date | 2026-08-16 |
+| date | 2026-08-16 00:05 |
 | model | `Qwen3.8-27B_reasoning_medium` |
 | provider | local |
 | outcome | pass |
@@ -28,26 +28,27 @@ Branch `bench/qwen3-8-27b-reasoning-medium` scored against the `frontmatter-upda
 | agentic | - |
 | review | 3.63 |
 | diff | 1651 |
-| tokens | - |
+| tokens | in 323.5k out 93.7k |
+| cache | r 2.6M w 0 |
 | cost | - |
-| time | 1h53m |
+| time | 1h28m10s |
 
-`agentic`, `tokens` and `cost` are `-` for this run, not zero — see **Harness deviation** below. `time` is the sprint's wall clock measured by the runner (first transition 00:04 to plan `done` 01:57); the worker logs span 1h39m02s from first log start to last log end.
+`agentic` and `cost` are `-` for this run, not zero — see **Harness deviation** below. `tokens`, `cache` and `time` were re-measured after `bench-score` learned pi's log schema: 1h28m10s is the worker wall clock summed from the seven attempt logs, against a 1h46m17s span from first log start to last log end and 1h53m of runner wall clock from first transition to plan `done`.
 
 ## Harness deviation
 
-Not an `openrouter-developer` run, and not a Claude Code worker either. Every milestone went to the `pi-developer` agent, which hands the milestone to a headless **pi** session as `/orchestrate` and lets pi do its own planning, delegation and validation; the model behind it was `llama-local/Qwen3.8-27B_reasoning_medium` on the local llama-swap box. The registry entry's `worker` and `logs_dir` name `openrouter-developer` and `~/.tmp/openrouter-developer`; this run's logs were written by pi to `~/.tmp/pi-developer` and copied into the registry's `logs_dir` under its `{ts}-{model_slug}-{milestone}` naming so `bench-score` could select them.
+Not an `openrouter-developer` run, and not a Claude Code worker either. Every milestone went to the `pi-developer` agent, which hands the milestone to a headless **pi** session as `/orchestrate` and lets pi do its own planning, delegation and validation; the model behind it was `llama-local/Qwen3.8-27B_reasoning_medium` on the local llama-swap box. At the time of the run the registry entry still named `openrouter-developer` and `~/.tmp/openrouter-developer`; the entry now names pi, and this run's logs live in `~/.tmp/pi-developer` under the registry's `{ts}-{model_slug}-{milestone}` naming so `bench-score` can select them.
 
 What that costs the measurement, precisely:
 
-- **`agentic` is dropped.** pi's ndjson is its own event schema (`tool_execution_start/end`, `message_*`, `turn_*`, `agent_*`), not Claude Code's `assistant`/`user`/`result` stream, so `bench-score`'s detectors parsed no tool calls at all and scored `rebaseline`, `tool_discipline` and `churn` as perfect on zero evidence (20 + 30 + 20 of 100). Only `attempts` — 30 − 10×4 retries → 0 — was real. Publishing 70 would state as measured what was never observed, so the composite is withheld. The `att` cell (2/3/2) and the retry count stand: they come from log counts and the `feedback.md` sidecars, not from tool events.
+- **`agentic` is dropped.** When this run was first scored, `bench-score` could not read pi's ndjson — its own event schema (`tool_execution_start/end`, `message_*`, `turn_*`, `agent_*`) rather than Claude Code's `assistant`/`user`/`result` stream — so it parsed no tool calls and scored `rebaseline`, `tool_discipline` and `churn` as perfect on zero evidence. The parser has since learned that schema, and the profile below is re-measured with it; the composite stays withheld for the coverage reason in the next bullet, not for the parser. The `att` cell (2/3/2) and the retry count were never in doubt: they come from log counts and the `feedback.md` sidecars.
 - **The logs are not uniformly orchestrator-only, which is the second reason the composite cannot be salvaged.** pi tags each event with the agent that raised it (`agent: researcher|worker|validator`, plus `agentRun`), and in the run's last three attempt logs the sub-agents' own tool calls and per-agent token usage are all present: 44 sub-agent tool calls against 11 orchestrator ones in M02's third attempt, 43/11 in M03's first, 16/14 in M03's second. The run's first four logs carry no agent-tagged events at all — one `agent_start`, orchestrator calls only, the implementation sub-agents visible solely as `run_agent` text results. pi was updated partway through the run, around 01:10. So the coder's process signal exists for 3 of 7 attempts and is absent for 4, and a composite mixing the two would compare observed work against unobserved work rather than model against model.
-- **`tokens` and `cost` are dropped for the same split.** Native prompt+completion across the seven attempt logs, cache reads excluded, sums to **417.1k** — but that figure counts every agent in the last three attempts and only the orchestrator in the first four, so it is a floor on a mixed basis, not a measurement comparable to another row's. `cost` is genuinely nothing to measure: pi records `cost: 0` throughout because the box bills nothing, and `bench-score` found 0 OpenRouter generation ids.
+- **`tokens` and `cache` are published with the same caveat, `cost` is dropped.** in 323.5k / out 93.7k, cache read 2.6M, counts every agent in the last three attempts and only the orchestrator in the first four — a floor on a mixed basis rather than a figure strictly comparable to a row measured end to end. `cost` is genuinely nothing to measure: pi records `cost: 0` throughout because the box bills nothing, and no OpenRouter generation id appears in the logs, so `bench-score` costed the run from the worker's own usage accounting and got $0.
 - **Every other layer is the registry's standard run**: `code` (gates, corpus, mutation set), `diff`, `outcome` and both diff reviews are measured exactly as for any other row.
 
 Attempt logs excluded from the process figures, all of them launches that never reached the model: one harness no-op on M01 (pi resumed a stale `state.yaml` marked `completed` from the previous attempt, ran one sanity check and stopped without reading the feedback, 222 KB), one M02 launch the user killed (1.7 MB), and two stillborn launches (30 KB, 33 KB). Seven genuine attempt logs remain, 2/3/2 across the milestones.
 
-A run's worth of process signal is what this deviation costs. Making `agentic` measurable for pi-driven runs no longer needs anything from pi — the current build already emits agent-tagged tool events and per-agent usage. What it needs is a registry entry of its own whose `process` block reads pi's schema: `tool_execution_start` → the call with `toolName`/`args`, `tool_execution_end` → the result with `isError`, `message_end.usage` for tokens, and the `agent` tag to separate the coder's work from the orchestrator's. A run whose logs all carry those tags would score every agentic component the standard way.
+A run's worth of process signal is what this deviation costs — and only this run's. `bench-score` now reads pi's schema natively (`tool_execution_start/end` for calls and results, `message_end.usage` for tokens, the `agent` tag to separate the coder's work from the orchestrator's), so the next pi run scores every agentic component the standard way. Re-scored with that parser, this run's logs yield 173 tool calls — orchestrator 88, researcher 43, worker 34, validator 26 — 0 malformed, 0 loops, 0 deaths and 0 blind rebaselines, which would compute `agentic` at 70.0. That number is still withheld: four of the seven attempts contributed no sub-agent events at all, so its clean tool-discipline and churn readings rest partly on work no log recorded.
 
 ## Gates
 
@@ -142,21 +143,21 @@ Exact-name recall 3/34 (8.82%) → mapped recall 29/34 (85.29%); gaps 0/3 exact 
 
 | milestone | attempts | feedback files | wall | tool calls | malformed | loops | deaths | blind rebaselines | pushed lines |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| M01-core-cli-cases | 2 | 1 | 0m00s | 0 | 0 | 0 | 0 | 0 | 0 |
-| M02-list-ops-and-macro-cases | 3 | 1 | 0m00s | 0 | 0 | 0 | 0 | 0 | 0 |
-| M03-delete-superseded-units | 2 | 1 | 0m00s | 0 | 0 | 0 | 0 | 0 | 0 |
+| M01-core-cli-cases | 2 | 1 | 23m33s | 26 | 0 | 0 | 0 | 0 | 187 |
+| M02-list-ops-and-macro-cases | 3 | 1 | 41m12s | 81 | 0 | 0 | 0 | 0 | 358 |
+| M03-delete-superseded-units | 2 | 1 | 23m24s | 84 | 0 | 0 | 0 | 0 | 365 |
 
-Tool mix: . Worker wall clock 0m00s across 7 attempt log(s); first log start to last log end spans 1h39m02s.
+Tool mix: bash 87, edit 22, grep 1, read 48, run_agent 21, write 12. Calls by agent: orchestrator 88, researcher 43, validator 26, worker 34. Log schema: pi. Worker wall clock 1h28m10s across 7 attempt log(s); first log start to last log end spans 1h46m17s.
 
 ## Cost
 
-| milestone | generations | cost USD | native prompt | native completion | of which cached |
-| --- | --- | --- | --- | --- | --- |
-| M01-core-cli-cases | 0 | 0.0000 | 0 | 0 | 0 |
-| M02-list-ops-and-macro-cases | 0 | 0.0000 | 0 | 0 | 0 |
-| M03-delete-superseded-units | 0 | 0.0000 | 0 | 0 | 0 |
+| milestone | generations | cost USD | in | out | cache read | cache write |
+| --- | --- | --- | --- | --- | --- | --- |
+| M01-core-cli-cases | 0 | 0.0000 | 25.4k | 14.9k | 399.4k | 0 |
+| M02-list-ops-and-macro-cases | 0 | 0.0000 | 114.9k | 36.9k | 1.1M | 0 |
+| M03-delete-superseded-units | 0 | 0.0000 | 183.2k | 41.9k | 1.1M | 0 |
 
-Source `openrouter` via `https://openrouter.ai/api/v1/generation`: 0/0 unique generation ids fetched from 0 id mentions, failures none. OpenRouter total $0.0000; the ndjson fallback figure — Claude Code's own pricing, not OpenRouter billing — is $0.0000.
+Source `worker-usage`: no OpenRouter generation id appears in the logs, so the figures above are the worker's own usage accounting, not billing, totalling $0.0000.
 
 ## Composites
 
@@ -175,14 +176,16 @@ Source `openrouter` via `https://openrouter.ai/api/v1/generation`: 0/0 unique ge
 | corpus.wildcard | 5 | 5.0 | wildcard line ratio 0.0022 against band 0.05–0.3 |
 | corpus.mutation | 25 | 20.0 | 12/15 mutants killed × 25 |
 
-`agentic` is **withheld** — three of its four components had no evidence behind them. The table below is what `bench-score` emitted (70.0/100) and why each row does or does not stand; see **Harness deviation**.
+`agentic` is **withheld**. The table below is what `bench-score` computes from these logs now that it reads pi's schema; it is not published as this run's score because four of the seven attempts contributed no sub-agent events at all, so `tool_discipline` and `churn` read clean partly over work no log recorded. See **Harness deviation**.
 
-| component | weight | earned | arithmetic | stands? |
-| --- | --- | --- | --- | --- |
-| attempts | 30 | 0.0 | 30 − 10×4 retries | yes — log counts and `feedback.md` sidecars |
-| rebaseline | 20 | 20.0 | 20 − 10×0 blind rebaselines | no — zero tool calls parsed from pi's schema |
-| tool_discipline | 30 | 30.0 | 30 − 2×0 malformed − 5×0 loops − 10×0 deaths | no — zero tool calls parsed from pi's schema |
-| churn | 20 | 20.0 | 0 pushed ÷ 1651 diff = 0.0× against band 1.5–4.0 | no — pushed lines unobservable, so the ratio is vacuous |
+`agentic` scores 70.0 of 100 available weight → **70.0/100**.
+
+| component | weight | earned | arithmetic |
+| --- | --- | --- | --- |
+| attempts | 30 | 0.0 | 30 − 10×4 retries |
+| rebaseline | 20 | 20.0 | 20 − 10×0 blind rebaselines |
+| tool_discipline | 30 | 30.0 | 30 − 2×0 malformed − 5×0 loops − 10×0 deaths |
+| churn | 20 | 20.0 | 910 pushed ÷ 1651 diff = 0.5512× against band 1.5–4.0 |
 
 ## Review
 

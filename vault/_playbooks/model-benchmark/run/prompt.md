@@ -13,7 +13,9 @@ The user is unavailable for the whole sprint. `guide.md`'s **Autonomy** section 
 
 ## Delegation
 
-Every milestone and every retry goes to the entry's `worker` agent with the model pinned in the briefing, per `guide.md`'s **Worker delegation** section. No other agent writes code — not the runner, not a default developer agent. One model, end to end, or the run measures nothing.
+Every milestone and every retry goes to the entry's `worker` agent with the model **and the log path** pinned in the briefing, per `guide.md`'s **Worker delegation** section. No other agent writes code — not the runner, not a default developer agent. One model, end to end, or the run measures nothing.
+
+The log path is not decoration: `measure` selects a run's attempt logs by the `{ts}-{model_slug}-{milestone}.ndjson` name that briefing asks for, and an attempt logged under any other name is invisible to the process and cost layers until it is renamed by hand.
 
 ## When the sprint gives up
 

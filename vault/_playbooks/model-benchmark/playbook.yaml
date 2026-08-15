@@ -27,7 +27,7 @@ states:
       publishing:
         transitions:
           - to: done
-            when: "the history row is appended, the vault artifacts are committed, and the pull request against the reference branch is open or updated"
+            when: "the history row is appended and the vault artifacts are committed"
             gates:
               - "the appended row's cells sit in the registry's `history_columns` order"
       done:

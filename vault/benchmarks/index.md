@@ -10,8 +10,8 @@ benchmarks:
     baseline: a025189
     plan: vault/plans/202608121417_frontmatter-update-e2e-migration/index.md
     branch_scheme: bench/{model_slug}
-    worker: openrouter-developer
-    logs_dir: ~/.tmp/openrouter-developer
+    worker: pi-developer
+    logs_dir: ~/.tmp/pi-developer
     api_key_env: OPENROUTER_API_KEY
     scope_allowlist:
       - booping-python/e2e/cases/frontmatter-update/*.txtar
@@ -79,12 +79,12 @@ benchmarks:
       failure_pattern: "^FAILED\\s+(\\S+\\.txtar)"
     runs_dir: runs
     history_columns:
-      [date, model, provider, outcome, att, code, agentic, review, diff, tokens, cost, time, run]
+      [date, model, provider, outcome, att, code, agentic, review, diff, tokens, cache, cost, time, run]
     process:
       loop_threshold: 3
-      edit_tools: [Write, Edit, NotebookEdit]
-      edit_input_keys: [content, new_string, new_source]
-      shell_tool: Bash
+      edit_tools: [Write, Edit, NotebookEdit, write, edit]
+      edit_input_keys: [content, new_string, new_source, edits]
+      shell_tools: [Bash, bash]
       shell_input_key: command
       rebaseline_pattern: "--txtar-update"
       e2e_pattern: "just e2e|pytest[^\n]*\\be2e\\b"
@@ -152,7 +152,7 @@ Every run develops in its own clone under the entry's `workspaces_dir`, never in
 | --- | --- | --- | --- |
 | `frontmatter-update-e2e` | `202608121417_frontmatter-update-e2e-migration` | `bench/{model_slug}` | [guide.md](guide.md) |
 
-Scoring assets sit beside this file: [history.md](history.md) is the append-only scorecard table, `runs/` holds one detail report per run, `mutations/{id}/` holds the fixed patch set a corpus must kill, and `_fixtures/ndjson/` holds one hand-written synthetic log per process detector — a clean benchmark run never trips them, so they are how the detectors stay demonstrable. Run one with `bench-score process --benchmark {id} --ndjson _fixtures/ndjson/degenerate-loop.ndjson`: `degenerate-loop.ndjson` yields 1 loop and 0 malformed, `malformed-tool-inputs.ndjson` yields 2 malformed and 0 loops, the third tool error in it being an ordinary non-zero shell exit that must not count.
+Scoring assets sit beside this file: [history.md](history.md) is the append-only scorecard table and [method.md](method.md) states what its columns mean and how a run is driven, `runs/` holds one detail report per run, `mutations/{id}/` holds the fixed patch set a corpus must kill, and `_fixtures/ndjson/` holds one hand-written synthetic log per process detector — a clean benchmark run never trips them, so they are how the detectors stay demonstrable. Run one with `bench-score process --benchmark {id} --ndjson _fixtures/ndjson/degenerate-loop.ndjson`: `degenerate-loop.ndjson` yields 1 loop and 0 malformed, `malformed-tool-inputs.ndjson` yields 2 malformed and 0 loops, the third tool error in it being an ordinary non-zero shell exit that must not count.
 
 ## Entry keys
 
@@ -164,8 +164,9 @@ Scoring assets sit beside this file: [history.md](history.md) is the append-only
 - `unit_grep` — the token whose absence from the repo proves the superseded unit file left no stale reference. `unit_grep_exclude` lists directories the sweep skips: the plan documents under `vault/` name the deleted file on purpose, so a hit there is not a stale reference.
 - `etalon_cases` — the reference corpus frozen from the opus run (`dc0be24` + `0648787`); `gap_cases` are the subset with no pre-existing unit-test counterpart, the cases a model only writes by reading the CLI rather than by translating tests.
 - `weights` — composite scoring weights as data. Each composite sums to 100: `code` splits 40 gates / 60 corpus, `agentic` splits across the four process signals. `penalties` are the per-incident deductions inside `attempts`, `rebaseline` and `tool_discipline`; `thresholds` are the ratio bands where `wildcard` and `churn` earn their full weight or nothing, interpolated linearly between. A layer that was not measured (no mutation run yet) drops out of the composite's denominator and is named in the run detail.
-- `process` — how the worker's ndjson logs are read: which tools count as edits and where their payload sits, the regexes that recognise an e2e invocation and its green/red verdict, the `--txtar-update` marker, and the payload signatures that classify a tool error as a malformed input or a context death. `loop_threshold` is how many consecutive identical tool+input calls make a degenerate loop.
+- `worker` and `logs_dir` — the agent every milestone briefing goes to, and where it writes one ndjson per attempt. `pi-developer` is the current worker: it drives a headless pi session, which reaches every provider pi has, so the model id in the briefing (`llama-local/…`, `openrouter/…`) selects both model and provider. A run names its logs `{ts}-{model_slug}-{milestone}.ndjson` through pi-developer's `-L` flag, which is what `select_logs` matches; `--since`/`--until` narrow the window further.
+- `process` — how the worker's ndjson logs are read: which tools count as edits and where their payload sits, the regexes that recognise an e2e invocation and its green/red verdict, the `--txtar-update` marker, and the payload signatures that classify a tool error as a malformed input or a context death. `loop_threshold` is how many consecutive identical tool+input calls make a degenerate loop. Both harness schemas are read from one entry, which is why `edit_tools` and `shell_tools` list both vocabularies — Claude Code's `Write`/`Edit`/`Bash` and pi's `write`/`edit`/`bash`; `edit_input_keys` likewise covers pi's `edits` list of `{oldText, newText}` replacements alongside the string-valued keys. `bench-score` picks the schema per log file, so a run whose logs mix the two still profiles.
 - `mutations_dir` and `mutations` — where the frozen patch set lives (relative to the repo holding this registry) and how a mutant is judged: `command` names the `commands` entry re-run once per patch, narrowed to the corpus under test, and `failure_pattern` is the regex whose first group pulls a failing case name out of that command's output, so a kill carries the names that caught it. The set is frozen per benchmark id — a new baseline is a new entry with its own directory, never a regeneration in place.
-- `cost` — the OpenRouter generation endpoint plus the retry, concurrency and timeout budget for querying it. `--endpoint` overrides the URL per invocation.
+- `cost` — the OpenRouter generation endpoint plus the retry, concurrency and timeout budget for querying it. `--endpoint` overrides the URL per invocation. Logs carrying no OpenRouter generation id at all — a local model behind pi — are costed from the worker's own usage accounting instead, reported as source `worker-usage`.
 - `runs_dir` and `history_columns` — where run detail reports land (relative to this file) and the exact column order of [history.md](history.md)'s table, so the emitted row cannot drift from its header.
-- `api_key_env` names the environment variable holding the OpenRouter token. The token itself is never config.
+- `api_key_env` names the environment variable holding the OpenRouter token. The token itself is never config. It is read only when the logs actually carry generation ids to look up, so a local run needs no key.
