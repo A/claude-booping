@@ -1,0 +1,34 @@
+A boolean pair lands unquoted and typed in the file while the stderr summary echoes the raw text.
+
+-- fixtures/cwd/plan.md --
+---
+status: draft
+sp: 0
+---
+
+Body.
+-- cmd --
+booping frontmatter-update plan.md blocked=true
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,6 +1,7 @@
+ ---
+ status: draft
+ sp: 0
++blocked: true
+ ---
+ 
+ Body.
+-- stderr --
+updated plan.md: blocked=true
+-- expected/cwd/plan.md --
+---
+status: draft
+sp: 0
+blocked: true
+---
+
+Body.
+-- exit --
+0

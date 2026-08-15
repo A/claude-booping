@@ -1,0 +1,34 @@
+A null spelling lands as an unquoted YAML null in the file; the stderr summary still echoes the raw text retro=null.
+
+-- fixtures/cwd/plan.md --
+---
+status: draft
+sp: 0
+---
+
+Body.
+-- cmd --
+booping frontmatter-update plan.md retro=null
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,6 +1,7 @@
+ ---
+ status: draft
+ sp: 0
++retro: null
+ ---
+ 
+ Body.
+-- stderr --
+updated plan.md: retro=null
+-- expected/cwd/plan.md --
+---
+status: draft
+sp: 0
+retro: null
+---
+
+Body.
+-- exit --
+0

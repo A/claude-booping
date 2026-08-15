@@ -1,0 +1,40 @@
+A second identical call is a no-op: it prints no diff, exits 0, and the stdout carries only the first call's diff.
+
+-- fixtures/cwd/plan.md --
+---
+status: draft
+title: Probe plan
+sp: 0
+---
+
+Body paragraph one.
+
+Second paragraph.
+-- cmd --
+booping frontmatter-update plan.md status=ready
+booping frontmatter-update plan.md status=ready
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,5 +1,5 @@
+ ---
+-status: draft
++status: ready
+ title: Probe plan
+ sp: 0
+ ---
+-- stderr --
+updated plan.md: status=ready
+updated plan.md: status=ready
+-- expected/cwd/plan.md --
+---
+status: ready
+title: Probe plan
+sp: 0
+---
+
+Body paragraph one.
+
+Second paragraph.
+-- exit --
+0

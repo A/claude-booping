@@ -1,0 +1,33 @@
+An integer pair lands unquoted and typed in the file while the stderr summary echoes the raw text.
+
+-- fixtures/cwd/plan.md --
+---
+status: draft
+sp: 0
+---
+
+Body.
+-- cmd --
+booping frontmatter-update plan.md sp=23
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,6 +1,6 @@
+ ---
+ status: draft
+-sp: 0
++sp: 23
+ ---
+ 
+ Body.
+-- stderr --
+updated plan.md: sp=23
+-- expected/cwd/plan.md --
+---
+status: draft
+sp: 23
+---
+
+Body.
+-- exit --
+0

@@ -1,0 +1,41 @@
+Multiple key=value pairs apply in one call, each landing in the resulting frontmatter.
+
+-- fixtures/cwd/plan.md --
+---
+status: draft
+title: Probe plan
+sp: 0
+---
+
+Body paragraph one.
+
+Second paragraph.
+-- cmd --
+booping frontmatter-update plan.md status=ready sp=13
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,7 +1,7 @@
+ ---
+-status: draft
++status: ready
+ title: Probe plan
+-sp: 0
++sp: 13
+ ---
+ 
+ Body paragraph one.
+-- stderr --
+updated plan.md: status=ready, sp=13
+-- expected/cwd/plan.md --
+---
+status: ready
+title: Probe plan
+sp: 13
+---
+
+Body paragraph one.
+
+Second paragraph.
+-- exit --
+0

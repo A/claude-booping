@@ -1,0 +1,25 @@
+A no-op change prints an empty stdout and leaves the file byte-identical; the success summary line goes on stderr, not stdout.
+
+-- fixtures/cwd/plan.md --
+---
+status: ready
+title: Probe plan
+sp: 0
+---
+
+Body paragraph one.
+-- cmd --
+booping frontmatter-update plan.md status=ready
+-- stdout --
+-- stderr --
+updated plan.md: status=ready
+-- expected/cwd/plan.md --
+---
+status: ready
+title: Probe plan
+sp: 0
+---
+
+Body paragraph one.
+-- exit --
+0

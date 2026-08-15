@@ -1,0 +1,37 @@
+With a .booping marker above the cwd the run appends exactly one [frontmatter-update] line, naming the plan and the changed keys, to the attached vault's log.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+-- fixtures/cwd/vault/plans/probe/index.md --
+---
+status: draft
+title: Probe plan
+---
+
+Body.
+-- cmd --
+booping frontmatter-update vault/plans/probe/index.md status=ready
+-- stdout --
+--- vault/plans/probe/index.md
++++ vault/plans/probe/index.md
+@@ -1,5 +1,5 @@
+ ---
+-status: draft
++status: ready
+ title: Probe plan
+ ---
+ 
+-- stderr --
+updated vault/plans/probe/index.md: status=ready
+-- expected/cwd/vault/.booping.log --
+[..]Z: [frontmatter-update] vault/plans/probe/index.md status
+-- expected/cwd/vault/plans/probe/index.md --
+---
+status: ready
+title: Probe plan
+---
+
+Body.
+-- exit --
+0

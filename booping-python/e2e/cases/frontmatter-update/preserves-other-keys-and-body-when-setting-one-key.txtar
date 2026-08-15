@@ -1,0 +1,40 @@
+Setting one key leaves the other frontmatter keys and the markdown body byte-for-byte intact.
+
+-- fixtures/cwd/plan.md --
+---
+status: draft
+title: Probe plan
+sp: 0
+---
+
+Body paragraph one.
+
+Second paragraph.
+-- cmd --
+booping frontmatter-update plan.md owner=ada
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -2,6 +2,7 @@
+ status: draft
+ title: Probe plan
+ sp: 0
++owner: ada
+ ---
+ 
+ Body paragraph one.
+-- stderr --
+updated plan.md: owner=ada
+-- expected/cwd/plan.md --
+---
+status: draft
+title: Probe plan
+sp: 0
+owner: ada
+---
+
+Body paragraph one.
+
+Second paragraph.
+-- exit --
+0

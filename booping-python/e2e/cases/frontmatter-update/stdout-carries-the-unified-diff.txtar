@@ -1,0 +1,34 @@
+The mutated file's unified diff goes on stdout with ---, +++ and @@ header lines; the summary goes to stderr.
+
+-- fixtures/cwd/plan.md --
+---
+status: draft
+title: Probe plan
+sp: 0
+---
+
+Body paragraph one.
+-- cmd --
+booping frontmatter-update plan.md status=ready
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,5 +1,5 @@
+ ---
+-status: draft
++status: ready
+ title: Probe plan
+ sp: 0
+ ---
+-- stderr --
+updated plan.md: status=ready
+-- expected/cwd/plan.md --
+---
+status: ready
+title: Probe plan
+sp: 0
+---
+
+Body paragraph one.
+-- exit --
+0

@@ -1,0 +1,34 @@
+A tab-bearing value round-trips through the file unmangled; a literal newline is not typeable via the CLI (shlex, one invocation per line).
+
+-- fixtures/cwd/plan.md --
+---
+status: draft
+sp: 0
+---
+
+Body.
+-- cmd --
+booping frontmatter-update plan.md "note=a	b"
+-- stdout --
+--- plan.md
++++ plan.md
+@@ -1,6 +1,7 @@
+ ---
+ status: draft
+ sp: 0
++note: "a\tb"
+ ---
+ 
+ Body.
+-- stderr --
+updated plan.md: note=a	b
+-- expected/cwd/plan.md --
+---
+status: draft
+sp: 0
+note: "a\tb"
+---
+
+Body.
+-- exit --
+0
