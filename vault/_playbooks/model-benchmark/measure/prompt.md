@@ -5,7 +5,7 @@ review_gate: null
 
 # Measure the branch
 
-Everything mechanical is `bench-score`'s; everything judged is a sub-agent's. Run the script from the vault's own repo root so its default registry path resolves, or pass `--registry {vault}/benchmarks/index.md`. Each invocation takes `--benchmark {id}` and `--branch {branch}` from `prepare`'s return.
+Everything mechanical is `bench-score`'s; everything judged is a sub-agent's. Run the script from the source repo root so its default registry path resolves, or pass `--registry {vault}/benchmarks/index.md`. Each invocation takes `--benchmark {id}`, `--branch {branch}` and `--repo {workspace}` from `prepare`'s return — without `--repo` the script scores the source repo, which does not carry the branch.
 
 ## 1. Corpus, then the case mapping
 
@@ -15,7 +15,7 @@ Spawn one detached case-mapping judge. Its inputs are programmatic — never a c
 
 - the registry entry's `etalon_cases` and `gap_cases` lists;
 - the corpus JSON's `unmatched_etalon` and `unmatched_branch` lists;
-- the bodies of the branch cases named in `unmatched_branch`, read from the entry's `cases_dir` on the branch.
+- the bodies of the branch cases named in `unmatched_branch`, read from the entry's `cases_dir` in the workspace, on the branch.
 
 It returns one table and nothing else: a row per unmatched etalon name, `{etalon case} → {branch case, or none}`, with the branch case's behaviour in a clause; plus, for every `gap_cases` name, a verdict — covered by a named branch case, or not covered — since a gap case is scored on behaviour, not spelling. A branch case may map to at most one etalon name, and an etalon name to at most one branch case.
 
@@ -35,7 +35,7 @@ Then append a `## Case mapping` section to the detail, below the corpus table: t
 Spawn {% if review_agent %}two diff reviewers in parallel, both detached — a generic `fable:medium` sub-agent and `{{ review_agent }}`{% else %}one detached diff reviewer, a generic `fable:medium` sub-agent — no review agent is configured, which is not an error{% endif %}. The briefing every reviewer gets is the same:
 
 - `review-rubric.md` beside this step, in full — it is the contract, and both reviewers are graded against the identical text;
-- the branch diff against the registry entry's `baseline`, in the entry's `repo`;
+- the branch diff against the registry entry's `baseline`, taken in the workspace;
 - the case-mapping table from step 1, so a behaviour the branch never ported surfaces as a finding rather than as a silent absence;
 - the entry's `scope_allowlist`, which is what "in scope" means for this diff.
 

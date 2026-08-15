@@ -4,24 +4,25 @@
 
 **The method**: every model runs the same groomed plan from the same baseline commit (`a025189`), in its own throwaway clone on its own `bench/{model_slug}` branch. The develop playbook drives the sprint; every line of code is written by the worker agent pinned to the model under test, with review gates auto-answered and no human in the loop. Two failed attempts on a milestone end the run as `fail@Mnn`; a failed run is not scored on its partial work — `code`, `agentic` and `review` stay `-`, the row carries only the run's footprint: `diff`, `tokens`, `cost`, `time`. One row per run, appended by the `model-benchmark` playbook's publish step; every number is computed by `bench-score` and audited in the linked run detail.
 
-| date       | model                             | outcome       | att   | code | agentic | review | diff | tokens | cost  | time     | run                                                                               |
-| ---------- | --------------------------------- | ------------- | ----- | ---- | ------- | ------ | ---- | ------ | ----- | -------- | --------------------------------------------------------------------------------- |
-| 2026-08-14 | `google/gemma-4-31b-it`           | pass          | 1/1/1 | 86.0 | 80.0    | 2.6    | 1498 | 3.6M   | $0.37 | 21m38s   | [20260814-173237](runs/20260814-173237-google-gemma-4-31b-it.md)                  |
-| 2026-08-14 | `meta/muse-glimmer-30b`           | fail@M01 [^1] | 2     | -    | -       | -      | 33   | 391.6k | $0.30 | 5m51s    | [20260814-183901](runs/20260814-183901-meta-muse-glimmer-30b.md)                  |
-| 2026-08-14 | `deepseek/deepseek-v4-flash-0731` | fail@M01      | 2     | -    | -       | -      | 38   | 1.4M   | $0.06 | 22m51s   | [20260814-190948](runs/20260814-190948-deepseek-deepseek-v4-flash-0731.md)        |
-| 2026-08-14 | `x-ai/grok-4.6`                   | pass          | 1/1/1 | 91.3 | 80.0    | 3.1    | 1634 | 4.9M   | $3.68 | 46m23s   | [20260814-195257](runs/20260814-195257-x-ai-grok-4-6.md)                          |
-| 2026-08-14 | `claude-opus-5` [^2]              | pass          | 1/1/1 | 91.2 | 90.0    | 4.63   | 1832 | 5.1M   | n/a   | 13m19s   | [20260814-210820](runs/20260814-210820-claude-opus-5-medium-booping-developer.md) |
-| 2026-08-14 | `google/gemini-3.7-flash`         | pass          | 1/1/1 | 76.7 | 80.0    | 2.75   | 1564 | 9.4M   | $1.13 | 21m45s   | [20260814-211700](runs/20260814-211700-google-gemini-3-7-flash.md)                |
-| 2026-08-14 | `qwen/qwen3.6-27b`                | pass          | 2/1/1 | 87.4 | 63.0    | 3.25   | 1514 | 5.4M   | $2.54 | 29m13s   | [20260814-211257](runs/20260814-211257-qwen-qwen3-6-27b.md)                       |
-| 2026-08-14 | `z-ai/glm-4.5-air`                | pass          | 2/2/2 | 65.4 | 40.0    | 1.63   | 1680 | 12.5M  | $1.02 | 40m23s   | [20260814-211226](runs/20260814-211226-z-ai-glm-4-5-air.md)                       |
-| 2026-08-14 | `Qwen3.6-27B-Q6` [^3]             | pass          | 2/1/1 | 76.6 | 65.0    | 3.0    | 1618 | 252.8k | -     | 32m30s   | [20260814-233230](runs/20260814-233230-qwen3-6-27b-q6.md)                         |
-| 2026-08-14 | `poolside/laguna-s-2.1:free`      | pass          | 2/1/1 | 78.5 | 68.0    | 3.5    | 1524 | 12.5M  | $0.00 | 2h41m09s | [20260814-230156](runs/20260814-230156-poolside-laguna-s-2-1-free.md)             |
-| 2026-08-15 | `Qwen3.8-27B` [^4]                | pass          | 1/1/2 | 90.1 | 80.0    | 3.0    | 1804 | 557.6k | -     | 4h56m20s | [20260815-012945](runs/20260815-012945-qwen3-8-27b.md)                            |
+| date       | model                             | provider   | outcome       | att   | code | agentic | review | diff | tokens | cost  | time     | run                                                                               |
+| ---------- | --------------------------------- | ---------- | ------------- | ----- | ---- | ------- | ------ | ---- | ------ | ----- | -------- | --------------------------------------------------------------------------------- |
+| 2026-08-14 | `google/gemma-4-31b-it`           | openrouter | pass          | 1/1/1 | 86.0 | 80.0    | 2.6    | 1498 | 3.6M   | $0.37 | 21m38s   | [20260814-173237](runs/20260814-173237-google-gemma-4-31b-it.md)                  |
+| 2026-08-14 | `meta/muse-glimmer-30b`           | openrouter | fail@M01 [^1] | 2     | -    | -       | -      | 33   | 391.6k | $0.30 | 5m51s    | [20260814-183901](runs/20260814-183901-meta-muse-glimmer-30b.md)                  |
+| 2026-08-14 | `deepseek/deepseek-v4-flash-0731` | openrouter | fail@M01      | 2     | -    | -       | -      | 38   | 1.4M   | $0.06 | 22m51s   | [20260814-190948](runs/20260814-190948-deepseek-deepseek-v4-flash-0731.md)        |
+| 2026-08-14 | `x-ai/grok-4.6`                   | openrouter | pass          | 1/1/1 | 91.3 | 80.0    | 3.1    | 1634 | 4.9M   | $3.68 | 46m23s   | [20260814-195257](runs/20260814-195257-x-ai-grok-4-6.md)                          |
+| 2026-08-14 | `claude-opus-5`                   | anthropic  | pass          | 1/1/1 | 91.2 | 90.0    | 4.63   | 1832 | 5.1M   | n/a   | 13m19s   | [20260814-210820](runs/20260814-210820-claude-opus-5-medium-booping-developer.md) |
+| 2026-08-14 | `google/gemini-3.7-flash`         | openrouter | pass          | 1/1/1 | 76.7 | 80.0    | 2.75   | 1564 | 9.4M   | $1.13 | 21m45s   | [20260814-211700](runs/20260814-211700-google-gemini-3-7-flash.md)                |
+| 2026-08-14 | `qwen/qwen3.6-27b`                | openrouter | pass          | 2/1/1 | 87.4 | 63.0    | 3.25   | 1514 | 5.4M   | $2.54 | 29m13s   | [20260814-211257](runs/20260814-211257-qwen-qwen3-6-27b.md)                       |
+| 2026-08-14 | `z-ai/glm-4.5-air`                | openrouter | pass          | 2/2/2 | 65.4 | 40.0    | 1.63   | 1680 | 12.5M  | $1.02 | 40m23s   | [20260814-211226](runs/20260814-211226-z-ai-glm-4-5-air.md)                       |
+| 2026-08-14 | `Qwen3.6-27B-Q6`                  | local      | pass          | 2/1/1 | 76.6 | 65.0    | 3.0    | 1618 | 252.8k | -     | 32m30s   | [20260814-233230](runs/20260814-233230-qwen3-6-27b-q6.md)                         |
+| 2026-08-14 | `poolside/laguna-s-2.1:free`      | openrouter | pass          | 2/1/1 | 78.5 | 68.0    | 3.5    | 1524 | 12.5M  | $0.00 | 2h41m09s | [20260814-230156](runs/20260814-230156-poolside-laguna-s-2-1-free.md)             |
+| 2026-08-15 | `Qwen3.8-27B`                     | local      | pass          | 1/1/2 | 90.1 | 80.0    | 3.0    | 1804 | 557.6k | -     | 4h56m20s | [20260815-012945](runs/20260815-012945-qwen3-8-27b.md)                            |
 
 Columns:
 
 - `date` — run date
 - `model` — model id
+- `provider` — where the worker ran, keyed by the worker agent: `openrouter-developer` → `openrouter`, `llama-developer` → `local`, `booping:booping-developer` → `anthropic`
 - `outcome` — `pass`, or `fail@Mnn` naming the milestone the run died on
 - `att` — attempts spent per milestone
 - `code` — code-quality composite, %, grading the artifact: CI/scope/determinism gates plus corpus quality against the frozen etalon and mutation set

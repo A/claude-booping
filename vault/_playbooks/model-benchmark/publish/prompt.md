@@ -11,13 +11,14 @@ Append `measure`'s history row as the last row of the table in `{vault}/benchmar
 
 ## 2. The commit
 
-Commit the vault artifacts — the run detail and `history.md` — in the vault's own repo. That commit is the durable record of the run and is made before anything leaves this machine, so a push or a pull request that fails afterwards costs nothing but a retry.
+Commit the vault artifacts — the run detail and `history.md` — in the source repo, where the vault lives. That commit is the durable record of the run and is made before anything leaves this machine, so a push or a pull request that fails afterwards costs nothing but a retry. The workspace's own vault copy is scratch and is never committed from.
 
 ## 3. The pull request
 
-The benchmark branch lives in the entry's `repo`. Discover its remote before pushing (`git remote -v` — it is often not `origin`), push the branch, then look before creating:
+The benchmark branch lives only in the workspace until this step, so this is where it leaves the machine. Push it from the workspace to the entry's `push_remote` — `origin` there points back at the source repo and is never pushed to — then look before creating:
 
 ```
+git -C {workspace} push {push_remote.name} {branch}
 gh pr list --head {branch}
 ```
 
@@ -26,7 +27,7 @@ gh pr list --head {branch}
 
 The base is always `bench/reference`. The branch is left in place exactly as the sprint left it: never merged, never deleted, never rebased, and no commit added to it here.
 
-A failed push or a failed `gh` call is reported as what it is, with the pull request's state named. The vault commit stays; nothing is reverted, and the run is not re-measured to try again.
+A failed push or a failed `gh` call is reported as what it is, with the pull request's state named. The vault commit stays; nothing is reverted, and the run is not re-measured to try again. The workspace stays too — it is the only copy of an unpushed branch, so it is never pruned here, whether the push succeeded or not.
 
 ## Closing the step
 
@@ -44,6 +45,7 @@ Advance the run per the `## State` section once the row is committed and the pul
 
 - row: {the appended row, verbatim}
 - pull request: {created|updated} {url} — base `bench/reference`, head `{branch}`
-- branch: left in place at {sha}, not merged, not deleted
+- branch: pushed to `{push_remote.name}` at {sha}, not merged, not deleted
+- workspace: `{workspace path}` — left in place; prune with `rm -rf` when the branch is no longer needed locally
 - transition: {the transition report verbatim}
 ```

@@ -5,7 +5,7 @@ review_gate: null
 
 # Run the sprint
 
-The sprint is the measurement. It runs here, in this conversation: invoke `/playbook develop` on the entry's `plan` inside the entry's `repo`, on the branch `prepare` cut, and drive it to its end. Never hand the sprint to a sub-agent and never re-implement any part of the develop playbook — this step only supplies the answers develop would otherwise ask the user for.
+The sprint is the measurement. It runs here, in this conversation: invoke `/playbook develop` on the entry's `plan` inside the workspace `prepare` cloned, on the branch it cut there, and drive it to its end. Every path the sprint touches is inside that workspace — its plan, its milestone bookkeeping and its commits all belong to the clone's own `vault/` and are thrown away with it; nothing here writes to the source repo. Never hand the sprint to a sub-agent and never re-implement any part of the develop playbook — this step only supplies the answers develop would otherwise ask the user for.
 
 ## Autonomy
 
@@ -21,7 +21,7 @@ A model that exhausts its attempts on a milestone has produced a result. Take de
 
 ## Closing the step
 
-Leave the branch checked out with whatever work it carries and every worker log in place — `measure` reads both. Nothing is written to the vault here.
+Leave the workspace in place with the branch checked out, whatever work it carries, and every worker log — `measure` reads all three. Nothing is pushed and nothing is written to the source repo's vault here.
 
 ## Return format
 

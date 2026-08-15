@@ -1,7 +1,12 @@
 ---
 benchmarks:
   - id: frontmatter-update-e2e
-    repo: /home/anton/Dev/@A/claude-booping-local-bench
+    source_repo: /home/anton/Dev/@A/claude-booping
+    workspaces_dir: .benchmarks
+    workspace_scheme: "{workspace_id}-{model_slug}"
+    push_remote:
+      name: gh
+      url: git@github.com:A/claude-booping.git
     baseline: a025189
     plan: vault/plans/202608121417_frontmatter-update-e2e-migration/index.md
     branch_scheme: bench/{model_slug}
@@ -74,7 +79,7 @@ benchmarks:
       failure_pattern: "^FAILED\\s+(\\S+\\.txtar)"
     runs_dir: runs
     history_columns:
-      [date, model, outcome, att, code, agentic, review, diff, tokens, cost, wall, run]
+      [date, model, provider, outcome, att, code, agentic, review, diff, tokens, cost, time, run]
     process:
       loop_threshold: 3
       edit_tools: [Write, Edit, NotebookEdit]
@@ -141,6 +146,8 @@ This frontmatter is the machine-readable registry `bench-score` reads. Every ben
 
 A run is driven by `/playbook model-benchmark` ([`_playbooks/model-benchmark`](../_playbooks/model-benchmark/playbook.md)) — prepare, run, measure, publish — which resolves the model and the entry here and calls `bench-score` for every number it publishes. Driving a run by hand instead means following [guide.md](guide.md) step by step.
 
+Every run develops in its own clone under the entry's `workspaces_dir`, never in a checkout anyone works in. Runs before 2026-08-14 predate that and were developed in a long-lived copy of the repo instead; their detail reports are unaffected, since a report records the branch and never the path it was built at.
+
 | id | plan under test | branch scheme | runbook |
 | --- | --- | --- | --- |
 | `frontmatter-update-e2e` | `202608121417_frontmatter-update-e2e-migration` | `bench/{model_slug}` | [guide.md](guide.md) |
@@ -149,8 +156,11 @@ Scoring assets sit beside this file: [history.md](history.md) is the append-only
 
 ## Entry keys
 
-- `baseline` — the commit every run branches from; `plan`, `scope_allowlist`, `cases_dir` and `unit_file` are paths relative to `repo`; `milestones_glob` is relative to the plan's directory.
+- `source_repo`, `workspaces_dir`, `workspace_scheme` — a run is never developed in a checkout you work in. `prepare` clones `source_repo` into `{source_repo}/{workspaces_dir}/{workspace_scheme}` — one throwaway clone per run, `{workspace_id}` being prepare's own `YYYYMMDD-HHMMSS` stamp — and everything from the sprint to the diff review happens inside that clone. `workspaces_dir` is gitignored, so the clones never enter the source repo's index; they are disposable, and pruning one only costs the ability to re-read its worktree, the branch itself living on the remote.
+- `push_remote` — the name and URL added to each clone, so the bench branch reaches GitHub for its pull request. A local clone inherits only `origin` pointing back at `source_repo`, which is not where pull requests live.
+- `baseline` — the commit every run branches from; `plan`, `scope_allowlist`, `cases_dir` and `unit_file` are paths relative to the run's clone; `milestones_glob` is relative to the plan's directory.
 - `commands` — every command `bench-score` runs inside the scored worktree, as `argv` plus an optional worktree-relative `cwd`. The script hardcodes none of them, so a benchmark on a differently-built repo only needs a different entry here.
+- `bench-score --repo` — every subcommand takes the clone to score. Omitted, it falls back to `source_repo`, which only holds the branch after a `git fetch`; the playbook always passes the run's clone.
 - `unit_grep` — the token whose absence from the repo proves the superseded unit file left no stale reference. `unit_grep_exclude` lists directories the sweep skips: the plan documents under `vault/` name the deleted file on purpose, so a hit there is not a stale reference.
 - `etalon_cases` — the reference corpus frozen from the opus run (`dc0be24` + `0648787`); `gap_cases` are the subset with no pre-existing unit-test counterpart, the cases a model only writes by reading the CLI rather than by translating tests.
 - `weights` — composite scoring weights as data. Each composite sums to 100: `code` splits 40 gates / 60 corpus, `agentic` splits across the four process signals. `penalties` are the per-incident deductions inside `attempts`, `rebaseline` and `tool_discipline`; `thresholds` are the ratio bands where `wildcard` and `churn` earn their full weight or nothing, interpolated linearly between. A layer that was not measured (no mutation run yet) drops out of the composite's denominator and is named in the run detail.

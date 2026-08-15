@@ -1322,6 +1322,7 @@ def cmd_report(entry: dict[str, Any], args: argparse.Namespace) -> str:
     row = {
         "date": run["date"],
         "model": f"`{run['model']}`",
+        "provider": args.provider,
         "outcome": outcome,
         "att": run["attempts_per_milestone"],
         "code": f"{code['score']:.1f}",
@@ -1330,7 +1331,7 @@ def cmd_report(entry: dict[str, Any], args: argparse.Namespace) -> str:
         "diff": str(profile["totals"]["churn"]["diff_lines"]),
         "tokens": compact(tokens),
         "cost": f"${cost['total_cost_usd']:.2f}",
-        "wall": run["wall"],
+        "time": run["wall"],
         "run": f"[{run['run_id']}](runs/{detail})",
     }
     body = render_detail(
@@ -1360,6 +1361,7 @@ def main() -> None:
         sub.add_argument("--benchmark", required=True)
         sub.add_argument("--branch", required=branch_required)
         sub.add_argument("--registry", default=DEFAULT_REGISTRY, type=Path)
+        sub.add_argument("--repo", type=Path)
         return sub
 
     add("gates")
@@ -1377,6 +1379,9 @@ def main() -> None:
     report = subparsers.choices["report"]
     for name in ("gates", "corpus", "cost", "mutations"):
         report.add_argument(f"--{name}-json")
+    report.add_argument(
+        "--provider", choices=["openrouter", "local", "anthropic"], default="openrouter"
+    )
     report.add_argument("--dry-run", action="store_true")
 
     args = parser.parse_args()
@@ -1386,6 +1391,11 @@ def main() -> None:
     ):
         parser.error(f"{args.subcommand}: one of --branch or --ndjson is required")
     entry = load_entry(args.registry, args.benchmark)
+    # A run is scored in its own per-run clone, so the repo path is per invocation.
+    repo = args.repo or entry.get("source_repo")
+    if not repo:
+        parser.error("--repo is required: the entry carries no source_repo")
+    entry = {**entry, "repo": str(Path(repo).expanduser())}
 
     if args.subcommand == "report":
         sys.stdout.write(cmd_report(entry, args) + "\n")

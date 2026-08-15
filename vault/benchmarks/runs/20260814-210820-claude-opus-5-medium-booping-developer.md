@@ -8,7 +8,7 @@ outcome: pass
 code: 91.24
 agentic: 90.0
 review: 4.63
-status: publishing
+status: done
 ---
 
 # Benchmark run — claude-opus-5
@@ -173,10 +173,10 @@ Cost is **not measured** for this run — see **Harness deviation** above. The r
 
 Both reviewers worked from the same rubric, the branch diff against `a025189`, the case-mapping table and the scope allowlist. Per-reviewer grade is the mean of its four criterion grades; the history `review` cell is the mean of the two, **4.63/5**.
 
-| reviewer | grade /5 | findings |
-| --- | --- | --- |
-| `fable:medium` | 4.25 | 4 — criteria 3/4/5/5: the unit file was deleted while three CLI-observable behaviours kept no corpus successor (empty key in a pair, a value containing `=`, an empty value), against the plan's own precondition for deletion; the malformed-pair branch is exercised only through a positional argument, never through `--append`; the newline gap case round-trips a literal backslash-n rather than a real newline, which a Jinja string literal would carry; the `# keep` trailing-comment survival assertion is dropped with no successor |
-| `codex` | 5.00 | 0 — criteria 5/5/5/5: plan requirements satisfied in scope, cases assert observable outcomes across all four channels, naming and format consistent with the scaffold corpus, no out-of-scope file touched |
+| reviewer       | grade /5 | findings                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| -------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `fable:medium` | 4.25     | 4 — criteria 3/4/5/5: the unit file was deleted while three CLI-observable behaviours kept no corpus successor (empty key in a pair, a value containing `=`, an empty value), against the plan's own precondition for deletion; the malformed-pair branch is exercised only through a positional argument, never through `--append`; the newline gap case round-trips a literal backslash-n rather than a real newline, which a Jinja string literal would carry; the `# keep` trailing-comment survival assertion is dropped with no successor |
+| `codex`        | 5.00     | 0 — criteria 5/5/5/5: plan requirements satisfied in scope, cases assert observable outcomes across all four channels, naming and format consistent with the scaffold corpus, no out-of-scope file touched                                                                                                                                                                                                                                                                                                                                      |
 
 The two disagree on the same evidence: both saw the four unported etalon behaviours, `fable` graded them as a correctness defect against the plan's "delete wholesale once the corpus covers every CLI-observable behavior" decision, `codex` counted them as acknowledged in-scope gaps and returned no finding. The mutation set agrees with `fable`: patches `06_empty-value-becomes-null`, `07_first-equals-split-lost` and `08_empty-key-accepted` are exactly the three survivors.
 
