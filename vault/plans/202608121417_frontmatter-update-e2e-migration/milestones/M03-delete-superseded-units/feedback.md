@@ -1,0 +1,5 @@
+**Blocked (1/2)**: The unit-file deletion was left uncommitted — no commit was made on `bench/qwen3-8-27b-reasoning-medium`, so the milestone delivered nothing to the branch.
+
+What was checked: the branch head is still `2766c77` (the runner's plan bookkeeping commit) and `git status` shows `booping-python/tests/commands/frontmatter_update_test.py` as an unstaged deletion. The reported verify verdict (`uv run pytest tests/commands -q` → 144 passed, `uv run pytest e2e -k frontmatter -q` → 29 passed, stale-reference grep clean) is taken as given and was not re-run.
+
+What the next attempt must do: keep the work as it stands — the deletion and the `coverage-cross-check.md` table are correct, do not redo either — and commit the deletion of `booping-python/tests/commands/frontmatter_update_test.py` on branch `bench/qwen3-8-27b-reasoning-medium` with a conventional-commit message scoped to the milestone. Stage that deletion only; the plan directory under `vault/`, which is where `coverage-cross-check.md` lives, is the runner's bookkeeping and must stay out of the commit. Report the commit sha in the return.
