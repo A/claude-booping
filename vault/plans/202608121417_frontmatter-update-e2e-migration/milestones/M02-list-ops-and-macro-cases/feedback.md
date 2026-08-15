@@ -1,0 +1,11 @@
+**Blocked (1/2)**: The 11 authored txtar cases were left untracked in the working tree — no commit was made on `bench/qwen3-8-27b-reasoning-medium`, so the milestone delivered nothing to the branch.
+
+What was checked: the branch head is still `e22c368` (the runner's plan bookkeeping commit) and `booping-python/e2e/cases/frontmatter-update/` carries 11 untracked case files past M01's committed 17. The reported verify verdict (`uv run pytest e2e -k frontmatter -q` → 28 passed, no rewrites) is taken as given and was not re-run.
+
+What the next attempt must do: keep the existing case files as they stand — they are the work, do not re-author them — and commit them on branch `bench/qwen3-8-27b-reasoning-medium` with a conventional-commit message scoped to the milestone. Stage only the untracked case files under `booping-python/e2e/cases/frontmatter-update/`; the plan directory under `vault/` is the runner's bookkeeping and must stay out of the commit. Report the commit sha in the return.
+
+**Blocked (2/2)**: The commit landed (`b01d8e1`, 11 cases) and verify is green, but DoD 2.1's first box is unmet — `--remove` has no case of its own.
+
+What was checked: the committed corpus holds no remove-only case. `--remove` appears solely inside `an-append-combined-with-pairs-and-removals.txtar`, where its diff, resulting bytes, stderr summary and exit code are entangled with a set and an append. DoD 2.1 requires every `--remove`/`--append` behavior from the unit suite to have a corpus case asserting all four — the unit suite's remove-only paths (`test_remove_only_no_pairs`, `test_remove_key_and_add_empty`) have none. The attempt's own return flagged this as an M03 advisory rather than fixing it here.
+
+What the next attempt must do: add one kebab-named case for a remove-only call — `booping frontmatter-update` with `--remove` and no pairs — asserting the unified diff on stdout, the full resulting frontmatter bytes in `expected/**`, the stderr summary line and the exit code, authored through the milestone's own procedure (hand-write description/fixtures/cmd, fill the rest with `--txtar-update`, read it back). Leave the 11 committed cases untouched, then commit the new case on `bench/qwen3-8-27b-reasoning-medium` and report the sha. Do not restage the `vault/` plan directory.
