@@ -27,12 +27,12 @@ The worker agent is the registry entry's `worker`. Runs from 2026-08-16 use `pi-
 - `agentic` — process composite, %, read from the worker's tool logs: attempts, rebaselines, tool discipline, churn
 - `review` — mean grade on a 1 to 5 scale from independent diff reviewers — isolated sub-agents running OpenAI Sol and Anthropic Fable — scoring the branch against a shared rubric
 - `diff` — lines changed
-- `tokens` — the model's own work: `in {prompt} out {completion}`, cache excluded
-- `cache` — context replay alongside it: `r {cache read} w {cache write}`, never folded into `tokens`
+- `tokens` — `in {total input} out {output}`. `in` is the whole input side, cache included; `out` is what the model generated
+- `cache` — how much of that input never reached the model fresh: `in {cache reads} out {cache writes}` — read back from the cache, and written into it. Both sit inside `tokens in` and never in `tokens out`, so `in 2.9M` beside `cache in 2.6M` means only ~300k of the input was new. The two counters are disjoint in the raw logs of both harnesses, which is why `in` is their sum rather than either one
 - `cost` — USD, from OpenRouter's generation API when the logs carry generation ids, otherwise the worker's own usage accounting
 - `time` — sprint duration
 - `run` — link to the detail report
 
-Rows published before 2026-08-16 carry a single figure in `tokens` and `-` in `cache`: the split did not exist when they were scored, and a published row is never re-scored. Their `tokens` cell is in+out for every row but `claude-opus-5`, whose footnote records that its prompt figure includes cache reads.
+Rows published before 2026-08-16 carry a single figure in `tokens` and `-` in `cache`: the split did not exist when they were scored, and a published row is never re-scored. That figure is in+out with cache excluded for every row but `claude-opus-5`, whose footnote records that its prompt figure includes cache reads — so it is not comparable to the `in` of a row scored since.
 
 A cell reading `-` is a layer that was not measured, never a zero. The run detail names the reason.

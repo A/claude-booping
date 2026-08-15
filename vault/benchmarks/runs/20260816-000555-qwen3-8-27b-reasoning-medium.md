@@ -28,8 +28,8 @@ Branch `bench/qwen3-8-27b-reasoning-medium` scored against the `frontmatter-upda
 | agentic | - |
 | review | 3.63 |
 | diff | 1651 |
-| tokens | in 323.5k out 93.7k |
-| cache | r 2.6M w 0 |
+| tokens | in 2.9M out 93.7k |
+| cache | in 2.6M out 0 |
 | cost | - |
 | time | 1h28m10s |
 
@@ -43,7 +43,7 @@ What that costs the measurement, precisely:
 
 - **`agentic` is dropped.** When this run was first scored, `bench-score` could not read pi's ndjson — its own event schema (`tool_execution_start/end`, `message_*`, `turn_*`, `agent_*`) rather than Claude Code's `assistant`/`user`/`result` stream — so it parsed no tool calls and scored `rebaseline`, `tool_discipline` and `churn` as perfect on zero evidence. The parser has since learned that schema, and the profile below is re-measured with it; the composite stays withheld for the coverage reason in the next bullet, not for the parser. The `att` cell (2/3/2) and the retry count were never in doubt: they come from log counts and the `feedback.md` sidecars.
 - **The logs are not uniformly orchestrator-only, which is the second reason the composite cannot be salvaged.** pi tags each event with the agent that raised it (`agent: researcher|worker|validator`, plus `agentRun`), and in the run's last three attempt logs the sub-agents' own tool calls and per-agent token usage are all present: 44 sub-agent tool calls against 11 orchestrator ones in M02's third attempt, 43/11 in M03's first, 16/14 in M03's second. The run's first four logs carry no agent-tagged events at all — one `agent_start`, orchestrator calls only, the implementation sub-agents visible solely as `run_agent` text results. pi was updated partway through the run, around 01:10. So the coder's process signal exists for 3 of 7 attempts and is absent for 4, and a composite mixing the two would compare observed work against unobserved work rather than model against model.
-- **`tokens` and `cache` are published with the same caveat, `cost` is dropped.** in 323.5k / out 93.7k, cache read 2.6M, counts every agent in the last three attempts and only the orchestrator in the first four — a floor on a mixed basis rather than a figure strictly comparable to a row measured end to end. `cost` is genuinely nothing to measure: pi records `cost: 0` throughout because the box bills nothing, and no OpenRouter generation id appears in the logs, so `bench-score` costed the run from the worker's own usage accounting and got $0.
+- **`tokens` and `cache` are published with the same caveat, `cost` is dropped.** in 2.9M (of which 2.6M served from cache) / out 93.7k counts every agent in the last three attempts and only the orchestrator in the first four — a floor on a mixed basis rather than a figure strictly comparable to a row measured end to end. `cost` is genuinely nothing to measure: pi records `cost: 0` throughout because the box bills nothing, and no OpenRouter generation id appears in the logs, so `bench-score` costed the run from the worker's own usage accounting and got $0.
 - **Every other layer is the registry's standard run**: `code` (gates, corpus, mutation set), `diff`, `outcome` and both diff reviews are measured exactly as for any other row.
 
 Attempt logs excluded from the process figures, all of them launches that never reached the model: one harness no-op on M01 (pi resumed a stale `state.yaml` marked `completed` from the previous attempt, ran one sanity check and stopped without reading the feedback, 222 KB), one M02 launch the user killed (1.7 MB), and two stillborn launches (30 KB, 33 KB). Seven genuine attempt logs remain, 2/3/2 across the milestones.
@@ -151,11 +151,11 @@ Tool mix: bash 87, edit 22, grep 1, read 48, run_agent 21, write 12. Calls by ag
 
 ## Cost
 
-| milestone | generations | cost USD | in | out | cache read | cache write |
+| milestone | generations | cost USD | in | out | cache in | cache out |
 | --- | --- | --- | --- | --- | --- | --- |
-| M01-core-cli-cases | 0 | 0.0000 | 25.4k | 14.9k | 399.4k | 0 |
-| M02-list-ops-and-macro-cases | 0 | 0.0000 | 114.9k | 36.9k | 1.1M | 0 |
-| M03-delete-superseded-units | 0 | 0.0000 | 183.2k | 41.9k | 1.1M | 0 |
+| M01-core-cli-cases | 0 | 0.0000 | 424.8k | 14.9k | 399.4k | 0 |
+| M02-list-ops-and-macro-cases | 0 | 0.0000 | 1.2M | 36.9k | 1.1M | 0 |
+| M03-delete-superseded-units | 0 | 0.0000 | 1.3M | 41.9k | 1.1M | 0 |
 
 Source `worker-usage`: no OpenRouter generation id appears in the logs, so the figures above are the worker's own usage accounting, not billing, totalling $0.0000.
 
@@ -200,6 +200,6 @@ Both reviewers independently flagged the same three mutation survivors the corpu
 
 ## History row
 
-| date | model | provider | outcome | att | code | agentic | review | diff | tokens | cost | time | run |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 2026-08-16 | `Qwen3.8-27B_reasoning_medium` | local | pass | 2/3/2 | 89.0 | - | 3.63 | 1651 | - | - | 1h53m | [20260816-000555](runs/20260816-000555-qwen3-8-27b-reasoning-medium.md) |
+| date | model | provider | outcome | att | code | agentic | review | diff | tokens | cache | cost | time | run |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 2026-08-16 00:05 | `Qwen3.8-27B_reasoning_medium` | local | pass | 2/3/2 | 89.0 | - | 3.63 | 1651 | in 2.9M out 93.7k | in 2.6M out 0 | - | 1h28m10s | [20260816-000555](runs/20260816-000555-qwen3-8-27b-reasoning-medium.md) |

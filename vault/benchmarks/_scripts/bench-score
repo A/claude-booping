@@ -1411,15 +1411,19 @@ def render_detail(
                 "cost USD",
                 "in",
                 "out",
-                "cache read",
-                "cache write",
+                "cache in",
+                "cache out",
             ],
             [
                 [
                     name,
                     str(int(bucket["ids"])),
                     f"{bucket['cost']:.4f}",
-                    compact(int(bucket["prompt"])),
+                    compact(
+                        int(bucket["prompt"])
+                        + int(bucket["cached"])
+                        + int(bucket["cache_write"])
+                    ),
                     compact(int(bucket["completion"])),
                     compact(int(bucket["cached"])),
                     compact(int(bucket["cache_write"])),
@@ -1500,8 +1504,10 @@ def cmd_report(entry: dict[str, Any], args: argparse.Namespace) -> str:
         "agentic": f"{agentic['score']:.1f}",
         "review": "_pending_",
         "diff": str(profile["totals"]["churn"]["diff_lines"]),
-        "tokens": f"in {compact(tokens['prompt'])} out {compact(tokens['completion'])}",
-        "cache": f"r {compact(tokens['cached'])} w {compact(tokens['cache_write'])}",
+        # `in` is the whole input side; the cache cell says how much of it never
+        # reached the model fresh. The two counters are disjoint in both harnesses.
+        "tokens": f"in {compact(tokens['prompt'] + tokens['cached'] + tokens['cache_write'])} out {compact(tokens['completion'])}",
+        "cache": f"in {compact(tokens['cached'])} out {compact(tokens['cache_write'])}",
         "cost": f"${cost['total_cost_usd']:.2f}",
         "time": run["wall"],
         "run": f"[{run['run_id']}](runs/{detail})",
