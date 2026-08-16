@@ -8,7 +8,7 @@ outcome: pass
 code: 89.05
 agentic: 100.0
 review: 3.5
-status: publishing
+status: done
 ---
 
 # Benchmark run — google/gemini-3.7-flash
