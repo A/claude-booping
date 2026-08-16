@@ -8,7 +8,7 @@ outcome: pass
 code: 89.57
 agentic: 90.0
 review: 3.95
-status: publishing
+status: done
 ---
 
 # Benchmark run — deepseek/deepseek-v4-flash-0731
