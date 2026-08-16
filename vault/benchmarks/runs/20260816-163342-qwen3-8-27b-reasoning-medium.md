@@ -8,7 +8,7 @@ outcome: pass
 code: 89.05
 agentic: 80.0
 review: 3.13
-status: publishing
+status: done
 ---
 
 # Benchmark run — Qwen3.8-27B_reasoning_medium
