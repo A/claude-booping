@@ -3,7 +3,8 @@ graph:
   prepare: []
   run: [prepare]
   measure: [run]
-  publish: [measure]
+  report: [measure]
+  publish: [report]
 
 states:
   run:
@@ -30,6 +31,7 @@ states:
             when: "the history row is appended and the vault artifacts are committed"
             gates:
               - "the appended row's cells sit in the registry's `history_columns` order"
+              - "the row's link cell points at the human-readable report under the registry's `reports_dir`, and that report links the run detail"
       done:
         terminal: true
       cancelled:

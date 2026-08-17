@@ -14,7 +14,7 @@ One row per benchmark run, appended and never rewritten. What the task is, how a
 | 2026-08-16 16:33 | `Qwen3.8-27B_reasoning_medium`    | local      | pass [^9]     | 1/1/1 | 89.0 | 80.0    | 3.13   | 1559 | in 4.1M out 122.3k  | in 3.6M out 0 | -     | 1h02m42s | [20260816-163342](runs/20260816-163342-qwen3-8-27b-reasoning-medium.md)           |
 | 2026-08-16 17:31 | `google/gemini-3.7-flash`         | openrouter | pass [^10]    | 1/1/1 | 89.0 | 100.0   | 3.5    | 1520 | in 18.6M out 111.7k | in 8.3M out 0 | $1.30 | 46m48s   | [20260816-173144](runs/20260816-173144-google-gemini-3-7-flash.md)                |
 | 2026-08-16 18:25 | `deepseek/deepseek-v4-flash-0731` | openrouter | pass [^11]    | 1/1/1 | 89.6 | 90.0    | 3.95   | 1606 | in 13.1M out 216.7k | in 5.9M out 0 | $0.20 | 41m59s   | [20260816-182530](runs/20260816-182530-deepseek-deepseek-v4-flash-0731.md)        |
-| 2026-08-17 17:20 | `Qwen3.8-27B-Q8`                  | local      | pass [^12]    | 1/1/1 | 88.6 | 90.0    | 3.38   | 1618 | in 8.1M out 246.3k  | in 7.5M out 0 | -     | 1h51m43s | [20260817-172010](runs/20260817-172010-qwen3-8-27b-q8.md)                         |
+| 2026-08-17 17:20 | `Qwen3.8-27B-Q8`                  | local      | pass [^12]    | 1/1/1 | 88.6 | 90.0    | 3.38   | 1618 | in 8.1M out 246.3k  | in 7.5M out 0 | -     | 1h51m43s | [20260817-172010](reports/20260817-172010-qwen3-8-27b-q8.md)                         |
 
 [^1]: Both M01 attempts were terminated by an OpenRouter `400 Provider returned error`, not by the model; the `deaths` detector does not recognise a provider abort, so `agentic` carries no death penalty. Not a clean read on the model — re-run to score it.
 
