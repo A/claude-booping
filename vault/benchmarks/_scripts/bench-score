@@ -9,7 +9,8 @@ Subcommands:
   gates     — layer-1 pass/fail checks, re-run mechanically in a throwaway worktree
   corpus    — corpus-quality metrics parsed out of the branch's .txtar cases
   mutations — kill rate of the frozen mutation set against the branch's corpus
-  process   — process profile read out of the worker's ndjson attempt logs
+  process   — process profile read out of the run's shared ndjson log (`--log`),
+              split into one attempt per `run_segment` marker pair
   cost      — exact spend and native token counts from OpenRouter's generation API
   report    — the two scorecard surfaces: history row + per-run detail markdown
 
@@ -481,29 +482,80 @@ def feedback_counts(tree: Path, entry: dict[str, Any]) -> dict[str, int]:
     return counts
 
 
+@dataclass
+class Segment:
+    """One attempt's slice of a shared run log, as half-open 0-based line indices."""
+
+    label: str
+    ts: str
+    start: int
+    end: int | None = None
+
+
+def segment_stamp(value: Any) -> str:
+    """A marker's ISO-8601 `timestamp` in the compact stamp the rest of the script sorts on."""
+    text = str(value or "")
+    try:
+        parsed = time.strptime(text[:19], ISO_TS)
+    except (ValueError, TypeError):
+        return text
+    return time.strftime(TS_FMT, parsed)
+
+
+def scan_segments(path: Path) -> list[Segment]:
+    """Split a shared run log on the `run_segment` markers pi-developer writes.
+
+    Malformed sequences resolve rather than raise: a start with no end closes at
+    the next start or at end-of-file, and an end with nothing open is skipped.
+    """
+    lines = path.read_text(errors="replace").splitlines()
+    segments: list[Segment] = []
+    current: Segment | None = None
+    for index, line in enumerate(lines):
+        if not line.startswith("{"):
+            continue
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if event.get("type") != "run_segment":
+            continue
+        label = str(event.get("segment") or "")
+        if event.get("event") == "start":
+            if current is not None:
+                current.end = index
+                segments.append(current)
+            current = Segment(label, segment_stamp(event.get("timestamp")), index + 1)
+        elif event.get("event") == "end" and current is not None and label == current.label:
+            current.end = index
+            segments.append(current)
+            current = None
+    if current is not None:
+        current.end = len(lines)
+        segments.append(current)
+    return segments
+
+
 def select_logs(
-    entry: dict[str, Any],
-    model_slug: str,
+    log_path: Path,
     milestones: list[str],
     since: str | None,
     until: str | None,
-) -> dict[str, list[Path]]:
-    logs_dir = Path(entry["logs_dir"]).expanduser()
-    picked: dict[str, list[Path]] = {name: [] for name in milestones}
-    for path in sorted(logs_dir.glob("*.ndjson")):
-        stem = LOG_STEM.match(path.stem)
-        if not stem:
+) -> dict[str, list[Segment]]:
+    found = scan_segments(log_path)
+    missing = [name for name in milestones if not any(s.label == name for s in found)]
+    if missing:
+        raise SystemExit(
+            f"bench-score: no segment in {log_path} for milestone(s): {', '.join(missing)}"
+        )
+    picked: dict[str, list[Segment]] = {name: [] for name in milestones}
+    for segment in found:
+        if (since and segment.ts < since) or (until and segment.ts > until):
             continue
-        ts, rest = stem.groups()
-        if (since and ts < since) or (until and ts > until):
-            continue
-        for name in milestones:
-            suffix = f"-{name}"
-            if rest.endswith(suffix) and slugify(rest[: -len(suffix)]) == model_slug:
-                picked[name].append(path)
-                break
-    for name, paths in picked.items():
-        log(f"process: {name}: {len(paths)} attempt log(s)")
+        if segment.label in picked:
+            picked[segment.label].append(segment)
+    for name, segments in picked.items():
+        log(f"process: {name}: {len(segments)} attempt segment(s)")
     return picked
 
 
@@ -613,10 +665,12 @@ def load_pi(attempt: Attempt, event: dict[str, Any], clock: dict[str, int]) -> N
             clock.setdefault("start", stamp)
 
 
-def load_attempt(path: Path, milestone: str, ts: str) -> Attempt:
+def load_attempt(
+    path: Path, milestone: str, ts: str, start: int = 0, end: int | None = None
+) -> Attempt:
     attempt = Attempt(path=path, milestone=milestone, ts=ts)
     clock: dict[str, int] = {}
-    for line in path.read_text(errors="replace").splitlines():
+    for line in path.read_text(errors="replace").splitlines()[start:end]:
         if not line.startswith("{"):
             continue
         try:
@@ -789,27 +843,44 @@ def human_ms(milliseconds: int) -> str:
     return f"{minutes}m{seconds:02d}s"
 
 
+def run_stem_ts(args: argparse.Namespace) -> str:
+    """The run's identity: the `{ts}` half of the shared log's `{ts}-{model_slug}` stem."""
+    if not getattr(args, "log", None):
+        return ""
+    stem = LOG_STEM.match(Path(args.log).stem)
+    return stem.group(1) if stem else ""
+
+
 def collect_attempts(
     entry: dict[str, Any], args: argparse.Namespace
 ) -> tuple[list[Attempt], dict[str, list[Path]], dict[str, int], int | None]:
     if args.ndjson:
-        attempts = [
-            load_attempt(Path(path), Path(path).stem, "") for path in args.ndjson
-        ]
+        attempts = []
+        for name in args.ndjson:
+            path = Path(name)
+            # A log with no markers — the hand-written detector fixtures — is one attempt.
+            segments = scan_segments(path) or [Segment(path.stem, "", 0)]
+            attempts.extend(
+                load_attempt(path, seg.label, seg.ts, seg.start, seg.end)
+                for seg in segments
+            )
         selected = {attempt.milestone: [attempt.path] for attempt in attempts}
         return attempts, selected, {}, None
 
-    slug = model_slug_from_branch(entry, args.branch)
+    if not args.log:
+        raise SystemExit("bench-score: --log is required: the run's shared log path")
+    log_path = Path(args.log).expanduser()
     with worktree(Path(entry["repo"]), args.branch) as tree:
         names = milestone_names(tree, entry)
         feedback = feedback_counts(tree, entry)
         changed = diff_lines(tree, entry)
-    selected = select_logs(entry, slug, names, args.since, args.until)
+    picked = select_logs(log_path, names, args.since, args.until)
     attempts = [
-        load_attempt(path, name, LOG_STEM.match(path.stem).group(1))  # type: ignore[union-attr]
+        load_attempt(log_path, name, seg.ts, seg.start, seg.end)
         for name in names
-        for path in selected[name]
+        for seg in picked[name]
     ]
+    selected = {name: [log_path] for name in picked}
     return attempts, selected, feedback, changed
 
 
@@ -867,12 +938,13 @@ def cmd_process(entry: dict[str, Any], args: argparse.Namespace) -> dict[str, An
     for attempt in attempts:
         agents.update(attempt.agents)
 
+    run_id = run_stem_ts(args) or first.ts
     return {
         "run": {
             "model": first.model,
-            "run_id": first.ts,
-            "date": f"{first.ts[:4]}-{first.ts[4:6]}-{first.ts[6:8]} {first.ts[9:11]}:{first.ts[11:13]}"
-            if first.ts
+            "run_id": run_id,
+            "date": f"{run_id[:4]}-{run_id[4:6]}-{run_id[6:8]} {run_id[9:11]}:{run_id[11:13]}"
+            if run_id
             else "",
             "schemas": sorted({attempt.schema for attempt in attempts}),
             "wall_ms": wall_ms,
@@ -885,7 +957,7 @@ def cmd_process(entry: dict[str, Any], args: argparse.Namespace) -> dict[str, An
                 str(milestones[name]["attempts"]) for name in sorted(milestones)
             ),
             "retries": len(attempts) - len(milestones),
-            "logs": [attempt.path.name for attempt in ordered],
+            "logs": list(dict.fromkeys(attempt.path.name for attempt in ordered)),
         },
         "totals": {
             "tool_calls": sum(tools.values()),
@@ -1547,6 +1619,7 @@ def main() -> None:
     add("mutations")
     for name in ("process", "cost", "report"):
         sub = add(name, branch_required=name == "report")
+        sub.add_argument("--log")
         sub.add_argument("--ndjson", action="append", default=[])
         sub.add_argument("--since")
         sub.add_argument("--until")

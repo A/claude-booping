@@ -13,9 +13,9 @@ The user is unavailable for the whole sprint. `guide.md`'s **Autonomy** section 
 
 ## Delegation
 
-Every milestone and every retry goes to the entry's `worker` agent with the model **and the log path** pinned in the briefing, per `guide.md`'s **Worker delegation** section. No other agent writes code — not the runner, not a default developer agent. One model, end to end, or the run measures nothing.
+Every milestone and every retry goes to the entry's `worker` agent with the model, **the run's log path** and **this milestone's segment label** pinned in the briefing, per `guide.md`'s **Worker delegation** section. No other agent writes code — not the runner, not a default developer agent. One model, end to end, or the run measures nothing.
 
-The log path is not decoration: `measure` selects a run's attempt logs by the `{ts}-{model_slug}-{milestone}.ndjson` name that briefing asks for, and an attempt logged under any other name is invisible to the process and cost layers until it is renamed by hand.
+Stamp the log path once, before the first milestone: `~/.tmp/pi-developer/{ts}-{model_slug}.ndjson` with `{ts}` from `date +%Y%m%d-%H%M%S`. Every briefing after it — every later milestone, every retry — repeats that same path verbatim and varies only the `-S {milestone}` label. The whole run lands in that one file, and `measure` splits it into attempts by those labels; an invocation briefed without its label, or against a second path, is invisible to the process and cost layers.
 
 ## When the sprint gives up
 
@@ -23,7 +23,7 @@ A model that exhausts its attempts on a milestone has produced a result. Take de
 
 ## Closing the step
 
-Leave the workspace in place with the branch checked out, whatever work it carries, and every worker log — `measure` reads all three. Nothing is pushed and nothing is written to the source repo's vault here.
+Leave the workspace in place with the branch checked out, whatever work it carries, and the run's log where it was written — `measure` reads it. Nothing is pushed and nothing is written to the source repo's vault here.
 
 ## Return format
 
@@ -33,6 +33,6 @@ Leave the workspace in place with the branch checked out, whatever work it carri
 - outcome: `pass` | `fail@Mnn` — {one line on how the sprint ended}
 - milestones: {per milestone — attempts spent, commit sha, whether the DoD held first time}
 - auto-answered gates: {one clause per gate — which gate, which answer}, or `none`
-- logs: {n} ndjson files under `{logs_dir}`
+- log: `{the run's shared ndjson path}` — {n} segments, one per milestone invocation
 - sprint report: {what develop's own wrap-up reported, in one line}
 ```

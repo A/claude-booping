@@ -84,14 +84,15 @@ Then continue exactly as for a passing run: leave the workspace and its branch i
 
 ## Worker delegation
 
-Every milestone briefing goes to the `pi-developer` agent, and the briefing's first line pins the model and the log path:
+Every milestone briefing goes to the `pi-developer` agent, and the briefing's first line pins the model, the run's log path and this milestone's segment label:
 
 ```
-Use model id `{model}` for this milestone (pass it as `--model`), and log the run to
-`~/.tmp/pi-developer/{ts}-{model_slug}-{milestone}.ndjson` (pass it as `-L`).
+Use model id `{model}` for this milestone (pass it as `--model`), log the run to
+`~/.tmp/pi-developer/{ts}-{model_slug}.ndjson` (pass it as `-L`) and label this
+invocation `{milestone}` (pass it as `-S`).
 ```
 
-`{ts}` is the launch stamp, `date +%Y%m%d-%H%M%S`. That naming is what `bench-score` selects logs by; a run logged under pi-developer's default `{ts}-{pid}` name has to be renamed before it can be scored.
+`{ts}` is stamped once for the whole run, `date +%Y%m%d-%H%M%S`, and every briefing — retries included — repeats that same path: one run is one log, appended to. `-S` is what splits it back apart, `pi-developer` bracketing each invocation with a `run_segment` marker carrying the label, and `bench-score` scoring one attempt per marker pair. An invocation left without `-S` is labelled with pi-developer's default, the pid, which matches no milestone name and scores as nothing.
 
 No other agent writes code — not `booping:booping-developer`, not the runner. That holds for fix attempts too: a retry after a failed milestone goes back to `pi-developer` with the same `{model}`, so the benchmark measures one model end to end.
 
@@ -105,6 +106,6 @@ Post the sprint report the playbook asks for, then add the benchmark scorecard:
 - per milestone: attempts spent (1, 2, or failed), the commit sha, whether the DoD held on the first attempt
 - guardrails: the `just ci` verdict at the end of the run
 - failures worth naming: context-limit deaths, degenerate tool-call loops, malformed tool inputs, milestones abandoned
-- the worker's run logs — `~/.tmp/pi-developer/*.ndjson`, one per attempt
+- the run's log — `~/.tmp/pi-developer/{ts}-{model_slug}.ndjson`, one file holding every attempt as a segment
 
 Leave the branch in place when the run ends; it is the artifact being compared. Do not merge it, do not delete it, do not rebase it. Nothing in the run pushes it anywhere and no pull request is opened — publish commits the scorecard and the run detail, and stops there. The workspace therefore holds the only copy of the branch: it stays until you prune it, and pruning it before pushing the branch by hand throws the artifact away.
