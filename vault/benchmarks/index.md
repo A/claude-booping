@@ -80,7 +80,7 @@ benchmarks:
     runs_dir: runs
     reports_dir: reports
     history_columns:
-      [date, model, provider, outcome, att, code, agentic, review, diff, tokens, cache, cost, time, run]
+      [date, model, provider, orch, outcome, att, code, agentic, review, diff, tokens, cache, cost, time, report]
     process:
       loop_threshold: 3
       edit_tools: [Write, Edit, NotebookEdit, write, edit]
@@ -153,7 +153,7 @@ Every run develops in its own clone under the entry's `workspaces_dir`, never in
 | --- | --- | --- | --- |
 | `frontmatter-update-e2e` | `202608121417_frontmatter-update-e2e-migration` | `bench/{model_slug}` | [guide.md](guide.md) |
 
-Scoring assets sit beside this file: [history.md](history.md) is the append-only scorecard table and [method.md](method.md) states what its columns mean and how a run is driven, `runs/` holds one machine-shaped detail report per run, `reports/` one human-readable run report written from it (rows from 2026-08-17 on link the report, which links its detail; earlier rows link their detail directly), `mutations/{id}/` holds the fixed patch set a corpus must kill, and `_fixtures/ndjson/` holds one hand-written synthetic log per process detector — a clean benchmark run never trips them, so they are how the detectors stay demonstrable. Run one with `bench-score process --benchmark {id} --ndjson _fixtures/ndjson/degenerate-loop.ndjson`: `degenerate-loop.ndjson` yields 1 loop and 0 malformed, `malformed-tool-inputs.ndjson` yields 2 malformed and 0 loops, the third tool error in it being an ordinary non-zero shell exit that must not count.
+Scoring assets sit beside this file: [history.md](history.md) is the append-only scorecard table and [method.md](method.md) states what its columns mean and how a run is driven, `runs/` holds one machine-shaped detail report per run, `reports/` one human-readable run report written from it (the `report` cell links it for rows from 2026-08-17 on, and the report links its detail; earlier rows carry `-` there and are read through `runs/` directly), `mutations/{id}/` holds the fixed patch set a corpus must kill, and `_fixtures/ndjson/` holds one hand-written synthetic log per process detector — a clean benchmark run never trips them, so they are how the detectors stay demonstrable. Run one with `bench-score process --benchmark {id} --ndjson _fixtures/ndjson/degenerate-loop.ndjson`: `degenerate-loop.ndjson` yields 1 loop and 0 malformed, `malformed-tool-inputs.ndjson` yields 2 malformed and 0 loops, the third tool error in it being an ordinary non-zero shell exit that must not count.
 
 ## Entry keys
 

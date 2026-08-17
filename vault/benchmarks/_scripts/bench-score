@@ -1381,7 +1381,7 @@ def render_detail(
         "## Summary",
         table(
             ["field", "value"],
-            [[key, row[key]] for key in entry["history_columns"] if key != "run"],
+            [[key, row[key]] for key in entry["history_columns"] if key != "report"],
         ),
         "## Gates",
         table(
@@ -1570,6 +1570,7 @@ def cmd_report(entry: dict[str, Any], args: argparse.Namespace) -> str:
         "date": run["date"],
         "model": f"`{run['model']}`",
         "provider": args.provider,
+        "orch": args.orch,
         "outcome": outcome,
         "att": run["attempts_per_milestone"],
         "code": f"{code['score']:.1f}",
@@ -1582,7 +1583,7 @@ def cmd_report(entry: dict[str, Any], args: argparse.Namespace) -> str:
         "cache": f"in {compact(tokens['cached'])} out {compact(tokens['cache_write'])}",
         "cost": f"${cost['total_cost_usd']:.2f}",
         "time": run["wall"],
-        "run": f"[{run['run_id']}](runs/{detail})",
+        "report": f"[{run['run_id']}](runs/{detail})",
     }
     body = render_detail(
         entry, args, row, gates, corpus, mutations, profile, cost, code, agentic
@@ -1632,6 +1633,9 @@ def main() -> None:
         report.add_argument(f"--{name}-json")
     report.add_argument(
         "--provider", choices=["openrouter", "local", "anthropic"], default="openrouter"
+    )
+    report.add_argument(
+        "--orch", choices=["loop", "orchestrate", "direct"], default="-"
     )
     report.add_argument("--dry-run", action="store_true")
 

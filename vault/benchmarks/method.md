@@ -12,15 +12,22 @@ Every model runs the same groomed plan from the same baseline commit (`a025189`)
 
 ## The worker
 
-The worker agent is the registry entry's `worker`, and it is `pi-developer`: it hands each milestone to a headless **pi** session as `/orchestrate` and lets pi do its own planning, delegation and validation — one harness reaching every provider pi has (`llama-local/…`, `ollama-cloud/…`, `openrouter/…`), so the model id in the briefing selects both model and provider. It is the only worker. `openrouter-developer` and `llama-developer` were retired on 2026-08-16, pi covering both their providers through one code path; rows they produced keep their footnotes, since a published row records the harness that actually ran it.
+The worker agent is the registry entry's `worker`, and it is `pi-developer`: it hands each milestone to a headless **pi** session and lets pi do its own planning, delegation and validation — one harness reaching every provider pi has (`llama-local/…`, `ollama-cloud/…`, `openrouter/…`), so the model id in the briefing selects both model and provider. It is the only worker. `openrouter-developer` and `llama-developer` were retired on 2026-08-16, pi covering both their providers through one code path; rows they produced record the harness that actually ran them in their run details.
+
+How the milestone is driven inside that session is the run's `orch` setting — `/loop`, `/orchestrate`, or `direct` with no template at all. It is a harness variable, not a model one, so two rows differing only in `orch` measure the orchestration and not the model.
 
 `bench-score` reads either log schema — Claude Code's `assistant`/`user`/`result` stream, or pi's `tool_execution_*` / `message_end` events — and normalises them, so a row's process figures mean the same thing whichever harness produced them. pi tags every event a sub-agent raises with `agent`/`agentRun`, and the run detail's process profile breaks the tool calls down by agent; a pi log written before that tagging existed carries orchestrator traffic only, and a run scored from such logs says so in its detail rather than reporting the gap as clean process.
 
 ## Columns
 
-- `date` — run start, `YYYY-MM-DD hh:mm`, taken from the first attempt log's stamp (the same stamp as the `run` link's id)
+- `date` — run start, `YYYY-MM-DD hh:mm`, taken from the first attempt log's stamp (the same stamp as the `report` link's id)
 - `model` — model id as the worker's provider spells it
 - `provider` — where the worker ran: the provider half of pi's model id (`llama-local/…` → `local`, `ollama-cloud/…` → `local`, `openrouter/…` → `openrouter`). Rows predating pi are keyed by their own retired worker instead — `openrouter-developer` → `openrouter`, `llama-developer` → `local`, `booping:booping-developer` → `anthropic`
+- `orch` — how the milestone was driven inside the pi session, which is a property of the harness rather than of the model:
+  - `orchestrate` — pi's `/orchestrate`: the session cuts the milestone into chunks and briefs a fresh worker per chunk, validating each with a separate validator agent
+  - `loop` — pi's `/loop`: the session writes one task list and workers take tasks from it in a single warm context until a context budget stops them, each reporting what the next one needs to know
+  - `direct` — no runner at all: the milestone briefing goes straight to pi as a plain prompt, with pi's own tools and no orchestration template. The baseline the other two are measured against
+  - `-` — rows predating pi, driven by a retired worker that had no such choice
 - `outcome` — `pass`, or `fail@Mnn` naming the milestone the run died on
 - `att` — attempts spent per milestone
 - `code` — code-quality composite, %, grading the artifact: CI/scope/determinism gates plus corpus quality against the frozen etalon and mutation set
@@ -31,8 +38,8 @@ The worker agent is the registry entry's `worker`, and it is `pi-developer`: it 
 - `cache` — how much of that input never reached the model fresh: `in {cache reads} out {cache writes}` — read back from the cache, and written into it. Both sit inside `tokens in` and never in `tokens out`, so `in 2.9M` beside `cache in 2.6M` means only ~300k of the input was new. The two counters are disjoint in the raw logs of both harnesses, which is why `in` is their sum rather than either one
 - `cost` — USD, from OpenRouter's generation API when the logs carry generation ids, otherwise the worker's own usage accounting
 - `time` — sprint duration
-- `run` — link to the detail report
+- `report` — link to the human-readable run report under `reports/`; rows published before the reports existed carry `-` and are read through their detail under `runs/`
 
-Rows published before 2026-08-16 carry a single figure in `tokens` and `-` in `cache`: the split did not exist when they were scored, and a published row is never re-scored. That figure is in+out with cache excluded for every row but `claude-opus-5`, whose footnote records that its prompt figure includes cache reads — so it is not comparable to the `in` of a row scored since.
+Rows published before 2026-08-16 carry a single figure in `tokens` and `-` in `cache`: the split did not exist when they were scored, and a published row is never re-scored. That figure is in+out with cache excluded for every row but `claude-opus-5`, whose prompt figure includes cache reads — so it is not comparable to the `in` of a row scored since.
 
 A cell reading `-` is a layer that was not measured, never a zero. The run detail names the reason.
