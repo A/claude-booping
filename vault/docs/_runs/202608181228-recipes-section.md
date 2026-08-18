@@ -1,9 +1,11 @@
 ---
 title: Recipes section
-status: researching
+status: updating
 started: 2026-08-18 12:30
 commit: 999e07f2b6c9c58c760e7c47491cf06bf395f6f1
 scope_reviewed_at: 2026-08-18 14:11
+changes_reviewed_at: 2026-08-18 14:24
+targeting_reviewed_at: 2026-08-18 14:29
 ---
 
 # Recipes section
@@ -40,8 +42,31 @@ scope_reviewed_at: 2026-08-18 14:11
 
 Confirmed 2026-08-18: narrow — only the recipes ask.
 
-- In scope: `plans/202608102115_pi-developer-userland-wiring/index.md` and `plans/202608141156_benchmark-scoring/index.md`, read as source for two user-dictated recipes.
-- Deliverable: a new **recipes** section on the public docs site (`documentation/`), two guides: (1) wiring external agents (codex, pi-developer, …) — the agent proxy pattern; (2) benchmarks — how they work at a high level, how to set up and run one, and the orchestrate-vs-loop-vs-direct insight (direct wins).
+- In scope: `plans/202608141156_benchmark-scoring/index.md`, plus the user's own ask — the recipes section itself.
+- Deliverable: a new **`documentation/recipes/`** directory — each recipe a blogpost-like guide on doing something non-trivial with booping, linked from the README. Two initial recipes: (1) wiring external agents (codex, pi-developer, …) — the agent proxy pattern; (2) benchmarks — how they work at a high level, how to set up and run one, and the orchestrate-vs-loop-vs-direct insight (direct wins).
 - Recipes are not a delivered-work surface: their content is dictated by the user, blogpost-like. Docs sweeps may review an existing recipe during `update`, but never generate or extend one from the change table.
-- Out of scope: the other 8 undocumented items — they stay outside the ledger and resurface at the next survey.
+- Out of scope: `plans/202608102115_pi-developer-userland-wiring/index.md` (not a feature — its wiring only serves as material for recipe 1) and the other 8 undocumented items — all stay outside the ledger and resurface at the next survey.
 - Spec files: none flagged for refresh; `_specs/targets.md` gains the recipes surface via research → sync-specs.
+
+## Changes
+
+| # | Work item | Type | What changed | Audience | Target files | Spec-set effect |
+| --- | --- | --- | --- | --- | --- | --- |
+| C1 | User ask (this run) — the recipes section | new feature | The docs site gains `documentation/recipes/` — each recipe a blogpost-like guide on doing something non-trivial with booping, its content dictated by the user, linked from the README. Two initial recipes: wiring external agents (codex, pi-developer, …) via the agent-proxy pattern — a thin `~/.claude/agents/` agent relays the work, vault config points a playbook's agent slot at it — and the model benchmarks guide. | Advanced users | `documentation/` (recipes), `README.md`, `docs/_specs/` | `targets.md`: the surface table gains `documentation/recipes/` — user-dictated guides, reviewed on update sweeps but never generated from the change table |
+| C2 | Benchmark scoring — per-model scorecard for the fixed develop-sprint benchmark | new feature | Model benchmarking runs as a user playbook — prepare / run / measure / publish — with a `bench-score` script computing gates, corpus quality, mutation kill-rate, process cost and review scores, appending one comparable scorecard row plus a per-run detail report. Insight to carry: direct orchestration beats `/orchestrate` and `/loop` — `/loop` earned nothing for its overhead and is retired. The user dictates the recipe: how benchmarks work, how to set up and run one, and that insight. | Contributors | `documentation/` (recipes), `docs/_specs/` | none beyond C1's `targets.md` edit — benchmark machinery is vault content exercising the plugin, not a plugin feature |
+
+2 rows — 1 in-scope work item plus the run's own ask; 2 new feature; spec-set effect: `targets.md` (one edit, the recipes surface row).
+
+## Targeting plan
+
+| Destination | Roles | Changes | Must say | Progress |
+| --- | --- | --- | --- | --- |
+| `documentation/recipes/external-agents.md` | Advanced users | C1 | The agent-proxy pattern as a blogpost-like walkthrough: any external agent — codex, a headless pi session, anything with a CLI — joins a playbook through a thin `~/.claude/agents/` proxy agent that relays the work and returns the report, with vault config pointing the playbook's agent slot at it. Worked examples: codex (relay to `codex exec`) and pi-developer (milestone handed to a headless pi session). Links `../integrating-external-agents.md` for the dry mechanics rather than restating them. | pending |
+| `documentation/recipes/benchmarks.md` | Contributors | C1, C2 | The benchmarks recipe: how the fixed develop-sprint benchmark works at a high level (throwaway workspace, autonomous sprint on its own branch, `bench-score` computing gates, corpus quality, mutation kill-rate, process cost and review scores into one comparable scorecard row plus a detail report); how to set one up and run it in your own vault; the insight — direct orchestration beats `/orchestrate` and `/loop`, `/loop` retired as pure overhead. | pending |
+| `README.md` | Users | C1 | One short pointer to the recipes section on the docs site — guides for non-trivial uses of booping — beside the existing docs-site links; no recipe content inlined. | pending |
+
+## Not targeted
+
+- *(none — both confirmed changes are assigned)*
+
+Runner note: `mkdocs.yml` (not markdown, outside the loop) needs a `Recipes` nav section for the two new pages — `strict: true` fails the build otherwise; the runner edits it beside the loop.
