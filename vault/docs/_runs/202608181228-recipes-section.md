@@ -1,11 +1,14 @@
 ---
 title: Recipes section
-status: updating
+status: done
 started: 2026-08-18 12:30
 commit: 999e07f2b6c9c58c760e7c47491cf06bf395f6f1
 scope_reviewed_at: 2026-08-18 14:11
 changes_reviewed_at: 2026-08-18 14:24
 targeting_reviewed_at: 2026-08-18 14:29
+documented:
+- plans/202608141156_benchmark-scoring/index.md
+completed: 2026-08-18 14:39
 ---
 
 # Recipes section
@@ -61,12 +64,30 @@ Confirmed 2026-08-18: narrow — only the recipes ask.
 
 | Destination | Roles | Changes | Must say | Progress |
 | --- | --- | --- | --- | --- |
-| `documentation/recipes/external-agents.md` | Advanced users | C1 | The agent-proxy pattern as a blogpost-like walkthrough: any external agent — codex, a headless pi session, anything with a CLI — joins a playbook through a thin `~/.claude/agents/` proxy agent that relays the work and returns the report, with vault config pointing the playbook's agent slot at it. Worked examples: codex (relay to `codex exec`) and pi-developer (milestone handed to a headless pi session). Links `../integrating-external-agents.md` for the dry mechanics rather than restating them. | pending |
-| `documentation/recipes/benchmarks.md` | Contributors | C1, C2 | The benchmarks recipe: how the fixed develop-sprint benchmark works at a high level (throwaway workspace, autonomous sprint on its own branch, `bench-score` computing gates, corpus quality, mutation kill-rate, process cost and review scores into one comparable scorecard row plus a detail report); how to set one up and run it in your own vault; the insight — direct orchestration beats `/orchestrate` and `/loop`, `/loop` retired as pure overhead. | pending |
-| `README.md` | Users | C1 | One short pointer to the recipes section on the docs site — guides for non-trivial uses of booping — beside the existing docs-site links; no recipe content inlined. | pending |
+| `documentation/recipes/external-agents.md` | Advanced users | C1 | The agent-proxy pattern as a blogpost-like walkthrough: any external agent — codex, a headless pi session, anything with a CLI — joins a playbook through a thin `~/.claude/agents/` proxy agent that relays the work and returns the report, with vault config pointing the playbook's agent slot at it. Worked examples: codex (relay to `codex exec`) and pi-developer (milestone handed to a headless pi session). Links `../integrating-external-agents.md` for the dry mechanics rather than restating them. | verified |
+| `documentation/recipes/benchmarks.md` | Contributors | C1, C2 | The benchmarks recipe: how the fixed develop-sprint benchmark works at a high level (throwaway workspace, autonomous sprint on its own branch, `bench-score` computing gates, corpus quality, mutation kill-rate, process cost and review scores into one comparable scorecard row plus a detail report); how to set one up and run it in your own vault; the insight — direct orchestration beats `/orchestrate` and `/loop`, `/loop` retired as pure overhead. | verified |
+| `README.md` | Users | C1 | One short pointer to the recipes section on the docs site — guides for non-trivial uses of booping — beside the existing docs-site links; no recipe content inlined. | verified |
 
 ## Not targeted
 
 - *(none — both confirmed changes are assigned)*
 
-Runner note: `mkdocs.yml` (not markdown, outside the loop) needs a `Recipes` nav section for the two new pages — `strict: true` fails the build otherwise; the runner edits it beside the loop.
+Runner note: `mkdocs.yml` (not markdown, outside the loop) needs a `Recipes` nav section for the two new pages — `strict: true` fails the build otherwise; the runner edits it beside the loop. Done — nav gained `Recipes:` with both pages.
+
+## Verify findings (unresolved by source)
+
+- `README.md`: the two recipe links are not live until this branch merges to `master` (the docs site builds from `master`; `documentation/recipes/` and the `mkdocs.yml` nav change are uncommitted). Correct once merged; left as written.
+- `documentation/recipes/benchmarks.md`: the invocation line `/playbook model-benchmark with llama-local/Qwen3.8-27B-Q8` — the playbook takes free-form args and `guide.md` shows only a prose invocation, so no source confirms or refutes the exact wording; left as written.
+- Stale vault claim, not this run's document: `vault/benchmarks/index.md` line 148 describes the model-benchmark playbook as "prepare, run, measure, publish", omitting the `report` step its own `playbook.yaml` declares.
+- Side observation: `~/.claude/agents/pi-developer.md` still defaults to `/loop` while the benchmark baseline retired it for `direct`; userland file, outside this run's scope.
+
+## Landed
+
+| Destination | Changes | Outcome |
+| --- | --- | --- |
+| `documentation/recipes/external-agents.md` | C1 | verified — created |
+| `documentation/recipes/benchmarks.md` | C1, C2 | verified — created |
+| `README.md` | C1 | verified — Quick start gained the recipes pointer |
+| `CHANGELOG.md` | — | untouched — both changes omitted as not user-visible: the recipes are this run's own docs output, the benchmark machinery is vault content |
+
+1 of 1 in-scope work items documented — `plans/202608141156_benchmark-scoring/index.md` via C2 — none withheld; `plans/202608102115_pi-developer-userland-wiring/index.md` was ruled out of scope and stays outside the ledger to resurface at the next survey. 4 verification findings stay open on this record.
