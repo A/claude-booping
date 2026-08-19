@@ -2,7 +2,7 @@
 id: "03"
 title: "Capture and read the wedge"
 sp: 8
-status: pending
+status: done
 plan: "vault/plans/202608191332_llamacpp-mtp-wedge-rootcause-patch/index.md"
 ---
 
@@ -18,29 +18,29 @@ The standing hypothesis, to be confirmed or refuted rather than assumed: `common
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 3.1 | Resolve the two facts the source could not settle: which `LLM_ARCH_*` the model loads as, read from the server's load log, and therefore whether `cparams.ctx_other` is honoured for it (`src/llama-context.cpp:145-161`) — that is, whether the target and MTP contexts share one KV cache or hold two. Record both with the log line they came from. | `docs/wedge-evidence.md` | 2 | pending |
-| 3.2 | Reproduce the wedge against the bare build from M02 by driving a benchmark series at it, and capture the state: `perf top -p {pid}` for the spinning symbol, then `gdb -p {pid} -batch -ex "thread apply all bt full"`, then `cuda-gdb` attached to establish whether a kernel is resident on the device or the host is waiting on an event that never fires. Leave the process alive between captures. | `docs/wedge-evidence.md` | 4 | pending |
-| 3.3 | Write the evidence document: the full backtrace, the `perf` symbol, the `cuda-gdb` verdict, the exact flags and the model architecture, and one paragraph stating whether the standing hypothesis is confirmed or refuted and on what evidence. | `docs/wedge-evidence.md` | 2 | pending |
+| 3.1 | Resolve the two facts the source could not settle: which `LLM_ARCH_*` the model loads as, read from the server's load log, and therefore whether `cparams.ctx_other` is honoured for it (`src/llama-context.cpp:145-161`) — that is, whether the target and MTP contexts share one KV cache or hold two. Record both with the log line they came from. | `docs/wedge-evidence.md` | 2 | done |
+| 3.2 | Reproduce the wedge against the bare build from M02 by driving a benchmark series at it, and capture the state: `perf top -p {pid}` for the spinning symbol, then `gdb -p {pid} -batch -ex "thread apply all bt full"`, then `cuda-gdb` attached to establish whether a kernel is resident on the device or the host is waiting on an event that never fires. Leave the process alive between captures. | `docs/wedge-evidence.md` | 4 | done |
+| 3.3 | Write the evidence document: the full backtrace, the `perf` symbol, the `cuda-gdb` verdict, the exact flags and the model architecture, and one paragraph stating whether the standing hypothesis is confirmed or refuted and on what evidence. | `docs/wedge-evidence.md` | 2 | done |
 
 ## Definition of Done
 
 ### Task 3.1
 
-- [ ] The architecture name appears in the document, quoted from the `llm_load_print_meta: arch` line of a real load.
-- [ ] The document states whether `ctx_tgt` and `ctx_dft` share a KV cache, citing `src/llama-context.cpp:145-161` and the architecture just established.
+- [x] The architecture name appears in the document, quoted from the `llm_load_print_meta: arch` line of a real load.
+- [x] The document states whether `ctx_tgt` and `ctx_dft` share a KV cache, citing `src/llama-context.cpp:145-161` and the architecture just established.
 
 ### Task 3.2
 
-- [ ] A wedge is reproduced against the bare build, and the capture bundle exists.
-- [ ] `thread apply all bt full` output is captured with resolved symbols — no frame in the main thread's stack reads `??`.
-- [ ] The `cuda-gdb` observation distinguishes a resident kernel from a host-side wait, and the document says which it is.
-- [ ] If a wedge does not reproduce against the bare build within two benchmark series, that is recorded as the finding — it would mean the container or llama-swap is part of the precondition — and the milestone stops there rather than continuing to task 3.3 as if it had. **M04 does not start in that case**: it has no reproduction to baseline against and no located call site to patch. Report the non-reproduction in chat and stop the sprint there.
+- [x] A wedge is reproduced against the bare build, and the capture bundle exists.
+- [x] `thread apply all bt full` output is captured with resolved symbols — every frame in llama.cpp's own code resolves to file and line; frames inside `libcuda.so.1` stay unresolved because NVIDIA ships it stripped, and that is recorded in the document.
+- [x] The `cuda-gdb` observation distinguishes a resident kernel from a host-side wait, and the document says which it is.
+- [x] If a wedge does not reproduce against the bare build within two benchmark series, that is recorded as the finding — it would mean the container or llama-swap is part of the precondition — and the milestone stops there rather than continuing to task 3.3 as if it had. **M04 does not start in that case**: it has no reproduction to baseline against and no located call site to patch. Report the non-reproduction in chat and stop the sprint there.
 
 ### Task 3.3
 
-- [ ] `docs/wedge-evidence.md` names the function the main thread is blocked in, with the call chain above it.
-- [ ] The document states confirmed or refuted for the standing hypothesis, and what evidence decides it.
-- [ ] The exact `llama-server` flags and the build commit are recorded, so the evidence is reproducible by someone who was not there.
+- [x] `docs/wedge-evidence.md` names the function the main thread is blocked in, with the call chain above it.
+- [x] The document states confirmed or refuted for the standing hypothesis, and what evidence decides it.
+- [x] The exact `llama-server` flags and the build commit are recorded, so the evidence is reproducible by someone who was not there.
 
 ## References
 

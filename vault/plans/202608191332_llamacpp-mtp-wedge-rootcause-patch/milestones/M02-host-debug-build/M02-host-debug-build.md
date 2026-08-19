@@ -2,7 +2,7 @@
 id: "02"
 title: "Debug vehicle on the inference host"
 sp: 6
-status: pending
+status: done
 plan: "vault/plans/202608191332_llamacpp-mtp-wedge-rootcause-patch/index.md"
 ---
 
@@ -20,31 +20,31 @@ Constraints the worker must respect: `/` on that host is 86 % full with about 79
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 2.1 | Install the missing toolchain on the host: `gcc-14`, `g++-14`, `ccache`, `gdb`, and the `perf` package for this kernel. Set a `ccache` maximum size that fits the remaining disk budget. Record what was installed and the resulting free space. | host `10.0.0.106`, `docs/debugging-the-wedge.md` | 1 | pending |
-| 2.2 | Clone llama.cpp at the commit `roles/llama_swap_image/defaults/main.yml` pins in `llama_swap_image_llama_commit`, apply every patch in `roles/llama_swap_image/files/patches/` in filename order with `git apply --verbose`, and build `-DCMAKE_BUILD_TYPE=RelWithDebInfo -DGGML_CUDA=ON -DGGML_BACKEND_DL=ON -DGGML_CPU_ALL_VARIANTS=ON -DCMAKE_CUDA_ARCHITECTURES=86` with `ccache` enabled. The build must reproduce the image's flags apart from the build type. | host build tree, `docs/debugging-the-wedge.md` | 3 | pending |
-| 2.3 | Write the bare-run recipe: the exact `llama-server` invocation, derived from the Q8 entry in `/opt/llama-swap/config.yaml` with `${server_cmd}` and `${qwen_base_params}` expanded, on a port that does not collide with llama-swap. Include the stop-llama-swap and restart-llama-swap steps around it, and a hang-detection wrapper that fires the M01 capture after 30 s of silence on the server's log rather than killing the process. | `docs/debugging-the-wedge.md`, `scripts/wedge-bare-run.sh` | 2 | pending |
+| 2.1 | Install the missing toolchain on the host: `gcc-14`, `g++-14`, `ccache`, `gdb`, and the `perf` package for this kernel. Set a `ccache` maximum size that fits the remaining disk budget. Record what was installed and the resulting free space. | host `10.0.0.106`, `docs/debugging-the-wedge.md` | 1 | done |
+| 2.2 | Clone llama.cpp at the commit `roles/llama_swap_image/defaults/main.yml` pins in `llama_swap_image_llama_commit`, apply every patch in `roles/llama_swap_image/files/patches/` in filename order with `git apply --verbose`, and build `-DCMAKE_BUILD_TYPE=RelWithDebInfo -DGGML_CUDA=ON -DGGML_BACKEND_DL=ON -DGGML_CPU_ALL_VARIANTS=ON -DCMAKE_CUDA_ARCHITECTURES=86` with `ccache` enabled. The build must reproduce the image's flags apart from the build type. | host build tree, `docs/debugging-the-wedge.md` | 3 | done |
+| 2.3 | Write the bare-run recipe: the exact `llama-server` invocation, derived from the Q8 entry in `/opt/llama-swap/config.yaml` with `${server_cmd}` and `${qwen_base_params}` expanded, on a port that does not collide with llama-swap. Include the stop-llama-swap and restart-llama-swap steps around it, and a hang-detection wrapper that fires the M01 capture after 30 s of silence on the server's log rather than killing the process. | `docs/debugging-the-wedge.md`, `scripts/wedge-bare-run.sh` | 2 | done |
 
 ## Definition of Done
 
 ### Task 2.1
 
-- [ ] `gcc-14`, `g++-14`, `ccache`, `gdb` and `perf` all resolve on the host.
-- [ ] `ccache --max-size` is set to a value that leaves at least 60 GB free on `/`, and `df -h /` after the first full build confirms it.
+- [x] `gcc-14`, `g++-14`, `ccache`, `gdb` and `perf` all resolve on the host.
+- [x] `ccache --max-size` is set to a value that leaves at least 60 GB free on `/`, and `df -h /` after the first full build confirms it.
 
 ### Task 2.2
 
-- [ ] `git apply --verbose` reports every patch in `files/patches/` applied, with no rejects.
-- [ ] `build/bin/llama-server --version` reports the same build number as the image's `system_fingerprint` (`b1-25ae3a9` at the pinned commit).
-- [ ] `file build/bin/llama-server` reports "with debug_info, not stripped".
-- [ ] A second build after touching one source file completes in under 5 minutes.
+- [x] `git apply --verbose` reports every patch in `files/patches/` applied, with no rejects.
+- [x] `build/bin/llama-server --version` reports the same build number as the image's `system_fingerprint` (`b1-25ae3a9` at the pinned commit).
+- [x] `file build/bin/llama-server` reports "with debug_info, not stripped".
+- [x] A second build after touching one source file completes in under 5 minutes.
 
 ### Task 2.3
 
-- [ ] `scripts/wedge-bare-run.sh` starts the bare server, and `curl` against its port returns a completion.
-- [ ] The recipe's invocation matches the production Q8 command flag for flag, apart from `--port`; a diff of the two flag lists is recorded in the runbook.
-- [ ] Token generation measured against the bare server with `API` pointed at its port is within 2 % of the `Qwen3.8-27B-Q8` row in `docs/benchmarks.md`.
-- [ ] The wrapper fires the M01 capture on 30 s of log silence and leaves the process running, so the wedged state is still attachable afterwards.
-- [ ] The runbook states how to stop llama-swap before a bare run and start it after, and warns that the two cannot hold VRAM simultaneously.
+- [x] `scripts/wedge-bare-run.sh` starts the bare server, and `curl` against its port returns a completion.
+- [x] The recipe's invocation matches the production Q8 command flag for flag, apart from `--port`; a diff of the two flag lists is recorded in the runbook.
+- [x] Token generation measured against the bare server with `API` pointed at its port is within 2 % of the `Qwen3.8-27B-Q8` row in `docs/benchmarks.md`.
+- [x] The wrapper fires the M01 capture on 30 s of log silence and leaves the process running, so the wedged state is still attachable afterwards.
+- [x] The runbook states how to stop llama-swap before a bare run and start it after, and warns that the two cannot hold VRAM simultaneously.
 
 ## References
 

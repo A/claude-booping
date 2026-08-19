@@ -24,6 +24,7 @@ agents:
   research-codebase: a62cd848b829c9f0b
   cross-review: aca8675e412e369b5
   develop-loop-M01: aa2960b59edfd7be8
+  develop-loop-M02-M03: ace87a2a4acb7bbe5
 reviewed_at: 2026-08-19 19:21
 ---
 
@@ -82,8 +83,8 @@ The delivery path already exists: `roles/llama_swap_image` fetches llama.cpp at 
 | id | title | sp | status |
 | --- | --- | --- | --- |
 | 01 | [Persist the wedge evidence](milestones/M01-persist-wedge-evidence/M01-persist-wedge-evidence.md) | 5 | done |
-| 02 | [Debug vehicle on the inference host](milestones/M02-host-debug-build/M02-host-debug-build.md) | 6 | pending |
-| 03 | [Capture and read the wedge](milestones/M03-capture-and-read-the-wedge/M03-capture-and-read-the-wedge.md) | 8 | pending |
+| 02 | [Debug vehicle on the inference host](milestones/M02-host-debug-build/M02-host-debug-build.md) | 6 | done |
+| 03 | [Capture and read the wedge](milestones/M03-capture-and-read-the-wedge/M03-capture-and-read-the-wedge.md) | 8 | done |
 | 04 | [Candidate patch and measurement](milestones/M04-patch-and-measure/M04-patch-and-measure.md) | 8 | pending |
 | 05 | [Ship the patch through the image pipeline](milestones/M05-ship-the-patch/M05-ship-the-patch.md) | 4 | pending |
 
