@@ -40,7 +40,7 @@ How the milestone is driven inside that session is the run's `orch` setting — 
 - `cost` — USD, from OpenRouter's generation API when the logs carry generation ids, otherwise the worker's own usage accounting
 - `time` — sprint duration
 - `freeze` — `{lost time} ({wedge count})`: time lost to provider wedges — a stream dying mid-request and being auto-retried, which locally means the model reloading or llama-swap restarting. Counted from pi's `auto_retry` events; each wedge is measured from the last logged progress before the doomed request to the first progress after its retry, so the doomed generation itself counts as lost. A lower bound: a stall the provider recovers from without a retry leaves no event and is not counted. `-` on rows whose logs carry no retry events (Claude Code schema, or scored before the metric existed), never a zero
-- `report` — link to the human-readable run report under `reports/`; rows published before the reports existed carry `-` and are read through their detail under `runs/`
+- `report` — link to the human-readable run report in the [booping-benchmarks](https://github.com/A/booping-benchmarks) archive; rows published before the reports existed carry `-` and are read through their detail under the archive's `runs/`
 - `comment` — free-form human note on the row, written by hand after the run; `bench-score` and the playbook always leave it empty
 
 Rows published before 2026-08-16 carry a single figure in `tokens` and `-` in `cache`: the split did not exist when they were scored, and a published row is never re-scored. That figure is in+out with cache excluded for every row but `claude-opus-5`, whose prompt figure includes cache reads — so it is not comparable to the `in` of a row scored since.
