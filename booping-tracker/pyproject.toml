@@ -1,0 +1,41 @@
+[project]
+name = "booping-tracker"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "pyyaml",
+]
+
+[project.scripts]
+booping-tracker = "booping_tracker.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/booping_tracker"]
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "pytest-txtar>=0.1.0",
+    "ruff",
+    "basedpyright",
+]
+
+# `just pytest` is the unit suite; the txtar corpus under e2e/ is `just e2e`'s job.
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+
+[tool.basedpyright]
+include = ["src", "tests", "e2e"]
+extraPaths = ["src"]
+pythonVersion = "3.12"
+typeCheckingMode = "strict"

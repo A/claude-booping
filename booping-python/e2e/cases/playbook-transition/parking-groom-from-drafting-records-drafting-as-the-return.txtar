@@ -1,0 +1,45 @@
+The second entering edge carries its own literal: parked from `drafting`, the run comes back to
+`drafting`. A hook value cannot be computed from the transition, so the source status is static per
+edge and the recorded value differs by which edge was taken.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  tracker:
+    driver: cli
+-- fixtures/cwd/run/index.md --
+---
+title: "Demo"
+status: drafting
+return_to: null
+---
+
+# Demo
+-- fixtures/cwd/run/clarifications.md --
+# Clarifications
+
+## C1 — retention window — open
+
+**Asked:** 2026-08-14 — draft-plan
+
+**Question:** How long are archives retained?
+
+**Answer:**
+-- cmd --
+booping playbook-transition groom awaiting-clarification --workdir run
+-- exit --
+0
+-- stdout --
+drafting → awaiting-clarification
+frontmatter: status=awaiting-clarification
+frontmatter index.md: return_to=drafting
+script tracker-comment: ok
+script tracker-sync: ok
+-- stderr --
+-- expected/cwd/run/index.md --
+---
+title: "Demo"
+status: awaiting-clarification
+return_to: drafting
+---
+
+# Demo

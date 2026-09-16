@@ -17,8 +17,11 @@ carries:
 
 - the one item's path, and nothing pointing past it: no sibling item, no commit range, no repo
   history — a sub-agent that wanders re-reads what another one already owns
-- the spec-set facts its row must be tied to: the briefing's vision in a line, the role names, the
-  surface paths, the capability and group names of the feature index
+- the spec-set facts its row must be tied to: the briefing's vision in a line, the role names with
+  the depth each one reads at, the surface paths with the audience and depth of each, and the
+  capability and group names of the feature index. The role names and the surface paths are what
+  the row's **Audience** and **Target files** cells are filled from, so a brief that omits them
+  gets those two cells invented
 - the fixed question — what changed for someone who uses this project, of which type, against which
   spec file — plus the row shape below and the instruction to return the row or rows alone
 
@@ -30,7 +33,7 @@ provably covered — the exit gate demands it, and `record` marks items document
 Ids run `C1`, `C2`, … in scope order; on a second pass the rows already written keep their ids and
 their wording, and the added items continue the sequence.
 
-Columns: `# | Work item | Type | What changed | Spec-set effect`.
+Columns: `# | Work item | Type | What changed | Audience | Target files | Spec-set effect`.
 
 - **Type** is a closed vocabulary — `vision shift`, `new feature`, `refactoring`, `feature drop`,
   `chore`. No sixth word.
@@ -38,8 +41,21 @@ Columns: `# | Work item | Type | What changed | Spec-set effect`.
   present tense. Never diff language, file lists or module names: a business-facing surface is
   served from this cell later, which is why roles and surfaces are read here and not only at
   targeting.
+- **Audience** names the roles that consume this change, taken from `_specs/roles.md` by their own
+  names — never a role invented here, never "everyone". A change no role outside the repo consumes
+  says so with the one role that does.
+- **Target files** names the surfaces the change plausibly belongs on, taken from
+  `_specs/targets.md` by their own paths, vault-relative where that file writes them so. These are
+  **candidates, not the plan** — `targeting` owns the destinations and may add, drop or split them
+  against the surfaces' depth ceilings. A row whose change is already documented on a surface still
+  names it, so the gate can see the overlap.
 - **Spec-set effect** names each spec file a row moves and the edit it implies (`features.md`: new
-  capability *frontmatter query* under the CLI group), or `none`.
+  capability *frontmatter query* under the CLI group), or `none`. The spec set is itself a surface:
+  a row that moves one of its files names it under **Target files** too.
+
+Audience and Target files are why the surfaces and roles files are read at this step. Filling either
+from your own judgement rather than from those two files is the failure mode — a role or a path that
+does not appear there does not exist.
 
 ## The file to write
 
@@ -63,6 +79,8 @@ own file is touched, and no destination document is opened. No frontmatter of yo
 
 ## Notes:
 - types: {n} vision shift, {n} new feature, {n} refactoring, {n} feature drop, {n} chore
+- audience: {one clause per role any row names, with the row ids}
+- target files: {one clause per surface any row names, with the row ids}
 - spec-set effect: {one clause per spec file any row touches, or `none`}
 - read: {m} items in {m} sub-agents
 

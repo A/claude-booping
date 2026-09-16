@@ -62,3 +62,4 @@ One row per work item every one of whose changes is documented; the survey's und
 | `plans/202608081419_justfile-scripts-dead-code-cleanup/index.md` | `_runs/202608101223-docs-refresh.md` |
 | `plans/202608081523_session-metrics-idle-and-tokens/index.md` | `_runs/202608101223-docs-refresh.md` |
 | `plans/202608091310_scaffold-seeded-plan-creation/index.md` | `_runs/202608101223-docs-refresh.md` |
+| `plans/202608141156_benchmark-scoring/index.md` | `_runs/202608181228-recipes-section.md` |

@@ -1,0 +1,9 @@
+A verb invoked without its required flag is a user error — exit 1, not argparse's own 2.
+
+-- cmd --
+booping-tracker show
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: the following arguments are required: --issue

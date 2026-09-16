@@ -1,0 +1,10 @@
+The shipped tracker driver is `cli`, so a vault that configures nothing gets the no-op provider
+and every playbook run keeps its interactive behaviour.
+
+-- cmd --
+booping config-get core.tracker.driver
+-- exit --
+0
+-- stdout --
+cli
+-- stderr --

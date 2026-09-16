@@ -1,0 +1,10 @@
+Under the shipped `cli` driver every verb is a no-op that still prints a receipt, so a caller
+sees the same shape it would get from a real provider.
+
+-- cmd --
+booping-tracker states --team ENG
+-- exit --
+0
+-- stdout --
+states ENG: cli driver, no-op
+-- stderr --

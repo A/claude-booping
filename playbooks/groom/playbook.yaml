@@ -7,6 +7,9 @@ graph:
   cross-review: [draft-plan]
   present: [cross-review]
 
+# Every transition mirrors the run's status onto the tracker issue: `script
+# tracker-sync` is the last hook on every edge below, after the vault-side hooks,
+# and every edge added later carries it too.
 states:
   run:
     artifact: index.md
@@ -18,35 +21,73 @@ states:
             when: "intake posted the framing brief in chat, created `index.md` with its identity frontmatter, and the user's answers settled the scope questions — clear intent is enough"
             gates:
               - "answers that change the task type, the restated problem or a boundary re-run intake first"
-            hooks: ["script stamp-session", "script commit-plan"]
+            hooks: ["script stamp-session", "script commit-plan", "script tracker-sync"]
+          - to: awaiting-clarification
+            when: "the run raised questions it cannot answer itself and wrote them to `clarifications.md`"
+            gates:
+              - "every question in `clarifications.md` is open and attributed — an id, a topic, the date and the step that raised it"
+            hooks:
+              - frontmatter-update index.md return_to=framing
+              - "script tracker-comment clarifications.md"
+              - "script tracker-sync"
       researching:
         transitions:
           - to: drafting
             when: "the blast-radius map and the web-research findings are both posted in chat"
+            hooks: ["script tracker-sync"]
       drafting:
         transitions:
           - to: cross-reviewing
             when: "architecture, surface changes and trade-offs are settled with the user in conversation, and draft-plan wrote `index.md`'s body against the template's Plan Body and passed its Quality Checklist"
             gates:
               - "every call that is the user's is answered"
+            hooks: ["script tracker-sync"]
           - to: researching
             when: "the design needs blast radius or external practice the research pass missed"
+            hooks: ["script tracker-sync"]
+          - to: awaiting-clarification
+            when: "the run raised questions it cannot answer itself and wrote them to `clarifications.md`"
+            gates:
+              - "every question in `clarifications.md` is open and attributed — an id, a topic, the date and the step that raised it"
+            hooks:
+              - frontmatter-update index.md return_to=drafting
+              - "script tracker-comment clarifications.md"
+              - "script tracker-sync"
+      awaiting-clarification:
+        transitions:
+          - to: framing
+            when: "the answers came back and `return_to` names `framing`"
+            gates:
+              - "every question in `clarifications.md` carries an answer"
+              - "`return_to` is `framing` — any other value picks the other return edge"
+            hooks:
+              - "frontmatter-update index.md return_to=''"
+              - "script tracker-sync"
+          - to: drafting
+            when: "the answers came back and `return_to` names `drafting`"
+            gates:
+              - "every question in `clarifications.md` carries an answer"
+              - "`return_to` is `drafting` — any other value picks the other return edge"
+            hooks:
+              - "frontmatter-update index.md return_to=''"
+              - "script tracker-sync"
       cross-reviewing:
         transitions:
           - to: presenting
             when: "the cross-review pass disposed of every finding, or no `core.groom_playbook.cross_review_agent` is configured and the pass was skipped"
             gates:
               - "every CRITICAL finding folded in or recorded as a deferral — vacuously satisfied with no `core.groom_playbook.cross_review_agent` configured"
-            hooks: ["script commit-plan"]
+            hooks: ["script commit-plan", "script tracker-sync"]
       presenting:
         transitions:
           - to: awaiting-approval
             when: "present posted the approval screen in chat — summary, split recommendation if any, handoff to the `develop` playbook"
+            hooks: ["script tracker-sync"]
       awaiting-approval:
         transitions:
           - to: drafting
             when: "the user's change request touches the plan itself — architecture, scope, milestones, tasks or estimates"
-            hooks: ["script commit-plan"]
+            hooks: ["script commit-plan", "script tracker-sync"]
           - to: ready-for-dev
             when: 'the user explicitly approves the plan — "looks good" counts, silence never does'
             gates:
@@ -55,6 +96,7 @@ states:
               - frontmatter-update index.md reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
               - "script stamp-session"
               - "script commit-plan"
+              - "script tracker-sync"
       ready-for-dev:
         terminal: true
       cancelled:
@@ -67,10 +109,11 @@ states:
           - researching
           - drafting
           - cross-reviewing
+          - awaiting-clarification
         transitions:
           - to: cancelled
             when: "the user cancels the run"
-            hooks: ["script commit-plan"]
+            hooks: ["script commit-plan", "script tracker-sync"]
       awaiting-plan-review:
         states:
           - presenting
@@ -78,7 +121,7 @@ states:
         transitions:
           - to: cancelled
             when: "the user cancels the run"
-            hooks: ["script commit-plan"]
+            hooks: ["script commit-plan", "script tracker-sync"]
       terminal:
         states:
           - ready-for-dev

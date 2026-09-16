@@ -1,22 +1,28 @@
 default:
     @just --list
 
-# Lint booping-python
+# Lint both uv projects
 lint:
     cd booping-python && uv run ruff check .
+    cd booping-tracker && uv run ruff check .
 
-# Type-check booping-python
+# Type-check both uv projects
 typecheck:
     cd booping-python && uv run basedpyright
+    cd booping-tracker && uv run basedpyright
 
-# Run booping-python tests
+# Run both unit suites
 pytest:
     cd booping-python && uv run pytest
+    cd booping-tracker && uv run pytest
 
-# Run the contract corpus — `just e2e [-k expression]`; `pytest e2e --txtar-update` rebaselines
+# Run both contract corpora — `just e2e [-k expression]`; `pytest e2e --txtar-update` rebaselines
+# Exit 5 is "no tests collected": a -k expression selecting cases in one corpus leaves the
+# other empty, which is a filtered-out corpus rather than a failure.
 [no-exit-message]
 e2e *args:
-    cd booping-python && uv run pytest e2e {{ args }}
+    cd booping-python && uv run pytest e2e {{ args }} || [ $? -eq 5 ]
+    cd booping-tracker && uv run pytest e2e {{ args }} || [ $? -eq 5 ]
 
 # Every check CI runs, in order, stopping at the first failure.
 ci: lint typecheck pytest snapshots mdcheck e2e

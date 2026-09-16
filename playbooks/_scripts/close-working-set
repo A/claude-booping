@@ -99,6 +99,17 @@ def stamp(plan: Path, values: dict[str, str]) -> None:
     plan.write_text(head + sep + body)
 
 
+def _inside_git_worktree(vault: Path) -> bool:
+    """The vault may be a subdirectory of a larger repository, so a `.git` at its root
+    is not the test — ask git."""
+    result = subprocess.run(
+        ["git", "-C", str(vault), "rev-parse", "--is-inside-work-tree"],
+        capture_output=True,
+        text=True,
+    )
+    return result.returncode == 0 and result.stdout.strip() == "true"
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Close a working set of plans and commit the vault.")
     parser.add_argument("--status")
@@ -161,7 +172,7 @@ def main() -> None:
         summary += "; " + ", ".join(f"{rel} → {args.status}" for rel in moved)
 
     slug = artifact.stem
-    if (vault / ".git").exists():
+    if _inside_git_worktree(vault):
         stage = [artifact_rel, *(rel for rel, _, _ in targets)]
         for extra in args.stage:
             if (vault / extra).exists():

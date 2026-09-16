@@ -31,6 +31,14 @@ a current file are skipped rather than redone.
   uses) — persists across runs and is only ever refreshed, never rebuilt from scratch once
   established. `_specs/documented.md` is the ledger of already-documented work;
   `research` reads it to surface only the delivered items still missing from it.
+- The spec set is **both this run's context and one of its targets**. It is compact documentation
+  on how to document this project, and its audience is Claude itself — every later step resolves
+  "what does this project ship, for whom, at what depth, on which surface" against it, so a stale
+  spec file mis-aims every destination downstream. It carries a row in `_specs/targets.md` like
+  any other surface, written vault-relative as `docs/_specs/`, and `sync-specs` keeps it current
+  from the confirmed change table before `targeting` reads it. Load it for context at every step
+  that resolves audience or destination; never let a run write a destination document from a spec
+  set the same run has already found stale.
 - Source files are never edited: every destination the `update` loop writes is markdown.
   Code-level documentation stays with `develop`.
 - Roles drive tone in both `research` and `write` — a business-facing surface never gets

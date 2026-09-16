@@ -1,0 +1,46 @@
+groom parks on `awaiting-clarification` from `framing`, and the edge's own `frontmatter-update`
+hook records `framing` as the status to come back to — a step body never writes `return_to`. The
+mutation report lists that write ahead of both script hooks, which is the order the edge declares
+them in.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  tracker:
+    driver: cli
+-- fixtures/cwd/run/index.md --
+---
+title: "Demo"
+status: framing
+return_to: null
+---
+
+# Demo
+-- fixtures/cwd/run/clarifications.md --
+# Clarifications
+
+## C1 — retention window — open
+
+**Asked:** 2026-08-14 — intake
+
+**Question:** How long are archives retained?
+
+**Answer:**
+-- cmd --
+booping playbook-transition groom awaiting-clarification --workdir run
+-- exit --
+0
+-- stdout --
+framing → awaiting-clarification
+frontmatter: status=awaiting-clarification
+frontmatter index.md: return_to=framing
+script tracker-comment: ok
+script tracker-sync: ok
+-- stderr --
+-- expected/cwd/run/index.md --
+---
+title: "Demo"
+status: awaiting-clarification
+return_to: framing
+---
+
+# Demo

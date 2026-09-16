@@ -46,6 +46,9 @@ core:
     glob:
       - plans/*/index.md
 
+  tracker:
+    driver: cli
+
   sprint:
     default_threshold_sp: 35
     redecompose_threshold: 5
@@ -213,6 +216,18 @@ The agent id an **assisted** playbook step delegates its bulk reads to. Default 
 ### `core.plans.glob`
 
 The plan shape as data: an ordered list of vault-relative glob patterns, default `plans/*/index.md`. All plan discovery goes through it — patterns are tried in order, the first to claim a slug wins. A vault laid out differently edits this one key, and every [query spec](#query-specs) without its own `glob` inherits it.
+
+### `core.tracker`
+
+The task tracker a run mirrors itself onto. Directly under `core` because it is not one playbook's key — the plan track reads it today and the other tracks are meant to.
+
+- **`core.tracker.driver`** — which provider every tracker call dispatches to. Default `cli`, the one shipped driver: a no-op that prints receipts and touches nothing, so a plugin with no tracker configured behaves exactly as it always has. An unknown name is a hard error rather than a quiet fall back to no-op — the config merge validates nothing, so `driver: clii` would otherwise silently disable mirroring.
+- **`core.tracker.<driver>`** — that driver's settings block, inert while another driver is selected. A driver that talks to a real tracker names the environment variable its API key lives in under `api_key_env`.
+
+!!! warning "A config file never holds a token"
+    `api_key_env` is a variable *name*. **No config value in any tier is environment-interpolated** — there is no `${VAR}` syntax to expand, and none is coming. Secrets stay in your environment, which matters because a project tier arrives with a `git clone`.
+
+Mirroring is best-effort by design: a failed push warns, never rolls a status back, and `booping-tracker sync --artifact {plan-dir}/index.md` re-pushes idempotently. Only the plan track's `groom` is wired today; `develop`, `retro` and `code-review` keep their conversation-only behaviour whatever the driver.
 
 ### `core.macros`
 

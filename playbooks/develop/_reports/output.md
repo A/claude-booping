@@ -270,7 +270,7 @@ The edge's hook regenerates `index.md`'s `## Milestones` table and its `sp` — 
 
    ## Return
 
-   One block per milestone, in the same order: what was done in one paragraph, the files touched, the `## Verify` command with its verdict, and the commit sha. No diffs, no pasted code, no command logs.
+   One block per milestone, in the same order: what was done in one paragraph, the files touched, and the `## Verify` command with its verdict. Leave the work uncommitted — committing is the runner's. No diffs, no pasted code, no command logs.
    ```
 
    Paths only: never paste a milestone's goal, tasks, DoD or Verify text into the briefing — the worker reads its contract itself. Briefings carry no lesson paths either; the worker gets its lesson context from its own extension file.
@@ -279,23 +279,26 @@ The edge's hook regenerates `index.md`'s `## Milestones` table and its `sp` — 
 
 ## Closing a milestone
 
-Once the briefing that covers this instance's milestone has come back, the worker has already run the milestone's `## Verify` and committed its work. Never re-run that command, and never commit repo code yourself:
+Once the briefing that covers this instance's milestone has come back, the worker has already run the milestone's `## Verify` and left its work uncommitted in the working tree. Never re-run that command, and never edit application code yourself — but the commit is yours: nothing reaches the branch that has not passed the DoD.
 
-1. Validate the worker's commit diff against the milestone file's `## Definition of Done`.
-2. In the milestone file: flip each satisfied DoD checkbox `- [ ]` → `- [x]`, and each finished task row's status. Bookkeeping only — no new tasks, no rewritten ones, and never `status:`, which the machine owns.
-3. Take the milestone's closing edge.
-4. Commit the plan in the vault git repo: `git -C {vault} add plans/{slug}`, then `git -C {vault} commit -q -m "develop: {slug} → in-progress"`.
-5. Report to the user in one paragraph — what shipped, anything deferred — before the next milestone starts.
+1. Validate the working tree against the milestone file's `## Definition of Done` — `git status --short` and `git diff` (plus `git diff --cached`) over the paths the contract names.
+2. Commit the milestone in the attached repo — one commit per milestone, message format `<agent>: <plan title> <message>`, `<agent>` being the worker that built it. Stage the contract's own paths explicitly; never `git add -A`, never a vault path, never push, never switch or create a branch, never `--amend`.
+3. In the milestone file: flip each satisfied DoD checkbox `- [ ]` → `- [x]`, and each finished task row's status. Bookkeeping only — no new tasks, no rewritten ones, and never `status:`, which the machine owns.
+4. Take the milestone's closing edge.
+5. Commit the plan in the vault git repo: `git -C {vault} add plans/{slug}`, then `git -C {vault} commit -q -m "develop: {slug} → in-progress"`.
+6. Report to the user in one paragraph — what shipped, anything deferred — before the next milestone starts.
+
+A worker that reports its milestone green over a working tree with nothing to stage has shipped nothing: that is a failed attempt, not a closed milestone.
 
 ## When a milestone does not close
 
-A diff that misses the DoD, or a `## Verify` the worker reports red, goes back as a fix briefing. First write your findings into `feedback.md` beside the milestone file — what you checked, what was wrong, what the next attempt must do — headed by the attempt record line:
+A tree that misses the DoD, a `## Verify` the worker reports red, or a green report over an empty tree goes back as a fix briefing — uncommitted, since the commit only happens on a pass. First write your findings into `feedback.md` beside the milestone file — what you checked, what was wrong, what the next attempt must do — headed by the attempt record line:
 
 **Blocked (n/2)**: {what failed}
 
 `n` is one more than the number of `**Blocked (` lines already in that file; that file is the only place attempts are counted.
 
-Take the milestone's blocked edge on the record, and the edge back when the next attempt starts. Brief a **fresh** agent for the fix — the same block, the same contract path, now with the feedback path — routed to `booping:booping-developer` when the milestone was built by some other agent. A fix lands as a new commit, never an amend. After two recorded attempts on the same issue the blocker is unrecoverable: ask the user to approve the abort, then take the run machine's `in-progress` → `fail` edge. No scope additions and no runner-authored fix at any point.
+Take the milestone's blocked edge on the record, and the edge back when the next attempt starts. Brief a **fresh** agent for the fix — the same block, the same contract path, now with the feedback path — routed to `booping:booping-developer` when the milestone was built by some other agent. A rejected attempt left no commit behind, so the fix carries the milestone's whole work into one closing commit — never an amend of an earlier one. After two recorded attempts on the same issue the blocker is unrecoverable: ask the user to approve the abort, then take the run machine's `in-progress` → `fail` edge. No scope additions and no runner-authored fix at any point.
 
 ## Return format
 

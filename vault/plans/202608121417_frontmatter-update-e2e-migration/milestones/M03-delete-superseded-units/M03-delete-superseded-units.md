@@ -14,10 +14,10 @@ Scope: deletion of the unit file; a coverage cross-check table appended to this 
 
 ## Tasks
 
-| Task | Description | Files | SP | Status |
-|------|-------------|-------|----|--------|
-| 3.1 | Cross-check: list every test in `frontmatter_update_test.py`, map each to its corpus case filename or to a recorded drop rationale (hook-tokenising → playbook_transition coverage; live-git → M02/2.3); append the mapping table under `## Coverage cross-check` in this file | this milestone file | 1 | done |
-| 3.2 | Delete `booping-python/tests/commands/frontmatter_update_test.py`; sweep stale references (`grep -rn frontmatter_update_test` over the repo) and fix any hit; confirm unit suite still green | `booping-python/tests/commands/frontmatter_update_test.py` | 1 | done |
+| Task | Description                                                                                                                                                                                                                                                                    | Files                                                      | SP  | Status |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------- | --- | ------ |
+| 3.1  | Cross-check: list every test in `frontmatter_update_test.py`, map each to its corpus case filename or to a recorded drop rationale (hook-tokenising → playbook_transition coverage; live-git → M02/2.3); append the mapping table under `## Coverage cross-check` in this file | this milestone file                                        | 1   | done   |
+| 3.2  | Delete `booping-python/tests/commands/frontmatter_update_test.py`; sweep stale references (`grep -rn frontmatter_update_test` over the repo) and fix any hit; confirm unit suite still green                                                                                   | `booping-python/tests/commands/frontmatter_update_test.py` | 1   | done   |
 
 ## Definition of Done
 

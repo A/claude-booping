@@ -2,7 +2,31 @@
 
 Notable user-visible changes, newest first, in the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format; versions follow [semantic versioning](https://semver.org/).
 
-## Unreleased
+## v1.1.0 — 2026-09-16
+
+A grooming run can now park itself instead of holding you in the conversation, workers stopped touching git history, and the docs grew a recipes section for the non-obvious setups.
+
+### Added
+
+- Groom gained an `awaiting-clarification` status. A run that hits a question it cannot answer writes it to a `clarifications.md` beside the plan, records where to come back to, and ends — a later run reads the answers off the file and picks up where it stopped.
+- A second CLI, `bin/booping-tracker`, carries every interaction booping has with an issue tracker: read an issue, comment on it, create issues and sub-issues, cross-link them, and push a plan's status onto its issue. One driver ships — `cli`, a receipts-only no-op that keeps today's behaviour exactly as it was; a real tracker slots in as another provider behind the same facade.
+- `core.tracker` in the config picks the driver and holds its settings block. Secrets are never config values: a driver's `api_key_env` names an environment variable and the tracker reads the token from there.
+- The docs site gained a **Recipes** section: wiring external agents, and running model benchmarks over a develop sprint.
+
+### Changed
+
+- The runner now owns the milestone commit. A coding worker implements the contract, runs its verification and leaves the work uncommitted; develop validates the working tree against the Definition of Done and commits it itself, staged from the contract's own paths — only DoD-green state ever reaches the branch, and a worker driven through a foreign harness needs no git at all.
+- Every groom transition mirrors the plan's status onto its tracker issue through the hook scripts. A tracker that is unreachable never fails the transition — the vault stays authoritative, the mirror warns, and re-running `booping-tracker sync` reconciles it. Under the shipped `cli` driver this is a visible receipt and nothing more.
+- A milestone now carries a `## References` section: the one or two existing files a worker copies the shape of, and the spec it should not go hunting for. Groom fills it in as it drafts, and the plan templates' checklists gate on it.
+- Groom holds milestones to four rules it did not before: one way to do a thing rather than a choice of two, one verification command scoped to what that milestone changed, and any table or write-up the worker must produce named as a file path rather than asked for in its report.
+- A coding worker is briefed to plan its file list before the first edit, read narrowly rather than sweeping a directory, verify a file before moving to the next, and treat its milestone's verification command as the whole gate — the runner owns the repo-wide suites. Together these cut what a run pulls into its context, which is most of what a run costs.
+
+### Fixed
+
+- A lesson written by learn with several targets put them in one comma-separated YAML item — one invalid target, so the lesson injected nowhere. The write step now emits one list item per target and quotes the title against colons.
+- A vault nested inside a larger repository has no `.git` at its root, so the close-working-set hook skipped the vault commit silently; it now detects the repo with `git rev-parse`.
+
+Nothing changes for an interactive run: with no `core.tracker` configured, groom renders and behaves as it did in 1.0.1.
 
 ## v1.0.1 — 2026-08-13
 

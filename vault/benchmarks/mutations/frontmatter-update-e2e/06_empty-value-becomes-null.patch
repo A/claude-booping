@@ -1,0 +1,13 @@
+diff --git a/booping-python/src/booping/commands/frontmatter_update.py b/booping-python/src/booping/commands/frontmatter_update.py
+index db3dacc..f6dfce1 100644
+--- a/booping-python/src/booping/commands/frontmatter_update.py
++++ b/booping-python/src/booping/commands/frontmatter_update.py
+@@ -96,7 +96,7 @@ def coerce_scalar(value: str) -> object:
+     use is marked single-quoted, so it reloads as the string it was written as.
+     """
+     if not value.strip():
+-        return value
++        return None
+ 
+     try:
+         loaded: object = RuamelYAML(typ="rt").load(value)  # type: ignore[reportUnknownMemberType]

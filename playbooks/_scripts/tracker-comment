@@ -1,0 +1,53 @@
+#!/bin/sh
+# Shared hook: post a vault file as a comment on the run's tracker issue.
+#
+# Usage: script tracker-comment <workdir-relative-path>
+#
+# Environment (set by `booping playbook-transition`): BOOPING_ARTIFACT = the run's
+# resolved target, whose frontmatter carries the issue refs; cwd is the workdir.
+#
+# The tracker's exit code is absorbed on purpose: a hook exiting non-zero aborts
+# `playbook-transition` *after* `status:` is already written, which would leave the
+# vault advanced and the tracker behind with no way back.
+set -u
+
+if [ $# -ne 1 ]; then
+    echo "warning: tracker-comment takes one workdir-relative path" >&2
+    exit 0
+fi
+
+body_file="$1"
+[ -f "$body_file" ] || exit 0
+
+artifact="${BOOPING_ARTIFACT:-}"
+[ -f "$artifact" ] || exit 0
+
+frontmatter_value() {
+    awk -v key="$1" '
+        NR == 1 { if ($0 != "---") exit; next }
+        /^---[[:space:]]*$/ { exit }
+        index($0, key ":") == 1 {
+            value = substr($0, length(key) + 2)
+            sub(/^[ \t]+/, "", value)
+            sub(/[ \t]+$/, "", value)
+            gsub(/^["\047]+|["\047]+$/, "", value)
+            if (value == "null" || value == "~") value = ""
+            print value
+            exit
+        }
+    ' "$2"
+}
+
+issue="$(frontmatter_value tracker_request "$artifact")"
+[ -n "$issue" ] || issue="$(frontmatter_value tracker_issue "$artifact")"
+[ -n "$issue" ] || exit 0
+
+TRACKER="${BOOPING_TRACKER_BIN:-$(cd "$(dirname "$0")/../.." && pwd)/bin/booping-tracker}"
+
+"$TRACKER" comment --issue "$issue" --body-file "$body_file"
+status=$?
+if [ "$status" -ne 0 ]; then
+    echo "warning: tracker comment failed (exit $status)" >&2
+fi
+
+exit 0

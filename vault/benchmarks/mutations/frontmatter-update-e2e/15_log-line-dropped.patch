@@ -1,0 +1,17 @@
+diff --git a/booping-python/src/booping/commands/frontmatter_update.py b/booping-python/src/booping/commands/frontmatter_update.py
+index db3dacc..1cc612b 100644
+--- a/booping-python/src/booping/commands/frontmatter_update.py
++++ b/booping-python/src/booping/commands/frontmatter_update.py
+@@ -186,12 +186,6 @@ def _run(args: argparse.Namespace) -> None:
+     if report:
+         print(report)
+ 
+-    vault = project.directory if project is not None else None
+-    changed = [f"-{k}" for k in removals] + list(resolved.keys()) + list(resolved_appends.keys())
+-    logger.log(
+-        vault=vault, subcommand="frontmatter-update", message=f"{plan_path} {' '.join(changed)}"
+-    )
+-
+     parts = (
+         [f"-{k}" for k in removals]
+         + [f"{k}={v}" for k, v in summary_values.items()]

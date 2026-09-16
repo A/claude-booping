@@ -36,6 +36,7 @@ One file per milestone directory under the plan directory's `milestones/`, named
   | 1.1 | ... | `bin/mytool`, `tests/fixtures/*.txt` | 2 | pending |
 
 - `## Definition of Done` — one `### Task {n}.{m}` block per task, checkbox bullets only: happy-path invocation produces the expected output, `--help` reflects the new surface, exit code matches the contract (0 on success, ≠0 on defined failure modes).
+- `## References` — where such files exist, 1–3 existing commands, fixtures or corpus cases whose shape this milestone copies, by path, plus the path of any format spec it must not go looking for.
 - `## Verify` — exact invocation + expected output (e.g. `./bin/mytool --flag arg 2>&1 | diff - tests/fixtures/expected.txt`). Scoped to this milestone — whole-repo gates (full test suite, repo-wide lint/typecheck, an aggregate `ci` target) run once in `index.md`'s Final Verification, never per milestone.
 
 ## I/O contract
@@ -81,6 +82,9 @@ Name sections to update (new CLI in the `CLI` section, new inlining point in a s
 - [ ] Every milestone is a file in `milestones/` carrying its own goal, tasks, DoD and Verify — no milestone body in `index.md`.
 - [ ] `index.md`'s milestone table has one row per milestone file and matches their frontmatter.
 - [ ] Every milestone file's `## Verify` is an invocation scoped to what that milestone changed — no whole-repo gate (full suite, repo-wide lint/typecheck, aggregate `ci` target); those belong to `index.md`'s Final Verification.
+- [ ] Every milestone file's `## References` names 1–3 existing files to copy the shape of where such files exist, or states that none applies.
+- [ ] No milestone's Scope or Tasks offers two ways to do the same thing ("by hand or via X").
+- [ ] No milestone asks for a deliverable in the worker's report — each is named as a path plus "Create" or "Append to", relative to the repo root or the plan directory.
 - [ ] Each milestone file executable from a fresh session with only it and `index.md` as context.
 
 ## I/O contract

@@ -36,6 +36,7 @@ One file per milestone directory under the plan directory's `milestones/`, named
   | 1.1 | ... | `src/templates/skills/{name}.md.j2`, `src/config.yaml` | 2 | pending |
 
 - `## Definition of Done` — one `### Task {n}.{m}` block per task, checkbox bullets only: rendered diff matches the intended shape, no hardcoded values that duplicate config, lazy-load links resolve.
+- `## References` — where such files exist, 1–3 existing templates, partials or rendered reports whose shape this milestone copies, by path, plus the path of any config block it must not go looking for.
 - `## Verify` — render and sanity check (e.g. `bin/booping render src/templates/skills/{name}.md.j2` and review output) — the rebuild plus the surfaces this milestone touched. Whole-repo gates (full test suite, repo-wide lint/typecheck, an aggregate `ci` target) run once in `index.md`'s Final Verification, never per milestone.
 
 ## Final Verification
@@ -70,6 +71,9 @@ Name sections to update, or state "No CLAUDE.md changes required — {justificat
 - [ ] Every milestone is a file in `milestones/` carrying its own goal, tasks, DoD and Verify — no milestone body in `index.md`.
 - [ ] `index.md`'s milestone table has one row per milestone file and matches their frontmatter.
 - [ ] Every milestone file's `## Verify` includes a rebuild and stays scoped to the surfaces that milestone touched — no whole-repo gate (full suite, repo-wide lint/typecheck, aggregate `ci` target); those belong to `index.md`'s Final Verification.
+- [ ] Every milestone file's `## References` names 1–3 existing files to copy the shape of where such files exist, or states that none applies.
+- [ ] No milestone's Scope or Tasks offers two ways to do the same thing ("by hand or via X").
+- [ ] No milestone asks for a deliverable in the worker's report — each is named as a path plus "Create" or "Append to", relative to the repo root or the plan directory.
 - [ ] Each milestone file executable from a fresh session with only it and `index.md` as context.
 
 ## Skill-design hygiene

@@ -1,0 +1,34 @@
+`--help` is the discovery surface: it lists every verb of the I/O contract and the global flags
+each of them accepts. Help text is asserted loosely — the verb names and flag names are the
+contract, their descriptions are not.
+
+-- cmd --
+booping-tracker --help
+-- exit --
+0
+-- stdout --
+usage: booping-tracker [-h] [--driver DRIVER] [--config-file CONFIG_FILE]
+[..][--output {text,json}] [--dry-run]
+[..]<verb> ...
+
+booping tracker CLI
+
+positional arguments:
+  <verb>
+    states[..]
+    show[..]
+    comment[..]
+    issue-create[..]
+    issue-update[..]
+    relate[..]
+    sync[..]
+
+options:
+  -h, --help[..]
+  --driver DRIVER[..]
+  --config-file CONFIG_FILE
+[..]
+[..]
+  --output {text,json}[..]
+  --dry-run[..]
+-- stderr --

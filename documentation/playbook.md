@@ -349,6 +349,9 @@ A `script <name>` hook runs an executable found by name:
 - it receives `BOOPING_ARTIFACT` (absolute artifact path), `BOOPING_WORKDIR` (absolute run workdir) and `BOOPING_INSTANCE` (the instance slug, empty for a non-instance machine);
 - a non-zero exit aborts the transition; the script's stderr is relayed.
 
+!!! warning "A hook that mirrors outward should absorb its own failure"
+    `status:` is written **before** the hooks run, so a script failing at hook time aborts the transition with the artifact already advanced. That is the right shape for a script guarding an invariant — the abort is the signal. It is the wrong shape for one pushing state to a system outside the vault: the failure would leave the vault ahead of that system with no way back. The shipped `tracker-sync` and `tracker-comment` scripts therefore report a failed push on stderr and exit 0, leaving re-running the push as the reconcile.
+
 ### Run workspace
 
 A run gets its own workdir; artifact paths resolve against it and the playbook directory stays read-only source. A playbook's preamble names the workdir convention it wants — the plan-track playbooks make the plan's own directory the workdir, and the retro and code-review playbooks use the vault root. Absent one, `/playbook` falls back to:
@@ -368,6 +371,14 @@ with `<run-slug>` = `{YYYYMMDD}-<kebab-topic>`. Every state command takes `--wor
 ### Resume
 
 `/playbook` runs `booping playbook-state <name> --workdir <workdir>` on entry — first run and every resume — and restarts from the reported frontier: work already past its status is skipped, the first non-terminal status is re-entered, and `not-started` means bootstrap on the first transition. Nothing hand-edits an artifact's `status:` or a hook-written key; only `playbook-transition` mutates run state.
+
+A resume does not need the run that started it. A run driven from outside a conversation — one invocation per turn, nothing to ask a question in — **parks** rather than blocks: it writes what it needs into a sidecar beside the artifact, transitions into a status that means *waiting*, and ends. The pattern is three pieces, all of them ordinary state machinery:
+
+- a non-terminal **parking status**, reachable from each status a run may stop in and with one return edge back to each of them;
+- a **`frontmatter-update` hook on every entering edge** stamping where to come back to (groom writes `return_to`), cleared again by the return edges. A hook value cannot be computed from the transition, so the mapping is one literal per edge — which also keeps the frontier report readable;
+- a **sidecar** carrying the content, since frontmatter holds keys and not paragraphs. groom's is `clarifications.md`: one H2 per open question, answered in place, and postable to a tracker verbatim by a `script` hook.
+
+The next invocation reads `playbook-state`, finds the parking status and the recorded return, reads the sidecar, and either takes the return edge or ends again untouched. Every step is a legal transition, so a parked run is indistinguishable from any other resume.
 
 ### Cancellation
 

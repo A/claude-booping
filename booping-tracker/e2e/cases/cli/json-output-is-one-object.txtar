@@ -1,0 +1,10 @@
+`--output json` prints exactly one JSON object carrying the operation's result fields, and
+nothing else on stdout. The flag is accepted after the verb as well as before it.
+
+-- cmd --
+booping-tracker comment --issue LIN-1 --body hi --output json
+-- exit --
+0
+-- stdout --
+{"receipt": "comment LIN-1: cli driver, no-op", "target": "LIN-1", "url": null, "verb": "comment"}
+-- stderr --

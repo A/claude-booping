@@ -50,6 +50,7 @@ One file per milestone directory under the plan directory's `milestones/`, named
   | 1.1 | ... | `documentation/{page}.md`, `mkdocs.yml` | 2 | pending |
 
 - `## Definition of Done` — one `### Task {n}.{m}` block per task, checkbox bullets only: page renders in the local build with no broken links, cross-links to/from sibling pages resolve, code blocks lint cleanly (correct language tags, runnable where applicable), no prose duplicating another page — link instead.
+- `## References` — where such files exist, 1–3 existing pages whose structure and voice this milestone copies, by path, plus the path of any style guide or spec it must not go looking for.
 - `## Verify` — build/serve the site locally and load the pages this milestone changed; check their cross-links resolve. Whole-repo gates — a strict full-site build, a pushed branch confirming the CI workflow green, an aggregate `ci` target — run once in `index.md`'s Final Verification, never per milestone.
 
 ## Final Verification
@@ -86,6 +87,9 @@ Name sections to update (e.g. add `documentation/` to the layout section, distin
 - [ ] Every milestone is a file in `milestones/` carrying its own goal, tasks, DoD and Verify — no milestone body in `index.md`.
 - [ ] `index.md`'s milestone table has one row per milestone file and matches their frontmatter.
 - [ ] Every milestone file's `## Verify` includes a build or local-serve check of the pages that milestone changed — no whole-repo gate (strict full-site build, CI-workflow run, aggregate `ci` target); those belong to `index.md`'s Final Verification.
+- [ ] Every milestone file's `## References` names 1–3 existing files to copy the shape of where such files exist, or states that none applies.
+- [ ] No milestone's Scope or Tasks offers two ways to do the same thing ("by hand or via X").
+- [ ] No milestone asks for a deliverable in the worker's report — each is named as a path plus "Create" or "Append to", relative to the repo root or the plan directory.
 - [ ] Each milestone file executable from a fresh session with only it and `index.md` as context.
 
 ## Documentation hygiene

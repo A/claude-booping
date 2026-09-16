@@ -1,0 +1,13 @@
+diff --git a/booping-python/src/booping/commands/frontmatter_update.py b/booping-python/src/booping/commands/frontmatter_update.py
+index db3dacc..0e1dba2 100644
+--- a/booping-python/src/booping/commands/frontmatter_update.py
++++ b/booping-python/src/booping/commands/frontmatter_update.py
+@@ -70,7 +70,7 @@ def interpolate(
+ 
+     A value carrying no Jinja passes through untouched.
+     """
+-    if "{{" not in value and "{%" not in value:
++    if "{{" in value or "{%" in value:
+         return value
+     env = Environment()  # noqa: S701 — frontmatter values, not HTML
+     globals_: dict[str, Any] = env.globals  # type: ignore[assignment]

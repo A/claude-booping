@@ -1,0 +1,16 @@
+diff --git a/booping-python/src/booping/commands/frontmatter_update.py b/booping-python/src/booping/commands/frontmatter_update.py
+index db3dacc..da9b908 100644
+--- a/booping-python/src/booping/commands/frontmatter_update.py
++++ b/booping-python/src/booping/commands/frontmatter_update.py
+@@ -107,8 +107,10 @@ def coerce_scalar(value: str) -> object:
+         # An anchor or an empty tag also loads as None; only the null spellings
+         # are a real null.
+         return None if value.strip() in _NULL_FORMS else _quote_if_ambiguous(value)
+-    if isinstance(loaded, bool | int | float):
++    if isinstance(loaded, bool | int):
+         return loaded
++    if isinstance(loaded, float):
++        return _quote_if_ambiguous(value)
+     return _quote_if_ambiguous(value)
+ 
+ 

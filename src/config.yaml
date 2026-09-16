@@ -97,6 +97,21 @@ core:
       description: "Internal structure change with no user-visible behavior change. Needs current-vs-target design, migration steps, and a no-behavior-change DoD."
       doc_uri: ${CLAUDE_PLUGIN_ROOT}/docs/task_refactoring.md
 
+  # Task-tracker surface. Directly under `core` rather than in a playbook
+  # namespace because several playbooks mirror their run outward through it.
+  # `bin/booping-tracker` resolves this block by shelling to
+  # `booping config-get core.tracker`, so the three-tier merge stays single-sourced.
+  tracker:
+    # Provider the tracker CLI dispatches to. `cli` ships alone: receipts-only
+    # no-ops, every interactive run behaves exactly as it does today. Overridable
+    # per invocation with `--driver`. An unknown name is a hard error rather than
+    # a silent degrade to no-op, because the config merge has no schema gate.
+    # A real provider's settings live in a block named after it; its
+    # `api_key_env` names the environment variable carrying the API key — a
+    # variable *name*, never a token: no config value anywhere is
+    # env-interpolated, and secrets stay out of every config tier.
+    driver: cli
+
   groom_playbook:
     # Agent that performs the detached second-model review of a drafted plan.
     # Null → the reviewing step is skipped entirely.
@@ -123,10 +138,19 @@ core:
         retro: null
         summary: null
         commit: {{ macro('core.macros.git_commit') }}
+        tracker_provider: null
+        tracker_request: null
+        tracker_issue: null
+        return_to: null
         ---
 
         # {{ title }}
       request.md: ""
+      # Sidecar the run parks its open questions in on `awaiting-clarification`;
+      # seeded empty so the file is postable to the tracker verbatim from the
+      # first question on. Format: ${CLAUDE_PLUGIN_ROOT}/docs/clarifications.md.
+      clarifications.md: |
+        # Clarifications
       milestones:
         type: dir
     # Scaffold tree materialised once per milestone by
@@ -153,6 +177,8 @@ core:
           ## Tasks
 
           ## Definition of Done
+
+          ## References
 
           ## Verify
     agents:

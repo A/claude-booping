@@ -44,4 +44,6 @@ booping query --glob {plan-dir}/{{ config.core.plans.milestones.glob }} --column
 
 A milestone that changes after that is edited in its own file, and the query re-run.
 
+{% include "_partials/milestone_contract.md" %}
+
 {% include "_partials/sprint_planning.md" %}

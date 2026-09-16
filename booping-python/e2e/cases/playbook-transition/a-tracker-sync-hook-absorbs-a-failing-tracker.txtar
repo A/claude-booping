@@ -1,0 +1,59 @@
+A tracker that exits non-zero — here because the resolved config names a driver that does not exist,
+which `booping-tracker` rejects with exit 1 — never fails the transition: `tracker-sync` warns on its
+own stderr and exits 0, so the edge completes, the report is printed and the status stays advanced.
+Without the absorption the hook would abort with exit 2 *after* `status:` was already on disk. The
+warning itself is not relayed here, since `playbook-transition` captures the stderr of a hook that
+succeeds.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  tracker:
+    driver: nosuchdriver
+-- fixtures/home/Claude/_playbooks/fx-tracker/playbook.md --
+---
+name: fx-tracker
+title: Tracker
+summary: Tracker-hook fixture for playbook-transition.
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-tracker/playbook.yaml --
+state: main
+graph:
+  only: []
+
+states:
+  main:
+    artifact: index.md
+    initial: intaking
+    statuses:
+      intaking:
+        transitions:
+          - to: noted
+            when: the run moves on
+            hooks: ["script tracker-sync"]
+      noted: {terminal: true}
+-- fixtures/home/Claude/_playbooks/fx-tracker/only/prompt.md --
+---
+summary: Only step.
+---
+
+Only body.
+-- fixtures/cwd/run/.keep --
+-- cmd --
+booping playbook-transition fx-tracker intaking --workdir run
+booping playbook-transition fx-tracker noted --workdir run
+-- exit --
+0
+-- stdout --
+created index.md
+not-started → intaking
+frontmatter: status=intaking
+intaking → noted
+frontmatter: status=noted
+script tracker-sync: ok
+-- stderr --
+-- expected/cwd/run/index.md --
+---
+status: noted
+---
