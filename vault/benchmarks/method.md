@@ -28,6 +28,7 @@ How the milestone is driven inside that session is the run's `orch` setting — 
   - `loop` — pi's `/loop`: the session writes one task list and workers take tasks from it in a single warm context until a context budget stops them, each reporting what the next one needs to know
   - `direct` — no runner at all: the milestone briefing goes straight to pi as a plain prompt, with pi's own tools and no orchestration template. The baseline the other two are measured against
   - `-` — rows predating pi, driven by a retired worker that had no such choice
+- `effort` — the reasoning-effort preset the run pinned the model to (`medium`, `high`, …). Stated by the invoker at scoring time (`bench-score report --effort`): the logs never record it, so the branch slug and the run setup are its only witnesses. `-` when the run used the model's default or the setting predates the column
 - `outcome` — `pass`, or `fail@Mnn` naming the milestone the run died on
 - `att` — attempts spent per milestone
 - `code` — code-quality composite, %, grading the artifact: CI/scope/determinism gates plus corpus quality against the frozen etalon and mutation set
@@ -38,7 +39,9 @@ How the milestone is driven inside that session is the run's `orch` setting — 
 - `cache` — how much of that input never reached the model fresh: `in {cache reads} out {cache writes}` — read back from the cache, and written into it. Both sit inside `tokens in` and never in `tokens out`, so `in 2.9M` beside `cache in 2.6M` means only ~300k of the input was new. The two counters are disjoint in the raw logs of both harnesses, which is why `in` is their sum rather than either one
 - `cost` — USD, from OpenRouter's generation API when the logs carry generation ids, otherwise the worker's own usage accounting
 - `time` — sprint duration
+- `freeze` — `{lost time} ({wedge count})`: time lost to provider wedges — a stream dying mid-request and being auto-retried, which locally means the model reloading or llama-swap restarting. Counted from pi's `auto_retry` events; each wedge is measured from the last logged progress before the doomed request to the first progress after its retry, so the doomed generation itself counts as lost. A lower bound: a stall the provider recovers from without a retry leaves no event and is not counted. `-` on rows whose logs carry no retry events (Claude Code schema, or scored before the metric existed), never a zero
 - `report` — link to the human-readable run report under `reports/`; rows published before the reports existed carry `-` and are read through their detail under `runs/`
+- `comment` — free-form human note on the row, written by hand after the run; `bench-score` and the playbook always leave it empty
 
 Rows published before 2026-08-16 carry a single figure in `tokens` and `-` in `cache`: the split did not exist when they were scored, and a published row is never re-scored. That figure is in+out with cache excluded for every row but `claude-opus-5`, whose prompt figure includes cache reads — so it is not comparable to the `in` of a row scored since.
 

@@ -7,7 +7,7 @@ review_gate: null
 
 ## 1. The row
 
-Take `measure`'s history row and repoint its link cell before appending: `bench-score` emits it linking the run detail under `runs/`, and the published row links the human-readable report at `{reports_dir}/{run_id}-{model_slug}.md` instead — the chain is history row → report → detail, so the detail stays one click away through the report's own link. Nothing else in the row changes.
+Take `measure`'s history row and repoint its link cell before appending: `bench-score` emits it linking the run detail under `runs/`, and the published row links the human-readable report at `{reports_dir}/{run_id}-{model_slug}.md` instead — the chain is history row → report → detail, so the detail stays one click away through the report's own link. Nothing else in the row changes — the `comment` cell in particular stays empty: it is the human's cell, written by hand after the run, never by this step.
 
 Append it as the last row of the table in `{vault}/benchmarks/history.md`, cells in the registry's `history_columns` order. Nothing else in that file is edited — earlier rows are history and are never rewritten, re-sorted or re-scored, not even when a column's meaning has moved on. Column meanings and the method behind them live in `{vault}/benchmarks/method.md`; a run that deviated from that method says so in a footnote on its own row, and never by editing the method page.
 

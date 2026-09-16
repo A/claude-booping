@@ -96,7 +96,21 @@ invocation `{milestone}` (pass it as `-S`).
 
 No other agent writes code — not `booping:booping-developer`, not the runner. That holds for fix attempts too: a retry after a failed milestone goes back to `pi-developer` with the same `{model}`, so the benchmark measures one model end to end.
 
-The scorecard's `provider` column is the provider half of pi's model id — `llama-local/…` → `local`, `openrouter/…` → `openrouter`, `ollama-cloud/…` → `local`. Pass it to `bench-score report` as `--provider` (default `openrouter`). `pi-developer` is the only worker there is: the `openrouter-developer` and `llama-developer` agents it replaced were retired on 2026-08-16, and rows they produced are keyed by their own agent; see [method.md](method.md).
+### Reasoning effort
+
+`--thinking` takes seven names but `qwen3.8-27b-fp8` serves **three** efforts, so the seven collapse onto them — plus `off`, which suppresses thinking entirely:
+
+| pi level | template effort |
+| --- | --- |
+| `minimal`, `low` | low |
+| `medium` | medium |
+| `high`, `xhigh`, `max` | xhigh |
+
+A tier comparison must therefore pick levels from **different rows**. `low` against `medium` against `xhigh` measures three efforts; `high` against `xhigh` against `max` measures one effort three times, and `low` against `minimal` measures one effort twice. Levels within a row differ only by run-to-run variance, which on this benchmark is wide enough to look like a result.
+
+Two things nothing downstream can catch, so the invoker is the only witness: pi clamps a level the model does not expose without printing anything, and the logs carry no reasoning-level field (`usage.reasoning` is 0 on every message). Before trusting a new tier axis, probe it — same prompt, each level three or more times, counting `assistantMessageEvent.thinking_delta` characters in the `-L` ndjson — and re-probe after any change to what the host serves. Reasoning length is prompt-sensitive: on a short factual prompt the three efforts span roughly 250 → 500 → 1,500 characters, on a multi-constraint puzzle roughly 2,300 → 1,600 → 3,700, and the fine ordering between adjacent levels flips between the two.
+
+The scorecard's `provider` column is the provider half of pi's model id — `llama-local/…` → `local`, `openrouter/…` → `openrouter`, `ollama-cloud/…` → `local`. Pass it to `bench-score report` as `--provider` (default `openrouter`). The `effort` column is `--effort` on the same call: the reasoning preset the run pinned (`medium`, `high`, …), left at its `-` default when the model ran on its own default — the logs never record it, so the invoker is the only witness, and two rows naming different levels from the same row of the **Reasoning effort** table above ran at the same effort. `pi-developer` is the only worker there is: the `openrouter-developer` and `llama-developer` agents it replaced were retired on 2026-08-16, and rows they produced are keyed by their own agent; see [method.md](method.md).
 
 ## Report
 

@@ -454,6 +454,12 @@ class Attempt:
     stop_reason: str = ""
     generations: list[str] = field(default_factory=list)
     agents: Counter[str] = field(default_factory=Counter)
+    # Provider wedges: auto-retried request deaths (model reload, llama-swap
+    # restart). Time is lost-progress: last stamp before the doomed request to
+    # the first stamp after its retry. pi logs only — Claude Code logs carry no
+    # retry events, so both stay 0 there and the row cell renders "-".
+    freeze_count: int = 0
+    freeze_ms: int = 0
 
 
 def slugify(text: str) -> str:
@@ -665,11 +671,24 @@ def load_pi(attempt: Attempt, event: dict[str, Any], clock: dict[str, int]) -> N
             clock.setdefault("start", stamp)
 
 
+def event_ms(event: dict[str, Any]) -> int | None:
+    """The event's own stamp, wherever pi put it: top level or on the message."""
+    stamp = event.get("timestamp")
+    if stamp is None:
+        stamp = (event.get("message") or {}).get("timestamp")
+    return stamp_ms(stamp)
+
+
 def load_attempt(
     path: Path, milestone: str, ts: str, start: int = 0, end: int | None = None
 ) -> Attempt:
     attempt = Attempt(path=path, milestone=milestone, ts=ts)
     clock: dict[str, int] = {}
+    # A retry event carries no stamp, so a wedge is bracketed by its stamped
+    # neighbours; retries with no stamped event between them share one bracket.
+    wedge_open = False
+    wedge_start: int | None = None
+    last_stamp: int | None = None
     for line in path.read_text(errors="replace").splitlines()[start:end]:
         if not line.startswith("{"):
             continue
@@ -677,6 +696,17 @@ def load_attempt(
             event = json.loads(line)
         except json.JSONDecodeError:
             continue
+        if event.get("type") == "auto_retry_start":
+            attempt.freeze_count += 1
+            if not wedge_open:
+                wedge_open, wedge_start = True, last_stamp
+        stamp = event_ms(event)
+        if stamp is not None:
+            if wedge_open:
+                if wedge_start is not None:
+                    attempt.freeze_ms += max(stamp - wedge_start, 0)
+                wedge_open = False
+            last_stamp = stamp
         if event.get("type") in PI_EVENTS or event.get("type", "").startswith("orch_"):
             attempt.schema = "pi"
             load_pi(attempt, event, clock)
@@ -790,6 +820,8 @@ def profile_attempt(attempt: Attempt, proc: dict[str, Any]) -> dict[str, Any]:
         "malformed": malformed,
         "loops": count_loops(keys, proc["loop_threshold"]),
         "deaths": deaths,
+        "freezes": attempt.freeze_count,
+        "freeze_ms": attempt.freeze_ms,
         "pushed_lines": pushed,
     }
 
@@ -841,6 +873,18 @@ def human_ms(milliseconds: int) -> str:
     if hours:
         return f"{hours}h{minutes:02d}m{seconds:02d}s"
     return f"{minutes}m{seconds:02d}s"
+
+
+def freeze_cell(run: dict[str, Any]) -> str:
+    """The history row's freeze cell: total lost time (wedge count).
+
+    Only pi logs record retries, so a run with none is "-" — unmeasured, not
+    wedge-free. An older process JSON predating the metric reads the same way.
+    """
+    if "pi" not in (run.get("schemas") or []) or "freeze_ms" not in run:
+        return "-"
+    count = run.get("freezes") or 0
+    return f"{human_ms(run['freeze_ms'])} ({count})" if count else "0s"
 
 
 def run_stem_ts(args: argparse.Namespace) -> str:
@@ -909,6 +953,8 @@ def cmd_process(entry: dict[str, Any], args: argparse.Namespace) -> dict[str, An
             "malformed": sum(p["malformed"] for p in profiles),
             "loops": sum(p["loops"] for p in profiles),
             "deaths": sum(p["deaths"] for p in profiles),
+            "freezes": sum(p["freezes"] for p in profiles),
+            "freeze_ms": sum(p["freeze_ms"] for p in profiles),
             "blind_rebaselines": rebaselines.get(name, 0),
             "pushed_lines": sum(p["pushed_lines"] for p in profiles),
             "result_cost_usd": sum(p["result_cost_usd"] or 0.0 for p in profiles),
@@ -951,6 +997,8 @@ def cmd_process(entry: dict[str, Any], args: argparse.Namespace) -> dict[str, An
             "wall": human_ms(wall_ms),
             "span_ms": span_ms,
             "span": human_ms(span_ms) if span_ms else None,
+            "freezes": sum(m["freezes"] for m in milestones.values()),
+            "freeze_ms": sum(m["freeze_ms"] for m in milestones.values()),
             "milestone_count": len(milestones),
             "attempts_total": len(attempts),
             "attempts_per_milestone": "/".join(
@@ -1381,7 +1429,11 @@ def render_detail(
         "## Summary",
         table(
             ["field", "value"],
-            [[key, row[key]] for key in entry["history_columns"] if key != "report"],
+            [
+                [key, row[key]]
+                for key in entry["history_columns"]
+                if key not in ("report", "comment")
+            ],
         ),
         "## Gates",
         table(
@@ -1452,6 +1504,7 @@ def render_detail(
                 "malformed",
                 "loops",
                 "deaths",
+                "freezes",
                 "blind rebaselines",
                 "pushed lines",
             ],
@@ -1465,6 +1518,7 @@ def render_detail(
                     str(entry_["malformed"]),
                     str(entry_["loops"]),
                     str(entry_["deaths"]),
+                    f"{entry_.get('freezes', 0)} ({human_ms(entry_.get('freeze_ms', 0))})",
                     str(entry_["blind_rebaselines"]),
                     str(entry_["pushed_lines"]),
                 ]
@@ -1571,6 +1625,7 @@ def cmd_report(entry: dict[str, Any], args: argparse.Namespace) -> str:
         "model": f"`{run['model']}`",
         "provider": args.provider,
         "orch": args.orch,
+        "effort": args.effort,
         "outcome": outcome,
         "att": run["attempts_per_milestone"],
         "code": f"{code['score']:.1f}",
@@ -1583,7 +1638,11 @@ def cmd_report(entry: dict[str, Any], args: argparse.Namespace) -> str:
         "cache": f"in {compact(tokens['cached'])} out {compact(tokens['cache_write'])}",
         "cost": f"${cost['total_cost_usd']:.2f}",
         "time": run["wall"],
+        "freeze": freeze_cell(run),
         "report": f"[{run['run_id']}](runs/{detail})",
+        # human-authored cell on the published row; emitted empty so the row
+        # matches the history header's column count
+        "comment": "",
     }
     body = render_detail(
         entry, args, row, gates, corpus, mutations, profile, cost, code, agentic
@@ -1637,6 +1696,9 @@ def main() -> None:
     report.add_argument(
         "--orch", choices=["loop", "orchestrate", "direct"], default="-"
     )
+    # Free-form: effort names vary by provider (none/low/medium/high/…) and the
+    # logs never record it, so the invoker states what the run was pinned to.
+    report.add_argument("--effort", default="-")
     report.add_argument("--dry-run", action="store_true")
 
     args = parser.parse_args()
