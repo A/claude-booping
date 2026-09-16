@@ -21,6 +21,11 @@ A grooming run can now park itself instead of holding you in the conversation, w
 - Groom holds milestones to four rules it did not before: one way to do a thing rather than a choice of two, one verification command scoped to what that milestone changed, and any table or write-up the worker must produce named as a file path rather than asked for in its report.
 - A coding worker is briefed to plan its file list before the first edit, read narrowly rather than sweeping a directory, verify a file before moving to the next, and treat its milestone's verification command as the whole gate — the runner owns the repo-wide suites. Together these cut what a run pulls into its context, which is most of what a run costs.
 
+### Fixed
+
+- A lesson written by learn with several targets put them in one comma-separated YAML item — one invalid target, so the lesson injected nowhere. The write step now emits one list item per target and quotes the title against colons.
+- A vault nested inside a larger repository has no `.git` at its root, so the close-working-set hook skipped the vault commit silently; it now detects the repo with `git rev-parse`.
+
 Nothing changes for an interactive run: with no `core.tracker` configured, groom renders and behaves as it did in 1.0.1.
 
 ## v1.0.1 — 2026-08-13
