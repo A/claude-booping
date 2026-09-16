@@ -131,6 +131,13 @@
                 <li class="toctree-l1"><a class="reference internal" href="../integrating-external-agents/">Integrating external agents</a>
                 </li>
               </ul>
+              <p class="caption"><span class="caption-text">Recipes</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../recipes/external-agents/">Wiring external agents</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../recipes/benchmarks/">Model benchmarks</a>
+                  </li>
+              </ul>
               <p class="caption"><span class="caption-text">Workflow</span></p>
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../groom/">groom playbook</a>
@@ -501,6 +508,10 @@ states:
 <li>it receives <code>BOOPING_ARTIFACT</code> (absolute artifact path), <code>BOOPING_WORKDIR</code> (absolute run workdir) and <code>BOOPING_INSTANCE</code> (the instance slug, empty for a non-instance machine);</li>
 <li>a non-zero exit aborts the transition; the script's stderr is relayed.</li>
 </ul>
+<div class="admonition warning">
+<p class="admonition-title">A hook that mirrors outward should absorb its own failure</p>
+<p><code>status:</code> is written <strong>before</strong> the hooks run, so a script failing at hook time aborts the transition with the artifact already advanced. That is the right shape for a script guarding an invariant — the abort is the signal. It is the wrong shape for one pushing state to a system outside the vault: the failure would leave the vault ahead of that system with no way back. The shipped <code>tracker-sync</code> and <code>tracker-comment</code> scripts therefore report a failed push on stderr and exit 0, leaving re-running the push as the reconcile.</p>
+</div>
 <h3 id="run-workspace">Run workspace</h3>
 <p>A run gets its own workdir; artifact paths resolve against it and the playbook directory stays read-only source. A playbook's preamble names the workdir convention it wants — the plan-track playbooks make the plan's own directory the workdir, and the retro and code-review playbooks use the vault root. Absent one, <code>/playbook</code> falls back to:</p>
 <pre><code>{vault}/_runs/&lt;playbook&gt;/&lt;run-slug&gt;/
@@ -511,6 +522,13 @@ states:
 <p><code>booping playbook-transition &lt;playbook&gt; &lt;to&gt; [--state NAME] [--target PATH] [--instance SLUG] [--workdir PATH]</code> — the only writer of run state. <code>--state</code> defaults to the outer graph's <code>state:</code> ref; <code>--instance</code> is required exactly when the artifact path carries <code>{instance}</code>; <code>--target PATH</code> names the artifact outright (workdir-relative or absolute), is mutually exclusive with <code>--instance</code>, and is required for a machine that declares no <code>artifact:</code>. With no <code>--workdir</code>, an <strong>absolute</strong> <code>--target</code> ending in the machine's declared <code>artifact:</code> implies the workdir — <code>--target {vault}/plans/x/index.md</code> on a machine declaring <code>artifact: index.md</code> runs hooks in <code>{vault}/plans/x</code>; a relative target, a non-matching absolute one, or a machine declaring no <code>artifact:</code> falls back to cwd. It reads the artifact's current status, checks that <code>&lt;to&gt;</code> is reachable from it, sets <code>status: &lt;to&gt;</code>, then runs the matched transition's hooks in order. A missing artifact — or one whose frontmatter has no <code>status:</code> key yet — is bootstrapped, legal only when <code>&lt;to&gt;</code> is the machine's <code>initial</code>; bootstrapping an existing file writes <code>status:</code> into its frontmatter, keeping the other keys intact. Re-running the same target is idempotent. It prints a <strong>mutation report</strong> (created/<code>from → to</code>/each frontmatter line/each script result) which is the authoritative record — the driver relays it and never re-reads the artifact to verify. Illegal transitions exit 1; hook failures exit 2.</p>
 <h3 id="resume">Resume</h3>
 <p><code>/playbook</code> runs <code>booping playbook-state &lt;name&gt; --workdir &lt;workdir&gt;</code> on entry — first run and every resume — and restarts from the reported frontier: work already past its status is skipped, the first non-terminal status is re-entered, and <code>not-started</code> means bootstrap on the first transition. Nothing hand-edits an artifact's <code>status:</code> or a hook-written key; only <code>playbook-transition</code> mutates run state.</p>
+<p>A resume does not need the run that started it. A run driven from outside a conversation — one invocation per turn, nothing to ask a question in — <strong>parks</strong> rather than blocks: it writes what it needs into a sidecar beside the artifact, transitions into a status that means <em>waiting</em>, and ends. The pattern is three pieces, all of them ordinary state machinery:</p>
+<ul>
+<li>a non-terminal <strong>parking status</strong>, reachable from each status a run may stop in and with one return edge back to each of them;</li>
+<li>a <strong><code>frontmatter-update</code> hook on every entering edge</strong> stamping where to come back to (groom writes <code>return_to</code>), cleared again by the return edges. A hook value cannot be computed from the transition, so the mapping is one literal per edge — which also keeps the frontier report readable;</li>
+<li>a <strong>sidecar</strong> carrying the content, since frontmatter holds keys and not paragraphs. groom's is <code>clarifications.md</code>: one H2 per open question, answered in place, and postable to a tracker verbatim by a <code>script</code> hook.</li>
+</ul>
+<p>The next invocation reads <code>playbook-state</code>, finds the parking status and the recorded return, reads the sidecar, and either takes the return edge or ends again untouched. Every step is a legal transition, so a parked run is indistinguishable from any other resume.</p>
 <h3 id="cancellation">Cancellation</h3>
 <p>A run does not have to reach its success terminal: declare a <code>cancelled</code> status — terminal like <code>done</code> — and reach it from every status a run may be abandoned in. A <code>superstates:</code> group does that in one place: it lists the non-terminal statuses and the <code>to: cancelled</code> transition they all inherit, so <code>booping playbook-transition &lt;name&gt; cancelled …</code> is legal wherever the run stands without an edge repeated per status. Hooks declared on that transition fire like any other's — stamp the artifact, commit the vault. Once cancelled the run is over: <code>playbook-state</code> reports the terminal status with no edges leaving it.</p>
 <h3 id="how-state-renders">How state renders</h3>

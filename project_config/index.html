@@ -76,6 +76,8 @@
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#coreplansglob">core.plans.glob</a>
     </li>
+    <li class="toctree-l3"><a class="reference internal" href="#coretracker">core.tracker</a>
+    </li>
     <li class="toctree-l3"><a class="reference internal" href="#coremacros">core.macros</a>
     </li>
         </ul>
@@ -122,6 +124,13 @@
               <ul>
                 <li class="toctree-l1"><a class="reference internal" href="../integrating-external-agents/">Integrating external agents</a>
                 </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Recipes</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../recipes/external-agents/">Wiring external agents</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../recipes/benchmarks/">Model benchmarks</a>
+                  </li>
               </ul>
               <p class="caption"><span class="caption-text">Workflow</span></p>
               <ul>
@@ -213,6 +222,9 @@ core:
   plans:
     glob:
       - plans/*/index.md
+
+  tracker:
+    driver: cli
 
   sprint:
     default_threshold_sp: 35
@@ -375,6 +387,17 @@ core:
 <p>The agent id an <strong>assisted</strong> playbook step delegates its bulk reads to. Default <code>booping:booping-researcher</code>. Point it at any agent id — a shipped worker or an external agent you registered — and every assisted step's delegated reads route there; nothing else changes. Directly under <code>core</code> because more than one playbook reads it (groom's two research steps, retro's session-log mining and issue research).</p>
 <h3 id="coreplansglob"><code>core.plans.glob</code></h3>
 <p>The plan shape as data: an ordered list of vault-relative glob patterns, default <code>plans/*/index.md</code>. All plan discovery goes through it — patterns are tried in order, the first to claim a slug wins. A vault laid out differently edits this one key, and every <a href="#query-specs">query spec</a> without its own <code>glob</code> inherits it.</p>
+<h3 id="coretracker"><code>core.tracker</code></h3>
+<p>The task tracker a run mirrors itself onto. Directly under <code>core</code> because it is not one playbook's key — the plan track reads it today and the other tracks are meant to.</p>
+<ul>
+<li><strong><code>core.tracker.driver</code></strong> — which provider every tracker call dispatches to. Default <code>cli</code>, the one shipped driver: a no-op that prints receipts and touches nothing, so a plugin with no tracker configured behaves exactly as it always has. An unknown name is a hard error rather than a quiet fall back to no-op — the config merge validates nothing, so <code>driver: clii</code> would otherwise silently disable mirroring.</li>
+<li><strong><code>core.tracker.&lt;driver&gt;</code></strong> — that driver's settings block, inert while another driver is selected. A driver that talks to a real tracker names the environment variable its API key lives in under <code>api_key_env</code>.</li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">A config file never holds a token</p>
+<p><code>api_key_env</code> is a variable <em>name</em>. <strong>No config value in any tier is environment-interpolated</strong> — there is no <code>${VAR}</code> syntax to expand, and none is coming. Secrets stay in your environment, which matters because a project tier arrives with a <code>git clone</code>.</p>
+</div>
+<p>Mirroring is best-effort by design: a failed push warns, never rolls a status back, and <code>booping-tracker sync --artifact {plan-dir}/index.md</code> re-pushes idempotently. Only the plan track's <code>groom</code> is wired today; <code>develop</code>, <code>retro</code> and <code>code-review</code> keep their conversation-only behaviour whatever the driver.</p>
 <h3 id="coremacros"><code>core.macros</code></h3>
 <p>Shell-outs a rendered body may call by dotted path. Each entry is an <strong>argv list</strong>, never a shell string, run with <code>shell=False</code> — either the bare list, or a mapping carrying it under <code>command:</code> plus an optional <code>cwd:</code> of <code>repo</code> or <code>vault</code>: the attached repo or the Project Vault. Omit <code>cwd:</code> and the command runs in the process's own working directory.</p>
 <pre><code class="language-yaml">core:

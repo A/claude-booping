@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://A.github.io/claude-booping/recipes/external-agents/" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Wiring external agents - booping</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Wiring external agents";
+        var mkdocs_page_input_path = "recipes/external-agents.md";
+        var mkdocs_page_url = "/claude-booping/recipes/external-agents/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> booping
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../quick_start/">Quick start</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../install/">Install</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../vault/">Vault</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../playbook/">Playbooks</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../project_config/">Project config</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../integrating-external-agents/">Integrating external agents</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Recipes</span></p>
+              <ul class="current">
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Wiring external agents</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#the-pattern-in-one-picture">The pattern in one picture</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#worked-example-1-a-thin-relay-to-codex">Worked example 1 — a thin relay to Codex</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#worked-example-2-a-milestone-handed-to-a-headless-pi-session">Worked example 2 — a milestone handed to a headless pi session</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#pointing-develop-at-it">Pointing develop at it</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#what-generalizes">What generalizes</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../benchmarks/">Model benchmarks</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Workflow</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../groom/">groom playbook</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../develop/">develop playbook</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../code_review/">code-review playbook</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../retro/">retro playbook</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../learn/">learn playbook</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">booping</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Recipes</li>
+      <li class="breadcrumb-item active">Wiring external agents</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/A/claude-booping/edit/master/docs/recipes/external-agents.md">Edit on A/claude-booping</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="any-cli-can-be-a-playbook-worker">Any CLI can be a playbook worker</h1>
+<p>booping's playbooks delegate work through Claude Code's <code>Agent</code> tool: develop hands a milestone to a worker agent, code-review hands a diff to a reviewer. Out of the box those workers are Claude agents — but the delegation seam only cares that <em>something</em> takes a briefing and returns a report, so any external agent with a CLI (Codex, a headless pi session, an in-house tool) can sit behind it.</p>
+<p>The trick is the <strong>agent-proxy pattern</strong>. Rather than teach a playbook about your external tool, you write a thin proxy agent in <code>~/.claude/agents/</code> whose only job is to relay the briefing to the external CLI and return its report, then point the playbook's agent slot at the proxy via vault config. The playbook sees no change — it invokes an agent by name and reads a report back. Everything specific to the external tool lives in the proxy's body, which you author.</p>
+<p>Two real proxies below: a minimal relay to Codex, and a full develop worker backed by a headless pi session. The dry mechanics — config merge rules, the lesson system, disabling built-in agents — live in <a href="../../integrating-external-agents/">Integrating external agents</a>; this page shows the shape in motion.</p>
+<h2 id="the-pattern-in-one-picture">The pattern in one picture</h2>
+<p>Every proxy integration is the same two files:</p>
+<ol>
+<li><strong>The proxy agent</strong> — a markdown file at <code>~/.claude/agents/{id}.md</code>. Frontmatter declares the name, a description that tells playbooks when to pick it, and a small tool set (usually just <code>Bash</code> and <code>Read</code> — a relay doesn't edit code). The body is the relay procedure: take the briefing, hand it to the external CLI, collect the output, report back. Files there register globally for every project; a new Claude Code session picks them up.</li>
+<li><strong>The vault config entry</strong> — a block under <code>core.{name}_playbook.agents.{id}</code> in <code>~/Claude/{project}/config.yaml</code> (or your repo-local vault's). The playbook's agent slot: it puts your proxy into that playbook's delegation table, with <code>good_for</code> / <code>bad_for</code> bullets steering when it gets picked.</li>
+</ol>
+<p>That's the whole surface. No plugin edits, no scripts inside booping — the proxy and the config entry are both userland.</p>
+<h2 id="worked-example-1-a-thin-relay-to-codex">Worked example 1 — a thin relay to Codex</h2>
+<p>The simplest possible proxy: an agent that hands its prompt to <code>codex exec</code> and returns whatever Codex says, verbatim. It runs on a cheap model because it does no thinking of its own.</p>
+<p><code>~/.claude/agents/codex.md</code>:</p>
+<pre><code class="language-markdown">---
+name: codex
+description: Thin relay to the Codex CLI. Takes a prompt, runs `codex exec` non-interactively in the caller's working directory, and returns Codex's output verbatim. Use when the user asks to delegate a task or question to Codex.
+tools: Bash, Read
+model: haiku
+---
+
+You are a thin relay to the `codex` CLI. You do not solve the task yourself — you hand the prompt to Codex, capture its output, and report it back.
+
+1. Write the prompt you received verbatim to a temp file (avoids shell-quoting issues):
+   p=&quot;$(mktemp)&quot;; cat &gt; &quot;$p&quot; &lt;&lt;'CODEX_PROMPT_EOF' ... CODEX_PROMPT_EOF
+2. Run Codex non-interactively, reading the prompt from stdin:
+   codex exec - &lt; &quot;$p&quot;
+3. If the caller asked for file changes, run `git status --porcelain` and include the changed-file list in your report.
+
+Hard rules: always `codex exec`, never an interactive session; pass the prompt through unmodified; never answer the task yourself; on failure report `CODEX FAILED (exit {code}): {exact stderr}` instead of inventing output.
+</code></pre>
+<p>Three details carry most of the weight, and they recur in every proxy you'll write:</p>
+<ul>
+<li><strong>The prompt goes through a temp file, not a shell argument.</strong> Briefings contain quotes, backticks, and newlines; <code>cat &gt; "$p" &lt;&lt;'EOF'</code> sidesteps all of it.</li>
+<li><strong>The relay is forbidden from doing the work itself.</strong> Without that rule, the proxy's own model happily answers easy questions and you never find out your external tool was down.</li>
+<li><strong>Failure is reported, never papered over.</strong> A non-zero exit comes back as an explicit <code>FAILED</code> line with the real stderr — the caller decides what to do with it.</li>
+</ul>
+<p>This agent isn't wired to a playbook slot — it's a general-purpose relay you invoke by name. To make a playbook prefer it, add the config entry shown in the next example.</p>
+<h2 id="worked-example-2-a-milestone-handed-to-a-headless-pi-session">Worked example 2 — a milestone handed to a headless pi session</h2>
+<p>The Codex relay forwards a prompt and comes straight back. <code>pi-developer</code> does the same relay job for a much bigger unit of work: an entire develop milestone, executed by a headless pi session that does its own planning, delegation and validation. The proxy still never edits code and never writes the method — it hands over file links and waits.</p>
+<p><code>~/.claude/agents/pi-developer.md</code> (abridged to the load-bearing parts):</p>
+<pre><code class="language-markdown">---
+name: pi-developer
+description: Hands a milestone to a headless pi session and returns pi's report. pi does the planning, delegation and validation itself.
+tools: Read, Bash
+model: opus
+---
+
+Hand one milestone to pi and return its report. You never edit code — pi's own agents own that.
+
+1. Start it detached; the wrapper returns at once with log/out/err/status paths:
+   ~/.claude/bin/pi-developer -D -C {workdir} [--model {model}] \
+     &quot;/loop implement {milestone-path}, part of the plan {index-path}&quot;
+2. Poll until done:  ~/.claude/bin/pi-developer --status {status-path}
+   On RUNNING, call it again. Repeat until DONE.
+3. On DONE, read the report:  tail -40 {out-path}
+   Return it, prefixed by one line naming the model.
+
+pi commits nothing, by design: the work comes back as a working tree and whoever briefed you owns the commit.
+</code></pre>
+<p>Notice what the briefing is: <strong>paths, not pasted content</strong>. Develop briefs workers with the milestone file, the plan index and the workdir; pi has its own read tools and pulls what it needs. The proxy adds nothing and summarises nothing — the report is pi's own, and the develop runner validates it against the milestone's DoD exactly as it would a built-in worker's.</p>
+<p>Two conventions here are worth stealing:</p>
+<ul>
+<li><strong>Long-running backends run detached, with a single sanctioned wait mechanism.</strong> The wrapper script returns immediately with a status file; the proxy polls that file and nothing else. No <code>sleep</code> loops, no <code>pgrep</code> — a hand-rolled wait tends to watch itself instead of the run.</li>
+<li><strong>The external worker never commits.</strong> In booping's develop lifecycle the runner owns git history; the proxy passes that rule through to pi, so the work arrives as an uncommitted working tree the runner can validate and commit with scoped staging.</li>
+</ul>
+<p>When the backend needs orchestration beyond a single command — launching, readiness checks, log collection — that trivia belongs in a wrapper script (here <code>~/.claude/bin/pi-developer</code>), not in the agent body. The agent stays a readable procedure; the script owns the plumbing.</p>
+<h3 id="pointing-develop-at-it">Pointing develop at it</h3>
+<p>The config entry is the same shape for any proxy. In your vault's <code>config.yaml</code>:</p>
+<pre><code class="language-yaml">core:
+  develop_playbook:
+    agents:
+      pi-developer:
+        good_for:
+          - &quot;All development tasks — use instead of booping-developer&quot;
+        bad_for:
+          - &quot;Drift spot-checks or non-coding reads — those go to booping-researcher&quot;
+</code></pre>
+<p>With that block in place, <code>pi-developer</code> shows up in the develop steps' Available Agents table and the playbook delegates milestones to it — zero edits to the plugin itself. The block name is the playbook name with <code>-</code> replaced by <code>_</code>, so a reviewer proxy registers under <code>core.code_review_playbook.agents</code>. The <a href="../../project_config/"><code>agents</code> key reference</a> covers entry shape and merge rules.</p>
+<h2 id="what-generalizes">What generalizes</h2>
+<p>Strip the two examples down and the recipe is always:</p>
+<ol>
+<li>Write a proxy at <code>~/.claude/agents/{id}.md</code>: relay the briefing (through a temp file), drive the CLI (directly, or via a wrapper script for anything stateful), return the backend's report without editorializing, and report failures as failures.</li>
+<li>Register it in vault config under the target playbook's <code>core.{name}_playbook.agents.{id}</code> with honest <code>good_for</code> / <code>bad_for</code> bullets.</li>
+<li>Start a fresh session and run the playbook — it delegates to your proxy like any other agent.</li>
+</ol>
+<p>For briefing shaping via targeted lessons, hiding the built-in workers, and the full config-key tour, see <a href="../../integrating-external-agents/">Integrating external agents</a>.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../../integrating-external-agents/" class="btn btn-neutral float-left" title="Integrating external agents"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../benchmarks/" class="btn btn-neutral float-right" title="Model benchmarks">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/A/claude-booping" class="fa fa-code-fork" style="color: #fcfcfc"> A/claude-booping</a>
+        </span>
+    
+    
+      <span><a href="../../integrating-external-agents/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../benchmarks/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

@@ -67,6 +67,13 @@
                 <li class="toctree-l1"><a class="reference internal" href="../integrating-external-agents/">Integrating external agents</a>
                 </li>
               </ul>
+              <p class="caption"><span class="caption-text">Recipes</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../recipes/external-agents/">Wiring external agents</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../recipes/benchmarks/">Model benchmarks</a>
+                  </li>
+              </ul>
               <p class="caption"><span class="caption-text">Workflow</span></p>
               <ul class="current">
                   <li class="toctree-l1"><a class="reference internal" href="../groom/">groom playbook</a>
@@ -153,7 +160,7 @@
 </tr>
 <tr>
 <td><code>develop-loop</code></td>
-<td>Brief <code>booping-developer</code> per group — milestone files as the contract, <code>index.md</code> as context — then check each returned commit against the milestone's DoD</td>
+<td>Brief <code>booping-developer</code> per group — milestone files as the contract, <code>index.md</code> as context — then check each returned working tree against the milestone's DoD and commit it</td>
 </tr>
 <tr>
 <td><code>verify</code></td>
@@ -166,8 +173,9 @@
 </tbody>
 </table>
 <p>The runner edits no application code — all coding is delegated; it owns reads/writes against the vault, briefing assembly and the plan's own bookkeeping.</p>
-<p>The split at each milestone is deliberate. The <strong>agent</strong> implements the contract, runs the milestone's own verification command until it is green, and makes the repo commit — one commit per milestone, a fix always a new commit. The <strong>runner</strong> never re-runs that command and never commits repo code: it reads the returned commit's diff against the Definition of Done, ticks the checkboxes the diff earns, takes the milestone's transition, and commits the plan in the vault. Whoever ran the command is the one who saw it run.</p>
-<p>When a diff falls short of the DoD, or the agent reports its verification red, the runner writes what it found into a <code>feedback.md</code> beside that milestone file — what it checked, what was wrong, what the next attempt must do — and briefs a <strong>fresh</strong> agent with both paths. That file is also where attempts are counted; after two the blocker is unrecoverable, and the run asks you to approve the abort. A milestone the runner has sent back keeps its feedback on disk, so the record survives the session.</p>
+<p>The split at each milestone is deliberate. The <strong>agent</strong> implements the contract, runs the milestone's own verification command until it is green, and stops there — it writes code, never git history. The <strong>runner</strong> never re-runs that command and never edits application code: it reads the working tree against the Definition of Done, and only once the DoD holds does it commit — one commit per milestone, staged from the contract's own paths — then ticks the checkboxes the diff earns, takes the milestone's transition, and commits the plan in the vault. Whoever ran the command is the one who saw it run; whoever validated the work is the one who lands it.</p>
+<p>Committing on the runner's side is what keeps the branch honest across coding agents: only DoD-green state ever reaches it, a rejected attempt leaves nothing behind to amend or revert, and an agent driven through a foreign harness — one with its own rules about git — needs no git at all.</p>
+<p>When a tree falls short of the DoD, or the agent reports its verification red, the runner writes what it found into a <code>feedback.md</code> beside that milestone file — what it checked, what was wrong, what the next attempt must do — and briefs a <strong>fresh</strong> agent with both paths. That file is also where attempts are counted; after two the blocker is unrecoverable, and the run asks you to approve the abort. A milestone the runner has sent back keeps its feedback on disk, so the record survives the session.</p>
 <p>Every milestone group runs in <strong>one session</strong>.</p>
 <h2 id="starting-a-run">Starting a run</h2>
 <pre><code class="language-text">/playbook develop
