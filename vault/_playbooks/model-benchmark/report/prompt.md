@@ -5,9 +5,9 @@ review_gate: null
 
 # Write the run report
 
-The detail under `runs/` is machine-shaped evidence; this step writes the human telling of the same run. The reader is someone scanning [history.md](../history.md) who clicked a row: they get the story, the judgement, and the standing — every number still traceable.
+The detail under `runs/` is machine-shaped evidence; this step writes the human telling of the same run. The reader is someone scanning the benchmarks repo's README history table who clicked a row: they get the story, the judgement, and the standing — every number still traceable.
 
-- Path: `{vault}/benchmarks/{reports_dir}/{run_id}-{model_slug}.md` — same basename as the detail, sibling directory from the registry entry's `reports_dir`.
+- Path: `{bench}/{reports_dir}/{run_id}-{model_slug}.md` — same basename as the detail, sibling directory from the registry entry's `reports_dir`.
 - Sources, and nothing else: the run detail, `run`'s and `measure`'s returns held in this conversation, and existing history rows for the standing section. No `bench-score` re-run, no metric computed here, no new measurement. A claim that cannot be pointed at a detail cell or an earlier row does not go in.
 - The detail itself is never edited here, and its frontmatter `status:` stays the machine's.
 
@@ -25,7 +25,7 @@ Sections, in order — each one says what its numbers *mean*, not only what they
 6. **Mutation kills** — the kill rate, what was killed cleanly in one breath, and a table of the survivors with why each lived. Tie survivors to unported behaviours when the mapping shows it.
 7. **Process profile** — the per-milestone table, tool mix, and a plain statement of where every agentic deduction came from.
 8. **Review** — both grades with sub-grades, the convergent findings worst first, and the pattern in one sentence.
-9. **Standing** — a comparison table of the relevant sibling rows read from history.md (same weights at other quantisations, the same model's earlier rows, nearest cloud scores), and what the comparison actually says. Rows are read, never recomputed.
+9. **Standing** — a comparison table of the relevant sibling rows read from the README history table (same weights at other quantisations, the same model's earlier rows, nearest cloud scores), and what the comparison actually says. Rows are read, never recomputed.
 10. **Footnotes** — conventions in play (a `-` cost cell, worker-usage accounting), process notes (renamed logs, harness quirks), and where the branch and workspace live.
 
 Tone: narrated plain English over metric dumps; weaknesses named as plainly as strengths; no praise filler, no hedging. Tables carry the numbers, prose carries the meaning.

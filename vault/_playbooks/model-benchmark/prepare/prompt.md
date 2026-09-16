@@ -8,7 +8,7 @@ review_gate: null
 ## Resolve
 
 - **Model** — the id the user gave, verbatim, as pi spells it: `provider/model` (`pi-developer --list-models [search]` lists them). A bare model name with no provider → resolve it against that list and say which provider you took; ambiguous across providers → ask. None given → say so and stop. Never pick a model, never infer one from an earlier run.
-- **Benchmark** — the id the user gave, matched against the registry entries in `{vault}/benchmarks/index.md`. None given and the registry holds one entry → that entry. Several → ask which. An id no entry carries → say so and stop.
+- **Benchmark** — the id the user gave, matched against the registry entries in `{bench}/index.md`. None given and the registry holds one entry → that entry. Several → ask which. An id no entry carries → say so and stop.
 - **`{model_slug}`** — derived from the model name per `guide.md`'s **Invocation** section. The branch is the entry's `branch_scheme` with that slug substituted.
 - **`{workspace_id}`** — `date +%Y%m%d-%H%M%S`, stamped now. The workspace is the entry's `workspace_scheme` with it and the slug substituted, under `{source_repo}/{workspaces_dir}/`. It is this run's own directory: never reused, never shared with another run, and unrelated to the detail report's `{run_id}`, which `measure` derives from the worker logs.
 
