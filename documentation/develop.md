@@ -18,15 +18,17 @@ Five steps, in dependency order:
 |------|--------------|
 | `intake` | Resolve the plan — one entering at `awaiting-approval` is advanced to `ready-for-dev` without asking, since handing it to develop is the approval — and check the plan against the repo's current shape (drift) |
 | `provision` | Pick and confirm the sprint branch, then settle the milestone groups the briefings will cover |
-| `develop-loop` | Brief `booping-developer` per group — milestone files as the contract, `index.md` as context — then check each returned commit against the milestone's DoD |
+| `develop-loop` | Brief `booping-developer` per group — milestone files as the contract, `index.md` as context — then check each returned working tree against the milestone's DoD and commit it |
 | `verify` | Run the project's lint / typecheck / test gates plus the plan's Final Verification |
 | `wrap-up` | Closing commit, sprint report, transition to `done` |
 
 The runner edits no application code — all coding is delegated; it owns reads/writes against the vault, briefing assembly and the plan's own bookkeeping.
 
-The split at each milestone is deliberate. The **agent** implements the contract, runs the milestone's own verification command until it is green, and makes the repo commit — one commit per milestone, a fix always a new commit. The **runner** never re-runs that command and never commits repo code: it reads the returned commit's diff against the Definition of Done, ticks the checkboxes the diff earns, takes the milestone's transition, and commits the plan in the vault. Whoever ran the command is the one who saw it run.
+The split at each milestone is deliberate. The **agent** implements the contract, runs the milestone's own verification command until it is green, and stops there — it writes code, never git history. The **runner** never re-runs that command and never edits application code: it reads the working tree against the Definition of Done, and only once the DoD holds does it commit — one commit per milestone, staged from the contract's own paths — then ticks the checkboxes the diff earns, takes the milestone's transition, and commits the plan in the vault. Whoever ran the command is the one who saw it run; whoever validated the work is the one who lands it.
 
-When a diff falls short of the DoD, or the agent reports its verification red, the runner writes what it found into a `feedback.md` beside that milestone file — what it checked, what was wrong, what the next attempt must do — and briefs a **fresh** agent with both paths. That file is also where attempts are counted; after two the blocker is unrecoverable, and the run asks you to approve the abort. A milestone the runner has sent back keeps its feedback on disk, so the record survives the session.
+Committing on the runner's side is what keeps the branch honest across coding agents: only DoD-green state ever reaches it, a rejected attempt leaves nothing behind to amend or revert, and an agent driven through a foreign harness — one with its own rules about git — needs no git at all.
+
+When a tree falls short of the DoD, or the agent reports its verification red, the runner writes what it found into a `feedback.md` beside that milestone file — what it checked, what was wrong, what the next attempt must do — and briefs a **fresh** agent with both paths. That file is also where attempts are counted; after two the blocker is unrecoverable, and the run asks you to approve the abort. A milestone the runner has sent back keeps its feedback on disk, so the record survives the session.
 
 Every milestone group runs in **one session**.
 

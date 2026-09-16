@@ -56,7 +56,7 @@ After installing, `cd` into the target repo and run `/playbook setup`. It settle
 
 ## Quick start
 
-For a hand-holding walkthrough and per-command reference, see the [docs site](https://A.github.io/claude-booping/).
+For a hand-holding walkthrough and per-command reference, see the [docs site](https://A.github.io/claude-booping/). Its recipes section holds guides for non-trivial uses — [wiring external agents](https://A.github.io/claude-booping/recipes/external-agents/) and [running model benchmarks](https://A.github.io/claude-booping/recipes/benchmarks/).
 
 The full loop is five steps, each a **playbook** driven by `/playbook` — the plugin's one shipped skill and single entry point. Run them in order:
 
@@ -80,13 +80,13 @@ The full loop is five steps, each a **playbook** driven by `/playbook` — the p
 /playbook learn
 ```
 
-Candidates are listed for you if you forget the exact path.
+Candidates are listed if you forget the exact path.
 
 ## Workflow
 
 `groom` shapes the spec and waits for explicit user approval before handing off; `develop` claims the next ready plan and executes milestone by milestone; `retro` compares what shipped to the original spec; `learn` distils the retrospective into rules that bind the next sprint.
 
-A plan is a directory, not a file: `plans/{slug}/index.md` carries the frontmatter, the approach and a generated `## Milestones` table, while each milestone gets a directory of its own under `milestones/`. Inside it sits the milestone file — same name as the directory — holding that milestone's tasks, definition of done and verification, joined during the sprint by whatever that milestone accumulates, currently a `feedback.md` written when an attempt is sent back. That milestone file is what develop hands a coding agent as its contract, with `index.md` alongside as context; the agent implements it, runs its verification and commits, and develop validates the commit against the definition of done before moving the milestone on.
+A plan is a directory, not a file: `plans/{slug}/index.md` carries the frontmatter, the approach and a generated `## Milestones` table, while each milestone gets a directory of its own under `milestones/`. Inside it sits the milestone file — same name as the directory — holding that milestone's tasks, definition of done and verification, joined during the sprint by whatever that milestone accumulates, currently a `feedback.md` written when an attempt is sent back. That milestone file is what develop hands a coding agent as its contract, with `index.md` alongside as context; the agent implements it and runs its verification, leaving the work uncommitted, and develop validates the working tree against the definition of done, commits it, and moves the milestone on.
 
 There is no shared status table — **each playbook has its own status vocabulary** and advances its own run artifact through it. Groom and develop run on the plan, so its `status:` frontmatter is whatever those two last wrote, and the plan track ends when develop closes it — at `done`, or at `fail` or `cancelled`. Retro and learn are a **separate track** over a standalone retrospective under `retrospectives/`; code review is a third, over one file per run under `codereviews/`. The statuses those tracks write are their own artifact's, never the plan's.
 
