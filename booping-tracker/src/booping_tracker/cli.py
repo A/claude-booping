@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
@@ -36,6 +37,13 @@ class TrackerParser(argparse.ArgumentParser):
     """Argparse exits 2 on a usage error; the tracker's contract says 1."""
 
     def error(self, message: str) -> NoReturn:
+        # Python 3.14 quotes the names in "(choose from …)"; unquote so the
+        # error contract reads the same on every supported Python.
+        message = re.sub(
+            r"\(choose from (.+)\)",
+            lambda m: "(choose from " + m.group(1).replace("'", "") + ")",
+            message,
+        )
         self.exit(1, f"error: {message}\n")
 
 
