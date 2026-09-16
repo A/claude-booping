@@ -5,7 +5,7 @@ review_gate: null
 
 # Measure the branch
 
-Everything mechanical is `bench-score`'s; everything judged is a sub-agent's. Run the script from the source repo root so its default registry path resolves, or pass `--registry {vault}/benchmarks/index.md`. Each invocation takes `--benchmark {id}`, `--branch {branch}` and `--repo {workspace}` from `prepare`'s return — without `--repo` the script scores the source repo, which does not carry the branch. The `process`, `cost` and `report` invocations take one more, `--log {path}`: the run's shared ndjson from `run`'s return, which the script splits into one attempt per segment marker. It reads that file and no other — a milestone whose label is missing from it is reported by name and scored as nothing, never as zero attempts.
+Everything mechanical is `bench-score`'s; everything judged is a sub-agent's. The script is `{bench}/_scripts/bench-score`, and its default registry resolves to the `index.md` beside it — pass `--registry` only to point somewhere else. Each invocation takes `--benchmark {id}`, `--branch {branch}` and `--repo {workspace}` from `prepare`'s return — without `--repo` the script scores the source repo, which does not carry the branch. The `process`, `cost` and `report` invocations take one more, `--log {path}`: the run's shared ndjson from `run`'s return, which the script splits into one attempt per segment marker. It reads that file and no other — a milestone whose label is missing from it is reported by name and scored as nothing, never as zero attempts.
 
 ## 1. Corpus, then the case mapping
 
@@ -52,7 +52,7 @@ With no placeholder cell left in the detail, advance the run per the `## State` 
 ```markdown
 ## Changed:
 
-- [CREATED] benchmarks/runs/{run_id}-{model_slug}.md — full run detail
+- [CREATED] {bench}/runs/{run_id}-{model_slug}.md — full run detail
 
 ## Notes:
 

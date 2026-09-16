@@ -83,3 +83,7 @@ Direct was meant to be the humble baseline the other two justified themselves ag
 `/loop` was retired on that evidence: it earned nothing for its overhead. Every run since uses direct orchestration, and it is now the baseline any future template has to beat — with a scorecard row, not an argument.
 
 That is the real return on the benchmark: set up to compare models, its first durable finding was about the harness — a claim nobody would have settled from intuition, closed by two rows in a table.
+
+---
+
+A worked reference of all of the above — registry, runbook, `bench-score`, mutation sets, and the full scorecard with every run report — is public at [booping-benchmarks](https://github.com/A/booping-benchmarks). This project keeps its benchmark data there rather than in the vault, with only the driving playbook staying in `_playbooks/`; both layouts work, since every path comes from the registry.
