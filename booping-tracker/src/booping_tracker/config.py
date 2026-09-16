@@ -15,7 +15,7 @@ from typing import Any, cast
 
 import yaml
 
-KNOWN_DRIVERS = ("cli", "linear")
+KNOWN_DRIVERS = ("cli",)
 BOOPING = Path(__file__).resolve().parents[3] / "bin" / "booping"
 
 

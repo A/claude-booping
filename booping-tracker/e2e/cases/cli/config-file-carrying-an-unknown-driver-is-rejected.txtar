@@ -8,4 +8,4 @@ booping-tracker --config-file tracker.yaml states --team ENG
 1
 -- stdout --
 -- stderr --
-error: unknown driver: jira (known: cli, linear)
+error: unknown driver: jira (known: cli)

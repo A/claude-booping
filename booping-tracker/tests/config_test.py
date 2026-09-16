@@ -34,7 +34,6 @@ def test_config_get_resolves_the_shipped_tracker_block() -> None:
     config = load(cwd=REPO_ROOT)
 
     assert config.driver == "cli"
-    assert config.settings["linear"]["api_url"] == "https://api.linear.app/graphql"
 
 
 def test_missing_config_file_is_an_error(tmp_path: Path, unreachable_booping: None) -> None:
@@ -51,8 +50,8 @@ def test_unresolvable_config_get_is_an_error(unreachable_booping: None) -> None:
     ("body", "override", "expected"),
     [
         ("driver: jira\n", None, "unknown driver: jira"),
-        ("driver: cli\n", "linaer", "unknown driver: linaer"),
-        ("linear:\n  api_key_env: TOKEN\n", None, "no tracker driver configured"),
+        ("driver: cli\n", "clii", "unknown driver: clii"),
+        ("settings:\n  api_key_env: TOKEN\n", None, "no tracker driver configured"),
         ("[]\n", None, "tracker config is not a mapping"),
     ],
 )
@@ -67,41 +66,47 @@ def test_rejected_drivers_and_shapes(
         load(config_file=_write(tmp_path, body), driver_override=override)
 
 
+@pytest.fixture
+def fake_driver(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Register a hypothetical API-keyed driver, to exercise the generic plumbing."""
+    monkeypatch.setattr(config_mod, "KNOWN_DRIVERS", ("cli", "fake"))
+
+
 def test_driver_override_wins_over_the_configured_driver(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, unreachable_booping: None
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, unreachable_booping: None, fake_driver: None
 ) -> None:
-    monkeypatch.setenv("LINEAR_API_KEY", "lin_api_x")
+    monkeypatch.setenv("FAKE_API_KEY", "fake_x")
     config = load(
-        config_file=_write(tmp_path, "driver: cli\nlinear:\n  api_key_env: LINEAR_API_KEY\n"),
-        driver_override="linear",
+        config_file=_write(tmp_path, "driver: cli\nfake:\n  api_key_env: FAKE_API_KEY\n"),
+        driver_override="fake",
     )
 
-    assert config.driver == "linear"
+    assert config.driver == "fake"
 
 
 def test_unset_api_key_variable_is_an_error(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, unreachable_booping: None
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, unreachable_booping: None, fake_driver: None
 ) -> None:
-    monkeypatch.delenv("LINEAR_API_KEY", raising=False)
-    path = _write(tmp_path, "driver: linear\nlinear:\n  api_key_env: LINEAR_API_KEY\n")
+    monkeypatch.delenv("FAKE_API_KEY", raising=False)
+    path = _write(tmp_path, "driver: fake\nfake:\n  api_key_env: FAKE_API_KEY\n")
 
-    with pytest.raises(ConfigError, match="LINEAR_API_KEY is unset"):
+    with pytest.raises(ConfigError, match="FAKE_API_KEY is unset"):
         load(config_file=path)
 
 
 def test_api_key_is_only_required_by_the_driver_that_needs_it(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, unreachable_booping: None
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, unreachable_booping: None, fake_driver: None
 ) -> None:
-    monkeypatch.delenv("LINEAR_API_KEY", raising=False)
-    path = _write(tmp_path, "driver: cli\nlinear:\n  api_key_env: LINEAR_API_KEY\n")
+    monkeypatch.delenv("FAKE_API_KEY", raising=False)
+    path = _write(tmp_path, "driver: cli\nfake:\n  api_key_env: FAKE_API_KEY\n")
 
     assert load(config_file=path).driver == "cli"
 
 
 def test_driver_settings_expose_the_selected_driver_block(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, unreachable_booping: None
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, unreachable_booping: None, fake_driver: None
 ) -> None:
-    monkeypatch.setenv("LINEAR_API_KEY", "lin_api_x")
-    path = _write(tmp_path, "driver: linear\nlinear:\n  api_key_env: LINEAR_API_KEY\n  team: ENG\n")
+    monkeypatch.setenv("FAKE_API_KEY", "fake_x")
+    path = _write(tmp_path, "driver: fake\nfake:\n  api_key_env: FAKE_API_KEY\n  team: ENG\n")
 
     assert load(config_file=path).driver_settings()["team"] == "ENG"

@@ -4,9 +4,9 @@ The task-tracker CLI. One binary, `bin/booping-tracker`, carries every interacti
 with an issue tracker — the playbooks and their hook scripts reach a tracker through it and
 through nothing else.
 
-Two providers today. `cli` is the default: every verb is a receipt-printing no-op, so a project
-with no tracker configured behaves exactly as it did before this binary existed. `linear` talks
-to the Linear GraphQL API.
+One provider ships today. `cli` is the default: every verb is a receipt-printing no-op, so a
+project with no tracker configured behaves exactly as it did before this binary existed. A real
+tracker slots in as another provider behind the same facade, named by `core.tracker.driver`.
 
 ## Invocation
 
@@ -18,7 +18,7 @@ Global flags, accepted by every verb:
 
 | Flag | Meaning |
 | --- | --- |
-| `--driver cli\|linear` | Override `core.tracker.driver` for this invocation. |
+| `--driver NAME` | Override `core.tracker.driver` for this invocation. |
 | `--config-file PATH` | Read the tracker config from this YAML file instead of shelling to `booping config-get` — for tests and for callers outside a vault. |
 | `--output text\|json` | Receipt format. Default `text`. |
 | `--dry-run` | Resolve the call, print what it would do, perform no write. Reaches no provider, so it needs no API key. |
@@ -35,8 +35,7 @@ Global flags, accepted by every verb:
 | `relate` | `--issue REF` `--to REF` `[--type related\|blocks\|duplicate\|similar]` | Creates a relation, default `related`. |
 | `sync` | `--artifact PATH` `[--playbook NAME]` | Reads the artifact's frontmatter, maps its `status:` through the configured status map, and pushes the result to the issue in `tracker_issue`. Idempotent: a second run reports `(unchanged)` and writes nothing. |
 
-`REF` is a Linear human identifier (`LIN-123`) or a UUID — the API accepts both, so no lookup
-round-trip is needed.
+`REF` is the provider's issue identifier — a human-readable key (`ENG-123`) or a UUID.
 
 **stdin** is not read by any verb; bodies come from `--body` or `--body-file`.
 
@@ -46,10 +45,10 @@ round-trip is needed.
 operation:
 
 ```
-comment LIN-123: created https://linear.app/…
-issue-create ENG: created LIN-45 https://linear.app/… (sub-issue of LIN-12)
-sync LIN-45: state "Planning" (unchanged)
-show LIN-123: "Add a tracker driver" [In Progress] https://linear.app/…
+comment ENG-123: created (cli driver, no-op)
+issue-create ENG: created (cli driver, no-op)
+sync ENG-45: state "Planning" (cli driver, no-op)
+show ENG-123: (cli driver, no-op)
 ```
 
 `--output json` prints one JSON object carrying the operation's result fields. The `cli` provider
@@ -65,7 +64,7 @@ convention `booping` uses.
 | --- | --- | --- |
 | `0` | Success | Including every `cli`-provider no-op, a `--dry-run`, and a `sync` that finds nothing to change. |
 | `1` | User error | Unknown verb or flag, a missing required flag, an unknown driver name, missing or unreadable config, an unset API-key variable, an unknown team / workflow state / label / relation type, an issue that does not exist, a `--body-file` that does not, or a status with no mapping. |
-| `2` | Provider error | The tracker's fault: transport failure, a GraphQL error response, a malformed response, or a rate-limited request. Linear answers a throttled request with HTTP 400 and a `RATELIMITED` code, so the status code alone is never trusted. |
+| `2` | Provider error | The tracker's fault: transport failure, an error response, a malformed response, or a rate-limited request. |
 
 The split is what lets a caller retry sensibly: `1` will fail the same way again, `2` may not.
 
@@ -76,10 +75,10 @@ it — it shells to `bin/booping config-get core.tracker` and parses the YAML, u
 `--config-file PATH` names a file to read instead. The keys are documented in
 [Project config → `core.tracker`](../documentation/project_config.md#coretracker).
 
-Secrets are never in config. `core.tracker.linear.api_key_env` holds the **name** of the
-environment variable the personal API key lives in (`LINEAR_API_KEY` by default), and this binary
-reads that variable itself — nothing anywhere interpolates `${VAR}` into a config value. Hook
-scripts inherit the full environment, so a run invoked with the key exported has it.
+Secrets are never in config. A provider's `api_key_env` holds the **name** of the environment
+variable the personal API key lives in, and this binary reads that variable itself — nothing
+anywhere interpolates `${VAR}` into a config value. Hook scripts inherit the full environment,
+so a run invoked with the key exported has it.
 
 That key variable is the only one this binary reads. Two more belong to its callers, not to it:
 groom's step bodies fall back to `BOOPING_TRACKER_ISSUE` for the request issue ref when the ask
@@ -97,9 +96,7 @@ Every invocation appends one line to `{vault}/.booping.log` in booping's existin
    wired onto a playbook's transitions. Both absorb this binary's exit code and warn instead,
    because a hook failing after `status:` is written would abort the transition with the vault
    advanced and the tracker behind.
-2. **Step bodies** — under `core.tracker.driver: linear`, groom's injected partials call `show`,
-   `issue-create` and `relate` directly.
-3. **You** — `booping-tracker sync --artifact {plan-dir}/index.md` is the reconcile after any
+2. **You** — `booping-tracker sync --artifact {plan-dir}/index.md` is the reconcile after any
    failed mirror.
 
 ## Development
@@ -109,5 +106,5 @@ just lint | just typecheck | just pytest | just e2e     # both uv projects
 cd booping-tracker && uv run pytest                     # this project's unit suite only
 ```
 
-Unit tests drive the `linear` provider through an injectable transport, so the whole suite runs
-without network. The txtar contract corpus and its conventions: [e2e/README.md](e2e/README.md).
+The unit suite runs without network. The txtar contract corpus and its conventions:
+[e2e/README.md](e2e/README.md).

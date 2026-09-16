@@ -7,4 +7,4 @@ booping-tracker --driver linaer states --team ENG
 1
 -- stdout --
 -- stderr --
-error: unknown driver: linaer (known: cli, linear)
+error: unknown driver: linaer (known: cli)
