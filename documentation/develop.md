@@ -51,7 +51,7 @@ That confirmation is the playbook's single review gate.
 
 ## Session metrics
 
-[groom](groom.md) and develop transitions record the plan's Claude Code session ids as they go; when develop closes the plan, `booping session-stats` mines those session logs and stamps the plan's frontmatter with `metrics_*` keys: active work minutes, the models that ran the sessions, and token counts (input, output, cache creation, cache read) totalled over the plan's sessions — the command's own output breaks the same numbers down per session. Active time is idle-aware — minutes spent waiting on you, a question unanswered or a tool call rejected, are excluded.
+[groom](groom.md) and develop transitions record the plan's Claude Code session ids as they go; when develop closes the plan, `booping session-stats` mines those session logs and stamps the plan's frontmatter with `metrics_*` keys: active work minutes, the models that ran the sessions, and token counts (input, output, cache creation, cache read) totalled over the plan's sessions — the command's own output breaks the same numbers down per session. Active time is idle-aware — minutes spent waiting on you, a question unanswered or a tool call rejected, are excluded. Tokens count each API message once: Claude Code logs one message as a line per content block, each repeating the same usage, so lines sharing a message id are one message. Only the main thread is measured — sub-agent transcripts are not read.
 
 `booping session-stats` is the one metrics surface. The stamped numbers roll up into the vault's `sprints.md` columns, so a sprint's cost is visible without opening each plan — see [Vault](vault.md).
 
