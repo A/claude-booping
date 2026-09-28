@@ -209,3 +209,35 @@ def test_models_are_sorted_deduped_across_sessions() -> None:
 def test_report_tokens_sum_across_sessions() -> None:
     report = build_report(["sess-alpha", "sess-beta"], PROJECTS)
     assert report.tokens == Tokens(input=44, output=21, cache_creation=82, cache_read=116)
+
+
+# --- one API message split across lines --------------------------------------
+
+
+def test_message_split_into_block_lines_is_counted_once() -> None:
+    events, _ = parse_transcript(PROJ_B / "sess-tokens-split.jsonl")
+    first = [e for e in events if e.message_key == "msg_1"]
+    assert len(first) == 3
+    assert summarize("split", first).tokens == Tokens(
+        input=100, output=10, cache_creation=1000, cache_read=5000
+    )
+
+
+def test_distinct_messages_are_each_counted() -> None:
+    assert _summary(PROJ_B / "sess-tokens-split.jsonl").tokens == Tokens(
+        input=300, output=30, cache_creation=3000, cache_read=11000
+    )
+
+
+def test_line_without_usage_is_ignored() -> None:
+    events, _ = parse_transcript(PROJ_B / "sess-tokens-split.jsonl")
+    tail = [e for e in events if e.message_key == "msg_2"]
+    assert [e.has_usage for e in tail] == [True, False]
+    assert summarize("tail", tail).tokens.output == 20
+    assert summarize("tail", tail[1:]).tokens == Tokens()
+
+
+def test_last_line_usage_wins_and_uuid_keys_a_message_without_id() -> None:
+    events, _ = parse_transcript(PROJ_B / "sess-tokens-growing.jsonl")
+    assert [e.message_key for e in events if e.kind == "assistant"] == ["msg_1", "msg_1", "a-3"]
+    assert _summary(PROJ_B / "sess-tokens-growing.jsonl").tokens == Tokens(input=107, output=45)

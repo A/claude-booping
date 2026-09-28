@@ -6,6 +6,15 @@ turn, every stretch the session spent blocked on a human — an `AskUserQuestion
 call until its `tool_result`, or a tool call the user rejected — is subtracted,
 because it is wall clock the machine spent waiting rather than working.
 
+Token usage counts each API message once.  Claude Code writes one assistant
+message as several lines, one per content block, each repeating the message's
+`usage`; lines sharing a message id are one message, and the last line's usage
+wins because a later block can carry the final `output_tokens`.
+
+Only the main thread is measured.  Sub-agent transcripts live in their own
+files beside the session's and are never located; `isSidechain` lines inside
+the session file are skipped for time, tokens and models alike.
+
 The jsonl schema is internal to Claude Code and shifts between versions, so
 every line is parsed defensively: unknown types are skipped, broken lines are
 counted.
@@ -66,6 +75,8 @@ class Event:
     tool_uses: tuple[ToolUse, ...] = ()
     tool_result_ids: tuple[str, ...] = ()
     tokens: Tokens = field(default_factory=Tokens)
+    message_key: str | None = None
+    has_usage: bool = False
 
 
 @dataclass(frozen=True)
@@ -159,6 +170,10 @@ def _tokens_of(message: dict[str, object]) -> Tokens:
     )
 
 
+def _message_key(record: dict[str, object], message: dict[str, object]) -> str | None:
+    return _str_at(message, "id") or _str_at(record, "requestId") or _str_at(record, "uuid")
+
+
 def _is_real_prompt(record: dict[str, object], message: dict[str, object]) -> bool:
     """A user line typed by the human.
 
@@ -205,6 +220,8 @@ def _event_of(record: dict[str, object]) -> Event | None:
         tool_uses=tuple(tool_uses),
         tool_result_ids=tuple(tool_result_ids),
         tokens=_tokens_of(message) if kind == "assistant" else Tokens(),
+        message_key=_message_key(record, message) if kind == "assistant" else None,
+        has_usage=kind == "assistant" and isinstance(message.get("usage"), dict),
     )
 
 
@@ -306,13 +323,17 @@ def active_seconds(events: list[Event]) -> float:
 
 def summarize(session_id: str, events: list[Event]) -> SessionStats:
     models: set[str] = set()
-    tokens = Tokens()
-    for event in events:
+    usage: dict[str | int, Tokens] = {}
+    for index, event in enumerate(events):
         if event.is_sidechain or event.kind != "assistant":
             continue
         if event.model:
             models.add(event.model)
-        tokens = tokens + event.tokens
+        if event.has_usage:
+            usage[event.message_key or index] = event.tokens
+    tokens = Tokens()
+    for message_tokens in usage.values():
+        tokens = tokens + message_tokens
 
     return SessionStats(
         session_id=session_id,

@@ -2,6 +2,12 @@
 
 Notable user-visible changes, newest first, in the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format; versions follow [semantic versioning](https://semver.org/).
 
+## Unreleased
+
+### Fixed
+
+- `booping session-stats` counted an assistant message's token usage once per transcript line, and Claude Code writes one line per content block (thinking, text, tool use), each repeating the message's usage — so the `metrics_tokens_*` stamped on a plan came out about twice the real figure. Usage is now counted once per message id, keeping the last line's usage. Re-run `booping session-stats {vault}/plans --mask index.md --force` to correct plans already stamped.
+
 ## v1.1.0 — 2026-09-16
 
 A grooming run can now park itself instead of holding you in the conversation, workers stopped touching git history, and the docs grew a recipes section for the non-obvious setups.
