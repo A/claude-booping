@@ -1,0 +1,57 @@
+A `frontmatter-update` hook types its values exactly as the `frontmatter-update` CLI does:
+`key=null` clears the key to a YAML null, booleans and integers are written unquoted,
+and a string whose plain form would reload as another type stays quoted.
+
+-- fixtures/home/Claude/_playbooks/fx-hooks/playbook.md --
+---
+name: fx-hooks
+title: Hooks
+summary: Hook-bearing fixture for playbook-transition.
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-hooks/playbook.yaml --
+state: main
+graph:
+  only: []
+
+states:
+  main:
+    artifact: index.md
+    initial: parked
+    statuses:
+      parked:
+        transitions:
+          - to: resumed
+            when: the run returns
+            hooks: ["frontmatter-update return_to=null attempts=2 blocked=false label=plain answer=yes"]
+      resumed: {terminal: true}
+-- fixtures/home/Claude/_playbooks/fx-hooks/only/prompt.md --
+---
+summary: Only step.
+---
+
+Only body.
+-- fixtures/cwd/run/index.md --
+---
+status: parked
+return_to: inbox
+---
+-- cmd --
+booping playbook-transition fx-hooks resumed --workdir run
+-- exit --
+0
+-- stdout --
+parked → resumed
+frontmatter: status=resumed
+frontmatter: return_to=null attempts=2 blocked=false label=plain answer=yes
+-- stderr --
+-- expected/cwd/run/index.md --
+---
+status: resumed
+return_to: null
+attempts: 2
+blocked: false
+label: plain
+answer: 'yes'
+---

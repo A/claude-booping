@@ -52,7 +52,7 @@ script env-note: ok
 -- expected/cwd/run/review.md --
 ---
 status: noted
-researched: yes
+researched: 'yes'
 ---
 -- expected/cwd/run/env.txt --
 artifact={CWD}/run/review.md

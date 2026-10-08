@@ -16,7 +16,7 @@ from pathlib import Path, PurePosixPath
 from typing import Any, NoReturn
 
 from booping import logger
-from booping.commands.frontmatter_update import interpolate, parse_pairs
+from booping.commands.frontmatter_update import parse_pairs, resolve_values
 from booping.context import Context
 from booping.context._yaml import parse_frontmatter_only, update_frontmatter
 from booping.context.lifecycle import resolve_edges, resolve_hooks
@@ -41,7 +41,8 @@ def dispatch_frontmatter_update(
     ``frontmatter-update _specs/brief.md reviewed="{{ macro('core.macros.date',
     '+%Y-%m-%d') }}"``.
 
-    Returns ``(file-target rel-path or None, applied key → resolved-value)``.
+    Returns ``(file-target rel-path or None, applied key → interpolated text)``;
+    the written values are typed as the ``frontmatter-update`` CLI types them.
     """
     # shlex, not str.split: a value carrying a macro call has spaces in it and is
     # quoted in the hook string.
@@ -68,18 +69,15 @@ def dispatch_frontmatter_update(
         target = file_base / rel
 
     repo_dir = project.repo_directory if project is not None else None
-    resolved = {
-        key: interpolate(value, repo_dir, config)
-        for key, value in parse_pairs(pairs)
-    }
+    resolved, rendered = resolve_values(dict(parse_pairs(pairs)), repo_dir, config)
 
     try:
-        update_frontmatter(target, dict(resolved))
+        update_frontmatter(target, resolved)
     except Exception as exc:
         print(f"error: frontmatter-update failed: {exc}", file=sys.stderr)
         sys.exit(2)
 
-    return rel, resolved
+    return rel, rendered
 
 
 def format_frontmatter_line(

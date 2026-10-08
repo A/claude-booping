@@ -122,6 +122,24 @@ def _quote_if_ambiguous(value: str) -> str:
     return SingleQuotedScalarString(value)
 
 
+def resolve_values(
+    updates: Mapping[str, str],
+    repo_dir: Path | None = None,
+    config: Mapping[str, Any] | None = None,
+    vault_dir: Path | None = None,
+) -> tuple[dict[str, object], dict[str, str]]:
+    """Interpolate and type each key=value set, the one path every writer shares.
+
+    Returns ``(key → coerced value to write, key → interpolated text to echo)``.
+    """
+    resolved: dict[str, object] = {}
+    rendered: dict[str, str] = {}
+    for key, value in updates.items():
+        rendered[key] = interpolate(value, repo_dir, config, vault_dir)
+        resolved[key] = coerce_scalar(rendered[key])
+    return resolved, rendered
+
+
 def parse_pairs(pairs: list[str]) -> list[tuple[str, str]]:
     parsed: list[tuple[str, str]] = []
     for pair in pairs:
@@ -158,14 +176,9 @@ def _run(args: argparse.Namespace) -> None:
     repo_dir = project.repo_directory if project is not None else None
     vault_dir = project.directory if project is not None else None
 
-    resolved: dict[str, object] = {}
     # The summary echoes the interpolated text, not the coerced value, so the
     # stderr line reads the same as before the typing rule.
-    summary_values: dict[str, str] = {}
-    for key, value in updates.items():
-        rendered = interpolate(value, repo_dir, ctx.config, vault_dir)
-        summary_values[key] = rendered
-        resolved[key] = coerce_scalar(rendered)
+    resolved, summary_values = resolve_values(updates, repo_dir, ctx.config, vault_dir)
 
     resolved_appends: list[tuple[str, object]] = [
         (key, interpolate(value, repo_dir, ctx.config, vault_dir)) for key, value in appends
