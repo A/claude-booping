@@ -2,7 +2,9 @@
 
 Notable user-visible changes, newest first, in the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format; versions follow [semantic versioning](https://semver.org/).
 
-## Unreleased
+## v1.1.1 — 2026-10-08
+
+A patch release of engine fixes: `frontmatter-update` hooks now type their values like the command does, repeated `--append` flags all land, and `session-stats` no longer double-counts tokens.
 
 ### Fixed
 
