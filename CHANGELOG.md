@@ -6,6 +6,8 @@ Notable user-visible changes, newest first, in the [Keep a Changelog](https://ke
 
 ### Fixed
 
+- A `frontmatter-update` transition hook wrote every value as a string, so `key=null` landed as the quoted string `'null'` (and `2`, `false` as `'2'`, `'false'`), and a playbook had to clear a key with `key=''`. A hook value is now typed exactly as the `booping frontmatter-update` command types it: `key=null` clears to a YAML `null`, numbers and booleans land unquoted.
+- `booping frontmatter-update` kept only the last of several `--append` flags naming the same key, dropping the others silently. Every `--append` now lands, in the order given, and the summary lists each one.
 - `booping session-stats` counted an assistant message's token usage once per transcript line, and Claude Code writes one line per content block (thinking, text, tool use), each repeating the message's usage — so the `metrics_tokens_*` stamped on a plan came out about twice the real figure. Usage is now counted once per message id, keeping the last line's usage. Re-run `booping session-stats {vault}/plans --mask index.md --force` to correct plans already stamped.
 
 ## v1.1.0 — 2026-09-16

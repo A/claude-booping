@@ -131,7 +131,7 @@ def update_frontmatter(
     path: Path,
     updates: dict[str, object],
     removals: list[str] | None = None,
-    appends: dict[str, object] | None = None,
+    appends: list[tuple[str, object]] | None = None,
 ) -> None:
     """Update frontmatter keys in a markdown file using ruamel.yaml round-trip mode.
 
@@ -142,10 +142,10 @@ def update_frontmatter(
     ignored.  Removals are applied before updates so a key may be removed and
     re-added in one call.
 
-    ``appends`` maps a key to a value appended to that key's list, applied
-    after ``updates``.  An absent or null key becomes a one-element list, a
-    value already in the list is a no-op, and an existing scalar raises
-    :class:`ValueError`.
+    ``appends`` lists ``(key, value)`` pairs, each value appended to that
+    key's list in order, applied after ``updates``; one key may repeat.  An
+    absent or null key becomes a one-element list, a value already in the
+    list is a no-op, and an existing scalar raises :class:`ValueError`.
 
     A file without a frontmatter block gets one prepended; the existing
     content becomes the body unchanged.
@@ -170,7 +170,7 @@ def update_frontmatter(
     for key, value in updates.items():
         data[key] = value
 
-    for key, value in (appends or {}).items():
+    for key, value in appends or []:
         current: Any = data.get(key)  # type: ignore[reportUnknownMemberType]
         if current is None:
             data[key] = [value]

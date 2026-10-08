@@ -228,6 +228,47 @@ class TestUpdateFrontmatter:
         assert "summary:" in text
         assert "title: Foo" in text
 
+    @pytest.mark.parametrize(
+        ("frontmatter", "appends", "expected"),
+        [
+            pytest.param(
+                "sessions:\n- a\n",
+                [("sessions", "b"), ("sessions", "c")],
+                "sessions:\n- a\n- b\n- c\n",
+                id="repeated-key-keeps-every-value-in-order",
+            ),
+            pytest.param(
+                "sessions:\n",
+                [("sessions", "a"), ("sessions", "b")],
+                "sessions:\n- a\n- b\n",
+                id="null-key-then-repeat",
+            ),
+            pytest.param(
+                "title: Foo\n",
+                [("sessions", "a"), ("sessions", "a")],
+                "title: Foo\nsessions:\n- a\n",
+                id="absent-key-duplicate-value-added-once",
+            ),
+        ],
+    )
+    def test_appends_apply_each_pair(
+        self, tmp_path: Path, frontmatter: str, appends: list[tuple[str, object]], expected: str
+    ) -> None:
+        plan = tmp_path / "plan.md"
+        plan.write_text(f"---\n{frontmatter}---\nbody\n")
+
+        update_frontmatter(plan, {}, appends=appends)
+
+        assert plan.read_text() == f"---\n{expected}---\nbody\n"
+
+    def test_append_onto_scalar_raises(self, tmp_path: Path) -> None:
+        plan = tmp_path / "plan.md"
+        plan.write_text("---\nsessions: a\n---\nbody\n")
+
+        with pytest.raises(ValueError, match="scalar"):
+            update_frontmatter(plan, {}, appends=[("sessions", "b")])
+
+
 # ── update_marker ───────────────────────────────────────────────────────
 
 
