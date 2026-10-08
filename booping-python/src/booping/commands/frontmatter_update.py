@@ -122,8 +122,8 @@ def _quote_if_ambiguous(value: str) -> str:
     return SingleQuotedScalarString(value)
 
 
-def parse_pairs(pairs: list[str]) -> dict[str, str]:
-    updates: dict[str, str] = {}
+def parse_pairs(pairs: list[str]) -> list[tuple[str, str]]:
+    parsed: list[tuple[str, str]] = []
     for pair in pairs:
         if "=" not in pair:
             print(f"error: malformed key=value pair: {pair!r}", file=sys.stderr)
@@ -132,8 +132,8 @@ def parse_pairs(pairs: list[str]) -> dict[str, str]:
         if not key:
             print(f"error: empty key in pair: {pair!r}", file=sys.stderr)
             sys.exit(1)
-        updates[key] = value
-    return updates
+        parsed.append((key, value))
+    return parsed
 
 
 def _run(args: argparse.Namespace) -> None:
@@ -143,7 +143,7 @@ def _run(args: argparse.Namespace) -> None:
         sys.exit(1)
 
     removals: list[str] = list(getattr(args, "removals", None) or [])
-    updates = parse_pairs(args.pairs)
+    updates = dict(parse_pairs(args.pairs))
     appends = parse_pairs(list(getattr(args, "appends", None) or []))
 
     if not updates and not removals and not appends:
@@ -167,9 +167,9 @@ def _run(args: argparse.Namespace) -> None:
         summary_values[key] = rendered
         resolved[key] = coerce_scalar(rendered)
 
-    resolved_appends: dict[str, object] = {}
-    for key, value in appends.items():
-        resolved_appends[key] = interpolate(value, repo_dir, ctx.config, vault_dir)
+    resolved_appends: list[tuple[str, object]] = [
+        (key, interpolate(value, repo_dir, ctx.config, vault_dir)) for key, value in appends
+    ]
 
     previous = plan_path.read_text()
 
@@ -187,7 +187,7 @@ def _run(args: argparse.Namespace) -> None:
         print(report)
 
     vault = project.directory if project is not None else None
-    changed = [f"-{k}" for k in removals] + list(resolved.keys()) + list(resolved_appends.keys())
+    changed = [f"-{k}" for k in removals] + list(resolved.keys()) + [k for k, _ in resolved_appends]
     logger.log(
         vault=vault, subcommand="frontmatter-update", message=f"{plan_path} {' '.join(changed)}"
     )
@@ -195,6 +195,6 @@ def _run(args: argparse.Namespace) -> None:
     parts = (
         [f"-{k}" for k in removals]
         + [f"{k}={v}" for k, v in summary_values.items()]
-        + [f"{k}+={v}" for k, v in resolved_appends.items()]
+        + [f"{k}+={v}" for k, v in resolved_appends]
     )
     print(f"updated {plan_path}: {', '.join(parts)}", file=sys.stderr)

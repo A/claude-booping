@@ -70,7 +70,7 @@ def dispatch_frontmatter_update(
     repo_dir = project.repo_directory if project is not None else None
     resolved = {
         key: interpolate(value, repo_dir, config)
-        for key, value in parse_pairs(pairs).items()
+        for key, value in parse_pairs(pairs)
     }
 
     try:

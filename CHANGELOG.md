@@ -6,6 +6,7 @@ Notable user-visible changes, newest first, in the [Keep a Changelog](https://ke
 
 ### Fixed
 
+- `booping frontmatter-update` kept only the last of several `--append` flags naming the same key, dropping the others silently. Every `--append` now lands, in the order given, and the summary lists each one.
 - `booping session-stats` counted an assistant message's token usage once per transcript line, and Claude Code writes one line per content block (thinking, text, tool use), each repeating the message's usage — so the `metrics_tokens_*` stamped on a plan came out about twice the real figure. Usage is now counted once per message id, keeping the last line's usage. Re-run `booping session-stats {vault}/plans --mask index.md --force` to correct plans already stamped.
 
 ## v1.1.0 — 2026-09-16
