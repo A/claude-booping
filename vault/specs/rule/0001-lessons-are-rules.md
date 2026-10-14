@@ -6,6 +6,8 @@ created_by: claude
 created_at: 2026-10-14
 updated_at: 2026-10-14
 status: accepted
+targets: [learn]
+brief: "Write every accepted learning as a rule record in the project specs tier (targets, a self-sufficient one-or-two-line brief, Rule and Follows from) or as a repo CLAUDE.md bullet; never as a lesson file."
 ---
 
 ## Rule
@@ -28,9 +30,3 @@ incident) when no value names it.
   the brief, not the whole record.
 - [Single source](../value/0003-single-source.md) — one record carries the rule and its
   reason; no second lesson file restates it.
-
-## Exceptions
-
-- Until the lessons migration, `learn` still writes lesson files; the rule carries
-  no `targets` until then, so it is not injected into a `learn` run that cannot
-  follow it.

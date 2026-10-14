@@ -1,0 +1,30 @@
+{% raw %}
+```
+---
+type: rule
+title: "{one-sentence rule as a prescriptive statement}"
+summary: "{what the rule says and where it applies, one line, at most 200 characters}"
+created_by: claude
+created_at: {YYYY-MM-DD}                     # the run date
+updated_at: {YYYY-MM-DD}                     # the run date; bumped on every in-place edit
+status: accepted
+targets:                                     # the row's Targets cell, one entry per item
+  - {playbook}                               # or {playbook}/{step}, agent:{agent-id}, skill:{name}
+brief: "{the row's Brief cell}"
+sources: [{retrospective path relative to the repo root}]   # omit when the vault is outside the repo
+---
+
+## Rule
+
+{The principle, imperative form. One compact paragraph; a short bullet list is fine when the rule has named sub-checks.}
+
+**Example**: {One concrete case — what went wrong or right, in one or two lines.}
+
+## Follows from
+
+- [{value title}]({relative path to the value record}) — {vault inside the repo: the value a project or booping value names; vault outside: a fitting project-tier value}
+- [Retro: {slug}]({relative path to retrospectives/{slug}.md}) — {vault inside the repo, no value names it: the retrospective}
+- [clarify] Learnt from `retrospectives/{slug}.md` in the project vault, which a record outside the vault cannot link — see the [tier README](../README.md); link a value or settle the source.
+  {vault outside the repo, no project-tier value fits: this exact item, the only one}
+```
+{% endraw %}

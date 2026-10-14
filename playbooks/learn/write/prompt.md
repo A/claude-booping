@@ -1,9 +1,10 @@
 ---
 summary: >-
-  Write every accepted row in one pass per destination — new lesson files at
-  the next free number, in-place updates to the file the sweep matched, one-line
-  bullets into the repo's `CLAUDE.md` — with table acceptance as the sole
-  consent and never a write outside the vault and the attached repo.
+  Write every accepted row in one pass per destination — new rule records in
+  the project specs tier at the number `booping specs next` hands out, in-place
+  updates to the rule the sweep matched, one-line bullets into the repo's
+  `CLAUDE.md` — with table acceptance as the sole consent and never a write
+  outside the vault, its specs tier and the attached repo.
 review_gate: null
 ---
 
