@@ -7,13 +7,11 @@ from typing import Any
 import yaml
 from pydantic import BaseModel
 
-from booping.context._yaml import safe_load_str
+from booping.context._yaml import UnclosedFrontmatterError, safe_load_str, split_frontmatter
 from booping.specs.tiers import Tier
 
 _FILENAME_RE = re.compile(r"^(\d{4})-([a-z0-9]+(?:-[a-z0-9]+)*)\.md$")
 _REF_RE = re.compile(r"^(?:([A-Za-z0-9][A-Za-z0-9._-]*):)?([a-z][a-z0-9_-]*)/(\d{4})$")
-# Delimiters are whole lines, so a `---` inside a value does not end the block.
-_FRONTMATTER_RE = re.compile(r"\A---[ \t]*\n(.*?)^---[ \t]*$\n?", re.S | re.M)
 
 
 class Ref(BaseModel):
@@ -49,20 +47,6 @@ def parse_ref(text: str) -> Ref | None:
     return Ref(namespace=match.group(1), type=match.group(2), number=int(match.group(3)))
 
 
-class _UnclosedFrontmatterError(ValueError):
-    pass
-
-
-def _split_frontmatter(text: str) -> tuple[str | None, str]:
-    """YAML text between the delimiter lines (None without frontmatter) and the body."""
-    if not text.startswith("---"):
-        return None, text
-    match = _FRONTMATTER_RE.match(text)
-    if match is None:
-        raise _UnclosedFrontmatterError
-    return match.group(1), text[match.end() :].lstrip("\n")
-
-
 def _frontmatter_error(exc: yaml.YAMLError) -> tuple[str, int]:
     """One-line message and file line. YAML sees the text after the opening delimiter
     line, so its mark line 0 is file line 2."""
@@ -80,10 +64,10 @@ def load_record(path: Path, type_: str) -> Record:
     frontmatter: dict[str, Any] = {}
     error, error_line = None, 1
     try:
-        yaml_text, body = _split_frontmatter(text)
-    except _UnclosedFrontmatterError:
+        yaml_text, body = split_frontmatter(text)
+    except UnclosedFrontmatterError as exc:
         yaml_text, body = None, text
-        error = "frontmatter block is not closed"
+        error = str(exc)
     if yaml_text is not None:
         try:
             frontmatter = safe_load_str(yaml_text)
