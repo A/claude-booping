@@ -65,7 +65,7 @@ Milestones run in id order; M04 and M06 call the verb M01 adds. `tiers.py` stays
 | 04 | [Learn writes rule records](milestones/M04-learn-writes-rule-records/M04-learn-writes-rule-records.md) | 4 | done |
 | 05 | [Learn eval suites on rules](milestones/M05-learn-evals-on-rules/M05-learn-evals-on-rules.md) | 3 | done |
 | 06 | [Setup provisions the specs tiers and namespace](milestones/M06-setup-provisions-tiers/M06-setup-provisions-tiers.md) | 3 | done |
-| 07 | [Docs for rule-writing learn, specs init and setup](milestones/M07-docs-learn-setup-specs-init/M07-docs-learn-setup-specs-init.md) | 3 | pending |
+| 07 | [Docs for rule-writing learn, specs init and setup](milestones/M07-docs-learn-setup-specs-init/M07-docs-learn-setup-specs-init.md) | 3 | done |
 
 ## Final Verification
 
