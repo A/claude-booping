@@ -5,14 +5,20 @@ the root's `README.md` is the tier's guide, not a record, and is left alone.
 project_name: probe
 vault_path: ./vault
 latest_migration: 9999
--- fixtures/cwd/vault/specs/README.md --
+-- fixtures/cwd/vault/config.yaml --
+core:
+  specs:
+    tiers:
+      project:
+        path: records
+-- fixtures/cwd/records/README.md --
 # Specs
--- fixtures/cwd/vault/specs/0002-loose.md --
+-- fixtures/cwd/records/0002-loose.md --
 ---
 type: value
 title: Loose
 ---
--- fixtures/cwd/vault/specs/value/0001-first.md --
+-- fixtures/cwd/records/value/0001-first.md --
 ---
 type: value
 title: First
@@ -33,6 +39,6 @@ booping specs check
 -- exit --
 1
 -- stdout --
-vault/specs/0002-loose.md:1  error  layout  a record lives at {type}/{NNNN}-{slug}.md
+records/0002-loose.md:1  error  layout  a record lives at {type}/{NNNN}-{slug}.md
 -- stderr --
 2 record(s) checked: 1 error(s), 0 warning(s)
