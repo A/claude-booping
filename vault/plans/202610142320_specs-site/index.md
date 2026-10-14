@@ -2,7 +2,7 @@
 title: "Specs site — static HTML over one or several specs roots"
 type: "feature"
 status: in-progress
-sp: null
+sp: 30
 related_to: null
 created: 2026-10-14 23:20
 planned: null
@@ -62,12 +62,12 @@ Input: specs tier directories (read only). Output: the out directory. No network
 
 ## Milestones
 
-| id | title | sp | status | path | slug |
-| --- | --- | --- | --- | --- | --- |
-| 01 | Site model and markdown rendering | 10 | pending | plans/202610142320_specs-site/milestones/M01-site-model-and-markdown/M01-site-model-and-markdown.md | M01-site-model-and-markdown |
-| 02 | Site pages, stylesheet and writer | 9 | pending | plans/202610142320_specs-site/milestones/M02-site-pages-and-writer/M02-site-pages-and-writer.md | M02-site-pages-and-writer |
-| 03 | booping specs site command, roots config and e2e cases | 8 | pending | plans/202610142320_specs-site/milestones/M03-specs-site-command/M03-specs-site-command.md | M03-specs-site-command |
-| 04 | Document the specs site | 3 | pending | plans/202610142320_specs-site/milestones/M04-document-specs-site/M04-document-specs-site.md | M04-document-specs-site |
+| id | title | sp | status |
+| --- | --- | --- | --- |
+| 01 | [Site model and markdown rendering](milestones/M01-site-model-and-markdown/M01-site-model-and-markdown.md) | 10 | done |
+| 02 | [Site pages, stylesheet and writer](milestones/M02-site-pages-and-writer/M02-site-pages-and-writer.md) | 9 | pending |
+| 03 | [booping specs site command, roots config and e2e cases](milestones/M03-specs-site-command/M03-specs-site-command.md) | 8 | pending |
+| 04 | [Document the specs site](milestones/M04-document-specs-site/M04-document-specs-site.md) | 3 | pending |
 
 ## I/O contract
 

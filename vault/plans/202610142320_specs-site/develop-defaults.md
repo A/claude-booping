@@ -25,3 +25,7 @@ Autonomous run: gates auto-confirmed; no questions asked.
 ## Accepted snapshots
 
 None yet.
+
+## D6 — `.gitignore` anchored to `/site/`
+
+The repo `.gitignore` rule `site/` (MkDocs output at the repo root) also matched the new package `booping-python/src/booping/specs/site/`, hiding it from git and from ruff. Anchored to `/site/` in M01's commit — outside the plan's file lists, but without it the package is neither committable by path nor linted.

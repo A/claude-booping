@@ -2,7 +2,7 @@
 id: "01"
 title: "Site model and markdown rendering"
 sp: 10
-status: pending
+status: done
 plan: "vault/plans/202610142320_specs-site/index.md"
 ---
 
@@ -26,27 +26,27 @@ A pure in-memory layer loads the records of several named roots, resolves refs a
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 1.1 | Add `markdown-it-py` (`>=4.2,<5`) and write `render_body` + `slug` | `booping-python/pyproject.toml`, `booping-python/uv.lock`, `booping-python/src/booping/specs/site/markdown.py`, `booping-python/src/booping/specs/site/__init__.py` | 4 | pending |
-| 1.2 | Write the root/record model: `SiteRoot`, `SiteRecord`, `load_site`, `resolve_ref`, `resolve_link`, `backlinks` | `booping-python/src/booping/specs/site/model.py` | 4 | pending |
-| 1.3 | Unit tests over the pure logic | `booping-python/tests/specs/site_test.py` | 2 | pending |
+| 1.1 | Add `markdown-it-py` (`>=4.2,<5`) and write `render_body` + `slug` | `booping-python/pyproject.toml`, `booping-python/uv.lock`, `booping-python/src/booping/specs/site/markdown.py`, `booping-python/src/booping/specs/site/__init__.py` | 4 | done |
+| 1.2 | Write the root/record model: `SiteRoot`, `SiteRecord`, `load_site`, `resolve_ref`, `resolve_link`, `backlinks` | `booping-python/src/booping/specs/site/model.py` | 4 | done |
+| 1.3 | Unit tests over the pure logic | `booping-python/tests/specs/site_test.py` | 2 | done |
 
 ## Definition of Done
 
 ### Task 1.1
 
-- [ ] `markdown-it-py` added with `uv add` in `booping-python/` (lock updated by uv, not by hand).
-- [ ] `render_body` and `slug` behave as the Scope states, including escaped raw HTML and marks left alone inside code.
-- [ ] No module-level state; two calls with the same input return identical strings.
+- [x] `markdown-it-py` added with `uv add` in `booping-python/` (lock updated by uv, not by hand).
+- [x] `render_body` and `slug` behave as the Scope states, including escaped raw HTML and marks left alone inside code.
+- [x] No module-level state; two calls with the same input return identical strings.
 
 ### Task 1.2
 
-- [ ] `load_site` order, `resolve_ref`, `resolve_link` kinds and `backlinks` behave as the Scope states.
-- [ ] A link through a symlinked directory resolves to the same record as the direct path.
+- [x] `load_site` order, `resolve_ref`, `resolve_link` kinds and `backlinks` behave as the Scope states.
+- [x] A link through a symlinked directory resolves to the same record as the direct path.
 
 ### Task 1.3
 
-- [ ] Test surface: `render_body`, `slug`, `Site` over records written into `tmp_path`. Cases, parametrized where the surface is the same: slug of punctuation/mixed-case/duplicate headings; mark in text vs inside a code span vs a fenced block, with its `L{n}` id and cut text; raw `<script>` escaped; ref `type/NNNN` same root, `ns:type/NNNN` other root, missing record in a rendered root (`warn` true), unknown namespace (`warn` false); body link to a record with anchor, through a symlink, to an existing non-record file, to a missing file, into a symlink loop (→ `unresolved`), to a URL, to `#anchor`; backlinks from a frontmatter ref and a body link, deduped.
-- [ ] Expected values are hand-written literals; no mocks — real files in `tmp_path`.
+- [x] Test surface: `render_body`, `slug`, `Site` over records written into `tmp_path`. Cases, parametrized where the surface is the same: slug of punctuation/mixed-case/duplicate headings; mark in text vs inside a code span vs a fenced block, with its `L{n}` id and cut text; raw `<script>` escaped; ref `type/NNNN` same root, `ns:type/NNNN` other root, missing record in a rendered root (`warn` true), unknown namespace (`warn` false); body link to a record with anchor, through a symlink, to an existing non-record file, to a missing file, into a symlink loop (→ `unresolved`), to a URL, to `#anchor`; backlinks from a frontmatter ref and a body link, deduped.
+- [x] Expected values are hand-written literals; no mocks — real files in `tmp_path`.
 
 ## References
 
