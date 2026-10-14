@@ -2,20 +2,21 @@
 title: "Specs rule injection — targeted rules from three tiers into playbook, agent
   and skill bodies"
 type: "feature"
-status: ready-for-dev
-sp: null
+status: in-progress
+sp: 23
 related_to: plans/202610141731_specs-core-format-cli-injection/index.md
 created: 2026-10-14 17:42
 planned: null
-started: null
+started: 2026-10-14 19:10
 completed: null
 code_reviews: []
 sessions:
 - 49e4cb90-6c29-4738-81f1-88d4adc4b259
+- 6b70255a-7607-4a86-8613-75a66a61dcfc
 retro: null
 summary: Inject accepted targeted rules from core, global and project specs 
   tiers as brief plus link beside lessons
-commit: fd1ffb644a3624a5ef7dd54c43f968d326bc0dd5
+commit: 4964ceb611e30b662a4f88cf77569c315a5e087d
 tracker_provider: null
 tracker_request: null
 tracker_issue: null
@@ -64,10 +65,10 @@ Callers of the output: the `/playbook` skill reads render-playbook stdout; agent
 
 | id | title | sp | status |
 | --- | --- | --- | --- |
-| 01 | Targeted rule loader across the three tiers | 7 | pending |
-| 02 | Rules section on the render-playbook surfaces | 9 | pending |
-| 03 | Rules section in agent and skill bodies | 4 | pending |
-| 04 | Document rule injection | 3 | pending |
+| 01 | [Targeted rule loader across the three tiers](milestones/M01-targeted-rule-loader/M01-targeted-rule-loader.md) | 7 | done |
+| 02 | [Rules section on the render-playbook surfaces](milestones/M02-rules-on-render-playbook-surfaces/M02-rules-on-render-playbook-surfaces.md) | 9 | pending |
+| 03 | [Rules section in agent and skill bodies](milestones/M03-rules-in-agent-and-skill-bodies/M03-rules-in-agent-and-skill-bodies.md) | 4 | pending |
+| 04 | [Document rule injection](milestones/M04-rule-injection-docs/M04-rule-injection-docs.md) | 3 | pending |
 
 ## I/O contract
 

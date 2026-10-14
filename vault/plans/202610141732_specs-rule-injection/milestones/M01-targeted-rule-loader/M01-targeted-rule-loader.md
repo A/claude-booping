@@ -2,7 +2,7 @@
 id: "01"
 title: "Targeted rule loader across the three tiers"
 sp: 7
-status: pending
+status: done
 plan: "vault/plans/202610141732_specs-rule-injection/index.md"
 ---
 
@@ -16,9 +16,9 @@ Every `Context.assemble()` carries `targeted_rules` — each `status: accepted` 
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 1.1 | `TargetedRule` model and `load_targeted_rules(tiers)` — reads only each tier's `rule/` directory through `load_record`, filters, parses targets, builds ref, brief and link, dedupes by realpath | `booping-python/src/booping/specs/rules.py` | 3 | pending |
-| 1.2 | Wire into `Context.assemble`: resolve tiers with `resolve_tiers` from the merged config, `home_dir`, the project's `repo_directory`, the vault and `vault_override is not None`; set `targeted_rules` and `rule_skips` | `booping-python/src/booping/context/__init__.py` | 2 | pending |
-| 1.3 | Unit tests for the loader and the assemble wiring | `booping-python/tests/specs/rules_test.py`, `booping-python/tests/context/assemble_test.py` | 2 | pending |
+| 1.1 | `TargetedRule` model and `load_targeted_rules(tiers)` — reads only each tier's `rule/` directory through `load_record`, filters, parses targets, builds ref, brief and link, dedupes by realpath | `booping-python/src/booping/specs/rules.py` | 3 | done |
+| 1.2 | Wire into `Context.assemble`: resolve tiers with `resolve_tiers` from the merged config, `home_dir`, the project's `repo_directory`, the vault and `vault_override is not None`; set `targeted_rules` and `rule_skips` | `booping-python/src/booping/context/__init__.py` | 2 | done |
+| 1.3 | Unit tests for the loader and the assemble wiring | `booping-python/tests/specs/rules_test.py`, `booping-python/tests/context/assemble_test.py` | 2 | done |
 
 Model and behaviour (locked in [clarifications.md](../../clarifications.md) C1–C3, C6):
 
@@ -34,23 +34,23 @@ Model and behaviour (locked in [clarifications.md](../../clarifications.md) C1�
 
 ### Task 1.1
 
-- [ ] `load_targeted_rules` returns `(list[TargetedRule], list[RuleSkip])` in the order and with the ref, link and brief forms above.
-- [ ] Retired, untargeted and non-rule records never appear in either list.
-- [ ] Function is pure over the tiers passed in — no config or environment reads.
+- [x] `load_targeted_rules` returns `(list[TargetedRule], list[RuleSkip])` in the order and with the ref, link and brief forms above.
+- [x] Retired, untargeted and non-rule records never appear in either list.
+- [x] Function is pure over the tiers passed in — no config or environment reads.
 
 ### Task 1.2
 
-- [ ] `Context.targeted_rules` and `Context.rule_skips` default to empty lists and are filled by `assemble`.
-- [ ] With `vault_override` set, no global-tier rule is loaded (the tier is absent from `resolve_tiers`); core and project still load.
-- [ ] With no attached project, core and global rules still load.
+- [x] `Context.targeted_rules` and `Context.rule_skips` default to empty lists and are filled by `assemble`.
+- [x] With `vault_override` set, no global-tier rule is loaded (the tier is absent from `resolve_tiers`); core and project still load.
+- [x] With no attached project, core and global rules still load.
 
 ### Task 1.3
 
-- [ ] Tests build real tier directories under `tmp_path` and pass `Tier` objects to the loader — no mocks.
-- [ ] Parametrized over the skip reasons: frontmatter error, targets without brief, brief without targets, unparseable target, numberless filename.
-- [ ] Cover: retired and untargeted rules absent; core/global/project ref and link forms, including `${CLAUDE_PLUGIN_ROOT}/vault/specs/rule/0004-x.md` for a core record under the anchor; a core record outside its anchor gets an absolute link; core and project tiers on one directory yield each rule once with the core ref; tier then number order; multi-line brief collapsed.
-- [ ] `assemble_test.py`: a vault override drops a global-tier rule present under the fixture home; an un-pinned assemble loads it.
-- [ ] Expected values are literals in the test, not derived from the loader.
+- [x] Tests build real tier directories under `tmp_path` and pass `Tier` objects to the loader — no mocks.
+- [x] Parametrized over the skip reasons: frontmatter error, targets without brief, brief without targets, unparseable target, numberless filename.
+- [x] Cover: retired and untargeted rules absent; core/global/project ref and link forms, including `${CLAUDE_PLUGIN_ROOT}/vault/specs/rule/0004-x.md` for a core record under the anchor; a core record outside its anchor gets an absolute link; core and project tiers on one directory yield each rule once with the core ref; tier then number order; multi-line brief collapsed.
+- [x] `assemble_test.py`: a vault override drops a global-tier rule present under the fixture home; an un-pinned assemble loads it.
+- [x] Expected values are literals in the test, not derived from the loader.
 
 ## References
 
