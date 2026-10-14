@@ -7,7 +7,8 @@ created_at: 2026-10-14
 updated_at: 2026-10-14
 status: accepted
 values: [value/0010, value/0003]
-sources: [vault/notes/test-strategy.md, CLAUDE.md]
+sources: [CLAUDE.md]
+# also distilled from the owner's local, unpublished notes (vault/notes/ is gitignored): vault/notes/test-strategy.md
 ---
 
 ## Context

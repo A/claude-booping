@@ -7,7 +7,8 @@ created_at: 2026-10-14
 updated_at: 2026-10-14
 status: accepted
 values: [value/0007, value/0009, value/0012]
-sources: [vault/notes/20260731-playbook-authoring-state-machines-design.md, playbooks/playbook-authoring/_specs/DECISIONS.md, playbooks/migrate/_specs/DECISIONS.md]
+sources: [playbooks/playbook-authoring/_specs/DECISIONS.md, playbooks/migrate/_specs/DECISIONS.md]
+# also distilled from the owner's local, unpublished notes (vault/notes/ is gitignored): vault/notes/20260731-playbook-authoring-state-machines-design.md
 ---
 
 ## Context

@@ -7,7 +7,7 @@ created_at: 2026-10-14
 updated_at: 2026-10-14
 status: proposed
 values: [value/0012, value/0002]
-sources: [vault/notes/20260821-milestone-grouping-by-sp.md]
+# also distilled from the owner's local, unpublished notes (vault/notes/ is gitignored): vault/notes/20260821-milestone-grouping-by-sp.md
 ---
 
 ## Context

@@ -1,7 +1,7 @@
 ---
 type: value
 title: Analysable history
-summary: Plans, runs and their outcomes are kept across every project, so the history can be analysed: practices taken over from one project to another, benchmarks, quality comparison, problem analysis.
+summary: "Plans, runs and their outcomes are kept across every project, so the history can be analysed: practices taken over from one project to another, benchmarks, quality comparison, problem analysis."
 kind: value
 created_by: owner
 created_at: 2026-10-14

@@ -7,7 +7,8 @@ created_at: 2026-10-14
 updated_at: 2026-10-14
 status: accepted
 values: [value/0003, value/0012, value/0011]
-sources: [playbooks/groom/_specs/DECISIONS.md, vault/notes/20260802-groom-skill-vs-playbook-metrics.md, playbooks/migrate/_specs/DECISIONS.md, CHANGELOG.md, CLAUDE.md]
+sources: [playbooks/groom/_specs/DECISIONS.md, playbooks/migrate/_specs/DECISIONS.md, CHANGELOG.md, CLAUDE.md]
+# also distilled from the owner's local, unpublished notes (vault/notes/ is gitignored): vault/notes/20260802-groom-skill-vs-playbook-metrics.md
 ---
 
 ## Context

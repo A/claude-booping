@@ -1,7 +1,7 @@
 ---
 type: story
 title: Targeted lessons
-summary: A lesson is a markdown note injected into exactly the playbooks, steps, agents or skills its targets: list names.
+summary: "A lesson is a markdown note injected into exactly the playbooks, steps, agents or skills its targets: list names."
 created_by: claude
 created_at: 2026-10-14
 updated_at: 2026-10-14

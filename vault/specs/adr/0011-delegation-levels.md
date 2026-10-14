@@ -7,7 +7,8 @@ created_at: 2026-10-14
 updated_at: 2026-10-14
 status: accepted
 values: [value/0002, value/0012]
-sources: [playbooks/groom/_specs/DECISIONS.md, playbooks/retro/_specs/index.md, playbooks/code-review/_specs/DECISIONS.md, vault/notes/20260802-groom-skill-vs-playbook-metrics.md, vault/researches/20260802-01-31_framework-cli-extraction-research.md, CHANGELOG.md, CLAUDE.md]
+sources: [playbooks/groom/_specs/DECISIONS.md, playbooks/retro/_specs/index.md, playbooks/code-review/_specs/DECISIONS.md, vault/researches/20260802-01-31_framework-cli-extraction-research.md, CHANGELOG.md, CLAUDE.md]
+# also distilled from the owner's local, unpublished notes (vault/notes/ is gitignored): vault/notes/20260802-groom-skill-vs-playbook-metrics.md
 ---
 
 ## Context

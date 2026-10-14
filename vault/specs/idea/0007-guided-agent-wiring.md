@@ -6,7 +6,7 @@ created_by: claude
 created_at: 2026-10-14
 updated_at: 2026-10-14
 status: open
-sources: [vault/notes/User Stories.md]
+# also distilled from the owner's local, unpublished notes (vault/notes/ is gitignored): vault/notes/User Stories.md
 ---
 
 ## Idea

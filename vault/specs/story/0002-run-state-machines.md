@@ -1,7 +1,7 @@
 ---
 type: story
 title: Run state machines
-summary: A run's state lives in per-playbook states: machines that only the booping CLI advances.
+summary: "A run's state lives in per-playbook states: machines that only the booping CLI advances."
 created_by: claude
 created_at: 2026-10-14
 updated_at: 2026-10-14
