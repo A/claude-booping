@@ -1,7 +1,7 @@
 ---
 title: "Lessons become rules — migration 004 and rule-only injection"
 type: "feature"
-status: presenting
+status: ready-for-dev
 sp: null
 related_to: null
 created: 2026-10-15 01:10
@@ -22,6 +22,7 @@ return_to: null
 agents:
   research-codebase: ad7f4b43df8f31faf
   cross-review: acdf9a7240042e122
+reviewed_at: 2026-10-15 01:30
 ---
 
 # Lessons become rules — migration 004 and rule-only injection
