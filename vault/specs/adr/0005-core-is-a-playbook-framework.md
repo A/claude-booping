@@ -82,5 +82,5 @@ command handles it.
   config.
 - Scripts shared by several playbooks live in `playbooks/_scripts/`, resolved
   playbook-local first.
-- [clarify] Whether the framework CLI is published as a package separate from the
-  plugin was an open question in the research; it still ships inside the plugin.
+- Whether the framework CLI is published as a package separate from the plugin is
+  deferred by the owner (2026-10-14); it ships inside the plugin until then.

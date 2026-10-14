@@ -52,14 +52,24 @@ comparison, problem analysis.
 
 ### Stack-agnostic core
 
-The core knows nothing about a stack or a project; specifics live in the user's and
-the project's tiers.
+The core knows nothing about a stack or a project; specifics live in the global and
+the project tiers.
 
 - **In practice:** skills, playbooks and the specs skeleton stay generic and
-  leave enough room to extend booping in userland: the user and the project
+  leave enough room to extend booping in userland: the global and the project
   tiers add and override — their own plan templates, playbooks, rules.
 - **Trade-off:** [clarify] proposed: the core ships no stack-specific defaults;
   whoever wants them writes them in their own tier.
+
+### A constructor, not a fixed solution
+
+Booping is a constructor — a framework for playbooks with a set of core mechanics —
+not a ready solution fixed to one task.
+
+- **In practice:** a project's config extends booping's logic: user playbooks,
+  scripts and templates read their own config keys, and the core mechanics (state
+  machines, hooks, queries, scaffolds, tiers) carry them.
+- **Trade-off:** no schema gate on config: a mistyped key is not caught at load.
 
 ### Plans run to the end
 
@@ -123,8 +133,11 @@ Booping is a work tool for professionals, so the quality of the result matters. 
 spends tokens rationally, without token-maxing, and keeps a balance between
 simplicity and the quality of the result.
 
-- **In practice:** [clarify] what tells a rational spend from token-maxing is
-  not named in the source.
+- **In practice:** step prompts are evaluated and narrowed while the evals show the
+  result still holds; a step's prompt is tuned to a specific model and copied and
+  re-tuned for another, with evals working as unit tests for the steps; what a
+  sub-agent already knows when asked about a prompt detail does not belong in the
+  prompt; lessons are written as compact rules with examples, not as a raw retro.
 - **Trade-off:** A run sometimes costs more than the
   cheapest one that would pass.
 

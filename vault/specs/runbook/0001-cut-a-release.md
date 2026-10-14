@@ -44,10 +44,9 @@ with `/plugin update booping`.
   commit after a fetch.
 - `.claude-plugin/plugin.json` on `master` reads `X.Y.Z`.
 - The docs workflow ran green on the push to `master` (it publishes the site to `gh-pages`).
-- [clarify] No source names a post-release smoke test; proposed: `/plugin update booping`
-  in a scratch project, then `/playbook` lists the playbooks with no STOP notice.
 
 ## Rollback
 
-- [clarify] No release has been rolled back and no source names the procedure; proposed:
-  ship a new patch release that reverts the change rather than deleting the tag.
+- No release has been rolled back and there is no rollback procedure; the owner
+  finds that acceptable for now (2026-10-14). A broken release is fixed by the next
+  patch release.

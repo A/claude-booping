@@ -61,8 +61,7 @@ The run asks and waits in the same session.
 The resume point is worked out at runtime from history.
 
 - **Pros:** not named in the source.
-- **Cons:** [clarify] the source chooses a static per-edge `return_to` without naming
-  why a computed one was worse.
+- **Cons:** not named in the source.
 - **Complexity:** low.
 - **Reversibility:** high.
 

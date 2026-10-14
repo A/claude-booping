@@ -24,9 +24,8 @@ sources: [vault/docs/_specs/glossary.md]
 - **Levels** — the discovery and config-merge ladder, always named "the core, global
   and project levels"; later levels win on merge, names are unique across levels on
   discovery.
-- The specs "user tier" ([adr/0001](../adr/0001-specs-tiers.md)) lives in the global
-  level, under `<home_dir>/_specs/`. [clarify] Whether "user tier" and "global level"
-  should be unified under one name is not settled.
+- Specs tiers ([adr/0001](../adr/0001-specs-tiers.md)) use the config level names:
+  core, global (`<home_dir>/_specs/`, named by the user's namespace), project.
 - **Playbook** — a multi-step guided procedure: a directory with `playbook.md`, an
   optional `playbook.yaml` (`graph:` plus state machines) and one directory per step.
 - **Step** — one unit of a playbook's graph: a directory holding `prompt.md`,

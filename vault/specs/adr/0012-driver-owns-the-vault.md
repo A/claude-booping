@@ -27,7 +27,9 @@ The driver — the runner of a playbook — owns all vault reads and writes: pla
 status, lessons, milestone tables, sidecars, vault commits. Worker agents touch only
 repo code. A worker receives a briefing (its milestone file's path and the context
 the runner chooses) and returns a bounded report; it does not name skills or
-playbooks, read lessons or know plan statuses. A lesson reaches a worker only
+playbooks, read lessons or know plan statuses. A worker's code work may reach outside
+the attached repo (a deliverable under `~/.claude/`, another repo) only after the
+user explicitly confirms it for that plan; the vault stays the driver's either way. A lesson reaches a worker only
 through the runner's briefing; project-local shaping of an agent is a targeted
 lesson (`agent:{id}`), not an extension file.
 
@@ -64,7 +66,8 @@ Agents load lessons, read the plan and update its status themselves.
 
 - Develop's runner flips milestone checkboxes, takes transitions and commits the
   vault; the worker reports what it did and leaves the work uncommitted.
-- [unknown] The 2026-06-10 Plannotator retro calls "developer agents operate only
-  inside the attached repo" an artificial limitation when the deliverable lives
-  outside the repo (`~/.claude/`); whether "workers touch only repo code" still
-  forbids such deliverables is not confirmed.
+- Work outside the repo with the user's explicit confirmation was settled by the
+  owner on 2026-10-14, after the 2026-06-10 Plannotator retro called "developer
+  agents operate only inside the attached repo" an artificial limitation for a
+  deliverable under `~/.claude/`. The code and `CLAUDE.md` still say "only repo
+  code" — a backlog task brings them in line.

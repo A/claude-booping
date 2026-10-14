@@ -73,7 +73,8 @@ A cap range rather than one number.
 
 ## Consequences
 
-- [unknown] `src/config.yaml` and develop's `provision` step still use
-  `max_milestones_per_agent: 2`; the change and the groom gate are not implemented.
+- Not implemented yet: `src/config.yaml` and develop's `provision` step still use
+  `max_milestones_per_agent: 2`, and the groom gate is missing. The owner confirmed
+  on 2026-10-14 that it must be done; a backlog task tracks it.
 - Planned calibration: re-groom a 31-SP plan with sp-8 milestones and run it as a
   second benchmark in two groups of about 15.

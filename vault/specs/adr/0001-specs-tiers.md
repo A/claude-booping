@@ -1,7 +1,7 @@
 ---
 type: adr
 title: Specs are a core feature in three tiers
-summary: Booping ships the specs format and its own specs; a user tier in the home dir and a project tier in the repo add their records, cross-tier refs go by namespace.
+summary: Booping ships the specs format and its own specs; a global tier in the home dir and a project tier in the repo add their records, cross-tier refs go by namespace.
 created_by: claude
 created_at: 2026-10-14
 updated_at: 2026-10-14
@@ -36,13 +36,13 @@ The specs format is a core feature of booping, in three tiers:
 - **core** — booping's repo: the format (README, schemas, later the checker and the
   setup and upgrade playbooks) and booping's own specs in `vault/specs/`, which are
   also the dogfood of the format.
-- **user** — `<home_dir>/_specs/`: one person's values and rules for every project.
+- **global** — `<home_dir>/_specs/`, booping's existing global config level: one person's values and rules for every project.
 - **project** — `specs/` in the project repo, so a spec changes in the same commit as
   the code; when the vault is in the repo, `<vault>/specs/`. A vault outside the repo
   reaches the project specs through a symlink.
 
 A reference without a namespace points into its own tier. Another tier is named by a
-namespace — `booping:` for core, the user's id for a user tier (default `$USER`,
+namespace — `booping:` for core, the user's id for the global tier (default `$USER`,
 confirmed at setup) — never by a path such as `~`, so the same reference names the
 same person's record on every machine. An unresolved namespace (a collaborator, CI)
 is a warning, not an error. A project that departs from a rule of a tier above
@@ -60,7 +60,7 @@ booping migrations. Lessons become rules with `targets` and `brief`
 
 ### Core feature of booping
 
-Booping ships the format and merges the user and project tiers the way it merges
+Booping ships the format and merges the global and project tiers the way it merges
 config and playbooks.
 
 - **Pros:** booping's tier merge, migrations and vault already exist; lessons and
@@ -97,7 +97,7 @@ Each project keeps its own copy of the format and its own checker.
   `docs` playbook and lesson injection read from specs.
 - The existing project copies migrate after the feature ships, each with a commit
   before the migration for rollback.
-- [clarify] An exported user tier that a project imports, so a namespace resolves
+- [clarify] An exported global tier that a project imports, so a namespace resolves
   without the home dir, is out of scope for now.
 - Confirmation: `just specs-check` validates this set; a project set up by the setup
-  playbook resolves a `booping:` and a user reference.
+  playbook resolves a `booping:` and a global reference.

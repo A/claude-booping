@@ -55,8 +55,9 @@ Core, global and project config deep-merge with no validation of key names.
 The merge warns on a key the core schema does not declare.
 
 - **Pros:** typos surface at load.
-- **Cons:** [clarify] why the warning was dropped in v1.0.0 is not named in the
-  source.
+- **Cons:** a key booping does not know is not a typo by default — user code
+  (playbooks, scripts, templates) reads its own keys, so a project's config extends
+  booping's logic; a warning would flag every such key (owner, 2026-10-14).
 - **Complexity:** medium.
 - **Reversibility:** high.
 

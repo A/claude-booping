@@ -5,7 +5,7 @@ summary: In this project the code-review human step always runs through the plan
 created_by: claude
 created_at: 2026-10-14
 updated_at: 2026-10-14
-status: accepted
+status: retired
 targets: [code-review]
 brief: "Hand every finding set, even an empty one, to plannotator-reviewer instead of printing findings in chat; its reply is the human's review. Agent missing or SURFACE UNAVAILABLE: stop and tell the user."
 sources: [vault/_lessons/0012_review_every_diff_in_plannotator.md, vault/config.yaml]
@@ -13,8 +13,9 @@ sources: [vault/_lessons/0012_review_every_diff_in_plannotator.md, vault/config.
 
 ## Rule
 
-This project reviews every diff in Plannotator; the browser review replaces
-presenting findings in chat.
+Retired on 2026-10-14: the owner deactivated the Plannotator review for now and may
+revisit it. While it was accepted: this project reviews every diff in Plannotator;
+the browser review replaces presenting findings in chat.
 
 - Once findings are computed, they are handed to the `plannotator-reviewer` agent
   with the diff ref (a PR URL, or a token such as `HEAD` for the working tree), the
@@ -28,9 +29,6 @@ presenting findings in chat.
 - If the agent returns `SURFACE UNAVAILABLE`, the run reports exactly what failed
   and stops; it never substitutes a chat review.
 
-[unknown] The lesson names the config key `skills.code-review.agents.plannotator-reviewer`
-and phases (e)–(h); the current vault config registers the agent under
-`core.code_review_playbook.agents` and code-review is a playbook with steps.
 
 ## Follows from
 

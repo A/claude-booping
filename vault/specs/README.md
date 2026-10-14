@@ -28,11 +28,11 @@ Specs come in three tiers ([adr/0001](adr/0001-specs-tiers.md)):
 | Tier    | Where                                                    | Holds                                         |
 |---------|----------------------------------------------------------|-----------------------------------------------|
 | core    | this directory, shipped with booping                     | booping's values and rules, the format itself |
-| user    | `<home_dir>/_specs/`                                     | one person's values and rules for every project |
+| global  | `<home_dir>/_specs/`                                     | one person's values and rules for every project |
 | project | `specs/` in the project repo, or `<vault>/specs/` when the vault is in the repo | the project's own records |
 
 A reference without a namespace points into its own tier: `rule/0003`. Another tier is
-named by its namespace: `booping:rule/0003` for core, `<user>:rule/0003` for a user
+named by its namespace: `booping:rule/0003` for core, `<user>:rule/0003` for the global
 tier (the id defaults to `$USER` and is confirmed at setup). A project that departs
 from a rule of a tier above records it in its own ADR or conflict.
 

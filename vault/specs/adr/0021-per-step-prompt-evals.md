@@ -64,8 +64,9 @@ Whole-run scoring across cases and models.
 Suites run on every push and block the merge on failure.
 
 - **Pros:** a regression cannot merge unnoticed.
-- **Cons:** [clarify] the source states only that evals run on subscription auth and
-  never in CI; the reason against a gate is not named.
+- **Cons:** evals are expensive — too expensive to run on every CI run. A playbook is
+  built first and its prompts optimised against the evals afterwards; the evals are an
+  optimisation tool, not a merge gate (owner, 2026-10-14).
 - **Complexity:** medium.
 - **Reversibility:** high.
 

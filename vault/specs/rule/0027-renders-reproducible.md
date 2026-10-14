@@ -13,7 +13,7 @@ sources: [vault/docs/_specs/features.md]
 
 A hermetic render repeats byte for byte on any machine: macro stubs pin every
 config-declared macro, and `--project` pins the config merge to the core and
-project levels, so nothing from the machine or the user tier leaks in. A change
+project levels, so nothing from the machine or the global level leaks in. A change
 that makes a render depend on anything else breaks this rule.
 
 ## Follows from
