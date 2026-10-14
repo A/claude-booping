@@ -26,3 +26,11 @@ The M01 Verify `just e2e -k "specs and init"` could not run: the recipe interpol
 
 DoD 2.2 asks the full `render-playbook learn` to name no `_lessons/` destination, but the remaining mentions sit in the Dedup Sweep and Write bodies that M03 and M04 rewrite. Closed M02 on its own files (preamble, `## Targets`, Extract Candidates clean); the whole-render assertion is carried by the plan's Final Verification after M04.
 
+## D7 — rule/0001 commits with the code
+
+`vault/specs/` is this repo's project specs tier, which [adr/0001](../../specs/adr/0001-specs-tiers.md) puts in the same commit as the code it governs. M04's rule/0001 edit is committed in the milestone commit, not the vault bookkeeping commit.
+
+## D8 — C5's plain-text source contradicts the rule schema
+
+C5 writes `## Follows from` as plain text `retrospectives/{slug}.md` when the vault is outside the repo, but `src/specs/schemas/rule.yaml` requires a link in every item, so such a record fails `booping specs check`. The check is not weakened. Default: vault outside the repo → link a project-tier value when one fits; otherwise one item opening with `[clarify]`, naming the retrospective in plain text and linking the tier README, so the owner settles the source. [clarify] the owner may prefer a schema change (allow an unlinked source item) instead.
+
