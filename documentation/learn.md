@@ -22,7 +22,7 @@ Six steps, in dependency order:
 |------|--------------|
 | `intake` | Resolve the retrospective and its working set; validate the entry status |
 | `extract-candidates` | Decompose the retro into atomic rules, each routed to a single destination |
-| `dedup-sweep` | Filtered read of the rules of all three specs tiers, the remaining lessons and the repo `CLAUDE.md` — update vs create vs covered vs conflict |
+| `dedup-sweep` | Filtered read of the rules of all three specs tiers and the repo `CLAUDE.md` — update vs create vs covered vs conflict |
 | `review-table` | Present the unified review table; you accept, reject rows, or add your own |
 | `write` | Write the accepted items, one pass per target type |
 | `transition` | Close the retrospective at `done` and commit |
@@ -77,7 +77,7 @@ Target forms are `{playbook}`, `{playbook}/{step}`, `agent:{id}` and `skill:{nam
 
 ### Update-vs-create sweep
 
-Before drafting proposals, `dedup-sweep` reads the rules of the three specs tiers, the remaining lessons and the repo `CLAUDE.md` to check whether each candidate is genuinely new. A candidate that duplicates or refines a project rule becomes an **update** to that record, edited in place, rather than a near-duplicate; one that duplicates a project lesson becomes a new rule carrying the lesson's content, and the lesson file is deleted — learn never writes or edits a lesson. A candidate a `core` or `global` rule, or a global lesson, already holds is **covered**; one that contradicts a rule is flagged a **conflict** for you to resolve in the review table. That is what keeps the rule set from accumulating redundant or self-contradicting rules over many sprints.
+Before drafting proposals, `dedup-sweep` reads the rules of the three specs tiers and the repo `CLAUDE.md` to check whether each candidate is genuinely new. A candidate that duplicates or refines a project rule becomes an **update** to that record, edited in place, rather than a near-duplicate. A candidate a `core` or `global` rule already holds is **covered**; one that contradicts a rule is flagged a **conflict** for you to resolve in the review table. That is what keeps the rule set from accumulating redundant or self-contradicting rules over many sprints.
 
 ### The review table
 
@@ -86,7 +86,7 @@ Every candidate appears in a single review table before anything is written — 
 | Column | Holds |
 |--------|-------|
 | `#` | A stable row number, used to reject rows. |
-| `Target` | Where the row lands: `rule/{NNNN}-{slug}.md` for a new rule (the number is provisional until write), the existing `rule/NNNN` or lesson for an update, `CLAUDE.md`, or the covering rule's ref. |
+| `Target` | Where the row lands: `rule/{NNNN}-{slug}.md` for a new rule (the number is provisional until write), the existing `rule/NNNN` for an update, `CLAUDE.md`, or the covering rule's ref. |
 | `Type` | `rule`, `claude-md` or `covered` — a `covered` row is shown, never written. |
 | `Targets` | The exact `targets:` entries the rule is written with, drawn from the fetched target space; `—` for `claude-md` and `covered`. |
 | `Brief` | The one or two lines injected into each target; `—` for `claude-md` and `covered`. |

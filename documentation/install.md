@@ -52,7 +52,6 @@ The scaffolded vault:
 
 - `plans/` — sprint plans authored by the [groom playbook](groom.md), executed by the [develop playbook](develop.md).
 - `retrospectives/` — standalone retrospectives authored by the [retro playbook](retro.md), consumed by the [learn playbook](learn.md).
-- `_lessons/` — targeted lessons, still injected into the runs they target; the [learn playbook](learn.md) writes rules into the project specs tier instead.
 - `notes/` — your own free-form notes (untouched by booping).
 - `sprints.md` — an Obsidian Bases fence over the vault's `plans/*/index.md` files; seeded once, evaluated live by Obsidian.
 - `.gitignore` — vault-level ignores, including the `.booping.log` the CLI writes at the vault root.

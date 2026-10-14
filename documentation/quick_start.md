@@ -25,7 +25,7 @@ See [Install](install.md) for prerequisites (`uv`, `git`).
 /playbook setup
 ```
 
-The `setup` playbook settles the machine level (home dir + machine config), then the project level: it asks for the vault location — the default `<home_dir>/{project}/` or a repo-local directory (wired via the `.booping` marker's `vault_path:` key) — and creates the vault with `plans/`, `retrospectives/`, `codereviews/`, `_lessons/`, `notes/`, plus a `.booping` marker file in the repo. It also asks once for your global namespace (default `$USER`) and creates both [specs](specs.md) tiers your rules live in: the global one at `<home_dir>/_specs/` and the project one. Anything already in place is detected and skipped. See [Vault](vault.md) for what each directory is for.
+The `setup` playbook settles the machine level (home dir + machine config), then the project level: it asks for the vault location — the default `<home_dir>/{project}/` or a repo-local directory (wired via the `.booping` marker's `vault_path:` key) — and creates the vault with `plans/`, `retrospectives/`, `codereviews/`, `notes/`, plus a `.booping` marker file in the repo. It also asks once for your global namespace (default `$USER`) and creates both [specs](specs.md) tiers your rules live in: the global one at `<home_dir>/_specs/` and the project one. Anything already in place is detected and skipped. See [Vault](vault.md) for what each directory is for.
 
 ## 3. See what is available
 

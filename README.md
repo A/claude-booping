@@ -1,6 +1,6 @@
 # booping
 
-A self-learning, project-scoped sprint workflow for Claude Code. booping turns a feature idea into a durable, on-disk loop — **groom → develop → retro → learn** — that uses sub-agents to avoid context rot, with an optional second-model cross-review of every plan. Every artifact (plans, retros, lessons, sprint snapshots) lives under `~/Claude/{project}/`, one folder per codebase.
+A self-learning, project-scoped sprint workflow for Claude Code. booping turns a feature idea into a durable, on-disk loop — **groom → develop → retro → learn** — that uses sub-agents to avoid context rot, with an optional second-model cross-review of every plan. Every artifact (plans, retros, code reviews, sprint snapshots) lives under `~/Claude/{project}/`, one folder per codebase.
 
 ![Vault open in Obsidian](docs/images/vault-in-obsidian.webp)
 
@@ -16,7 +16,7 @@ booping is **not** spec-driven development — it doesn't keep specs as a living
 
 The vault at `~/Claude/{project}/` is markdown-only with YAML frontmatter that Obsidian renders natively as Properties. One vault per project, side-by-side with whatever else you keep in `~/Claude/`. No lock-in — just files you can grep, version, and edit by hand.
 
-This repo is developed with booping itself, and its vault is checked in at [`vault/`](vault/) — browse a [finished plan](vault/plans/202608081300_session-time-metrics/index.md), the [targeted lessons](vault/_lessons/) the loop has accumulated, or a [retrospective](vault/retrospectives/20260722-seven-plan-retro.md).
+This repo is developed with booping itself, and its vault is checked in at [`vault/`](vault/) — browse a [finished plan](vault/plans/202608081300_session-time-metrics/index.md), the [targeted rules](vault/specs/rule/) the loop has accumulated, or a [retrospective](vault/retrospectives/20260722-seven-plan-retro.md).
 
 ## Disclaimer
 
@@ -52,7 +52,7 @@ Inside Claude Code, register the marketplace once, then install the plugin:
 
 Update later via `/plugin update booping` (or from the `/plugin` UI).
 
-After installing, `cd` into the target repo and run `/playbook setup`. It settles the machine config, then scaffolds the vault (`plans/`, `retrospectives/`, `codereviews/`, `_lessons/`, `notes/`) and writes the `.booping` marker. Anything already in place is detected and skipped. The `booping` CLI logs its invocations to `.booping.log` at the vault root.
+After installing, `cd` into the target repo and run `/playbook setup`. It settles the machine config, then scaffolds the vault (`plans/`, `retrospectives/`, `codereviews/`, `notes/`) and writes the `.booping` marker. Anything already in place is detected and skipped. The `booping` CLI logs its invocations to `.booping.log` at the vault root.
 
 ## Quick start
 

@@ -181,7 +181,6 @@ core:
       plans:   { type: dir }
       retrospectives: { type: dir }
       codereviews: { type: dir }
-      _lessons: { type: dir }
       notes:   { type: dir }
       sprints.md: |
         ```base
@@ -374,7 +373,7 @@ Trees ride the same core → global → project merge as everything else here, s
     ~/Claude/_playbooks/my-playbook --set name=my-playbook
   ```
 
-- **`core.setup_playbook.scaffold`** — the project vault: `plans/`, `retrospectives/`, `codereviews/`, `_lessons/`, `notes/`, plus the seeded `sprints.md` Obsidian Bases fence and a `.gitignore`. Takes no `--set` variables.
+- **`core.setup_playbook.scaffold`** — the project vault: `plans/`, `retrospectives/`, `codereviews/`, `notes/`, plus the seeded `sprints.md` Obsidian Bases fence and a `.gitignore`. Takes no `--set` variables.
 
 - **`core.groom_playbook.scaffold`** — the tree groom seeds every new plan from, in one `booping scaffold` call: a plan directory holding `index.md` (the plan's identity frontmatter — the sole definition of it, `commit:` stamped with the repo's HEAD at creation — plus the title as an `#` heading) and an empty `request.md`. Takes `--set title=` and `--set type=`.
 

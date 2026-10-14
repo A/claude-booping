@@ -15,7 +15,7 @@ Playbooks are discovered from the core, global and project levels:
 - **Global** — `<home_dir>/_playbooks/<name>/` (default `~/Claude/_playbooks/`). Shared across every project on the machine.
 - **Project** — `{vault}/_playbooks/<name>/`. Specific to one Project Vault.
 
-**A playbook `name` must be unique across levels.** The same name at two levels is a name clash: `/playbook` marks the entry `⚠ clash` in its listing, and rendering the playbook returns a blocking STOP notice instead of the procedure — neither copy runs until one of them is renamed. To adapt a playbook you didn't write, copy it under a new name or attach [lessons](#lessons) to it. Directories whose name starts with `_` (e.g. `_lib`, `_partials`) are skipped, so shared helper content can sit alongside playbooks.
+**A playbook `name` must be unique across levels.** The same name at two levels is a name clash: `/playbook` marks the entry `⚠ clash` in its listing, and rendering the playbook returns a blocking STOP notice instead of the procedure — neither copy runs until one of them is renamed. To adapt a playbook you didn't write, copy it under a new name or attach [rules](#rules) to it. Directories whose name starts with `_` (e.g. `_lib`, `_partials`) are skipped, so shared helper content can sit alongside playbooks.
 
 ### Shipped playbooks
 
@@ -50,31 +50,28 @@ Each playbook is a directory:
 
 Directory order on disk is irrelevant — **the `graph:` decides which steps run and in what order**. `_`-prefixed directories (`_references/`, `_fixtures/`) are never steps, so disabled steps and shared material can sit alongside without being wired in.
 
-## Lessons
+## Rules
 
-A **lesson** is a short standing rule injected into a playbook run — the way to correct a procedure without editing its prompts. Lessons are markdown files (the convention is `NNNN_title.md`), loaded in filename order from exactly **two** directories:
-
-| Level | Directory | Reaches |
-| --- | --- | --- |
-| Global | `<home_dir>/_lessons/` (default `~/Claude/_lessons/`) | every project on the machine |
-| Project | `{vault}/_lessons/` | this project only |
-
-Neither directory decides *what* a lesson binds — the file's own `targets:` frontmatter does. A lesson with no usable `targets:` is injected nowhere: **lessons are opt-in.**
+A [rule](specs.md) record is the way to correct a procedure without editing its prompts. A rule injects when it is `status: accepted` and carries both `targets:` and `brief:`; a retired rule, or one without targets, injects nowhere: **injection is opt-in.** Rules are read from all three [specs tiers](specs.md#tiers) — core, global, project. A render pinned with `--project` drops the global tier, so core and project rules still show.
 
 ```markdown
 ---
+type: rule
 title: Name every artifact path absolutely
+status: accepted
 targets:
   - groom
   - ship/publish
   - agent:booping-developer
+brief: "Name every artifact path absolutely; a relative path is ambiguous once the run moves between workdirs."
+# … the remaining rule frontmatter, see specs.md
 ---
-
-Receipts must name paths absolutely — a relative path is ambiguous once the run moves between workdirs.
 ```
 
-- `title` — *optional*, used in the lesson's heading; defaults to the filename without its extension.
-- `targets` — the list of things this lesson is injected into. A bare scalar (`targets: groom`) counts as a one-entry list.
+- `targets` — the list of things this rule is injected into. A bare scalar (`targets: groom`) counts as a one-entry list.
+- `brief` — the one or two lines injected there; the record's body is read on demand, never injected.
+
+A vault's former lesson files are converted into rule records by migration 004, applied through `/playbook migrate`.
 
 ### Target forms
 
@@ -82,32 +79,19 @@ Exact names only — no globs, no wildcards, no negation:
 
 | Form | Example | Injected into |
 | --- | --- | --- |
-| `{playbook}` | `groom` | the `## Lessons` section of that playbook's composed procedure |
+| `{playbook}` | `groom` | the `## Rules` section of that playbook's composed procedure |
 | `{playbook}/{step}` | `ship/publish` | that one step's prompt, on both the `--step` and inline surfaces |
 | `agent:{id}` | `agent:booping-developer` | that agent's body, at agent load time |
 | `skill:{name}` | `skill:playbook` | that skill's body, at skill load time |
 
-A lesson may carry several entries, of mixed forms. An entry matching none of these forms is ignored (see [Notices](#notices)).
-
-Injection happens in `booping render-playbook` itself — there is no lessons partial to include, and a playbook cannot opt out.
+A rule may carry several entries, of mixed forms. Injection happens in `booping render-playbook` itself — there is no rules partial to include.
 
 !!! warning "Agent targets reach booping's own agents only"
-    `agent:` targets are injected into the plugin's internal agents — `agent:booping-developer` and `agent:booping-researcher`. An [external or global agent](integrating-external-agents.md) at `~/.claude/agents/<id>.md`, and a sub-agent spawned by model tier (`detached: sonnet:high`), receive **no** targeted lessons: their bodies are not rendered by booping. To reach one of those, target the step it performs (`{playbook}/{step}`) — the step prompt is fetched by the agent itself.
+    `agent:` targets are injected into the plugin's internal agents — `agent:booping-developer` and `agent:booping-researcher`. An [external or global agent](integrating-external-agents.md) at `~/.claude/agents/<id>.md`, and a sub-agent spawned by model tier (`detached: sonnet:high`), receive **no** targeted rules: their bodies are not rendered by booping. To reach one of those, target the step it performs (`{playbook}/{step}`) — the step prompt is fetched by the agent itself.
 
-**Same filename in both directories → the project copy wins.** A `0002_receipts.md` present in `~/Claude/_lessons/` and in `{vault}/_lessons/` loads once, from the vault. Give lessons distinct names unless you mean to shadow one.
+**Where they surface.** Playbook-targeted rules render as a `## Rules` section in the composed procedure, right before `## Playbook Steps`; they bind the driver for the whole run. Step-targeted rules are appended to that step's `booping render-playbook <name> --step <step>` output, so they reach exactly the agent running that step (and the embedded body when the playbook renders steps inline). `agent:{id}` and `skill:{name}` rules render inside the named agent's or skill's body when it loads — `skill:playbook` shapes the `/playbook` skill itself.
 
-**Where they surface.** Playbook-targeted lessons render as a `## Lessons` section in the composed procedure, between the preamble and `## Playbook Steps`; they bind the driver for the whole run. Step-targeted lessons are appended to that step's `booping render-playbook <name> --step <step>` output, so they reach exactly the agent running that step (and the embedded body when the playbook renders steps inline). `agent:{id}` and `skill:{name}` lessons render inside the named agent's or skill's body when it loads — `skill:playbook` shapes the `/playbook` skill itself. `--no-lessons` suppresses both sections *and* the lesson notices, so the output matches a lesson-free vault byte for byte.
-
-!!! note "Retired: playbook-local `_lessons/` and `step:`"
-    A `_lessons/` directory inside a discovery root or inside a playbook directory is not read, and neither is a lesson's `step:` frontmatter key. Move those files into `{vault}/_lessons/` (or `<home_dir>/_lessons/`) and express `step: draft` as `targets: [<playbook>/draft]`. While a retired directory still holds markdown, every render of that playbook emits a non-blocking migration note naming it.
-
-## Rules
-
-A [rule](specs.md) record can be injected the way a lesson is. A rule injects when it is `status: accepted` and carries both `targets:` and `brief:`; a retired rule, or one without targets, injects nowhere. Rules are read from all three [specs tiers](specs.md#tiers) — core, global, project. A render pinned with `--project` drops the global tier, as it does for lessons, so core and project rules still show.
-
-`targets:` takes the same forms as a lesson's — see [Target forms](#target-forms) — and a rule reaches the same surfaces: the composed procedure, one step's `--step` output (and its inline body), an internal agent's body, a skill's body.
-
-The rule's brief is injected, not its body: one line per rule, under a `## Rules` section placed directly before `## Lessons` (or where `## Lessons` would sit when no lesson applies):
+The rule's brief is injected, not its body: one line per rule, under the `## Rules` section:
 
 ```markdown
 ## Rules
@@ -130,7 +114,7 @@ The ref and link depend on the rule's tier:
 
 When two tiers point at the same directory — booping's own repo, where core and project are both `vault/specs/` — each rule file injects once, from the first tier in core → global → project order.
 
-On the `render-playbook` surfaces, a rule that cannot be injected (bad frontmatter, `targets:` without `brief:`, a target that does not parse) and a rule whose `{playbook}/{step}` target names a step this playbook doesn't have each produce a non-blocking note pointing at `booping specs check` — see [Notices](#notices). Agent and skill bodies stay silent. `--no-rules` drops every `## Rules` section and every rule note; `--no-lessons` leaves rules alone.
+On the `render-playbook` surfaces, a rule that cannot be injected (bad frontmatter, `targets:` without `brief:`, a target that does not parse) and a rule whose `{playbook}/{step}` target names a step this playbook doesn't have each produce a non-blocking note pointing at `booping specs check` — see [Notices](#notices). Agent and skill bodies stay silent. `--no-rules` drops every `## Rules` section and every rule note.
 
 ## The manifest
 
@@ -234,7 +218,7 @@ A Jinja body is meaningless until rendered — the `booping render-playbook <nam
 `/playbook` renders the graph as a **step table** — one row per step, in dependency order, carrying the step name, its dependencies, its summary and its review gate.
 
 - **Step bodies are fetched, not embedded** — by default every section ends with the command that fetches the body, the same for plain and `jinja: true` playbooks. The procedure the driver holds is therefore proportional to the graph — step table plus per-step metadata, never bodies — and each body enters exactly one context, only when its step runs. A runner-performed step's section is a metadata block (summary, dependencies, review gate) closed by *Run `booping render-playbook <name> --step <step>` for content.* A **detached** step's section is instead one order to the driver — its summary as a paragraph, its review gate when it has one, then *Tell the `<agent>` agent to get its instructions by calling this command: `booping render-playbook <name> --step <step>`.* Its dependencies and wave order are omitted there; the step table already carries them.
-- **`inline_steps` embeds the runner's bodies** — with `inline_steps: true` in the manifest (or `--inline-steps` on the command), a runner-performed step's section carries its rendered body, with that step's lessons already appended, in place of *both* the metadata block and the fetch command; its summary, dependencies and review gate stay in the step table. Detached steps keep fetch-form, so their agents still fetch their own body. A body that fails to render is a blocking `STOP` notice like any other.
+- **`inline_steps` embeds the runner's bodies** — with `inline_steps: true` in the manifest (or `--inline-steps` on the command), a runner-performed step's section carries its rendered body, with that step's rules already appended, in place of *both* the metadata block and the fetch command; its summary, dependencies and review gate stay in the step table. Detached steps keep fetch-form, so their agents still fetch their own body. A body that fails to render is a blocking `STOP` notice like any other.
 - **Delegated steps fetch their own body** — the driver never runs the fetch command for a sub-agent step. It spawns the agent with a bootstrap prompt: the fetch command ("treat its stdout as your full instruction"), a `## Run-time context` block (project, plus `workdir` / `instance` where they apply), a `## Inputs` block assembled from the run-time context and prior steps' receipts, and a uniform `## Return` contract (`artifacts written + outcome, ≤ 5 lines`) — a richer contract belongs in the step body. A step without `detached:` is the only case where the driver runs the fetch itself and executes the stdout.
 - **Steps that can run together must be `detached:`** — a step the runner performs itself can't run in parallel, so steps whose dependencies are satisfied at the same time must all be `detached:`.
 - **Review gates pause after the batch** — once every step running together finishes, each one's gate is presented (labeled by step) and the run waits for your confirmation before the next batch.
@@ -425,7 +409,6 @@ Problems in the manifest surface as in-band notices when you render (or run) the
 
 - **Blocking `STOP` notices** — the playbook refuses to run. Causes: a step named in the graph has no `<name>/prompt.md` file; a dependency names a step that isn't in the graph; the graph has a cycle; the graph is missing entirely; a step that is not `detached:` shares a parallel wave; a step carries the legacy `agent:` key instead of `detached:`; `graph:` is declared in both `playbook.yaml` and `playbook.md` frontmatter; `playbook.yaml` is unparseable or is not a mapping; a `states:` entry is malformed (an `initial` that is not one of its `statuses`, or `{instance}` in the artifact path with no subgraph referencing it); a `state:` ref names a states entry that does not exist; a `jinja: true` playbook rendered without project context, or whose body fails to render; the playbook `name` is defined at more than one level.
 - **Warning notes** — a step directory that exists on disk but isn't wired into the graph (it never runs), or a `states:` entry no graph scope references (it is never used), produces a note.
-- **Lesson notes** — also non-blocking: a [lesson](#lessons) carrying no usable `targets:` entry (it is injected nowhere), a lesson whose `{playbook}/{step}` target names a step this playbook doesn't have (that entry is ignored), and one note per retired lesson directory still holding markdown on disk — a legacy playbook `_lessons/` dir, or the vault's legacy `lessons/` directory. `--no-lessons` suppresses these along with the lesson sections.
 - **Rule notes** — non-blocking: a targeted [rule](#rules) that cannot be injected (its reason named, with a pointer to `booping specs check` on its tier), and a rule whose `{playbook}/{step}` target names a step this playbook doesn't have. `--no-rules` suppresses these along with the rule sections.
 
 ## Authoring a global playbook
@@ -508,14 +491,13 @@ The rendered procedure lists the steps as:
 
 `booping render-playbook <name>` renders the composed procedure to stdout, or to a file with `--output PATH` (`--output -` writes to stdout). An unknown playbook name exits 1. Graph problems don't fail the command — they render as the in-band STOP/Note notices described above (exit 0).
 
-The composed output carries a `## Rules` section when any [rule](#rules) targets the playbook by name, and a `## Lessons` section when any [lesson](#lessons) does.
+The composed output carries a `## Rules` section when any [rule](#rules) targets the playbook by name.
 
 These flags help while authoring:
 
-- `--step <step>` — print just that step's body (rendered, for a `jinja: true` playbook), with no heading, instruction bullets, or gate wrapping, followed by the lessons targeting that step. This is the command every composed step section points at, and it is handy for eyeballing one prompt in isolation.
-- `--no-lessons` — drop the `## Lessons` section from the composed output, the step-lesson append from `--step`, and the lesson notices, leaving the bodies alone.
-- `--no-rules` — the same for [rules](#rules): drop every `## Rules` section and the rule notices, leaving lessons and bodies alone.
-- `--project <path>` — resolve context against the Project Vault at `<path>` instead of whatever project is attached to the current directory. Lets you render a `requires_project` or `jinja: true` playbook from anywhere. It **pins the render to the core and project levels**: the config merge skips the global tier (`~/.config/booping/config.yaml`), and discovery — for playbooks and [lessons](#lessons) alike — skips the global roots (`<home_dir>/_playbooks/`, `<home_dir>/_lessons/`) and the global specs tier for [rules](#rules), so the same command renders the same bytes on another machine.
+- `--step <step>` — print just that step's body (rendered, for a `jinja: true` playbook), with no heading, instruction bullets, or gate wrapping, followed by the rules targeting that step. This is the command every composed step section points at, and it is handy for eyeballing one prompt in isolation.
+- `--no-rules` — drop the [`## Rules`](#rules) section from the composed output, the step-rule append from `--step`, and the rule notices, leaving the bodies alone.
+- `--project <path>` — resolve context against the Project Vault at `<path>` instead of whatever project is attached to the current directory. Lets you render a `requires_project` or `jinja: true` playbook from anywhere. It **pins the render to the core and project levels**: the config merge skips the global tier (`~/.config/booping/config.yaml`), and discovery — for playbooks and [rules](#rules) alike — skips the global playbook root (`<home_dir>/_playbooks/`) and the global specs tier, so the same command renders the same bytes on another machine.
 - `--set <dotted.key>=<value>` — override one config value for this render only (repeatable, later pairs win, values stay strings). The pair wins over every config tier, which is how a partial is parameterised from the command line — and how a timestamp a template reads from config gets pinned to a fixed value for a reproducible render.
 - `--inline-steps` — embed each runner-performed step's body in its section instead of the fetch command, the same as `inline_steps: true` in the manifest. Detached steps keep fetch-form. Handy for reading a whole procedure as one document.
 
