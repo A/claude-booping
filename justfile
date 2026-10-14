@@ -25,11 +25,25 @@ e2e *args:
     cd booping-tracker && uv run pytest e2e {{ args }} || [ $? -eq 5 ]
 
 # Every check CI runs, in order, stopping at the first failure.
-ci: lint typecheck pytest snapshots mdcheck e2e
+ci: lint typecheck pytest snapshots mdcheck specs-check e2e
 
 [doc("Structural checks over the rendered reports")]
 mdcheck:
     @uv run scripts/mdcheck.py
+
+[doc("Check every record in vault/specs against its type's schema")]
+specs-check:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cd vault/specs
+    rc=0
+    for schema in schemas/*.yaml; do
+        type=$(basename "$schema" .yaml)
+        files=("$type"/*.md)
+        [ -e "${files[0]}" ] || continue
+        mdcheck "$schema" "${files[@]}" || rc=1
+    done
+    exit $rc
 
 [doc("Check the committed reports against a fresh hermetic render")]
 snapshots:

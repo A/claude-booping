@@ -1,0 +1,25 @@
+# reference: specs/reference/<NNNN>-<slug>.md — facts the code does not show,
+# one subject per file, and optionally how to re-check them.
+doc: reference
+
+rules:
+  - select: FRONTMATTER
+    has:
+      type: reference
+      title: '^.+$'
+      summary: '^.{1,200}$'
+      created_by: { enum: [owner, claude] }
+      created_at: '^\d{4}-\d{2}-\d{2}$'
+      updated_at: '^\d{4}-\d{2}-\d{2}$'
+      status: { enum: [live, retired] }
+
+  - select: H2
+    ordered: [Facts, How to check?]
+    strict: true
+
+  - select: SECTION("Facts") > UL > LI
+    min: 1
+
+  - select: SECTION("How to check") > UL > LI
+    optional: true
+    min: 1

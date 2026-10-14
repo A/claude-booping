@@ -1,0 +1,25 @@
+# conflict: specs/conflict/<NNNN>-<slug>.md — two or more values pulling apart
+# (title `A ↔ B`), and how that is settled once resolved.
+doc: conflict
+
+rules:
+  - select: FRONTMATTER
+    has:
+      type: conflict
+      title: '^.+ ↔ .+$'
+      summary: '^.{1,200}$'
+      created_by: { enum: [owner, claude] }
+      created_at: '^\d{4}-\d{2}-\d{2}$'
+      updated_at: '^\d{4}-\d{2}-\d{2}$'
+      status: { enum: [open, resolved] }
+
+  - select: H2
+    ordered: [Conflict, Resolution?]
+    strict: true
+
+  - select: SECTION("Conflict") > P
+    min: 1
+
+  - select: SECTION("Resolution") > P
+    optional: true
+    min: 1
