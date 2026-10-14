@@ -2,7 +2,7 @@
 id: "02"
 title: "Learn preamble and target space on rules"
 sp: 4
-status: pending
+status: done
 plan: "vault/plans/202610142150_lessons-become-rules/index.md"
 ---
 
@@ -18,24 +18,24 @@ Tests: the rendered surface — `render-playbook learn` and the partial with `--
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 2.1 | Rename the partial with `git mv`; heading `## Targets`; after the step table, a `**Rules:**` list — one bullet `- {ref} — {brief}` per rule whose `parsed_targets` name the playbook — before the existing `**Lessons:**` list. Update every reference to the old path. | `playbooks/_partials/target_space.md`, `playbooks/learn/_partials/_learn_targets.j2` | 2 | pending |
-| 2.2 | Preamble and target prose: the two destinations are a rule record in the project specs tier (`booping specs init --tier project` prints its root) and the repo `CLAUDE.md`; `targets:` is the rule's wiring; `brief:` is what reaches the target. Frontmatter `summary`/`trigger` say rules, not lessons. | `playbooks/learn/playbook.md`, `playbooks/learn/_partials/_learn_targets.j2` | 1 | pending |
-| 2.3 | `extract-candidates` (both variants): destination `Rule` instead of `Lesson`; each rule candidate carries a `Brief` — one or two self-sufficient lines that do not restate what the agent checks anyway (`src/specs/README.md`, rule frontmatter); the returned table (fable-5) gains a `Brief` column after `Targets`; "existing lesson" ID wording covers an existing rule (`rule/0004 (questions-settled-in-grooming)`). | `playbooks/learn/extract-candidates/base.md`, `playbooks/learn/extract-candidates/fable-5.md` | 1 | pending |
+| 2.1 | Rename the partial with `git mv`; heading `## Targets`; after the step table, a `**Rules:**` list — one bullet `- {ref} — {brief}` per rule whose `parsed_targets` name the playbook — before the existing `**Lessons:**` list. Update every reference to the old path. | `playbooks/_partials/target_space.md`, `playbooks/learn/_partials/_learn_targets.j2` | 2 | done |
+| 2.2 | Preamble and target prose: the two destinations are a rule record in the project specs tier (`booping specs init --tier project` prints its root) and the repo `CLAUDE.md`; `targets:` is the rule's wiring; `brief:` is what reaches the target. Frontmatter `summary`/`trigger` say rules, not lessons. | `playbooks/learn/playbook.md`, `playbooks/learn/_partials/_learn_targets.j2` | 1 | done |
+| 2.3 | `extract-candidates` (both variants): destination `Rule` instead of `Lesson`; each rule candidate carries a `Brief` — one or two self-sufficient lines that do not restate what the agent checks anyway (`src/specs/README.md`, rule frontmatter); the returned table (fable-5) gains a `Brief` column after `Targets`; "existing lesson" ID wording covers an existing rule (`rule/0004 (questions-settled-in-grooming)`). | `playbooks/learn/extract-candidates/base.md`, `playbooks/learn/extract-candidates/fable-5.md` | 1 | done |
 
 ## Definition of Done
 
 ### Task 2.1
 
-- [ ] `rg -n lesson_target_space playbooks src docs documentation -g '!_reports'` returns nothing.
-- [ ] `bin/booping render playbooks/_partials/target_space.md --set targets_for=groom` shows a `**Rules:**` list carrying the core groom-targeted rules (e.g. `booping:rule/0004`).
+- [x] `rg -n lesson_target_space playbooks src docs documentation -g '!_reports'` returns nothing.
+- [x] `bin/booping render playbooks/_partials/target_space.md --set targets_for=groom` shows a `**Rules:**` list carrying the core groom-targeted rules (e.g. `booping:rule/0004`).
 
 ### Task 2.2
 
-- [ ] `bin/booping render-playbook learn` names no `_lessons/` destination; the rendered `## Targets` says rule.
+- [x] `bin/booping render-playbook learn` names no `_lessons/` destination; the rendered `## Targets` says rule.
 
 ### Task 2.3
 
-- [ ] Neither variant routes a candidate to `_lessons/`; fable-5's table columns are `#`, `Rule`, `Example`, `Target`, `Lands at`, `Targets`, `Brief`.
+- [x] Neither variant routes a candidate to `_lessons/`; fable-5's table columns are `#`, `Rule`, `Example`, `Target`, `Lands at`, `Targets`, `Brief`.
 
 Return: the list of changed files, nothing else.
 

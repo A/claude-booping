@@ -60,7 +60,7 @@ Milestones run in id order; M04 and M06 call the verb M01 adds. `tiers.py` stays
 | id | title | sp | status |
 | --- | --- | --- | --- |
 | 01 | [booping specs init creates a tier](milestones/M01-specs-init-verb/M01-specs-init-verb.md) | 6 | done |
-| 02 | [Learn preamble and target space on rules](milestones/M02-learn-target-space-on-rules/M02-learn-target-space-on-rules.md) | 4 | pending |
+| 02 | [Learn preamble and target space on rules](milestones/M02-learn-target-space-on-rules/M02-learn-target-space-on-rules.md) | 4 | done |
 | 03 | [Learn dedup sweep and review table over rules](milestones/M03-learn-dedup-and-review-table/M03-learn-dedup-and-review-table.md) | 4 | pending |
 | 04 | [Learn writes rule records](milestones/M04-learn-writes-rule-records/M04-learn-writes-rule-records.md) | 4 | pending |
 | 05 | [Learn eval suites on rules](milestones/M05-learn-evals-on-rules/M05-learn-evals-on-rules.md) | 3 | pending |

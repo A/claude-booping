@@ -22,3 +22,7 @@ The develop playbook's `<agent>: <plan title> <message>` contradicts [rule/0022]
 
 The M01 Verify `just e2e -k "specs and init"` could not run: the recipe interpolated `{{ args }}` unquoted, splitting the `-k` expression. The worker switched the recipe to `[positional-arguments]` + `"$@"`. Outside the contract's file list but required for its own Verify; kept, committed with M01.
 
+## D6 — M02 DoD 2.2 read as scoped to M02's files
+
+DoD 2.2 asks the full `render-playbook learn` to name no `_lessons/` destination, but the remaining mentions sit in the Dedup Sweep and Write bodies that M03 and M04 rewrite. Closed M02 on its own files (preamble, `## Targets`, Extract Candidates clean); the whole-render assertion is carried by the plan's Final Verification after M04.
+
