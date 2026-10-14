@@ -19,6 +19,7 @@ nav:
   - Vault: vault.md
   - Playbooks: playbook.md
   - Project config: project_config.md
+  - Specs: specs.md
   - Integrating external agents: integrating-external-agents.md
   - Recipes:
       - Wiring external agents: recipes/external-agents.md

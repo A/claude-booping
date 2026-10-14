@@ -49,6 +49,13 @@ core:
   tracker:
     driver: cli
 
+  specs:
+    format: src/specs
+    tiers:
+      core: {namespace: booping, path: vault/specs}
+      global: {namespace: null, path: _specs}
+      project: {path: null}
+
   sprint:
     default_threshold_sp: 35
     redecompose_threshold: 5
@@ -247,6 +254,17 @@ A body calls one with `{{ macro('core.macros.date', '+%H:%M') }}`. The `command:
 For a reproducible render, pin a macro instead of executing it: `--stub-macro DOTTED.PATH=LITERAL` on `booping render`, `booping render-playbook` and `booping scaffold` makes the named macro return the literal without running its command (e.g. `--stub-macro core.macros.date=19700101-00-00`). The flag is repeatable, later pins winning.
 
 Macros are honoured in every tier, project included. A project config arrives with a `git clone`, so treat an unfamiliar vault's `core.macros` block as executable content in a repo.
+
+### `core.specs`
+
+Where the three [specs](specs.md) tiers live and what their namespaces are. Directly under `core` because `booping specs` and rule injection both read it.
+
+- **`core.specs.format`** — the directory holding the format guide and the per-type schemas, relative to the plugin root. Default `src/specs`; the record types are the schema file stems found there.
+- **`core.specs.tiers.core`** — booping's own records: `path` relative to the plugin root (`vault/specs`), `namespace` the prefix other tiers cite them by (`booping`).
+- **`core.specs.tiers.global`** — your records for every project: `path` relative to `home_dir` (`_specs`), `namespace` your prefix. `null` takes the `USER` environment variable.
+- **`core.specs.tiers.project`** — the project's own records: `path` relative to the attached repo. `null` resolves to `<vault>/specs` when the vault lives inside the repo, else `specs`.
+
+A tier `path` that is absolute or starts with `~` is taken as is.
 
 ## Per-playbook keys, under `core.{name}_playbook`
 

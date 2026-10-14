@@ -34,9 +34,6 @@ jobs:
       - name: Test
         run: just pytest
 
-      - name: Contract corpus
-        run: just e2e
-
   snapshots:
     runs-on: ubuntu-latest
     steps:
@@ -94,3 +91,9 @@ jobs:
 
       - name: Structural checks over rendered reports
         run: just mdcheck
+
+      - name: Specs records
+        run: just specs-check
+
+      - name: Contract corpus
+        run: just e2e

@@ -31,18 +31,9 @@ ci: lint typecheck pytest snapshots mdcheck specs-check e2e
 mdcheck:
     @uv run scripts/mdcheck.py
 
-[doc("Check every record in vault/specs against its type's shipped schema")]
+[doc("Check this repo's specs records (project tier) — booping specs check")]
 specs-check:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    rc=0
-    for schema in src/specs/schemas/*.yaml; do
-        type=$(basename "$schema" .yaml)
-        files=(vault/specs/"$type"/*.md)
-        [ -e "${files[0]}" ] || continue
-        mdcheck "$schema" "${files[@]}" || rc=1
-    done
-    exit $rc
+    bin/booping specs check
 
 [doc("Check the committed reports against a fresh hermetic render")]
 snapshots:

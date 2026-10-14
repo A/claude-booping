@@ -32,4 +32,8 @@ is the shipped guide: [src/specs/README.md](../../src/specs/README.md).
 just specs-check
 ```
 
-Checks every record here against its type's shipped schema (mdcheck).
+Runs `booping specs check` over this directory, the project tier of this repo: each
+record against its type's shipped schema (mdcheck), layout, file names, unique
+numbers, frontmatter, rule targets, relative link targets, typed refs and `sources`
+paths, with a warning for a namespace no tier answers to. The full list is the
+shipped guide's [Check](../../src/specs/README.md#check) section.
