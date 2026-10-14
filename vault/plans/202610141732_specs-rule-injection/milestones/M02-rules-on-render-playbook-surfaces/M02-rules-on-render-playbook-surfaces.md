@@ -2,7 +2,7 @@
 id: "02"
 title: "Rules section on the render-playbook surfaces"
 sp: 9
-status: pending
+status: done
 plan: "vault/plans/202610141732_specs-rule-injection/index.md"
 ---
 
@@ -16,10 +16,10 @@ plan: "vault/plans/202610141732_specs-rule-injection/index.md"
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 2.1 | `_rules.j2` partial (args `rules`, `surface`) and matching: generalize `playbook_lessons` / `step_lessons` to any item with `parsed_targets` and use them for rules; render `## Rules` directly before the lessons section on the composed surface, the `--step` surface and inline-step sections | `src/templates/_partials/_rules.j2`, `booping-python/src/booping/commands/render_playbook.py` | 3 | pending |
-| 2.2 | `--no-rules` flag: strips every rules section and every rule notice; `--no-lessons` unchanged | `booping-python/src/booping/commands/render_playbook.py` | 1 | pending |
-| 2.3 | Rule notices: one `**Note — tell the user:**` per `RuleSkip` and per rule step target naming a step this playbook lacks | `booping-python/src/booping/commands/render_playbook.py` | 2 | pending |
-| 2.4 | e2e cases pinning the section, the notices and the flag; rebaseline the `--help` case | `booping-python/e2e/cases/render-playbook/*.txtar` | 3 | pending |
+| 2.1 | `_rules.j2` partial (args `rules`, `surface`) and matching: generalize `playbook_lessons` / `step_lessons` to any item with `parsed_targets` and use them for rules; render `## Rules` directly before the lessons section on the composed surface, the `--step` surface and inline-step sections | `src/templates/_partials/_rules.j2`, `booping-python/src/booping/commands/render_playbook.py` | 3 | done |
+| 2.2 | `--no-rules` flag: strips every rules section and every rule notice; `--no-lessons` unchanged | `booping-python/src/booping/commands/render_playbook.py` | 1 | done |
+| 2.3 | Rule notices: one `**Note — tell the user:**` per `RuleSkip` and per rule step target naming a step this playbook lacks | `booping-python/src/booping/commands/render_playbook.py` | 2 | done |
+| 2.4 | e2e cases pinning the section, the notices and the flag; rebaseline the `--help` case | `booping-python/e2e/cases/render-playbook/*.txtar` | 3 | done |
 
 Section content (locked, [clarifications.md](../../clarifications.md) C1), byte for byte:
 
@@ -44,25 +44,25 @@ Notice texts (C6):
 
 ### Task 2.1
 
-- [ ] A playbook-targeted rule renders in the composed output's `## Rules` section, before `## Lessons` when both exist, at the lessons position when only rules exist.
-- [ ] A `{playbook}/{step}`-targeted rule renders on that step's `--step` output and its inline-step section, never on the composed playbook section.
-- [ ] One partial serves both surfaces; the matching helpers are shared by lessons and rules (no second copy of the target-matching logic).
+- [x] A playbook-targeted rule renders in the composed output's `## Rules` section, before `## Lessons` when both exist, at the lessons position when only rules exist.
+- [x] A `{playbook}/{step}`-targeted rule renders on that step's `--step` output and its inline-step section, never on the composed playbook section.
+- [x] One partial serves both surfaces; the matching helpers are shared by lessons and rules (no second copy of the target-matching logic).
 
 ### Task 2.2
 
-- [ ] `--no-rules` removes every rules section and rule notice; lessons unaffected.
-- [ ] `render-playbook --help` lists `--no-rules`.
+- [x] `--no-rules` removes every rules section and rule notice; lessons unaffected.
+- [x] `render-playbook --help` lists `--no-rules`.
 
 ### Task 2.3
 
-- [ ] Both notice texts print exactly as above; exit code stays 0.
-- [ ] An untargeted or retired rule raises nothing.
+- [x] Both notice texts print exactly as above; exit code stays 0.
+- [x] An untargeted or retired rule raises nothing.
 
 ### Task 2.4
 
-- [ ] New cases, tier fixtures built in the case: core tier via an xdg config setting `core.specs.tiers.core.path: ~/core-specs` (`~` is the case's home) and `namespace: fx`; global tier under `home/Claude/_specs/` with an explicit `core.specs.tiers.global.namespace`; project tier under the case's repo.
-- [ ] Cases cover: section shape with one rule per tier in core/global/project order with each ref and link form; step-targeted rule on `--step` and on an inlined step only; rules before lessons; retired and untargeted rules render nowhere; core and project on one directory renders each rule once; both notices; `--no-rules`; a `--project` pinned render drops the global rule.
-- [ ] `help-lists-every-flag-including-no-lessons.txtar` rebaselined with `--txtar-update` and nothing else in it changed; any other case that moves is listed in the return.
+- [x] New cases, tier fixtures built in the case: core tier via an xdg config setting `core.specs.tiers.core.path: ~/core-specs` (`~` is the case's home) and `namespace: fx`; global tier under `home/Claude/_specs/` with an explicit `core.specs.tiers.global.namespace`; project tier under the case's repo.
+- [x] Cases cover: section shape with one rule per tier in core/global/project order with each ref and link form; step-targeted rule on `--step` and on an inlined step only; rules before lessons; retired and untargeted rules render nowhere; core and project on one directory renders each rule once; both notices; `--no-rules`; a `--project` pinned render drops the global rule.
+- [x] `help-lists-every-flag-including-no-lessons.txtar` rebaselined with `--txtar-update` and nothing else in it changed; any other case that moves is listed in the return.
 
 ## References
 
