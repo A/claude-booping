@@ -28,6 +28,7 @@ Core playbooks own the main workflow:
 - **`learn`** — fold retro findings into durable rules. See [learn](learn.md).
 - **`code-review`** — review a confirmed scope: findings, verdict, approved fixes, recorded in the run's own `codereviews/` artifact. See [code-review](code_review.md).
 - **`migrate`** — bring a vault up to the plugin's current migration watermark.
+- **`makemigration`** — author a new plugin-shipped vault migration at the next id, for `migrate` to apply.
 - **`playbook-authoring`** — the procedure for writing a new playbook.
 
 Run any of them with `/playbook <name>`. A playbook of your own sharing a core name clashes with it rather than replaces it.

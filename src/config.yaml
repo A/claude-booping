@@ -327,6 +327,18 @@ core:
           - migrations/*/migration.md
         sort: id
 
+  makemigration_playbook:
+    queries:
+      # Every migration the plugin ships, in id order — the highest `id` plus one
+      # is the next migration's id. Kept apart from migrate's `pending` spec so
+      # neither playbook's narrowing leaks into the other.
+      shipped:
+        root: core
+        glob:
+          - migrations/*/migration.md
+        sort: id
+        columns: [id, title, summary]
+
   setup_playbook:
     # Scaffold tree materialised by
     # `booping scaffold core.setup_playbook.scaffold <vault-dir>`. The vault is a

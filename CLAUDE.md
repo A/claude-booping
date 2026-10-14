@@ -2,7 +2,7 @@
 
 Claude Code plugin that grooms and executes plans across user projects. Plans and other run artifacts live in the per-project **vault** — `~/Claude/{project}/` by default, or a repo-local directory via the `.booping` marker's `vault_path:` key. Skills, agents, playbooks, templates, and config live in this repo.
 
-One shipped skill (`/playbook`); everything procedural is a **playbook** it drives (`groom`, `develop`, `code-review`, `retro`, `learn`, `setup`, `migrate`, `playbook-authoring`).
+One shipped skill (`/playbook`); everything procedural is a **playbook** it drives (`groom`, `develop`, `code-review`, `retro`, `learn`, `setup`, `migrate`, `makemigration`, `playbook-authoring`).
 
 ## Commands
 
