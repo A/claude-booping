@@ -2,7 +2,7 @@
 id: "02"
 title: "Site pages, stylesheet and writer"
 sp: 9
-status: pending
+status: done
 plan: "vault/plans/202610142320_specs-site/index.md"
 ---
 
@@ -27,32 +27,32 @@ A `Site` from M01 becomes a deterministic map of output files — top index, roo
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 2.1 | Templates and stylesheet | `booping-python/src/booping/specs/site/templates/*.html.j2`, `booping-python/src/booping/specs/site/style.css` | 4 | pending |
-| 2.2 | `build_site`: page assembly, link callback, counts, marks list, backlinks, warnings | `booping-python/src/booping/specs/site/pages.py` | 3 | pending |
-| 2.3 | `write_site` with the out-directory guards | `booping-python/src/booping/specs/site/write.py` | 2 | pending |
+| 2.1 | Templates and stylesheet | `booping-python/src/booping/specs/site/templates/*.html.j2`, `booping-python/src/booping/specs/site/style.css` | 4 | done |
+| 2.2 | `build_site`: page assembly, link callback, counts, marks list, backlinks, warnings | `booping-python/src/booping/specs/site/pages.py` | 3 | done |
+| 2.3 | `write_site` with the out-directory guards | `booping-python/src/booping/specs/site/write.py` | 2 | done |
 
 ## Definition of Done
 
 ### Task 2.1
 
-- [ ] Every page carries exactly the structure the Scope lists; no `<script>`, no absolute URL except a record's own external links.
-- [ ] Autoescape on; record text never reaches HTML unescaped except the `render_body` output.
+- [x] Every page carries exactly the structure the Scope lists; no `<script>`, no absolute URL except a record's own external links.
+- [x] Autoescape on; record text never reaches HTML unescaped except the `render_body` output.
 
 ### Task 2.2
 
-- [ ] `build_site` is a pure function: two calls over the same `Site` return equal maps.
-- [ ] Every relative `href` in every page resolves to a key of the map, and every `#fragment` to an `id` on the target page (the property the 2.3 tests assert).
-- [ ] Warnings are deduped per record and sorted by `(path, line)`.
+- [x] `build_site` is a pure function: two calls over the same `Site` return equal maps.
+- [x] Every relative `href` in every page resolves to a key of the map, and every `#fragment` to an `id` on the target page (the property the 2.3 tests assert).
+- [x] Warnings are deduped per record and sorted by `(path, line)`.
 
 ### Task 2.3
 
-- [ ] Each refusal raises `SiteError` with a one-line message naming the path; nothing is written or removed on refusal.
-- [ ] A second run over a marked directory removes a page whose record was deleted.
-- [ ] The marker is on disk before the first page is written.
+- [x] Each refusal raises `SiteError` with a one-line message naming the path; nothing is written or removed on refusal.
+- [x] A second run over a marked directory removes a page whose record was deleted.
+- [x] The marker is on disk before the first page is written.
 
 ### Tests (part of 2.3's SP)
 
-- [ ] Test surface: `build_site` and `write_site` over a two-root fixture in `tmp_path` (a value, an ADR with frontmatter `values:` ref, a body link with anchor, a cross-root `ns:` ref, a `[clarify]` mark, an unresolved link). Cases: the link-integrity property over every page; the marks list entry and its `L{n}` target; backlinks on the value page; the cross-root ref href `../../{other}/value/{stem}.html`; warnings list; each `write_site` refusal (parametrized) and the marker rewrite. Hand-written expectations, real files, no mocks.
+- [x] Test surface: `build_site` and `write_site` over a two-root fixture in `tmp_path` (a value, an ADR with frontmatter `values:` ref, a body link with anchor, a cross-root `ns:` ref, a `[clarify]` mark, an unresolved link). Cases: the link-integrity property over every page; the marks list entry and its `L{n}` target; backlinks on the value page; the cross-root ref href `../../{other}/value/{stem}.html`; warnings list; each `write_site` refusal (parametrized) and the marker rewrite. Hand-written expectations, real files, no mocks.
 
 ## References
 

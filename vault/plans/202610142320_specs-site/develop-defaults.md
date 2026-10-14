@@ -29,3 +29,11 @@ None yet.
 ## D6 — `.gitignore` anchored to `/site/`
 
 The repo `.gitignore` rule `site/` (MkDocs output at the repo root) also matched the new package `booping-python/src/booping/specs/site/`, hiding it from git and from ruff. Anchored to `/site/` in M01's commit — outside the plan's file lists, but without it the package is neither committable by path nor linted.
+
+## D7 — `build_site` returns `(files, warnings)`
+
+M02's contract lets `build_site` "return (or expose)" the warnings; the worker returns a tuple `(files, warnings)` with `warnings` a sorted, deduped list of `SiteWarning(path, line, message)`. Accepted as within the contract; M03 unpacks the tuple.
+
+## D8 — frontmatter ref line numbers read from disk
+
+YAML parsing carries no line numbers, so `build_site` re-reads each record file to locate the frontmatter line of an unresolved ref. The output stays deterministic (two calls over the same `Site` return equal maps, the DoD's test of purity), though the function reads files. Accepted.
