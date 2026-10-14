@@ -54,7 +54,7 @@ reviewed_at: 2026-10-14 21:36
 | id | title | sp | status |
 | --- | --- | --- | --- |
 | 01 | [Specs records load frontmatter through the shared splitter](milestones/M01-specs-shared-frontmatter-splitter/M01-specs-shared-frontmatter-splitter.md) | 2 | done |
-| 02 | [Vault-commit hooks commit an in-repo vault, vault paths only](milestones/M02-vault-commits-in-repo-vault/M02-vault-commits-in-repo-vault.md) | 8 | pending |
+| 02 | [Vault-commit hooks commit an in-repo vault, vault paths only](milestones/M02-vault-commits-in-repo-vault/M02-vault-commits-in-repo-vault.md) | 8 | done |
 | 03 | [code-review candidates show the plan's baseline commit](milestones/M03-review-candidates-baseline/M03-review-candidates-baseline.md) | 2 | pending |
 
 ## Implementation Order
