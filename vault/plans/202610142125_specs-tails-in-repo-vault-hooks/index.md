@@ -2,13 +2,13 @@
 title: "Specs tails and in-repo vault hooks — shared frontmatter splitter, vault commits,
   review baseline"
 type: "bug"
-status: in-progress
+status: done
 sp: 12
 related_to: null
 created: 2026-10-14 21:26
 planned: null
 started: 2026-10-14 21:37
-completed: null
+completed: 2026-10-14 21:50
 code_reviews: []
 sessions:
 - a07e88d4-8835-40cb-89ab-80a93a6d3fdb
@@ -25,6 +25,13 @@ agents:
   research-codebase: adb2303da067e50bc
   cross-review: a836e3e0b34be7c5c
 reviewed_at: 2026-10-14 21:36
+metrics_active_minutes: 24
+metrics_models:
+- claude-opus-5-5
+metrics_tokens_input: 138
+metrics_tokens_output: 37691
+metrics_tokens_cache_creation: 211448
+metrics_tokens_cache_read: 6254205
 ---
 
 # Specs tails and in-repo vault hooks — shared frontmatter splitter, vault commits, review baseline
