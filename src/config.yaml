@@ -125,6 +125,10 @@ core:
       global: {namespace: null, path: _specs}
       # Repo-relative; path null → {vault}/specs when the vault is inside the repo, else specs.
       project: {path: null}
+    site:
+      # Extra roots `booping specs site` renders after the tiers, each `{name, path}`;
+      # path home_dir-relative like tiers.global. Set in the global tier.
+      roots: []
 
   groom_playbook:
     # Agent that performs the detached second-model review of a drafted plan.

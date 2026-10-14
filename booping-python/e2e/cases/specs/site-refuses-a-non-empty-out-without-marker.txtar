@@ -1,0 +1,23 @@
+An existing, non-empty out directory without the `.booping-site` marker is refused; its file is
+left as it was.
+
+-- fixtures/cwd/specs/value/0001-small-steps.md --
+---
+type: value
+title: Small steps
+summary: Ship in small, reviewable steps.
+kind: value
+---
+
+# Small steps
+-- fixtures/cwd/specs-site/notes.txt --
+keep me
+-- cmd --
+booping specs site --root proj=specs
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: out path specs-site is not empty and has no .booping-site marker
+-- expected/cwd/specs-site/notes.txt --
+keep me

@@ -1,20 +1,30 @@
 from __future__ import annotations
 
 import argparse
+import re
 import sys
 from pathlib import Path
-from typing import NoReturn
+from typing import Any, NoReturn, cast
 
 from booping import logger
 from booping.context import Context
 from booping.context import config as config_mod
 from booping.rendering import get_plugin_root
-from booping.specs.check import CheckError, check_tier, format_finding
+from booping.specs.check import CheckError, check_tier, display_path, format_finding
 from booping.specs.init import InitError, apply, plan
 from booping.specs.records import Record, load_tier
-from booping.specs.tiers import Tier, resolve_tiers, types
+from booping.specs.site.model import SiteRoot, load_site
+from booping.specs.site.pages import build_site
+from booping.specs.site.write import SiteError, write_site
+from booping.specs.tiers import (
+    Tier,
+    _resolve_path,  # pyright: ignore[reportPrivateUsage]
+    resolve_tiers,
+    types,
+)
 
 TIER_CHOICES = ("core", "global", "project")
+ROOT_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*")
 
 
 def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:  # type: ignore[type-arg]
@@ -47,6 +57,27 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
     )
     _add_tier(init, "Tier to create; core ships with the plugin and is rejected (default: project)")
     init.set_defaults(func=_run_init)
+
+    site = verbs.add_parser(
+        "site",
+        help="Render specs roots to a static HTML site (default roots: the tiers"
+        " plus core.specs.site.roots)",
+    )
+    site.add_argument(
+        "--out",
+        default="specs-site",
+        metavar="DIR",
+        help="Output directory (default: specs-site)",
+    )
+    site.add_argument(
+        "--root",
+        dest="roots",
+        action="append",
+        default=[],
+        metavar="NAME=PATH",
+        help="A root to render (repeatable); replaces the tier and config roots",
+    )
+    site.set_defaults(func=_run_site)
 
 
 def _add_tier(
@@ -193,3 +224,99 @@ def _run_init(args: argparse.Namespace) -> None:
         print(line)
     logger.log(vault=ctx.vault, subcommand="specs", message=f"init --tier {args.tier}")
     print(tier.root.absolute())
+
+
+def _flag_roots(values: list[str]) -> list[SiteRoot]:
+    roots: list[SiteRoot] = []
+    for value in values:
+        name, sep, path = value.partition("=")
+        if not sep:
+            _fail(f"--root `{value}` is not NAME=PATH")
+        if ROOT_NAME.fullmatch(name) is None:
+            _fail(f"--root name `{name}` must match {ROOT_NAME.pattern}")
+        root_path = Path(path).expanduser()
+        if not root_path.is_dir():
+            _fail(f"--root `{name}`: {path} is not a directory")
+        roots.append(SiteRoot(name=name, path=root_path))
+    return roots
+
+
+def _default_roots(
+    ctx: Context, root: Path, home_dir: Path
+) -> tuple[list[SiteRoot], list[tuple[Path, str]]]:
+    """Tier roots then configured roots, deduplicated by resolved path; the second
+    item is the configured roots skipped for a missing directory, as `(path, name)`."""
+    roots: list[SiteRoot] = []
+    seen: set[Path] = set()
+    skipped: list[tuple[Path, str]] = []
+    for tier in _resolve(ctx, root, home_dir):
+        if not tier.root.is_dir() or tier.root.resolve() in seen:
+            continue
+        if tier.namespace is not None:
+            name = tier.namespace
+        else:
+            name = ctx.project.name if ctx.project is not None else tier.name
+        roots.append(SiteRoot(name=name, path=tier.root))
+        seen.add(tier.root.resolve())
+
+    site_cfg: dict[str, Any] = ctx.config.get("core", {}).get("specs", {}).get("site") or {}
+    entries: list[Any] = site_cfg.get("roots") or []
+    for entry in entries:
+        fields: dict[str, Any] = cast("dict[str, Any]", entry) if isinstance(entry, dict) else {}
+        name = fields.get("name")
+        path = fields.get("path")
+        if not isinstance(name, str) or ROOT_NAME.fullmatch(name) is None:
+            _fail(
+                f"core.specs.site.roots: bad entry {entry!r}; name must match {ROOT_NAME.pattern}"
+            )
+        if path is None:
+            _fail(f"core.specs.site.roots: entry `{name}` has no path")
+        root_path = _resolve_path(home_dir, str(path))
+        if root_path.resolve() in seen:
+            continue
+        if not root_path.is_dir():
+            skipped.append((root_path, name))
+            continue
+        roots.append(SiteRoot(name=name, path=root_path))
+        seen.add(root_path.resolve())
+    return roots, skipped
+
+
+def _run_site(args: argparse.Namespace) -> None:
+    ctx, root, home_dir = _assemble()
+    logger.log(vault=ctx.vault, subcommand="specs", message=f"site --out {args.out}")
+    known = _known_types(ctx, root)
+
+    skipped: list[tuple[Path, str]] = []
+    if args.roots:
+        roots = _flag_roots(args.roots)
+    else:
+        roots, skipped = _default_roots(ctx, root, home_dir)
+    if not roots:
+        _fail("no specs roots to render")
+    names = [r.name for r in roots]
+    duplicates = sorted({n for n in names if names.count(n) > 1})
+    if duplicates:
+        _fail(f"duplicate root name(s): {', '.join(duplicates)}")
+
+    site = load_site(roots, known)
+    files, warnings = build_site(site, known)
+    try:
+        write_site(files, Path(args.out), roots)
+    except SiteError as exc:
+        _fail(str(exc))
+
+    lines = [
+        (display_path(w.path), w.line, f":{w.line}  warning  site  {w.message}") for w in warnings
+    ]
+    lines += [
+        (display_path(path), 0, f"  warning  site  root {name} not found, skipped")
+        for path, name in skipped
+    ]
+    for path, _, rest in sorted(lines):
+        print(f"{path}{rest}", file=sys.stderr)
+    pages = sum(1 for path in files if path.endswith(".html"))
+    print(
+        f"specs site: {len(roots)} roots, {len(site.records)} records, {pages} pages,"
+        f" {len(lines)} warnings -> {args.out}"
+    )
