@@ -15,6 +15,8 @@ from booping.context.project import Project
 from booping.context.review_template import ReviewTemplate
 from booping.context.skill import Skill
 from booping.rendering import get_plugin_root
+from booping.specs.rules import RuleSkip, TargetedRule, load_targeted_rules
+from booping.specs.tiers import resolve_tiers
 
 
 class Context(BaseModel):
@@ -24,6 +26,8 @@ class Context(BaseModel):
     vault: Path | None = None
     lessons: list[Lesson] = []
     targeted_lessons: list[Lesson] = []
+    targeted_rules: list[TargetedRule] = []
+    rule_skips: list[RuleSkip] = []
     plan_templates: list[PlanTemplate] = []
     review_templates: list[ReviewTemplate] = []
     skills: dict[str, Skill] = {}
@@ -94,12 +98,24 @@ class Context(BaseModel):
         agents = Agent.load_all(root)
         playbooks = Playbook.load_all(vault, pinned_home_dir, root)
         targeted_lessons = Lesson.load_targeted(pinned_home_dir, vault)
+        targeted_rules, rule_skips = load_targeted_rules(
+            resolve_tiers(
+                cfg,
+                plugin_root=root,
+                home_dir=home_dir,
+                repo=project.repo_directory if project is not None else None,
+                vault=vault,
+                vault_override=vault_override is not None,
+            )
+        )
 
         return cls(
             project=project,
             vault=vault,
             lessons=lessons,
             targeted_lessons=targeted_lessons,
+            targeted_rules=targeted_rules,
+            rule_skips=rule_skips,
             plan_templates=plan_templates,
             review_templates=review_templates,
             skills=skills,
