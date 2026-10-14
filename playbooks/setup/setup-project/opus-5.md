@@ -21,6 +21,7 @@ Then, in order:
 4. `{repo_root}/.booping` — `project_name: {name}` always, plus `vault_path: {dir}` resolved against the repo root when the vault lives in the repo. Then, from the repo root, `booping marker-set latest_migration=@latest` — a fresh vault is already current, and without the key every render reports it behind.
 5. Repo-local vault only: `{home_dir}/{name}` as a symlink to the absolute vault dir. The scaffold tree cannot make it — it declares directories and text files only — so create it here.
 6. The visibility answer: append `.booping` to `{repo_root}/.gitignore` or to `{repo_root}/.git/info/exclude`. Tracked, or the question skipped → neither file is touched.
+7. From the repo root, `booping specs init --tier project` — the project specs tier, placed by the merged config. Report its output: one action line per change, then the absolute tier root.
 
 ## The project is already initialized
 
@@ -31,13 +32,16 @@ Project `claude-booping` is already set up.
   vault:  /home/anton/Dev/claude-booping/booping (in the repo)
   marker: .booping — project_name: claude-booping, vault_path: booping
   link:   ~/Claude/claude-booping -> booping/
+  specs:  /home/anton/Dev/claude-booping/booping/specs
 ```
+
+`specs:` is the project tier root when it exists, else `none — run booping specs init --tier project`.
 
 Then offer the change routes via `AskUserQuestion`: move the vault, rename the project, merge it into another project, or change nothing. The routes are **offered, not scripted** — act on the user's call plus what this run already knows. A rename moves three things together: the vault directory, the marker's `project_name` and the home-dir symlink. Changing nothing writes nothing, and the report above is then the whole outcome.
 
 ## Hard rules
 
-- Every decision is the user's, taken in-step via `AskUserQuestion`. Nothing is inferred silently, and nothing outside the vault, the marker and the symlink is written.
+- Every decision is the user's, taken in-step via `AskUserQuestion`. Nothing is inferred silently, and nothing outside the vault, the marker, the symlink and the specs tier `booping specs init` creates is written.
 - There is no attach route — never wire the repo to a vault this run did not create.
 - Stack detection and `_booping/` extension seeding are out of scope.
 
