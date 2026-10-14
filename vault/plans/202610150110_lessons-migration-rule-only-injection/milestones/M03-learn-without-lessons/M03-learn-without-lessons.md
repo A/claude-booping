@@ -2,7 +2,7 @@
 id: "03"
 title: "Learn stops reading and staging _lessons"
 sp: 3
-status: pending
+status: done
 plan: "vault/plans/202610150110_lessons-migration-rule-only-injection/index.md"
 ---
 
@@ -18,21 +18,21 @@ Tests: the learn render (snapshot) carries the change; `just smoke learn/dedup-s
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 3.1 | Dedup sweep and review-table doc without lessons; `_learn_targets.j2` wording. | `playbooks/learn/dedup-sweep/base.md`, `playbooks/learn/dedup-sweep/prompt.md`, `docs/learn_review_table.md`, `playbooks/learn/_partials/_learn_targets.j2` | 2 | pending |
-| 3.2 | Closing hook stages `specs` only; learn eval fixtures/asserts that name `_lessons` move to rules, smoke tier run. | `playbooks/learn/playbook.yaml`, `playbooks/learn/*/tests.yaml`, `playbooks/learn/*/_fixtures/*` | 1 | pending |
+| 3.1 | Dedup sweep and review-table doc without lessons; `_learn_targets.j2` wording. | `playbooks/learn/dedup-sweep/base.md`, `playbooks/learn/dedup-sweep/prompt.md`, `docs/learn_review_table.md`, `playbooks/learn/_partials/_learn_targets.j2` | 2 | done |
+| 3.2 | Closing hook stages `specs` only; learn eval fixtures/asserts that name `_lessons` move to rules, smoke tier run. | `playbooks/learn/playbook.yaml`, `playbooks/learn/*/tests.yaml`, `playbooks/learn/*/_fixtures/*` | 1 | done |
 
 ## Definition of Done
 
 ### Task 3.1
 
-- [ ] `rg -n '_lessons' playbooks/learn docs/learn_review_table.md` prints nothing.
-- [ ] The sweep's verdict vocabulary matches the review table's Type column in `docs/learn_review_table.md` (`rule` | `claude-md` | `covered`).
+- [x] `rg -n '_lessons' playbooks/learn docs/learn_review_table.md` prints nothing.
+- [x] The sweep's verdict vocabulary matches the review table's Type column in `docs/learn_review_table.md` (`rule` | `claude-md` | `covered`).
 
 ### Task 3.2
 
-- [ ] `bin/booping render-playbook learn` shows the closing edge staging `specs` only.
-- [ ] Every smoke suite whose files changed passes.
-- [ ] `just snapshots` drift is limited to `playbooks/learn/_reports/output.md`, each hunk one of this milestone's changes.
+- [x] `bin/booping render-playbook learn` shows the closing edge staging `specs` only.
+- [x] Every smoke suite whose files changed passes.
+- [x] `just snapshots` drift is limited to `playbooks/learn/_reports/output.md`, each hunk one of this milestone's changes.
 
 Return: the list of changed files, nothing else.
 

@@ -29,6 +29,7 @@ The configured ceiling is one milestone per briefing, so nine briefings, one per
 ## Accepted snapshots
 
 - `playbooks/develop/_reports/output.md` (M02) — one hunk: develop-loop `base.md`'s briefing line reworded from lesson context to `agent:{id}` rules, M02 task 2.2. `learn` did not drift: the hermetic fixture vault holds no playbook-targeted lesson, so the removed `**Lessons:**` block never rendered there.
+- `playbooks/learn/_reports/output.md` (M03) — five hunks, all the lesson removal M03 names: `_learn_targets.j2` wording, dedup-sweep summary and lookup set, the retired `update existing at _lessons/{file}` verdict and its write handling, and the transition summary no longer naming a lesson deletion.
 
 ## D7 — M01 import grep
 
@@ -37,3 +38,7 @@ M01's DoD grep `rg -n 'LessonTarget|context.lesson import' booping-python/src` s
 ## D8 — M02 extra test file
 
 The worker also rewrote `tests/templates/test_skill_rules.py`, outside the contract's list: its body test located the rules section by the `## Lessons` heading the milestone removes.
+
+## D9 — M03 scope and evidence
+
+The worker also edited `playbooks/learn/write/{base,fable-5}.md` and `playbooks/learn/transition/{base,prompt}.md`, outside the contract's list: they handled the retired lesson-conversion verdict, and M03's own DoD grep (`_lessons` over `playbooks/learn`) cannot pass without them. No learn eval fixture or assert named a lesson file (the `extract-candidates` NO-LESSON-PATH negative assert stays valid), so no suite changed and no smoke run was due — the playbook preamble also bars the runner from launching evals. `render-playbook learn` does not print state hooks, so the closing edge's `--stage specs` is read off `playbooks/learn/playbook.yaml` instead.
