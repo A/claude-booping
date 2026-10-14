@@ -4,7 +4,7 @@ title: Glossary
 summary: The canonical names for booping's concepts — one term per concept, never a synonym, used across records, docs and step bodies.
 created_by: claude
 created_at: 2026-10-14
-updated_at: 2026-10-14
+updated_at: 2026-10-15
 status: live
 sources: [https://github.com/A/claude-booping/blob/c7e43b43dfe5fc1c0fafe253dd148d7e62ea231e/vault/docs/_specs/glossary.md]
 ---
@@ -12,12 +12,12 @@ sources: [https://github.com/A/claude-booping/blob/c7e43b43dfe5fc1c0fafe253dd148
 ## Facts
 
 - **Project Vault** — the per-project directory holding every run artefact (`plans/`,
-  `retrospectives/`, `codereviews/`, `_lessons/`, `_playbooks/`, templates,
+  `retrospectives/`, `codereviews/`, `_playbooks/`, templates,
   `sprints.md`): `~/Claude/{project}/` by default, or repo-local via the marker's
   `vault_path:` key.
 - **Core level** — the plugin repo itself: the shipped playbooks, agents, the
   `/playbook` skill and the `src/config.yaml` defaults.
-- **Global level** — the machine-wide tier: `<home_dir>/` (`_playbooks/`, `_lessons/`,
+- **Global level** — the machine-wide tier: `<home_dir>/` (`_playbooks/`, `_specs/`,
   templates) and `~/.config/booping/config.yaml`.
 - **Project level** — the tier scoped to one attached repo: the Project Vault and its
   `config.yaml`.
@@ -42,8 +42,9 @@ sources: [https://github.com/A/claude-booping/blob/c7e43b43dfe5fc1c0fafe253dd148
   the Project Vault.
 - **Retrospective artefact** — the standalone `retrospectives/{slug}.md` the retro
   track advances, linked back from the covered plan's `retro:` key.
-- **Targeted lesson** — a markdown note injected into exactly the playbooks, steps,
-  agents or skills its `targets:` list names; an untargeted one injects nowhere.
+- **Targeted rule** — an accepted rule record whose brief is injected into exactly the
+  playbooks, steps, agents or skills its `targets:` list names; an untargeted one
+  injects nowhere.
 - **Marker** — the repo's `.booping` file attaching it to a Project Vault:
   `project_name:`, optional `vault_path:` and the `latest_migration:` watermark.
 - **Migration watermark** — the marker's `latest_migration:` key, the highest shipped

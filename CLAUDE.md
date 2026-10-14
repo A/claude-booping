@@ -35,7 +35,7 @@ One shipped skill (`/playbook`); everything procedural is a **playbook** it driv
 
 ## Rendering pipeline
 
-One stage, at **runtime** (skill load): a thin shell's `!`booping render src/templates/…`` line renders the body with full project context — config merge, vault, lessons, playbooks.
+One stage, at **runtime** (skill load): a thin shell's `!`booping render src/templates/…`` line renders the body with full project context — config merge, vault, rules, playbooks.
 
 ## Config
 
@@ -57,8 +57,7 @@ Multi-step guided procedures discovered from three roots — core `playbooks/`, 
 - `jinja: true` opts all bodies into Jinja through the full context env, each with a loader chain body → step dir → playbook dir → discovery roots (local → global → core) → `src/templates/`.
 - **Run state** is opt-in via `states:` (named state machines: `artifact`, `initial`, `statuses`, transitions with `when`/`gates`/`hooks`). `booping playbook-transition` is the **only** writer of run state; its printed mutation report is authoritative — never re-read to verify. `booping playbook-state` is the read-only frontier report used to resume; both address the run artifact via `--target` when the machine declares no `artifact:`. Hooks: `frontmatter-update` and `script <name> [args…]` (argv passed through; playbook `_scripts/` first, then the discovery roots' `_scripts/`, most specific wins).
 - **Tracker mirroring**: `playbooks/_scripts/tracker-sync` (push the artifact's status) and `tracker-comment <workdir-relative-path>` (post a file as a comment) are `script` hooks on groom's edges. Both absorb the tracker's exit code and warn on stderr — a hook failing after `status:` is written would abort the transition with the vault advanced and the tracker behind; `booping-tracker sync --artifact …` by hand is the reconcile.
-- **Lessons**: markdown files in `<home_dir>/_lessons/` and `{vault}/_lessons/` with a `targets:` list (`{playbook}`, `{playbook}/{step}`, `agent:{id}`, `skill:{name}`), injected by `render-playbook` and by internal agent and skill bodies. Untargeted lessons inject nowhere.
-- **Rules**: `status: accepted` spec rules with `targets:` (lesson target forms) and `brief:`, read from the three `core.specs` tiers and injected as brief plus link in a `## Rules` section right before `## Lessons`, wherever lessons inject; `--no-rules` opts out of render-playbook's. See [documentation/playbook.md#rules](documentation/playbook.md#rules).
+- **Rules**: `status: accepted` spec rules with `targets:` (`{playbook}`, `{playbook}/{step}`, `agent:{id}`, `skill:{name}`) and `brief:`, read from the three `core.specs` tiers and injected as brief plus link in a `## Rules` section by `render-playbook` and by internal agent and skill bodies; an untargeted rule injects nowhere; `--no-rules` opts out of render-playbook's. See [documentation/playbook.md#rules](documentation/playbook.md#rules).
 - Graph/render problems surface as in-band `**STOP — tell the user:**` / `**Note — tell the user:**` notices at exit 0, never crashes.
 - The driving protocol lives in `src/templates/_partials/_playbook_driving.j2`. Full mechanics: [documentation/playbook.md](documentation/playbook.md).
 
@@ -76,7 +75,7 @@ Each playbook owns its own status vocabulary in its `states:` block — there is
 
 ## Vault (out of framework scope, authored per project)
 
-`plans/`, `retrospectives/`, `codereviews/`, `_lessons/` (targeted), `_playbooks/` (user playbooks), `plan_templates/`, `review_templates/`, `notes/`, `sprints.md` (Obsidian Bases fence, seeded once, written by nothing), `.booping.log` (CLI log at the vault root, gitignored there). Obsidian-ready: markdown + YAML frontmatter only. See [documentation/vault.md](documentation/vault.md). Everything benchmark — registry, runbook, method, `bench-score`, mutations, fixtures, run artifacts, and the scorecard table in its README — lives in the separate [booping-benchmarks](https://github.com/A/booping-benchmarks) repo (local clone `~/Dev/@A/booping-benchmarks/`); only the `model-benchmark` playbook that drives a run stays in this vault's `_playbooks/`.
+`plans/`, `retrospectives/`, `codereviews/`, `_playbooks/` (user playbooks), `plan_templates/`, `review_templates/`, `notes/`, `sprints.md` (Obsidian Bases fence, seeded once, written by nothing), `.booping.log` (CLI log at the vault root, gitignored there). Obsidian-ready: markdown + YAML frontmatter only. See [documentation/vault.md](documentation/vault.md). Everything benchmark — registry, runbook, method, `bench-score`, mutations, fixtures, run artifacts, and the scorecard table in its README — lives in the separate [booping-benchmarks](https://github.com/A/booping-benchmarks) repo (local clone `~/Dev/@A/booping-benchmarks/`); only the `model-benchmark` playbook that drives a run stays in this vault's `_playbooks/`.
 
 This repo's own vault is checked in at `vault/`. Its `specs/` holds booping's values, rules, ADRs, stories, ideas, references and runbooks as typed records (format: `src/specs/README.md`, check: `just specs-check`) — the authority on why booping is the way it is; read the values and rules before a design change. The `docs` playbook reads and keeps current the value records, reference/0001–0003 and the story records, its feature index rendered from the stories.
 
@@ -87,7 +86,7 @@ This repo's own vault is checked in at `vault/`. Its `specs/` holds booping's va
 - **Schema over prose**: structured data lives in `src/config.yaml` and is rendered from there — never restated in body prose.
 - **Reference the source, never the literal**: dynamic values (statuses, queues, agent ids) render from config/query specs.
 - **Wide-domain**: skills and playbooks stay stack-agnostic. Project specifics live in the project specs tier (rule records) and the attached repo's own `CLAUDE.md` — the only two destinations learn writes.
-- **Agent wiring**: the driver owns all vault reads/writes; worker agents touch only repo code. Project-local shaping of an agent or a skill is a targeted lesson or rule (`agent:{id}`, `skill:{name}`), not a separate extension file. External global agents at `~/.claude/agents/` wire in via config — see [documentation/integrating-external-agents.md](documentation/integrating-external-agents.md).
+- **Agent wiring**: the driver owns all vault reads/writes; worker agents touch only repo code. Project-local shaping of an agent or a skill is a targeted rule (`agent:{id}`, `skill:{name}`), not a separate extension file. External global agents at `~/.claude/agents/` wire in via config — see [documentation/integrating-external-agents.md](documentation/integrating-external-agents.md).
 
 ## Editing conventions
 

@@ -67,7 +67,7 @@ One table row per destination document:
 | Destination | Roles | Changes | Must say | Progress |
 | --- | --- | --- | --- | --- |
 | `README.md` | Plugin user | C1, C3 | C1: the Statuses narrative now describes retro as its own track, plan statuses ending at `done`. C3: code review is queued from plan frontmatter, one line, no mechanics. | pending |
-| `documentation/vault.md` | Playbook author, Plugin user | C2 | `_lessons/` holds flat files carrying `targets:`; describe the current shape only — no per-surface-file narration. | pending |
+| `documentation/vault.md` | Playbook author, Plugin user | C2 | `specs/rule/` records carry `targets:`; describe the current shape only — no per-surface-file narration. | pending |
 
 ## Not targeted
 

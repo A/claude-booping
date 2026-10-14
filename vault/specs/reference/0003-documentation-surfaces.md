@@ -4,7 +4,7 @@ title: Documentation surfaces
 summary: Booping's markdown documentation surfaces, each with its audience and the depth ceiling past which content belongs elsewhere; executed or generated markdown is not a surface.
 created_by: claude
 created_at: 2026-10-14
-updated_at: 2026-10-14
+updated_at: 2026-10-15
 status: live
 sources: [https://github.com/A/claude-booping/blob/c7e43b43dfe5fc1c0fafe253dd148d7e62ea231e/vault/docs/_specs/targets.md]
 ---
@@ -16,7 +16,7 @@ sources: [https://github.com/A/claude-booping/blob/c7e43b43dfe5fc1c0fafe253dd148
   first install; command references, config keys and playbook mechanics belong on the
   site. Its Statuses section is hand-maintained over the per-playbook `states:` blocks.
 - `documentation/` (the MkDocs site) — for users (quick start, per-playbook commands,
-  status vocabularies) and advanced users (config merge, templates, lessons, playbook
+  status vocabularies) and advanced users (config merge, templates, rules, playbook
   authoring, external agents). The deep public reference, exhaustive on behaviour and
   configuration; plugin internals (build pipeline, snapshots, evals) stay out.
 - `documentation/recipes/` — for advanced users and contributors: one blogpost-like,

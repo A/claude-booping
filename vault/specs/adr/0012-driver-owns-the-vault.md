@@ -1,10 +1,10 @@
 ---
 type: adr
 title: The driver owns the vault; workers receive briefings
-summary: The playbook driver does every vault read and write; worker agents touch only repo code and know nothing of lessons, plan statuses or the vault layout.
+summary: The playbook driver does every vault read and write; worker agents touch only repo code and know nothing of rules, plan statuses or the vault layout.
 created_by: claude
 created_at: 2026-10-14
-updated_at: 2026-10-14
+updated_at: 2026-10-15
 status: accepted
 rules: [rule/0019]
 values: [value/0002, value/0003, value/0005]
@@ -24,14 +24,14 @@ bounded the return to what the harness needs.
 ## Decision
 
 The driver — the runner of a playbook — owns all vault reads and writes: plan
-status, lessons, milestone tables, sidecars, vault commits. Worker agents touch only
+status, rules, milestone tables, sidecars, vault commits. Worker agents touch only
 repo code. A worker receives a briefing (its milestone file's path and the context
 the runner chooses) and returns a bounded report; it does not name skills or
-playbooks, read lessons or know plan statuses. A worker's code work may reach outside
+playbooks, read rules or know plan statuses. A worker's code work may reach outside
 the attached repo (a deliverable under `~/.claude/`, another repo) only after the
-user explicitly confirms it for that plan; the vault stays the driver's either way. A lesson reaches a worker only
+user explicitly confirms it for that plan; the vault stays the driver's either way. A rule reaches a worker only
 through the runner's briefing; project-local shaping of an agent is a targeted
-lesson (`agent:{id}`), not an extension file.
+rule (`agent:{id}`), not an extension file.
 
 ## Alternatives
 

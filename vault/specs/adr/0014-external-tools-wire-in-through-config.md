@@ -1,10 +1,10 @@
 ---
 type: adr
 title: External agents and surfaces wire in through config; core names no external tool
-summary: An external worker or review surface is a plain agent registered in config and steered by a targeted lesson; core ships no wrapper for it and no playbook names it.
+summary: An external worker or review surface is a plain agent registered in config and steered by a targeted rule; core ships no wrapper for it and no playbook names it.
 created_by: claude
 created_at: 2026-10-14
-updated_at: 2026-10-14
+updated_at: 2026-10-15
 status: accepted
 values: [value/0005, value/0009]
 sources: [playbooks/code-review/_specs/DECISIONS.md, vault/retrospectives/20260610-cli-logging-and-agent-namespacing.md, vault/retrospectives/20260610-plannotator-code-review-surface.md, vault/retrospectives/20260722-seven-plan-retro.md, CLAUDE.md]
@@ -29,7 +29,7 @@ knows nothing about Plannotator.
 An external worker or surface is a self-contained Claude Code agent (global at
 `~/.claude/agents/` or the user's own), registered under
 `core.{name}_playbook.agents.<id>` with `good_for`/`bad_for` bullets and steered by a
-targeted lesson on the step that delegates. Core ships no wrapper, compile step or
+targeted rule on the step that delegates. Core ships no wrapper, compile step or
 transport for it, and no playbook body names a specific external tool. Code review's
 `present` step shows the findings in chat and collects the verdict; a browser round
 is the configured agent's own business, and with no agent configured the chat
@@ -49,7 +49,7 @@ Every worker, internal or external, is an agent invoked the same way.
 
 - **Pros:** one mental model for the runner; the user swaps workers in their own
   tier; core stays free of tool-specific code.
-- **Cons:** the user writes the agent and its lesson; booping never shapes the
+- **Cons:** the user writes the agent and its rule; booping never shapes the
   agent's prompt.
 - **Complexity:** low.
 - **Reversibility:** high.

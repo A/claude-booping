@@ -4,7 +4,7 @@ title: Bodies render at skill load, with no build stage
 summary: Skill and agent bodies are rendered from templates at load time with full project context; the generated-file build stage is retired.
 created_by: claude
 created_at: 2026-10-14
-updated_at: 2026-10-14
+updated_at: 2026-10-15
 status: accepted
 rules: [rule/0017]
 values: [value/0003, value/0005]
@@ -20,7 +20,7 @@ plugin-packaging files. The framework research found that `config_files.yaml`
 carried only `effort:` and could fold into normal config, "killing the fourth config
 file and possibly the whole build step", and classed the build as plugin packaging
 rather than framework. What a body needs — the merged config tiers, the vault,
-lessons, the playbook set — belongs to one project and is known only when the skill
+rules, the playbook set — belongs to one project and is known only when the skill
 is loaded in it.
 
 ## Decision
@@ -43,7 +43,7 @@ rebuilt. The build stage and `config_files.yaml` are gone.
 
 A thin shell calls the renderer when Claude Code loads the skill or agent.
 
-- **Pros:** the body sees the merged config, vault and lessons of the project it
+- **Pros:** the body sees the merged config, vault and rules of the project it
   runs in; template edits take effect on the next load.
 - **Cons:** every load runs the CLI; other costs are not named in the source.
 - **Complexity:** medium.
@@ -55,7 +55,7 @@ A build step renders templates into committed files.
 
 - **Pros:** the rendered body is visible in the repo.
 - **Cons:** a rebuild after every edit; a fourth config file; the output cannot carry
-  one project's config or lessons.
+  one project's config or rules.
 - **Complexity:** medium.
 - **Reversibility:** high.
 

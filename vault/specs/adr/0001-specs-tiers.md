@@ -4,7 +4,7 @@ title: Specs are a core feature in three tiers
 summary: Booping ships the specs format and its own specs; a global tier in the home dir and a project tier in the repo add their records, cross-tier refs go by namespace.
 created_by: claude
 created_at: 2026-10-14
-updated_at: 2026-10-14
+updated_at: 2026-10-15
 status: accepted
 values: [value/0003, value/0005, value/0011, value/0001]
 rules: [rule/0001]
@@ -93,7 +93,8 @@ Each project keeps its own copy of the format and its own checker.
 
 ## Consequences
 
-- `vault/_lessons/` is deprecated; it stays until lesson injection reads from specs.
+- `vault/_lessons/` was converted into rule records and removed by
+  [migration 004](https://github.com/A/claude-booping/blob/master/migrations/004_lessons_to_rules/migration.md).
 - The existing project copies migrate after the feature ships, each with a commit
   before the migration for rollback.
 - [clarify] An exported global tier that a project imports, so a namespace resolves

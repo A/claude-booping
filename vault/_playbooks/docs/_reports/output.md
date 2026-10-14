@@ -201,10 +201,10 @@ is read in its own sub-agent, and what comes back to you is a row, never the ite
 | Playbook driver | The /playbook skill discovers a procedure across the core, global and project levels and drives it to completion. | done | specs/story/0001-playbook-driver.md |
 | Run state machines | A run's state lives in per-playbook states: machines that only the booping CLI advances. | done | specs/story/0002-run-state-machines.md |
 | Layered configuration | Config is a deep merge over the core, global and project levels, and any mapping in it can be a query spec or a scaffold tree. | done | specs/story/0003-layered-configuration.md |
-| Targeted lessons | A lesson is a markdown note injected into exactly the playbooks, steps, agents or skills its targets: list names. | done | specs/story/0004-targeted-lessons.md |
+| Targeted rules | An accepted rule's brief is injected into exactly the playbooks, steps, agents or skills its targets: list names. | done | specs/story/0004-targeted-rules.md |
 | Plan and review templates | Groom and code-review offer plan and review templates the user authored in the Project Vault or at the global level. | done | specs/story/0005-plan-and-review-templates.md |
 | User playbooks | Playbooks the user authors at the global level or in the Project Vault are discovered and run beside the core ones. | done | specs/story/0006-user-playbooks.md |
-| External agents | Agents the plugin does not ship are wired into playbook agent slots through config and shaped per project by targeted lessons. | done | specs/story/0007-external-agents.md |
+| External agents | Agents the plugin does not ship are wired into playbook agent slots through config and shaped per project by targeted rules. | done | specs/story/0007-external-agents.md |
 | Template pipeline | Skill and agent bodies render in one runtime stage from src/templates/ with full project context, reproducibly when pinned. | done | specs/story/0008-template-pipeline.md |
 | Quality gates | just ci runs lint, typecheck, pytest, snapshots, mdcheck and e2e in order, holding the plugin's behaviour. | done | specs/story/0009-quality-gates.md |
 | pytest-txtar | The e2e corpus's case format and sandboxed runner ship as a standalone pytest plugin on PyPI. | done | specs/story/0010-pytest-txtar.md |
@@ -216,7 +216,7 @@ is read in its own sub-agent, and what comes back to you is a row, never the ite
 | Groom | Groom shapes a feature, bug or refactor into a specified, estimated plan the user approved, ending at ready-for-dev. | done | specs/story/0016-groom.md |
 | Develop | Develop executes a groomed plan one milestone at a time through a worker agent and closes it at done or fail. | done | specs/story/0017-develop.md |
 | Retro | Retro mines a finished sprint's session logs, diff and the user's feedback into a standalone retrospective. | done | specs/story/0018-retro.md |
-| Learn | Learn turns retrospective findings the user confirmed into targeted lessons or CLAUDE.md entries. | done | specs/story/0019-learn.md |
+| Learn | Learn turns retrospective findings the user confirmed into rule records in the project specs tier or CLAUDE.md entries. | done | specs/story/0019-learn.md |
 | Session metrics | A plan carries measured active minutes, tokens and models computed from Claude Code session logs. | done | specs/story/0020-session-metrics.md |
 | Code review | The code-review playbook reviews a confirmed scope, collects the human verdict and applies only approved fixes. | done | specs/story/0021-code-review.md |
 | Task tracker | The booping-tracker CLI carries every interaction with an issue tracker, and groom mirrors its run status and questions onto the tracker issue. | done | specs/story/0022-task-tracker.md |
@@ -334,10 +334,10 @@ driving context whole; the documentation's structure comes from the surfaces rec
 | Playbook driver | The /playbook skill discovers a procedure across the core, global and project levels and drives it to completion. | done | specs/story/0001-playbook-driver.md |
 | Run state machines | A run's state lives in per-playbook states: machines that only the booping CLI advances. | done | specs/story/0002-run-state-machines.md |
 | Layered configuration | Config is a deep merge over the core, global and project levels, and any mapping in it can be a query spec or a scaffold tree. | done | specs/story/0003-layered-configuration.md |
-| Targeted lessons | A lesson is a markdown note injected into exactly the playbooks, steps, agents or skills its targets: list names. | done | specs/story/0004-targeted-lessons.md |
+| Targeted rules | An accepted rule's brief is injected into exactly the playbooks, steps, agents or skills its targets: list names. | done | specs/story/0004-targeted-rules.md |
 | Plan and review templates | Groom and code-review offer plan and review templates the user authored in the Project Vault or at the global level. | done | specs/story/0005-plan-and-review-templates.md |
 | User playbooks | Playbooks the user authors at the global level or in the Project Vault are discovered and run beside the core ones. | done | specs/story/0006-user-playbooks.md |
-| External agents | Agents the plugin does not ship are wired into playbook agent slots through config and shaped per project by targeted lessons. | done | specs/story/0007-external-agents.md |
+| External agents | Agents the plugin does not ship are wired into playbook agent slots through config and shaped per project by targeted rules. | done | specs/story/0007-external-agents.md |
 | Template pipeline | Skill and agent bodies render in one runtime stage from src/templates/ with full project context, reproducibly when pinned. | done | specs/story/0008-template-pipeline.md |
 | Quality gates | just ci runs lint, typecheck, pytest, snapshots, mdcheck and e2e in order, holding the plugin's behaviour. | done | specs/story/0009-quality-gates.md |
 | pytest-txtar | The e2e corpus's case format and sandboxed runner ship as a standalone pytest plugin on PyPI. | done | specs/story/0010-pytest-txtar.md |
@@ -349,7 +349,7 @@ driving context whole; the documentation's structure comes from the surfaces rec
 | Groom | Groom shapes a feature, bug or refactor into a specified, estimated plan the user approved, ending at ready-for-dev. | done | specs/story/0016-groom.md |
 | Develop | Develop executes a groomed plan one milestone at a time through a worker agent and closes it at done or fail. | done | specs/story/0017-develop.md |
 | Retro | Retro mines a finished sprint's session logs, diff and the user's feedback into a standalone retrospective. | done | specs/story/0018-retro.md |
-| Learn | Learn turns retrospective findings the user confirmed into targeted lessons or CLAUDE.md entries. | done | specs/story/0019-learn.md |
+| Learn | Learn turns retrospective findings the user confirmed into rule records in the project specs tier or CLAUDE.md entries. | done | specs/story/0019-learn.md |
 | Session metrics | A plan carries measured active minutes, tokens and models computed from Claude Code session logs. | done | specs/story/0020-session-metrics.md |
 | Code review | The code-review playbook reviews a confirmed scope, collects the human verdict and applies only approved fixes. | done | specs/story/0021-code-review.md |
 | Task tracker | The booping-tracker CLI carries every interaction with an issue tracker, and groom mirrors its run status and questions onto the tracker issue. | done | specs/story/0022-task-tracker.md |
@@ -396,7 +396,7 @@ One table row per destination document:
 | Destination | Roles | Changes | Must say | Progress |
 | --- | --- | --- | --- | --- |
 | `README.md` | Plugin user | C1, C3 | C1: the Statuses narrative now describes retro as its own track, plan statuses ending at `done`. C3: code review is queued from plan frontmatter, one line, no mechanics. | pending |
-| `documentation/vault.md` | Playbook author, Plugin user | C2 | `_lessons/` holds flat files carrying `targets:`; describe the current shape only — no per-surface-file narration. | pending |
+| `documentation/vault.md` | Playbook author, Plugin user | C2 | `specs/rule/` records carry `targets:`; describe the current shape only — no per-surface-file narration. | pending |
 
 ## Not targeted
 

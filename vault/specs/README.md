@@ -16,9 +16,6 @@ What lives where:
 - **`documentation/`** — the public docs site, for users; `docs/` — fragments the
   skills lazy-load at runtime.
 
-`vault/_lessons/` is deprecated: it stays until lesson injection reads rules
-([rule/0001](rule/0001-lessons-are-rules.md)).
-
 ## Format
 
 The format these records follow — tiers, types, files, frontmatter, body, marks —

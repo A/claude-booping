@@ -4,7 +4,7 @@ title: Audience
 summary: Booping is read by three roles — users, advanced users and contributors — each coming for different things at a different depth, in a different voice.
 created_by: claude
 created_at: 2026-10-14
-updated_at: 2026-10-14
+updated_at: 2026-10-15
 status: live
 sources: [https://github.com/A/claude-booping/blob/c7e43b43dfe5fc1c0fafe253dd148d7e62ea231e/vault/docs/_specs/roles.md, https://github.com/A/claude-booping/blob/c7e43b43dfe5fc1c0fafe253dd148d7e62ea231e/vault/docs/_specs/index.md]
 ---
@@ -26,9 +26,9 @@ sources: [https://github.com/A/claude-booping/blob/c7e43b43dfe5fc1c0fafe253dd148
   happy path first and variations after. Reads the README, the docs site and release
   notes.
 - **Advanced user** — a user shaping booping to a specific codebase: tuning config,
-  authoring templates and lessons, writing their own playbooks, wiring in external
+  authoring templates and rules, writing their own playbooks, wiring in external
   agents. Comes for the three-level config merge and per-project config keys, plan and
-  review templates, targeted lessons, playbook authoring (graphs, states, hooks) and
+  review templates, targeted rules, playbook authoring (graphs, states, hooks) and
   external-agent integration.
 - Advanced-user depth: every user-facing config key, the full playbook manifest
   surface, query specs and scaffold trees as features; never plugin internals (build
