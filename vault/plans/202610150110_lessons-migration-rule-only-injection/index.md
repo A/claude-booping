@@ -71,7 +71,7 @@ M01 first (every later code milestone imports the new module); M02–M03 take te
 | 06 | [The vault scaffold drops _lessons](milestones/M06-scaffold-drops-lessons/M06-scaffold-drops-lessons.md) | 2 | done |
 | 07 | [Migration 004 converts lessons into rules; booping's vault migrated](milestones/M07-migration-004/M07-migration-004.md) | 9 | done |
 | 08 | [Public docs describe rules as the one carrier](milestones/M08-public-docs/M08-public-docs.md) | 4 | done |
-| 09 | [CLAUDE.md, internal docs and specs records drop lessons](milestones/M09-internal-docs-and-records/M09-internal-docs-and-records.md) | 4 | pending |
+| 09 | [CLAUDE.md, internal docs and specs records drop lessons](milestones/M09-internal-docs-and-records/M09-internal-docs-and-records.md) | 4 | done |
 
 ## Final Verification
 

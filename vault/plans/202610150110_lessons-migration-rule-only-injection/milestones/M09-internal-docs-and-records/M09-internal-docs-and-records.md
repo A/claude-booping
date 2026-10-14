@@ -2,7 +2,7 @@
 id: "09"
 title: "CLAUDE.md, internal docs and specs records drop lessons"
 sp: 4
-status: pending
+status: done
 plan: "vault/plans/202610150110_lessons-migration-rule-only-injection/index.md"
 ---
 
@@ -18,21 +18,21 @@ Tests: `just specs-check` is the record check; links resolve.
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 9.1 | `CLAUDE.md` and the internal docs. | `CLAUDE.md`, `docs/development_quality_checks.md`, `docs/how_to_initialize_project.md`, `docs/plan_templates/claude_skill.md`, `vault/_playbooks/docs/targeting/opus-5.md` | 2 | pending |
-| 9.2 | Specs records, including the story rename and its inbound links. | `vault/specs/story/0004-targeted-lessons.md` → `vault/specs/story/0004-targeted-rules.md`, `vault/specs/reference/0002-glossary.md`, `vault/specs/rule/0018-project-specifics-stay-out-of-core.md`, `vault/specs/rule/0020-agent-shaping-is-targeted.md`, `vault/specs/adr/0001-specs-tiers.md`, `vault/specs/README.md`, `vault/specs/idea/0002-learn-prefers-guidance-over-validators.md` | 2 | pending |
+| 9.1 | `CLAUDE.md` and the internal docs. | `CLAUDE.md`, `docs/development_quality_checks.md`, `docs/how_to_initialize_project.md`, `docs/plan_templates/claude_skill.md`, `vault/_playbooks/docs/targeting/opus-5.md` | 2 | done |
+| 9.2 | Specs records, including the story rename and its inbound links. | `vault/specs/story/0004-targeted-lessons.md` → `vault/specs/story/0004-targeted-rules.md`, `vault/specs/reference/0002-glossary.md`, `vault/specs/rule/0018-project-specifics-stay-out-of-core.md`, `vault/specs/rule/0020-agent-shaping-is-targeted.md`, `vault/specs/adr/0001-specs-tiers.md`, `vault/specs/README.md`, `vault/specs/idea/0002-learn-prefers-guidance-over-validators.md` | 2 | done |
 
 ## Definition of Done
 
 ### Task 9.1
 
-- [ ] `rg -n -i '_lessons|targeted lesson|## Lessons|no-lessons' CLAUDE.md docs vault/_playbooks` prints only `docs/retrospective_template.md` / `docs/retro_summary_format.md` lines, if any.
-- [ ] `CLAUDE.md`'s Rules bullet still links `documentation/playbook.md#rules`.
+- [x] `rg -n -i '_lessons|targeted lesson|## Lessons|no-lessons' CLAUDE.md docs vault/_playbooks` prints only `docs/retrospective_template.md` / `docs/retro_summary_format.md` lines, if any.
+- [x] `CLAUDE.md`'s Rules bullet still links `documentation/playbook.md#rules`.
 
 ### Task 9.2
 
-- [ ] `rg -n 'targeted-lessons' . --glob '!vault/plans/**' --glob '!vault/retrospectives/**' --glob '!vault/codereviews/**'` prints nothing.
-- [ ] `rg -n -i 'lesson' vault/specs` hits only rule/0001's own subject ("a lesson is a rule"), migration-004 history lines, and plain-English retro wording.
-- [ ] No record's `targets:` changed.
+- [x] `rg -n 'targeted-lessons' . --glob '!vault/plans/**' --glob '!vault/retrospectives/**' --glob '!vault/codereviews/**'` prints nothing.
+- [x] `rg -n -i 'lesson' vault/specs` hits only rule/0001's own subject ("a lesson is a rule"), migration-004 history lines, and plain-English retro wording.
+- [x] No record's `targets:` changed.
 
 Return: the list of changed files, nothing else.
 
