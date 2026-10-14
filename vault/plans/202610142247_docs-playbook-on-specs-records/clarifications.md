@@ -100,7 +100,7 @@ The docs-relevant records — the value records, reference/0001, reference/0002,
 
 **Answer:**
 
-`vault/_playbooks/docs/_reports/output.md` is not covered by `just snapshots` (it renders `playbooks/*` only) and is already stale against the current sources. It is regenerated once at the end with `bin/booping render-playbook docs --stub-macro core.macros.date=2026-10-14 --output vault/_playbooks/docs/_reports/output.md` and committed with the sources. The docs steps carry no eval suites (no `tests.yaml` / `promptfooconfig.yaml` beside any step), so no eval changes. The plan touches no core playbook source, so `just snapshots` is expected clean and the snapshot policy is not exercised.
+`vault/_playbooks/docs/_reports/output.md` is not covered by `just snapshots` (it renders `playbooks/*` only) and is already stale against the current sources. It is regenerated once at the end with `bin/booping render-playbook docs --stub-macro core.macros.date=2026-10-14 --output vault/_playbooks/docs/_reports/output.md` and committed with the sources. The docs steps carry no eval suites (no `tests.yaml` / `promptfooconfig.yaml` beside any step), so no eval changes. The plan touches no core playbook source, so `just snapshots` is expected clean and the snapshot policy is not exercised. Regenerating the report inside the run departs from rule/0013 (a run never writes a committed report); the departure rests on the request itself ("its committed report … follow[s] the change") and the owner's standing snapshot permission for this feature dated 2026-10-14, and develop lists it in its defaults file.
 
 ## C10 — what stays untouched — answered
 
