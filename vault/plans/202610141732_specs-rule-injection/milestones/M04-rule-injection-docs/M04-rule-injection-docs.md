@@ -2,7 +2,7 @@
 id: "04"
 title: "Document rule injection"
 sp: 3
-status: pending
+status: done
 plan: "vault/plans/202610141732_specs-rule-injection/index.md"
 ---
 
@@ -16,21 +16,21 @@ The public docs, the project guide and the specs format guide say where an accep
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 4.1 | `## Rules` section in the playbook reference beside `## Lessons`: which rules inject (accepted, targets + brief, three tiers, global dropped in pinned renders), target forms (link to the lessons target table, not a copy), the section shape, the ref and link forms, one rule per file when two tiers share a directory, rules before lessons, the notes, `--no-rules`; `--no-rules` added where `--no-lessons` is documented; an injection paragraph in the specs page linking to it | `documentation/playbook.md`, `documentation/specs.md` | 2 | pending |
-| 4.2 | `CLAUDE.md` Playbooks section: a **Rules** bullet beside **Lessons**; Agent wiring bullet says "a targeted lesson or rule". `src/specs/README.md`: the rule `targets:` line links to the injection docs | `CLAUDE.md`, `src/specs/README.md` | 1 | pending |
+| 4.1 | `## Rules` section in the playbook reference beside `## Lessons`: which rules inject (accepted, targets + brief, three tiers, global dropped in pinned renders), target forms (link to the lessons target table, not a copy), the section shape, the ref and link forms, one rule per file when two tiers share a directory, rules before lessons, the notes, `--no-rules`; `--no-rules` added where `--no-lessons` is documented; an injection paragraph in the specs page linking to it | `documentation/playbook.md`, `documentation/specs.md` | 2 | done |
+| 4.2 | `CLAUDE.md` Playbooks section: a **Rules** bullet beside **Lessons**; Agent wiring bullet says "a targeted lesson or rule". `src/specs/README.md`: the rule `targets:` line links to the injection docs | `CLAUDE.md`, `src/specs/README.md` | 1 | done |
 
 ## Definition of Done
 
 ### Task 4.1
 
-- [ ] `documentation/playbook.md` has a `## Rules` section covering every point in the task row, with the section shape shown as a fenced example matching M02's locked text.
-- [ ] No loader internals in either page; the target-form table exists once (lessons section) and is linked, not copied.
-- [ ] `documentation/specs.md` links `playbook.md#rules`; `just docs` exits 0.
+- [x] `documentation/playbook.md` has a `## Rules` section covering every point in the task row, with the section shape shown as a fenced example matching M02's locked text.
+- [x] No loader internals in either page; the target-form table exists once (lessons section) and is linked, not copied.
+- [x] `documentation/specs.md` links `playbook.md#rules`; `just docs` exits 0.
 
 ### Task 4.2
 
-- [ ] `CLAUDE.md` names rule injection beside lessons in one bullet, with no restated config literal.
-- [ ] `src/specs/README.md` rule bullet links the injection docs; `just specs-check` stays clean.
+- [x] `CLAUDE.md` names rule injection beside lessons in one bullet, with no restated config literal.
+- [x] `src/specs/README.md` rule bullet links the injection docs; `just specs-check` stays clean.
 
 ## References
 

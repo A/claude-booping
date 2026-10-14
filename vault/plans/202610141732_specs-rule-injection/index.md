@@ -68,7 +68,7 @@ Callers of the output: the `/playbook` skill reads render-playbook stdout; agent
 | 01 | [Targeted rule loader across the three tiers](milestones/M01-targeted-rule-loader/M01-targeted-rule-loader.md) | 7 | done |
 | 02 | [Rules section on the render-playbook surfaces](milestones/M02-rules-on-render-playbook-surfaces/M02-rules-on-render-playbook-surfaces.md) | 9 | done |
 | 03 | [Rules section in agent and skill bodies](milestones/M03-rules-in-agent-and-skill-bodies/M03-rules-in-agent-and-skill-bodies.md) | 4 | done |
-| 04 | [Document rule injection](milestones/M04-rule-injection-docs/M04-rule-injection-docs.md) | 3 | pending |
+| 04 | [Document rule injection](milestones/M04-rule-injection-docs/M04-rule-injection-docs.md) | 3 | done |
 
 ## I/O contract
 
