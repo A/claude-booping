@@ -99,7 +99,7 @@ Callers: `just specs-check` (CI) only. No skill or playbook inlines these comman
 | 03 | [booping specs ls and next](milestones/M03-specs-ls-and-next/M03-specs-ls-and-next.md) | 5 | done |
 | 04 | [booping specs check — per-record checks](milestones/M04-specs-check-per-record/M04-specs-check-per-record.md) | 6 | done |
 | 05 | [booping specs check — links, refs and namespaces](milestones/M05-specs-check-cross-file/M05-specs-check-cross-file.md) | 8 | done |
-| 06 | [specs-check on the CLI, docs and CLAUDE.md](milestones/M06-specs-check-in-ci-and-docs/M06-specs-check-in-ci-and-docs.md) | 4 | pending |
+| 06 | [specs-check on the CLI, docs and CLAUDE.md](milestones/M06-specs-check-in-ci-and-docs/M06-specs-check-in-ci-and-docs.md) | 4 | done |
 
 ## Milestone files
 

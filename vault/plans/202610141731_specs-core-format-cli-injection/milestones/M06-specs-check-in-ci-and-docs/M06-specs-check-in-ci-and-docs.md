@@ -2,7 +2,7 @@
 id: "06"
 title: "specs-check on the CLI, docs and CLAUDE.md"
 sp: 4
-status: pending
+status: done
 plan: "plans/202610141731_specs-core-format-cli-injection/index.md"
 ---
 
@@ -16,27 +16,27 @@ plan: "plans/202610141731_specs-core-format-cli-injection/index.md"
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 6.1 | Replace the `specs-check` bash loop with `bin/booping specs check`; update both README Check sections. | `justfile`, `vault/specs/README.md`, `src/specs/README.md` | 1 | pending |
-| 6.2 | Create `documentation/specs.md`; append the `core.specs` keys to `documentation/project_config.md` in its existing per-key style; add the nav entry. | `documentation/specs.md`, `documentation/project_config.md`, `mkdocs.yml` | 2 | pending |
-| 6.3 | `CLAUDE.md`: Commands (`specs` in the `bin/booping` list, `just specs-check` described), Layout (`src/specs/`), Config (`core.specs` bullet), Vault paragraph (format → `src/specs/README.md`). | `CLAUDE.md` | 1 | pending |
+| 6.1 | Replace the `specs-check` bash loop with `bin/booping specs check`; update both README Check sections. | `justfile`, `vault/specs/README.md`, `src/specs/README.md` | 1 | done |
+| 6.2 | Create `documentation/specs.md`; append the `core.specs` keys to `documentation/project_config.md` in its existing per-key style; add the nav entry. | `documentation/specs.md`, `documentation/project_config.md`, `mkdocs.yml` | 2 | done |
+| 6.3 | `CLAUDE.md`: Commands (`specs` in the `bin/booping` list, `just specs-check` described), Layout (`src/specs/`), Config (`core.specs` bullet), Vault paragraph (format → `src/specs/README.md`). | `CLAUDE.md` | 1 | done |
 
 ## Definition of Done
 
 ### Task 6.1
 
-- [ ] `just specs-check` runs `bin/booping specs check` and its exit code is the command's.
-- [ ] Neither README says link targets or unique numbers are "not checked yet".
+- [x] `just specs-check` runs `bin/booping specs check` and its exit code is the command's.
+- [x] Neither README says link targets or unique numbers are "not checked yet".
 
 ### Task 6.2
 
-- [ ] `just docs` builds without warnings about the new page or nav.
-- [ ] `documentation/specs.md` names no Python module, no internal check function and no other project.
-- [ ] Every `core.specs` key from `src/config.yaml` appears in `documentation/project_config.md`.
+- [x] `just docs` builds without warnings about the new page or nav.
+- [x] `documentation/specs.md` names no Python module, no internal check function and no other project.
+- [x] Every `core.specs` key from `src/config.yaml` appears in `documentation/project_config.md`.
 
 ### Task 6.3
 
-- [ ] `rg -n 'vault/specs/README|vault/specs/schemas' CLAUDE.md justfile documentation` prints nothing.
-- [ ] `CLAUDE.md` lists `specs` among the `bin/booping` subcommands.
+- [x] `rg -n 'vault/specs/README|vault/specs/schemas' CLAUDE.md justfile documentation` prints nothing.
+- [x] `CLAUDE.md` lists `specs` among the `bin/booping` subcommands.
 
 Return: the list of changed files, nothing else.
 
