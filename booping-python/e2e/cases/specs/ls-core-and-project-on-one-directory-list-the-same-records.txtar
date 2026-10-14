@@ -1,0 +1,30 @@
+When the core and the project tier resolve to one directory, `--tier core` and `--tier project`
+both list its records: one directory, two tiers. The vault's config points the core tier at the
+directory the project tier's null `path` resolves to.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+core:
+  specs:
+    tiers:
+      core: {path: ~/../cwd/vault/specs}
+      project: {path: null}
+-- fixtures/cwd/vault/specs/rule/0001-keep-it-short.md --
+---
+type: rule
+title: Keep it short
+summary: Cut what the reader does not need.
+status: accepted
+---
+-- cmd --
+booping specs ls --tier core
+booping specs ls --tier project
+-- exit --
+0
+-- stdout --
+rule/0001  accepted  Cut what the reader does not need.
+rule/0001  accepted  Cut what the reader does not need.
+-- stderr --
