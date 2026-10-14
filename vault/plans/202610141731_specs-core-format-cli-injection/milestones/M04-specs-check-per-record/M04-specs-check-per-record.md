@@ -1,8 +1,8 @@
 ---
 id: "04"
-title: "booping specs check \u2014 per-record checks"
+title: "booping specs check — per-record checks"
 sp: 6
-status: pending
+status: done
 plan: "plans/202610141731_specs-core-format-cli-injection/index.md"
 ---
 
@@ -16,22 +16,22 @@ plan: "plans/202610141731_specs-core-format-cli-injection/index.md"
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 4.1 | `check` verb with `--tier`: `Finding`, sorting, output line, stderr trailer, exit codes, the `schema` check via mdcheck; e2e clean-tier and schema-finding cases; the missing-binary unit test. | `booping-python/src/booping/specs/check.py`, `booping-python/src/booping/commands/specs.py`, `booping-python/e2e/cases/specs/check-*.txtar`, `booping-python/tests/specs/check_test.py` | 3 | pending |
-| 4.2 | `layout`, `filename`, `id`, `frontmatter`, `targets` checks with the plan's message texts; one e2e case per check. | `booping-python/src/booping/specs/check.py`, `booping-python/e2e/cases/specs/check-*.txtar` | 3 | pending |
+| 4.1 | `check` verb with `--tier`: `Finding`, sorting, output line, stderr trailer, exit codes, the `schema` check via mdcheck; e2e clean-tier and schema-finding cases; the missing-binary unit test. | `booping-python/src/booping/specs/check.py`, `booping-python/src/booping/commands/specs.py`, `booping-python/e2e/cases/specs/check-*.txtar`, `booping-python/tests/specs/check_test.py` | 3 | done |
+| 4.2 | `layout`, `filename`, `id`, `frontmatter`, `targets` checks with the plan's message texts; one e2e case per check. | `booping-python/src/booping/specs/check.py`, `booping-python/e2e/cases/specs/check-*.txtar` | 3 | done |
 
 ## Definition of Done
 
 ### Task 4.1
 
-- [ ] `bin/booping specs check --help` shows `--tier`.
-- [ ] A clean tier → empty stdout, stderr exactly `{n} record(s) checked: 0 error(s), 0 warning(s)`, exit 0.
-- [ ] A schema violation → `{path}:{line}  error  schema  {mdcheck message}`, exit 1.
-- [ ] `mdcheck` absent from PATH → stderr `error: mdcheck not found on PATH — cargo install markdown-checker`, exit 2.
+- [x] `bin/booping specs check --help` shows `--tier`.
+- [x] A clean tier → empty stdout, stderr exactly `{n} record(s) checked: 0 error(s), 0 warning(s)`, exit 0.
+- [x] A schema violation → `{path}:{line}  error  schema  {mdcheck message}`, exit 1.
+- [x] `mdcheck` absent from PATH → stderr `error: mdcheck not found on PATH — cargo install markdown-checker`, exit 2.
 
 ### Task 4.2
 
-- [ ] Each of `layout`, `filename`, `id`, `frontmatter`, `targets` has a passing e2e case pinning its exact output line and exit 1.
-- [ ] A rule with both `targets:` and `brief:` and parseable targets yields no `targets` finding.
+- [x] Each of `layout`, `filename`, `id`, `frontmatter`, `targets` has a passing e2e case pinning its exact output line and exit 1.
+- [x] A rule with both `targets:` and `brief:` and parseable targets yields no `targets` finding.
 
 Return: the list of changed files, nothing else.
 
