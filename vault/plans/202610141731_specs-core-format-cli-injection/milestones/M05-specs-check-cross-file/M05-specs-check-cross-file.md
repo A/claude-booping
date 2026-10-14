@@ -1,8 +1,8 @@
 ---
 id: "05"
-title: "booping specs check \u2014 links, refs and namespaces"
+title: "booping specs check — links, refs and namespaces"
 sp: 8
-status: pending
+status: done
 plan: "plans/202610141731_specs-core-format-cli-injection/index.md"
 ---
 
@@ -23,27 +23,27 @@ Tests: unit tests for `links.py` only (pure logic with tricky branches — param
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 5.1 | `links.py` link extraction + the `link` check; unit tests and e2e cases per Scope. | `booping-python/src/booping/specs/links.py`, `booping-python/src/booping/specs/check.py`, `booping-python/tests/specs/links_test.py`, `booping-python/e2e/cases/specs/check-link-*.txtar` | 2 | pending |
-| 5.2 | `ref` (un-namespaced) and `sources` checks with the plan's message texts; e2e cases per Scope. | `booping-python/src/booping/specs/check.py`, `booping-python/e2e/cases/specs/check-ref-*.txtar`, `booping-python/e2e/cases/specs/check-sources-*.txtar` | 3 | pending |
-| 5.3 | Cross-tier index, namespaced ref resolution and the `namespace` warning; e2e cases per Scope. | `booping-python/src/booping/specs/check.py`, `booping-python/e2e/cases/specs/check-namespace-*.txtar` | 3 | pending |
+| 5.1 | `links.py` link extraction + the `link` check; unit tests and e2e cases per Scope. | `booping-python/src/booping/specs/links.py`, `booping-python/src/booping/specs/check.py`, `booping-python/tests/specs/links_test.py`, `booping-python/e2e/cases/specs/check-link-*.txtar` | 2 | done |
+| 5.2 | `ref` (un-namespaced) and `sources` checks with the plan's message texts; e2e cases per Scope. | `booping-python/src/booping/specs/check.py`, `booping-python/e2e/cases/specs/check-ref-*.txtar`, `booping-python/e2e/cases/specs/check-sources-*.txtar` | 3 | done |
+| 5.3 | Cross-tier index, namespaced ref resolution and the `namespace` warning; e2e cases per Scope. | `booping-python/src/booping/specs/check.py`, `booping-python/e2e/cases/specs/check-namespace-*.txtar` | 3 | done |
 
 ## Definition of Done
 
 ### Task 5.1
 
-- [ ] A link to a missing file → `{path}:{line}  error  link  link target `{dest}` does not exist`, the link's own line.
-- [ ] URLs, mailto, absolute paths, anchor-only links and links in code produce no finding.
+- [x] A link to a missing file → `{path}:{line}  error  link  link target `{dest}` does not exist`, the link's own line.
+- [x] URLs, mailto, absolute paths, anchor-only links and links in code produce no finding.
 
 ### Task 5.2
 
-- [ ] `values: [rule/0001]` → ``values: `rule/0001` is not a value ref``; `values: [value/9999]` → ``values: `value/9999` does not exist``.
-- [ ] A missing `sources` entry → ``sources: `{entry}` does not exist``.
+- [x] `values: [rule/0001]` → ``values: `rule/0001` is not a value ref``; `values: [value/9999]` → ``values: `value/9999` does not exist``.
+- [x] A missing `sources` entry → ``sources: `{entry}` does not exist``.
 
 ### Task 5.3
 
-- [ ] `values: [booping:value/0001]` in a project-tier record → no finding.
-- [ ] `rules: [ghost:rule/0001]` → `warning  namespace` finding, trailer counts it under warnings, exit 0.
-- [ ] A ref into the global namespace resolves when the fixture global tier holds the record, and is a `namespace` warning when the fixture has no global tier directory.
+- [x] `values: [booping:value/0001]` in a project-tier record → no finding.
+- [x] `rules: [ghost:rule/0001]` → `warning  namespace` finding, trailer counts it under warnings, exit 0.
+- [x] A ref into the global namespace resolves when the fixture global tier holds the record, and is a `namespace` warning when the fixture has no global tier directory.
 
 Return: the list of changed files, nothing else.
 
