@@ -1,20 +1,21 @@
 ---
 title: "Lessons become rules — migration 004 and rule-only injection"
 type: "feature"
-status: ready-for-dev
-sp: null
+status: in-progress
+sp: 35
 related_to: null
 created: 2026-10-15 01:10
 planned: null
-started: null
+started: 2026-10-15 01:31
 completed: null
 code_reviews: []
 sessions:
 - bdaa9426-d742-41ed-aff2-33570ac9d2e5
+- 0d329ff6-0279-4360-80b1-d3bcef7dd462
 retro: null
 summary: Migration 004 turns lessons into rules; render surfaces inject rules 
   only; --no-lessons and the _lessons scaffold go
-commit: 0c846dd81ae665daecfb6cc33d35b90057db2eee
+commit: 632d7e11fbd2d014fa7c6bfb07b29fc2aa9f21b0
 tracker_provider: null
 tracker_request: null
 tracker_issue: null
@@ -62,7 +63,7 @@ M01 first (every later code milestone imports the new module); M02–M03 take te
 
 | id | title | sp | status |
 | --- | --- | --- | --- |
-| 01 | [Target parsing lives in specs/targets.py](milestones/M01-target-parsing-in-specs/M01-target-parsing-in-specs.md) | 3 | pending |
+| 01 | [Target parsing lives in specs/targets.py](milestones/M01-target-parsing-in-specs/M01-target-parsing-in-specs.md) | 3 | done |
 | 02 | [Agent, skill and step bodies inject rules only](milestones/M02-bodies-drop-lesson-partials/M02-bodies-drop-lesson-partials.md) | 3 | pending |
 | 03 | [Learn stops reading and staging _lessons](milestones/M03-learn-without-lessons/M03-learn-without-lessons.md) | 3 | pending |
 | 04 | [render-playbook and the context load rules only; --no-lessons removed](milestones/M04-render-playbook-rules-only/M04-render-playbook-rules-only.md) | 5 | pending |

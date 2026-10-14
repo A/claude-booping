@@ -2,7 +2,7 @@
 id: "01"
 title: "Target parsing lives in specs/targets.py"
 sp: 3
-status: pending
+status: done
 plan: "vault/plans/202610150110_lessons-migration-rule-only-injection/index.md"
 ---
 
@@ -18,21 +18,21 @@ Tests: the classifier's unit tests move with it to `booping-python/tests/specs/t
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 1.1 | Create `specs/targets.py` with the moved classifier (`LessonTarget` → `Target`); repoint every importer; delete the moved code from `context/lesson.py`. | `booping-python/src/booping/specs/targets.py`, `booping-python/src/booping/context/lesson.py`, `booping-python/src/booping/specs/rules.py`, `booping-python/src/booping/specs/check.py`, `booping-python/src/booping/commands/render_playbook.py` | 2 | pending |
-| 1.2 | Move the target-parsing unit tests to `tests/specs/targets_test.py` (from wherever they live today — `tests/context/lesson_test.py`, `tests/specs/rules_test.py`); reword the README sentence and the e2e case comment. | `booping-python/tests/specs/targets_test.py`, `src/specs/README.md`, `booping-python/e2e/cases/specs/check-targets-must-pair-with-brief-and-parse.txtar` | 1 | pending |
+| 1.1 | Create `specs/targets.py` with the moved classifier (`LessonTarget` → `Target`); repoint every importer; delete the moved code from `context/lesson.py`. | `booping-python/src/booping/specs/targets.py`, `booping-python/src/booping/context/lesson.py`, `booping-python/src/booping/specs/rules.py`, `booping-python/src/booping/specs/check.py`, `booping-python/src/booping/commands/render_playbook.py` | 2 | done |
+| 1.2 | Move the target-parsing unit tests to `tests/specs/targets_test.py` (from wherever they live today — `tests/context/lesson_test.py`, `tests/specs/rules_test.py`); reword the README sentence and the e2e case comment. | `booping-python/tests/specs/targets_test.py`, `src/specs/README.md`, `booping-python/e2e/cases/specs/check-targets-must-pair-with-brief-and-parse.txtar` | 1 | done |
 
 ## Definition of Done
 
 ### Task 1.1
 
-- [ ] `rg -n 'LessonTarget|context.lesson import' booping-python/src` prints nothing.
-- [ ] `specs/targets.py` holds the only target regexes in the package.
-- [ ] No behaviour change: every existing e2e case passes without its expected output edited.
+- [x] `rg -n 'LessonTarget|context.lesson import' booping-python/src` prints nothing.
+- [x] `specs/targets.py` holds the only target regexes in the package.
+- [x] No behaviour change: every existing e2e case passes without its expected output edited.
 
 ### Task 1.2
 
-- [ ] `tests/specs/targets_test.py` covers each accepted form and each rejection, parametrized, expectations hand-written.
-- [ ] `rg -n -i 'lesson target' src/specs booping-python/e2e` prints nothing.
+- [x] `tests/specs/targets_test.py` covers each accepted form and each rejection, parametrized, expectations hand-written.
+- [x] `rg -n -i 'lesson target' src/specs booping-python/e2e` prints nothing.
 
 Return: the list of changed files, nothing else.
 
