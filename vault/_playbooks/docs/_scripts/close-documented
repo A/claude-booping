@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Exit hook for the docs playbook (`recording -> done`): fold the run record's
-`documented:` frontmatter list into the ledger `_specs/documented.md`, seeding the
-ledger when it does not exist yet.
+`documented:` frontmatter list into the ledger `documented.md` at the workdir
+root, seeding the ledger when it does not exist yet.
 
 Environment (set by `booping playbook-transition`): BOOPING_WORKDIR = the run
 workdir `{vault}/docs` (also cwd), BOOPING_ARTIFACT = the run record.
@@ -66,7 +66,7 @@ def main() -> None:
     except ValueError:
         record_rel = artifact.name
 
-    ledger = workdir / "_specs" / "documented.md"
+    ledger = workdir / "documented.md"
     if ledger.is_file():
         lines = ledger.read_text().rstrip("\n").splitlines()
     else:
@@ -84,7 +84,6 @@ def main() -> None:
         lines.append(f"| `{item}` | `{record_rel}` |")
         added += 1
 
-    ledger.parent.mkdir(parents=True, exist_ok=True)
     ledger.write_text("\n".join(lines) + "\n")
     print(f"close-documented: {added} rows appended, {len(items) - added} already present")
 

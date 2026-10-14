@@ -6,6 +6,17 @@ core:
     # Second diff reviewer beside the generic `fable:medium` one; null → fable alone.
     review_agent: codex
 
+  docs_playbook:
+    queries:
+      # The feature index, rendered into `research` and `targeting`.
+      features:
+        glob: [specs/story/*.md]
+        columns: [title, summary, status]
+      # The value list, rendered into `briefing` and `research`.
+      values:
+        glob: [specs/value/*.md]
+        columns: [title, kind, summary]
+
   code_review_playbook:
     agents:
       plannotator-reviewer:
