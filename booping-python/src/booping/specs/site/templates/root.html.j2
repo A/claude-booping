@@ -1,0 +1,30 @@
+{% extends "base.html.j2" %}
+{% from "_macros.html.j2" import count_cell %}
+{% block main %}
+<h1>{{ root }}</h1>
+<div class="table-wrap">
+<table>
+<thead>
+<tr><th>Type</th><th>Records</th><th>[clarify]</th><th>[unknown]</th><th>Unreviewed</th></tr>
+</thead>
+<tbody>
+{% for row in rows %}
+<tr><td><a href="{{ row.href }}">{{ row.name }}</a></td><td>{{ row.records }}</td>{{ count_cell(row.clarify) }}{{ count_cell(row.unknown) }}{{ count_cell(row.unreviewed) }}</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+<h2 id="marks">Marks</h2>
+{% for kind, entries in marks %}
+<h3>[{{ kind }}]</h3>
+{% if entries %}
+<ul class="marks">
+{% for entry in entries %}
+<li><a href="{{ entry.href }}"><code>{{ entry.ref }}</code> {{ entry.title }}</a> — {{ entry.text }}</li>
+{% endfor %}
+</ul>
+{% else %}
+<p>None.</p>
+{% endif %}
+{% endfor %}
+{% endblock %}

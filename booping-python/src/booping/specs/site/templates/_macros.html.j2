@@ -1,0 +1,36 @@
+{% macro status_badge(badge) %}{% if badge is not none %}<span class="badge st-{{ badge }}">{{ badge }}</span>{% endif %}{% endmacro %}
+
+{% macro count_cell(n) %}<td>{% if n %}{{ n }}{% endif %}</td>{% endmacro %}
+
+{% macro fact_item(item) %}
+{%- if item.href is not none -%}
+<a href="{{ item.href }}"><code>{{ item.text }}</code></a>
+{%- elif item.code -%}
+<code{% if item.css is not none %} class="{{ item.css }}"{% endif %}>{{ item.text }}</code>
+{%- else -%}
+{{ item.text }}
+{%- endif -%}
+{% endmacro %}
+
+{% macro record_block(r, level) %}
+<h{{ level }}>{% if r.title_href is not none %}<a href="{{ r.title_href }}">{{ r.title }}</a>{% else %}{{ r.title }}{% endif %}</h{{ level }}>
+<p class="meta"><code>{{ r.ref }}</code>
+{% if r.badge is not none %} {{ status_badge(r.badge) }}{% endif %}
+{% if r.unreviewed %} <span class="badge unreviewed">unreviewed</span>{% endif %}
+{% if r.clarify %} <span class="chip mk-clarify">[clarify] {{ r.clarify }}</span>{% endif %}
+{% if r.unknown %} <span class="chip mk-unknown">[unknown] {{ r.unknown }}</span>{% endif %}
+</p>
+{% if r.summary is not none %}
+<p class="summary">{{ r.summary }}</p>
+{% endif %}
+{% if r.facts %}
+<dl class="facts">
+{% for fact in r.facts %}
+<dt>{{ fact.key }}</dt>
+<dd>{% for item in fact["items"] %}{% if not loop.first %}, {% endif %}{{ fact_item(item) }}{% endfor %}</dd>
+{% endfor %}
+</dl>
+{% endif %}
+<div class="body">
+{{ r.body }}</div>
+{% endmacro %}

@@ -1,0 +1,17 @@
+{% extends "base.html.j2" %}
+{% from "_macros.html.j2" import record_block %}
+{% block main %}
+<article>
+{{ record_block(record, 1) }}
+</article>
+<h2 id="referenced-by">Referenced by</h2>
+{% if backlinks %}
+<ul class="backlinks">
+{% for link in backlinks %}
+<li><a href="{{ link.href }}"><code>{{ link.ref }}</code> {{ link.title }}</a></li>
+{% endfor %}
+</ul>
+{% else %}
+<p>Nothing references this record.</p>
+{% endif %}
+{% endblock %}
