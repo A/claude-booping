@@ -1,13 +1,13 @@
 ---
 title: "Lessons become rules — migration 004 and rule-only injection"
 type: "feature"
-status: in-progress
+status: done
 sp: 35
 related_to: null
 created: 2026-10-15 01:10
 planned: null
 started: 2026-10-15 01:31
-completed: null
+completed: 2026-10-15 02:25
 code_reviews: []
 sessions:
 - bdaa9426-d742-41ed-aff2-33570ac9d2e5
@@ -23,7 +23,24 @@ return_to: null
 agents:
   research-codebase: ad7f4b43df8f31faf
   cross-review: acdf9a7240042e122
+  develop-loop/M01-target-parsing-in-specs: a48775a27b77b4c74
+  develop-loop/M02-bodies-drop-lesson-partials: a9f3be2d74ebfeb03
+  develop-loop/M03-learn-without-lessons: affdf319847abba23
+  develop-loop/M04-render-playbook-rules-only: aaef1fea093b23607
+  develop-loop/M05-shared-tier-directory-case: a0c1dc878cd0468e9
+  develop-loop/M06-scaffold-drops-lessons: a448a2b0db8895b00
+  develop-loop/M07-migration-004: a1e3c310267bcbf27
+  develop-loop/M08-public-docs: a9bf4f9e63934be67
+  develop-loop/M09-internal-docs-and-records: a5e131541f684330d
+  verify: ab75a8fccc820dbd2
 reviewed_at: 2026-10-15 01:30
+metrics_active_minutes: 75
+metrics_models:
+- claude-opus-5-5
+metrics_tokens_input: 222
+metrics_tokens_output: 100646
+metrics_tokens_cache_creation: 336131
+metrics_tokens_cache_read: 13258143
 ---
 
 # Lessons become rules — migration 004 and rule-only injection

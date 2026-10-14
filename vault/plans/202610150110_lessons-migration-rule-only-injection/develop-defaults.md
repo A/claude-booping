@@ -73,3 +73,11 @@ M08's Scope sketched the external-agent example as `targets: [agent:{id}]`; the 
 ## D15 — M09 second attempt and residue
 
 The first attempt left DoD 9.2's `lesson` grep hitting eight records outside the contract's list that stated targeted lessons as current behaviour; recorded as Blocked (1/2) in M09's `feedback.md` and fixed by a fresh worker (rule/0007). Records' `## Context` / `## Alternatives` prose in ADRs, value/0001, value/0012, adr/0008, adr/0011, story/0015, idea/0005, reference/0005 keep "lesson" as history or plain English. `vault/_playbooks/docs/_reports/output.md` — the local docs playbook's committed render, outside `just snapshots` — was brought in line with a fresh `render-playbook docs` (story/0004, 0007, 0019 feature-index rows and the `documentation/vault.md` targeting row); its `Date & time` line kept as committed. DoD 9.1's grep over `vault/_playbooks` still hits `vault/_playbooks/docs/_specs/**`, playbook-authoring history that CLAUDE.md declares intentionally stale — the same class the plan's Final Verification excludes for core playbooks; left as is.
+
+## D16 — wrap-up documentation
+
+M08 and M09 already rewrote every surface the sprint invalidated. `CHANGELOG.md` is written at release time by the `release` skill (no Unreleased section; earlier sprints on this branch added none), and README's Statuses section is untouched because no `states:` block changed. No closing commit.
+
+## Verify receipt
+
+`just ci` exit 0 — lint, typecheck, pytest (536 + 12), snapshots (no drift), mdcheck, specs-check (100 records, 0 errors), e2e (392 + 18). Final Verification items checked: groom and researcher renders carry no `## Lessons` and no placeholder leaks; `vault/_lessons/` gone, `.booping` at 4; the `_lessons|targeted lesson|no-lessons` grep residue is migration history, the parked cross-check, the M04 regression fixture and `_specs/` history. All nine milestones `done`, every DoD box `[x]`.
