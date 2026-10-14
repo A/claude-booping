@@ -3,7 +3,7 @@
 {%- set _lts_wanted = _lts_wanted.split(",") | reject("equalto", "") | list -%}
 {%- set _lts_selected = context.playbooks | selectattr("name", "in", _lts_wanted) | list -%}
 {%- if _lts_selected -%}
-## Lesson Targets
+## Targets
 {% for _lts_pb in _lts_selected %}
 ### {{ _lts_pb.name }}
 
@@ -13,6 +13,19 @@
 {% for _lts_step in _lts_steps -%}
 | `{{ _lts_pb.name }}/{{ _lts_step.name }}` | {{ _lts_step.summary | replace("\n", " ") | replace("|", "\\|") | trim }} |
 {% endfor %}
+{%- set _lts_rules = [] -%}
+{%- for _lts_rule in context.targeted_rules -%}
+{%- if _lts_rule.parsed_targets | selectattr("playbook", "equalto", _lts_pb.name) | list -%}
+{%- set _ = _lts_rules.append(_lts_rule) -%}
+{%- endif -%}
+{%- endfor -%}
+{%- if _lts_rules %}
+**Rules:**
+
+{% for _lts_rule in _lts_rules -%}
+- {{ _lts_rule.ref }} — {{ _lts_rule.brief }}
+{% endfor %}
+{%- endif -%}
 {%- set _lts_lessons = [] -%}
 {%- for _lts_lesson in context.targeted_lessons -%}
 {%- if _lts_lesson.parsed_targets | selectattr("playbook", "equalto", _lts_pb.name) | list -%}
