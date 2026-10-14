@@ -261,8 +261,8 @@ Where the three [specs](specs.md) tiers live and what their namespaces are. Dire
 
 - **`core.specs.format`** — the directory holding the format guide and the per-type schemas, relative to the plugin root. Default `src/specs`; the record types are the schema file stems found there.
 - **`core.specs.tiers.core`** — booping's own records: `path` relative to the plugin root (`vault/specs`), `namespace` the prefix other tiers cite them by (`booping`).
-- **`core.specs.tiers.global`** — your records for every project: `path` relative to `home_dir` (`_specs`), `namespace` your prefix. `null` takes the `USER` environment variable.
-- **`core.specs.tiers.project`** — the project's own records: `path` relative to the attached repo. `null` resolves to `<vault>/specs` when the vault lives inside the repo, else `specs`.
+- **`core.specs.tiers.global`** — your records for every project: `path` relative to `home_dir` (`_specs`), `namespace` your prefix. `null` takes the `USER` environment variable. The [setup playbook](install.md#scaffold-the-project-vault) asks for `core.specs.tiers.global.namespace` once, `$USER` as the default, and writes it into the global config beside `home_dir`; a global config already carrying the key is not asked again.
+- **`core.specs.tiers.project`** — the project's own records: `path` relative to the attached repo. `null` resolves to `<vault>/specs` when the vault lives inside the repo, else `specs`. When the vault lives outside the repo, [`booping specs init`](specs.md#booping-specs-init) links `<vault>/specs` to the repo's tier.
 
 A tier `path` that is absolute or starts with `~` is taken as is.
 

@@ -53,7 +53,7 @@ The file records `## Scope`, `## Findings`, `## Verdict` and `## Resolution`. It
 
 ## `_lessons/`
 
-Durable rules accumulated over many sprints, and the only file surface the [learn playbook](learn.md) writes inside the Project Vault. Lessons live in exactly two flat roots: this directory, scoped to the project, and its machine-wide sibling `<home_dir>/_lessons/` (default `~/Claude/_lessons/`), which applies to every project — a file of the same name here shadows the global one. Files are named `{N}_{title}.md`, `N` a monotonic counter keeping each directory chronologically ordered.
+Durable rules accumulated over earlier sprints. The [learn playbook](learn.md) no longer adds files here — it writes rule records into the project [specs](specs.md) tier, and touches this directory only to delete a lesson it converts into a rule. Lessons already here keep injecting. Lessons live in exactly two flat roots: this directory, scoped to the project, and its machine-wide sibling `<home_dir>/_lessons/` (default `~/Claude/_lessons/`), which applies to every project — a file of the same name here shadows the global one. Files are named `{N}_{title}.md`, `N` a monotonic counter keeping each directory chronologically ordered.
 
 Each file carries a `targets:` frontmatter list: `{playbook}`, `{playbook}/{step}`, `agent:{id}`, or `skill:{name}`. That list is the only routing there is — a file with no valid `targets:` is injected nowhere.
 

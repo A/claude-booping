@@ -18,11 +18,11 @@ Specs come in three tiers, each a tier root of its own:
 | `global`  | `<home_dir>/_specs/`                                                                      | your values and rules for every project          |
 | `project` | `specs/` in the attached repo, or `<vault>/specs/` when the vault lives inside the repo   | the project's own records                        |
 
-Where each tier lives and what it is called is the [`core.specs`](project_config.md#corespecs) config key.
+Where each tier lives and what it is called is the [`core.specs`](project_config.md#corespecs) config key. The [setup playbook](install.md#scaffold-the-project-vault) creates the global and project tiers and asks for your global namespace; [`booping specs init`](#booping-specs-init) creates either one on demand.
 
 ## Namespaced refs
 
-A reference without a namespace points into its own tier: `rule/0003`. A reference into another tier names that tier's namespace in front: `booping:rule/0003` for core, `<user>:rule/0003` for the global tier, where the namespace defaults to your `$USER`. A project that departs from a rule of a tier above records that in its own ADR or conflict, citing the rule by its namespaced ref.
+A reference without a namespace points into its own tier: `rule/0003`. A reference into another tier names that tier's namespace in front: `booping:rule/0003` for core, `<user>:rule/0003` for the global tier, where the namespace is the one you gave setup — your `$USER` when none is set. A project that departs from a rule of a tier above records that in its own ADR or conflict, citing the rule by its namespaced ref.
 
 ## Injection
 
@@ -30,7 +30,26 @@ An accepted rule carrying `targets:` and `brief:` is injected into the playbooks
 
 ## Commands
 
-All three verbs take `--tier core|global|project`, default `project`.
+Every verb takes `--tier core|global|project`, default `project`.
+
+### `booping specs init`
+
+```
+booping specs init [--tier global|project]
+```
+
+Creates the tier root and its `README.md` when absent. When the vault lives outside the repo, the project tier is `specs/` in the repo and `init` also links `<vault>/specs` to it, so the records sit with the code and stay reachable from the vault. Safe to re-run: it changes only what is missing.
+
+Prints one line per change, in the order made, then the absolute tier root as the last line — on a re-run with nothing to do, only that last line:
+
+```
+created dir /home/me/Dev/app/specs
+created file /home/me/Dev/app/specs/README.md
+linked /home/me/Claude/app/specs -> /home/me/Dev/app/specs
+/home/me/Dev/app/specs
+```
+
+The `core` tier ships with the plugin and is never created. An error prints `specs init: {message}` on stderr — the core tier asked for, a path in the way that is not a directory, or a `<vault>/specs` that is not a link to the tier — and nothing is written.
 
 ### `booping specs ls`
 
@@ -64,8 +83,8 @@ cargo install markdown-checker --version 0.1.1 --locked
 
 ### Exit codes
 
-| Code | `ls`, `next`                                                   | `check`                                                        |
-|------|----------------------------------------------------------------|----------------------------------------------------------------|
-| 0    | printed                                                        | no errors (warnings may be printed)                            |
-| 1    | unknown type, or the tier is unavailable or has no directory   | at least one error, or the tier is unavailable or has no directory |
-| 2    | config could not be loaded                                     | the check could not run: config not loaded, `mdcheck` missing or failing |
+| Code | `init`                                                     | `ls`, `next`                                                   | `check`                                                        |
+|------|------------------------------------------------------------|----------------------------------------------------------------|----------------------------------------------------------------|
+| 0    | tier in place                                              | printed                                                        | no errors (warnings may be printed)                            |
+| 1    | the tier is `core` or unavailable, or a path is in the way | unknown type, or the tier is unavailable or has no directory   | at least one error, or the tier is unavailable or has no directory |
+| 2    | config could not be loaded                                 | config could not be loaded                                     | the check could not run: config not loaded, `mdcheck` missing or failing |

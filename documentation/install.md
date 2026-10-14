@@ -45,14 +45,14 @@ The `setup` playbook takes the repo from any starting state to a working booping
 
 It runs in two steps:
 
-1. **Machine level** — when booping is not yet initialized, it asks for your preferred home dir (default `~/Claude/`), writes the machine config at `${XDG_CONFIG_HOME:-~/.config}/booping/config.yaml`, and makes the home dir exist as a git repo.
-2. **Project level** — it asks where the vault lives (the default `<home_dir>/{project}/`, kept outside the repo, or a **repo-local** directory recorded via the `.booping` marker's `vault_path:` key), the project name, and marker visibility; then scaffolds the vault tree, writes the `.booping` marker, symlinks a repo-local vault into the home dir, and seeds `sprints.md`.
+1. **Machine level** — when booping is not yet initialized, it asks for your preferred home dir (default `~/Claude/`), writes the machine config at `${XDG_CONFIG_HOME:-~/.config}/booping/config.yaml`, and makes the home dir exist as a git repo. When the machine config names no global [specs](specs.md) namespace yet, it asks for one (default `$USER`) and stores it as `core.specs.tiers.global.namespace`; then it creates the global specs tier at `<home_dir>/_specs/`.
+2. **Project level** — it asks where the vault lives (the default `<home_dir>/{project}/`, kept outside the repo, or a **repo-local** directory recorded via the `.booping` marker's `vault_path:` key), the project name, and marker visibility; then scaffolds the vault tree, writes the `.booping` marker, symlinks a repo-local vault into the home dir, and seeds `sprints.md`; last, it creates the project specs tier — `<vault>/specs/` when the vault lives inside the repo, else `specs/` in the repo, linked from `<vault>/specs`.
 
 The scaffolded vault:
 
 - `plans/` — sprint plans authored by the [groom playbook](groom.md), executed by the [develop playbook](develop.md).
 - `retrospectives/` — standalone retrospectives authored by the [retro playbook](retro.md), consumed by the [learn playbook](learn.md).
-- `_lessons/` — durable, targeted rules authored by the [learn playbook](learn.md).
+- `_lessons/` — targeted lessons, still injected into the runs they target; the [learn playbook](learn.md) writes rules into the project specs tier instead.
 - `notes/` — your own free-form notes (untouched by booping).
 - `sprints.md` — an Obsidian Bases fence over the vault's `plans/*/index.md` files; seeded once, evaluated live by Obsidian.
 - `.gitignore` — vault-level ignores, including the `.booping.log` the CLI writes at the vault root.

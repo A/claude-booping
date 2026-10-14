@@ -25,7 +25,7 @@ See [Install](install.md) for prerequisites (`uv`, `git`).
 /playbook setup
 ```
 
-The `setup` playbook settles the machine level (home dir + machine config), then the project level: it asks for the vault location — the default `<home_dir>/{project}/` or a repo-local directory (wired via the `.booping` marker's `vault_path:` key) — and creates the vault with `plans/`, `retrospectives/`, `codereviews/`, `_lessons/`, `notes/`, plus a `.booping` marker file in the repo. Anything already in place is detected and skipped. See [Vault](vault.md) for what each directory is for.
+The `setup` playbook settles the machine level (home dir + machine config), then the project level: it asks for the vault location — the default `<home_dir>/{project}/` or a repo-local directory (wired via the `.booping` marker's `vault_path:` key) — and creates the vault with `plans/`, `retrospectives/`, `codereviews/`, `_lessons/`, `notes/`, plus a `.booping` marker file in the repo. It also asks once for your global namespace (default `$USER`) and creates both [specs](specs.md) tiers your rules live in: the global one at `<home_dir>/_specs/` and the project one. Anything already in place is detected and skipped. See [Vault](vault.md) for what each directory is for.
 
 ## 3. See what is available
 
@@ -103,6 +103,6 @@ Fold the retro into durable rules:
 /playbook learn
 ```
 
-The [learn playbook](learn.md) proposes targeted lessons (`~/Claude/{project}/_lessons/{N}_{kebab-title}.md`, each carrying a `targets:` list) and one-line bullets for the repo's own `CLAUDE.md`, in one review table for your confirmation. Approved lessons are injected into the playbooks, steps, agents and skills they name.
+The [learn playbook](learn.md) proposes rule records for the project's [specs](specs.md) tier (`rule/{NNNN}-{slug}.md`, each carrying a `targets:` list and a `brief:`) and one-line bullets for the repo's own `CLAUDE.md`, in one review table for your confirmation. An approved rule's brief is injected into the playbooks, steps, agents and skills it targets.
 
 When learn finishes, the retrospective reaches `done` and your first loop is complete. The next groom run inherits everything you just learned.
