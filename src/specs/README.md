@@ -68,7 +68,7 @@ By type:
 - `rule` — `status`: `accepted` or `retired` (a retired rule stays so it is not
   reinvented). Optional `targets:` — where the rule is injected (`groom`,
   `develop/run`, `agent:<id>`, `skill:<name>`) — and `brief:`, the one or two lines
-  injected there.
+  injected there ([how rules are injected](https://A.github.io/claude-booping/playbook/#rules)).
 - `adr` — `status`: `proposed`, `accepted`, `superseded`, `rejected`; optional
   `values` (value refs), `rules`, `supersedes`.
 - `conflict` — `status`: `open` or `resolved`; `values` — at least two value refs.

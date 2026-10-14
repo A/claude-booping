@@ -101,6 +101,37 @@ Injection happens in `booping render-playbook` itself — there is no lessons pa
 !!! note "Retired: playbook-local `_lessons/` and `step:`"
     A `_lessons/` directory inside a discovery root or inside a playbook directory is not read, and neither is a lesson's `step:` frontmatter key. Move those files into `{vault}/_lessons/` (or `<home_dir>/_lessons/`) and express `step: draft` as `targets: [<playbook>/draft]`. While a retired directory still holds markdown, every render of that playbook emits a non-blocking migration note naming it.
 
+## Rules
+
+A [rule](specs.md) record can be injected the way a lesson is. A rule injects when it is `status: accepted` and carries both `targets:` and `brief:`; a retired rule, or one without targets, injects nowhere. Rules are read from all three [specs tiers](specs.md#tiers) — core, global, project. A render pinned with `--project` drops the global tier, as it does for lessons, so core and project rules still show.
+
+`targets:` takes the same forms as a lesson's — see [Target forms](#target-forms) — and a rule reaches the same surfaces: the composed procedure, one step's `--step` output (and its inline body), an internal agent's body, a skill's body.
+
+The rule's brief is injected, not its body: one line per rule, under a `## Rules` section placed directly before `## Lessons` (or where `## Lessons` would sit when no lesson applies):
+
+```markdown
+## Rules
+
+The following 2 rule(s) apply to this step. Never silently violate one. Read a rule's record when its brief is not enough.
+
+- **Generated content is scoped to its audience** — For user-facing content, put the audience filter into the task's DoD. [booping:rule/0008](${CLAUDE_PLUGIN_ROOT}/vault/specs/rule/0008-audience-scoped-content.md)
+- **Tests run against real behaviour** — Assert behaviour, not mechanism. [rule/0003](specs/rule/0003-tests-against-real-behaviour.md)
+```
+
+The count sentence names the surface — `playbook`, `step`, `agent` or `skill`; on the composed playbook it adds `; conflict → stop and flag`. The brief is folded onto one line and printed as written, never rendered as a template.
+
+The ref and link depend on the rule's tier:
+
+| Tier | Ref | Link |
+| --- | --- | --- |
+| core | `booping:rule/NNNN` | `${CLAUDE_PLUGIN_ROOT}/…`, from the plugin root |
+| global | `<namespace>:rule/NNNN` | the record's absolute path |
+| project | `rule/NNNN` | the record's path relative to the repo root |
+
+When two tiers point at the same directory — booping's own repo, where core and project are both `vault/specs/` — each rule file injects once, from the first tier in core → global → project order.
+
+On the `render-playbook` surfaces, a rule that cannot be injected (bad frontmatter, `targets:` without `brief:`, a target that does not parse) and a rule whose `{playbook}/{step}` target names a step this playbook doesn't have each produce a non-blocking note pointing at `booping specs check` — see [Notices](#notices). Agent and skill bodies stay silent. `--no-rules` drops every `## Rules` section and every rule note; `--no-lessons` leaves rules alone.
+
 ## The manifest
 
 ### `playbook.yaml`
@@ -395,6 +426,7 @@ Problems in the manifest surface as in-band notices when you render (or run) the
 - **Blocking `STOP` notices** — the playbook refuses to run. Causes: a step named in the graph has no `<name>/prompt.md` file; a dependency names a step that isn't in the graph; the graph has a cycle; the graph is missing entirely; a step that is not `detached:` shares a parallel wave; a step carries the legacy `agent:` key instead of `detached:`; `graph:` is declared in both `playbook.yaml` and `playbook.md` frontmatter; `playbook.yaml` is unparseable or is not a mapping; a `states:` entry is malformed (an `initial` that is not one of its `statuses`, or `{instance}` in the artifact path with no subgraph referencing it); a `state:` ref names a states entry that does not exist; a `jinja: true` playbook rendered without project context, or whose body fails to render; the playbook `name` is defined at more than one level.
 - **Warning notes** — a step directory that exists on disk but isn't wired into the graph (it never runs), or a `states:` entry no graph scope references (it is never used), produces a note.
 - **Lesson notes** — also non-blocking: a [lesson](#lessons) carrying no usable `targets:` entry (it is injected nowhere), a lesson whose `{playbook}/{step}` target names a step this playbook doesn't have (that entry is ignored), and one note per retired lesson directory still holding markdown on disk — a legacy playbook `_lessons/` dir, or the vault's legacy `lessons/` directory. `--no-lessons` suppresses these along with the lesson sections.
+- **Rule notes** — non-blocking: a targeted [rule](#rules) that cannot be injected (its reason named, with a pointer to `booping specs check` on its tier), and a rule whose `{playbook}/{step}` target names a step this playbook doesn't have. `--no-rules` suppresses these along with the rule sections.
 
 ## Authoring a global playbook
 
@@ -476,13 +508,14 @@ The rendered procedure lists the steps as:
 
 `booping render-playbook <name>` renders the composed procedure to stdout, or to a file with `--output PATH` (`--output -` writes to stdout). An unknown playbook name exits 1. Graph problems don't fail the command — they render as the in-band STOP/Note notices described above (exit 0).
 
-The composed output carries a `## Lessons` section when any [lesson](#lessons) targets the playbook by name.
+The composed output carries a `## Rules` section when any [rule](#rules) targets the playbook by name, and a `## Lessons` section when any [lesson](#lessons) does.
 
 These flags help while authoring:
 
 - `--step <step>` — print just that step's body (rendered, for a `jinja: true` playbook), with no heading, instruction bullets, or gate wrapping, followed by the lessons targeting that step. This is the command every composed step section points at, and it is handy for eyeballing one prompt in isolation.
 - `--no-lessons` — drop the `## Lessons` section from the composed output, the step-lesson append from `--step`, and the lesson notices, leaving the bodies alone.
-- `--project <path>` — resolve context against the Project Vault at `<path>` instead of whatever project is attached to the current directory. Lets you render a `requires_project` or `jinja: true` playbook from anywhere. It **pins the render to the core and project levels**: the config merge skips the global tier (`~/.config/booping/config.yaml`), and discovery — for playbooks and [lessons](#lessons) alike — skips the global roots (`<home_dir>/_playbooks/`, `<home_dir>/_lessons/`), so the same command renders the same bytes on another machine.
+- `--no-rules` — the same for [rules](#rules): drop every `## Rules` section and the rule notices, leaving lessons and bodies alone.
+- `--project <path>` — resolve context against the Project Vault at `<path>` instead of whatever project is attached to the current directory. Lets you render a `requires_project` or `jinja: true` playbook from anywhere. It **pins the render to the core and project levels**: the config merge skips the global tier (`~/.config/booping/config.yaml`), and discovery — for playbooks and [lessons](#lessons) alike — skips the global roots (`<home_dir>/_playbooks/`, `<home_dir>/_lessons/`) and the global specs tier for [rules](#rules), so the same command renders the same bytes on another machine.
 - `--set <dotted.key>=<value>` — override one config value for this render only (repeatable, later pairs win, values stay strings). The pair wins over every config tier, which is how a partial is parameterised from the command line — and how a timestamp a template reads from config gets pinned to a fixed value for a reproducible render.
 - `--inline-steps` — embed each runner-performed step's body in its section instead of the fetch command, the same as `inline_steps: true` in the manifest. Detached steps keep fetch-form. Handy for reading a whole procedure as one document.
 
