@@ -31,15 +31,14 @@ ci: lint typecheck pytest snapshots mdcheck specs-check e2e
 mdcheck:
     @uv run scripts/mdcheck.py
 
-[doc("Check every record in vault/specs against its type's schema")]
+[doc("Check every record in vault/specs against its type's shipped schema")]
 specs-check:
     #!/usr/bin/env bash
     set -euo pipefail
-    cd vault/specs
     rc=0
-    for schema in schemas/*.yaml; do
+    for schema in src/specs/schemas/*.yaml; do
         type=$(basename "$schema" .yaml)
-        files=("$type"/*.md)
+        files=(vault/specs/"$type"/*.md)
         [ -e "${files[0]}" ] || continue
         mdcheck "$schema" "${files[@]}" || rc=1
     done
