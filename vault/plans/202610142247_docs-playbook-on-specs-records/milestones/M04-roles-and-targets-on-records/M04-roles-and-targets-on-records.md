@@ -2,7 +2,7 @@
 id: "04"
 title: "Roles and targets refresh reference/0001 and reference/0003"
 sp: 4
-status: pending
+status: in-progress
 plan: "plans/202610142247_docs-playbook-on-specs-records/index.md"
 ---
 
