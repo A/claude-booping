@@ -1,61 +1,61 @@
 # Enumerate the documentation surfaces
 
-You receive the confirmed briefing — what the project is, who it serves, where it is heading —
-the attached repo's path, and the run workdir `{vault}/docs/`. Describe the project's own parts
-in the briefing's vocabulary.
+You receive the attached repo's path and the run record
+`{vault}/docs/_runs/{YYYYMMDDHHmm}-{title}.md`; its `## Briefing` — what the project is, who it
+serves, where it is heading — is confirmed. Describe the project's own parts in the briefing's
+vocabulary.
 
-Read the repo yourself: every markdown documentation surface it carries today, and the
-conventions each one follows — where it lives, how it is built and published, how long its
-entries run, how it links, what it habitually omits. Read `{vault}/docs/_specs/targets.md`
-first when it exists: a run refreshes that file, it never regenerates it.
+Read the surfaces record `{vault}/specs/reference/0003-documentation-surfaces.md` first: a run
+refreshes it, it never regenerates it. Then read the repo yourself: every markdown documentation
+surface it carries today, and the conventions each one follows — where it lives, how it is built
+and published, how long its entries run, how it links, what it habitually omits.
 
 Audience is described from the surface itself — who reaches for this file and why — never by
-role id. The role vocabulary is being authored in parallel; surfaces and roles meet later, at
-targeting.
+role id. The audience record reference/0001 is being refreshed in parallel and is not a source
+here; surfaces and roles meet later, at targeting.
 
-## The file to write
+## The record to refresh
 
-`{vault}/docs/_specs/targets.md`:
+The surfaces record's `## Facts` section, rewritten in place. Nothing else is written.
 
-- no frontmatter of your own — the confirming edge stamps `reviewed_at:`, and an existing
-  file's frontmatter survives untouched
-- an H1 naming the project and the file: `# {project} — Documentation surfaces`
-- a lead of one or two lines naming the rule the set obeys: markdown surfaces only, one row per
-  destination file or per documented directory
-- one table, columns `Surface | Format & conventions | Audience | Depth`
-  - **Surface** — the backticked path or root
-  - **Format & conventions** — how it is built, published and written: generator, link style,
-    entry length, heading habits
-  - **Audience** — who reaches for it and why, in plain description
-  - **Depth** — how much detail belongs there, and what is out of place on it
-- a `CHANGELOG.md` row always, marked as introduced by this playbook; when the repo carries no
-  `CHANGELOG.md` yet, say so in the row, so the changelog step knows it seeds rather than appends
-- a `docs/_specs/` row always, written vault-relative and marked as such — the spec set is a
-  surface, not only this playbook's scratch space. Its audience is **Claude itself**, which reads
-  the set to learn the product vision, the audiences and the feature inventory before writing any
-  other destination, so a stale spec set mis-aims everything downstream. Its depth is the
-  project's model of itself — vision, roles, features, surfaces — and its format is one file per
-  question: `glossary.md` canonical terms, `index.md` the briefing, `roles.md` the audience map,
-  `features.md` the feature index of groups, features and capabilities, `targets.md` this set,
-  `documented.md` the ledger. Describe it in the surface's own terms like any other row; you
-  still never edit a sibling `_specs/` file from here.
-- a closing `## Not surfaces` section naming what was considered and excluded, each with its
-  reason — source files, module headers and inline comments (owned by `develop`), build
-  artefacts, generated reports, non-markdown assets — so no later wave re-litigates the boundary
-- on a refresh: keep the rows that still hold in their existing hand-made wording, and rewrite
-  only what the repo moved. A surface that no longer exists leaves the file and is named in your
-  return — never dropped silently.
+- One fact per bullet, in the bullet style the record uses today: one bullet per destination file
+  or documented directory, opening with the backticked path, then who reaches for it and why, its
+  depth ceiling — how much detail belongs there and what belongs elsewhere — and its conventions:
+  generator, link style, entry length, heading habits.
+- A `CHANGELOG.md` bullet always, marked as introduced by this playbook; when the repo carries no
+  `CHANGELOG.md` yet, say so in the bullet, so the changelog step knows it seeds rather than
+  appends.
+- A spec-set bullet always: the project specs tier records the docs playbook reads — the value
+  records, reference/0001–0003 (audience, glossary, surfaces) and the story records. Its audience
+  is **Claude itself**, which reads them to learn the product's values, audiences, vocabulary,
+  surfaces and features before writing any other destination, so a stale record mis-aims
+  everything downstream. Its ceiling is the project's model of itself — never how-to prose, run
+  history or implementation detail. Its convention is one typed record per subject, in the shape
+  `booping specs check` enforces. Describe it like any other surface; you still never edit
+  another record from here.
+- A closing "Not surfaces" bullet naming what was considered and excluded, each with its reason —
+  source files, module headers and inline comments (owned by `develop`), build artefacts,
+  generated reports, non-markdown assets — so no later wave re-litigates the boundary.
+- On a refresh: keep the bullets that still hold in their existing wording, and rewrite only what
+  the repo moved. A surface that no longer exists leaves the record and is named in your return —
+  never dropped silently.
+- A default you chose that the repo and the briefing do not settle is marked `[clarify]` with one
+  sentence on what to settle (rule/0002).
+- Frontmatter stays untouched except `updated_at`, set to today. `reviewed` is the owner's alone —
+  never add or change it.
+- The H2 order the record shape enforces stays as it is: `## Facts`, then `## How to check?` when
+  present.
 
 The set is closed by construction: markdown only, so a source file can never become a
-destination. Write no other file — you enumerate surfaces, never edit one, and never touch the
-sibling `_specs/` files being written in the same wave, whatever your reading suggests about them.
+destination. Write nothing else — you enumerate surfaces, never edit one, and never touch
+reference/0001, whatever your reading suggests about it.
 
 ## Return format
 
 ```
 ## Changed:
 
-- [UPDATED] {vault}/docs/_specs/targets.md — 5 surfaces, 1 new
+- [UPDATED] the surfaces record — 5 surfaces, 1 new
 
 ## Notes:
 
@@ -64,12 +64,12 @@ sibling `_specs/` files being written in the same wave, whatever your reading su
 - `docs/` — plugin-internal fragments read by agents mid-run; route-specific detail only
 - `CHANGELOG.md` — new surface, repo has none yet: the changelog step seeds rather than appends
 - `CLAUDE.md` — session-loaded project guide for agents; the map, not the data
-- added since the previous file: `CHANGELOG.md`
+- added since the previous facts: `CHANGELOG.md`
 - dropped: `documentation/roadmap.md` — no longer in the repo
 ```
 
-`[CREATED]` on a first run, annotated with the surface count and how many are new. One
-`## Notes:` line per surface — path, then its audience and depth in a few words — then a line
-naming what was added and what was dropped since the previous file, and a line stating whether
-the repo already has a `CHANGELOG.md`. The runner presents the surfaces at the gate from these
-lines alone and never opens the file.
+The `## Changed:` line is annotated with the surface count and how many are new. One `## Notes:`
+line per surface — path, then its audience and depth in a few words — then a line naming what was
+added and what was dropped since the previous facts, and a line stating whether the repo already
+has a `CHANGELOG.md`. The runner presents the surfaces at the gate from these lines alone and
+never opens the record.
