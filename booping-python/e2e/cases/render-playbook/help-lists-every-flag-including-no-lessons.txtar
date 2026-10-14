@@ -8,7 +8,7 @@ booping render-playbook --help
 usage: booping render-playbook [-h] [--step NAME] [--project PATH]
                                [--output PATH] [--set KEY=VALUE]
                                [--stub-macro DOTTED.PATH=LITERAL]
-                               [--no-lessons] [--inline-steps]
+                               [--no-lessons] [--no-rules] [--inline-steps]
                                name
 
 positional arguments:
@@ -30,6 +30,8 @@ options:
                         pairs win
   --no-lessons          Suppress the Lessons section on both the composed and
                         --step surfaces
+  --no-rules            Suppress every Rules section and rule notice on both
+                        the composed and --step surfaces
   --inline-steps        Embed each non-detached step's body in its composed
                         section instead of the fetch command (detached steps
                         keep fetch-form); implied by `inline_steps: true` in

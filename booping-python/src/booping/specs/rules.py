@@ -23,6 +23,7 @@ class TargetedRule(BaseModel):
 
 class RuleSkip(BaseModel):
     path: Path
+    link: str
     reason: str
 
 
@@ -44,10 +45,14 @@ def _ref(tier: Tier, number: int) -> str:
     return f"{tier.namespace}:{ref}" if tier.namespace else ref
 
 
+def _skip(tier: Tier, record: Record, reason: str) -> RuleSkip:
+    return RuleSkip(path=record.path, link=_link(tier, record.path), reason=reason)
+
+
 def _take(tier: Tier, record: Record) -> TargetedRule | RuleSkip | None:
     """None for a record that is not an injectable rule and raises nothing."""
     if record.frontmatter_error is not None:
-        return RuleSkip(path=record.path, reason=record.frontmatter_error)
+        return _skip(tier, record, record.frontmatter_error)
     fm = record.frontmatter
     if fm.get("status") != "accepted":
         return None
@@ -56,15 +61,15 @@ def _take(tier: Tier, record: Record) -> TargetedRule | RuleSkip | None:
     if targets is None and brief is None:
         return None
     if not (isinstance(brief, str) and brief.strip() and isinstance(targets, list) and targets):
-        return RuleSkip(path=record.path, reason="targets and brief must come together")
+        return _skip(tier, record, "targets and brief must come together")
     entries: list[object] = list(targets)  # pyright: ignore[reportUnknownArgumentType]
     if record.number is None:
-        return RuleSkip(path=record.path, reason="filename is not NNNN-slug.md")
+        return _skip(tier, record, "filename is not NNNN-slug.md")
     parsed: list[LessonTarget] = []
     for entry in entries:
         result = parse_target(entry)
         if isinstance(result, TargetRejection):
-            return RuleSkip(path=record.path, reason=f"target {entry!r}: {result.reason}")
+            return _skip(tier, record, f"target {entry!r}: {result.reason}")
         parsed.append(result)
     return TargetedRule(
         ref=_ref(tier, record.number),
