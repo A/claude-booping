@@ -1,20 +1,21 @@
 ---
 title: "Specs as a core feature — shipped format, specs CLI, tiers, rule injection"
 type: "feature"
-status: ready-for-dev
-sp: null
+status: in-progress
+sp: 34
 related_to: null
 created: 2026-10-14 17:32
 planned: null
-started: null
+started: 2026-10-14 17:47
 completed: null
 code_reviews: []
 sessions:
 - 4fcdac60-259a-4a51-8481-b0c2629bb285
+- 7f3bec31-4b2a-439f-ba9d-90c94c239644
 retro: null
 summary: Ship the specs format at src/specs, core.specs tier config and booping 
   specs check/ls/next; rule injection split off
-commit: fd1ffb644a3624a5ef7dd54c43f968d326bc0dd5
+commit: c604dfa30cb19334bf9277b145a87c2e5c8aad1f
 tracker_provider: null
 tracker_request: null
 tracker_issue: null
@@ -91,14 +92,14 @@ Callers: `just specs-check` (CI) only. No skill or playbook inlines these comman
 
 ## Milestones
 
-| id | title | sp | status | path | slug |
-| --- | --- | --- | --- | --- | --- |
-| 01 | Shipped specs format at src/specs | 4 | pending | plans/202610141731_specs-core-format-cli-injection/milestones/M01-shipped-format-location/M01-shipped-format-location.md | M01-shipped-format-location |
-| 02 | Specs tier config and record model | 7 | pending | plans/202610141731_specs-core-format-cli-injection/milestones/M02-specs-config-and-record-model/M02-specs-config-and-record-model.md | M02-specs-config-and-record-model |
-| 03 | booping specs ls and next | 5 | pending | plans/202610141731_specs-core-format-cli-injection/milestones/M03-specs-ls-and-next/M03-specs-ls-and-next.md | M03-specs-ls-and-next |
-| 04 | booping specs check — per-record checks | 6 | pending | plans/202610141731_specs-core-format-cli-injection/milestones/M04-specs-check-per-record/M04-specs-check-per-record.md | M04-specs-check-per-record |
-| 05 | booping specs check — links, refs and namespaces | 8 | pending | plans/202610141731_specs-core-format-cli-injection/milestones/M05-specs-check-cross-file/M05-specs-check-cross-file.md | M05-specs-check-cross-file |
-| 06 | specs-check on the CLI, docs and CLAUDE.md | 4 | pending | plans/202610141731_specs-core-format-cli-injection/milestones/M06-specs-check-in-ci-and-docs/M06-specs-check-in-ci-and-docs.md | M06-specs-check-in-ci-and-docs |
+| id | title | sp | status |
+| --- | --- | --- | --- |
+| 01 | [Shipped specs format at src/specs](milestones/M01-shipped-format-location/M01-shipped-format-location.md) | 4 | done |
+| 02 | [Specs tier config and record model](milestones/M02-specs-config-and-record-model/M02-specs-config-and-record-model.md) | 7 | pending |
+| 03 | [booping specs ls and next](milestones/M03-specs-ls-and-next/M03-specs-ls-and-next.md) | 5 | pending |
+| 04 | [booping specs check — per-record checks](milestones/M04-specs-check-per-record/M04-specs-check-per-record.md) | 6 | pending |
+| 05 | [booping specs check — links, refs and namespaces](milestones/M05-specs-check-cross-file/M05-specs-check-cross-file.md) | 8 | pending |
+| 06 | [specs-check on the CLI, docs and CLAUDE.md](milestones/M06-specs-check-in-ci-and-docs/M06-specs-check-in-ci-and-docs.md) | 4 | pending |
 
 ## Milestone files
 
