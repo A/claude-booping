@@ -2,7 +2,7 @@
 id: "01"
 title: "Specs records load frontmatter through the shared splitter"
 sp: 2
-status: pending
+status: done
 plan: "vault/plans/202610142125_specs-tails-in-repo-vault-hooks/index.md"
 ---
 
@@ -16,17 +16,17 @@ plan: "vault/plans/202610142125_specs-tails-in-repo-vault-hooks/index.md"
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 1.1 | Replace the private splitter with the shared `split_frontmatter` / `UnclosedFrontmatterError` | `booping-python/src/booping/specs/records.py` | 2 | pending |
+| 1.1 | Replace the private splitter with the shared `split_frontmatter` / `UnclosedFrontmatterError` | `booping-python/src/booping/specs/records.py` | 2 | done |
 
 ## Definition of Done
 
 ### Task 1.1
 
-- [ ] `rg -n "_FRONTMATTER_RE|_UnclosedFrontmatterError|_split_frontmatter" booping-python/src/booping/specs` prints nothing.
-- [ ] `records.py` imports `split_frontmatter` and `UnclosedFrontmatterError` from `booping.context._yaml`.
-- [ ] The five `booping-python/e2e/cases/specs/check-frontmatter-*.txtar` cases pass unmodified — they pin the unclosed-block message, the YAML error messages and their line numbers, and a `---` inside a value not closing the block. Tests: no new test; these existing e2e cases are the regression contract (integration tier).
-- [ ] No `.txtar` file is rebaselined (`git diff --stat booping-python/e2e` empty).
-- [ ] Worker's final reply: only the list of changed files.
+- [x] `rg -n "_FRONTMATTER_RE|_UnclosedFrontmatterError|_split_frontmatter" booping-python/src/booping/specs` prints nothing.
+- [x] `records.py` imports `split_frontmatter` and `UnclosedFrontmatterError` from `booping.context._yaml`.
+- [x] The five `booping-python/e2e/cases/specs/check-frontmatter-*.txtar` cases pass unmodified — they pin the unclosed-block message, the YAML error messages and their line numbers, and a `---` inside a value not closing the block. Tests: no new test; these existing e2e cases are the regression contract (integration tier).
+- [x] No `.txtar` file is rebaselined (`git diff --stat booping-python/e2e` empty).
+- [x] Worker's final reply: only the list of changed files.
 
 ## References
 

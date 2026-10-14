@@ -2,20 +2,21 @@
 title: "Specs tails and in-repo vault hooks — shared frontmatter splitter, vault commits,
   review baseline"
 type: "bug"
-status: ready-for-dev
-sp: null
+status: in-progress
+sp: 12
 related_to: null
 created: 2026-10-14 21:26
 planned: null
-started: null
+started: 2026-10-14 21:37
 completed: null
 code_reviews: []
 sessions:
 - a07e88d4-8835-40cb-89ab-80a93a6d3fdb
+- a9ee126f-d8cb-4dd2-a9b1-14922499c384
 retro: null
 summary: Specs reuse the shared frontmatter splitter; vault-commit hooks work 
   for an in-repo vault; review baseline shows commit
-commit: 7183ceb2576b6307411a4ed4c5a6489b3517c32a
+commit: 1fc868204f7c2fa4ca6e53e766d66e9938388331
 tracker_provider: null
 tracker_request: null
 tracker_issue: null
@@ -50,11 +51,11 @@ reviewed_at: 2026-10-14 21:36
 
 ## Milestones
 
-| id | title | sp | status | path | slug |
-| --- | --- | --- | --- | --- | --- |
-| 01 | Specs records load frontmatter through the shared splitter | 2 | pending | plans/202610142125_specs-tails-in-repo-vault-hooks/milestones/M01-specs-shared-frontmatter-splitter/M01-specs-shared-frontmatter-splitter.md | M01-specs-shared-frontmatter-splitter |
-| 02 | Vault-commit hooks commit an in-repo vault, vault paths only | 8 | pending | plans/202610142125_specs-tails-in-repo-vault-hooks/milestones/M02-vault-commits-in-repo-vault/M02-vault-commits-in-repo-vault.md | M02-vault-commits-in-repo-vault |
-| 03 | code-review candidates show the plan's baseline commit | 2 | pending | plans/202610142125_specs-tails-in-repo-vault-hooks/milestones/M03-review-candidates-baseline/M03-review-candidates-baseline.md | M03-review-candidates-baseline |
+| id | title | sp | status |
+| --- | --- | --- | --- |
+| 01 | [Specs records load frontmatter through the shared splitter](milestones/M01-specs-shared-frontmatter-splitter/M01-specs-shared-frontmatter-splitter.md) | 2 | done |
+| 02 | [Vault-commit hooks commit an in-repo vault, vault paths only](milestones/M02-vault-commits-in-repo-vault/M02-vault-commits-in-repo-vault.md) | 8 | pending |
+| 03 | [code-review candidates show the plan's baseline commit](milestones/M03-review-candidates-baseline/M03-review-candidates-baseline.md) | 2 | pending |
 
 ## Implementation Order
 
