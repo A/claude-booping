@@ -2,7 +2,7 @@
 id: "08"
 title: "Public docs describe rules as the one carrier"
 sp: 4
-status: pending
+status: done
 plan: "vault/plans/202610150110_lessons-migration-rule-only-injection/index.md"
 ---
 
@@ -20,21 +20,21 @@ Tests: `just docs` builds the site with no new warning; links resolve.
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 8.1 | `playbook.md` rewrite of the lessons and rules sections and the flag reference. | `documentation/playbook.md` | 2 | pending |
-| 8.2 | The remaining pages and the README, as Scope lists. | `documentation/vault.md`, `documentation/project_config.md`, `documentation/integrating-external-agents.md`, `documentation/recipes/external-agents.md`, `documentation/specs.md`, `documentation/learn.md`, `documentation/install.md`, `documentation/quick_start.md`, `documentation/index.md`, `documentation/groom.md`, `README.md` | 2 | pending |
+| 8.1 | `playbook.md` rewrite of the lessons and rules sections and the flag reference. | `documentation/playbook.md` | 2 | done |
+| 8.2 | The remaining pages and the README, as Scope lists. | `documentation/vault.md`, `documentation/project_config.md`, `documentation/integrating-external-agents.md`, `documentation/recipes/external-agents.md`, `documentation/specs.md`, `documentation/learn.md`, `documentation/install.md`, `documentation/quick_start.md`, `documentation/index.md`, `documentation/groom.md`, `README.md` | 2 | done |
 
 ## Definition of Done
 
 ### Task 8.1
 
-- [ ] `rg -n -i 'lesson' documentation/playbook.md` prints only the migration-004 sentence.
-- [ ] Every anchor other pages link into `playbook.md` (`#rules` and any `#lessons` link) resolves — `#lessons` links are repointed at `#rules`.
+- [x] `rg -n -i 'lesson' documentation/playbook.md` prints only the migration-004 sentence.
+- [x] Every anchor other pages link into `playbook.md` (`#rules` and any `#lessons` link) resolves — `#lessons` links are repointed at `#rules`.
 
 ### Task 8.2
 
-- [ ] `rg -n -i '_lessons|targeted lesson|no-lessons|## Lessons' documentation README.md` prints nothing.
-- [ ] Remaining `lesson` hits in these files are plain-English retro wording or `documentation/retro.md`'s cross-check, nothing else.
-- [ ] No page names a Python module, a context field or a template partial.
+- [x] `rg -n -i '_lessons|targeted lesson|no-lessons|## Lessons' documentation README.md` prints nothing.
+- [x] Remaining `lesson` hits in these files are plain-English retro wording or `documentation/retro.md`'s cross-check, nothing else.
+- [x] No page names a Python module, a context field or a template partial.
 
 Return: the list of changed files, nothing else.
 

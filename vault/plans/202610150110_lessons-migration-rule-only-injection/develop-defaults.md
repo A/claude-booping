@@ -65,3 +65,7 @@ M06's `rg -n '_lessons' src/config.yaml playbooks/setup` still matches four line
 - **Fixture location.** `check.sh` requires the copy at `/tmp/m004` because the fixture config pins `home_dir: /tmp/m004/home`.
 - **Idempotence diff.** The second application's `diff -r` differs only in `vault/.booping.log` (the CLI invocation log every `booping` call appends to); empty otherwise.
 - **anton:rule/0001–0003** were not reported dangling: their `sources` resolve through `{home_dir}/claude-booping` to the main checkout, which still holds the lessons until this branch merges. The owner fixes them by hand (C5). `~/Dev/@A/notes` status identical before and after.
+
+## D14 — M08 external-agent example targets a step
+
+M08's Scope sketched the external-agent example as `targets: [agent:{id}]`; the docs' own rule (and the renderer) inject `agent:` targets into booping's internal agents only — an external agent's body is never rendered. The worked examples therefore target the delegating step (`develop/develop-loop`), the form `documentation/playbook.md` tells external-agent users to use. The worker also reworded one line of `documentation/retro.md` ("targeted lesson" → "targeted rule") that M08's DoD grep caught; the parked cross-check wording there is untouched.
