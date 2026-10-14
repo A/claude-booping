@@ -2,7 +2,7 @@
 id: "05"
 title: "Research, sync-specs and targeting work on records"
 sp: 10
-status: pending
+status: in-progress
 plan: "plans/202610142247_docs-playbook-on-specs-records/index.md"
 ---
 
