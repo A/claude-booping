@@ -3,9 +3,6 @@
 
   kind — agent | skill; also the surface noun of the section
   id   — matched against the `{kind}:{id}` targets of `context.targeted_rules`
-
-  Ends with a blank line when non-empty, so a call site placed directly before
-  the lessons partial with `-}}` keeps the two sections apart without a stray line.
 -#}
 {%- set _tr_kind = kwargs.kind -%}
 {%- set _tr_id = kwargs.id -%}

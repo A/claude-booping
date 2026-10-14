@@ -26,19 +26,6 @@
 - {{ _lts_rule.ref }} — {{ _lts_rule.brief }}
 {% endfor %}
 {%- endif -%}
-{%- set _lts_lessons = [] -%}
-{%- for _lts_lesson in context.targeted_lessons -%}
-{%- if _lts_lesson.parsed_targets | selectattr("playbook", "equalto", _lts_pb.name) | list -%}
-{%- set _ = _lts_lessons.append(_lts_lesson) -%}
-{%- endif -%}
-{%- endfor -%}
-{%- if _lts_lessons %}
-**Lessons:**
-
-{% for _lts_lesson in _lts_lessons -%}
-- {{ _lts_lesson.title }} — {{ (_lts_lesson.frontmatter.get("summary") or _lts_lesson.body.strip().split("\n")[0]) | replace("\n", " ") | trim }}
-{% endfor %}
-{%- endif -%}
 {%- set _lts_agents = [] -%}
 {%- set _lts_seen = [] -%}
 {%- for _lts_id, _lts_spec in (config.core.get(_lts_pb.name | replace("-", "_") ~ "_playbook", {}) or {}).get("agents", {}).items() -%}

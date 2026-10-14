@@ -74,7 +74,7 @@ def test_skill_rules_section_renders_for_targeted_skill_only(
     assert out == expected
 
 
-def test_skill_body_places_rules_directly_before_lessons(tmp_path: Path) -> None:
+def test_skill_body_closes_with_rules_and_carries_no_lessons(tmp_path: Path) -> None:
     lessons = tmp_path / "_lessons"
     lessons.mkdir()
     (lessons / "0001_x.md").write_text("---\ntitle: X\ntargets:\n  - skill:playbook\n---\nBody.\n")
@@ -83,10 +83,5 @@ def test_skill_body_places_rules_directly_before_lessons(tmp_path: Path) -> None
 
     result = _render(_context(tmp_path, [_rule("skill:playbook")]), PLAYBOOK_SKILL, {})
     assert result.count("## Rules\n") == baseline.count("## Rules\n") + 1
-    assert result == _insert_before_last_lessons(baseline, SECTION)
-
-
-def _insert_before_last_lessons(text: str, section: str) -> str:
-    head, sep, tail = text.rpartition("## Lessons\n")
-    assert sep
-    return head + section + sep + tail
+    assert "## Lessons" not in result
+    assert result.rstrip("\n").endswith(SECTION.rstrip("\n"))

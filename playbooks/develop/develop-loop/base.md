@@ -40,7 +40,7 @@ The edge's hook regenerates `index.md`'s `## Milestones` table and its `sp` — 
    One block per milestone, in the same order: what was done in one paragraph, the files touched, and the `## Verify` command with its verdict. Leave the work uncommitted — committing is the runner's. No diffs, no pasted code, no command logs.
    ```
 
-   Paths only: never paste a milestone's goal, tasks, DoD or Verify text into the briefing — the worker reads its contract itself. Briefings carry no lesson paths either; the worker gets its lesson context from its own extension file.
+   Paths only: never paste a milestone's goal, tasks, DoD or Verify text into the briefing — the worker reads its contract itself. Briefings carry no rule paths either; the worker gets its project shaping from the `agent:{id}` rules injected into its own body.
 4. Delegate the briefing to the worker agent named in [Available Agents](#available-agents) — always delegate, even for a one-line change.
 5. Never resurrect a worker by ID for the next group. Each group gets a fresh agent with empty context.
 

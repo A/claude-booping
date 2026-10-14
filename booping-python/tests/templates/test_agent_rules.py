@@ -82,7 +82,7 @@ def test_agent_rules_section_renders_for_targeted_agent_only(
         pytest.param(DEVELOPER, "booping-developer", "booping-researcher", id="developer"),
     ],
 )
-def test_agent_body_places_rules_directly_before_lessons(
+def test_agent_body_closes_with_rules_and_carries_no_lessons(
     tmp_path: Path, template: str, agent: str, other: str
 ) -> None:
     lessons = tmp_path / "_lessons"
@@ -95,4 +95,6 @@ def test_agent_body_places_rules_directly_before_lessons(
 
     assert _render(for_other, template, {}) == baseline
     result = _render(for_this, template, {})
-    assert result == baseline.replace("## Lessons\n", SECTION + "## Lessons\n", 1)
+    assert "## Lessons" not in result
+    assert result.count("## Rules\n") == baseline.count("## Rules\n") + 1
+    assert result.rstrip("\n").endswith(SECTION.rstrip("\n"))
