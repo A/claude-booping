@@ -22,7 +22,7 @@ A rule is a `rule` record in this project's specs tier — `booping specs init -
 
 Several entries in one list are one rule, not a multi-target row. A rule with no valid target reaches nothing.
 
-The table of contents below is the whole space. Pick the playbooks a candidate actually touches and fetch their targets — step summaries, rules and lessons already targeting them, addressable agents — with the command on each entry. Several names fetch in one call: `--set targets_for=a,b`.
+The table of contents below is the whole space. Pick the playbooks a candidate actually touches and fetch their targets — step summaries, rules already targeting them, addressable agents — with the command on each entry. Several names fetch in one call: `--set targets_for=a,b`.
 
 Skills are not listed per playbook: `skill:playbook` is the only skill target.
 
@@ -118,10 +118,10 @@ Execute the steps in the most effective order considering their dependencies.
 | --- | --- | --- | --- |
 | `intake` | — | Resolve the run's retrospective — from `$ARGUMENTS` as a `retrospectives/` path, or by picking one from the awaiting-learning list — validate it sits at learn's entry status, then read it in full and each plan in its `plans:` list for context, with the vault root as the workdir. | — |
 | `extract-candidates` | `intake` | Decompose every retrospective insight into atomic candidates — one imperative rule per candidate, single concern, no bare internal IDs, one sentence per review-table cell — and route each to exactly one of the preamble's two destinations, holding the set in context for the sweep. | — |
-| `dedup-sweep` | `extract-candidates` | Sweep every candidate against existing coverage — the rule records of the three specs tiers, the remaining lessons and the repo's `CLAUDE.md` — and record a per-candidate verdict: new, update-existing at the rule or lesson already holding it, covered by a core or global rule or global lesson, or a conflict flagged visibly for the review table. | — |
+| `dedup-sweep` | `extract-candidates` | Sweep every candidate against existing coverage — the rule records of the three specs tiers and the repo's `CLAUDE.md` — and record a per-candidate verdict: new, update-existing at the project rule already holding it, covered by a core or global rule, or a conflict flagged visibly for the review table. | — |
 | `review-table` | `dedup-sweep` | Present the unified review table in the format the review-table doc owns — every candidate with its target and sweep verdict, conflicts flagged — and collect the user's accept / reject / add response in a single `AskUserQuestion` call, never per row; the recorded response is the run's consent to write. | — |
 | `write` | `review-table` | Write every accepted row in one pass per destination — new rule records in the project specs tier at the number `booping specs next` hands out, in-place updates to the rule the sweep matched, one-line bullets into the repo's `CLAUDE.md` — with table acceptance as the sole consent and never a write outside the vault, its specs tier and the attached repo. | — |
-| `transition` | `write` | Fire the exit transition from the vault root — `booping playbook-transition learn done --target retrospectives/{slug}.md` — whose hook commits the vault including the written rule records and any converted lesson's deletion; commit any repo `CLAUDE.md` addition, and the rule records when the vault is outside the repo, separately in the repo working tree, then close on a report of items written per target. | — |
+| `transition` | `write` | Fire the exit transition from the vault root — `booping playbook-transition learn done --target retrospectives/{slug}.md` — whose hook commits the vault including the written rule records; commit any repo `CLAUDE.md` addition, and the rule records when the vault is outside the repo, separately in the repo working tree, then close on a report of items written per target. | — |
 
 ## State
 
@@ -200,18 +200,15 @@ Before drafting the review table, check whether each candidate duplicates or con
 The lookup set is:
 
 - The rule records of all three specs tiers — `booping specs ls --tier {core,global,project} --type rule`, one call per tier; a tier that does not exist is skipped silently. Only the project tier is ever written.
-- `{vault}/_lessons/` — this project's lessons, shadowing a global lesson of the same filename.
-- `{home_dir}/_lessons/` — global lessons, shared across projects (the vault-home base is `booping config-get home_dir`).
 - The attached repo's `CLAUDE.md` — the non-rule destination.
 
-Skip silently when a directory is empty or a file is absent. Lessons are read here, never written: no row routes to a lesson file.
+Skip silently when a file is absent.
 
 Record a sweep verdict per candidate as one of:
 
 - `new` — no prior coverage anywhere in the lookup set.
 - `update existing at rule/NNNN` — duplicate or refinement of a project rule; the candidate becomes an edit of that record in place.
-- `update existing at _lessons/{file}` — duplicate of a lesson in `{vault}/_lessons/`; the candidate is converted on write into a new project rule carrying the merged content.
-- `covered by {ref}` — already covered by a core or global rule, or a global lesson; shown in the review table and never written.
+- `covered by {ref}` — already covered by a core or global rule; shown in the review table and never written.
 - `conflict with {ref}` — contradicts an existing rule; surface it in the review table as a visible flag.
 
 ## Step: Review Table
@@ -232,7 +229,6 @@ There are exactly two destinations (resolve each placeholder before writing):
 Rows by sweep verdict:
 
 - `update existing at rule/NNNN` — edit that record in place, no fresh record, and bump `updated_at`. Extend, don't rewrite: add the row's content in the shape the record already uses, touch only prose the addition makes stale, and leave everything else — including the existing **Example** — byte-identical.
-- `update existing at _lessons/{file}` — write a new rule record carrying the lesson's content merged with the row's, then delete the lesson file. This deletion is the only write under `_lessons/`; learn never writes or edits a lesson.
 - `covered` — not written.
 - `conflict with {ref}`, accepted — written as a new project rule whose `## Rule` opens with a `[clarify]` sentence naming `{ref}` as the departed rule and asking the owner for an ADR recording the departure.
 
@@ -278,7 +274,7 @@ Everything accepted is on disk; nothing here re-drafts or re-opens the table.
 
 ## 1. Transition
 
-Once every accepted item is written, advance the run per the `## State` section — from the vault root, passing `--target retrospectives/{slug}.md` for the run's retrospective. The exit edge's hook commits that file together with the rule records this run wrote under the vault's `specs/` and any `_lessons/` file a conversion deleted; when the vault is outside the repo the records live in the repo and are committed in §2. Plan frontmatter is never touched: the plans closed at develop and learn leaves them alone.
+Once every accepted item is written, advance the run per the `## State` section — from the vault root, passing `--target retrospectives/{slug}.md` for the run's retrospective. The exit edge's hook commits that file together with the rule records this run wrote under the vault's `specs/`; when the vault is outside the repo the records live in the repo and are committed in §2. Plan frontmatter is never touched: the plans closed at develop and learn leaves them alone.
 
 ## 2. Repo commit
 

@@ -8,7 +8,6 @@ There are exactly two destinations (resolve each placeholder before writing):
 Rows by sweep verdict:
 
 - `update existing at rule/NNNN` — edit that record in place, no fresh record, and bump `updated_at`. Extend, don't rewrite: add the row's content in the shape the record already uses, touch only prose the addition makes stale, and leave everything else — including the existing **Example** — byte-identical.
-- `update existing at _lessons/{file}` — write a new rule record carrying the lesson's content merged with the row's, then delete the lesson file. This deletion is the only write under `_lessons/`; learn never writes or edits a lesson.
 - `covered` — not written.
 - `conflict with {ref}`, accepted — written as a new project rule whose `## Rule` opens with a `[clarify]` sentence naming `{ref}` as the departed rule and asking the owner for an ADR recording the departure.
 

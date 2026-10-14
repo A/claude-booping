@@ -18,7 +18,7 @@ states:
             gates:
               - "user confirmed the review table — the accept / reject / add response is recorded"
               - "every accepted row written to its single target — rule records pass booping specs check"
-            hooks: ["script close-working-set --stage _lessons specs --prefix learn"]
+            hooks: ["script close-working-set --stage specs --prefix learn"]
       done:
         terminal: true
 
