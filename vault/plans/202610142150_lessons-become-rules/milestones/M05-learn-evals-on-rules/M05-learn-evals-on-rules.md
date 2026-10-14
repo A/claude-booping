@@ -2,7 +2,7 @@
 id: "05"
 title: "Learn eval suites on rules"
 sp: 3
-status: pending
+status: done
 plan: "vault/plans/202610142150_lessons-become-rules/index.md"
 ---
 
@@ -18,19 +18,19 @@ Tests: smoke-tier deterministic asserts — extract: a candidate table with `Bri
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 5.1 | extract-candidates: fixture target space and asserts move to rules (`Rule` destination, `Brief` column, no lesson path). | `playbooks/learn/extract-candidates/tests.yaml`, `playbooks/learn/extract-candidates/_fixtures/` | 1 | pending |
-| 5.2 | write: `accepted-table.md` in C12 columns incl. one `covered` row; `refine-existing.md` becomes a project rule record; asserts on path, frontmatter keys, byte-identical untouched body, no file for `covered`. | `playbooks/learn/write/tests.yaml`, `playbooks/learn/write/_fixtures/` | 2 | pending |
+| 5.1 | extract-candidates: fixture target space and asserts move to rules (`Rule` destination, `Brief` column, no lesson path). | `playbooks/learn/extract-candidates/tests.yaml`, `playbooks/learn/extract-candidates/_fixtures/` | 1 | done |
+| 5.2 | write: `accepted-table.md` in C12 columns incl. one `covered` row; `refine-existing.md` becomes a project rule record; asserts on path, frontmatter keys, byte-identical untouched body, no file for `covered`. | `playbooks/learn/write/tests.yaml`, `playbooks/learn/write/_fixtures/` | 2 | done |
 
 ## Definition of Done
 
 ### Task 5.1
 
-- [ ] `rg -n '_lessons' playbooks/learn/extract-candidates` returns nothing.
+- [x] `rg -n '_lessons' playbooks/learn/extract-candidates` returns nothing.
 
 ### Task 5.2
 
-- [ ] `rg -n '_lessons' playbooks/learn/write` returns nothing.
-- [ ] `EVAL_PR=0 just smoke learn/write` and `EVAL_PR=0 just smoke learn/extract-candidates` pass.
+- [x] `rg -n '_lessons' playbooks/learn/write` returns nothing.
+- [x] `EVAL_PR=0 just smoke learn/write` and `EVAL_PR=0 just smoke learn/extract-candidates` pass.
 
 Return: the list of changed files and the two smoke pass/fail lines, nothing else.
 

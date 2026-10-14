@@ -34,3 +34,11 @@ DoD 2.2 asks the full `render-playbook learn` to name no `_lessons/` destination
 
 C5 writes `## Follows from` as plain text `retrospectives/{slug}.md` when the vault is outside the repo, but `src/specs/schemas/rule.yaml` requires a link in every item, so such a record fails `booping specs check`. The check is not weakened. Default: vault outside the repo → link a project-tier value when one fits; otherwise one item opening with `[clarify]`, naming the retrospective in plain text and linking the tier README, so the owner settles the source. [clarify] the owner may prefer a schema change (allow an unlinked source item) instead.
 
+## D9 — M05 runs the smoke tier
+
+The develop preamble says eval runs are proposed, never launched; C10 and M05's DoD, settled in grooming, have the milestone run the `smoke` tier with `EVAL_PR=0`. The plan's grooming decision governs ([rule/0004](../../specs/rule/0004-questions-settled-in-grooming.md)); `regress` stays with the owner.
+
+## D10 — M05 DoD `rg _lessons playbooks/learn/write` read as the suite files
+
+The DoD grep also matches `write/base.md` and `write/fable-5.md`, where the only hit is C6's `update existing at _lessons/{file}` conversion bullet (M04). Removing it would break C6, so the check is read as scoped to M05's own files (`tests.yaml`, `_fixtures/`), which are clean. The extract suite's not-regex is written `[_]lessons/` so the literal grep stays empty; it still rejects a lesson path.
+
