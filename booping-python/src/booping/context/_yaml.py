@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from io import StringIO
 from pathlib import Path
 from typing import Any
@@ -55,15 +56,43 @@ def safe_load_str(text: str) -> dict[str, Any]:
     return _load_dict(yaml.safe_load(text))
 
 
+# The block closes at the first line that is exactly `---`; a `---` inside a value
+# or an indented block scalar line must not end it.
+_FRONTMATTER_RE = re.compile(r"\A---[ \t\r]*\n(.*?)^---[ \t\r]*$\n?", re.S | re.M)
+
+
+class UnclosedFrontmatterError(ValueError):
+    def __init__(self) -> None:
+        super().__init__("frontmatter block is not closed")
+
+
+def _match_frontmatter(text: str) -> re.Match[str] | None:
+    """Match of the frontmatter block, or None when the text does not open one.
+
+    Raises :class:`UnclosedFrontmatterError` when the opening line has no closing line.
+    """
+    if not text.startswith("---"):
+        return None
+    match = _FRONTMATTER_RE.match(text)
+    if match is None:
+        raise UnclosedFrontmatterError
+    return match
+
+
+def split_frontmatter(text: str) -> tuple[str | None, str]:
+    """YAML text between the delimiter lines (None without frontmatter) and the body."""
+    match = _match_frontmatter(text)
+    if match is None:
+        return None, text
+    return match.group(1), text[match.end() :].lstrip("\n")
+
+
 def parse_frontmatter(path: Path) -> tuple[dict[str, Any], str]:
     """Split markdown frontmatter from body; frontmatter is parsed YAML."""
-    text = path.read_text()
-    if not text.startswith("---"):
-        return {}, text
-    end = text.index("---", 3)
-    fm = safe_load_str(text[3:end])
-    body = text[end + 3 :].lstrip("\n")
-    return fm, body
+    yaml_text, body = split_frontmatter(path.read_text())
+    if yaml_text is None:
+        return {}, body
+    return safe_load_str(yaml_text), body
 
 
 def parse_frontmatter_only(path: Path) -> dict[str, Any]:
@@ -75,26 +104,21 @@ def parse_frontmatter_only(path: Path) -> dict[str, Any]:
 def split_frontmatter_md(text: str) -> tuple[str, str, str]:
     """Split markdown with frontmatter into (before_yaml, yaml_text, after_yaml).
 
-    * ``before_yaml``: opening ``---\\n`` delimiter.
-    * ``yaml_text``: YAML content between the two delimiters (may be empty).
-    * ``after_yaml``: closing ``---`` delimiter and body text.
+    * ``before_yaml``: opening ``---`` delimiter line.
+    * ``yaml_text``: YAML content between the two delimiter lines (may be empty).
+    * ``after_yaml``: closing ``---`` delimiter line and body text.
 
     The original text can be reconstructed as ``before_yaml + yaml_text + after_yaml``.
 
     Raises :class:`ValueError` if no frontmatter delimiters are found.
     """
-    if not text.startswith("---"):
+    match = _match_frontmatter(text)
+    if match is None:
         raise ValueError("No frontmatter opening delimiter")
-    if text[3:4] != "\n":
-        raise ValueError("Opening --- must be followed by newline")
 
-    close_pos = text.find("---", 3)
-    if close_pos == -1:
-        raise ValueError("No frontmatter closing delimiter")
-
-    before_yaml = text[:4]  # "---\n"
-    yaml_text = text[4:close_pos]
-    after_yaml = text[close_pos:]  # "---\n<body>"
+    before_yaml = text[: match.start(1)]
+    yaml_text = match.group(1)
+    after_yaml = text[match.end(1) :]
 
     return before_yaml, yaml_text, after_yaml
 
