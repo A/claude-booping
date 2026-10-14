@@ -9,7 +9,7 @@ destination whole before writing — a change is folded into the wording already
 to the end.
 
 Nothing the row settled is re-opened here. The destination is the row's, the audience fit is the
-row's, the depth ceiling is the roles file's, and a fact is the change table's; the gate that
+row's, the depth ceiling is the audience record's, and a fact is the change table's; the gate that
 confirmed the plan is your authorisation to write. Anything you cannot write faithfully goes in the
 return as `not written:` rather than being improvised into the file. Read no source to check a
 claim — fact-checking against code is `verify`'s step, and this one writes what its row says.
@@ -35,8 +35,8 @@ may write.
   then the surface's conventions shape the new file's skeleton
 - never a source file: the destination set is markdown by construction, and code-level docs stay
   with `develop`
-- nothing else is written — not the run record, not the spec set, not another row's destination, not
-  `CHANGELOG.md`
+- nothing else is written — not the run record, not the spec records, not another row's destination,
+  not `CHANGELOG.md`
 
 Judge the draft on being correct and complete at its depth, not on being tight. `compact` runs next
 and is the pass that cuts: a fact stated twice is cheap, a fact missing is not — which is not a
