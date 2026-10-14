@@ -99,9 +99,7 @@ def make_query_filter(config: object) -> Callable[..., list[Row]]:
     from booping.query import QueryError, build_spec, resolve_spec, run
 
     @pass_context
-    def query_filter(
-        jinja_ctx: JinjaContext, spec_path: object, **overrides: Any
-    ) -> list[Row]:
+    def query_filter(jinja_ctx: JinjaContext, spec_path: object, **overrides: Any) -> list[Row]:
         cfg = cast("dict[str, Any]", config) if isinstance(config, dict) else {}
         dotted = str(spec_path)
         base = resolve_spec(cfg, dotted)
@@ -112,9 +110,7 @@ def make_query_filter(config: object) -> Callable[..., list[Row]]:
         vault = _vault_of(jinja_ctx.get("context"))
         # A `root: core` spec globs the plugin root, so it needs no vault at all.
         if vault is None and spec.root is None:
-            raise QueryError(
-                f"cannot run query {dotted}: no vault resolved for this render"
-            )
+            raise QueryError(f"cannot run query {dotted}: no vault resolved for this render")
         return run(spec, vault)
 
     return query_filter

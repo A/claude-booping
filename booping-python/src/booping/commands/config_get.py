@@ -17,8 +17,7 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
     p.add_argument(
         "key",
         help=(
-            "Dot-separated key path into the merged config"
-            " (e.g. core.sprint.default_threshold_sp)"
+            "Dot-separated key path into the merged config (e.g. core.sprint.default_threshold_sp)"
         ),
     )
     p.set_defaults(func=_run)

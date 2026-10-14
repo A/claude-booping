@@ -72,14 +72,7 @@ class TestUpdateFrontmatter:
         assert plan.read_text() == md
 
     def test_updates_key_preserves_others(self, tmp_path: Path) -> None:
-        md = (
-            "---\n"
-            "title: Foo\n"
-            "status: backlog\n"
-            "sp: 3\n"
-            "---\n"
-            "# Body\n"
-        )
+        md = "---\ntitle: Foo\nstatus: backlog\nsp: 3\n---\n# Body\n"
         plan = tmp_path / "plan.md"
         plan.write_text(md)
 

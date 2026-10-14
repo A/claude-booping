@@ -32,10 +32,7 @@ def test_no_migrations_shipped_yields_no_notice(tmp_path: Path) -> None:
 
 def test_current_vault_yields_no_notice(tmp_path: Path) -> None:
     start = _vault(tmp_path, "project_name: x\nlatest_migration: 2\n")
-    assert (
-        migrations.render_gate(start=start, plugin_root=_plugin_root(tmp_path, 1, 2))
-        is None
-    )
+    assert migrations.render_gate(start=start, plugin_root=_plugin_root(tmp_path, 1, 2)) is None
 
 
 def test_behind_vault_names_the_remedy_command(tmp_path: Path) -> None:
@@ -55,10 +52,7 @@ def test_marker_read_tolerates_unknown_keys(tmp_path: Path) -> None:
         tmp_path,
         "project_name: x\nlatest_migration: 2\nfuture_key: {nested: [1, 2]}\n",
     )
-    assert (
-        migrations.render_gate(start=start, plugin_root=_plugin_root(tmp_path, 1, 2))
-        is None
-    )
+    assert migrations.render_gate(start=start, plugin_root=_plugin_root(tmp_path, 1, 2)) is None
 
 
 def test_non_integer_watermark_counts_as_behind(tmp_path: Path) -> None:

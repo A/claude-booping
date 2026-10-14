@@ -5,6 +5,7 @@ Operates on a *machine dict* carrying ``statuses``, ``superstates``, and
 valid edges and ordered hook lists for any status transition, without
 executing them (that is the dispatcher's job).
 """
+
 from __future__ import annotations
 
 from typing import Any
@@ -18,6 +19,7 @@ class InvalidTransitionError(Exception):
 # ---------------------------------------------------------------------------
 # Edge representation
 # ---------------------------------------------------------------------------
+
 
 class Edge:
     """A single transition edge with metadata."""
@@ -38,8 +40,7 @@ class Edge:
 
     def __repr__(self) -> str:  # pragma: no cover
         return (
-            f"Edge(to={self.to!r}, when={self.when!r}, "
-            f"gates={self.gates!r}, hooks={self.hooks!r})"
+            f"Edge(to={self.to!r}, when={self.when!r}, gates={self.gates!r}, hooks={self.hooks!r})"
         )
 
     def __eq__(self, other: object) -> bool:
@@ -59,6 +60,7 @@ class Edge:
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _parse_transition(t: dict[str, Any]) -> Edge:
     """Parse a raw transition dict from config into an Edge."""
@@ -87,6 +89,7 @@ def _superstate_hooks(key: str, superstate_name: str, superstates: dict[str, Any
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
+
 
 def resolve_edges(status: str, machine: dict[str, Any]) -> list[Edge]:
     """Return all valid edges from *status*: own transitions ∪ inherited
@@ -135,9 +138,7 @@ def resolve_hooks(from_status: str, to_status: str, machine: dict[str, Any]) -> 
             matched = e
             break
     if matched is None:
-        raise InvalidTransitionError(
-            f"No valid transition from {from_status!r} to {to_status!r}"
-        )
+        raise InvalidTransitionError(f"No valid transition from {from_status!r} to {to_status!r}")
 
     result: list[str] = []
 

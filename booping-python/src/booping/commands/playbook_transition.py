@@ -4,6 +4,7 @@ The artifact path of a `states:` entry is relative to the run workdir (default c
 the playbook dir stays read-only source. Every artifact mutation happens here — the
 printed report is the authoritative record of what changed.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -80,12 +81,8 @@ def dispatch_frontmatter_update(
     return rel, rendered
 
 
-def format_frontmatter_line(
-    resolved: dict[str, str], target: str | None = None
-) -> str:
-    pairs = [
-        f'{k}="{v}"' if " " in v else f"{k}={v}" for k, v in resolved.items()
-    ]
+def format_frontmatter_line(resolved: dict[str, str], target: str | None = None) -> str:
+    pairs = [f'{k}="{v}"' if " " in v else f"{k}={v}" for k, v in resolved.items()]
     prefix = "frontmatter: " if target is None else f"frontmatter {target}: "
     return prefix + " ".join(pairs)
 
@@ -174,7 +171,7 @@ def implied_workdir(artifact: Path, rel: str | None) -> Path | None:
     if not rel or "{instance}" in rel:
         return None
     parts = PurePosixPath(rel).parts
-    if len(parts) >= len(artifact.parts) or artifact.parts[-len(parts):] != parts:
+    if len(parts) >= len(artifact.parts) or artifact.parts[-len(parts) :] != parts:
         return None
     return artifact.parents[len(parts) - 1]
 
@@ -188,9 +185,7 @@ def _resolve_artifact(
         resolved = resolve_target(target, workdir)
         return resolved, str(resolved)
     if not machine.artifact:
-        _fail(
-            f"state '{machine.name}' declares no `artifact:`; pass --target PATH"
-        )
+        _fail(f"state '{machine.name}' declares no `artifact:`; pass --target PATH")
     rel = machine.artifact
     if "{instance}" in rel:
         if instance is None:
@@ -294,11 +289,7 @@ def _run(args: argparse.Namespace) -> None:
         _fail("--target and --instance are mutually exclusive")
 
     workdir_arg: str | None = args.workdir
-    workdir = (
-        Path(workdir_arg).expanduser().resolve()
-        if workdir_arg is not None
-        else Path.cwd()
-    )
+    workdir = Path(workdir_arg).expanduser().resolve() if workdir_arg is not None else Path.cwd()
     if not workdir.is_dir():
         _fail(f"workdir not found: {workdir}")
 
@@ -332,15 +323,10 @@ def _run(args: argparse.Namespace) -> None:
                 if existing
                 else f"artifact {artifact_rel} does not exist"
             )
-            _fail(
-                f"{missing}; the only legal target is "
-                f"the initial status {machine.initial!r}"
-            )
+            _fail(f"{missing}; the only legal target is the initial status {machine.initial!r}")
         _bootstrap(artifact, machine.initial)
         from_status = NOT_STARTED
-        report.append(
-            f"bootstrapped {artifact_rel}" if existing else f"created {artifact_rel}"
-        )
+        report.append(f"bootstrapped {artifact_rel}" if existing else f"created {artifact_rel}")
         report.append(f"{from_status} → {to_status}")
         report.append(format_frontmatter_line({"status": to_status}))
         hooks = [str(h) for h in machine.raw.get("hooks", {}).get("post", [])]

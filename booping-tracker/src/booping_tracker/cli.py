@@ -111,7 +111,9 @@ def build_parser() -> argparse.ArgumentParser:
     relate.add_argument("--issue", required=True)
     relate.add_argument("--to", required=True)
     relate.add_argument(
-        "--type", dest="relation", choices=("related", "blocks", "duplicate", "similar"),
+        "--type",
+        dest="relation",
+        choices=("related", "blocks", "duplicate", "similar"),
         default="related",
     )
 

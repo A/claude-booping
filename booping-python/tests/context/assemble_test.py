@@ -46,9 +46,7 @@ def test_assemble_no_project(tmp_path: Path) -> None:
     assert ctx.config != {}
 
 
-def test_assemble_no_project_merges_global(
-    tmp_path: Path, isolated_xdg_config_home: Path
-) -> None:
+def test_assemble_no_project_merges_global(tmp_path: Path, isolated_xdg_config_home: Path) -> None:
     """No-project branch (outside any .booping) still merges the global tier."""
     plugin_root = get_fixture_path("plugin-root-minimal")
     _write_global(isolated_xdg_config_home, {"sprint": {"default_threshold_sp": 77}})
@@ -57,9 +55,7 @@ def test_assemble_no_project_merges_global(
     assert ctx.config["sprint"]["default_threshold_sp"] == 77
 
 
-def test_assemble_home_dir_drives_vault(
-    tmp_path: Path, isolated_xdg_config_home: Path
-) -> None:
+def test_assemble_home_dir_drives_vault(tmp_path: Path, isolated_xdg_config_home: Path) -> None:
     """Global `home_dir` + no `vault_path:` → Project.directory == <home_dir>/<name>."""
     plugin_root = get_fixture_path("plugin-root-minimal")
     vault_base = tmp_path / "vaults"
@@ -216,9 +212,7 @@ def test_assemble_vault_override_pins_targeted_lessons(
     vault.mkdir()
     _write_targeted_lesson(vault, "0002_project.md", "groom")
 
-    pinned = Context.assemble(
-        start=tmp_path, plugin_root=plugin_root, vault_override=vault
-    )
+    pinned = Context.assemble(start=tmp_path, plugin_root=plugin_root, vault_override=vault)
     assert [lesson.id for lesson in pinned.targeted_lessons] == ["0002_project"]
 
     unpinned = Context.assemble(start=tmp_path, plugin_root=plugin_root)

@@ -36,10 +36,7 @@ _UNKNOWN_DEP_INNER = (
     "**STOP — tell the user:** in subgraph '{scope}': '{dep}' is listed as a dependency"
     " of '{name}' but is not a step in that subgraph. Do not execute this playbook."
 )
-_CYCLE = (
-    "**STOP — tell the user:** the graph has a cycle: {path}."
-    " Do not execute this playbook."
-)
+_CYCLE = "**STOP — tell the user:** the graph has a cycle: {path}. Do not execute this playbook."
 _CYCLE_INNER = (
     "**STOP — tell the user:** in subgraph '{scope}': the graph has a cycle: {path}."
     " Do not execute this playbook."
@@ -124,9 +121,7 @@ _LEGACY_LESSONS = (
     "**Note — tell the user:** legacy lessons detected ({paths}) — playbooks no longer"
     " read them; migrate to _lessons/ with targets: frontmatter."
 )
-_UNTARGETED_LESSON = (
-    "**Note — tell the user:** lesson {file} has no valid targets: — not injected."
-)
+_UNTARGETED_LESSON = "**Note — tell the user:** lesson {file} has no valid targets: — not injected."
 _NON_BLOCKING = {"orphan_state"}
 
 
@@ -205,9 +200,7 @@ class PlaybookEnvironment(Environment):
     def join_path(self, template: str, parent: str) -> str:
         if not template.startswith(("./", "../")):
             return template
-        joined = posixpath.normpath(
-            posixpath.join(posixpath.dirname(parent), template)
-        )
+        joined = posixpath.normpath(posixpath.join(posixpath.dirname(parent), template))
         return template if joined.startswith("..") else joined
 
 
@@ -307,9 +300,7 @@ def _render_step_fields(
         return step, None
 
     search_dirs = [step.path.parent, pb.path.parent, *pb.search_roots]
-    env = build_env(
-        plugin_root=plugin_root, context=context, search_dirs=search_dirs
-    )
+    env = build_env(plugin_root=plugin_root, context=context, search_dirs=search_dirs)
     rendered: dict[str, Any] = {}
     for key, value in fields.items():
         if not value:
@@ -401,9 +392,7 @@ def _resolver_notice(prob: GraphProblem) -> str:
             return _CYCLE_INNER.format(path=path, scope=prob.scope)
         return _CYCLE.format(path=path)
     if prob.scope:
-        return _UNKNOWN_DEP_INNER.format(
-            dep=prob.dep, name=prob.dependent, scope=prob.scope
-        )
+        return _UNKNOWN_DEP_INNER.format(dep=prob.dep, name=prob.dependent, scope=prob.scope)
     return _UNKNOWN_DEP.format(dep=prob.dep, name=prob.dependent)
 
 
@@ -416,9 +405,7 @@ def playbook_lessons(lessons: list[Lesson], name: str) -> list[Lesson]:
     return [
         lesson
         for lesson in lessons
-        if any(
-            t.kind == "playbook" and t.playbook == name for t in lesson.parsed_targets
-        )
+        if any(t.kind == "playbook" and t.playbook == name for t in lesson.parsed_targets)
     ]
 
 
@@ -450,11 +437,7 @@ def _lesson_notices(pb: Playbook, context: Context | None) -> list[str]:
             notices.append(_UNTARGETED_LESSON.format(file=lesson.path.name))
             continue
         for target in lesson.parsed_targets:
-            if (
-                target.kind == "step"
-                and target.playbook == pb.name
-                and target.step not in known
-            ):
+            if target.kind == "step" and target.playbook == pb.name and target.step not in known:
                 notices.append(
                     _UNKNOWN_STEP_TARGET.format(
                         file=lesson.path.name, step=target.step, name=pb.name
@@ -463,9 +446,7 @@ def _lesson_notices(pb: Playbook, context: Context | None) -> list[str]:
     return notices
 
 
-def _render_lessons(
-    lessons: list[Lesson], env: Environment, *, step_mode: bool = False
-) -> str:
+def _render_lessons(lessons: list[Lesson], env: Environment, *, step_mode: bool = False) -> str:
     """The `## Lessons` section for either surface; empty string when nothing applies."""
     if not lessons:
         return ""
@@ -508,9 +489,7 @@ def compose(
             step, err = _render_step_fields(pb, step, context, plugin_root)
             if err is not None:
                 field_errors.append(
-                    _JINJA_ERROR.format(
-                        where=f"step '{step.name}' frontmatter", error=err
-                    )
+                    _JINJA_ERROR.format(where=f"step '{step.name}' frontmatter", error=err)
                 )
             resolved.append(step)
         steps = resolved
@@ -612,11 +591,7 @@ def compose(
                     continue
             else:
                 body = step.body
-            lessons = (
-                step_lessons(_targeted(context), pb.name, name)
-                if include_lessons
-                else []
-            )
+            lessons = step_lessons(_targeted(context), pb.name, name) if include_lessons else []
             section = _render_lessons(lessons, env, step_mode=True)
             if section:
                 body = body.rstrip("\n") + "\n\n" + section
@@ -630,9 +605,7 @@ def compose(
 
     if not blocking:
         if include_lessons:
-            section = _render_lessons(
-                playbook_lessons(_targeted(context), pb.name), env
-            )
+            section = _render_lessons(playbook_lessons(_targeted(context), pb.name), env)
             if section:
                 sections.append(section)
         sections.append(
@@ -676,9 +649,7 @@ def compose(
                 )
                 for inner_wave in inner_waves[name]:
                     for inner in inner_wave:
-                        sections.append(
-                            render_step(inner, sub.graph[inner], name)
-                        )
+                        sections.append(render_step(inner, sub.graph[inner], name))
 
     return "\n\n".join(sections) + "\n"
 
@@ -724,9 +695,7 @@ def _run(args: argparse.Namespace) -> None:
         sys.exit(1)
 
     try:
-        overrides = deep_merge(
-            overrides, parse_stub_overrides(args.stub_macros or [])
-        )
+        overrides = deep_merge(overrides, parse_stub_overrides(args.stub_macros or []))
     except ValueError as exc:
         print(
             f"error: malformed --stub-macro pair (expected DOTTED.PATH=LITERAL): {exc}",
@@ -735,9 +704,7 @@ def _run(args: argparse.Namespace) -> None:
         sys.exit(1)
 
     project_str: str | None = args.project
-    vault_override = (
-        Path(project_str).expanduser().resolve() if project_str is not None else None
-    )
+    vault_override = Path(project_str).expanduser().resolve() if project_str is not None else None
     notice = migrations.render_gate(args.name, start=vault_override)
     if notice is not None:
         _emit(notice + "\n", args.output)
@@ -749,11 +716,7 @@ def _run(args: argparse.Namespace) -> None:
     ctx = Context.assemble(start=vault_override, vault_override=vault_override)
     if overrides:
         ctx = ctx.model_copy(
-            update={
-                "config": deep_merge(
-                    ctx.config, overrides, shallow_merge_keys=["agents"]
-                )
-            }
+            update={"config": deep_merge(ctx.config, overrides, shallow_merge_keys=["agents"])}
         )
 
     pb = next((p for p in ctx.playbooks if p.name == args.name), None)

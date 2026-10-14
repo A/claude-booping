@@ -124,7 +124,5 @@ def _resolve_latest_migration(data: dict[str, object], marker: Path) -> int:
     if raw is None:
         return -1
     if isinstance(raw, bool) or not isinstance(raw, int):
-        raise ValueError(
-            f"invalid latest_migration in {marker}: expected an integer, got {raw!r}"
-        )
+        raise ValueError(f"invalid latest_migration in {marker}: expected an integer, got {raw!r}")
     return raw

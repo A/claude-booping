@@ -12,9 +12,7 @@ DEVELOPER = "src/templates/agents/booping-developer.md.j2"
 def _write_lesson(vault: Path, name: str, title: str, target: str, body: str) -> None:
     lessons = vault / "_lessons"
     lessons.mkdir(parents=True, exist_ok=True)
-    (lessons / name).write_text(
-        f"---\ntitle: {title}\ntargets:\n  - {target}\n---\n{body}\n"
-    )
+    (lessons / name).write_text(f"---\ntitle: {title}\ntargets:\n  - {target}\n---\n{body}\n")
 
 
 def _render_agent(vault: Path, template: str) -> str:
@@ -56,9 +54,7 @@ def test_agent_lessons_non_matching_targets_render_nothing(tmp_path: Path) -> No
     baseline = _render_agent(vault, RESEARCHER)
     _write_lesson(vault, "0001_playbook.md", "Playbook", "groom", "Playbook-scoped.")
     _write_lesson(vault, "0002_step.md", "Step", "groom/intake", "Step-scoped.")
-    _write_lesson(
-        vault, "0003_dev.md", "Dev", "agent:booping-developer", "Developer-scoped."
-    )
+    _write_lesson(vault, "0003_dev.md", "Dev", "agent:booping-developer", "Developer-scoped.")
     (vault / "lessons").mkdir()
     (vault / "lessons" / "0004_legacy.md").write_text("---\n---\nLegacy lesson.\n")
 
@@ -85,9 +81,7 @@ def test_agent_lessons_developer_body(tmp_path: Path) -> None:
     vault = tmp_path / "vault"
     vault.mkdir()
     baseline = _render_agent(vault, DEVELOPER)
-    _write_lesson(
-        vault, "0001_dev.md", "Small diffs", "agent:booping-developer", "Keep it small."
-    )
+    _write_lesson(vault, "0001_dev.md", "Small diffs", "agent:booping-developer", "Keep it small.")
     result = _render_agent(vault, DEVELOPER)
 
     assert result != baseline

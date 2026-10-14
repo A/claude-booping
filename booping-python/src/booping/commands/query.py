@@ -5,6 +5,7 @@ exit-code mapping. A spec is addressed by dotted config path (`--config`) or
 given inline (`--glob`); inline `--where` / `--sort` / `--columns` narrow a
 resolved spec by deep-merging over it.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -156,10 +157,7 @@ def _inline_spec(args: argparse.Namespace) -> dict[str, Any]:
     try:
         where = parse_where(args.where or [])
     except ValueError as exc:
-        _fail(
-            "malformed --where clause"
-            f" (expected k=v, k!=v, k:in=a,b, k:gt=n or k:lt=n): {exc}"
-        )
+        _fail(f"malformed --where clause (expected k=v, k!=v, k:in=a,b, k:gt=n or k:lt=n): {exc}")
     if where:
         inline["where"] = where
     if args.sort is not None:
@@ -201,9 +199,7 @@ def _run(args: argparse.Namespace) -> None:
     inline = _inline_spec(args)
 
     project_str: str | None = args.project
-    vault_override = (
-        Path(project_str).expanduser().resolve() if project_str is not None else None
-    )
+    vault_override = Path(project_str).expanduser().resolve() if project_str is not None else None
     ctx = Context.assemble(vault_override=vault_override)
 
     base = _resolve_spec(ctx.config, config_path) if config_path is not None else {}
@@ -219,9 +215,7 @@ def _run(args: argparse.Namespace) -> None:
     # A `root: core` spec globs the plugin root, so it needs no vault at all.
     if spec.root is None:
         if vault is None:
-            _fail(
-                "no vault resolved — run inside a booping project or pass --project", code=2
-            )
+            _fail("no vault resolved — run inside a booping project or pass --project", code=2)
         if not vault.is_dir():
             _fail(f"vault is not a readable directory: {vault}", code=2)
 

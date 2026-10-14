@@ -3,8 +3,8 @@ default:
 
 # Lint both uv projects
 lint:
-    cd booping-python && uv run ruff check .
-    cd booping-tracker && uv run ruff check .
+    cd booping-python && uv run ruff check . && uv run ruff format --check .
+    cd booping-tracker && uv run ruff check . && uv run ruff format --check .
 
 # Type-check both uv projects
 typecheck:

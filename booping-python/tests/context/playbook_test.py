@@ -171,9 +171,7 @@ def test_tolerant_partial_frontmatter() -> None:
 
 def test_missing_roots_empty() -> None:
     assert (
-        Playbook.load_all(
-            vault=None, home_dir=Path("/nonexistent/home"), plugin_root=_no_core()
-        )
+        Playbook.load_all(vault=None, home_dir=Path("/nonexistent/home"), plugin_root=_no_core())
         == []
     )
     assert (
@@ -195,9 +193,7 @@ def test_missing_core_root_degrades_silently(
 
 
 def test_core_discovery() -> None:
-    pbs = Playbook.load_all(
-        vault=None, home_dir=Path("/nonexistent/home"), plugin_root=_core()
-    )
+    pbs = Playbook.load_all(vault=None, home_dir=Path("/nonexistent/home"), plugin_root=_core())
     assert {pb.name for pb in pbs} == {"alpha", "shared", "core-only"}
     assert all(pb.scope == "core" for pb in pbs)
     core_only = next(pb for pb in pbs if pb.name == "core-only")
@@ -467,8 +463,7 @@ def test_resolve_scopes_outer_and_inner_waves(tmp_path: Path) -> None:
 def test_resolve_scopes_inner_problem_carries_scope(tmp_path: Path) -> None:
     pb = _load_graph(
         tmp_path,
-        "  a: []\n"
-        "  loop:\n    dependencies: [a]\n    graph:\n      b: [nope]\n      c: [b]\n",
+        "  a: []\n  loop:\n    dependencies: [a]\n    graph:\n      b: [nope]\n      c: [b]\n",
     )
     inner = pb.resolve_scopes()["loop"]
     assert inner.waves == []
@@ -483,9 +478,7 @@ def test_inner_dep_on_outer_step_is_unknown(tmp_path: Path) -> None:
         "  a: []\n  loop:\n    dependencies: [a]\n    graph:\n      b: [a]\n",
     )
     inner = pb.resolve_scopes()["loop"]
-    assert [(p.kind, p.dep, p.scope) for p in inner.problems] == [
-        ("unknown_dep", "a", "loop")
-    ]
+    assert [(p.kind, p.dep, p.scope) for p in inner.problems] == [("unknown_dep", "a", "loop")]
 
 
 def test_subgraph_dependency_on_inner_step_is_unknown(tmp_path: Path) -> None:
@@ -620,8 +613,7 @@ def test_unknown_state_ref(tmp_path: Path) -> None:
 def test_unknown_state_ref_from_subgraph(tmp_path: Path) -> None:
     pb = _load_manifest(
         tmp_path,
-        "graph:\n  loop:\n    dependencies: []\n    state: nope\n"
-        "    graph:\n      b: []\n",
+        "graph:\n  loop:\n    dependencies: []\n    state: nope\n    graph:\n      b: []\n",
         _NO_GRAPH_MD,
     )
     assert [(p.kind, p.node, p.scope) for p in pb.graph_problems] == [
@@ -785,9 +777,7 @@ def test_name_clash_across_roots(tmp_path: Path) -> None:
     pb = _load(tmp_path)["dup"]
     assert pb.scope == "local"
     assert pb.clash_scopes == ["global", "local"]
-    assert [(p.kind, p.detail) for p in pb.graph_problems] == [
-        ("name_clash", "global, local")
-    ]
+    assert [(p.kind, p.detail) for p in pb.graph_problems] == [("name_clash", "global, local")]
 
 
 def test_no_name_clash(tmp_path: Path) -> None:

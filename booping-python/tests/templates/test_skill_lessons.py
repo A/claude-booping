@@ -11,9 +11,7 @@ PLAYBOOK_SKILL = "src/templates/skills/playbook.md.j2"
 def _write_lesson(vault: Path, name: str, title: str, target: str, body: str) -> None:
     lessons = vault / "_lessons"
     lessons.mkdir(parents=True, exist_ok=True)
-    (lessons / name).write_text(
-        f"---\ntitle: {title}\ntargets:\n  - {target}\n---\n{body}\n"
-    )
+    (lessons / name).write_text(f"---\ntitle: {title}\ntargets:\n  - {target}\n---\n{body}\n")
 
 
 def _render_skill(vault: Path, template: str) -> str:
@@ -55,9 +53,7 @@ def test_skill_lessons_non_matching_targets_render_nothing(tmp_path: Path) -> No
     baseline = _render_skill(vault, PLAYBOOK_SKILL)
     _write_lesson(vault, "0001_playbook.md", "Playbook", "groom", "Playbook-scoped.")
     _write_lesson(vault, "0002_step.md", "Step", "groom/intake", "Step-scoped.")
-    _write_lesson(
-        vault, "0003_other.md", "Other", "skill:code-review", "Other-skill-scoped."
-    )
+    _write_lesson(vault, "0003_other.md", "Other", "skill:code-review", "Other-skill-scoped.")
 
     assert _render_skill(vault, PLAYBOOK_SKILL) == baseline
 

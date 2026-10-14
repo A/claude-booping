@@ -25,9 +25,7 @@ def machine() -> dict[str, Any]:
                     {"to": "abandoned"},
                 ]
             },
-            "shipped": {
-                "transitions": [{"to": "abandoned", "when": "own edge wins"}]
-            },
+            "shipped": {"transitions": [{"to": "abandoned", "when": "own edge wins"}]},
             "abandoned": {"terminal": True},
         },
         "superstates": {

@@ -38,8 +38,7 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
         "--force",
         action="store_true",
         help=(
-            "Overwrite the files the tree names when they already exist;"
-            " never deletes a directory"
+            "Overwrite the files the tree names when they already exist; never deletes a directory"
         ),
     )
     p.add_argument(

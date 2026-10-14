@@ -183,9 +183,7 @@ def test_booping_global_in_render(tmp_path: object) -> None:
 def test_booping_global_in_source_env() -> None:
     """The scaffold seed path: build_source_env + from_string."""
     fixture = get_fixture_path("plugin-root-minimal")
-    env = build_source_env(
-        context=_project_context(9), config={}, plugin_root=fixture
-    )
+    env = build_source_env(context=_project_context(9), config={}, plugin_root=fixture)
 
     assert env.from_string("{{ booping.latest_migration }}").render() == "9"
 

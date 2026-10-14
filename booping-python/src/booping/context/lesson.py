@@ -88,9 +88,7 @@ class Lesson(BaseModel):
                     scope=scope,
                     targets=[str(entry) for entry in entries],
                     parsed_targets=[r for r in results if isinstance(r, LessonTarget)],
-                    target_rejections=[
-                        r for r in results if isinstance(r, TargetRejection)
-                    ],
+                    target_rejections=[r for r in results if isinstance(r, TargetRejection)],
                 )
             )
         return lessons

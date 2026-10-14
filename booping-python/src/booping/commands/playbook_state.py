@@ -4,6 +4,7 @@ Read-only counterpart of `playbook-transition`: resolves the same artifacts agai
 the run workdir and prints, per `states:` entry, the current status plus the edges
 leaving it. Nothing is written except the standard `.booping.log` line.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -113,18 +114,12 @@ def _instances(machine: StateMachine, workdir: Path) -> dict[str, Any]:
         segment = match.relative_to(workdir).parts[slug_index]
         slug = segment[len(prefix) :]
         found[slug[: -len(suffix)] if suffix else slug] = match
-    return {
-        slug: _report_status(found[slug], machine) for slug in sorted(found)
-    }
+    return {slug: _report_status(found[slug], machine) for slug in sorted(found)}
 
 
 def _run(args: argparse.Namespace) -> None:
     workdir_arg: str | None = args.workdir
-    workdir = (
-        Path(workdir_arg).expanduser().resolve()
-        if workdir_arg is not None
-        else Path.cwd()
-    )
+    workdir = Path(workdir_arg).expanduser().resolve() if workdir_arg is not None else Path.cwd()
     if not workdir.is_dir():
         _fail(f"workdir not found: {workdir}")
 

@@ -51,9 +51,7 @@ def test_load_dir_scope_comes_from_caller(tmp_path: Path) -> None:
 def test_load_dir_frontmatterless_falls_back_to_stem(tmp_path: Path) -> None:
     (tmp_path / "0001_bare.md").write_text("just a body\n")
     lessons = Lesson.load_dir(tmp_path)
-    assert [(lesson.title, lesson.body) for lesson in lessons] == [
-        ("0001_bare", "just a body\n")
-    ]
+    assert [(lesson.title, lesson.body) for lesson in lessons] == [("0001_bare", "just a body\n")]
     assert lessons[0].targets == []
     assert lessons[0].parsed_targets == []
     assert lessons[0].target_rejections == []
@@ -122,9 +120,7 @@ def test_load_dir_targets_list_mixed_valid_and_malformed(tmp_path: Path) -> None
     )
     lesson = Lesson.load_dir(tmp_path)[0]
     assert lesson.targets == ["groom/draft-plan", "groom/*"]
-    assert lesson.parsed_targets == [
-        LessonTarget(kind="step", playbook="groom", step="draft-plan")
-    ]
+    assert lesson.parsed_targets == [LessonTarget(kind="step", playbook="groom", step="draft-plan")]
     assert [r.entry for r in lesson.target_rejections] == ["groom/*"]
 
 

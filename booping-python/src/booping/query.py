@@ -8,6 +8,7 @@ user sort applies, because ``Path.glob`` documents no ordering.
 
 Pure logic — no argparse, no Jinja, no I/O beyond reading the matched files.
 """
+
 from __future__ import annotations
 
 import sys
@@ -113,9 +114,7 @@ class QuerySpec(BaseModel):
         # first and this message is unreachable.
         if value is None or value in ROOTS:
             return value
-        raise QueryError(
-            f"unknown query root: {value!r} (expected one of: {', '.join(ROOTS)})"
-        )
+        raise QueryError(f"unknown query root: {value!r} (expected one of: {', '.join(ROOTS)})")
 
 
 def slug_for(pattern: str, rel_path: Path) -> str:
@@ -299,17 +298,10 @@ def cell(value: Any) -> str:
         text = ", ".join(cell(item) for item in value)  # pyright: ignore[reportUnknownArgumentType, reportUnknownVariableType]
     else:
         text = str(value)
-    return (
-        text.replace("|", "\\|")
-        .replace("\r\n", " ")
-        .replace("\n", " ")
-        .replace("\r", " ")
-    )
+    return text.replace("|", "\\|").replace("\r\n", " ").replace("\n", " ").replace("\r", " ")
 
 
-def as_table(
-    rows: Sequence[Row | Mapping[str, Any]], columns: Sequence[str] | None = None
-) -> str:
+def as_table(rows: Sequence[Row | Mapping[str, Any]], columns: Sequence[str] | None = None) -> str:
     """A GFM table over *rows*, narrowed to *columns* when given.
 
     The one table writer — `booping query --output table` and the `as_table`
@@ -325,9 +317,7 @@ def as_table(
         "| " + " | ".join(header) + " |",
         "| " + " | ".join("---" for _ in header) + " |",
     ]
-    lines += [
-        "| " + " | ".join(cell(row.get(col)) for col in header) + " |" for row in dicts
-    ]
+    lines += ["| " + " | ".join(cell(row.get(col)) for col in header) + " |" for row in dicts]
     return "\n".join(lines) + "\n"
 
 
