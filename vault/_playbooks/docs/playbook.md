@@ -26,19 +26,20 @@ a current file are skipped rather than redone.
   loose in `docs/` beside real documentation. Every `booping playbook-state` / `booping
   playbook-transition` call passes `--workdir {vault}/docs --target
   _runs/{YYYYMMDDHHmm}-{title}.md`, since the machine declares no `artifact:`.
-- The spec set — `_specs/index.md` (briefing), `_specs/roles.md`, `_specs/targets.md`,
-  `_specs/features.md`, `_specs/glossary.md` (canonical terms every spec file and destination
-  uses) — persists across runs and is only ever refreshed, never rebuilt from scratch once
-  established. `_specs/documented.md` is the ledger of already-documented work;
-  `research` reads it to surface only the delivered items still missing from it.
-- The spec set is **both this run's context and one of its targets**. It is compact documentation
-  on how to document this project, and its audience is Claude itself — every later step resolves
-  "what does this project ship, for whom, at what depth, on which surface" against it, so a stale
-  spec file mis-aims every destination downstream. It carries a row in `_specs/targets.md` like
-  any other surface, written vault-relative as `docs/_specs/`, and `sync-specs` keeps it current
-  from the confirmed change table before `targeting` reads it. Load it for context at every step
-  that resolves audience or destination; never let a run write a destination document from a spec
-  set the same run has already found stale.
+- The spec set is the project specs tier records: the value records
+  (`core.docs_playbook.queries.values`), reference/0001 (audience), reference/0002 (glossary —
+  canonical terms every record and destination uses), reference/0003 (surfaces) and the story
+  records, whose feature index is `core.docs_playbook.queries.features`, rendered and never
+  stored. It is refreshed, never rebuilt. `{vault}/docs/documented.md` is the ledger of
+  already-documented work; `research` reads it to surface only the delivered items still missing
+  from it.
+- A step that edits a record bumps its `updated_at` and never sets `reviewed` — that is the
+  owner's (`src/specs/README.md`, Frontmatter); what its source does not settle it marks
+  `[clarify]` / `[unknown]` per rule/0002.
+- The spec set is **both this run's context and one of its targets** — reference/0003 lists it as
+  the surface for Claude itself, so load it at every step that resolves audience or destination,
+  `sync-specs` keeps it current from the confirmed change table before `targeting` reads it, and
+  no destination is written from a set the same run found stale.
 - Source files are never edited: every destination the `update` loop writes is markdown.
   Code-level documentation stays with `develop`.
 - Roles drive tone in both `research` and `write` — a business-facing surface never gets
