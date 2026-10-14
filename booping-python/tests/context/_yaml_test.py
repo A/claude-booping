@@ -5,7 +5,72 @@ from pathlib import Path
 import pytest
 import yaml
 
-from booping.context._yaml import split_frontmatter_md, update_frontmatter, update_marker
+from booping.context._yaml import (
+    UnclosedFrontmatterError,
+    split_frontmatter,
+    split_frontmatter_md,
+    update_frontmatter,
+    update_marker,
+)
+
+# ── split_frontmatter ───────────────────────────────────────────────────
+
+
+class TestSplitFrontmatter:
+    @pytest.mark.parametrize(
+        ("text", "yaml_text", "body"),
+        [
+            pytest.param(
+                "---\ntitle: Foo\n---\n\n# Body\n", "title: Foo\n", "# Body\n", id="plain"
+            ),
+            pytest.param(
+                "---\ntitle: a --- b\nstatus: done\n---\nbody\n",
+                "title: a --- b\nstatus: done\n",
+                "body\n",
+                id="dashes-inside-a-value",
+            ),
+            pytest.param(
+                "---\nnotes: |\n  one\n  ---\n  two\nstatus: done\n---\nbody\n",
+                "notes: |\n  one\n  ---\n  two\nstatus: done\n",
+                "body\n",
+                id="dashes-inside-a-block-scalar",
+            ),
+            pytest.param(
+                "---\r\ntitle: Foo\r\n---\r\nbody\r\n",
+                "title: Foo\r\n",
+                "body\r\n",
+                id="crlf",
+            ),
+            pytest.param(
+                "---  \ntitle: Foo\n--- \nbody\n", "title: Foo\n", "body\n", id="trailing-spaces"
+            ),
+            pytest.param("---\ntitle: Foo\n---", "title: Foo\n", "", id="closing-line-at-eof"),
+            pytest.param(
+                "# Title\n\n---\nbody\n", None, "# Title\n\n---\nbody\n", id="no-frontmatter"
+            ),
+        ],
+    )
+    def test_splits_at_the_first_bare_delimiter_line(
+        self, text: str, yaml_text: str | None, body: str
+    ) -> None:
+        assert split_frontmatter(text) == (yaml_text, body)
+
+    @pytest.mark.parametrize(
+        "text",
+        [
+            pytest.param("---\ntitle: Foo\n\nbody\n", id="never-closed"),
+            pytest.param("---\ntitle: a --- b\n", id="only-dashes-inside-a-value"),
+            pytest.param("---\nnotes: |\n  ---\n", id="only-an-indented-dash-line"),
+        ],
+    )
+    def test_unclosed_block_is_a_value_error(self, text: str) -> None:
+        with pytest.raises(ValueError, match="frontmatter block is not closed"):
+            split_frontmatter(text)
+
+    def test_unclosed_error_is_its_own_type(self) -> None:
+        with pytest.raises(UnclosedFrontmatterError):
+            split_frontmatter("---\ntitle: Foo\n")
+
 
 # ── split_frontmatter_md ────────────────────────────────────────────────
 
@@ -36,18 +101,36 @@ class TestSplitFrontmatterMd:
             split_frontmatter_md("no frontmatter\n")
 
     def test_raises_on_missing_closing_delimiter(self) -> None:
-        with pytest.raises(ValueError, match="closing"):
+        with pytest.raises(ValueError, match="not closed"):
             split_frontmatter_md("---\ntitle: Foo\n")
 
     def test_raises_on_opening_without_newline(self) -> None:
-        with pytest.raises(ValueError, match="newline"):
+        with pytest.raises(ValueError):
             split_frontmatter_md("---title: Foo\n---\nbody\n")
+
+    def test_dashes_inside_a_value_stay_in_the_yaml(self) -> None:
+        text = "---\ntitle: a --- b\nstatus: done\n---\nbody\n"
+        _, yaml_text, after = split_frontmatter_md(text)
+        assert yaml_text == "title: a --- b\nstatus: done\n"
+        assert after == "---\nbody\n"
+
+    def test_crlf_reconstructs_identical(self) -> None:
+        text = "---\r\ntitle: Foo\r\n---\r\nbody\r\n"
+        before, yaml_text, after = split_frontmatter_md(text)
+        assert (before, yaml_text) == ("---\r\n", "title: Foo\r\n")
+        assert before + yaml_text + after == text
 
 
 # ── update_frontmatter ───────────────────────────────────────────────────
 
 
 class TestUpdateFrontmatter:
+    def test_keys_after_a_dashed_value_survive_an_update(self, tmp_path: Path) -> None:
+        f = tmp_path / "plan.md"
+        f.write_text("---\ntitle: a --- b\nstatus: draft\n---\nbody\n")
+        update_frontmatter(f, {"status": "done"})
+        assert f.read_text() == "---\ntitle: a --- b\nstatus: done\n---\nbody\n"
+
     def test_round_trip_no_changes(self, tmp_path: Path) -> None:
         """Round-trip with no key changes leaves the whole file byte-identical."""
         md = (

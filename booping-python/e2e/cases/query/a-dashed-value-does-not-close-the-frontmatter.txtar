@@ -1,0 +1,33 @@
+A `---` inside a value or an indented block-scalar line is content, not the closing delimiter:
+the keys after it still reach the row, so a `where` on them matches.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+-- fixtures/cwd/vault/plans/alpha/index.md --
+---
+title: before --- after
+notes: |
+  first
+  ---
+  last
+status: done
+---
+
+body
+-- fixtures/cwd/vault/plans/beta/index.md --
+---
+title: Beta
+status: ready-for-dev
+---
+
+body
+-- cmd --
+booping query --glob 'plans/*/index.md' --where status=done --columns slug,title
+-- exit --
+0
+-- stdout --
+| slug | title | path |
+| --- | --- | --- |
+| alpha | before --- after | plans/alpha/index.md |
+-- stderr --
