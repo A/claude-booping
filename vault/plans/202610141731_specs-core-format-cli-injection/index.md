@@ -1,13 +1,13 @@
 ---
 title: "Specs as a core feature — shipped format, specs CLI, tiers, rule injection"
 type: "feature"
-status: in-progress
+status: done
 sp: 34
 related_to: null
 created: 2026-10-14 17:32
 planned: null
 started: 2026-10-14 17:47
-completed: null
+completed: 2026-10-14 18:17
 code_reviews: []
 sessions:
 - 4fcdac60-259a-4a51-8481-b0c2629bb285
@@ -24,7 +24,22 @@ agents:
   research-codebase: a5666b20e0e8382b1
   research-port-source: ad4b22bf0a5098dc7
   cross-review: a6996b104723c9cc9
+  develop-loop/M01-shipped-format-location: a74df2e7eaca6df63
+  develop-loop/M02-specs-config-and-record-model: a288ff309a4125dd1
+  develop-loop/M03-specs-ls-and-next: a02d24d56a0541a9d
+  develop-loop/M04-specs-check-per-record: a4da90e6c25a37896
+  develop-loop/M05-specs-check-cross-file: a742c51d4313ec45e
+  develop-loop/M06-specs-check-in-ci-and-docs: ad2bdd125b768582a
+  verify: a382f7d30764be199
+  verify-fix: aeab5671554c61ce6
 reviewed_at: 2026-10-14 17:46
+metrics_active_minutes: 45
+metrics_models:
+- claude-opus-5-5
+metrics_tokens_input: 176
+metrics_tokens_output: 72174
+metrics_tokens_cache_creation: 265572
+metrics_tokens_cache_read: 8956529
 ---
 
 # Specs as a core feature — shipped format, specs CLI, tiers, rule injection
