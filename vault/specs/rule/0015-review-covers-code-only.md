@@ -6,7 +6,6 @@ created_by: claude
 created_at: 2026-10-14
 updated_at: 2026-10-14
 status: accepted
-sources: [vault/_lessons/0015_review-only-code-files.md]
 ---
 
 ## Rule
@@ -18,5 +17,5 @@ is not named in the source; it is the owner's preference.
 
 ## Follows from
 
-- [Lesson 0015](../../_lessons/0015_review-only-code-files.md) — the source names no
+- `_lessons/0015_review-only-code-files.md` (removed by [migration 004](https://github.com/A/claude-booping/blob/master/migrations/004_lessons_to_rules/migration.md)) — the source names no
   retro.

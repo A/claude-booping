@@ -8,7 +8,7 @@ updated_at: 2026-10-14
 status: accepted
 targets: [groom/draft-plan]
 brief: "For user-facing content (release notes, docs, changelogs), put the audience filter into the task's DoD: only what that audience touches, no internal churn."
-sources: [vault/_lessons/0006_audience-scoped-content.md, vault/retrospectives/20260610-cli-logging-and-agent-namespacing.md]
+sources: [vault/retrospectives/20260610-cli-logging-and-agent-namespacing.md]
 ---
 
 ## Rule

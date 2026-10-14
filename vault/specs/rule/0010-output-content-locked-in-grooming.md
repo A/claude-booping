@@ -8,7 +8,6 @@ updated_at: 2026-10-14
 status: accepted
 targets: [groom/draft-plan]
 brief: "When the plan defines a user-facing output or log format, lock its exact content with the user now — line fields, truncation rules, trailers — not just the format in prose."
-sources: [vault/_lessons/0010_lock-output-content-during-grooming.md]
 ---
 
 ## Rule
@@ -23,5 +22,5 @@ develop is iterated live instead of decided up front.
 
 - [Plans run to the end](../value/0007-plans-run-to-the-end.md) — develop does not stop to
   settle what grooming should have asked.
-- [Lesson 0010](../../_lessons/0010_lock-output-content-during-grooming.md) — the
+- `_lessons/0010_lock-output-content-during-grooming.md` (removed by [migration 004](https://github.com/A/claude-booping/blob/master/migrations/004_lessons_to_rules/migration.md)) — the
   source names no retro.

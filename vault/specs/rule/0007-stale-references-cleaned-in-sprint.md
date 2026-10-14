@@ -8,7 +8,7 @@ updated_at: 2026-10-14
 status: accepted
 targets: [groom/draft-plan]
 brief: "When the plan deletes or renames partials, agents, CLAUDE.md lines or doc links, make the cleanup of every stale reference a milestone task with its own DoD in this sprint."
-sources: [vault/_lessons/0005_stale-reference-cleanup-in-same-sprint.md, vault/retrospectives/20260425-migrate-retro-skill-to-template-pipeline.md]
+sources: [vault/retrospectives/20260425-migrate-retro-skill-to-template-pipeline.md]
 ---
 
 ## Rule

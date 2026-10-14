@@ -8,7 +8,7 @@ updated_at: 2026-10-14
 status: accepted
 targets: [groom]
 brief: "Before saving a skill, agent, partial, template or briefing, check every block for scoping, duplication, configurability and hierarchy; cut motivation, restated context and preambles."
-sources: [vault/_lessons/0004_information-architecture-pass.md, CLAUDE.md, vault/retrospectives/20260423-skill-refactors-chat-develop-retro.md]
+sources: [CLAUDE.md, vault/retrospectives/20260423-skill-refactors-chat-develop-retro.md]
 ---
 
 ## Rule

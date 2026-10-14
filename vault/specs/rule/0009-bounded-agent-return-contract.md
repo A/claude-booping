@@ -8,7 +8,7 @@ updated_at: 2026-10-14
 status: accepted
 targets: [groom/draft-plan]
 brief: "When folding DoD and Verify into tasks, state the exact return shape the worker replies with — only what the orchestrator needs (e.g. the list of changed files)."
-sources: [vault/_lessons/0007_bound-agent-return-contract.md, vault/retrospectives/20260610-cli-logging-and-agent-namespacing.md]
+sources: [vault/retrospectives/20260610-cli-logging-and-agent-namespacing.md]
 ---
 
 ## Rule

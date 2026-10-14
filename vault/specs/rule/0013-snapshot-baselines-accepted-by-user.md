@@ -6,7 +6,7 @@ created_by: claude
 created_at: 2026-10-14
 updated_at: 2026-10-14
 status: accepted
-sources: [vault/_lessons/0013_snapshot-baselines-are-the-users-review-gate.md, CLAUDE.md]
+sources: [CLAUDE.md]
 ---
 
 ## Rule

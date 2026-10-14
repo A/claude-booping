@@ -6,7 +6,7 @@ created_by: claude
 created_at: 2026-10-14
 updated_at: 2026-10-14
 status: live
-sources: [justfile, scripts/snapshots.py, vault/_lessons/0013_snapshot-baselines-are-the-users-review-gate.md, CLAUDE.md]
+sources: [justfile, scripts/snapshots.py, CLAUDE.md]
 ---
 
 ## When

@@ -6,7 +6,7 @@ created_by: claude
 created_at: 2026-10-14
 updated_at: 2026-10-14
 status: retired
-sources: [vault/_lessons/0012_review_every_diff_in_plannotator.md, vault/config.yaml]
+sources: [vault/config.yaml]
 ---
 
 ## Rule
@@ -33,5 +33,5 @@ the browser review replaces presenting findings in chat.
 - [Effective human review](../value/0008-effective-human-review.md) — the human reviews the diff
   inline with the findings, where it is convenient for them; the owner's preference
   for this project.
-- [Lesson 0012](../../_lessons/0012_review_every_diff_in_plannotator.md) — the
+- `_lessons/0012_review_every_diff_in_plannotator.md` (removed by [migration 004](https://github.com/A/claude-booping/blob/master/migrations/004_lessons_to_rules/migration.md)) — the
   source names no retro.
