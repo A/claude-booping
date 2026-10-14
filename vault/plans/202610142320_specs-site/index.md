@@ -1,20 +1,21 @@
 ---
 title: "Specs site — static HTML over one or several specs roots"
 type: "feature"
-status: ready-for-dev
+status: in-progress
 sp: null
 related_to: null
 created: 2026-10-14 23:20
 planned: null
-started: null
+started: 2026-10-14 23:34
 completed: null
 code_reviews: []
 sessions:
 - d0a2aeef-e06e-442c-adb3-1abbb2d6c765
+- b129377e-4c8b-4ab9-b53f-9a552bb18fd0
 retro: null
 summary: booping specs site renders one or several specs roots to an offline 
   static HTML site; global-config roots for an aggregated site
-commit: d30e0da3765f3dbfb92a7053e804ca950e2bb68b
+commit: fb28dce0c47994cc2c75ce426a79215980be133e
 tracker_provider: null
 tracker_request: null
 tracker_issue: null
