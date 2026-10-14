@@ -66,7 +66,7 @@ M01 first (every later code milestone imports the new module); M02–M03 take te
 | 01 | [Target parsing lives in specs/targets.py](milestones/M01-target-parsing-in-specs/M01-target-parsing-in-specs.md) | 3 | done |
 | 02 | [Agent, skill and step bodies inject rules only](milestones/M02-bodies-drop-lesson-partials/M02-bodies-drop-lesson-partials.md) | 3 | done |
 | 03 | [Learn stops reading and staging _lessons](milestones/M03-learn-without-lessons/M03-learn-without-lessons.md) | 3 | done |
-| 04 | [render-playbook and the context load rules only; --no-lessons removed](milestones/M04-render-playbook-rules-only/M04-render-playbook-rules-only.md) | 5 | pending |
+| 04 | [render-playbook and the context load rules only; --no-lessons removed](milestones/M04-render-playbook-rules-only/M04-render-playbook-rules-only.md) | 5 | done |
 | 05 | [One directory as core and project tier injects each rule once](milestones/M05-shared-tier-directory-case/M05-shared-tier-directory-case.md) | 2 | pending |
 | 06 | [The vault scaffold drops _lessons](milestones/M06-scaffold-drops-lessons/M06-scaffold-drops-lessons.md) | 2 | pending |
 | 07 | [Migration 004 converts lessons into rules; booping's vault migrated](milestones/M07-migration-004/M07-migration-004.md) | 9 | pending |

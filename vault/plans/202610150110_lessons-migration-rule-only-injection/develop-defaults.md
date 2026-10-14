@@ -42,3 +42,7 @@ The worker also rewrote `tests/templates/test_skill_rules.py`, outside the contr
 ## D9 — M03 scope and evidence
 
 The worker also edited `playbooks/learn/write/{base,fable-5}.md` and `playbooks/learn/transition/{base,prompt}.md`, outside the contract's list: they handled the retired lesson-conversion verdict, and M03's own DoD grep (`_lessons` over `playbooks/learn`) cannot pass without them. No learn eval fixture or assert named a lesson file (the `extract-candidates` NO-LESSON-PATH negative assert stays valid), so no suite changed and no smoke run was due — the playbook preamble also bars the runner from launching evals. `render-playbook learn` does not print state hooks, so the closing edge's `--stage specs` is read off `playbooks/learn/playbook.yaml` instead.
+
+## D10 — M04 grep and extra edits
+
+M04's DoD pattern `load_targeted` also matches `load_targeted_rules`, the rules loader; with a word boundary (`load_targeted\b`) the grep prints nothing. The worker also edited `tests/context/lesson_test.py` (deleted `load_targeted` tests), `tests/templates/test_agent_rules.py` (stale `targeted_lessons` key) and three rules e2e cases whose fixtures carried lessons (DoD 4.2 allows only the new case to mention lessons) — all forced by the removal. No snapshot drift.
