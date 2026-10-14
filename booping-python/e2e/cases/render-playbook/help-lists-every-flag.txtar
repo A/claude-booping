@@ -1,4 +1,4 @@
-`--help` succeeds and documents the full flag set, `--no-lessons` among it.
+`--help` succeeds and documents the full flag set.
 
 -- cmd --
 booping render-playbook --help
@@ -7,8 +7,8 @@ booping render-playbook --help
 -- stdout --
 usage: booping render-playbook [-h] [--step NAME] [--project PATH]
                                [--output PATH] [--set KEY=VALUE]
-                               [--stub-macro DOTTED.PATH=LITERAL]
-                               [--no-lessons] [--no-rules] [--inline-steps]
+                               [--stub-macro DOTTED.PATH=LITERAL] [--no-rules]
+                               [--inline-steps]
                                name
 
 positional arguments:
@@ -28,8 +28,6 @@ options:
                         Make a macro return LITERAL without executing it (e.g.
                         core.macros.date=19700101-00-00); repeatable, later
                         pairs win
-  --no-lessons          Suppress the Lessons section on both the composed and
-                        --step surfaces
   --no-rules            Suppress every Rules section and rule notice on both
                         the composed and --step surfaces
   --inline-steps        Embed each non-detached step's body in its composed

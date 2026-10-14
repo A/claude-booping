@@ -79,38 +79,3 @@ def test_load_dir_malformed_targets_lesson_is_not_dropped(tmp_path: Path) -> Non
     assert [lesson.id for lesson in lessons] == ["0001_bad"]
     assert lessons[0].parsed_targets == []
     assert [r.entry for r in lessons[0].target_rejections] == ["!groom"]
-
-
-def _write_lesson(root: Path, name: str, body: str) -> None:
-    root.mkdir(parents=True, exist_ok=True)
-    (root / name).write_text(f"---\ntargets:\n  - groom\n---\n{body}\n")
-
-
-def test_load_targeted_union_and_shadowing(tmp_path: Path) -> None:
-    home_dir = tmp_path / "home"
-    vault = tmp_path / "vault"
-    _write_lesson(home_dir / "_lessons", "0001_shared.md", "global copy")
-    _write_lesson(home_dir / "_lessons", "0003_global_only.md", "global only")
-    _write_lesson(vault / "_lessons", "0001_shared.md", "project copy")
-    _write_lesson(vault / "_lessons", "0002_project_only.md", "project only")
-
-    lessons = Lesson.load_targeted(home_dir, vault)
-    assert [lesson.path.name for lesson in lessons] == [
-        "0001_shared.md",
-        "0002_project_only.md",
-        "0003_global_only.md",
-    ]
-    assert [lesson.scope for lesson in lessons] == ["project", "project", "global"]
-    assert lessons[0].body.strip() == "project copy"
-
-
-def test_load_targeted_global_only_without_vault(tmp_path: Path) -> None:
-    home_dir = tmp_path / "home"
-    _write_lesson(home_dir / "_lessons", "0001_g.md", "global")
-    lessons = Lesson.load_targeted(home_dir, None)
-    assert [lesson.id for lesson in lessons] == ["0001_g"]
-
-
-def test_load_targeted_missing_dirs(tmp_path: Path) -> None:
-    assert Lesson.load_targeted(tmp_path / "home", tmp_path / "vault") == []
-    assert Lesson.load_targeted(None, None) == []

@@ -55,28 +55,3 @@ class Lesson(BaseModel):
     @classmethod
     def load_all(cls, vault: Path) -> list[Lesson]:
         return cls.load_dir(vault / "lessons")
-
-    @classmethod
-    def load_targeted(cls, home_dir: Path | None, vault: Path | None) -> list[Lesson]:
-        """Lessons from the two `_lessons/` roots — global `{home_dir}/_lessons/` then
-        project `{vault}/_lessons/`, project shadowing global by filename."""
-        dirs: list[tuple[str, Path]] = []
-        if home_dir is not None:
-            dirs.append(("global", home_dir / "_lessons"))
-        if vault is not None:
-            dirs.append(("project", vault / "_lessons"))
-        merged = _merge_by_filename([(scope, cls.load_dir(p, scope)) for scope, p in dirs])
-        return sorted(merged, key=lambda lesson: lesson.path.name)
-
-
-def _merge_by_filename(loaded: list[tuple[str, list[Lesson]]]) -> list[Lesson]:
-    """Roots ordered least → most specific; a filename carried by several roots keeps
-    only its most specific copy."""
-    winner: dict[str, int] = {}
-    for index, (_, lessons) in enumerate(loaded):
-        for lesson in lessons:
-            winner[lesson.path.name] = index
-    merged: list[Lesson] = []
-    for index, (_, lessons) in enumerate(loaded):
-        merged.extend(lesson for lesson in lessons if winner[lesson.path.name] == index)
-    return merged

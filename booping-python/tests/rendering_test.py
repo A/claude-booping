@@ -204,7 +204,7 @@ def test_booping_global_in_playbook_env() -> None:
 
 
 def test_playbook_env_without_context_has_no_booping_global_or_query_filter() -> None:
-    """The lesson-rendering branch: neither surface is wired.
+    """The non-Jinja branch: neither surface is wired.
 
     `booping` is an undefined name and renders empty; `query` is an absent filter and
     so fails at compile time — Jinja has no undefined-filter fallback.

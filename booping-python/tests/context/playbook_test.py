@@ -6,7 +6,6 @@ import pytest
 
 from booping.context.playbook import (
     Playbook,
-    legacy_lesson_dirs,
     resolve_detached,
     resolve_waves,
 )
@@ -740,26 +739,6 @@ def test_legacy_lesson_dirs_no_longer_load(tmp_path: Path) -> None:
     assert pb.graph_problems == []
 
 
-def test_legacy_lesson_dirs_reports_root_and_playbook_level(tmp_path: Path) -> None:
-    core, glob, local = _roots(tmp_path)
-    _write_playbook(core, "one", "One")
-    _write_lesson(core / "_lessons", "0001_core.md")
-    _write_lesson(glob / "one" / "_lessons", "0002_pb.md")
-    _write_lesson(local / "_lessons", "0003_project.md")
-    pb = _load(tmp_path)["one"]
-    assert sorted(legacy_lesson_dirs(pb.search_roots)) == sorted(
-        [core / "_lessons", glob / "one" / "_lessons", local / "_lessons"]
-    )
-
-
-def test_legacy_lesson_dirs_ignores_empty_and_missing(tmp_path: Path) -> None:
-    core, _, _ = _roots(tmp_path)
-    _write_playbook(core, "one", "One")
-    (core / "_lessons").mkdir()
-    pb = _load(tmp_path)["one"]
-    assert legacy_lesson_dirs(pb.search_roots) == []
-
-
 def test_lessons_dir_not_treated_as_playbook_or_step(tmp_path: Path) -> None:
     core, _, _ = _roots(tmp_path)
     _write_playbook(core, "one", "One")
@@ -793,7 +772,6 @@ def test_clashing_name_keeps_search_roots(tmp_path: Path) -> None:
     core, glob, local = _roots(tmp_path)
     _write_playbook(core, "dup", "Core Dup")
     _write_playbook(local, "dup", "Local Dup")
-    _write_lesson(glob / "dup" / "_lessons", "0002_global.md")
+    glob.mkdir(parents=True)
     pb = _load(tmp_path)["dup"]
     assert pb.search_roots == [local, glob, core]
-    assert legacy_lesson_dirs(pb.search_roots) == [glob / "dup" / "_lessons"]

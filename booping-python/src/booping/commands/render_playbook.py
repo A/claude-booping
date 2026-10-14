@@ -11,8 +11,6 @@ from jinja2 import BaseLoader, ChoiceLoader, DictLoader, Environment, FileSystem
 
 from booping import logger, migrations
 from booping.context import Context
-from booping.context import playbook as playbook_mod
-from booping.context.lesson import Lesson
 from booping.context.lifecycle import resolve_edges
 from booping.context.playbook import GraphProblem, Playbook, Step, resolve_detached
 from booping.macros import make_macro, parse_stub_overrides
@@ -115,15 +113,6 @@ _NAME_CLASH = (
     "**STOP — tell the user:** playbook '{name}' is defined in more than one root"
     " ({scopes}) — playbook names must be unique; rename one."
 )
-_UNKNOWN_STEP_TARGET = (
-    "**Note — tell the user:** lesson '{file}' targets unknown step '{step}' in"
-    " playbook '{name}'; it is ignored."
-)
-_LEGACY_LESSONS = (
-    "**Note — tell the user:** legacy lessons detected ({paths}) — playbooks no longer"
-    " read them; migrate to _lessons/ with targets: frontmatter."
-)
-_UNTARGETED_LESSON = "**Note — tell the user:** lesson {file} has no valid targets: — not injected."
 _RULE_SKIP = (
     "**Note — tell the user:** rule {link} is not injected — {reason}."
     " Run `booping specs check` on its tier."
@@ -183,11 +172,6 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
             "Make a macro return LITERAL without executing it (e.g."
             " core.macros.date=19700101-00-00); repeatable, later pairs win"
         ),
-    )
-    p.add_argument(
-        "--no-lessons",
-        action="store_true",
-        help="Suppress the Lessons section on both the composed and --step surfaces",
     )
     p.add_argument(
         "--no-rules",
@@ -251,10 +235,8 @@ def build_env(
             env_class=PlaybookEnvironment,
         )
     else:
-        # No context — the lesson-rendering path. This env carries neither the
-        # `booping` global nor the `query` filter: a lesson body naming `booping`
-        # renders empty, and one piping through `query` fails to compile (Jinja has
-        # no undefined-filter fallback). Neither is available to lesson authors.
+        # No context — the non-Jinja path: partials only, no `booping` global and
+        # no `query` filter.
         env = PlaybookEnvironment(
             loader=loader,
             undefined=LenientUndefined,
@@ -413,10 +395,6 @@ def _resolver_notice(prob: GraphProblem) -> str:
     return _UNKNOWN_DEP.format(dep=prob.dep, name=prob.dependent)
 
 
-def _targeted(context: Context | None) -> list[Lesson]:
-    return list(context.targeted_lessons) if context is not None else []
-
-
 def _targeted_rules(context: Context | None) -> list[TargetedRule]:
     return list(context.targeted_rules) if context is not None else []
 
@@ -427,7 +405,7 @@ class _Targeted(Protocol):
 
 
 def playbook_targeted[T: _Targeted](items: list[T], name: str) -> list[T]:
-    """Lessons or rules whose `targets:` name the playbook as a whole."""
+    """Rules whose `targets:` name the playbook as a whole."""
     return [
         item
         for item in items
@@ -436,7 +414,7 @@ def playbook_targeted[T: _Targeted](items: list[T], name: str) -> list[T]:
 
 
 def step_targeted[T: _Targeted](items: list[T], name: str, step: str) -> list[T]:
-    """Lessons or rules whose `targets:` name `{playbook}/{step}`."""
+    """Rules whose `targets:` name `{playbook}/{step}`."""
     return [
         item
         for item in items
@@ -448,31 +426,6 @@ def step_targeted[T: _Targeted](items: list[T], name: str, step: str) -> list[T]
 
 def _known_steps(pb: Playbook) -> set[str]:
     return set(pb.executable_step_names) | {step.name for step in pb.steps}
-
-
-def _lesson_notices(pb: Playbook, context: Context | None) -> list[str]:
-    """Migration + opt-in notes: retired lesson dirs still on disk, lessons in the new
-    roots carrying no usable target, and step targets naming an unknown step."""
-    notices: list[str] = []
-
-    legacy = [str(p) for p in playbook_mod.legacy_lesson_dirs(pb.search_roots)]
-    if context is not None and context.lessons:
-        legacy.append(str(context.lessons[0].path.parent))
-    notices.extend(_LEGACY_LESSONS.format(paths=path) for path in sorted(set(legacy)))
-
-    known = _known_steps(pb)
-    for lesson in _targeted(context):
-        if not lesson.parsed_targets:
-            notices.append(_UNTARGETED_LESSON.format(file=lesson.path.name))
-            continue
-        for target in lesson.parsed_targets:
-            if target.kind == "step" and target.playbook == pb.name and target.step not in known:
-                notices.append(
-                    _UNKNOWN_STEP_TARGET.format(
-                        file=lesson.path.name, step=target.step, name=pb.name
-                    )
-                )
-    return notices
 
 
 def _rule_notices(pb: Playbook, context: Context | None) -> list[str]:
@@ -505,23 +458,11 @@ def _append_sections(body: str, sections: list[str]) -> str:
     return body.rstrip("\n") + "\n\n" + "\n\n".join(present)
 
 
-def _render_lessons(lessons: list[Lesson], env: Environment, *, step_mode: bool = False) -> str:
-    """The `## Lessons` section for either surface; empty string when nothing applies."""
-    if not lessons:
-        return ""
-    return (
-        env.get_template("_partials/_playbook_lessons.j2")
-        .render(lessons=lessons, step_mode=step_mode)
-        .strip()
-    )
-
-
 def compose(
     pb: Playbook,
     plugin_root: Path | None = None,
     context: Context | None = None,
     *,
-    include_lessons: bool = True,
     include_rules: bool = True,
     inline_steps: bool = False,
 ) -> str:
@@ -530,7 +471,7 @@ def compose(
     The ``graph:`` frontmatter drives sequencing. By default no step body is
     embedded — every step section is fetch-form. With ``inline_steps`` (the
     parameter, or ``inline_steps: true`` in the playbook's manifest frontmatter)
-    each non-detached step's body (plus its step-scoped lessons) replaces the
+    each non-detached step's body (plus its step-scoped rules) replaces the
     fetch command; detached steps keep fetch-form so their agents fetch their own
     body. The preamble passes through verbatim unless
     the playbook sets ``jinja: true``, in which case it is rendered through the full
@@ -618,8 +559,6 @@ def compose(
         if step.name not in wired:
             notices.append(_ORPHAN.format(name=step.name))
 
-    if include_lessons:
-        notices.extend(_lesson_notices(pb, context))
     if include_rules:
         notices.extend(_rule_notices(pb, context))
 
@@ -654,14 +593,7 @@ def compose(
             else:
                 body = step.body
             rules = step_targeted(_targeted_rules(context), pb.name, name) if include_rules else []
-            lessons = step_targeted(_targeted(context), pb.name, name) if include_lessons else []
-            body = _append_sections(
-                body,
-                [
-                    _render_rules(rules, env, surface="step"),
-                    _render_lessons(lessons, env, step_mode=True),
-                ],
-            )
+            body = _append_sections(body, [_render_rules(rules, env, surface="step")])
             inline_bodies[name] = body.strip()
 
     sections: list[str] = []
@@ -675,10 +607,6 @@ def compose(
             section = _render_rules(
                 playbook_targeted(_targeted_rules(context), pb.name), env, surface="playbook"
             )
-            if section:
-                sections.append(section)
-        if include_lessons:
-            section = _render_lessons(playbook_targeted(_targeted(context), pb.name), env)
             if section:
                 sections.append(section)
         sections.append(
@@ -732,12 +660,11 @@ def compose_step(
     step_name: str,
     context: Context | None = None,
     *,
-    include_lessons: bool = True,
     include_rules: bool = True,
 ) -> str:
     """The step body alone — no headings, instruction bullets, or gate chrome —
-    followed by the rules and lessons targeting this step. Jinja-rendered when the playbook
-    opts in; verbatim otherwise (lesson bodies are never Jinja-rendered).
+    followed by the rules targeting this step. Jinja-rendered when the playbook
+    opts in; verbatim otherwise.
     """
     step = next(s for s in pb.steps if s.name == step_name)
     if not pb.jinja:
@@ -751,15 +678,9 @@ def compose_step(
         body = rendered
 
     rules = step_targeted(_targeted_rules(context), pb.name, step_name) if include_rules else []
-    lessons = step_targeted(_targeted(context), pb.name, step_name) if include_lessons else []
-    if not rules and not lessons:
+    if not rules:
         return body
-    env = build_env()
-    sections = [
-        _render_rules(rules, env, surface="step"),
-        _render_lessons(lessons, env, step_mode=True),
-    ]
-    return _append_sections(body, sections) + "\n"
+    return _append_sections(body, [_render_rules(rules, build_env(), surface="step")]) + "\n"
 
 
 def _run(args: argparse.Namespace) -> None:
@@ -838,17 +759,13 @@ def _run(args: argparse.Namespace) -> None:
         message=message,
     )
 
-    include_lessons = not args.no_lessons
     include_rules = not args.no_rules
     if step_name is not None:
-        result = compose_step(
-            pb, step_name, ctx, include_lessons=include_lessons, include_rules=include_rules
-        )
+        result = compose_step(pb, step_name, ctx, include_rules=include_rules)
     else:
         result = compose(
             pb,
             context=ctx,
-            include_lessons=include_lessons,
             include_rules=include_rules,
             inline_steps=args.inline_steps,
         )

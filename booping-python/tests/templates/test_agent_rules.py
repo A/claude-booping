@@ -42,7 +42,7 @@ def _rule(target: str) -> TargetedRule:
 def _context(vault: Path, rules: list[TargetedRule]) -> Context:
     plugin_root = get_plugin_root()
     ctx = Context.assemble(start=vault, plugin_root=plugin_root, vault_override=vault)
-    return ctx.model_copy(update={"targeted_rules": rules, "targeted_lessons": []})
+    return ctx.model_copy(update={"targeted_rules": rules})
 
 
 def _render(ctx: Context, template: str, kwargs: dict[str, str]) -> str:

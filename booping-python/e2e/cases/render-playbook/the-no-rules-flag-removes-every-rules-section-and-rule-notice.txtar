@@ -1,5 +1,5 @@
 `--no-rules` drops the composed `## Rules` section and every rule notice — a skipped rule's and an
-unknown-step target's — while the playbook-targeted lesson keeps its section.
+unknown-step target's — leaving the preamble directly above `## Playbook Steps`.
 
 -- fixtures/xdg/booping/config.yaml --
 core:
@@ -29,13 +29,6 @@ title: Briefless rule
 status: accepted
 targets: [fx-rule-off]
 ---
--- fixtures/home/Claude/_lessons/0001_alpha.md --
----
-title: Alpha lesson
-targets: [fx-rule-off]
----
-
-Alpha body.
 -- fixtures/home/Claude/_playbooks/fx-rule-off/playbook.md --
 ---
 name: fx-rule-off
@@ -61,14 +54,6 @@ booping render-playbook fx-rule-off --no-rules
 0
 -- stdout --
 Preamble.
-
-## Lessons
-
-The following 1 lesson(s) apply to this playbook. Never silently violate one; conflict → stop and flag.
-
-### 0001_alpha — Alpha lesson
-
-Alpha body.
 
 ## Playbook Steps
 

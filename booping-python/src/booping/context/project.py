@@ -84,7 +84,7 @@ def _from_vault_containment(origin: Path, home_dir: str) -> Project | None:
     """Resolve the project a path inside `home_dir/{project}/` belongs to, or None.
 
     Underscore- and dot-prefixed first segments are the home_dir's own machinery
-    (`_playbooks/`, `_lessons/`, …), never a vault.
+    (`_playbooks/`, …), never a vault.
     """
     base = Path(home_dir).expanduser().resolve()
     if not origin.is_relative_to(base) or origin == base:

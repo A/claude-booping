@@ -3,7 +3,7 @@ section: the count sentence carrying the playbook-only conflict clause and the p
 record, then one bullet per rule in core → global → project order. Each tier's ref form shows —
 the core namespace from config, the explicit global namespace, the bare project ref — and each
 link form: absolute for a core tier living outside the plugin root and for the global tier,
-repo-relative for the project tier. The section takes the lessons position, between the preamble
+repo-relative for the project tier. The section sits between the preamble
 and `## Playbook Steps`.
 
 -- fixtures/xdg/booping/config.yaml --

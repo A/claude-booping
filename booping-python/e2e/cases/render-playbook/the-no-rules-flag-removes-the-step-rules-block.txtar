@@ -1,4 +1,4 @@
-`--no-rules` drops the step's `## Rules` block on the `--step` surface; the step lesson stays.
+`--no-rules` drops the step's `## Rules` block on the `--step` surface, leaving the bare body.
 
 -- fixtures/xdg/booping/config.yaml --
 core:
@@ -13,13 +13,6 @@ status: accepted
 targets: [fx-rule-step-off/s1]
 brief: Step brief.
 ---
--- fixtures/home/Claude/_lessons/0001_step.md --
----
-title: Step lesson
-targets: [fx-rule-step-off/s1]
----
-
-Step lesson body.
 -- fixtures/home/Claude/_playbooks/fx-rule-step-off/playbook.md --
 ---
 name: fx-rule-step-off
@@ -45,12 +38,4 @@ booping render-playbook fx-rule-step-off --step s1 --no-rules
 0
 -- stdout --
 Step body.
-
-## Lessons
-
-The following 1 lesson(s) apply to this step. Never silently violate one.
-
-### 0001_step — Step lesson
-
-Step lesson body.
 -- stderr --

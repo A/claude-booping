@@ -25,7 +25,6 @@ class Context(BaseModel):
     # override a pinned render passed. Queries resolve their glob roots against it.
     vault: Path | None = None
     lessons: list[Lesson] = []
-    targeted_lessons: list[Lesson] = []
     targeted_rules: list[TargetedRule] = []
     rule_skips: list[RuleSkip] = []
     plan_templates: list[PlanTemplate] = []
@@ -97,7 +96,6 @@ class Context(BaseModel):
         skills = Skill.load_all(root)
         agents = Agent.load_all(root)
         playbooks = Playbook.load_all(vault, pinned_home_dir, root)
-        targeted_lessons = Lesson.load_targeted(pinned_home_dir, vault)
         targeted_rules, rule_skips = load_targeted_rules(
             resolve_tiers(
                 cfg,
@@ -113,7 +111,6 @@ class Context(BaseModel):
             project=project,
             vault=vault,
             lessons=lessons,
-            targeted_lessons=targeted_lessons,
             targeted_rules=targeted_rules,
             rule_skips=rule_skips,
             plan_templates=plan_templates,

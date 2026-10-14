@@ -261,20 +261,6 @@ class Playbook(BaseModel):
         return result
 
 
-def legacy_lesson_dirs(roots: list[Path]) -> list[Path]:
-    """Retired playbook lesson dirs that still carry markdown — `<root>/_lessons/` and
-    `<root>/<playbook>/_lessons/` — across the given discovery roots. Nothing reads them
-    any more; render surfaces them as a migration notice."""
-    found: list[Path] = []
-    for root in roots:
-        if not root.is_dir():
-            continue
-        candidates = [root / "_lessons"]
-        candidates.extend(d / "_lessons" for d in sorted(root.iterdir()) if d.is_dir())
-        found.extend(c for c in candidates if c.is_dir() and any(c.glob("*.md")))
-    return found
-
-
 def _load_one(
     pb_dir: Path,
     scope: Literal["core", "global", "local"],

@@ -1,6 +1,6 @@
 When a step body is inlined, its step-targeted rule comes with it — the step's `## Rules` block
-follows the body inside the `## Step:` section, ahead of the step's `## Lessons` block — while the
-playbook-targeted rule keeps its own section above the step table.
+follows the body inside the `## Step:` section — while the playbook-targeted rule keeps its own
+section above the step table.
 
 -- fixtures/xdg/booping/config.yaml --
 core:
@@ -23,13 +23,6 @@ status: accepted
 targets: [fx-rule-inline/s1]
 brief: Step brief.
 ---
--- fixtures/home/Claude/_lessons/0001_step.md --
----
-title: Step lesson
-targets: [fx-rule-inline/s1]
----
-
-Step lesson body.
 -- fixtures/home/Claude/_playbooks/fx-rule-inline/playbook.md --
 ---
 name: fx-rule-inline
@@ -78,12 +71,4 @@ Step body.
 The following 1 rule(s) apply to this step. Never silently violate one. Read a rule's record when its brief is not enough.
 
 - Step brief. [fx:rule/0002]({HOME}/core-specs/rule/0002-step-rule.md)
-
-## Lessons
-
-The following 1 lesson(s) apply to this step. Never silently violate one.
-
-### 0001_step — Step lesson
-
-Step lesson body.
 -- stderr --
