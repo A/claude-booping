@@ -1,0 +1,23 @@
+`--tier global` creates `{home_dir}/_specs/` with the global README naming the resolved namespace,
+and needs no attached project.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  specs:
+    tiers:
+      global:
+        namespace: owner
+-- cmd --
+booping specs init --tier global
+-- exit --
+0
+-- stdout --
+created dir {HOME}/Claude
+created dir {HOME}/Claude/_specs
+created file {HOME}/Claude/_specs/README.md
+{HOME}/Claude/_specs
+-- stderr --
+-- expected/home/Claude/_specs/README.md --
+# _specs/ — global tier (namespace `owner`)
+
+One person's values and rules for every project, in booping's specs format — the guide is `src/specs/README.md` in the booping plugin. Referenced from a project as `owner:rule/NNNN`. Check with `booping specs check --tier global`.

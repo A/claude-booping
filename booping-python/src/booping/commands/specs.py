@@ -10,6 +10,7 @@ from booping.context import Context
 from booping.context import config as config_mod
 from booping.rendering import get_plugin_root
 from booping.specs.check import CheckError, check_tier, format_finding
+from booping.specs.init import InitError, apply, plan
 from booping.specs.records import Record, load_tier
 from booping.specs.tiers import Tier, resolve_tiers, types
 
@@ -40,13 +41,22 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
     _add_tier(chk)
     chk.set_defaults(func=_run_check)
 
+    init = verbs.add_parser(
+        "init",
+        help="Create a tier's root and README (and the vault symlink); print the tier root",
+    )
+    _add_tier(init, "Tier to create; core ships with the plugin and is rejected (default: project)")
+    init.set_defaults(func=_run_init)
 
-def _add_tier(p: argparse.ArgumentParser) -> None:
+
+def _add_tier(
+    p: argparse.ArgumentParser, help_text: str = "Tier to read (default: project)"
+) -> None:
     p.add_argument(
         "--tier",
         choices=TIER_CHOICES,
         default="project",
-        help="Tier to read (default: project)",
+        help=help_text,
     )
 
 
@@ -166,3 +176,20 @@ def _run_check(args: argparse.Namespace) -> None:
     print(f"{checked} record(s) checked: {errors} error(s), {warnings} warning(s)", file=sys.stderr)
     if errors:
         sys.exit(1)
+
+
+def _run_init(args: argparse.Namespace) -> None:
+    ctx, root, home_dir = _assemble()
+    repo = ctx.project.repo_directory if ctx.project is not None else None
+    tier = next((t for t in _resolve(ctx, root, home_dir) if t.name == args.tier), None)
+    try:
+        if tier is None:
+            raise InitError(f"tier `{args.tier}` is not available here")
+        actions = plan(tier, repo=repo, vault=ctx.vault)
+    except InitError as exc:
+        print(f"specs init: {exc}", file=sys.stderr)
+        sys.exit(1)
+    for line in apply(actions):
+        print(line)
+    logger.log(vault=ctx.vault, subcommand="specs", message=f"init --tier {args.tier}")
+    print(tier.root.absolute())

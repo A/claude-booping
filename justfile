@@ -20,9 +20,10 @@ pytest:
 # Exit 5 is "no tests collected": a -k expression selecting cases in one corpus leaves the
 # other empty, which is a filtered-out corpus rather than a failure.
 [no-exit-message]
+[positional-arguments]
 e2e *args:
-    cd booping-python && uv run pytest e2e {{ args }} || [ $? -eq 5 ]
-    cd booping-tracker && uv run pytest e2e {{ args }} || [ $? -eq 5 ]
+    cd booping-python && uv run pytest e2e "$@" || [ $? -eq 5 ]
+    cd booping-tracker && uv run pytest e2e "$@" || [ $? -eq 5 ]
 
 # Every check CI runs, in order, stopping at the first failure.
 ci: lint typecheck pytest snapshots mdcheck specs-check e2e

@@ -1,0 +1,24 @@
+With the vault outside the repo, `--tier project` creates `{repo}/specs/` and its README, then the
+symlink `{vault}/specs -> {repo}/specs`; `readlink` asserts the link's target.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+latest_migration: 9999
+-- fixtures/home/Claude/probe/sprints.md --
+sprints
+-- cmd --
+booping specs init --tier project
+readlink ../home/Claude/probe/specs
+-- exit --
+0
+-- stdout --
+created dir {CWD}/specs
+created file {CWD}/specs/README.md
+linked {HOME}/Claude/probe/specs -> {CWD}/specs
+{CWD}/specs
+{CWD}/specs
+-- stderr --
+-- expected/cwd/specs/README.md --
+# specs/
+
+This project's specs tier: values, rules, ADRs and the other typed records, in booping's specs format — the guide is `src/specs/README.md` in the booping plugin. Check with `booping specs check --tier project`.

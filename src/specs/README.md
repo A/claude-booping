@@ -18,7 +18,8 @@ Specs come in three tiers:
 A reference without a namespace points into its own tier: `rule/0003`. Another tier is
 named by its namespace: `booping:rule/0003` for core, `<user>:rule/0003` for the global
 tier (the id defaults to `$USER` and is confirmed at setup). A project that departs
-from a rule of a tier above records it in its own ADR or conflict.
+from a rule of a tier above records it in its own ADR or conflict. A tier is created with
+`booping specs init --tier global|project`.
 
 ## Types
 
