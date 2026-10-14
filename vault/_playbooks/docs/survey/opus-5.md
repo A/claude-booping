@@ -1,4 +1,4 @@
-# Survey the spec set and the undocumented work
+# Survey the spec records and the undocumented work
 
 You receive the workdir (`{vault}/docs/`), the attached repo, and — on a re-survey — the scope
 answer that sent the run back here and the name of the run record already on disk. A run has
@@ -7,19 +7,22 @@ exactly one record: reuse that name, never open a second.
 Two cheap sweeps, then the record. Read no work item's body and no source file: this step settles
 what is worth reading, it does not do the reading.
 
-## Sweep 1 — the spec set
+## Sweep 1 — the spec records
 
-Four files under `_specs/`, each judged **by shape alone** — `present`, `incomplete`, `missing`:
+The records, under the project specs tier root:
 
-- `_specs/index.md` — the briefing: what the project is, who it serves, where it is heading
-- `_specs/roles.md` — one section per audience, each with its depth, tone and withheld set
-- `_specs/targets.md` — one entry per markdown surface, with format, audience and depth
-- `_specs/features.md` — features, their capabilities, their groups
+- `specs/value/` — every value record
+- `specs/reference/0001-*` — audience
+- `specs/reference/0002-*` — glossary
+- `specs/reference/0003-*` — documentation surfaces
+- `specs/story/` — every story record
 
-`incomplete` means the file exists but is missing sections its own heading structure requires, or
-carries a section with no content under it. Never judge a file by whether its content looks dated
-— content drift is the change table's business, in `research`. These three words are also what the
-run's exit edges read, so use no others.
+Run `booping specs check --tier project` once. Each record gets one state: `missing` when its file
+is absent, `incomplete` when an error names it, else `present`. Never judge a record by whether its
+content looks dated — content drift is the change table's business, in `research`. These three
+words are also what the run's exit edges read, so use no others.
+
+Count each record's open marks with `rg -n '\[(clarify|unknown)\]'` over the tier root.
 
 ## Sweep 2 — the undocumented work
 
@@ -28,9 +31,9 @@ plan track's terminal one. From each, take only its path, its status, the date i
 completion stamp in its frontmatter) and a one-line headline. Nothing more: what the item actually
 changed is `research`'s job, in its own sub-agents.
 
-The undocumented set is those items minus the rows of the ledger `_specs/documented.md`. Membership
-is by absence from the ledger, never by date, so a long-postponed item developed late surfaces in
-the run after it lands rather than never.
+The undocumented set is those items minus the rows of the ledger `{vault}/docs/documented.md`.
+Membership is by absence from the ledger, never by date, so a long-postponed item developed late
+surfaces in the run after it lands rather than never.
 
 ## The file to write
 
@@ -41,9 +44,12 @@ headline for the undocumented set as a whole (`nothing-to-document` when it is e
   `playbook-transition`'s, `started:` and `commit:` the surveying edge's hooks', every later stamp
   its own edge's. Write none of them.
 - H1 repeating the title.
-- `## Spec set` — a `File | State | Gap` table, one row per spec file in the order above, `—` in
-  Gap when the state is `present`, otherwise the precise absence. Closed by one prose line: `{n} of
-  4 usable`, which files need the spec waves, and which are complete.
+- `## Spec set` — a `Record | State | Open marks | Gap` table, five rows in the order above: one
+  per reference record, one each summarising `specs/value/` and `specs/story/` with their record
+  count. A summary row takes its worst record's state and sums its marks. `—` in Gap when the
+  state is `present`, otherwise each record not present with the check error or absence. Closed by
+  one prose line: `{n} of 5 usable`, the open-mark total, and whether the spec waves are needed —
+  they are when reference/0001 or reference/0003 is not `present`.
 - `## Undocumented work` — a `Work item | Status | Landed | Headline` table, one row per item.
   Closed by one prose line: the count, the date range, and how many rows the ledger holds with its
   most recent one. An empty set keeps the heading and replaces the table with a single line
@@ -53,13 +59,13 @@ headline for the undocumented set as a whole (`nothing-to-document` when it is e
   Never fill it — you have no confirmed answer to write. On a re-survey, leave whatever this
   section already holds untouched.
 
-Nothing else is written. `_specs/` is read-only here, the ledger is appended by the
+Nothing else is written. The records are read-only here, the ledger is appended by the
 `close-documented` hook at `record`, and no work item's own file is touched. A re-survey rewrites
 the two tables of the same record in place.
 
 The record and the return must be decisive enough for the runner to see which route out of the
-scope gate the user's answer can take: some spec file needs work, the spec set is current and the
-spec waves are skipped, or there is nothing to do at all.
+scope gate the user's answer can take: the spec waves are needed, the spec set is current and
+the spec waves are skipped, or there is nothing to do at all.
 
 You never stop for the user: write the record, return, and the scope gate is the runner's.
 
@@ -70,7 +76,7 @@ You never stop for the user: write the record, return, and the scope gate is the
 - [CREATED|UPDATED] {vault}/docs/_runs/{YYYYMMDDHHmm}-{title}.md
 
 ## Notes:
-- spec set: {n} of 4 usable — {one clause per file: name, state, the gap when not present}
+- spec set: {n} of 5 usable, {m} open marks — {one clause per row: record, state, the gap when not present}
 - undocumented: {n} items outside the ledger, {earliest} → {latest}
 - route: {spec waves needed | spec set current, straight to research | nothing to do}
 
