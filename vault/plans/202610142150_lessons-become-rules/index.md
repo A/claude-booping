@@ -1,7 +1,7 @@
 ---
 title: "Learn writes rules — specs init, learn on rule records, setup provisions tiers"
 type: "feature"
-status: presenting
+status: ready-for-dev
 sp: null
 related_to: null
 created: 2026-10-14 21:51
@@ -19,6 +19,10 @@ tracker_provider: null
 tracker_request: null
 tracker_issue: null
 return_to: null
+agents:
+  research-codebase: a3bf4d40f592c8d55
+  cross-review: afec65a15af3fcf4f
+reviewed_at: 2026-10-14 22:07
 ---
 
 # Learn writes rules — specs init, learn on rule records, setup provisions tiers
