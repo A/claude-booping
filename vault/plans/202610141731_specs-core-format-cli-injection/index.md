@@ -95,7 +95,7 @@ Callers: `just specs-check` (CI) only. No skill or playbook inlines these comman
 | id | title | sp | status |
 | --- | --- | --- | --- |
 | 01 | [Shipped specs format at src/specs](milestones/M01-shipped-format-location/M01-shipped-format-location.md) | 4 | done |
-| 02 | [Specs tier config and record model](milestones/M02-specs-config-and-record-model/M02-specs-config-and-record-model.md) | 7 | pending |
+| 02 | [Specs tier config and record model](milestones/M02-specs-config-and-record-model/M02-specs-config-and-record-model.md) | 7 | done |
 | 03 | [booping specs ls and next](milestones/M03-specs-ls-and-next/M03-specs-ls-and-next.md) | 5 | pending |
 | 04 | [booping specs check — per-record checks](milestones/M04-specs-check-per-record/M04-specs-check-per-record.md) | 6 | pending |
 | 05 | [booping specs check — links, refs and namespaces](milestones/M05-specs-check-cross-file/M05-specs-check-cross-file.md) | 8 | pending |
