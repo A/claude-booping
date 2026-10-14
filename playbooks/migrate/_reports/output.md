@@ -29,7 +29,7 @@ Execute the steps in the most effective order considering their dependencies.
 
 Confirm a project is attached, and name it and its vault path in the presentation.
 
-The recorded migration id — the last migration this vault applied — is **3**,
+The recorded migration id — the last migration this vault applied — is **4**,
 read from the repo `.booping` marker's `latest_migration` key; `-1` means nothing has been applied yet.
 If no project is attached, or that id came through as anything other than a number, say which and
 end the run: nothing below resolves without it.
@@ -37,7 +37,7 @@ end the run: nothing below resolves without it.
 
 ## Already current
 
-Nothing is pending: **3** is the latest migration the plugin ships.
+Nothing is pending: **4** is the latest migration the plugin ships.
 
 Report it in one line — the project and its vault, the recorded id, that the vault is **already
 current**, and that the run ends here. Ask nothing, commit nothing, and do not continue to the next
@@ -49,7 +49,7 @@ step.
 ## Changed:
 
 ## Notes:
-- pending: 0 — already current at recorded id 3
+- pending: 0 — already current at recorded id 4
 - end the run: nothing to apply
 ```
 
