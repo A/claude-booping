@@ -2,7 +2,7 @@
 id: "06"
 title: "Retire vault/docs/_specs — sources, deprecation notes, report"
 sp: 6
-status: pending
+status: in-progress
 plan: "plans/202610142247_docs-playbook-on-specs-records/index.md"
 ---
 
