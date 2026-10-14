@@ -37,6 +37,12 @@ itself stays yours. Never delegate to an agent that is not on this list.
 - Never manually break markdown lines. Write each paragraph, bullet, or table row as one line and
   let the renderer wrap it — hard line breaks turn into mid-sentence breaks after any later edit.
 
+## Rules
+
+The following 1 rule(s) apply to this playbook. Never silently violate one; conflict → stop and flag. Read a rule's record when its brief is not enough.
+
+- Settle every open question with the user during grooming; in develop, stop only for force majeure, not for what grooming should have asked. [booping:rule/0004](${CLAUDE_PLUGIN_ROOT}/vault/specs/rule/0004-questions-settled-in-grooming.md)
+
 ## Playbook Steps
 
 Execute the steps in the most effective order considering their dependencies.
