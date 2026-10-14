@@ -4,7 +4,7 @@ __pycache__/
 .DS_Store
 .booping
 .debug_enabled
-site/
+/site/
 
 # Fixture vaults need their own .booping / .debug_enabled markers tracked in git.
 !booping-python/tests/__fixtures__/**/.booping
