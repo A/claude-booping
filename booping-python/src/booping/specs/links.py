@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from urllib.parse import unquote
 
 from pydantic import BaseModel
 
@@ -13,14 +14,14 @@ class Link(BaseModel):
     line: int
     # As written between the parentheses, a `<…>` wrapper removed.
     dest: str
-    # `dest` with any `#anchor` stripped: the file the link points at.
+    # `dest` with any `#anchor` stripped, percent-decoded: the file the link points at.
     path: str
 
 
 def _local_path(dest: str) -> str | None:
     if "://" in dest or dest.startswith(("mailto:", "/", "#")):
         return None
-    return dest.split("#", 1)[0]
+    return unquote(dest.split("#", 1)[0])
 
 
 def relative_links(text: str, first_line: int = 1) -> list[Link]:

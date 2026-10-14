@@ -11,6 +11,7 @@ from booping.specs.links import relative_links
         pytest.param("See [a](../value/0001-a.md).", [(1, "../value/0001-a.md")], id="plain"),
         pytest.param("[a](notes.md#why)", [(1, "notes.md")], id="anchor-stripped"),
         pytest.param("[a](<my notes.md>)", [(1, "my notes.md")], id="angle-wrapper"),
+        pytest.param("[a](my%20notes.md)", [(1, "my notes.md")], id="percent-decoded"),
         pytest.param('[a](notes.md "Title")', [(1, "notes.md")], id="title"),
         pytest.param("[a](https://example.com/x.md)", [], id="url"),
         pytest.param("[mail](mailto:me@example.com)", [], id="mailto"),
