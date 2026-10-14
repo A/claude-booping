@@ -6,8 +6,6 @@ created_by: claude
 created_at: 2026-10-14
 updated_at: 2026-10-14
 status: accepted
-targets: [code-review]
-brief: "Review only code files; raise no findings on documentation, plans or other prose in the diff."
 sources: [vault/_lessons/0015_review-only-code-files.md]
 ---
 

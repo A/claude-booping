@@ -6,8 +6,6 @@ created_by: claude
 created_at: 2026-10-14
 updated_at: 2026-10-14
 status: retired
-targets: [code-review]
-brief: "Hand every finding set, even an empty one, to plannotator-reviewer instead of printing findings in chat; its reply is the human's review. Agent missing or SURFACE UNAVAILABLE: stop and tell the user."
 sources: [vault/_lessons/0012_review_every_diff_in_plannotator.md, vault/config.yaml]
 ---
 

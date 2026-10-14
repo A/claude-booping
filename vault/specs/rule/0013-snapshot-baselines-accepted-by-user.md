@@ -6,8 +6,6 @@ created_by: claude
 created_at: 2026-10-14
 updated_at: 2026-10-14
 status: accepted
-targets: [develop]
-brief: "Never run just snapshots-accept or write playbooks/*/_reports/output.md. At wrap-up run just snapshots; on drift, show it and ask the user to accept before the closing commit."
 sources: [vault/_lessons/0013_snapshot-baselines-are-the-users-review-gate.md, CLAUDE.md]
 ---
 
