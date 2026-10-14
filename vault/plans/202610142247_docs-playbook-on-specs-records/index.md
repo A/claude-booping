@@ -1,20 +1,21 @@
 ---
 title: "Docs playbook on specs records — retire vault/docs/_specs"
 type: "refactoring"
-status: ready-for-dev
-sp: null
+status: in-progress
+sp: 35
 related_to: null
 created: 2026-10-14 22:51
 planned: null
-started: null
+started: 2026-10-14 22:59
 completed: null
 code_reviews: []
 sessions:
 - e46d0ff7-edb0-438e-96f5-d7315b54c5cc
+- 95e3e021-3f47-4205-baa8-77d443b36758
 retro: null
 summary: Docs playbook reads and edits specs records; feature index rendered 
   from stories; vault/docs/_specs deleted
-commit: 6afb00cebe39b9014a0f4e3737c0ddab33eea1e1
+commit: 10e82bb3e3f164db3d3da3e6cdf96d514ae5526c
 tracker_provider: null
 tracker_request: null
 tracker_issue: null
@@ -59,12 +60,12 @@ Load-time inputs: `core.docs_playbook.queries.values` and `.features` (vault `co
 
 | id | title | sp | status |
 | --- | --- | --- | --- |
-| 01 | Ledger move, hook scripts and story/value query specs | 4 | pending |
-| 02 | Manifest and guidance on records — feature-index step and its gate removed | 5 | pending |
-| 03 | Survey judges records, briefing reads values into the run record | 6 | pending |
-| 04 | Roles and targets refresh reference/0001 and reference/0003 | 4 | pending |
-| 05 | Research, sync-specs and targeting work on records | 10 | pending |
-| 06 | Retire vault/docs/_specs — sources, deprecation notes, report | 6 | pending |
+| 01 | [Ledger move, hook scripts and story/value query specs](milestones/M01-ledger-scripts-queries/M01-ledger-scripts-queries.md) | 4 | in-progress |
+| 02 | [Manifest and guidance on records — feature-index step and its gate removed](milestones/M02-manifest-and-guidance/M02-manifest-and-guidance.md) | 5 | pending |
+| 03 | [Survey judges records, briefing reads values into the run record](milestones/M03-survey-and-briefing/M03-survey-and-briefing.md) | 6 | pending |
+| 04 | [Roles and targets refresh reference/0001 and reference/0003](milestones/M04-roles-and-targets-on-records/M04-roles-and-targets-on-records.md) | 4 | pending |
+| 05 | [Research, sync-specs and targeting work on records](milestones/M05-change-set-steps-on-records/M05-change-set-steps-on-records.md) | 10 | pending |
+| 06 | [Retire vault/docs/_specs — sources, deprecation notes, report](milestones/M06-retire-docs-specs/M06-retire-docs-specs.md) | 6 | pending |
 
 ## Final Verification
 

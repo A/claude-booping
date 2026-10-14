@@ -2,7 +2,7 @@
 id: "01"
 title: "Ledger move, hook scripts and story/value query specs"
 sp: 4
-status: pending
+status: in-progress
 plan: "plans/202610142247_docs-playbook-on-specs-records/index.md"
 ---
 
