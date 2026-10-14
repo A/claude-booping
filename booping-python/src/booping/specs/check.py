@@ -62,8 +62,14 @@ def _check_filename(record: Record) -> list[Finding]:
 
 def _check_frontmatter(record: Record) -> list[Finding]:
     if record.frontmatter_error is not None:
-        # PyYAML appends the location and a caret snippet on further lines; a finding is one line.
-        return [_error(record.path, "frontmatter", record.frontmatter_error.splitlines()[0])]
+        return [
+            _error(
+                record.path,
+                "frontmatter",
+                record.frontmatter_error,
+                record.frontmatter_error_line,
+            )
+        ]
     declared = record.frontmatter.get("type")
     if declared is not None and declared != record.type:
         return [

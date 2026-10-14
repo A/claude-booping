@@ -1,5 +1,5 @@
-A record whose frontmatter is not valid YAML gets a `frontmatter` finding on line 1 carrying the
-parser's error text.
+A record whose frontmatter is not valid YAML gets a `frontmatter` finding on the file line of the
+problem, carrying the parser's problem text and its line and column.
 
 -- fixtures/cwd/.booping --
 project_name: probe
@@ -26,6 +26,6 @@ booping specs check
 -- exit --
 1
 -- stdout --
-vault/specs/value/0001-first.md:1  error  frontmatter  mapping values are not allowed here
+vault/specs/value/0001-first.md:4  error  frontmatter  mapping values are not allowed here, line 4, column 19
 -- stderr --
 1 record(s) checked: 1 error(s), 0 warning(s)
