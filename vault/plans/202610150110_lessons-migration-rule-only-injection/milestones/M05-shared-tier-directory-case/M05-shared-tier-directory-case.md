@@ -2,7 +2,7 @@
 id: "05"
 title: "One directory as core and project tier injects each rule once"
 sp: 2
-status: pending
+status: done
 plan: "vault/plans/202610150110_lessons-migration-rule-only-injection/index.md"
 ---
 
@@ -18,15 +18,15 @@ Tests: this milestone is the test — integration tier, against the real config 
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 5.1 | The render case and the `specs ls` case, expected output hand-written. | `booping-python/e2e/cases/render-playbook/a-directory-that-is-core-and-project-tier-injects-each-rule-once.txtar`, `booping-python/e2e/cases/specs/ls-core-and-project-on-one-directory-list-the-same-records.txtar` | 2 | pending |
+| 5.1 | The render case and the `specs ls` case, expected output hand-written. | `booping-python/e2e/cases/render-playbook/a-directory-that-is-core-and-project-tier-injects-each-rule-once.txtar`, `booping-python/e2e/cases/specs/ls-core-and-project-on-one-directory-list-the-same-records.txtar` | 2 | done |
 
 ## Definition of Done
 
 ### Task 5.1
 
-- [ ] The render fixture reaches the shared directory through the plugin root and the vault's own config, never by stubbing tiers.
-- [ ] The rendered rule appears exactly once, ref `booping:rule/0001`.
-- [ ] Mutating `load_targeted_rules` to skip the `seen` check makes the render case fail (checked once by hand, reverted).
+- [x] The render fixture reaches the shared directory through the plugin root and the vault's own config, never by stubbing tiers.
+- [x] The rendered rule appears exactly once, ref `booping:rule/0001`.
+- [x] Mutating `load_targeted_rules` to skip the `seen` check makes the render case fail (checked once by hand, reverted).
 
 Return: the list of changed files, nothing else.
 

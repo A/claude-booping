@@ -46,3 +46,7 @@ The worker also edited `playbooks/learn/write/{base,fable-5}.md` and `playbooks/
 ## D10 — M04 grep and extra edits
 
 M04's DoD pattern `load_targeted` also matches `load_targeted_rules`, the rules loader; with a word boundary (`load_targeted\b`) the grep prints nothing. The worker also edited `tests/context/lesson_test.py` (deleted `load_targeted` tests), `tests/templates/test_agent_rules.py` (stale `targeted_lessons` key) and three rules e2e cases whose fixtures carried lessons (DoD 4.2 allows only the new case to mention lessons) — all forced by the removal. No snapshot drift.
+
+## D11 — M05 fixture route
+
+M05 asks for a fixture plugin root holding the shared directory; a txtar case cannot create one (`get_plugin_root()` always resolves the real checkout, fixtures write only under the sandbox `home`, `xdg`, `cwd`). The case instead sets core `path: ~/../cwd/vault/specs` and project `path: null` in the sandbox vault's own `config.yaml`, so both tiers come out of `resolve_tiers()` through the real config merge pointing at one directory — the DoD's "never by stubbing tiers" holds. The worker's hand mutation of the `seen` check failed the render case and was reverted.
