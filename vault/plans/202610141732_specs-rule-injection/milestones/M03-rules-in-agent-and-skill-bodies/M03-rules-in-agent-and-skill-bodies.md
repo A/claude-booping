@@ -2,7 +2,7 @@
 id: "03"
 title: "Rules section in agent and skill bodies"
 sp: 4
-status: pending
+status: done
 plan: "vault/plans/202610141732_specs-rule-injection/index.md"
 ---
 
@@ -16,8 +16,8 @@ The internal agent bodies (`booping-developer`, `booping-researcher`) and the `/
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 3.1 | `_targeted_rules.j2` (args `kind` = `agent`\|`skill`, `id`): selects `context.targeted_rules` whose `parsed_targets` name that agent or skill and renders `_rules.j2` with `surface` = `kind`; called directly before the lessons partial at each of the three call sites | `src/templates/_partials/_targeted_rules.j2`, `src/templates/_partials/_developer_body.j2`, `src/templates/agents/booping-researcher.md.j2`, `src/templates/skills/playbook.md.j2` | 2 | pending |
-| 3.2 | Template tests for agent and skill surfaces | `booping-python/tests/templates/test_agent_rules.py`, `booping-python/tests/templates/test_skill_rules.py` | 2 | pending |
+| 3.1 | `_targeted_rules.j2` (args `kind` = `agent`\|`skill`, `id`): selects `context.targeted_rules` whose `parsed_targets` name that agent or skill and renders `_rules.j2` with `surface` = `kind`; called directly before the lessons partial at each of the three call sites | `src/templates/_partials/_targeted_rules.j2`, `src/templates/_partials/_developer_body.j2`, `src/templates/agents/booping-researcher.md.j2`, `src/templates/skills/playbook.md.j2` | 2 | done |
+| 3.2 | Template tests for agent and skill surfaces | `booping-python/tests/templates/test_agent_rules.py`, `booping-python/tests/templates/test_skill_rules.py` | 2 | done |
 
 Section content is M02's, with `{agent|skill}` as the surface noun and no `; conflict → stop and flag` ([clarifications.md](../../clarifications.md) C1). Agent and skill surfaces print no notices (C6).
 
@@ -25,14 +25,14 @@ Section content is M02's, with `{agent|skill}` as the surface noun and no `; con
 
 ### Task 3.1
 
-- [ ] A rule targeting `agent:booping-researcher` renders in the researcher body only; `agent:booping-developer` in the developer body only; `skill:playbook` in the `/playbook` skill body only.
-- [ ] Rules section sits directly before the lessons section; no matching rule → nothing rendered, no stray blank lines.
-- [ ] The three call sites hold one line each; selection logic lives once, in `_targeted_rules.j2`.
+- [x] A rule targeting `agent:booping-researcher` renders in the researcher body only; `agent:booping-developer` in the developer body only; `skill:playbook` in the `/playbook` skill body only.
+- [x] Rules section sits directly before the lessons section; no matching rule → nothing rendered, no stray blank lines.
+- [x] The three call sites hold one line each; selection logic lives once, in `_targeted_rules.j2`.
 
 ### Task 3.2
 
-- [ ] Tests render the partial against a context carrying real `TargetedRule` objects, mirroring `test_agent_lessons.py`.
-- [ ] Parametrized over: matching agent, other agent, matching skill, other skill, no rules; exact section text asserted as a literal.
+- [x] Tests render the partial against a context carrying real `TargetedRule` objects, mirroring `test_agent_lessons.py`.
+- [x] Parametrized over: matching agent, other agent, matching skill, other skill, no rules; exact section text asserted as a literal.
 
 ## References
 
