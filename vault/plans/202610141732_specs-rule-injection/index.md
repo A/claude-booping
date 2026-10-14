@@ -2,17 +2,18 @@
 title: "Specs rule injection — targeted rules from three tiers into playbook, agent
   and skill bodies"
 type: "feature"
-status: in-progress
+status: done
 sp: 23
 related_to: plans/202610141731_specs-core-format-cli-injection/index.md
 created: 2026-10-14 17:42
 planned: null
 started: 2026-10-14 19:10
-completed: null
+completed: 2026-10-14 20:18
 code_reviews: []
 sessions:
 - 49e4cb90-6c29-4738-81f1-88d4adc4b259
 - 6b70255a-7607-4a86-8613-75a66a61dcfc
+- 36dbf90d-0102-4f43-add1-4a69775c2e2f
 retro: null
 summary: Inject accepted targeted rules from core, global and project specs 
   tiers as brief plus link beside lessons
@@ -31,6 +32,13 @@ agents:
   develop-loop/M04-rule-injection-docs: a37bffa08489583c7
   verify: a08b9b2abce2c9e90
 reviewed_at: 2026-10-14 19:07
+metrics_active_minutes: 215
+metrics_models:
+- claude-opus-5-5
+metrics_tokens_input: 470
+metrics_tokens_output: 164532
+metrics_tokens_cache_creation: 511540
+metrics_tokens_cache_read: 40084185
 ---
 
 # Specs rule injection — targeted rules from three tiers into playbook, agent and skill bodies
