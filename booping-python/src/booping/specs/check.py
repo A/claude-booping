@@ -10,10 +10,13 @@ from typing import Any, Literal
 from pydantic import BaseModel
 
 from booping.context.lesson import TargetRejection, parse_target
-from booping.specs.records import Record, load_tier
+from booping.specs.links import relative_links
+from booping.specs.records import Record, load_tier, parse_ref
 from booping.specs.tiers import Tier
 
 LAYOUT_MESSAGE = "a record lives at {type}/{NNNN}-{slug}.md"
+
+REF_FIELDS = {"values": "value", "rules": "rule", "supersedes": "adr"}
 
 
 class Finding(BaseModel):
@@ -41,12 +44,12 @@ def _error(path: Path, check: str, message: str, line: int = 1) -> Finding:
     return Finding(path=path, line=line, level="error", check=check, message=message)
 
 
-def _type_key_line(path: Path) -> int:
+def _key_line(path: Path, key: str) -> int:
     lines = path.read_text().splitlines()
     for index, text in enumerate(lines[1:], start=2):
         if text.strip() == "---":
             break
-        if text.startswith("type:"):
+        if text.startswith(f"{key}:"):
             return index
     return 1
 
@@ -68,7 +71,7 @@ def _check_frontmatter(record: Record) -> list[Finding]:
                 record.path,
                 "frontmatter",
                 f"type is `{declared}`, the directory is `{record.type}`",
-                _type_key_line(record.path),
+                _key_line(record.path, "type"),
             )
         ]
     return []
@@ -120,7 +123,7 @@ def run_mdcheck(schema: Path, record: Record) -> list[Finding]:
         ) from exc
 
 
-def _check_ids(records: list[Record]) -> list[Finding]:
+def _check_ids(records: list[Record], scope: Scope) -> list[Finding]:
     by_number: dict[tuple[str, int], list[Record]] = {}
     for r in records:
         if r.number is not None:
@@ -140,12 +143,137 @@ def _check_ids(records: list[Record]) -> list[Finding]:
     return findings
 
 
-# Checks over the whole tier's well-placed records; M05 appends link, ref, sources, namespace.
-CROSS_FILE_CHECKS: list[Callable[[list[Record]], list[Finding]]] = [_check_ids]
+class Scope(BaseModel):
+    """What a cross-file check sees beyond the records: the checked tier and the
+    `{namespace → (tier, {type → {number}})}` index over every resolved tier."""
+
+    tier: Tier
+    own: dict[str, set[int]]
+    namespaces: dict[str, tuple[Tier, dict[str, set[int]]]]
 
 
-def check_tier(tier: Tier, format_dir: Path, known: list[str]) -> tuple[list[Finding], int]:
-    """Findings sorted by path then line, and the number of records checked."""
+def _numbers(records: list[Record]) -> dict[str, set[int]]:
+    index: dict[str, set[int]] = {}
+    for r in records:
+        if r.number is not None:
+            index.setdefault(r.type, set()).add(r.number)
+    return index
+
+
+def _check_links(records: list[Record], scope: Scope) -> list[Finding]:
+    findings: list[Finding] = []
+    for record in records:
+        text = record.path.read_text()
+        first_line = text[: len(text) - len(record.body)].count("\n") + 1
+        for link in relative_links(record.body, first_line):
+            if not (record.path.parent / link.path).exists():
+                findings.append(
+                    _error(
+                        record.path,
+                        "link",
+                        f"link target `{link.dest}` does not exist",
+                        link.line,
+                    )
+                )
+    return findings
+
+
+def _list_field(record: Record, field: str) -> tuple[list[Any] | None, Finding | None]:
+    value = record.frontmatter.get(field)
+    if value is None:
+        return None, None
+    if not isinstance(value, list):
+        line = _key_line(record.path, field)
+        check = "ref" if field in REF_FIELDS else field
+        return None, _error(record.path, check, f"{field}: must be a list", line)
+    return list(value), None  # pyright: ignore[reportUnknownArgumentType]
+
+
+def _namespace(record: Record, line: int, message: str) -> Finding:
+    return Finding(path=record.path, line=line, level="warning", check="namespace", message=message)
+
+
+def _check_refs(records: list[Record], scope: Scope) -> list[Finding]:
+    findings: list[Finding] = []
+    for record in records:
+        for field, type_ in REF_FIELDS.items():
+            items, invalid = _list_field(record, field)
+            if invalid is not None:
+                findings.append(invalid)
+            if not items:
+                continue
+            line = _key_line(record.path, field)
+            for item in items:
+                ref = parse_ref(str(item))
+                if ref is None or ref.type != type_:
+                    findings.append(
+                        _error(record.path, "ref", f"{field}: `{item}` is not a {type_} ref", line)
+                    )
+                    continue
+                if ref.namespace is None:
+                    numbers = scope.own
+                elif ref.namespace not in scope.namespaces:
+                    findings.append(
+                        _namespace(
+                            record, line, f"{field}: namespace `{ref.namespace}` names no tier"
+                        )
+                    )
+                    continue
+                else:
+                    target, numbers = scope.namespaces[ref.namespace]
+                    if not target.root.is_dir():
+                        message = f"tier `{target.name}` has no specs at {target.root}"
+                        findings.append(_namespace(record, line, f"{field}: {message}"))
+                        continue
+                if ref.number not in numbers.get(ref.type, set()):
+                    findings.append(
+                        _error(record.path, "ref", f"{field}: `{item}` does not exist", line)
+                    )
+    return findings
+
+
+def _check_sources(records: list[Record], scope: Scope) -> list[Finding]:
+    findings: list[Finding] = []
+    for record in records:
+        entries, invalid = _list_field(record, "sources")
+        if invalid is not None:
+            findings.append(invalid)
+        if not entries:
+            continue
+        line = _key_line(record.path, "sources")
+        for entry in entries:
+            text = str(entry)
+            if "://" not in text and not (scope.tier.anchor / text).exists():
+                findings.append(
+                    _error(record.path, "sources", f"sources: `{text}` does not exist", line)
+                )
+    return findings
+
+
+# Checks over the whole tier's well-placed records.
+CROSS_FILE_CHECKS: list[Callable[[list[Record], Scope], list[Finding]]] = [
+    _check_ids,
+    _check_links,
+    _check_refs,
+    _check_sources,
+]
+
+
+def _scope(tier: Tier, records: list[Record], tiers: list[Tier], known: list[str]) -> Scope:
+    namespaces: dict[str, tuple[Tier, dict[str, set[int]]]] = {}
+    for t in tiers:
+        if t.namespace is None:
+            continue
+        loaded = records if t.root == tier.root else load_tier(t, known)
+        namespaces[t.namespace] = (t, _numbers([r for r in loaded if r.type in known]))
+    return Scope(tier=tier, own=_numbers(records), namespaces=namespaces)
+
+
+def check_tier(
+    tier: Tier, format_dir: Path, known: list[str], tiers: list[Tier]
+) -> tuple[list[Finding], int]:
+    """Findings sorted by path then line, and the number of records checked.
+    `tiers` is every resolved tier; namespaced refs resolve against them."""
     if shutil.which("mdcheck") is None:
         raise CheckError("mdcheck not found on PATH — cargo install markdown-checker")
 
@@ -164,8 +292,9 @@ def check_tier(tier: Tier, format_dir: Path, known: list[str]) -> tuple[list[Fin
         findings += _check_targets(record)
         findings += run_mdcheck(format_dir / "schemas" / f"{record.type}.yaml", record)
 
+    scope = _scope(tier, placed, tiers, known)
     for cross_file in CROSS_FILE_CHECKS:
-        findings += cross_file(placed)
+        findings += cross_file(placed, scope)
 
     findings.sort(key=lambda f: (display_path(f.path), f.line))
     return findings, len(records) + len(strays)

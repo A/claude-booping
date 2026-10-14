@@ -82,15 +82,18 @@ def _check_type(type_: str, known: list[str]) -> None:
         _fail(f"unknown type `{type_}`; known: {', '.join(known)}")
 
 
-def _select_tier(ctx: Context, root: Path, home_dir: Path, name: str) -> Tier:
-    tiers = resolve_tiers(
+def _resolve(ctx: Context, root: Path, home_dir: Path) -> list[Tier]:
+    return resolve_tiers(
         ctx.config,
         plugin_root=root,
         home_dir=home_dir,
         repo=ctx.project.repo_directory if ctx.project is not None else None,
         vault=ctx.vault,
     )
-    tier = next((t for t in tiers if t.name == name), None)
+
+
+def _select_tier(ctx: Context, root: Path, home_dir: Path, name: str) -> Tier:
+    tier = next((t for t in _resolve(ctx, root, home_dir) if t.name == name), None)
     if tier is None:
         _fail(f"tier `{name}` is not available here")
     if not tier.root.is_dir():
@@ -151,7 +154,9 @@ def _run_check(args: argparse.Namespace) -> None:
     tier = _select_tier(ctx, root, home_dir, args.tier)
 
     try:
-        findings, checked = check_tier(tier, _format_dir(ctx, root), known)
+        findings, checked = check_tier(
+            tier, _format_dir(ctx, root), known, _resolve(ctx, root, home_dir)
+        )
     except CheckError as exc:
         _fail(str(exc), 2)
     for f in findings:

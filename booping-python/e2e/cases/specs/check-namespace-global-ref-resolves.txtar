@@ -1,0 +1,62 @@
+The global tier's namespace, pinned in the global config, names `{home_dir}/_specs/`; a project
+record's ref into it resolves against the records there.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  specs:
+    tiers:
+      global:
+        namespace: owner
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/specs/value/0001-first.md --
+---
+type: value
+title: First
+summary: The first value.
+kind: value
+created_by: owner
+created_at: 2026-01-01
+updated_at: 2026-01-01
+---
+
+Why the project exists.
+
+## In practice
+
+It shows in every run.
+-- fixtures/cwd/vault/specs/rule/0002-keep-it-shorter.md --
+---
+type: rule
+title: Keep it short
+summary: Cut what the reader does not need.
+created_by: owner
+created_at: 2026-01-01
+updated_at: 2026-01-01
+status: accepted
+rules: [owner:rule/0001]
+---
+
+## Rule
+
+Keep it short.
+
+## Follows from
+
+- [First](../value/0001-first.md)
+-- fixtures/home/Claude/_specs/rule/0001-global-rule.md --
+---
+type: rule
+title: Global
+summary: A global rule.
+status: accepted
+---
+-- cmd --
+booping specs check
+-- exit --
+0
+-- stdout --
+-- stderr --
+2 record(s) checked: 0 error(s), 0 warning(s)
