@@ -1,0 +1,52 @@
+A `---` inside a frontmatter value does not end the block: the keys after it are still checked,
+and body lines keep their file numbers.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/specs/value/0001-first.md --
+---
+type: value
+title: First
+summary: The first value.
+kind: value
+created_by: owner
+created_at: 2026-01-01
+updated_at: 2026-01-01
+---
+
+Why the project exists.
+
+## In practice
+
+It shows in every run.
+-- fixtures/cwd/vault/specs/rule/0001-keep-it-short.md --
+---
+type: rule
+title: Keep it short
+summary: Cut a---b from what the reader does not need.
+created_by: owner
+created_at: 2026-01-01
+updated_at: 2026-01-01
+status: accepted
+values: [value/0001, value/9999]
+---
+
+## Rule
+
+Keep it short.
+
+## Follows from
+
+- [First](../value/0001-first.md)
+- [Gone](../value/0002-gone.md)
+-- cmd --
+booping specs check
+-- exit --
+1
+-- stdout --
+vault/specs/rule/0001-keep-it-short.md:9  error  ref  values: `value/9999` does not exist
+vault/specs/rule/0001-keep-it-short.md:19  error  link  link target `../value/0002-gone.md` does not exist
+-- stderr --
+2 record(s) checked: 2 error(s), 0 warning(s)

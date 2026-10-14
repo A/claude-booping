@@ -7,11 +7,13 @@ from typing import Any
 import yaml
 from pydantic import BaseModel
 
-from booping.context._yaml import parse_frontmatter
+from booping.context._yaml import safe_load_str
 from booping.specs.tiers import Tier
 
 _FILENAME_RE = re.compile(r"^(\d{4})-([a-z0-9]+(?:-[a-z0-9]+)*)\.md$")
 _REF_RE = re.compile(r"^(?:([A-Za-z0-9][A-Za-z0-9._-]*):)?([a-z][a-z0-9_-]*)/(\d{4})$")
+# Delimiters are whole lines, so a `---` inside a value does not end the block.
+_FRONTMATTER_RE = re.compile(r"\A---[ \t]*\n(.*?)^---[ \t]*$\n?", re.S | re.M)
 
 
 class Ref(BaseModel):
@@ -47,35 +49,46 @@ def parse_ref(text: str) -> Ref | None:
     return Ref(namespace=match.group(1), type=match.group(2), number=int(match.group(3)))
 
 
-def _body_after_frontmatter(text: str) -> str:
+class _UnclosedFrontmatterError(ValueError):
+    pass
+
+
+def _split_frontmatter(text: str) -> tuple[str | None, str]:
+    """YAML text between the delimiter lines (None without frontmatter) and the body."""
     if not text.startswith("---"):
-        return text
-    end = text.find("---", 3)
-    if end == -1:
-        return text
-    return text[end + 3 :].lstrip("\n")
+        return None, text
+    match = _FRONTMATTER_RE.match(text)
+    if match is None:
+        raise _UnclosedFrontmatterError
+    return match.group(1), text[match.end() :].lstrip("\n")
 
 
-def _frontmatter_error(exc: Exception) -> tuple[str, int]:
-    """One-line message and file line. parse_frontmatter hands YAML the text right after
-    the opening `---`, so mark line 0 is file line 1, shifted three columns."""
+def _frontmatter_error(exc: yaml.YAMLError) -> tuple[str, int]:
+    """One-line message and file line. YAML sees the text after the opening delimiter
+    line, so its mark line 0 is file line 2."""
     if isinstance(exc, yaml.MarkedYAMLError) and exc.problem_mark is not None and exc.problem:
         mark = exc.problem_mark
-        line = mark.line + 1
-        column = mark.column + 1 + (3 if mark.line == 0 else 0)
-        return f"{exc.problem}, line {line}, column {column}", line
+        line = mark.line + 2
+        return f"{exc.problem}, line {line}, column {mark.column + 1}", line
     return str(exc).splitlines()[0], 1
 
 
 def load_record(path: Path, type_: str) -> Record:
     parsed = parse_filename(path.name)
     number, slug = parsed if parsed is not None else (None, None)
+    text = path.read_text()
+    frontmatter: dict[str, Any] = {}
+    error, error_line = None, 1
     try:
-        frontmatter, body = parse_frontmatter(path)
-        error, error_line = None, 1
-    except (yaml.YAMLError, ValueError) as exc:
-        frontmatter, body = {}, _body_after_frontmatter(path.read_text())
-        error, error_line = _frontmatter_error(exc)
+        yaml_text, body = _split_frontmatter(text)
+    except _UnclosedFrontmatterError:
+        yaml_text, body = None, text
+        error = "frontmatter block is not closed"
+    if yaml_text is not None:
+        try:
+            frontmatter = safe_load_str(yaml_text)
+        except yaml.YAMLError as exc:
+            error, error_line = _frontmatter_error(exc)
     return Record(
         type=type_,
         number=number,
