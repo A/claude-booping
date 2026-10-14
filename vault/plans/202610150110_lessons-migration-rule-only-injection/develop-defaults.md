@@ -30,6 +30,7 @@ The configured ceiling is one milestone per briefing, so nine briefings, one per
 
 - `playbooks/develop/_reports/output.md` (M02) — one hunk: develop-loop `base.md`'s briefing line reworded from lesson context to `agent:{id}` rules, M02 task 2.2. `learn` did not drift: the hermetic fixture vault holds no playbook-targeted lesson, so the removed `**Lessons:**` block never rendered there.
 - `playbooks/learn/_reports/output.md` (M03) — five hunks, all the lesson removal M03 names: `_learn_targets.j2` wording, dedup-sweep summary and lookup set, the retired `update existing at _lessons/{file}` verdict and its write handling, and the transition summary no longer naming a lesson deletion.
+- `playbooks/setup/_reports/output.md` (M06) — one hunk: setup-project's vault-tree list drops `_lessons/`, M06 task 6.1.
 
 ## D7 — M01 import grep
 
@@ -50,3 +51,7 @@ M04's DoD pattern `load_targeted` also matches `load_targeted_rules`, the rules 
 ## D11 — M05 fixture route
 
 M05 asks for a fixture plugin root holding the shared directory; a txtar case cannot create one (`get_plugin_root()` always resolves the real checkout, fixtures write only under the sandbox `home`, `xdg`, `cwd`). The case instead sets core `path: ~/../cwd/vault/specs` and project `path: null` in the sandbox vault's own `config.yaml`, so both tiers come out of `resolve_tiers()` through the real config merge pointing at one directory — the DoD's "never by stubbing tiers" holds. The worker's hand mutation of the `seen` check failed the render case and was reverted.
+
+## D12 — M06 grep residue
+
+M06's `rg -n '_lessons' src/config.yaml playbooks/setup` still matches four lines under `playbooks/setup/_specs/` — playbook-authoring design history, intentionally stale per CLAUDE.md and excluded by the plan's own Final Verification grep. Left as is.

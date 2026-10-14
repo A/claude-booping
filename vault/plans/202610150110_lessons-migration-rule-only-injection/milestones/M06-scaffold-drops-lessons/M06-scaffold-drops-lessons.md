@@ -2,7 +2,7 @@
 id: "06"
 title: "The vault scaffold drops _lessons"
 sp: 2
-status: pending
+status: done
 plan: "vault/plans/202610150110_lessons-migration-rule-only-injection/index.md"
 ---
 
@@ -18,19 +18,19 @@ Tests: the scaffold txtar cases are the integration check; expected trees edited
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 6.1 | Drop the scaffold key and the setup-project mention. | `src/config.yaml`, `playbooks/setup/setup-project/opus-5.md` | 1 | pending |
-| 6.2 | Scaffold cases without `_lessons/`. | `booping-python/e2e/cases/scaffold/core-vault-tree-*.txtar` | 1 | pending |
+| 6.1 | Drop the scaffold key and the setup-project mention. | `src/config.yaml`, `playbooks/setup/setup-project/opus-5.md` | 1 | done |
+| 6.2 | Scaffold cases without `_lessons/`. | `booping-python/e2e/cases/scaffold/core-vault-tree-*.txtar` | 1 | done |
 
 ## Definition of Done
 
 ### Task 6.1
 
-- [ ] `rg -n '_lessons' src/config.yaml playbooks/setup` prints nothing.
-- [ ] `just snapshots` drift is limited to `playbooks/setup/_reports/output.md`, the one-word list change.
+- [x] `rg -n '_lessons' src/config.yaml playbooks/setup` prints nothing.
+- [x] `just snapshots` drift is limited to `playbooks/setup/_reports/output.md`, the one-word list change.
 
 ### Task 6.2
 
-- [ ] `rg -l '_lessons' booping-python/e2e/cases/scaffold` prints nothing.
+- [x] `rg -l '_lessons' booping-python/e2e/cases/scaffold` prints nothing.
 
 Return: the list of changed files, nothing else.
 
