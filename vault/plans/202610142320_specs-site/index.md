@@ -67,7 +67,7 @@ Input: specs tier directories (read only). Output: the out directory. No network
 | 01 | [Site model and markdown rendering](milestones/M01-site-model-and-markdown/M01-site-model-and-markdown.md) | 10 | done |
 | 02 | [Site pages, stylesheet and writer](milestones/M02-site-pages-and-writer/M02-site-pages-and-writer.md) | 9 | done |
 | 03 | [booping specs site command, roots config and e2e cases](milestones/M03-specs-site-command/M03-specs-site-command.md) | 8 | done |
-| 04 | [Document the specs site](milestones/M04-document-specs-site/M04-document-specs-site.md) | 3 | pending |
+| 04 | [Document the specs site](milestones/M04-document-specs-site/M04-document-specs-site.md) | 3 | done |
 
 ## I/O contract
 
