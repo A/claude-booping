@@ -1,13 +1,13 @@
 ---
 title: "Docs playbook on specs records — retire vault/docs/_specs"
 type: "refactoring"
-status: in-progress
+status: done
 sp: 35
 related_to: null
 created: 2026-10-14 22:51
 planned: null
 started: 2026-10-14 22:59
-completed: null
+completed: 2026-10-14 23:19
 code_reviews: []
 sessions:
 - e46d0ff7-edb0-438e-96f5-d7315b54c5cc
@@ -20,8 +20,18 @@ tracker_provider: null
 tracker_request: null
 tracker_issue: null
 return_to: null
-agents: '{"cross-review": "a12cfe89d62b28a3c"}'
+agents: '{"cross-review": "a12cfe89d62b28a3c", "develop-loop/M01": "a8a70eef3f292022a",
+  "develop-loop/M02": "adc4479b1412ed1af", "develop-loop/M03": "a7e903cea9d61b2e6",
+  "develop-loop/M04": "ac6bd4506b5c5d5eb", "develop-loop/M05": "a1f9b87087ca6f1e0",
+  "develop-loop/M06": "a50beac9f9bbc7743", "verify": "ad8a57abb3020c12d"}'
 reviewed_at: 2026-10-14 22:58
+metrics_active_minutes: 32
+metrics_models:
+- claude-opus-5-5
+metrics_tokens_input: 158
+metrics_tokens_output: 62250
+metrics_tokens_cache_creation: 294190
+metrics_tokens_cache_read: 8581962
 ---
 
 # Docs playbook on specs records — retire vault/docs/_specs
