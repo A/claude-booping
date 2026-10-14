@@ -13,6 +13,7 @@ from booping.commands import render as render_cmd
 from booping.commands import render_playbook as render_playbook_cmd
 from booping.commands import scaffold as scaffold_cmd
 from booping.commands import session_stats as session_stats_cmd
+from booping.commands import specs as specs_cmd
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -34,6 +35,7 @@ def build_parser() -> argparse.ArgumentParser:
     debug_cmd.add_parser(sub)
     frontmatter_update_cmd.add_parser(sub)
     session_stats_cmd.add_parser(sub)
+    specs_cmd.add_parser(sub)
 
     return parser
 

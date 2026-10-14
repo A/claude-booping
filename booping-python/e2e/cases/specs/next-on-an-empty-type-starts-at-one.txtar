@@ -1,0 +1,18 @@
+A type with no directory in the tier starts its numbering at `0001`.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/specs/value/0001-first.md --
+---
+type: value
+title: First
+---
+-- cmd --
+booping specs next adr
+-- exit --
+0
+-- stdout --
+adr/0001
+-- stderr --
