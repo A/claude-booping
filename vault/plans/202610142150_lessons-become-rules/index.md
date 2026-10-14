@@ -1,20 +1,21 @@
 ---
 title: "Learn writes rules — specs init, learn on rule records, setup provisions tiers"
 type: "feature"
-status: ready-for-dev
-sp: null
+status: in-progress
+sp: 27
 related_to: null
 created: 2026-10-14 21:51
 planned: null
-started: null
+started: 2026-10-14 22:08
 completed: null
 code_reviews: []
 sessions:
 - 9b11eed5-034e-486d-9c23-2799aaaad265
+- c65fdd23-eb0c-4af4-aed3-823b23ed70cc
 retro: null
 summary: learn writes rule records in the project specs tier; booping specs init
   creates tiers; setup provisions tiers and namespace
-commit: de5276323965a1166bb1d062ad86ab1d20881b62
+commit: becd24d74b721a19ff825ee9b2229c551e34cf38
 tracker_provider: null
 tracker_request: null
 tracker_issue: null
@@ -58,13 +59,13 @@ Milestones run in id order; M04 and M06 call the verb M01 adds. `tiers.py` stays
 
 | id | title | sp | status |
 | --- | --- | --- | --- |
-| 01 | booping specs init creates a tier | 6 | pending |
-| 02 | Learn preamble and target space on rules | 4 | pending |
-| 03 | Learn dedup sweep and review table over rules | 4 | pending |
-| 04 | Learn writes rule records | 4 | pending |
-| 05 | Learn eval suites on rules | 3 | pending |
-| 06 | Setup provisions the specs tiers and namespace | 3 | pending |
-| 07 | Docs for rule-writing learn, specs init and setup | 3 | pending |
+| 01 | [booping specs init creates a tier](milestones/M01-specs-init-verb/M01-specs-init-verb.md) | 6 | done |
+| 02 | [Learn preamble and target space on rules](milestones/M02-learn-target-space-on-rules/M02-learn-target-space-on-rules.md) | 4 | pending |
+| 03 | [Learn dedup sweep and review table over rules](milestones/M03-learn-dedup-and-review-table/M03-learn-dedup-and-review-table.md) | 4 | pending |
+| 04 | [Learn writes rule records](milestones/M04-learn-writes-rule-records/M04-learn-writes-rule-records.md) | 4 | pending |
+| 05 | [Learn eval suites on rules](milestones/M05-learn-evals-on-rules/M05-learn-evals-on-rules.md) | 3 | pending |
+| 06 | [Setup provisions the specs tiers and namespace](milestones/M06-setup-provisions-tiers/M06-setup-provisions-tiers.md) | 3 | pending |
+| 07 | [Docs for rule-writing learn, specs init and setup](milestones/M07-docs-learn-setup-specs-init/M07-docs-learn-setup-specs-init.md) | 3 | pending |
 
 ## Final Verification
 

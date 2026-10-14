@@ -1,0 +1,24 @@
+# Develop defaults
+
+Autonomous develop run on 2026-10-14: the owner was unavailable, so every point below was settled by the run. Each stays reviewable ([value/0009](../../specs/value/0009-adjustable-control.md)).
+
+## D1 — branch
+
+The owner fixed the branch for this run: `feat/specs`, the worktree's current branch, reused as is. No branch created, no `AskUserQuestion` (provision's branch gate auto-confirmed by the owner's instruction).
+
+## D2 — milestone groups
+
+Group ceiling is 1 → seven briefings, one per milestone, in id order (M01 … M07).
+
+## D3 — snapshot acceptance overrides rule/0013 for this run
+
+[rule/0013](../../specs/rule/0013-snapshot-baselines-accepted-by-user.md) and lesson 0013 forbid `just snapshots-accept` from inside a run. The owner's standing permission for this feature (2026-10-14) overrides it for this run only: accept only when every drifted hunk is a change the plan describes; any other drift stops the run. Accepted reports are listed under `## Accepted reports` at the end.
+
+## D4 — commit message format
+
+The develop playbook's `<agent>: <plan title> <message>` contradicts [rule/0022](../../specs/rule/0022-conventional-commits-with-scope.md) (conventional commits with scope) and every non-run commit on this branch. Milestone commits use `type(scope): …`, the building worker named in the body.
+
+## D5 — M01 touched `justfile`
+
+The M01 Verify `just e2e -k "specs and init"` could not run: the recipe interpolated `{{ args }}` unquoted, splitting the `-k` expression. The worker switched the recipe to `[positional-arguments]` + `"$@"`. Outside the contract's file list but required for its own Verify; kept, committed with M01.
+
