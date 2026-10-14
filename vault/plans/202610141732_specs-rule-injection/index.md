@@ -24,6 +24,12 @@ return_to: null
 agents:
   research-codebase: a698a450f756f2eff
   cross-review: a93bb738fbcd23a8a
+  intake: ac6da67f7546f6634
+  develop-loop/M01-targeted-rule-loader: ada3895535401bc57
+  develop-loop/M02-rules-on-render-playbook-surfaces: a435d26f994e4ef88
+  develop-loop/M03-rules-in-agent-and-skill-bodies: a0cf51434bae97dbf
+  develop-loop/M04-rule-injection-docs: a37bffa08489583c7
+  verify: a08b9b2abce2c9e90
 reviewed_at: 2026-10-14 19:07
 ---
 
