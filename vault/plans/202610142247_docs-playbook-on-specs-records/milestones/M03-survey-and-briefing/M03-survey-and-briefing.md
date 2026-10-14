@@ -2,7 +2,7 @@
 id: "03"
 title: "Survey judges records, briefing reads values into the run record"
 sp: 6
-status: pending
+status: in-progress
 plan: "plans/202610142247_docs-playbook-on-specs-records/index.md"
 ---
 
