@@ -1,7 +1,7 @@
 ---
 title: "Docs playbook on specs records — retire vault/docs/_specs"
 type: "refactoring"
-status: presenting
+status: ready-for-dev
 sp: null
 related_to: null
 created: 2026-10-14 22:51
@@ -20,6 +20,7 @@ tracker_request: null
 tracker_issue: null
 return_to: null
 agents: '{"cross-review": "a12cfe89d62b28a3c"}'
+reviewed_at: 2026-10-14 22:58
 ---
 
 # Docs playbook on specs records — retire vault/docs/_specs
