@@ -16,9 +16,7 @@ What lives where:
 - **`documentation/`** — the public docs site, for users; `docs/` — fragments the
   skills lazy-load at runtime.
 
-`vault/docs/_specs/` (briefing, roles, features, targets, glossary, documented) is
-deprecated: its content moves here; it stays until the `docs` playbook reads from
-here. `vault/_lessons/` likewise stays until lesson injection reads rules
+`vault/_lessons/` is deprecated: it stays until lesson injection reads rules
 ([rule/0001](rule/0001-lessons-are-rules.md)).
 
 ## Format

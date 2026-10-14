@@ -93,8 +93,7 @@ Each project keeps its own copy of the format and its own checker.
 
 ## Consequences
 
-- `vault/docs/_specs/` and `vault/_lessons/` are deprecated; they stay until the
-  `docs` playbook and lesson injection read from specs.
+- `vault/_lessons/` is deprecated; it stays until lesson injection reads from specs.
 - The existing project copies migrate after the feature ships, each with a commit
   before the migration for rollback.
 - [clarify] An exported global tier that a project imports, so a namespace resolves

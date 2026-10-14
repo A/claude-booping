@@ -6,7 +6,7 @@ created_by: claude
 created_at: 2026-10-14
 updated_at: 2026-10-14
 status: live
-sources: [vault/docs/_specs/targets.md]
+sources: [https://github.com/A/claude-booping/blob/c7e43b43dfe5fc1c0fafe253dd148d7e62ea231e/vault/docs/_specs/targets.md]
 ---
 
 ## Facts
@@ -39,9 +39,8 @@ sources: [vault/docs/_specs/targets.md]
   surface so a change lands in the right place; a stale set mis-aims every surface
   downstream. Ceiling: the project's model of itself (vision, roles, features,
   surfaces); never how-to prose, run history or implementation detail. The surface is
-  `vault/docs/_specs/`, deprecated in favour of `vault/specs/`
-  ([adr/0001](../adr/0001-specs-tiers.md)) and still read by the `docs` playbook until
-  it is migrated.
+  the project specs tier records the `docs` playbook reads: the value records,
+  reference/0001–0003 and the story records.
 - Not surfaces: playbook source (`playbooks/**` manifests, step prompts, partials,
   fixtures, scripts), the generated `playbooks/*/_reports/*.md` snapshots, the
   `skills/` and `agents/` thin shells, `src/templates/**`, `migrations/*/migration.md`,

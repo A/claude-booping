@@ -6,7 +6,7 @@ created_by: claude
 created_at: 2026-10-14
 updated_at: 2026-10-14
 status: done
-sources: [vault/docs/_specs/features.md]
+sources: [https://github.com/A/claude-booping/blob/c7e43b43dfe5fc1c0fafe253dd148d7e62ea231e/vault/docs/_specs/features.md]
 ---
 
 As **a user**, I want a confirmed scope reviewed end to end with my verdict before any

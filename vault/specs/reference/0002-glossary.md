@@ -6,7 +6,7 @@ created_by: claude
 created_at: 2026-10-14
 updated_at: 2026-10-14
 status: live
-sources: [vault/docs/_specs/glossary.md]
+sources: [https://github.com/A/claude-booping/blob/c7e43b43dfe5fc1c0fafe253dd148d7e62ea231e/vault/docs/_specs/glossary.md]
 ---
 
 ## Facts
@@ -56,7 +56,5 @@ sources: [vault/docs/_specs/glossary.md]
   frontmatter query over a markdown directory.
 - **Scaffold tree** — a config-declared file tree `booping scaffold` materialises at a
   destination.
-- **Spec set** — `vault/docs/_specs/` (briefing, feature index, glossary, roles,
-  targets); deprecated in favour of `vault/specs/`
-  ([adr/0001](../adr/0001-specs-tiers.md)), still read by the `docs` playbook until it
-  is migrated.
+- **Spec set** — the project specs tier records the `docs` playbook reads: the value
+  records, reference/0001–0003 and the story records.
