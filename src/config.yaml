@@ -352,8 +352,6 @@ core:
         type: dir
       codereviews:
         type: dir
-      _lessons:
-        type: dir
       notes:
         type: dir
       # Obsidian Bases fence (core plugin, no install needed) — a live view over
