@@ -114,8 +114,8 @@ The rule's brief is injected, not its body: one line per rule, under a `## Rules
 
 The following 2 rule(s) apply to this step. Never silently violate one. Read a rule's record when its brief is not enough.
 
-- **Generated content is scoped to its audience** — For user-facing content, put the audience filter into the task's DoD. [booping:rule/0008](${CLAUDE_PLUGIN_ROOT}/vault/specs/rule/0008-audience-scoped-content.md)
-- **Tests run against real behaviour** — Assert behaviour, not mechanism. [rule/0003](specs/rule/0003-tests-against-real-behaviour.md)
+- For user-facing content, put the audience filter into the task's DoD. [booping:rule/0008](${CLAUDE_PLUGIN_ROOT}/vault/specs/rule/0008-audience-scoped-content.md)
+- Assert behaviour, not mechanism. [rule/0003](specs/rule/0003-tests-against-real-behaviour.md)
 ```
 
 The count sentence names the surface — `playbook`, `step`, `agent` or `skill`; on the composed playbook it adds `; conflict → stop and flag`. The brief is folded onto one line and printed as written, never rendered as a template.

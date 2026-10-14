@@ -4,7 +4,7 @@
   rules   — list[booping.specs.rules.TargetedRule]; empty renders nothing
   surface — playbook | step | agent | skill; only `playbook` carries the conflict clause
 
-  Titles and briefs are inserted as variables, never parsed as Jinja.
+  Briefs are inserted as variables, never parsed as Jinja.
 -#}
 {%- if rules -%}
 ## Rules
@@ -12,6 +12,6 @@
 The following {{ rules | length }} rule(s) apply to this {{ surface }}. Never silently violate one{% if surface == "playbook" %}; conflict → stop and flag{% endif %}. Read a rule's record when its brief is not enough.
 
 {% for rule in rules -%}
-- **{{ rule.title }}** — {{ rule.brief }} [{{ rule.ref }}]({{ rule.link }})
+- {{ rule.brief }} [{{ rule.ref }}]({{ rule.link }})
 {% endfor %}
 {%- endif %}

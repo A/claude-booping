@@ -6,7 +6,7 @@ Autonomous groom run on 2026-10-14: the owner was unavailable, so every question
 
 **Asked:** 2026-10-14 — draft-plan
 
-**Question:** Rule/0010 wants the exact content of a user-facing output locked in grooming. Shape of the injected section on every surface: an H2 `## Rules`, then the count sentence `The following {n} rule(s) apply to this {playbook|step|agent|skill}. Never silently violate one{; conflict → stop and flag — playbook surface only}. Read a rule's record when its brief is not enough.`, then one bullet per rule `- **{title}** — {brief} [{ref}]({link})`, the brief's whitespace collapsed to one line and never Jinja-rendered. Confirm or amend.
+**Question:** Rule/0010 wants the exact content of a user-facing output locked in grooming. Shape of the injected section on every surface: an H2 `## Rules`, then the count sentence `The following {n} rule(s) apply to this {playbook|step|agent|skill}. Never silently violate one{; conflict → stop and flag — playbook surface only}. Read a rule's record when its brief is not enough.`, then one bullet per rule `- {brief} [{ref}]({link})`, the brief's whitespace collapsed to one line and never Jinja-rendered. Confirm or amend.
 
 **Options:**
 

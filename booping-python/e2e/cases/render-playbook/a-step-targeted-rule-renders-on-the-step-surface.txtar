@@ -52,5 +52,5 @@ Step body.
 
 The following 1 rule(s) apply to this step. Never silently violate one. Read a rule's record when its brief is not enough.
 
-- **Step rule** — Step brief. [fx:rule/0002]({HOME}/core-specs/rule/0002-step-rule.md)
+- Step brief. [fx:rule/0002]({HOME}/core-specs/rule/0002-step-rule.md)
 -- stderr --

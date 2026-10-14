@@ -18,7 +18,7 @@ SECTION = (
     "The following 1 rule(s) apply to this skill. Never silently violate one. "
     "Read a rule's record when its brief is not enough.\n"
     "\n"
-    "- **Announce steps** — Show the step table before the first step. "
+    "- Show the step table before the first step. "
     "[rule/0003](vault/specs/rule/0003-announce-steps.md)\n"
     "\n"
 )

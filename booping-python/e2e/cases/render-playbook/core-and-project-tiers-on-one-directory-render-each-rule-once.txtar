@@ -49,7 +49,7 @@ Preamble.
 
 The following 1 rule(s) apply to this playbook. Never silently violate one; conflict → stop and flag. Read a rule's record when its brief is not enough.
 
-- **Shared rule** — Shared brief. [fx:rule/0001]({HOME}/core-specs/rule/0001-shared-rule.md)
+- Shared brief. [fx:rule/0001]({HOME}/core-specs/rule/0001-shared-rule.md)
 
 ## Playbook Steps
 

@@ -51,7 +51,7 @@ Preamble.
 
 The following 1 rule(s) apply to this playbook. Never silently violate one; conflict → stop and flag. Read a rule's record when its brief is not enough.
 
-- **Playbook rule** — Playbook brief. [fx:rule/0001]({HOME}/core-specs/rule/0001-playbook-rule.md)
+- Playbook brief. [fx:rule/0001]({HOME}/core-specs/rule/0001-playbook-rule.md)
 
 ## Lessons
 

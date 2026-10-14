@@ -87,7 +87,7 @@ Callers of the output: the `/playbook` skill reads render-playbook stdout; agent
 
   The following {n} rule(s) apply to this {playbook|step|agent|skill}. Never silently violate one{; conflict → stop and flag}. Read a rule's record when its brief is not enough.
 
-  - **{title}** — {brief} [{ref}]({link})
+  - {brief} [{ref}]({link})
   ```
 
   `; conflict → stop and flag` on the composed playbook surface only. New notices among the existing ones: `**Note — tell the user:** rule {link} is not injected — {reason}. Run \`booping specs check\` on its tier.` and `**Note — tell the user:** rule {link} targets step \`{step}\` of playbook \`{name}\`, which has no such step.`

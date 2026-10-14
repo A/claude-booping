@@ -19,7 +19,7 @@ SECTION = (
     "The following 1 rule(s) apply to this agent. Never silently violate one. "
     "Read a rule's record when its brief is not enough.\n"
     "\n"
-    "- **Cite sources** — Every web finding carries its URL. "
+    "- Every web finding carries its URL. "
     "[booping:rule/0007](${CLAUDE_PLUGIN_ROOT}/src/specs/rule/0007-cite-sources.md)\n"
     "\n"
 )

@@ -70,9 +70,9 @@ Preamble.
 
 The following 3 rule(s) apply to this playbook. Never silently violate one; conflict → stop and flag. Read a rule's record when its brief is not enough.
 
-- **Core rule** — Core brief. [fx:rule/0001]({HOME}/core-specs/rule/0001-core-rule.md)
-- **Global rule** — Global brief. [me:rule/0002]({HOME}/Claude/_specs/rule/0002-global-rule.md)
-- **Project rule** — Project brief. [rule/0003](vault/specs/rule/0003-project-rule.md)
+- Core brief. [fx:rule/0001]({HOME}/core-specs/rule/0001-core-rule.md)
+- Global brief. [me:rule/0002]({HOME}/Claude/_specs/rule/0002-global-rule.md)
+- Project brief. [rule/0003](vault/specs/rule/0003-project-rule.md)
 
 ## Playbook Steps
 

@@ -28,7 +28,7 @@ Section content (locked, [clarifications.md](../../clarifications.md) C1), byte 
 
 The following {n} rule(s) apply to this {playbook|step}. Never silently violate one{; conflict → stop and flag}. Read a rule's record when its brief is not enough.
 
-- **{title}** — {brief} [{ref}]({link})
+- {brief} [{ref}]({link})
 ```
 
 `; conflict → stop and flag` on the playbook surface only, as the lessons section does. One bullet per rule, M01's order. Title and brief inserted as variables, never Jinja-rendered. No rules → no section and no blank lines left behind.

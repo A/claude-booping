@@ -6,8 +6,6 @@ created_by: claude
 created_at: 2026-10-14
 updated_at: 2026-10-14
 status: accepted
-targets: [learn]
-brief: Write a taken lesson as a rule in specs/rule/ with targets, a one-or-two-line brief and a Follows-from link; never as a separate lesson file.
 ---
 
 ## Rule
@@ -16,7 +14,9 @@ A lesson the user takes from a retro or a review is written as a rule: a record
 in `specs/rule/` of its tier (project, user or core) with `targets:` — the
 playbooks, steps, agents or skills it applies to — and `brief:`, one or two
 lines. Only the brief is injected into a targeted step, with a link to the
-record; the step reads the body when it needs the reason. `## Follows from`
+record. The brief is enough for most of the work on its own: an agent reads the
+record only for an edge case or the reason, never for every rule; and the brief
+does not restate what the agent checks or knows anyway. `## Follows from`
 links a value, or the source the lesson came from (the retro, the review, the
 incident) when no value names it.
 
@@ -28,3 +28,9 @@ incident) when no value names it.
   the brief, not the whole record.
 - [Single source](../value/0003-single-source.md) — one record carries the rule and its
   reason; no second lesson file restates it.
+
+## Exceptions
+
+- Until the lessons migration, `learn` still writes lesson files; the rule carries
+  no `targets` until then, so it is not injected into a `learn` run that cannot
+  follow it.
