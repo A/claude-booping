@@ -30,7 +30,7 @@ An accepted rule carrying `targets:` and `brief:` is injected into the playbooks
 
 ## Commands
 
-Every verb takes `--tier core|global|project`, default `project`.
+Every verb but `site` takes `--tier core|global|project`, default `project`.
 
 ### `booping specs init`
 
@@ -81,10 +81,65 @@ The check needs the `mdcheck` binary on `PATH`:
 cargo install markdown-checker --version 0.1.1 --locked
 ```
 
+### `booping specs site`
+
+```
+booping specs site [--out DIR] [--root NAME=PATH ...]
+```
+
+Renders one or several specs roots to a static HTML site you open in a browser straight from disk: no server, no network, no JavaScript. The same input always produces a byte-identical tree.
+
+- **`--out DIR`** — the output directory, default `specs-site` in the working directory.
+- **`--root NAME=PATH`** — a root to render, repeatable: a name (`[A-Za-z0-9][A-Za-z0-9._-]*`) and a directory holding type directories. `~` is expanded.
+
+**Root selection.** Given `--root` at least once, exactly those roots are rendered, in the order given. Otherwise the roots are the three [tiers](#tiers) — core, global, project, each named by its namespace, the project tier by the project's name — followed by every entry of [`core.specs.site.roots`](project_config.md#corespecs). A tier whose directory does not exist is left out silently; a configured root whose directory does not exist is skipped with a warning. A root resolving to a directory already selected is skipped, so a tier that is also a configured root renders once. A root's name is its namespace on the site: `name:type/NNNN` refs resolve against it, so give a configured root the namespace its records are cited by.
+
+To build one site over every project's specs, list them in the global config and run the command from `home_dir`:
+
+```yaml
+# ~/.config/booping/config.yaml
+home_dir: ~/Claude
+core:
+  specs:
+    site:
+      roots:
+        - {name: app, path: ../Dev/app/specs}
+        - {name: api, path: /home/me/Dev/api/specs}
+```
+
+A `path` is absolute, `~`-prefixed, or relative to `home_dir`.
+
+**Pages.**
+
+- `index.html` — one row per root: its record count, the count per type, the open `[clarify]` and `[unknown]` marks, and how many records are unreviewed.
+- `{root}/index.html` — one row per type with the same counts, then every `[clarify]` and `[unknown]` mark in the root, each linking to its line in the record.
+- `{root}/{type}/index.html` — a contents list, then every record of the type in full.
+- `{root}/{type}/{NNNN-slug}.html` — one record: title, ref, status or kind badge, an `unreviewed` badge when `reviewed` is not set, mark counts, summary, every other frontmatter key, the body, then **Referenced by** — every record linking to this one, across roots.
+
+Relative links and typed refs between records become links to the target's page, across roots too. A link to something that is not a record renders as plain text; a link or ref whose target is missing renders as plain text and prints a warning. The site never fails on a link — `booping specs check` is the validator.
+
+**Output directory.** Every build writes a `.booping-site` marker into the out directory. The command refuses — and writes nothing — when the out path is a file, lies inside one of the rendered roots, or is a non-empty directory without the marker. A directory carrying the marker is cleared and rewritten, so re-running into the same `--out` is safe.
+
+**Output.** On success, stdout gets one line:
+
+```
+specs site: 3 roots, 42 records, 51 pages, 2 warnings -> specs-site
+```
+
+Warnings go to stderr, sorted by path then line:
+
+```
+/home/me/Dev/old/specs  warning  site  root old not found, skipped
+vault/specs/adr/0002-ports.md:5  warning  site  unresolved ref booping:rule/0099
+vault/specs/adr/0002-ports.md:14  warning  site  unresolved link ../rule/0099-gone.md
+```
+
+An error prints one `error: {message}` line on stderr.
+
 ### Exit codes
 
-| Code | `init`                                                     | `ls`, `next`                                                   | `check`                                                        |
-|------|------------------------------------------------------------|----------------------------------------------------------------|----------------------------------------------------------------|
-| 0    | tier in place                                              | printed                                                        | no errors (warnings may be printed)                            |
-| 1    | the tier is `core` or unavailable, or a path is in the way | unknown type, or the tier is unavailable or has no directory   | at least one error, or the tier is unavailable or has no directory |
-| 2    | config could not be loaded                                 | config could not be loaded                                     | the check could not run: config not loaded, `mdcheck` missing or failing |
+| Code | `init`                                                     | `ls`, `next`                                                   | `check`                                                        | `site` |
+|------|------------------------------------------------------------|----------------------------------------------------------------|----------------------------------------------------------------|------|
+| 0    | tier in place                                              | printed                                                        | no errors (warnings may be printed)                            | site written (warnings may be printed) |
+| 1    | the tier is `core` or unavailable, or a path is in the way | unknown type, or the tier is unavailable or has no directory   | at least one error, or the tier is unavailable or has no directory | a malformed `--root` or one that is not a directory, a bad configured root entry, duplicate root names, no roots, or the out directory refused |
+| 2    | config could not be loaded                                 | config could not be loaded                                     | the check could not run: config not loaded, `mdcheck` missing or failing | config could not be loaded |

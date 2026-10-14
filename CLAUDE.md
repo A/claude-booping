@@ -14,7 +14,7 @@ One shipped skill (`/playbook`); everything procedural is a **playbook** it driv
 - `just ci` — everything CI runs, in order: `lint typecheck pytest snapshots mdcheck specs-check e2e`. Run before committing.
 - `just eval|smoke|regress <playbook>/<step>` (or `all`) — promptfoo eval suites; `just suites` lists them. Runs on subscription auth (`claude -p`), never in CI; each run posts a sticky, advisory PR comment via `scripts/eval-pr-comment.sh` (`EVAL_PR=0` opts out) — no commit status, no merge gate.
 - `just docs` / `just docs-serve` — build / preview the public docs site.
-- `bin/booping <subcommand> --help` — the runtime CLI: `render`, `render-playbook`, `playbook-state`, `playbook-transition`, `query`, `config-get`, `marker-set`, `scaffold`, `frontmatter-update`, `session-stats`, `specs` (`ls`, `next`, `check`, `init`), `debug-context`.
+- `bin/booping <subcommand> --help` — the runtime CLI: `render`, `render-playbook`, `playbook-state`, `playbook-transition`, `query`, `config-get`, `marker-set`, `scaffold`, `frontmatter-update`, `session-stats`, `specs` (`ls`, `next`, `check`, `init`, `site`), `debug-context`.
 - `bin/booping-tracker <verb> --help` — the task-tracker CLI: `states`, `show`, `comment`, `issue-create`, `issue-update`, `relate`, `sync`. Reference: [booping-tracker/README.md](booping-tracker/README.md).
 
 ## Layout

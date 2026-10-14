@@ -5,6 +5,7 @@ __pycache__/
 .booping
 .debug_enabled
 /site/
+specs-site/
 
 # Fixture vaults need their own .booping / .debug_enabled markers tracked in git.
 !booping-python/tests/__fixtures__/**/.booping
