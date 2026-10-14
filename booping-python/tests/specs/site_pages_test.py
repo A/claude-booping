@@ -192,6 +192,11 @@ def _refusal_inside_root(tmp_path: Path) -> Path:
     return tmp_path / "proj" / "site"
 
 
+def _refusal_contains_root(tmp_path: Path) -> Path:
+    _write(tmp_path / ".booping-site", "booping specs site\n")
+    return tmp_path
+
+
 def _refusal_unmarked(tmp_path: Path) -> Path:
     out = tmp_path / "out"
     _write(out / "mine.txt", "keep\n")
@@ -210,6 +215,7 @@ def _snapshot(base: Path) -> dict[str, str]:
     [
         (_refusal_file, "is a file"),
         (_refusal_inside_root, "is inside root proj"),
+        (_refusal_contains_root, "contains root core"),
         (_refusal_unmarked, "is not empty and has no .booping-site marker"),
     ],
 )

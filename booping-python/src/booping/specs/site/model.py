@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from collections.abc import Iterator
 from dataclasses import dataclass, field
 from functools import cached_property
@@ -9,6 +10,8 @@ from urllib.parse import unquote
 
 from booping.specs.links import relative_links
 from booping.specs.records import load_record, parse_filename, parse_ref
+
+_URI_SCHEME = re.compile(r"[A-Za-z][A-Za-z0-9+.-]*:")
 
 
 @dataclass(frozen=True)
@@ -97,7 +100,7 @@ class Site:
         return record if record is not None else RefMiss(warn=True)
 
     def resolve_link(self, dest: str, from_record: SiteRecord) -> LinkTarget:
-        if "://" in dest or dest.startswith(("mailto:", "/")):
+        if _URI_SCHEME.match(dest) or dest.startswith("/"):
             return LinkTarget(kind="external")
         if dest.startswith("#"):
             return LinkTarget(kind="anchor")

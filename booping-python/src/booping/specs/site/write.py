@@ -20,6 +20,8 @@ def _check(out: Path, roots: list[SiteRoot]) -> None:
     for root in roots:
         if resolved.is_relative_to(root.path.resolve()):
             raise SiteError(f"out path {out} is inside root {root.name} ({root.path})")
+        if root.path.resolve().is_relative_to(resolved):
+            raise SiteError(f"out path {out} contains root {root.name} ({root.path})")
     if out.is_dir() and any(out.iterdir()) and not (out / MARKER).is_file():
         raise SiteError(f"out path {out} is not empty and has no {MARKER} marker")
 

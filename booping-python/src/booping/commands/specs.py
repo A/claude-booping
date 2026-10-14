@@ -253,9 +253,13 @@ def _default_roots(
         if not tier.root.is_dir() or tier.root.resolve() in seen:
             continue
         if tier.namespace is not None:
-            name = tier.namespace
+            name, source = tier.namespace, f"core.specs.tiers.{tier.name}.namespace"
+        elif ctx.project is not None:
+            name, source = ctx.project.name, "project name"
         else:
-            name = ctx.project.name if ctx.project is not None else tier.name
+            name, source = tier.name, "tier name"
+        if ROOT_NAME.fullmatch(name) is None:
+            _fail(f"{source} `{name}` must match {ROOT_NAME.pattern} to name a site root")
         roots.append(SiteRoot(name=name, path=tier.root))
         seen.add(tier.root.resolve())
 
