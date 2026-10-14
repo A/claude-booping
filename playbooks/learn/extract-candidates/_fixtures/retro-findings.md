@@ -2,39 +2,44 @@
 
 Extract self-learning candidates from the retrospective below. The project is `taskflow`, a Django + React task manager. Run date: **2026-08-06**.
 
-## Lesson Target Space
+## Rule Target Space
 
-Every lesson targets exactly one entry from the target space, written into its `targets:` frontmatter list. Entry forms — exact names only, no globs, no wildcards, no negation:
+A rule reaches the entries of its `targets:` frontmatter list. Entry forms — exact names only, no globs, no wildcards, no negation:
 
 - `{playbook}` — the whole playbook
 - `{playbook}/{step}` — one step of it
 - `agent:{id}` — one agent
+- `skill:{name}` — one skill (`playbook` is the only one)
 
-The target space, already fetched for every playbook this project runs:
+The target space, already fetched for every playbook this project runs, with the rules already targeting each:
 
 ### groom
 
 Shape a feature, bug, or refactor into a specified, estimated, user-approved plan. Grooming owns the plan's content: scope, design, milestones, Definition of Done, and the verification steps a sprint must clear before it closes.
 
 - Steps: `intake`, `research-codebase`, `research-web`, `draft-plan`, `cross-review`, `present`
+- Rules: none
 
 ### develop
 
 Execute a groomed plan by delegating every task to a worker agent, one milestone group at a time, then hand off a verified sprint to retro. Owns git mechanics: the `provision` step selects and creates the working branch per the configured branch conventions, and the loop commits each milestone group.
 
 - Steps: `intake`, `provision`, `develop-loop`, `verify`, `wrap-up`
+- Rules: `rule/0002` (atomic-migrations) — one migration per schema change, each reversible; `rule/0003` (fixture-factories) — build test data through factories, never shared fixtures
 
 ### retro
 
-Generate a project- and plan-specific sprint retrospective — mine session logs, gather the user's raw feedback, triage issues, then save it and hand off to learn. The `research-issues` step audits what happened during the sprint against what the plan and lessons prescribed.
+Generate a project- and plan-specific sprint retrospective — mine session logs, gather the user's raw feedback, triage issues, then save it and hand off to learn. The `research-issues` step audits what happened during the sprint against what the plan and rules prescribed.
 
 - Steps: `intake`, `prepare`, `gather-feedback`, `research-issues`, `synthesize`, `save`
+- Rules: none
 
 ### learn
 
 Turn retrospective findings into durable behavior changes routed to exactly one target each — extract atomic candidates, sweep for duplicates, confirm a review table with the user, write the accepted items, close the plans out.
 
 - Steps: `intake`, `extract-candidates`, `dedup-sweep`, `review-table`, `write`, `transition`
+- Rules: none
 
 Addressable agents: `agent:booping-developer` (the worker that implements milestone groups), `agent:booping-researcher` (heavy reads, returns summaries).
 
@@ -46,7 +51,7 @@ Addressable agents: `agent:booping-developer` (the worker that implements milest
 
 2. The sprint ran on a feature branch `feat/notification-center`, and merging it back at the end cost an hour of conflict resolution against two hotfixes that had landed on master meanwhile. The user decided: in this project, always commit straight to master; never create separate branches.
 
-3. Lessons 0002 (atomic-migrations) and 0003 (fixture-factories) were both directly relevant to this sprint's work, yet the sprint's sessions never consulted either, and the retrospective only caught this by accident. The retrospective procedure should explicitly check which existing lessons were applicable to the sprint and flag the ones that went unused.
+3. Rules 0002 (atomic-migrations) and 0003 (fixture-factories) were both directly relevant to this sprint's work, yet the sprint's sessions never consulted either, and the retrospective only caught this by accident. The retrospective procedure should explicitly check which existing rules were applicable to the sprint and flag the ones that went unused.
 
 4. Two worker sessions stalled rediscovering project basics: that the API service starts with `just api`, and that the end-to-end tests only run against the compose stack via `just e2e`. Neither command is written down anywhere an agent reads.
 
