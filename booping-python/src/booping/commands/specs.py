@@ -9,6 +9,7 @@ from booping import logger
 from booping.context import Context
 from booping.context import config as config_mod
 from booping.rendering import get_plugin_root
+from booping.specs.check import CheckError, check_tier, format_finding
 from booping.specs.records import Record, load_tier
 from booping.specs.tiers import Tier, resolve_tiers, types
 
@@ -18,7 +19,7 @@ TIER_CHOICES = ("core", "global", "project")
 def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:  # type: ignore[type-arg]
     p = subparsers.add_parser(
         "specs",
-        help="List and number typed spec records (values, rules, ADRs, …) of a tier",
+        help="List, number and check typed spec records (values, rules, ADRs, …) of a tier",
     )
     verbs = p.add_subparsers(dest="specs_verb", metavar="<verb>", required=True)
 
@@ -31,6 +32,13 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
     nxt.add_argument("record_type", metavar="type", help="Record type (e.g. adr, rule)")
     _add_tier(nxt)
     nxt.set_defaults(func=_run_next)
+
+    chk = verbs.add_parser(
+        "check",
+        help="Validate a tier's records: {path}:{line}  {level}  {check}  {message}",
+    )
+    _add_tier(chk)
+    chk.set_defaults(func=_run_check)
 
 
 def _add_tier(p: argparse.ArgumentParser) -> None:
@@ -60,9 +68,13 @@ def _assemble() -> tuple[Context, Path, Path]:
     return ctx, root, home_dir
 
 
-def _known_types(ctx: Context, root: Path) -> list[str]:
+def _format_dir(ctx: Context, root: Path) -> Path:
     specs = ctx.config.get("core", {}).get("specs", {})
-    return types(root / str(specs.get("format")))
+    return root / str(specs.get("format"))
+
+
+def _known_types(ctx: Context, root: Path) -> list[str]:
+    return types(_format_dir(ctx, root))
 
 
 def _check_type(type_: str, known: list[str]) -> None:
@@ -130,3 +142,22 @@ def _run_next(args: argparse.Namespace) -> None:
         if r.type == args.record_type and r.number is not None
     ]
     print(f"{args.record_type}/{max(numbers, default=0) + 1:04d}")
+
+
+def _run_check(args: argparse.Namespace) -> None:
+    ctx, root, home_dir = _assemble()
+    logger.log(vault=ctx.vault, subcommand="specs", message=f"check --tier {args.tier}")
+    known = _known_types(ctx, root)
+    tier = _select_tier(ctx, root, home_dir, args.tier)
+
+    try:
+        findings, checked = check_tier(tier, _format_dir(ctx, root), known)
+    except CheckError as exc:
+        _fail(str(exc), 2)
+    for f in findings:
+        print(format_finding(f))
+    errors = sum(1 for f in findings if f.level == "error")
+    warnings = len(findings) - errors
+    print(f"{checked} record(s) checked: {errors} error(s), {warnings} warning(s)", file=sys.stderr)
+    if errors:
+        sys.exit(1)

@@ -1,0 +1,92 @@
+A rule's `targets:` and `brief:` come together, and every target parses as a lesson target:
+targets without a brief, a brief without targets and an unparsable entry each get a `targets`
+finding on line 1.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/specs/value/0001-first.md --
+---
+type: value
+title: First
+summary: The first value.
+kind: value
+created_by: owner
+created_at: 2026-01-01
+updated_at: 2026-01-01
+---
+
+Why the project exists.
+
+## In practice
+
+It shows in every run.
+-- fixtures/cwd/vault/specs/rule/0001-no-brief.md --
+---
+type: rule
+title: Keep it short
+summary: Cut what the reader does not need.
+created_by: owner
+created_at: 2026-01-01
+updated_at: 2026-01-01
+status: accepted
+targets: [groom]
+---
+
+## Rule
+
+Keep it short.
+
+## Follows from
+
+- [First](../value/0001-first.md)
+-- fixtures/cwd/vault/specs/rule/0002-no-targets.md --
+---
+type: rule
+title: Keep it short
+summary: Cut what the reader does not need.
+created_by: owner
+created_at: 2026-01-01
+updated_at: 2026-01-01
+status: accepted
+brief: Cut what the reader does not need.
+---
+
+## Rule
+
+Keep it short.
+
+## Follows from
+
+- [First](../value/0001-first.md)
+-- fixtures/cwd/vault/specs/rule/0003-bad-target.md --
+---
+type: rule
+title: Keep it short
+summary: Cut what the reader does not need.
+created_by: owner
+created_at: 2026-01-01
+updated_at: 2026-01-01
+status: accepted
+targets: [groom, "bad target"]
+brief: Cut what the reader does not need.
+---
+
+## Rule
+
+Keep it short.
+
+## Follows from
+
+- [First](../value/0001-first.md)
+-- cmd --
+booping specs check
+-- exit --
+1
+-- stdout --
+vault/specs/rule/0001-no-brief.md:1  error  targets  targets without brief
+vault/specs/rule/0002-no-targets.md:1  error  targets  brief without targets
+vault/specs/rule/0003-bad-target.md:1  error  targets  target `bad target`: not a target expression
+-- stderr --
+4 record(s) checked: 3 error(s), 0 warning(s)
