@@ -2,7 +2,7 @@
 id: "03"
 title: "booping specs ls and next"
 sp: 5
-status: pending
+status: done
 plan: "plans/202610141731_specs-core-format-cli-injection/index.md"
 ---
 
@@ -16,23 +16,23 @@ plan: "plans/202610141731_specs-core-format-cli-injection/index.md"
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 3.1 | `specs` group + `ls` verb with `--tier` (choices `core`, `global`, `project`, default `project`) and `--type`; output line `{type}/{NNNN}  {status}  {summary}`; e2e cases for `ls` per Scope. | `booping-python/src/booping/cli.py`, `booping-python/src/booping/commands/specs.py`, `booping-python/e2e/cases/specs/ls-*.txtar` | 3 | pending |
-| 3.2 | `next {type}` verb with `--tier`; e2e cases for `next` per Scope. | `booping-python/src/booping/commands/specs.py`, `booping-python/e2e/cases/specs/next-*.txtar` | 2 | pending |
+| 3.1 | `specs` group + `ls` verb with `--tier` (choices `core`, `global`, `project`, default `project`) and `--type`; output line `{type}/{NNNN}  {status}  {summary}`; e2e cases for `ls` per Scope. | `booping-python/src/booping/cli.py`, `booping-python/src/booping/commands/specs.py`, `booping-python/e2e/cases/specs/ls-*.txtar` | 3 | done |
+| 3.2 | `next {type}` verb with `--tier`; e2e cases for `next` per Scope. | `booping-python/src/booping/commands/specs.py`, `booping-python/e2e/cases/specs/next-*.txtar` | 2 | done |
 
 ## Definition of Done
 
 ### Task 3.1
 
-- [ ] `bin/booping specs --help` lists the verbs; `bin/booping specs ls --help` shows `--tier` and `--type`.
-- [ ] From the repo root, `bin/booping specs ls --type value` prints one line per file in `vault/specs/value/`, each `value/{NNNN}  -  {summary}`.
-- [ ] Missing tier directory → stderr ``error: no specs for tier `{tier}` at {root}``, exit 1, empty stdout.
-- [ ] `--tier project` with no project attached → stderr ``error: tier `project` is not available here``, exit 1.
-- [ ] Unknown type → stderr ``error: unknown type `{t}`; known: adr, conflict, idea, reference, rule, runbook, story, value``, exit 1.
+- [x] `bin/booping specs --help` lists the verbs; `bin/booping specs ls --help` shows `--tier` and `--type`.
+- [x] From the repo root, `bin/booping specs ls --type value` prints one line per file in `vault/specs/value/`, each `value/{NNNN}  -  {summary}`.
+- [x] Missing tier directory → stderr ``error: no specs for tier `{tier}` at {root}``, exit 1, empty stdout.
+- [x] `--tier project` with no project attached → stderr ``error: tier `project` is not available here``, exit 1.
+- [x] Unknown type → stderr ``error: unknown type `{t}`; known: adr, conflict, idea, reference, rule, runbook, story, value``, exit 1.
 
 ### Task 3.2
 
-- [ ] From the repo root, `bin/booping specs next adr` prints the highest number in `vault/specs/adr/` plus one.
-- [ ] Empty or missing type directory → `{type}/0001`, exit 0.
+- [x] From the repo root, `bin/booping specs next adr` prints the highest number in `vault/specs/adr/` plus one.
+- [x] Empty or missing type directory → `{type}/0001`, exit 0.
 
 Return: the list of changed files, nothing else.
 
