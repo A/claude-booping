@@ -1,4 +1,4 @@
-{% set shipped = 'core.makemigration_playbook.queries.shipped' | query -%}
+{% set shipped = 'core.migrate_playbook.queries.pending' | query -%}
 {% set ids = shipped | map(attribute='id') | list -%}
 {% set next_id = (ids | max + 1) if ids else 1 -%}
 # Open the authoring run
@@ -11,7 +11,7 @@ ships with the plugin, never with a project.
 
 The migrations below were resolved from the plugin root this render ran from. When that is not
 the working repo (an installed plugin rendering while you sit in a checkout), re-list them with
-the checkout's own `bin/booping query --config core.makemigration_playbook.queries.shipped` and use
+the checkout's own `bin/booping query --config core.migrate_playbook.queries.pending` and use
 that listing and its highest `id` instead.
 
 ## Shipped migrations
