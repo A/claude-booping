@@ -2,9 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
-
-from booping.context.lesson import Lesson, LessonTarget, TargetRejection, parse_target
+from booping.context.lesson import Lesson
+from booping.specs.targets import Target
 from tests.helpers import get_fixture_path
 
 
@@ -57,61 +56,11 @@ def test_load_dir_frontmatterless_falls_back_to_stem(tmp_path: Path) -> None:
     assert lessons[0].target_rejections == []
 
 
-@pytest.mark.parametrize(
-    ("entry", "expected"),
-    [
-        ("groom", LessonTarget(kind="playbook", playbook="groom")),
-        (
-            "groom/draft-plan",
-            LessonTarget(kind="step", playbook="groom", step="draft-plan"),
-        ),
-        (
-            "agent:booping-developer",
-            LessonTarget(kind="agent", agent="booping-developer"),
-        ),
-        (
-            "agent:booping:booping-researcher",
-            LessonTarget(kind="agent", agent="booping:booping-researcher"),
-        ),
-        ("skill:playbook", LessonTarget(kind="skill", skill="playbook")),
-        ("skill:code-review", LessonTarget(kind="skill", skill="code-review")),
-    ],
-)
-def test_parse_target_legal_forms(entry: str, expected: LessonTarget) -> None:
-    assert parse_target(entry) == expected
-
-
-@pytest.mark.parametrize(
-    "entry",
-    [
-        "",
-        "  ",
-        " groom",
-        "groom*",
-        "!groom",
-        "groom/*",
-        "groom/draft-plan/extra",
-        "/groom",
-        "groom/",
-        "agent:",
-        "agent:*",
-        "skill:",
-        "skill:*",
-        "some playbook",
-        42,
-        {"playbook": "groom"},
-        None,
-    ],
-)
-def test_parse_target_rejections(entry: object) -> None:
-    assert isinstance(parse_target(entry), TargetRejection)
-
-
 def test_load_dir_targets_scalar_normalizes_to_list(tmp_path: Path) -> None:
     (tmp_path / "0001_scalar.md").write_text("---\ntargets: groom\n---\nbody\n")
     lesson = Lesson.load_dir(tmp_path)[0]
     assert lesson.targets == ["groom"]
-    assert lesson.parsed_targets == [LessonTarget(kind="playbook", playbook="groom")]
+    assert lesson.parsed_targets == [Target(kind="playbook", playbook="groom")]
 
 
 def test_load_dir_targets_list_mixed_valid_and_malformed(tmp_path: Path) -> None:
@@ -120,7 +69,7 @@ def test_load_dir_targets_list_mixed_valid_and_malformed(tmp_path: Path) -> None
     )
     lesson = Lesson.load_dir(tmp_path)[0]
     assert lesson.targets == ["groom/draft-plan", "groom/*"]
-    assert lesson.parsed_targets == [LessonTarget(kind="step", playbook="groom", step="draft-plan")]
+    assert lesson.parsed_targets == [Target(kind="step", playbook="groom", step="draft-plan")]
     assert [r.entry for r in lesson.target_rejections] == ["groom/*"]
 
 

@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from booping.context.lesson import LessonTarget
 from booping.specs.rules import load_targeted_rules
+from booping.specs.targets import Target
 from booping.specs.tiers import Tier, TierName
 
 _ACCEPTED = "status: accepted\ntargets: [groom]\nbrief: Do the thing.\n"
@@ -45,10 +45,10 @@ def test_loads_accepted_targeted_rule(tmp_path: Path) -> None:
         path,
     )
     assert rule.parsed_targets == [
-        LessonTarget(kind="playbook", playbook="groom"),
-        LessonTarget(kind="step", playbook="develop", step="sprint"),
-        LessonTarget(kind="agent", agent="dev"),
-        LessonTarget(kind="skill", skill="playbook"),
+        Target(kind="playbook", playbook="groom"),
+        Target(kind="step", playbook="develop", step="sprint"),
+        Target(kind="agent", agent="dev"),
+        Target(kind="skill", skill="playbook"),
     ]
 
 

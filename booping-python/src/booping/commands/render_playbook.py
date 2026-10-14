@@ -12,7 +12,7 @@ from jinja2 import BaseLoader, ChoiceLoader, DictLoader, Environment, FileSystem
 from booping import logger, migrations
 from booping.context import Context
 from booping.context import playbook as playbook_mod
-from booping.context.lesson import Lesson, LessonTarget
+from booping.context.lesson import Lesson
 from booping.context.lifecycle import resolve_edges
 from booping.context.playbook import GraphProblem, Playbook, Step, resolve_detached
 from booping.macros import make_macro, parse_stub_overrides
@@ -23,6 +23,7 @@ from booping.rendering import (
     macro_dirs,
 )
 from booping.specs.rules import TargetedRule
+from booping.specs.targets import Target
 from booping.utils import deep_merge, parse_set_overrides
 
 _NO_GRAPH = (
@@ -422,7 +423,7 @@ def _targeted_rules(context: Context | None) -> list[TargetedRule]:
 
 class _Targeted(Protocol):
     @property
-    def parsed_targets(self) -> list[LessonTarget]: ...
+    def parsed_targets(self) -> list[Target]: ...
 
 
 def playbook_targeted[T: _Targeted](items: list[T], name: str) -> list[T]:

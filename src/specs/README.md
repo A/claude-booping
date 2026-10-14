@@ -134,7 +134,7 @@ Checks one tier (default `project`). Errors:
 - `id` — numbers are unique within a type;
 - `frontmatter` — the frontmatter parses and its `type:` matches the directory;
 - `targets` — a rule's `targets:` and `brief:` come together, and every target parses
-  as a lesson target;
+  as a target;
 - `link` — every relative link target exists;
 - `ref` — `values` point at values, `rules` at rules, `supersedes` at ADRs;
 - `sources` — every `sources` path exists, resolved against the tier's anchor (core —

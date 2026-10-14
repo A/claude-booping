@@ -9,9 +9,9 @@ from typing import Any, Literal
 
 from pydantic import BaseModel
 
-from booping.context.lesson import TargetRejection, parse_target
 from booping.specs.links import relative_links
 from booping.specs.records import Record, load_tier, parse_ref
+from booping.specs.targets import TargetRejection, parse_target
 from booping.specs.tiers import Tier
 
 LAYOUT_MESSAGE = "a record lives at {type}/{NNNN}-{slug}.md"

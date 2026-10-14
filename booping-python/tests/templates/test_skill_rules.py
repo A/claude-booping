@@ -5,9 +5,9 @@ from pathlib import Path
 import pytest
 
 from booping.context import Context
-from booping.context.lesson import parse_target
 from booping.rendering import get_plugin_root, render
 from booping.specs.rules import TargetedRule
+from booping.specs.targets import parse_target
 
 PARTIAL = "src/templates/_partials/_targeted_rules.j2"
 PLAYBOOK_SKILL = "src/templates/skills/playbook.md.j2"

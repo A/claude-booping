@@ -1,4 +1,4 @@
-A rule's `targets:` and `brief:` come together, and every target parses as a lesson target:
+A rule's `targets:` and `brief:` come together, and every target parses as a target:
 targets without a brief, a brief without targets and an unparsable entry each get a `targets`
 finding on line 1.
 

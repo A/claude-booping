@@ -6,8 +6,8 @@ from typing import Any
 
 from pydantic import BaseModel
 
-from booping.context.lesson import LessonTarget, TargetRejection, parse_target
 from booping.specs.records import Record, load_record
+from booping.specs.targets import Target, TargetRejection, parse_target
 from booping.specs.tiers import Tier, TierName
 
 
@@ -18,7 +18,7 @@ class TargetedRule(BaseModel):
     link: str
     tier: TierName
     path: Path
-    parsed_targets: list[LessonTarget]
+    parsed_targets: list[Target]
 
 
 class RuleSkip(BaseModel):
@@ -65,7 +65,7 @@ def _take(tier: Tier, record: Record) -> TargetedRule | RuleSkip | None:
     entries: list[object] = list(targets)  # pyright: ignore[reportUnknownArgumentType]
     if record.number is None:
         return _skip(tier, record, "filename is not NNNN-slug.md")
-    parsed: list[LessonTarget] = []
+    parsed: list[Target] = []
     for entry in entries:
         result = parse_target(entry)
         if isinstance(result, TargetRejection):
