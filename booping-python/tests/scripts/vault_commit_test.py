@@ -207,3 +207,54 @@ def test_a_rerun_with_no_changes_commits_nothing(
     assert result.returncode == 0, result.stderr
     assert _head(layout.repo, env) == first
     assert "vault-commit: nothing to commit" in result.stdout
+
+
+def _empty_dir(vault: Path) -> None:
+    (vault / "extra").mkdir(parents=True)
+
+
+def _ignored_only_dir(vault: Path) -> None:
+    _write(vault / ".gitignore", "extra/*.tmp\n")
+    _write(vault / "extra/scratch.tmp", "ignored\n")
+
+
+@pytest.mark.parametrize("make_layout", [_nested, _own_repo], ids=["nested", "own-repo"])
+@pytest.mark.parametrize(
+    "make_extra", [_empty_dir, _ignored_only_dir], ids=["empty", "ignored-only"]
+)
+def test_a_stage_dir_with_nothing_to_add_still_commits_the_artifact(
+    tmp_path: Path,
+    make_layout: Callable[[Path, dict[str, str]], Layout],
+    make_extra: Callable[[Path], None],
+) -> None:
+    env = _env(tmp_path)
+    layout = make_layout(tmp_path, env)
+    base = HOOKS["close-working-set"]
+    hook = base._replace(argv=[*base.argv, "--stage", "extra"])
+    hook.seed(layout.vault)
+    make_extra(layout.vault)
+    before = _head(layout.repo, env)
+
+    result = _run(hook, layout.vault, env)
+
+    assert result.returncode == 0, result.stderr
+    assert _head(layout.repo, env) != before
+    assert _head_paths(layout.repo, env) == {f"{layout.prefix}{rel}" for rel in hook.committed}
+    assert "vault-commit: ok" in result.stdout
+
+
+def test_a_failing_commit_aborts_with_gits_error(tmp_path: Path) -> None:
+    env = _env(tmp_path)
+    layout = _own_repo(tmp_path, env)
+    hook_file = layout.repo / ".git/hooks/pre-commit"
+    _write(hook_file, "#!/bin/sh\necho 'rejected by pre-commit' >&2\nexit 1\n")
+    hook_file.chmod(0o755)
+    hook = HOOKS["commit-plan"]
+    hook.seed(layout.vault)
+    before = _head(layout.repo, env)
+
+    result = _run(hook, layout.vault, env)
+
+    assert result.returncode != 0
+    assert "rejected by pre-commit" in result.stderr
+    assert _head(layout.repo, env) == before
