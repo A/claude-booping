@@ -23,12 +23,14 @@ Enumerate the milestones in execution order — never from `index.md`'s table, w
 booping query --glob {plan-dir}/{{ config.core.plans.milestones.glob }} --columns {{ config.core.plans.milestones.table_columns | join(',') }} --sort id
 ```
 
+{% if config.core.sprint.max_sp -%}
 Pack milestones into agent briefings greedily, in that order: a group takes the next milestone
 while the group's summed `sp` stays at or under **{{ config.core.sprint.max_sp }} SP**, and closes otherwise.
-A group is a contiguous run of milestones in `id` order and never spans a dependency boundary the
-plan declares. A single milestone is always a valid group and is never split, even when its `sp`
-alone exceeds the cap.
-
+A group is a contiguous run of milestones in `id` order. A single milestone is always a valid group
+and is never split, even when its `sp` alone exceeds the cap.
+{% else -%}
+One milestone per briefing: each milestone is its own group.
+{% endif %}
 The groups are yours to settle — reported in the return, never put to the user for confirmation.
 Settle them as a table you keep for the return, milestones named by their directory so
 `develop-loop` briefs paths:

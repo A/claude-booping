@@ -2,6 +2,18 @@
 
 Notable user-visible changes, newest first, in the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format; versions follow [semantic versioning](https://semver.org/).
 
+## Unreleased
+
+### Added
+
+- The `makemigration` playbook authors a new plugin-shipped vault migration at the next id, in the format `migrate` applies.
+
+### Changed
+
+- `core.sprint.max_milestones_per_agent` is replaced by `core.sprint.max_sp` (default `15`): develop packs consecutive milestones into one briefing while their summed SP stays at or under it. A config still setting the old key is ignored — rename it, and set `max_sp` low (e.g. `1`) to keep one milestone per briefing.
+- Groom no longer lets a milestone at or over `redecompose_threshold` leave drafting.
+- A worker's code work may reach outside the attached repo once the user confirms it for the plan.
+
 ## v1.1.1 — 2026-10-08
 
 A patch release of engine fixes: `frontmatter-update` hooks now type their values like the command does, repeated `--append` flags all land, and `session-stats` no longer double-counts tokens.
