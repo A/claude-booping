@@ -2,7 +2,7 @@
 id: "02"
 title: "Agent, skill and step bodies inject rules only"
 sp: 3
-status: pending
+status: done
 plan: "vault/plans/202610150110_lessons-migration-rule-only-injection/index.md"
 ---
 
@@ -18,20 +18,20 @@ Tests: the surviving `tests/templates/test_agent_rules.py` / `test_skill_rules.p
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 2.1 | Delete the three partials and two test files; drop the call lines; trim `_targeted_rules.j2`'s header; one added test asserting a `_lessons/` file no longer reaches an agent body. | `src/templates/_partials/_agent_lessons.j2`, `src/templates/_partials/_skill_lessons.j2`, `src/templates/_partials/_lesson_template.j2`, `src/templates/_partials/_developer_body.j2`, `src/templates/skills/playbook.md.j2`, `src/templates/agents/booping-researcher.md.j2`, `src/templates/_partials/_targeted_rules.j2`, `booping-python/tests/templates/test_agent_lessons.py`, `booping-python/tests/templates/test_skill_lessons.py`, `booping-python/tests/templates/test_agent_rules.py` | 2 | pending |
-| 2.2 | Reword `_playbook_driving.j2`, `target_space.md` and develop-loop `base.md` as Scope states. | `src/templates/_partials/_playbook_driving.j2`, `playbooks/_partials/target_space.md`, `playbooks/develop/develop-loop/base.md` | 1 | pending |
+| 2.1 | Delete the three partials and two test files; drop the call lines; trim `_targeted_rules.j2`'s header; one added test asserting a `_lessons/` file no longer reaches an agent body. | `src/templates/_partials/_agent_lessons.j2`, `src/templates/_partials/_skill_lessons.j2`, `src/templates/_partials/_lesson_template.j2`, `src/templates/_partials/_developer_body.j2`, `src/templates/skills/playbook.md.j2`, `src/templates/agents/booping-researcher.md.j2`, `src/templates/_partials/_targeted_rules.j2`, `booping-python/tests/templates/test_agent_lessons.py`, `booping-python/tests/templates/test_skill_lessons.py`, `booping-python/tests/templates/test_agent_rules.py` | 2 | done |
+| 2.2 | Reword `_playbook_driving.j2`, `target_space.md` and develop-loop `base.md` as Scope states. | `src/templates/_partials/_playbook_driving.j2`, `playbooks/_partials/target_space.md`, `playbooks/develop/develop-loop/base.md` | 1 | done |
 
 ## Definition of Done
 
 ### Task 2.1
 
-- [ ] `rg -n '_agent_lessons|_skill_lessons|_lesson_template' src playbooks booping-python` prints nothing.
-- [ ] `bin/booping render src/templates/agents/booping-researcher.md.j2` and `bin/booping render src/templates/skills/playbook.md.j2` render without error and contain no `## Lessons`.
+- [x] `rg -n '_agent_lessons|_skill_lessons|_lesson_template' src playbooks booping-python` prints nothing.
+- [x] `bin/booping render src/templates/agents/booping-researcher.md.j2` and `bin/booping render src/templates/skills/playbook.md.j2` render without error and contain no `## Lessons`.
 
 ### Task 2.2
 
-- [ ] `rg -n -i 'lesson' src/templates/_partials/_playbook_driving.j2 playbooks/_partials/target_space.md playbooks/develop/develop-loop/base.md` prints nothing.
-- [ ] `just snapshots` drift is limited to `playbooks/develop/_reports/output.md` and `playbooks/learn/_reports/output.md`, each hunk one of this milestone's rewordings.
+- [x] `rg -n -i 'lesson' src/templates/_partials/_playbook_driving.j2 playbooks/_partials/target_space.md playbooks/develop/develop-loop/base.md` prints nothing.
+- [x] `just snapshots` drift is limited to `playbooks/develop/_reports/output.md` and `playbooks/learn/_reports/output.md`, each hunk one of this milestone's rewordings.
 
 Return: the list of changed files, nothing else.
 

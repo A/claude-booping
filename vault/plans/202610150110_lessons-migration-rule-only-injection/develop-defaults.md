@@ -28,8 +28,12 @@ The configured ceiling is one milestone per briefing, so nine briefings, one per
 
 ## Accepted snapshots
 
-None yet.
+- `playbooks/develop/_reports/output.md` (M02) — one hunk: develop-loop `base.md`'s briefing line reworded from lesson context to `agent:{id}` rules, M02 task 2.2. `learn` did not drift: the hermetic fixture vault holds no playbook-targeted lesson, so the removed `**Lessons:**` block never rendered there.
 
 ## D7 — M01 import grep
 
 M01's DoD grep `rg -n 'LessonTarget|context.lesson import' booping-python/src` still matches two `from booping.context.lesson import Lesson` lines (`commands/render_playbook.py`, `context/__init__.py`): the `Lesson` model stays in `context/lesson.py` until M04 by the milestone's own scope. Read as "nothing imports target parsing from `context/lesson.py`" — the milestone's stated goal — which holds; `LessonTarget` is gone. The worker also repointed two test files outside the contract's list (`tests/templates/test_{agent,skill}_rules.py`), required once the shim was not kept. Full pytest, typecheck and both e2e corpora green with no expected output edited.
+
+## D8 — M02 extra test file
+
+The worker also rewrote `tests/templates/test_skill_rules.py`, outside the contract's list: its body test located the rules section by the `## Lessons` heading the milestone removes.
