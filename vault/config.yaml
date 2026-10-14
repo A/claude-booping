@@ -1,7 +1,4 @@
 core:
-  sprint:
-    max_milestones_per_agent: 1
-
   model_benchmark_playbook:
     # Second diff reviewer beside the generic `fable:medium` one; null → fable alone.
     review_agent: codex
