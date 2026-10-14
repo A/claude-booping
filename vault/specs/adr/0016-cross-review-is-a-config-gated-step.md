@@ -6,7 +6,7 @@ created_by: claude
 created_at: 2026-10-14
 updated_at: 2026-10-14
 status: accepted
-values: [values/0001#quality-at-a-rational-cost, values/0001#stack-agnostic-core]
+values: [value/0012, value/0005]
 sources: [playbooks/groom/_specs/DECISIONS.md, vault/retrospectives/20260423-skill-refactors-chat-develop-retro.md, CHANGELOG.md]
 ---
 

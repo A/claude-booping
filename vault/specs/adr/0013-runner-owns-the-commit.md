@@ -6,7 +6,7 @@ created_by: claude
 created_at: 2026-10-14
 updated_at: 2026-10-14
 status: accepted
-values: [values/0001#proven-to-work, values/0001#stack-agnostic-core]
+values: [value/0010, value/0005]
 sources: [CHANGELOG.md, CLAUDE.md]
 ---
 

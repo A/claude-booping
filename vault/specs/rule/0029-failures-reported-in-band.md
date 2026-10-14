@@ -17,5 +17,5 @@ It never surfaces as a crash.
 
 ## Follows from
 
-- [Guides to the goal](../values/0001-booping.md#guides-to-the-goal) — the user is told what is wrong
+- [Guides to the goal](../value/0013-guides-to-the-goal.md) — the user is told what is wrong
   inside the run instead of facing a stack trace.

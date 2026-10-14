@@ -6,7 +6,7 @@ created_by: claude
 created_at: 2026-10-14
 updated_at: 2026-10-14
 status: accepted
-values: [values/0001#plans-run-to-the-end, values/0001#effective-human-review]
+values: [value/0007, value/0008]
 rules: [rule/0004]
 sources: [CHANGELOG.md, CLAUDE.md]
 ---

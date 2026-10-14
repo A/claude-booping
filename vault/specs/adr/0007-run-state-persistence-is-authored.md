@@ -6,7 +6,7 @@ created_by: claude
 created_at: 2026-10-14
 updated_at: 2026-10-14
 status: accepted
-values: [values/0001#plans-run-to-the-end, values/0001#adjustable-control, values/0001#quality-at-a-rational-cost]
+values: [value/0007, value/0009, value/0012]
 sources: [vault/notes/20260731-playbook-authoring-state-machines-design.md, playbooks/playbook-authoring/_specs/DECISIONS.md, playbooks/migrate/_specs/DECISIONS.md]
 ---
 

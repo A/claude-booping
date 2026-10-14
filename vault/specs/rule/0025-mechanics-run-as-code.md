@@ -19,7 +19,7 @@ verify it.
 
 ## Follows from
 
-- [Quality at a rational cost](../values/0001-booping.md#quality-at-a-rational-cost) — code does the
+- [Quality at a rational cost](../value/0012-quality-at-a-rational-cost.md) — code does the
   mechanics without spending tokens on them.
-- [Proven to work](../values/0001-booping.md#proven-to-work) — code can be tested; a model re-deriving a
+- [Proven to work](../value/0010-proven-to-work.md) — code can be tested; a model re-deriving a
   transition cannot be held by a check.

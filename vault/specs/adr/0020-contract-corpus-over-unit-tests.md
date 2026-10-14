@@ -6,7 +6,7 @@ created_by: claude
 created_at: 2026-10-14
 updated_at: 2026-10-14
 status: accepted
-values: [values/0001#proven-to-work, values/0001#single-source]
+values: [value/0010, value/0003]
 sources: [vault/notes/test-strategy.md, CLAUDE.md]
 ---
 

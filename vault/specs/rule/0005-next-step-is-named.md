@@ -18,5 +18,5 @@ path; the hint does not block it.
 
 ## Follows from
 
-- [Guides to the goal](../values/0001-booping.md#guides-to-the-goal) — the system leads to the goal
+- [Guides to the goal](../value/0013-guides-to-the-goal.md) — the system leads to the goal
   and lets a professional step aside.

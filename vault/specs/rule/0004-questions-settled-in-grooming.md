@@ -20,7 +20,7 @@ have known.
 
 ## Follows from
 
-- [Plans run to the end](../values/0001-booping.md#plans-run-to-the-end) — a plan runs to the end
+- [Plans run to the end](../value/0007-plans-run-to-the-end.md) — a plan runs to the end
   only when its questions are answered before it starts.
-- [Effective human review](../values/0001-booping.md#effective-human-review) — the user answers in
+- [Effective human review](../value/0008-effective-human-review.md) — the user answers in
   one planning session, not in ad-hoc interruptions.

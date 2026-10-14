@@ -6,7 +6,7 @@ created_by: claude
 created_at: 2026-10-14
 updated_at: 2026-10-14
 status: accepted
-values: [values/0001#everything-in-one-place, values/0001#plans-run-to-the-end]
+values: [value/0011, value/0007]
 sources: [CHANGELOG.md, CLAUDE.md]
 ---
 

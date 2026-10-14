@@ -6,7 +6,7 @@ created_by: claude
 created_at: 2026-10-14
 updated_at: 2026-10-14
 status: accepted
-values: [values/0001#effective-human-review, values/0001#minimal-effective-context, values/0001#adjustable-control]
+values: [value/0008, value/0002, value/0009]
 sources: [playbooks/migrate/_specs/DECISIONS.md]
 ---
 

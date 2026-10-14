@@ -18,5 +18,5 @@ that makes a render depend on anything else breaks this rule.
 
 ## Follows from
 
-- [Proven to work](../values/0001-booping.md#proven-to-work) — the committed snapshot reports can only
+- [Proven to work](../value/0010-proven-to-work.md) — the committed snapshot reports can only
   hold behaviour if the render is reproducible.

@@ -32,9 +32,9 @@ not.
 
 ## Follows from
 
-- [Minimal effective context](../values/0001-booping.md#minimal-effective-context) — a body carries only
+- [Minimal effective context](../value/0002-minimal-effective-context.md) — a body carries only
   what its step needs.
-- [Single source](../values/0001-booping.md#single-source) — a duplicated block drifts.
+- [Single source](../value/0003-single-source.md) — a duplicated block drifts.
 - [Retro: skill refactors, chat, develop](../../retrospectives/20260423-skill-refactors-chat-develop-retro.md)
   — one pass caught an inlined roster, its verbatim copy in a sibling skill, a
   negative rule without a positive one and a hard-coded threshold.

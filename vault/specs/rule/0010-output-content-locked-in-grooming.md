@@ -21,7 +21,7 @@ develop is iterated live instead of decided up front.
 
 ## Follows from
 
-- [Plans run to the end](../values/0001-booping.md#plans-run-to-the-end) — develop does not stop to
+- [Plans run to the end](../value/0007-plans-run-to-the-end.md) — develop does not stop to
   settle what grooming should have asked.
 - [Lesson 0010](../../_lessons/0010_lock-output-content-during-grooming.md) — the
   source names no retro.

@@ -12,7 +12,7 @@ sources: [vault/docs/_specs/roles.md, vault/docs/_specs/index.md]
 ## Facts
 
 - Every role is a technical professional; people without a technical background are
-  not the audience ([values/0001 — Not valued](../values/0001-booping.md#comfort-for-non-technical-users)).
+  not the audience ([value/0014 — Comfort for non-technical users](../value/0014-comfort-for-non-technical-users.md)).
 - **User** — an experienced developer or tech lead who installed booping and runs the
   groom → develop → retro → learn loop on their own repo via `/playbook`. Comes for
   installation and setup, the quick-start loop, what each playbook does to their repo

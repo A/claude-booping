@@ -19,4 +19,4 @@ not.
 
 ## Follows from
 
-- [Single source](../values/0001-booping.md#single-source) — config is the source; prose never restates it.
+- [Single source](../value/0003-single-source.md) — config is the source; prose never restates it.

@@ -40,7 +40,7 @@ from a rule of a tier above records it in its own ADR or conflict.
 
 | Type       | Directory          | What for                                                          |
 |------------|--------------------|-------------------------------------------------------------------|
-| `values`   | `values/`          | Why it exists and what it is like; one file per area              |
+| `value`    | `value/`           | One value: why it exists and what it is like, or a non-value      |
 | `rule`     | `rule/`            | A constraint every decision obeys, following from a value or a source |
 | `adr`      | `adr/`             | One durable choice: context, options, decision, consequences      |
 | `conflict` | `conflict/`        | Two or more values pulling apart, and how that is settled         |
@@ -57,9 +57,9 @@ The shape of each type is `schemas/<type>.yaml`, a
 - One record — one markdown file with YAML frontmatter.
 - Name — `<NNNN>-<slug>.md`: a four-digit number running within the type (the next
   one is the highest plus one) and a kebab-case latin slug.
-- A reference to a record is `<type>/<NNNN>` (`adr/0001`); to one value, by anchor:
-  `values/0001#adjustable-control`. In the body, references are ordinary relative
-  markdown links.
+- A reference to a record is `<type>/<NNNN>` (`adr/0001`, `value/0009`). In the body,
+  references are ordinary relative markdown links. The site renders a type's records
+  together, so splitting a set into records costs no readability.
 
 ## Frontmatter
 
@@ -78,26 +78,27 @@ Common to every type:
 
 By type:
 
-- `values` — no `status`.
+- `value` — no `status`; `kind`: `value` or `non-value` (what we deliberately do
+  not optimise for).
 - `rule` — `status`: `accepted` or `retired` (a retired rule stays so it is not
   reinvented). Optional `targets:` — where the rule is injected (`groom`,
   `develop/run`, `agent:<id>`, `skill:<name>`) — and `brief:`, the one or two lines
   injected there.
 - `adr` — `status`: `proposed`, `accepted`, `superseded`, `rejected`; optional
-  `values`, `rules`, `supersedes`.
-- `conflict` — `status`: `open` or `resolved`; `values` — at least two value anchors.
+  `values` (value refs), `rules`, `supersedes`.
+- `conflict` — `status`: `open` or `resolved`; `values` — at least two value refs.
 - `story` — `status`: `done`, `planned`, `deferred`.
 - `idea` — `status`: `open`, `validating`, `accepted` (went on: an ADR, a story, a
   plan), `rejected` (stays so it is not proposed again).
 - `reference`, `runbook` — `status`: `live` or `retired`.
 
-Reference fields are lists like `[values/0001#single-source, rule/0003]`. Back
+Reference fields are lists like `[value/0003, rule/0003]`. Back
 references are not written.
 
 ## Body
 
-- `values` — `## Values`, a `###` per value: a paragraph, then two items
-  `**In practice:**` and `**Trade-off:**`; optional `## Not valued`.
+- `value` — a paragraph stating the value, `## In practice`, then `## Trade-off`
+  (absent for a non-value).
 - `rule` — `## Rule`, `## Follows from` (each item links a value, or the source a
   learnt rule came from: a retro, a review, an incident), optional `## Exceptions`.
 - `adr` — `## Context`, optional `## Criteria`, `## Decision`, `## Alternatives`,

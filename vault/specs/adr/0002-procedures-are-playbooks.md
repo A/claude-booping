@@ -7,7 +7,7 @@ created_at: 2026-10-14
 updated_at: 2026-10-14
 status: accepted
 rules: [rule/0024]
-values: [values/0001#plans-run-to-the-end, values/0001#stack-agnostic-core, values/0001#minimal-effective-context, values/0001#quality-at-a-rational-cost]
+values: [value/0007, value/0005, value/0002, value/0012]
 sources: [playbooks/groom/_specs/DECISIONS.md, playbooks/code-review/_specs/DECISIONS.md, vault/notes/20260802-groom-skill-vs-playbook-metrics.md, CHANGELOG.md, CLAUDE.md]
 ---
 

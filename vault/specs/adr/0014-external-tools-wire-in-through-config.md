@@ -6,7 +6,7 @@ created_by: claude
 created_at: 2026-10-14
 updated_at: 2026-10-14
 status: accepted
-values: [values/0001#stack-agnostic-core, values/0001#adjustable-control]
+values: [value/0005, value/0009]
 sources: [playbooks/code-review/_specs/DECISIONS.md, vault/retrospectives/20260610-cli-logging-and-agent-namespacing.md, vault/retrospectives/20260610-plannotator-code-review-surface.md, vault/retrospectives/20260722-seven-plan-retro.md, CLAUDE.md]
 ---
 

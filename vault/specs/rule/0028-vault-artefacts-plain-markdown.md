@@ -16,7 +16,7 @@ format and no database — so the vault opens as is in Obsidian.
 
 ## Follows from
 
-- [Everything in one place](../values/0001-booping.md#everything-in-one-place) — everything is plain
+- [Everything in one place](../value/0011-everything-in-one-place.md) — everything is plain
   files, easy to look at from one place.
-- [Analysable history](../values/0001-booping.md#analysable-history) — a stable plain shape stays
+- [Analysable history](../value/0004-analysable-history.md) — a stable plain shape stays
   comparable across projects.

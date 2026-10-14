@@ -18,7 +18,7 @@ what to settle; a reason that is only the user's preference is called that.
 
 ## Follows from
 
-- [Adjustable control](../values/0001-booping.md#adjustable-control) — the human finds what the
+- [Adjustable control](../value/0009-adjustable-control.md) — the human finds what the
   agent decided alone only if it is marked.
-- [Effective human review](../values/0001-booping.md#effective-human-review) — a review checks the
+- [Effective human review](../value/0008-effective-human-review.md) — a review checks the
   marks instead of rereading everything for what was guessed.

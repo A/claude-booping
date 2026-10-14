@@ -7,7 +7,7 @@ created_at: 2026-10-14
 updated_at: 2026-10-14
 status: accepted
 rules: [rule/0017]
-values: [values/0001#single-source, values/0001#stack-agnostic-core]
+values: [value/0003, value/0005]
 sources: [CLAUDE.md, vault/retrospectives/20260425-migrate-retro-skill-to-template-pipeline.md, vault/researches/20260802-01-31_framework-cli-extraction-research.md]
 ---
 

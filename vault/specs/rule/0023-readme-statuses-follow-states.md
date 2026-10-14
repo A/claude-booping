@@ -20,5 +20,5 @@ named in the source.
 
 ## Follows from
 
-- [Single source](../values/0001-booping.md#single-source) — the narrative is a known copy, kept honest by
+- [Single source](../value/0003-single-source.md) — the narrative is a known copy, kept honest by
   hand until it is rendered.

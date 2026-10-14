@@ -6,7 +6,7 @@ created_by: claude
 created_at: 2026-10-14
 updated_at: 2026-10-14
 status: accepted
-values: [values/0001#minimal-effective-context, values/0001#single-source, values/0001#plans-run-to-the-end]
+values: [value/0002, value/0003, value/0007]
 sources: [CHANGELOG.md, CLAUDE.md]
 ---
 

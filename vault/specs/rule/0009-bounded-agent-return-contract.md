@@ -21,7 +21,7 @@ prose into the orchestrator's context.
 
 ## Follows from
 
-- [Minimal effective context](../values/0001-booping.md#minimal-effective-context) — the orchestrator's
+- [Minimal effective context](../value/0002-minimal-effective-context.md) — the orchestrator's
   context holds only what it acts on.
 - [Retro: CLI logging and agent namespacing](../../retrospectives/20260610-cli-logging-and-agent-namespacing.md)
   — mid-sprint the user had to tell the agent to return only the changed files.

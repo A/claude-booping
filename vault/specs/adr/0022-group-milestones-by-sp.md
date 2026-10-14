@@ -6,7 +6,7 @@ created_by: claude
 created_at: 2026-10-14
 updated_at: 2026-10-14
 status: proposed
-values: [values/0001#quality-at-a-rational-cost, values/0001#minimal-effective-context]
+values: [value/0012, value/0002]
 sources: [vault/notes/20260821-milestone-grouping-by-sp.md]
 ---
 

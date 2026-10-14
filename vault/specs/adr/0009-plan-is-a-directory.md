@@ -6,7 +6,7 @@ created_by: claude
 created_at: 2026-10-14
 updated_at: 2026-10-14
 status: accepted
-values: [values/0001#single-source, values/0001#quality-at-a-rational-cost, values/0001#everything-in-one-place]
+values: [value/0003, value/0012, value/0011]
 sources: [playbooks/groom/_specs/DECISIONS.md, vault/notes/20260802-groom-skill-vs-playbook-metrics.md, playbooks/migrate/_specs/DECISIONS.md, CHANGELOG.md, CLAUDE.md]
 ---
 

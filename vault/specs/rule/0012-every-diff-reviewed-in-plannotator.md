@@ -32,7 +32,7 @@ the browser review replaces presenting findings in chat.
 
 ## Follows from
 
-- [Effective human review](../values/0001-booping.md#effective-human-review) — the human reviews the diff
+- [Effective human review](../value/0008-effective-human-review.md) — the human reviews the diff
   inline with the findings, where it is convenient for them; the owner's preference
   for this project.
 - [Lesson 0012](../../_lessons/0012_review_every_diff_in_plannotator.md) — the

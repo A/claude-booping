@@ -6,7 +6,7 @@ created_by: claude
 created_at: 2026-10-14
 updated_at: 2026-10-14
 status: accepted
-values: [values/0001#stack-agnostic-core, values/0001#single-source, values/0001#everything-in-one-place]
+values: [value/0005, value/0003, value/0011]
 sources: [playbooks/groom/_specs/DECISIONS.md, vault/researches/20260802-01-31_framework-cli-extraction-research.md, CHANGELOG.md, CLAUDE.md]
 ---
 

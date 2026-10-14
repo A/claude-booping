@@ -6,7 +6,7 @@ created_by: claude
 created_at: 2026-10-14
 updated_at: 2026-10-14
 status: accepted
-values: [values/0001#effective-human-review, values/0001#plans-run-to-the-end, values/0001#quality-at-a-rational-cost]
+values: [value/0008, value/0007, value/0012]
 rules: [rule/0003, rule/0004]
 sources: [playbooks/groom/_specs/DECISIONS.md, playbooks/develop/_specs/DECISIONS.md, playbooks/code-review/_specs/DECISIONS.md, playbooks/migrate/_specs/DECISIONS.md, playbooks/setup/_specs/DECISIONS.md, vault/notes/20260802-groom-skill-vs-playbook-metrics.md, CHANGELOG.md]
 ---

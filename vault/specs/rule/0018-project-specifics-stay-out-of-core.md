@@ -20,5 +20,5 @@ Lessons are moving into project-tier rules ([rule/0001](0001-lessons-are-rules.m
 
 ## Follows from
 
-- [Stack-agnostic core](../values/0001-booping.md#stack-agnostic-core) — specifics live in the global and
+- [Stack-agnostic core](../value/0005-stack-agnostic-core.md) — specifics live in the global and
   the project's tiers.

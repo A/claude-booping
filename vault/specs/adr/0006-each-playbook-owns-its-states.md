@@ -6,7 +6,7 @@ created_by: claude
 created_at: 2026-10-14
 updated_at: 2026-10-14
 status: accepted
-values: [values/0001#single-source, values/0001#plans-run-to-the-end]
+values: [value/0003, value/0007]
 sources: [playbooks/groom/_specs/DECISIONS.md, playbooks/develop/_specs/DECISIONS.md, playbooks/develop/_specs/index.md, vault/researches/20260802-01-31_framework-cli-extraction-research.md, CHANGELOG.md, CLAUDE.md]
 ---
 

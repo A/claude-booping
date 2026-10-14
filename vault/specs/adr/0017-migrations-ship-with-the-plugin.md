@@ -6,7 +6,7 @@ created_by: claude
 created_at: 2026-10-14
 updated_at: 2026-10-14
 status: accepted
-values: [values/0001#single-source, values/0001#guides-to-the-goal]
+values: [value/0003, value/0013]
 sources: [playbooks/migrate/_specs/DECISIONS.md, CHANGELOG.md, CLAUDE.md]
 ---
 

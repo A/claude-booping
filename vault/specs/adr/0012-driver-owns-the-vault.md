@@ -7,7 +7,7 @@ created_at: 2026-10-14
 updated_at: 2026-10-14
 status: accepted
 rules: [rule/0019]
-values: [values/0001#minimal-effective-context, values/0001#single-source, values/0001#stack-agnostic-core]
+values: [value/0002, value/0003, value/0005]
 sources: [CLAUDE.md, vault/retrospectives/20260423-skill-refactors-chat-develop-retro.md, vault/retrospectives/20260422-plans-as-data-refactor.md, vault/retrospectives/20260610-plannotator-code-review-surface.md, vault/retrospectives/20260610-cli-logging-and-agent-namespacing.md, vault/retrospectives/20260722-seven-plan-retro.md]
 ---
 

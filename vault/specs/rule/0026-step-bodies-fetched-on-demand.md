@@ -17,5 +17,5 @@ sum of its step bodies.
 
 ## Follows from
 
-- [Minimal effective context](../values/0001-booping.md#minimal-effective-context) — detail is read on
+- [Minimal effective context](../value/0002-minimal-effective-context.md) — detail is read on
   demand, never inlined in case it helps.

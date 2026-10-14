@@ -23,8 +23,8 @@ committed together. No drift, nothing to ask.
 
 ## Follows from
 
-- [Adjustable control](../values/0001-booping.md#adjustable-control) — a change to what playbooks say
+- [Adjustable control](../value/0009-adjustable-control.md) — a change to what playbooks say
   stays visible to the human instead of passing the gate silently.
-- [Proven to work](../values/0001-booping.md#proven-to-work) — the baseline holds the rendered behaviour;
+- [Proven to work](../value/0010-proven-to-work.md) — the baseline holds the rendered behaviour;
   accepting it from inside a run empties the check.
 

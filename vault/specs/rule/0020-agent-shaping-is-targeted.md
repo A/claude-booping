@@ -19,7 +19,7 @@ agent or skill. Today the record is a targeted lesson; with
 
 ## Follows from
 
-- [Single source](../values/0001-booping.md#single-source) — one record per adjustment, no second
+- [Single source](../value/0003-single-source.md) — one record per adjustment, no second
   extension mechanism restating it.
-- [Stack-agnostic core](../values/0001-booping.md#stack-agnostic-core) — the core agent stays generic;
+- [Stack-agnostic core](../value/0005-stack-agnostic-core.md) — the core agent stays generic;
   the project tier adds.

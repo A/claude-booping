@@ -6,7 +6,7 @@ created_by: claude
 created_at: 2026-10-14
 updated_at: 2026-10-14
 status: accepted
-values: [values/0001#analysable-history, values/0001#single-source]
+values: [value/0004, value/0003]
 sources: [playbooks/retro/_specs/DECISIONS.md, playbooks/retro/_specs/index.md, playbooks/code-review/_specs/DECISIONS.md, CHANGELOG.md, CLAUDE.md]
 ---
 

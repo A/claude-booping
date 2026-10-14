@@ -21,7 +21,7 @@ repo inconsistent and gets dropped.
 
 ## Follows from
 
-- [Single source](../values/0001-booping.md#single-source) — a stale reference is a second, wrong copy of
+- [Single source](../value/0003-single-source.md) — a stale reference is a second, wrong copy of
   a fact.
 - [Retro: migrate retro skill to the template pipeline](../../retrospectives/20260425-migrate-retro-skill-to-template-pipeline.md)
   — deleting a partial and updating a CLAUDE.md status block as their own

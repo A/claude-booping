@@ -18,5 +18,5 @@ steps back.
 
 ## Follows from
 
-- [Effective human review](../values/0001-booping.md#effective-human-review) — the cheap artefact
+- [Effective human review](../value/0008-effective-human-review.md) — the cheap artefact
   is where a wrong direction is cheapest to catch.

@@ -22,9 +22,9 @@ incident) when no value names it.
 
 ## Follows from
 
-- [Curated self-learning](../values/0001-booping.md#curated-self-learning) — a lesson becomes a
+- [Curated self-learning](../value/0001-curated-self-learning.md) — a lesson becomes a
   rule only when the user takes it, and a rule is where taken knowledge lives.
-- [Minimal effective context](../values/0001-booping.md#minimal-effective-context) — a step gets
+- [Minimal effective context](../value/0002-minimal-effective-context.md) — a step gets
   the brief, not the whole record.
-- [Single source](../values/0001-booping.md#single-source) — one record carries the rule and its
+- [Single source](../value/0003-single-source.md) — one record carries the rule and its
   reason; no second lesson file restates it.
