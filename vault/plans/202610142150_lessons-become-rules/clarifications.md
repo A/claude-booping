@@ -13,7 +13,7 @@ Autonomous groom run on 2026-10-14: the owner was unavailable, so every question
 - This plan: `learn` writes rules, a `booping specs init` mechanic, `setup` provisions both tiers, rule/0001 regains its targets, and the docs of those; parked: the lessons migration, rule-only injection and booping's own vault migration (default applied)
 - This plan: migration + rule-only injection; parked: learn and setup
 
-**Answer:** First option — default applied. This plan ships on its own: existing lessons keep injecting while every new learning lands as a rule, so no state between the plans is broken. The second order is not shippable alone: removing lesson injection while `learn` still writes lessons makes every new lesson inject nowhere. The parked plan is useless without this one, which is the seam the groom's split rule asks for. Parked stub: see `index.md` `## Parked siblings`.
+**Answer:** First option — default applied. This plan ships on its own: existing lessons keep injecting while every new learning lands as a rule, so no state between the plans is broken. The second order is not shippable alone: removing lesson injection while `learn` still writes lessons makes every new lesson inject nowhere. The parked plan is useless without this one, which is the seam the groom's split rule asks for. Parked stub: `index.md` `## Out of scope`.
 
 ## C2 — fate of `--no-lessons` — answered
 
@@ -145,3 +145,11 @@ One person's values and rules for every project, in booping's specs format — t
 **Question:** Which docs move in this plan?
 
 **Answer:** Default applied: only what this plan changes — learn's destinations and review table, `specs init`, setup's tier and namespace, rule/0001. Lesson injection docs (`documentation/playbook.md` `#lessons`, `--no-lessons`) stay true until the parked plan and move with it ([rule/0007](../../specs/rule/0007-stale-references-cleaned-in-sprint.md) binds per sprint, and nothing this plan does stales them).
+
+## C12 — review table columns — answered
+
+**Asked:** 2026-10-14 — draft-plan
+
+**Question:** [rule/0010](../../specs/rule/0010-output-content-locked-in-grooming.md): the exact review-table content learn shows the user?
+
+**Answer:** Default applied. Columns, in order: `#` (stable integer), `Target` (`rule/{NNNN}-{slug}.md` relative to the project tier root — the number provisional until write — or an existing `rule/NNNN` / `_lessons/{file}` for an update, `CLAUDE.md`, or the covering ref), `Type` (`rule` | `claude-md` | `covered`), `Targets` (comma-separated target entries; `—` for `claude-md` and `covered`), `Brief` (the one or two lines that will be injected; `—` for `claude-md` and `covered`), `Rule` (one imperative sentence), `Example` (one concrete sentence). Accept / reject syntax and the split rule unchanged.
