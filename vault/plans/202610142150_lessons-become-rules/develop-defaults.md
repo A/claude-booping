@@ -42,3 +42,15 @@ The develop preamble says eval runs are proposed, never launched; C10 and M05's 
 
 The DoD grep also matches `write/base.md` and `write/fable-5.md`, where the only hit is C6's `update existing at _lessons/{file}` conversion bullet (M04). Removing it would break C6, so the check is read as scoped to M05's own files (`tests.yaml`, `_fixtures/`), which are clean. The extract suite's not-regex is written `[_]lessons/` so the literal grep stays empty; it still rejects a lesson path.
 
+## D11 — learn's transition step was stale after M04
+
+`playbooks/learn/transition/` (no milestone lists it) still said the exit hook commits "the written lessons". Fixed in the sprint per [rule/0007](../../specs/rule/0007-stale-references-cleaned-in-sprint.md). C7 assumed learn's `CLAUDE.md` bullets stay uncommitted; the step in fact commits them in the repo. C7's intent — out-of-vault rule records treated exactly like those bullets — is kept: when the vault is outside the repo, the step's repo commit stages the rule records it wrote beside `CLAUDE.md`.
+
+## Accepted reports
+
+Drift checked hunk by hunk with `just snapshots`, then accepted under D3:
+
+- `playbooks/learn/_reports/output.md` — M02 (preamble destinations, `## Targets` on rules, `target_space.md` paths, learn summary, extract-candidates `Brief`), M03 (dedup-sweep lookup set and C6 verdicts, review-table body linking the format doc, dedup-sweep summary), M04 (write step on rule records and `_rule_template.j2`, gate text, rule/0001 under `## Rules`, write summary), D11 (transition step summary and body).
+- `playbooks/setup/_reports/output.md` — M06 (setup-booping `## Global specs tier`, the config-edit exception; setup-project step 7, the `specs:` report line, the hard-rule addition).
+
+No other report drifted.
