@@ -8,7 +8,8 @@ created: 2026-10-14 17:32
 planned: null
 started: 2026-10-14 17:47
 completed: 2026-10-14 18:17
-code_reviews: []
+code_reviews:
+  - codereviews/202610141731_specs-core-format-cli-injection/202610141837.md
 sessions:
 - 4fcdac60-259a-4a51-8481-b0c2629bb285
 - 7f3bec31-4b2a-439f-ba9d-90c94c239644
