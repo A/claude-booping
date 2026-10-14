@@ -23,15 +23,11 @@ Enumerate the milestones in execution order — never from `index.md`'s table, w
 booping query --glob {plan-dir}/{{ config.core.plans.milestones.glob }} --columns {{ config.core.plans.milestones.table_columns | join(',') }} --sort id
 ```
 
-{% if config.core.sprint.max_milestones_per_agent -%}
-Group consecutive milestones into agent briefings: each briefing covers **up to {{ config.core.sprint.max_milestones_per_agent }} milestone(s)**.
-Group only when the milestones share enough context that one agent handling them in sequence is
-cheaper than spinning a fresh agent per milestone. Otherwise keep them one-per-briefing.
-{%- else -%}
-Group consecutive milestones into agent briefings only when they share enough context that one
-agent handling them in sequence is cheaper than spinning a fresh agent per milestone. Otherwise
-keep them one-per-briefing.
-{%- endif %}
+Pack milestones into agent briefings greedily, in that order: a group takes the next milestone
+while the group's summed `sp` stays at or under **{{ config.core.sprint.max_sp }} SP**, and closes otherwise.
+A group is a contiguous run of milestones in `id` order and never spans a dependency boundary the
+plan declares. A single milestone is always a valid group and is never split, even when its `sp`
+alone exceeds the cap.
 
 The groups are yours to settle — reported in the return, never put to the user for confirmation.
 Settle them as a table you keep for the return, milestones named by their directory so
@@ -57,7 +53,7 @@ With the branch created and the groups settled, advance the run per the `## Stat
 
 - branch: `{name}` created off the current branch `{base}`, name confirmed by the user
 - transition: {the transition report verbatim}
-- groups: {n} briefings over {m} milestones (ceiling {c}) — G1 `M01-{kebab}`+`M02-{kebab}`, G2 `M03-{kebab}`
+- groups: {n} briefings over {m} milestones (cap {c} SP) — G1 `M01-{kebab}`+`M02-{kebab}`, G2 `M03-{kebab}`
 - drift: {what intake raised and whether anything is outstanding}
 
 ```

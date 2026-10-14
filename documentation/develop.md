@@ -79,7 +79,7 @@ The discipline is the [groom playbook](groom.md)'s for cross-review findings: ev
 
 The playbook reads these keys from `src/config.yaml`. See [Project config](project_config.md) for the deep-merge override mechanics; per-project tweaks live in `~/Claude/{project}/config.yaml`.
 
-- **`core.sprint.max_milestones_per_agent`** — maximum consecutive milestones grouped into a single `booping-developer` briefing; grouping happens only when the milestones share enough context that one agent in sequence beats a fresh agent per milestone. Default `2`.
+- **`core.sprint.max_sp`** — SP budget of a single `booping-developer` briefing. `provision` packs milestones greedily in execution order while the group's summed `sp` stays at or under it, never across a dependency boundary the plan declares; a lone milestone is always its own valid group and is never split, even over the cap. Grouping changes only the briefing — each milestone is still validated, committed and transitioned on its own. Default `15`.
 - **`core.develop_playbook.fallback_agent`** — the agent a fix briefing is routed to when the milestone was built by some other agent, so an externally built milestone still gets its fixes done in-house. Default `booping:booping-developer`.
 - **`core.develop_playbook.git.branches`** — list of `{branch, when}` entries that map plan `type` (or freeform descriptors) to a branch prefix; `provision` picks from this list.
 - **`core.develop_playbook.git.commit_message`** — message format string used for in-sprint commits. Override per-project to enforce a different commit shape.

@@ -2,7 +2,7 @@
 summary: Set the sprint up — pick the branch from the plan's task type per the 
   branch conventions, propose a kebab-case name and create it off the repo's 
   current branch only after the user confirms; then settle the milestone groups 
-  the briefings will cover, within the configured ceiling, and fire the 
+  the briefings will cover, packed under the configured SP cap, and fire the 
   `ready-for-dev` → `in-progress` transition.
 review_gate: "The user confirms the branch name before the branch is created — asked
   through `AskUserQuestion`, never as chat prose; a name the user rewrites is used

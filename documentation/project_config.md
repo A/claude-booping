@@ -52,7 +52,7 @@ core:
   sprint:
     default_threshold_sp: 35
     redecompose_threshold: 5
-    max_milestones_per_agent: 2
+    max_sp: 15
     scale:
       - { sp: 1, meaning: "Simple text/config change, no risk" }
       - { sp: 2, meaning: "Simple task, predictable, no risk" }
@@ -201,8 +201,8 @@ core:
 Sprint sizing thresholds and the story-point scale.
 
 - **`core.sprint.default_threshold_sp`** — soft cap on total SP per plan. Above this, groom proposes splitting the plan into sibling stubs. Default: `35`.
-- **`core.sprint.redecompose_threshold`** — per-task SP value at or above which groom must re-decompose the task before the run can leave `drafting`. Default: `5`.
-- **`core.sprint.max_milestones_per_agent`** — cap on consecutive milestones grouped into one `booping-developer` briefing by the develop playbook. Default: `2`.
+- **`core.sprint.redecompose_threshold`** — per-task and per-milestone SP value at or above which groom must re-decompose the task or milestone before the run can leave `drafting`. Default: `5`.
+- **`core.sprint.max_sp`** — SP cap on one `booping-developer` briefing: the develop playbook packs a contiguous run of milestones in `id` order while their summed `sp` stays at or under it; a lone milestone over the cap is still its own group. Default: `15`.
 - **`core.sprint.scale`** — the 1–5 SP definitions rendered into groom's body. Each entry is `{sp, meaning}`. Replace wholesale to redefine — lists merge by replacement.
 
 ### `core.task_types`
