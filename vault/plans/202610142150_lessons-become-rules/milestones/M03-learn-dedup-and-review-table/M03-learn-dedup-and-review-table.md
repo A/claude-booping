@@ -2,7 +2,7 @@
 id: "03"
 title: "Learn dedup sweep and review table over rules"
 sp: 4
-status: pending
+status: done
 plan: "vault/plans/202610142150_lessons-become-rules/index.md"
 ---
 
@@ -18,20 +18,20 @@ Tests: the rendered step bodies (`render-playbook learn --step dedup-sweep` / `-
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 3.1 | Lookup set: `booping specs ls --tier {core,global,project} --type rule` (a missing tier is skipped silently), `{vault}/_lessons/`, `{home_dir}/_lessons/`, the repo `CLAUDE.md`; delete the bullet that starts "The vault's legacy `lessons/`" from the lookup list. Verdicts per C6: `new`, `update existing at rule/NNNN` (project rule) or `at _lessons/{file}` (converted on write), `covered by {ref}` (core/global rule or global lesson — never written), `conflict with {ref}`. | `playbooks/learn/dedup-sweep/base.md` | 2 | pending |
-| 3.2 | Review table per C12: columns `#`, `Target`, `Type`, `Targets`, `Brief`, `Rule`, `Example`; Type `rule` / `claude-md` / `covered`; the format doc owns the columns, so `review-table/base.md` drops its "one added column" paragraph and the four target forms (the preamble's `## Targets` carries them) and keeps only the AskUserQuestion and record-the-response instructions. | `playbooks/learn/review-table/base.md`, `docs/learn_review_table.md` | 2 | pending |
+| 3.1 | Lookup set: `booping specs ls --tier {core,global,project} --type rule` (a missing tier is skipped silently), `{vault}/_lessons/`, `{home_dir}/_lessons/`, the repo `CLAUDE.md`; delete the bullet that starts "The vault's legacy `lessons/`" from the lookup list. Verdicts per C6: `new`, `update existing at rule/NNNN` (project rule) or `at _lessons/{file}` (converted on write), `covered by {ref}` (core/global rule or global lesson — never written), `conflict with {ref}`. | `playbooks/learn/dedup-sweep/base.md` | 2 | done |
+| 3.2 | Review table per C12: columns `#`, `Target`, `Type`, `Targets`, `Brief`, `Rule`, `Example`; Type `rule` / `claude-md` / `covered`; the format doc owns the columns, so `review-table/base.md` drops its "one added column" paragraph and the four target forms (the preamble's `## Targets` carries them) and keeps only the AskUserQuestion and record-the-response instructions. | `playbooks/learn/review-table/base.md`, `docs/learn_review_table.md` | 2 | done |
 
 ## Definition of Done
 
 ### Task 3.1
 
-- [ ] The step never names `lessons/` (legacy) and never routes a row to a lesson file.
-- [ ] Every C6 verdict appears once, worded as in C6.
+- [x] The step never names `lessons/` (legacy) and never routes a row to a lesson file.
+- [x] Every C6 verdict appears once, worded as in C6.
 
 ### Task 3.2
 
-- [ ] `docs/learn_review_table.md`'s example table has one `rule`, one `claude-md` and one `covered` row in the C12 column order.
-- [ ] The target forms are stated in exactly one place (`_learn_targets.j2`); `review-table/base.md` links rather than restates.
+- [x] `docs/learn_review_table.md`'s example table has one `rule`, one `claude-md` and one `covered` row in the C12 column order.
+- [x] The target forms are stated in exactly one place (`_learn_targets.j2`); `review-table/base.md` links rather than restates.
 
 Return: the list of changed files, nothing else.
 
