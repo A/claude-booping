@@ -1,8 +1,8 @@
 ---
 id: "07"
-title: "Migration 004 converts lessons into rules; booping\u0027s vault migrated"
+title: "Migration 004 converts lessons into rules; booping's vault migrated"
 sp: 9
-status: pending
+status: done
 plan: "vault/plans/202610150110_lessons-migration-rule-only-injection/index.md"
 ---
 
@@ -22,29 +22,29 @@ Tests: the fixture run is the migration's test (agent-applied, not in `just ci`,
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 7.1 | Author `migration.md`: prompt, the two passes, judged steps, embedded rewrite-and-delete script, closing check, report (C7). | `migrations/004_lessons_to_rules/migration.md` | 4 | pending |
-| 7.2 | Build the fixture and `check.sh`; copy the fixture to `/tmp/m004`, apply `migration.md` to the copy with `XDG_CONFIG_HOME` pointing at the copy's `home/` config, run `check.sh`; fix `migration.md` until it passes. | `migrations/004_lessons_to_rules/_fixtures/**`, `migrations/004_lessons_to_rules/_fixtures/check.sh` | 3 | pending |
-| 7.3 | Apply `migration.md` to `vault/`; set the marker; bump the hermetic fixture marker. | `vault/_lessons/*`, `vault/specs/rule/*.md`, `vault/specs/runbook/0003-accept-new-baselines.md`, `.booping`, `playbooks/_fixtures/vault/.booping` | 2 | pending |
+| 7.1 | Author `migration.md`: prompt, the two passes, judged steps, embedded rewrite-and-delete script, closing check, report (C7). | `migrations/004_lessons_to_rules/migration.md` | 4 | done |
+| 7.2 | Build the fixture and `check.sh`; copy the fixture to `/tmp/m004`, apply `migration.md` to the copy with `XDG_CONFIG_HOME` pointing at the copy's `home/` config, run `check.sh`; fix `migration.md` until it passes. | `migrations/004_lessons_to_rules/_fixtures/**`, `migrations/004_lessons_to_rules/_fixtures/check.sh` | 3 | done |
+| 7.3 | Apply `migration.md` to `vault/`; set the marker; bump the hermetic fixture marker. | `vault/_lessons/*`, `vault/specs/rule/*.md`, `vault/specs/runbook/0003-accept-new-baselines.md`, `.booping`, `playbooks/_fixtures/vault/.booping` | 2 | done |
 
 ## Definition of Done
 
 ### Task 7.1
 
-- [ ] The `migrate` survey's pending query (`core.migrate_playbook.queries.pending`, ids greater than 3) lists migration 4 and nothing under `_fixtures/`.
-- [ ] Every C7 report line form appears in `migration.md` verbatim; no other line form is introduced.
-- [ ] The script never edits a record outside the tier root its pass writes, and never edits a core-tier record's `targets`.
+- [x] The `migrate` survey's pending query (`core.migrate_playbook.queries.pending`, ids greater than 3) lists migration 4 and nothing under `_fixtures/`.
+- [x] Every C7 report line form appears in `migration.md` verbatim; no other line form is introduced.
+- [x] The script never edits a record outside the tier root its pass writes, and never edits a core-tier record's `targets`.
 
 ### Task 7.2
 
-- [ ] The fixture covers every lesson case in Scope, each named in a comment in `check.sh`.
-- [ ] `bash migrations/004_lessons_to_rules/_fixtures/check.sh /tmp/m004` exits 0 after applying; a second application to the same copy changes nothing (checked with `diff -r` against a copy taken before it).
+- [x] The fixture covers every lesson case in Scope, each named in a comment in `check.sh`.
+- [x] `bash migrations/004_lessons_to_rules/_fixtures/check.sh /tmp/m004` exits 0 after applying; a second application to the same copy changes nothing (checked with `diff -r` against a copy taken before it).
 
 ### Task 7.3
 
-- [ ] `vault/_lessons/` no longer exists; `git status --short vault/specs` lists only `sources` / link rewrites (no `targets:` line changed).
-- [ ] `bin/booping specs check --tier project` reports no error; `.booping` reads `latest_migration: 4`.
-- [ ] `bin/booping render-playbook develop` renders without a migration STOP.
-- [ ] Nothing under `~/Dev/@A/notes/projects` changed (`git -C ~/Dev/@A/notes status --short` identical before and after).
+- [x] `vault/_lessons/` no longer exists; `git status --short vault/specs` lists only `sources` / link rewrites (no `targets:` line changed).
+- [x] `bin/booping specs check --tier project` reports no error; `.booping` reads `latest_migration: 4`.
+- [x] `bin/booping render-playbook develop` renders without a migration STOP.
+- [x] Nothing under `~/Dev/@A/notes/projects` changed (`git -C ~/Dev/@A/notes status --short` identical before and after).
 
 Return: the list of changed files, nothing else.
 

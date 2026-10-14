@@ -31,6 +31,7 @@ The configured ceiling is one milestone per briefing, so nine briefings, one per
 - `playbooks/develop/_reports/output.md` (M02) — one hunk: develop-loop `base.md`'s briefing line reworded from lesson context to `agent:{id}` rules, M02 task 2.2. `learn` did not drift: the hermetic fixture vault holds no playbook-targeted lesson, so the removed `**Lessons:**` block never rendered there.
 - `playbooks/learn/_reports/output.md` (M03) — five hunks, all the lesson removal M03 names: `_learn_targets.j2` wording, dedup-sweep summary and lookup set, the retired `update existing at _lessons/{file}` verdict and its write handling, and the transition summary no longer naming a lesson deletion.
 - `playbooks/setup/_reports/output.md` (M06) — one hunk: setup-project's vault-tree list drops `_lessons/`, M06 task 6.1.
+- `playbooks/migrate/_reports/output.md` (M07) — three hunks, the recorded and latest migration id `3` → `4`. **Outside C12's predicted set** (C12 said `migrate` must not drift, thinking of its worked-example receipts, which did not change). The hunks are the direct render of M07 task 7.3's planned bump of `playbooks/_fixtures/vault/.booping` to 4 (C9) — without that bump every hermetic render would STOP on the migration gate — so every hunk is a change the plan describes and it was accepted; committed separately (`test(migrate): …`) for easy review or revert.
 
 ## D7 — M01 import grep
 
@@ -55,3 +56,12 @@ M05 asks for a fixture plugin root holding the shared directory; a txtar case ca
 ## D12 — M06 grep residue
 
 M06's `rg -n '_lessons' src/config.yaml playbooks/setup` still matches four lines under `playbooks/setup/_specs/` — playbook-authoring design history, intentionally stale per CLAUDE.md and excluded by the plan's own Final Verification grep. Left as is.
+
+## D13 — M07 decisions
+
+- **Link text for a removed lesson without a retro.** C5 says plain text; the rule schema requires a link in every `## Follows from` item (mdcheck fails rule/0015 otherwise). The replacement reads `` `_lessons/{file}` (removed by [migration 004](https://github.com/A/claude-booping/blob/master/migrations/004_lessons_to_rules/migration.md)) `` — C5's wording with "migration 004" linked to the shipped migration on the repo's default branch `master`; converted rules without a retro link the same URL under `## Follows from`.
+- **Fixture marker force-added.** `.booping` is gitignored repo-wide; the fixture's `repo/.booping` is committed with `git add -f`, as `playbooks/_fixtures/vault/.booping` already is.
+- **Own vault marker not committed.** The repo-root `.booping` (now `latest_migration: 4`) is gitignored local state; another checkout of this branch STOPs its renders until it runs `/playbook migrate`, which is the migration's intended path.
+- **Fixture location.** `check.sh` requires the copy at `/tmp/m004` because the fixture config pins `home_dir: /tmp/m004/home`.
+- **Idempotence diff.** The second application's `diff -r` differs only in `vault/.booping.log` (the CLI invocation log every `booping` call appends to); empty otherwise.
+- **anton:rule/0001–0003** were not reported dangling: their `sources` resolve through `{home_dir}/claude-booping` to the main checkout, which still holds the lessons until this branch merges. The owner fixes them by hand (C5). `~/Dev/@A/notes` status identical before and after.
