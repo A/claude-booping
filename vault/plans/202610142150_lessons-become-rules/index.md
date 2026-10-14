@@ -1,13 +1,13 @@
 ---
 title: "Learn writes rules — specs init, learn on rule records, setup provisions tiers"
 type: "feature"
-status: in-progress
+status: done
 sp: 27
 related_to: null
 created: 2026-10-14 21:51
 planned: null
 started: 2026-10-14 22:08
-completed: null
+completed: 2026-10-14 22:47
 code_reviews: []
 sessions:
 - 9b11eed5-034e-486d-9c23-2799aaaad265
@@ -23,7 +23,23 @@ return_to: null
 agents:
   research-codebase: a3bf4d40f592c8d55
   cross-review: afec65a15af3fcf4f
+  develop-loop/M01-specs-init-verb: ab4ae882d44dc85dd
+  develop-loop/M02-learn-target-space-on-rules: a67aaa59b5e908473
+  develop-loop/M03-learn-dedup-and-review-table: a72bfb53d39dab227
+  develop-loop/M04-learn-writes-rule-records: a374ba0749b5bb6fc
+  develop-loop/M04-transition-follow-up: a13c49a07e8116ca6
+  develop-loop/M05-learn-evals-on-rules: a2e6442528e706ba2
+  develop-loop/M06-setup-provisions-tiers: a7055487f31d4030e
+  develop-loop/M07-docs-learn-setup-specs-init: a3344983af093d646
+  verify: a44d7297627485647
 reviewed_at: 2026-10-14 22:07
+metrics_active_minutes: 57
+metrics_models:
+- claude-opus-5-5
+metrics_tokens_input: 208
+metrics_tokens_output: 75766
+metrics_tokens_cache_creation: 305554
+metrics_tokens_cache_read: 11639950
 ---
 
 # Learn writes rules — specs init, learn on rule records, setup provisions tiers
