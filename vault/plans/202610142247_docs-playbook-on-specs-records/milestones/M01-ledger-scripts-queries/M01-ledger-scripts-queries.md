@@ -2,7 +2,7 @@
 id: "01"
 title: "Ledger move, hook scripts and story/value query specs"
 sp: 4
-status: in-progress
+status: done
 plan: "plans/202610142247_docs-playbook-on-specs-records/index.md"
 ---
 
@@ -18,26 +18,26 @@ The docs playbook's ledger lives at `vault/docs/documented.md`, its hooks commit
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 1.1 | Move the ledger with `git mv vault/docs/_specs/documented.md vault/docs/documented.md`; `close-documented` reads and writes `{workdir}/documented.md` instead of `{workdir}/_specs/documented.md`, docstring updated to match. | `vault/docs/documented.md`, `vault/_playbooks/docs/_scripts/close-documented` | 2 | pending |
-| 1.2 | `commit-docs` stages and commits `$workdir` and the sibling specs tier `$workdir/../specs` (resolved; skipped silently when absent) with an explicit pathspec — never anything outside the two; its header comment says so. | `vault/_playbooks/docs/_scripts/commit-docs` | 1 | pending |
-| 1.3 | Add `core.docs_playbook.queries.features` (glob `specs/story/*.md`, columns `title, summary, status`) and `core.docs_playbook.queries.values` (glob `specs/value/*.md`, columns `title, kind, summary`) to `vault/config.yaml`, each with a one-line comment naming its consumer (the feature index for `research` and `targeting`; the value list for `briefing` and `research`). | `vault/config.yaml` | 1 | pending |
+| 1.1 | Move the ledger with `git mv vault/docs/_specs/documented.md vault/docs/documented.md`; `close-documented` reads and writes `{workdir}/documented.md` instead of `{workdir}/_specs/documented.md`, docstring updated to match. | `vault/docs/documented.md`, `vault/_playbooks/docs/_scripts/close-documented` | 2 | done |
+| 1.2 | `commit-docs` stages and commits `$workdir` and the sibling specs tier `$workdir/../specs` (resolved; skipped silently when absent) with an explicit pathspec — never anything outside the two; its header comment says so. | `vault/_playbooks/docs/_scripts/commit-docs` | 1 | done |
+| 1.3 | Add `core.docs_playbook.queries.features` (glob `specs/story/*.md`, columns `title, summary, status`) and `core.docs_playbook.queries.values` (glob `specs/value/*.md`, columns `title, kind, summary`) to `vault/config.yaml`, each with a one-line comment naming its consumer (the feature index for `research` and `targeting`; the value list for `briefing` and `research`). | `vault/config.yaml` | 1 | done |
 
 ## Definition of Done
 
 ### Task 1.1
 
-- [ ] `vault/docs/documented.md` exists with the ledger's rows unchanged; `vault/docs/_specs/documented.md` is gone (git sees a rename).
-- [ ] `close-documented` contains no `_specs` path; the three test cases above pass.
+- [x] `vault/docs/documented.md` exists with the ledger's rows unchanged; `vault/docs/_specs/documented.md` is gone (git sees a rename).
+- [x] `close-documented` contains no `_specs` path; the three test cases above pass.
 
 ### Task 1.2
 
-- [ ] `commit-docs` pathspec covers exactly `$workdir` and the resolved specs dir; no `git add -A` without a pathspec.
-- [ ] `bash -n vault/_playbooks/docs/_scripts/commit-docs` passes.
+- [x] `commit-docs` pathspec covers exactly `$workdir` and the resolved specs dir; no `git add -A` without a pathspec.
+- [x] `bash -n vault/_playbooks/docs/_scripts/commit-docs` passes.
 
 ### Task 1.3
 
-- [ ] `bin/booping query --config core.docs_playbook.queries.features` prints one row per `vault/specs/story/*.md` record; `...queries.values` one row per value record.
-- [ ] Keys sit under `core.docs_playbook` (placement rule in `CLAUDE.md`, Config).
+- [x] `bin/booping query --config core.docs_playbook.queries.features` prints one row per `vault/specs/story/*.md` record; `...queries.values` one row per value record.
+- [x] Keys sit under `core.docs_playbook` (placement rule in `CLAUDE.md`, Config).
 
 ## References
 

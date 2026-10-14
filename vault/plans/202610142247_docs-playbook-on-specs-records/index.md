@@ -60,7 +60,7 @@ Load-time inputs: `core.docs_playbook.queries.values` and `.features` (vault `co
 
 | id | title | sp | status |
 | --- | --- | --- | --- |
-| 01 | [Ledger move, hook scripts and story/value query specs](milestones/M01-ledger-scripts-queries/M01-ledger-scripts-queries.md) | 4 | in-progress |
+| 01 | [Ledger move, hook scripts and story/value query specs](milestones/M01-ledger-scripts-queries/M01-ledger-scripts-queries.md) | 4 | done |
 | 02 | [Manifest and guidance on records — feature-index step and its gate removed](milestones/M02-manifest-and-guidance/M02-manifest-and-guidance.md) | 5 | pending |
 | 03 | [Survey judges records, briefing reads values into the run record](milestones/M03-survey-and-briefing/M03-survey-and-briefing.md) | 6 | pending |
 | 04 | [Roles and targets refresh reference/0001 and reference/0003](milestones/M04-roles-and-targets-on-records/M04-roles-and-targets-on-records.md) | 4 | pending |
