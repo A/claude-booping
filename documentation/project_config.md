@@ -153,7 +153,7 @@ core:
     queries:
       scope_candidates:
         where: { status: done }
-        columns: [sp, title, code_reviews]
+        columns: [sp, title, code_reviews, commit]
     agents:
       booping-researcher:
         internal: true
