@@ -83,7 +83,7 @@ This repo's own vault is checked in at `vault/`. Its `docs/_specs/` is the produ
 - **Schema over prose**: structured data lives in `src/config.yaml` and is rendered from there — never restated in body prose.
 - **Reference the source, never the literal**: dynamic values (statuses, queues, agent ids) render from config/query specs.
 - **Wide-domain**: skills and playbooks stay stack-agnostic. Project specifics live in the vault's `_lessons/` and the attached repo's own `CLAUDE.md` — the only two destinations learn writes.
-- **Agent wiring**: the driver owns all vault reads/writes; worker agents touch only repo code. Project-local shaping of an agent or a skill is a targeted lesson (`agent:{id}`, `skill:{name}`), not a separate extension file. External global agents at `~/.claude/agents/` wire in via config — see [documentation/integrating-external-agents.md](documentation/integrating-external-agents.md).
+- **Agent wiring**: the driver owns all vault reads/writes, run state and every commit; worker agents edit code — the attached repo's, or code outside it once the user confirms that for the plan — never the vault or git history. Project-local shaping of an agent or a skill is a targeted lesson (`agent:{id}`, `skill:{name}`), not a separate extension file. External global agents at `~/.claude/agents/` wire in via config — see [documentation/integrating-external-agents.md](documentation/integrating-external-agents.md).
 
 ## Editing conventions
 
