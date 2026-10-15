@@ -1,0 +1,99 @@
+# Three smoke cases over the intake step. The run has no shell: each fixture states the
+# `booping` outputs a live run would have read, and stands in for the item and sidecar writes
+# the CLI would have made. The cwd is the vault root.
+
+- description: intake smoke — two requests and an aside file three items, each in the user's words
+  vars:
+    input: file://_fixtures/two-requests-and-an-aside.md
+  metadata:
+    playbook: project-manager
+    step: intake
+    fixture: two-requests-and-an-aside
+    tier: smoke
+  assert:
+    # ONE-ITEM-PER-REQUEST — verbatim body, in message order, nothing else written
+    - type: javascript
+      value: file://../../_lib/asserts/files.js
+      config:
+        onTextMode: fail
+        expect:
+          - path: '^open-items/OI-0001\.md$'
+            contains:
+              - '^id: OI-0001\s*$'
+              - '^status: open\s*$'
+              - '^source: request\s*$'
+              - 'the CSV export drops the header row when the report is empty'
+          - path: '^open-items/OI-0002\.md$'
+            contains:
+              - '^id: OI-0002\s*$'
+              - '^status: open\s*$'
+              - '^source: request\s*$'
+              - 'flag to `taskflow jobs list` so I can filter jobs by their creation date'
+          - path: '^open-items/OI-0003\.md$'
+            contains:
+              - '^id: OI-0003\s*$'
+              - '^status: open\s*$'
+              - '^source: request\s*$'
+              - 'the README still says Python 3\.9 is the minimum version, it should say 3\.12'
+        noOthers: true
+
+- description: intake smoke — a message that only answers C1 files no item and answers the question
+  vars:
+    input: file://_fixtures/answer-only.md
+  metadata:
+    playbook: project-manager
+    step: intake
+    fixture: answer-only
+    tier: smoke
+  assert:
+    # ANSWER-ONLY — the sidecar's C1 is answered in the user's words; no item file written
+    - type: javascript
+      value: file://../../_lib/asserts/files.js
+      config:
+        onTextMode: fail
+        expect:
+          - path: '^open-items/questions/OI-0001\.md$'
+            contains:
+              - '^## C1 — retry limit — answered\s*$'
+              - 'Make it configurable per job type, with three attempts as the default when a job type sets nothing'
+            forbids:
+              - '— open\s*$'
+        noOthers: true
+
+- description: intake smoke — the reply posts each filed id with its title
+  vars:
+    input: file://_fixtures/filed-ids-posted.md
+  metadata:
+    playbook: project-manager
+    step: intake
+    fixture: filed-ids-posted
+    tier: smoke
+  assert:
+    # TWO-ITEMS
+    - type: javascript
+      value: file://../../_lib/asserts/files.js
+      config:
+        onTextMode: fail
+        expect:
+          - path: '^open-items/OI-000[12]\.md$'
+            count: 2
+            contains:
+              - '^source: request\s*$'
+        noOthers: true
+    # ONE-LINE-PER-ITEM — each id opens exactly one line, followed by its title
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        entry: '^[-*\s`]*OI-0001\b`?\W+\S'
+        onlyEntries: false
+        minEntries: 1
+        maxEntries: 1
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        entry: '^[-*\s`]*OI-0002\b`?\W+\S'
+        onlyEntries: false
+        minEntries: 1
+        maxEntries: 1
