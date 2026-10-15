@@ -89,6 +89,13 @@ Take a repo from any starting state to a working booping project — machine-lev
 - Steps: `setup-booping`, `setup-project`
 - Targets: `booping render playbooks/_partials/target_space.md --set targets_for=setup`
 
+### specs
+
+Work the project's specs records — set up a tier, settle values, record decisions, ideas and rules, review the set, sync it with the code and work its open items.
+
+- Steps: `guide`
+- Targets: `booping render playbooks/_partials/target_space.md --set targets_for=specs`
+
 ## Repo CLAUDE.md
 
 The one non-rule destination: the attached repo's `CLAUDE.md`. Route a candidate here when it is a project fact that aids fresh-agent project understanding — a layout path, a CLI command, a code-side convention. One-bullet additions; no paragraph rewrites.
