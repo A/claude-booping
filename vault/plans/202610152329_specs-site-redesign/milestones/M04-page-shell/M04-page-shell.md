@@ -2,7 +2,7 @@
 id: "04"
 title: "Page shell — header, theme toggle, sidebar, drawer, crumbs, footer"
 sp: 4
-status: pending
+status: done
 plan: "plans/202610152329_specs-site-redesign/index.md"
 ---
 
@@ -18,22 +18,22 @@ Tests (integration): `site_pages_test.py` — every built page has exactly one `
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 4.1 | `base.html.j2` shell, the `nav` context in `build_site`, crumbs as `<ol>`, the tests, golden rebaseline. | `booping-python/src/booping/specs/site/templates/base.html.j2`, `booping-python/src/booping/specs/site/pages.py`, `booping-python/src/booping/specs/site/index.py`, `booping-python/tests/specs/site_pages_test.py`, `booping-python/e2e/cases/specs/site-*.txtar` | 3 | pending |
-| 4.2 | `site.js` theme cycle and drawer, shipped in both outputs. | `booping-python/src/booping/specs/site/site.js`, `booping-python/src/booping/specs/site/pages.py`, `booping-python/src/booping/specs/site/index.py` | 1 | pending |
+| 4.1 | `base.html.j2` shell, the `nav` context in `build_site`, crumbs as `<ol>`, the tests, golden rebaseline. | `booping-python/src/booping/specs/site/templates/base.html.j2`, `booping-python/src/booping/specs/site/pages.py`, `booping-python/src/booping/specs/site/index.py`, `booping-python/tests/specs/site_pages_test.py`, `booping-python/e2e/cases/specs/site-*.txtar` | 3 | done |
+| 4.2 | `site.js` theme cycle and drawer, shipped in both outputs. | `booping-python/src/booping/specs/site/site.js`, `booping-python/src/booping/specs/site/pages.py`, `booping-python/src/booping/specs/site/index.py` | 1 | done |
 
 ## Definition of Done
 
 ### Task 4.1
 
-- [ ] Without JS every page shows its full content and its sidebar (in flow on narrow screens).
-- [ ] Keyboard path: Tab from page top reaches skip link, menu (phone), brand, theme toggle, sidebar links, main content in that order.
-- [ ] The new `site_pages_test.py` cases pass; rebaselined goldens differ only in shell markup.
+- [x] Without JS every page shows its full content and its sidebar (in flow on narrow screens).
+- [x] Keyboard path: Tab from page top reaches skip link, menu (phone), brand, theme toggle, sidebar links, main content in that order.
+- [x] The new `site_pages_test.py` cases pass; rebaselined goldens differ only in shell markup.
 
 ### Task 4.2
 
-- [ ] `site.js` has no `fetch`, no module syntax, no external reference; loads from `file://`.
-- [ ] Theme choice survives a reload; auto removes the key.
-- [ ] Esc and scrim close the drawer and restore focus to the menu button.
+- [x] `site.js` has no `fetch`, no module syntax, no external reference; loads from `file://`.
+- [x] Theme choice survives a reload; auto removes the key.
+- [x] Esc and scrim close the drawer and restore focus to the menu button.
 
 Return: the list of changed and created files, nothing else.
 

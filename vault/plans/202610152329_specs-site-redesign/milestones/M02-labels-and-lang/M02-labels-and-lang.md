@@ -2,7 +2,7 @@
 id: "02"
 title: "Labels and lang — config label table, html lang, site title"
 sp: 3
-status: pending
+status: done
 plan: "plans/202610152329_specs-site-redesign/index.md"
 ---
 
@@ -18,23 +18,23 @@ Tests (integration): `booping-python/tests/specs/site_labels_test.py` — `ru` r
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 2.1 | `core.specs.site.lang` and `core.specs.site.labels.{en,ru}` in config. | `src/config.yaml` | 1 | pending |
-| 2.2 | `labels.py`, `--title`, wiring into `_run_site`/`environment()`/templates, the tests, golden rebaseline. | `booping-python/src/booping/specs/site/labels.py`, `booping-python/src/booping/specs/site/pages.py`, `booping-python/src/booping/specs/site/templates/*.j2`, `booping-python/src/booping/commands/specs.py`, `booping-python/tests/specs/site_labels_test.py`, `booping-python/e2e/cases/specs/site-*.txtar` | 2 | pending |
+| 2.1 | `core.specs.site.lang` and `core.specs.site.labels.{en,ru}` in config. | `src/config.yaml` | 1 | done |
+| 2.2 | `labels.py`, `--title`, wiring into `_run_site`/`environment()`/templates, the tests, golden rebaseline. | `booping-python/src/booping/specs/site/labels.py`, `booping-python/src/booping/specs/site/pages.py`, `booping-python/src/booping/specs/site/templates/*.j2`, `booping-python/src/booping/commands/specs.py`, `booping-python/tests/specs/site_labels_test.py`, `booping-python/e2e/cases/specs/site-*.txtar` | 2 | done |
 
 ## Definition of Done
 
 ### Task 2.1
 
-- [ ] `bin/booping config-get core.specs.site.labels.ru.types.adr` prints the ru `name`/`plural`/`scenario`.
-- [ ] Every status listed in `src/specs/README.md` has an `en` and a `ru` label.
+- [x] `bin/booping config-get core.specs.site.labels.ru.types.adr` prints the ru `name`/`plural`/`scenario`.
+- [x] Every status listed in `src/specs/README.md` has an `en` and a `ru` label.
 
 ### Task 2.2
 
-- [ ] `booping specs site --help` lists `--title` with its default.
-- [ ] With `core.specs.site.lang: ru` in a vault config, `<html lang="ru">` and Russian labels appear on every page.
-- [ ] No template carries a hardcoded English UI string (the `Specs` crumb included).
-- [ ] `site-index-*.txtar` cases still pass after their rebaseline.
-- [ ] `uv run pytest tests/specs/site_labels_test.py -q` passes; the rebaselined goldens differ only in `lang`, `<title>` and label text.
+- [x] `booping specs site --help` lists `--title` with its default.
+- [x] With `core.specs.site.lang: ru` in a vault config, `<html lang="ru">` and Russian labels appear on every page.
+- [x] No template carries a hardcoded English UI string (the `Specs` crumb included).
+- [x] `site-index-*.txtar` cases still pass after their rebaseline.
+- [x] `uv run pytest tests/specs/site_labels_test.py -q` passes; the rebaselined goldens differ only in `lang`, `<title>` and label text.
 
 Return: the list of changed and created files, nothing else.
 

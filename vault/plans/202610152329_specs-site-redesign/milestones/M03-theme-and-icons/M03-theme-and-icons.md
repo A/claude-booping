@@ -2,7 +2,7 @@
 id: "03"
 title: "Theme and icons — mockup tokens, reading typography, SVG sprite"
 sp: 4
-status: pending
+status: done
 plan: "plans/202610152329_specs-site-redesign/index.md"
 ---
 
@@ -18,21 +18,21 @@ Tests (integration, `booping-python/tests/specs/site_pages_test.py`): the render
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 3.1 | `style.css` rewrite from the mockup tokens and the type scale, phone rules, no-JS narrow fallback, focus and motion rules; the contrast test. | `booping-python/src/booping/specs/site/style.css`, `booping-python/tests/specs/site_contrast_test.py` | 3 | pending |
-| 3.2 | `_icons.html.j2` sprite, `icon` and `state_badges` macros, their tests. | `booping-python/src/booping/specs/site/templates/_icons.html.j2`, `booping-python/src/booping/specs/site/templates/_macros.html.j2`, `booping-python/tests/specs/site_pages_test.py` | 1 | pending |
+| 3.1 | `style.css` rewrite from the mockup tokens and the type scale, phone rules, no-JS narrow fallback, focus and motion rules; the contrast test. | `booping-python/src/booping/specs/site/style.css`, `booping-python/tests/specs/site_contrast_test.py` | 3 | done |
+| 3.2 | `_icons.html.j2` sprite, `icon` and `state_badges` macros, their tests. | `booping-python/src/booping/specs/site/templates/_icons.html.j2`, `booping-python/src/booping/specs/site/templates/_macros.html.j2`, `booping-python/tests/specs/site_pages_test.py` | 1 | done |
 
 ## Definition of Done
 
 ### Task 3.1
 
-- [ ] Every token of the mockup's `:root` appears in `style.css` with the mockup's value, in both themes.
-- [ ] `uv run pytest tests/specs/site_contrast_test.py -q` passes.
-- [ ] No `system-ui` anywhere in `style.css`; monospace only on code, refs and the `kbd` hint.
+- [x] Every token of the mockup's `:root` appears in `style.css` with the mockup's value, in both themes.
+- [x] `uv run pytest tests/specs/site_contrast_test.py -q` passes.
+- [x] No `system-ui` anywhere in `style.css`; monospace only on code, refs and the `kbd` hint.
 
 ### Task 3.2
 
-- [ ] Every icon pairs with text in `state_badges`; no colour-only state.
-- [ ] The new tests in `site_pages_test.py` pass.
+- [x] Every icon pairs with text in `state_badges`; no colour-only state.
+- [x] The new tests in `site_pages_test.py` pass.
 
 Return: the list of changed and created files, nothing else.
 

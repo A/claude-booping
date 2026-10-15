@@ -1,20 +1,21 @@
 ---
 title: "Specs site redesign, part 1 — fonts, theme, shell, record state, machine layer"
 type: "feature"
-status: ready-for-dev
-sp: null
+status: in-progress
+sp: 34
 related_to: null
 created: 2026-10-15 23:30
 planned: null
-started: null
+started: 2026-10-15 23:49
 completed: null
 code_reviews: []
 sessions:
 - 89fea733-132d-4d26-8d40-e7167a12bdd1
+- 247b0aa9-8026-4117-88f5-18a7b3234051
 retro: null
 summary: 'Specs site part 1: shipped fonts, mockup theme and shell, labelled record
   pages, plain lists, llms.txt/index.json/.md copies'
-commit: ac8ac224ec15cc27e45188a6b3733190414afbf0
+commit: 25e1bcb953b1ebe3b59a2efd6da344d71b321406
 tracker_provider: null
 tracker_request: null
 tracker_issue: null
@@ -73,19 +74,19 @@ The output tree keeps today's paths (`index.html`, `{root}/index.html`, `{root}/
 
 ## Milestones
 
-| id | title | sp | status | path | slug |
-| --- | --- | --- | --- | --- | --- |
-| 01 | Shipped fonts — vendored woff2 embedded in fonts.css | 3 | pending | plans/202610152329_specs-site-redesign/milestones/M01-shipped-fonts/M01-shipped-fonts.md | M01-shipped-fonts |
-| 02 | Labels and lang — config label table, html lang, site title | 3 | pending | plans/202610152329_specs-site-redesign/milestones/M02-labels-and-lang/M02-labels-and-lang.md | M02-labels-and-lang |
-| 03 | Theme and icons — mockup tokens, reading typography, SVG sprite | 4 | pending | plans/202610152329_specs-site-redesign/milestones/M03-theme-and-icons/M03-theme-and-icons.md | M03-theme-and-icons |
-| 04 | Page shell — header, theme toggle, sidebar, drawer, crumbs, footer | 4 | pending | plans/202610152329_specs-site-redesign/milestones/M04-page-shell/M04-page-shell.md | M04-page-shell |
-| 05 | Record model — superseded-by, resolved relations, record state | 3 | pending | plans/202610152329_specs-site-redesign/milestones/M05-record-model/M05-record-model.md | M05-record-model |
-| 06 | Record page — state badges, labelled facts, titled relations, marks | 3 | pending | plans/202610152329_specs-site-redesign/milestones/M06-record-page/M06-record-page.md | M06-record-page |
-| 07 | List pages — type, root and home pages as record and type lists | 3 | pending | plans/202610152329_specs-site-redesign/milestones/M07-list-pages/M07-list-pages.md | M07-list-pages |
-| 08 | Machine layer — llms.txt and index.json | 3 | pending | plans/202610152329_specs-site-redesign/milestones/M08-llms-and-index-json/M08-llms-and-index-json.md | M08-llms-and-index-json |
-| 09 | Machine layer — .md copies and 404 page with --site-url | 3 | pending | plans/202610152329_specs-site-redesign/milestones/M09-md-copies-and-404/M09-md-copies-and-404.md | M09-md-copies-and-404 |
-| 10 | site-index in the new design | 2 | pending | plans/202610152329_specs-site-redesign/milestones/M10-site-index-design/M10-site-index-design.md | M10-site-index-design |
-| 11 | Docs and a Russian fixture case | 3 | pending | plans/202610152329_specs-site-redesign/milestones/M11-docs-and-russian-fixture/M11-docs-and-russian-fixture.md | M11-docs-and-russian-fixture |
+| id | title | sp | status |
+| --- | --- | --- | --- |
+| 01 | [Shipped fonts — vendored woff2 embedded in fonts.css](milestones/M01-shipped-fonts/M01-shipped-fonts.md) | 3 | done |
+| 02 | [Labels and lang — config label table, html lang, site title](milestones/M02-labels-and-lang/M02-labels-and-lang.md) | 3 | done |
+| 03 | [Theme and icons — mockup tokens, reading typography, SVG sprite](milestones/M03-theme-and-icons/M03-theme-and-icons.md) | 4 | done |
+| 04 | [Page shell — header, theme toggle, sidebar, drawer, crumbs, footer](milestones/M04-page-shell/M04-page-shell.md) | 4 | done |
+| 05 | [Record model — superseded-by, resolved relations, record state](milestones/M05-record-model/M05-record-model.md) | 3 | pending |
+| 06 | [Record page — state badges, labelled facts, titled relations, marks](milestones/M06-record-page/M06-record-page.md) | 3 | pending |
+| 07 | [List pages — type, root and home pages as record and type lists](milestones/M07-list-pages/M07-list-pages.md) | 3 | pending |
+| 08 | [Machine layer — llms.txt and index.json](milestones/M08-llms-and-index-json/M08-llms-and-index-json.md) | 3 | pending |
+| 09 | [Machine layer — .md copies and 404 page with --site-url](milestones/M09-md-copies-and-404/M09-md-copies-and-404.md) | 3 | pending |
+| 10 | [site-index in the new design](milestones/M10-site-index-design/M10-site-index-design.md) | 2 | pending |
+| 11 | [Docs and a Russian fixture case](milestones/M11-docs-and-russian-fixture/M11-docs-and-russian-fixture.md) | 3 | pending |
 
 ## Final Verification
 
