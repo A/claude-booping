@@ -44,6 +44,7 @@ states:
               - frontmatter-update completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
               - "script stamp-session"
               - "script stamp-active-time"
+              - "script open-items-follow-plan done"
           - to: fail
             when: "an unrecoverable blocker at any point in the sprint, verification included, after two fix attempts on the same issue"
             gates:
@@ -53,6 +54,7 @@ states:
               - frontmatter-update completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
               - "script stamp-session"
               - "script stamp-active-time"
+              - "script open-items-follow-plan open"
       done:
         terminal: true
       fail:
@@ -71,6 +73,7 @@ states:
             when: "the user cancels the run"
             hooks:
               - frontmatter-update completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - "script open-items-follow-plan open"
       terminal:
         states:
           - done

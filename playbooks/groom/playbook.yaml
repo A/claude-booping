@@ -114,7 +114,7 @@ states:
         transitions:
           - to: cancelled
             when: "the user cancels the run"
-            hooks: ["script commit-plan", "script tracker-sync"]
+            hooks: ["script open-items-follow-plan open", "script commit-plan", "script tracker-sync"]
       awaiting-plan-review:
         states:
           - presenting
@@ -122,7 +122,7 @@ states:
         transitions:
           - to: cancelled
             when: "the user cancels the run"
-            hooks: ["script commit-plan", "script tracker-sync"]
+            hooks: ["script open-items-follow-plan open", "script commit-plan", "script tracker-sync"]
       terminal:
         states:
           - ready-for-dev

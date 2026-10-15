@@ -1,0 +1,101 @@
+With `BOOPING_BIN` pointing at a command that exits 1, the hook absorbs the failure and exits 0,
+so the transition completes and the plan stays advanced; the fake records the argv it was called
+with, showing the override is the binary run. The hook's `warning: open-items follow-plan failed
+(exit 1)` is not relayed here, since `playbook-transition` captures the stderr of a hook that
+succeeds. `env` finds `booping` on the venv PATH the test runner runs under.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+macro_stubs:
+  core.macros.date: "2026-10-15"
+-- fixtures/home/Claude/_playbooks/fx-follow/playbook.md --
+---
+name: fx-follow
+title: Follow
+summary: Open-items follow-plan fixture for playbook-transition.
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-follow/playbook.yaml --
+state: main
+graph:
+  only: []
+
+states:
+  main:
+    artifact: index.md
+    initial: building
+    statuses:
+      building:
+        transitions:
+          - to: done
+            when: the plan lands
+            hooks: ["script open-items-follow-plan done"]
+          - to: fail
+            when: the plan fails
+            hooks: ["script open-items-follow-plan open"]
+      done: {terminal: true}
+      fail: {terminal: true}
+-- fixtures/home/Claude/_playbooks/fx-follow/only/prompt.md --
+---
+summary: Only step.
+---
+
+Only body.
+-- fixtures/cwd/vault/plans/p/index.md --
+---
+status: building
+---
+-- fixtures/cwd/vault/open-items/OI-0001.md --
+---
+id: OI-0001
+title: "Gap OI-0001"
+status: planned
+direction: clarify
+record: null
+source: manual
+plan: plans/p/index.md
+created_at: 2026-10-01
+closed_at: null
+reason: null
+---
+
+# Gap OI-0001
+-- fixtures/cwd/fake-booping --
+#!/bin/sh
+echo "$@" > fake-argv.txt
+exit 1
+-- cmd --
+chmod +x fake-booping
+env BOOPING_BIN=../../../fake-booping booping playbook-transition fx-follow done --workdir vault/plans/p
+-- exit --
+0
+-- stdout --
+building → done
+frontmatter: status=done
+script open-items-follow-plan: ok
+-- stderr --
+-- expected/cwd/vault/plans/p/fake-argv.txt --
+specs open-items close --plan {CWD}/vault/plans/p/index.md
+-- expected/cwd/vault/plans/p/index.md --
+---
+status: done
+---
+-- expected/cwd/vault/open-items/OI-0001.md --
+---
+id: OI-0001
+title: "Gap OI-0001"
+status: planned
+direction: clarify
+record: null
+source: manual
+plan: plans/p/index.md
+created_at: 2026-10-01
+closed_at: null
+reason: null
+---
+
+# Gap OI-0001

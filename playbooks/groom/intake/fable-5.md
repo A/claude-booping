@@ -26,6 +26,9 @@ booping scaffold core.groom_playbook.scaffold {plan-dir} --set title="{title}" -
 The printed diff is the confirmation — do not read the created files back. A target reported as
 already existing was not written; decide what that means for this run.
 
+- A request naming open items (`OI-NNNN`) links each to the new plan once the directory exists:
+  `booping specs open-items plan {ids} --plan {plan-dir}/index.md`.
+
 ## The brief — written to `request.md`, posted in chat
 
 The framing brief is this step's outcome: it is written to `request.md`, which every later step

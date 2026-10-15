@@ -20,6 +20,7 @@ booping playbook-transition groom cancelled --workdir run
 -- stdout --
 awaiting-clarification → cancelled
 frontmatter: status=cancelled
+script open-items-follow-plan: ok
 script commit-plan: ok
 script tracker-sync: ok
 -- stderr --

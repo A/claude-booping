@@ -1,0 +1,16 @@
+The hook run directly, outside `playbook-transition` (which captures the stderr of a hook that
+exits 0): with `BOOPING_BIN` pointing at a command that exits 1, it exits 0 and stderr carries the
+warning. The script is the plugin's own copy, located through the root `booping` resolves for its
+core playbooks.
+
+-- fixtures/cwd/fake-booping --
+#!/bin/sh
+exit 1
+-- cmd --
+chmod +x fake-booping
+env BOOPING_ARTIFACT=plans/p/index.md BOOPING_BIN=./fake-booping sh -c "exec \"$(python -c 'from booping.rendering import get_plugin_root; print(get_plugin_root())')/playbooks/_scripts/open-items-follow-plan\" open"
+-- exit --
+0
+-- stdout --
+-- stderr --
+warning: open-items follow-plan failed (exit 1)
