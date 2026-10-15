@@ -4,6 +4,12 @@ the missing vault symlink is created and the README keeps its content.
 -- fixtures/cwd/.booping --
 project_name: probe
 latest_migration: 9999
+-- fixtures/home/Claude/probe/config.yaml --
+core:
+  specs:
+    tiers:
+      project:
+        path: specs
 -- fixtures/cwd/specs/README.md --
 # Our specs
 

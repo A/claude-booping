@@ -3,6 +3,12 @@ A second run on an initialized tier takes no action and prints only the tier roo
 -- fixtures/cwd/.booping --
 project_name: probe
 latest_migration: 9999
+-- fixtures/home/Claude/probe/config.yaml --
+core:
+  specs:
+    tiers:
+      project:
+        path: specs
 -- fixtures/home/Claude/probe/sprints.md --
 sprints
 -- cmd --

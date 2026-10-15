@@ -1,9 +1,15 @@
-With the vault outside the repo, `--tier project` creates `{repo}/specs/` and its README, then the
+With the vault outside the repo and the tier pinned to `path: specs`, `--tier project` creates `{repo}/specs/` and its README, then the
 symlink `{vault}/specs -> {repo}/specs`; `readlink` asserts the link's target.
 
 -- fixtures/cwd/.booping --
 project_name: probe
 latest_migration: 9999
+-- fixtures/home/Claude/probe/config.yaml --
+core:
+  specs:
+    tiers:
+      project:
+        path: specs
 -- fixtures/home/Claude/probe/sprints.md --
 sprints
 -- cmd --

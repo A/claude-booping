@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
 
-from booping.specs.tiers import Tier, project_root
+from booping.specs.tiers import Tier
 
 PROJECT_README = (
     "# specs/\n"
@@ -54,6 +54,8 @@ def plan(tier: Tier, *, repo: Path | None, vault: Path | None) -> list[Action]:
     """Every change `init` would make, in order; raises before anything is written."""
     if tier.name == "core":
         raise InitError("the core tier ships with the plugin; only global and project are created")
+    if tier.vault_rooted:
+        return []
     root = tier.root.absolute()
     if root.exists() and not root.is_dir():
         raise InitError(f"{root} exists and is not a directory")
@@ -61,8 +63,7 @@ def plan(tier: Tier, *, repo: Path | None, vault: Path | None) -> list[Action]:
     link: Action | None = None
     if tier.name == "project" and repo is not None and vault is not None:
         vault_specs = vault.absolute() / "specs"
-        # tiers.py's default root leaves the vault exactly when the vault is outside the repo.
-        if project_root(None, repo, vault).absolute() != vault_specs:
+        if not root.resolve().is_relative_to(vault.resolve()):
             if vault_specs.is_symlink():
                 if vault_specs.resolve() != root.resolve():
                     raise InitError(f"{vault_specs} is a symlink not pointing to {root}")
