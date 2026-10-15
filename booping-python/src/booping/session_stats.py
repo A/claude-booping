@@ -23,6 +23,7 @@ counted.
 from __future__ import annotations
 
 import json
+from collections.abc import Iterator
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
@@ -225,31 +226,64 @@ def _event_of(record: dict[str, object]) -> Event | None:
     )
 
 
-def parse_transcript(path: Path) -> tuple[list[Event], int]:
-    """Stream a transcript into conversational events plus a malformed-line count."""
-    events: list[Event] = []
-    malformed = 0
+def read_records(path: Path) -> Iterator[tuple[int, dict[str, object] | None]]:
+    """Each non-blank line's 1-based number and its JSON object, `None` when malformed."""
     with path.open(encoding="utf-8") as handle:
-        for raw_line in handle:
+        for number, raw_line in enumerate(handle, 1):
             line = raw_line.strip()
             if not line:
                 continue
             try:
                 record: object = json.loads(line)
             except json.JSONDecodeError:
-                malformed += 1
+                yield number, None
                 continue
-            typed = _mapping(record)
-            if not isinstance(record, dict):
-                malformed += 1
-                continue
-            if typed.get("type") not in _CONVERSATIONAL_TYPES:
-                continue
-            event = _event_of(typed)
-            if event is None:
-                malformed += 1
-                continue
-            events.append(event)
+            yield number, _mapping(record) if isinstance(record, dict) else None
+
+
+def _tool_result_text(content: object) -> str:
+    if isinstance(content, str):
+        return content
+    if not isinstance(content, list):
+        return ""
+    blocks = [_mapping(block) for block in cast(list[object], content)]
+    return "\n".join(_str_at(b, "text") or "" for b in blocks if b.get("type") == "text")
+
+
+def user_text(record: dict[str, object]) -> str | None:
+    """The text of a main-thread user message — string content, or its array's `text`
+    blocks and `tool_result` contents joined — else `None`."""
+    if record.get("type") != "user" or record.get("isMeta") or record.get("isSidechain"):
+        return None
+    message = _mapping(record.get("message"))
+    content = message.get("content")
+    if isinstance(content, str):
+        return content
+    parts: list[str] = []
+    for block in _blocks(message):
+        block_type = block.get("type")
+        if block_type == "text":
+            parts.append(_str_at(block, "text") or "")
+        elif block_type == "tool_result":
+            parts.append(_tool_result_text(block.get("content")))
+    return "\n".join(parts)
+
+
+def parse_transcript(path: Path) -> tuple[list[Event], int]:
+    """Stream a transcript into conversational events plus a malformed-line count."""
+    events: list[Event] = []
+    malformed = 0
+    for _, typed in read_records(path):
+        if typed is None:
+            malformed += 1
+            continue
+        if typed.get("type") not in _CONVERSATIONAL_TYPES:
+            continue
+        event = _event_of(typed)
+        if event is None:
+            malformed += 1
+            continue
+        events.append(event)
     return events, malformed
 
 

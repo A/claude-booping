@@ -1,0 +1,44 @@
+`--session` wins over `CLAUDE_CODE_SESSION_ID`: both sessions have a transcript holding the
+quote, and the entry links the flag's.
+
+-- fixtures/home/.claude/projects/proj/s-env.jsonl --
+{"type":"user","uuid":"u-env","timestamp":"2026-10-15T15:39:00.000Z","message":{"role":"user","content":"split it"}}
+-- fixtures/home/.claude/projects/proj/s-flag.jsonl --
+{"type":"system","subtype":"init","uuid":"u-sys","timestamp":"2026-10-15T15:30:00.000Z"}
+{"type":"user","uuid":"u-flag","timestamp":"2026-10-15T15:39:00.000Z","message":{"role":"user","content":"split it"}}
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+macro_stubs:
+  "core.macros.date +%Y-%m-%d %H:%M": "2026-10-15 15:40"
+-- fixtures/cwd/vault/plans/p/index.md --
+---
+title: P
+---
+
+# P
+-- cmd --
+env CLAUDE_CODE_SESSION_ID=s-env booping correction add --session s-flag --target plans/p/index.md --step groom/draft-plan --did "proposed one plan" --said "split it"
+-- exit --
+0
+-- stdout --
+plans/p/corrections.md#R1
+-- stderr --
+-- expected/cwd/vault/plans/p/corrections.md --
+# Corrections
+
+## R1 — groom/draft-plan — 2026-10-15 15:40
+
+**Did:** proposed one plan
+
+**Said:**
+
+> split it
+
+**Why:** not stated
+
+**Dialogue:** `s-flag` line 2 · `u-flag`
+
+**Artifact:** [index.md](index.md)

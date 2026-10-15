@@ -1,0 +1,44 @@
+A string-content user message holding `--said` is linked by the session id from
+`CLAUDE_CODE_SESSION_ID`, its 1-based jsonl line and its `uuid`. Line 1 is a system record,
+line 2 the prompt, line 3 the assistant's reply.
+
+-- fixtures/home/.claude/projects/proj/s-one.jsonl --
+{"type":"system","subtype":"init","uuid":"u-sys","timestamp":"2026-10-15T15:30:00.000Z"}
+{"type":"user","uuid":"u-prompt","timestamp":"2026-10-15T15:39:00.000Z","message":{"role":"user","content":"no — split it, corrections first"}}
+{"type":"assistant","uuid":"u-reply","timestamp":"2026-10-15T15:39:30.000Z","message":{"role":"assistant","content":[{"type":"text","text":"ok"}]}}
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+macro_stubs:
+  "core.macros.date +%Y-%m-%d %H:%M": "2026-10-15 15:40"
+-- fixtures/cwd/vault/plans/p/index.md --
+---
+title: P
+---
+
+# P
+-- cmd --
+env CLAUDE_CODE_SESSION_ID=s-one booping correction add --target plans/p/index.md --step groom/draft-plan --did "proposed one plan" --said "split it, corrections first"
+-- exit --
+0
+-- stdout --
+plans/p/corrections.md#R1
+-- stderr --
+-- expected/cwd/vault/plans/p/corrections.md --
+# Corrections
+
+## R1 — groom/draft-plan — 2026-10-15 15:40
+
+**Did:** proposed one plan
+
+**Said:**
+
+> split it, corrections first
+
+**Why:** not stated
+
+**Dialogue:** `s-one` line 2 · `u-prompt`
+
+**Artifact:** [index.md](index.md)
