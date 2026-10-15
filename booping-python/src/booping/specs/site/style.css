@@ -441,6 +441,7 @@ img { max-width: 100%; }
   .facts { grid-template-columns: minmax(0, 1fr); gap: 0; }
   .facts dd { margin: 0 0 8px; }
   .recent li { flex-wrap: wrap; row-gap: 2px; }
+  .recent li a { flex: 1 1 0; min-width: 0; }
   .recent time { flex-basis: calc(100% - 108px); margin-left: 108px; }
   .row .t, .rel li a, .types a { display: inline-flex; align-items: center; min-height: 44px; }
   .side a { min-height: 44px; padding: 8px 12px; font-size: 16px; }
