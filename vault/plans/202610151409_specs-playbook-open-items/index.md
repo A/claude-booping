@@ -1,13 +1,13 @@
 ---
 title: "Specs playbook and open items"
 type: "feature"
-status: in-progress
+status: done
 sp: 34
 related_to: null
 created: 2026-10-15 14:09
 planned: null
 started: 2026-10-15 14:29
-completed: null
+completed: 2026-10-15 15:31
 code_reviews: []
 sessions:
 - e47a3e24-2b43-4c07-9bf4-7e3853a04685
@@ -21,6 +21,13 @@ tracker_request: null
 tracker_issue: null
 return_to: null
 reviewed_at: 2026-10-15 14:26
+metrics_active_minutes: 82
+metrics_models:
+- claude-opus-5-5
+metrics_tokens_input: 176
+metrics_tokens_output: 75047
+metrics_tokens_cache_creation: 363766
+metrics_tokens_cache_read: 8752490
 ---
 
 # Specs playbook and open items
