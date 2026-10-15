@@ -2,7 +2,7 @@
 id: "02"
 title: "Project tier default resolves to the vault root"
 sp: 3
-status: pending
+status: in-progress
 plan: "plans/202610151727_project-specs-at-vault-root/index.md"
 ---
 

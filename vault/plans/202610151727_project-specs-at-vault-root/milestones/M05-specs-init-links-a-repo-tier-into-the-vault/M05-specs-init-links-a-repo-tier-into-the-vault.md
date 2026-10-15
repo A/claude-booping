@@ -1,8 +1,8 @@
 ---
 id: "05"
-title: "specs init \u2014 nothing at the vault root, a repo tier linked into the vault"
+title: "specs init — nothing at the vault root, a repo tier linked into the vault"
 sp: 4
-status: pending
+status: in-progress
 plan: "plans/202610151727_project-specs-at-vault-root/index.md"
 ---
 

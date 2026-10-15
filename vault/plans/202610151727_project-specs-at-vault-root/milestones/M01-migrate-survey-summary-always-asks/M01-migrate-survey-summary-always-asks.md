@@ -2,7 +2,7 @@
 id: "01"
 title: "Migrate survey summary always asks about uncommitted work"
 sp: 1
-status: pending
+status: done
 plan: "plans/202610151727_project-specs-at-vault-root/index.md"
 ---
 
@@ -22,15 +22,15 @@ Tests: none new — the committed migrate report holds the rendered summary, and
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 1.1 | Replace the frontmatter `summary:` with the text above. | `playbooks/migrate/survey/prompt.md` | 1 | pending |
+| 1.1 | Replace the frontmatter `summary:` with the text above. | `playbooks/migrate/survey/prompt.md` | 1 | done |
 
 ## Definition of Done
 
 ### Task 1.1
 
-- [ ] `summary:` renders character for character as the text above.
-- [ ] `bin/booping render-playbook migrate` prints no STOP notice.
-- [ ] No other file changes.
+- [x] `summary:` renders character for character as the text above.
+- [x] `bin/booping render-playbook migrate` prints no STOP notice.
+- [x] No other file changes.
 
 Return: the list of changed files, nothing else.
 

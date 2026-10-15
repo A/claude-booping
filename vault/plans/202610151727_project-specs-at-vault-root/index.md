@@ -2,20 +2,21 @@
 title: "Project specs tier at the vault root — tier resolution, booping's records
   moved, migration"
 type: "feature"
-status: ready-for-dev
-sp: null
+status: in-progress
+sp: 29
 related_to: null
 created: 2026-10-15 17:27
 planned: null
-started: null
+started: 2026-10-15 17:46
 completed: null
 code_reviews: []
 sessions:
 - 0de1a11b-6029-434b-9646-dec9c019459b
+- 313e7b6b-ed34-4cef-9fbc-32cff672c444
 retro: null
 summary: Project specs tier defaults to the vault root; check reads type dirs 
   only; init links repo tiers; migration 005 moves vaults
-commit: 0a3547fb3531bafb8f391c6cce3bcee10617ccd9
+commit: e609badcd1d877d0899e1d1eadd32eca2035d7b8
 tracker_provider: null
 tracker_request: null
 tracker_issue: null
@@ -64,11 +65,11 @@ This is the first slice of a larger request (`request.md`); the project-manager 
 
 | id | title | sp | status |
 | --- | --- | --- | --- |
-| 01 | [Migrate survey summary always asks about uncommitted work](milestones/M01-migrate-survey-summary-always-asks/M01-migrate-survey-summary-always-asks.md) | 1 | pending |
-| 02 | [Project tier default resolves to the vault root](milestones/M02-project-tier-default-is-the-vault-root/M02-project-tier-default-is-the-vault-root.md) | 3 | pending |
-| 03 | [E2E fixtures seed project records at the vault root](milestones/M03-e2e-fixtures-at-the-vault-root/M03-e2e-fixtures-at-the-vault-root.md) | 3 | pending |
-| 04 | [A vault-rooted tier reads only type directories](milestones/M04-vault-rooted-tier-reads-only-type-directories/M04-vault-rooted-tier-reads-only-type-directories.md) | 4 | pending |
-| 05 | [specs init — nothing at the vault root, a repo tier linked into the vault](milestones/M05-specs-init-links-a-repo-tier-into-the-vault/M05-specs-init-links-a-repo-tier-into-the-vault.md) | 4 | pending |
+| 01 | [Migrate survey summary always asks about uncommitted work](milestones/M01-migrate-survey-summary-always-asks/M01-migrate-survey-summary-always-asks.md) | 1 | done |
+| 02 | [Project tier default resolves to the vault root](milestones/M02-project-tier-default-is-the-vault-root/M02-project-tier-default-is-the-vault-root.md) | 3 | in-progress |
+| 03 | [E2E fixtures seed project records at the vault root](milestones/M03-e2e-fixtures-at-the-vault-root/M03-e2e-fixtures-at-the-vault-root.md) | 3 | in-progress |
+| 04 | [A vault-rooted tier reads only type directories](milestones/M04-vault-rooted-tier-reads-only-type-directories/M04-vault-rooted-tier-reads-only-type-directories.md) | 4 | in-progress |
+| 05 | [specs init — nothing at the vault root, a repo tier linked into the vault](milestones/M05-specs-init-links-a-repo-tier-into-the-vault/M05-specs-init-links-a-repo-tier-into-the-vault.md) | 4 | in-progress |
 | 06 | [Migration 005 — project specs move to the vault root](milestones/M06-migration-005-project-specs-to-vault-root/M06-migration-005-project-specs-to-vault-root.md) | 4 | pending |
 | 07 | [Booping's own records move to the vault root](milestones/M07-booping-records-move-to-the-vault-root/M07-booping-records-move-to-the-vault-root.md) | 3 | pending |
 | 08 | [Repo references follow the move](milestones/M08-repo-references-follow-the-move/M08-repo-references-follow-the-move.md) | 4 | pending |
