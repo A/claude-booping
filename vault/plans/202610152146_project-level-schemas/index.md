@@ -2,7 +2,7 @@
 title: "Project-level schemas — tiers carry their own mdcheck schemas, tags dictionary,
   ADR alternatives checks, Russian set"
 type: "feature"
-status: presenting
+status: ready-for-dev
 sp: null
 related_to: null
 created: 2026-10-15 21:46
@@ -24,6 +24,7 @@ agents:
   research-codebase: a27f2a0098a805df6
   research-web: a0afe17b358721481
   cross-review: a7c243a8562aa2c3f
+reviewed_at: 2026-10-15 22:01
 ---
 
 # Project-level schemas — tiers carry their own mdcheck schemas, tags dictionary, ADR alternatives checks, Russian set
