@@ -6,7 +6,7 @@ from typing import Any
 import pytest
 
 from booping.rendering import get_plugin_root
-from booping.specs.tiers import project_root, resolve_tiers, schemas, types
+from booping.specs.tiers import project_root, resolve_tiers, schemas, status_enum, types
 
 
 def _config(**tiers: dict[str, Any]) -> dict[str, Any]:
@@ -157,3 +157,14 @@ def test_resolve_tiers_gives_each_tier_its_own_overlay(tmp_path: Path) -> None:
         "global": (["mechanic", "rule"], home / "_specs/_schemas/rule.yaml"),
         "project": (["rule"], plugin / "src/specs/schemas/rule.yaml"),
     }
+
+
+def test_status_enum_reads_the_frontmatter_rule_in_written_order() -> None:
+    idea = get_plugin_root() / "src" / "specs" / "schemas" / "idea.yaml"
+    assert status_enum(idea) == ["open", "validating", "accepted", "rejected"]
+
+
+def test_status_enum_is_empty_without_a_status_enum(tmp_path: Path) -> None:
+    schema = tmp_path / "x.yaml"
+    schema.write_text("doc: x\nrules:\n  - select: FRONTMATTER\n    has:\n      type: x\n")
+    assert status_enum(schema) == []

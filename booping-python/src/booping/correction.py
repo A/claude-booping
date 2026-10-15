@@ -15,17 +15,18 @@ from typing import cast
 
 from booping.context import Context
 from booping.context._yaml import parse_frontmatter_only
-from booping.rendering import build_source_env, get_plugin_root
+from booping.rendering import get_plugin_root
 from booping.session_stats import locate_transcript, read_records, user_text
+from booping.sidecar import Sidecar, normalise, now, relative
 from booping.specs import open_items
 from booping.specs.open_items import OpenItemError
 from booping.specs.tiers import types
 
 SIDECAR = "corrections.md"
 HEADING = "# Corrections"
+PREFIX = "R"
 SESSION_ENV = "CLAUDE_CODE_SESSION_ID"
 
-_ENTRY = re.compile(r"^## R(\d+) ", re.MULTILINE)
 _RECORD = re.compile(r"(?:[^\s:/]+:)?([^\s:/]+)/\d{4}")
 
 
@@ -47,14 +48,6 @@ def require_vault(ctx: Context) -> Path:
     return ctx.vault
 
 
-def _relative(path: PurePosixPath, start: PurePosixPath) -> str:
-    return PurePosixPath(os.path.relpath(path, start)).as_posix()
-
-
-def next_number(text: str) -> int:
-    return max((int(n) for n in _ENTRY.findall(text)), default=0) + 1
-
-
 def check_record(ctx: Context, ref: str) -> None:
     """Shape only — a cross-tier ref may not resolve on this machine."""
     specs_format = str(ctx.config.get("core", {}).get("specs", {}).get("format"))
@@ -66,10 +59,6 @@ def check_record(ctx: Context, ref: str) -> None:
 def resolve_session(flag: str | None) -> str | None:
     session = (flag or os.environ.get(SESSION_ENV, "")).strip()
     return session or None
-
-
-def normalise(text: str) -> str:
-    return " ".join(text.split())
 
 
 def find_message(transcript: Path, said: str) -> tuple[int, str] | None:
@@ -102,14 +91,9 @@ def dialogue(session: str | None, said: str, projects_root: Path) -> tuple[str, 
     return f"`{session}` line {number} · `{uuid}`", None
 
 
-def _now(ctx: Context) -> str:
-    env = build_source_env(context=ctx, config=ctx.config)
-    return env.from_string("{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}").render().strip()
-
-
 def render_entry(
+    log: Sidecar,
     *,
-    number: int,
     step: str,
     when: str,
     did: str,
@@ -117,11 +101,11 @@ def render_entry(
     why: str | None,
     dialogue: str,
     record: str | None,
-    artifact: str,
+    target_rel: PurePosixPath,
 ) -> str:
     quote = "\n".join(f"> {line}" if line else ">" for line in said.splitlines())
     lines = [
-        f"## R{number} — {step} — {when}",
+        log.header(step, when),
         "",
         f"**Did:** {did}",
         "",
@@ -134,7 +118,7 @@ def render_entry(
         f"**Dialogue:** {dialogue}",
         "",
         *([record, ""] if record else []),
-        f"**Artifact:** [{PurePosixPath(artifact).name}]({artifact})",
+        log.artifact_line(target_rel),
     ]
     return "\n".join(lines) + "\n"
 
@@ -161,17 +145,16 @@ def add(
         check_record(ctx, record)
     linked, warning = dialogue(session, said, projects_root)
 
-    sidecar_rel = target_rel.parent / SIDECAR
-    sidecar = vault / sidecar_rel
-    existing = sidecar.read_text(encoding="utf-8") if sidecar.is_file() else f"{HEADING}\n"
-    number = next_number(existing)
-    when = _now(ctx)
+    log = Sidecar.open(vault, target_rel, name=SIDECAR, heading=HEADING, prefix=PREFIX)
+    sidecar_rel = log.rel
+    number = log.number
+    when = now(ctx)
     item_rel: PurePosixPath | None = None
     record_line: str | None = None
     if record is not None:
         items_rel = PurePosixPath(open_items.vault_relative(ctx, open_items.items_dir(ctx)))
         ref = f"{sidecar_rel.as_posix()}#R{number}"
-        back = f"{_relative(sidecar_rel, items_rel)}#R{number}"
+        back = f"{relative(sidecar_rel, items_rel)}#R{number}"
         try:
             item = open_items.write_item(
                 ctx,
@@ -184,10 +167,10 @@ def add(
         except OpenItemError as exc:
             raise CorrectionError(str(exc)) from exc
         item_rel = PurePosixPath(open_items.vault_relative(ctx, item))
-        link = _relative(item_rel, sidecar_rel.parent)
+        link = relative(item_rel, sidecar_rel.parent)
         record_line = f"**Record:** {record} → [{item_rel.stem}]({link})"
     entry = render_entry(
-        number=number,
+        log,
         step=step,
         when=when,
         did=did,
@@ -195,9 +178,9 @@ def add(
         why=why,
         dialogue=linked,
         record=record_line,
-        artifact=_relative(target_rel, sidecar_rel.parent),
+        target_rel=target_rel,
     )
-    sidecar.write_text(existing.rstrip("\n") + "\n\n" + entry, encoding="utf-8")
+    log.append(entry)
     return Added(
         sidecar=sidecar_rel.as_posix(),
         number=number,

@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import Mapping
 from pathlib import Path
+from typing import Any
 
 import yaml
 
@@ -8,6 +10,7 @@ from booping.context import config as config_mod
 from booping.context._yaml import parse_frontmatter_only
 from booping.context.project import Project
 from booping.rendering import get_plugin_root
+from booping.utils import deep_merge, parse_bool
 
 # The playbook that is the remedy; it never traverses its own gate.
 MIGRATE_PLAYBOOK = "migrate"
@@ -83,12 +86,15 @@ def auto_migrate(
     start: Path | None = None,
     plugin_root: Path | None = None,
     vault_override: Path | None = None,
+    overrides: Mapping[str, Any] | None = None,
 ) -> bool:
     """The merged `core.auto_migrate`, `True` when no tier sets it.
 
     Tiers resolve the way `Context.assemble` does — a pinned vault drops the global
-    tier. Config that cannot be read yields `False`: a vault that broken gets the
-    STOP notice for the user rather than an unattended migration.
+    tier — and `--set` *overrides* win over them; a `--set` value is a string, so the
+    flag is read through `parse_bool`. Config that cannot be read, or a value that is
+    no boolean, yields `False`: the user gets the STOP notice rather than an unattended
+    migration.
     """
     try:
         root = plugin_root if plugin_root is not None else get_plugin_root()
@@ -102,10 +108,12 @@ def auto_migrate(
         cfg = config_mod.load(root, tiers)
     except Exception:
         return False
+    if overrides:
+        cfg = deep_merge(cfg, dict(overrides))
     core = cfg.get("core")
     if not isinstance(core, dict):
         return True
-    return core.get("auto_migrate", True) is True  # type: ignore[reportUnknownMemberType]
+    return parse_bool(core.get("auto_migrate", True)) is True  # type: ignore[reportUnknownMemberType]
 
 
 def render_gate(
@@ -113,6 +121,7 @@ def render_gate(
     start: Path | None = None,
     plugin_root: Path | None = None,
     vault_override: Path | None = None,
+    overrides: Mapping[str, Any] | None = None,
 ) -> str | None:
     """The notice a render surface must print *instead of* its output, or None.
 
@@ -133,5 +142,6 @@ def render_gate(
     recorded = recorded_id(marker)
     if recorded >= latest:
         return None
-    template = _AUTO if auto_migrate(start, plugin_root, vault_override) else _BEHIND
+    auto = auto_migrate(start, plugin_root, vault_override, overrides)
+    template = _AUTO if auto else _BEHIND
     return template.format(recorded=recorded, latest=latest)

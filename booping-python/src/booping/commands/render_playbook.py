@@ -716,7 +716,9 @@ def _run(args: argparse.Namespace) -> None:
 
     project_str: str | None = args.project
     vault_override = Path(project_str).expanduser().resolve() if project_str is not None else None
-    notice = migrations.render_gate(args.name, start=vault_override, vault_override=vault_override)
+    notice = migrations.render_gate(
+        args.name, start=vault_override, vault_override=vault_override, overrides=overrides
+    )
     if notice is not None:
         _emit(notice + "\n", args.output)
         return

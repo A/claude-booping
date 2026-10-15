@@ -2,7 +2,7 @@ from typing import Any
 
 import pytest
 
-from booping.utils import PathError, deep_merge, parse_set_overrides, resolve_path
+from booping.utils import PathError, deep_merge, parse_bool, parse_set_overrides, resolve_path
 
 
 class TestResolvePath:
@@ -120,3 +120,17 @@ def test_set_override_repeated_pairs_later_wins() -> None:
 def test_set_override_malformed_pair_raises() -> None:
     with pytest.raises(ValueError, match="nope"):
         parse_set_overrides(["nope"])
+
+
+class TestParseBool:
+    @pytest.mark.parametrize("value", [True, 1, "true", "True", "YES", "yes", "1", " true "])
+    def test_true_spellings(self, value: object) -> None:
+        assert parse_bool(value) is True
+
+    @pytest.mark.parametrize("value", [False, 0, "false", "FALSE", "no", "No", "0"])
+    def test_false_spellings(self, value: object) -> None:
+        assert parse_bool(value) is False
+
+    @pytest.mark.parametrize("value", ["maybe", "", 2, None, ["true"]])
+    def test_anything_else_is_unrecognised(self, value: object) -> None:
+        assert parse_bool(value) is None

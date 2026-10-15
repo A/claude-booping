@@ -130,14 +130,36 @@ def slug_for(pattern: str, rel_path: Path) -> str:
     return rel_path.stem
 
 
+def expand(root: Path, pattern: str) -> list[Path]:
+    """The paths *pattern* matches: under *root*, or from its own literal prefix if absolute.
+
+    ``Path.glob`` rejects absolute patterns, so an absolute one is split at its first
+    wildcard segment and the literal head becomes the directory globbed.
+    """
+    target = Path(pattern)
+    if not target.is_absolute():
+        return sorted(root.glob(pattern))
+    parts = target.parts
+    split = next((i for i, part in enumerate(parts) if _GLOB_MAGIC & set(part)), len(parts))
+    base = Path(*parts[:split])
+    if split == len(parts):
+        return [base] if base.exists() else []
+    return sorted(base.glob(str(Path(*parts[split:]))))
+
+
+def relative(root: Path, path: Path) -> Path:
+    """*path* relative to *root*, or left absolute when an absolute glob reached outside it."""
+    return path.relative_to(root) if path.is_relative_to(root) else path
+
+
 def discover(root: Path, globs: Sequence[str]) -> list[tuple[str, Path]]:
     """Return ``(slug, path)`` pairs for *globs*, de-duplicated by slug and slug-sorted."""
     claimed: dict[str, Path] = {}
     for pattern in globs:
-        for path in sorted(root.glob(pattern)):
+        for path in expand(root, pattern):
             if not path.is_file():
                 continue
-            slug = slug_for(pattern, path.relative_to(root))
+            slug = slug_for(pattern, relative(root, path))
             if slug in claimed:
                 continue
             claimed[slug] = path
@@ -151,7 +173,7 @@ def read_row(root: Path, slug: str, path: Path) -> dict[str, Any] | None:
     except Exception as exc:  # noqa: BLE001 — one bad file must not fail the query
         print(f"warning: skipping {path} — unparseable frontmatter ({exc})", file=sys.stderr)
         return None
-    return {**frontmatter, "path": path.relative_to(root).as_posix(), "slug": slug}
+    return {**frontmatter, "path": relative(root, path).as_posix(), "slug": slug}
 
 
 def split_clause(clause: str) -> tuple[str, str]:

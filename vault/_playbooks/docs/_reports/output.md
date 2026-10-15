@@ -5,7 +5,7 @@ a current file are skipped rather than redone.
 
 ## Guidance
 
-- Date & time: 2026-10-14
+- Date & time: 1970-01-01 00:00
 - The run workdir is `{vault}/docs/`; run records live under its `_runs/` subdirectory, never
   loose in `docs/` beside real documentation. Every `booping playbook-state` / `booping
   playbook-transition` call passes `--workdir {vault}/docs --target
@@ -167,8 +167,8 @@ Tell a sub-agent — model fable, effort medium — to get its instructions by c
 You receive the workdir (`{vault}/docs/`), the run record already on disk — its `## Briefing` and
 the confirmed scope from its `## Scope` section, the delivered items this run covers — and the
 spec records: the values and the feature index below, the audience record
-`{vault}/specs/reference/0001-audience.md` and the surfaces record
-`{vault}/specs/reference/0003-documentation-surfaces.md`. On a re-entry from the change gate you
+`{vault}/reference/0001-audience.md` and the surfaces record
+`{vault}/reference/0003-documentation-surfaces.md`. On a re-entry from the change gate you
 also receive the items the user added; only those are read again.
 
 This is the run's one expensive read, paid once and compressed. You read no work item yourself: each
@@ -178,48 +178,49 @@ is read in its own sub-agent, and what comes back to you is a row, never the ite
 
 | Value | Kind | Summary | Path |
 | --- | --- | --- | --- |
-| Curated self-learning | value | The system gets better from its own runs, but only through the user and when the user wants it: a lesson becomes a rule after the user takes it, not after every run. | specs/value/0001-curated-self-learning.md |
-| Minimal effective context | value | A step gets only what it needs. | specs/value/0002-minimal-effective-context.md |
-| Single source | value | Each fact, decision and piece of structured data lives in one place and is referenced or rendered from there; a decision is kept together with its reason. | specs/value/0003-single-source.md |
-| Analysable history | value | Plans, runs and their outcomes are kept across every project, so the history can be analysed: practices taken over from one project to another, benchmarks, quality comparison, problem analysis. | specs/value/0004-analysable-history.md |
-| Stack-agnostic core | value | The core knows nothing about a stack or a project; specifics live in the global and the project tiers. | specs/value/0005-stack-agnostic-core.md |
-| A constructor, not a fixed solution | value | Booping is a constructor — a framework for playbooks with a set of core mechanics — not a ready solution fixed to one task. | specs/value/0006-a-constructor-not-a-fixed-solution.md |
-| Plans run to the end | value | The agent carries a plan through to the end on its own unless force majeure stops it. | specs/value/0007-plans-run-to-the-end.md |
-| Effective human review | value | Every step where a human takes part is convenient and effective for that human. | specs/value/0008-effective-human-review.md |
-| Adjustable control | value | The human can review the system deeply, or give the agent more freedom to act inside the values and boundaries. | specs/value/0009-adjustable-control.md |
-| Proven to work | value | We know the system works as it should and can guarantee it high enough to call it reliable. | specs/value/0010-proven-to-work.md |
-| Everything in one place | value | Everything is plain files, easy to look at from one place — for example Obsidian; symlinks back to the project repos keep it together. | specs/value/0011-everything-in-one-place.md |
-| Quality at a rational cost | value | Booping is a work tool for professionals, so the quality of the result matters. | specs/value/0012-quality-at-a-rational-cost.md |
-| Guides to the goal | value | The system is clear to the user and leads them to the goal by the hand, while letting a professional step aside and get there their own way. | specs/value/0013-guides-to-the-goal.md |
-| Comfort for non-technical users | non-value | How comfortable booping is for people without a strong technical background is not optimised for; they are not its audience. | specs/value/0014-comfort-for-non-technical-users.md |
+| Curated self-learning | value | The system gets better from its own runs, but only through the user and when the user wants it: a lesson becomes a rule after the user takes it, not after every run. | value/0001-curated-self-learning.md |
+| Minimal effective context | value | A step gets only what it needs. | value/0002-minimal-effective-context.md |
+| Single source | value | Each fact, decision and piece of structured data lives in one place and is referenced or rendered from there; a decision is kept together with its reason. | value/0003-single-source.md |
+| Analysable history | value | Plans, runs and their outcomes are kept across every project, so the history can be analysed: practices taken over from one project to another, benchmarks, quality comparison, problem analysis. | value/0004-analysable-history.md |
+| Stack-agnostic core | value | The core knows nothing about a stack or a project; specifics live in the global and the project tiers. | value/0005-stack-agnostic-core.md |
+| A constructor, not a fixed solution | value | Booping is a constructor — a framework for playbooks with a set of core mechanics — not a ready solution fixed to one task. | value/0006-a-constructor-not-a-fixed-solution.md |
+| Plans run to the end | value | The agent carries a plan through to the end on its own unless force majeure stops it. | value/0007-plans-run-to-the-end.md |
+| Effective human review | value | Every step where a human takes part is convenient and effective for that human. | value/0008-effective-human-review.md |
+| Adjustable control | value | The human can review the system deeply, or give the agent more freedom to act inside the values and boundaries. | value/0009-adjustable-control.md |
+| Proven to work | value | We know the system works as it should and can guarantee it high enough to call it reliable. | value/0010-proven-to-work.md |
+| Everything in one place | value | Everything is plain files, easy to look at from one place — for example Obsidian; symlinks back to the project repos keep it together. | value/0011-everything-in-one-place.md |
+| Quality at a rational cost | value | Booping is a work tool for professionals, so the quality of the result matters. | value/0012-quality-at-a-rational-cost.md |
+| Guides to the goal | value | The system is clear to the user and leads them to the goal by the hand, while letting a professional step aside and get there their own way. | value/0013-guides-to-the-goal.md |
+| Comfort for non-technical users | non-value | How comfortable booping is for people without a strong technical background is not optimised for; they are not its audience. | value/0014-comfort-for-non-technical-users.md |
+| Deterministic where it can be | value | Whatever can be computed is computed by code; the model spends tokens only on judgement, so a result does not depend on which model produced it. | value/0015-deterministic-where-it-can-be.md |
 
 
 ## The feature index
 
 | Story | Summary | Status | Path |
 | --- | --- | --- | --- |
-| Playbook driver | The /playbook skill discovers a procedure across the core, global and project levels and drives it to completion. | done | specs/story/0001-playbook-driver.md |
-| Run state machines | A run's state lives in per-playbook states: machines that only the booping CLI advances. | done | specs/story/0002-run-state-machines.md |
-| Layered configuration | Config is a deep merge over the core, global and project levels, and any mapping in it can be a query spec or a scaffold tree. | done | specs/story/0003-layered-configuration.md |
-| Targeted rules | An accepted rule's brief is injected into exactly the playbooks, steps, agents or skills its targets: list names. | done | specs/story/0004-targeted-rules.md |
-| Plan and review templates | Groom and code-review offer plan and review templates the user authored in the Project Vault or at the global level. | done | specs/story/0005-plan-and-review-templates.md |
-| User playbooks | Playbooks the user authors at the global level or in the Project Vault are discovered and run beside the core ones. | done | specs/story/0006-user-playbooks.md |
-| External agents | Agents the plugin does not ship are wired into playbook agent slots through config and shaped per project by targeted rules. | done | specs/story/0007-external-agents.md |
-| Template pipeline | Skill and agent bodies render in one runtime stage from src/templates/ with full project context, reproducibly when pinned. | done | specs/story/0008-template-pipeline.md |
-| Quality gates | just ci runs lint, typecheck, pytest, snapshots, mdcheck and e2e in order, holding the plugin's behaviour. | done | specs/story/0009-quality-gates.md |
-| pytest-txtar | The e2e corpus's case format and sandboxed runner ship as a standalone pytest plugin on PyPI. | done | specs/story/0010-pytest-txtar.md |
-| Eval suites | Promptfoo suites beside each step guard its contract in a deterministic and an llm-rubric tier. | done | specs/story/0011-eval-suites.md |
-| Migration shipping | The plugin ships Project Vault migrations, and every render surface is gated on a vault's applied watermark. | done | specs/story/0012-migration-shipping.md |
-| Documentation site | The public MkDocs reference builds strictly and publishes to gh-pages on push to master. | done | specs/story/0013-documentation-site.md |
-| Project setup | The setup playbook takes a repo from any state to a working booping project and re-runs without changing what is already set up. | done | specs/story/0014-project-setup.md |
-| Project Vault migrations | The migrate playbook brings an existing Project Vault current with the plugin, one approval and one commit per migration. | done | specs/story/0015-vault-migrations.md |
-| Groom | Groom shapes a feature, bug or refactor into a specified, estimated plan the user approved, ending at ready-for-dev. | done | specs/story/0016-groom.md |
-| Develop | Develop executes a groomed plan one milestone at a time through a worker agent and closes it at done or fail. | done | specs/story/0017-develop.md |
-| Retro | Retro mines a finished sprint's session logs, diff and the user's feedback into a standalone retrospective. | done | specs/story/0018-retro.md |
-| Learn | Learn turns retrospective findings the user confirmed into rule records in the project specs tier or CLAUDE.md entries. | done | specs/story/0019-learn.md |
-| Session metrics | A plan carries measured active minutes, tokens and models computed from Claude Code session logs. | done | specs/story/0020-session-metrics.md |
-| Code review | The code-review playbook reviews a confirmed scope, collects the human verdict and applies only approved fixes. | done | specs/story/0021-code-review.md |
-| Task tracker | The booping-tracker CLI carries every interaction with an issue tracker, and groom mirrors its run status and questions onto the tracker issue. | done | specs/story/0022-task-tracker.md |
+| Playbook driver | The /playbook skill discovers a procedure across the core, global and project levels and drives it to completion. | done | story/0001-playbook-driver.md |
+| Run state machines | A run's state lives in per-playbook states: machines that only the booping CLI advances. | done | story/0002-run-state-machines.md |
+| Layered configuration | Config is a deep merge over the core, global and project levels, and any mapping in it can be a query spec or a scaffold tree. | done | story/0003-layered-configuration.md |
+| Targeted rules | An accepted rule's brief is injected into exactly the playbooks, steps, agents or skills its targets: list names. | done | story/0004-targeted-rules.md |
+| Plan and review templates | Groom and code-review offer plan and review templates the user authored in the Project Vault or at the global level. | done | story/0005-plan-and-review-templates.md |
+| User playbooks | Playbooks the user authors at the global level or in the Project Vault are discovered and run beside the core ones. | done | story/0006-user-playbooks.md |
+| External agents | Agents the plugin does not ship are wired into playbook agent slots through config and shaped per project by targeted rules. | done | story/0007-external-agents.md |
+| Template pipeline | Skill and agent bodies render in one runtime stage from src/templates/ with full project context, reproducibly when pinned. | done | story/0008-template-pipeline.md |
+| Quality gates | just ci runs lint, typecheck, pytest, snapshots, mdcheck and e2e in order, holding the plugin's behaviour. | done | story/0009-quality-gates.md |
+| pytest-txtar | The e2e corpus's case format and sandboxed runner ship as a standalone pytest plugin on PyPI. | done | story/0010-pytest-txtar.md |
+| Eval suites | Promptfoo suites beside each step guard its contract in a deterministic and an llm-rubric tier. | done | story/0011-eval-suites.md |
+| Migration shipping | The plugin ships Project Vault migrations, and every render surface is gated on a vault's applied watermark. | done | story/0012-migration-shipping.md |
+| Documentation site | The public MkDocs reference builds strictly and publishes to gh-pages on push to master. | done | story/0013-documentation-site.md |
+| Project setup | The setup playbook takes a repo from any state to a working booping project and re-runs without changing what is already set up. | done | story/0014-project-setup.md |
+| Project Vault migrations | The migrate playbook brings an existing Project Vault current with the plugin, one approval and one commit per migration. | done | story/0015-vault-migrations.md |
+| Groom | Groom shapes a feature, bug or refactor into a specified, estimated plan the user approved, ending at ready-for-dev. | done | story/0016-groom.md |
+| Develop | Develop executes a groomed plan one milestone at a time through a worker agent and closes it at done or fail. | done | story/0017-develop.md |
+| Retro | Retro mines a finished sprint's session logs, diff and the user's feedback into a standalone retrospective. | done | story/0018-retro.md |
+| Learn | Learn turns retrospective findings the user confirmed into rule records in the project specs tier or CLAUDE.md entries. | done | story/0019-learn.md |
+| Session metrics | A plan carries measured active minutes, tokens and models computed from Claude Code session logs. | done | story/0020-session-metrics.md |
+| Code review | The code-review playbook reviews a confirmed scope, collects the human verdict and applies only approved fixes. | done | story/0021-code-review.md |
+| Task tracker | The booping-tracker CLI carries every interaction with an issue tracker, and groom mirrors its run status and questions onto the tracker issue. | done | story/0022-task-tracker.md |
 
 
 ## The fan-out
@@ -321,8 +322,8 @@ You have the workdir (`{vault}/docs/`), the run record whose change table the us
 extended and confirmed, the feature index below, and spec records `sync-specs` has already folded
 those changes into. Read the change table directly — each change's id, its type, what it touched,
 and the record its spec-set effect names. Hand the record reads to `booping:booping-researcher`,
-one brief covering the surfaces record `{vault}/specs/reference/0003-documentation-surfaces.md`
-and the audience record `{vault}/specs/reference/0001-audience.md`, and ask for exactly what a row
+one brief covering the surfaces record `{vault}/reference/0003-documentation-surfaces.md`
+and the audience record `{vault}/reference/0001-audience.md`, and ask for exactly what a row
 needs back: per surface its path, format, audience, depth and whether this run seeds it or appends
 to it; per role its depth ceiling, its voice and its withheld set. The two records never enter the
 driving context whole; the documentation's structure comes from the surfaces record.
@@ -331,28 +332,28 @@ driving context whole; the documentation's structure comes from the surfaces rec
 
 | Story | Summary | Status | Path |
 | --- | --- | --- | --- |
-| Playbook driver | The /playbook skill discovers a procedure across the core, global and project levels and drives it to completion. | done | specs/story/0001-playbook-driver.md |
-| Run state machines | A run's state lives in per-playbook states: machines that only the booping CLI advances. | done | specs/story/0002-run-state-machines.md |
-| Layered configuration | Config is a deep merge over the core, global and project levels, and any mapping in it can be a query spec or a scaffold tree. | done | specs/story/0003-layered-configuration.md |
-| Targeted rules | An accepted rule's brief is injected into exactly the playbooks, steps, agents or skills its targets: list names. | done | specs/story/0004-targeted-rules.md |
-| Plan and review templates | Groom and code-review offer plan and review templates the user authored in the Project Vault or at the global level. | done | specs/story/0005-plan-and-review-templates.md |
-| User playbooks | Playbooks the user authors at the global level or in the Project Vault are discovered and run beside the core ones. | done | specs/story/0006-user-playbooks.md |
-| External agents | Agents the plugin does not ship are wired into playbook agent slots through config and shaped per project by targeted rules. | done | specs/story/0007-external-agents.md |
-| Template pipeline | Skill and agent bodies render in one runtime stage from src/templates/ with full project context, reproducibly when pinned. | done | specs/story/0008-template-pipeline.md |
-| Quality gates | just ci runs lint, typecheck, pytest, snapshots, mdcheck and e2e in order, holding the plugin's behaviour. | done | specs/story/0009-quality-gates.md |
-| pytest-txtar | The e2e corpus's case format and sandboxed runner ship as a standalone pytest plugin on PyPI. | done | specs/story/0010-pytest-txtar.md |
-| Eval suites | Promptfoo suites beside each step guard its contract in a deterministic and an llm-rubric tier. | done | specs/story/0011-eval-suites.md |
-| Migration shipping | The plugin ships Project Vault migrations, and every render surface is gated on a vault's applied watermark. | done | specs/story/0012-migration-shipping.md |
-| Documentation site | The public MkDocs reference builds strictly and publishes to gh-pages on push to master. | done | specs/story/0013-documentation-site.md |
-| Project setup | The setup playbook takes a repo from any state to a working booping project and re-runs without changing what is already set up. | done | specs/story/0014-project-setup.md |
-| Project Vault migrations | The migrate playbook brings an existing Project Vault current with the plugin, one approval and one commit per migration. | done | specs/story/0015-vault-migrations.md |
-| Groom | Groom shapes a feature, bug or refactor into a specified, estimated plan the user approved, ending at ready-for-dev. | done | specs/story/0016-groom.md |
-| Develop | Develop executes a groomed plan one milestone at a time through a worker agent and closes it at done or fail. | done | specs/story/0017-develop.md |
-| Retro | Retro mines a finished sprint's session logs, diff and the user's feedback into a standalone retrospective. | done | specs/story/0018-retro.md |
-| Learn | Learn turns retrospective findings the user confirmed into rule records in the project specs tier or CLAUDE.md entries. | done | specs/story/0019-learn.md |
-| Session metrics | A plan carries measured active minutes, tokens and models computed from Claude Code session logs. | done | specs/story/0020-session-metrics.md |
-| Code review | The code-review playbook reviews a confirmed scope, collects the human verdict and applies only approved fixes. | done | specs/story/0021-code-review.md |
-| Task tracker | The booping-tracker CLI carries every interaction with an issue tracker, and groom mirrors its run status and questions onto the tracker issue. | done | specs/story/0022-task-tracker.md |
+| Playbook driver | The /playbook skill discovers a procedure across the core, global and project levels and drives it to completion. | done | story/0001-playbook-driver.md |
+| Run state machines | A run's state lives in per-playbook states: machines that only the booping CLI advances. | done | story/0002-run-state-machines.md |
+| Layered configuration | Config is a deep merge over the core, global and project levels, and any mapping in it can be a query spec or a scaffold tree. | done | story/0003-layered-configuration.md |
+| Targeted rules | An accepted rule's brief is injected into exactly the playbooks, steps, agents or skills its targets: list names. | done | story/0004-targeted-rules.md |
+| Plan and review templates | Groom and code-review offer plan and review templates the user authored in the Project Vault or at the global level. | done | story/0005-plan-and-review-templates.md |
+| User playbooks | Playbooks the user authors at the global level or in the Project Vault are discovered and run beside the core ones. | done | story/0006-user-playbooks.md |
+| External agents | Agents the plugin does not ship are wired into playbook agent slots through config and shaped per project by targeted rules. | done | story/0007-external-agents.md |
+| Template pipeline | Skill and agent bodies render in one runtime stage from src/templates/ with full project context, reproducibly when pinned. | done | story/0008-template-pipeline.md |
+| Quality gates | just ci runs lint, typecheck, pytest, snapshots, mdcheck and e2e in order, holding the plugin's behaviour. | done | story/0009-quality-gates.md |
+| pytest-txtar | The e2e corpus's case format and sandboxed runner ship as a standalone pytest plugin on PyPI. | done | story/0010-pytest-txtar.md |
+| Eval suites | Promptfoo suites beside each step guard its contract in a deterministic and an llm-rubric tier. | done | story/0011-eval-suites.md |
+| Migration shipping | The plugin ships Project Vault migrations, and every render surface is gated on a vault's applied watermark. | done | story/0012-migration-shipping.md |
+| Documentation site | The public MkDocs reference builds strictly and publishes to gh-pages on push to master. | done | story/0013-documentation-site.md |
+| Project setup | The setup playbook takes a repo from any state to a working booping project and re-runs without changing what is already set up. | done | story/0014-project-setup.md |
+| Project Vault migrations | The migrate playbook brings an existing Project Vault current with the plugin, one approval and one commit per migration. | done | story/0015-vault-migrations.md |
+| Groom | Groom shapes a feature, bug or refactor into a specified, estimated plan the user approved, ending at ready-for-dev. | done | story/0016-groom.md |
+| Develop | Develop executes a groomed plan one milestone at a time through a worker agent and closes it at done or fail. | done | story/0017-develop.md |
+| Retro | Retro mines a finished sprint's session logs, diff and the user's feedback into a standalone retrospective. | done | story/0018-retro.md |
+| Learn | Learn turns retrospective findings the user confirmed into rule records in the project specs tier or CLAUDE.md entries. | done | story/0019-learn.md |
+| Session metrics | A plan carries measured active minutes, tokens and models computed from Claude Code session logs. | done | story/0020-session-metrics.md |
+| Code review | The code-review playbook reviews a confirmed scope, collects the human verdict and applies only approved fixes. | done | story/0021-code-review.md |
+| Task tracker | The booping-tracker CLI carries every interaction with an issue tracker, and groom mirrors its run status and questions onto the tracker issue. | done | story/0022-task-tracker.md |
 
 
 A story `sync-specs` created this run is not in the index above — its path is in `sync-specs`'
