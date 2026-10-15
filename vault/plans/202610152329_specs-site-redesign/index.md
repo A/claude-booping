@@ -1,7 +1,7 @@
 ---
 title: "Specs site redesign, part 1 — fonts, theme, shell, record state, machine layer"
 type: "feature"
-status: presenting
+status: ready-for-dev
 sp: null
 related_to: null
 created: 2026-10-15 23:30
@@ -19,6 +19,9 @@ tracker_provider: null
 tracker_request: null
 tracker_issue: null
 return_to: null
+agents: '{"research-codebase": ["a58e0220f768d569f", "aac49bc2f976b8701"], "research-web":
+  "a4c624d6825488430", "cross-review": "a722dee293a62d7a9"}'
+reviewed_at: 2026-10-15 23:44
 ---
 
 
