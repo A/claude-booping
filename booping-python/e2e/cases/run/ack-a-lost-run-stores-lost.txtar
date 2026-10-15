@@ -1,0 +1,78 @@
+A record left `running` by a wrapper whose pid names no live process reads `lost`; `ack`
+stores that status with `acked_at`, after acking the finished run named first.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+macro_stubs:
+  core.macros.date +%Y-%m-%d %H:%M: "2026-10-16 09:30"
+-- fixtures/cwd/vault/runs/r1.md --
+---
+id: r1
+playbook: develop
+mode: supervised
+target:
+- plans/p1/index.md
+plan: plans/p1/index.md
+items: []
+status: finished
+pid: null
+session_id: 00000000-0000-0000-0000-000000000000
+log: runs/r1.log
+started_at: 2026-10-15 12:00
+ended_at: 2026-10-15 12:10
+exit_code: 0
+acked_at: null
+---
+
+# r1
+-- fixtures/cwd/vault/runs/r2.md --
+---
+id: r2
+playbook: develop
+mode: supervised
+target:
+- plans/p1/index.md
+plan: plans/p1/index.md
+items: []
+status: running
+pid: 999999999
+session_id: 00000000-0000-0000-0000-000000000000
+log: runs/r2.log
+started_at: 2026-10-15 12:00
+ended_at: null
+exit_code: null
+acked_at: null
+---
+
+# r2
+-- cmd --
+booping run ack r1 r2
+-- exit --
+0
+-- stdout --
+r1: acked
+r2: acked
+-- stderr --
+-- expected/cwd/vault/runs/r2.md --
+---
+id: r2
+playbook: develop
+mode: supervised
+target:
+- plans/p1/index.md
+plan: plans/p1/index.md
+items: []
+status: lost
+pid: 999999999
+session_id: 00000000-0000-0000-0000-000000000000
+log: runs/r2.log
+started_at: 2026-10-15 12:00
+ended_at: null
+exit_code: null
+acked_at: 2026-10-16 09:30
+---
+
+# r2
