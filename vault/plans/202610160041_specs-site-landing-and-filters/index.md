@@ -1,13 +1,13 @@
 ---
 title: "Specs site redesign, part 2 — landing, review filter, list filters, tags"
 type: "feature"
-status: in-progress
+status: done
 sp: 28
 related_to: null
 created: 2026-10-16 00:42
 planned: null
 started: 2026-10-16 01:04
-completed: null
+completed: 2026-10-16 01:38
 code_reviews: []
 sessions:
 - c310b57e-c84e-4872-9b76-858b73cd43c6
@@ -23,6 +23,13 @@ return_to: null
 agents: '{"research-codebase": ["a0b8a2b74092960e6", "ab2d304af55ca3f2f"], "cross-review":
   "a3684efefe36a6f11"}'
 reviewed_at: 2026-10-16 00:54
+metrics_active_minutes: 57
+metrics_models:
+- claude-opus-5-5
+metrics_tokens_input: 138
+metrics_tokens_output: 61740
+metrics_tokens_cache_creation: 260004
+metrics_tokens_cache_read: 6778782
 ---
 
 # Specs site redesign, part 2 — landing, review filter, list filters, tags

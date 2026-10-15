@@ -59,3 +59,23 @@
 **Why:** M05–M07 edit the same `pages.py`, `_macros.html.j2` and site goldens, and M09's Russian golden changes with them; the docs edit is separable
 
 **Artifact:** [index.md](index.md)
+
+## D7 — develop/wrap-up — 2026-10-16
+
+**Asked:** Which documentation the sprint invalidated beyond M09's `documentation/specs.md`
+
+**Default:** None — no closing commit; CHANGELOG left to the release
+
+**Why:** CHANGELOG entries are drafted at release time (part 1 of this feature added none); no CLI verb, flag, config key or layout line changed, so README and CLAUDE.md stay true
+
+**Artifact:** [index.md](index.md)
+
+## D8 — develop/wrap-up — 2026-10-16
+
+**Asked:** Snapshot drift at wrap-up
+
+**Default:** None to accept — `just snapshots` inside `just ci` reported no drift; `just snapshots-accept` was not run
+
+**Why:** No playbook source was edited, as the plan's Decisions predicted
+
+**Artifact:** [index.md](index.md)
