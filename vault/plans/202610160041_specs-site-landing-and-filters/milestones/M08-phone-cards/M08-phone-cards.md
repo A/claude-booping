@@ -2,7 +2,7 @@
 id: "08"
 title: "Phone cards and chip styling"
 sp: 2
-status: pending
+status: done
 plan: "plans/202610160041_specs-site-landing-and-filters/index.md"
 ---
 
@@ -18,15 +18,15 @@ Tests (integration): `site_contrast_test.py` extended with every new text/backgr
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 8.1 | Chip, sort, count, tag-tree styles; phone card rules; contrast pairs. | `booping-python/src/booping/specs/site/style.css`, `booping-python/tests/specs/site_contrast_test.py` | 2 | pending |
+| 8.1 | Chip, sort, count, tag-tree styles; phone card rules; contrast pairs. | `booping-python/src/booping/specs/site/style.css`, `booping-python/tests/specs/site_contrast_test.py` | 2 | done |
 
 ## Definition of Done
 
 ### Task 8.1
 
-- [ ] At 390px wide no page scrolls horizontally; rows render as cards; chips scroll in one line (runner checks in Final Verification).
-- [ ] Every new colour pair is ≥ 4.5:1 in both themes, asserted by the contrast test.
-- [ ] `prefers-reduced-motion` respected for any new transition.
+- [x] At 390px wide no page scrolls horizontally; rows render as cards; chips scroll in one line (runner checks in Final Verification).
+- [x] Every new colour pair is ≥ 4.5:1 in both themes, asserted by the contrast test.
+- [x] `prefers-reduced-motion` respected for any new transition.
 
 Return: the list of changed and created files, nothing else.
 

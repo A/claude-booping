@@ -2,7 +2,7 @@
 id: "07"
 title: "Tag pages — tag tree, per-tag lists, linked record tags"
 sp: 3
-status: pending
+status: done
 plan: "plans/202610160041_specs-site-landing-and-filters/index.md"
 ---
 
@@ -18,19 +18,19 @@ Tests (integration, `site_pages_test.py`): the M02 fixture renders `tags/index.h
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 7.1 | Tag tree page, tag pages with filtered lists, record tag links; labels. | `booping-python/src/booping/specs/site/templates/tags.html.j2`, `booping-python/src/booping/specs/site/templates/tag.html.j2`, `booping-python/src/booping/specs/site/templates/record.html.j2`, `booping-python/src/booping/specs/site/templates/_macros.html.j2`, `booping-python/src/booping/specs/site/pages.py`, `src/config.yaml` | 2 | pending |
-| 7.2 | Tests, new txtar case, golden rebaseline. | `booping-python/tests/specs/site_pages_test.py`, `booping-python/e2e/cases/specs/site-renders-tag-pages-from-tags-yaml.txtar`, `booping-python/e2e/cases/specs/site-*.txtar` | 1 | pending |
+| 7.1 | Tag tree page, tag pages with filtered lists, record tag links; labels. | `booping-python/src/booping/specs/site/templates/tags.html.j2`, `booping-python/src/booping/specs/site/templates/tag.html.j2`, `booping-python/src/booping/specs/site/templates/record.html.j2`, `booping-python/src/booping/specs/site/templates/_macros.html.j2`, `booping-python/src/booping/specs/site/pages.py`, `src/config.yaml` | 2 | done |
+| 7.2 | Tests, new txtar case, golden rebaseline. | `booping-python/tests/specs/site_pages_test.py`, `booping-python/e2e/cases/specs/site-renders-tag-pages-from-tags-yaml.txtar`, `booping-python/e2e/cases/specs/site-*.txtar` | 1 | done |
 
 ## Definition of Done
 
 ### Task 7.1
 
-- [ ] Tag pages and tree follow C7; record tags link to them.
-- [ ] No link in the output is unresolved.
+- [x] Tag pages and tree follow C7; record tags link to them.
+- [x] No link in the output is unresolved.
 
 ### Task 7.2
 
-- [ ] Tests and the new txtar case pass; other goldens differ only by tag links.
+- [x] Tests and the new txtar case pass; other goldens differ only by tag links.
 
 Return: the list of changed and created files, nothing else.
 

@@ -2,7 +2,7 @@
 id: "05"
 title: "Review page — the needs-you pool as a filtered list"
 sp: 3
-status: pending
+status: done
 plan: "plans/202610160041_specs-site-landing-and-filters/index.md"
 ---
 
@@ -18,19 +18,19 @@ Tests (integration, `site_pages_test.py`): a fixture with an unreviewed record, 
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 5.1 | Review pool, `review.html`, item rows, unknown-badge link; labels. | `booping-python/src/booping/specs/site/templates/review.html.j2`, `booping-python/src/booping/specs/site/templates/_macros.html.j2`, `booping-python/src/booping/specs/site/pages.py`, `src/config.yaml` | 2 | pending |
-| 5.2 | Tests; golden rebaseline. | `booping-python/tests/specs/site_pages_test.py`, `booping-python/e2e/cases/specs/site-*.txtar` | 1 | pending |
+| 5.1 | Review pool, `review.html`, item rows, unknown-badge link; labels. | `booping-python/src/booping/specs/site/templates/review.html.j2`, `booping-python/src/booping/specs/site/templates/_macros.html.j2`, `booping-python/src/booping/specs/site/pages.py`, `src/config.yaml` | 2 | done |
+| 5.2 | Tests; golden rebaseline. | `booping-python/tests/specs/site_pages_test.py`, `booping-python/e2e/cases/specs/site-*.txtar` | 1 | done |
 
 ## Definition of Done
 
 ### Task 5.1
 
-- [ ] `review.html` lists the C4 pool with reasons shown as icon + text and mark links resolving to `L{line}` anchors.
-- [ ] `filter.js` sorts the page by `review` order when no `sort` is in the hash.
+- [x] `review.html` lists the C4 pool with reasons shown as icon + text and mark links resolving to `L{line}` anchors.
+- [x] `filter.js` sorts the page by `review` order when no `sort` is in the hash.
 
 ### Task 5.2
 
-- [ ] Tests above pass; goldens differ only by the new page.
+- [x] Tests above pass; goldens differ only by the new page.
 
 Return: the list of changed and created files, nothing else.
 

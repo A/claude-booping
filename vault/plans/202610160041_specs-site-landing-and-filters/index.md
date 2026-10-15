@@ -80,11 +80,11 @@ Rows carry `data-type data-source data-status data-flags data-updated data-title
 | 02 | [Tag model — per-root tree from tags.yaml and used tags](milestones/M02-tag-model/M02-tag-model.md) | 3 | done |
 | 03 | [List rows with data attributes, All records page, sidebar](milestones/M03-list-rows-and-all-records/M03-list-rows-and-all-records.md) | 4 | done |
 | 04 | [Filter bar — chips, sort, hash state in filter.js](milestones/M04-filter-bar/M04-filter-bar.md) | 4 | done |
-| 05 | [Review page — the needs-you pool as a filtered list](milestones/M05-review-page/M05-review-page.md) | 3 | pending |
-| 06 | [Home landing — lead, needs-you callout, scenarios, recently updated](milestones/M06-home-landing/M06-home-landing.md) | 3 | pending |
-| 07 | [Tag pages — tag tree, per-tag lists, linked record tags](milestones/M07-tag-pages/M07-tag-pages.md) | 3 | pending |
-| 08 | [Phone cards and chip styling](milestones/M08-phone-cards/M08-phone-cards.md) | 2 | pending |
-| 09 | [Docs and the Russian fixture](milestones/M09-docs-and-fixtures/M09-docs-and-fixtures.md) | 3 | pending |
+| 05 | [Review page — the needs-you pool as a filtered list](milestones/M05-review-page/M05-review-page.md) | 3 | done |
+| 06 | [Home landing — lead, needs-you callout, scenarios, recently updated](milestones/M06-home-landing/M06-home-landing.md) | 3 | done |
+| 07 | [Tag pages — tag tree, per-tag lists, linked record tags](milestones/M07-tag-pages/M07-tag-pages.md) | 3 | done |
+| 08 | [Phone cards and chip styling](milestones/M08-phone-cards/M08-phone-cards.md) | 2 | done |
+| 09 | [Docs and the Russian fixture](milestones/M09-docs-and-fixtures/M09-docs-and-fixtures.md) | 3 | done |
 
 ## Final Verification
 

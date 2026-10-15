@@ -2,7 +2,7 @@
 id: "06"
 title: "Home landing — lead, needs-you callout, scenarios, recently updated"
 sp: 3
-status: pending
+status: done
 plan: "plans/202610160041_specs-site-landing-and-filters/index.md"
 ---
 
@@ -18,20 +18,20 @@ Tests (integration, `site_pages_test.py`): a fixture with a value record, three 
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 6.1 | Landing template, shared lead helper, recent list, callout; CSS; labels. | `booping-python/src/booping/specs/site/templates/index.html.j2`, `booping-python/src/booping/specs/site/pages.py`, `booping-python/src/booping/specs/site/machine.py`, `booping-python/src/booping/specs/site/style.css`, `src/config.yaml` | 2 | pending |
-| 6.2 | Tests; golden rebaseline. | `booping-python/tests/specs/site_pages_test.py`, `booping-python/e2e/cases/specs/site-*.txtar` | 1 | pending |
+| 6.1 | Landing template, shared lead helper, recent list, callout; CSS; labels. | `booping-python/src/booping/specs/site/templates/index.html.j2`, `booping-python/src/booping/specs/site/pages.py`, `booping-python/src/booping/specs/site/machine.py`, `booping-python/src/booping/specs/site/style.css`, `src/config.yaml` | 2 | done |
+| 6.2 | Tests; golden rebaseline. | `booping-python/tests/specs/site_pages_test.py`, `booping-python/e2e/cases/specs/site-*.txtar` | 1 | done |
 
 ## Definition of Done
 
 ### Task 6.1
 
-- [ ] Home matches C5; no count table and no per-root type list remain on it.
-- [ ] `llms.txt` output is byte-identical to before (shared helper, same result).
-- [ ] New colours, if any, pass `site_contrast_test.py`.
+- [x] Home matches C5; no count table and no per-root type list remain on it.
+- [x] `llms.txt` output is byte-identical to before (shared helper, same result).
+- [x] New colours, if any, pass `site_contrast_test.py`.
 
 ### Task 6.2
 
-- [ ] Tests above pass; goldens differ only in `index.html`.
+- [x] Tests above pass; goldens differ only in `index.html`.
 
 Return: the list of changed and created files, nothing else.
 

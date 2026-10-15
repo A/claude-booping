@@ -49,3 +49,13 @@
 **Why:** Each is the minimum the contracted change needs (import cycle, client-side plurals, a dataclass equality test); no behaviour beyond the plan
 
 **Artifact:** [index.md](index.md)
+
+## D6 — develop/develop-loop — 2026-10-16
+
+**Asked:** One commit per milestone for G2 (M05–M09)
+
+**Default:** Code of M05–M09 in one commit (38eb26a), M09's documentation in its own commit (6ba0d65)
+
+**Why:** M05–M07 edit the same `pages.py`, `_macros.html.j2` and site goldens, and M09's Russian golden changes with them; the docs edit is separable
+
+**Artifact:** [index.md](index.md)

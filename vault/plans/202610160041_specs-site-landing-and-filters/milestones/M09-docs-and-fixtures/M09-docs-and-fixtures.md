@@ -2,7 +2,7 @@
 id: "09"
 title: "Docs and the Russian fixture"
 sp: 3
-status: pending
+status: done
 plan: "plans/202610160041_specs-site-landing-and-filters/index.md"
 ---
 
@@ -18,19 +18,19 @@ Tests: the extended txtar case.
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 9.1 | Site section of the user docs. | `documentation/specs.md` | 1 | pending |
-| 9.2 | Russian fixture extended with tags, marks and the new pages. | `booping-python/e2e/cases/specs/site-renders-russian-labels-and-a-tier-own-type.txtar` | 2 | pending |
+| 9.1 | Site section of the user docs. | `documentation/specs.md` | 1 | done |
+| 9.2 | Russian fixture extended with tags, marks and the new pages. | `booping-python/e2e/cases/specs/site-renders-russian-labels-and-a-tier-own-type.txtar` | 2 | done |
 
 ## Definition of Done
 
 ### Task 9.1
 
-- [ ] Docs name every new page, the hash format with examples, the review reasons and the tag source; no internal module or function names.
-- [ ] `just docs` builds.
+- [x] Docs name every new page, the hash format with examples, the review reasons and the tag source; no internal module or function names.
+- [x] `just docs` builds.
 
 ### Task 9.2
 
-- [ ] The Russian case's expected pages hold no English UI string (grep the expected blocks for the `en` labels added by M03–M07).
+- [x] The Russian case's expected pages hold no English UI string (grep the expected blocks for the `en` labels added by M03–M07).
 
 Return: the list of changed and created files, nothing else.
 
