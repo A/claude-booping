@@ -18,7 +18,7 @@ pages:
       - .uv-cache
   script:
     - git clone --depth 1 --branch "$BOOPING_REF" "$BOOPING_REPO" /tmp/booping
-    - /tmp/booping/src/ci/gitlab/list-specs-projects.py > projects.json
+    - uv run --no-project python /tmp/booping/src/ci/gitlab/list-specs-projects.py > projects.json
     - /tmp/booping/bin/booping specs site-index --projects - --out public < projects.json
   artifacts:
     paths:
