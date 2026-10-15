@@ -52,4 +52,10 @@ M09's first attempt copied `src/specs/schemas/adr.yaml` verbatim into `tests.yam
 
 ## Accepted snapshot reports
 
-{filled in as accepted}
+Accepted 2026-10-15 under D3, committed as `chore(snapshots)`; `just snapshots` clean afterwards:
+
+- `playbooks/specs/_reports/output.md` — new report for the playbook M01 created and M07 filled; renders with no STOP notice.
+- `playbooks/groom/_reports/output.md` — one hunk: M06's intake bullet linking open items a request names (`booping specs open-items plan {ids} --plan {plan-dir}/index.md`).
+- `playbooks/learn/_reports/output.md` — one hunk: learn's playbook target list renders the new `specs` playbook (its summary, step `guide`, targets line); a direct render of M01's playbook, not listed in the plan's Final Verification but no change beyond it.
+
+develop's report did not drift: the M06 hooks sit on transitions, which its render does not show.
