@@ -2,7 +2,7 @@
 id: "03"
 title: "Source column and collision-safe ids"
 sp: 3
-status: pending
+status: done
 plan: "plans/202610151825_user-request-items/index.md"
 ---
 
@@ -23,19 +23,19 @@ Tests:
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 3.1 | `source` index column and the three list cases. | `src/config.yaml`, `booping-python/e2e/cases/items/list-*.txtar` | 1 | pending |
-| 3.2 | Exclusive-create id allocation with the injectable listing and its unit test. | `booping-python/src/booping/specs/open_items.py`, `booping-python/tests/specs/open_items_test.py` | 2 | pending |
+| 3.1 | `source` index column and the three list cases. | `src/config.yaml`, `booping-python/e2e/cases/items/list-*.txtar` | 1 | done |
+| 3.2 | Exclusive-create id allocation with the injectable listing and its unit test. | `booping-python/src/booping/specs/open_items.py`, `booping-python/tests/specs/open_items_test.py` | 2 | done |
 
 ## Definition of Done
 
 ### Task 3.1
 
-- [ ] `bin/booping items list` prints a table whose header is `| id | status | source | direction | record | title | plan |`.
+- [x] `bin/booping items list` prints a table whose header is `| id | status | source | direction | record | title | plan |`.
 
 ### Task 3.2
 
-- [ ] The unit test in Tests passes; a pre-existing item file is never overwritten.
-- [ ] The retry bound and its error message are as in Scope.
+- [x] The unit test in Tests passes; a pre-existing item file is never overwritten.
+- [x] The retry bound and its error message are as in Scope.
 
 Return: the list of changed and created files, nothing else.
 

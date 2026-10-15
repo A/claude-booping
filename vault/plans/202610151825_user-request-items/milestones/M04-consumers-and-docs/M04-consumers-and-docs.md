@@ -2,7 +2,7 @@
 id: "04"
 title: "Playbooks, docs and CLAUDE.md on booping items"
 sp: 4
-status: pending
+status: done
 plan: "plans/202610151825_user-request-items/index.md"
 ---
 
@@ -24,20 +24,20 @@ Tests: none — prose only; the grep in Verify is the check.
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 4.1 | Playbook manifests, prompts, eval fixtures and suite. | `playbooks/specs/playbook.md`, `playbooks/specs/playbook.yaml`, `playbooks/specs/guide/prompt.md`, `playbooks/specs/guide/_fixtures/*.md`, `playbooks/specs/guide/tests.yaml`, `playbooks/groom/intake/fable-5.md` | 2 | pending |
-| 4.2 | Public docs, README and CLAUDE.md. | `documentation/specs_playbook.md`, `documentation/specs.md`, `documentation/project_config.md`, `README.md`, `CLAUDE.md` | 2 | pending |
+| 4.1 | Playbook manifests, prompts, eval fixtures and suite. | `playbooks/specs/playbook.md`, `playbooks/specs/playbook.yaml`, `playbooks/specs/guide/prompt.md`, `playbooks/specs/guide/_fixtures/*.md`, `playbooks/specs/guide/tests.yaml`, `playbooks/groom/intake/fable-5.md` | 2 | done |
+| 4.2 | Public docs, README and CLAUDE.md. | `documentation/specs_playbook.md`, `documentation/specs.md`, `documentation/project_config.md`, `README.md`, `CLAUDE.md` | 2 | done |
 
 ## Definition of Done
 
 ### Task 4.1
 
-- [ ] No playbook file names `specs open-items` or `--body`.
-- [ ] `bin/booping render-playbook specs` and `bin/booping render-playbook groom` print no `STOP` notice.
+- [x] No playbook file names `specs open-items` or `--body`.
+- [x] `bin/booping render-playbook specs` and `bin/booping render-playbook groom` print no `STOP` notice.
 
 ### Task 4.2
 
-- [ ] `documentation/specs_playbook.md` documents `booping items add` with `--text -`, the `request` and `backlog` sources and the null direction, in user terms only.
-- [ ] `CLAUDE.md` lines 17, 48 and 78 read as Scope states.
+- [x] `documentation/specs_playbook.md` documents `booping items add` with `--text -`, the `request` and `backlog` sources and the null direction, in user terms only.
+- [x] `CLAUDE.md` lines 17, 48 and 78 read as Scope states.
 
 Return: the list of changed files, nothing else.
 

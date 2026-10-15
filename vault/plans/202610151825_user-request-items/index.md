@@ -2,20 +2,21 @@
 title: "User-request items — source and verbatim text on the item store, booping items
   add"
 type: "feature"
-status: ready-for-dev
-sp: null
+status: in-progress
+sp: 15
 related_to: null
 created: 2026-10-15 18:25
 planned: null
-started: null
+started: 2026-10-15 18:43
 completed: null
 code_reviews: []
 sessions:
 - 75e28809-8ea1-4cee-8c48-f7ef5b025853
+- 2e8c33fb-782e-47f3-aaf0-7272c5e014c7
 retro: null
 summary: Item store files user requests verbatim from any channel via booping 
   items add; store verbs move to booping items
-commit: 2a5f98134404672214d8b1b9594dc1e1a731fb94
+commit: 2827180dc6344607e67cc4fdacf690e5fab56aa0
 tracker_provider: null
 tracker_request: null
 tracker_issue: null
@@ -69,10 +70,10 @@ This is part (1) of the project-manager request (`request.md`); parts (2)–(5) 
 
 | id | title | sp | status |
 | --- | --- | --- | --- |
-| 01 | [booping items command group](milestones/M01-items-command-group/M01-items-command-group.md) | 4 | pending |
-| 02 | [Request and backlog items with verbatim text](milestones/M02-request-items/M02-request-items.md) | 4 | pending |
-| 03 | [Source column and collision-safe ids](milestones/M03-index-source-and-safe-ids/M03-index-source-and-safe-ids.md) | 3 | pending |
-| 04 | [Playbooks, docs and CLAUDE.md on booping items](milestones/M04-consumers-and-docs/M04-consumers-and-docs.md) | 4 | pending |
+| 01 | [booping items command group](milestones/M01-items-command-group/M01-items-command-group.md) | 4 | done |
+| 02 | [Request and backlog items with verbatim text](milestones/M02-request-items/M02-request-items.md) | 4 | done |
+| 03 | [Source column and collision-safe ids](milestones/M03-index-source-and-safe-ids/M03-index-source-and-safe-ids.md) | 3 | done |
+| 04 | [Playbooks, docs and CLAUDE.md on booping items](milestones/M04-consumers-and-docs/M04-consumers-and-docs.md) | 4 | done |
 
 ## I/O contract
 

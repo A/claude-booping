@@ -58,3 +58,6 @@ Marks, open conflicts and check findings are collected at query time; nothing st
   autonomy mode the project sets ([adr/0027](0027-autonomy-modes.md)).
 - Confirmation: creating an ADR with a confirmation line adds an open item; closing
   its plan closes the item; `booping specs open-items` hides it afterwards.
+- 2026-10-15: the store's command is `booping items`, and items include user requests
+  filed verbatim (`source: request`/`backlog`) beside spec gaps
+  ([adr/0028](0028-one-project-manager.md)).

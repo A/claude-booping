@@ -2,7 +2,7 @@
 id: "02"
 title: "Request and backlog items with verbatim text"
 sp: 4
-status: pending
+status: done
 plan: "plans/202610151825_user-request-items/index.md"
 ---
 
@@ -37,20 +37,20 @@ Tests: integration tier, new e2e cases under `booping-python/e2e/cases/items/`, 
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 2.1 | Sources, defaulting, request validation, `--text`/stdin, title derivation, verbatim body, null direction in the scaffold. | `booping-python/src/booping/specs/open_items.py`, `booping-python/src/booping/commands/items.py`, `booping-python/src/booping/correction.py`, `src/config.yaml` | 2 | pending |
-| 2.2 | The six new cases and the `--body` → `--text` switch in existing cases. | `booping-python/e2e/cases/items/*.txtar` | 2 | pending |
+| 2.1 | Sources, defaulting, request validation, `--text`/stdin, title derivation, verbatim body, null direction in the scaffold. | `booping-python/src/booping/specs/open_items.py`, `booping-python/src/booping/commands/items.py`, `booping-python/src/booping/correction.py`, `src/config.yaml` | 2 | done |
+| 2.2 | The six new cases and the `--body` → `--text` switch in existing cases. | `booping-python/e2e/cases/items/*.txtar` | 2 | done |
 
 ## Definition of Done
 
 ### Task 2.1
 
-- [ ] `bin/booping items add --help` shows `--text` and the new `--source` default text; no `--body`.
-- [ ] Each error in Scope exits 1 with exactly that message and writes no file.
-- [ ] A spec-gap `add` (`--title --direction`) produces the same file as before this milestone.
+- [x] `bin/booping items add --help` shows `--text` and the new `--source` default text; no `--body`.
+- [x] Each error in Scope exits 1 with exactly that message and writes no file.
+- [x] A spec-gap `add` (`--title --direction`) produces the same file as before this milestone.
 
 ### Task 2.2
 
-- [ ] The six cases in Tests exist and pass; `grep -rn -- "--body" booping-python/e2e/cases/items` prints nothing.
+- [x] The six cases in Tests exist and pass; `grep -rn -- "--body" booping-python/e2e/cases/items` prints nothing.
 
 Return: the list of changed and created files, nothing else.
 

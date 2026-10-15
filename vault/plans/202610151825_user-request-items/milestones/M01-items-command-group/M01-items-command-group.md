@@ -2,7 +2,7 @@
 id: "01"
 title: "booping items command group"
 sp: 4
-status: pending
+status: done
 plan: "plans/202610151825_user-request-items/index.md"
 ---
 
@@ -20,21 +20,21 @@ Tests: integration tier, the moved e2e corpus — every existing case passes unc
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 1.1 | Move the parser and runners to `commands/items.py`, register the group, rename log subcommand and messages. | `booping-python/src/booping/commands/items.py`, `booping-python/src/booping/commands/specs.py`, `booping-python/src/booping/cli.py`, `booping-python/src/booping/specs/open_items.py`, `booping-python/src/booping/correction.py` | 2 | pending |
-| 1.2 | Move the 21 cases, update the follow-plan script and its case, add the gone case. | `booping-python/e2e/cases/items/*.txtar`, `booping-python/e2e/cases/playbook-transition/open-items-follow-plan-absorbs-a-failing-cli.txtar`, `playbooks/_scripts/open-items-follow-plan` | 2 | pending |
+| 1.1 | Move the parser and runners to `commands/items.py`, register the group, rename log subcommand and messages. | `booping-python/src/booping/commands/items.py`, `booping-python/src/booping/commands/specs.py`, `booping-python/src/booping/cli.py`, `booping-python/src/booping/specs/open_items.py`, `booping-python/src/booping/correction.py` | 2 | done |
+| 1.2 | Move the 21 cases, update the follow-plan script and its case, add the gone case. | `booping-python/e2e/cases/items/*.txtar`, `booping-python/e2e/cases/playbook-transition/open-items-follow-plan-absorbs-a-failing-cli.txtar`, `playbooks/_scripts/open-items-follow-plan` | 2 | done |
 
 ## Definition of Done
 
 ### Task 1.1
 
-- [ ] `bin/booping items --help` lists the six verbs; each verb's `--help` matches its old `specs open-items` help.
-- [ ] `bin/booping specs --help` no longer lists `open-items`.
-- [ ] `grep -rn "specs open-items" booping-python/src` prints nothing.
+- [x] `bin/booping items --help` lists the six verbs; each verb's `--help` matches its old `specs open-items` help.
+- [x] `bin/booping specs --help` no longer lists `open-items`.
+- [x] `grep -rn "specs open-items" booping-python/src` prints nothing.
 
 ### Task 1.2
 
-- [ ] `booping-python/e2e/cases/specs/` holds no `open-items-*` case; `booping-python/e2e/cases/items/` holds the 21 moved cases plus the gone case.
-- [ ] `grep -n "specs open-items" playbooks/_scripts/open-items-follow-plan` prints nothing.
+- [x] `booping-python/e2e/cases/specs/` holds no `open-items-*` case; `booping-python/e2e/cases/items/` holds the 21 moved cases plus the gone case.
+- [x] `grep -n "specs open-items" playbooks/_scripts/open-items-follow-plan` prints nothing.
 
 Return: the list of changed, moved and created files, nothing else.
 
