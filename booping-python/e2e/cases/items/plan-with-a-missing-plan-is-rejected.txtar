@@ -23,7 +23,7 @@ reason: null
 
 # Gap OI-0001
 -- cmd --
-booping specs open-items plan OI-0001 --plan plans/202610151409_gone/index.md
+booping items plan OI-0001 --plan plans/202610151409_gone/index.md
 -- exit --
 1
 -- stdout --

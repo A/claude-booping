@@ -151,27 +151,30 @@ core:
       # Extra roots `booping specs site` renders after the tiers, each `{name, path}`;
       # path home_dir-relative like tiers.global. Set in the global tier.
       roots: []
-    # Open items: one file per specs-to-code gap, `{vault}/{dir}/OI-NNNN.md`, moved
-    # through the `open_item` machine of `playbooks/specs/playbook.yaml` by
-    # `booping specs open-items` only. Shared by that CLI, the specs playbook and
-    # the develop/groom hooks, so it sits under `core.specs`.
+    # Open items: one file per user request or specs-to-code gap,
+    # `{vault}/{dir}/OI-NNNN.md`, moved through the `open_item` machine of
+    # `playbooks/specs/playbook.yaml` by `booping items` only. Shared by that CLI,
+    # the specs playbook and the develop/groom hooks, so it sits under `core.specs`.
     open_items:
       # Vault-relative directory holding the item files; created on first write.
       dir: open-items
       # Scaffold tree materialised once per item by
       # `booping scaffold core.specs.open_items.scaffold {vault}/{dir} --set id=OI-NNNN
-      #  --set title=<t> --set direction=<d> --set record=<ref|null> --set source=<s>
+      #  --set title=<t> --set direction=<d|null> --set record=<ref|null> --set source=<s>
       #  --set created_at=<YYYY-MM-DD> [--set body=<text>]`.
       # Sole definition of the item file. `status: open` is the machine's `initial`;
       # `plan`, `closed_at` and `reason` start null and are written by the CLI and
       # the machine's hooks. `title` goes through `tojson` like the plan scaffold's.
+      # `direction` is null for request and backlog items. `body` is the item text,
+      # written verbatim (a variable's value is never re-parsed as Jinja), ending in
+      # exactly the newlines it brought, or one when it brought none.
       scaffold:
         "{{ id }}.md": |
           ---
           id: {{ id }}
           title: {{ title | tojson }}
           status: open
-          direction: {{ direction }}
+          direction: {% if direction and direction != 'null' %}{{ direction }}{% else %}null{% endif %}
           record: {% if record and record != 'null' %}{{ record | tojson }}{% else %}null{% endif %}
           source: {{ source }}
           plan: null
@@ -182,14 +185,13 @@ core:
 
           # {{ title }}
           {% if body %}
-          {{ body }}
-          {% endif -%}
-      # The index `booping specs open-items list` renders. The glob mirrors `dir`;
+          {{ body }}{% if not body.endswith('\n') %}{{ '\n' }}{% endif %}{% endif -%}
+      # The index `booping items list` renders. The glob mirrors `dir`;
       # the status filter is applied per call from the machine, never stated here.
       index:
         glob: [open-items/OI-*.md]
         sort: id
-        columns: [id, status, direction, record, title, plan]
+        columns: [id, status, source, direction, record, title, plan]
 
   groom_playbook:
     # Agent that performs the detached second-model review of a drafted plan.

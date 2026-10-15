@@ -1,4 +1,5 @@
-`--plan` matching no planned item is not an error: one notice line, exit 0, nothing moved.
+`close --dropped --reason` takes an open item straight to `dropped`: the reason is written
+first, then the edge stamps `closed_at`.
 
 -- fixtures/cwd/.booping --
 project_name: probe
@@ -23,24 +24,28 @@ reason: null
 
 # Gap OI-0001
 -- cmd --
-booping specs open-items reopen --plan plans/202610151409_x/index.md
+booping items close OI-0001 --dropped --reason "resolved upstream"
 -- exit --
 0
 -- stdout --
-no planned items for plans/202610151409_x/index.md
+open-items/OI-0001.md
+frontmatter: reason="resolved upstream"
+open → dropped
+frontmatter: status=dropped
+frontmatter: closed_at=2026-10-15
 -- stderr --
 -- expected/cwd/vault/open-items/OI-0001.md --
 ---
 id: OI-0001
 title: "Gap OI-0001"
-status: open
+status: dropped
 direction: clarify
 record: null
 source: manual
 plan: null
 created_at: 2026-10-01
-closed_at: null
-reason: null
+closed_at: '2026-10-15'
+reason: resolved upstream
 ---
 
 # Gap OI-0001

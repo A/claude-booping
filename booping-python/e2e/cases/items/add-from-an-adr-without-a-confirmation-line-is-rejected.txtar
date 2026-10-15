@@ -20,7 +20,7 @@ status: accepted
 
 - Something changes.
 -- cmd --
-booping specs open-items add --record adr/0002
+booping items add --record adr/0002
 -- exit --
 1
 -- stdout --

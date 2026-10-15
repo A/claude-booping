@@ -43,7 +43,7 @@ reason: resolved
 
 # Which runs count as every run
 -- cmd --
-booping specs open-items scan
+booping items scan
 -- exit --
 0
 -- stdout --

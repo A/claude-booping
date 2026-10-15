@@ -1,0 +1,17 @@
+A request item carries no direction: `--direction` with `--source request` is a user error
+and nothing is filed.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+macro_stubs:
+  core.macros.date: "2026-10-15"
+-- cmd --
+booping items add --source request --direction clarify --text "Ship it."
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: --direction does not apply to source request

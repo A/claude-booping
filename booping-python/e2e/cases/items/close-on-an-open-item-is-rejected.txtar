@@ -24,7 +24,7 @@ reason: null
 
 # Gap OI-0001
 -- cmd --
-booping specs open-items close OI-0001 --reason "done already"
+booping items close OI-0001 --reason "done already"
 -- exit --
 1
 -- stdout --

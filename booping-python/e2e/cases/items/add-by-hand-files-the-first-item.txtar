@@ -10,7 +10,7 @@ latest_migration: 9999
 macro_stubs:
   core.macros.date: "2026-10-15"
 -- cmd --
-booping specs open-items add --title "Spec the tracker" --direction code-to-spec --body "Two lines of prose."
+booping items add --title "Spec the tracker" --direction code-to-spec --text "Two lines of prose."
 -- exit --
 0
 -- stdout --

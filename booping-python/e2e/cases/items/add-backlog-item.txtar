@@ -1,4 +1,5 @@
-`correction` is an accepted `--source` when an item is filed by hand.
+`--source backlog` files a backlog item under the request rules: no direction, the title
+derived from the text.
 
 -- fixtures/cwd/.booping --
 project_name: probe
@@ -8,7 +9,7 @@ latest_migration: 9999
 macro_stubs:
   core.macros.date: "2026-10-15"
 -- cmd --
-booping specs open-items add --title "Split plans over 35 SP" --direction conflict --record value/0007 --source correction
+booping items add --source backlog --text "Retire the old exporter! It is unused."
 -- exit --
 0
 -- stdout --
@@ -17,15 +18,17 @@ open-items/OI-0001.md
 -- expected/cwd/vault/open-items/OI-0001.md --
 ---
 id: OI-0001
-title: "Split plans over 35 SP"
+title: "Retire the old exporter"
 status: open
-direction: conflict
-record: "value/0007"
-source: correction
+direction: null
+record: null
+source: backlog
 plan: null
 created_at: 2026-10-15
 closed_at: null
 reason: null
 ---
 
-# Split plans over 35 SP
+# Retire the old exporter
+
+Retire the old exporter! It is unused.

@@ -30,7 +30,7 @@ It shows in every run. [clarify] Which runs count as every run? The owner decide
 - [unknown] The code skips dry runs; the record says it never does.
 - A mid-sentence [clarify] mark is not one.
 -- cmd --
-booping specs open-items scan
+booping items scan
 -- exit --
 0
 -- stdout --

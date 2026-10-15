@@ -16,7 +16,7 @@ status: done
 
 # First
 -- cmd --
-booping specs open-items add --title "Second gap" --direction conflict --record rule/0003
+booping items add --title "Second gap" --direction conflict --record rule/0003
 -- exit --
 0
 -- stdout --

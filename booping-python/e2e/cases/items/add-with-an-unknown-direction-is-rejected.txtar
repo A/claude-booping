@@ -8,7 +8,7 @@ latest_migration: 9999
 macro_stubs:
   core.macros.date: "2026-10-15"
 -- cmd --
-booping specs open-items add --title "Gap" --direction sideways
+booping items add --title "Gap" --direction sideways
 -- exit --
 1
 -- stdout --

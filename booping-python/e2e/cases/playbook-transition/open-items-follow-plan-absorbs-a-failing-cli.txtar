@@ -79,7 +79,7 @@ frontmatter: status=done
 script open-items-follow-plan: ok
 -- stderr --
 -- expected/cwd/vault/plans/p/fake-argv.txt --
-specs open-items close --plan {CWD}/vault/plans/p/index.md
+items close --plan {CWD}/vault/plans/p/index.md
 -- expected/cwd/vault/plans/p/index.md --
 ---
 status: done

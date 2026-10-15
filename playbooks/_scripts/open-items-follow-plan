@@ -12,7 +12,7 @@
 # The CLI's exit code is absorbed on purpose: a hook exiting non-zero aborts
 # `playbook-transition` *after* `status:` is already written, which would leave the
 # plan advanced and its items behind with no way back. A failed follow is a
-# warning; `booping specs open-items close|reopen --plan …` by hand is the reconcile.
+# warning; `booping items close|reopen --plan …` by hand is the reconcile.
 #
 # The binary is resolved from this script's own location — cwd is the plan
 # directory, so a relative path would miss.
@@ -29,7 +29,7 @@ case "${1:-}" in
         ;;
 esac
 
-"$BOOPING" specs open-items "$verb" --plan "${BOOPING_ARTIFACT:-}"
+"$BOOPING" items "$verb" --plan "${BOOPING_ARTIFACT:-}"
 status=$?
 if [ "$status" -ne 0 ]; then
     echo "warning: open-items follow-plan failed (exit $status)" >&2

@@ -1,0 +1,17 @@
+With neither `--direction` nor `--source` the item is a request, whose text is required:
+`--title` alone is a user error and nothing is filed.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+macro_stubs:
+  core.macros.date: "2026-10-15"
+-- cmd --
+booping items add --title "Ship it"
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: --text is required for source request

@@ -1,5 +1,5 @@
-`reopen --plan` moves that plan's planned items back to `open`; the edge's hook clears `plan`
-to null. An item planned under another plan stays.
+`plan` writes the vault-relative plan path onto each open item, then moves it to `planned`
+through the machine, in the order given; each item prints its path and the engine's report.
 
 -- fixtures/cwd/.booping --
 project_name: probe
@@ -8,47 +8,11 @@ latest_migration: 9999
 -- fixtures/cwd/vault/config.yaml --
 macro_stubs:
   core.macros.date: "2026-10-15"
+-- fixtures/cwd/vault/plans/202610151409_x/index.md --
+---
+title: X
+---
 -- fixtures/cwd/vault/open-items/OI-0001.md --
----
-id: OI-0001
-title: "Gap OI-0001"
-status: planned
-direction: clarify
-record: null
-source: manual
-plan: plans/202610151409_x/index.md
-created_at: 2026-10-01
-closed_at: null
-reason: null
----
-
-# Gap OI-0001
--- fixtures/cwd/vault/open-items/OI-0002.md --
----
-id: OI-0002
-title: "Gap OI-0002"
-status: planned
-direction: clarify
-record: null
-source: manual
-plan: plans/202610010000_y/index.md
-created_at: 2026-10-01
-closed_at: null
-reason: null
----
-
-# Gap OI-0002
--- cmd --
-booping specs open-items reopen --plan plans/202610151409_x/index.md
--- exit --
-0
--- stdout --
-open-items/OI-0001.md
-planned → open
-frontmatter: status=open
-frontmatter: plan=null
--- stderr --
--- expected/cwd/vault/open-items/OI-0001.md --
 ---
 id: OI-0001
 title: "Gap OI-0001"
@@ -63,6 +27,50 @@ reason: null
 ---
 
 # Gap OI-0001
+-- fixtures/cwd/vault/open-items/OI-0002.md --
+---
+id: OI-0002
+title: "Gap OI-0002"
+status: open
+direction: clarify
+record: null
+source: manual
+plan: null
+created_at: 2026-10-01
+closed_at: null
+reason: null
+---
+
+# Gap OI-0002
+-- cmd --
+booping items plan OI-0002 OI-0001 --plan plans/202610151409_x/index.md
+-- exit --
+0
+-- stdout --
+open-items/OI-0002.md
+frontmatter: plan=plans/202610151409_x/index.md
+open → planned
+frontmatter: status=planned
+open-items/OI-0001.md
+frontmatter: plan=plans/202610151409_x/index.md
+open → planned
+frontmatter: status=planned
+-- stderr --
+-- expected/cwd/vault/open-items/OI-0001.md --
+---
+id: OI-0001
+title: "Gap OI-0001"
+status: planned
+direction: clarify
+record: null
+source: manual
+plan: plans/202610151409_x/index.md
+created_at: 2026-10-01
+closed_at: null
+reason: null
+---
+
+# Gap OI-0001
 -- expected/cwd/vault/open-items/OI-0002.md --
 ---
 id: OI-0002
@@ -71,7 +79,7 @@ status: planned
 direction: clarify
 record: null
 source: manual
-plan: plans/202610010000_y/index.md
+plan: plans/202610151409_x/index.md
 created_at: 2026-10-01
 closed_at: null
 reason: null

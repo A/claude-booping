@@ -1,13 +1,14 @@
 """Open items — one file per specs-to-code gap under `{vault}/{core.specs.open_items.dir}`.
 
 Numbering, the item scaffold, ADR confirmation extraction and the index live here;
-`booping.commands.specs` is the argparse shell over them. Status moves go through
+`booping.commands.items` is the argparse shell over them. Status moves go through
 the `open_item` machine of the `specs` playbook, never a direct `status:` write.
 """
 
 from __future__ import annotations
 
 import re
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 from typing import Any, cast
@@ -33,12 +34,14 @@ from booping.specs.records import Record, parse_filename
 from booping.specs.site.markdown import slug
 
 DIRECTIONS = ("code-to-spec", "spec-to-code", "conflict", "clarify")
-SOURCES = ("manual", "adr", "mark", "check", "sync", "correction")
+SOURCES = ("manual", "adr", "mark", "check", "sync", "correction", "request", "backlog")
+REQUEST_SOURCES = ("request", "backlog")
 PLAYBOOK = "specs"
 STATE = "open_item"
 SCAFFOLD_PATH = "core.specs.open_items.scaffold"
 INDEX_PATH = "core.specs.open_items.index"
 TITLE_LIMIT = 100
+ID_ATTEMPTS = 100
 
 _ITEM_FILE = re.compile(r"OI-(\d+)\.md")
 _ADR_REF = re.compile(r"adr/(\d{4})")
@@ -74,13 +77,30 @@ def vault_relative(ctx: Context, path: Path) -> str:
     return path.relative_to(require_vault(ctx)).as_posix()
 
 
-def next_id(directory: Path) -> str:
-    numbers = (
-        [int(m.group(1)) for p in directory.iterdir() if (m := _ITEM_FILE.fullmatch(p.name))]
-        if directory.is_dir()
-        else []
-    )
-    return f"OI-{max(numbers, default=0) + 1:04d}"
+def listed_names(directory: Path) -> list[str]:
+    return [p.name for p in directory.iterdir()] if directory.is_dir() else []
+
+
+def create_item(
+    directory: Path,
+    render: Callable[[str], tuple[Path, str]],
+    listing: Callable[[Path], Iterable[str]] = listed_names,
+) -> Path:
+    """Write the item *render* produces for the next free id. The listing only picks
+    the starting id; the exclusive create is what claims it, so a racing writer that
+    took the id first sends this one on to the next."""
+    numbers = [int(m.group(1)) for name in listing(directory) if (m := _ITEM_FILE.fullmatch(name))]
+    number = max(numbers, default=0) + 1
+    for _ in range(ID_ATTEMPTS):
+        path, content = render(f"OI-{number:04d}")
+        try:
+            with path.open("x", encoding="utf-8") as handle:
+                handle.write(content)
+        except FileExistsError:
+            number += 1
+            continue
+        return path
+    raise OpenItemError(f"could not allocate an item id under {directory}")
 
 
 def truncate(text: str, limit: int = TITLE_LIMIT) -> str:
@@ -90,6 +110,12 @@ def truncate(text: str, limit: int = TITLE_LIMIT) -> str:
 def first_sentence(text: str) -> str:
     match = _SENTENCE_END.search(text)
     return (text[: match.start()] if match else text).strip()
+
+
+def derived_title(text: str) -> str:
+    """The title of a request item filed without one: its text's first sentence."""
+    first = next((line for line in text.splitlines() if line.strip()), "")
+    return truncate(first_sentence(first))
 
 
 def _section(body: str, heading: str) -> list[str]:
@@ -155,18 +181,17 @@ def write_item(
     ctx: Context,
     *,
     title: str,
-    direction: str,
+    direction: str | None,
     record: str | None,
     source: str,
     body: str | None,
+    listing: Callable[[Path], Iterable[str]] = listed_names,
 ) -> Path:
     """Scaffold the next numbered item file through `core.specs.open_items.scaffold`."""
     directory = items_dir(ctx)
-    item_id = next_id(directory)
     env = build_source_env(context=ctx, config=ctx.config)
     globals_: dict[str, Any] = env.globals  # type: ignore[assignment]
     globals_.update(
-        id=item_id,
         title=title,
         direction=direction,
         record=record,
@@ -174,16 +199,20 @@ def write_item(
         created_at=today(ctx),
         body=body,
     )
-    try:
-        writes = _plan(load(ctx.config, SCAFFOLD_PATH), directory, env)
-    except ScaffoldError as exc:
-        raise OpenItemError(str(exc)) from exc
-    for write in writes:
-        if write.content is None:
-            write.path.mkdir(parents=True, exist_ok=True)
-        else:
-            write.path.write_text(write.content, encoding="utf-8")
-    return item_path(ctx, item_id)
+
+    def render(item_id: str) -> tuple[Path, str]:
+        globals_["id"] = item_id
+        try:
+            writes = _plan(load(ctx.config, SCAFFOLD_PATH), directory, env)
+        except ScaffoldError as exc:
+            raise OpenItemError(str(exc)) from exc
+        for write in writes:
+            if write.content is None:
+                write.path.mkdir(parents=True, exist_ok=True)
+        item = next(w for w in writes if w.content is not None)
+        return item.path, cast(str, item.content)
+
+    return create_item(directory, render, listing)
 
 
 def machine(ctx: Context) -> StateMachine:

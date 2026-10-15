@@ -73,7 +73,7 @@ reason: null
 
 # Gap OI-0004
 -- cmd --
-booping specs open-items close --plan plans/202610151409_x/index.md
+booping items close --plan plans/202610151409_x/index.md
 -- exit --
 0
 -- stdout --

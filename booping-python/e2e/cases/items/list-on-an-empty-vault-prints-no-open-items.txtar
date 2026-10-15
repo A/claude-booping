@@ -6,7 +6,7 @@ vault_path: ./vault
 latest_migration: 9999
 -- fixtures/cwd/vault/config.yaml --
 -- cmd --
-booping specs open-items list
+booping items list
 -- exit --
 0
 -- stdout --

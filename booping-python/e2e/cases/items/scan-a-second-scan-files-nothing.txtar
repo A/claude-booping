@@ -73,7 +73,7 @@ reason: null
 
 # link: link target `../notes/missing.md` does not exist
 -- cmd --
-booping specs open-items scan
+booping items scan
 -- exit --
 0
 -- stdout --

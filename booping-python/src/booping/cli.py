@@ -7,6 +7,7 @@ from booping.commands import correction as correction_cmd
 from booping.commands import debug as debug_cmd
 from booping.commands import defaults as defaults_cmd
 from booping.commands import frontmatter_update as frontmatter_update_cmd
+from booping.commands import items as items_cmd
 from booping.commands import marker_set as marker_set_cmd
 from booping.commands import playbook_state as playbook_state_cmd
 from booping.commands import playbook_transition as playbook_transition_cmd
@@ -40,6 +41,7 @@ def build_parser() -> argparse.ArgumentParser:
     specs_cmd.add_parser(sub)
     correction_cmd.add_parser(sub)
     defaults_cmd.add_parser(sub)
+    items_cmd.add_parser(sub)
 
     return parser
 

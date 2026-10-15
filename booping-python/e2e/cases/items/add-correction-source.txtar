@@ -1,0 +1,31 @@
+`correction` is an accepted `--source` when an item is filed by hand.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+macro_stubs:
+  core.macros.date: "2026-10-15"
+-- cmd --
+booping items add --title "Split plans over 35 SP" --direction conflict --record value/0007 --source correction
+-- exit --
+0
+-- stdout --
+open-items/OI-0001.md
+-- stderr --
+-- expected/cwd/vault/open-items/OI-0001.md --
+---
+id: OI-0001
+title: "Split plans over 35 SP"
+status: open
+direction: conflict
+record: "value/0007"
+source: correction
+plan: null
+created_at: 2026-10-15
+closed_at: null
+reason: null
+---
+
+# Split plans over 35 SP

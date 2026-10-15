@@ -26,7 +26,7 @@ Closing a plan closes its items.
 - Confirmation: every plan that reaches develop's done closes the open items linked to it,
   and a failed or cancelled plan returns them to open. A second sentence follows.
 -- cmd --
-booping specs open-items add --record adr/0099
+booping items add --record adr/0099
 -- exit --
 1
 -- stdout --
