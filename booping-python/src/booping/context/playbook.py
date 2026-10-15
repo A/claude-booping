@@ -57,6 +57,8 @@ class StateMachine(BaseModel):
     artifact: str = ""
     initial: str
     statuses: dict[str, Any] = {}
+    # Moved only by `--state {name} --instance {id}` calls, never by a graph scope.
+    standalone: bool = False
     raw: dict[str, Any] = {}
 
 
@@ -384,13 +386,15 @@ def _parse_states(
         if not isinstance(statuses, dict) or initial not in statuses:
             bad(f"`initial` '{initial}' is not in `statuses`")
             continue
-        if "{instance}" in artifact and name not in instance_refs:
+        standalone = entry.get("standalone") is True
+        if "{instance}" in artifact and name not in instance_refs and not standalone:
             bad("`{instance}` in `artifact` requires a subgraph to reference this state")
             continue
         states[name] = StateMachine(
             name=name,
             artifact=artifact,
             initial=initial,
+            standalone=standalone,
             statuses={str(k): v for k, v in cast("dict[Any, Any]", statuses).items()},
             raw={str(k): v for k, v in entry.items()},
         )
@@ -399,8 +403,8 @@ def _parse_states(
     for scope, ref in refs.items():
         if ref not in declared:
             problems.append(GraphProblem(kind="unknown_state", node=ref, scope=scope))
-    for name in states:
-        if name not in refs.values():
+    for name, machine in states.items():
+        if not machine.standalone and name not in refs.values():
             problems.append(GraphProblem(kind="orphan_state", node=name))
 
     return states, refs

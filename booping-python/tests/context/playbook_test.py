@@ -686,6 +686,42 @@ def test_instance_artifact_allowed_for_subgraph_state() -> None:
     assert "{instance}" in pb.states["step"].artifact
 
 
+_ITEM_STATE = (
+    "    artifact: items/{instance}.md\n    initial: s\n    statuses:\n      s: {terminal: true}\n"
+)
+
+
+def test_standalone_instance_state_loads_without_a_scope(tmp_path: Path) -> None:
+    pb = _load_manifest(
+        tmp_path,
+        f"graph:\n  a: []\nstates:\n  item:\n    standalone: true\n{_ITEM_STATE}",
+        _NO_GRAPH_MD,
+    )
+    assert pb.graph_problems == []
+    assert pb.states["item"].standalone is True
+
+
+def test_unkeyed_unreferenced_instance_state_is_bad_state(tmp_path: Path) -> None:
+    pb = _load_manifest(
+        tmp_path,
+        f"graph:\n  a: []\nstates:\n  item:\n{_ITEM_STATE}",
+        _NO_GRAPH_MD,
+    )
+    assert [(p.kind, p.node) for p in pb.graph_problems] == [("bad_state", "item")]
+    assert pb.states == {}
+
+
+def test_standalone_plain_state_is_not_an_orphan(tmp_path: Path) -> None:
+    pb = _load_manifest(
+        tmp_path,
+        "graph:\n  a: []\n"
+        "states:\n  unused:\n    standalone: true\n    artifact: index.md\n"
+        "    initial: s\n    statuses:\n      s: {terminal: true}\n",
+        _NO_GRAPH_MD,
+    )
+    assert pb.graph_problems == []
+
+
 def test_subgraph_state_must_be_string(tmp_path: Path) -> None:
     pb = _load_graph(
         tmp_path,

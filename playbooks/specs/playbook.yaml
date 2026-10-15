@@ -1,0 +1,36 @@
+graph:
+  guide: []
+
+states:
+  # Lifecycle of one open item. The workdir is the vault; only
+  # `booping specs open-items` moves it — the `specs` run itself never does.
+  open_item:
+    standalone: true
+    artifact: open-items/{instance}.md
+    initial: open
+    statuses:
+      open:
+        transitions:
+          - to: planned
+            when: "`booping specs open-items plan` linked the item to a plan"
+            gates: ["`plan` names an existing plan file"]
+          - to: dropped
+            when: "`booping specs open-items close --dropped` closed the item without work"
+            hooks:
+              - frontmatter-update closed_at="{{ macro('core.macros.date', '+%Y-%m-%d') }}"
+      planned:
+        transitions:
+          - to: done
+            when: "`booping specs open-items close`, or the linked plan reached develop's `done`"
+            hooks:
+              - frontmatter-update closed_at="{{ macro('core.macros.date', '+%Y-%m-%d') }}"
+          - to: dropped
+            when: "`booping specs open-items close --dropped` closed the item without work"
+            hooks:
+              - frontmatter-update closed_at="{{ macro('core.macros.date', '+%Y-%m-%d') }}"
+          - to: open
+            when: "`booping specs open-items reopen`, or the linked plan failed or was cancelled"
+            hooks:
+              - frontmatter-update plan=null
+      done: {terminal: true}
+      dropped: {terminal: true}

@@ -381,7 +381,12 @@ def _state_entries(pb: Playbook) -> list[dict[str, Any]]:
                     "outer graph" if scope == "" else f"subgraph `{scope}`"
                     for scope, ref in pb.state_refs.items()
                     if ref == name
-                ],
+                ]
+                or (
+                    [f"no graph scope — standalone, moved only by `--state {name}` calls"]
+                    if machine.standalone
+                    else []
+                ),
                 "per_instance": "{instance}" in machine.artifact,
                 "is_outer": name == outer_ref,
                 "rows": rows,
