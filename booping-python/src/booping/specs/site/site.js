@@ -44,6 +44,17 @@
       announce(status ? status.getAttribute("data-copied") : "");
     }, function () {});
   });
+  document.addEventListener("click", function (e) {
+    if (e.button !== 0 || !e.target.closest) return;
+    var row = e.target.closest(".row");
+    var link = row && row.querySelector("a.t[href]");
+    if (!link || e.target.closest("a, button, input, select, textarea")) return;
+    var sel = window.getSelection && window.getSelection();
+    if (sel && !sel.isCollapsed) return;
+    var href = link.getAttribute("href");
+    if (e.ctrlKey || e.metaKey) window.open(href, "_blank", "noopener");
+    else location.assign(href);
+  });
   function openTarget() {
     var id = decodeURIComponent(location.hash.slice(1));
     var target = id && document.getElementById(id);
