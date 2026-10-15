@@ -1,13 +1,13 @@
 ---
 title: "Specs site redesign, part 1 — fonts, theme, shell, record state, machine layer"
 type: "feature"
-status: in-progress
+status: done
 sp: 34
 related_to: null
 created: 2026-10-15 23:30
 planned: null
 started: 2026-10-15 23:49
-completed: null
+completed: 2026-10-16 00:40
 code_reviews: []
 sessions:
 - 89fea733-132d-4d26-8d40-e7167a12bdd1
@@ -23,6 +23,13 @@ return_to: null
 agents: '{"research-codebase": ["a58e0220f768d569f", "aac49bc2f976b8701"], "research-web":
   "a4c624d6825488430", "cross-review": "a722dee293a62d7a9"}'
 reviewed_at: 2026-10-15 23:44
+metrics_active_minutes: 72
+metrics_models:
+- claude-opus-5-5
+metrics_tokens_input: 196
+metrics_tokens_output: 85300
+metrics_tokens_cache_creation: 300038
+metrics_tokens_cache_read: 11219685
 ---
 
 
@@ -90,23 +97,23 @@ The output tree keeps today's paths (`index.html`, `{root}/index.html`, `{root}/
 
 ## Final Verification
 
-- [ ] `just ci` passes (lint, typecheck, pytest, snapshots, mdcheck, specs-check, e2e), run once in the foreground.
-- [ ] Two runs of `bin/booping specs site --out /tmp/specs-site-a` and `--out /tmp/specs-site-b` over this repo's vault give identical trees (`diff -r`).
-- [ ] Visual check by the runner: render this repo's specs (`bin/booping specs site --out /tmp/specs-site-booping`) and the swarmlight fixture vault (`~/.tmp/specs-site-fixtures/swarmlight/vault`, copied to `/tmp` first) with `core.specs.site.lang: ru`; screenshot home, a type page and an ADR record at 1280×900 and 390×844 in light and dark with headless Chromium; confirm Golos Text renders (not monospace), no horizontal scroll at 390px, badges carry icon and text, theme toggle cycles, drawer opens and closes.
-- [ ] Opened from `file://` in Firefox, a record page two directories deep renders in Golos Text.
+- [x] `just ci` passes (lint, typecheck, pytest, snapshots, mdcheck, specs-check, e2e), run once in the foreground.
+- [x] Two runs of `bin/booping specs site --out /tmp/specs-site-a` and `--out /tmp/specs-site-b` over this repo's vault give identical trees (`diff -r`).
+- [x] Visual check by the runner: render this repo's specs (`bin/booping specs site --out /tmp/specs-site-booping`) and the swarmlight fixture vault (`~/.tmp/specs-site-fixtures/swarmlight/vault`, copied to `/tmp` first) with `core.specs.site.lang: ru`; screenshot home, a type page and an ADR record at 1280×900 and 390×844 in light and dark with headless Chromium; confirm Golos Text renders (not monospace), no horizontal scroll at 390px, badges carry icon and text, theme toggle cycles, drawer opens and closes.
+- [x] Opened from `file://` in Firefox, a record page two directories deep renders in Golos Text.
 
 ## Accessibility & interaction
 
-- [ ] Keyboard paths: skip link → menu (phone) → brand → theme toggle → sidebar → main; drawer closes on Esc and returns focus (M04).
-- [ ] Roles and labels: `<nav aria-label>` for sidebar and breadcrumbs, `aria-current="page"`, `aria-expanded`/`aria-controls` on the menu button, theme button `aria-label` names the state (M04).
-- [ ] State is never colour alone: every badge has icon + text; icons `aria-hidden` (M03).
-- [ ] Contrast ≥ 4.5:1 for text, links and badges in both themes, body ≥ 7:1 in dark — asserted by `site_contrast_test.py` (M03).
-- [ ] `prefers-reduced-motion` drops the drawer transition; `:focus-visible` rings (M03).
+- [x] Keyboard paths: skip link → menu (phone) → brand → theme toggle → sidebar → main; drawer closes on Esc and returns focus (M04).
+- [x] Roles and labels: `<nav aria-label>` for sidebar and breadcrumbs, `aria-current="page"`, `aria-expanded`/`aria-controls` on the menu button, theme button `aria-label` names the state (M04).
+- [x] State is never colour alone: every badge has icon + text; icons `aria-hidden` (M03).
+- [x] Contrast ≥ 4.5:1 for text, links and badges in both themes, body ≥ 7:1 in dark — asserted by `site_contrast_test.py` (M03).
+- [x] `prefers-reduced-motion` drops the drawer transition; `:focus-visible` rings (M03).
 
 ## Responsive & cross-browser
 
-- [ ] One breakpoint, 760px: one column, sidebar in the drawer, crumbs last level only, rows stacked, facts one column, tap targets ≥ 44px, no horizontal scroll (M03).
-- [ ] Verified in headless Chromium at 1280 and 390 px wide and in Firefox from `file://` (Final Verification).
+- [x] One breakpoint, 760px: one column, sidebar in the drawer, crumbs last level only, rows stacked, facts one column, tap targets ≥ 44px, no horizontal scroll (M03).
+- [x] Verified in headless Chromium at 1280 and 390 px wide and in Firefox from `file://` (Final Verification).
 
 ## Out of scope
 
