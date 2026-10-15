@@ -1,17 +1,9 @@
 {% extends "base.html.j2" %}
-{% from "_macros.html.j2" import count_cell %}
+{% from "_macros.html.j2" import types_list %}
 {% block main %}
 <h1>{{ site_title }}</h1>
-<div class="table-wrap">
-<table>
-<thead>
-<tr><th>{{ labels.ui("root") }}</th><th>{{ labels.ui("records") }}</th>{% for type in types %}<th>{{ labels.type_plural(type) }}</th>{% endfor %}<th>[clarify]</th><th>[unknown]</th><th>{{ labels.ui("unreviewed") }}</th></tr>
-</thead>
-<tbody>
-{% for row in rows %}
-<tr><td><a href="{{ row.href }}">{{ row.name }}</a></td><td>{{ row.records }}</td>{% for cell in row.cells %}<td>{% if cell.count %}<a href="{{ cell.href }}">{{ cell.count }}</a>{% endif %}</td>{% endfor %}{{ count_cell(row.clarify) }}{{ count_cell(row.unknown) }}{{ count_cell(row.unreviewed) }}</tr>
+{% for group in roots %}
+<h2>{{ group.root }}</h2>
+{{ types_list(group.types, group.root ~ "/") | trim }}
 {% endfor %}
-</tbody>
-</table>
-</div>
 {% endblock %}

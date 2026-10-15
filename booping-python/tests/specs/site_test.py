@@ -13,6 +13,10 @@ from booping.specs.site.model import (
     SiteRoot,
     load_site,
 )
+from booping.specs.site.state import RecordState, record_state
+
+CLARIFY_ICON = '<svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>'
+UNKNOWN_ICON = '<svg class="ic" aria-hidden="true"><use href="#i-unknown"/></svg>'
 
 
 def _no_link(dest: str) -> tuple[str | None, str | None]:
@@ -20,9 +24,7 @@ def _no_link(dest: str) -> tuple[str | None, str | None]:
 
 
 def _render(text: str, first_line: int = 1, statuses: set[str] | None = None) -> str:
-    return render_body(
-        text, first_line=first_line, id_prefix="", link=_no_link, statuses=statuses or set()
-    ).html
+    return render_body(text, first_line=first_line, link=_no_link, statuses=statuses or set()).html
 
 
 @pytest.mark.parametrize(
@@ -42,14 +44,11 @@ def test_repeated_headings_get_numbered_ids() -> None:
     html = render_body(
         "# Notes\n\n## Notes\n\n### Notes\n",
         first_line=1,
-        id_prefix="r-",
         link=_no_link,
         statuses=set(),
     ).html
     assert html == (
-        '<h1 id="r-notes">Notes</h1>\n'
-        '<h2 id="r-notes-1">Notes</h2>\n'
-        '<h3 id="r-notes-2">Notes</h3>\n'
+        '<h1 id="notes">Notes</h1>\n<h2 id="notes-1">Notes</h2>\n<h3 id="notes-2">Notes</h3>\n'
     )
 
 
@@ -64,19 +63,25 @@ def test_raw_html_is_escaped() -> None:
     [
         (
             "intro\n\nwe [clarify] this\n",
-            '<p>intro</p>\n<p id="L12">we <mark class="mk mk-clarify">[clarify]</mark> this</p>\n',
+            '<p>intro</p>\n<p id="L12">we <mark class="mk mk-clarify">'
+            + CLARIFY_ICON
+            + "[clarify]</mark> this</p>\n",
             [Mark(line=12, kind="clarify", text="we [clarify] this")],
         ),
         (
             "- first\n- second [unknown]\n",
-            '<ul>\n<li>first</li>\n<li id="L11">second <mark class="mk mk-unknown">[unknown]'
+            '<ul>\n<li>first</li>\n<li id="L11">second <mark class="mk mk-unknown">'
+            + UNKNOWN_ICON
+            + "[unknown]"
             "</mark></li>\n</ul>\n",
             [Mark(line=11, kind="unknown", text="second [unknown]")],
         ),
         (
             "| a | b |\n|---|---|\n| x | [clarify] |\n",
             "<table>\n<thead>\n<tr>\n<th>a</th>\n<th>b</th>\n</tr>\n</thead>\n<tbody>\n"
-            '<tr id="L12">\n<td>x</td>\n<td><mark class="mk mk-clarify">[clarify]</mark></td>\n'
+            '<tr id="L12">\n<td>x</td>\n<td><mark class="mk mk-clarify">'
+            + CLARIFY_ICON
+            + "[clarify]</mark></td>\n"
             "</tr>\n</tbody>\n</table>\n",
             [Mark(line=12, kind="clarify", text="x [clarify]")],
         ),
@@ -94,23 +99,21 @@ def test_raw_html_is_escaped() -> None:
     ids=["paragraph", "list-item", "table-row", "code-span", "fenced-block"],
 )
 def test_marks_wrap_text_outside_code(text: str, html: str, marks: list[Mark]) -> None:
-    rendered = render_body(text, first_line=10, id_prefix="", link=_no_link, statuses=set())
+    rendered = render_body(text, first_line=10, link=_no_link, statuses=set())
     assert rendered.html == html
     assert rendered.marks == marks
 
 
 def test_mark_text_is_collapsed_and_cut() -> None:
     body = "[clarify] " + "word " * 40 + "\nmore\n"
-    rendered = render_body(body, first_line=3, id_prefix="x-", link=_no_link, statuses=set())
+    rendered = render_body(body, first_line=3, link=_no_link, statuses=set())
     expected = ("[clarify] " + "word " * 40 + "more")[:160] + "…"
     assert rendered.marks == [Mark(line=3, kind="clarify", text=expected)]
-    assert rendered.html.startswith('<p id="x-L3">')
+    assert rendered.html.startswith('<p id="L3">')
 
 
 def test_one_anchor_per_block_with_both_kinds() -> None:
-    rendered = render_body(
-        "a [clarify] b [unknown]\n", first_line=1, id_prefix="", link=_no_link, statuses=set()
-    )
+    rendered = render_body("a [clarify] b [unknown]\n", first_line=1, link=_no_link, statuses=set())
     assert rendered.html.count('id="L1"') == 1
     assert [(m.line, m.kind) for m in rendered.marks] == [(1, "clarify"), (1, "unknown")]
 
@@ -124,7 +127,6 @@ def test_links_are_reported_and_rendered_through_the_callback() -> None:
     rendered = render_body(
         "first [a](rule/0001.md#why)\nsecond [b](gone.md)\n",
         first_line=7,
-        id_prefix="",
         link=link,
         statuses=set(),
     )
@@ -262,3 +264,66 @@ def test_backlinks_from_frontmatter_and_body_deduped(site: Site) -> None:
     assert [r.page for r in site.backlinks(base)] == ["proj/rule/0003-uses.html"]
     assert [r.page for r in site.backlinks(other)] == ["proj/rule/0010-late.html"]
     assert site.backlinks(_record(site, "proj", "rule/0003")) == []
+
+
+@pytest.fixture
+def related(tmp_path: Path) -> Site:
+    proj = tmp_path / "proj"
+    booping = tmp_path / "booping"
+    _write(proj / "value" / "0001-v.md", "---\ntitle: V\n---\nv\n")
+    _write(proj / "mechanic" / "0001-dash.md", "---\ntitle: Dash\n---\nd\n")
+    _write(
+        proj / "adr" / "0001-old.md",
+        "---\nvalues: [value/0001, value/0001, value/0099]\nmechanics: [mechanic/0001]\n"
+        "rules: [booping:rule/0002]\ntags: [x]\n---\nold\n",
+    )
+    _write(proj / "adr" / "0002-new.md", "---\nsupersedes: [adr/0001]\n---\nnew\n")
+    _write(booping / "rule" / "0002-r.md", "---\ntitle: R\n---\nr\n")
+    return load_site(
+        [SiteRoot(name="proj", path=proj), SiteRoot(name="booping", path=booping)],
+        ["value", "rule", "adr", "mechanic"],
+    )
+
+
+def test_relations_resolve_dedupe_and_sort_keys(related: Site) -> None:
+    relations = related.relations(_record(related, "proj", "adr/0001"))
+    assert {key: [r.page for r in targets] for key, targets in relations.items()} == {
+        "mechanics": ["proj/mechanic/0001-dash.html"],
+        "rules": ["booping/rule/0002-r.html"],
+        "values": ["proj/value/0001-v.html"],
+    }
+    assert list(relations) == ["mechanics", "rules", "values"]
+    assert related.relations(_record(related, "proj", "value/0001")) == {}
+
+
+def test_superseded_by_follows_direct_supersedes(related: Site) -> None:
+    old = _record(related, "proj", "adr/0001")
+    new = _record(related, "proj", "adr/0002")
+    assert related.superseded_by(old) == [new]
+    assert related.superseded_by(new) == []
+
+
+def test_record_state_counts_marks_and_review(related: Site) -> None:
+    record = SiteRecord(
+        root="proj",
+        type="adr",
+        number=3,
+        slug="s",
+        path=Path("/x/0003-s.md"),
+        frontmatter={"status": "proposed", "kind": None, "reviewed": "2026-10-01"},
+        body="",
+        body_first_line=1,
+    )
+    marks = render_body(
+        "a [clarify]\n\nb [unknown] [clarify]\n",
+        first_line=7,
+        link=_no_link,
+        statuses=set(),
+    ).marks
+    assert record_state(record, marks) == RecordState(
+        status="proposed", kind=None, clarify=2, unknown=1, unreviewed=False, first_mark="L7"
+    )
+    unread = _record(related, "proj", "adr/0002")
+    assert record_state(unread, []) == RecordState(
+        status=None, kind=None, clarify=0, unknown=0, unreviewed=True, first_mark=None
+    )

@@ -140,6 +140,51 @@ class Site:
     def backlinks(self, record: SiteRecord) -> list[SiteRecord]:
         return list(self._backlinks.get(id(record), []))
 
+    @cached_property
+    def _relations(self) -> dict[int, dict[str, list[SiteRecord]]]:
+        index: dict[int, dict[str, list[SiteRecord]]] = {}
+        for source in self.records:
+            relations: dict[str, list[SiteRecord]] = {}
+            for key in sorted(ref_keys(source.frontmatter)):
+                targets: list[SiteRecord] = []
+                for text in ref_values(source.frontmatter[key]):
+                    resolved = self.resolve_ref(text, source.root)
+                    if isinstance(resolved, SiteRecord) and resolved not in targets:
+                        targets.append(resolved)
+                if targets:
+                    relations[key] = targets
+            index[id(source)] = relations
+        return index
+
+    def relations(self, record: SiteRecord) -> dict[str, list[SiteRecord]]:
+        """Frontmatter ref keys, sorted, each with the records its refs resolve to in
+        frontmatter order, once each; a key resolving to nothing is absent."""
+        return {key: list(targets) for key, targets in self._relations[id(record)].items()}
+
+    @cached_property
+    def _superseded_by(self) -> dict[int, list[SiteRecord]]:
+        index: dict[int, list[SiteRecord]] = {}
+        for source in self.records:
+            for target in self._relations[id(source)].get("supersedes", []):
+                index.setdefault(id(target), []).append(source)
+        return index
+
+    def superseded_by(self, record: SiteRecord) -> list[SiteRecord]:
+        return list(self._superseded_by.get(id(record), []))
+
+
+def ref_values(value: Any) -> list[str]:
+    """The ref strings of a frontmatter value that is a ref or a list of refs, else []."""
+    items: list[Any] = value if isinstance(value, list) else [value]  # pyright: ignore[reportUnknownVariableType]
+    if not items or not all(isinstance(i, str) and parse_ref(i) is not None for i in items):
+        return []
+    return [str(i) for i in items]
+
+
+def ref_keys(frontmatter: dict[str, Any]) -> list[str]:
+    """Frontmatter keys whose value is a ref or a list of refs, in frontmatter order."""
+    return [key for key, value in frontmatter.items() if ref_values(value)]
+
 
 def _strings(value: Any) -> Iterator[str]:
     if isinstance(value, str):

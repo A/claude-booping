@@ -8,6 +8,7 @@ from pathlib import Path
 
 import pytest
 
+from booping.specs.site import pages as site_pages
 from booping.specs.site.labels import load_labels
 from booping.specs.site.model import Site, SiteRoot, load_site
 from booping.specs.site.pages import SiteWarning, build_site, environment
@@ -87,8 +88,12 @@ def _parse(html: str) -> _Links:
 
 
 def test_every_relative_link_lands_on_a_page_and_id(site: Site) -> None:
-    files = _texts(site)
-    pages = {path: _parse(text) for path, text in files.items() if path.endswith(".html")}
+    files = build_site(site, TYPES)[0]
+    pages = {
+        path: _parse(text)
+        for path, text in files.items()
+        if path.endswith(".html") and isinstance(text, str)
+    }
     checked = 0
     for path, parsed in pages.items():
         assert parsed.scripts == 2
@@ -111,12 +116,16 @@ def test_page_map_paths(site: Site) -> None:
     assert sorted(files) == [
         "core/index.html",
         "core/value/0001-clarity.html",
+        "core/value/0001-clarity.md",
         "core/value/index.html",
         "fonts.css",
         "fonts/OFL-golos-text.txt",
         "fonts/OFL-jetbrains-mono.txt",
         "index.html",
+        "index.json",
+        "llms.txt",
         "proj/adr/0001-pick.html",
+        "proj/adr/0001-pick.md",
         "proj/adr/index.html",
         "proj/index.html",
         "site.js",
@@ -128,61 +137,68 @@ def test_build_is_repeatable(site: Site, roots: list[SiteRoot]) -> None:
     assert build_site(site, TYPES) == build_site(load_site(roots, TYPES), TYPES)
 
 
-def test_marks_list_links_to_the_marked_line(site: Site) -> None:
+def test_root_page_lists_types_with_counts_and_marks_with_links(site: Site) -> None:
     files = _texts(site)
+    root = files["proj/index.html"]
     assert (
-        '<li><a href="adr/0001-pick.html#L10"><code>adr/0001</code> Pick</a>'
-        " — We [clarify] this.</li>"
-    ) in files["proj/index.html"]
-    assert "<h3>[unknown]</h3>\n<p>None.</p>" in files["proj/index.html"]
-    assert 'id="L10"' in files["proj/adr/0001-pick.html"]
-    assert 'id="0001-pick--L10"' in files["proj/adr/index.html"]
+        '<ul class="types">\n<li><a href="adr/index.html">ADRs</a>'
+        ' <span class="n">Records: 1</span>\n<p>why it was decided so</p>\n</li>\n</ul>'
+    ) in root
+    rows = re.findall(r'<li class="row">.*?<a class="t" href="([^"]+)">([^<]+)</a>', root)
+    assert rows == [("adr/0001-pick.html#L10", "Pick")]
+    assert '<span class="s">We [clarify] this.</span>' in root
+    target, _, fragment = rows[0][0].partition("#")
+    assert fragment in _parse(files[f"proj/{target}"]).ids
 
 
 def test_value_page_lists_cross_root_backlink(site: Site) -> None:
     files = _texts(site)
     assert (
-        '<a href="../../proj/adr/0001-pick.html"><code>proj:adr/0001</code> Pick</a>'
-        in files["core/value/0001-clarity.html"]
-    )
+        '<li><a href="../../proj/adr/0001-pick.html">Pick</a>'
+        ' <code class="ref">proj:adr/0001</code> <span class="b ok">'
+    ) in files["core/value/0001-clarity.html"]
     assert "Nothing references this record." in files["proj/adr/0001-pick.html"]
 
 
 def test_record_page_links_refs_and_body(site: Site) -> None:
     page = _texts(site)["proj/adr/0001-pick.html"]
-    assert '<a href="../../core/value/0001-clarity.html"><code>core:value/0001</code></a>' in page
-    assert '<code class="unresolved">core:value/0009</code>' in page
+    assert (
+        '<dt>Serves values</dt>\n<dd><ul class="rel">\n'
+        '<li><a href="../../core/value/0001-clarity.html">Clarity</a>'
+        ' <code class="ref">core:value/0001</code></li>\n'
+        '<li><code class="unresolved">core:value/0009</code></li>\n'
+    ) in page
     assert '<a href="../../core/value/0001-clarity.html#why">why</a>' in page
     assert '<span class="unresolved">gone</span>' in page
-    assert '<span class="badge st-accepted">accepted</span>' in page
-    assert '<span class="badge unreviewed">unreviewed</span>' in page
-    assert '<span class="chip mk-clarify">1 question for you</span>' in page
+    badges = re.findall(r"<span class=\"b ([a-z]+)\">(?:<svg[^>]*>.*?</svg>)([^<]+)</span>", page)
+    assert badges == [("ok", "accepted"), ("warn", "1 question for you"), ("plain", "unreviewed")]
 
 
-def test_type_page_prefixes_in_page_anchors(site: Site) -> None:
-    page = _texts(site)["proj/adr/index.html"]
-    assert '<a href="#0001-pick--decision">top</a>' in page
-    assert '<h2 id="0001-pick--decision">Decision</h2>' in page
+def test_type_page_is_one_row_per_record_without_bodies(tmp_path: Path) -> None:
+    page = _record_page(tmp_path)["s/adr/index.html"]
+    assert page.count('<li class="row">') == 2
+    assert re.findall(r'<a class="t" href="([^"]+)">([^<]+)</a>', page) == [
+        ("0001-robot.html", "Robot"),
+        ("0002-chassis.html", "Chassis"),
+    ]
+    assert '<p class="lead">why it was decided so</p>' in page
+    assert "Intro." not in page
+    assert "<article" not in page
 
 
-def test_value_badge_uses_kind_and_reviewed_hides_unreviewed(site: Site) -> None:
+def test_value_kind_is_a_raw_row_and_reviewed_hides_unreviewed(site: Site) -> None:
     page = _texts(site)["core/value/0001-clarity.html"]
-    assert '<span class="badge st-value">value</span>' in page
-    assert 'class="badge unreviewed"' not in page
+    assert "<dt>kind</dt>\n<dd>value</dd>" in page
+    assert '<dt>Reviewed</dt>\n<dd><time datetime="2026-10-01">1 October 2026</time></dd>' in page
+    assert '<div class="badges">' not in page
 
 
-def test_top_index_counts(site: Site) -> None:
-    index = _texts(site)["index.html"]
-    assert (
-        '<tr><td><a href="core/index.html">core</a></td><td>1</td>'
-        '<td><a href="core/value/index.html">1</a></td><td></td>'
-        "<td></td><td></td><td></td></tr>"
-    ) in index
-    assert (
-        '<tr><td><a href="proj/index.html">proj</a></td><td>1</td>'
-        '<td></td><td><a href="proj/adr/index.html">1</a></td>'
-        "<td>1</td><td></td><td>1</td></tr>"
-    ) in index
+def test_no_page_holds_a_table(site: Site) -> None:
+    files = _texts(site)
+    home = files["index.html"]
+    assert re.findall(r"<h2>([^<]+)</h2>", home) == ["core", "proj"]
+    assert '<li><a href="core/value/index.html">Values</a>' in home
+    assert all("<table" not in html for path, html in files.items() if path.endswith(".html"))
 
 
 def test_warnings_once_per_record_sorted(site: Site, tmp_path: Path) -> None:
@@ -343,3 +359,92 @@ def test_crumbs_are_an_ordered_list_with_the_current_page_last(site: Site) -> No
         '<li><span aria-current="page">adr/0001</span></li>\n'
         "</ol>\n</nav>"
     ) in page
+
+
+def _record_page(tmp_path: Path, lang: str = "en") -> dict[str, str]:
+    _write(
+        tmp_path / "s" / "value" / "0001-craft.md", "---\ntitle: Craft\nstatus: accepted\n---\nc\n"
+    )
+    _write(
+        tmp_path / "s" / "adr" / "0001-robot.md",
+        "---\ntitle: Robot\nstatus: superseded\ncreated_by: claude\nupdated_at: 2026-10-15\n"
+        "values: [value/0001]\ntags: [robot]\ntargets: [develop]\n---\n"
+        "Intro.\n\nWho swaps [clarify] slots?\n",
+    )
+    _write(
+        tmp_path / "s" / "adr" / "0002-chassis.md",
+        "---\ntitle: Chassis\nsupersedes: [adr/0001]\n---\nx\n",
+    )
+    labels, lang, _ = load_labels({"lang": lang})
+    files, _ = build_site(load_site([SiteRoot("s", tmp_path / "s")], TYPES), TYPES, labels, lang)
+    return {path: text for path, text in files.items() if isinstance(text, str)}
+
+
+def test_record_page_head_facts_and_relations_in_russian(tmp_path: Path) -> None:
+    page = _record_page(tmp_path, "ru")["s/adr/0001-robot.html"]
+    facts = page[page.index('<dl class="facts">') : page.index("</dl>")]
+    assert re.findall(r"<dt>([^<]+)</dt>", facts) == ["Автор", "Изменено", "Ревью"]
+    assert "<dd>агент</dd>" in facts
+    assert '<dd><time datetime="2026-10-15">15 октября 2026</time></dd>' in facts
+    assert "<dd>ещё не было</dd>" in facts
+    assert (
+        '<dt>Служит ценностям</dt>\n<dd><ul class="rel">\n'
+        '<li><a href="../../s/value/0001-craft.html">Craft</a> <code class="ref">value/0001</code>'
+    ) in page
+    assert '<span class="tag">#robot</span>' in page
+    anchor = re.search(r'<a href="#(L\d+)"><span class="b warn">', page)
+    assert anchor is not None
+    assert anchor.group(1) in _parse(page).ids
+    assert "<dt>targets</dt>\n<dd>develop</dd>" in page
+    for raw in ("created_by", "updated_at"):
+        assert f"<dt>{raw}</dt>" not in page
+
+
+def test_superseded_record_names_its_superseder(tmp_path: Path) -> None:
+    page = _record_page(tmp_path)["s/adr/0001-robot.html"]
+    assert (
+        '<dt>Superseded by</dt>\n<dd><ul class="rel">\n'
+        '<li><a href="../../s/adr/0002-chassis.html">Chassis</a>'
+        ' <code class="ref">adr/0002</code></li>'
+    ) in page
+
+
+STYLE = (Path(site_pages.__file__).parent / "style.css").read_text()
+LIST_CLASSES = {
+    "rows",
+    "row",
+    "t",
+    "s",
+    "why",
+    "ref",
+    "tags",
+    "tag",
+    "facts",
+    "relations",
+    "rel",
+    "types",
+}
+
+
+def _rules(css: str) -> list[tuple[str, str]]:
+    stripped = re.sub(r"/\*.*?\*/", "", css, flags=re.S)
+    return [(sel.strip(), body) for sel, body in re.findall(r"([^{}]+)\{([^{}]*)\}", stripped)]
+
+
+def test_list_and_record_classes_the_pages_emit_are_styled(tmp_path: Path) -> None:
+    pages = _record_page(tmp_path)
+    emitted = {
+        cls
+        for html in pages.values()
+        for attr in re.findall(r'class="([^"]+)"', html)
+        for cls in attr.split()
+    }
+    assert emitted >= LIST_CLASSES
+    selectors = " ".join(selector for selector, _ in _rules(STYLE))
+    unstyled = {c for c in LIST_CLASSES if not re.search(rf"\.{c}(?![\w-])", selectors)}
+    assert unstyled == set()
+    for ul in ("ul.rows", "ul.rel", "ul.types"):
+        assert any(
+            ul in selector.split(", ") and "list-style: none" in body and "padding: 0" in body
+            for selector, body in _rules(STYLE)
+        ), ul

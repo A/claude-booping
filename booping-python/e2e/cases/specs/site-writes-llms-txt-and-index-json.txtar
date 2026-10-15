@@ -1,0 +1,152 @@
+`booping specs site` writes `llms.txt` and `index.json` beside the pages: the first value's summary
+as the blockquote, one section per type in page order, a record with no summary ending after its
+link, and every record's metadata, relations and backlinks as `{root}:{ref}` ids.
+
+-- fixtures/cwd/specs/value/0001-small-steps.md --
+---
+type: value
+title: Small steps
+summary: Ship in small, reviewable steps.
+kind: value
+---
+
+# Small steps
+-- fixtures/cwd/specs/rule/0001-one-concern.md --
+---
+type: rule
+title: One concern per commit
+summary: A commit carries one concern.
+status: accepted
+tags: [git]
+values: [value/0001]
+reviewed: 2026-10-01
+---
+
+# One concern per commit
+-- fixtures/cwd/specs/adr/0001-squash.md --
+---
+type: adr
+title: Adopt squash merges
+status: proposed
+rules: [rule/0001]
+---
+
+# Adopt squash merges
+
+[clarify] Release branches?
+-- cmd --
+booping specs site --root proj=specs
+-- exit --
+0
+-- stdout --
+specs site: 1 roots, 3 records, 8 pages, 0 warnings -> specs-site
+-- stderr --
+-- expected/cwd/specs-site/llms.txt --
+# Specs
+
+> Ship in small, reviewable steps.
+
+## ADRs — proj
+
+- [adr/0001 Adopt squash merges](proj/adr/0001-squash.md)
+
+## Rules — proj
+
+- [rule/0001 One concern per commit](proj/rule/0001-one-concern.md): A commit carries one concern. (accepted; git)
+
+## Values — proj
+
+- [value/0001 Small steps](proj/value/0001-small-steps.md): Ship in small, reviewable steps.
+-- expected/cwd/specs-site/index.json --
+{
+ "title": "Specs",
+ "lang": "en",
+ "records": [
+  {
+   "id": "proj:adr/0001",
+   "root": "proj",
+   "ref": "adr/0001",
+   "type": "adr",
+   "title": "Adopt squash merges",
+   "summary": null,
+   "status": "proposed",
+   "kind": null,
+   "tags": [],
+   "created_by": null,
+   "created_at": null,
+   "updated_at": null,
+   "reviewed": null,
+   "url": "proj/adr/0001-squash.html",
+   "md": "proj/adr/0001-squash.md",
+   "marks": {
+    "clarify": 1,
+    "unknown": 0
+   },
+   "relations": {
+    "rules": [
+     "proj:rule/0001"
+    ]
+   },
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "proj:rule/0001",
+   "root": "proj",
+   "ref": "rule/0001",
+   "type": "rule",
+   "title": "One concern per commit",
+   "summary": "A commit carries one concern.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [
+    "git"
+   ],
+   "created_by": null,
+   "created_at": null,
+   "updated_at": null,
+   "reviewed": "2026-10-01",
+   "url": "proj/rule/0001-one-concern.html",
+   "md": "proj/rule/0001-one-concern.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {
+    "values": [
+     "proj:value/0001"
+    ]
+   },
+   "superseded_by": [],
+   "backlinks": [
+    "proj:adr/0001"
+   ]
+  },
+  {
+   "id": "proj:value/0001",
+   "root": "proj",
+   "ref": "value/0001",
+   "type": "value",
+   "title": "Small steps",
+   "summary": "Ship in small, reviewable steps.",
+   "status": null,
+   "kind": "value",
+   "tags": [],
+   "created_by": null,
+   "created_at": null,
+   "updated_at": null,
+   "reviewed": null,
+   "url": "proj/value/0001-small-steps.html",
+   "md": "proj/value/0001-small-steps.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": [
+    "proj:rule/0001"
+   ]
+  }
+ ]
+}

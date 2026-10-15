@@ -39,6 +39,7 @@ specs site: 2 roots, 2 records, 7 pages, 0 warnings -> specs-site
 <link rel="stylesheet" href="../../fonts.css">
 <link rel="stylesheet" href="../../style.css">
 <script src="../../site.js" defer></script>
+<link rel="alternate" type="text/markdown" href="0001-one-concern-per-commit.md">
 </head>
 <body>
 <svg aria-hidden="true" style="display:none">
@@ -87,17 +88,23 @@ specs site: 2 roots, 2 records, 7 pages, 0 warnings -> specs-site
 </nav>
 <article>
 <h1>One concern per commit</h1>
-<p class="meta"><code>rule/0001</code>
- <span class="badge st-accepted">accepted</span> <span class="badge unreviewed">unreviewed</span></p>
-<p class="summary">A commit carries one concern.</p>
+<div class="badges"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-unreviewed"/></svg>unreviewed</span></div>
+<p class="lead">A commit carries one concern.</p>
 <dl class="facts">
-<dt>Serves values</dt>
-<dd><a href="../../a/value/0001-small-steps.html"><code>a:value/0001</code></a></dd>
+<dt>Reviewed</dt>
+<dd>not reviewed yet</dd>
 </dl>
+<section class="relations">
+<dl>
+<dt>Serves values</dt>
+<dd><ul class="rel">
+<li><a href="../../a/value/0001-small-steps.html">Small steps</a> <code class="ref">a:value/0001</code></li>
+</ul></dd>
+</dl>
+</section>
 <div class="body">
 <h1 id="one-concern-per-commit">One concern per commit</h1>
 </div>
-
 </article>
 <h2 id="referenced-by">Referenced by</h2>
 <p>Nothing references this record.</p>

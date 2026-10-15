@@ -4,6 +4,9 @@
 <html lang="{{ lang }}">
 <head>
 <meta charset="utf-8">
+{% if base_href is defined %}
+<base href="{{ base_href }}">
+{% endif %}
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script>try{var t=localStorage.getItem("specs-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}document.documentElement.classList.add("js")</script>
 <meta name="color-scheme" content="light dark">
@@ -11,6 +14,7 @@
 <link rel="stylesheet" href="{{ prefix }}fonts.css">
 <link rel="stylesheet" href="{{ prefix }}style.css">
 <script src="{{ prefix }}site.js" defer></script>
+{% block head %}{% endblock %}
 </head>
 <body>
 {% include "_icons.html.j2" %}

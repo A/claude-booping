@@ -79,7 +79,10 @@ def _split_marks(children: list[Token]) -> tuple[list[Token], list[tuple[Token, 
             if match.start() > pos:
                 out.append(Token("text", "", 0, content=child.content[pos : match.start()]))
             kind = match.group(1)
-            token = _html_token(f'<mark class="mk mk-{kind}">[{kind}]</mark>')
+            token = _html_token(
+                f'<mark class="mk mk-{kind}"><svg class="ic" aria-hidden="true">'
+                f'<use href="#i-{kind}"/></svg>[{kind}]</mark>'
+            )
             out.append(token)
             marks.append((token, kind))
             pos = match.end()
@@ -117,7 +120,6 @@ def render_body(
     text: str,
     *,
     first_line: int,
-    id_prefix: str,
     link: LinkRenderer,
     statuses: Collection[str],
 ) -> Rendered:
@@ -139,7 +141,7 @@ def render_body(
         elif token.type in _ANCHOR_CLOSE:
             stack.pop()
         if token.type == "heading_open":
-            token.attrSet("id", id_prefix + _unique_slug(_plain(tokens[index + 1]), seen_slugs))
+            token.attrSet("id", _unique_slug(_plain(tokens[index + 1]), seen_slugs))
         if token.type != "inline" or token.map is None:
             continue
         if tokens[index - 1].type in ("td_open", "th_open") and token.content.strip() in statuses:
@@ -156,7 +158,7 @@ def render_body(
         line = first_line + (block.map or token.map)[0]
         if line not in anchored_lines:
             anchored_lines.add(line)
-            anchor_id = f"{id_prefix}L{line}"
+            anchor_id = f"L{line}"
             if block.type == "heading_open":
                 first_mark = found[0][0]
                 first_mark.content = first_mark.content.replace(

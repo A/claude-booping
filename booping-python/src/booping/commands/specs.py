@@ -88,6 +88,12 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
         help="Site title in the header and every page title"
         " (default: the attached project's name, else Specs)",
     )
+    site.add_argument(
+        "--site-url",
+        metavar="URL",
+        help="Public http(s) URL the site is served at; writes a 404.html whose links"
+        " resolve against its path",
+    )
     site.set_defaults(func=_run_site)
 
     index = verbs.add_parser(
@@ -328,6 +334,8 @@ def _default_roots(
 def _run_site(args: argparse.Namespace) -> None:
     ctx, root, home_dir = _assemble()
     logger.log(vault=ctx.vault, subcommand="specs", message=f"site --out {args.out}")
+    if args.site_url is not None and not args.site_url.startswith(("http://", "https://")):
+        _fail("--site-url must be an http:// or https:// URL")
     known = types(_format_dir(ctx, root))
 
     skipped: list[tuple[Path, str]] = []
@@ -349,7 +357,7 @@ def _run_site(args: argparse.Namespace) -> None:
     title = args.title or (ctx.project.name if ctx.project is not None else "Specs")
 
     site = load_site(roots, known)
-    files, warnings = build_site(site, known, labels, lang, title)
+    files, warnings = build_site(site, known, labels, lang, title, args.site_url)
     try:
         write_site(files, Path(args.out), roots)
     except SiteError as exc:

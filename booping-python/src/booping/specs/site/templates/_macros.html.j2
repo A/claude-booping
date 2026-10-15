@@ -1,7 +1,3 @@
-{% macro status_badge(badge) %}{% if badge is not none %}<span class="badge st-{{ badge }}">{{ labels.status(badge) }}</span>{% endif %}{% endmacro %}
-
-{% macro count_cell(n) %}<td>{% if n %}{{ n }}{% endif %}</td>{% endmacro %}
-
 {% macro fact_item(item) %}
 {%- if item.href is not none -%}
 <a href="{{ item.href }}"><code>{{ item.text }}</code></a>
@@ -12,40 +8,19 @@
 {%- endif -%}
 {% endmacro %}
 
-{% macro record_block(r, level) %}
-<h{{ level }}>{% if r.title_href is not none %}<a href="{{ r.title_href }}">{{ r.title }}</a>{% else %}{{ r.title }}{% endif %}</h{{ level }}>
-<p class="meta"><code>{{ r.ref }}</code>
-{% if r.badge is not none %} {{ status_badge(r.badge) }}{% endif %}
-{% if r.unreviewed %} <span class="badge unreviewed">{{ labels.ui("unreviewed") }}</span>{% endif %}
-{% if r.clarify %} <span class="chip mk-clarify">{{ labels.plural("clarify", r.clarify) }}</span>{% endif %}
-{% if r.unknown %} <span class="chip mk-unknown">{{ labels.ui("unknown") }} {{ r.unknown }}</span>{% endif %}
-</p>
-{% if r.summary is not none %}
-<p class="summary">{{ r.summary }}</p>
-{% endif %}
-{% if r.facts %}
-<dl class="facts">
-{% for fact in r.facts %}
-<dt>{{ labels.fact(fact.key) }}</dt>
-<dd>{% for item in fact["items"] %}{% if not loop.first %}, {% endif %}{{ fact_item(item) }}{% endfor %}</dd>
-{% endfor %}
-</dl>
-{% endif %}
-<div class="body">
-{{ r.body }}</div>
-{% endmacro %}
-
 {% macro icon(id) %}<svg class="ic" aria-hidden="true"><use href="#{{ id }}"/></svg>{% endmacro %}
 
 {% macro badge(css, icon_id, text) %}<span class="b {{ css }}">{{ icon(icon_id) }}{{ text }}</span>{% endmacro %}
 
-{% macro state_badges(state, labels, hide_unreviewed=false) %}
+{% macro state_badges(state, labels, hide_unreviewed=false, clarify_href=none) %}
 {%- set css = {"accepted": "ok", "done": "ok", "live": "ok", "resolved": "ok", "proposed": "warn", "planned": "warn", "validating": "warn", "open": "info"} -%}
 {%- set icons = {"accepted": "i-accepted", "done": "i-accepted", "live": "i-accepted", "resolved": "i-accepted", "proposed": "i-planned", "planned": "i-planned", "validating": "i-planned", "deferred": "i-planned", "open": "i-open", "rejected": "i-rejected", "retired": "i-rejected", "superseded": "i-rejected"} -%}
 {%- if state.status -%}
 {{ badge(css.get(state.status, "plain"), icons.get(state.status, "i-open"), labels.status(state.status)) }}
 {%- endif -%}
-{%- if state.clarify -%}
+{%- if state.clarify and clarify_href is not none -%}
+<a href="{{ clarify_href }}">{{ badge("warn", "i-clarify", labels.plural("clarify", state.clarify)) }}</a>
+{%- elif state.clarify -%}
 {{ badge("warn", "i-clarify", labels.plural("clarify", state.clarify)) }}
 {%- endif -%}
 {%- if state.unknown -%}
@@ -54,4 +29,35 @@
 {%- if state.unreviewed and not hide_unreviewed -%}
 {{ badge("plain", "i-unreviewed", labels.ui("unreviewed")) }}
 {%- endif -%}
+{% endmacro %}
+
+{% macro rel_item(item) %}
+{%- if item.href is not none -%}
+<a href="{{ item.href }}">{{ item.title }}</a> <code class="ref">{{ item.ref }}</code>{% if item.state.status %} {{ state_badges(item.state, labels) }}{% endif %}
+{%- else -%}
+<code{% if item.css is not none %} class="{{ item.css }}"{% endif %}>{{ item.text }}</code>
+{%- endif -%}
+{% endmacro %}
+
+{% macro fact_value(item) %}
+{%- if item.datetime is not none -%}
+<time datetime="{{ item.datetime }}">{{ item.text }}</time>
+{%- elif item.href is not none -%}
+<a href="{{ item.href }}">{{ item.text }}</a>
+{%- else -%}
+{{ item.text }}
+{%- endif -%}
+{% endmacro %}
+
+{% macro types_list(types, base) %}
+<ul class="types">
+{% for t in types %}
+<li><a href="{{ base }}{{ t.type }}/index.html">{{ labels.type_plural(t.type) }}</a> <span class="n">{{ labels.ui("records") }}: {{ t.count }}</span>
+{% set scenario = labels.scenario(t.type) %}
+{% if scenario %}
+<p>{{ scenario }}</p>
+{% endif %}
+</li>
+{% endfor %}
+</ul>
 {% endmacro %}

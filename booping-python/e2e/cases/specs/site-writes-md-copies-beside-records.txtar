@@ -1,0 +1,34 @@
+Every record page gets its source file beside it as `{stem}.md`, byte for byte, and announces it
+with a `<link rel="alternate" type="text/markdown">` in its head.
+
+-- fixtures/cwd/specs/value/0001-small-steps.md --
+---
+type: value
+title: Small steps
+summary: Ship in small, reviewable steps.
+---
+
+# Small steps
+
+Small changes are cheap to review.  
+A trailing double space stays.
+-- cmd --
+sh -c 'booping specs site --root proj=specs && grep -F "<link rel=\"alternate\"" specs-site/proj/value/0001-small-steps.html && cmp specs/value/0001-small-steps.md specs-site/proj/value/0001-small-steps.md && echo identical'
+-- exit --
+0
+-- stdout --
+specs site: 1 roots, 1 records, 4 pages, 0 warnings -> specs-site
+<link rel="alternate" type="text/markdown" href="0001-small-steps.md">
+identical
+-- stderr --
+-- expected/cwd/specs-site/proj/value/0001-small-steps.md --
+---
+type: value
+title: Small steps
+summary: Ship in small, reviewable steps.
+---
+
+# Small steps
+
+Small changes are cheap to review.  
+A trailing double space stays.

@@ -15,7 +15,7 @@ pages:
       - .uv-cache
   script:
     - git clone --depth 1 --branch "$BOOPING_REF" "$BOOPING_REPO" /tmp/booping
-    - /tmp/booping/bin/booping specs site --out public
+    - /tmp/booping/bin/booping specs site --out public --site-url "$CI_PAGES_URL"
   artifacts:
     paths:
       - public

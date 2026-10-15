@@ -1,15 +1,14 @@
 {% extends "base.html.j2" %}
-{% from "_macros.html.j2" import record_block, status_badge %}
+{% from "_macros.html.j2" import state_badges %}
 {% block main %}
-<h1>{{ labels.type_plural(type) }} <span class="count">{{ records | length }}</span></h1>
-<ul class="contents">
-{% for r in records %}
-<li><code>{{ r.ref }}</code> <a href="#{{ r.stem }}">{{ r.title }}</a>{% if r.badge is not none %} {{ status_badge(r.badge) }}{% endif %}</li>
+<h1>{{ labels.type_plural(type) }}</h1>
+{% set scenario = labels.scenario(type) %}
+{% if scenario %}
+<p class="lead">{{ scenario }}</p>
+{% endif %}
+<ul class="rows">
+{% for row in rows %}
+<li class="row"><code class="ref">{{ row.ref }}</code><a class="t" href="{{ row.href }}">{{ row.title }}</a><span class="why">{{ state_badges(row.state, labels) }}</span>{% if row.summary is not none %}<span class="s">{{ row.summary }}</span>{% endif %}</li>
 {% endfor %}
 </ul>
-{% for r in records %}
-<article id="{{ r.stem }}">
-{{ record_block(r, 2) }}
-</article>
-{% endfor %}
 {% endblock %}

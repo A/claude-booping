@@ -1,0 +1,17 @@
+A `--site-url` that is not http(s) is rejected before anything is rendered; no out directory is
+created.
+
+-- fixtures/cwd/specs/value/0001-small-steps.md --
+---
+type: value
+title: Small steps
+---
+
+# Small steps
+-- cmd --
+sh -c 'booping specs site --root proj=specs --site-url "javascript:alert(1)"; s=$?; test -e specs-site && echo specs-site exists; exit $s'
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: --site-url must be an http:// or https:// URL
