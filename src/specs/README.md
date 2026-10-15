@@ -13,7 +13,7 @@ Specs come in three tiers:
 |---------|----------------------------------------------------------|-----------------------------------------------|
 | core    | shipped with booping, at `specs/` in the plugin          | booping's rules for every project             |
 | global  | `<home_dir>/_specs/`                                     | one person's values and rules for every project |
-| project | `specs/` in the project repo, or `<vault>/specs/` when the vault is in the repo | the project's own records |
+| project | the vault root — type directories beside `plans/`; or a repo directory set by `core.specs.tiers.project.path`, linked into the vault as `<vault>/specs` by `booping specs init` | the project's own records |
 
 A reference without a namespace points into its own tier: `rule/0003`. Another tier is
 named by its namespace: `booping:rule/0003` for core, `<user>:rule/0003` for the global
@@ -129,7 +129,8 @@ booping specs check --tier core|global|project
 Checks one tier (default `project`). Errors:
 
 - `schema` — each record against its type's `schemas/<type>.yaml` (mdcheck);
-- `layout` — every record sits in a type directory;
+- `layout` — every record sits in a type directory; a tier rooted at the vault reads only
+  type directories and ignores the rest of the vault;
 - `filename` — the name is `<NNNN>-<slug>.md`;
 - `id` — numbers are unique within a type;
 - `frontmatter` — the frontmatter parses and its `type:` matches the directory;

@@ -16,9 +16,11 @@ Specs come in three tiers, each a tier root of its own:
 |-----------|-------------------------------------------------------------------------------------------|--------------------------------------------------|
 | `core`    | shipped with the plugin, at `specs/`                                                      | booping's rules for every project                |
 | `global`  | `<home_dir>/_specs/`                                                                      | your values and rules for every project          |
-| `project` | `specs/` in the attached repo, or `<vault>/specs/` when the vault lives inside the repo   | the project's own records                        |
+| `project` | the vault root, type directories beside `plans/`; or a repo directory you choose          | the project's own records                        |
 
-Where each tier lives and what it is called is the [`core.specs`](project_config.md#corespecs) config key. The [setup playbook](install.md#scaffold-the-project-vault) creates the global and project tiers and asks for your global namespace; [`booping specs init`](#booping-specs-init) creates either one on demand.
+At the vault root only the type directories are records; plans, retrospectives and everything else in the vault are left alone. To keep the project's records in the repo instead, set the project tier's `path` — `booping specs init` links it into the vault as `<vault>/specs`. A vault that still holds its records under `<vault>/specs/` is moved to the root by `/playbook migrate`, which leaves a tier you pointed at the repo where it is.
+
+Where each tier lives and what it is called is the [`core.specs`](project_config.md#corespecs) config key. The [setup playbook](install.md#scaffold-the-project-vault) sets up the global and project tiers and asks for your global namespace; [`booping specs init`](#booping-specs-init) creates either one on demand.
 
 ## Namespaced refs
 
@@ -42,9 +44,9 @@ Every verb but `site` takes `--tier core|global|project`, default `project`.
 booping specs init [--tier global|project]
 ```
 
-Creates the tier root and its `README.md` when absent. When the vault lives outside the repo, the project tier is `specs/` in the repo and `init` also links `<vault>/specs` to it, so the records sit with the code and stay reachable from the vault. Safe to re-run: it changes only what is missing.
+Creates the tier root and its `README.md` when absent. The default project tier is the vault root, so there `init` creates nothing and prints only the root. A project tier kept in the repo is created there and linked from `<vault>/specs`, so the records sit with the code and stay reachable from the vault. Safe to re-run: it changes only what is missing.
 
-Prints one line per change, in the order made, then the absolute tier root as the last line — on a re-run with nothing to do, only that last line:
+Prints one line per change, in the order made, then the absolute tier root as the last line — on a re-run with nothing to do, only that last line. For a project tier kept at `specs/` in the repo:
 
 ```
 created dir /home/me/Dev/app/specs
@@ -134,8 +136,8 @@ Warnings go to stderr, sorted by path then line:
 
 ```
 /home/me/Dev/old/specs  warning  site  root old not found, skipped
-vault/specs/adr/0002-ports.md:5  warning  site  unresolved ref booping:rule/0099
-vault/specs/adr/0002-ports.md:14  warning  site  unresolved link ../rule/0099-gone.md
+vault/adr/0002-ports.md:5  warning  site  unresolved ref booping:rule/0099
+vault/adr/0002-ports.md:14  warning  site  unresolved link ../rule/0099-gone.md
 ```
 
 An error prints one `error: {message}` line on stderr.

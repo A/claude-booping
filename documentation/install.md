@@ -46,7 +46,7 @@ The `setup` playbook takes the repo from any starting state to a working booping
 It runs in two steps:
 
 1. **Machine level** — when booping is not yet initialized, it asks for your preferred home dir (default `~/Claude/`), writes the machine config at `${XDG_CONFIG_HOME:-~/.config}/booping/config.yaml`, and makes the home dir exist as a git repo. When the machine config names no global [specs](specs.md) namespace yet, it asks for one (default `$USER`) and stores it as `core.specs.tiers.global.namespace`; then it creates the global specs tier at `<home_dir>/_specs/`.
-2. **Project level** — it asks where the vault lives (the default `<home_dir>/{project}/`, kept outside the repo, or a **repo-local** directory recorded via the `.booping` marker's `vault_path:` key), the project name, and marker visibility; then scaffolds the vault tree, writes the `.booping` marker, symlinks a repo-local vault into the home dir, and seeds `sprints.md`; last, it creates the project specs tier — `<vault>/specs/` when the vault lives inside the repo, else `specs/` in the repo, linked from `<vault>/specs`.
+2. **Project level** — it asks where the vault lives (the default `<home_dir>/{project}/`, kept outside the repo, or a **repo-local** directory recorded via the `.booping` marker's `vault_path:` key), the project name, and marker visibility; then scaffolds the vault tree, writes the `.booping` marker, symlinks a repo-local vault into the home dir, and seeds `sprints.md`; last, it sets up the project specs tier — by default the vault root itself, where the record type directories sit beside `plans/`, so nothing is created; a tier you keep in the repo is created there and linked from `<vault>/specs`.
 
 The scaffolded vault:
 
