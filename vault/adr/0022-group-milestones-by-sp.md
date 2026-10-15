@@ -40,7 +40,7 @@ the reviewer, not to the model.
 
 | Option | Status | Complexity | Reversibility | Verdict |
 |---|---|---|---|---|
-| [SP cap of 15](#sp-cap-of-15) | proposed | low | high | Halves delegations on the median plan |
+| [SP cap of 15](#sp-cap-of-15) | accepted | low | high | Halves delegations on the median plan |
 | [Count cap of two](#count-cap-of-two) | rejected | low | high | Cuts well below the measured floor |
 | [A 10 to 15 band with rounding](#a-10-to-15-band-with-rounding) | rejected | low | high | Same group counts as the plain cap |
 
