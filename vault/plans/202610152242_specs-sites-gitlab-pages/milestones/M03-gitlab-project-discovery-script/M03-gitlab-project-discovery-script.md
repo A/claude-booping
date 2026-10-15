@@ -3,7 +3,7 @@ id: "03"
 title: "GitLab discovery script — the group's booping-specs projects as site-index
   input"
 sp: 3
-status: in-progress
+status: done
 plan: "plans/202610152242_specs-sites-gitlab-pages/index.md"
 ---
 
@@ -19,20 +19,20 @@ Tests (integration tier, `booping-python/tests/ci/list_specs_projects_test.py`):
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 3.1 | The discovery script. | `src/ci/gitlab/list-specs-projects.py` | 2 | pending |
-| 3.2 | Subprocess tests against the fake server. | `booping-python/tests/ci/list_specs_projects_test.py`, `booping-python/tests/ci/__init__.py` | 1 | pending |
+| 3.1 | The discovery script. | `src/ci/gitlab/list-specs-projects.py` | 2 | done |
+| 3.2 | Subprocess tests against the fake server. | `booping-python/tests/ci/list_specs_projects_test.py`, `booping-python/tests/ci/__init__.py` | 1 | done |
 
 ## Definition of Done
 
 ### Task 3.1
 
-- [ ] The script imports only the standard library and is executable.
-- [ ] The token appears only in the request header — in no message, no exception text and no URL.
+- [x] The script imports only the standard library and is executable.
+- [x] The token appears only in the request header — in no message, no exception text and no URL.
 
 ### Task 3.2
 
-- [ ] The four cases pass; the token-leak case asserts the token string is absent from stdout and stderr.
-- [ ] `just lint` and `just typecheck` cover the test file without new ignores.
+- [x] The four cases pass; the token-leak case asserts the token string is absent from stdout and stderr.
+- [x] `just lint` and `just typecheck` cover the test file without new ignores.
 
 Return: the list of changed and created files, nothing else.
 

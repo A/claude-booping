@@ -2,7 +2,7 @@
 id: "01"
 title: "site-index — the index page from a YAML project file"
 sp: 4
-status: in-progress
+status: done
 plan: "plans/202610152242_specs-sites-gitlab-pages/index.md"
 ---
 
@@ -18,26 +18,26 @@ Tests (integration tier, `booping-python/e2e/cases/specs/`, hand-derived expecte
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 1.1 | `index.py` (`Project`, `load_projects`, `build_index`) and the `site_index.html.j2` template on the shared environment. | `booping-python/src/booping/specs/site/index.py`, `booping-python/src/booping/specs/site/pages.py`, `booping-python/src/booping/specs/site/templates/site_index.html.j2` | 2 | pending |
-| 1.2 | `site-index` verb: argparse wiring, YAML file read, write via `write_site`, stdout line. | `booping-python/src/booping/commands/specs.py` | 1 | pending |
-| 1.3 | The four e2e cases above. | `booping-python/e2e/cases/specs/site-index-*.txtar` | 1 | pending |
+| 1.1 | `index.py` (`Project`, `load_projects`, `build_index`) and the `site_index.html.j2` template on the shared environment. | `booping-python/src/booping/specs/site/index.py`, `booping-python/src/booping/specs/site/pages.py`, `booping-python/src/booping/specs/site/templates/site_index.html.j2` | 2 | done |
+| 1.2 | `site-index` verb: argparse wiring, YAML file read, write via `write_site`, stdout line. | `booping-python/src/booping/commands/specs.py` | 1 | done |
+| 1.3 | The four e2e cases above. | `booping-python/e2e/cases/specs/site-index-*.txtar` | 1 | done |
 
 ## Definition of Done
 
 ### Task 1.1
 
-- [ ] `build_index` output depends only on its arguments: no timestamp, no environment, rows sorted as C3 states.
-- [ ] `style.css` in the result equals `booping-python/src/booping/specs/site/style.css` byte for byte.
-- [ ] `booping specs site` output is unchanged — the existing `site-*.txtar` cases pass untouched.
+- [x] `build_index` output depends only on its arguments: no timestamp, no environment, rows sorted as C3 states.
+- [x] `style.css` in the result equals `booping-python/src/booping/specs/site/style.css` byte for byte.
+- [x] `booping specs site` output is unchanged — the existing `site-*.txtar` cases pass untouched.
 
 ### Task 1.2
 
-- [ ] `booping specs site-index --help` lists `--projects`, `--out`, `--title` with their defaults.
-- [ ] Success prints exactly `specs site-index: {n} projects -> {out}` on stdout and nothing on stderr.
+- [x] `booping specs site-index --help` lists `--projects`, `--out`, `--title` with their defaults.
+- [x] Success prints exactly `specs site-index: {n} projects -> {out}` on stdout and nothing on stderr.
 
 ### Task 1.3
 
-- [ ] The four cases exist under `booping-python/e2e/cases/specs/`, named `site-index-{kebab-description}.txtar`, and pass.
+- [x] The four cases exist under `booping-python/e2e/cases/specs/`, named `site-index-{kebab-description}.txtar`, and pass.
 
 Return: the list of changed and created files, nothing else.
 

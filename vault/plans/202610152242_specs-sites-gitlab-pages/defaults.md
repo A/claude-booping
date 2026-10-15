@@ -39,3 +39,33 @@
 **Why:** Owner's standing permission for this feature (2026-10-14), recorded in the plan's C6
 
 **Artifact:** [index.md](index.md)
+
+## D5 — develop/develop-loop — 2026-10-15 23:10
+
+**Asked:** The worker built site-index in its M02 shape at once — commands/specs.py and index.py carry M01 and M02 together; one commit per milestone cannot split them
+
+**Default:** Shared source landed in M01's commit 0b0d338; M02's commit 9dc8d4e carries its six e2e cases
+
+**Why:** Every commit stays importable; path-scoped staging cannot split one file
+
+**Artifact:** [index.md](index.md)
+
+## D6 — develop/develop-loop — 2026-10-15 23:10
+
+**Asked:** M04 DoD allows no host besides github.com/A/claude-booping and the uv image, yet the templates' header names raw.githubusercontent.com/A/claude-booping
+
+**Default:** Accepted: the include: remote: URL is the plan's own (C1, M04 header, M05)
+
+**Why:** The DoD's intent is no homelab host; the raw URL is the same repo
+
+**Artifact:** [index.md](index.md)
+
+## D7 — develop/develop-loop — 2026-10-15 23:10
+
+**Asked:** Wording of the validation errors M02 left open, and BOOPING_REF pin example in docs
+
+**Default:** Worker's wording kept (projects: not a list; projects[i]: not a mapping / `name` must be a non-empty string / …); docs pin example v1.1.1, the latest tag
+
+**Why:** C3 fixes only shape (one error: line naming projects[i]); the latest real tag is the honest example
+
+**Artifact:** [index.md](index.md)

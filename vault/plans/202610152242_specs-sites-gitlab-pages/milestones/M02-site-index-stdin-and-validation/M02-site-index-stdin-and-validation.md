@@ -2,7 +2,7 @@
 id: "02"
 title: "site-index — stdin JSON and input validation"
 sp: 3
-status: in-progress
+status: done
 plan: "plans/202610152242_specs-sites-gitlab-pages/index.md"
 ---
 
@@ -18,23 +18,23 @@ Tests (integration tier, `booping-python/e2e/cases/specs/`, hand-derived): stdin
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 2.1 | Stdin JSON as the default source; file stays YAML. | `booping-python/src/booping/commands/specs.py` | 1 | pending |
-| 2.2 | Validation in `load_projects` with indexed messages. | `booping-python/src/booping/specs/site/index.py` | 1 | pending |
-| 2.3 | The six e2e cases above. | `booping-python/e2e/cases/specs/site-index-*.txtar` | 1 | pending |
+| 2.1 | Stdin JSON as the default source; file stays YAML. | `booping-python/src/booping/commands/specs.py` | 1 | done |
+| 2.2 | Validation in `load_projects` with indexed messages. | `booping-python/src/booping/specs/site/index.py` | 1 | done |
+| 2.3 | The six e2e cases above. | `booping-python/e2e/cases/specs/site-index-*.txtar` | 1 | done |
 
 ## Definition of Done
 
 ### Task 2.1
 
-- [ ] `--projects` defaults to `-`; `--help` says stdin is JSON and a file is YAML.
+- [x] `--projects` defaults to `-`; `--help` says stdin is JSON and a file is YAML.
 
 ### Task 2.2
 
-- [ ] Every rejection listed in Scope gives exactly one `error: projects[{i}]: …` (or input-level `error: …`) line on stderr, exit 1, and leaves no out dir behind.
+- [x] Every rejection listed in Scope gives exactly one `error: projects[{i}]: …` (or input-level `error: …`) line on stderr, exit 1, and leaves no out dir behind.
 
 ### Task 2.3
 
-- [ ] The six cases exist and pass; the M01 cases still pass.
+- [x] The six cases exist and pass; the M01 cases still pass.
 
 Return: the list of changed and created files, nothing else.
 

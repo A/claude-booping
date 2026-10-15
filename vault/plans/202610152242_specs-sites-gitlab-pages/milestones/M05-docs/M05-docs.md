@@ -2,7 +2,7 @@
 id: "05"
 title: "Docs — site-index, publishing on GitLab Pages, CLAUDE.md"
 sp: 2
-status: in-progress
+status: done
 plan: "plans/202610152242_specs-sites-gitlab-pages/index.md"
 ---
 
@@ -19,19 +19,19 @@ plan: "plans/202610152242_specs-sites-gitlab-pages/index.md"
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 5.1 | `site-index` command section, exit-code column, and the publishing section. | `documentation/specs.md` | 1 | pending |
-| 5.2 | CLAUDE.md commands and layout lines. | `CLAUDE.md` | 1 | pending |
+| 5.1 | `site-index` command section, exit-code column, and the publishing section. | `documentation/specs.md` | 1 | done |
+| 5.2 | CLAUDE.md commands and layout lines. | `CLAUDE.md` | 1 | done |
 
 ## Definition of Done
 
 ### Task 5.1
 
-- [ ] Every flag, default, variable and path named in the docs matches the shipped code and templates.
-- [ ] No host or group name from the owner's homelab appears — examples use `{group}` and `{pages-domain}`.
+- [x] Every flag, default, variable and path named in the docs matches the shipped code and templates.
+- [x] No host or group name from the owner's homelab appears — examples use `{group}` and `{pages-domain}`.
 
 ### Task 5.2
 
-- [ ] The two CLAUDE.md lines exist; nothing else in CLAUDE.md changes.
+- [x] The two CLAUDE.md lines exist; nothing else in CLAUDE.md changes.
 
 Return: the list of changed and created files, nothing else.
 

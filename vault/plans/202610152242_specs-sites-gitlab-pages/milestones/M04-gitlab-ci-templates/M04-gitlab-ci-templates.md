@@ -2,7 +2,7 @@
 id: "04"
 title: "GitLab CI templates — the project pages job and the index job"
 sp: 2
-status: in-progress
+status: done
 plan: "plans/202610152242_specs-sites-gitlab-pages/index.md"
 ---
 
@@ -22,18 +22,18 @@ Tests (integration tier, `booping-python/tests/ci/templates_test.py`): each temp
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 4.1 | The two templates. | `src/ci/gitlab/specs-site.gitlab-ci.yml`, `src/ci/gitlab/specs-index.gitlab-ci.yml` | 1 | pending |
-| 4.2 | Template tests. | `booping-python/tests/ci/templates_test.py` | 1 | pending |
+| 4.1 | The two templates. | `src/ci/gitlab/specs-site.gitlab-ci.yml`, `src/ci/gitlab/specs-index.gitlab-ci.yml` | 1 | done |
+| 4.2 | Template tests. | `booping-python/tests/ci/templates_test.py` | 1 | done |
 
 ## Definition of Done
 
 ### Task 4.1
 
-- [ ] Both files match the Scope job by job; neither names `lab`, `zorya` or any other host besides `github.com/A/claude-booping` and the uv image.
+- [x] Both files match the Scope job by job; neither names `lab`, `zorya` or any other host besides `github.com/A/claude-booping` and the uv image.
 
 ### Task 4.2
 
-- [ ] The four checks pass for both templates.
+- [x] The four checks pass for both templates.
 
 Return: the list of changed and created files, nothing else.
 

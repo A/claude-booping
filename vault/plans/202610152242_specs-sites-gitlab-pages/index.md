@@ -66,11 +66,11 @@ In `booping-python`: `commands/specs.py` registers `site-index`; `specs/site/ind
 
 | id | title | sp | status |
 | --- | --- | --- | --- |
-| 01 | [site-index — the index page from a YAML project file](milestones/M01-site-index-from-a-yaml-file/M01-site-index-from-a-yaml-file.md) | 4 | in-progress |
-| 02 | [site-index — stdin JSON and input validation](milestones/M02-site-index-stdin-and-validation/M02-site-index-stdin-and-validation.md) | 3 | in-progress |
-| 03 | [GitLab discovery script — the group's booping-specs projects as site-index input](milestones/M03-gitlab-project-discovery-script/M03-gitlab-project-discovery-script.md) | 3 | in-progress |
-| 04 | [GitLab CI templates — the project pages job and the index job](milestones/M04-gitlab-ci-templates/M04-gitlab-ci-templates.md) | 2 | in-progress |
-| 05 | [Docs — site-index, publishing on GitLab Pages, CLAUDE.md](milestones/M05-docs/M05-docs.md) | 2 | in-progress |
+| 01 | [site-index — the index page from a YAML project file](milestones/M01-site-index-from-a-yaml-file/M01-site-index-from-a-yaml-file.md) | 4 | done |
+| 02 | [site-index — stdin JSON and input validation](milestones/M02-site-index-stdin-and-validation/M02-site-index-stdin-and-validation.md) | 3 | done |
+| 03 | [GitLab discovery script — the group's booping-specs projects as site-index input](milestones/M03-gitlab-project-discovery-script/M03-gitlab-project-discovery-script.md) | 3 | done |
+| 04 | [GitLab CI templates — the project pages job and the index job](milestones/M04-gitlab-ci-templates/M04-gitlab-ci-templates.md) | 2 | done |
+| 05 | [Docs — site-index, publishing on GitLab Pages, CLAUDE.md](milestones/M05-docs/M05-docs.md) | 2 | done |
 
 ## Milestone files
 
