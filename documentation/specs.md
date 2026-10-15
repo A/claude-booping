@@ -103,13 +103,15 @@ cargo install markdown-checker --version 0.1.1 --locked
 ### `booping specs site`
 
 ```
-booping specs site [--out DIR] [--root NAME=PATH ...]
+booping specs site [--out DIR] [--root NAME=PATH ...] [--title TEXT] [--site-url URL]
 ```
 
-Renders one or several specs roots to a static HTML site you open in a browser straight from disk: no server, no network, no JavaScript. The same input always produces a byte-identical tree.
+Renders one or several specs roots to a static HTML site you open in a browser straight from disk: no server and no network — fonts, icons and styles ship inside the output. The same input always produces a byte-identical tree.
 
 - **`--out DIR`** — the output directory, default `specs-site` in the working directory.
-- **`--root NAME=PATH`** — a root to render, repeatable: a name (`[A-Za-z0-9][A-Za-z0-9._-]*`) and a directory holding type directories. `~` is expanded.
+- **`--root NAME=PATH`** — a root to render, repeatable: a name (`[A-Za-z0-9][A-Za-z0-9._-]*`) and a directory holding type directories. `~` is expanded. Default: the tier and configured roots, below.
+- **`--title TEXT`** — the site title, shown in the header and in every page's `<title>`; default the attached project's name, else `Specs`.
+- **`--site-url URL`** — the public `http://` or `https://` URL the site is served at; default none. Given, the build also writes `404.html` (below).
 
 **Root selection.** Given `--root` at least once, exactly those roots are rendered, in the order given. Otherwise the roots are the three [tiers](#tiers) — core, global, project, each named by its namespace, the project tier by the project's name — followed by every entry of [`core.specs.site.roots`](project_config.md#corespecs). A tier whose directory does not exist is left out silently; a configured root whose directory does not exist is skipped with a warning. A root resolving to a directory already selected is skipped, so a tier that is also a configured root renders once. A root's name is its namespace on the site: `name:type/NNNN` refs resolve against it, so give a configured root the namespace its records are cited by.
 
@@ -128,16 +130,45 @@ core:
 
 A `path` is absolute, `~`-prefixed, or relative to `home_dir`.
 
+**Page shell.** Every page has a skip link, a header with the site title (linking home) and a theme toggle, a sidebar listing each root's types with their record counts, breadcrumbs, and a footer naming the generator — no build date, so rebuilds stay byte-identical. The theme toggle cycles auto → light → dark and remembers the choice in the browser; auto follows the system setting. Text is set in Golos Text, code in JetBrains Mono, both Cyrillic and Latin. Below 760px wide the layout drops to one column and the sidebar moves into a drawer opened from a menu button; without JavaScript the sidebar renders in the page flow instead, and every page still reads.
+
 **Pages.**
 
-- `index.html` — one row per root: its record count, the count per type, the open `[clarify]` and `[unknown]` marks, and how many records are unreviewed.
-- `{root}/index.html` — one row per type with the same counts, then every `[clarify]` and `[unknown]` mark in the root, each linking to its line in the record.
-- `{root}/{type}/index.html` — a contents list, then every record of the type in full.
-- `{root}/{type}/{NNNN-slug}.html` — one record: title, ref, status or kind badge, an `unreviewed` badge when `reviewed` is not set, mark counts, summary, every other frontmatter key, the body, then **Referenced by** — every record linking to this one, across roots.
+- `index.html` — home: each root with its types, each type showing its name, record count and a one-line scenario ("why the project exists" for values).
+- `{root}/index.html` — the root's types the same way, then every `[clarify]` and `[unknown]` mark in the root, each linking to its line in the record.
+- `{root}/{type}/index.html` — the type's scenario, then one row per record: ref, title linking to the record page, summary and state badges.
+- `{root}/{type}/{NNNN-slug}.html` — one record: title, state badges, tags, summary, then labelled facts — author, created, updated, reviewed, sources — with dates written out in the site's language, then every relation (`values`, `rules`, `supersedes`, …) as titled links with the target's status, plus **Superseded by** when a later record supersedes this one, any other frontmatter key, the body, and **Referenced by** — every record linking to this one, across roots.
+
+**State badges.** Each badge carries an icon and text, never colour alone: the record's status (`accepted`, `proposed`, …), the count of `[clarify]` marks (`2 questions for you`, linking to the first mark on a record page), `[unknown]` when the body has one, and `unreviewed` when `reviewed` is not set.
 
 Relative links and typed refs between records become links to the target's page, across roots too. A link to something that is not a record renders as plain text; a link or ref whose target is missing renders as plain text and prints a warning. The site never fails on a link — `booping specs check` is the validator.
 
-**Output directory.** Every build writes a `.booping-site` marker into the out directory. The command refuses — and writes nothing — when the out path is a file, lies inside one of the rendered roots, or is a non-empty directory without the marker. A directory carrying the marker is cleared and rewritten, so re-running into the same `--out` is safe.
+**Language and labels.** Page text — UI strings, type names and scenarios, statuses, fact names, author names and month names — comes from the label table for `core.specs.site.lang` (default `en`; `en` and `ru` ship), which also sets `<html lang>`. A language with no table renders with English labels, keeps its `<html lang>` and prints one warning. `core.specs.site.labels.{lang}` overrides or adds labels key by key through the usual config merge, falling back to `en` and then to the raw id, so a project names its own types without restating the rest. A project tier with a `_schemas/mechanic.yaml` type, published in Russian:
+
+```yaml
+# {vault}/config.yaml
+core:
+  specs:
+    site:
+      lang: ru
+      labels:
+        ru:
+          types:
+            mechanic: {name: Механика, plural: Механики, scenario: "Механики — как устроен мир"}
+```
+
+A label holding counts is a list of plural forms: two (one, other) or three (the Slavic one, few, many), as in `clarify: ["{n} вопрос к тебе", "{n} вопроса к тебе", "{n} вопросов к тебе"]`. `booping config-get core.specs.site.labels.en` prints every key with its shipped value.
+
+**Output directory.** Besides the pages, every build writes:
+
+- `style.css`, `site.js` (theme toggle and drawer), `fonts.css` with the fonts embedded — so nested pages opened from `file://` render them too — and the fonts' OFL licences under `fonts/`;
+- `{root}/{type}/{NNNN-slug}.md` — each record's source file, byte for byte, linked from its page as the Markdown alternate;
+- `llms.txt` — the site in the [llms.txt](https://llmstxt.org/) shape: the title, the first value's summary, then one section per root and type with a line per record linking its `.md` copy, with its summary, status and tags;
+- `index.json` — the title, the language and every record's metadata in page order: id (`{root}:{ref}`), type, title, summary, status, tags, author and dates, page and `.md` paths, mark counts, relations, superseded-by and backlinks as ids;
+- `404.html`, only with `--site-url` — a not-found page whose links resolve against the URL's path, so it works at any depth the host serves it from;
+- the `.booping-site` marker.
+
+The command refuses — and writes nothing — when the out path is a file, lies inside one of the rendered roots, or is a non-empty directory without the marker. A directory carrying the marker is cleared and rewritten, so re-running into the same `--out` is safe.
 
 **Output.** On success, stdout gets one line:
 
@@ -161,11 +192,11 @@ An error prints one `error: {message}` line on stderr.
 booping specs site-index [--projects PATH|-] [--out DIR] [--title TEXT]
 ```
 
-Renders one index page in the site's look that links to several projects' specs sites — the page at the root of a [GitLab Pages group](#publishing-on-gitlab-pages). Reads no specs root and no config key. The same input always produces a byte-identical tree.
+Renders one index page in the site's design that links to several projects' specs sites — the page at the root of a [GitLab Pages group](#publishing-on-gitlab-pages). Reads no specs root; its language and labels come from `core.specs.site.lang` and `core.specs.site.labels`, as for [`booping specs site`](#booping-specs-site). The same input always produces a byte-identical tree.
 
 - **`--projects PATH|-`** — the project list, default `-`: `-` reads it as JSON from stdin, a path reads the file as YAML.
 - **`--out DIR`** — the output directory, default `specs-site-index` in the working directory.
-- **`--title TEXT`** — the page heading, its single crumb and its `<title>` (`{TEXT} — specs`), default `Specs`.
+- **`--title TEXT`** — the site title in the header, the page heading, its single crumb and its `<title>`, default `Specs`.
 
 **Input.** A list of entries, each a mapping with exactly these keys:
 
@@ -175,9 +206,9 @@ Renders one index page in the site's look that links to several projects' specs 
 
 Any other key, a top level that is not a list, an entry that is not a mapping, and every violation above is an error naming the entry by its 0-based position in the input (`projects[3]: …`); so is unreadable input — a missing file or a YAML or JSON syntax error.
 
-**Page.** The heading, then a `Project | Description` table with one row per entry, the name linking to its URL. Rows are sorted by name, case-insensitively; input order never shows. A description's whitespace — newlines included — collapses to single spaces, so each renders on one line; a missing or null description is an empty cell. An empty list renders the heading and `No projects.` and still succeeds.
+**Page.** The same shell as a site page — skip link, header with the theme toggle, breadcrumbs, footer — without the sidebar. The heading, then one row per entry: the name linking to its URL, its description below. Rows are sorted by name, case-insensitively; input order never shows. A description's whitespace — newlines included — collapses to single spaces, so each renders on one line; a missing or null description leaves the row with the name only. An empty list renders the heading and `No projects.` (in the configured language) and still succeeds.
 
-**Output directory.** `index.html`, the site's `style.css` and the `.booping-site` marker, under the same rules as [`booping specs site`](#booping-specs-site): a non-empty directory without the marker is refused, one carrying it is cleared and rewritten.
+**Output directory.** `index.html`, the site's `style.css`, `site.js`, `fonts.css` and font licences, and the `.booping-site` marker, under the same rules as [`booping specs site`](#booping-specs-site): a non-empty directory without the marker is refused, one carrying it is cleared and rewritten.
 
 **Output.** Piping a two-project list on stdin:
 
@@ -200,14 +231,14 @@ An error prints one `error: {message}` line on stderr and writes nothing.
 | Code | `init`                                                     | `ls`, `next`                                                   | `check`                                                        | `site` | `site-index` |
 |------|------------------------------------------------------------|----------------------------------------------------------------|----------------------------------------------------------------|------|------|
 | 0    | tier in place                                              | printed                                                        | no errors (warnings may be printed)                            | site written (warnings may be printed) | index written |
-| 1    | the tier is `core` or unavailable, or a path is in the way | unknown type, or the tier is unavailable or has no directory   | at least one error, or the tier is unavailable or has no directory | a malformed `--root` or one that is not a directory, a bad configured root entry, duplicate root names, no roots, or the out directory refused | an unreadable or invalid project list, or the out directory refused |
+| 1    | the tier is `core` or unavailable, or a path is in the way | unknown type, or the tier is unavailable or has no directory   | at least one error, or the tier is unavailable or has no directory | a malformed `--root` or one that is not a directory, a bad configured root entry, duplicate root names, no roots, a `--site-url` that is not `http(s)`, or the out directory refused | an unreadable or invalid project list, or the out directory refused |
 | 2    | config could not be loaded                                 | config could not be loaded                                     | the check could not run: config not loaded, `mdcheck` missing or failing | config could not be loaded | config could not be loaded |
 
 ## Publishing on GitLab Pages
 
 Each project publishes its own specs site on GitLab Pages, and one index project at the group's Pages root lists every project of the group carrying a topic, linking to each site. booping ships both CI jobs as templates a project includes by URL.
 
-**A project's site.** The project keeps its specs in a [repo-local vault](vault.md#booping). Its `.gitlab-ci.yml` includes the site template, which adds a `pages` job on the default branch running `booping specs site --out public`:
+**A project's site.** The project keeps its specs in a [repo-local vault](vault.md#booping). Its `.gitlab-ci.yml` includes the site template, which adds a `pages` job on the default branch running `booping specs site --out public --site-url "$CI_PAGES_URL"` — so the site gets its `404.html`:
 
 ```yaml
 include:

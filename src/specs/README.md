@@ -63,8 +63,9 @@ A tier schema may never rename what booping reads: the frontmatter keys `type`,
 - Name — `<NNNN>-<slug>.md`: a four-digit number running within the type (the next
   one is the highest plus one) and a kebab-case latin slug.
 - A reference to a record is `<type>/<NNNN>` (`adr/0001`, `value/0009`). In the body,
-  references are ordinary relative markdown links. The site renders a type's records
-  together, so splitting a set into records costs no readability.
+  references are ordinary relative markdown links. The site lists a type's records on
+  one page and gives each record its own page linked to its relations, so splitting a
+  set into records costs no readability.
 
 ## Frontmatter
 
