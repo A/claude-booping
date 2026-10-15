@@ -24,7 +24,7 @@ In `supervised` mode it proposes the first action and waits for you; in `autonom
 
 | Kind | What happens |
 |------|--------------|
-| tiny fix | A few lines, obvious from the text: a worker agent makes the change, the manager checks it, commits it naming the item id and closes the item. |
+| tiny fix | A few lines, obvious from the text: the manager sizes it and works it in a [batch](#batches) — a worker agent makes the changes, the manager checks them, commits each naming its item id and closes the items. |
 | plan | Anything with a design choice or more than one sitting: groom, develop, code review, merge — see [Runs](#runs). Several items you framed as one change share one plan. |
 | question | You asked something: answered in chat when the repo or vault holds the answer, otherwise filed back to you as a question on the item. |
 | decision | You stated a choice: recorded through the [specs playbook](specs_playbook.md) as an ADR or an idea, and the item closed with a reference to that record. |
@@ -42,6 +42,7 @@ In `supervised` mode it proposes the first action and waits for you; in `autonom
 | `running` | the run record `runs/{run}.md` |
 | `waiting on you` | the question, `open-items/questions/{id}.md#C{n}` |
 | `dropped` | the reason it was closed |
+| `paused` | the run record `runs/{run}.md`, or `gate closed` when no run started — see [Budget and time window](#budget-and-time-window) |
 
 Then the next action, in one sentence.
 
@@ -74,6 +75,62 @@ Planned work runs headless, as registered runs you can follow with `booping stat
 - `booping run code-review {plan} --autonomous` — once develop finishes the plan. The manager commits the fixes the review leaves, reads its findings, and turns an unfixed blocker into a question on the plan's items instead of merging.
 
 One develop or code-review run per checkout at a time — a second item queues until the running one ends; groom runs may overlap. A develop run that fails is reported with its log, never retried silently. Once the manager has acted on a run's outcome it acknowledges it with `booping run ack`, which hides it from `booping status`.
+
+## Budget and time window
+
+An autonomous project spends your Claude subscription while you are away. The **budget gate** keeps it inside the limits you set:
+
+```text
+booping budget read    # 5-hour and 7-day usage, when each resets, and where the reading came from
+booping budget gate    # allow (exit 0) or pause (exit 3)
+```
+
+The reading comes from the newest recent run log — a headless run already streams the subscription's usage — or, when there is none, from a one-line probe call. The gate pauses when:
+
+- the time is outside your window;
+- there is no usage reading at all;
+- 5-hour or 7-day usage has reached its ceiling;
+- the run has spent its own allowance of 7-day usage, counted from the reading it launched with.
+
+A `pause` prints the reason and, when one is known, a second line `resume_after: {YYYY-MM-DD HH:MM}` — the next window start or the usage reset. The thresholds, the window and the probe are `core.budget` in the [project config](project_config.md#corebudget).
+
+**When it runs.** At every `booping run … --autonomous` launch, and before each milestone group of a develop run. A supervised session at your keyboard is never gated.
+
+- A launch that meets a closed gate prints the verdict, starts nothing and exits 3; the manager reports the item `paused` with `gate closed` and keeps it queued.
+- A develop run that meets it between milestone groups stops there — never mid-milestone — and its run ends `paused`, recording why, when to resume and the plan's next milestone.
+
+**Paused runs in `booping status`.** `booping status runs --detail` lists every paused run nobody resumed under `Paused:`, with its plan, items, next milestone, reason, resume time and the command that resumes it:
+
+```text
+booping run develop {plan} --autonomous
+```
+
+Develop picks up from the plan's first unfinished milestone. Once a later run on the same plan exists, the paused one is no longer listed. The manager relaunches a paused run itself on a later turn, once its resume time has passed — or, with none recorded, once the gate allows again.
+
+**A timer.** booping ships no scheduler; point your own at the resume command. A cron line that tries every hour during the night:
+
+```text
+0 0-6 * * * cd /path/to/repo && booping run develop {plan} --autonomous
+```
+
+Outside the window, or over a ceiling, the launch exits 3 and nothing runs.
+
+## Batches
+
+A tiny fix gets a size when the manager classifies it — its judgement, written onto the item:
+
+```text
+booping items size ID SIZE    # SIZE is one of the sizes in core.project_manager_playbook.batch
+```
+
+`booping items list` shows it in the `size` column; an item filed before sizes existed simply has none. `booping items batch` packs the open items whose size skips grooming and that wait on no question, in id order, into batches under a story-point cap, one line each:
+
+```text
+B1 (8 SP): OI-0002 OI-0004 OI-0006 OI-0007
+B2 (1 SP): OI-0009
+```
+
+or `no batch: no open item of a direct size`. Each batch passes the [budget gate](#budget-and-time-window), then goes to one worker briefing carrying every item's text; the manager checks the result and commits once per item, naming its id, then closes the items. An unsized item, or one of a size that does not skip grooming, takes the plan route. The sizes, their story points, which sizes skip grooming and the cap are `core.project_manager_playbook.batch` in the [project config](project_config.md#coreproject_manager_playbookbatch).
 
 ## Merge, push and deploy
 

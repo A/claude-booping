@@ -275,6 +275,17 @@ How `booping run groom` and `booping run develop` launch a recorded headless run
 - **`core.run.preamble`** — the autonomy instructions appended after a blank line under `--autonomous`: settle gates and questions without asking, log each with `booping defaults add`, never push.
 - **`core.run.dir`** — the vault directory of run records, `runs` as shipped.
 
+### `core.budget`
+
+What the [budget gate](project_manager.md#budget-and-time-window) checks before an autonomous launch and before each develop milestone group. Directly under `core` because the run launcher, develop and the project-manager all read it. No value is env-interpolated.
+
+- **`core.budget.max_age_s`** — how many seconds a run log stays a usable usage reading; with no log that recent, the probe runs. Default `600`.
+- **`core.budget.probe`** — the argv run in the repo for a reading when no fresh log has one: a one-turn `claude -p` on `haiku` with streamed JSON output as shipped. Its output must carry a `rate_limit_event` line, or there is no reading and the gate pauses.
+- **`core.budget.ceiling_5h_pct`** — 5-hour usage percent at or over which the gate pauses. Default `90`.
+- **`core.budget.ceiling_7d_pct`** — 7-day usage percent at or over which the gate pauses. Default `85`.
+- **`core.budget.run_pct`** — 7-day percent points one autonomous run may spend, counted from the reading its launch passed; the gate pauses the run once it has spent them. Default `null`, off.
+- **`core.budget.window`** — `{start: "HH:MM", end: "HH:MM"}` in local time; an end before the start wraps midnight. Outside it the gate pauses until the next start. Default `null`, always open.
+
 ### `core.macros`
 
 Shell-outs a rendered body may call by dotted path. Each entry is an **argv list**, never a shell string, run with `shell=False` — either the bare list, or a mapping carrying it under `command:` plus an optional `cwd:` of `repo` or `vault`: the attached repo or the Project Vault. Omit `cwd:` and the command runs in the process's own working directory.
@@ -303,7 +314,7 @@ Where the three [specs](specs.md) tiers live and what their namespaces are. Dire
 - **`core.specs.tiers.global`** — your records for every project: `path` relative to `home_dir` (`_specs`), `namespace` your prefix. `null` takes the `USER` environment variable. The [setup playbook](install.md#scaffold-the-project-vault) asks for `core.specs.tiers.global.namespace` once, `$USER` as the default, and writes it into the global config beside `home_dir`; a global config already carrying the key is not asked again.
 - **`core.specs.tiers.project`** — the project's own records: `path` relative to the attached repo. `null` resolves to the vault root: the type directories sit beside `plans/`. Set `path` to keep the records in the repo instead; [`booping specs init`](specs.md#booping-specs-init) then links `<vault>/specs` to that directory, so the records stay reachable from the vault.
 - **`core.specs.site.roots`** — extra roots [`booping specs site`](specs.md#booping-specs-site) renders after the tiers, a list of `{name, path}`: `name` is the root's namespace on the site, `path` relative to `home_dir` like the global tier. Default `[]`; set it in the global config to build one site over every project's specs.
-- **`core.specs.open_items`** — the [open items](specs_playbook.md#open-items) store: `dir`, the vault-relative directory the item files live in (`open-items`, created on the first item); `scaffold`, the [scaffold tree](#scaffold-trees) one item file is written from; `index`, the [query spec](#query-specs) `booping items list` renders — its columns `id`, `status`, `source`, `direction`, `record`, `title`, `plan`.
+- **`core.specs.open_items`** — the [open items](specs_playbook.md#open-items) store: `dir`, the vault-relative directory the item files live in (`open-items`, created on the first item); `scaffold`, the [scaffold tree](#scaffold-trees) one item file is written from; `index`, the [query spec](#query-specs) `booping items list` renders — its columns `id`, `status`, `source`, `size`, `direction`, `record`, `title`, `plan`.
 
 A tier `path` that is absolute or starts with `~` is taken as is.
 
@@ -329,6 +340,14 @@ A [query spec](#query-specs), living beside the body that renders it.
 ### `core.{name}_playbook.git`
 
 Develop-only: `commit_message` (the conventional-commit format string for in-sprint commits) and `branches`, a list of `{branch, when}` entries. `branch` is the literal prefix (e.g. `feat/`, `fix/`); `when` is a list of short matches against the plan `type` (`feature`, `bug`, `refactoring`) or freeform descriptors. Develop's `provision` step walks the list to pick the sprint branch prefix.
+
+### `core.project_manager_playbook.batch`
+
+How the project-manager sizes tiny fixes and packs them into [batches](project_manager.md#batches) that skip grooming.
+
+- **`core.project_manager_playbook.batch.sizes`** — the sizes `booping items size` accepts, each with its story points. Default `{XS: 1, S: 2, M: 5, L: 13}`.
+- **`core.project_manager_playbook.batch.direct`** — the sizes that skip grooming and go into batches; any other size, or none, takes the plan route. Default `[XS, S]`.
+- **`core.project_manager_playbook.batch.max_sp`** — the story-point cap on one batch. Default `8`.
 
 ### `core.groom_playbook.cross_review_agent`
 
