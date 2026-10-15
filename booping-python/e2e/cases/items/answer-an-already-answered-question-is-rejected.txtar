@@ -1,0 +1,55 @@
+`answer` on a question that passes the answered test exits 1; the sidecar is unchanged.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+macro_stubs:
+  core.macros.date: "2026-10-15"
+-- fixtures/cwd/vault/open-items/OI-0001.md --
+---
+id: OI-0001
+title: "Retire the exporter"
+status: open
+direction: null
+record: null
+source: request
+plan: null
+created_at: 2026-10-01
+closed_at: null
+reason: null
+---
+
+# Retire the exporter
+-- fixtures/cwd/vault/open-items/questions/OI-0001.md --
+# Questions — OI-0001
+
+## C1 — export format — answered
+
+**Asked:** 2026-10-14 — project-manager/work
+
+**Question:** CSV or JSON?
+
+**Answer:**
+
+JSON.
+-- cmd --
+booping items answer OI-0001 C1 --text "CSV."
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: question OI-0001 C1 is already answered
+-- expected/cwd/vault/open-items/questions/OI-0001.md --
+# Questions — OI-0001
+
+## C1 — export format — answered
+
+**Asked:** 2026-10-14 — project-manager/work
+
+**Question:** CSV or JSON?
+
+**Answer:**
+
+JSON.

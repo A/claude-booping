@@ -1,0 +1,48 @@
+`ask` on an open item creates `open-items/questions/OI-0001.md` with its H1 and `C1`:
+the topic and `open` in the heading, the stubbed date and the default step, the question,
+one bullet per `--option` and an empty `**Answer:**`.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+macro_stubs:
+  core.macros.date: "2026-10-15"
+-- fixtures/cwd/vault/open-items/OI-0001.md --
+---
+id: OI-0001
+title: "Retire the exporter"
+status: open
+direction: null
+record: null
+source: request
+plan: null
+created_at: 2026-10-01
+closed_at: null
+reason: null
+---
+
+# Retire the exporter
+-- cmd --
+booping items ask OI-0001 --topic "export format" --question "CSV or JSON?" --option "CSV — what the old tool wrote" --option "JSON"
+-- exit --
+0
+-- stdout --
+open-items/questions/OI-0001.md#C1
+-- stderr --
+-- expected/cwd/vault/open-items/questions/OI-0001.md --
+# Questions — OI-0001
+
+## C1 — export format — open
+
+**Asked:** 2026-10-15 — project-manager/work
+
+**Question:** CSV or JSON?
+
+**Options:**
+
+- CSV — what the old tool wrote
+- JSON
+
+**Answer:**

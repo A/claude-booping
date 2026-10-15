@@ -15,7 +15,7 @@ from booping.commands.specs import (
     _select_tier,  # pyright: ignore[reportPrivateUsage]
 )
 from booping.context import Context
-from booping.specs import open_items
+from booping.specs import open_items, questions
 from booping.specs.check import CheckError, check_tier
 from booping.specs.open_items import OpenItemError
 from booping.specs.records import load_tier
@@ -111,6 +111,43 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
         help="Instead of ids: every planned item linked to this plan",
     )
     reopen.set_defaults(func=_run_reopen)
+
+    ask = verbs.add_parser(
+        "ask",
+        help="File a question on an open or planned item into its questions sidecar and"
+        " print the question's vault-relative anchor",
+    )
+    ask.add_argument("id", metavar="ID", help="Open or planned item id, e.g. OI-0001")
+    ask.add_argument(
+        "--topic", required=True, metavar="TEXT", help="A few words naming the question"
+    )
+    ask.add_argument(
+        "--question", required=True, metavar="TEXT", help="The question, one paragraph"
+    )
+    ask.add_argument(
+        "--option",
+        action="append",
+        default=[],
+        metavar="TEXT",
+        help="A candidate answer; repeat for each",
+    )
+    ask.add_argument(
+        "--step",
+        default="project-manager/work",
+        metavar="TEXT",
+        help="The step that raised it (default: project-manager/work)",
+    )
+    ask.set_defaults(func=_run_ask)
+
+    answer = verbs.add_parser(
+        "answer", help="Record the answer to an item's question and mark it answered"
+    )
+    answer.add_argument("id", metavar="ID", help="Item id, e.g. OI-0001")
+    answer.add_argument("question", metavar="C{n}", help="Question id, e.g. C1")
+    answer.add_argument(
+        "--text", required=True, metavar="TEXT", help="The answer, verbatim; - reads stdin"
+    )
+    answer.set_defaults(func=_run_answer)
 
 
 def _run_add(args: argparse.Namespace) -> None:
@@ -243,3 +280,31 @@ def _run_close(args: argparse.Namespace) -> None:
 
 def _run_reopen(args: argparse.Namespace) -> None:
     _run_move("reopen", args.ids, args.plan, "open", {})
+
+
+def _run_ask(args: argparse.Namespace) -> None:
+    ctx = _assemble()[0]
+    try:
+        anchor = questions.ask(
+            ctx,
+            args.id,
+            topic=args.topic,
+            question=args.question,
+            options=args.option,
+            step=args.step,
+        )
+    except OpenItemError as exc:
+        _fail(str(exc))
+    logger.log(vault=ctx.vault, subcommand="items", message=f"ask {anchor}")
+    print(anchor)
+
+
+def _run_answer(args: argparse.Namespace) -> None:
+    ctx = _assemble()[0]
+    text: str = sys.stdin.buffer.read().decode("utf-8") if args.text == "-" else args.text
+    try:
+        anchor = questions.answer(ctx, args.id, args.question, text)
+    except OpenItemError as exc:
+        _fail(str(exc))
+    logger.log(vault=ctx.vault, subcommand="items", message=f"answer {anchor}")
+    print(f"{anchor}: answered")

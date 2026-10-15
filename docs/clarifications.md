@@ -1,6 +1,6 @@
 # clarifications.md format
 
-Sidecar beside `index.md` in the plan directory, holding every question a run could not answer itself. Seeded by the groom scaffold with its H1 and nothing else. Posted to the tracker verbatim, so it is plain markdown with no frontmatter.
+Sidecar beside `index.md` in the plan directory, holding every question a run could not answer itself. Seeded by the groom scaffold with its H1 and nothing else. Posted to the tracker verbatim, so it is plain markdown with no frontmatter. The same format holds an item's questions at `open-items/questions/{id}.md`, written by `booping items ask|answer`.
 
 ## Shape
 

@@ -1,0 +1,46 @@
+`ask` on a closed item exits 1 naming its status; no sidecar is written.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+macro_stubs:
+  core.macros.date: "2026-10-15"
+-- fixtures/cwd/vault/open-items/OI-0001.md --
+---
+id: OI-0001
+title: "Retire the exporter"
+status: done
+direction: null
+record: null
+source: request
+plan: null
+created_at: 2026-10-01
+closed_at: null
+reason: null
+---
+
+# Retire the exporter
+-- cmd --
+booping items ask OI-0001 --topic "export format" --question "CSV or JSON?"
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: item OI-0001 is done
+-- expected/cwd/vault/open-items/OI-0001.md --
+---
+id: OI-0001
+title: "Retire the exporter"
+status: done
+direction: null
+record: null
+source: request
+plan: null
+created_at: 2026-10-01
+closed_at: null
+reason: null
+---
+
+# Retire the exporter
