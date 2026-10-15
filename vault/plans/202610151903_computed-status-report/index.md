@@ -2,7 +2,7 @@
 title: "Computed status report — booping status over items, ideas, plans, records
   and marks"
 type: "feature"
-status: presenting
+status: ready-for-dev
 sp: 12
 related_to: null
 created: 2026-10-15 19:04
@@ -23,6 +23,7 @@ return_to: null
 agents:
   research-codebase: a12e77b90acab7246
   cross-review: a2e1a6ea67e762d8a
+reviewed_at: 2026-10-15 19:15
 ---
 
 # Computed status report — booping status over items, ideas, plans, records and marks

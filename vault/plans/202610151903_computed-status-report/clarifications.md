@@ -84,3 +84,11 @@
 **Question:** What of the project-manager request lands here?
 
 **Answer:** Default (autonomous run): only the command, its shared helpers, its e2e cases and its docs entries (CLAUDE.md, documentation). Out: the runs section and the run registry (part 3), any playbook calling `booping status` (part 4), project-manager docs and setup linking (part 5) — so no playbook source changes and no snapshot drift.
+
+## C11 — plan approval — answered
+
+**Asked:** 2026-10-15 — groom/present
+
+**Question:** The plan is ready for development — approve, or say what to change?
+
+**Answer:** Default (autonomous run): approved as written — 12 SP, under the 35 SP split threshold, so no split; the cross-review (codex) returned one RISK (CLAUDE.md impact named the wrong milestone task), folded in. No plan branch: the run stays on `feat/specs` as directed.
