@@ -36,7 +36,7 @@ It does not need it. `booping specs site` never calls mdcheck (only `specs check
 
 **Answer:**
 
-- Input: a list of mappings with keys `name` (required, non-empty string), `url` (required, `http://` or `https://`), `description` (optional string or null). `--projects FILE` parses FILE as YAML; `--projects -` (the default) parses stdin as JSON. Unknown keys, a non-list top level, a missing or empty name, a non-http(s) URL and a duplicate name each fail with exit 2 and one `booping specs: …` stderr line naming the entry index.
+- Input: a list of mappings with keys `name` (required, non-empty string), `url` (required, `http://` or `https://`), `description` (optional string or null). `--projects FILE` parses FILE as YAML; `--projects -` (the default) parses stdin as JSON. Unknown keys, a non-list top level, a missing or empty name, a non-http(s) URL and a duplicate name each fail with exit 1 and one `error: …` stderr line naming the entry by its 0-based index (`projects[3]: …`), the `specs` verbs' existing contract; unreadable input (missing file, YAML/JSON syntax error) is exit 1 the same way, and config that cannot load stays exit 2.
 - Order: entries sorted by `(name.casefold(), name)`; the input order never shows.
 - Description: whitespace runs collapsed to one space and stripped, so a multi-line description renders as one line; absent or null renders an empty cell.
 - Output: `--out DIR` (default `specs-site-index`) gets `index.html`, `style.css` (the site's stylesheet, byte-identical) and the `.booping-site` marker, written by the site's own writer with its non-empty-out safety check. `--title TEXT` (default `Specs`) is the H1, the `<title>` (`{title} — specs`, the site's shape) and the single crumb.
