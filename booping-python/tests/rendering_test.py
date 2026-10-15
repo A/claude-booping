@@ -239,9 +239,7 @@ def test_booping_global_lists_the_resolved_specs_tiers(
     ).render()
 
     assert rendered == (
-        "core|booping|${CLAUDE_PLUGIN_ROOT}/specs;"
-        f"global|alice|{home}/_specs;"
-        "project|-|vault/specs;"
+        f"core|booping|${{CLAUDE_PLUGIN_ROOT}}/specs;global|alice|{home}/_specs;project|-|vault;"
     )
 
 

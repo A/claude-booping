@@ -23,7 +23,7 @@ def test_project_root_vault_inside_repo(tmp_path: Path) -> None:
     repo = tmp_path / "repo"
     vault = repo / "vault"
     vault.mkdir(parents=True)
-    assert project_root(None, repo, vault) == vault / "specs"
+    assert project_root(None, repo, vault) == tmp_path / "repo" / "vault"
 
 
 def test_project_root_vault_outside_repo(tmp_path: Path) -> None:
@@ -31,11 +31,16 @@ def test_project_root_vault_outside_repo(tmp_path: Path) -> None:
     vault = tmp_path / "Claude" / "repo"
     repo.mkdir()
     vault.mkdir(parents=True)
-    assert project_root(None, repo, vault) == repo / "specs"
+    assert project_root(None, repo, vault) == tmp_path / "Claude" / "repo"
 
 
 def test_project_root_no_vault(tmp_path: Path) -> None:
     assert project_root(None, tmp_path, None) == tmp_path / "specs"
+
+
+def test_project_root_specs_path(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    assert project_root("specs", repo, repo / "vault") == tmp_path / "repo" / "specs"
 
 
 @pytest.mark.parametrize(
@@ -63,7 +68,7 @@ def test_resolve_tiers_all_three(tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     assert [(t.name, t.namespace, t.root, t.anchor) for t in tiers] == [
         ("core", "booping", plugin / "vault/specs", plugin),
         ("global", "alice", home / "_specs", home),
-        ("project", None, repo / "vault/specs", repo),
+        ("project", None, repo / "vault", repo),
     ]
 
 
@@ -95,7 +100,7 @@ def test_resolve_tiers_vault_override_drops_global(tmp_path: Path) -> None:
         vault_override=True,
     )
     assert [t.name for t in tiers] == ["core", "project"]
-    assert tiers[1].root == repo / "specs"
+    assert tiers[1].root == tmp_path / "fixture-vault"
 
 
 def test_types_lists_shipped_schemas() -> None:

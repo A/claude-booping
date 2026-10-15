@@ -145,7 +145,7 @@ core:
       core: {namespace: booping, path: specs}
       # home_dir-relative; namespace null → the `USER` environment variable, read by code.
       global: {namespace: null, path: _specs}
-      # Repo-relative; path null → {vault}/specs when the vault is inside the repo, else specs.
+      # Repo-relative; path null → the vault root itself (type directories beside plans/).
       project: {path: null}
     site:
       # Extra roots `booping specs site` renders after the tiers, each `{name, path}`;

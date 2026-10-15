@@ -157,7 +157,7 @@ def test_record_outside_anchor_links_absolute(
 
 
 def test_shared_directory_yields_each_rule_once_with_first_tier(tmp_path: Path) -> None:
-    root = tmp_path / "vault" / "specs"
+    root = tmp_path / "vault"
     _rule(root, "0001-a.md", _ACCEPTED)
     _rule(root, "0002-b.md", "status: accepted\ntargets: [groom]\n")
     tiers = [

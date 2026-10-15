@@ -19,7 +19,7 @@ SECTION = (
     "Read a rule's record when its brief is not enough.\n"
     "\n"
     "- Show the step table before the first step. "
-    "[rule/0003](vault/specs/rule/0003-announce-steps.md)\n"
+    "[rule/0003](vault/rule/0003-announce-steps.md)\n"
     "\n"
 )
 
@@ -31,9 +31,9 @@ def _rule(target: str) -> TargetedRule:
         ref="rule/0003",
         title="Announce steps",
         brief="Show the step table before the first step.",
-        link="vault/specs/rule/0003-announce-steps.md",
+        link="vault/rule/0003-announce-steps.md",
         tier="project",
-        path=Path("/repo/vault/specs/rule/0003-announce-steps.md"),
+        path=Path("/repo/vault/rule/0003-announce-steps.md"),
         parsed_targets=[parsed],  # pyright: ignore[reportArgumentType]
     )
 

@@ -48,11 +48,11 @@ def _resolve_path(anchor: Path, path: str) -> Path:
 
 def project_root(path: str | None, repo: Path, vault: Path | None) -> Path:
     """Project tier root: an explicit `path` resolves against the repo; null means
-    `{vault}/specs` when the vault lives inside the repo, else `{repo}/specs`."""
+    the vault root itself, wherever the vault lives, or `{repo}/specs` with no vault."""
     if path is not None:
         return _resolve_path(repo, path)
-    if vault is not None and vault.resolve().is_relative_to(repo.resolve()):
-        return vault / "specs"
+    if vault is not None:
+        return vault
     return repo / "specs"
 
 
