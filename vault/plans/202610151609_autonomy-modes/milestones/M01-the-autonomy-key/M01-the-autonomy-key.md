@@ -2,7 +2,7 @@
 id: "01"
 title: "core.autonomy key, invalid-value STOP, project-context line"
 sp: 3
-status: pending
+status: in-progress
 plan: "plans/202610151609_autonomy-modes/index.md"
 ---
 

@@ -2,7 +2,7 @@
 id: "03"
 title: "The driving protocol renders gates and questions per mode"
 sp: 3
-status: pending
+status: in-progress
 plan: "plans/202610151609_autonomy-modes/index.md"
 ---
 

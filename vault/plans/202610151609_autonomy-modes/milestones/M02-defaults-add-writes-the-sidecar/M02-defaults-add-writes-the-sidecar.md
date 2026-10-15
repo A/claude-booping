@@ -2,7 +2,7 @@
 id: "02"
 title: "booping defaults add writes the defaults sidecar"
 sp: 4
-status: pending
+status: in-progress
 plan: "plans/202610151609_autonomy-modes/index.md"
 ---
 

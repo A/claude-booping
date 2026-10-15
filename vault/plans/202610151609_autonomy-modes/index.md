@@ -2,20 +2,21 @@
 title: "Autonomy modes — core.autonomy supervised | autonomous, gates honour it, migrate
   asks on a dirty branch"
 type: "feature"
-status: ready-for-dev
-sp: null
+status: in-progress
+sp: 18
 related_to: null
 created: 2026-10-15 16:09
 planned: null
-started: null
+started: 2026-10-15 16:36
 completed: null
 code_reviews: []
 sessions:
 - f5f0d6c5-5081-40c4-813c-55027756aea0
+- e272718e-474f-4519-bf25-2b31268b76b5
 retro: null
 summary: core.autonomy supervised|autonomous switches the driving protocol's 
   gates; defaults.md log; specs open items and migrate honour it
-commit: 10eb8d49fd955ad96a114bb9338ff47231a64859
+commit: c48e6178da1f237f8b8c9f649adcdc49fde8db2b
 tracker_provider: null
 tracker_request: null
 tracker_issue: null
@@ -168,14 +169,14 @@ Plain markdown, no frontmatter, seeded with `# Defaults` on the first `add`. One
 
 ## Milestones
 
-| id | title | sp | status | path | slug |
-| --- | --- | --- | --- | --- | --- |
-| 01 | core.autonomy key, invalid-value STOP, project-context line | 3 | pending | plans/202610151609_autonomy-modes/milestones/M01-the-autonomy-key/M01-the-autonomy-key.md | M01-the-autonomy-key |
-| 02 | booping defaults add writes the defaults sidecar | 4 | pending | plans/202610151609_autonomy-modes/milestones/M02-defaults-add-writes-the-sidecar/M02-defaults-add-writes-the-sidecar.md | M02-defaults-add-writes-the-sidecar |
-| 03 | The driving protocol renders gates and questions per mode | 3 | pending | plans/202610151609_autonomy-modes/milestones/M03-driving-protocol-honours-the-mode/M03-driving-protocol-honours-the-mode.md | M03-driving-protocol-honours-the-mode |
-| 04 | The specs open-items scenario honours the mode | 3 | pending | plans/202610151609_autonomy-modes/milestones/M04-specs-open-items-honour-the-mode/M04-specs-open-items-honour-the-mode.md | M04-specs-open-items-honour-the-mode |
-| 05 | Migrate always asks about uncommitted work on the branch | 3 | pending | plans/202610151609_autonomy-modes/milestones/M05-migrate-always-asks-on-a-dirty-branch/M05-migrate-always-asks-on-a-dirty-branch.md | M05-migrate-always-asks-on-a-dirty-branch |
-| 06 | Docs and CLAUDE.md name the mode | 2 | pending | plans/202610151609_autonomy-modes/milestones/M06-docs-and-claude-md/M06-docs-and-claude-md.md | M06-docs-and-claude-md |
+| id | title | sp | status |
+| --- | --- | --- | --- |
+| 01 | [core.autonomy key, invalid-value STOP, project-context line](milestones/M01-the-autonomy-key/M01-the-autonomy-key.md) | 3 | in-progress |
+| 02 | [booping defaults add writes the defaults sidecar](milestones/M02-defaults-add-writes-the-sidecar/M02-defaults-add-writes-the-sidecar.md) | 4 | in-progress |
+| 03 | [The driving protocol renders gates and questions per mode](milestones/M03-driving-protocol-honours-the-mode/M03-driving-protocol-honours-the-mode.md) | 3 | in-progress |
+| 04 | [The specs open-items scenario honours the mode](milestones/M04-specs-open-items-honour-the-mode/M04-specs-open-items-honour-the-mode.md) | 3 | in-progress |
+| 05 | [Migrate always asks about uncommitted work on the branch](milestones/M05-migrate-always-asks-on-a-dirty-branch/M05-migrate-always-asks-on-a-dirty-branch.md) | 3 | pending |
+| 06 | [Docs and CLAUDE.md name the mode](milestones/M06-docs-and-claude-md/M06-docs-and-claude-md.md) | 2 | pending |
 
 ## Final Verification
 

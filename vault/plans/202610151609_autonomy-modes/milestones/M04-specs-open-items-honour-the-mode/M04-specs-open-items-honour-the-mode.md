@@ -2,7 +2,7 @@
 id: "04"
 title: "The specs open-items scenario honours the mode"
 sp: 3
-status: pending
+status: in-progress
 plan: "plans/202610151609_autonomy-modes/index.md"
 ---
 
