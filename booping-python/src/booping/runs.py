@@ -18,8 +18,8 @@ from booping.context import Context
 from booping.context._yaml import parse_frontmatter_only, update_frontmatter
 from booping.rendering import build_source_env
 
-STATUSES = ("running", "finished", "failed", "lost")
-RUNNING, FINISHED, FAILED, LOST = STATUSES
+STATUSES = ("running", "finished", "paused", "failed", "lost")
+RUNNING, FINISHED, PAUSED, FAILED, LOST = STATUSES
 MODES = ("autonomous", "supervised")
 ID_DATE = "+%Y%m%d-%H%M%S"
 STAMP_DATE = "+%Y-%m-%d %H:%M"
@@ -103,8 +103,10 @@ def create(
     items: list[str],
     pid: int,
     prompt: str,
+    baseline_7d: int | None = None,
 ) -> None:
-    """Write *run*'s record as `running`. Raises `OSError`."""
+    """Write *run*'s record as `running`; `usage_baseline_7d` only when *baseline_7d* is
+    given. Raises `OSError`."""
     frontmatter: dict[str, Any] = {
         "id": run.id,
         "playbook": playbook,
@@ -121,14 +123,22 @@ def create(
         "exit_code": None,
         "acked_at": None,
     }
+    if baseline_7d is not None:
+        frontmatter["usage_baseline_7d"] = baseline_7d
     head = yaml.safe_dump(frontmatter, sort_keys=False, allow_unicode=True, width=4096)
     body = f"# {run.id}\n\n```text\n{prompt}\n```\n"
     run.record.write_text(f"---\n{head}---\n\n{body}", encoding="utf-8")
 
 
 def finish(ctx: Context, run: Run, exit_code: int) -> str:
-    """Write the outcome of *run*; returns its status."""
-    status = FINISHED if exit_code == 0 else FAILED
+    """Write the outcome of *run*; returns its status — `paused` when the child exited 0
+    after the budget gate stamped `paused_reason` on the record."""
+    if exit_code != 0:
+        status = FAILED
+    elif read(run.record).get("paused_reason"):
+        status = PAUSED
+    else:
+        status = FINISHED
     update_frontmatter(
         run.record,
         {
@@ -174,7 +184,7 @@ def effective_status(record: dict[str, Any]) -> str:
 
 
 def ack(ctx: Context, ids: list[str]) -> None:
-    """Mark finished runs seen. Every id is checked before the first write."""
+    """Mark ended runs seen. Every id is checked before the first write."""
     directory = runs_dir(ctx)
     checked: list[tuple[Path, str]] = []
     for run_id in ids:

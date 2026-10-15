@@ -1,0 +1,41 @@
+The child's environment carries `BOOPING_RUN_ID`, the run's id, which tells `booping budget
+gate` it runs inside a registered run.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+macro_stubs:
+  core.macros.date +%Y%m%d-%H%M%S: "20261015-120000"
+  core.macros.date +%Y-%m-%d %H:%M: "2026-10-15 12:00"
+core:
+  run:
+    command: [sh, -c, "echo \"run id: $BOOPING_RUN_ID\""]
+-- fixtures/cwd/vault/plans/p1/index.md --
+---
+title: P1
+status: in-progress
+---
+-- fixtures/cwd/vault/plans/p1/milestones/M01-first/M01-first.md --
+---
+id: "01"
+title: First
+status: done
+---
+-- fixtures/cwd/vault/plans/p1/milestones/M02-second/M02-second.md --
+---
+id: "02"
+title: Second
+status: pending
+---
+-- cmd --
+booping run develop vault/plans/p1
+-- exit --
+0
+-- stdout --
+runs/20261015-120000-develop.md
+20261015-120000-develop: finished (exit 0)
+-- stderr --
+-- expected/cwd/vault/runs/20261015-120000-develop.log --
+run id: 20261015-120000-develop

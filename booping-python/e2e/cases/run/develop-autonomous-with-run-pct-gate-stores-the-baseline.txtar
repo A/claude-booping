@@ -1,0 +1,73 @@
+With `core.budget.run_pct` set, an autonomous launch stores the 7-day percent its gate passed
+at as `usage_baseline_7d` on the record.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+macro_stubs:
+  core.macros.date +%Y%m%d-%H%M%S: "20261015-120000"
+  core.macros.date +%Y-%m-%d %H:%M: "2026-10-15 12:00"
+core:
+  budget:
+    run_pct: 5
+    probe:
+      - sh
+      - -c
+      - |
+        printf '%s\n' '{"type":"rate_limit_event","rate_limit_info":{"unifiedWindows":{"five_hour":{"utilization":0.42,"resetsAt":1792090800},"seven_day":{"utilization":0.31,"resetsAt":1792573200}}}}'
+  run:
+    command: [sh, -c, "exit 0"]
+-- fixtures/cwd/vault/plans/p1/index.md --
+---
+title: P1
+status: in-progress
+---
+-- fixtures/cwd/vault/plans/p1/milestones/M01-first/M01-first.md --
+---
+id: "01"
+title: First
+status: done
+---
+-- fixtures/cwd/vault/plans/p1/milestones/M02-second/M02-second.md --
+---
+id: "02"
+title: Second
+status: pending
+---
+-- cmd --
+booping run develop vault/plans/p1 --autonomous
+-- exit --
+0
+-- stdout --
+runs/20261015-120000-develop.md
+20261015-120000-develop: finished (exit 0)
+-- stderr --
+-- expected/cwd/vault/runs/20261015-120000-develop.md --
+---
+id: 20261015-120000-develop
+playbook: develop
+mode: autonomous
+target:
+- plans/p1/index.md
+plan: plans/p1/index.md
+items: []
+status: finished
+pid: null
+session_id: cdc127f3-6d68-54bf-9265-1c33ed83cac1
+log: runs/20261015-120000-develop.log
+started_at: 2026-10-15 12:00
+ended_at: 2026-10-15 12:00
+exit_code: 0
+acked_at: null
+usage_baseline_7d: 31
+---
+
+# 20261015-120000-develop
+
+```text
+/booping:playbook develop {CWD}/vault/plans/p1/index.md
+
+AUTONOMOUS RUN, started by booping run — nobody can answer. Do not use AskUserQuestion and do not wait at review gates: confirm each yourself and log it with booping defaults add. Settle an unclear point with a sensible default and log it the same way. A question only the owner can answer parks the run where the playbook allows it; otherwise stop and report it. Never end the run while a background agent or a check you started is still running — wait for it. Never push.
+```
