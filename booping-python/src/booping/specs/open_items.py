@@ -33,7 +33,7 @@ from booping.specs.records import Record, parse_filename
 from booping.specs.site.markdown import slug
 
 DIRECTIONS = ("code-to-spec", "spec-to-code", "conflict", "clarify")
-SOURCES = ("manual", "adr", "mark", "check", "sync")
+SOURCES = ("manual", "adr", "mark", "check", "sync", "correction")
 PLAYBOOK = "specs"
 STATE = "open_item"
 SCAFFOLD_PATH = "core.specs.open_items.scaffold"
