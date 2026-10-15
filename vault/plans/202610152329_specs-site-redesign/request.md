@@ -15,4 +15,5 @@
 - Source precedence: brief's owner corrections > approved mockup (`specs-site-mockup.html`) > base spec.
 - Fonts are vendored into the repo once (woff2 + OFL) and copied into every site output; nothing fetched at render or view time.
 - Priority 3 (relation graph, hover previews) is out of scope.
-- Split decision deferred to draft-plan, made on the estimate against the 35 SP threshold.
+- Split into three plans at the foundation seam; this plan is part 1 (34 SP), parts 2 and 3 parked under Out of scope (C2).
+- Fonts base64-embedded in `fonts.css` for Firefox `file://` (C3); labels and `lang` in config (C4); `--title` (C5); no build date (C6); button drawer with no-JS fallback (C7); three-state theme (C8); machine formats locked (C9); part-1 list pages (C10); localised dates (C11).
