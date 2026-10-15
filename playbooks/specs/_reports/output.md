@@ -3,7 +3,7 @@ Specs are typed records about why the project is the way it is; every type, its 
 Tiers (`core.specs.tiers`; every `booping specs` verb takes `--tier`, default `project`):
 
 - `core` — `${CLAUDE_PLUGIN_ROOT}/specs`, namespace `booping`.
-- `project` — `specs`.
+- `project` — `.`.
 
 Autonomy: `supervised` (`core.autonomy`).
 

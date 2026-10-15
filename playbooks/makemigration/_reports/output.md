@@ -37,9 +37,10 @@ that listing and its highest `id` instead.
 | 2 | Retro becomes its own track; extension files become targeted lessons | End the plan lifecycle at `done` and move every `plans/{slug}/retro.md` out to a standalone `retrospectives/{slug}.md`; convert every `_booping/skill_*.md` and `_booping/agent_*.md` into a targeted `_lessons/NNNN_*.md`, and move the invocation log to the vault root. | migrations/002_tracks_and_lessons/migration.md | 002_tracks_and_lessons |
 | 3 | Session metrics live in flat `metrics_` frontmatter and the sprints view | Rename `active_minutes` → `metrics_active_minutes` and `models` → `metrics_models` on every plan, and rewrite the `sprints.md` Bases fence to the six `metrics_*` columns. | migrations/003_session_metrics/migration.md | 003_session_metrics |
 | 4 | Lessons become rules | Turn every lesson in `{home_dir}/_lessons/` and `{vault}/_lessons/` into a rule record of its tier, or drop it as a duplicate of an existing rule; rewrite references to the removed files and remove both directories. | migrations/004_lessons_to_rules/migration.md | 004_lessons_to_rules |
+| 5 | Project specs move to the vault root | Move a vault's project spec records from `{vault}/specs/{type}/` to `{vault}/{type}/` and re-point the links inside them; a project tier the old default placed elsewhere is pinned there with an explicit `path`. | migrations/005_project_specs_to_vault_root/migration.md | 005_project_specs_to_vault_root |
 
 
-Next id: **5** — the highest shipped `id` plus one. Ids are set from frontmatter,
+Next id: **6** — the highest shipped `id` plus one. Ids are set from frontmatter,
 never parsed off a directory name.
 
 ## The change
@@ -59,14 +60,14 @@ In chat, in this order:
 - the change in two or three lines: before, after, what is left alone
 - the shipped table above
 - the proposal:
-  - id `5`
-  - directory `migrations/005_<slug>/` — `<slug>` snake_case, two or
+  - id `6`
+  - directory `migrations/006_<slug>/` — `<slug>` snake_case, two or
     three words naming the change, like the shipped ones
   - `title` — one sentence stating the vault's new state
   - `summary` — one sentence naming each conversion concretely, the line `migrate` shows the user
     before applying
 
-Close on one question — `Write migration 5 as proposed?` — asked in **prose**, never
+Close on one question — `Write migration 6 as proposed?` — asked in **prose**, never
 through `AskUserQuestion`. Wait for the answer; fold any correction into the proposal and ask again.
 
 ## Return
@@ -75,7 +76,7 @@ through `AskUserQuestion`. Wait for the answer; fold any correction into the pro
 ## Changed:
 
 ## Notes:
-- id: 5; dir: migrations/005_<slug>/
+- id: 6; dir: migrations/006_<slug>/
 - title: <title>
 - summary: <summary>
 - converts: <before → after, one line per part>
@@ -88,7 +89,7 @@ through `AskUserQuestion`. Wait for the answer; fold any correction into the pro
 # Write the migration
 
 Create the directory and `migration.md` approved in `survey`, and nothing else. A shipped
-migration — `migrations/004_lessons_to_rules/migration.md` — is the structural model;
+migration — `migrations/005_project_specs_to_vault_root/migration.md` — is the structural model;
 read one before writing.
 
 ## The file
@@ -126,7 +127,7 @@ Run the commands in a scratch copy of a vault that holds the old layout, twice: 
 converts, the second changes nothing. Then, from the plugin repo root:
 
 ```bash
-bin/booping query --config core.migrate_playbook.queries.pending --where 'id:gt=4' --columns id,title,summary
+bin/booping query --config core.migrate_playbook.queries.pending --where 'id:gt=5' --columns id,title,summary
 ```
 
 It must list exactly the new migration, with the approved id, title and summary. Anything else —
@@ -140,9 +141,9 @@ Present in chat the path written and the listing row, then one line: every vault
 
 ```markdown
 ## Changed:
-- [CREATED] migrations/005_<slug>/migration.md
+- [CREATED] migrations/006_<slug>/migration.md
 
 ## Notes:
-- migration 5 (<slug>) written; query lists it as the newest shipped migration
+- migration 6 (<slug>) written; query lists it as the newest shipped migration
 - commands checked on a scratch vault: converted, second run a no-op
 ```

@@ -116,7 +116,7 @@ Project `claude-booping` is already set up.
   vault:  /home/anton/Dev/claude-booping/booping (in the repo)
   marker: .booping — project_name: claude-booping, vault_path: booping
   link:   ~/Claude/claude-booping -> booping/
-  specs:  /home/anton/Dev/claude-booping/booping/specs
+  specs:  /home/anton/Dev/claude-booping/booping
 ```
 
 `specs:` is the project tier root when it exists, else `none — run booping specs init --tier project`.

@@ -17,7 +17,7 @@ Execute the steps in the most effective order considering their dependencies.
 
 | Step | Dependencies | Summary | Review gate |
 | --- | --- | --- | --- |
-| `survey` | — | Open the run: confirm a project is attached and the recorded migration id is readable; when work is uncommitted, name it, ask, and commit repo and vault on confirmation; present the pending set the rendered body carries and what each migration will do; report "already current" and end the run when the set is empty. | — |
+| `survey` | — | Open the run: confirm a project is attached and the recorded migration id is readable; when work is uncommitted, name the current branch and the work and ask to commit repo and vault — always asked, whatever `core.auto_migrate` and `core.autonomy` say — committing on confirmation; present the pending set the rendered body carries and what each migration will do; report "already current" and end the run when the set is empty. | — |
 | `apply` *(subgraph)* | `survey` | once per pending migration, in ascending id order; strictly one instance at a time — never in parallel — and a failed instance stops the run | — |
 | `apply-migration` *(in apply)* | — | Run one migration's whole cycle — hand its `migration.md`, prompt plus commands, to a context-fresh sub-agent, then advance `latest_migration` and commit everything; on failure halt the sequence, naming the failing id, what failed and a remedy the user can apply by hand. | — |
 | `summarize` | `apply` | Close with a single report of what changed across the whole run — the migrations applied, the commits carrying them, and whether the vault is now current. | — |
@@ -29,7 +29,7 @@ Execute the steps in the most effective order considering their dependencies.
 
 Confirm a project is attached, and name it and its vault path in the presentation.
 
-The recorded migration id — the last migration this vault applied — is **4**,
+The recorded migration id — the last migration this vault applied — is **5**,
 read from the repo `.booping` marker's `latest_migration` key; `-1` means nothing has been applied yet.
 If no project is attached, or that id came through as anything other than a number, say which and
 end the run: nothing below resolves without it.
@@ -37,7 +37,7 @@ end the run: nothing below resolves without it.
 
 ## Already current
 
-Nothing is pending: **4** is the latest migration the plugin ships.
+Nothing is pending: **5** is the latest migration the plugin ships.
 
 Report it in one line — the project and its vault, the recorded id, that the vault is **already
 current**, and that the run ends here. Ask nothing, commit nothing, and do not continue to the next
@@ -49,7 +49,7 @@ step.
 ## Changed:
 
 ## Notes:
-- pending: 0 — already current at recorded id 4
+- pending: 0 — already current at recorded id 5
 - end the run: nothing to apply
 ```
 
