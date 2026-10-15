@@ -2,20 +2,21 @@
 title: "Project-manager playbook — the core manager over items, groom, develop and
   runs"
 type: "feature"
-status: ready-for-dev
+status: in-progress
 sp: 25
 related_to: null
 created: 2026-10-15 20:06
 planned: null
-started: null
+started: 2026-10-15 20:26
 completed: null
 code_reviews: []
 sessions:
 - c89cc3ae-5e20-46ac-93d9-c83f4ddb84b3
+- e1d4bd12-b0f2-4016-8b84-e28f10b43ab8
 retro: null
 summary: 'Core project-manager playbook: items in, groom/develop/review/merge out
   per autonomy mode; item questions; run code-review'
-commit: 8fe37fdf57a31f0a158bc10957517c70d408c8dd
+commit: d81f517f27104c0bfb6a7f23297882c072314455
 tracker_provider: null
 tracker_request: null
 tracker_issue: null
@@ -96,10 +97,10 @@ session start ─► on-start ─► booping status ─► work ◄─ booping s
 
 | id | title | sp | status |
 | --- | --- | --- | --- |
-| 01 | [Questions on an item — booping items ask and answer](milestones/M01-item-questions/M01-item-questions.md) | 4 | pending |
-| 02 | [Closing an open item and the waiting-on-you status](milestones/M02-item-close-and-status/M02-item-close-and-status.md) | 3 | pending |
-| 03 | [booping run code-review registers the independent review](milestones/M03-run-code-review/M03-run-code-review.md) | 2 | pending |
-| 04 | [project-manager playbook — manifest, preamble, on-start and intake](milestones/M04-playbook-skeleton/M04-playbook-skeleton.md) | 4 | pending |
+| 01 | [Questions on an item — booping items ask and answer](milestones/M01-item-questions/M01-item-questions.md) | 4 | done |
+| 02 | [Closing an open item and the waiting-on-you status](milestones/M02-item-close-and-status/M02-item-close-and-status.md) | 3 | done |
+| 03 | [booping run code-review registers the independent review](milestones/M03-run-code-review/M03-run-code-review.md) | 2 | done |
+| 04 | [project-manager playbook — manifest, preamble, on-start and intake](milestones/M04-playbook-skeleton/M04-playbook-skeleton.md) | 4 | in-progress |
 | 05 | [project-manager work step — classify, route, review, merge, report](milestones/M05-work-step/M05-work-step.md) | 4 | pending |
 | 06 | [Smoke suite for project-manager intake](milestones/M06-intake-smoke/M06-intake-smoke.md) | 3 | pending |
 | 07 | [Smoke suite for project-manager on-start](milestones/M07-on-start-smoke/M07-on-start-smoke.md) | 2 | pending |

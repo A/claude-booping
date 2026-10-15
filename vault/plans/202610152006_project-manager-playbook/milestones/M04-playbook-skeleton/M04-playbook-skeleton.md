@@ -1,8 +1,8 @@
 ---
 id: "04"
-title: "project-manager playbook \u2014 manifest, preamble, on-start and intake"
+title: "project-manager playbook — manifest, preamble, on-start and intake"
 sp: 4
-status: pending
+status: in-progress
 plan: "plans/202610152006_project-manager-playbook/index.md"
 ---
 

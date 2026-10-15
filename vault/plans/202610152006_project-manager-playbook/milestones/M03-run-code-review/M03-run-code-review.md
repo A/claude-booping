@@ -2,7 +2,7 @@
 id: "03"
 title: "booping run code-review registers the independent review"
 sp: 2
-status: pending
+status: done
 plan: "plans/202610152006_project-manager-playbook/index.md"
 ---
 
@@ -18,19 +18,19 @@ Tests (integration tier, e2e corpus `booping-python/e2e/cases/run/`, the same `s
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 3.1 | `code-review` sub-verb on `booping run`. | `booping-python/src/booping/commands/run.py`, `booping-python/src/booping/runs.py` | 1 | pending |
-| 3.2 | Two e2e cases above. | `booping-python/e2e/cases/run/code-review-*.txtar` | 1 | pending |
+| 3.1 | `code-review` sub-verb on `booping run`. | `booping-python/src/booping/commands/run.py`, `booping-python/src/booping/runs.py` | 1 | done |
+| 3.2 | Two e2e cases above. | `booping-python/e2e/cases/run/code-review-*.txtar` | 1 | done |
 
 ## Definition of Done
 
 ### Task 3.1
 
-- [ ] `bin/booping run --help` lists `groom`, `develop`, `code-review`, `ack`; `bin/booping run code-review --help` shows `PLAN` and `--autonomous`.
-- [ ] `develop` and `code-review` share one validation path — no copied block.
+- [x] `bin/booping run --help` lists `groom`, `develop`, `code-review`, `ack`; `bin/booping run code-review --help` shows `PLAN` and `--autonomous`.
+- [x] `develop` and `code-review` share one validation path — no copied block.
 
 ### Task 3.2
 
-- [ ] Both cases exist and pass; every existing `run` case passes unchanged.
+- [x] Both cases exist and pass; every existing `run` case passes unchanged.
 
 Return: the list of changed and created files, nothing else.
 
