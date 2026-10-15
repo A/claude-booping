@@ -2,7 +2,7 @@
 title: "Corrections log — booping correction add, the corrections sidecar, retro's
   feed"
 type: "feature"
-status: presenting
+status: ready-for-dev
 sp: null
 related_to: null
 created: 2026-10-15 15:32
@@ -20,6 +20,8 @@ tracker_provider: null
 tracker_request: null
 tracker_issue: null
 return_to: null
+agents: '{"research-codebase": "a532951ede0d0389c", "cross-review": "a67b2e29dfcbaa692"}'
+reviewed_at: 2026-10-15 15:46
 ---
 
 # Corrections log — booping correction add, the corrections sidecar, retro's feed
