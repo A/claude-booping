@@ -259,9 +259,10 @@ The edge's hook regenerates `index.md`'s `## Milestones` table and its `sp` — 
 
 ## Delegating a group
 
-1. Open one tracking task for the group.
-2. Transition every milestone in the group onto the edge whose `when` is the group being handed to a worker.
-3. Compose **one** briefing, exactly this block:
+1. Run `booping budget gate`. Exit 3 → take no transition and end the run, its report the verdict the gate printed (the gate has already stamped the run record); exit 0 → continue.
+2. Open one tracking task for the group.
+3. Transition every milestone in the group onto the edge whose `when` is the group being handed to a worker.
+4. Compose **one** briefing, exactly this block:
 
    ```markdown
    ## Task
@@ -283,8 +284,8 @@ The edge's hook regenerates `index.md`'s `## Milestones` table and its `sp` — 
 
    Paths only: never paste a milestone's goal, tasks, DoD or Verify text into the briefing — the worker reads its contract itself. Briefings carry no rule paths either; the worker gets its project shaping from the `agent:{id}` rules injected into its own body.
    A code path a milestone's tasks name outside the attached repo is delegated only once the user has confirmed it for this plan; a worker is never handed a vault path to edit.
-4. Delegate the briefing to the worker agent named in [Available Agents](#available-agents) — always delegate, even for a one-line change.
-5. Never resurrect a worker by ID for the next group. Each group gets a fresh agent with empty context.
+5. Delegate the briefing to the worker agent named in [Available Agents](#available-agents) — always delegate, even for a one-line change.
+6. Never resurrect a worker by ID for the next group. Each group gets a fresh agent with empty context.
 
 ## Closing a milestone
 

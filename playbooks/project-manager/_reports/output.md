@@ -91,12 +91,37 @@ Each item taken up is one of:
 - `question` — the user asks something.
 - `decision` — the user states a choice to record.
 
+A tiny fix is also sized: `booping items size {id} {size}`, one of the sizes
+`booping config-get core.project_manager_playbook.batch` lists.
+
 Next: the class's route below; a class the item does not let you judge → `booping items ask {id}`.
 
 ## Tiny fix
 
-Brief the worker from the agents table with the item text; verify its change; commit it by path
-with a conventional message naming the item id. Next: `booping items close {id}`.
+`booping items batch` prints one line per batch; an item it leaves out takes the plan route. Per
+batch line:
+
+1. `booping budget gate` — exit 3 → stop the turn and report.
+2. Brief the worker from the agents table, exactly this block:
+
+   ```markdown
+   ## Task
+
+   Fix the items below. Leave the work uncommitted.
+
+   ## Item {id}
+
+   {the item's text, verbatim from its item file}
+
+   ## Return
+
+   Per item: the files touched and its check's verdict, nothing else.
+   ```
+
+   One `## Item {id}` block per item in the batch, in the batch's order.
+3. Verify each item's change; commit each by path with a conventional message naming its id.
+
+Next: `booping items close {id}` for each item of the batch.
 
 ## Question
 
@@ -134,7 +159,10 @@ Next: the report line for each of the plan's items.
 
 One develop or code-review run per checkout at a time; groom runs may overlap. Before launching
 one: `booping status runs --detail` — a `running` develop or code-review row → the item queues
-until it ends. A run that ends → act on its outcome. Next: `booping run ack {id}`.
+until it ends. `booping run … --autonomous` exiting 3 → the gate is closed: the item stays
+queued, reported `paused`. A `Paused:` row in `booping status runs --detail` whose `resume after`
+has passed, or is empty and `booping budget gate` now allows → run its `resume` command. A run
+that ends → act on its outcome. Next: `booping run ack {id}`.
 
 ## Report
 
@@ -149,6 +177,7 @@ After each turn's work, one line per item touched:
 | `running` | the run record `runs/{run}.md` |
 | `waiting on you` | the sidecar `open-items/questions/{id}.md#C{n}` |
 | `dropped` | the close reason |
+| `paused` | the run record `runs/{run}.md`, or `gate closed` when no run started |
 
 Next: the next action, in one sentence.
 
