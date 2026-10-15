@@ -1,7 +1,7 @@
 ---
 title: "Specs sites on GitLab Pages — booping specs site-index and the CI templates"
 type: "feature"
-status: presenting
+status: ready-for-dev
 sp: null
 related_to: null
 created: 2026-10-15 22:43
@@ -19,6 +19,10 @@ tracker_provider: null
 tracker_request: null
 tracker_issue: null
 return_to: null
+agents:
+  research-codebase: a901595dabfaacf43
+  cross-review: a607f2912e88df15d
+reviewed_at: 2026-10-15 22:54
 ---
 
 # Specs sites on GitLab Pages — booping specs site-index and the CI templates

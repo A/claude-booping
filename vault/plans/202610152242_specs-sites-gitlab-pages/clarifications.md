@@ -73,3 +73,13 @@ One plan: it stays well under the 35 SP threshold, and the templates are useless
 
 - value/0005 (stack-agnostic core): the core ships GitLab CI templates and a GitLab script. adr/0029 decided exactly that; they are opt-in files under `src/ci/gitlab/`, carry no project or host name (no `lab`, no `zorya`), and the CLI itself stays GitLab-free.
 - vault rule/0013 (snapshot baselines accepted by the user): the owner's standing permission for this feature (2026-10-14) lets the run accept drift the plan describes. This plan touches no playbook source, so no drift is expected.
+
+## C7 — approval gate — answered
+
+**Asked:** 2026-10-15 — present
+
+**Question:** The plan's only review gate: approve the plan for development?
+
+**Answer:**
+
+Auto-confirmed by the autonomous run per the owner's session directive. The cross-review's two CRITICAL findings (an unspecified Jinja environment hook in M01, M03's sort order differing from site-index's) and its three RISKs (unknown-key and parse-error message formats in M02, M03's last-page test) were folded into the milestone files; its NOTE (M05's example) too. None reopened a settled call.
