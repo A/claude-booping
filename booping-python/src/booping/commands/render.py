@@ -4,7 +4,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from booping import logger, migrations
+from booping import autonomy, logger, migrations
 from booping.context import Context
 from booping.macros import MacroError, parse_stub_overrides
 from booping.rendering import get_plugin_root, render
@@ -71,6 +71,11 @@ def _run(args: argparse.Namespace) -> None:
         ctx = ctx.model_copy(
             update={"config": deep_merge(ctx.config, overrides, shallow_merge_keys=["agents"])}
         )
+
+    notice = autonomy.render_gate(ctx.config)
+    if notice is not None:
+        _emit(notice + "\n", args.output)
+        return
 
     message = str(args.path)
     if args.output is not None:

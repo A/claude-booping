@@ -1,0 +1,34 @@
+A misspelt `core.autonomy` in the vault's config.yaml stops the playbook render in band: the STOP
+notice alone on stdout, exit 0, and the fixture playbook's preamble never appears.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+latest_migration: 9999
+-- fixtures/home/Claude/probe/config.yaml --
+core:
+  autonomy: autonomus
+-- fixtures/home/Claude/_playbooks/fx-autonomy/playbook.md --
+---
+name: fx-autonomy
+title: Autonomy
+summary: Must not render with an unknown autonomy mode.
+---
+
+Preamble that a working gate suppresses.
+-- fixtures/home/Claude/_playbooks/fx-autonomy/playbook.yaml --
+graph:
+  only: []
+-- fixtures/home/Claude/_playbooks/fx-autonomy/only/prompt.md --
+---
+name: only
+summary: Only step.
+---
+
+Only body.
+-- cmd --
+booping render-playbook fx-autonomy
+-- exit --
+0
+-- stdout --
+**STOP — tell the user:** `core.autonomy` is `autonomus`; it must be `supervised` or `autonomous`. Fix it in the config tier that sets it, then retry.
+-- stderr --

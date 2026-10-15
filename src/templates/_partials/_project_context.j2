@@ -8,6 +8,7 @@ name: {{ context.project.name }}
 directory: {{ context.project.directory }}
 repo_directory: {{ context.project.repo_directory }}
 git_commit: {{ macro('core.macros.git_commit') }}
+autonomy: {{ config.core.autonomy }}
 {%- if context.project.is_local_vault %}
 local_vault: true
 {%- endif %}
