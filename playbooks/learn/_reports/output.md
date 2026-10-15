@@ -75,6 +75,13 @@ Turn a procedure description into a working playbook — an interviewed brief, a
 - Steps: `decompose`, `fixtures`, `interview`, `llm-tests`, `manifest`, `record-decision`, `regress-optimizer`, `smoke-optimizer`, `states`, `step-prompt`, `step-spec`, `step-suite`
 - Targets: `booping render playbooks/_partials/target_space.md --set targets_for=playbook-authoring`
 
+### project-manager
+
+The manager the user talks to — files every request as an item and carries each through groom, develop, review and merge in the project's autonomy mode.
+
+- Steps: `intake`, `on-start`, `work`
+- Targets: `booping render playbooks/_partials/target_space.md --set targets_for=project-manager`
+
 ### retro
 
 Generate a project- and plan-specific sprint retrospective — mine session logs, gather the user's raw feedback, triage issues, then save it and hand off to `/playbook learn`.

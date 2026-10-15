@@ -53,6 +53,7 @@ booping playbook-state specs --workdir <run workdir>
 | Status | To | When | Gates |
 | --- | --- | --- | --- |
 | `open` | `planned` | `booping items plan` linked the item to a plan | `plan` names an existing plan file |
+| `open` | `done` | `booping items close` on an open item — a tiny fix, an answered question or a recorded decision closed without a plan | — |
 | `open` | `dropped` | `booping items close --dropped` closed the item without work | — |
 | `planned` | `done` | `booping items close`, or the linked plan reached develop's `done` | — |
 | `planned` | `dropped` | `booping items close --dropped` closed the item without work | — |
