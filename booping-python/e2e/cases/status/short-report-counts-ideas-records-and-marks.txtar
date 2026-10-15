@@ -84,6 +84,7 @@ booping status
 items: 1 open — request 0, backlog 0, spec gap 1
 ideas: 1 open, not taken
 plans: none active
+runs: none
 records: 3 unreviewed — idea 2, value 1
 marks: 2 — clarify 1, unknown 1
 -- stderr --

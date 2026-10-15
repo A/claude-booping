@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from functools import cached_property
 from typing import Any
 
+from booping import runs
 from booping.context import Context
 from booping.query import QueryError, as_dict, build_spec, resolve_spec, run
 from booping.rendering import get_plugin_root
@@ -27,6 +28,17 @@ TIER = "project"
 IDEA_TYPE = "idea"
 IDEA_OPEN = "open"
 MARK_KINDS = ("clarify", "unknown")
+RUN_COLUMNS = [
+    "id",
+    "playbook",
+    "mode",
+    "items",
+    "status",
+    "started_at",
+    "ended_at",
+    "exit_code",
+    "log",
+]
 
 
 class StatusError(Exception):
@@ -84,6 +96,15 @@ class StatusContext:
     @cached_property
     def retro_plans(self) -> Table:
         return self._plans(RETRO_PLANS)
+
+    @cached_property
+    def runs(self) -> list[dict[str, Any]]:
+        """Run records nobody acked, by id, each with its effective status."""
+        return [
+            record | {"status": runs.effective_status(record)}
+            for record in runs.records(self.ctx)
+            if record.get("acked_at") is None
+        ]
 
     @cached_property
     def record_types(self) -> list[str]:
@@ -190,6 +211,15 @@ def _plans_detail(sc: StatusContext) -> str:
     )
 
 
+def _runs_summary(sc: StatusContext) -> str:
+    counts = _counts(list(runs.STATUSES), [str(r.get("status")) for r in sc.runs])
+    return f"runs: {counts}" if counts else "runs: none"
+
+
+def _runs_detail(sc: StatusContext) -> str:
+    return _table((sc.runs, RUN_COLUMNS))
+
+
 def _unreviewed(sc: StatusContext) -> list[Record]:
     return [r for r in sc.records if unreviewed(r)]
 
@@ -232,6 +262,7 @@ SECTIONS: tuple[Section, ...] = (
     Section("items", _items_summary, _items_detail),
     Section("ideas", _ideas_summary, _ideas_detail),
     Section("plans", _plans_summary, _plans_detail),
+    Section("runs", _runs_summary, _runs_detail),
     Section("records", _records_summary, _records_detail),
     Section("marks", _marks_summary, _marks_detail),
 )

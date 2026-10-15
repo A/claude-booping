@@ -11,5 +11,6 @@ booping status bogus
 2
 -- stdout --
 -- stderr --
-usage: booping status [-h] [--detail] [{items,ideas,plans,records,marks} ...]
-booping status: error: argument section: invalid choice: 'bogus' (choose from items, ideas, plans, records, marks)
+usage: booping status [-h] [--detail]
+                      [{items,ideas,plans,runs,records,marks} ...]
+booping status: error: argument section: invalid choice: 'bogus' (choose from items, ideas, plans, runs, records, marks)

@@ -26,6 +26,7 @@ booping status
 items: none
 ideas: none
 plans: none active
+runs: none
 records: none unreviewed
 marks: none
 -- stderr --
