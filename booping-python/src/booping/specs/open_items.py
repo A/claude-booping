@@ -8,8 +8,12 @@ the `open_item` machine of the `specs` playbook, never a direct `status:` write.
 from __future__ import annotations
 
 import re
+from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 from typing import Any, cast
+
+from markdown_it import MarkdownIt
+from markdown_it.token import Token
 
 from booping.commands.playbook_transition import (
     format_frontmatter_line,
@@ -18,13 +22,15 @@ from booping.commands.playbook_transition import (
 )
 from booping.commands.scaffold import _plan  # pyright: ignore[reportPrivateUsage]
 from booping.context import Context
-from booping.context._yaml import update_frontmatter
+from booping.context._yaml import parse_frontmatter_only, update_frontmatter
 from booping.context.lifecycle import resolve_edges
 from booping.context.playbook import StateMachine
 from booping.context.scaffold import ScaffoldError, load
 from booping.query import QueryError, as_dict, build_spec, cell, resolve_spec, run
 from booping.rendering import build_source_env
-from booping.specs.records import Record
+from booping.specs.check import Finding
+from booping.specs.records import Record, parse_filename
+from booping.specs.site.markdown import slug
 
 DIRECTIONS = ("code-to-spec", "spec-to-code", "conflict", "clarify")
 SOURCES = ("manual", "adr", "mark", "check", "sync")
@@ -38,6 +44,8 @@ _ITEM_FILE = re.compile(r"OI-(\d+)\.md")
 _ADR_REF = re.compile(r"adr/(\d{4})")
 _SENTENCE_END = re.compile(r"[.!?](?=\s|$)")
 _BULLET = re.compile(r"[-*]\s+")
+_MARK = re.compile(r"\[(clarify|unknown)\]")
+_WS = re.compile(r"\s+")
 
 
 class OpenItemError(Exception):
@@ -259,3 +267,108 @@ def move(ctx: Context, item_id: str, to: str, fields: dict[str, str] | None = No
         PLAYBOOK, to, state=STATE, instance=item_id, workdir=str(require_vault(ctx))
     )
     return report
+
+
+@dataclass(frozen=True)
+class Candidate:
+    """An item `scan` would file; `(source, record, title)` is its dedup key."""
+
+    source: str
+    record: str
+    title: str
+
+
+def record_ref(tier_root: Path, path: Path) -> str:
+    """`{type}/{NNNN}` when *path* is a well-named record, else its tier-relative path."""
+    parsed = parse_filename(path.name)
+    if parsed is not None and path.parent.parent.resolve() == tier_root.resolve():
+        return f"{path.parent.name}/{parsed[0]:04d}"
+    try:
+        return path.resolve().relative_to(tier_root.resolve()).as_posix()
+    except ValueError:
+        return path.as_posix()
+
+
+def _inline_text(children: list[Token]) -> str:
+    return "".join(
+        " " if c.type in ("softbreak", "hardbreak") else c.content
+        for c in children
+        if c.type in ("text", "code_inline", "softbreak", "hardbreak")
+    )
+
+
+def _marks_in(children: list[Token]) -> list[str]:
+    """Titles of the marks in one inline block that open it or open a sentence;
+    code spans are separate tokens, so a quoted mark is never one."""
+    titles: list[str] = []
+    for index, child in enumerate(children):
+        if child.type != "text":
+            continue
+        for match in _MARK.finditer(child.content):
+            before = (_inline_text(children[:index]) + child.content[: match.start()]).rstrip()
+            if before and before[-1] not in ".!?":
+                continue
+            after = child.content[match.end() :] + _inline_text(children[index + 1 :])
+            titles.append(truncate(first_sentence(_WS.sub(" ", after).strip())))
+    return titles
+
+
+def mark_candidates(records: list[Record], tier_root: Path) -> list[Candidate]:
+    md = MarkdownIt("commonmark", {"html": False}).enable("table")
+    candidates: list[Candidate] = []
+    for record in records:
+        ref = record_ref(tier_root, record.path)
+        heading: str | None = None
+        tokens = md.parse(record.body)
+        for index, token in enumerate(tokens):
+            if token.type != "inline":
+                continue
+            children = token.children or []
+            if index > 0 and tokens[index - 1].type == "heading_open":
+                heading = slug(_inline_text(children))
+                continue
+            anchored = f"{ref}#{heading}" if heading else ref
+            candidates += [Candidate("mark", anchored, title) for title in _marks_in(children)]
+    return candidates
+
+
+def finding_candidates(findings: list[Finding], tier_root: Path) -> list[Candidate]:
+    return [
+        Candidate("check", record_ref(tier_root, f.path), truncate(f"{f.check}: {f.message}"))
+        for f in findings
+    ]
+
+
+def _tracked(ctx: Context) -> set[Candidate]:
+    directory = items_dir(ctx)
+    if not directory.is_dir():
+        return set()
+    keys: set[Candidate] = set()
+    for path in sorted(directory.glob("OI-*.md")):
+        fm = parse_frontmatter_only(path)
+        keys.add(Candidate(str(fm.get("source")), str(fm.get("record")), str(fm.get("title"))))
+    return keys
+
+
+def scan(ctx: Context, candidates: list[Candidate]) -> tuple[list[Path], int]:
+    """File every candidate not yet tracked by an item of any status; returns the
+    created paths and the count already tracked."""
+    tracked = _tracked(ctx)
+    created: list[Path] = []
+    skipped = 0
+    for candidate in candidates:
+        if candidate in tracked:
+            skipped += 1
+            continue
+        created.append(
+            write_item(
+                ctx,
+                title=candidate.title,
+                direction="clarify",
+                record=candidate.record,
+                source=candidate.source,
+                body=None,
+            )
+        )
+        tracked.add(candidate)
+    return created, skipped

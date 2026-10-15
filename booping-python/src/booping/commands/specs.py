@@ -116,6 +116,14 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
     add.add_argument("--body", default=None, metavar="TEXT", help="Optional body paragraph")
     add.set_defaults(func=_run_oi_add)
 
+    scan = oi_verbs.add_parser(
+        "scan",
+        help="File one clarify item per [clarify]/[unknown] mark and per `specs check`"
+        " finding in a tier, skipping any already tracked",
+    )
+    _add_tier(scan, "Tier to scan (default: project)")
+    scan.set_defaults(func=_run_oi_scan)
+
     lst = oi_verbs.add_parser(
         "list",
         help="Print the open-items index as a markdown table (open and planned items)",
@@ -443,6 +451,32 @@ def _run_oi_add(args: argparse.Namespace) -> None:
     rel = open_items.vault_relative(ctx, path)
     logger.log(vault=ctx.vault, subcommand="specs", message=f"open-items add {rel}")
     print(rel)
+
+
+def _run_oi_scan(args: argparse.Namespace) -> None:
+    ctx, root, home_dir = _assemble()
+    try:
+        open_items.require_vault(ctx)
+    except OpenItemError as exc:
+        _fail(str(exc))
+    known = _known_types(ctx, root)
+    tier = _select_tier(ctx, root, home_dir, args.tier)
+    records = load_tier(tier, known)
+    try:
+        findings, _ = check_tier(tier, _format_dir(ctx, root), known, _resolve(ctx, root, home_dir))
+    except CheckError as exc:
+        _fail(str(exc), 2)
+    candidates = open_items.mark_candidates(
+        [r for r in records if r.type in known], tier.root
+    ) + open_items.finding_candidates(findings, tier.root)
+    try:
+        created, skipped = open_items.scan(ctx, candidates)
+    except OpenItemError as exc:
+        _fail(str(exc))
+    for path in created:
+        print(open_items.vault_relative(ctx, path))
+    logger.log(vault=ctx.vault, subcommand="specs", message=f"open-items scan --tier {args.tier}")
+    print(f"{len(created)} created, {skipped} already tracked")
 
 
 def _run_oi_list(args: argparse.Namespace) -> None:

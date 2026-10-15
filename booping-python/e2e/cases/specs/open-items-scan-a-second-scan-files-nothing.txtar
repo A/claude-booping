@@ -1,0 +1,81 @@
+A second scan over the same tier files nothing: every mark and finding matches an item's
+`(source, record, title)`.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+macro_stubs:
+  core.macros.date: "2026-10-15"
+-- fixtures/cwd/vault/specs/value/0001-first.md --
+---
+type: value
+title: First
+summary: The first value.
+kind: value
+created_by: owner
+created_at: 2026-01-01
+updated_at: 2026-01-01
+---
+
+Why the project exists, see [notes](../notes/missing.md).
+
+## In practice
+
+It shows in every run. [clarify] Which runs count as every run? The owner decides.
+
+- [unknown] The code skips dry runs; the record says it never does.
+- A mid-sentence [clarify] mark is not one.
+-- fixtures/cwd/vault/open-items/OI-0001.md --
+---
+id: OI-0001
+title: "Which runs count as every run"
+status: open
+direction: clarify
+record: "value/0001#in-practice"
+source: mark
+plan: null
+created_at: 2026-10-15
+closed_at: null
+reason: null
+---
+
+# Which runs count as every run
+-- fixtures/cwd/vault/open-items/OI-0002.md --
+---
+id: OI-0002
+title: "The code skips dry runs; the record says it never does"
+status: open
+direction: clarify
+record: "value/0001#in-practice"
+source: mark
+plan: null
+created_at: 2026-10-15
+closed_at: null
+reason: null
+---
+
+# The code skips dry runs; the record says it never does
+-- fixtures/cwd/vault/open-items/OI-0003.md --
+---
+id: OI-0003
+title: "link: link target `../notes/missing.md` does not exist"
+status: open
+direction: clarify
+record: "value/0001"
+source: check
+plan: null
+created_at: 2026-10-15
+closed_at: null
+reason: null
+---
+
+# link: link target `../notes/missing.md` does not exist
+-- cmd --
+booping specs open-items scan
+-- exit --
+0
+-- stdout --
+0 created, 3 already tracked
+-- stderr --
