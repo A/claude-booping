@@ -115,7 +115,7 @@ The one non-rule destination: the attached repo's `CLAUDE.md`. Route a candidate
 
 The following 1 rule(s) apply to this playbook. Never silently violate one; conflict → stop and flag. Read a rule's record when its brief is not enough.
 
-- Write every accepted learning as a rule record in the project specs tier (targets, a self-sufficient one-or-two-line brief, Rule and Follows from) or as a repo CLAUDE.md bullet; never as a lesson file. [booping:rule/0001](${CLAUDE_PLUGIN_ROOT}/vault/specs/rule/0001-lessons-are-rules.md)
+- Write every accepted learning as a rule record in the project specs tier (targets, a self-sufficient one-or-two-line brief, Rule and Follows from) or as a repo CLAUDE.md bullet; never as a lesson file. [booping:rule/0001](${CLAUDE_PLUGIN_ROOT}/specs/rule/0001-lessons-are-rules.md)
 
 ## Playbook Steps
 

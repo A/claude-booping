@@ -124,7 +124,7 @@ core:
     format: src/specs
     tiers:
       # Plugin-root-relative: booping's own shipped records.
-      core: {namespace: booping, path: vault/specs}
+      core: {namespace: booping, path: specs}
       # home_dir-relative; namespace null → the `USER` environment variable, read by code.
       global: {namespace: null, path: _specs}
       # Repo-relative; path null → {vault}/specs when the vault is inside the repo, else specs.

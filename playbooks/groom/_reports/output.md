@@ -28,8 +28,8 @@ itself stays yours. Never delegate to an agent that is not on this list.
 
 The following 2 rule(s) apply to this playbook. Never silently violate one; conflict → stop and flag. Read a rule's record when its brief is not enough.
 
-- Settle every open question with the user during grooming; in develop, stop only for force majeure, not for what grooming should have asked. [booping:rule/0004](${CLAUDE_PLUGIN_ROOT}/vault/specs/rule/0004-questions-settled-in-grooming.md)
-- Before saving a skill, agent, partial, template or briefing, check every block for scoping, duplication, configurability and hierarchy; cut motivation, restated context and preambles. [booping:rule/0006](${CLAUDE_PLUGIN_ROOT}/vault/specs/rule/0006-information-architecture-pass.md)
+- Settle every open question with the user during grooming; in develop, stop only for force majeure, not for what grooming should have asked. [booping:rule/0004](${CLAUDE_PLUGIN_ROOT}/specs/rule/0004-questions-settled-in-grooming.md)
+- Before saving a skill, agent, partial, template or briefing, check every block for scoping, duplication, configurability and hierarchy; cut motivation, restated context and preambles. [booping:rule/0006](${CLAUDE_PLUGIN_ROOT}/specs/rule/0006-information-architecture-pass.md)
 
 ## Playbook Steps
 
@@ -292,10 +292,10 @@ Project-specific sizing overrides live in `{project}/_booping/skill_groom.md` an
 
 The following 4 rule(s) apply to this step. Never silently violate one. Read a rule's record when its brief is not enough.
 
-- When the plan deletes or renames partials, agents, CLAUDE.md lines or doc links, make the cleanup of every stale reference a milestone task with its own DoD in this sprint. [booping:rule/0007](${CLAUDE_PLUGIN_ROOT}/vault/specs/rule/0007-stale-references-cleaned-in-sprint.md)
-- For user-facing content (release notes, docs, changelogs), put the audience filter into the task's DoD: only what that audience touches, no internal churn. [booping:rule/0008](${CLAUDE_PLUGIN_ROOT}/vault/specs/rule/0008-audience-scoped-content.md)
-- When folding DoD and Verify into tasks, state the exact return shape the worker replies with — only what the orchestrator needs (e.g. the list of changed files). [booping:rule/0009](${CLAUDE_PLUGIN_ROOT}/vault/specs/rule/0009-bounded-agent-return-contract.md)
-- When the plan defines a user-facing output or log format, lock its exact content with the user now — line fields, truncation rules, trailers — not just the format in prose. [booping:rule/0010](${CLAUDE_PLUGIN_ROOT}/vault/specs/rule/0010-output-content-locked-in-grooming.md)
+- When the plan deletes or renames partials, agents, CLAUDE.md lines or doc links, make the cleanup of every stale reference a milestone task with its own DoD in this sprint. [booping:rule/0007](${CLAUDE_PLUGIN_ROOT}/specs/rule/0007-stale-references-cleaned-in-sprint.md)
+- For user-facing content (release notes, docs, changelogs), put the audience filter into the task's DoD: only what that audience touches, no internal churn. [booping:rule/0008](${CLAUDE_PLUGIN_ROOT}/specs/rule/0008-audience-scoped-content.md)
+- When folding DoD and Verify into tasks, state the exact return shape the worker replies with — only what the orchestrator needs (e.g. the list of changed files). [booping:rule/0009](${CLAUDE_PLUGIN_ROOT}/specs/rule/0009-bounded-agent-return-contract.md)
+- When the plan defines a user-facing output or log format, lock its exact content with the user now — line fields, truncation rules, trailers — not just the format in prose. [booping:rule/0010](${CLAUDE_PLUGIN_ROOT}/specs/rule/0010-output-content-locked-in-grooming.md)
 
 ## Step: Cross Review
 

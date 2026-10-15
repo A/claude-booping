@@ -20,7 +20,7 @@ develop is iterated live instead of decided up front.
 
 ## Follows from
 
-- [Plans run to the end](../value/0007-plans-run-to-the-end.md) — develop does not stop to
+- [Plans run to the end](../../vault/specs/value/0007-plans-run-to-the-end.md) — develop does not stop to
   settle what grooming should have asked.
 - `_lessons/0010_lock-output-content-during-grooming.md` (removed by [migration 004](https://github.com/A/claude-booping/blob/master/migrations/004_lessons_to_rules/migration.md)) — the
   source names no retro.

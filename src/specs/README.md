@@ -11,7 +11,7 @@ Specs come in three tiers:
 
 | Tier    | Where                                                    | Holds                                         |
 |---------|----------------------------------------------------------|-----------------------------------------------|
-| core    | shipped with booping, at `vault/specs/` in the plugin    | booping's values and rules                    |
+| core    | shipped with booping, at `specs/` in the plugin          | booping's rules for every project             |
 | global  | `<home_dir>/_specs/`                                     | one person's values and rules for every project |
 | project | `specs/` in the project repo, or `<vault>/specs/` when the vault is in the repo | the project's own records |
 

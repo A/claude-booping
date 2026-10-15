@@ -14,7 +14,7 @@ sources: [CLAUDE.md, playbooks/learn/playbook.md]
 Core skills and playbooks name no stack and no project. A project's specifics —
 its conventions, commands, the shaping of an agent for it — live in the project's
 own destinations: rule records in the project specs tier and the attached repo's
-`CLAUDE.md`, the only two places `learn` writes ([rule/0001](0001-lessons-are-rules.md)).
+`CLAUDE.md`, the only two places `learn` writes ([booping:rule/0001](../../../specs/rule/0001-lessons-are-rules.md)).
 A run never writes a project specific into the core or into a user-level scope such
 as `~/.claude/CLAUDE.md`.
 

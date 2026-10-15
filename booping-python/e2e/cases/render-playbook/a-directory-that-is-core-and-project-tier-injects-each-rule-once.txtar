@@ -1,5 +1,5 @@
-When the core and the project tier resolve to one directory — booping's own repo, where the vault
-sits in the plugin root and `vault/specs` is both — a targeted rule injects once, under the core
+When the core and the project tier resolve to one directory — a vault in the plugin root whose
+`vault/specs` is also configured as the core tier — a targeted rule injects once, under the core
 tier's ref. The plugin root is the real checkout, so the vault's config points the core tier at the
 sandbox repo's `vault/specs`, the directory the project tier's null `path` resolves to.
 

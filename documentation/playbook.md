@@ -99,7 +99,7 @@ The rule's brief is injected, not its body: one line per rule, under the `## Rul
 
 The following 2 rule(s) apply to this step. Never silently violate one. Read a rule's record when its brief is not enough.
 
-- For user-facing content, put the audience filter into the task's DoD. [booping:rule/0008](${CLAUDE_PLUGIN_ROOT}/vault/specs/rule/0008-audience-scoped-content.md)
+- For user-facing content, put the audience filter into the task's DoD. [booping:rule/0008](${CLAUDE_PLUGIN_ROOT}/specs/rule/0008-audience-scoped-content.md)
 - Assert behaviour, not mechanism. [rule/0003](specs/rule/0003-tests-against-real-behaviour.md)
 ```
 
@@ -113,7 +113,7 @@ The ref and link depend on the rule's tier:
 | global | `<namespace>:rule/NNNN` | the record's absolute path |
 | project | `rule/NNNN` | the record's path relative to the repo root |
 
-When two tiers point at the same directory — booping's own repo, where core and project are both `vault/specs/` — each rule file injects once, from the first tier in core → global → project order.
+When two tiers point at the same directory — say a project tier configured onto the core tier's path — each rule file injects once, from the first tier in core → global → project order.
 
 On the `render-playbook` surfaces, a rule that cannot be injected (bad frontmatter, `targets:` without `brief:`, a target that does not parse) and a rule whose `{playbook}/{step}` target names a step this playbook doesn't have each produce a non-blocking note pointing at `booping specs check` — see [Notices](#notices). Agent and skill bodies stay silent. `--no-rules` drops every `## Rules` section and every rule note.
 

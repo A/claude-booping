@@ -32,9 +32,10 @@ ci: lint typecheck pytest snapshots mdcheck specs-check e2e
 mdcheck:
     @uv run scripts/mdcheck.py
 
-[doc("Check this repo's specs records (project tier) — booping specs check")]
+[doc("Check this repo's specs records (core and project tiers) — booping specs check")]
 specs-check:
-    bin/booping specs check
+    bin/booping specs check --tier core
+    bin/booping specs check --tier project
 
 [doc("Check the committed reports against a fresh hermetic render")]
 snapshots:

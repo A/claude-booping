@@ -34,7 +34,7 @@ ls -1 "$VAULT"/_lessons/*.md 2>/dev/null || echo "no project lessons"
 
 Tier anchors — what `sources` entries and every path in the report are relative to: core → the
 plugin root, global → `$HOME_DIR`, project → `$REPO`. When the project tier root is the core tier
-root (booping's own repo), its records count as **core**: the first tier wins, as in rule injection.
+root (a vault whose specs directory is the core tier), its records count as **core**: the first tier wins, as in rule injection.
 
 ## Order
 

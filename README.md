@@ -16,7 +16,7 @@ booping is **not** spec-driven development — it doesn't keep specs as a living
 
 The vault at `~/Claude/{project}/` is markdown-only with YAML frontmatter that Obsidian renders natively as Properties. One vault per project, side-by-side with whatever else you keep in `~/Claude/`. No lock-in — just files you can grep, version, and edit by hand.
 
-This repo is developed with booping itself, and its vault is checked in at [`vault/`](vault/) — browse a [finished plan](vault/plans/202608081300_session-time-metrics/index.md), the [targeted rules](vault/specs/rule/) the loop has accumulated, or a [retrospective](vault/retrospectives/20260722-seven-plan-retro.md).
+This repo is developed with booping itself, and its vault is checked in at [`vault/`](vault/) — browse a [finished plan](vault/plans/202608081300_session-time-metrics/index.md), the [specs records](vault/specs/) the loop has accumulated, or a [retrospective](vault/retrospectives/20260722-seven-plan-retro.md).
 
 ## Disclaimer
 

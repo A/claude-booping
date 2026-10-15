@@ -7,7 +7,7 @@ created_at: 2026-10-14
 updated_at: 2026-10-14
 status: accepted
 values: [value/0008, value/0007, value/0012]
-rules: [rule/0003, rule/0004]
+rules: [rule/0003, booping:rule/0004]
 sources: [playbooks/groom/_specs/DECISIONS.md, playbooks/develop/_specs/DECISIONS.md, playbooks/code-review/_specs/DECISIONS.md, playbooks/migrate/_specs/DECISIONS.md, playbooks/setup/_specs/DECISIONS.md, CHANGELOG.md]
 # also distilled from the owner's local, unpublished notes (vault/notes/ is gitignored): vault/notes/20260802-groom-skill-vs-playbook-metrics.md
 ---

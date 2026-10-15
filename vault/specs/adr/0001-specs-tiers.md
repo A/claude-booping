@@ -7,7 +7,7 @@ created_at: 2026-10-14
 updated_at: 2026-10-15
 status: accepted
 values: [value/0003, value/0005, value/0011, value/0001]
-rules: [rule/0001]
+rules: [booping:rule/0001]
 ---
 
 ## Context
@@ -34,8 +34,11 @@ on 2026-10-14.
 The specs format is a core feature of booping, in three tiers:
 
 - **core** — booping's repo: the format (README, schemas, later the checker and the
-  setup and upgrade playbooks) and booping's own specs in `vault/specs/`, which are
-  also the dogfood of the format.
+  setup and upgrade playbooks) and the shipped records in `specs/`, beside the core
+  `playbooks/` — the rules whose `targets` steer core playbooks for every user.
+  Booping's records about its own development — values, ADRs, stories, references,
+  ideas, runbooks and the rules that concern only booping — are booping's project
+  tier, `vault/specs/`, which is also the dogfood of the format.
 - **global** — `<home_dir>/_specs/`, booping's existing global config level: one person's values and rules for every project.
 - **project** — `specs/` in the project repo, so a spec changes in the same commit as
   the code; when the vault is in the repo, `<vault>/specs/`. A vault outside the repo
@@ -48,7 +51,7 @@ same person's record on every machine. An unresolved namespace (a collaborator, 
 is a warning, not an error. A project that departs from a rule of a tier above
 records it in its own ADR or conflict. Changes to the format reach projects as
 booping migrations. Lessons become rules with `targets` and `brief`
-([rule/0001](../rule/0001-lessons-are-rules.md)).
+([booping:rule/0001](../../../specs/rule/0001-lessons-are-rules.md)).
 
 ## Alternatives
 
@@ -99,5 +102,9 @@ Each project keeps its own copy of the format and its own checker.
   before the migration for rollback.
 - [clarify] An exported global tier that a project imports, so a namespace resolves
   without the home dir, is out of scope for now.
-- Confirmation: `just specs-check` validates this set; a project set up by the setup
+- 2026-10-15: the core tier moved from `vault/specs/` to `specs/` at the repo root and
+  holds only the shipped targeted rules; `vault/specs/` became booping's project tier.
+  With both on one directory, a booping-only rule could not keep `targets` without
+  reaching every user — rule/0013 and rule/0015 got their targets back as project rules.
+- Confirmation: `just specs-check` validates both tiers; a project set up by the setup
   playbook resolves a `booping:` and a global reference.

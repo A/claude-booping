@@ -7,6 +7,8 @@ created_at: 2026-10-14
 updated_at: 2026-10-14
 status: accepted
 sources: [CLAUDE.md]
+targets: [develop]
+brief: "Never run just snapshots-accept or write playbooks/*/_reports/output.md. At wrap-up run just snapshots; on drift, show it and ask the user to accept before the closing commit."
 ---
 
 ## Rule

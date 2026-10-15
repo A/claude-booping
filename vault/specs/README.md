@@ -1,14 +1,17 @@
 # specs/
 
-Booping's own specs, written in the format booping will ship as a core feature: why
-booping exists and what it is like (values), the constraints every decision obeys
-(rules), the decisions with their rejected alternatives (ADRs), and the rest of what
-the code cannot show. This set is also the dogfood of the format itself — the rules
-on how records are written live here as records.
+Booping's project tier: the specs about developing booping itself, in the format
+booping ships — why booping exists and what it is like (values), the constraints
+every decision obeys (rules), the decisions with their rejected alternatives (ADRs),
+and the rest of what the code cannot show. This set is also the dogfood of the format
+itself — the rules on how records are written live here as records.
 
 What lives where:
 
 - **`vault/specs/`** — why and where the boundaries are: values, rules, decisions.
+  A rule here reaches only runs in this repo.
+- **`specs/`** at the repo root — the core tier: rules shipped with the plugin and
+  injected into every user's runs. Cited from here as `booping:rule/NNNN`.
 - **Vault artefacts** (`plans/`, `retrospectives/`, `codereviews/`, `notes/`) — work
   and its history; a decision made in a run goes up into an ADR here.
 - **Code** (`booping-python/`, `booping-tracker/`, `playbooks/`, `src/`) — how things
@@ -27,7 +30,7 @@ is the shipped guide: [src/specs/README.md](../../src/specs/README.md).
 just specs-check
 ```
 
-Runs `booping specs check` over this directory, the project tier of this repo: each
+Runs `booping specs check` over the core tier (`specs/`) and this directory, the project tier of this repo: each
 record against its type's shipped schema (mdcheck), layout, file names, unique
 numbers, frontmatter, rule targets, relative link targets, typed refs and `sources`
 paths, with a warning for a namespace no tier answers to. The full list is the

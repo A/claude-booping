@@ -21,6 +21,6 @@ not cleaned up in a post-edit.
 
 ## Follows from
 
-- [Retro: CLI logging and agent namespacing](../../retrospectives/20260610-cli-logging-and-agent-namespacing.md)
+- [Retro: CLI logging and agent namespacing](../../vault/retrospectives/20260610-cli-logging-and-agent-namespacing.md)
   — generated release notes listed internal `booping` CLI changes users never
   invoke; the same oversharing recurred in a docs review.
