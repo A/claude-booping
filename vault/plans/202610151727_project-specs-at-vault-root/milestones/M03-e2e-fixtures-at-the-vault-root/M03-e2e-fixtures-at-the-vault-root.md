@@ -2,7 +2,7 @@
 id: "03"
 title: "E2E fixtures seed project records at the vault root"
 sp: 3
-status: in-progress
+status: done
 plan: "plans/202610151727_project-specs-at-vault-root/index.md"
 ---
 
@@ -18,18 +18,18 @@ Tests: the rewritten cases themselves — integration tier, assertions unchanged
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 3.1 | The sed pass over the listed cases. | `booping-python/e2e/cases/**/*.txtar` (the grep's list minus `init-*`, `check-layout-*`) | 2 | pending |
-| 3.2 | Run the corpus; fix missed paths by hand, report any other failure. | same | 1 | pending |
+| 3.1 | The sed pass over the listed cases. | `booping-python/e2e/cases/**/*.txtar` (the grep's list minus `init-*`, `check-layout-*`) | 2 | done |
+| 3.2 | Run the corpus; fix missed paths by hand, report any other failure. | same | 1 | done |
 
 ## Definition of Done
 
 ### Task 3.1
 
-- [ ] `grep -rlE '^-- [^ ]*vault[^ ]*/specs/' booping-python/e2e/cases` lists only `init-*` and `check-layout-*` cases, and any case pinned to an explicit path.
+- [x] `grep -rlE '^-- [^ ]*vault[^ ]*/specs/' booping-python/e2e/cases` lists only `init-*` and `check-layout-*` cases, and any case pinned to an explicit path.
 
 ### Task 3.2
 
-- [ ] The Verify command passes; no case was rebaselined with `--txtar-update`.
+- [x] The Verify command passes; no case was rebaselined with `--txtar-update`.
 
 Return: the list of changed files, plus each case fixed by hand with one line on why.
 
