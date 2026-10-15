@@ -2,17 +2,18 @@
 title: "Project-manager playbook — the core manager over items, groom, develop and
   runs"
 type: "feature"
-status: in-progress
+status: done
 sp: 25
 related_to: null
 created: 2026-10-15 20:06
 planned: null
 started: 2026-10-15 20:26
-completed: null
+completed: 2026-10-15 20:53
 code_reviews: []
 sessions:
 - c89cc3ae-5e20-46ac-93d9-c83f4ddb84b3
 - e1d4bd12-b0f2-4016-8b84-e28f10b43ab8
+- 36dbf90d-0102-4f43-add1-4a69775c2e2f
 retro: null
 summary: 'Core project-manager playbook: items in, groom/develop/review/merge out
   per autonomy mode; item questions; run code-review'
@@ -29,6 +30,14 @@ agents:
   develop-loop-G2: a01463dfad3af8d36
   verify: aaff8f222f06df44a
 reviewed_at: 2026-10-15 20:21
+metrics_active_minutes: 821
+metrics_models:
+- <synthetic>
+- claude-opus-5-5
+metrics_tokens_input: 832
+metrics_tokens_output: 286050
+metrics_tokens_cache_creation: 2313640
+metrics_tokens_cache_read: 111314302
 ---
 
 # Project-manager playbook — the core manager over items, groom, develop and runs
