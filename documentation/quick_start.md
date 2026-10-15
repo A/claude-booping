@@ -47,7 +47,15 @@ The fence is seeded once and yours to edit (see [Vault](vault.md)). Outside Obsi
 bin/booping query --config core.plans --where status:in=ready-for-dev,in-progress
 ```
 
-`bin/booping status` prints the short project status (items, ideas, plans, records, marks), `bin/booping status plans` the plan tables.
+`bin/booping status` prints the short project status (items, ideas, plans, runs, records, marks), `bin/booping status plans` the plan tables.
+
+To run a groomed plan headless, launch it from the repo and leave it in the background:
+
+```bash
+bin/booping run develop plans/{slug}/index.md --autonomous &
+```
+
+It records the run under `runs/` in the vault — plan, items, session id, a log of the run's output, and how it ended — and `bin/booping status runs` lists it until `bin/booping run ack {id}` marks it seen.
 
 ## 5. First groom
 

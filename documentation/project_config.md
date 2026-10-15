@@ -265,6 +265,16 @@ The query specs behind `booping status`, which prints the project's status — i
 
 The plans section also reads `core.retro_playbook.queries.candidates`, the retro queue, for done plans without a retro. Override any of the three [query specs](#query-specs) in a tier to change what the report lists.
 
+### `core.run`
+
+How `booping run groom` and `booping run develop` launch a recorded headless run. Directly under `core` because the CLI and the project-manager share it. No value is env-interpolated.
+
+- **`core.run.command`** — the argv of the launched run, `claude -p` with auto permissions and streamed JSON output as shipped. `--session-id {uuid}` and the prompt are appended per run.
+- **`core.run.env`** — variables set on top of the inherited environment. The shipped `CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS: "0"` keeps a headless run from ending its own background workers after ten minutes.
+- **`core.run.prompt`** — the prompt, `/booping:playbook {playbook} {target}`; `{target}` is the plan's absolute `index.md`, or each item as `{id} ({path})`.
+- **`core.run.preamble`** — the autonomy instructions appended after a blank line under `--autonomous`: settle gates and questions without asking, log each with `booping defaults add`, never push.
+- **`core.run.dir`** — the vault directory of run records, `runs` as shipped.
+
 ### `core.macros`
 
 Shell-outs a rendered body may call by dotted path. Each entry is an **argv list**, never a shell string, run with `shell=False` — either the bare list, or a mapping carrying it under `command:` plus an optional `cwd:` of `repo` or `vault`: the attached repo or the Project Vault. Omit `cwd:` and the command runs in the process's own working directory.
