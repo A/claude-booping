@@ -1,8 +1,8 @@
 ---
 id: "03"
-title: "Tags dictionary \u2014 record tags checked against the tier\u0027s tags.yaml"
+title: "Tags dictionary — record tags checked against the tier's tags.yaml"
 sp: 3
-status: pending
+status: in-progress
 plan: "plans/202610152146_project-level-schemas/index.md"
 ---
 

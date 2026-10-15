@@ -1,8 +1,8 @@
 ---
 id: "01"
-title: "Tier schemas \u2014 each tier\u0027s effective schema set, used by booping specs check"
+title: "Tier schemas — each tier's effective schema set, used by booping specs check"
 sp: 4
-status: pending
+status: in-progress
 plan: "plans/202610152146_project-level-schemas/index.md"
 ---
 

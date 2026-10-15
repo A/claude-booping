@@ -1,8 +1,9 @@
 ---
 id: "02"
-title: "Tier types everywhere \u2014 ls, next, site, items and status read each tier\u0027s own types"
+title: "Tier types everywhere — ls, next, site, items and status read each tier's
+  own types"
 sp: 4
-status: pending
+status: in-progress
 plan: "plans/202610152146_project-level-schemas/index.md"
 ---
 

@@ -2,20 +2,21 @@
 title: "Project-level schemas — tiers carry their own mdcheck schemas, tags dictionary,
   ADR alternatives checks, Russian set"
 type: "feature"
-status: ready-for-dev
-sp: null
+status: in-progress
+sp: 26
 related_to: null
 created: 2026-10-15 21:46
 planned: null
-started: null
+started: 2026-10-15 22:11
 completed: null
 code_reviews: []
 sessions:
 - 2740a7e8-9ead-4aa2-92ad-5cf9208bef05
+- f2280e4c-6a1f-4aa5-992a-85b25a75da65
 retro: null
 summary: A tier carries its own mdcheck schemas (override, add types), tags 
   dictionary, ADR alternatives checks, Russian set via init --schemas
-commit: 7b70e0be1762735d997d208f321184cb6672c058
+commit: 7959557867b9f7f928ab95e408f1c22ed124b7dc
 tracker_provider: null
 tracker_request: null
 tracker_issue: null
@@ -41,6 +42,8 @@ reviewed_at: 2026-10-15 22:01
 Frontmatter keys and the values code reads stay English in every set.
 
 ## Decisions
+
+> Owner decision 2026-10-15 (C-owner) supersedes every Russian-set and `init --schemas` line below: structural headings stay English in every tier; M05 states that rule, M06 is removed, M07 guides a heading rename.
 
 - **Location**: `{tier root}/_schemas/{type}.yaml`; `_`-prefixed directories are never record directories — C1, C11, C12.
 - **Overlay**: per tier, shipped ∪ own, no cascade between tiers; site roots read like tiers — C3.
@@ -90,12 +93,12 @@ specs init --schemas SET ─► copy {format}/schemas-SET/*.yaml → {root}/_sch
 
 | id | title | sp | status |
 | --- | --- | --- | --- |
-| 01 | [Tier schemas — each tier's effective schema set, used by booping specs check](milestones/M01-tier-schemas-in-check/M01-tier-schemas-in-check.md) | 4 | pending |
-| 02 | [Tier types everywhere — ls, next, site, items and status read each tier's own types](milestones/M02-tier-types-everywhere/M02-tier-types-everywhere.md) | 4 | pending |
-| 03 | [Tags dictionary — record tags checked against the tier's tags.yaml](milestones/M03-tags-dictionary/M03-tags-dictionary.md) | 3 | pending |
-| 04 | [Alternatives check — table rows match H3 options, one accepted, names from the schema](milestones/M04-alternatives-check/M04-alternatives-check.md) | 4 | pending |
-| 05 | [Russian schema set — src/specs/schemas-ru, a translation of every shipped schema](milestones/M05-russian-schema-set/M05-russian-schema-set.md) | 3 | pending |
-| 06 | [booping specs init --schemas copies a shipped schema set into a tier](milestones/M06-init-schemas/M06-init-schemas.md) | 3 | pending |
+| 01 | [Tier schemas — each tier's effective schema set, used by booping specs check](milestones/M01-tier-schemas-in-check/M01-tier-schemas-in-check.md) | 4 | in-progress |
+| 02 | [Tier types everywhere — ls, next, site, items and status read each tier's own types](milestones/M02-tier-types-everywhere/M02-tier-types-everywhere.md) | 4 | in-progress |
+| 03 | [Tags dictionary — record tags checked against the tier's tags.yaml](milestones/M03-tags-dictionary/M03-tags-dictionary.md) | 3 | in-progress |
+| 04 | [Alternatives check — table rows match H3 options, one accepted, names from the schema](milestones/M04-alternatives-check/M04-alternatives-check.md) | 4 | in-progress |
+| 05 | [Structural headings are English in every tier](milestones/M05-russian-schema-set/M05-russian-schema-set.md) | 3 | pending |
+| 06 | [(removed) init --schemas](milestones/M06-init-schemas/M06-init-schemas.md) | 3 | pending |
 | 07 | [Specs import guidance — init with a language set, splitting an area file into value records](milestones/M07-import-guidance/M07-import-guidance.md) | 2 | pending |
 | 08 | [Documentation — format guide, specs docs, config reference and CLAUDE.md for tier schemas](milestones/M08-docs/M08-docs.md) | 3 | pending |
 
@@ -113,7 +116,7 @@ specs init --schemas SET ─► copy {format}/schemas-SET/*.yaml → {root}/_sch
 
 - [ ] `just ci` green, run to completion.
 - [ ] `just snapshots` drift only in `playbooks/specs/_reports/output.md` (the guide step's `Import` scenario and `Init` sentence); accepted per the owner's snapshot policy and listed in `develop-defaults.md`.
-- [ ] `bin/booping specs init --help` shows `--schemas SET`; happy path (`init --schemas ru` on a scratch vault) and one failure path (`--schemas xx`, exit 1) run by hand.
+- [ ] `bin/booping specs init --help` names no `--schemas` option (owner decision 2026-10-15, C-owner: no Russian set, no `init --schemas`; M05–M07 amended).
 - [ ] `just specs-check` green on this repo — both tiers, with the new `tags` and `alternatives` checks active.
 
 ## Out of scope

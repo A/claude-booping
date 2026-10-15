@@ -1,8 +1,9 @@
 ---
 id: "04"
-title: "Alternatives check \u2014 table rows match H3 options, one accepted, names from the schema"
+title: "Alternatives check — table rows match H3 options, one accepted, names from
+  the schema"
 sp: 4
-status: pending
+status: in-progress
 plan: "plans/202610152146_project-level-schemas/index.md"
 ---
 
