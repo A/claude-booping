@@ -155,10 +155,94 @@ vault/adr/0002-ports.md:14  warning  site  unresolved link ../rule/0099-gone.md
 
 An error prints one `error: {message}` line on stderr.
 
+### `booping specs site-index`
+
+```
+booping specs site-index [--projects PATH|-] [--out DIR] [--title TEXT]
+```
+
+Renders one index page in the site's look that links to several projects' specs sites — the page at the root of a [GitLab Pages group](#publishing-on-gitlab-pages). Reads no specs root and no config key. The same input always produces a byte-identical tree.
+
+- **`--projects PATH|-`** — the project list, default `-`: `-` reads it as JSON from stdin, a path reads the file as YAML.
+- **`--out DIR`** — the output directory, default `specs-site-index` in the working directory.
+- **`--title TEXT`** — the page heading, its single crumb and its `<title>` (`{TEXT} — specs`), default `Specs`.
+
+**Input.** A list of entries, each a mapping with exactly these keys:
+
+- `name` — required, a non-empty string, unique across the list.
+- `url` — required, starting `http://` or `https://`.
+- `description` — optional, a string or null.
+
+Any other key, a top level that is not a list, an entry that is not a mapping, and every violation above is an error naming the entry by its 0-based position in the input (`projects[3]: …`); so is unreadable input — a missing file or a YAML or JSON syntax error.
+
+**Page.** The heading, then a `Project | Description` table with one row per entry, the name linking to its URL. Rows are sorted by name, case-insensitively; input order never shows. A description's whitespace — newlines included — collapses to single spaces, so each renders on one line; a missing or null description is an empty cell. An empty list renders the heading and `No projects.` and still succeeds.
+
+**Output directory.** `index.html`, the site's `style.css` and the `.booping-site` marker, under the same rules as [`booping specs site`](#booping-specs-site): a non-empty directory without the marker is refused, one carrying it is cleared and rewritten.
+
+**Output.** Piping a two-project list on stdin:
+
+```json
+[
+  {"name": "api", "url": "https://{group}.{pages-domain}/api", "description": "Payments API."},
+  {"name": "app", "url": "https://{group}.{pages-domain}/app", "description": null}
+]
+```
+
+```
+$ booping specs site-index --out public < projects.json
+specs site-index: 2 projects -> public
+```
+
+An error prints one `error: {message}` line on stderr and writes nothing.
+
 ### Exit codes
 
-| Code | `init`                                                     | `ls`, `next`                                                   | `check`                                                        | `site` |
-|------|------------------------------------------------------------|----------------------------------------------------------------|----------------------------------------------------------------|------|
-| 0    | tier in place                                              | printed                                                        | no errors (warnings may be printed)                            | site written (warnings may be printed) |
-| 1    | the tier is `core` or unavailable, or a path is in the way | unknown type, or the tier is unavailable or has no directory   | at least one error, or the tier is unavailable or has no directory | a malformed `--root` or one that is not a directory, a bad configured root entry, duplicate root names, no roots, or the out directory refused |
-| 2    | config could not be loaded                                 | config could not be loaded                                     | the check could not run: config not loaded, `mdcheck` missing or failing | config could not be loaded |
+| Code | `init`                                                     | `ls`, `next`                                                   | `check`                                                        | `site` | `site-index` |
+|------|------------------------------------------------------------|----------------------------------------------------------------|----------------------------------------------------------------|------|------|
+| 0    | tier in place                                              | printed                                                        | no errors (warnings may be printed)                            | site written (warnings may be printed) | index written |
+| 1    | the tier is `core` or unavailable, or a path is in the way | unknown type, or the tier is unavailable or has no directory   | at least one error, or the tier is unavailable or has no directory | a malformed `--root` or one that is not a directory, a bad configured root entry, duplicate root names, no roots, or the out directory refused | an unreadable or invalid project list, or the out directory refused |
+| 2    | config could not be loaded                                 | config could not be loaded                                     | the check could not run: config not loaded, `mdcheck` missing or failing | config could not be loaded | config could not be loaded |
+
+## Publishing on GitLab Pages
+
+Each project publishes its own specs site on GitLab Pages, and one index project at the group's Pages root lists every project of the group carrying a topic, linking to each site. booping ships both CI jobs as templates a project includes by URL.
+
+**A project's site.** The project keeps its specs in a [repo-local vault](vault.md#booping). Its `.gitlab-ci.yml` includes the site template, which adds a `pages` job on the default branch running `booping specs site --out public`:
+
+```yaml
+include:
+  - remote: https://raw.githubusercontent.com/A/claude-booping/master/src/ci/gitlab/specs-site.gitlab-ci.yml
+
+pages:
+  variables:
+    BOOPING_REF: v1.1.1  # a release tag
+```
+
+`BOOPING_REF` defaults to `master`; pin it to a release tag so a booping change reaches the site only when you move the pin. `BOOPING_REPO` overrides the clone URL. The site is served at `https://{group}.{pages-domain}/{project}`.
+
+**The index.** Create a project named `{group}.{pages-domain}` in the group — GitLab serves its Pages at the group's Pages root, `https://{group}.{pages-domain}/`. Its `.gitlab-ci.yml` includes the index template:
+
+```yaml
+include:
+  - remote: https://raw.githubusercontent.com/A/claude-booping/master/src/ci/gitlab/specs-index.gitlab-ci.yml
+```
+
+Then, in that project's settings:
+
+- a project access token with the `read_api` scope, stored as the masked CI variable `SPECS_INDEX_TOKEN`;
+- a pipeline schedule — the job runs on a schedule and on a manual pipeline run, never on push.
+
+The job lists the group's non-archived projects carrying the topic through the GitLab API and pipes them into `booping specs site-index --projects - --out public`. Optional variables:
+
+- `SPECS_TOPIC` — the topic that marks a project for the index, default `booping-specs`.
+- `SPECS_PAGES_BASE` — the base URL a project's site is linked under as `{base}/{project path}`, default the index project's own Pages URL (`CI_PAGES_URL`).
+
+**Adding a project** to the index is setting the topic on it; the next scheduled run lists it.
+
+**How the jobs get booping.** Both run on the `ghcr.io/astral-sh/uv:python3.12-trixie` image, which carries uv, Python and git, shallow-clone booping at `BOOPING_REF` and run its `bin/booping`; the uv cache is kept between runs. Neither job needs `mdcheck` — only `booping specs check` does. A project adding its own `specs check` job installs it with:
+
+```
+cargo install markdown-checker --version 0.1.1 --locked
+```
+
+**Limits.** Projects in subgroups are not listed — only the group's own projects. Archived projects are skipped.
