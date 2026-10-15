@@ -22,12 +22,14 @@ from booping.specs.open_items import OpenItemError
 
 _ITEM_ID = re.compile(r"OI-\d+")
 _FORWARDED = (signal.SIGINT, signal.SIGTERM)
+PLAN_PLAYBOOKS = ("develop", "code-review")
 
 
 def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:  # type: ignore[type-arg]
     p = subparsers.add_parser(
         "run",
-        help="Launch a recorded headless groom or develop run from core.run, or ack finished runs",
+        help="Launch a recorded headless groom, develop or code-review run from core.run, or ack"
+        " finished runs",
     )
     verbs = p.add_subparsers(dest="run_verb", metavar="<verb>", required=True)
 
@@ -44,15 +46,16 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
     _add_autonomous(groom)
     groom.set_defaults(func=_run_groom)
 
-    develop = verbs.add_parser("develop", help="Launch a develop run over one plan")
-    develop.add_argument(
-        "targets",
-        nargs="+",
-        metavar="PLAN",
-        help="The plan's index.md or its directory, inside the vault",
-    )
-    _add_autonomous(develop)
-    develop.set_defaults(func=_run_develop)
+    for playbook in PLAN_PLAYBOOKS:
+        verb = verbs.add_parser(playbook, help=f"Launch a {playbook} run over one plan")
+        verb.add_argument(
+            "targets",
+            nargs="+",
+            metavar="PLAN",
+            help="The plan's index.md or its directory, inside the vault",
+        )
+        _add_autonomous(verb)
+        verb.set_defaults(func=_run_over_plan, playbook=playbook)
 
     ack = verbs.add_parser("ack", help="Mark finished, failed or lost runs as seen")
     ack.add_argument("ids", nargs="+", metavar="ID", help="Run id")
@@ -87,18 +90,19 @@ def _item(ctx: Context, item_id: str) -> Path:
     return path.resolve()
 
 
-def _run_develop(args: argparse.Namespace) -> None:
+def _run_over_plan(args: argparse.Namespace) -> None:
     ctx = _assemble()[0]
+    playbook: str = args.playbook
     targets: list[str] = args.targets
     try:
         open_items.require_vault(ctx)
         if len(targets) != 1:
-            raise OpenItemError("develop takes exactly one plan")
+            raise OpenItemError(f"{playbook} takes exactly one plan")
         rel, path = _plan(ctx, targets[0])
         items = open_items.planned_for(ctx, rel)
     except OpenItemError as exc:
         _fail(str(exc))
-    _launch(ctx, "develop", args.autonomous, [rel], rel, items, str(path))
+    _launch(ctx, playbook, args.autonomous, [rel], rel, items, str(path))
 
 
 def _run_groom(args: argparse.Namespace) -> None:
