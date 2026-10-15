@@ -2,7 +2,7 @@
 id: "05"
 title: "scan files items from marks and check findings"
 sp: 4
-status: pending
+status: done
 plan: "plans/202610151409_specs-playbook-open-items/index.md"
 ---
 
@@ -18,25 +18,25 @@ Tests: integration tier, txtar cases — a tier with one `[clarify]`, one `[unkn
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 5.1 | Mark scanning with heading anchors. | `booping-python/src/booping/specs/open_items.py` | 1 | pending |
-| 5.2 | Check-finding items and the dedup key. | `booping-python/src/booping/specs/open_items.py`, `booping-python/src/booping/commands/specs.py` | 2 | pending |
-| 5.3 | The three cases. | `booping-python/e2e/cases/specs/open-items-scan-*.txtar` | 1 | pending |
+| 5.1 | Mark scanning with heading anchors. | `booping-python/src/booping/specs/open_items.py` | 1 | done |
+| 5.2 | Check-finding items and the dedup key. | `booping-python/src/booping/specs/open_items.py`, `booping-python/src/booping/commands/specs.py` | 2 | done |
+| 5.3 | The three cases. | `booping-python/e2e/cases/specs/open-items-scan-*.txtar` | 1 | done |
 
 ## Definition of Done
 
 ### Task 5.1
 
-- [ ] A mark mid-sentence (not at an item or sentence start) is not filed.
-- [ ] The anchor is `site/markdown.py`'s `slug` of that heading.
+- [x] A mark mid-sentence (not at an item or sentence start) is not filed.
+- [x] The anchor is `site/markdown.py`'s `slug` of that heading.
 
 ### Task 5.2
 
-- [ ] Check findings come from the check module's data, not parsed text.
-- [ ] The final line is exactly `{n} created, {m} already tracked`.
+- [x] Check findings come from the check module's data, not parsed text.
+- [x] The final line is exactly `{n} created, {m} already tracked`.
 
 ### Task 5.3
 
-- [ ] Three cases, one per behaviour named in Tests.
+- [x] Three cases, one per behaviour named in Tests.
 
 Return: the list of changed files, nothing else.
 

@@ -2,7 +2,7 @@
 id: "08"
 title: "The alignment guide doc"
 sp: 2
-status: pending
+status: done
 plan: "plans/202610151409_specs-playbook-open-items/index.md"
 ---
 
@@ -18,14 +18,14 @@ Tests: none — prose doc; M09's init case exercises the link.
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 8.1 | Create the alignment guide. | `docs/specs-alignment.md` | 2 | pending |
+| 8.1 | Create the alignment guide. | `docs/specs-alignment.md` | 2 | done |
 
 ## Definition of Done
 
 ### Task 8.1
 
-- [ ] ≤ 60 lines, no restated type table or frontmatter list.
-- [ ] The link from `playbooks/specs/guide/prompt.md` resolves to it.
+- [x] ≤ 60 lines, no restated type table or frontmatter list.
+- [x] The link from `playbooks/specs/guide/prompt.md` resolves to it.
 
 Return: the list of changed files, nothing else.
 

@@ -1,8 +1,8 @@
 ---
 id: "07"
-title: "The specs guide \u2014 preamble and scenarios"
+title: "The specs guide — preamble and scenarios"
 sp: 4
-status: pending
+status: done
 plan: "plans/202610151409_specs-playbook-open-items/index.md"
 ---
 
@@ -28,22 +28,22 @@ Tests: none at this tier — M09's smoke suite covers the rendered guide.
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 7.1 | The preamble: README link, rendered tiers, record-writing invariants. | `playbooks/specs/playbook.md` | 2 | pending |
-| 7.2 | The guide body: opening line and the seven scenarios. | `playbooks/specs/guide/prompt.md` | 2 | pending |
+| 7.1 | The preamble: README link, rendered tiers, record-writing invariants. | `playbooks/specs/playbook.md` | 2 | done |
+| 7.2 | The guide body: opening line and the seven scenarios. | `playbooks/specs/guide/prompt.md` | 2 | done |
 
 ## Definition of Done
 
 ### Task 7.1
 
-- [ ] No sentence restates `src/specs/README.md`; the README is linked once.
-- [ ] Tier paths render from config — `bin/booping render-playbook specs` shows this repo's resolved tiers.
-- [ ] The information-architecture pass ([booping:rule/0006](../../../../../specs/rule/0006-information-architecture-pass.md)) holds: no motivation, no "you are" preamble.
+- [x] No sentence restates `src/specs/README.md`; the README is linked once.
+- [x] Tier paths render from config — `bin/booping render-playbook specs` shows this repo's resolved tiers.
+- [x] The information-architecture pass ([booping:rule/0006](../../../../../specs/rule/0006-information-architecture-pass.md)) holds: no motivation, no "you are" preamble.
 
 ### Task 7.2
 
-- [ ] Seven scenarios, each ending with the named next call.
-- [ ] No list of directions or statuses typed in prose.
-- [ ] The alignment-guide link is the only place it is referenced.
+- [x] Seven scenarios, each ending with the named next call.
+- [x] No list of directions or statuses typed in prose.
+- [x] The alignment-guide link is the only place it is referenced.
 
 Return: the list of changed files, nothing else.
 

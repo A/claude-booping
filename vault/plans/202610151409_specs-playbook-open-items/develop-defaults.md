@@ -34,6 +34,14 @@ The Architecture table says `frontmatter-update plan=''`; the item shape wants `
 
 M02–M04 share `commands/specs.py` and `specs/open_items.py`; path staging cannot split one file across milestones, so M02–M04 land as one commit (`bc387db`), M01 as its own (`956b528`). M03 ships 3 list cases (plan said 2) and M04 8 (plan said 7): a txtar case runs one command, so two-command behaviours split in two — a superset of the named behaviours, accepted.
 
+## D9 — tier roots from code
+
+M07's first attempt resolved tier roots in Jinja, copying `tiers.project_root`'s fallback — against value/0003 and rule/0025. Default applied: `Context.assemble` keeps `resolve_tiers`' result, exposed as the `booping.specs_tiers` template global; the preamble only prints it. Outside M07's file list, needed to meet the values.
+
+## D10 — M06 warning asserted on the script
+
+`playbook-transition` swallows a hook's stderr when it exits 0, so the warning is asserted by a fourth case running the script directly; the through-a-transition case stays.
+
 ## Accepted snapshot reports
 
 {filled in as accepted}

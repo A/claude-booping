@@ -128,10 +128,10 @@ reason: null
 | 02 | [booping specs open-items add files an item](milestones/M02-open-items-add/M02-open-items-add.md) | 4 | done |
 | 03 | [booping specs open-items list renders the index](milestones/M03-open-items-list/M03-open-items-list.md) | 2 | done |
 | 04 | [plan, close and reopen move items through the machine](milestones/M04-open-items-plan-close-reopen/M04-open-items-plan-close-reopen.md) | 4 | done |
-| 05 | [scan files items from marks and check findings](milestones/M05-open-items-scan/M05-open-items-scan.md) | 4 | pending |
-| 06 | [Plans link, close and reopen their items](milestones/M06-plans-close-their-items/M06-plans-close-their-items.md) | 4 | pending |
-| 07 | [The specs guide — preamble and scenarios](milestones/M07-specs-guide-body/M07-specs-guide-body.md) | 4 | pending |
-| 08 | [The alignment guide doc](milestones/M08-alignment-guide/M08-alignment-guide.md) | 2 | pending |
+| 05 | [scan files items from marks and check findings](milestones/M05-open-items-scan/M05-open-items-scan.md) | 4 | done |
+| 06 | [Plans link, close and reopen their items](milestones/M06-plans-close-their-items/M06-plans-close-their-items.md) | 4 | done |
+| 07 | [The specs guide — preamble and scenarios](milestones/M07-specs-guide-body/M07-specs-guide-body.md) | 4 | done |
+| 08 | [The alignment guide doc](milestones/M08-alignment-guide/M08-alignment-guide.md) | 2 | done |
 | 09 | [Smoke evals for specs/guide](milestones/M09-specs-guide-smoke-evals/M09-specs-guide-smoke-evals.md) | 4 | pending |
 | 10 | [Docs, README and CLAUDE.md name the specs playbook and open items](milestones/M10-docs-and-claude-md/M10-docs-and-claude-md.md) | 3 | pending |
 

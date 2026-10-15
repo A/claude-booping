@@ -2,7 +2,7 @@
 id: "06"
 title: "Plans link, close and reopen their items"
 sp: 4
-status: pending
+status: done
 plan: "plans/202610151409_specs-playbook-open-items/index.md"
 ---
 
@@ -18,24 +18,24 @@ Tests: integration tier, txtar cases with a fixture user playbook whose edge car
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 6.1 | The hook script and its three cases. | `playbooks/_scripts/open-items-follow-plan`, `booping-python/e2e/cases/playbook-transition/open-items-follow-plan-*.txtar` | 2 | pending |
-| 6.2 | Hooks on develop's and groom's edges. | `playbooks/develop/playbook.yaml`, `playbooks/groom/playbook.yaml` | 1 | pending |
-| 6.3 | The groom intake bullet. | `playbooks/groom/intake/fable-5.md` | 1 | pending |
+| 6.1 | The hook script and its three cases. | `playbooks/_scripts/open-items-follow-plan`, `booping-python/e2e/cases/playbook-transition/open-items-follow-plan-*.txtar` | 2 | done |
+| 6.2 | Hooks on develop's and groom's edges. | `playbooks/develop/playbook.yaml`, `playbooks/groom/playbook.yaml` | 1 | done |
+| 6.3 | The groom intake bullet. | `playbooks/groom/intake/fable-5.md` | 1 | done |
 
 ## Definition of Done
 
 ### Task 6.1
 
-- [ ] The script is executable and exits 0 on every path.
-- [ ] Three cases, one per behaviour named in Tests.
+- [x] The script is executable and exits 0 on every path.
+- [x] Three cases, one per behaviour named in Tests.
 
 ### Task 6.2
 
-- [ ] Exactly the five edges named in Scope carry the hook; no other edge changed.
+- [x] Exactly the five edges named in Scope carry the hook; no other edge changed.
 
 ### Task 6.3
 
-- [ ] One bullet, the command rendered as written in Scope; no restated machine statuses.
+- [x] One bullet, the command rendered as written in Scope; no restated machine statuses.
 
 Return: the list of changed files, nothing else.
 
