@@ -1,13 +1,13 @@
 ---
 title: "Specs sites on GitLab Pages — booping specs site-index and the CI templates"
 type: "feature"
-status: in-progress
+status: done
 sp: 14
 related_to: null
 created: 2026-10-15 22:43
 planned: null
 started: 2026-10-15 23:03
-completed: null
+completed: 2026-10-15 23:22
 code_reviews: []
 sessions:
 - 908d42c7-d080-4f88-89c0-c354e8d7d15a
@@ -24,6 +24,13 @@ agents:
   research-codebase: a901595dabfaacf43
   cross-review: a607f2912e88df15d
 reviewed_at: 2026-10-15 22:54
+metrics_active_minutes: 39
+metrics_models:
+- claude-opus-5-5
+metrics_tokens_input: 120
+metrics_tokens_output: 43344
+metrics_tokens_cache_creation: 204324
+metrics_tokens_cache_read: 5257846
 ---
 
 # Specs sites on GitLab Pages — booping specs site-index and the CI templates
