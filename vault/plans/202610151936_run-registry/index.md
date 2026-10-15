@@ -2,7 +2,7 @@
 title: "Run registry — booping run groom|develop launches recorded claude -p runs,
   status shows them"
 type: "feature"
-status: presenting
+status: ready-for-dev
 sp: null
 related_to: null
 created: 2026-10-15 19:37
@@ -23,6 +23,8 @@ return_to: null
 agents:
   research-codebase: a466f96bb943b3ec0
   research-web: afcd469e8c683ac34
+  cross-review: af594f8f99c0dec9c
+reviewed_at: 2026-10-15 19:49
 ---
 
 # Run registry — booping run groom|develop launches recorded claude -p runs, status shows them

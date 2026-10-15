@@ -84,3 +84,11 @@
 **Question:** What of the project-manager request lands here?
 
 **Answer:** Default (autonomous run): the `booping run` command, its record and log, `core.run`, the status `runs` section, e2e cases and docs entries. Out: budget and window gates, batching, a timer unit, pause/resume and `--resume` of a session (part 4, the project-manager's autonomous mode); the project-manager playbook itself (part 4); project-manager docs and setup linking (part 5). No playbook source changes, so no snapshot drift.
+
+## C11 — plan approval — answered
+
+**Asked:** 2026-10-15 — groom/present
+
+**Question:** The plan is ready for development — approve, or say what to change?
+
+**Answer:** Default (autonomous run): approved as written — 12 SP, under the 35 SP split threshold, so no split; parts (4) and (5) stay parked as sibling stubs under Out of scope. The cross-review (codex) returned four RISKs, all folded into M01: plan paths turned vault-relative with `open_items.vault_path`, item paths from `open_items.item_path`, a plan directory resolving to its `index.md`, and a record-write failure exiting 1 before launch. No plan branch: the run stays on `feat/specs` as directed.
