@@ -2,7 +2,7 @@
 title: "Project specs tier at the vault root — tier resolution, booping's records
   moved, migration"
 type: "feature"
-status: presenting
+status: ready-for-dev
 sp: null
 related_to: null
 created: 2026-10-15 17:27
@@ -20,6 +20,10 @@ tracker_provider: null
 tracker_request: null
 tracker_issue: null
 return_to: null
+agents:
+  research-codebase: ac9bca6adbbf5e8ab
+  cross-review: ac2fc748a8cbc7c52
+reviewed_at: 2026-10-15 17:41
 ---
 
 # Project specs tier at the vault root — tier resolution, booping's records moved, migration
