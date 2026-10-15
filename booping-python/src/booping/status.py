@@ -16,7 +16,7 @@ from booping.query import QueryError, as_dict, build_spec, resolve_spec, run
 from booping.specs import open_items, questions
 from booping.specs.open_items import Mark
 from booping.specs.records import Record, load_tier, unreviewed
-from booping.specs.tiers import Tier
+from booping.specs.tiers import Tier, status_enum
 
 PLAN_PLAYBOOKS = ("groom", "develop")
 PLAN_STATE = "run"
@@ -25,7 +25,6 @@ UNREVIEWED_PLANS = "core.status.queries.unreviewed_plans"
 RETRO_PLANS = "core.retro_playbook.queries.candidates"
 TIER = "project"
 IDEA_TYPE = "idea"
-IDEA_OPEN = "open"
 MARK_KINDS = ("clarify", "unknown")
 RUN_COLUMNS = [
     "id",
@@ -133,6 +132,14 @@ class StatusContext:
         return self.tier.types if self.tier is not None else []
 
     @cached_property
+    def idea_open(self) -> str | None:
+        """The idea schema's first status — the one a new idea is written with, open
+        until checked; the tier's `_schemas/` overlay may rename it."""
+        schema = self.tier.schemas.get(IDEA_TYPE) if self.tier is not None else None
+        enum = status_enum(schema) if schema is not None else []
+        return enum[0] if enum else None
+
+    @cached_property
     def tier(self) -> Tier | None:
         return next((t for t in self.ctx.specs_tiers if t.name == TIER), None)
 
@@ -214,7 +221,7 @@ def _open_ideas(sc: StatusContext) -> list[dict[str, Any]]:
             "created_at": r.frontmatter.get("created_at"),
         }
         for r in sc.records
-        if r.type == IDEA_TYPE and r.frontmatter.get("status") == IDEA_OPEN
+        if r.type == IDEA_TYPE and sc.idea_open and r.frontmatter.get("status") == sc.idea_open
     ]
     return [idea for idea in ideas if idea["ref"] not in taken]
 

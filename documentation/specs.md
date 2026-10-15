@@ -97,7 +97,7 @@ Validates every record of the tier: its type's schema (the tier's own from `_sch
 The check needs the `mdcheck` binary on `PATH`:
 
 ```
-cargo install markdown-checker --version 0.1.1 --locked
+cargo install markdown-checker --version 0.1.2 --locked
 ```
 
 ### `booping specs site`
@@ -315,7 +315,7 @@ The job lists the group's non-archived projects carrying the topic through the G
 **How the jobs get booping.** Both run on the `ghcr.io/astral-sh/uv:python3.12-trixie` image, which carries uv, Python and git, shallow-clone booping at `BOOPING_REF` and run its `bin/booping`; the uv cache is kept between runs. Neither job needs `mdcheck` — only `booping specs check` does. A project adding its own `specs check` job installs it with:
 
 ```
-cargo install markdown-checker --version 0.1.1 --locked
+cargo install markdown-checker --version 0.1.2 --locked
 ```
 
 **Limits.** Projects in subgroups are not listed — only the group's own projects. Archived projects are skipped.

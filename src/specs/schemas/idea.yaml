@@ -1,5 +1,6 @@
 # idea: specs/idea/<NNNN>-<slug>.md — what is proposed, the cheapest check that
-# gives a verdict, and the verdict once checked.
+# gives a verdict, and the verdict once checked. The status enum lists the open status
+# first: `booping status` counts ideas in it as open.
 doc: idea
 
 rules:

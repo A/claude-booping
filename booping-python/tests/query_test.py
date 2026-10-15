@@ -100,3 +100,26 @@ class TestQueryFilterWithoutAVault:
     def test_a_vault_relative_spec_raises(self) -> None:
         with pytest.raises(QueryError, match="no vault resolved"):
             self._rows({"glob": PLAN_GLOBS}, self.SLUGS)
+
+
+class TestAbsoluteGlob:
+    def test_an_absolute_glob_inside_the_vault_yields_vault_relative_paths(
+        self, vault: Path
+    ) -> None:
+        rows = run(QuerySpec(glob=[f"{vault}/plans/*/index.md"]), vault)
+        assert [(r.slug, r.path) for r in rows] == [
+            ("alpha", "plans/alpha/index.md"),
+            ("zeta", "plans/zeta/index.md"),
+        ]
+
+    def test_an_absolute_glob_outside_the_vault_keeps_absolute_paths(
+        self, vault: Path, tmp_path_factory: pytest.TempPathFactory
+    ) -> None:
+        elsewhere = tmp_path_factory.mktemp("elsewhere")
+        _plan(elsewhere, "notes/far.md", status="done")
+        rows = run(QuerySpec(glob=[f"{elsewhere}/notes/*.md"]), vault)
+        assert [(r.slug, r.path) for r in rows] == [("far", f"{elsewhere}/notes/far.md")]
+
+    def test_an_absolute_literal_path_matches_the_one_file(self, vault: Path) -> None:
+        rows = run(QuerySpec(glob=[f"{vault}/plans/mid.md"]), vault)
+        assert [r.path for r in rows] == ["plans/mid.md"]

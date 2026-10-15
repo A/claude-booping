@@ -7,18 +7,16 @@ runs before the single write, so an error never leaves a partial entry.
 
 from __future__ import annotations
 
-import os
-import re
 from dataclasses import dataclass
-from pathlib import Path, PurePosixPath
+from pathlib import PurePosixPath
 
+from booping import sidecar
 from booping.context import Context
-from booping.rendering import build_source_env
+from booping.sidecar import Sidecar, normalise
 
 SIDECAR = "defaults.md"
 HEADING = "# Defaults"
-
-_ENTRY = re.compile(r"^## D(\d+) ", re.MULTILINE)
+PREFIX = "D"
 
 
 class DefaultsError(Exception):
@@ -31,24 +29,18 @@ class Added:
     number: int
 
 
-def normalise(text: str) -> str:
-    return " ".join(text.split())
-
-
-def next_number(text: str) -> int:
-    return max((int(n) for n in _ENTRY.findall(text)), default=0) + 1
-
-
-def _now(ctx: Context) -> str:
-    env = build_source_env(context=ctx, config=ctx.config)
-    return env.from_string("{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}").render().strip()
-
-
 def render_entry(
-    *, number: int, step: str, when: str, asked: str, default: str, why: str | None, artifact: str
+    log: Sidecar,
+    *,
+    step: str,
+    when: str,
+    asked: str,
+    default: str,
+    why: str | None,
+    target_rel: PurePosixPath,
 ) -> str:
     lines = [
-        f"## D{number} — {step} — {when}",
+        log.header(step, when),
         "",
         f"**Asked:** {asked}",
         "",
@@ -56,7 +48,7 @@ def render_entry(
         "",
         f"**Why:** {why if why else 'not stated'}",
         "",
-        f"**Artifact:** [{PurePosixPath(artifact).name}]({artifact})",
+        log.artifact_line(target_rel),
     ]
     return "\n".join(lines) + "\n"
 
@@ -87,18 +79,15 @@ def add(
     why = normalise(why) if why is not None else None
 
     target_rel = PurePosixPath(resolved.relative_to(vault).as_posix())
-    sidecar_rel = target_rel.parent / SIDECAR
-    sidecar: Path = vault / sidecar_rel
-    existing = sidecar.read_text(encoding="utf-8") if sidecar.is_file() else f"{HEADING}\n"
-    number = next_number(existing)
+    log = Sidecar.open(vault, target_rel, name=SIDECAR, heading=HEADING, prefix=PREFIX)
     entry = render_entry(
-        number=number,
+        log,
         step=step,
-        when=_now(ctx),
+        when=sidecar.now(ctx),
         asked=asked,
         default=default,
         why=why,
-        artifact=PurePosixPath(os.path.relpath(target_rel, sidecar_rel.parent)).as_posix(),
+        target_rel=target_rel,
     )
-    sidecar.write_text(existing.rstrip("\n") + "\n\n" + entry, encoding="utf-8")
-    return Added(sidecar=sidecar_rel.as_posix(), number=number)
+    log.append(entry)
+    return Added(sidecar=log.rel.as_posix(), number=log.number)

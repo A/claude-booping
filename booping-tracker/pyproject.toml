@@ -22,6 +22,7 @@ dev = [
     "pytest-txtar>=0.1.0",
     "ruff",
     "basedpyright",
+    "pytest-xdist>=3.8.0",
 ]
 
 # `just pytest` is the unit suite; the txtar corpus under e2e/ is `just e2e`'s job.

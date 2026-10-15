@@ -80,11 +80,11 @@ jobs:
       - name: Cache cargo
         uses: Swatinem/rust-cache@v2
         with:
-          key: markdown-checker-0.1.1
+          key: markdown-checker-0.1.2
           cache-targets: false
 
       - name: Install mdcheck
-        run: cargo install markdown-checker --version 0.1.1 --locked
+        run: cargo install markdown-checker --version 0.1.2 --locked
 
       - name: Verify mdcheck is on PATH
         run: mdcheck --version

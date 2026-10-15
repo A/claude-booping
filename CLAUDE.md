@@ -7,9 +7,9 @@ One shipped skill (`/playbook`); everything procedural is a **playbook** it driv
 ## Commands
 
 - `just lint` / `just typecheck` / `just pytest` — ruff / basedpyright / pytest over both uv projects, `booping-python/` then `booping-tracker/`.
-- `just snapshots` — diff committed playbook reports against a fresh hermetic render (writes nothing). `just snapshots-accept [playbook]` — the **only** writer of the committed reports.
-- `just mdcheck` — structural rule checks over the rendered reports. Needs the `mdcheck` binary: `cargo install markdown-checker --version 0.1.1 --locked` (the crate named `mdcheck` is unrelated).
-- `just e2e [pytest args…]` — run both txtar contract corpora through pytest, passing any arguments straight to it (`just e2e -k config-get`, `just e2e --txtar-update`); `--txtar-update` rebaselines the selected cases. A `-k` expression that selects in one corpus only leaves the other collecting nothing, which is not a failure.
+- `just snapshots` — diff committed playbook reports against a fresh hermetic render (writes nothing); a playbook in this repo's `vault/_playbooks/` joins once it commits a `_reports/output.md`, rendered against a stub-pinned temp copy of the vault. `just snapshots-accept [playbook]` — the **only** writer of the committed reports.
+- `just mdcheck` — structural rule checks over the rendered reports. Needs the `mdcheck` binary: `cargo install markdown-checker --version 0.1.2 --locked` (the crate named `mdcheck` is unrelated).
+- `just e2e [pytest args…]` — run both txtar contract corpora through pytest, passing any arguments straight to it (`just e2e -k config-get`, `just e2e --txtar-update`); `--txtar-update` rebaselines the selected cases. Cases run in parallel (pytest-xdist, `-n auto`); `--txtar-update` runs serially. A `-k` expression that selects in one corpus only leaves the other collecting nothing, which is not a failure.
 - `just specs-check` — `bin/booping specs check` over the core tier, `specs/` (records shipped to every user), and this repo's project tier, the type directories in `vault/`; needs `mdcheck` too.
 - `just ci` — everything CI runs, in order: `lint typecheck pytest snapshots mdcheck specs-check e2e`. Run before committing.
 - `just eval|smoke|regress <playbook>/<step>` (or `all`) — promptfoo eval suites; `just suites` lists them. Runs on subscription auth (`claude -p`), never in CI; each run posts a sticky, advisory PR comment via `scripts/eval-pr-comment.sh` (`EVAL_PR=0` opts out) — no commit status, no merge gate.

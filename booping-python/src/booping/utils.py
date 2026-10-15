@@ -85,6 +85,27 @@ def resolve_path(config: dict[str, Any], dotted_path: str) -> Any:
     return current
 
 
+_TRUE = frozenset({"true", "yes", "1"})
+_FALSE = frozenset({"false", "no", "0"})
+
+
+def parse_bool(value: object) -> bool | None:
+    """A config flag as a bool: a real bool, or the YAML-ish spelling a `--set` string
+    carries (true/false, yes/no, 1/0, any case). Anything else is `None` — unrecognised.
+    """
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, int) and value in (0, 1):
+        return bool(value)
+    if isinstance(value, str):
+        word = value.strip().lower()
+        if word in _TRUE:
+            return True
+        if word in _FALSE:
+            return False
+    return None
+
+
 def parse_set_overrides(pairs: Sequence[str]) -> dict[str, Any]:
     """`a.b=c` → `{"a": {"b": "c"}}`, accumulated later-wins across pairs. Values stay
     strings. Raises ValueError carrying the offending pair when it has no `=`.

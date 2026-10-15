@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any, Literal, cast
 
 from pydantic import BaseModel
+from ruamel.yaml import YAML
 
 TierName = Literal["core", "global", "project"]
 
@@ -142,3 +143,25 @@ def own_types(root: Path) -> list[str]:
 def types(format_dir: Path) -> list[str]:
     """Record type names: the stems of `{format_dir}/schemas/*.yaml`, sorted."""
     return sorted(p.stem for p in (format_dir / "schemas").glob("*.yaml"))
+
+
+def status_enum(schema: Path) -> list[str]:
+    """The `status` enum a schema's FRONTMATTER rule declares, in its written order;
+    empty when the schema declares none."""
+    # PyYAML rejects plain flow scalars like `[Criteria?, Decision]` that mdcheck accepts.
+    data: Any = YAML(typ="safe", pure=True).load(schema.read_text(encoding="utf-8"))  # pyright: ignore[reportUnknownMemberType]
+    for rule in _list(_get(data, "rules")):
+        if _get(rule, "select") != "FRONTMATTER":
+            continue
+        enum = _get(_get(_get(rule, "has"), "status"), "enum")
+        if isinstance(enum, list):
+            return [str(value) for value in cast("list[object]", enum)]
+    return []
+
+
+def _get(node: object, key: str) -> object:
+    return cast("dict[str, object]", node).get(key) if isinstance(node, dict) else None
+
+
+def _list(node: object) -> list[object]:
+    return cast("list[object]", node) if isinstance(node, list) else []

@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from booping import migrations
 
 
@@ -166,3 +168,28 @@ def test_unreadable_config_stops_for_the_user(tmp_path: Path) -> None:
     notice = migrations.render_gate(start=_behind(tmp_path), plugin_root=root)
     assert notice is not None
     assert notice.startswith(STOP_PREFIX)
+
+
+@pytest.mark.parametrize(
+    ("value", "prefix"),
+    [
+        ("true", AUTO_PREFIX),
+        ("YES", AUTO_PREFIX),
+        ("1", AUTO_PREFIX),
+        ("False", STOP_PREFIX),
+        ("no", STOP_PREFIX),
+        ("0", STOP_PREFIX),
+        ("maybe", STOP_PREFIX),
+    ],
+)
+def test_a_set_override_string_is_read_as_a_boolean(
+    tmp_path: Path, value: str, prefix: str
+) -> None:
+    root = _plugin_root(tmp_path, 1, 2)
+    start = _behind(tmp_path)
+    opposite = "false" if prefix == AUTO_PREFIX else "true"
+    _write(start / "vault" / "config.yaml", f"core:\n  auto_migrate: {opposite}\n")
+    overrides = {"core": {"auto_migrate": value}}
+    notice = migrations.render_gate(start=start, plugin_root=root, overrides=overrides)
+    assert notice is not None
+    assert notice.startswith(prefix)

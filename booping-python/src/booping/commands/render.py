@@ -61,7 +61,7 @@ def _run(args: argparse.Namespace) -> None:
         )
         sys.exit(1)
 
-    notice = migrations.render_gate()
+    notice = migrations.render_gate(overrides=overrides)
     if notice is not None:
         _emit(notice + "\n", args.output)
         return

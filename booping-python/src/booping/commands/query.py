@@ -79,7 +79,7 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
         default=None,
         metavar="PATTERN",
         help=(
-            "Vault-relative glob to match; repeatable and ordered — the first"
+            "Glob to match, vault-relative or absolute; repeatable and ordered — the first"
             " glob claiming a slug wins"
         ),
     )
