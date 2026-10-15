@@ -1,20 +1,21 @@
 ---
 title: "Specs site redesign, part 5 — review comments and the root landing"
 type: "feature"
-status: ready-for-dev
-sp: null
+status: in-progress
+sp: 20
 related_to: null
 created: 2026-10-16 03:36
 planned: null
-started: null
+started: 2026-10-16 03:51
 completed: null
 code_reviews: []
 sessions:
 - 8a86d73b-8759-4a61-afb0-73379f041cc4
+- efa13f68-2130-446c-82be-8c42f7797643
 retro: null
 summary: 'Specs site part 5: review comments in localStorage, record and site-wide
   panels, copy-for-the-model export; root landing'
-commit: 7d4023234a5faa2a341e35693bec061a1ab0348f
+commit: fcb38e860c927387af9f190f78b9b98692abddad
 tracker_provider: null
 tracker_request: null
 tracker_issue: null
@@ -66,10 +67,10 @@ src/config.yaml: labels.{en,ru}.ui.* for every comment string (M03); `records` l
 
 | id | title | sp | status |
 | --- | --- | --- | --- |
-| 01 | [Root page follows the Overview landing](milestones/M01-root-landing/M01-root-landing.md) | 3 | pending |
-| 02 | [Comment export builder and its node test](milestones/M02-export-builder/M02-export-builder.md) | 3 | pending |
-| 03 | [Comment hooks in the generated HTML and the storage module](milestones/M03-comment-hooks/M03-comment-hooks.md) | 4 | pending |
-| 04 | [Comment affordances and the compose dialog](milestones/M04-comment-capture/M04-comment-capture.md) | 4 | pending |
+| 01 | [Root page follows the Overview landing](milestones/M01-root-landing/M01-root-landing.md) | 3 | done |
+| 02 | [Comment export builder and its node test](milestones/M02-export-builder/M02-export-builder.md) | 3 | done |
+| 03 | [Comment hooks in the generated HTML and the storage module](milestones/M03-comment-hooks/M03-comment-hooks.md) | 4 | done |
+| 04 | [Comment affordances and the compose dialog](milestones/M04-comment-capture/M04-comment-capture.md) | 4 | done |
 | 05 | [Record and site-wide comment panels with copy and clear](milestones/M05-comment-panels/M05-comment-panels.md) | 4 | pending |
 | 06 | [Document review comments and the root landing](milestones/M06-comments-docs/M06-comments-docs.md) | 2 | pending |
 

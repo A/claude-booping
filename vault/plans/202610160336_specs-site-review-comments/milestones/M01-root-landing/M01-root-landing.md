@@ -2,7 +2,7 @@
 id: "01"
 title: "Root page follows the Overview landing"
 sp: 3
-status: pending
+status: done
 plan: "/home/anton/Dev/@A/claude-booping-specs/vault/plans/202610160336_specs-site-review-comments/index.md"
 ---
 
@@ -18,22 +18,22 @@ Tests (integration, `booping-python/tests/specs/site_pages_test.py`): replace `t
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 1.1 | Shared landing-context helper in `pages.py`; root page context per C6; tests. | `booping-python/src/booping/specs/site/pages.py`, `booping-python/tests/specs/site_pages_test.py` | 2 | pending |
-| 1.2 | Landing macros; `index.html.j2` and `root.html.j2` on them; `types_list` and an unused `records` label removed; golden rebaseline. | `booping-python/src/booping/specs/site/templates/_macros.html.j2`, `booping-python/src/booping/specs/site/templates/index.html.j2`, `booping-python/src/booping/specs/site/templates/root.html.j2`, `src/config.yaml`, `booping-python/e2e/cases/specs/site-*.txtar` | 1 | pending |
+| 1.1 | Shared landing-context helper in `pages.py`; root page context per C6; tests. | `booping-python/src/booping/specs/site/pages.py`, `booping-python/tests/specs/site_pages_test.py` | 2 | done |
+| 1.2 | Landing macros; `index.html.j2` and `root.html.j2` on them; `types_list` and an unused `records` label removed; golden rebaseline. | `booping-python/src/booping/specs/site/templates/_macros.html.j2`, `booping-python/src/booping/specs/site/templates/index.html.j2`, `booping-python/src/booping/specs/site/templates/root.html.j2`, `src/config.yaml`, `booping-python/e2e/cases/specs/site-*.txtar` | 1 | done |
 
 ## Definition of Done
 
 ### Task 1.1
 
-- [ ] `index.html` and every `{root}/index.html` get their landing context from one helper.
-- [ ] Root callout counts and link match C6; no callout when the root's `needs` is 0.
-- [ ] The new root-landing test asserts hand-derived counts, cards, hrefs and recent order; the old marks test is gone.
+- [x] `index.html` and every `{root}/index.html` get their landing context from one helper.
+- [x] Root callout counts and link match C6; no callout when the root's `needs` is 0.
+- [x] The new root-landing test asserts hand-derived counts, cards, hrefs and recent order; the old marks test is gone.
 
 ### Task 1.2
 
-- [ ] `index.html` output is byte-identical to before (its golden hunks are unchanged).
-- [ ] `root.html.j2` holds no mark list and no `types_list` call; `types_list` no longer exists; `grep -rn '"records"\|ui("records")' booping-python/src src/config.yaml` finds nothing, or the label stays because something still reads it.
-- [ ] `site-*.txtar` goldens rebaselined with `just e2e -k site --txtar-update`; their diff touches `{root}/index.html` pages only.
+- [x] `index.html` output is byte-identical to before (its golden hunks are unchanged).
+- [x] `root.html.j2` holds no mark list and no `types_list` call; `types_list` no longer exists; `grep -rn '"records"\|ui("records")' booping-python/src src/config.yaml` finds nothing, or the label stays because something still reads it.
+- [x] `site-*.txtar` goldens rebaselined with `just e2e -k site --txtar-update`; their diff touches `{root}/index.html` pages only.
 
 Return: the list of changed and created files, nothing else.
 

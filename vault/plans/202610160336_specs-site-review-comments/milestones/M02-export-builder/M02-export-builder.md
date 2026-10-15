@@ -2,7 +2,7 @@
 id: "02"
 title: "Comment export builder and its node test"
 sp: 3
-status: pending
+status: done
 plan: "/home/anton/Dev/@A/claude-booping-specs/vault/plans/202610160336_specs-site-review-comments/index.md"
 ---
 
@@ -18,20 +18,20 @@ Tests (integration, create `booping-python/tests/specs/site_comments_format_test
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 2.1 | `comments-format.js` per C2; shipped by `pages.py`. | `booping-python/src/booping/specs/site/comments-format.js`, `booping-python/src/booping/specs/site/pages.py` | 1 | pending |
-| 2.2 | Node-run unit tests with hand-derived expected blocks. | `booping-python/tests/specs/site_comments_format_test.py` | 2 | pending |
+| 2.1 | `comments-format.js` per C2; shipped by `pages.py`. | `booping-python/src/booping/specs/site/comments-format.js`, `booping-python/src/booping/specs/site/pages.py` | 1 | done |
+| 2.2 | Node-run unit tests with hand-derived expected blocks. | `booping-python/tests/specs/site_comments_format_test.py` | 2 | done |
 
 ## Definition of Done
 
 ### Task 2.1
 
-- [ ] `formatComments` matches every C2 bullet; the file touches no DOM, `window` or storage.
-- [ ] The built site holds `comments-format.js`; `index.json`, `llms.txt` and the search files do not mention it.
+- [x] `formatComments` matches every C2 bullet; the file touches no DOM, `window` or storage.
+- [x] The built site holds `comments-format.js`; `index.json`, `llms.txt` and the search files do not mention it.
 
 ### Task 2.2
 
-- [ ] Every case above is a test with its full expected string; all pass under `node`.
-- [ ] Without `node` on PATH the test fails with a message naming `node`.
+- [x] Every case above is a test with its full expected string; all pass under `node`.
+- [x] Without `node` on PATH the test fails with a message naming `node`.
 
 Return: the list of changed and created files, nothing else.
 

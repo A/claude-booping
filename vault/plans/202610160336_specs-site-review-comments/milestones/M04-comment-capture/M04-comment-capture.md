@@ -2,7 +2,7 @@
 id: "04"
 title: "Comment affordances and the compose dialog"
 sp: 4
-status: pending
+status: done
 plan: "/home/anton/Dev/@A/claude-booping-specs/vault/plans/202610160336_specs-site-review-comments/index.md"
 ---
 
@@ -25,21 +25,21 @@ Tests: none new in pytest — the behaviour is DOM-only; the runner's browser ch
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 4.1 | Section buttons, floating span/paragraph button, anchor resolution. | `booping-python/src/booping/specs/site/comments.js`, `booping-python/src/booping/specs/site/style.css` | 2 | pending |
-| 4.2 | Compose dialog wiring, save to store, keyboard and focus; phone sheet CSS; golden rebaseline. | `booping-python/src/booping/specs/site/comments.js`, `booping-python/src/booping/specs/site/style.css`, `booping-python/e2e/cases/specs/site-*.txtar` | 2 | pending |
+| 4.1 | Section buttons, floating span/paragraph button, anchor resolution. | `booping-python/src/booping/specs/site/comments.js`, `booping-python/src/booping/specs/site/style.css` | 2 | done |
+| 4.2 | Compose dialog wiring, save to store, keyboard and focus; phone sheet CSS; golden rebaseline. | `booping-python/src/booping/specs/site/comments.js`, `booping-python/src/booping/specs/site/style.css`, `booping-python/e2e/cases/specs/site-*.txtar` | 2 | done |
 
 ## Definition of Done
 
 ### Task 4.1
 
-- [ ] Each C4 trigger opens the compose dialog with the right kind, anchor and quote, checked by the worker in headless Chromium on a built fixture site (`bin/booping specs site --out /tmp/…`).
-- [ ] Without JS or without storage no comment control is visible.
+- [x] Each C4 trigger opens the compose dialog with the right kind, anchor and quote, checked by the worker in headless Chromium on a built fixture site (`bin/booping specs site --out /tmp/…`).
+- [x] Without JS or without storage no comment control is visible.
 
 ### Task 4.2
 
-- [ ] A saved comment is in localStorage under the C5 key with every C5 field; the header and sidebar counts update without reload.
-- [ ] Tab reaches every section button; Escape closes the dialog and focus returns to the opener.
-- [ ] `site-*.txtar` rebaselined with `just e2e -k site --txtar-update`; diff limited to `comments.js` and `style.css`.
+- [x] A saved comment is in localStorage under the C5 key with every C5 field; the header and sidebar counts update without reload.
+- [x] Tab reaches every section button; Escape closes the dialog and focus returns to the opener.
+- [x] `site-*.txtar` rebaselined with `just e2e -k site --txtar-update`; diff limited to `comments.js` and `style.css`.
 
 Return: the list of changed and created files, nothing else.
 

@@ -2,7 +2,7 @@
 id: "03"
 title: "Comment hooks in the generated HTML and the storage module"
 sp: 4
-status: pending
+status: done
 plan: "/home/anton/Dev/@A/claude-booping-specs/vault/plans/202610160336_specs-site-review-comments/index.md"
 ---
 
@@ -26,21 +26,21 @@ Tests (integration, `booping-python/tests/specs/site_pages_test.py`): a record p
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 3.1 | Templates: article data, header button, sidebar entry, dialogs partial, `comments.html`, icon; labels en/ru; tests; golden rebaseline. | `booping-python/src/booping/specs/site/templates/record.html.j2`, `booping-python/src/booping/specs/site/templates/base.html.j2`, `booping-python/src/booping/specs/site/templates/_comments.html.j2`, `booping-python/src/booping/specs/site/templates/comments.html.j2`, `booping-python/src/booping/specs/site/templates/_icons.html.j2`, `booping-python/src/booping/specs/site/pages.py`, `src/config.yaml`, `booping-python/tests/specs/site_pages_test.py`, `booping-python/e2e/cases/specs/site-*.txtar` | 3 | pending |
-| 3.2 | `comments.js` store and counts; shipped; CSS gating. | `booping-python/src/booping/specs/site/comments.js`, `booping-python/src/booping/specs/site/pages.py`, `booping-python/src/booping/specs/site/style.css` | 1 | pending |
+| 3.1 | Templates: article data, header button, sidebar entry, dialogs partial, `comments.html`, icon; labels en/ru; tests; golden rebaseline. | `booping-python/src/booping/specs/site/templates/record.html.j2`, `booping-python/src/booping/specs/site/templates/base.html.j2`, `booping-python/src/booping/specs/site/templates/_comments.html.j2`, `booping-python/src/booping/specs/site/templates/comments.html.j2`, `booping-python/src/booping/specs/site/templates/_icons.html.j2`, `booping-python/src/booping/specs/site/pages.py`, `src/config.yaml`, `booping-python/tests/specs/site_pages_test.py`, `booping-python/e2e/cases/specs/site-*.txtar` | 3 | done |
+| 3.2 | `comments.js` store and counts; shipped; CSS gating. | `booping-python/src/booping/specs/site/comments.js`, `booping-python/src/booping/specs/site/pages.py`, `booping-python/src/booping/specs/site/style.css` | 1 | done |
 
 ## Definition of Done
 
 ### Task 3.1
 
-- [ ] Every hook listed in Scope is in the generated HTML; labels exactly as listed, en and ru.
-- [ ] The tests above pass with hand-derived values; two builds of one fixture are byte-identical (existing determinism test still green).
-- [ ] `site-*.txtar` rebaselined with `just e2e -k site --txtar-update`; the diff shows only the listed hooks, script tags, `comments.html` and the shipped JS files.
+- [x] Every hook listed in Scope is in the generated HTML; labels exactly as listed, en and ru.
+- [x] The tests above pass with hand-derived values; two builds of one fixture are byte-identical (existing determinism test still green).
+- [x] `site-*.txtar` rebaselined with `just e2e -k site --txtar-update`; the diff shows only the listed hooks, script tags, `comments.html` and the shipped JS files.
 
 ### Task 3.2
 
-- [ ] `comments.js` touches storage only inside try/catch; with storage throwing, no error reaches the console and `html.cmt` is not set.
-- [ ] The sidebar entry shows with JS and storage, its count hidden at 0.
+- [x] `comments.js` touches storage only inside try/catch; with storage throwing, no error reaches the console and `html.cmt` is not set.
+- [x] The sidebar entry shows with JS and storage, its count hidden at 0.
 
 Return: the list of changed and created files, nothing else.
 
