@@ -8,6 +8,8 @@ from jinja2 import Environment, FileSystemLoader, StrictUndefined
 from markupsafe import Markup
 
 from booping.specs.records import unreviewed
+from booping.specs.site.fonts import font_files
+from booping.specs.site.labels import Labels, load_labels
 from booping.specs.site.markdown import LinkRenderer, Mark, Rendered, render_body
 from booping.specs.site.model import RefMiss, Site, SiteRecord
 
@@ -28,8 +30,8 @@ class Crumb:
     href: str | None
 
 
-def environment() -> Environment:
-    return Environment(
+def environment(labels: Labels, lang: str, site_title: str) -> Environment:
+    env = Environment(
         loader=FileSystemLoader(str(_HERE / "templates")),
         autoescape=True,
         undefined=StrictUndefined,
@@ -37,6 +39,9 @@ def environment() -> Environment:
         lstrip_blocks=True,
         keep_trailing_newline=True,
     )
+    shared: dict[str, Any] = {"labels": labels, "lang": lang, "site_title": site_title}
+    env.globals.update(shared)
+    return env
 
 
 def _title(record: SiteRecord) -> str:
@@ -135,18 +140,51 @@ def _render(site: Site, record: SiteRecord, id_prefix: str) -> Rendered:
     )
 
 
-def build_site(site: Site, known_types: list[str]) -> tuple[dict[str, str], list[SiteWarning]]:
+def build_site(
+    site: Site,
+    known_types: list[str],
+    labels: Labels | None = None,
+    lang: str = "en",
+    site_title: str = "Specs",
+) -> tuple[dict[str, str | bytes], list[SiteWarning]]:
     """Out-root-relative path → file content, plus the resolution warnings sorted by
     `(path, line)`, each once per record. Types order as `known_types`, then the types
-    a root's `_schemas/` added, sorted."""
-    env = environment()
-    files: dict[str, str] = {"style.css": (_HERE / "style.css").read_text()}
+    a root's `_schemas/` added, sorted. No `labels` → English."""
+    if labels is None:
+        labels, lang, _ = load_labels({})
+    env = environment(labels, lang, site_title)
+    files: dict[str, str | bytes] = {
+        **font_files(),
+        "style.css": (_HERE / "style.css").read_text(),
+        "site.js": (_HERE / "site.js").read_text(),
+    }
     warnings: set[SiteWarning] = set()
+
+    added = sorted({r.type for r in site.records} - set(known_types))
+    present = [t for t in [*known_types, *added] if any(r.type == t for r in site.records)]
+    nav = [
+        {
+            "root": root.name,
+            "types": [
+                {
+                    "type": type_,
+                    "label": labels.type_plural(type_),
+                    "count": count,
+                    "href": f"{root.name}/{type_}/index.html",
+                }
+                for type_ in present
+                if (
+                    count := sum(1 for r in site.records if r.root == root.name and r.type == type_)
+                )
+            ],
+        }
+        for root in site.roots
+    ]
 
     def page(template: str, path: str, title: str, crumbs: list[Crumb], **ctx: Any) -> None:
         prefix = "../" * path.count("/")
         files[path] = env.get_template(template).render(
-            title=title, prefix=prefix, crumbs=crumbs, **ctx
+            title=title, prefix=prefix, path=path, crumbs=crumbs, nav=nav, **ctx
         )
 
     marks: dict[int, list[Mark]] = {}
@@ -171,9 +209,9 @@ def build_site(site: Site, known_types: list[str]) -> tuple[dict[str, str], list
             record.page,
             title,
             [
-                Crumb("Specs", "../../index.html"),
+                Crumb(labels.ui("overview"), "../../index.html"),
                 Crumb(record.root, "../index.html"),
-                Crumb(record.type, "index.html"),
+                Crumb(labels.type_plural(record.type), "index.html"),
                 Crumb(record.ref, None),
             ],
             record=_block(site, record, own, None, warnings),
@@ -182,8 +220,6 @@ def build_site(site: Site, known_types: list[str]) -> tuple[dict[str, str], list
         in_type = _render(site, record, f"{record.stem}--")
         type_blocks[id(record)] = _block(site, record, in_type, f"{record.stem}.html", warnings)
 
-    added = sorted({r.type for r in site.records} - set(known_types))
-    present = [t for t in [*known_types, *added] if any(r.type == t for r in site.records)]
     index_rows: list[dict[str, Any]] = []
     for root in site.roots:
         records = [r for r in site.records if r.root == root.name]
@@ -206,11 +242,11 @@ def build_site(site: Site, known_types: list[str]) -> tuple[dict[str, str], list
             page(
                 "type.html.j2",
                 f"{root.name}/{type_}/index.html",
-                type_,
+                labels.type_plural(type_),
                 [
-                    Crumb("Specs", "../../index.html"),
+                    Crumb(labels.ui("overview"), "../../index.html"),
                     Crumb(root.name, "../index.html"),
-                    Crumb(type_, None),
+                    Crumb(labels.type_plural(type_), None),
                 ],
                 type=type_,
                 records=[type_blocks[id(r)] for r in of_type],
@@ -236,7 +272,7 @@ def build_site(site: Site, known_types: list[str]) -> tuple[dict[str, str], list
             "root.html.j2",
             f"{root.name}/index.html",
             root.name,
-            [Crumb("Specs", "../index.html"), Crumb(root.name, None)],
+            [Crumb(labels.ui("overview"), "../index.html"), Crumb(root.name, None)],
             root=root.name,
             rows=type_rows,
             marks=mark_lists,
@@ -262,8 +298,8 @@ def build_site(site: Site, known_types: list[str]) -> tuple[dict[str, str], list
     page(
         "index.html.j2",
         "index.html",
-        "Specs",
-        [Crumb("Specs", None)],
+        site_title,
+        [Crumb(labels.ui("overview"), None)],
         types=present,
         rows=index_rows,
     )

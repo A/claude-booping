@@ -17,6 +17,7 @@ from booping.specs.check import CheckError, check_tier, display_path, format_fin
 from booping.specs.init import InitError, apply, plan
 from booping.specs.records import Record, load_tier
 from booping.specs.site.index import ProjectsError, build_index, load_projects
+from booping.specs.site.labels import load_labels
 from booping.specs.site.model import SiteRoot, load_site
 from booping.specs.site.pages import build_site
 from booping.specs.site.write import SiteError, write_site
@@ -80,6 +81,12 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
         default=[],
         metavar="NAME=PATH",
         help="A root to render (repeatable); replaces the tier and config roots",
+    )
+    site.add_argument(
+        "--title",
+        metavar="TEXT",
+        help="Site title in the header and every page title"
+        " (default: the attached project's name, else Specs)",
     )
     site.set_defaults(func=_run_site)
 
@@ -335,8 +342,14 @@ def _run_site(args: argparse.Namespace) -> None:
     if duplicates:
         _fail(f"duplicate root name(s): {', '.join(duplicates)}")
 
+    site_cfg: dict[str, Any] = ctx.config.get("core", {}).get("specs", {}).get("site") or {}
+    labels, lang, label_warnings = load_labels(site_cfg)
+    for text in label_warnings:
+        print(f"warning: {text}", file=sys.stderr)
+    title = args.title or (ctx.project.name if ctx.project is not None else "Specs")
+
     site = load_site(roots, known)
-    files, warnings = build_site(site, known)
+    files, warnings = build_site(site, known, labels, lang, title)
     try:
         write_site(files, Path(args.out), roots)
     except SiteError as exc:

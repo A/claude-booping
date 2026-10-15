@@ -1,14 +1,16 @@
 from __future__ import annotations
 
 import posixpath
+import re
 from collections.abc import Callable
 from html.parser import HTMLParser
 from pathlib import Path
 
 import pytest
 
+from booping.specs.site.labels import load_labels
 from booping.specs.site.model import Site, SiteRoot, load_site
-from booping.specs.site.pages import SiteWarning, build_site
+from booping.specs.site.pages import SiteWarning, build_site, environment
 from booping.specs.site.write import SiteError, write_site
 
 TYPES = ["value", "adr"]
@@ -73,6 +75,11 @@ class _Links(HTMLParser):
                 self.ids.add(value)
 
 
+def _texts(site: Site) -> dict[str, str]:
+    files, _ = build_site(site, TYPES)
+    return {path: text for path, text in files.items() if isinstance(text, str)}
+
+
 def _parse(html: str) -> _Links:
     parser = _Links()
     parser.feed(html)
@@ -80,11 +87,11 @@ def _parse(html: str) -> _Links:
 
 
 def test_every_relative_link_lands_on_a_page_and_id(site: Site) -> None:
-    files, _ = build_site(site, TYPES)
+    files = _texts(site)
     pages = {path: _parse(text) for path, text in files.items() if path.endswith(".html")}
     checked = 0
     for path, parsed in pages.items():
-        assert parsed.scripts == 0
+        assert parsed.scripts == 2
         for href in parsed.hrefs:
             assert "://" not in href and not href.startswith("/"), (path, href)
             target, _, fragment = href.partition("#")
@@ -105,10 +112,14 @@ def test_page_map_paths(site: Site) -> None:
         "core/index.html",
         "core/value/0001-clarity.html",
         "core/value/index.html",
+        "fonts.css",
+        "fonts/OFL-golos-text.txt",
+        "fonts/OFL-jetbrains-mono.txt",
         "index.html",
         "proj/adr/0001-pick.html",
         "proj/adr/index.html",
         "proj/index.html",
+        "site.js",
         "style.css",
     ]
 
@@ -118,7 +129,7 @@ def test_build_is_repeatable(site: Site, roots: list[SiteRoot]) -> None:
 
 
 def test_marks_list_links_to_the_marked_line(site: Site) -> None:
-    files, _ = build_site(site, TYPES)
+    files = _texts(site)
     assert (
         '<li><a href="adr/0001-pick.html#L10"><code>adr/0001</code> Pick</a>'
         " — We [clarify] this.</li>"
@@ -129,7 +140,7 @@ def test_marks_list_links_to_the_marked_line(site: Site) -> None:
 
 
 def test_value_page_lists_cross_root_backlink(site: Site) -> None:
-    files, _ = build_site(site, TYPES)
+    files = _texts(site)
     assert (
         '<a href="../../proj/adr/0001-pick.html"><code>proj:adr/0001</code> Pick</a>'
         in files["core/value/0001-clarity.html"]
@@ -138,30 +149,30 @@ def test_value_page_lists_cross_root_backlink(site: Site) -> None:
 
 
 def test_record_page_links_refs_and_body(site: Site) -> None:
-    page = build_site(site, TYPES)[0]["proj/adr/0001-pick.html"]
+    page = _texts(site)["proj/adr/0001-pick.html"]
     assert '<a href="../../core/value/0001-clarity.html"><code>core:value/0001</code></a>' in page
     assert '<code class="unresolved">core:value/0009</code>' in page
     assert '<a href="../../core/value/0001-clarity.html#why">why</a>' in page
     assert '<span class="unresolved">gone</span>' in page
     assert '<span class="badge st-accepted">accepted</span>' in page
     assert '<span class="badge unreviewed">unreviewed</span>' in page
-    assert '<span class="chip mk-clarify">[clarify] 1</span>' in page
+    assert '<span class="chip mk-clarify">1 question for you</span>' in page
 
 
 def test_type_page_prefixes_in_page_anchors(site: Site) -> None:
-    page = build_site(site, TYPES)[0]["proj/adr/index.html"]
+    page = _texts(site)["proj/adr/index.html"]
     assert '<a href="#0001-pick--decision">top</a>' in page
     assert '<h2 id="0001-pick--decision">Decision</h2>' in page
 
 
 def test_value_badge_uses_kind_and_reviewed_hides_unreviewed(site: Site) -> None:
-    page = build_site(site, TYPES)[0]["core/value/0001-clarity.html"]
+    page = _texts(site)["core/value/0001-clarity.html"]
     assert '<span class="badge st-value">value</span>' in page
-    assert "unreviewed" not in page
+    assert 'class="badge unreviewed"' not in page
 
 
 def test_top_index_counts(site: Site) -> None:
-    index = build_site(site, TYPES)[0]["index.html"]
+    index = _texts(site)["index.html"]
     assert (
         '<tr><td><a href="core/index.html">core</a></td><td>1</td>'
         '<td><a href="core/value/index.html">1</a></td><td></td>'
@@ -261,3 +272,74 @@ def test_marker_precedes_pages_so_a_failed_run_is_clearable(
     assert (out / ".booping-site").is_file()
     write_site({"index.html": "ok\n"}, out, roots)
     assert sorted(p.name for p in out.iterdir()) == [".booping-site", "index.html"]
+
+
+def test_icon_sprite_holds_thirteen_unique_symbols() -> None:
+    labels, lang, _ = load_labels({})
+    sprite = environment(labels, lang, "Specs").get_template("_icons.html.j2").render()
+    ids = re.findall(r'<symbol id="([^"]+)"', sprite)
+    assert len(ids) == 13
+    assert len(set(ids)) == 13
+    assert {"i-sun", "i-auto", "i-moon", "i-clarify"} <= set(ids)
+
+
+def test_state_badges_pair_every_icon_with_text() -> None:
+    labels, lang, _ = load_labels({"lang": "ru"})
+    html = (
+        environment(labels, lang, "Specs")
+        .from_string(
+            '{% from "_macros.html.j2" import state_badges %}{{ state_badges(state, labels) }}'
+        )
+        .render(state={"status": "accepted", "clarify": 3, "unknown": 1, "unreviewed": True})
+    )
+    badges = re.findall(r'<span class="b ([a-z]+)">(<svg[^>]*>.*?</svg>)([^<]+)</span>', html)
+    assert [(css, text) for css, _, text in badges] == [
+        ("ok", "принято"),
+        ("warn", "3 вопроса к тебе"),
+        ("bad", "[unknown]"),
+        ("plain", "без ревью"),
+    ]
+    assert all('aria-hidden="true"' in svg for _, svg, _ in badges)
+
+
+def test_every_page_sits_in_the_shell(site: Site) -> None:
+    files = _texts(site)
+    depths: set[int] = set()
+    for path, html in files.items():
+        if not path.endswith(".html"):
+            continue
+        prefix = "../" * path.count("/")
+        depths.add(path.count("/"))
+        assert html.count('<main id="main">') == 1, path
+        assert html.count('<a class="skip" href="#main">') == 1, path
+        assert '<html lang="en">' in html, path
+        assert f'<link rel="stylesheet" href="{prefix}fonts.css">' in html, path
+        assert f'<link rel="stylesheet" href="{prefix}style.css">' in html, path
+        assert f'<script src="{prefix}site.js" defer></script>' in html, path
+        assert html.index("<script>") < html.index('<link rel="stylesheet"'), path
+        assert "<footer>Generated by booping specs site</footer>" in html, path
+    assert depths == {0, 1, 2}
+
+
+def test_sidebar_lists_both_roots_and_marks_the_current_type(site: Site) -> None:
+    page = _texts(site)["proj/adr/index.html"]
+    side = page[page.index('<nav class="side"') : page.index("</nav>", page.index('class="side"'))]
+    assert re.findall(r"<h4>([^<]+)</h4>", side) == ["core", "proj"]
+    assert '<a href="../../core/value/index.html">Values<span class="n">1</span></a>' in side
+    assert (
+        '<a href="../../proj/adr/index.html" aria-current="page">ADRs<span class="n">1</span></a>'
+        in side
+    )
+    assert side.count('aria-current="page"') == 1
+
+
+def test_crumbs_are_an_ordered_list_with_the_current_page_last(site: Site) -> None:
+    page = _texts(site)["proj/adr/0001-pick.html"]
+    assert (
+        '<nav class="crumbs" aria-label="breadcrumb">\n<ol>\n'
+        '<li><a href="../../index.html">Overview</a></li>\n'
+        '<li class="mid"><a href="../index.html">proj</a></li>\n'
+        '<li class="mid"><a href="index.html">ADRs</a></li>\n'
+        '<li><span aria-current="page">adr/0001</span></li>\n'
+        "</ol>\n</nav>"
+    ) in page

@@ -5,16 +5,16 @@
 <div class="table-wrap">
 <table>
 <thead>
-<tr><th>Type</th><th>Records</th><th>[clarify]</th><th>[unknown]</th><th>Unreviewed</th></tr>
+<tr><th>{{ labels.ui("type") }}</th><th>{{ labels.ui("records") }}</th><th>[clarify]</th><th>[unknown]</th><th>{{ labels.ui("unreviewed") }}</th></tr>
 </thead>
 <tbody>
 {% for row in rows %}
-<tr><td><a href="{{ row.href }}">{{ row.name }}</a></td><td>{{ row.records }}</td>{{ count_cell(row.clarify) }}{{ count_cell(row.unknown) }}{{ count_cell(row.unreviewed) }}</tr>
+<tr><td><a href="{{ row.href }}">{{ labels.type_plural(row.name) }}</a></td><td>{{ row.records }}</td>{{ count_cell(row.clarify) }}{{ count_cell(row.unknown) }}{{ count_cell(row.unreviewed) }}</tr>
 {% endfor %}
 </tbody>
 </table>
 </div>
-<h2 id="marks">Marks</h2>
+<h2 id="marks">{{ labels.ui("marks") }}</h2>
 {% for kind, entries in marks %}
 <h3>[{{ kind }}]</h3>
 {% if entries %}
@@ -24,7 +24,7 @@
 {% endfor %}
 </ul>
 {% else %}
-<p>None.</p>
+<p>{{ labels.ui("none") }}</p>
 {% endif %}
 {% endfor %}
 {% endblock %}

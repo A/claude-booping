@@ -1,19 +1,59 @@
+{% from "_macros.html.j2" import icon %}
+{% set rail_html = self.rail() | trim %}
 <!doctype html>
-<html lang="en">
+<html lang="{{ lang }}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{{ title }} — specs</title>
+<script>try{var t=localStorage.getItem("specs-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}document.documentElement.classList.add("js")</script>
+<meta name="color-scheme" content="light dark">
+<title>{% if title == site_title %}{{ site_title }}{% else %}{{ title }} — {{ site_title }}{% endif %}</title>
+<link rel="stylesheet" href="{{ prefix }}fonts.css">
 <link rel="stylesheet" href="{{ prefix }}style.css">
+<script src="{{ prefix }}site.js" defer></script>
 </head>
 <body>
-<nav class="crumbs">
-{% for crumb in crumbs %}
-{% if not loop.first %} › {% endif %}{% if crumb.href is not none %}<a href="{{ crumb.href }}">{{ crumb.label }}</a>{% else %}<span>{{ crumb.label }}</span>{% endif %}
+{% include "_icons.html.j2" %}
+<a class="skip" href="#main">{{ labels.ui("skip") }}</a>
+<header class="top">
+{% if nav %}
+<button class="iconbtn menu" type="button" aria-expanded="false" aria-controls="drawer" aria-label="{{ labels.ui('menu') }}">{{ icon("i-menu") }}</button>
+{% endif %}
+<a class="brand" href="{{ prefix }}index.html">{{ site_title }}</a>
+<button class="iconbtn theme" type="button" aria-label="{{ labels.ui('theme_auto') }}" title="{{ labels.ui('theme_auto') }}" data-label-auto="{{ labels.ui('theme_auto') }}" data-label-light="{{ labels.ui('theme_light') }}" data-label-dark="{{ labels.ui('theme_dark') }}">{{ icon("i-auto") }}</button>
+</header>
+<div class="body{% if not nav %} noside{% endif %}{% if not rail_html %} norail{% endif %}">
+{% if nav %}
+<nav class="side" id="drawer" aria-label="{{ labels.ui('types') }}">
+<ul>
+<li><a href="{{ prefix }}index.html"{% if path == "index.html" %} aria-current="page"{% endif %}>{{ labels.ui("overview") }}</a></li>
+</ul>
+{% for group in nav %}
+<h4>{{ group.root }}</h4>
+<ul>
+{% for t in group.types %}
+<li><a href="{{ prefix }}{{ t.href }}"{% if path == t.href %} aria-current="page"{% endif %}>{{ t.label }}<span class="n">{{ t.count }}</span></a></li>
+{% endfor %}
+</ul>
 {% endfor %}
 </nav>
-<main>
+{% endif %}
+<main id="main">
+<nav class="crumbs" aria-label="breadcrumb">
+<ol>
+{% for crumb in crumbs %}
+<li{% if not loop.first and not loop.last %} class="mid"{% endif %}>{% if loop.last %}<span aria-current="page">{{ crumb.label }}</span>{% elif crumb.href is not none %}<a href="{{ crumb.href }}">{{ crumb.label }}</a>{% else %}<span>{{ crumb.label }}</span>{% endif %}</li>
+{% endfor %}
+</ol>
+</nav>
 {% block main %}{% endblock %}
 </main>
+{% if rail_html %}
+<aside class="rail">
+{% block rail %}{% endblock %}
+</aside>
+{% endif %}
+</div>
+<footer>{{ labels.ui("generator") }}</footer>
 </body>
 </html>

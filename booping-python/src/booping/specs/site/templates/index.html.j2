@@ -1,11 +1,11 @@
 {% extends "base.html.j2" %}
 {% from "_macros.html.j2" import count_cell %}
 {% block main %}
-<h1>Specs</h1>
+<h1>{{ site_title }}</h1>
 <div class="table-wrap">
 <table>
 <thead>
-<tr><th>Root</th><th>Records</th>{% for type in types %}<th>{{ type }}</th>{% endfor %}<th>[clarify]</th><th>[unknown]</th><th>Unreviewed</th></tr>
+<tr><th>{{ labels.ui("root") }}</th><th>{{ labels.ui("records") }}</th>{% for type in types %}<th>{{ labels.type_plural(type) }}</th>{% endfor %}<th>[clarify]</th><th>[unknown]</th><th>{{ labels.ui("unreviewed") }}</th></tr>
 </thead>
 <tbody>
 {% for row in rows %}

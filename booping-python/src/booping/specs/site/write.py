@@ -26,7 +26,7 @@ def _check(out: Path, roots: list[SiteRoot]) -> None:
         raise SiteError(f"out path {out} is not empty and has no {MARKER} marker")
 
 
-def write_site(files: dict[str, str], out: Path, roots: list[SiteRoot]) -> None:
+def write_site(files: dict[str, str | bytes], out: Path, roots: list[SiteRoot]) -> None:
     _check(out, roots)
     if out.is_dir():
         # The marker stays through the clear, so a run that dies here is still clearable.
@@ -43,4 +43,8 @@ def write_site(files: dict[str, str], out: Path, roots: list[SiteRoot]) -> None:
     for path in sorted(files):
         target = out / path
         target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_text(files[path], newline="\n")
+        content = files[path]
+        if isinstance(content, bytes):
+            target.write_bytes(content)
+        else:
+            target.write_text(content, newline="\n")

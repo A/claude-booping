@@ -4,7 +4,7 @@
 <article>
 {{ record_block(record, 1) }}
 </article>
-<h2 id="referenced-by">Referenced by</h2>
+<h2 id="referenced-by">{{ labels.ui("referenced_by") }}</h2>
 {% if backlinks %}
 <ul class="backlinks">
 {% for link in backlinks %}
@@ -12,6 +12,6 @@
 {% endfor %}
 </ul>
 {% else %}
-<p>Nothing references this record.</p>
+<p>{{ labels.ui("nothing_references") }}</p>
 {% endif %}
 {% endblock %}

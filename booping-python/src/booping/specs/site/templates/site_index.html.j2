@@ -5,7 +5,7 @@
 <div class="table-wrap">
 <table>
 <thead>
-<tr><th>Project</th><th>Description</th></tr>
+<tr><th>{{ labels.ui("project") }}</th><th>{{ labels.ui("description") }}</th></tr>
 </thead>
 <tbody>
 {% for project in projects %}
@@ -15,6 +15,6 @@
 </table>
 </div>
 {% else %}
-<p>No projects.</p>
+<p>{{ labels.ui("no_projects") }}</p>
 {% endif %}
 {% endblock %}
