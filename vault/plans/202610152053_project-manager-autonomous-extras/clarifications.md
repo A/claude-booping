@@ -126,3 +126,13 @@ No. A timer is the machine's scheduler (systemd, cron, launchd) — not core (va
 **Answer:**
 
 No new suite. The changed behaviour is code-computed and held by e2e cases; the prompt changes are one call each, held by the committed snapshot reports. The work step has no suite today and adding one is its own task.
+
+## C13 — plan approval — answered
+
+**Asked:** 2026-10-15 — present
+
+**Question:** The plan is ready for development — approve, or say what to change?
+
+**Answer:**
+
+Approved by the autonomous run (the owner was unavailable; the session directive auto-confirms review gates). Cross-review (codex) returned three RISKs and no CRITICAL, all folded in: M06's batch briefing now has a fixed shape (`## Task`, one `## Item {id}` block per item, `## Return`); M03 gained a sixth case for a paused child exiting non-zero; M04 and the I/O contract state that only develop runs pause and that a later record of any playbook on the same plan resumes one.

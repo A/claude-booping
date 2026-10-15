@@ -1,7 +1,7 @@
 ---
 title: "Project-manager autonomous extras — budget gate, time window, size batching"
 type: "feature"
-status: presenting
+status: ready-for-dev
 sp: null
 related_to: null
 created: 2026-10-15 20:54
@@ -23,6 +23,7 @@ agents:
   research-sources: aadfc435155833a3e
   research-codebase: a1d5160b7fc56a628
   cross-review: ad3d63ce1ba1b7168
+reviewed_at: 2026-10-15 21:06
 ---
 
 # Project-manager autonomous extras — budget gate, time window, size batching
