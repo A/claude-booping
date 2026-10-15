@@ -45,5 +45,6 @@ written directly. Next: `/playbook learn`, or `booping specs check` after the ru
 
 Show `booping specs open-items list`; the user picks. An item needing no work →
 `booping specs open-items close {ids} --dropped --reason "…"`; a planned item whose plan was
-cancelled outside develop → `booping specs open-items reopen --plan {plan}`. Next:
-`/playbook groom` naming the picked ids — groom links them to the plan.
+cancelled outside develop → `booping specs open-items reopen --plan {plan}`.
+Supervised: next is `/playbook groom` naming the picked ids — groom links them to the plan and stops at its plan review.
+Autonomous: run `/playbook groom` naming the picked ids — none picked, every `open` item — then `/playbook develop` on the plan it readies, in this session, without stopping; a groom that splits develops the first plan and reports the parked stubs.

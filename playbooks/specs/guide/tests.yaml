@@ -1,4 +1,4 @@
-# Three smoke cases over the guide step. The run has no shell: each fixture states the
+# Four smoke cases over the guide step. The run has no shell: each fixture states the
 # `booping` outputs a live run would have read, and stands in for the writes the CLI would
 # have made. The cwd is the vault root; the project tier, when there is one, is `specs/`.
 
@@ -110,3 +110,59 @@
         entry: 'OI-0002'
         onlyEntries: false
         minEntries: 1
+
+- description: guide smoke — autonomous, work the open items chains groom and develop unasked
+  vars:
+    input: file://_fixtures/autonomous-open-items.md
+  metadata:
+    playbook: specs
+    step: guide
+    fixture: autonomous-open-items
+    tier: smoke
+  assert:
+    # NO-SPECS-WRITE — the items go to groom; nothing lands under a specs/ dir
+    - type: javascript
+      value: file://../../_lib/asserts/files.js
+      config:
+        expect: []
+        allow:
+          - '^(?!(?:.*/)?specs/)'
+        noOthers: true
+    # GROOM-THEN-DEVELOP — groom names both ids, develop follows
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        entry: '/playbook groom'
+        onlyEntries: false
+        minEntries: 1
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        entry: 'OI-0001'
+        onlyEntries: false
+        minEntries: 1
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        entry: 'OI-0002'
+        onlyEntries: false
+        minEntries: 1
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        entry: '/playbook develop'
+        onlyEntries: false
+        minEntries: 1
+    # ASKS-NOTHING — no line ends in a question, an item title quoted by id aside
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        entry: '^(?!.*OI-\d{4}).*\?\W*$'
+        onlyEntries: false
+        minEntries: 0
+        maxEntries: 0

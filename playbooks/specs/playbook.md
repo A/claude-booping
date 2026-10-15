@@ -18,6 +18,8 @@ Tiers (`core.specs.tiers`; every `booping specs` verb takes `--tier`, default `p
 {% if booping.specs_tiers | selectattr('name', 'equalto', 'project') | list | length == 0 -%}
 - `project` — none: no repo is attached.
 {% endif %}
+Autonomy: `{{ config.core.autonomy }}` (`core.autonomy`).
+
 Writing a record:
 
 - Number it with `booping specs next {type}`.
