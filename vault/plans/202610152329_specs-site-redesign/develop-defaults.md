@@ -69,3 +69,13 @@
 **Why:** C9 names no fallback for these cases; each keeps output deterministic and minimal
 
 **Artifact:** [M08](milestones/M08-llms-and-index-json/M08-llms-and-index-json.md)
+
+## D8 — develop/verify — 2026-10-16
+
+**Asked:** Phone defects found by the Final Verification visual check after every milestone closed (crumbs misaligned and not last-level-only; drawer focus lands on the skip link)
+
+**Default:** Fixed by a fresh worker against M04's contract, findings in M04's `feedback.md`, committed as a `fix(specs)` commit; `just ci` re-run once after the fix
+
+**Why:** The milestone machine has no edge out of `done`; the plan's Final Verification gates the run's `done` edge, so the fix lands before wrap-up
+
+**Artifact:** [M04](milestones/M04-page-shell/M04-page-shell.md)
