@@ -2,13 +2,13 @@
 title: "Project-level schemas — tiers carry their own mdcheck schemas, tags dictionary,
   ADR alternatives checks, Russian set"
 type: "feature"
-status: in-progress
+status: done
 sp: 26
 related_to: null
 created: 2026-10-15 21:46
 planned: null
 started: 2026-10-15 22:11
-completed: null
+completed: 2026-10-15 22:37
 code_reviews: []
 sessions:
 - 2740a7e8-9ead-4aa2-92ad-5cf9208bef05
@@ -25,7 +25,17 @@ agents:
   research-codebase: a27f2a0098a805df6
   research-web: a0afe17b358721481
   cross-review: a7c243a8562aa2c3f
+  develop-loop-g1: af44eece586376c38
+  develop-loop-g2: a18b83c4c8af55736
+  verify: a7ce57e020d48377b
 reviewed_at: 2026-10-15 22:01
+metrics_active_minutes: 51
+metrics_models:
+- claude-opus-5-5
+metrics_tokens_input: 144
+metrics_tokens_output: 58771
+metrics_tokens_cache_creation: 249342
+metrics_tokens_cache_read: 7359460
 ---
 
 # Project-level schemas — tiers carry their own mdcheck schemas, tags dictionary, ADR alternatives checks, Russian set

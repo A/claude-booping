@@ -69,3 +69,13 @@
 **Why:** Path-scoped staging cannot split one file between milestones
 
 **Artifact:** [index.md](index.md)
+
+## D8 — develop/wrap-up — 2026-10-15 22:28
+
+**Asked:** just snapshots drifted — accept?
+
+**Default:** Accepted playbooks/specs/_reports/output.md (sole drift): one hunk, the guide step's new ## Import scenario (M07). The plan also expected an Init sentence; M07's amended scope dropped it, so none appears
+
+**Why:** Every drifted hunk is plan-described; owner's snapshot policy for this feature (2026-10-14)
+
+**Artifact:** [index.md](index.md)
