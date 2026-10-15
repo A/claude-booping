@@ -2,13 +2,13 @@
 title: "Specs site redesign, part 4 — landing column, reading measure, relations in
   the facts grid"
 type: "feature"
-status: in-progress
+status: done
 sp: 8
 related_to: null
 created: 2026-10-16 02:52
 planned: null
 started: 2026-10-16 03:00
-completed: null
+completed: 2026-10-16 03:11
 code_reviews: []
 sessions:
 - c768fd6c-5287-467e-b5b6-da56d84b7512
@@ -22,6 +22,13 @@ tracker_request: null
 tracker_issue: null
 return_to: null
 reviewed_at: 2026-10-16 02:58
+metrics_active_minutes: 22
+metrics_models:
+- claude-opus-5-5
+metrics_tokens_input: 152
+metrics_tokens_output: 45642
+metrics_tokens_cache_creation: 243679
+metrics_tokens_cache_read: 7612087
 ---
 
 # Specs site redesign, part 4 — landing column, reading measure, relations in the facts grid
