@@ -2,7 +2,7 @@
 id: "05"
 title: "Migrate always asks about uncommitted work on the branch"
 sp: 3
-status: in-progress
+status: done
 plan: "plans/202610151609_autonomy-modes/index.md"
 ---
 
@@ -18,19 +18,19 @@ Tests: the three existing txtar cases and the unit test, updated to the new noti
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 5.1 | Survey text: branch named, the answer always awaited. | `playbooks/migrate/survey/opus-5.md` | 1 | pending |
-| 5.2 | Amended `_AUTO` notice and every assertion of the old text. | `booping-python/src/booping/migrations.py`, the three cases, `booping-python/tests/migrations_test.py` | 2 | pending |
+| 5.1 | Survey text: branch named, the answer always awaited. | `playbooks/migrate/survey/opus-5.md` | 1 | done |
+| 5.2 | Amended `_AUTO` notice and every assertion of the old text. | `booping-python/src/booping/migrations.py`, the three cases, `booping-python/tests/migrations_test.py` | 2 | done |
 
 ## Definition of Done
 
 ### Task 5.1
 
-- [ ] The survey names the branch, asks, waits, and still proceeds on a decline; nothing else in the body changes.
-- [ ] `just snapshots` drift is limited to `playbooks/migrate/_reports/output.md`, in `## Work in flight`.
+- [x] The survey names the branch, asks, waits, and still proceeds on a decline; nothing else in the body changes.
+- [x] `just snapshots` drift is limited to `playbooks/migrate/_reports/output.md`, in `## Work in flight`.
 
 ### Task 5.2
 
-- [ ] `_AUTO` equals the contract text; `grep -rn "without asking the user" booping-python` finds nothing.
+- [x] `_AUTO` equals the contract text; `grep -rn "without asking the user" booping-python` finds nothing.
 
 Return: the list of changed files, nothing else.
 

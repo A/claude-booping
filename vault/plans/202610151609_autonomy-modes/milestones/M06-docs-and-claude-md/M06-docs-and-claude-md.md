@@ -2,7 +2,7 @@
 id: "06"
 title: "Docs and CLAUDE.md name the mode"
 sp: 2
-status: in-progress
+status: done
 plan: "plans/202610151609_autonomy-modes/index.md"
 ---
 
@@ -18,20 +18,20 @@ Audience filter (rule/0008): the two `documentation/` pages say only what a plug
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 6.1 | The two public pages. | `documentation/project_config.md`, `documentation/playbook.md` | 1 | pending |
-| 6.2 | CLAUDE.md, three sections. | `CLAUDE.md` | 1 | pending |
+| 6.1 | The two public pages. | `documentation/project_config.md`, `documentation/playbook.md` | 1 | done |
+| 6.2 | CLAUDE.md, three sections. | `CLAUDE.md` | 1 | done |
 
 ## Definition of Done
 
 ### Task 6.1
 
-- [ ] The new section restates no literal from `src/config.yaml` beyond the key, its default and its two values.
-- [ ] No partial name, module path or internal file appears in either page.
-- [ ] `just docs` builds without warnings about the changed pages.
+- [x] The new section restates no literal from `src/config.yaml` beyond the key, its default and its two values.
+- [x] No partial name, module path or internal file appears in either page.
+- [x] `just docs` builds without warnings about the changed pages.
 
 ### Task 6.2
 
-- [ ] CLAUDE.md names the key, the verb and the sidecar once each, in the sections above.
+- [x] CLAUDE.md names the key, the verb and the sidecar once each, in the sections above.
 
 Return: the list of changed files, nothing else.
 

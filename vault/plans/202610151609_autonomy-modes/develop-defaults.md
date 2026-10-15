@@ -41,3 +41,11 @@ Decisions the runner took without the owner, per the run's AUTONOMOUS RUN instru
 **Default:** accepted with M04's commit `3b684ae`.
 
 **Why:** the drift was exactly two hunks, both M04's: the `Autonomy:` preamble line and the replaced `Next:` sentence (Supervised/Autonomous lines), matching the plan's output contract.
+
+## D6 — develop/develop-loop — M05 snapshot DoD with no drift
+
+**Asked:** M05's DoD expects `playbooks/migrate/_reports/output.md` to drift in `## Work in flight`; `just snapshots` shows no drift.
+
+**Default:** DoD line treated as satisfied ("drift is limited to" holds with zero drift); nothing accepted for migrate.
+
+**Why:** the committed report renders the generic `survey/prompt.md`, not the `opus-5.md` variant M05 edits, so the edit cannot reach it. The generic `prompt.md` was outside M05's file list and left unchanged (it already says "name it, ask"); listed as an open issue.
