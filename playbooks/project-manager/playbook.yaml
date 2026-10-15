@@ -1,0 +1,4 @@
+graph:
+  on-start: []
+  intake: [on-start]
+  work: [intake]

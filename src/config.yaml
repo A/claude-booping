@@ -426,6 +426,23 @@ core:
         bad_for:
           - "Trivial inline nits — orchestrator handles those directly"
 
+  project_manager_playbook:
+    # Workers the manager delegates to; the vault, every commit and every transition
+    # stay with the driver.
+    agents:
+      booping-developer:
+        internal: true
+        good_for:
+          - "Tiny fixes filed as items and fixes from the independent code review — every repo code edit; the manager never edits code itself"
+        bad_for:
+          - "Planned work — that goes through groom and `booping run develop`"
+      booping-researcher:
+        internal: true
+        good_for:
+          - "Classifying an item that needs a wide read of the repo before it is a tiny fix or a plan"
+        bad_for:
+          - "Single-file reads — call Read directly"
+
   migrate_playbook:
     queries:
       # Every migration the plugin ships, in id order. The `migrate` playbook
