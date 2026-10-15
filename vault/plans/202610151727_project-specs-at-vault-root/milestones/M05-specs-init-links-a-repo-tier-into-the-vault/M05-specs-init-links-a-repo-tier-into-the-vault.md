@@ -2,7 +2,7 @@
 id: "05"
 title: "specs init — nothing at the vault root, a repo tier linked into the vault"
 sp: 4
-status: in-progress
+status: done
 plan: "plans/202610151727_project-specs-at-vault-root/index.md"
 ---
 
@@ -28,20 +28,20 @@ Tests: integration tier, txtar, under `booping-python/e2e/cases/specs/`:
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 5.1 | `plan()` per Scope; `PROJECT_README` wording. | `booping-python/src/booping/specs/init.py` | 2 | pending |
-| 5.2 | The renamed, new and pinned cases in Tests. | `booping-python/e2e/cases/specs/init-*.txtar` | 2 | pending |
+| 5.1 | `plan()` per Scope; `PROJECT_README` wording. | `booping-python/src/booping/specs/init.py` | 2 | done |
+| 5.2 | The renamed, new and pinned cases in Tests. | `booping-python/e2e/cases/specs/init-*.txtar` | 2 | done |
 
 ## Definition of Done
 
 ### Task 5.1
 
-- [ ] Default tier: exit 0, stdout the vault root alone, nothing written.
-- [ ] A tier root outside the vault: `{vault}/specs` links to it, in either vault placement.
-- [ ] A refused `{vault}/specs` exits non-zero with its stderr message and writes nothing.
+- [x] Default tier: exit 0, stdout the vault root alone, nothing written.
+- [x] A tier root outside the vault: `{vault}/specs` links to it, in either vault placement.
+- [x] A refused `{vault}/specs` exits non-zero with its stderr message and writes nothing.
 
 ### Task 5.2
 
-- [ ] Every case in Tests exists and passes; no `init-*` case seeds `vault/specs/` as the default tier.
+- [x] Every case in Tests exists and passes; no `init-*` case seeds `vault/specs/` as the default tier.
 
 Return: the list of changed files, nothing else.
 
