@@ -2,7 +2,8 @@
 # Consume with:
 #   include:
 #     - remote: https://raw.githubusercontent.com/A/claude-booping/master/src/ci/gitlab/specs-index.gitlab-ci.yml
-# Variables: SPECS_INDEX_TOKEN (masked, read_api), BOOPING_REF, SPECS_TOPIC, SPECS_PAGES_BASE.
+# Variables: SPECS_INDEX_TOKEN (masked, read_api), BOOPING_REF, SPECS_TOPIC, SPECS_PAGES_BASE (fallback only:
+# each project's URL comes from its Pages API, so unique domains work).
 # Runs on a pipeline schedule or a manual run.
 pages:
   image: ghcr.io/astral-sh/uv:python3.12-trixie

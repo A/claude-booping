@@ -27,10 +27,12 @@ class Request:
 
 @dataclass
 class FakeGitLab:
-    """Serves `pages[n-1]` for `page=n`; `status` replaces every response when set."""
+    """Serves `pages[n-1]` for `page=n` and `pages_urls[id]` at `/projects/{id}/pages`
+    (404 for an id absent there); `status` replaces every response when set."""
 
     url: str = ""
     pages: list[list[dict[str, object]]] = field(default_factory=lambda: [[]])
+    pages_urls: dict[int, str] = field(default_factory=lambda: {})
     status: int = 200
     requests: list[Request] = field(default_factory=lambda: [])
 
@@ -49,6 +51,10 @@ def gitlab() -> Iterator[FakeGitLab]:
                 self.end_headers()
                 self.wfile.write(b'{"message": "401 Unauthorized"}')
                 return
+            parts = split.path.split("/")
+            if parts[-1] == "pages" and parts[-3] == "projects":
+                self._pages(int(parts[-2]))
+                return
             page = int(query["page"][0])
             body = json.dumps(fake.pages[page - 1]).encode()
             self.send_response(200)
@@ -56,6 +62,19 @@ def gitlab() -> Iterator[FakeGitLab]:
             self.send_header("x-next-page", str(page + 1) if page < len(fake.pages) else "")
             self.end_headers()
             self.wfile.write(body)
+
+        def _pages(self, project_id: int) -> None:
+            url = fake.pages_urls.get(project_id)
+            if url is None:
+                self.send_response(404)
+                self.end_headers()
+                self.wfile.write(b'{"message": "404 Not Found"}')
+                return
+            body: dict[str, object] = {"url": url, "is_unique_domain_enabled": True}
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps(body).encode())
 
         def log_message(self, format: str, *args: object) -> None:
             pass
@@ -85,16 +104,25 @@ def _ci_env(fake: FakeGitLab, **extra: str) -> dict[str, str]:
     }
 
 
-def test_two_pages_merge_sorted_with_pages_urls(gitlab: FakeGitLab) -> None:
+def _listing(gitlab: FakeGitLab) -> list[Request]:
+    return [r for r in gitlab.requests if r.path.endswith("/groups/lab%2Fsub/projects")]
+
+
+def test_two_pages_merge_sorted_with_urls_from_pages_api(gitlab: FakeGitLab) -> None:
     gitlab.pages = [
         [
-            {"name": "zeta", "path": "zeta-svc", "description": "Zeta specs."},
-            {"name": "Beta", "path": "beta", "description": None},
+            {"id": 30, "name": "zeta", "path": "zeta-svc", "description": "Zeta specs."},
+            {"id": 20, "name": "Beta", "path": "beta", "description": None},
         ],
-        [{"name": "alpha", "path": "alpha", "description": "Ålpha."}],
+        [{"id": 10, "name": "alpha", "path": "alpha", "description": "Ålpha."}],
     ]
+    gitlab.pages_urls = {
+        10: "https://alpha-1a2b3c.pages.example.org/",
+        20: "https://beta-4d5e6f.pages.example.org",
+        30: "https://zeta-svc-7a8b9c.pages.example.org",
+    }
 
-    result = _run(_ci_env(gitlab, SPECS_PAGES_BASE="https://lab.pages.example.org/"))
+    result = _run(_ci_env(gitlab))
 
     assert result.returncode == 0, result.stderr
     assert result.stderr == ""
@@ -102,37 +130,68 @@ def test_two_pages_merge_sorted_with_pages_urls(gitlab: FakeGitLab) -> None:
         "[\n"
         "  {\n"
         '    "name": "alpha",\n'
-        '    "url": "https://lab.pages.example.org/alpha",\n'
+        '    "url": "https://alpha-1a2b3c.pages.example.org",\n'
         '    "description": "Ålpha."\n'
         "  },\n"
         "  {\n"
         '    "name": "Beta",\n'
-        '    "url": "https://lab.pages.example.org/beta",\n'
+        '    "url": "https://beta-4d5e6f.pages.example.org",\n'
         '    "description": null\n'
         "  },\n"
         "  {\n"
         '    "name": "zeta",\n'
-        '    "url": "https://lab.pages.example.org/zeta-svc",\n'
+        '    "url": "https://zeta-svc-7a8b9c.pages.example.org",\n'
         '    "description": "Zeta specs."\n'
         "  }\n"
         "]\n"
     )
-    assert [r.query["page"] for r in gitlab.requests] == [["1"], ["2"]]
-    first = gitlab.requests[0]
-    assert first.path == "/api/v4/groups/lab%2Fsub/projects"
+    listing = _listing(gitlab)
+    assert [r.query["page"] for r in listing] == [["1"], ["2"]]
+    first = listing[0]
     assert first.token == TOKEN
     assert first.query["topic"] == ["booping-specs"]
     assert first.query["archived"] == ["false"]
+    pages_requests = [r for r in gitlab.requests if r not in listing]
+    assert sorted(r.path for r in pages_requests) == [
+        "/api/v4/projects/10/pages",
+        "/api/v4/projects/20/pages",
+        "/api/v4/projects/30/pages",
+    ]
+    assert {r.token for r in pages_requests} == {TOKEN}
 
 
-def test_pages_base_defaults_to_ci_pages_url(gitlab: FakeGitLab) -> None:
-    gitlab.pages = [[{"name": "alpha", "path": "alpha", "description": "A."}]]
+def test_project_without_pages_is_skipped(gitlab: FakeGitLab) -> None:
+    gitlab.pages = [
+        [
+            {"id": 1, "name": "alpha", "path": "alpha", "description": "A."},
+            {"id": 2, "name": "bare", "path": "bare", "description": "No Pages."},
+        ]
+    ]
+    gitlab.pages_urls = {1: "https://alpha-1a2b3c.pages.example.org"}
 
-    result = _run(_ci_env(gitlab, CI_PAGES_URL="https://group.pages.example.org"))
+    result = _run(_ci_env(gitlab))
 
     assert result.returncode == 0, result.stderr
     assert json.loads(result.stdout) == [
-        {"name": "alpha", "url": "https://group.pages.example.org/alpha", "description": "A."}
+        {"name": "alpha", "url": "https://alpha-1a2b3c.pages.example.org", "description": "A."}
+    ]
+
+
+def test_fallback_base_applies_only_without_a_pages_url(gitlab: FakeGitLab) -> None:
+    gitlab.pages = [
+        [
+            {"id": 1, "name": "alpha", "path": "alpha", "description": "A."},
+            {"id": 2, "name": "bare", "path": "bare-svc", "description": None},
+        ]
+    ]
+    gitlab.pages_urls = {1: "https://alpha-1a2b3c.pages.example.org"}
+
+    result = _run(_ci_env(gitlab, SPECS_PAGES_BASE="https://lab.pages.example.org/"))
+
+    assert result.returncode == 0, result.stderr
+    assert json.loads(result.stdout) == [
+        {"name": "alpha", "url": "https://alpha-1a2b3c.pages.example.org", "description": "A."},
+        {"name": "bare", "url": "https://lab.pages.example.org/bare-svc", "description": None},
     ]
 
 

@@ -235,7 +235,7 @@ Then, in that project's settings:
 The job lists the group's non-archived projects carrying the topic through the GitLab API and pipes them into `booping specs site-index --projects - --out public`. Optional variables:
 
 - `SPECS_TOPIC` — the topic that marks a project for the index, default `booping-specs`.
-- `SPECS_PAGES_BASE` — the base URL a project's site is linked under as `{base}/{project path}`, default the index project's own Pages URL (`CI_PAGES_URL`).
+- `SPECS_PAGES_BASE` — optional fallback base URL (`{base}/{project path}`) for a project whose Pages URL the API does not return; normally each project's link is its own Pages URL from `GET /projects/:id/pages`, so unique Pages domains work. A project without Pages is left out of the index.
 
 **Adding a project** to the index is setting the topic on it; the next scheduled run lists it.
 
