@@ -12,6 +12,7 @@ from urllib.parse import urlsplit
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 from markupsafe import Markup
 
+from booping.specs.site.backlinks import backlink_groups
 from booping.specs.site.fonts import font_files
 from booping.specs.site.items import OpenItem
 from booping.specs.site.labels import Labels, load_labels
@@ -284,15 +285,41 @@ def _relations(
     return rows
 
 
+def _toc(rendered: Rendered, labels: Labels) -> list[dict[str, Any]]:
+    """`h2` entries with their `h3` entries nested, then "Referenced by"; an `h3`
+    before any `h2` stands on its own. Fewer than two entries → no ToC."""
+    entries: list[dict[str, Any]] = []
+    for heading in rendered.headings:
+        entry: dict[str, Any] = {"href": f"#{heading.id}", "text": heading.text, "children": []}
+        if heading.level == 2 or (heading.level == 3 and not entries):
+            entries.append(entry)
+        elif heading.level == 3:
+            entries[-1]["children"].append(entry)
+    entries.append({"href": "#referenced-by", "text": labels.ui("referenced_by"), "children": []})
+    return entries if len(entries) >= 2 else []
+
+
+def _questions(rendered: Rendered) -> list[dict[str, Any]]:
+    return [
+        {"href": f"#L{m.line}", "kind": m.kind, "text": m.text}
+        for kind in _MARK_KINDS
+        for m in rendered.marks
+        if m.kind == kind
+    ]
+
+
 def _record_view(
     site: Site,
     record: SiteRecord,
-    rendered: Rendered,
+    rendered: dict[int, Rendered],
+    types: Sequence[str],
     state: RecordState,
     labels: Labels,
     warnings: set[SiteWarning],
 ) -> dict[str, Any]:
     fm = record.frontmatter
+    own = rendered[id(record)]
+    groups = backlink_groups(site, record, rendered, labels, types)
     raw_tags: Any = fm.get("tags") or []
     tags: list[Any] = raw_tags if isinstance(raw_tags, list) else [raw_tags]  # pyright: ignore[reportUnknownVariableType]
     linked = set(record_tags(record))
@@ -317,8 +344,28 @@ def _record_view(
             for key, value in fm.items()
             if key not in skip
         ],
-        "body": Markup(rendered.html),
-        "backlinks": [_rel_item(src, record.root) for src in site.backlinks(record)],
+        "body": Markup(own.html),
+        "toc": _toc(own, labels),
+        "questions": _questions(own),
+        "backlinks": {
+            "by_type": [
+                {
+                    "label": group.label,
+                    "items": [
+                        {"item": _rel_item(b.record, record.root), "via": b.via}
+                        for b in group.items
+                    ],
+                }
+                for group in groups.by_type
+            ],
+            "by_section": [
+                {
+                    "heading": section.heading,
+                    "sources": [_rel_item(src, record.root) for src in section.sources],
+                }
+                for section in groups.by_section
+            ],
+        },
     }
 
 
@@ -436,12 +483,14 @@ def _nav(
     }
 
 
-def _render(site: Site, record: SiteRecord) -> Rendered:
+def _render(site: Site, record: SiteRecord, labels: Labels) -> Rendered:
     return render_body(
         record.body,
         first_line=record.body_first_line,
         link=_link_renderer(site, record),
         statuses=site.statuses,
+        labels=labels,
+        alternatives=record.type == "adr",
     )
 
 
@@ -487,7 +536,7 @@ def build_site(
     states: dict[SiteRecord, RecordState] = {}
     rendered: dict[int, Rendered] = {}
     for record in site.records:
-        own = rendered[id(record)] = _render(site, record)
+        own = rendered[id(record)] = _render(site, record, labels)
         marks[id(record)] = own.marks
         states[record] = record_state(record, own.marks)
 
@@ -519,7 +568,7 @@ def build_site(
                 Crumb(labels.type_plural(record.type), "index.html"),
                 Crumb(record.ref, None),
             ],
-            record=_record_view(site, record, own, state, labels, warnings),
+            record=_record_view(site, record, rendered, present, state, labels, warnings),
         )
         files[f"{record.root}/{record.type}/{record.stem}.md"] = record.path.read_bytes()
 

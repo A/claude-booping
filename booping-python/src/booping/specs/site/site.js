@@ -28,6 +28,60 @@
       show();
     });
   }
+  var status = document.getElementById("status");
+  var statusTimer = null;
+  function announce(text) {
+    if (!status) return;
+    status.textContent = text;
+    clearTimeout(statusTimer);
+    statusTimer = setTimeout(function () { status.textContent = ""; }, 2000);
+  }
+  document.addEventListener("click", function (e) {
+    var a = e.target.closest && e.target.closest("a.anchor");
+    if (!a || !navigator.clipboard) return;
+    var url = location.href.split("#")[0] + a.getAttribute("href");
+    navigator.clipboard.writeText(url).then(function () {
+      announce(status ? status.getAttribute("data-copied") : "");
+    }, function () {});
+  });
+  function openTarget() {
+    var id = decodeURIComponent(location.hash.slice(1));
+    var target = id && document.getElementById(id);
+    if (!target) return;
+    for (var el = target.parentElement; el; el = el.parentElement) {
+      if (el.tagName === "DETAILS" && !el.open) el.open = true;
+    }
+  }
+  openTarget();
+  window.addEventListener("hashchange", openTarget);
+  var railLinks = document.querySelectorAll(".rail .toc a");
+  if (railLinks.length && "IntersectionObserver" in window) {
+    var byId = {};
+    var targets = [];
+    for (var i = 0; i < railLinks.length; i++) {
+      var heading = document.getElementById(decodeURIComponent(railLinks[i].getAttribute("href").slice(1)));
+      if (heading) {
+        byId[heading.id] = railLinks[i];
+        targets.push(heading);
+      }
+    }
+    var crossed = {};
+    var currentLink = null;
+    var spy = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        // Above the observed band means the heading has scrolled past the top 30%.
+        crossed[entry.target.id] = entry.isIntersecting || entry.boundingClientRect.top < entry.rootBounds.top;
+      });
+      var last = null;
+      targets.forEach(function (t) { if (crossed[t.id]) last = t; });
+      var link = last ? byId[last.id] : null;
+      if (link === currentLink) return;
+      if (currentLink) currentLink.removeAttribute("aria-current");
+      if (link) link.setAttribute("aria-current", "location");
+      currentLink = link;
+    }, { rootMargin: "0px 0px -70% 0px" });
+    targets.forEach(function (t) { spy.observe(t); });
+  }
   var menu = document.querySelector(".iconbtn.menu");
   var side = document.getElementById("drawer");
   if (!menu || !side) return;

@@ -274,6 +274,15 @@ core:
             needs_you: ["{n} needs you →", "{n} need you →"]
             open_questions: ["{n} open question", "{n} open questions"]
             recently_updated: Recently updated
+            section_link: Link to this section
+            link_copied: Link copied
+            by_section: By section
+            via: via
+            complexity: complexity
+            reversibility: reversibility
+            level_low: low
+            level_medium: medium
+            level_high: high
           types:
             value: {name: Value, plural: Values, scenario: "why the project exists"}
             rule: {name: Rule, plural: Rules, scenario: "what constrains decisions"}
@@ -366,6 +375,15 @@ core:
             needs_you: ["{n} запись ждёт тебя →", "{n} записи ждут тебя →", "{n} записей ждут тебя →"]
             open_questions: ["{n} открытый вопрос", "{n} открытых вопроса", "{n} открытых вопросов"]
             recently_updated: Недавно изменённое
+            section_link: Ссылка на раздел
+            link_copied: Ссылка скопирована
+            by_section: По разделам
+            via: через
+            complexity: сложность
+            reversibility: обратимость
+            level_low: низкая
+            level_medium: средняя
+            level_high: высокая
           types:
             value: {name: Ценность, plural: Ценности, scenario: "Ценности — зачем этот проект и какой он"}
             rule: {name: Правило, plural: Правила, scenario: "Правила — что ограничивает решения"}

@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from booping.specs.site.markdown import Mark, render_body, slug
+from booping.specs.site.markdown import Heading, Mark, render_body, slug
 from booping.specs.site.model import (
     LinkTarget,
     RefMiss,
@@ -48,7 +48,40 @@ def test_repeated_headings_get_numbered_ids() -> None:
         statuses=set(),
     ).html
     assert html == (
-        '<h1 id="notes">Notes</h1>\n<h2 id="notes-1">Notes</h2>\n<h3 id="notes-2">Notes</h3>\n'
+        '<h1 id="notes">Notes</h1>\n'
+        '<h2 id="notes-1">Notes<a class="anchor" href="#notes-1"'
+        ' aria-label="Link to this section: Notes">§</a></h2>\n'
+        '<h3 id="notes-2">Notes<a class="anchor" href="#notes-2"'
+        ' aria-label="Link to this section: Notes">§</a></h3>\n'
+    )
+
+
+def _anchor(id_: str, text: str) -> str:
+    return f'<a class="anchor" href="#{id_}" aria-label="Link to this section: {text}">§</a>'
+
+
+def test_headings_are_listed_and_h2_to_h4_end_with_a_section_anchor() -> None:
+    body = "# Title\n\n## Why\n\n### Open [clarify] point\n\n#### Deep\n\n## Why\n\n##### Tiny\n"
+    rendered = render_body(body, first_line=5, link=_no_link, statuses=set())
+    assert rendered.headings == [
+        Heading(level=1, text="Title", id="title", line=5),
+        Heading(level=2, text="Why", id="why", line=7),
+        Heading(level=3, text="Open [clarify] point", id="open-clarify-point", line=9),
+        Heading(level=4, text="Deep", id="deep", line=11),
+        Heading(level=2, text="Why", id="why-1", line=13),
+        Heading(level=5, text="Tiny", id="tiny", line=15),
+    ]
+    assert rendered.html == (
+        '<h1 id="title">Title</h1>\n'
+        '<h2 id="why">Why' + _anchor("why", "Why") + "</h2>\n"
+        '<h3 id="open-clarify-point">Open <mark id="L9" class="mk mk-clarify">'
+        + CLARIFY_ICON
+        + "[clarify]</mark> point"
+        + _anchor("open-clarify-point", "Open [clarify] point")
+        + "</h3>\n"
+        '<h4 id="deep">Deep' + _anchor("deep", "Deep") + "</h4>\n"
+        '<h2 id="why-1">Why' + _anchor("why-1", "Why") + "</h2>\n"
+        '<h5 id="tiny">Tiny</h5>\n'
     )
 
 

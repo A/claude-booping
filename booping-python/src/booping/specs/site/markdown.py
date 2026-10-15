@@ -8,6 +8,9 @@ from html import escape
 from markdown_it import MarkdownIt
 from markdown_it.token import Token
 
+from booping.specs.site.adr import option_cards
+from booping.specs.site.labels import Labels, load_labels
+
 LinkRenderer = Callable[[str], tuple[str | None, str | None]]
 
 _MARK_RE = re.compile(r"\[(clarify|unknown)\]")
@@ -16,6 +19,7 @@ _WS_RE = re.compile(r"\s+")
 _MARK_TEXT_LIMIT = 160
 _ANCHOR_OPEN = ("tr_open", "list_item_open", "paragraph_open", "heading_open")
 _ANCHOR_CLOSE = ("tr_close", "list_item_close", "paragraph_close", "heading_close")
+_SECTION_TAGS = ("h2", "h3", "h4")
 
 
 @dataclass(frozen=True)
@@ -26,10 +30,24 @@ class Mark:
 
 
 @dataclass(frozen=True)
+class Heading:
+    level: int
+    text: str
+    id: str
+    line: int
+
+
+@dataclass(frozen=True)
 class Rendered:
     html: str
     marks: list[Mark]
     links: list[tuple[int, str]]
+    headings: list[Heading]
+
+
+def section_anchor(id_: str, text: str, labels: Labels) -> str:
+    label = escape(f"{labels.ui('section_link')}: {text}")
+    return f'<a class="anchor" href="#{escape(id_)}" aria-label="{label}">§</a>'
 
 
 def slug(text: str) -> str:
@@ -122,7 +140,11 @@ def render_body(
     first_line: int,
     link: LinkRenderer,
     statuses: Collection[str],
+    labels: Labels | None = None,
+    alternatives: bool = False,
 ) -> Rendered:
+    if labels is None:
+        labels = load_labels({})[0]
     md = MarkdownIt("commonmark", {"html": False}).enable("table")
     # Keep each destination as written, so callers resolve and report the author's text.
     md.normalizeLink = lambda url: url  # type: ignore[method-assign]
@@ -132,6 +154,7 @@ def render_body(
     anchored_lines: set[int] = set()
     marks: list[Mark] = []
     links: list[tuple[int, str]] = []
+    headings: list[tuple[Token, Heading]] = []
     # Open blocks that can carry a mark anchor.
     stack: list[Token] = []
 
@@ -141,7 +164,12 @@ def render_body(
         elif token.type in _ANCHOR_CLOSE:
             stack.pop()
         if token.type == "heading_open":
-            token.attrSet("id", _unique_slug(_plain(tokens[index + 1]), seen_slugs))
+            text = _plain(tokens[index + 1])
+            heading_id = _unique_slug(text, seen_slugs)
+            token.attrSet("id", heading_id)
+            line = first_line + (token.map or [0])[0]
+            heading = Heading(int(token.tag[1:]), text.strip(), heading_id, line)
+            headings.append((tokens[index + 1], heading))
         if token.type != "inline" or token.map is None:
             continue
         if tokens[index - 1].type in ("td_open", "th_open") and token.content.strip() in statuses:
@@ -173,7 +201,20 @@ def render_body(
                 seen_kinds.add(kind)
                 marks.append(Mark(line=line, kind=kind, text=block_text))
 
-    return Rendered(html=md.renderer.render(tokens, md.options, {}), marks=marks, links=links)
+    for inline, heading in headings:
+        if f"h{heading.level}" in _SECTION_TAGS:
+            inline.children = [
+                *(inline.children or []),
+                _html_token(section_anchor(heading.id, heading.text, labels)),
+            ]
+    if alternatives:
+        tokens = option_cards(tokens, labels)
+    return Rendered(
+        html=md.renderer.render(tokens, md.options, {}),
+        marks=marks,
+        links=links,
+        headings=[h for _, h in headings],
+    )
 
 
 def _row_texts(tokens: list[Token]) -> dict[int, str]:

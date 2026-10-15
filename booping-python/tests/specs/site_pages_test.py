@@ -877,3 +877,81 @@ def test_record_tags_link_their_pages_and_every_link_resolves(tmp_path: Path) ->
     assert '<span class="tag">#q</span>' in odd
     assert not any(path.startswith("p/tags/") for path in files)
     assert _check_links(files) > 20
+
+
+RAILED = (
+    "---\n"
+    "title: Railed\n"
+    "---\n"
+    "# Railed\n"
+    "\n"
+    "## Context\n"
+    "\n"
+    "We [unknown] this.\n"
+    "\n"
+    "### Detail\n"
+    "\n"
+    "Ask [clarify] here.\n"
+    "\n"
+    "## Decision\n"
+)
+
+
+def _toc_page(tmp_path: Path, body: str) -> str:
+    _write(tmp_path / "proj" / "adr" / "0001-railed.md", body)
+    files, _ = build_site(load_site([SiteRoot("proj", tmp_path / "proj")], TYPES), TYPES)
+    page = files["proj/adr/0001-railed.html"]
+    assert isinstance(page, str)
+    return page
+
+
+def _toc_blocks(key: str, shift: int = 0) -> str:
+    return (
+        f'<nav class="toc" aria-labelledby="{key}-toc">\n'
+        f'<h4 id="{key}-toc">On this page</h4>\n'
+        "<ul>\n"
+        '<li><a href="#context">Context</a>\n'
+        "<ul>\n"
+        '<li><a href="#detail">Detail</a></li>\n'
+        "</ul>\n"
+        "</li>\n"
+        '<li><a href="#decision">Decision</a>\n'
+        "</li>\n"
+        '<li><a href="#referenced-by">Referenced by</a>\n'
+        "</li>\n"
+        "</ul>\n"
+        "</nav>\n"
+        '<div class="q">\n'
+        "<h4>2 open questions</h4>\n"
+        "<ul>\n"
+        f'<li><a class="mk-clarify" href="#L{12 + shift}"><svg class="ic" aria-hidden="true">'
+        '<use href="#i-clarify"/></svg>Ask [clarify] here.</a></li>\n'
+        f'<li><a class="mk-unknown" href="#L{8 + shift}"><svg class="ic" aria-hidden="true">'
+        '<use href="#i-unknown"/></svg>We [unknown] this.</a></li>\n'
+        "</ul>\n"
+        "</div>\n"
+    )
+
+
+def test_record_rail_nests_the_toc_and_lists_clarify_before_unknown(tmp_path: Path) -> None:
+    page = _toc_page(tmp_path, RAILED)
+    rail = page[page.index('<aside class="rail">') : page.index("</aside>")]
+    assert rail == '<aside class="rail">\n' + _toc_blocks("rail")
+    assert 'class="body norail"' not in page
+
+
+def test_record_phone_details_hold_the_same_blocks_after_the_lead(tmp_path: Path) -> None:
+    page = _toc_page(tmp_path, RAILED.replace("title: Railed\n", "title: Railed\nsummary: Lead.\n"))
+    details = page[page.index('<details class="toc-m">') : page.index("</details>")]
+    assert details == (
+        '<details class="toc-m">\n'
+        "<summary>On this page · 2 open questions</summary>\n" + _toc_blocks("toc-m", 1)
+    )
+    assert page.index('<p class="lead">Lead.</p>') < page.index('<details class="toc-m">')
+
+
+def test_record_with_one_heading_and_no_marks_has_no_rail(tmp_path: Path) -> None:
+    page = _toc_page(tmp_path, "---\ntitle: Solo\n---\n# Solo\n\nText.\n")
+    assert '<aside class="rail">' not in page
+    assert "toc-m" not in page
+    assert 'class="body norail"' in page

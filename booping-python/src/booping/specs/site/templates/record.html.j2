@@ -1,7 +1,12 @@
 {% extends "base.html.j2" %}
-{% from "_macros.html.j2" import state_badges, fact_item, fact_value, rel_item %}
+{% from "_macros.html.j2" import state_badges, fact_item, fact_value, rel_item, toc_blocks %}
 {% block head %}
 <link rel="alternate" type="text/markdown" href="{{ record.stem }}.md">
+{% endblock %}
+{% block rail %}
+{% if record.toc or record.questions %}
+{{ toc_blocks(record, labels, "rail") | trim }}
+{% endif %}
 {% endblock %}
 {% block main %}
 {% set r = record %}
@@ -16,6 +21,12 @@
 {% endif %}
 {% if r.summary is not none %}
 <p class="lead">{{ r.summary }}</p>
+{% endif %}
+{% if r.toc or r.questions %}
+<details class="toc-m">
+<summary>{{ labels.ui("on_this_page") }}{% if r.questions %} · {{ labels.plural("open_questions", r.questions | length) }}{% endif %}</summary>
+{{ toc_blocks(r, labels, "toc-m") | trim }}
+</details>
 {% endif %}
 {% if r.facts %}
 <dl class="facts">
@@ -50,13 +61,24 @@
 <div class="body">
 {{ r.body }}</div>
 </article>
-<h2 id="referenced-by">{{ labels.ui("referenced_by") }}</h2>
-{% if r.backlinks %}
+<h2 id="referenced-by">{{ labels.ui("referenced_by") }}<a class="anchor" href="#referenced-by" aria-label="{{ labels.ui('section_link') }}: {{ labels.ui('referenced_by') }}">§</a></h2>
+{% if r.backlinks.by_type %}
+{% for group in r.backlinks.by_type %}
+<h3>{{ group.label }}</h3>
 <ul class="rel backlinks">
-{% for item in r.backlinks %}
-<li>{{ rel_item(item) }}</li>
+{% for b in group["items"] %}
+<li>{{ rel_item(b.item) }}{% if b.via %} <span class="via">{{ labels.ui("via") }} {{ b.via | join(", ") }}</span>{% endif %}</li>
 {% endfor %}
 </ul>
+{% endfor %}
+{% if r.backlinks.by_section %}
+<h3>{{ labels.ui("by_section") }}</h3>
+<ul class="rel by-section">
+{% for section in r.backlinks.by_section %}
+<li><a href="#{{ section.heading.id }}">{{ section.heading.text }}</a> ← {% for src in section.sources %}{% if not loop.first %}, {% endif %}<a href="{{ src.href }}"><code class="ref">{{ src.ref }}</code></a>{% endfor %}</li>
+{% endfor %}
+</ul>
+{% endif %}
 {% else %}
 <p>{{ labels.ui("nothing_references") }}</p>
 {% endif %}

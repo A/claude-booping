@@ -105,3 +105,34 @@
 {% endfor %}
 </ul>
 {% endmacro %}
+
+{% macro toc_blocks(view, labels, key) %}
+{% if view.toc %}
+<nav class="toc" aria-labelledby="{{ key }}-toc">
+<h4 id="{{ key }}-toc">{{ labels.ui("on_this_page") }}</h4>
+<ul>
+{% for entry in view.toc %}
+<li><a href="{{ entry.href }}">{{ entry.text }}</a>
+{% if entry.children %}
+<ul>
+{% for child in entry.children %}
+<li><a href="{{ child.href }}">{{ child.text }}</a></li>
+{% endfor %}
+</ul>
+{% endif %}
+</li>
+{% endfor %}
+</ul>
+</nav>
+{% endif %}
+{% if view.questions %}
+<div class="q">
+<h4>{{ labels.plural("open_questions", view.questions | length) }}</h4>
+<ul>
+{% for q in view.questions %}
+<li><a class="mk-{{ q.kind }}" href="{{ q.href }}">{{ icon("i-" ~ q.kind) }}{{ q.text }}</a></li>
+{% endfor %}
+</ul>
+</div>
+{% endif %}
+{% endmacro %}

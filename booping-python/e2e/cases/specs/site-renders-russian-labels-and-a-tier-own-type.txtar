@@ -195,6 +195,7 @@ specs site: 1 roots, 4 records, 14 pages, 0 warnings -> specs-site
 </ul>
 </main>
 </div>
+<div id="status" class="toast" role="status" data-copied="Ссылка скопирована"></div>
 <footer>Собрано booping specs site</footer>
 </body>
 </html>
@@ -300,6 +301,7 @@ specs site: 1 roots, 4 records, 14 pages, 0 warnings -> specs-site
 </ul>
 </main>
 </div>
+<div id="status" class="toast" role="status" data-copied="Ссылка скопирована"></div>
 <footer>Собрано booping specs site</footer>
 </body>
 </html>
@@ -379,6 +381,7 @@ specs site: 1 roots, 4 records, 14 pages, 0 warnings -> specs-site
 </ul>
 </main>
 </div>
+<div id="status" class="toast" role="status" data-copied="Ссылка скопирована"></div>
 <footer>Собрано booping specs site</footer>
 </body>
 </html>
@@ -473,6 +476,7 @@ specs site: 1 roots, 4 records, 14 pages, 0 warnings -> specs-site
 </ul>
 </main>
 </div>
+<div id="status" class="toast" role="status" data-copied="Ссылка скопирована"></div>
 <footer>Собрано booping specs site</footer>
 </body>
 </html>
@@ -512,7 +516,7 @@ specs site: 1 roots, 4 records, 14 pages, 0 warnings -> specs-site
 <a class="brand" href="../../index.html">probe</a>
 <button class="iconbtn theme" type="button" aria-label="Тема: как в системе" title="Тема: как в системе" data-label-auto="Тема: как в системе" data-label-light="Тема: светлая" data-label-dark="Тема: тёмная"><svg class="ic" aria-hidden="true"><use href="#i-auto"/></svg></button>
 </header>
-<div class="body norail">
+<div class="body">
 <nav class="side" id="drawer" aria-label="Навигация">
 <ul>
 <li><a href="../../index.html">Обзор</a></li>
@@ -552,6 +556,15 @@ specs site: 1 roots, 4 records, 14 pages, 0 warnings -> specs-site
 <h1>Сливаем ветки одним коммитом</h1>
 <div class="badges"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>принято</span><a href="#L15"><span class="b warn"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>1 вопрос к тебе</span></a><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-unreviewed"/></svg>без ревью</span></div>
 <p class="lead">Каждая ветка попадает в основную одним коммитом.</p>
+<details class="toc-m">
+<summary>На странице · 1 открытый вопрос</summary>
+<div class="q">
+<h4>1 открытый вопрос</h4>
+<ul>
+<li><a class="mk-clarify" href="#L15"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>[clarify] Касается ли это релизных веток?</a></li>
+</ul>
+</div>
+</details>
 <dl class="facts">
 <dt>Автор</dt>
 <dd>агент</dd>
@@ -574,10 +587,19 @@ specs site: 1 roots, 4 records, 14 pages, 0 warnings -> specs-site
 <p id="L15"><mark class="mk mk-clarify"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>[clarify]</mark> Касается ли это релизных веток?</p>
 </div>
 </article>
-<h2 id="referenced-by">Ссылаются сюда</h2>
+<h2 id="referenced-by">Ссылаются сюда<a class="anchor" href="#referenced-by" aria-label="Ссылка на раздел: Ссылаются сюда">§</a></h2>
 <p>Сюда никто не ссылается.</p>
 </main>
+<aside class="rail">
+<div class="q">
+<h4>1 открытый вопрос</h4>
+<ul>
+<li><a class="mk-clarify" href="#L15"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>[clarify] Касается ли это релизных веток?</a></li>
+</ul>
 </div>
+</aside>
+</div>
+<div id="status" class="toast" role="status" data-copied="Ссылка скопирована"></div>
 <footer>Собрано booping specs site</footer>
 </body>
 </html>
@@ -671,6 +693,7 @@ specs site: 1 roots, 4 records, 14 pages, 0 warnings -> specs-site
 </ul>
 </main>
 </div>
+<div id="status" class="toast" role="status" data-copied="Ссылка скопирована"></div>
 <footer>Собрано booping specs site</footer>
 </body>
 </html>
