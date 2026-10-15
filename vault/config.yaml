@@ -7,9 +7,9 @@ core:
     queries:
       # The feature index, rendered into `research` and `targeting`.
       features:
-        glob: [specs/story/*.md]
+        glob: [story/*.md]
         columns: [title, summary, status]
       # The value list, rendered into `briefing` and `research`.
       values:
-        glob: [specs/value/*.md]
+        glob: [value/*.md]
         columns: [title, kind, summary]

@@ -32,9 +32,9 @@ not.
 
 ## Follows from
 
-- [Minimal effective context](../../vault/specs/value/0002-minimal-effective-context.md) — a body carries only
+- [Minimal effective context](../../vault/value/0002-minimal-effective-context.md) — a body carries only
   what its step needs.
-- [Single source](../../vault/specs/value/0003-single-source.md) — a duplicated block drifts.
+- [Single source](../../vault/value/0003-single-source.md) — a duplicated block drifts.
 - [Retro: skill refactors, chat, develop](../../vault/retrospectives/20260423-skill-refactors-chat-develop-retro.md)
   — one pass caught an inlined roster, its verbatim copy in a sibling skill, a
   negative rule without a positive one and a hard-coded threshold.

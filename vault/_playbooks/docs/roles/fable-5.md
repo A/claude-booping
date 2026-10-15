@@ -9,7 +9,7 @@ Read, in this order:
   role you name is an audience that briefing implies.
 - the repo itself, for the surfaces it exposes and who opens them: README, the public docs site
   source, the changelog, plugin-internal docs, command help output, issue and release history.
-- the audience record `{vault}/specs/reference/0001-audience.md` — the current characterisation,
+- the audience record `{vault}/reference/0001-audience.md` — the current characterisation,
   and the file you refresh.
 
 Never read reference/0003 (documentation surfaces): it is being refreshed concurrently by a

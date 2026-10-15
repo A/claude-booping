@@ -19,7 +19,7 @@ the quality of later work.
 
 ## Follows from
 
-- [Adjustable control](../../vault/specs/value/0009-adjustable-control.md) — the human sees the values
+- [Adjustable control](../../vault/value/0009-adjustable-control.md) — the human sees the values
   and boundaries at work and can take control of them.
-- [Effective human review](../../vault/specs/value/0008-effective-human-review.md) — the review reads
+- [Effective human review](../../vault/value/0008-effective-human-review.md) — the review reads
   the values in play instead of reverse-engineering them from the plan.

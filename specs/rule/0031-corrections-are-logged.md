@@ -24,9 +24,9 @@ groom and develop, the review's `codereviews/` directory for code-review. Format
 
 ## Follows from
 
-- [Curated self-learning](../../vault/specs/value/0001-curated-self-learning.md) — a correction is
+- [Curated self-learning](../../vault/value/0001-curated-self-learning.md) — a correction is
   logged, not turned into a rule; it reaches a rule only through retro and learn with the user.
-- [Analysable history](../../vault/specs/value/0004-analysable-history.md) — the log is plain
+- [Analysable history](../../vault/value/0004-analysable-history.md) — the log is plain
   markdown in the vault beside the artefact, with a link back to the dialogue.
-- [Corrections log](../../vault/specs/adr/0026-corrections-log.md) — the decision to log
+- [Corrections log](../../vault/adr/0026-corrections-log.md) — the decision to log
   corrections as they happen instead of mining transcripts at retro.

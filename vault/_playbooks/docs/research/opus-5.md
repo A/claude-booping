@@ -3,8 +3,8 @@
 You receive the workdir (`{vault}/docs/`), the run record already on disk — its `## Briefing` and
 the confirmed scope from its `## Scope` section, the delivered items this run covers — and the
 spec records: the values and the feature index below, the audience record
-`{vault}/specs/reference/0001-audience.md` and the surfaces record
-`{vault}/specs/reference/0003-documentation-surfaces.md`. On a re-entry from the change gate you
+`{vault}/reference/0001-audience.md` and the surfaces record
+`{vault}/reference/0003-documentation-surfaces.md`. On a re-entry from the change gate you
 also receive the items the user added; only those are read again.
 
 This is the run's one expensive read, paid once and compressed. You read no work item yourself: each

@@ -24,9 +24,9 @@ incident) when no value names it.
 
 ## Follows from
 
-- [Curated self-learning](../../vault/specs/value/0001-curated-self-learning.md) — a lesson becomes a
+- [Curated self-learning](../../vault/value/0001-curated-self-learning.md) — a lesson becomes a
   rule only when the user takes it, and a rule is where taken knowledge lives.
-- [Minimal effective context](../../vault/specs/value/0002-minimal-effective-context.md) — a step gets
+- [Minimal effective context](../../vault/value/0002-minimal-effective-context.md) — a step gets
   the brief, not the whole record.
-- [Single source](../../vault/specs/value/0003-single-source.md) — one record carries the rule and its
+- [Single source](../../vault/value/0003-single-source.md) — one record carries the rule and its
   reason; no second lesson file restates it.

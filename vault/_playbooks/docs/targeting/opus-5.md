@@ -7,8 +7,8 @@ You have the workdir (`{vault}/docs/`), the run record whose change table the us
 extended and confirmed, the feature index below, and spec records `sync-specs` has already folded
 those changes into. Read the change table directly — each change's id, its type, what it touched,
 and the record its spec-set effect names. Hand the record reads to `booping:booping-researcher`,
-one brief covering the surfaces record `{vault}/specs/reference/0003-documentation-surfaces.md`
-and the audience record `{vault}/specs/reference/0001-audience.md`, and ask for exactly what a row
+one brief covering the surfaces record `{vault}/reference/0003-documentation-surfaces.md`
+and the audience record `{vault}/reference/0001-audience.md`, and ask for exactly what a row
 needs back: per surface its path, format, audience, depth and whether this run seeds it or appends
 to it; per role its depth ceiling, its voice and its withheld set. The two records never enter the
 driving context whole; the documentation's structure comes from the surfaces record.

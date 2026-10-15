@@ -40,7 +40,7 @@ place on a rework. Nothing else in the record is touched.
 - nothing else — no history, no "it used to be" narration. A reader who has never seen the project
   must finish it knowing what the project is and who it is for.
 
-Nothing under `specs/` is written: the records are the owner's model, and this section reads them.
+No spec record is written: the records are the owner's model, and this section reads them.
 
 ## The vision shift
 

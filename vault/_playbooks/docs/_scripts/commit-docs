@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 # Vault-commit hook for the docs playbook: commit the docs workdir subtree and
-# the sibling specs tier `{vault}/specs` the spec steps edit.
+# the project specs tier the spec steps edit — the type directories at the vault
+# root, `{vault}/{type}`, types being the schema stems under `core.specs.format`.
 #
 # Environment (set by `booping playbook-transition`): BOOPING_WORKDIR = the run
 # workdir `{vault}/docs` (also cwd), BOOPING_ARTIFACT = the run record.
 #
-# Stages and commits with an explicit pathspec of exactly those two directories
-# (the specs one only when it exists), so unrelated changes elsewhere in the
-# enclosing repository are never swept into the docs commit.
+# Stages and commits with an explicit pathspec of exactly those directories
+# (each type directory only when it exists), so unrelated changes elsewhere in
+# the enclosing repository are never swept into the docs commit.
 set -euo pipefail
 
 workdir="${BOOPING_WORKDIR:?BOOPING_WORKDIR is not set}"
@@ -18,10 +19,19 @@ if ! git -C "$workdir" rev-parse --git-dir >/dev/null 2>&1; then
   exit 0
 fi
 
+# This playbook lives in booping's own vault, so the enclosing repo is the plugin root.
+repo=$(git -C "$workdir" rev-parse --show-toplevel)
+booping="${BOOPING_BIN:-$repo/bin/booping}"
+format=$(cd "$workdir" && "$booping" config-get core.specs.format)
+vault=$(cd "$workdir/.." && pwd -P)
+
 paths=("$workdir")
-if [ -d "$workdir/../specs" ]; then
-  paths+=("$(cd "$workdir/../specs" && pwd -P)")
-fi
+for schema in "$repo/$format"/schemas/*.yaml; do
+  type=$(basename "$schema" .yaml)
+  if [ -d "$vault/$type" ]; then
+    paths+=("$vault/$type")
+  fi
+done
 
 if [ -z "$(git -C "$workdir" status --porcelain -- "${paths[@]}")" ]; then
   echo "commit-docs: nothing to commit"

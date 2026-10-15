@@ -21,7 +21,7 @@ prose into the orchestrator's context.
 
 ## Follows from
 
-- [Minimal effective context](../../vault/specs/value/0002-minimal-effective-context.md) — the orchestrator's
+- [Minimal effective context](../../vault/value/0002-minimal-effective-context.md) — the orchestrator's
   context holds only what it acts on.
 - [Retro: CLI logging and agent namespacing](../../vault/retrospectives/20260610-cli-logging-and-agent-namespacing.md)
   — mid-sprint the user had to tell the agent to return only the changed files.

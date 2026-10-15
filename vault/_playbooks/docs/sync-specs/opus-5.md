@@ -11,18 +11,18 @@ back. You detect nothing yourself — a disagreement between a record and the co
 as a row that states it.
 
 Read in full the records the table's rows target, under the project specs tier root
-`{vault}/specs/`, then edit each in place. Their shapes are the specs format's
+`{vault}/`, then edit each in place. Their shapes are the specs format's
 (`src/specs/README.md`, Body and Marks, and `src/specs/schemas/<type>.yaml` under the plugin root).
 
 ## Where a row lands
 
 | Row — its type, or the spec-set effect it names | Record | Action |
 | --- | --- | --- |
-| vision shift | the affected value record, `specs/value/` | a `[clarify]` sentence in its `## In practice`, naming the shift; the value's statement, its other sections and its frontmatter fields other than `updated_at` are never rewritten — values are the owner's |
-| audience | `specs/reference/0001-audience.md` | the role's bullets in `## Facts` edited in place: a new audience, a depth ceiling that moved, a withheld set that changed |
-| surface | `specs/reference/0003-documentation-surfaces.md` | the surface's bullet in `## Facts` added, dropped or re-scoped in place: format, audience, depth |
-| term | `specs/reference/0002-glossary.md` | the term's bullet in `## Facts` introduced, renamed or retired in place |
-| new feature | a new story record, `specs/story/{NNNN}-{slug}.md` | `NNNN` the next number in `specs/story/`; frontmatter `type: story`, `title`, `summary` (one line, at most 200 characters), `created_by: claude`, `created_at` and `updated_at` today, `status: done`; body the "As **who**, I want …, so that …" sentence, then `## Criteria` with one to five items |
+| vision shift | the affected value record, `value/` | a `[clarify]` sentence in its `## In practice`, naming the shift; the value's statement, its other sections and its frontmatter fields other than `updated_at` are never rewritten — values are the owner's |
+| audience | `reference/0001-audience.md` | the role's bullets in `## Facts` edited in place: a new audience, a depth ceiling that moved, a withheld set that changed |
+| surface | `reference/0003-documentation-surfaces.md` | the surface's bullet in `## Facts` added, dropped or re-scoped in place: format, audience, depth |
+| term | `reference/0002-glossary.md` | the term's bullet in `## Facts` introduced, renamed or retired in place |
+| new feature | a new story record, `story/{NNNN}-{slug}.md` | `NNNN` the next number in `story/`; frontmatter `type: story`, `title`, `summary` (one line, at most 200 characters), `created_by: claude`, `created_at` and `updated_at` today, `status: done`; body the "As **who**, I want …, so that …" sentence, then `## Criteria` with one to five items |
 | refactoring | the story it moves | that story's `## Criteria` items edited in place |
 | feature drop | the story it drops | a `[clarify]` mark in its `## Criteria` naming the drop; `status:` untouched |
 | chore | none | carried forward untouched for `targeting` to route |
@@ -63,8 +63,8 @@ again; the result line returned is the last run's.
 
 ```markdown
 ## Changed:
-- [CREATED] {vault}/specs/story/{NNNN}-{slug}.md — {the story, in a few words}
-- [UPDATED] {vault}/specs/{type}/{NNNN}-{slug}.md — {what moved, in a few words}
+- [CREATED] {vault}/story/{NNNN}-{slug}.md — {the story, in a few words}
+- [UPDATED] {vault}/{type}/{NNNN}-{slug}.md — {what moved, in a few words}
 
 ## Notes:
 - {row} ({type}) → {record}: {the edit in a phrase}

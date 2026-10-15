@@ -11,11 +11,11 @@ what is worth reading, it does not do the reading.
 
 The records, under the project specs tier root:
 
-- `specs/value/` — every value record
-- `specs/reference/0001-*` — audience
-- `specs/reference/0002-*` — glossary
-- `specs/reference/0003-*` — documentation surfaces
-- `specs/story/` — every story record
+- `value/` — every value record
+- `reference/0001-*` — audience
+- `reference/0002-*` — glossary
+- `reference/0003-*` — documentation surfaces
+- `story/` — every story record
 
 Run `booping specs check --tier project` once. Each record gets one state: `missing` when its file
 is absent, `incomplete` when an error names it, else `present`. Never judge a record by whether its
@@ -45,7 +45,7 @@ headline for the undocumented set as a whole (`nothing-to-document` when it is e
   its own edge's. Write none of them.
 - H1 repeating the title.
 - `## Spec set` — a `Record | State | Open marks | Gap` table, five rows in the order above: one
-  per reference record, one each summarising `specs/value/` and `specs/story/` with their record
+  per reference record, one each summarising `value/` and `story/` with their record
   count. A summary row takes its worst record's state and sums its marks. `—` in Gap when the
   state is `present`, otherwise each record not present with the check error or absence. Closed by
   one prose line: `{n} of 5 usable`, the open-mark total, and whether the spec waves are needed —

@@ -5,7 +5,7 @@ You receive the attached repo's path and the run record
 serves, where it is heading — is confirmed. Describe the project's own parts in the briefing's
 vocabulary.
 
-Read the surfaces record `{vault}/specs/reference/0003-documentation-surfaces.md` first: a run
+Read the surfaces record `{vault}/reference/0003-documentation-surfaces.md` first: a run
 refreshes it, it never regenerates it. Then read the repo yourself: every markdown documentation
 surface it carries today, and the conventions each one follows — where it lives, how it is built
 and published, how long its entries run, how it links, what it habitually omits.
