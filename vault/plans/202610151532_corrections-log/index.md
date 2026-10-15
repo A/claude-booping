@@ -2,13 +2,13 @@
 title: "Corrections log — booping correction add, the corrections sidecar, retro's
   feed"
 type: "feature"
-status: in-progress
+status: done
 sp: 20
 related_to: null
 created: 2026-10-15 15:32
 planned: null
 started: 2026-10-15 15:47
-completed: null
+completed: 2026-10-15 16:08
 code_reviews: []
 sessions:
 - 6a68e361-5db5-43f6-9580-ac2e1ae7254d
@@ -23,6 +23,13 @@ tracker_issue: null
 return_to: null
 agents: '{"research-codebase": "a532951ede0d0389c", "cross-review": "a67b2e29dfcbaa692"}'
 reviewed_at: 2026-10-15 15:46
+metrics_active_minutes: 36
+metrics_models:
+- claude-opus-5-5
+metrics_tokens_input: 122
+metrics_tokens_output: 54474
+metrics_tokens_cache_creation: 228304
+metrics_tokens_cache_read: 5691723
 ---
 
 # Corrections log — booping correction add, the corrections sidecar, retro's feed
