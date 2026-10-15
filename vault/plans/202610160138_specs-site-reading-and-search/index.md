@@ -1,17 +1,18 @@
 ---
 title: "Specs site redesign, part 3 — record reading and search"
 type: "feature"
-status: in-progress
+status: done
 sp: 22
 related_to: null
 created: 2026-10-16 01:39
 planned: null
 started: 2026-10-16 02:02
-completed: null
+completed: 2026-10-16 02:47
 code_reviews: []
 sessions:
 - 50d35fa2-5b16-450d-a9df-a7507d4ae767
 - 5f67de5e-559c-4b7a-a80c-708055d58a43
+- 36dbf90d-0102-4f43-add1-4a69775c2e2f
 retro: null
 summary: 'Specs site part 3: ToC rail, § anchors, grouped backlinks, ADR option cards,
   Cyrillic-aware vanilla search'
@@ -22,6 +23,14 @@ tracker_issue: null
 return_to: null
 agents: '{"research-codebase": "a94ca418362743d51", "cross-review": "a843baee827ba90c0"}'
 reviewed_at: 2026-10-16 01:51
+metrics_active_minutes: 1097
+metrics_models:
+- <synthetic>
+- claude-opus-5-5
+metrics_tokens_input: 1330
+metrics_tokens_output: 462740
+metrics_tokens_cache_creation: 2634045
+metrics_tokens_cache_read: 283416414
 ---
 
 # Specs site redesign, part 3 — record reading and search
