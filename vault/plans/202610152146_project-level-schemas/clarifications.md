@@ -141,3 +141,11 @@ No: the estimate is 26 SP, under the 35 SP threshold, so the whole request is on
 **Answer:**
 
 Auto-confirmed by the run under the session's autonomous directive: intake's framing stood as written (no change to type, problem or boundary); the cross-review (codex) returned no findings; present's approval was given by the run, moving the plan to `ready-for-dev`. The owner reviews the plan before or during develop.
+
+## C-owner — structural headings — answered
+
+**Asked:** 2026-10-15 — owner, during develop
+
+**Question:** Translated schema sets for projects writing in Russian?
+
+**Answer:** No. Structural headings, labels, table columns and frontmatter keys stay the shipped English ones in every tier; content may be in any language. M05 now states that rule, M06 (init --schemas) is removed, M07's import guidance renames headings instead. A tier's own schemas stay for its own types and fields (M01-M04 unchanged).
