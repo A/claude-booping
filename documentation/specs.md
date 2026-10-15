@@ -4,9 +4,22 @@ Specs are typed records of what the code cannot show: why a project exists and w
 
 ## Format in brief
 
-A tier root holds one directory per type — `value/`, `rule/`, `adr/`, `conflict/`, `story/`, `idea/`, `reference/`, `runbook/` — and each record is a file `<type>/<NNNN>-<slug>.md`: a four-digit number running within the type and a kebab-case slug. A record is referred to as `<type>/<NNNN>` (`adr/0001`); in a body, references are ordinary relative markdown links.
+A tier root holds one directory per type and each record is a file `<type>/<NNNN>-<slug>.md`: a four-digit number running within the type and a kebab-case slug. A record is referred to as `<type>/<NNNN>` (`adr/0001`); in a body, references are ordinary relative markdown links.
 
 The full format — frontmatter keys, the body sections each type requires, marks for open questions — is the shipped guide: [`src/specs/README.md`](https://github.com/A/claude-booping/blob/master/src/specs/README.md). Each type's shape is an [mdcheck](https://github.com/A/markdown-checker) rule file beside it under `src/specs/schemas/`.
+
+booping ships eight types — `value`, `rule`, `adr`, `conflict`, `story`, `idea`, `reference`, `runbook` — and a tier can override or add to them (see [Tier schemas and tags](#tier-schemas-and-tags)), so a tier's types are whatever its effective schema set holds.
+
+Write a record's content in any language, but keep its structural headings, bold labels, table columns and frontmatter keys the shipped English ones: one schema set serves every tier.
+
+## Tier schemas and tags
+
+A tier root can carry two files of its own beside its type directories:
+
+- **`_schemas/<type>.yaml`** — an mdcheck rule file. A type the shipped set has gets this shape instead in this tier; a new name adds a type, whose records go in `<type>/`. It applies to that tier only — a global-tier schema never reaches a project. Use it for your own types and fields, not to translate headings.
+- **`tags.yaml`** — a mapping `tag: one-line description`. Once it exists, every record's optional `tags:` list must use its keys: `area` or `area:sub` in kebab-case, with `area` itself listed for every `area:sub`.
+
+A tier schema must keep the frontmatter keys and values booping reads — `type`, `status`, `kind`, `targets`, `brief`, `values`, `rules`, `supersedes`, `sources`, `reviewed`, `created_by`, and an ADR's alternatives status cell — as they are.
 
 ## Tiers
 
@@ -79,7 +92,7 @@ Prints the next free ref of a type in the tier — the highest number plus one, 
 booping specs check [--tier TIER]
 ```
 
-Validates every record of the tier: its type's schema, the directory layout and file names, unique numbers, frontmatter, rule targets, relative link targets, typed refs and `sources` paths. Each finding prints as `{path}:{line}  {level}  {check}  {message}`, followed by a count on stderr. A cross-tier ref whose namespace no configured tier answers to, or whose tier is absent on this machine, is a warning, not an error.
+Validates every record of the tier: its type's schema (the tier's own from `_schemas/` when it has one), the directory layout and file names, unique numbers, frontmatter, rule targets, relative link targets, typed refs, `sources` paths, `tags` against the tier's `tags.yaml`, and each ADR's alternatives — every table row matches one `###` option and exactly one option is accepted (at most one while the ADR is not accepted or superseded). A tier schema mdcheck cannot load is reported as an error on that file. Each finding prints as `{path}:{line}  {level}  {check}  {message}`, followed by a count on stderr. A cross-tier ref whose namespace no configured tier answers to, or whose tier is absent on this machine, is a warning, not an error.
 
 The check needs the `mdcheck` binary on `PATH`:
 

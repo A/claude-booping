@@ -309,7 +309,7 @@ Macros are honoured in every tier, project included. A project config arrives wi
 
 Where the three [specs](specs.md) tiers live and what their namespaces are. Directly under `core` because `booping specs` and rule injection both read it.
 
-- **`core.specs.format`** — the directory holding the format guide and the per-type schemas, relative to the plugin root. Default `src/specs`; the record types are the schema file stems found there.
+- **`core.specs.format`** — the directory holding the format guide and the per-type schemas, relative to the plugin root. Default `src/specs`; the shipped record types are the schema file stems found there. Types are per tier: the shipped stems plus those in the tier's own `<tier root>/_schemas/`, which override or add.
 - **`core.specs.tiers.core`** — booping's own records: `path` relative to the plugin root (`specs`), `namespace` the prefix other tiers cite them by (`booping`).
 - **`core.specs.tiers.global`** — your records for every project: `path` relative to `home_dir` (`_specs`), `namespace` your prefix. `null` takes the `USER` environment variable. The [setup playbook](install.md#scaffold-the-project-vault) asks for `core.specs.tiers.global.namespace` once, `$USER` as the default, and writes it into the global config beside `home_dir`; a global config already carrying the key is not asked again.
 - **`core.specs.tiers.project`** — the project's own records: `path` relative to the attached repo. `null` resolves to the vault root: the type directories sit beside `plans/`. Set `path` to keep the records in the repo instead; [`booping specs init`](specs.md#booping-specs-init) then links `<vault>/specs` to that directory, so the records stay reachable from the vault.
