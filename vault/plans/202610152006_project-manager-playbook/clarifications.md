@@ -121,3 +121,13 @@ At most one develop or code-review run per checkout at a time — both write the
 **Answer:**
 
 One line per item: `{id} {title} — {outcome} — {pointer}`; outcome one of `done`, `planned`, `running`, `waiting on you`, `dropped`; pointer the plan path, the run record, the questions sidecar or the closing commit. Locked in the plan's I/O contract.
+
+## C12 — plan approval — answered
+
+**Asked:** 2026-10-15 — present
+
+**Question:** The plan is ready for development — approve, or say what to change?
+
+**Answer:**
+
+Approved by the autonomous run (the owner was unavailable; the session directive auto-confirms review gates). Cross-review (codex) returned one RISK and six NOTEs: the RISK (how the one-run-per-checkout queue is checked) and four NOTEs (branch merge target, groom batching, which items a blocker lands on, where review findings live) were folded into M05; two NOTEs (message splitting and item titles are judgement) were not — that judgement is the model's job by value/0015.

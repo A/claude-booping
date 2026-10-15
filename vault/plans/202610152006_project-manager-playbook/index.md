@@ -2,7 +2,7 @@
 title: "Project-manager playbook — the core manager over items, groom, develop and
   runs"
 type: "feature"
-status: presenting
+status: ready-for-dev
 sp: 25
 related_to: null
 created: 2026-10-15 20:06
@@ -20,8 +20,11 @@ tracker_provider: null
 tracker_request: null
 tracker_issue: null
 return_to: null
-agents: '{"research-codebase": "a25593ccb6e015e22", "research-sources": "a7b4675d1f20209c6",
-  "cross-review": "a56bd798773a71631"}'
+agents:
+  research-codebase: a25593ccb6e015e22
+  research-sources: a7b4675d1f20209c6
+  cross-review: a56bd798773a71631
+reviewed_at: 2026-10-15 20:21
 ---
 
 # Project-manager playbook — the core manager over items, groom, develop and runs
