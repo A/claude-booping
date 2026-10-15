@@ -1,7 +1,7 @@
 ---
 title: "Specs playbook and open items"
 type: "feature"
-status: presenting
+status: ready-for-dev
 sp: 34
 related_to: null
 created: 2026-10-15 14:09
@@ -19,6 +19,7 @@ tracker_provider: null
 tracker_request: null
 tracker_issue: null
 return_to: null
+reviewed_at: 2026-10-15 14:26
 ---
 
 # Specs playbook and open items

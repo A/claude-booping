@@ -96,3 +96,11 @@ Autonomous groom run on 2026-10-15: the owner was unavailable, so every question
 **Question:** Should this plan add a story record for the new surface, and seed booping's own vault with items?
 
 **Answer:** No to both — default applied. Story records are the `docs` playbook's to keep current; a `scan` over booping's tier would commit dozens of items as a side effect of a feature plan. Both stay the owner's call after merge.
+
+## C10 — plan approval — answered
+
+**Asked:** 2026-10-15 — present
+
+**Question:** The plan review gate asks for explicit approval. Who approves in an autonomous run?
+
+**Answer:** The run auto-confirmed it under the request's standing instruction ("do not wait at review gates — auto-confirm them yourself") — default applied. The cross-review returned one RISK (M05 named the wrong module for the heading slug), folded into M05; no CRITICAL. The owner can still send the plan back to drafting before develop starts.
