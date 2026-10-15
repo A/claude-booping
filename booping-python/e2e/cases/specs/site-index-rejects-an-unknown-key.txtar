@@ -1,0 +1,12 @@
+An entry key other than `name`, `url` and `description` is rejected, the first unknown key in
+sorted order named; no out directory is created.
+
+-- fixtures/cwd/projects.json --
+[{"name": "ok", "url": "https://pages.example.org/ok", "topic": "x", "owner": "y"}]
+-- cmd --
+sh -c 'booping specs site-index --out site < projects.json; s=$?; test -e site && echo site exists; exit $s'
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: projects[0]: unknown key `owner`

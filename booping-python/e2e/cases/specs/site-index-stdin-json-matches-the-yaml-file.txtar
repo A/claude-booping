@@ -1,0 +1,53 @@
+The default source is JSON on stdin; the same entries as a YAML file render the same `index.html`
+bytes.
+
+-- fixtures/cwd/projects.json --
+[
+  {"name": "beta", "url": "https://pages.example.org/beta", "description": "Beta\ntools."},
+  {"name": "Alpha", "url": "https://pages.example.org/alpha", "description": null}
+]
+-- fixtures/cwd/projects.yaml --
+- name: beta
+  url: https://pages.example.org/beta
+  description: "Beta\ntools."
+- name: Alpha
+  url: https://pages.example.org/alpha
+  description: null
+-- cmd --
+booping specs site-index --projects projects.yaml --out from-yaml
+sh -c 'booping specs site-index --out site < projects.json'
+cmp from-yaml/index.html site/index.html
+-- exit --
+0
+-- stdout --
+specs site-index: 2 projects -> from-yaml
+specs site-index: 2 projects -> site
+-- stderr --
+-- expected/cwd/site/index.html --
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Specs — specs</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav class="crumbs">
+<span>Specs</span></nav>
+<main>
+<h1>Specs</h1>
+<div class="table-wrap">
+<table>
+<thead>
+<tr><th>Project</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><a href="https://pages.example.org/alpha">Alpha</a></td><td></td></tr>
+<tr><td><a href="https://pages.example.org/beta">beta</a></td><td>Beta tools.</td></tr>
+</tbody>
+</table>
+</div>
+</main>
+</body>
+</html>

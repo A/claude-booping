@@ -1,0 +1,12 @@
+Two entries with the same name are rejected, the message naming both indexes; no out directory is
+created.
+
+-- fixtures/cwd/projects.json --
+[{"name": "a", "url": "https://pages.example.org/a"}, {"name": "b", "url": "https://pages.example.org/b"}, {"name": "a", "url": "https://pages.example.org/a2"}]
+-- cmd --
+sh -c 'booping specs site-index --out site < projects.json; s=$?; test -e site && echo site exists; exit $s'
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: projects[2]: duplicate name `a` (also projects[0])
