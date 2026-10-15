@@ -31,7 +31,7 @@ Default (autonomous run): the hybrid "inclusive card" pattern. `.row` is `positi
 Default (autonomous run). One button, `button.filter-open`, text:
 
 - `{filters}` when no chip is pressed, `{filters} ({n})` otherwise — `n` = number of pressed chips across all facets;
-- then ` · ` and the selected sort option's own text (e.g. `Filters (1) · For review`, `Фильтры (1) · Для ревью`).
+- then ` · ` and the selected sort option's own text (e.g. `Filters (1) · Review order`, `Фильтры (1) · Для ревью`).
 
 New config labels `core.specs.site.labels.{en,ru}.ui`: `filters` (`Filters` / `Фильтры`), `filter_remove` (`Remove filter: {label}` / `Убрать фильтр: {label}`) for the removable chips' aria-label, `filters_show` (`Show records` / `Показать записи`) for the sheet's done button. The sheet heading reuses `filters`; its close button reuses `close`. The count line ("79 records shown") stays visible on the page under the active chips.
 
@@ -64,3 +64,18 @@ Default (autonomous run): `min-height: 30px`, `padding: 2px 10px`, `font-size: 1
 **Answer:**
 
 Default (autonomous run): the chip groups and the sort label are wrapped once in `<dialog class="filter-sheet">` inside `.filters`. CSS shows that dialog as a static inline block at every width (`display: block; position: static`, dialog chrome reset) — so without JS, and with JS on desktop, the bar looks as today. Only under `html.js` at the phone breakpoint is a closed `.filter-sheet` hidden, the compact row shown, and an open one styled as the bottom sheet (`max-height: 80vh`, rounded top, `::backdrop` dimmed, slide-up off under `prefers-reduced-motion`), copying `dialog.cmt-sheet`. `filter.js` opens it with `showModal()`, closes it on the close button, the "Show records" button, Escape and a backdrop click, returns focus to `button.filter-open`, and closes it when the breakpoint media query stops matching. Chip presses inside the open sheet apply live (count line and list update behind it). Filter state stays in `location.hash` as today; the sheet's open state is not stored.
+
+## C7 — cross-review dispositions — answered
+
+**Asked:** 2026-10-16 — cross-review
+
+**Question:** How are the cross-review findings (codex) disposed of?
+
+**Answer:**
+
+Default (autonomous run):
+
+- CRITICAL `p.empty` lookup — folded in: M02 now keeps `p.empty` as the next sibling after `div.filters`, where `filter.js` finds it; M03 names that lookup as unchanged.
+- RISK no committed check — folded in partly: M03 adds the pure `filter-format.js` (row text, removable-chip list) under a node-run unit test (+1 SP); the DOM wiring stays held by headless checks, recorded as a departure from value/0010 in `index.md` Decisions.
+- RISK breakpoint 759 vs 760 — not folded: the phone block the plan targets is `@media (max-width: 760px)`; only `dialog.cmt-sheet` uses `759px`/`760px` min. The new rules use the phone block's `760px`.
+- RISK defaults file — folded in: `index.md` names `develop-defaults.md` beside the plan as the place accepted snapshot drift is listed.
