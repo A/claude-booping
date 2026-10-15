@@ -2,7 +2,7 @@
 id: "09"
 title: "Shipped specs guide and public docs"
 sp: 3
-status: in-progress
+status: done
 plan: "plans/202610151727_project-specs-at-vault-root/index.md"
 ---
 
@@ -24,19 +24,19 @@ Tests: the docs build.
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 9.1 | Shipped guide; setup example line. | `src/specs/README.md`, `playbooks/setup/setup-project/opus-5.md` | 1 | pending |
-| 9.2 | The three docs pages. | `documentation/project_config.md`, `documentation/install.md`, `documentation/specs.md` | 2 | pending |
+| 9.1 | Shipped guide; setup example line. | `src/specs/README.md`, `playbooks/setup/setup-project/opus-5.md` | 1 | done |
+| 9.2 | The three docs pages. | `documentation/project_config.md`, `documentation/install.md`, `documentation/specs.md` | 2 | done |
 
 ## Definition of Done
 
 ### Task 9.1
 
-- [ ] The guide's project row and `layout` bullet say what Scope says; no sentence places the default at `{vault}/specs`.
+- [x] The guide's project row and `layout` bullet say what Scope says; no sentence places the default at `{vault}/specs`.
 
 ### Task 9.2
 
-- [ ] No page states `{vault}/specs` or `vault/specs/` as the default; the migration sentence is present once.
-- [ ] Nothing in the changed text names an internal module, flag or test.
+- [x] No page states `{vault}/specs` or `vault/specs/` as the default; the migration sentence is present once.
+- [x] Nothing in the changed text names an internal module, flag or test.
 
 Return: the list of changed files, nothing else.
 
