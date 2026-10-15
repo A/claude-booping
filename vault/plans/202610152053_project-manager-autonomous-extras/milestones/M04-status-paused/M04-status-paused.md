@@ -2,7 +2,7 @@
 id: "04"
 title: "Paused runs in booping status with next milestone and resume command"
 sp: 3
-status: pending
+status: done
 plan: "plans/202610152053_project-manager-autonomous-extras/index.md"
 ---
 
@@ -18,18 +18,18 @@ Tests (integration tier, `booping-python/e2e/cases/status/`, hand-derived): shor
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 4.1 | Resumed computation and the `Paused:` table. | `booping-python/src/booping/status.py` | 2 | pending |
-| 4.2 | The three e2e cases above. | `booping-python/e2e/cases/status/*paused*.txtar` | 1 | pending |
+| 4.1 | Resumed computation and the `Paused:` table. | `booping-python/src/booping/status.py` | 2 | done |
+| 4.2 | The three e2e cases above. | `booping-python/e2e/cases/status/*paused*.txtar` | 1 | done |
 
 ## Definition of Done
 
 ### Task 4.1
 
-- [ ] No paused run → the detail output is byte-identical to today's; every existing `status` case passes unchanged.
+- [x] No paused run → the detail output is byte-identical to today's; every existing `status` case passes unchanged.
 
 ### Task 4.2
 
-- [ ] The three cases exist and pass.
+- [x] The three cases exist and pass.
 
 Return: the list of changed and created files, nothing else.
 

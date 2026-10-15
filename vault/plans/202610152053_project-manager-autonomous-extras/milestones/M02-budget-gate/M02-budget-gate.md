@@ -1,8 +1,8 @@
 ---
 id: "02"
-title: "Budget gate \u2014 ceilings, run allowance and time window in booping budget gate"
+title: "Budget gate — ceilings, run allowance and time window in booping budget gate"
 sp: 4
-status: pending
+status: done
 plan: "plans/202610152053_project-manager-autonomous-extras/index.md"
 ---
 
@@ -18,25 +18,25 @@ Tests (integration tier, `booping-python/e2e/cases/budget/`, hand-derived, probe
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 2.1 | Config keys with comments. | `src/config.yaml` | 1 | pending |
-| 2.2 | Verdict function and `gate` verb. | `booping-python/src/booping/budget.py`, `booping-python/src/booping/commands/budget.py` | 2 | pending |
-| 2.3 | The seven e2e cases above. | `booping-python/e2e/cases/budget/gate-*.txtar` | 1 | pending |
+| 2.1 | Config keys with comments. | `src/config.yaml` | 1 | done |
+| 2.2 | Verdict function and `gate` verb. | `booping-python/src/booping/budget.py`, `booping-python/src/booping/commands/budget.py` | 2 | done |
+| 2.3 | The seven e2e cases above. | `booping-python/e2e/cases/budget/gate-*.txtar` | 1 | done |
 
 ## Definition of Done
 
 ### Task 2.1
 
-- [ ] `bin/booping config-get core.budget` prints all six keys.
+- [x] `bin/booping config-get core.budget` prints all six keys.
 
 ### Task 2.2
 
-- [ ] `bin/booping budget gate --help` matches the contract; exit 0 on `allow`, 3 on `pause`, 1 on a config error (`error: core.budget.window must be {start: HH:MM, end: HH:MM}`).
-- [ ] stdout is exactly one verdict line; `pause` also prints `resume_after: {YYYY-MM-DD HH:MM}` on a second line when there is one.
-- [ ] The verdict is a pure function of (gated, now, window, reading or its absence, ceilings, run allowance, baseline) — unit-callable with no I/O.
+- [x] `bin/booping budget gate --help` matches the contract; exit 0 on `allow`, 3 on `pause`, 1 on a config error (`error: core.budget.window must be {start: HH:MM, end: HH:MM}`).
+- [x] stdout is exactly one verdict line; `pause` also prints `resume_after: {YYYY-MM-DD HH:MM}` on a second line when there is one.
+- [x] The verdict is a pure function of (gated, now, window, reading or its absence, ceilings, run allowance, baseline) — unit-callable with no I/O.
 
 ### Task 2.3
 
-- [ ] The seven cases exist and pass; M01's cases pass unchanged.
+- [x] The seven cases exist and pass; M01's cases pass unchanged.
 
 Return: the list of changed and created files, nothing else.
 

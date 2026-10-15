@@ -1,20 +1,21 @@
 ---
 title: "Project-manager autonomous extras — budget gate, time window, size batching"
 type: "feature"
-status: ready-for-dev
-sp: null
+status: in-progress
+sp: 24
 related_to: null
 created: 2026-10-15 20:54
 planned: null
-started: null
+started: 2026-10-15 21:14
 completed: null
 code_reviews: []
 sessions:
 - cc8c9973-3ab7-48e7-b1a5-806b0e65eba7
+- 018b65c5-3c42-4f44-a466-b84420bcdb9c
 retro: null
 summary: 'Autonomous extras for project-manager: code-computed usage/window gate with
   paused runs and resume, item sizes and batches'
-commit: 5cdefb9bc50b5ab26baeafafaea984790b725722
+commit: 44b785b3652b9f78bc8646ebf2f0e0e8dec54f48
 tracker_provider: null
 tracker_request: null
 tracker_issue: null
@@ -95,10 +96,10 @@ project-manager work: classify ─► tiny fix ─► booping items size ─► 
 
 | id | title | sp | status |
 | --- | --- | --- | --- |
-| 01 | [Usage reading — booping budget read over run logs and the probe](milestones/M01-usage-reading/M01-usage-reading.md) | 3 | pending |
-| 02 | [Budget gate — ceilings, run allowance and time window in booping budget gate](milestones/M02-budget-gate/M02-budget-gate.md) | 4 | pending |
-| 03 | [Paused runs — launch gate, the gate stamps the run record, the paused status](milestones/M03-run-pause/M03-run-pause.md) | 4 | pending |
-| 04 | [Paused runs in booping status with next milestone and resume command](milestones/M04-status-paused/M04-status-paused.md) | 3 | pending |
+| 01 | [Usage reading — booping budget read over run logs and the probe](milestones/M01-usage-reading/M01-usage-reading.md) | 3 | done |
+| 02 | [Budget gate — ceilings, run allowance and time window in booping budget gate](milestones/M02-budget-gate/M02-budget-gate.md) | 4 | done |
+| 03 | [Paused runs — launch gate, the gate stamps the run record, the paused status](milestones/M03-run-pause/M03-run-pause.md) | 4 | done |
+| 04 | [Paused runs in booping status with next milestone and resume command](milestones/M04-status-paused/M04-status-paused.md) | 3 | done |
 | 05 | [Item sizes and batches — booping items size and items batch](milestones/M05-item-size-batch/M05-item-size-batch.md) | 4 | pending |
 | 06 | [Develop-loop gate and project-manager batches, pauses and resumes](milestones/M06-playbook-wiring/M06-playbook-wiring.md) | 3 | pending |
 | 07 | [Documentation, CLAUDE.md and config reference for budget, window and batches](milestones/M07-docs/M07-docs.md) | 3 | pending |

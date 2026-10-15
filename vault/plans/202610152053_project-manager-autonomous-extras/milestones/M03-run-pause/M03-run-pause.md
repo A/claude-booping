@@ -2,7 +2,7 @@
 id: "03"
 title: "Paused runs — launch gate, the gate stamps the run record, the paused status"
 sp: 4
-status: pending
+status: done
 plan: "plans/202610152053_project-manager-autonomous-extras/index.md"
 ---
 
@@ -18,25 +18,25 @@ Tests (integration tier, e2e corpora `booping-python/e2e/cases/run/` and `.../bu
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 3.1 | `BOOPING_RUN_ID`, launch gate, baseline. | `booping-python/src/booping/commands/run.py` | 1 | pending |
-| 3.2 | `paused` status in `finish` and `ack`; gate stamps the record and computes `next_milestone`. | `booping-python/src/booping/runs.py`, `booping-python/src/booping/budget.py`, `booping-python/src/booping/commands/budget.py` | 2 | pending |
-| 3.3 | The six e2e cases above. | `booping-python/e2e/cases/run/*paused*.txtar`, `booping-python/e2e/cases/run/*gate*.txtar` | 1 | pending |
+| 3.1 | `BOOPING_RUN_ID`, launch gate, baseline. | `booping-python/src/booping/commands/run.py` | 1 | done |
+| 3.2 | `paused` status in `finish` and `ack`; gate stamps the record and computes `next_milestone`. | `booping-python/src/booping/runs.py`, `booping-python/src/booping/budget.py`, `booping-python/src/booping/commands/budget.py` | 2 | done |
+| 3.3 | The six e2e cases above. | `booping-python/e2e/cases/run/*paused*.txtar`, `booping-python/e2e/cases/run/*gate*.txtar` | 1 | done |
 
 ## Definition of Done
 
 ### Task 3.1
 
-- [ ] `bin/booping run develop --help` notes that `--autonomous` passes the budget gate first and exits 3 on `pause`.
-- [ ] A launch without `--autonomous` is never gated; every existing `run` case passes unchanged.
+- [x] `bin/booping run develop --help` notes that `--autonomous` passes the budget gate first and exits 3 on `pause`.
+- [x] A launch without `--autonomous` is never gated; every existing `run` case passes unchanged.
 
 ### Task 3.2
 
-- [ ] `gate` outside a registered run writes nothing.
-- [ ] A paused child that exits non-zero records `failed`, keeping the stamped keys.
+- [x] `gate` outside a registered run writes nothing.
+- [x] A paused child that exits non-zero records `failed`, keeping the stamped keys.
 
 ### Task 3.3
 
-- [ ] The six cases exist and pass.
+- [x] The six cases exist and pass.
 
 Return: the list of changed and created files, nothing else.
 

@@ -1,8 +1,8 @@
 ---
 id: "01"
-title: "Usage reading \u2014 booping budget read over run logs and the probe"
+title: "Usage reading — booping budget read over run logs and the probe"
 sp: 3
-status: pending
+status: done
 plan: "plans/202610152053_project-manager-autonomous-extras/index.md"
 ---
 
@@ -18,25 +18,25 @@ Tests (integration tier, e2e corpus `booping-python/e2e/cases/budget/`, hand-der
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 1.1 | `core.budget` keys `max_age_s`, `probe` with comments. | `src/config.yaml` | 1 | pending |
-| 1.2 | Stream parsing, log selection, probe, `booping budget read`. | `booping-python/src/booping/budget.py`, `booping-python/src/booping/commands/budget.py`, `booping-python/src/booping/cli.py` | 1 | pending |
-| 1.3 | The four e2e cases above. | `booping-python/e2e/cases/budget/read-*.txtar` | 1 | pending |
+| 1.1 | `core.budget` keys `max_age_s`, `probe` with comments. | `src/config.yaml` | 1 | done |
+| 1.2 | Stream parsing, log selection, probe, `booping budget read`. | `booping-python/src/booping/budget.py`, `booping-python/src/booping/commands/budget.py`, `booping-python/src/booping/cli.py` | 1 | done |
+| 1.3 | The four e2e cases above. | `booping-python/e2e/cases/budget/read-*.txtar` | 1 | done |
 
 ## Definition of Done
 
 ### Task 1.1
 
-- [ ] `bin/booping config-get core.budget` prints both keys with the defaults above.
+- [x] `bin/booping config-get core.budget` prints both keys with the defaults above.
 
 ### Task 1.2
 
-- [ ] `bin/booping budget --help` lists `read`; `bin/booping budget read --help` matches the I/O contract in `index.md`.
-- [ ] stdout is exactly the contract's three lines; a missing reading is exit 4 with `error: no usage reading: {why}` on stderr and nothing on stdout.
-- [ ] Nothing in `budget.py` prints; the command module formats.
+- [x] `bin/booping budget --help` lists `read`; `bin/booping budget read --help` matches the I/O contract in `index.md`.
+- [x] stdout is exactly the contract's three lines; a missing reading is exit 4 with `error: no usage reading: {why}` on stderr and nothing on stdout.
+- [x] Nothing in `budget.py` prints; the command module formats.
 
 ### Task 1.3
 
-- [ ] The four cases exist and pass.
+- [x] The four cases exist and pass.
 
 Return: the list of changed and created files, nothing else.
 
