@@ -2,7 +2,7 @@
 id: "04"
 title: "A vault-rooted tier reads only type directories"
 sp: 4
-status: in-progress
+status: done
 plan: "plans/202610151727_project-specs-at-vault-root/index.md"
 ---
 
@@ -18,19 +18,19 @@ Tests: integration tier, txtar. New `booping-python/e2e/cases/specs/check-a-vaul
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 4.1 | `vault_rooted` flag; loader and check honour it. | `booping-python/src/booping/specs/tiers.py`, `booping-python/src/booping/specs/records.py`, `booping-python/src/booping/specs/check.py` | 2 | pending |
-| 4.2 | The two new cases; the two layout cases pinned to a repo tier. | `booping-python/e2e/cases/specs/check-a-vault-rooted-tier-ignores-non-type-directories.txtar`, `booping-python/e2e/cases/specs/ls-a-vault-rooted-tier-lists-only-records.txtar`, `booping-python/e2e/cases/specs/check-layout-unknown-type-directory.txtar`, `booping-python/e2e/cases/specs/check-layout-stray-file-at-the-root.txtar` | 2 | pending |
+| 4.1 | `vault_rooted` flag; loader and check honour it. | `booping-python/src/booping/specs/tiers.py`, `booping-python/src/booping/specs/records.py`, `booping-python/src/booping/specs/check.py` | 2 | done |
+| 4.2 | The two new cases; the two layout cases pinned to a repo tier. | `booping-python/e2e/cases/specs/check-a-vault-rooted-tier-ignores-non-type-directories.txtar`, `booping-python/e2e/cases/specs/ls-a-vault-rooted-tier-lists-only-records.txtar`, `booping-python/e2e/cases/specs/check-layout-unknown-type-directory.txtar`, `booping-python/e2e/cases/specs/check-layout-stray-file-at-the-root.txtar` | 2 | done |
 
 ## Definition of Done
 
 ### Task 4.1
 
-- [ ] A vault-rooted tier yields no `layout` finding for any non-type directory or root-level file.
-- [ ] A non-vault-rooted tier reports unknown directories and stray root files exactly as before.
+- [x] A vault-rooted tier yields no `layout` finding for any non-type directory or root-level file.
+- [x] A non-vault-rooted tier reports unknown directories and stray root files exactly as before.
 
 ### Task 4.2
 
-- [ ] Each case in Tests exists and passes; the two layout cases' expected stdout is byte-identical to before.
+- [x] Each case in Tests exists and passes; the two layout cases' expected stdout is byte-identical to before.
 
 Return: the list of changed files, nothing else.
 
