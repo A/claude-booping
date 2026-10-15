@@ -2,6 +2,28 @@
 
 Notable user-visible changes, newest first, in the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format; versions follow [semantic versioning](https://semver.org/).
 
+## v2.0.0 — 2026-10-15
+
+Specs become a core feature: booping ships a typed-records format for a project's values, rules and decisions, checks it, renders it as a site, and injects targeted rules into playbook steps in place of lessons.
+
+### Added
+
+- The specs format — value, rule, adr, conflict, story, idea, reference and runbook records — shipped in `src/specs/` with a schema per type, in three tiers: core, global (`<home_dir>/_specs/`, named by your namespace, `$USER` by default) and project.
+- `booping specs check` validates every record against its schema and across files: unique numbers, relative links, reference fields and namespaced references between tiers. `booping specs ls`, `next` and `init` list records, name the next number and create a tier.
+- `booping specs site` renders one or several specs roots to a static site, one page per type with every record in full; a global config key lists the roots so one site can cover every project.
+- A rule with `targets:` and `brief:` is injected into the targeted playbook, step, agent or skill as its brief plus a link to the record.
+
+### Changed
+
+- Lessons are now rules. Migration 004 turns `{vault}/_lessons/` and `<home_dir>/_lessons/` into rule records and removes the lesson files; run `/playbook migrate`. `learn` writes rule records instead of lesson files, and `setup` creates the specs tiers and stores your namespace.
+- **Breaking:** lesson injection and the `--no-lessons` flag are gone; use `--no-rules`.
+
+### Fixed
+
+- A frontmatter value containing `---` no longer ends the frontmatter early and drops every later key; an unclosed frontmatter block reports that plainly.
+- Vault commits from playbook hooks work when the vault lives inside the project repo, commit only vault paths, and stop the transition with git's error instead of reporting `ok` with nothing committed.
+- code-review lists each candidate plan with its real baseline commit.
+
 ## v1.1.1 — 2026-10-08
 
 A patch release of engine fixes: `frontmatter-update` hooks now type their values like the command does, repeated `--append` flags all land, and `session-stats` no longer double-counts tokens.
