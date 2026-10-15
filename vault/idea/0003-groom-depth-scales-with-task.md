@@ -41,6 +41,13 @@ skill. The measurement does not say which steps the extra cost came from.
   run scored by `bench-score`; each groom prompt paragraph probed against an empty-context
   agent to cut what the model already knows. Results land in a reference record, the chosen
   shape in an ADR.
+- Added 2026-10-16 (owner): D1 — the whole development as one `claude -p` run with no groom
+  or develop playbooks, compared on time and outcome with the historical pipeline; every
+  variant runs in two isolation modes — a clean vault, and a vault with the project's plans,
+  retros and reviews dated before the task (realistic: past plans may guide the model);
+  historical reference plans came from older booping versions, so fresh references are made
+  with the current booping at the end and the judge checks against both. Corpus: 6 done
+  tasks, mostly web/client work (booping-benchmarks `groom/corpus/`).
 - Owner's targets: small tasks (10-15 SP) reach develop with little or no grooming; complex
   ones keep research quality and also get faster; tokens about the same or lower.
 - Run each variant on the same set of requests on the same commit, and compare plan

@@ -4,8 +4,8 @@ title: Develop groups milestones per worker by story points, not by count
 summary: Proposed — replace max_milestones_per_agent with a max_sp cap of 15, packing milestones greedily within one wave, and make sp ≥ 5 a hard groom gate.
 created_by: claude
 created_at: 2026-10-14
-updated_at: 2026-10-14
-status: proposed
+updated_at: 2026-10-16
+status: accepted
 values: [value/0012, value/0002]
 # also distilled from the owner's local, unpublished notes (vault/notes/ is gitignored): vault/notes/20260821-milestone-grouping-by-sp.md
 ---
@@ -24,13 +24,17 @@ threshold in 5 of 10 plans.
 
 ## Decision
 
-Proposed, decided in chat and not yet implemented: `core.sprint.max_sp: 15`
+`core.sprint.max_sp: 15`
 replaces `max_milestones_per_agent`. Milestones pack greedily and contiguously in
 graph order while the group's `sum(sp) <= max_sp`, only within one topological
 wave; a single milestone is always a valid group and is never split. Grouping
 changes only the briefing; the runner still validates, commits and transitions per
 milestone. Groom gets a hard gate: a milestone with `sp >= redecompose_threshold`
 (5) does not leave grooming.
+
+The cap measures review burden, not how hard the work is for the agent: it bounds how
+much one briefing hands the human to check at once (owner, 2026-10-16), so it is tuned to
+the reviewer, not to the model.
 
 ## Alternatives
 
