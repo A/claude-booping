@@ -2,7 +2,7 @@
 id: "07"
 title: "List pages — type, root and home pages as record and type lists"
 sp: 3
-status: pending
+status: done
 plan: "plans/202610152329_specs-site-redesign/index.md"
 ---
 
@@ -18,20 +18,20 @@ Tests (integration): `site_pages_test.py` — a type page holds one `.row` per r
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 7.1 | Type page as rows; drop the prefixed second render. | `booping-python/src/booping/specs/site/templates/type.html.j2`, `booping-python/src/booping/specs/site/pages.py`, `booping-python/src/booping/specs/site/markdown.py` | 2 | pending |
-| 7.2 | Root and home pages as type lists with scenarios; tests; golden rebaseline. | `booping-python/src/booping/specs/site/templates/root.html.j2`, `booping-python/src/booping/specs/site/templates/index.html.j2`, `booping-python/src/booping/specs/site/templates/_macros.html.j2`, `booping-python/tests/specs/site_pages_test.py`, `booping-python/e2e/cases/specs/site-*.txtar` | 1 | pending |
+| 7.1 | Type page as rows; drop the prefixed second render. | `booping-python/src/booping/specs/site/templates/type.html.j2`, `booping-python/src/booping/specs/site/pages.py`, `booping-python/src/booping/specs/site/markdown.py` | 2 | done |
+| 7.2 | Root and home pages as type lists with scenarios; tests; golden rebaseline. | `booping-python/src/booping/specs/site/templates/root.html.j2`, `booping-python/src/booping/specs/site/templates/index.html.j2`, `booping-python/src/booping/specs/site/templates/_macros.html.j2`, `booping-python/tests/specs/site_pages_test.py`, `booping-python/e2e/cases/specs/site-*.txtar` | 1 | done |
 
 ## Definition of Done
 
 ### Task 7.1
 
-- [ ] Each record body is rendered once per build.
-- [ ] A type page's size grows with its record count by one row each, not by body length.
+- [x] Each record body is rendered once per build.
+- [x] A type page's size grows with its record count by one row each, not by body length.
 
 ### Task 7.2
 
-- [ ] No page in the output contains a count matrix table.
-- [ ] The new tests pass; rebaselined goldens differ only on type, root and home pages.
+- [x] No page in the output contains a count matrix table.
+- [x] The new tests pass; rebaselined goldens differ only on type, root and home pages.
 
 Return: the list of changed and created files, nothing else.
 

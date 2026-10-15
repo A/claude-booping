@@ -2,7 +2,7 @@
 id: "08"
 title: "Machine layer — llms.txt and index.json"
 sp: 3
-status: pending
+status: done
 plan: "plans/202610152329_specs-site-redesign/index.md"
 ---
 
@@ -18,20 +18,20 @@ Tests (integration, `booping-python/tests/specs/site_machine_test.py`, expectati
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 8.1 | `llms_txt` and its tests. | `booping-python/src/booping/specs/site/machine.py`, `booping-python/tests/specs/site_machine_test.py` | 1 | pending |
-| 8.2 | `index_json`, wiring into `build_site`, its tests, the e2e case. | `booping-python/src/booping/specs/site/machine.py`, `booping-python/src/booping/specs/site/pages.py`, `booping-python/tests/specs/site_machine_test.py`, `booping-python/e2e/cases/specs/site-writes-llms-txt-and-index-json.txtar` | 2 | pending |
+| 8.1 | `llms_txt` and its tests. | `booping-python/src/booping/specs/site/machine.py`, `booping-python/tests/specs/site_machine_test.py` | 1 | done |
+| 8.2 | `index_json`, wiring into `build_site`, its tests, the e2e case. | `booping-python/src/booping/specs/site/machine.py`, `booping-python/src/booping/specs/site/pages.py`, `booping-python/tests/specs/site_machine_test.py`, `booping-python/e2e/cases/specs/site-writes-llms-txt-and-index-json.txtar` | 2 | done |
 
 ## Definition of Done
 
 ### Task 8.1
 
-- [ ] `llms.txt` follows llmstxt.org: one H1, optional blockquote, H2 file-list sections of `- [name](url): note` lines.
-- [ ] Output matches C9 character for character on the test fixture.
+- [x] `llms.txt` follows llmstxt.org: one H1, optional blockquote, H2 file-list sections of `- [name](url): note` lines.
+- [x] Output matches C9 character for character on the test fixture.
 
 ### Task 8.2
 
-- [ ] `index.json` key order is the C9 order for every record.
-- [ ] `uv run pytest tests/specs/site_machine_test.py -q` and the new e2e case pass.
+- [x] `index.json` key order is the C9 order for every record.
+- [x] `uv run pytest tests/specs/site_machine_test.py -q` and the new e2e case pass.
 
 Return: the list of changed and created files, nothing else.
 

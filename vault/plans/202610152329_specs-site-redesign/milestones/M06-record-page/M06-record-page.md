@@ -2,7 +2,7 @@
 id: "06"
 title: "Record page — state badges, labelled facts, titled relations, marks"
 sp: 3
-status: pending
+status: done
 plan: "plans/202610152329_specs-site-redesign/index.md"
 ---
 
@@ -18,20 +18,20 @@ Tests (integration): `site_pages_test.py` — a record with `created_by: claude`
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 6.1 | Record head, facts order and labels, relations block with titles and status, raw-key rows, backlink items. | `booping-python/src/booping/specs/site/templates/record.html.j2`, `booping-python/src/booping/specs/site/templates/_macros.html.j2`, `booping-python/src/booping/specs/site/pages.py` | 2 | pending |
-| 6.2 | Mark callout markup with icons; the tests; golden rebaseline. | `booping-python/src/booping/specs/site/markdown.py`, `booping-python/tests/specs/site_pages_test.py`, `booping-python/tests/specs/site_test.py`, `booping-python/e2e/cases/specs/site-*.txtar` | 1 | pending |
+| 6.1 | Record head, facts order and labels, relations block with titles and status, raw-key rows, backlink items. | `booping-python/src/booping/specs/site/templates/record.html.j2`, `booping-python/src/booping/specs/site/templates/_macros.html.j2`, `booping-python/src/booping/specs/site/pages.py` | 2 | done |
+| 6.2 | Mark callout markup with icons; the tests; golden rebaseline. | `booping-python/src/booping/specs/site/markdown.py`, `booping-python/tests/specs/site_pages_test.py`, `booping-python/tests/specs/site_test.py`, `booping-python/e2e/cases/specs/site-*.txtar` | 1 | done |
 
 ## Definition of Done
 
 ### Task 6.1
 
-- [ ] No record page shows a raw `created_by`/`updated_at` key or a bare relation code without its title.
-- [ ] Every frontmatter key of the record is still visible somewhere on its page.
+- [x] No record page shows a raw `created_by`/`updated_at` key or a bare relation code without its title.
+- [x] Every frontmatter key of the record is still visible somewhere on its page.
 
 ### Task 6.2
 
-- [ ] Mark anchors `L{n}` are unchanged, so existing links into marks keep working.
-- [ ] The new tests pass; rebaselined goldens differ only on record pages.
+- [x] Mark anchors `L{n}` are unchanged, so existing links into marks keep working.
+- [x] The new tests pass; rebaselined goldens differ only on record pages.
 
 Return: the list of changed and created files, nothing else.
 

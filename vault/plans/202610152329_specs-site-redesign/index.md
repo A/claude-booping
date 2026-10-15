@@ -80,11 +80,11 @@ The output tree keeps today's paths (`index.html`, `{root}/index.html`, `{root}/
 | 02 | [Labels and lang — config label table, html lang, site title](milestones/M02-labels-and-lang/M02-labels-and-lang.md) | 3 | done |
 | 03 | [Theme and icons — mockup tokens, reading typography, SVG sprite](milestones/M03-theme-and-icons/M03-theme-and-icons.md) | 4 | done |
 | 04 | [Page shell — header, theme toggle, sidebar, drawer, crumbs, footer](milestones/M04-page-shell/M04-page-shell.md) | 4 | done |
-| 05 | [Record model — superseded-by, resolved relations, record state](milestones/M05-record-model/M05-record-model.md) | 3 | pending |
-| 06 | [Record page — state badges, labelled facts, titled relations, marks](milestones/M06-record-page/M06-record-page.md) | 3 | pending |
-| 07 | [List pages — type, root and home pages as record and type lists](milestones/M07-list-pages/M07-list-pages.md) | 3 | pending |
-| 08 | [Machine layer — llms.txt and index.json](milestones/M08-llms-and-index-json/M08-llms-and-index-json.md) | 3 | pending |
-| 09 | [Machine layer — .md copies and 404 page with --site-url](milestones/M09-md-copies-and-404/M09-md-copies-and-404.md) | 3 | pending |
+| 05 | [Record model — superseded-by, resolved relations, record state](milestones/M05-record-model/M05-record-model.md) | 3 | done |
+| 06 | [Record page — state badges, labelled facts, titled relations, marks](milestones/M06-record-page/M06-record-page.md) | 3 | done |
+| 07 | [List pages — type, root and home pages as record and type lists](milestones/M07-list-pages/M07-list-pages.md) | 3 | done |
+| 08 | [Machine layer — llms.txt and index.json](milestones/M08-llms-and-index-json/M08-llms-and-index-json.md) | 3 | done |
+| 09 | [Machine layer — .md copies and 404 page with --site-url](milestones/M09-md-copies-and-404/M09-md-copies-and-404.md) | 3 | done |
 | 10 | [site-index in the new design](milestones/M10-site-index-design/M10-site-index-design.md) | 2 | pending |
 | 11 | [Docs and a Russian fixture case](milestones/M11-docs-and-russian-fixture/M11-docs-and-russian-fixture.md) | 3 | pending |
 

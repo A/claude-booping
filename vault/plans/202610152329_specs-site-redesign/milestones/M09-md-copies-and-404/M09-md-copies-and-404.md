@@ -2,7 +2,7 @@
 id: "09"
 title: "Machine layer — .md copies and 404 page with --site-url"
 sp: 3
-status: pending
+status: done
 plan: "plans/202610152329_specs-site-redesign/index.md"
 ---
 
@@ -18,20 +18,20 @@ Tests (integration, e2e): `booping-python/e2e/cases/specs/site-writes-md-copies-
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 9.1 | `.md` copies and the alternate link; its e2e case. | `booping-python/src/booping/specs/site/pages.py`, `booping-python/src/booping/specs/site/templates/record.html.j2`, `booping-python/src/booping/specs/site/templates/base.html.j2`, `booping-python/e2e/cases/specs/site-writes-md-copies-beside-records.txtar` | 1 | pending |
-| 9.2 | `--site-url`, `not_found.html.j2`, `404.html`, the Pages template line; the two e2e cases. | `booping-python/src/booping/commands/specs.py`, `booping-python/src/booping/specs/site/pages.py`, `booping-python/src/booping/specs/site/templates/not_found.html.j2`, `src/ci/gitlab/specs-site.gitlab-ci.yml`, `booping-python/e2e/cases/specs/site-*.txtar` | 2 | pending |
+| 9.1 | `.md` copies and the alternate link; its e2e case. | `booping-python/src/booping/specs/site/pages.py`, `booping-python/src/booping/specs/site/templates/record.html.j2`, `booping-python/src/booping/specs/site/templates/base.html.j2`, `booping-python/e2e/cases/specs/site-writes-md-copies-beside-records.txtar` | 1 | done |
+| 9.2 | `--site-url`, `not_found.html.j2`, `404.html`, the Pages template line; the two e2e cases. | `booping-python/src/booping/commands/specs.py`, `booping-python/src/booping/specs/site/pages.py`, `booping-python/src/booping/specs/site/templates/not_found.html.j2`, `src/ci/gitlab/specs-site.gitlab-ci.yml`, `booping-python/e2e/cases/specs/site-*.txtar` | 2 | done |
 
 ## Definition of Done
 
 ### Task 9.1
 
-- [ ] Every record page in the output has a sibling `.md` identical to its source file.
+- [x] Every record page in the output has a sibling `.md` identical to its source file.
 
 ### Task 9.2
 
-- [ ] `booping specs site --help` lists `--site-url`.
-- [ ] `404.html` resolves its stylesheet, script and home link against the base path.
-- [ ] The three e2e cases pass.
+- [x] `booping specs site --help` lists `--site-url`.
+- [x] `404.html` resolves its stylesheet, script and home link against the base path.
+- [x] The three e2e cases pass.
 
 Return: the list of changed and created files, nothing else.
 

@@ -2,7 +2,7 @@
 id: "05"
 title: "Record model — superseded-by, resolved relations, record state"
 sp: 3
-status: pending
+status: done
 plan: "plans/202610152329_specs-site-redesign/index.md"
 ---
 
@@ -18,20 +18,20 @@ Tests (integration, `booping-python/tests/specs/site_test.py`): an ADR with `val
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 5.1 | `Site.relations` and `Site.superseded_by` indexes and their tests. | `booping-python/src/booping/specs/site/model.py`, `booping-python/tests/specs/site_test.py` | 2 | pending |
-| 5.2 | `state.py` with `RecordState`/`record_state`, computed once in `build_site`; its tests. | `booping-python/src/booping/specs/site/state.py`, `booping-python/src/booping/specs/site/pages.py`, `booping-python/tests/specs/site_test.py` | 1 | pending |
+| 5.1 | `Site.relations` and `Site.superseded_by` indexes and their tests. | `booping-python/src/booping/specs/site/model.py`, `booping-python/tests/specs/site_test.py` | 2 | done |
+| 5.2 | `state.py` with `RecordState`/`record_state`, computed once in `build_site`; its tests. | `booping-python/src/booping/specs/site/state.py`, `booping-python/src/booping/specs/site/pages.py`, `booping-python/tests/specs/site_test.py` | 1 | done |
 
 ## Definition of Done
 
 ### Task 5.1
 
-- [ ] Both indexes are built once per `Site` and return records in a deterministic order.
-- [ ] The relation and supersession cases above pass.
+- [x] Both indexes are built once per `Site` and return records in a deterministic order.
+- [x] The relation and supersession cases above pass.
 
 ### Task 5.2
 
-- [ ] `RecordState` is the only place clarify/unknown counts and the unreviewed flag are computed; `_counts`/`_block` in `pages.py` read it.
-- [ ] Site output is byte-identical to before this milestone — `uv run pytest e2e -k site -q` passes without rebaselining.
+- [x] `RecordState` is the only place clarify/unknown counts and the unreviewed flag are computed; `_counts`/`_block` in `pages.py` read it.
+- [x] Site output is byte-identical to before this milestone — `uv run pytest e2e -k site -q` passes without rebaselining.
 
 Return: the list of changed and created files, nothing else.
 
