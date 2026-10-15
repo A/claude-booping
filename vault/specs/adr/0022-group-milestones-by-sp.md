@@ -73,8 +73,7 @@ A cap range rather than one number.
 
 ## Consequences
 
-- Not implemented yet: `src/config.yaml` and develop's `provision` step still use
-  `max_milestones_per_agent: 2`, and the groom gate is missing. The owner confirmed
-  on 2026-10-14 that it must be done; a backlog task tracks it.
+- `core.sprint.max_sp` (default 15) replaced `max_milestones_per_agent`, and groom keeps
+  a milestone at or over `redecompose_threshold` from leaving drafting (BL-0015).
 - Planned calibration: re-groom a 31-SP plan with sp-8 milestones and run it as a
   second benchmark in two groups of about 15.

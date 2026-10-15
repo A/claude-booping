@@ -77,5 +77,5 @@ The zero-padded `NNN_` prefix is parsed as the id.
   ambiguous when both roots match, and a root prefix inside the glob as an invented
   path microsyntax.
 - `id:gt` compares numerically, so the `-1` sentinel works and id 10 sorts after 9.
-- [clarify] The `makemigration` playbook named as the authoring counterpart is not in
-  `playbooks/`; whether it is still planned is not named in the source.
+- The `makemigration` playbook in `playbooks/makemigration/` authors a migration at the
+  next id (moved there from a skill, BL-0016).

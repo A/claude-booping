@@ -68,7 +68,7 @@ booping playbook-state groom --workdir <run workdir>
 | `framing` | `cancelled` | the user cancels the run | — |
 | `researching` | `drafting` | the blast-radius map and the web-research findings are both posted in chat | — |
 | `researching` | `cancelled` | the user cancels the run | — |
-| `drafting` | `cross-reviewing` | architecture, surface changes and trade-offs are settled with the user in conversation, and draft-plan wrote `index.md`'s body against the template's Plan Body and passed its Quality Checklist | every call that is the user's is answered |
+| `drafting` | `cross-reviewing` | architecture, surface changes and trade-offs are settled with the user in conversation, and draft-plan wrote `index.md`'s body against the template's Plan Body and passed its Quality Checklist | every call that is the user's is answered; no milestone's `sp` is at or over `core.sprint.redecompose_threshold` — one that is gets split before the plan leaves drafting |
 | `drafting` | `researching` | the design needs blast radius or external practice the research pass missed | — |
 | `drafting` | `awaiting-clarification` | the run raised questions it cannot answer itself and wrote them to `clarifications.md` | every question in `clarifications.md` is open and attributed — an id, a topic, the date and the step that raised it |
 | `drafting` | `cancelled` | the user cancels the run | — |
@@ -270,14 +270,16 @@ the diff demands. AI does implementation cheaply; this is what remains.
 | 5 | Research task — developer needs to clarify and decompose further before proceeding |
 
 
-Development bundles **up to 2 consecutive milestone(s)** into a single agent briefing — size
-milestones against that combined review burden.
+Development packs a contiguous run of milestones, in `id` order, into a single agent briefing while
+their summed SP stays at or under **15 SP** — size milestones against that combined
+review burden.
 
 ### Thresholds
 
-- **5 SP re-decompose threshold** — a task at or over it is split before the plan is
-  returned. Cut at a seam in its own work, never at its midpoint; each half stands alone with its
-  own DoD and Verify, and the milestone and sprint totals are re-summed from the new leaves.
+- **5 SP re-decompose threshold** — a task or a milestone at or over it is split before
+  the plan leaves drafting. Cut at a seam in its own work, never at its midpoint; each half stands
+  alone with its own DoD and Verify, and the milestone and sprint totals are re-summed from the new
+  leaves.
 - **35 SP split threshold** — not a velocity: the point past which a sprint is too large to
   hold together as one coherent iteration.
 

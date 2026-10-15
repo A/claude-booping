@@ -2,7 +2,7 @@
 
 Claude Code plugin that grooms and executes plans across user projects. Plans and other run artifacts live in the per-project **vault** — `~/Claude/{project}/` by default, or a repo-local directory via the `.booping` marker's `vault_path:` key. Skills, agents, playbooks, templates, and config live in this repo.
 
-One shipped skill (`/playbook`); everything procedural is a **playbook** it drives (`groom`, `develop`, `code-review`, `retro`, `learn`, `setup`, `migrate`, `playbook-authoring`).
+One shipped skill (`/playbook`); everything procedural is a **playbook** it drives (`groom`, `develop`, `code-review`, `retro`, `learn`, `setup`, `migrate`, `makemigration`, `playbook-authoring`).
 
 ## Commands
 
@@ -86,7 +86,7 @@ This repo's own vault is checked in at `vault/`. Its `specs/` holds booping's va
 - **Schema over prose**: structured data lives in `src/config.yaml` and is rendered from there — never restated in body prose.
 - **Reference the source, never the literal**: dynamic values (statuses, queues, agent ids) render from config/query specs.
 - **Wide-domain**: skills and playbooks stay stack-agnostic. Project specifics live in the project specs tier (rule records) and the attached repo's own `CLAUDE.md` — the only two destinations learn writes.
-- **Agent wiring**: the driver owns all vault reads/writes; worker agents touch only repo code. Project-local shaping of an agent or a skill is a targeted rule (`agent:{id}`, `skill:{name}`), not a separate extension file. External global agents at `~/.claude/agents/` wire in via config — see [documentation/integrating-external-agents.md](documentation/integrating-external-agents.md).
+- **Agent wiring**: the driver owns all vault reads/writes, run state and every commit; worker agents edit code — the attached repo's, or code outside it once the user confirms that for the plan — never the vault or git history. Project-local shaping of an agent or a skill is a targeted rule (`agent:{id}`, `skill:{name}`), not a separate extension file. External global agents at `~/.claude/agents/` wire in via config — see [documentation/integrating-external-agents.md](documentation/integrating-external-agents.md).
 
 ## Editing conventions
 

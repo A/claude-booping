@@ -41,6 +41,7 @@ states:
             when: "architecture, surface changes and trade-offs are settled with the user in conversation, and draft-plan wrote `index.md`'s body against the template's Plan Body and passed its Quality Checklist"
             gates:
               - "every call that is the user's is answered"
+              - "no milestone's `sp` is at or over `core.sprint.redecompose_threshold` — one that is gets split before the plan leaves drafting"
             hooks: ["script tracker-sync"]
           - to: researching
             when: "the design needs blast radius or external practice the research pass missed"

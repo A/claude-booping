@@ -50,7 +50,7 @@ Execute the steps in the most effective order considering their dependencies.
 | Step | Dependencies | Summary | Review gate |
 | --- | --- | --- | --- |
 | `intake` | — | Adopt the plan the preamble resolved — validate its `status:` against an entry transition, advance it to `ready-for-dev` without asking when it entered at `awaiting-approval`, then check plan validity against the repo's current commit: cheap summary first, the plan-named diff only on the user's word; trivial drift patched in place, non-trivial drift halted back to grooming. | — |
-| `provision` | `intake` | Set the sprint up — pick the branch from the plan's task type per the branch conventions, propose a kebab-case name and create it off the repo's current branch only after the user confirms; then settle the milestone groups the briefings will cover, within the configured ceiling, and fire the `ready-for-dev` → `in-progress` transition. | The user confirms the branch name before the branch is created — asked through `AskUserQuestion`, never as chat prose; a name the user rewrites is used verbatim, and nothing touches git until the answer arrives. The milestone groups are internal — settled by the step, reported in its return, never put to the user |
+| `provision` | `intake` | Set the sprint up — pick the branch from the plan's task type per the branch conventions, propose a kebab-case name and create it off the repo's current branch only after the user confirms; then settle the milestone groups the briefings will cover, packed under the configured SP cap, and fire the `ready-for-dev` → `in-progress` transition. | The user confirms the branch name before the branch is created — asked through `AskUserQuestion`, never as chat prose; a name the user rewrites is used verbatim, and nothing touches git until the answer arrives. The milestone groups are internal — settled by the step, reported in its return, never put to the user |
 | `milestones` *(subgraph)* | `provision` | once per milestone file in the plan's `milestones/`, in `id` order | — |
 | `develop-loop` *(in milestones)* | — | Run the sprint group by group — one briefing per group to the worker agent, one worker at a time on the sprint branch; on each report verify against the milestone's DoD and its plan-authored Verify, flip the checkboxes, task rows and milestone status, commit per milestone, refresh and commit the vault snapshot, and report what shipped before the next group. | — |
 | `verify` | `milestones` | Run the project's guardrails over the finished sprint once — tests, lint, typecheck, formatter, whatever else must hold for a PR to open without CI failing — plus the plan's own bookkeeping, every DoD checkbox `[x]` and every milestone `done`, read off disk, and return what passed and what failed; no code-quality judgement, no fixes applied here. | — |
@@ -190,9 +190,10 @@ Enumerate the milestones in execution order — never from `index.md`'s table, w
 booping query --glob {plan-dir}/milestones/*/M*.md --columns id,title,sp,status --sort id
 ```
 
-Group consecutive milestones into agent briefings: each briefing covers **up to 2 milestone(s)**.
-Group only when the milestones share enough context that one agent handling them in sequence is
-cheaper than spinning a fresh agent per milestone. Otherwise keep them one-per-briefing.
+Pack milestones into agent briefings greedily, in that order: a group takes the next milestone
+while the group's summed `sp` stays at or under **15 SP**, and closes otherwise.
+A group is a contiguous run of milestones in `id` order. A single milestone is always a valid group
+and is never split, even when its `sp` alone exceeds the cap.
 
 The groups are yours to settle — reported in the return, never put to the user for confirmation.
 Settle them as a table you keep for the return, milestones named by their directory so
@@ -218,7 +219,7 @@ With the branch created and the groups settled, advance the run per the `## Stat
 
 - branch: `{name}` created off the current branch `{base}`, name confirmed by the user
 - transition: {the transition report verbatim}
-- groups: {n} briefings over {m} milestones (ceiling {c}) — G1 `M01-{kebab}`+`M02-{kebab}`, G2 `M03-{kebab}`
+- groups: {n} briefings over {m} milestones (cap {c} SP) — G1 `M01-{kebab}`+`M02-{kebab}`, G2 `M03-{kebab}`
 - drift: {what intake raised and whether anything is outstanding}
 
 ```
@@ -280,6 +281,7 @@ The edge's hook regenerates `index.md`'s `## Milestones` table and its `sp` — 
    ```
 
    Paths only: never paste a milestone's goal, tasks, DoD or Verify text into the briefing — the worker reads its contract itself. Briefings carry no rule paths either; the worker gets its project shaping from the `agent:{id}` rules injected into its own body.
+   A code path a milestone's tasks name outside the attached repo is delegated only once the user has confirmed it for this plan; a worker is never handed a vault path to edit.
 4. Delegate the briefing to the worker agent named in [Available Agents](#available-agents) — always delegate, even for a one-line change.
 5. Never resurrect a worker by ID for the next group. Each group gets a fresh agent with empty context.
 

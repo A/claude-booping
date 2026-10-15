@@ -69,5 +69,4 @@ Agents load lessons, read the plan and update its status themselves.
 - Work outside the repo with the user's explicit confirmation was settled by the
   owner on 2026-10-14, after the 2026-06-10 Plannotator retro called "developer
   agents operate only inside the attached repo" an artificial limitation for a
-  deliverable under `~/.claude/`. The code and `CLAUDE.md` still say "only repo
-  code" — a backlog task brings them in line.
+  deliverable under `~/.claude/`; develop and `CLAUDE.md` follow it (BL-0014).

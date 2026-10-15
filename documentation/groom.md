@@ -104,7 +104,7 @@ booping uses a 1–5 scale for per-task estimates, set in `src/config.yaml`:
 Two thresholds drive the playbook's behaviour, both configurable:
 
 - **`core.sprint.default_threshold_sp` (default `35`)** — soft cap on plan size. Above this, `present` proposes splitting the plan into sibling stubs rather than shipping one mega-sprint.
-- **`core.sprint.redecompose_threshold` (default `5`)** — any task estimated at ≥ this value must be re-decomposed before the run can leave `drafting`.
+- **`core.sprint.redecompose_threshold` (default `5`)** — any task or milestone estimated at ≥ this value must be re-decomposed before the run can leave `drafting`; for milestones it is a hard gate on the `drafting → cross-reviewing` edge.
 
 Both thresholds are ceilings, not velocity targets. A 12-SP plan is fine; a 38-SP plan is the trigger to consider a split.
 
@@ -113,7 +113,7 @@ Both thresholds are ceilings, not velocity targets. A 12-SP plan is fine; a 38-S
 The playbook reads these keys from `src/config.yaml`. See [Project config](project_config.md) for the deep-merge override mechanics; per-project tweaks live in `~/Claude/{project}/config.yaml`.
 
 - **`core.sprint.default_threshold_sp`** — soft cap on total SP per plan; above this the run proposes a split.
-- **`core.sprint.redecompose_threshold`** — per-task SP value at or above which the task must be re-decomposed.
+- **`core.sprint.redecompose_threshold`** — per-task and per-milestone SP value at or above which the task or milestone must be re-decomposed.
 - **`core.sprint.scale`** — the 1–5 SP definitions (each a `{sp, meaning}` entry).
 - **`core.task_types`** — list of `{type, description, doc_uri}` entries (`feature`, `bug`, `refactoring`). The request is classified against this list; the matching `doc_uri` lazy-loads detailed guidance for that task type.
 - **`core.groom_playbook.cross_review_agent`** — the agent that cross-reviews the drafted plan. `null` by default, which skips the `cross-reviewing` step entirely.

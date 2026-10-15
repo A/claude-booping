@@ -12,11 +12,15 @@ Specs become a core feature: booping ships a typed-records format for a project'
 - `booping specs check` validates every record against its schema and across files: unique numbers, relative links, reference fields and namespaced references between tiers. `booping specs ls`, `next` and `init` list records, name the next number and create a tier.
 - `booping specs site` renders one or several specs roots to a static site, one page per type with every record in full; a global config key lists the roots so one site can cover every project.
 - A rule with `targets:` and `brief:` is injected into the targeted playbook, step, agent or skill as its brief plus a link to the record.
+- The `makemigration` playbook authors a new plugin-shipped vault migration at the next id, in the format `migrate` applies.
 
 ### Changed
 
 - Lessons are now rules. Migration 004 turns `{vault}/_lessons/` and `<home_dir>/_lessons/` into rule records and removes the lesson files; run `/playbook migrate`. `learn` writes rule records instead of lesson files, and `setup` creates the specs tiers and stores your namespace.
 - **Breaking:** lesson injection and the `--no-lessons` flag are gone; use `--no-rules`.
+- `core.sprint.max_milestones_per_agent` is replaced by `core.sprint.max_sp` (default `15`): develop packs consecutive milestones into one briefing while their summed SP stays at or under it. A config still setting the old key is ignored — rename it, and set `max_sp` low (e.g. `1`) to keep one milestone per briefing.
+- Groom no longer lets a milestone at or over `redecompose_threshold` leave drafting.
+- A worker's code work may reach outside the attached repo once the user confirms it for the plan.
 
 ### Fixed
 

@@ -77,7 +77,11 @@ core:
   sprint:
     default_threshold_sp: 35
     redecompose_threshold: 5
-    max_milestones_per_agent: 2
+    # SP budget of one develop briefing: milestones pack greedily as a contiguous
+    # run in `id` order while the group's summed `sp` stays at or under it. A lone milestone is
+    # always a valid group and never split, even over the cap. Groom gates
+    # milestones on `redecompose_threshold` too.
+    max_sp: 15
     scale:
       - { sp: 1, meaning: "Simple text/config change, no risk" }
       - { sp: 2, meaning: "Simple task, predictable, no risk" }
@@ -332,7 +336,8 @@ core:
     queries:
       # Every migration the plugin ships, in id order. The `migrate` playbook
       # narrows it to the pending set with `where={'id:gt': booping.latest_migration}`
-      # — the marker's watermark, `-1` when nothing has been applied. `root: core`
+      # — the marker's watermark, `-1` when nothing has been applied; `makemigration`
+      # reads it whole for the next id. `root: core`
       # because migrations ship with the plugin, not with the vault they transform.
       pending:
         root: core

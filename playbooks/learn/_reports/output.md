@@ -54,6 +54,13 @@ Turn retrospective findings into rules and repo CLAUDE.md facts, each routed to 
 - Steps: `dedup-sweep`, `extract-candidates`, `intake`, `review-table`, `transition`, `write`
 - Targets: `booping render playbooks/_partials/target_space.md --set targets_for=learn`
 
+### makemigration
+
+Author one new plugin-shipped vault migration — a `migrations/NNN_<slug>/migration.md` at the next id, in exactly the format `migrate` consumes.
+
+- Steps: `survey`, `write-migration`
+- Targets: `booping render playbooks/_partials/target_space.md --set targets_for=makemigration`
+
 ### migrate
 
 Bring a project vault up to date by applying every pending migration the plugin ships, in id order, on one up-front approval.
