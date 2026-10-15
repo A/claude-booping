@@ -2,20 +2,21 @@
 title: "Computed status report — booping status over items, ideas, plans, records
   and marks"
 type: "feature"
-status: ready-for-dev
+status: in-progress
 sp: 12
 related_to: null
 created: 2026-10-15 19:04
 planned: null
-started: null
+started: 2026-10-15 19:19
 completed: null
 code_reviews: []
 sessions:
 - 61290692-8f20-4ac8-9584-82a338dc496d
+- d5f6dbae-2151-4410-8617-2f647d7a67ab
 retro: null
 summary: booping status computes a short project status — items, open ideas, 
   plans, unreviewed records, marks — detail per section
-commit: 895f7a373dd38f27faa0927ca66091dcedcd2204
+commit: e82f87de6208e3d9594826bf2a1b5899ce455346
 tracker_provider: null
 tracker_request: null
 tracker_issue: null
@@ -69,10 +70,10 @@ New `booping-python/src/booping/status.py` computes the report: an ordered tuple
 
 | id | title | sp | status |
 | --- | --- | --- | --- |
-| 01 | [booping status command and the items section](milestones/M01-status-command-and-items/M01-status-command-and-items.md) | 3 | pending |
-| 02 | [Plans section](milestones/M02-plans-section/M02-plans-section.md) | 3 | pending |
-| 03 | [Ideas, records and marks sections](milestones/M03-ideas-records-marks/M03-ideas-records-marks.md) | 4 | pending |
-| 04 | [CLAUDE.md and documentation on booping status](milestones/M04-docs/M04-docs.md) | 2 | pending |
+| 01 | [booping status command and the items section](milestones/M01-status-command-and-items/M01-status-command-and-items.md) | 3 | in-progress |
+| 02 | [Plans section](milestones/M02-plans-section/M02-plans-section.md) | 3 | in-progress |
+| 03 | [Ideas, records and marks sections](milestones/M03-ideas-records-marks/M03-ideas-records-marks.md) | 4 | in-progress |
+| 04 | [CLAUDE.md and documentation on booping status](milestones/M04-docs/M04-docs.md) | 2 | in-progress |
 
 ## I/O contract
 

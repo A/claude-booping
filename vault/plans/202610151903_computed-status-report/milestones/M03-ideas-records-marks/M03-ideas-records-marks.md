@@ -2,7 +2,7 @@
 id: "03"
 title: "Ideas, records and marks sections"
 sp: 4
-status: pending
+status: in-progress
 plan: "plans/202610151903_computed-status-report/index.md"
 ---
 

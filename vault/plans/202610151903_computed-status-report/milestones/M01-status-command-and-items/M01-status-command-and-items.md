@@ -2,7 +2,7 @@
 id: "01"
 title: "booping status command and the items section"
 sp: 3
-status: pending
+status: in-progress
 plan: "plans/202610151903_computed-status-report/index.md"
 ---
 

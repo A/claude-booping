@@ -2,7 +2,7 @@
 id: "04"
 title: "CLAUDE.md and documentation on booping status"
 sp: 2
-status: pending
+status: in-progress
 plan: "plans/202610151903_computed-status-report/index.md"
 ---
 

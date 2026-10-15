@@ -2,7 +2,7 @@
 id: "02"
 title: "Plans section"
 sp: 3
-status: pending
+status: in-progress
 plan: "plans/202610151903_computed-status-report/index.md"
 ---
 
