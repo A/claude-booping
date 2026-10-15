@@ -60,7 +60,7 @@ Corrections you make during a review land in `codereviews/{dir}/corrections.md`,
 
 ## `runs/`
 
-One record per `booping run groom` or `booping run develop`: `runs/{id}.md`, written before the run starts and updated when it ends, with the run's output streamed to `runs/{id}.log` beside it. The record carries the playbook, the mode, the plan and items the run serves, its session id, start and end times and exit code, and a `status:` — `running`, then `finished` or `failed`. A `running` record whose launcher is gone reads `lost`. Created on the first run, with a `.gitignore` that keeps the logs out of vault commits.
+One record per `booping run groom` or `booping run develop`: `runs/{id}.md`, written before the run starts and updated when it ends, with the run's output streamed to `runs/{id}.log` beside it. The record carries the playbook, the mode, the plan and items the run serves, its session id, start and end times and exit code, and a `status:` — `running`, then `finished`, `paused` or `failed`. A `running` record whose launcher is gone reads `lost`. A run the budget gate paused carries `paused_reason`, `resume_after` and `next_milestone`; a later record on the same plan marks it resumed. Created on the first run, with a `.gitignore` that keeps the logs out of vault commits.
 
 `booping status runs` lists the runs nobody has acked yet; `booping run ack {id}` marks one seen and keeps the record.
 
