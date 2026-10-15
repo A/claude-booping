@@ -1,0 +1,22 @@
+At 12:00 the window 01:00-07:00 is closed: pause until 01:00 the following day, decided
+before any reading — the probe, which would exit 1, never runs.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+macro_stubs:
+  core.macros.date +%Y-%m-%d %H:%M: "2026-10-15 12:00"
+core:
+  budget:
+    probe: [sh, -c, "exit 1"]
+    window: {start: "01:00", end: "07:00"}
+-- cmd --
+env BOOPING_RUN_ID=r1 TZ=UTC booping budget gate
+-- exit --
+3
+-- stdout --
+pause — outside window 01:00-07:00
+resume_after: 2026-10-16 01:00
+-- stderr --

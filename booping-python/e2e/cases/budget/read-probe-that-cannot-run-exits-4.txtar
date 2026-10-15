@@ -1,0 +1,17 @@
+A probe argv whose program does not exist is no reading: exit 4, naming the program.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+core:
+  budget:
+    probe: [booping-no-such-probe, --flag]
+-- cmd --
+env TZ=UTC booping budget read
+-- exit --
+4
+-- stdout --
+-- stderr --
+error: no usage reading: cannot run probe: booping-no-such-probe

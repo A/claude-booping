@@ -1,0 +1,21 @@
+Under `core.autonomy: autonomous` the gate applies outside a registered run too; a probe that
+exits 1 is no reading, which pauses with no `resume_after`.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+macro_stubs:
+  core.macros.date +%Y-%m-%d %H:%M: "2026-10-15 12:00"
+core:
+  autonomy: autonomous
+  budget:
+    probe: [sh, -c, "exit 1"]
+-- cmd --
+env -u BOOPING_RUN_ID TZ=UTC booping budget gate
+-- exit --
+3
+-- stdout --
+pause — no usage reading: probe exited 1
+-- stderr --

@@ -127,6 +127,27 @@ core:
     # Appended after a blank line under `--autonomous`.
     preamble: "AUTONOMOUS RUN, started by booping run — nobody can answer. Do not use AskUserQuestion and do not wait at review gates: confirm each yourself and log it with booping defaults add. Settle an unclear point with a sensible default and log it the same way. A question only the owner can answer parks the run where the playbook allows it; otherwise stop and report it. Never end the run while a background agent or a check you started is still running — wait for it. Never push."
 
+  # `booping budget read|gate` — the subscription usage gate. Directly under `core`
+  # because the run launcher, develop and the project-manager all pass it. Gated only
+  # inside a registered run (`BOOPING_RUN_ID`, set by `booping run` on its child) or
+  # under `core.autonomy: autonomous`.
+  budget:
+    # Seconds a run log stays a usable reading source: the newest `{core.run.dir}/*.log`
+    # younger than this supplies the reading, else `probe` runs.
+    max_age_s: 600
+    # Argv run in the repo when no fresh log holds a reading; its stdout is parsed for
+    # the last `rate_limit_event` stream line, stderr discarded.
+    probe: [claude, -p, "Reply with the single word OK.", --model, haiku, --max-turns, "1", --no-session-persistence, --output-format, stream-json, --verbose]
+    # 5-hour and 7-day usage percent at or over which the gate pauses.
+    ceiling_5h_pct: 90
+    ceiling_7d_pct: 85
+    # 7-day percent points one registered run may spend, measured from the reading its
+    # launch passed (stored as `usage_baseline_7d` on the run record); null = off.
+    run_pct: null
+    # `{start: "HH:MM", end: "HH:MM"}`, local time, an end before the start wrapping
+    # midnight; outside it the gate pauses until the next start. null = always open.
+    window: null
+
   sprint:
     default_threshold_sp: 35
     redecompose_threshold: 5
