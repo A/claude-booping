@@ -1,0 +1,23 @@
+# Publishes this project's booping specs site on GitLab Pages from the default branch.
+# Consume with:
+#   include:
+#     - remote: https://raw.githubusercontent.com/A/claude-booping/master/src/ci/gitlab/specs-site.gitlab-ci.yml
+# Variables: BOOPING_REF (pin a release tag), BOOPING_REPO.
+pages:
+  image: ghcr.io/astral-sh/uv:python3.12-trixie
+  variables:
+    BOOPING_REPO: https://github.com/A/claude-booping.git
+    BOOPING_REF: master
+    UV_CACHE_DIR: $CI_PROJECT_DIR/.uv-cache
+  cache:
+    key: booping-uv
+    paths:
+      - .uv-cache
+  script:
+    - git clone --depth 1 --branch "$BOOPING_REF" "$BOOPING_REPO" /tmp/booping
+    - /tmp/booping/bin/booping specs site --out public
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
