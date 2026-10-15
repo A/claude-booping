@@ -360,13 +360,11 @@ ul.scen, ul.recent { list-style: none; padding: 0; }
 .facts dt { color: var(--muted); }
 .facts dd { margin: 0; min-width: 0; }
 
-.relations { margin: 0 0 16px; }
-.relations dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; font-size: 14px; color: var(--muted); margin: 8px 0; }
-.relations dd { margin: 0; min-width: 0; }
 .rel { margin: 0; }
 .rel li { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; margin: 0; padding: 4px 0; border-bottom: 1px dashed var(--line); font-size: 16px; }
 .rel .ref { flex: none; }
 .rel .via { flex-basis: 100%; font-size: 14px; line-height: 1.4; color: var(--muted); }
+.facts ul.rel li { padding: 0; border-bottom: 0; font-size: inherit; }
 
 .opt { border: 1px solid var(--line); border-radius: 8px; background: var(--surface); margin: 12px 0; }
 .opt summary { list-style: none; cursor: pointer; padding: 12px 16px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
@@ -442,8 +440,8 @@ img { max-width: 100%; }
   .row .why { grid-column: 1; grid-row: auto; justify-content: flex-start; max-width: none; }
   .facts { grid-template-columns: minmax(0, 1fr); gap: 0; }
   .facts dd { margin: 0 0 8px; }
-  .relations dl { grid-template-columns: minmax(0, 1fr); gap: 0; }
-  .relations dd { margin: 0 0 8px; }
+  .recent li { flex-wrap: wrap; row-gap: 2px; }
+  .recent time { flex-basis: calc(100% - 108px); margin-left: 108px; }
   .row .t, .rel li a, .types a { display: inline-flex; align-items: center; min-height: 44px; }
   .side a { min-height: 44px; padding: 8px 12px; font-size: 16px; }
   footer { padding: 16px; }

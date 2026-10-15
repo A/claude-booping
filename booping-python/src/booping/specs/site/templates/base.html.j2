@@ -62,7 +62,7 @@
 {% endif %}
 <ul>
 {% for node in group.nodes %}
-<li><a href="{{ prefix }}{{ node.href }}"{% if path == node.href %} aria-current="page"{% endif %}><code>{{ node.tag }}</code><span class="n">{{ node.count }}</span></a></li>
+<li><a href="{{ prefix }}{{ node.href }}"{% if path == node.href %} aria-current="page"{% endif %}>{{ node.tag }}<span class="n">{{ node.count }}</span></a></li>
 {% endfor %}
 <li><a href="{{ prefix }}{{ group.href }}"{% if path == group.href %} aria-current="page"{% endif %}>{{ labels.ui("all_tags") }}</a></li>
 </ul>

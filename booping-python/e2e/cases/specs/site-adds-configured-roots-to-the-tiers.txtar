@@ -110,9 +110,11 @@ specs site: 2 roots, 2 records, 10 pages, 1 warnings -> specs-site
 <li><span aria-current="page">Overview</span></li>
 </ol>
 </nav>
+<div class="measure">
 <h1>Specs</h1>
 <p class="lead">Ship in small, reviewable steps.</p>
-<p class="callout"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg><span><a href="review.html">2 need you →</a></span></p>
+<p class="callout"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg><span><a href="review.html">2 need you →</a> · 2 unreviewed</span></p>
+</div>
 <ul class="scen">
 <li><a href="records.html#type=rule"><b>Rules <span class="n">1</span></b><span class="s">what constrains decisions</span></a></li>
 <li><a href="records.html#type=value"><b>Values <span class="n">1</span></b><span class="s">why the project exists</span></a></li>

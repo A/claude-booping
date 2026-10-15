@@ -207,7 +207,7 @@ specs site: 1 roots, 6 records, 18 pages, 0 warnings -> specs-site
 </ul>
 <h4>Теги</h4>
 <ul>
-<li><a href="probe/tags/dvizhenie.html"><code>dvizhenie</code><span class="n">1</span></a></li>
+<li><a href="probe/tags/dvizhenie.html">dvizhenie<span class="n">1</span></a></li>
 <li><a href="probe/tags/index.html">Все теги</a></li>
 </ul>
 <h4>Источники</h4>
@@ -322,7 +322,7 @@ specs site: 1 roots, 6 records, 18 pages, 0 warnings -> specs-site
 </ul>
 <h4>Теги</h4>
 <ul>
-<li><a href="probe/tags/dvizhenie.html"><code>dvizhenie</code><span class="n">1</span></a></li>
+<li><a href="probe/tags/dvizhenie.html">dvizhenie<span class="n">1</span></a></li>
 <li><a href="probe/tags/index.html">Все теги</a></li>
 </ul>
 <h4>Источники</h4>
@@ -440,7 +440,7 @@ specs site: 1 roots, 6 records, 18 pages, 0 warnings -> specs-site
 </ul>
 <h4>Теги</h4>
 <ul>
-<li><a href="../../probe/tags/dvizhenie.html"><code>dvizhenie</code><span class="n">1</span></a></li>
+<li><a href="../../probe/tags/dvizhenie.html">dvizhenie<span class="n">1</span></a></li>
 <li><a href="../../probe/tags/index.html" aria-current="page">Все теги</a></li>
 </ul>
 <h4>Источники</h4>
@@ -531,7 +531,7 @@ specs site: 1 roots, 6 records, 18 pages, 0 warnings -> specs-site
 </ul>
 <h4>Теги</h4>
 <ul>
-<li><a href="../../probe/tags/dvizhenie.html" aria-current="page"><code>dvizhenie</code><span class="n">1</span></a></li>
+<li><a href="../../probe/tags/dvizhenie.html" aria-current="page">dvizhenie<span class="n">1</span></a></li>
 <li><a href="../../probe/tags/index.html">Все теги</a></li>
 </ul>
 <h4>Источники</h4>
@@ -636,7 +636,7 @@ specs site: 1 roots, 6 records, 18 pages, 0 warnings -> specs-site
 </ul>
 <h4>Теги</h4>
 <ul>
-<li><a href="../../probe/tags/dvizhenie.html"><code>dvizhenie</code><span class="n">1</span></a></li>
+<li><a href="../../probe/tags/dvizhenie.html">dvizhenie<span class="n">1</span></a></li>
 <li><a href="../../probe/tags/index.html">Все теги</a></li>
 </ul>
 <h4>Источники</h4>
@@ -656,6 +656,7 @@ specs site: 1 roots, 6 records, 18 pages, 0 warnings -> specs-site
 <li><span aria-current="page">adr/0001</span></li>
 </ol>
 </nav>
+<div class="measure">
 <article>
 <h1>Сливаем ветки одним коммитом</h1>
 <div class="badges"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>принято</span><a href="#L15"><span class="b warn"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>1 вопрос к тебе</span></a><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-unreviewed"/></svg>без ревью</span></div>
@@ -676,15 +677,11 @@ specs site: 1 roots, 6 records, 18 pages, 0 warnings -> specs-site
 <dd><time datetime="2026-03-14">14 марта 2026</time></dd>
 <dt>Ревью</dt>
 <dd>ещё не было</dd>
-</dl>
-<section class="relations">
-<dl>
 <dt>Служит ценностям</dt>
 <dd><ul class="rel">
 <li><a href="../../probe/value/0001-malye-shagi.html">Малые шаги</a> <code class="ref">value/0001</code></li>
 </ul></dd>
 </dl>
-</section>
 <div class="body">
 <h1 id="сливаем-ветки-одним-коммитом">Сливаем ветки одним коммитом</h1>
 <p>Следует <a href="../../probe/value/0001-malye-shagi.html">малым шагам</a>.</p>
@@ -693,6 +690,7 @@ specs site: 1 roots, 6 records, 18 pages, 0 warnings -> specs-site
 </article>
 <h2 id="referenced-by">Ссылаются сюда<a class="anchor" href="#referenced-by" aria-label="Ссылка на раздел: Ссылаются сюда">§</a></h2>
 <p>Сюда никто не ссылается.</p>
+</div>
 </main>
 <aside class="rail">
 <div class="q">
@@ -769,7 +767,7 @@ specs site: 1 roots, 6 records, 18 pages, 0 warnings -> specs-site
 </ul>
 <h4>Теги</h4>
 <ul>
-<li><a href="../../probe/tags/dvizhenie.html"><code>dvizhenie</code><span class="n">1</span></a></li>
+<li><a href="../../probe/tags/dvizhenie.html">dvizhenie<span class="n">1</span></a></li>
 <li><a href="../../probe/tags/index.html">Все теги</a></li>
 </ul>
 <h4>Источники</h4>
@@ -789,6 +787,7 @@ specs site: 1 roots, 6 records, 18 pages, 0 warnings -> specs-site
 <li><span aria-current="page">adr/0002</span></li>
 </ol>
 </nav>
+<div class="measure">
 <article>
 <h1>Перебазируем перед слиянием</h1>
 <div class="badges"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>принято</span></div>
@@ -881,6 +880,7 @@ specs site: 1 roots, 6 records, 18 pages, 0 warnings -> specs-site
 <ul class="rel by-section">
 <li><a href="#контекст">Контекст</a> ← <a href="../../probe/rule/0001-lineinaya-istoriya.html"><code class="ref">rule/0001</code></a></li>
 </ul>
+</div>
 </main>
 <aside class="rail">
 <nav class="toc" aria-labelledby="rail-toc">
@@ -966,7 +966,7 @@ specs site: 1 roots, 6 records, 18 pages, 0 warnings -> specs-site
 </ul>
 <h4>Теги</h4>
 <ul>
-<li><a href="../../probe/tags/dvizhenie.html"><code>dvizhenie</code><span class="n">1</span></a></li>
+<li><a href="../../probe/tags/dvizhenie.html">dvizhenie<span class="n">1</span></a></li>
 <li><a href="../../probe/tags/index.html">Все теги</a></li>
 </ul>
 <h4>Источники</h4>

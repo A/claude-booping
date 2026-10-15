@@ -471,7 +471,7 @@ def _nav(
                 ],
             }
             for root in site.roots
-            if (nodes := trees[root.name])
+            if (nodes := [node for node in trees[root.name] if node.count])
         ],
         "sources": [
             {
@@ -695,6 +695,7 @@ def build_site(
         [Crumb(labels.ui("overview"), None)],
         lead=lead_summary(site),
         needs=nav["review"],
+        unreviewed=sum(states[r].unreviewed for r in site.records),
         questions=sum(states[r].clarify for r in site.records),
         types=[
             {

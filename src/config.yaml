@@ -273,6 +273,7 @@ core:
             sort_review: Review order
             needs_you: ["{n} needs you →", "{n} need you →"]
             open_questions: ["{n} open question", "{n} open questions"]
+            unreviewed_n: ["{n} unreviewed", "{n} unreviewed"]
             recently_updated: Recently updated
             section_link: Link to this section
             link_copied: Link copied
@@ -380,6 +381,7 @@ core:
             sort_review: Для ревью
             needs_you: ["{n} запись ждёт тебя →", "{n} записи ждут тебя →", "{n} записей ждут тебя →"]
             open_questions: ["{n} открытый вопрос", "{n} открытых вопроса", "{n} открытых вопросов"]
+            unreviewed_n: ["{n} без ревью", "{n} без ревью", "{n} без ревью"]
             recently_updated: Недавно изменённое
             section_link: Ссылка на раздел
             link_copied: Ссылка скопирована

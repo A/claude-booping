@@ -10,6 +10,7 @@
 {% endblock %}
 {% block main %}
 {% set r = record %}
+<div class="measure">
 <article>
 <h1>{{ r.title }}</h1>
 {% set badges = state_badges(r.state, labels, clarify_href=("#" ~ r.state.first_mark) if r.state.first_mark else none) | trim %}
@@ -28,17 +29,12 @@
 {{ toc_blocks(r, labels, "toc-m") | trim }}
 </details>
 {% endif %}
-{% if r.facts %}
+{% if r.facts or r.relations %}
 <dl class="facts">
 {% for fact in r.facts %}
 <dt>{{ fact.label }}</dt>
 <dd>{% for item in fact["items"] %}{% if not loop.first %}, {% endif %}{{ fact_value(item) }}{% endfor %}</dd>
 {% endfor %}
-</dl>
-{% endif %}
-{% if r.relations %}
-<section class="relations">
-<dl>
 {% for row in r.relations %}
 <dt>{{ row.label }}</dt>
 <dd><ul class="rel">
@@ -48,7 +44,6 @@
 </ul></dd>
 {% endfor %}
 </dl>
-</section>
 {% endif %}
 {% if r.raw %}
 <dl class="facts">
@@ -82,4 +77,5 @@
 {% else %}
 <p>{{ labels.ui("nothing_references") }}</p>
 {% endif %}
+</div>
 {% endblock %}

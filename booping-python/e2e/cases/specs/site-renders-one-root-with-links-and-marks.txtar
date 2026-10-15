@@ -124,9 +124,11 @@ booping specs site
 <li><span aria-current="page">Overview</span></li>
 </ol>
 </nav>
+<div class="measure">
 <h1>Specs</h1>
 <p class="lead">Ship in small, reviewable steps.</p>
-<p class="callout"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg><span><a href="review.html">3 need you →</a> · 1 open question</span></p>
+<p class="callout"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg><span><a href="review.html">3 need you →</a> · 3 unreviewed · 1 open question</span></p>
+</div>
 <ul class="scen">
 <li><a href="records.html#type=adr"><b>ADRs <span class="n">1</span></b><span class="s">why it was decided so</span></a></li>
 <li><a href="records.html#type=rule"><b>Rules <span class="n">1</span></b><span class="s">what constrains decisions</span></a></li>
@@ -213,6 +215,7 @@ booping specs site
 <li><span aria-current="page">adr/0001</span></li>
 </ol>
 </nav>
+<div class="measure">
 <article>
 <h1>Adopt squash merges</h1>
 <div class="badges"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span><a href="#L13"><span class="b warn"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>1 question for you</span></a><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-unreviewed"/></svg>unreviewed</span></div>
@@ -229,15 +232,11 @@ booping specs site
 <dl class="facts">
 <dt>Reviewed</dt>
 <dd>not reviewed yet</dd>
-</dl>
-<section class="relations">
-<dl>
 <dt>Serves values</dt>
 <dd><ul class="rel">
 <li><a href="../../proj/value/0001-small-steps.html">Small steps</a> <code class="ref">value/0001</code></li>
 </ul></dd>
 </dl>
-</section>
 <div class="body">
 <h1 id="adopt-squash-merges">Adopt squash merges</h1>
 <p>Follows <a href="../../proj/value/0001-small-steps.html#why">small steps</a>.</p>
@@ -247,6 +246,7 @@ booping specs site
 </article>
 <h2 id="referenced-by">Referenced by<a class="anchor" href="#referenced-by" aria-label="Link to this section: Referenced by">§</a></h2>
 <p>Nothing references this record.</p>
+</div>
 </main>
 <aside class="rail">
 <div class="q">

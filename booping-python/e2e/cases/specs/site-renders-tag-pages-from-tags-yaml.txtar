@@ -89,7 +89,7 @@ specs site: 1 roots, 2 records, 11 pages, 0 warnings -> specs-site
 </ul>
 <h4>Tags</h4>
 <ul>
-<li><a href="../../proj/tags/ops.html"><code>ops</code><span class="n">2</span></a></li>
+<li><a href="../../proj/tags/ops.html">ops<span class="n">2</span></a></li>
 <li><a href="../../proj/tags/index.html" aria-current="page">All tags</a></li>
 </ul>
 <h4>Sources</h4>
@@ -179,7 +179,7 @@ specs site: 1 roots, 2 records, 11 pages, 0 warnings -> specs-site
 </ul>
 <h4>Tags</h4>
 <ul>
-<li><a href="../../proj/tags/ops.html" aria-current="page"><code>ops</code><span class="n">2</span></a></li>
+<li><a href="../../proj/tags/ops.html" aria-current="page">ops<span class="n">2</span></a></li>
 <li><a href="../../proj/tags/index.html">All tags</a></li>
 </ul>
 <h4>Sources</h4>

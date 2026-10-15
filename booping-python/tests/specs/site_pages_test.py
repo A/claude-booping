@@ -393,7 +393,9 @@ def test_sidebar_tags_group_per_root_with_top_level_counts(tmp_path: Path) -> No
     _write(tmp_path / "core" / "value" / "0001-a.md", "---\ntitle: A\ntags: [ux:nav]\n---\nx\n")
     _write(tmp_path / "core" / "value" / "0002-b.md", "---\ntitle: B\ntags: [ux]\n---\nx\n")
     _write(tmp_path / "proj" / "adr" / "0001-c.md", "---\ntitle: C\ntags: [ops]\n---\nx\n")
-    side = _side(_texts(load_site(_roots(tmp_path), TYPES))["index.html"])
+    _write(tmp_path / "core" / "tags.yaml", "ux: UX\nidle: Nobody carries it\n")
+    pages = _texts(load_site(_roots(tmp_path), TYPES))
+    side = _side(pages["index.html"])
     assert re.findall(r"<h4>([^<]+)</h4>", side) == ["Types", "Tags", "Sources"]
     assert re.findall(r"<h5>([^<]+)</h5>", side) == ["core", "proj"]
     tags = side[side.index("<h4>Tags</h4>") : side.index("<h4>Sources</h4>")]
@@ -403,6 +405,10 @@ def test_sidebar_tags_group_per_root_with_top_level_counts(tmp_path: Path) -> No
         ("proj/tags/ops.html", "ops", "1"),
         ("proj/tags/index.html", "All tags", ""),
     ]
+    assert '<a href="core/tags/ux.html">ux<span class="n">2</span></a>' in tags
+    assert "<code>" not in tags
+    assert "idle" not in side
+    assert 'href="idle.html"' in pages["core/tags/index.html"]
 
 
 def test_sidebar_tags_have_no_root_heading_with_one_tagged_root(tmp_path: Path) -> None:
@@ -410,7 +416,7 @@ def test_sidebar_tags_have_no_root_heading_with_one_tagged_root(tmp_path: Path) 
     _write(tmp_path / "proj" / "adr" / "0001-c.md", "---\ntitle: C\n---\nx\n")
     side = _side(_texts(load_site(_roots(tmp_path), TYPES))["index.html"])
     assert "<h5>" not in side
-    assert '<a href="core/tags/ux.html"><code>ux</code><span class="n">1</span></a>' in side
+    assert '<a href="core/tags/ux.html">ux<span class="n">1</span></a>' in side
 
 
 ROW_DATA = re.compile(
@@ -489,14 +495,25 @@ def _record_page(tmp_path: Path, lang: str = "en") -> dict[str, str]:
 def test_record_page_head_facts_and_relations_in_russian(tmp_path: Path) -> None:
     page = _record_page(tmp_path, "ru")["s/adr/0001-robot.html"]
     facts = page[page.index('<dl class="facts">') : page.index("</dl>")]
-    assert re.findall(r"<dt>([^<]+)</dt>", facts) == ["Автор", "Изменено", "Ревью"]
+    assert re.findall(r"<dt>([^<]+)</dt>", facts) == [
+        "Автор",
+        "Изменено",
+        "Ревью",
+        "Служит ценностям",
+        "Заменено на",
+    ]
     assert "<dd>агент</dd>" in facts
     assert '<dd><time datetime="2026-10-15">15 октября 2026</time></dd>' in facts
     assert "<dd>ещё не было</dd>" in facts
     assert (
         '<dt>Служит ценностям</dt>\n<dd><ul class="rel">\n'
         '<li><a href="../../s/value/0001-craft.html">Craft</a> <code class="ref">value/0001</code>'
-    ) in page
+    ) in facts
+    assert "<section" not in page
+    assert page.count("<dl") == 2
+    measure = page[page.index('<div class="measure">') :]
+    assert measure.index("<article>") < measure.index('<dl class="facts">')
+    assert measure.index('<h2 id="referenced-by">') < measure.index("</div>\n</main>")
     assert '<a class="tag" href="../../s/tags/robot.html">#robot</a>' in page
     anchor = re.search(r'<a href="#(L\d+)"><span class="b warn">', page)
     assert anchor is not None
@@ -526,7 +543,6 @@ LIST_CLASSES = {
     "tags",
     "tag",
     "facts",
-    "relations",
     "rel",
     "types",
 }
@@ -768,7 +784,22 @@ def test_home_lead_callout_scenarios_and_recent(tmp_path: Path) -> None:
         r'<p class="callout">.*?<span><a href="([^"]+)">([^<]+)</a>([^<]*)</span>', home
     )
     assert callout is not None
-    assert callout.groups() == ("review.html", "3 need you →", " · 2 open questions")
+    # One record lacks `reviewed:`; the two [clarify] marks are the open questions.
+    assert callout.groups() == (
+        "review.html",
+        "3 need you →",
+        " · 1 unreviewed · 2 open questions",
+    )
+    measures = re.findall(r'<div class="measure">\n(.*?)\n</div>', home, flags=re.S)
+    assert len(measures) == 2
+    assert '<p class="lead">We ship small.</p>' in measures[0]
+    assert 'class="callout"' in measures[0]
+    assert "<h2>Recently updated</h2>" in measures[1]
+    assert '<ul class="recent">' in measures[1]
+    assert all('class="scen"' not in m for m in measures)
+    assert '<ul class="scen">' in home
+    assert 'class="mark"' not in home
+    assert "[clarify]" not in home
     assert re.findall(
         r'<a href="(records\.html#type=[a-z]+)"><b>([^<]+) <span class="n">(\d+)', home
     ) == [
@@ -785,6 +816,16 @@ def test_home_lead_callout_scenarios_and_recent(tmp_path: Path) -> None:
     assert '<time datetime="2026-09-15">15 September 2026</time>' in recent
 
 
+def test_home_callout_omits_unreviewed_when_every_record_is_reviewed(tmp_path: Path) -> None:
+    _write(
+        tmp_path / "s" / "adr" / "0001-a.md",
+        "---\ntitle: A\nreviewed: 2026-10-01\n---\n[clarify] x\n",
+    )
+    home = _texts(load_site([SiteRoot("s", tmp_path / "s")], TYPES))["index.html"]
+    assert '<a href="review.html">1 needs you →</a> · 1 open question</span>' in home
+    assert " unreviewed" not in home
+
+
 def test_home_without_value_or_review_has_no_lead_or_callout(tmp_path: Path) -> None:
     _write(tmp_path / "s" / "adr" / "0001-a.md", "---\ntitle: A\nreviewed: 2026-10-01\n---\nx\n")
     home = _texts(load_site([SiteRoot("s", tmp_path / "s")], TYPES))["index.html"]
@@ -795,7 +836,9 @@ def test_home_without_value_or_review_has_no_lead_or_callout(tmp_path: Path) -> 
 
 def test_home_callout_in_russian_uses_the_few_form(tmp_path: Path) -> None:
     home = _home_site(tmp_path, "ru")
-    assert '<a href="review.html">3 записи ждут тебя →</a> · 2 открытых вопроса' in home
+    assert (
+        '<a href="review.html">3 записи ждут тебя →</a> · 1 без ревью · 2 открытых вопроса</span>'
+    ) in home
     assert "<h2>Недавно изменённое</h2>" in home
 
 
