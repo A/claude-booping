@@ -1,0 +1,13 @@
+A plan path that does not exist in the vault is one error line at exit 1, nothing on stdout.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- cmd --
+booping correction list --plan plans/q/index.md
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: plan not found: plans/q/index.md

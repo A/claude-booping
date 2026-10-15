@@ -1,0 +1,51 @@
+A plan with only its own sidecar prints it under a `# {sidecar path}` line, the file's body
+below its H1 following a blank line.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/plans/p/index.md --
+---
+title: P
+code_reviews: null
+---
+
+# P
+-- fixtures/cwd/vault/plans/p/corrections.md --
+# Corrections
+
+## R1 — groom/draft-plan — 2026-10-15 15:40
+
+**Did:** proposed one plan
+
+**Said:**
+
+> split it
+
+**Why:** not stated
+
+**Dialogue:** not found — no session id
+
+**Artifact:** [index.md](index.md)
+-- cmd --
+booping correction list --plan plans/p/index.md
+-- exit --
+0
+-- stdout --
+# plans/p/corrections.md
+
+## R1 — groom/draft-plan — 2026-10-15 15:40
+
+**Did:** proposed one plan
+
+**Said:**
+
+> split it
+
+**Why:** not stated
+
+**Dialogue:** not found — no session id
+
+**Artifact:** [index.md](index.md)
+-- stderr --
