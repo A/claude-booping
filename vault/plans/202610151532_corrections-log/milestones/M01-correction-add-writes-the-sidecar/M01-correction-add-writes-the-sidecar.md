@@ -2,7 +2,7 @@
 id: "01"
 title: "booping correction add writes the corrections sidecar"
 sp: 4
-status: pending
+status: done
 plan: "plans/202610151532_corrections-log/index.md"
 ---
 
@@ -18,21 +18,21 @@ Tests: integration tier, txtar cases under `booping-python/e2e/cases/correction/
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 1.1 | `correction` command, `add` verb, sidecar seeding, numbering, entry rendering. | `booping-python/src/booping/cli.py`, `booping-python/src/booping/commands/correction.py`, `booping-python/src/booping/correction.py` | 3 | pending |
-| 1.2 | The txtar cases named in Tests. | `booping-python/e2e/cases/correction/add-*.txtar` | 1 | pending |
+| 1.1 | `correction` command, `add` verb, sidecar seeding, numbering, entry rendering. | `booping-python/src/booping/cli.py`, `booping-python/src/booping/commands/correction.py`, `booping-python/src/booping/correction.py` | 3 | done |
+| 1.2 | The txtar cases named in Tests. | `booping-python/e2e/cases/correction/add-*.txtar` | 1 | done |
 
 ## Definition of Done
 
 ### Task 1.1
 
-- [ ] `booping correction --help` lists `add`; `add --help` lists `--target --step --did --said --why --session`.
-- [ ] The written entry matches `index.md` `### corrections.md` line for line, `**Record:**` absent; stdout is `{sidecar}#R{n}` alone.
-- [ ] Every error path prints one `error: …` line on stderr, exits 1, leaves stdout empty and the sidecar untouched.
+- [x] `booping correction --help` lists `add`; `add --help` lists `--target --step --did --said --why --session`.
+- [x] The written entry matches `index.md` `### corrections.md` line for line, `**Record:**` absent; stdout is `{sidecar}#R{n}` alone.
+- [x] Every error path prints one `error: …` line on stderr, exits 1, leaves stdout empty and the sidecar untouched.
 
 ### Task 1.2
 
-- [ ] Every case pins the heading time through `macro_stubs` in the fixture `vault/config.yaml`.
-- [ ] One case per behaviour named in Tests; each failure case asserts stderr, an empty stdout and no `corrections.md` in `expected/`.
+- [x] Every case pins the heading time through `macro_stubs` in the fixture `vault/config.yaml`.
+- [x] One case per behaviour named in Tests; each failure case asserts stderr, an empty stdout and no `corrections.md` in `expected/`.
 
 Return: the list of changed files, nothing else.
 

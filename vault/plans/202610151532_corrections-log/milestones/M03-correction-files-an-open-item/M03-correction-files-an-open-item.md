@@ -2,7 +2,7 @@
 id: "03"
 title: "add --record files an open item"
 sp: 3
-status: pending
+status: done
 plan: "plans/202610151532_corrections-log/index.md"
 ---
 
@@ -18,24 +18,24 @@ Tests: integration tier, txtar cases — `--record value/0007` writes the entry 
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 3.1 | `correction` source value and its help. | `booping-python/src/booping/specs/open_items.py`, `booping-python/src/booping/commands/specs.py` | 1 | pending |
-| 3.2 | `--record` on `correction add`: validation, item filing, entry and stdout. | `booping-python/src/booping/correction.py`, `booping-python/src/booping/commands/correction.py` | 1 | pending |
-| 3.3 | The txtar cases named in Tests. | `booping-python/e2e/cases/correction/add-record-*.txtar`, `booping-python/e2e/cases/specs/open-items-add-correction-source.txtar` | 1 | pending |
+| 3.1 | `correction` source value and its help. | `booping-python/src/booping/specs/open_items.py`, `booping-python/src/booping/commands/specs.py` | 1 | done |
+| 3.2 | `--record` on `correction add`: validation, item filing, entry and stdout. | `booping-python/src/booping/correction.py`, `booping-python/src/booping/commands/correction.py` | 1 | done |
+| 3.3 | The txtar cases named in Tests. | `booping-python/e2e/cases/correction/add-record-*.txtar`, `booping-python/e2e/cases/specs/open-items-add-correction-source.txtar` | 1 | done |
 
 ## Definition of Done
 
 ### Task 3.1
 
-- [ ] `booping specs open-items add --help` names `correction` among the sources.
+- [x] `booping specs open-items add --help` names `correction` among the sources.
 
 ### Task 3.2
 
-- [ ] The item file matches the open-item scaffold key for key with the values in Scope; the entry's link and the item's back link resolve relative to their own files.
-- [ ] A bad `--record` writes neither the entry nor an item.
+- [x] The item file matches the open-item scaffold key for key with the values in Scope; the entry's link and the item's back link resolve relative to their own files.
+- [x] A bad `--record` writes neither the entry nor an item.
 
 ### Task 3.3
 
-- [ ] One case per behaviour named in Tests.
+- [x] One case per behaviour named in Tests.
 
 Return: the list of changed files, nothing else.
 

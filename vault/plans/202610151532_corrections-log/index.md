@@ -2,20 +2,21 @@
 title: "Corrections log — booping correction add, the corrections sidecar, retro's
   feed"
 type: "feature"
-status: ready-for-dev
-sp: null
+status: in-progress
+sp: 20
 related_to: null
 created: 2026-10-15 15:32
 planned: null
-started: null
+started: 2026-10-15 15:47
 completed: null
 code_reviews: []
 sessions:
 - 6a68e361-5db5-43f6-9580-ac2e1ae7254d
+- 472924ad-8031-4e2b-b103-b50d62cb8074
 retro: null
 summary: booping correction add logs user corrections with a dialogue link into 
   a corrections.md sidecar; core rule; retro reads the feed
-commit: 0d2819eb5512d0ed6f442cb486de41d237869023
+commit: 202b1dab393736e6f8b6e2564a654b4e5235b9c9
 tracker_provider: null
 tracker_request: null
 tracker_issue: null
@@ -121,15 +122,15 @@ A *user message* is a jsonl record with `type: user`, not `isMeta`, not `isSidec
 
 ## Milestones
 
-| id | title | sp | status | path | slug |
-| --- | --- | --- | --- | --- | --- |
-| 01 | booping correction add writes the corrections sidecar | 4 | pending | plans/202610151532_corrections-log/milestones/M01-correction-add-writes-the-sidecar/M01-correction-add-writes-the-sidecar.md | M01-correction-add-writes-the-sidecar |
-| 02 | add links the entry to the dialogue | 4 | pending | plans/202610151532_corrections-log/milestones/M02-dialogue-link-from-the-transcript/M02-dialogue-link-from-the-transcript.md | M02-dialogue-link-from-the-transcript |
-| 03 | add --record files an open item | 3 | pending | plans/202610151532_corrections-log/milestones/M03-correction-files-an-open-item/M03-correction-files-an-open-item.md | M03-correction-files-an-open-item |
-| 04 | booping correction list prints a plan's feed | 3 | pending | plans/202610151532_corrections-log/milestones/M04-correction-list-for-a-plan/M04-correction-list-for-a-plan.md | M04-correction-list-for-a-plan |
-| 05 | Core rule 0031 and the corrections format doc | 2 | pending | plans/202610151532_corrections-log/milestones/M05-corrections-rule-and-format-doc/M05-corrections-rule-and-format-doc.md | M05-corrections-rule-and-format-doc |
-| 06 | Retro prepare reads the corrections feed | 2 | pending | plans/202610151532_corrections-log/milestones/M06-retro-reads-the-feed/M06-retro-reads-the-feed.md | M06-retro-reads-the-feed |
-| 07 | Docs and CLAUDE.md name corrections | 2 | pending | plans/202610151532_corrections-log/milestones/M07-docs-and-claude-md/M07-docs-and-claude-md.md | M07-docs-and-claude-md |
+| id | title | sp | status |
+| --- | --- | --- | --- |
+| 01 | [booping correction add writes the corrections sidecar](milestones/M01-correction-add-writes-the-sidecar/M01-correction-add-writes-the-sidecar.md) | 4 | done |
+| 02 | [add links the entry to the dialogue](milestones/M02-dialogue-link-from-the-transcript/M02-dialogue-link-from-the-transcript.md) | 4 | done |
+| 03 | [add --record files an open item](milestones/M03-correction-files-an-open-item/M03-correction-files-an-open-item.md) | 3 | done |
+| 04 | [booping correction list prints a plan's feed](milestones/M04-correction-list-for-a-plan/M04-correction-list-for-a-plan.md) | 3 | done |
+| 05 | [Core rule 0031 and the corrections format doc](milestones/M05-corrections-rule-and-format-doc/M05-corrections-rule-and-format-doc.md) | 2 | pending |
+| 06 | [Retro prepare reads the corrections feed](milestones/M06-retro-reads-the-feed/M06-retro-reads-the-feed.md) | 2 | pending |
+| 07 | [Docs and CLAUDE.md name corrections](milestones/M07-docs-and-claude-md/M07-docs-and-claude-md.md) | 2 | pending |
 
 ## I/O contract
 

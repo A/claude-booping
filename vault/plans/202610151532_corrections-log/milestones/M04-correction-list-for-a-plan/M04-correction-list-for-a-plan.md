@@ -1,8 +1,8 @@
 ---
 id: "04"
-title: "booping correction list prints a plan\u0027s feed"
+title: "booping correction list prints a plan's feed"
 sp: 3
-status: pending
+status: done
 plan: "plans/202610151532_corrections-log/index.md"
 ---
 
@@ -18,19 +18,19 @@ Tests: integration tier, txtar cases — a plan sidecar alone; a plan sidecar pl
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 4.1 | `list` verb and feed assembly. | `booping-python/src/booping/commands/correction.py`, `booping-python/src/booping/correction.py` | 2 | pending |
-| 4.2 | The txtar cases named in Tests. | `booping-python/e2e/cases/correction/list-*.txtar` | 1 | pending |
+| 4.1 | `list` verb and feed assembly. | `booping-python/src/booping/commands/correction.py`, `booping-python/src/booping/correction.py` | 2 | done |
+| 4.2 | The txtar cases named in Tests. | `booping-python/e2e/cases/correction/list-*.txtar` | 1 | done |
 
 ## Definition of Done
 
 ### Task 4.1
 
-- [ ] `booping correction list --help` lists `--plan`.
-- [ ] stdout matches the `list` shape of `index.md` `## I/O contract` exactly; nothing on stderr on success.
+- [x] `booping correction list --help` lists `--plan`.
+- [x] stdout matches the `list` shape of `index.md` `## I/O contract` exactly; nothing on stderr on success.
 
 ### Task 4.2
 
-- [ ] One case per behaviour named in Tests.
+- [x] One case per behaviour named in Tests.
 
 Return: the list of changed files, nothing else.
 
