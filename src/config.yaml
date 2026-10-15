@@ -283,6 +283,12 @@ core:
             level_low: low
             level_medium: medium
             level_high: high
+            search: Search
+            search_placeholder: Search the specs
+            search_all: All results
+            search_results: ["{n} result", "{n} results"]
+            search_none: Nothing found
+            search_needs_js: Search needs JavaScript.
           types:
             value: {name: Value, plural: Values, scenario: "why the project exists"}
             rule: {name: Rule, plural: Rules, scenario: "what constrains decisions"}
@@ -384,6 +390,12 @@ core:
             level_low: низкая
             level_medium: средняя
             level_high: высокая
+            search: Поиск
+            search_placeholder: Поиск по спекам
+            search_all: Все результаты
+            search_results: ["{n} результат", "{n} результата", "{n} результатов"]
+            search_none: Ничего не найдено
+            search_needs_js: Для поиска нужен JavaScript.
           types:
             value: {name: Ценность, plural: Ценности, scenario: "Ценности — зачем этот проект и какой он"}
             rule: {name: Правило, plural: Правила, scenario: "Правила — что ограничивает решения"}

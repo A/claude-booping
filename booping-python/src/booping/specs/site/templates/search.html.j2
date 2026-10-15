@@ -1,0 +1,15 @@
+{% extends "base.html.j2" %}
+{% block scripts %}
+<script src="{{ prefix }}search-index.js" defer></script>
+<script src="{{ prefix }}search-body.js" defer></script>
+{% endblock %}
+{% block main %}
+<h1>{{ labels.ui("search") }}</h1>
+<form class="search-page" role="search" action="search.html">
+<input type="search" name="q" aria-label="{{ labels.ui('search') }}" placeholder="{{ labels.ui('search_placeholder') }}">
+</form>
+<p class="needs-js">{{ labels.ui("search_needs_js") }} <a href="{{ prefix }}records.html">{{ labels.ui("all_records") }}</a></p>
+<p class="count" role="status" data-forms="{{ labels.plural_forms('search_results') | tojson | forceescape }}"></p>
+<ul class="rows search-results"></ul>
+<p class="empty" hidden>{{ labels.ui("search_none") }}</p>
+{% endblock %}

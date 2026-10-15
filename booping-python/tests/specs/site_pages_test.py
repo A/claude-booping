@@ -9,6 +9,7 @@ from pathlib import Path
 import pytest
 
 from booping.specs.site import pages as site_pages
+from booping.specs.site.index import Project, build_index
 from booping.specs.site.items import OpenItem
 from booping.specs.site.labels import load_labels
 from booping.specs.site.model import Site, SiteRoot, load_site
@@ -99,7 +100,8 @@ def _check_links(files: dict[str, str | bytes]) -> int:
     for path, parsed in pages.items():
         text = files[path]
         assert isinstance(text, str)
-        assert parsed.scripts == (3 if 'class="filters"' in text else 2), path
+        extra = 1 if 'class="filters"' in text else 2 if path == "search.html" else 0
+        assert parsed.scripts == 3 + extra, path
         for href in parsed.hrefs:
             assert "://" not in href and not href.startswith("/"), (path, href)
             target, _, fragment = href.partition("#")
@@ -139,6 +141,10 @@ def test_page_map_paths(site: Site) -> None:
         "proj/index.html",
         "records.html",
         "review.html",
+        "search-body.js",
+        "search-index.js",
+        "search.html",
+        "search.js",
         "site.js",
         "style.css",
     ]
@@ -955,3 +961,51 @@ def test_record_with_one_heading_and_no_marks_has_no_rail(tmp_path: Path) -> Non
     assert '<aside class="rail">' not in page
     assert "toc-m" not in page
     assert 'class="body norail"' in page
+
+
+def test_record_header_holds_the_search_combobox_and_script(site: Site) -> None:
+    page = _texts(site)["proj/adr/0001-pick.html"]
+    assert (
+        '<form class="search" role="search" action="../../search.html" data-prefix="../../"' in page
+    )
+    assert (
+        '<input type="search" name="q" role="combobox" aria-label="Search"'
+        ' aria-autocomplete="list" aria-expanded="false" aria-controls="search-list"'
+        ' autocomplete="off" placeholder="Search the specs">'
+    ) in page
+    assert "<kbd>/</kbd>" in page
+    assert '<ul id="search-list" role="listbox" aria-label="Search" hidden></ul>' in page
+    assert '<button class="iconbtn search-btn" type="button" aria-label="Search"' in page
+    assert '<script src="../../search.js" defer></script>' in page
+    assert '<script src="search.js" defer></script>' in _texts(site)["index.html"]
+
+
+def test_search_page_loads_both_data_files_and_says_it_needs_js(site: Site) -> None:
+    page = _texts(site)["search.html"]
+    assert '<script src="search-index.js" defer></script>' in page
+    assert '<script src="search-body.js" defer></script>' in page
+    assert page.index("search-body.js") < page.index('<script src="search.js"')
+    assert "<h1>Search</h1>" in page
+    assert (
+        '<p class="needs-js">Search needs JavaScript. <a href="records.html">All records</a></p>'
+        in page
+    )
+    assert '<form class="search" role="search" action="search.html"' in page
+
+
+def test_site_index_has_no_search() -> None:
+    page = build_index([Project("a", "https://a.example/", "A")], "Group")["index.html"]
+    assert isinstance(page, str)
+    assert 'class="search' not in page
+    assert "search.js" not in page
+
+
+def test_search_labels_resolve_in_russian(tmp_path: Path) -> None:
+    files = _record_page(tmp_path, "ru")
+    assert 'placeholder="Поиск по спекам"' in files["records.html"]
+    assert 'aria-label="Поиск"' in files["records.html"]
+    page = files["search.html"]
+    assert "<h1>Поиск</h1>" in page
+    assert "Для поиска нужен JavaScript." in page
+    assert 'data-forms="[&#34;{n} результат&#34;' in page
+    assert "Ничего не найдено" in page

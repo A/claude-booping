@@ -43,6 +43,8 @@ class Rendered:
     marks: list[Mark]
     links: list[tuple[int, str]]
     headings: list[Heading]
+    # The body's plain text for search: every inline token's text, whitespace collapsed.
+    text: str = ""
 
 
 def section_anchor(id_: str, text: str, labels: Labels) -> str:
@@ -155,6 +157,7 @@ def render_body(
     marks: list[Mark] = []
     links: list[tuple[int, str]] = []
     headings: list[tuple[Token, Heading]] = []
+    texts: list[str] = []
     # Open blocks that can carry a mark anchor.
     stack: list[Token] = []
 
@@ -170,6 +173,8 @@ def render_body(
             line = first_line + (token.map or [0])[0]
             heading = Heading(int(token.tag[1:]), text.strip(), heading_id, line)
             headings.append((tokens[index + 1], heading))
+        if token.type == "inline":
+            texts.append(_plain(token))
         if token.type != "inline" or token.map is None:
             continue
         if tokens[index - 1].type in ("td_open", "th_open") and token.content.strip() in statuses:
@@ -214,6 +219,7 @@ def render_body(
         marks=marks,
         links=links,
         headings=[h for _, h in headings],
+        text=_WS_RE.sub(" ", " ".join(texts)).strip(),
     )
 
 

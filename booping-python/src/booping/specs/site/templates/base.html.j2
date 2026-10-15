@@ -15,6 +15,9 @@
 <link rel="stylesheet" href="{{ prefix }}style.css">
 <script src="{{ prefix }}site.js" defer></script>
 {% block scripts %}{% endblock %}
+{% if nav %}
+<script src="{{ prefix }}search.js" defer></script>
+{% endif %}
 {% block head %}{% endblock %}
 </head>
 <body>
@@ -25,6 +28,16 @@
 <button class="iconbtn menu" type="button" aria-expanded="false" aria-controls="drawer" aria-label="{{ labels.ui('menu') }}">{{ icon("i-menu") }}</button>
 {% endif %}
 <a class="brand" href="{{ prefix }}index.html">{{ site_title }}</a>
+{% if nav %}
+<form class="search" role="search" action="{{ prefix }}search.html" data-prefix="{{ prefix }}" data-all="{{ labels.ui('search_all') }}">
+{{ icon("i-search") }}
+<input type="search" name="q" role="combobox" aria-label="{{ labels.ui('search') }}" aria-autocomplete="list" aria-expanded="false" aria-controls="search-list" autocomplete="off" placeholder="{{ labels.ui('search_placeholder') }}">
+<kbd>/</kbd>
+<button class="iconbtn search-close" type="button" aria-label="{{ labels.ui('close') }}">&times;</button>
+<ul id="search-list" role="listbox" aria-label="{{ labels.ui('search') }}" hidden></ul>
+</form>
+<button class="iconbtn search-btn" type="button" aria-label="{{ labels.ui('search') }}" title="{{ labels.ui('search') }}">{{ icon("i-search") }}</button>
+{% endif %}
 <button class="iconbtn theme" type="button" aria-label="{{ labels.ui('theme_auto') }}" title="{{ labels.ui('theme_auto') }}" data-label-auto="{{ labels.ui('theme_auto') }}" data-label-light="{{ labels.ui('theme_light') }}" data-label-dark="{{ labels.ui('theme_dark') }}">{{ icon("i-auto") }}</button>
 </header>
 <div class="body{% if not nav %} noside{% endif %}{% if not rail_html %} norail{% endif %}">

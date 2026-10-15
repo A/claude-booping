@@ -26,6 +26,7 @@ from booping.specs.site.model import (
     ref_keys,
     ref_values,
 )
+from booping.specs.site.search import search_body_js, search_index_js
 from booping.specs.site.state import RecordState, record_state
 from booping.specs.site.tags import TagNode, record_tags, tag_page_path, tag_tree, tagged
 
@@ -518,6 +519,7 @@ def build_site(
         "style.css": (_HERE / "style.css").read_text(),
         "site.js": (_HERE / "site.js").read_text(),
         "filter.js": (_HERE / "filter.js").read_text(),
+        "search.js": (_HERE / "search.js").read_text(),
     }
     warnings: set[SiteWarning] = set()
 
@@ -677,6 +679,12 @@ def build_site(
         rows=review_rows,
         filters=_filters(review_rows, labels, "review", REVIEW_SORTS, REVIEW_FACETS, REVIEW_FLAGS),
     )
+    page(
+        "search.html.j2",
+        "search.html",
+        labels.ui("search"),
+        [Crumb(labels.ui("overview"), "index.html"), Crumb(labels.ui("search"), None)],
+    )
     dated = [(_iso_date(r.frontmatter.get("updated_at")), r) for r in ordered]
     # Stable sort: equal dates keep page order.
     recent = sorted((d for d in dated if d[0]), key=lambda d: d[0], reverse=True)[:_RECENT]
@@ -718,4 +726,6 @@ def build_site(
         )
     files["llms.txt"] = llms_txt(site, states, labels, site_title)
     files["index.json"] = index_json(site, states, labels, site_title, lang)
+    files["search-index.js"] = search_index_js(site, labels, states)
+    files["search-body.js"] = search_body_js(site, rendered)
     return files, sorted(warnings)

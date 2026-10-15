@@ -25,7 +25,7 @@ booping specs site --root a=a --root b=b
 -- exit --
 0
 -- stdout --
-specs site: 2 roots, 2 records, 9 pages, 0 warnings -> specs-site
+specs site: 2 roots, 2 records, 10 pages, 0 warnings -> specs-site
 -- stderr --
 -- expected/cwd/specs-site/b/rule/0001-one-concern-per-commit.html --
 <!doctype html>
@@ -39,6 +39,7 @@ specs site: 2 roots, 2 records, 9 pages, 0 warnings -> specs-site
 <link rel="stylesheet" href="../../fonts.css">
 <link rel="stylesheet" href="../../style.css">
 <script src="../../site.js" defer></script>
+<script src="../../search.js" defer></script>
 <link rel="alternate" type="text/markdown" href="0001-one-concern-per-commit.md">
 </head>
 <body>
@@ -61,6 +62,14 @@ specs site: 2 roots, 2 records, 9 pages, 0 warnings -> specs-site
 <header class="top">
 <button class="iconbtn menu" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Menu"><svg class="ic" aria-hidden="true"><use href="#i-menu"/></svg></button>
 <a class="brand" href="../../index.html">Specs</a>
+<form class="search" role="search" action="../../search.html" data-prefix="../../" data-all="All results">
+<svg class="ic" aria-hidden="true"><use href="#i-search"/></svg>
+<input type="search" name="q" role="combobox" aria-label="Search" aria-autocomplete="list" aria-expanded="false" aria-controls="search-list" autocomplete="off" placeholder="Search the specs">
+<kbd>/</kbd>
+<button class="iconbtn search-close" type="button" aria-label="Close">&times;</button>
+<ul id="search-list" role="listbox" aria-label="Search" hidden></ul>
+</form>
+<button class="iconbtn search-btn" type="button" aria-label="Search" title="Search"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg></button>
 <button class="iconbtn theme" type="button" aria-label="Theme: auto" title="Theme: auto" data-label-auto="Theme: auto" data-label-light="Theme: light" data-label-dark="Theme: dark"><svg class="ic" aria-hidden="true"><use href="#i-auto"/></svg></button>
 </header>
 <div class="body norail">
