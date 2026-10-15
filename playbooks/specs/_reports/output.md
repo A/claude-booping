@@ -71,6 +71,11 @@ No project tier yet (the preamble lists none, or `booping specs ls` finds no spe
 create it. Once the user agrees, run `booping specs init --tier project`, then walk the user
 through [the alignment guide](${CLAUDE_PLUGIN_ROOT}/docs/specs-alignment.md).
 
+## Import
+
+The user brings specs written elsewhere: convert them per [the import guide](${CLAUDE_PLUGIN_ROOT}/docs/specs-import.md) —
+English structural headings, area files split into `value` records. Next: `booping specs check`.
+
 ## Alignment
 
 The user refines the project's values: read the `value` records, then follow the alignment
