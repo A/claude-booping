@@ -3,7 +3,7 @@ id: "04"
 title: "Alternatives check — table rows match H3 options, one accepted, names from
   the schema"
 sp: 4
-status: in-progress
+status: done
 plan: "plans/202610152146_project-level-schemas/index.md"
 ---
 
@@ -19,24 +19,24 @@ Tests (integration tier, `booping-python/e2e/cases/specs/`, hand-derived): with 
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 4.1 | Derive the check's names from a schema file. | `booping-python/src/booping/specs/alternatives.py` | 1 | pending |
-| 4.2 | Rows ↔ H3 and accepted-count check on a record; wired into `check_tier`. | `booping-python/src/booping/specs/alternatives.py`, `booping-python/src/booping/specs/check.py` | 2 | pending |
-| 4.3 | The e2e cases above. | `booping-python/e2e/cases/specs/check-alternatives-*.txtar` | 1 | pending |
+| 4.1 | Derive the check's names from a schema file. | `booping-python/src/booping/specs/alternatives.py` | 1 | done |
+| 4.2 | Rows ↔ H3 and accepted-count check on a record; wired into `check_tier`. | `booping-python/src/booping/specs/alternatives.py`, `booping-python/src/booping/specs/check.py` | 2 | done |
+| 4.3 | The e2e cases above. | `booping-python/e2e/cases/specs/check-alternatives-*.txtar` | 1 | done |
 
 ## Definition of Done
 
 ### Task 4.1
 
-- [ ] For the shipped `adr.yaml` the derived names are `Alternatives` / `Option` / `Status`; for a schema without such a rule, no check.
+- [x] For the shipped `adr.yaml` the derived names are `Alternatives` / `Option` / `Status`; for a schema without such a rule, no check.
 
 ### Task 4.2
 
-- [ ] `just specs-check` on this repo stays green (adr/0022 is `proposed` with no accepted row; every other ADR has one).
-- [ ] Each message is produced exactly as worded above.
+- [x] `just specs-check` on this repo stays green (adr/0022 is `proposed` with no accepted row; every other ADR has one).
+- [x] Each message is produced exactly as worded above.
 
 ### Task 4.3
 
-- [ ] The cases exist and pass.
+- [x] The cases exist and pass.
 
 Return: the list of changed and created files, nothing else.
 

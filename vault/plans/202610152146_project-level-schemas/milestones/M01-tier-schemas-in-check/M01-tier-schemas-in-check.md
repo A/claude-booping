@@ -2,7 +2,7 @@
 id: "01"
 title: "Tier schemas — each tier's effective schema set, used by booping specs check"
 sp: 4
-status: in-progress
+status: done
 plan: "plans/202610152146_project-level-schemas/index.md"
 ---
 
@@ -18,25 +18,25 @@ Tests (integration tier, `booping-python/e2e/cases/specs/`, hand-derived): a pro
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 1.1 | Per-tier schema resolver on `Tier`; `_`-prefixed directories skipped by `load_tier`. | `booping-python/src/booping/specs/tiers.py`, `booping-python/src/booping/specs/records.py`, `booping-python/tests/specs/tiers_test.py` | 2 | pending |
-| 1.2 | `check_tier` uses the tier's schema map; tier-schema load failure as a `schema` finding. | `booping-python/src/booping/specs/check.py`, `booping-python/src/booping/commands/specs.py` | 1 | pending |
-| 1.3 | The four e2e cases above. | `booping-python/e2e/cases/specs/check-*.txtar` | 1 | pending |
+| 1.1 | Per-tier schema resolver on `Tier`; `_`-prefixed directories skipped by `load_tier`. | `booping-python/src/booping/specs/tiers.py`, `booping-python/src/booping/specs/records.py`, `booping-python/tests/specs/tiers_test.py` | 2 | done |
+| 1.2 | `check_tier` uses the tier's schema map; tier-schema load failure as a `schema` finding. | `booping-python/src/booping/specs/check.py`, `booping-python/src/booping/commands/specs.py` | 1 | done |
+| 1.3 | The four e2e cases above. | `booping-python/e2e/cases/specs/check-*.txtar` | 1 | done |
 
 ## Definition of Done
 
 ### Task 1.1
 
-- [ ] `schemas(format_dir, root)` returns the shipped map when `{root}/_schemas/` is absent, replaces a same stem and adds a new stem when present — unit-tested.
-- [ ] A `_schemas/` directory in a tier not rooted at the vault yields no record and no `layout` finding.
+- [x] `schemas(format_dir, root)` returns the shipped map when `{root}/_schemas/` is absent, replaces a same stem and adds a new stem when present — unit-tested.
+- [x] A `_schemas/` directory in a tier not rooted at the vault yields no record and no `layout` finding.
 
 ### Task 1.2
 
-- [ ] `just specs-check` on this repo is unchanged (no `_schemas/` in either tier).
-- [ ] A broken tier schema → exactly one finding `{path}:1  error  schema  {mdcheck message}` for the schema file, exit 1; a broken shipped schema → exit 2 as before.
+- [x] `just specs-check` on this repo is unchanged (no `_schemas/` in either tier).
+- [x] A broken tier schema → exactly one finding `{path}:1  error  schema  {mdcheck message}` for the schema file, exit 1; a broken shipped schema → exit 2 as before.
 
 ### Task 1.3
 
-- [ ] The four cases exist and pass.
+- [x] The four cases exist and pass.
 
 Return: the list of changed and created files, nothing else.
 

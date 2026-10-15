@@ -3,7 +3,7 @@ id: "02"
 title: "Tier types everywhere — ls, next, site, items and status read each tier's
   own types"
 sp: 4
-status: in-progress
+status: done
 plan: "plans/202610152146_project-level-schemas/index.md"
 ---
 
@@ -19,24 +19,24 @@ Tests (integration tier, `booping-python/e2e/cases/specs/`, hand-derived): a pro
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 2.1 | `ls`, `next`, `site` and the site model per tier. | `booping-python/src/booping/commands/specs.py`, `booping-python/src/booping/specs/site/model.py`, `booping-python/src/booping/specs/site/pages.py` | 2 | pending |
-| 2.2 | `items add|scan` and `status` per tier. | `booping-python/src/booping/commands/items.py`, `booping-python/src/booping/status.py` | 1 | pending |
-| 2.3 | The e2e cases above. | `booping-python/e2e/cases/specs/*mechanic*.txtar`, `booping-python/e2e/cases/render-playbook/*russian-rule*.txtar` | 1 | pending |
+| 2.1 | `ls`, `next`, `site` and the site model per tier. | `booping-python/src/booping/commands/specs.py`, `booping-python/src/booping/specs/site/model.py`, `booping-python/src/booping/specs/site/pages.py` | 2 | done |
+| 2.2 | `items add|scan` and `status` per tier. | `booping-python/src/booping/commands/items.py`, `booping-python/src/booping/status.py` | 1 | done |
+| 2.3 | The e2e cases above. | `booping-python/e2e/cases/specs/*mechanic*.txtar`, `booping-python/e2e/cases/render-playbook/*russian-rule*.txtar` | 1 | done |
 
 ## Definition of Done
 
 ### Task 2.1
 
-- [ ] `grep -rn "_known_types" booping-python/src` prints nothing.
-- [ ] `booping specs site` renders a page for an added type and none for a type the root lacks.
+- [x] `grep -rn "_known_types" booping-python/src` prints nothing.
+- [x] `booping specs site` renders a page for an added type and none for a type the root lacks.
 
 ### Task 2.2
 
-- [ ] `booping status` and `booping items scan` on this repo's vault print what they printed before (no `_schemas/`).
+- [x] `booping status` and `booping items scan` on this repo's vault print what they printed before (no `_schemas/`).
 
 ### Task 2.3
 
-- [ ] The cases exist and pass.
+- [x] The cases exist and pass.
 
 Return: the list of changed and created files, nothing else.
 

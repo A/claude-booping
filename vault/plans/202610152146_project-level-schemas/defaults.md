@@ -49,3 +49,13 @@
 **Why:** Owner's standing permission for this feature (2026-10-14), recorded in the plan's Departures
 
 **Artifact:** [index.md](index.md)
+
+## D6 — develop/develop-loop — 2026-10-15 22:25
+
+**Asked:** M01–M04 share check.py, commands/specs.py, items.py and tiers.py — one commit per milestone cannot split those files cleanly
+
+**Default:** Shared source (incl. tags.py and alternatives.py, which check.py imports) landed in M01's commit 0f758af; M02 commit 2953357 carries status/site + its cases; M03 7059fd4 and M04 a376c64 carry their e2e cases
+
+**Why:** Every commit stays importable; no interactive hunk staging in this harness
+
+**Artifact:** [index.md](index.md)

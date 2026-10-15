@@ -2,7 +2,7 @@
 id: "03"
 title: "Tags dictionary — record tags checked against the tier's tags.yaml"
 sp: 3
-status: in-progress
+status: done
 plan: "plans/202610152146_project-level-schemas/index.md"
 ---
 
@@ -18,19 +18,19 @@ Tests (integration tier, `booping-python/e2e/cases/specs/`, hand-derived): a tie
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 3.1 | Dictionary load and per-record tag check. | `booping-python/src/booping/specs/tags.py`, `booping-python/src/booping/specs/check.py` | 2 | pending |
-| 3.2 | The two e2e cases above. | `booping-python/e2e/cases/specs/check-tags-*.txtar` | 1 | pending |
+| 3.1 | Dictionary load and per-record tag check. | `booping-python/src/booping/specs/tags.py`, `booping-python/src/booping/specs/check.py` | 2 | done |
+| 3.2 | The two e2e cases above. | `booping-python/e2e/cases/specs/check-tags-*.txtar` | 1 | done |
 
 ## Definition of Done
 
 ### Task 3.1
 
-- [ ] Each of the three messages and the malformed-dictionary error is produced exactly as worded above, finding format `{path}:{line}  error  tags  {message}`.
-- [ ] A tier without `tags.yaml` produces no `tags` finding.
+- [x] Each of the three messages and the malformed-dictionary error is produced exactly as worded above, finding format `{path}:{line}  error  tags  {message}`.
+- [x] A tier without `tags.yaml` produces no `tags` finding.
 
 ### Task 3.2
 
-- [ ] The cases exist and pass.
+- [x] The cases exist and pass.
 
 Return: the list of changed and created files, nothing else.
 
