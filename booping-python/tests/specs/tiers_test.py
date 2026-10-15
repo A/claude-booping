@@ -6,7 +6,7 @@ from typing import Any
 import pytest
 
 from booping.rendering import get_plugin_root
-from booping.specs.tiers import project_root, resolve_tiers, types
+from booping.specs.tiers import project_root, resolve_tiers, schemas, types
 
 
 def _config(**tiers: dict[str, Any]) -> dict[str, Any]:
@@ -114,3 +114,46 @@ def test_types_lists_shipped_schemas() -> None:
         "story",
         "value",
     ]
+
+
+def test_schemas_without_tier_dir_is_the_shipped_set(tmp_path: Path) -> None:
+    fmt = tmp_path / "format"
+    (fmt / "schemas").mkdir(parents=True)
+    (fmt / "schemas" / "rule.yaml").write_text("doc: rule\n")
+    (fmt / "schemas" / "adr.yaml").write_text("doc: adr\n")
+    assert schemas(fmt, tmp_path / "tier") == {
+        "adr": fmt / "schemas" / "adr.yaml",
+        "rule": fmt / "schemas" / "rule.yaml",
+    }
+
+
+def test_schemas_tier_overrides_a_stem_and_adds_one(tmp_path: Path) -> None:
+    fmt, root = tmp_path / "format", tmp_path / "tier"
+    (fmt / "schemas").mkdir(parents=True)
+    (root / "_schemas").mkdir(parents=True)
+    for stem in ("rule", "adr"):
+        (fmt / "schemas" / f"{stem}.yaml").write_text(f"doc: {stem}\n")
+    for stem in ("rule", "mechanic"):
+        (root / "_schemas" / f"{stem}.yaml").write_text(f"doc: {stem}\n")
+    assert schemas(fmt, root) == {
+        "adr": fmt / "schemas" / "adr.yaml",
+        "mechanic": root / "_schemas" / "mechanic.yaml",
+        "rule": root / "_schemas" / "rule.yaml",
+    }
+
+
+def test_resolve_tiers_gives_each_tier_its_own_overlay(tmp_path: Path) -> None:
+    plugin, home, repo = tmp_path / "plugin", tmp_path / "home", tmp_path / "repo"
+    (plugin / "src/specs/schemas").mkdir(parents=True)
+    (plugin / "src/specs/schemas/rule.yaml").write_text("doc: rule\n")
+    (home / "_specs/_schemas").mkdir(parents=True)
+    (home / "_specs/_schemas/rule.yaml").write_text("doc: rule\n")
+    (home / "_specs/_schemas/mechanic.yaml").write_text("doc: mechanic\n")
+    tiers = resolve_tiers(
+        _config(), plugin_root=plugin, home_dir=home, repo=repo, vault=repo / "vault"
+    )
+    assert {t.name: (t.types, t.schemas["rule"]) for t in tiers} == {
+        "core": (["rule"], plugin / "src/specs/schemas/rule.yaml"),
+        "global": (["mechanic", "rule"], home / "_specs/_schemas/rule.yaml"),
+        "project": (["rule"], plugin / "src/specs/schemas/rule.yaml"),
+    }

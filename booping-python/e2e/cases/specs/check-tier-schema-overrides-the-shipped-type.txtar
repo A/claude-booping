@@ -1,0 +1,87 @@
+A project tier's `_schemas/rule.yaml` replaces the shipped rule schema for that tier: a rule under
+the translated headings passes, one under the shipped English headings is flagged by the tier's
+schema. `_schemas/` itself holds no records.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/_schemas/rule.yaml --
+doc: rule
+
+rules:
+  - select: FRONTMATTER
+    has:
+      type: rule
+      title: '^.+$'
+      summary: '^.{1,200}$'
+      created_by: { enum: [owner, claude] }
+      created_at: '^\d{4}-\d{2}-\d{2}$'
+      updated_at: '^\d{4}-\d{2}-\d{2}$'
+      status: { enum: [accepted, retired] }
+
+  - select: H2
+    ordered: [Правило, Следует из ценностей, Исключения?]
+    strict: true
+
+  - select: SECTION("Правило") > P
+    min: 1
+
+  - select: SECTION("Следует из ценностей") > UL > LI
+    min: 1
+    each:
+      - select: A
+        min: 1
+
+  - select: SECTION("Исключения") > UL > LI
+    optional: true
+    min: 1
+-- fixtures/cwd/vault/rule/0001-keep-it-short.md --
+---
+type: rule
+title: Keep it short
+summary: Cut what the reader does not need.
+created_by: owner
+created_at: 2026-01-01
+updated_at: 2026-01-01
+status: accepted
+---
+
+## Правило
+
+Cut what the reader does not need.
+
+## Следует из ценностей
+
+- [Brevity](https://example.com/brevity)
+-- fixtures/cwd/vault/rule/0002-say-it-once.md --
+---
+type: rule
+title: Say it once
+summary: Never repeat a fact.
+created_by: owner
+created_at: 2026-01-01
+updated_at: 2026-01-01
+status: accepted
+---
+
+## Rule
+
+Never repeat a fact.
+
+## Follows from
+
+- [Brevity](https://example.com/brevity)
+-- cmd --
+booping specs check
+-- exit --
+1
+-- stdout --
+vault/rule/0002-say-it-once.md:1  error  schema  required section `Правило` missing
+vault/rule/0002-say-it-once.md:1  error  schema  required section `Следует из ценностей` missing
+vault/rule/0002-say-it-once.md:1  error  schema  `SECTION("Правило") > P`: 0 matches, expected ≥ 1
+vault/rule/0002-say-it-once.md:1  error  schema  `SECTION("Следует из ценностей") > UL > LI`: 0 matches, expected ≥ 1
+vault/rule/0002-say-it-once.md:11  error  schema  section `Rule` not allowed (strict)
+vault/rule/0002-say-it-once.md:15  error  schema  section `Follows from` not allowed (strict)
+-- stderr --
+2 record(s) checked: 6 error(s), 0 warning(s)

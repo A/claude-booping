@@ -9,6 +9,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel
 
+from booping.specs import alternatives, tags
 from booping.specs.links import relative_links
 from booping.specs.records import Record, load_tier, parse_ref
 from booping.specs.targets import TargetRejection, parse_target
@@ -29,6 +30,14 @@ class Finding(BaseModel):
 
 class CheckError(Exception):
     """An internal failure (exit 2): mdcheck missing, crashing or printing garbage."""
+
+
+class SchemaLoadError(CheckError):
+    """mdcheck exit 2: it could not load the schema file. `detail` is its first stderr line."""
+
+    def __init__(self, message: str, detail: str) -> None:
+        super().__init__(message)
+        self.detail = detail
 
 
 def display_path(path: Path) -> str:
@@ -103,6 +112,21 @@ def _check_targets(record: Record) -> list[Finding]:
     return findings
 
 
+def _check_tags(record: Record, dictionary: dict[str, str] | None) -> list[Finding]:
+    value = record.frontmatter.get("tags")
+    if dictionary is None or value is None:
+        return []
+    line = _key_line(record.path, "tags")
+    return [_error(record.path, "tags", m, line) for m in tags.problems(value, dictionary)]
+
+
+def _check_alternatives(record: Record, checks: list[alternatives.Names]) -> list[Finding]:
+    text = record.path.read_text()
+    first_line = text[: len(text) - len(record.body)].count("\n") + 1
+    problems = alternatives.check(record.body, first_line, record.frontmatter.get("status"), checks)
+    return [_error(record.path, "alternatives", message, line) for line, message in problems]
+
+
 def run_mdcheck(schema: Path, record: Record) -> list[Finding]:
     try:
         proc = subprocess.run(
@@ -116,10 +140,12 @@ def run_mdcheck(schema: Path, record: Record) -> list[Finding]:
         raise CheckError("mdcheck not found on PATH — cargo install markdown-checker") from exc
     if proc.returncode not in (0, 1):
         detail = proc.stderr.strip().splitlines()
-        raise CheckError(
-            f"mdcheck exited {proc.returncode} on {display_path(record.path)}"
-            + (f": {detail[0]}" if detail else "")
+        message = f"mdcheck exited {proc.returncode} on {display_path(record.path)}" + (
+            f": {detail[0]}" if detail else ""
         )
+        if proc.returncode == 2:
+            raise SchemaLoadError(message, detail[0] if detail else "")
+        raise CheckError(message)
     try:
         findings = json.loads(proc.stdout)["findings"]
         return [_error(record.path, "schema", str(f["message"]), int(f["line"])) for f in findings]
@@ -265,24 +291,28 @@ CROSS_FILE_CHECKS: list[Callable[[list[Record], Scope], list[Finding]]] = [
 ]
 
 
-def _scope(tier: Tier, records: list[Record], tiers: list[Tier], known: list[str]) -> Scope:
+def _scope(tier: Tier, records: list[Record], tiers: list[Tier]) -> Scope:
     namespaces: dict[str, tuple[Tier, dict[str, set[int]]]] = {}
     for t in tiers:
         if t.namespace is None:
             continue
-        loaded = records if t.root == tier.root else load_tier(t, known)
-        namespaces[t.namespace] = (t, _numbers([r for r in loaded if r.type in known]))
+        loaded = records if t.root == tier.root else load_tier(t, t.types)
+        namespaces[t.namespace] = (t, _numbers([r for r in loaded if r.type in t.schemas]))
     return Scope(tier=tier, own=_numbers(records), namespaces=namespaces)
 
 
-def check_tier(
-    tier: Tier, format_dir: Path, known: list[str], tiers: list[Tier]
-) -> tuple[list[Finding], int]:
+def _tier_owned(tier: Tier, schema: Path) -> bool:
+    return schema.is_relative_to(tier.root / "_schemas")
+
+
+def check_tier(tier: Tier, tiers: list[Tier]) -> tuple[list[Finding], int]:
     """Findings sorted by path then line, and the number of records checked.
-    `tiers` is every resolved tier; namespaced refs resolve against them."""
+    `tiers` is every resolved tier; namespaced refs resolve against them.
+    Each record is checked by its tier's schema for its type."""
     if shutil.which("mdcheck") is None:
         raise CheckError("mdcheck not found on PATH — cargo install markdown-checker")
 
+    known = tier.types
     records = load_tier(tier, known)
     strays = (
         []
@@ -291,18 +321,39 @@ def check_tier(
     )
     findings = [_error(p, "layout", LAYOUT_MESSAGE) for p in strays]
 
+    try:
+        dictionary = tags.load(tier.root)
+    except tags.MalformedDictionary as exc:
+        dictionary = None
+        findings.append(_error(tier.root / tags.DICTIONARY, "tags", str(exc)))
+
     placed: list[Record] = []
+    broken: set[str] = set()
+    names: dict[Path, list[alternatives.Names]] = {}
     for record in records:
-        if record.type not in known:
+        if record.type not in tier.schemas:
             findings.append(_error(record.path, "layout", LAYOUT_MESSAGE))
             continue
         placed.append(record)
         findings += _check_filename(record)
         findings += _check_frontmatter(record)
         findings += _check_targets(record)
-        findings += run_mdcheck(format_dir / "schemas" / f"{record.type}.yaml", record)
+        schema = tier.schemas[record.type]
+        if record.type not in broken:
+            try:
+                findings += run_mdcheck(schema, record)
+            except SchemaLoadError as exc:
+                if not _tier_owned(tier, schema):
+                    raise
+                broken.add(record.type)
+                findings.append(_error(schema, "schema", exc.detail))
+        if record.type not in broken:
+            if schema not in names:
+                names[schema] = alternatives.names(schema)
+            findings += _check_alternatives(record, names[schema])
+        findings += _check_tags(record, dictionary)
 
-    scope = _scope(tier, placed, tiers, known)
+    scope = _scope(tier, placed, tiers)
     for cross_file in CROSS_FILE_CHECKS:
         findings += cross_file(placed, scope)
 

@@ -9,8 +9,6 @@ from booping.commands.specs import (
     _add_tier,  # pyright: ignore[reportPrivateUsage]
     _assemble,  # pyright: ignore[reportPrivateUsage]
     _fail,  # pyright: ignore[reportPrivateUsage]
-    _format_dir,  # pyright: ignore[reportPrivateUsage]
-    _known_types,  # pyright: ignore[reportPrivateUsage]
     _resolve,  # pyright: ignore[reportPrivateUsage]
     _select_tier,  # pyright: ignore[reportPrivateUsage]
 )
@@ -178,9 +176,8 @@ def _run_add(args: argparse.Namespace) -> None:
         if record is not None and open_items.is_adr_ref(record):
             source = source or "adr"
             if source not in open_items.REQUEST_SOURCES:
-                known = _known_types(ctx, root)
                 tier = _select_tier(ctx, root, home_dir, "project")
-                adr = open_items.find_adr(load_tier(tier, known), record)
+                adr = open_items.find_adr(load_tier(tier, tier.types), record)
                 if title is None:
                     title = open_items.confirmation_title(adr)
                     if title is None:
@@ -222,11 +219,11 @@ def _run_scan(args: argparse.Namespace) -> None:
         open_items.require_vault(ctx)
     except OpenItemError as exc:
         _fail(str(exc))
-    known = _known_types(ctx, root)
     tier = _select_tier(ctx, root, home_dir, args.tier)
+    known = tier.types
     records = load_tier(tier, known)
     try:
-        findings, _ = check_tier(tier, _format_dir(ctx, root), known, _resolve(ctx, root, home_dir))
+        findings, _ = check_tier(tier, _resolve(ctx, root, home_dir))
     except CheckError as exc:
         _fail(str(exc), 2)
     candidates = open_items.mark_candidates(

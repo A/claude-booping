@@ -114,10 +114,6 @@ def _format_dir(ctx: Context, root: Path) -> Path:
     return root / str(specs.get("format"))
 
 
-def _known_types(ctx: Context, root: Path) -> list[str]:
-    return types(_format_dir(ctx, root))
-
-
 def _check_type(type_: str, known: list[str]) -> None:
     if type_ not in known:
         _fail(f"unknown type `{type_}`; known: {', '.join(known)}")
@@ -133,13 +129,21 @@ def _resolve(ctx: Context, root: Path, home_dir: Path) -> list[Tier]:
     )
 
 
-def _select_tier(ctx: Context, root: Path, home_dir: Path, name: str) -> Tier:
+def _find_tier(ctx: Context, root: Path, home_dir: Path, name: str) -> Tier:
     tier = next((t for t in _resolve(ctx, root, home_dir) if t.name == name), None)
     if tier is None:
         _fail(f"tier `{name}` is not available here")
-    if not tier.root.is_dir():
-        _fail(f"no specs for tier `{name}` at {tier.root}")
     return tier
+
+
+def _require_dir(tier: Tier) -> Tier:
+    if not tier.root.is_dir():
+        _fail(f"no specs for tier `{tier.name}` at {tier.root}")
+    return tier
+
+
+def _select_tier(ctx: Context, root: Path, home_dir: Path, name: str) -> Tier:
+    return _require_dir(_find_tier(ctx, root, home_dir, name))
 
 
 def _numbered(records: list[Record], known: list[str]) -> list[Record]:
@@ -151,10 +155,11 @@ def _numbered(records: list[Record], known: list[str]) -> list[Record]:
 def _run_ls(args: argparse.Namespace) -> None:
     ctx, root, home_dir = _assemble()
     logger.log(vault=ctx.vault, subcommand="specs", message=f"ls --tier {args.tier}")
-    known = _known_types(ctx, root)
+    tier = _find_tier(ctx, root, home_dir, args.tier)
+    known = tier.types
     if args.record_type is not None:
         _check_type(args.record_type, known)
-    tier = _select_tier(ctx, root, home_dir, args.tier)
+    _require_dir(tier)
 
     records = _numbered(load_tier(tier, known), known)
     if args.record_type is not None:
@@ -176,9 +181,10 @@ def _run_next(args: argparse.Namespace) -> None:
         subcommand="specs",
         message=f"next {args.record_type} --tier {args.tier}",
     )
-    known = _known_types(ctx, root)
+    tier = _find_tier(ctx, root, home_dir, args.tier)
+    known = tier.types
     _check_type(args.record_type, known)
-    tier = _select_tier(ctx, root, home_dir, args.tier)
+    _require_dir(tier)
 
     numbers = [
         r.number
@@ -191,13 +197,10 @@ def _run_next(args: argparse.Namespace) -> None:
 def _run_check(args: argparse.Namespace) -> None:
     ctx, root, home_dir = _assemble()
     logger.log(vault=ctx.vault, subcommand="specs", message=f"check --tier {args.tier}")
-    known = _known_types(ctx, root)
     tier = _select_tier(ctx, root, home_dir, args.tier)
 
     try:
-        findings, checked = check_tier(
-            tier, _format_dir(ctx, root), known, _resolve(ctx, root, home_dir)
-        )
+        findings, checked = check_tier(tier, _resolve(ctx, root, home_dir))
     except CheckError as exc:
         _fail(str(exc), 2)
     for f in findings:
@@ -289,7 +292,7 @@ def _default_roots(
 def _run_site(args: argparse.Namespace) -> None:
     ctx, root, home_dir = _assemble()
     logger.log(vault=ctx.vault, subcommand="specs", message=f"site --out {args.out}")
-    known = _known_types(ctx, root)
+    known = types(_format_dir(ctx, root))
 
     skipped: list[tuple[Path, str]] = []
     if args.roots:

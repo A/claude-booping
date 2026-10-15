@@ -18,6 +18,12 @@ class Tier(BaseModel):
     anchor: Path
     # The project tier rooted at the vault itself: only type directories hold records.
     vault_rooted: bool = False
+    # Effective schema set: type stem → mdcheck rule file, shipped overlaid by `{root}/_schemas/`.
+    schemas: dict[str, Path] = {}
+
+    @property
+    def types(self) -> list[str]:
+        return sorted(self.schemas)
 
     def link(self, path: Path) -> str:
         """`path` as a rendered body shows it: core under `${CLAUDE_PLUGIN_ROOT}`, project
@@ -74,6 +80,8 @@ def resolve_tiers(
     stays reproducible; no attached repo drops the project tier.
     """
     tiers: list[Tier] = []
+    specs = config.get("core", {}).get("specs", {})
+    format_dir = plugin_root / str(specs.get("format"))
 
     core = _tier_settings(config, "core")
     tiers.append(
@@ -111,7 +119,24 @@ def resolve_tiers(
             )
         )
 
-    return tiers
+    return [t.model_copy(update={"schemas": schemas(format_dir, t.root)}) for t in tiers]
+
+
+def schemas(format_dir: Path, root: Path) -> dict[str, Path]:
+    """Type stem → schema path: `{format_dir}/schemas/*.yaml`, then `{root}/_schemas/*.yaml`
+    replacing a same stem and adding new ones. No cascade between tiers."""
+    found = {p.stem: p for p in sorted((format_dir / "schemas").glob("*.yaml"))}
+    found.update(_own_schemas(root))
+    return found
+
+
+def _own_schemas(root: Path) -> dict[str, Path]:
+    return {p.stem: p for p in sorted((root / "_schemas").glob("*.yaml"))}
+
+
+def own_types(root: Path) -> list[str]:
+    """The type stems `{root}/_schemas/` holds, sorted — the overlay without the shipped set."""
+    return sorted(_own_schemas(root))
 
 
 def types(format_dir: Path) -> list[str]:
