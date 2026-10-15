@@ -30,3 +30,4 @@ nav:
       - code-review playbook: code_review.md
       - retro playbook: retro.md
       - learn playbook: learn.md
+      - specs playbook: specs_playbook.md

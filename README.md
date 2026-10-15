@@ -24,7 +24,7 @@ booping is aimed at **experienced developers and tech leads** — people comfort
 
 It's built for **iterative, agile-style development**: maintenance, incremental features, or growing a project sprint by sprint. It is **not** a waterfall tool — don't hand it a whole-project spec and expect a finished product. One plan is one sprint; the loop compounds across many.
 
-Drop a `config.yaml` into your vault and it overrides the defaults — sprint scale, task types, branch conventions and agent wiring are the natural targets. The `code-review` playbook (`/playbook code-review`) is a side-route for stack-aware review of a finished plan's diff, recorded as its own artifact under `codereviews/`.
+Drop a `config.yaml` into your vault and it overrides the defaults — sprint scale, task types, branch conventions and agent wiring are the natural targets. The `code-review` playbook (`/playbook code-review`) is a side-route for stack-aware review of a finished plan's diff, recorded as its own artifact under `codereviews/`. The `specs` playbook (`/playbook specs`) works the project's [specs](documentation/specs.md) records — values, rules, decisions — and the open items that track where specs and code still disagree.
 
 **A note on maturity:** v1.0 works — the whole loop is dogfooded on this repo — but it's beta-grade. Expect rough edges (eval suites pending review, some skills-era legacy in the core). Installation trouble? Run `/playbook setup` and discuss the issue with it.
 
@@ -105,6 +105,9 @@ retro       awaiting-retro → awaiting-learning (terminal)     [on retrospectiv
 learn       awaiting-learning → done (terminal)               [on retrospectives/{slug}.md]
 
 code-review in-agent-review → human-review → done (terminal)  [on codereviews/{dir}/{ts}.md]
+
+specs       open → planned → done (terminal)                  [on open-items/OI-NNNN.md, one per item]
+            (open | planned → dropped (terminal), planned → open)
 ```
 
 The tracks join the plan by frontmatter, not by status. A finished plan carries `retro: null` until a retrospective covers it, at which point retro stamps the retrospective's path there (or `skipped` when you skip it) — that null is the retro queue. Review joins by a **list**: `code_reviews:` starts empty and every closing review appends its path, so the key reads as history rather than a queue flag, and the review queue is every `done` plan, re-review included.
@@ -148,6 +151,13 @@ Skipping a plan's retro writes no retrospective at all: the plan is stamped `ret
 - **`in-agent-review`** — the review file is open on a confirmed scope and the review pass is producing findings.
 - **`human-review`** — the findings are recorded and your verdict on them is pending.
 - **`done`** *(code-review's terminal)* — every finding is applied, delegated or dropped, and the record is closed. Closing stamps `reviewed_at` and appends the review's path to the reviewed plan's `code_reviews:` list; an ad-hoc review (`plan: null`) links to nothing. The plan's own `status:` is never touched.
+
+**specs** — on each open item at `open-items/OI-NNNN.md`, moved only by `booping specs open-items`, never by a playbook run.
+
+- **`open`** — the gap is filed and waits for a plan.
+- **`planned`** — linked to a plan; develop finishing that plan closes it, a failed or cancelled plan returns it to `open`.
+- **`done`** *(terminal)* — the work landed.
+- **`dropped`** *(terminal)* — closed without work, with a reason.
 
 This README narrates the statuses — each playbook is the authority on its own transition rules and gates.
 
