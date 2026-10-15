@@ -1,6 +1,6 @@
 # booping
 
-A self-learning, project-scoped sprint workflow for Claude Code. booping turns a feature idea into a durable, on-disk loop — **groom → develop → retro → learn** — that uses sub-agents to avoid context rot, with an optional second-model cross-review of every plan. Every artifact (plans, retros, lessons, sprint snapshots) lives under `~/Claude/{project}/`, one folder per codebase.
+A self-learning, project-scoped sprint workflow for Claude Code. booping turns a feature idea into a durable, on-disk loop — **groom → develop → retro → learn** — that uses sub-agents to avoid context rot, with an optional second-model cross-review of every plan. Every artifact (plans, retros, code reviews, sprint snapshots) lives under `~/Claude/{project}/`, one folder per codebase.
 
 ![Vault open in Obsidian](docs/images/vault-in-obsidian.webp)
 
@@ -10,13 +10,13 @@ A self-learning, project-scoped sprint workflow for Claude Code. booping turns a
 
 Take a feature at whatever maturity it arrives — a rough idea over an existing codebase, a half-formed brief, a detailed PRD — and drive it through one loop: groom it into a plan, develop it, review the diff, retro what shipped.
 
-booping is **not** spec-driven development — it doesn't keep specs as a living mirror of the codebase. It's closer to scrum sprints: a plan is a sprint artifact, done and forgotten once it ships; what persists is the vault's history and the lessons the loop distils from it. Playbooks are plain markdown procedures — when the shipped loop doesn't fit, you write your own (see [Extensibility](#extensibility)).
+booping is **not** spec-driven development — it doesn't keep specs as a living mirror of the codebase. It's closer to scrum sprints: a plan is a sprint artifact, done and forgotten once it ships; what persists is the vault's history and the rules the loop distils from it. Playbooks are plain markdown procedures — when the shipped loop doesn't fit, you write your own (see [Extensibility](#extensibility)).
 
 ## Obsidian-ready by design
 
 The vault at `~/Claude/{project}/` is markdown-only with YAML frontmatter that Obsidian renders natively as Properties. One vault per project, side-by-side with whatever else you keep in `~/Claude/`. No lock-in — just files you can grep, version, and edit by hand.
 
-This repo is developed with booping itself, and its vault is checked in at [`vault/`](vault/) — browse a [finished plan](vault/plans/202608081300_session-time-metrics/index.md), the [targeted lessons](vault/_lessons/) the loop has accumulated, or a [retrospective](vault/retrospectives/20260722-seven-plan-retro.md).
+This repo is developed with booping itself, and its vault is checked in at [`vault/`](vault/) — browse a [finished plan](vault/plans/202608081300_session-time-metrics/index.md), the [targeted rules](vault/specs/rule/) the loop has accumulated, or a [retrospective](vault/retrospectives/20260722-seven-plan-retro.md).
 
 ## Disclaimer
 
@@ -52,7 +52,7 @@ Inside Claude Code, register the marketplace once, then install the plugin:
 
 Update later via `/plugin update booping` (or from the `/plugin` UI).
 
-After installing, `cd` into the target repo and run `/playbook setup`. It settles the machine config, then scaffolds the vault (`plans/`, `retrospectives/`, `codereviews/`, `_lessons/`, `notes/`) and writes the `.booping` marker. Anything already in place is detected and skipped. The `booping` CLI logs its invocations to `.booping.log` at the vault root.
+After installing, `cd` into the target repo and run `/playbook setup`. It settles the machine config, then scaffolds the vault (`plans/`, `retrospectives/`, `codereviews/`, `notes/`) and writes the `.booping` marker. Anything already in place is detected and skipped. The `booping` CLI logs its invocations to `.booping.log` at the vault root.
 
 ## Quick start
 
@@ -139,7 +139,7 @@ A plan's frontmatter status is written by groom or develop. Retro and learn writ
 
 - **`awaiting-retro`** — retro's entry status, set when the run starts.
 - **`awaiting-learning`** *(retro's terminal)* — the retrospective is written and signed off. Learn claims from here.
-- **`done`** *(learn's terminal)* — every accepted lesson is written to its target.
+- **`done`** *(learn's terminal)* — every accepted rule is written to its destination.
 
 Skipping a plan's retro writes no retrospective at all: the plan is stamped `retro: skipped`, taking it out of the queue while leaving its `status: done` alone.
 
@@ -169,7 +169,7 @@ Sprints over **35 SP** get hard to keep reviewable, so groom suggests a split in
 
 Playbooks stay wide-domain and stack-agnostic. Project-specific concerns live entirely in your vault:
 
-- **`~/Claude/{project}/_lessons/`** — targeted rules from learn. Each carries a `targets:` list naming the playbooks, steps, agents and skills it reaches — that list is how a project teaches groom its conventions, develop its test runner, or a worker agent its house rules.
+- **The project's [specs](documentation/specs.md) tier** — the project's rules, including the ones learn writes. A rule's `targets:` list names the playbooks, steps, agents and skills its brief reaches — that list is how a project teaches groom its conventions, develop its test runner, or a worker agent its house rules.
 - **`~/Claude/{project}/plan_templates/*.md`** — project-local plan templates. Discovered alongside the core templates (`backend`, `frontend`, `claude-skill`, `cli`, `documentation`); can override a core one by sharing its `name`, or add new ones.
 - **`~/Claude/{project}/review_templates/*.md`** — project-local code-review templates. Loaded by `code-review` alongside the core templates (`coding-architecture`, `python`, `security`); it picks the matching subset from the repo's manifests and each template's `description` frontmatter.
 - **`~/Claude/{project}/_playbooks/`** — playbooks of your own, discovered by `/playbook` beside the shipped ones.
@@ -178,13 +178,13 @@ Playbooks stay wide-domain and stack-agnostic. Project-specific concerns live en
 
 `retro` reads the working set of finished plans, mines the session logs and git diff for what actually shipped, takes your raw feedback first, and writes one standalone `~/Claude/{project}/retrospectives/{slug}.md` — what worked, what didn't, divergences from spec, a goal verdict per plan. One retrospective can cover several plans; each gets its `retro:` stamped with the file's path.
 
-`learn` then reviews the retrospective with you, picks the durable findings, and routes each to one of two destinations: a targeted lesson (`~/Claude/{project}/_lessons/{N}_{title}.md`, carrying a `targets:` list), or a one-line bullet in the attached repo's `CLAUDE.md`. Lessons are injected into the playbooks, steps, agents and skills they name. You confirm the whole review table before anything lands.
+`learn` then reviews the retrospective with you, picks the durable findings, and routes each to one of two destinations: a rule record in the project's [specs](documentation/specs.md) tier (`rule/{NNNN}-{slug}.md`, carrying a `targets:` list and a one-line `brief:`), or a one-line bullet in the attached repo's `CLAUDE.md`. A rule's brief, with a link to the record, is injected into the playbooks, steps, agents and skills it targets. You confirm the whole review table before anything lands.
 
 ## What booping doesn't do
 
 booping is a feedback loop, not an autopilot. Three things stay your job:
 
-- **Plan review is still on you.** Groom produces a draft and waits at `awaiting-approval` for a reason — sharpen it, push back, ask for splits. As lessons accumulate, plans drift toward your style and constraints, but only if you fed the loop honest reviews. Shit in, shit out.
+- **Plan review is still on you.** Groom produces a draft and waits at `awaiting-approval` for a reason — sharpen it, push back, ask for splits. As rules accumulate, plans drift toward your style and constraints, but only if you fed the loop honest reviews. Shit in, shit out.
 - **Code review is still on you.** Develop ships milestones; you own the quality bar. The `code-review` playbook is a helper that runs stack-aware passes over the diff and records its findings — but reading them, deciding what's off, and bringing them into retro so learn can turn them into rules is still your job.
 - **Learning isn't automatic.** Retro and learn are scaffolding for a feedback loop, not a substitute for one. You still need to sit with the retrospective, confirm which findings are durable, and let learn write them down. Skip that step and the loop stalls.
 

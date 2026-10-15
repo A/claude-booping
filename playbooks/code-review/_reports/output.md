@@ -84,9 +84,9 @@ Each is a candidate; its `commit:` is the diff base. **Reviews** counts the code
 
 | SP | Title | Baseline | Reviews |
 | --- | --- | --- | --- |
-| 5 | [Widget search](plans/19700101-widget-search/index.md) | — none | — |
-| 2 | [Login timeout fix](plans/19700102-login-timeout/index.md) | — none | — |
-| 3 | [Session cleanup sweep](plans/19700103-session-cleanup/index.md) | — none | 1 |
+| 5 | [Widget search](plans/19700101-widget-search/index.md) | aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa | — |
+| 2 | [Login timeout fix](plans/19700102-login-timeout/index.md) | bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb | — |
+| 3 | [Session cleanup sweep](plans/19700103-session-cleanup/index.md) | cccccccccccccccccccccccccccccccccccccccc | 1 |
 
 
 ## The question

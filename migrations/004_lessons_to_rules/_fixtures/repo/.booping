@@ -1,0 +1,3 @@
+project_name: m004-fixture
+latest_migration: 3
+vault_path: vault

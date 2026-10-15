@@ -183,9 +183,7 @@ def test_booping_global_in_render(tmp_path: object) -> None:
 def test_booping_global_in_source_env() -> None:
     """The scaffold seed path: build_source_env + from_string."""
     fixture = get_fixture_path("plugin-root-minimal")
-    env = build_source_env(
-        context=_project_context(9), config={}, plugin_root=fixture
-    )
+    env = build_source_env(context=_project_context(9), config={}, plugin_root=fixture)
 
     assert env.from_string("{{ booping.latest_migration }}").render() == "9"
 
@@ -206,7 +204,7 @@ def test_booping_global_in_playbook_env() -> None:
 
 
 def test_playbook_env_without_context_has_no_booping_global_or_query_filter() -> None:
-    """The lesson-rendering branch: neither surface is wired.
+    """The non-Jinja branch: neither surface is wired.
 
     `booping` is an undefined name and renders empty; `query` is an absent filter and
     so fails at compile time — Jinja has no undefined-filter fallback.

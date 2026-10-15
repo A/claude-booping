@@ -49,7 +49,7 @@ Everything you say in the invocation reaches `intake` verbatim.
 
 ### More detail in the prompt = sharper plan
 
-The playbook works from your request, the codebase, and accumulated lessons. The request is the only knob fully under your control — the more concrete it is, the less the run has to guess.
+The playbook works from your request, the codebase, and the accumulated rules. The request is the only knob fully under your control — the more concrete it is, the less the run has to guess.
 
 Brief request — lots of room for misalignment:
 

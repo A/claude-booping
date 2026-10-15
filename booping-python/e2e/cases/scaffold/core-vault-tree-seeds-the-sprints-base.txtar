@@ -10,7 +10,6 @@ created dir vault
 created dir vault/plans
 created dir vault/retrospectives
 created dir vault/codereviews
-created dir vault/_lessons
 created dir vault/notes
 --- /dev/null
 +++ vault/sprints.md
@@ -61,7 +60,7 @@ created dir vault/notes
 +++ vault/.gitignore
 @@ -0,0 +1 @@
 +.booping.log
-scaffolded 8 paths — 6 dirs created, 2 files created, 0 files overwritten
+scaffolded 7 paths — 5 dirs created, 2 files created, 0 files overwritten
 -- expected/cwd/vault/sprints.md --
 ```base
 formulas:

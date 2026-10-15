@@ -1,0 +1,101 @@
+from __future__ import annotations
+
+import os
+from pathlib import Path
+from typing import Any, Literal
+
+from pydantic import BaseModel
+
+TierName = Literal["core", "global", "project"]
+
+
+class Tier(BaseModel):
+    name: TierName
+    # None for the project tier: no upper tier references a project record.
+    namespace: str | None
+    root: Path
+    # Base a tier-relative path (`path`, a record's `sources`) resolves against.
+    anchor: Path
+
+
+def _tier_settings(config: dict[str, Any], name: str) -> dict[str, Any]:
+    node: Any = config
+    for key in ("core", "specs", "tiers", name):
+        node = node.get(key) if isinstance(node, dict) else None  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
+    return node if isinstance(node, dict) else {}  # pyright: ignore[reportUnknownVariableType]
+
+
+def _resolve_path(anchor: Path, path: str) -> Path:
+    if path.startswith("~"):
+        return Path(path).expanduser()
+    candidate = Path(path)
+    return candidate if candidate.is_absolute() else anchor / candidate
+
+
+def project_root(path: str | None, repo: Path, vault: Path | None) -> Path:
+    """Project tier root: an explicit `path` resolves against the repo; null means
+    `{vault}/specs` when the vault lives inside the repo, else `{repo}/specs`."""
+    if path is not None:
+        return _resolve_path(repo, path)
+    if vault is not None and vault.resolve().is_relative_to(repo.resolve()):
+        return vault / "specs"
+    return repo / "specs"
+
+
+def resolve_tiers(
+    config: dict[str, Any],
+    *,
+    plugin_root: Path,
+    home_dir: Path,
+    repo: Path | None,
+    vault: Path | None,
+    vault_override: bool = False,
+) -> list[Tier]:
+    """Tiers ordered core, global, project.
+
+    `home_dir` is the core+global merge's value, as `Context.assemble()` resolves it.
+    An explicit vault override drops the machine-local global tier so a pinned run
+    stays reproducible; no attached repo drops the project tier.
+    """
+    tiers: list[Tier] = []
+
+    core = _tier_settings(config, "core")
+    tiers.append(
+        Tier(
+            name="core",
+            namespace=core.get("namespace"),
+            root=_resolve_path(plugin_root, str(core.get("path"))),
+            anchor=plugin_root,
+        )
+    )
+
+    if not vault_override:
+        glob = _tier_settings(config, "global")
+        namespace = glob.get("namespace")
+        tiers.append(
+            Tier(
+                name="global",
+                namespace=str(namespace) if namespace is not None else os.environ.get("USER"),
+                root=_resolve_path(home_dir, str(glob.get("path"))),
+                anchor=home_dir,
+            )
+        )
+
+    if repo is not None:
+        project = _tier_settings(config, "project")
+        path = project.get("path")
+        tiers.append(
+            Tier(
+                name="project",
+                namespace=None,
+                root=project_root(str(path) if path is not None else None, repo, vault),
+                anchor=repo,
+            )
+        )
+
+    return tiers
+
+
+def types(format_dir: Path) -> list[str]:
+    """Record type names: the stems of `{format_dir}/schemas/*.yaml`, sorted."""
+    return sorted(p.stem for p in (format_dir / "schemas").glob("*.yaml"))

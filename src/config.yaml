@@ -112,6 +112,24 @@ core:
     # env-interpolated, and secrets stay out of every config tier.
     driver: cli
 
+  # Specs surface — typed records (values, rules, ADRs, …) read by `booping specs`
+  # and by rule injection. Directly under `core` because several consumers share it.
+  # A tier `path` that is absolute or `~`-prefixed is taken as is.
+  specs:
+    # Plugin-root-relative; holds README.md and schemas/{type}.yaml (types = schema stems).
+    format: src/specs
+    tiers:
+      # Plugin-root-relative: booping's own shipped records.
+      core: {namespace: booping, path: vault/specs}
+      # home_dir-relative; namespace null → the `USER` environment variable, read by code.
+      global: {namespace: null, path: _specs}
+      # Repo-relative; path null → {vault}/specs when the vault is inside the repo, else specs.
+      project: {path: null}
+    site:
+      # Extra roots `booping specs site` renders after the tiers, each `{name, path}`;
+      # path home_dir-relative like tiers.global. Set in the global tier.
+      roots: []
+
   groom_playbook:
     # Agent that performs the detached second-model review of a drafted plan.
     # Null → the reviewing step is skipped entirely.
@@ -294,7 +312,7 @@ core:
       scope_candidates:
         where:
           status: done
-        columns: [sp, title, code_reviews]
+        columns: [sp, title, code_reviews, commit]
     agents:
       booping-researcher:
         internal: true
@@ -333,8 +351,6 @@ core:
       retrospectives:
         type: dir
       codereviews:
-        type: dir
-      _lessons:
         type: dir
       notes:
         type: dir

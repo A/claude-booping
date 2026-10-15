@@ -4,8 +4,7 @@ graph:
   briefing: [survey]
   roles: [briefing]
   targets: [briefing]
-  feature-index: [briefing]
-  research: [roles, targets, feature-index]
+  research: [roles, targets]
   sync-specs: [research]
   targeting: [sync-specs]
   update:
@@ -32,18 +31,18 @@ states:
       awaiting-scope-confirm:
         transitions:
           - to: surveying
-            when: "the user's scope answer needs a fresh survey — a different item range, or spec files the survey did not inspect"
+            when: "the user's scope answer needs a fresh survey — a different item range, or spec records the survey did not inspect"
           - to: briefing
-            when: "the user settled which spec files to refresh and which delivered items to cover, and at least one spec file needs work"
+            when: "the user settled which spec records to refresh and which delivered items to cover, and at least one spec record needs work"
             gates:
               - "explicit user confirmation captured — silence never counts"
             hooks:
               - frontmatter-update scope_reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
           - to: researching
-            when: "the user settled the scope and every spec file is present and current — the spec waves are skipped"
+            when: "the user settled the scope and every spec record is present and current — the spec waves are skipped"
             gates:
               - "explicit user confirmation captured"
-              - "the survey found no missing or incomplete spec file"
+              - "the survey found no missing or incomplete spec record"
             hooks:
               - frontmatter-update scope_reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
               - "script commit-docs"
@@ -59,7 +58,7 @@ states:
       briefing:
         transitions:
           - to: awaiting-briefing-confirm
-            when: "briefing wrote `_specs/index.md`, naming any vision shift against the previous one"
+            when: "briefing wrote the run record's `## Briefing` section, naming any vision shift against the previous run record's"
       awaiting-briefing-confirm:
         transitions:
           - to: briefing
@@ -69,32 +68,21 @@ states:
             gates:
               - "explicit user confirmation captured — a vision shift is acknowledged in the answer, silence never counts"
             hooks:
-              - frontmatter-update _specs/index.md reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - frontmatter-update briefing_reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
       spec-building:
         transitions:
           - to: awaiting-roles-targets-confirm
-            when: "roles, targets and feature-index each wrote their file"
+            when: "roles and targets each refreshed their record"
       awaiting-roles-targets-confirm:
         transitions:
           - to: spec-building
             when: "the user wants roles or surfaces refined"
-          - to: awaiting-features-confirm
+          - to: researching
             when: "the user confirms roles and surfaces, presented together"
             gates:
               - "explicit user confirmation captured — silence never counts"
             hooks:
-              - frontmatter-update _specs/roles.md reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
-              - frontmatter-update _specs/targets.md reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
-      awaiting-features-confirm:
-        transitions:
-          - to: spec-building
-            when: "the user wants features, capabilities or groups refined"
-          - to: researching
-            when: "the user confirms the feature index"
-            gates:
-              - "explicit user confirmation captured"
-            hooks:
-              - frontmatter-update _specs/features.md reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - frontmatter-update specs_reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
               - "script commit-docs"
       researching:
         transitions:
@@ -115,7 +103,7 @@ states:
       syncing-specs:
         transitions:
           - to: targeting
-            when: "sync-specs folded the confirmed table into briefing, roles, surfaces and feature index"
+            when: "sync-specs folded the confirmed table into the spec records"
       targeting:
         transitions:
           - to: awaiting-targeting-confirm
@@ -167,7 +155,6 @@ states:
           - awaiting-briefing-confirm
           - spec-building
           - awaiting-roles-targets-confirm
-          - awaiting-features-confirm
         transitions:
           - to: cancelled
             when: "the user cancels the run"

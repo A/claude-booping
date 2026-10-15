@@ -1,0 +1,31 @@
+A record whose file name breaks the `{NNNN}-{slug}.md` shape gets a `filename` finding on line 1;
+its content is still checked against the schema, which it passes.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/specs/value/first.md --
+---
+type: value
+title: First
+summary: The first value.
+kind: value
+created_by: owner
+created_at: 2026-01-01
+updated_at: 2026-01-01
+---
+
+Why the project exists.
+
+## In practice
+
+It shows in every run.
+-- cmd --
+booping specs check
+-- exit --
+1
+-- stdout --
+vault/specs/value/first.md:1  error  filename  file name is not {NNNN}-{slug}.md
+-- stderr --
+1 record(s) checked: 1 error(s), 0 warning(s)

@@ -5,13 +5,13 @@ booping ships with built-in worker agents (`booping-developer`, `booping-researc
 Every integration comes down to two pieces of project config:
 
 - **`core.{name}_playbook.agents.<id>`** in your vault config (`~/Claude/{project}/config.yaml`) registers the agent with that playbook. Each entry carries `good_for` / `bad_for` bullets that guide it toward the right choice. The block name is the playbook name with `-` replaced by `_` — `develop` → `core.develop_playbook`, `code-review` → `core.code_review_playbook`.
-- **A targeted lesson in `_lessons/`**, aimed at the step that delegates (`develop/develop-loop`), tells that step to use your agent and what to hand it. See [Playbooks → Lessons](playbook.md#lessons).
+- **A targeted rule in the project [specs](specs.md) tier**, aimed at the step that delegates (`targets: [develop/develop-loop]`), whose `brief:` tells that step to use your agent and what to hand it. See [Playbooks → Rules](playbook.md#rules).
 
 The agent's own prompt is yours to write — booping never shapes it.
 
 You invoke an agent by its bare name through the `Agent` tool (`subagent_type="<id>"`). Any agent file you drop into `~/.claude/agents/` is registered for every project automatically; if you add it mid-session, start a new session to pick it up.
 
-See [Project config](project_config.md) for the config-merge rules and [Vault](vault.md) for where lessons live.
+See [Project config](project_config.md) for the config-merge rules and [Specs](specs.md#tiers) for where rule records live.
 
 ## How to disable internal agents
 
@@ -52,20 +52,32 @@ core:
           - "Large or tricky changes that need the stronger built-in worker"
 ```
 
-**3. Tell the playbook to use it** — write a targeted lesson at `~/Claude/{project}/_lessons/0001_prefer-haiku-developer.md`:
+**3. Tell the playbook to use it** — write a targeted rule record in the project specs tier, at `specs/rule/0001-prefer-haiku-developer.md` in your repo:
 
 ```markdown
 ---
+type: rule
 title: Prefer haiku-developer for small groups
-targets:
-  - develop/develop-loop
+summary: Small, well-scoped milestone groups go to haiku-developer.
+created_by: owner
+created_at: 2026-10-15
+updated_at: 2026-10-15
+status: accepted
+targets: [develop/develop-loop]
+brief: 'Delegate small, well-scoped milestone groups to `haiku-developer` (`subagent_type="haiku-developer"`), briefed with the request, the related files, and the DoD + Verify pasted from the plan; its returned message is the milestone report.'
 ---
 
-For small, well-scoped milestone groups, delegate to `haiku-developer`
-(`subagent_type="haiku-developer"`). Brief it with the request, the related
-files, and the DoD + Verify pasted from the plan. Its returned message is the
-milestone report.
+## Rule
+
+Small, well-scoped milestone groups run on `haiku-developer`; larger or tricky
+ones stay with the built-in worker.
+
+## Follows from
+
+- The owner's preference: a cheaper model for small work.
 ```
+
+Only the `brief:` is injected into the step; the body is there for whoever needs the reason.
 
 That's the whole integration — no CLI, no script.
 
@@ -76,7 +88,7 @@ To delegate to an external CLI (for example, a headless coding CLI), front it wi
 The split is what makes this work:
 
 - **The agent owns the interaction.** It takes the briefing, drives the external CLI, validates the result against the briefing's definition of done, and reports back in milestone format. All CLI trivia (flags, model selection, retries) lives in the agent body, which you author.
-- **A targeted lesson shapes the briefing.** A lesson aimed at the delegating step tells that step which fields to pass and how to invoke the agent — the agent itself only knows how to drive its backend, not what a given step should hand over.
+- **A targeted rule shapes the briefing.** A rule aimed at the delegating step tells that step which fields to pass and how to invoke the agent — the agent itself only knows how to drive its backend, not what a given step should hand over.
 
 When the backend needs more orchestration than a single command (a server, a browser, readiness checks), put that trivia in a global transport script under `~/.claude/bin/` and have the agent call the script instead of reimplementing it. Case (a) below is that shape; case (b) drives a CLI directly.
 
@@ -84,7 +96,7 @@ When the backend needs more orchestration than a single command (a server, a bro
 
 1. Create a global agent at `~/.claude/agents/<id>.md` that drives your CLI and reports in milestone format.
 2. Ask Claude to wire the agent into the target playbook's config — you should end up with a `core.{name}_playbook.agents.<id>` block like the examples below.
-3. Ask Claude to shape the briefing — a targeted lesson in `_lessons/` aimed at the delegating step.
+3. Ask Claude to shape the briefing — a targeted rule in the project specs tier aimed at the delegating step.
 4. Test it: run the playbook and confirm it delegates to your agent.
 
 ## Level 3 — Go-to examples
@@ -170,24 +182,35 @@ core:
           - "Drift spot-checks or non-coding reads — those stay in the skill or go to booping-researcher"
 ```
 
-**Targeted lesson — `~/Claude/{project}/_lessons/0002_brief-pi-developer.md`**
+**Targeted rule — `specs/rule/0002-brief-pi-developer.md` in the repo (project specs tier)**
 
 ```markdown
 ---
+type: rule
 title: Briefing the pi-developer worker
-targets:
-  - develop/develop-loop
+summary: Milestone-group implementation goes to pi-developer, briefed with the request, files, DoD and Verify.
+created_by: owner
+created_at: 2026-10-15
+updated_at: 2026-10-15
+status: accepted
+targets: [develop/develop-loop]
+brief: 'Delegate milestone-group implementation to `pi-developer` (`subagent_type="pi-developer"`), briefed with each milestone's request, the related files, its DoD and Verify pasted verbatim, and the project / stack context; its returned message is the milestone report.'
 ---
 
-For this project, prefer `pi-developer` for milestone-group implementation.
+## Rule
 
-When you delegate, invoke `pi-developer` (`subagent_type="pi-developer"`) and
-brief it with:
+For this project, `pi-developer` implements milestone groups. When the develop
+loop delegates, it briefs the agent with:
+
 - the request for each milestone in the group,
 - the related files to touch / read,
-- the DoD for each milestone (paste verbatim from the plan),
-- the Verify commands (paste verbatim from the plan),
+- the DoD for each milestone (pasted verbatim from the plan),
+- the Verify commands (pasted verbatim from the plan),
 - project / stack context.
 
 The agent's returned message is its milestone report — verify from it as usual.
+
+## Follows from
+
+- The owner's preference: pi is the preferred coding worker in this repo.
 ```

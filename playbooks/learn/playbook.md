@@ -1,11 +1,11 @@
 ---
 name: learn
 title: Learn
-summary: Turn retrospective findings into durable behavior changes routed to
-  exactly one target each — extract atomic candidates, sweep for duplicates,
-  confirm a review table with the user, write the accepted items, close the
-  plans out.
-trigger: absorb lessons from a retrospective after `/playbook retro`; fold retro findings into lessons and extensions
+summary: Turn retrospective findings into rules and repo CLAUDE.md facts, each
+  routed to exactly one destination — extract atomic candidates, sweep for
+  duplicates, confirm a review table with the user, write the accepted items,
+  close the plans out.
+trigger: absorb rules from a retrospective after `/playbook retro`; fold retro findings into rules and the repo CLAUDE.md
 jinja: true
 inline_steps: true
 requires_project: true
@@ -17,11 +17,11 @@ Turn retrospective findings into durable behavior changes routed to exactly one 
 - The run's unit of work is a standalone retrospective, `retrospectives/{slug}.md`; its `plans:` frontmatter lists the plans it covers, for context only.
 - The run workdir is the **vault root**; every `booping playbook-state` / `booping playbook-transition` call passes `--target retrospectives/{slug}.md`, since the machine declares no `artifact:`.
 - Plans are already `done` when learn runs and are never re-read for status or touched by it.
-- Learn writes exactly two destinations: this project's vault `_lessons/` and the attached repo's `CLAUDE.md`.
+- Learn writes exactly two destinations: a rule record in this project's specs tier and the attached repo's `CLAUDE.md`.
 
 ## Single-location rule
 
-Every accepted learning lands in **exactly one** destination. If a candidate would otherwise span both, decompose it into two distinct rows in the review table — one row per destination. The destinations and the lesson target forms live below; do not restate them elsewhere.
+Every accepted learning lands in **exactly one** destination. If a candidate would otherwise span both, decompose it into two distinct rows in the review table — one row per destination. The destinations and the rule target forms live below; do not restate them elsewhere.
 
 {% include "_partials/_learn_targets.j2" %}
 

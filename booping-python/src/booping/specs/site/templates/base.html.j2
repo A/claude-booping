@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ title }} — specs</title>
+<link rel="stylesheet" href="{{ prefix }}style.css">
+</head>
+<body>
+<nav class="crumbs">
+{% for crumb in crumbs %}
+{% if not loop.first %} › {% endif %}{% if crumb.href is not none %}<a href="{{ crumb.href }}">{{ crumb.label }}</a>{% else %}<span>{{ crumb.label }}</span>{% endif %}
+{% endfor %}
+</nav>
+<main>
+{% block main %}{% endblock %}
+</main>
+</body>
+</html>

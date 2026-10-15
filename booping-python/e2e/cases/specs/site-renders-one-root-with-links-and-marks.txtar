@@ -1,0 +1,117 @@
+`--root proj=specs` renders one root: the ADR's `values:` ref and its anchored body link resolve to
+the value's page, the `[clarify]` mark lands on the root index, and the link to a missing file is
+the one warning.
+
+-- fixtures/cwd/specs/value/0001-small-steps.md --
+---
+type: value
+title: Small steps
+summary: Ship in small, reviewable steps.
+kind: value
+---
+
+# Small steps
+
+## Why
+
+Small changes are cheap to review.
+-- fixtures/cwd/specs/rule/0001-one-concern-per-commit.md --
+---
+type: rule
+title: One concern per commit
+summary: A commit carries one concern.
+status: accepted
+values: [value/0001]
+---
+
+# One concern per commit
+
+Split unrelated changes.
+-- fixtures/cwd/specs/adr/0001-adopt-squash-merges.md --
+---
+type: adr
+title: Adopt squash merges
+summary: Every branch lands as one commit.
+status: accepted
+values: [value/0001]
+---
+
+# Adopt squash merges
+
+Follows [small steps](../value/0001-small-steps.md#why).
+
+[clarify] Does this cover release branches?
+
+See [the old notes](../notes/missing.md).
+-- cmd --
+booping specs site --root proj=specs
+-- exit --
+0
+-- stdout --
+specs site: 1 roots, 3 records, 8 pages, 1 warnings -> specs-site
+-- stderr --
+specs/adr/0001-adopt-squash-merges.md:15  warning  site  unresolved link ../notes/missing.md
+-- expected/cwd/specs-site/.booping-site --
+booping specs site
+-- expected/cwd/specs-site/index.html --
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Specs — specs</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav class="crumbs">
+<span>Specs</span></nav>
+<main>
+<h1>Specs</h1>
+<div class="table-wrap">
+<table>
+<thead>
+<tr><th>Root</th><th>Records</th><th>adr</th><th>rule</th><th>value</th><th>[clarify]</th><th>[unknown]</th><th>Unreviewed</th></tr>
+</thead>
+<tbody>
+<tr><td><a href="proj/index.html">proj</a></td><td>3</td><td><a href="proj/adr/index.html">1</a></td><td><a href="proj/rule/index.html">1</a></td><td><a href="proj/value/index.html">1</a></td><td>1</td><td></td><td>3</td></tr>
+</tbody>
+</table>
+</div>
+</main>
+</body>
+</html>
+-- expected/cwd/specs-site/proj/adr/0001-adopt-squash-merges.html --
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Adopt squash merges — specs</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<nav class="crumbs">
+<a href="../../index.html">Specs</a> › <a href="../index.html">proj</a> › <a href="index.html">adr</a> › <span>adr/0001</span></nav>
+<main>
+<article>
+<h1>Adopt squash merges</h1>
+<p class="meta"><code>adr/0001</code>
+ <span class="badge st-accepted">accepted</span> <span class="badge unreviewed">unreviewed</span> <span class="chip mk-clarify">[clarify] 1</span></p>
+<p class="summary">Every branch lands as one commit.</p>
+<dl class="facts">
+<dt>values</dt>
+<dd><a href="../../proj/value/0001-small-steps.html"><code>value/0001</code></a></dd>
+</dl>
+<div class="body">
+<h1 id="adopt-squash-merges">Adopt squash merges</h1>
+<p>Follows <a href="../../proj/value/0001-small-steps.html#why">small steps</a>.</p>
+<p id="L13"><mark class="mk mk-clarify">[clarify]</mark> Does this cover release branches?</p>
+<p>See <span class="unresolved">the old notes</span>.</p>
+</div>
+
+</article>
+<h2 id="referenced-by">Referenced by</h2>
+<p>Nothing references this record.</p>
+</main>
+</body>
+</html>

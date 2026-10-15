@@ -1,0 +1,23 @@
+`--tier global` reads `{home_dir}/_specs/` — `home_dir` defaults to `~/Claude/` — and needs no
+attached project.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  specs:
+    tiers:
+      global:
+        namespace: owner
+-- fixtures/home/Claude/_specs/rule/0001-keep-it-short.md --
+---
+type: rule
+title: Keep it short
+summary: Cut what the reader does not need.
+status: accepted
+---
+-- cmd --
+booping specs ls --tier global
+-- exit --
+0
+-- stdout --
+rule/0001  accepted  Cut what the reader does not need.
+-- stderr --

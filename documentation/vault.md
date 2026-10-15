@@ -1,6 +1,6 @@
 # Vault
 
-Every booping project gets its own Project Vault, scaffolded by the [setup playbook](install.md). By default it lives at `~/Claude/{project}/`; set the `.booping` marker's `vault_path:` key to keep it **inside the repo** instead (a local vault). Plain markdown with YAML frontmatter — open the directory in Obsidian for graph view and backlinks across plans, retros, and lessons.
+Every booping project gets its own Project Vault, scaffolded by the [setup playbook](install.md). By default it lives at `~/Claude/{project}/`; set the `.booping` marker's `vault_path:` key to keep it **inside the repo** instead (a local vault). Plain markdown with YAML frontmatter — open the directory in Obsidian for graph view and backlinks across plans, retros, and code reviews.
 
 Reference for every file and directory inside the vault. For the lifecycle that ties them together, start at [Quick start](quick_start.md).
 
@@ -50,16 +50,6 @@ That `status:` is the retro track's run state — `awaiting-retro → awaiting-l
 One file per code-review run, written by the [code-review playbook](code_review.md), grouped by what was reviewed: `codereviews/{plan-dirname}/{YYYYMMDDHHmm}.md` when a plan is in scope, `codereviews/{target-slug}/{YYYYMMDDHHmm}.md` for an ad-hoc scope such as the latest commits. Scaffolded for new vaults and created lazily in older ones — no migration needed.
 
 The file records `## Scope`, `## Findings`, `## Verdict` and `## Resolution`. Its frontmatter carries `plan:` — the reviewed plan's vault-relative path, or `null` — and its own `status:`, the code-review track's run state: `in-agent-review → human-review → done`. That status is the review's, never a plan's: the reviewed plan stays at `done` and only gains the review's path in its `code_reviews:` list. The playbook runs with the vault root as its workdir and addresses the file with `--target codereviews/{dir}/{ts}.md`.
-
-## `_lessons/`
-
-Durable rules accumulated over many sprints, and the only file surface the [learn playbook](learn.md) writes inside the Project Vault. Lessons live in exactly two flat roots: this directory, scoped to the project, and its machine-wide sibling `<home_dir>/_lessons/` (default `~/Claude/_lessons/`), which applies to every project — a file of the same name here shadows the global one. Files are named `{N}_{title}.md`, `N` a monotonic counter keeping each directory chronologically ordered.
-
-Each file carries a `targets:` frontmatter list: `{playbook}`, `{playbook}/{step}`, `agent:{id}`, or `skill:{name}`. That list is the only routing there is — a file with no valid `targets:` is injected nowhere.
-
-Targeted lessons are also the only way to shape a booping skill's or agent's behaviour for a project: an `agent:{id}` or `skill:{name}` lesson renders inside that agent's or skill's body, and there is no separate extension-file mechanism. An older vault still carrying `_booping/skill_*.md` or `agent_*.md` extension files gets them converted on the next `/playbook migrate` run — each becomes a targeted lesson here, and the converted original is removed.
-
-Injected by `booping render-playbook` into the composed procedure or a step prompt, and into the bodies of booping's own agents and skills at load time. See [Playbooks → Lessons](playbook.md#lessons) for the full reference.
 
 ## `notes/`
 

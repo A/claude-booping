@@ -55,9 +55,7 @@ def test_global_tier_overrides_core(tmp_path: Path) -> None:
     plugin_root = get_fixture_path("plugin-root-minimal")
     _ = _write_global(tmp_path, "sample", "Global-overridden sample")
 
-    templates = ReviewTemplate.load_all(
-        plugin_root, get_fixture_path("vault-empty"), tmp_path
-    )
+    templates = ReviewTemplate.load_all(plugin_root, get_fixture_path("vault-empty"), tmp_path)
     by_name = {t.name: t for t in templates}
     assert by_name["sample"].source == "global"
     assert by_name["sample"].description == "Global-overridden sample"
@@ -68,9 +66,7 @@ def test_project_tier_overrides_global(tmp_path: Path) -> None:
     plugin_root = get_fixture_path("plugin-root-minimal")
     _ = _write_global(tmp_path, "sample", "Global-overridden sample")
 
-    templates = ReviewTemplate.load_all(
-        plugin_root, get_fixture_path("vault-full"), tmp_path
-    )
+    templates = ReviewTemplate.load_all(plugin_root, get_fixture_path("vault-full"), tmp_path)
     core_only = ReviewTemplate.load_all(plugin_root, get_fixture_path("vault-empty"))
     assert len(templates) == len(core_only)
     by_name = {t.name: t for t in templates}
@@ -82,9 +78,7 @@ def test_global_only_template_appends(tmp_path: Path) -> None:
     plugin_root = get_fixture_path("plugin-root-minimal")
     path = _write_global(tmp_path, "house-style", "Global house style")
 
-    templates = ReviewTemplate.load_all(
-        plugin_root, get_fixture_path("vault-empty"), tmp_path
-    )
+    templates = ReviewTemplate.load_all(plugin_root, get_fixture_path("vault-empty"), tmp_path)
     by_name = {t.name: t for t in templates}
     assert by_name["house-style"].source == "global"
     assert by_name["house-style"].path == path

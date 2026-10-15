@@ -1,0 +1,44 @@
+Over a project tier holding two types, `ls` prints one line per record sorted by type name then
+number, whatever order the files sit in: `{type}/{NNNN}  {status}  {summary}`, with `-` standing in
+for a record that carries no `status` (values).
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/specs/value/0002-second.md --
+---
+type: value
+title: Second
+summary: The second value.
+---
+-- fixtures/cwd/vault/specs/value/0001-first.md --
+---
+type: value
+title: First
+summary: The first value.
+---
+-- fixtures/cwd/vault/specs/adr/0010-tenth.md --
+---
+type: adr
+title: Tenth
+summary: A later decision.
+status: proposed
+---
+-- fixtures/cwd/vault/specs/adr/0002-second.md --
+---
+type: adr
+title: Second
+summary: An earlier decision.
+status: accepted
+---
+-- cmd --
+booping specs ls
+-- exit --
+0
+-- stdout --
+adr/0002  accepted  An earlier decision.
+adr/0010  proposed  A later decision.
+value/0001  -  The first value.
+value/0002  -  The second value.
+-- stderr --

@@ -62,7 +62,7 @@ Read the written retrospective before letting [learn](learn.md) act on it, separ
 
 What to keep:
 
-- **Durable findings** — patterns that will recur across sprints. "The agent picks the wrong test runner when both pytest and unittest are present" is a project rule worth lifting into a targeted lesson.
+- **Durable findings** — patterns that will recur across sprints. "The agent picks the wrong test runner when both pytest and unittest are present" is a project rule worth lifting into a targeted rule.
 - **Process gaps** — places where the lifecycle itself failed you. "I wanted to stop after milestone 2 but did not realise I had to say so up front" is feedback for the prompt habits you bring to groom and develop runs.
 
 What to mark as one-off:

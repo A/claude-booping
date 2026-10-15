@@ -26,8 +26,9 @@ everything already in it stays exactly as found.
   `started:`, `commit:`, the `*_reviewed_at` stamps and `completed:` belong to their own edges.
 - every earlier section is left exactly as found — `## Scope`, `## Changes`, the targeting plan
   with its progress column and `## Verification findings` are not reworded, re-scoped or tidied.
-- nothing else is written or opened: `_specs/documented.md` is the `close-documented` hook's file,
-  the spec set is not touched, and `CHANGELOG.md` belongs to the step before this one.
+- nothing else is written or opened: the ledger `{vault}/docs/documented.md` is the
+  `close-documented` hook's file, the spec records are not touched, and `CHANGELOG.md` belongs to
+  the step before this one.
 
 A run whose targeting plan was empty still writes the heading, a table holding the history row
 alone, and its closing line.

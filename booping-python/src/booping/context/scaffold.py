@@ -18,6 +18,7 @@ mapping without ``type``         Directory; entries are its children
 Anything else — ``null``, a list, a number, a bool — is a
 :class:`ScaffoldError` reported against the offending node's dotted path.
 """
+
 from __future__ import annotations
 
 from typing import Any, cast
@@ -46,6 +47,7 @@ class ScaffoldError(Exception):
 # ---------------------------------------------------------------------------
 # Node representation
 # ---------------------------------------------------------------------------
+
 
 class Node:
     """Base for a scaffold node. ``path`` is the dotted config path it came from."""
@@ -94,9 +96,7 @@ class DirNode(Node):
         if not isinstance(other, DirNode):
             return NotImplemented
         return (
-            self.name == other.name
-            and self.path == other.path
-            and self.children == other.children
+            self.name == other.name and self.path == other.path and self.children == other.children
         )
 
     def __hash__(self) -> int:
@@ -106,6 +106,7 @@ class DirNode(Node):
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _join(path: str, segment: str) -> str:
     return f"{path}.{segment}" if path else segment
@@ -167,6 +168,7 @@ def _parse_mapping(raw: dict[str, Any], name: str, path: str) -> Node:
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
+
 
 def parse_node(value: Any, name: str, path: str) -> Node:
     """Parse one config *value* into a node named *name*, reported against *path*."""

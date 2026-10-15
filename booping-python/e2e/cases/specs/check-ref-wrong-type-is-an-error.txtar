@@ -1,0 +1,54 @@
+Each reference field takes refs of one type — `values` value refs, `rules` rule refs,
+`supersedes` ADR refs; an item of another type or no ref at all is a `ref` error on the field's
+line, and a field that is not a list is one too.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/specs/value/0001-first.md --
+---
+type: value
+title: First
+summary: The first value.
+kind: value
+created_by: owner
+created_at: 2026-01-01
+updated_at: 2026-01-01
+---
+
+Why the project exists.
+
+## In practice
+
+It shows in every run.
+-- fixtures/cwd/vault/specs/rule/0001-keep-it-short.md --
+---
+type: rule
+title: Keep it short
+summary: Cut what the reader does not need.
+created_by: owner
+created_at: 2026-01-01
+updated_at: 2026-01-01
+status: accepted
+values: [rule/0001, not-a-ref]
+rules: rule/0001
+---
+
+## Rule
+
+Keep it short.
+
+## Follows from
+
+- [First](../value/0001-first.md)
+-- cmd --
+booping specs check
+-- exit --
+1
+-- stdout --
+vault/specs/rule/0001-keep-it-short.md:9  error  ref  values: `rule/0001` is not a value ref
+vault/specs/rule/0001-keep-it-short.md:9  error  ref  values: `not-a-ref` is not a value ref
+vault/specs/rule/0001-keep-it-short.md:10  error  ref  rules: must be a list
+-- stderr --
+2 record(s) checked: 3 error(s), 0 warning(s)

@@ -37,6 +37,12 @@ itself stays yours. Never delegate to an agent that is not on this list.
 - Never manually break markdown lines. Write each paragraph, bullet, or table row as one line and
   let the renderer wrap it — hard line breaks turn into mid-sentence breaks after any later edit.
 
+## Rules
+
+The following 1 rule(s) apply to this playbook. Never silently violate one; conflict → stop and flag. Read a rule's record when its brief is not enough.
+
+- Settle every open question with the user during grooming; in develop, stop only for force majeure, not for what grooming should have asked. [booping:rule/0004](${CLAUDE_PLUGIN_ROOT}/vault/specs/rule/0004-questions-settled-in-grooming.md)
+
 ## Playbook Steps
 
 Execute the steps in the most effective order considering their dependencies.
@@ -273,7 +279,7 @@ The edge's hook regenerates `index.md`'s `## Milestones` table and its `sp` — 
    One block per milestone, in the same order: what was done in one paragraph, the files touched, and the `## Verify` command with its verdict. Leave the work uncommitted — committing is the runner's. No diffs, no pasted code, no command logs.
    ```
 
-   Paths only: never paste a milestone's goal, tasks, DoD or Verify text into the briefing — the worker reads its contract itself. Briefings carry no lesson paths either; the worker gets its lesson context from its own extension file.
+   Paths only: never paste a milestone's goal, tasks, DoD or Verify text into the briefing — the worker reads its contract itself. Briefings carry no rule paths either; the worker gets its project shaping from the `agent:{id}` rules injected into its own body.
 4. Delegate the briefing to the worker agent named in [Available Agents](#available-agents) — always delegate, even for a one-line change.
 5. Never resurrect a worker by ID for the next group. Each group gets a fresh agent with empty context.
 

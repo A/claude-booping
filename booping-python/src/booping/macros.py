@@ -18,6 +18,7 @@ so distinct runs — two formats of the same clock can disagree. A macro is
 expected to be idempotent within one render; a macro that is not must not be
 declared.
 """
+
 from __future__ import annotations
 
 import subprocess
@@ -81,9 +82,7 @@ def _resolve_mapping_node(node: Mapping[str, Any], dotted: str) -> tuple[list[st
         )
     if "command" not in node:
         raise MacroError(f"macro {dotted}: mapping node has no `command` argv list")
-    argv = _argv_list(
-        node["command"], f"macro {dotted}: `command` is not a non-empty argv list"
-    )
+    argv = _argv_list(node["command"], f"macro {dotted}: `command` is not a non-empty argv list")
     raw_cwd: Any = node.get("cwd")
     if raw_cwd is None:
         return argv, None
@@ -125,15 +124,11 @@ def run_argv(dotted: str, argv: Sequence[str], cwd: Path | None = None) -> str:
             list(argv), capture_output=True, text=True, check=True, cwd=cwd
         )
     except FileNotFoundError as exc:
-        raise MacroError(
-            f"macro {dotted}: executable not found: {argv[0]}"
-        ) from exc
+        raise MacroError(f"macro {dotted}: executable not found: {argv[0]}") from exc
     except subprocess.CalledProcessError as exc:
         detail = (exc.stderr or "").strip().splitlines()
         tail = f": {detail[-1]}" if detail else ""
-        raise MacroError(
-            f"macro {dotted}: command exited {exc.returncode}{tail}"
-        ) from exc
+        raise MacroError(f"macro {dotted}: command exited {exc.returncode}{tail}") from exc
     result = completed.stdout.strip()
     _cache[key] = result
     return result

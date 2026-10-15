@@ -1,0 +1,33 @@
+A `sources` value that is a scalar, not a list, is a `sources` error on the field's line.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/notes.md --
+notes
+-- fixtures/cwd/vault/specs/value/0001-first.md --
+---
+type: value
+title: First
+summary: The first value.
+kind: value
+created_by: owner
+created_at: 2026-01-01
+updated_at: 2026-01-01
+sources: notes.md
+---
+
+Why the project exists.
+
+## In practice
+
+It shows in every run.
+-- cmd --
+booping specs check
+-- exit --
+1
+-- stdout --
+vault/specs/value/0001-first.md:9  error  sources  sources: must be a list
+-- stderr --
+1 record(s) checked: 1 error(s), 0 warning(s)

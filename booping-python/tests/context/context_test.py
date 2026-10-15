@@ -34,9 +34,7 @@ def test_without_vault_override_global_tier_still_merges(
 ) -> None:
     plugin_root = get_fixture_path("plugin-root-minimal")
     vault_base = tmp_path / "vaults"
-    _write_global(
-        isolated_xdg_config_home, {"home_dir": str(vault_base), "machine_only": "leaked"}
-    )
+    _write_global(isolated_xdg_config_home, {"home_dir": str(vault_base), "machine_only": "leaked"})
     repo = tmp_path / "repo"
     repo.mkdir()
     (repo / ".booping").write_text("project_name: proj\n")

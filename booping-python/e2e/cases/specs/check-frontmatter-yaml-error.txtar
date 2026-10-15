@@ -1,0 +1,31 @@
+A record whose frontmatter is not valid YAML gets a `frontmatter` finding on the file line of the
+problem, carrying the parser's problem text and its line and column.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/specs/value/0001-first.md --
+---
+type: value
+title: First
+summary: The value: one that breaks YAML.
+kind: value
+created_by: owner
+created_at: 2026-01-01
+updated_at: 2026-01-01
+---
+
+Why the project exists.
+
+## In practice
+
+It shows in every run.
+-- cmd --
+booping specs check
+-- exit --
+1
+-- stdout --
+vault/specs/value/0001-first.md:4  error  frontmatter  mapping values are not allowed here, line 4, column 19
+-- stderr --
+1 record(s) checked: 1 error(s), 0 warning(s)

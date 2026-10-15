@@ -6,7 +6,7 @@ How the orchestrator handles per-project quality tooling (lint, typecheck, forma
 
 Walk this ladder and stop at the first rung that answers:
 
-1. **A targeted lesson** on `develop` or `develop/verify` naming the canonical quality commands — already injected into this body, no read needed.
+1. **A targeted rule** on `develop` or `develop/verify` naming the canonical quality commands — already injected into this body, no read needed.
 2. **The repo `CLAUDE.md`** naming the canonical commands for either bucket below.
 3. **Discovery** — inspect the attached repo yourself.
 

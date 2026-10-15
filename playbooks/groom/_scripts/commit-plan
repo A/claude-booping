@@ -5,16 +5,20 @@ Environment (set by `booping playbook-transition`): BOOPING_WORKDIR =
 {vault}/plans/{slug}, which is also cwd.
 
 Stages the run's plan directory and commits it, tagging the message with the
-`status:` `playbook-transition` already wrote to `index.md`. Self-contained: the
-vault carries no `.booping` marker, so nothing here shells back into `booping`,
-and nothing outside the standard library is imported.
+`status:` `playbook-transition` already wrote to `index.md`. The vault carries no
+`.booping` marker, so nothing here shells back into `booping`; the commit goes
+through the shared `_vault_git` helper in `playbooks/_scripts/`, and nothing
+outside the standard library is imported.
 """
 
 import os
 import re
-import subprocess
 import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "_scripts"))
+
+from _vault_git import commit_paths  # noqa: E402
 
 
 def read_status(plan: Path) -> str:
@@ -38,15 +42,10 @@ def main() -> None:
 
     status = read_status(plan)
 
-    if not (vault / ".git").exists():
+    outcome = commit_paths(vault, [f"plans/{slug}"], f"groom: {slug} → {status}")
+    if outcome is None:
         print(f"commit-plan: plans/{slug} → {status}; no vault git repo")
         return
-
-    subprocess.run(["git", "-C", str(vault), "add", f"plans/{slug}"], check=True)
-    result = subprocess.run(
-        ["git", "-C", str(vault), "commit", "-q", "-m", f"groom: {slug} → {status}"],
-    )
-    outcome = "ok" if result.returncode == 0 else "nothing to commit"
     print(f"commit-plan: plans/{slug} → {status}; vault-commit: {outcome}")
 
 

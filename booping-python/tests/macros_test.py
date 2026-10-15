@@ -24,9 +24,7 @@ def test_repeated_calls_spawn_one_subprocess(monkeypatch: pytest.MonkeyPatch) ->
     macros.clear_cache()
     calls: list[list[str]] = []
 
-    def counting_run(
-        argv: list[str], **_kwargs: Any
-    ) -> subprocess.CompletedProcess[str]:
+    def counting_run(argv: list[str], **_kwargs: Any) -> subprocess.CompletedProcess[str]:
         calls.append(argv)
         return subprocess.CompletedProcess(argv, 0, "stamped\n", "")
 
@@ -50,9 +48,7 @@ def test_distinct_args_are_distinct_cache_entries(
     macros.clear_cache()
     calls: list[list[str]] = []
 
-    def counting_run(
-        argv: list[str], **_kwargs: Any
-    ) -> subprocess.CompletedProcess[str]:
+    def counting_run(argv: list[str], **_kwargs: Any) -> subprocess.CompletedProcess[str]:
         calls.append(argv)
         return subprocess.CompletedProcess(argv, 0, f"{argv[-1]}\n", "")
 

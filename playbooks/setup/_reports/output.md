@@ -23,7 +23,7 @@ The run's context report carries the booping-initialized flag and, when booping 
 
 ## Branch: already initialized
 
-Read the resolved value back with `booping config-get home_dir` and report it. The config is never edited, re-pointed or reformatted. Still make the home dir exist and be a git repo, per **Home dir** below — an existing config says nothing about the directory.
+Read the resolved value back with `booping config-get home_dir` and report it. The config is never edited, re-pointed or reformatted — the one exception is adding the namespace key, per **Global specs tier** below. Still make the home dir exist and be a git repo, per **Home dir** below — an existing config says nothing about the directory.
 
 ## Branch: not initialized
 
@@ -47,6 +47,20 @@ git -C {home_dir} rev-parse --git-dir >/dev/null 2>&1 || git -C {home_dir} init
 ```
 
 Report which of the two actually did something. A home dir that already sits inside another git repo is left alone — say so rather than nesting a second one.
+
+## Global specs tier
+
+Applies on both branches, after **Home dir**. Run `booping config-get core.specs.tiers.global.namespace`; it prints `None` when no tier sets the key. Only then ask the user for the namespace through `AskUserQuestion` — one question, `$USER` (expanded) as the default option, any other id accepted as free input — and add it to `${XDG_CONFIG_HOME:-~/.config}/booping/config.yaml`, keeping every other key as it is:
+
+```yaml
+core:
+  specs:
+    tiers:
+      global:
+        namespace: {namespace}
+```
+
+A config already carrying the key is not asked again and not edited. Then run `booping specs init --tier global` and report its output.
 
 ## Return format
 
@@ -87,10 +101,11 @@ Ask first, write after.
 
 Then, in order:
 
-3. `booping scaffold core.setup_playbook.scaffold {vault_dir}` — the vault tree: `plans/`, `retrospectives/`, `_lessons/`, `_booping/`, `notes/`, a `sprints.md` Bases view and a `.gitignore`. It takes no `--set` variables. A non-empty destination exits 1; ask before re-running it with `--force` (0 success, 1 user error, 2 OSError).
+3. `booping scaffold core.setup_playbook.scaffold {vault_dir}` — the vault tree: `plans/`, `retrospectives/`, `_booping/`, `notes/`, a `sprints.md` Bases view and a `.gitignore`. It takes no `--set` variables. A non-empty destination exits 1; ask before re-running it with `--force` (0 success, 1 user error, 2 OSError).
 4. `{repo_root}/.booping` — `project_name: {name}` always, plus `vault_path: {dir}` resolved against the repo root when the vault lives in the repo. Then, from the repo root, `booping marker-set latest_migration=@latest` — a fresh vault is already current, and without the key every render reports it behind.
 5. Repo-local vault only: `{home_dir}/{name}` as a symlink to the absolute vault dir. The scaffold tree cannot make it — it declares directories and text files only — so create it here.
 6. The visibility answer: append `.booping` to `{repo_root}/.gitignore` or to `{repo_root}/.git/info/exclude`. Tracked, or the question skipped → neither file is touched.
+7. From the repo root, `booping specs init --tier project` — the project specs tier, placed by the merged config. Report its output: one action line per change, then the absolute tier root.
 
 ## The project is already initialized
 
@@ -101,13 +116,16 @@ Project `claude-booping` is already set up.
   vault:  /home/anton/Dev/claude-booping/booping (in the repo)
   marker: .booping — project_name: claude-booping, vault_path: booping
   link:   ~/Claude/claude-booping -> booping/
+  specs:  /home/anton/Dev/claude-booping/booping/specs
 ```
+
+`specs:` is the project tier root when it exists, else `none — run booping specs init --tier project`.
 
 Then offer the change routes via `AskUserQuestion`: move the vault, rename the project, merge it into another project, or change nothing. The routes are **offered, not scripted** — act on the user's call plus what this run already knows. A rename moves three things together: the vault directory, the marker's `project_name` and the home-dir symlink. Changing nothing writes nothing, and the report above is then the whole outcome.
 
 ## Hard rules
 
-- Every decision is the user's, taken in-step via `AskUserQuestion`. Nothing is inferred silently, and nothing outside the vault, the marker and the symlink is written.
+- Every decision is the user's, taken in-step via `AskUserQuestion`. Nothing is inferred silently, and nothing outside the vault, the marker, the symlink and the specs tier `booping specs init` creates is written.
 - There is no attach route — never wire the repo to a vault this run did not create.
 - Stack detection and `_booping/` extension seeding are out of scope.
 

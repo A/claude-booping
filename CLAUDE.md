@@ -8,12 +8,13 @@ One shipped skill (`/playbook`); everything procedural is a **playbook** it driv
 
 - `just lint` / `just typecheck` / `just pytest` — ruff / basedpyright / pytest over both uv projects, `booping-python/` then `booping-tracker/`.
 - `just snapshots` — diff committed playbook reports against a fresh hermetic render (writes nothing). `just snapshots-accept [playbook]` — the **only** writer of the committed reports.
-- `just mdcheck` — structural rule checks over the rendered reports. Needs the `mdcheck` binary: `cargo install markdown-checker` (the crate named `mdcheck` is unrelated).
+- `just mdcheck` — structural rule checks over the rendered reports. Needs the `mdcheck` binary: `cargo install markdown-checker --version 0.1.1 --locked` (the crate named `mdcheck` is unrelated).
 - `just e2e [pytest args…]` — run both txtar contract corpora through pytest, passing any arguments straight to it (`just e2e -k config-get`, `just e2e --txtar-update`); `--txtar-update` rebaselines the selected cases. A `-k` expression that selects in one corpus only leaves the other collecting nothing, which is not a failure.
-- `just ci` — everything CI runs, in order: `lint typecheck pytest snapshots mdcheck e2e`. Run before committing.
+- `just specs-check` — `bin/booping specs check` over this repo's project tier, `vault/specs/`; needs `mdcheck` too.
+- `just ci` — everything CI runs, in order: `lint typecheck pytest snapshots mdcheck specs-check e2e`. Run before committing.
 - `just eval|smoke|regress <playbook>/<step>` (or `all`) — promptfoo eval suites; `just suites` lists them. Runs on subscription auth (`claude -p`), never in CI; each run posts a sticky, advisory PR comment via `scripts/eval-pr-comment.sh` (`EVAL_PR=0` opts out) — no commit status, no merge gate.
 - `just docs` / `just docs-serve` — build / preview the public docs site.
-- `bin/booping <subcommand> --help` — the runtime CLI: `render`, `render-playbook`, `playbook-state`, `playbook-transition`, `query`, `config-get`, `marker-set`, `scaffold`, `frontmatter-update`, `session-stats`, `debug-context`.
+- `bin/booping <subcommand> --help` — the runtime CLI: `render`, `render-playbook`, `playbook-state`, `playbook-transition`, `query`, `config-get`, `marker-set`, `scaffold`, `frontmatter-update`, `session-stats`, `specs` (`ls`, `next`, `check`, `init`, `site`), `debug-context`.
 - `bin/booping-tracker <verb> --help` — the task-tracker CLI: `states`, `show`, `comment`, `issue-create`, `issue-update`, `relate`, `sync`. Reference: [booping-tracker/README.md](booping-tracker/README.md).
 
 ## Layout
@@ -25,6 +26,7 @@ One shipped skill (`/playbook`); everything procedural is a **playbook** it driv
 - `src/config.yaml` — runtime config, single source of truth for structured data (macros, query specs, scaffold trees, task types, sprint scale, per-playbook agents). Heavily commented — read it for key semantics.
 - `src/templates/` — runtime skill/agent templates + `_partials/`, rendered at skill-load time. Edits are **live**, no rebuild.
 - `skills/<name>/SKILL.md`, `agents/<name>.md` — hand-authored thin shells: frontmatter (including `effort:`) plus one `!`booping render src/templates/…`` line that pulls in the body at load time.
+- `src/specs/` — the shipped specs format: `README.md` (the guide) and `schemas/<type>.yaml` (one mdcheck rule file per record type).
 - `playbooks/<name>/` — core playbooks. Also: `_partials/` (shared fragments), `_scripts/` (shared hook scripts), `_lib/` (eval harness), `_fixtures/vault/` (hermetic render fixture). Each playbook commits its rendered report at `playbooks/<name>/_reports/output.md`.
 - `playbooks/*/_specs/` — playbook-authoring run artefacts and design history; intentionally stale, not a spec of current behaviour.
 - `migrations/<NNN>_<slug>/migration.md` — plugin-shipped vault migrations. Frontmatter `id` is the authority; a vault's applied watermark is the `.booping` marker's `latest_migration` key, and every render surface gates on it. Authoring primitives: query specs with `root: core` scan plugin-shipped files, numeric `--where` ordering (`gt`/`lt`), `{{ booping.latest_migration }}` in templates, marker writes via `booping marker-set`.
@@ -33,7 +35,7 @@ One shipped skill (`/playbook`); everything procedural is a **playbook** it driv
 
 ## Rendering pipeline
 
-One stage, at **runtime** (skill load): a thin shell's `!`booping render src/templates/…`` line renders the body with full project context — config merge, vault, lessons, playbooks.
+One stage, at **runtime** (skill load): a thin shell's `!`booping render src/templates/…`` line renders the body with full project context — config merge, vault, rules, playbooks.
 
 ## Config
 
@@ -42,6 +44,7 @@ One stage, at **runtime** (skill load): a thin shell's `!`booping render src/tem
 - Any mapping in the merged config can be a **query spec** (`booping query --config <dotted.path>`, `| query` filter) or a **scaffold tree** (`booping scaffold <dotted.path> <dest>`) — the value at the dotted path is the spec/tree, no wrapper key. Specs live beside their consumer (`core.{name}_playbook.queries.<id>`), never in a central registry.
 - `core.plans` — plan shape shared by groom and develop: `glob` (plan discovery) and `milestones` (`glob` relative to the plan dir, matching the milestone file inside each milestone directory and never a sidecar beside it, + `table_columns` for the generated table). Never restate either literal in prose.
 - `core.tracker` — task-tracker surface, directly under `core` because several playbooks mirror outward through it: `driver` (`cli` is the one shipped driver, `--driver` overrides per invocation, an unknown name is a hard error) plus one settings block per driver. Secrets are named, never carried: `api_key_env` holds the *name* of the environment variable the token lives in — **no config value anywhere is env-interpolated**, in any tier.
+- `core.specs` — the specs surface, directly under `core` because `booping specs` and rule injection share it: `format` (plugin-root-relative dir of the guide + schemas; types = schema stems) and `tiers.{core,global,project}` with `path` (anchored at plugin root / `home_dir` / repo) and `namespace` (`booping`; global `null` → `$USER`; project `path: null` → `{vault}/specs` when the vault is in the repo, else `specs`).
 - `core.macros.<name>` — an argv list, or a mapping with `command:` plus `cwd: repo|vault` scoping; rendered bodies call them via the `macro()` global; `--stub-macro` (or a vault `macro_stubs:` mapping) pins them for reproducible renders.
 - Full reference: [documentation/project_config.md](documentation/project_config.md).
 
@@ -54,7 +57,7 @@ Multi-step guided procedures discovered from three roots — core `playbooks/`, 
 - `jinja: true` opts all bodies into Jinja through the full context env, each with a loader chain body → step dir → playbook dir → discovery roots (local → global → core) → `src/templates/`.
 - **Run state** is opt-in via `states:` (named state machines: `artifact`, `initial`, `statuses`, transitions with `when`/`gates`/`hooks`). `booping playbook-transition` is the **only** writer of run state; its printed mutation report is authoritative — never re-read to verify. `booping playbook-state` is the read-only frontier report used to resume; both address the run artifact via `--target` when the machine declares no `artifact:`. Hooks: `frontmatter-update` and `script <name> [args…]` (argv passed through; playbook `_scripts/` first, then the discovery roots' `_scripts/`, most specific wins).
 - **Tracker mirroring**: `playbooks/_scripts/tracker-sync` (push the artifact's status) and `tracker-comment <workdir-relative-path>` (post a file as a comment) are `script` hooks on groom's edges. Both absorb the tracker's exit code and warn on stderr — a hook failing after `status:` is written would abort the transition with the vault advanced and the tracker behind; `booping-tracker sync --artifact …` by hand is the reconcile.
-- **Lessons**: markdown files in `<home_dir>/_lessons/` and `{vault}/_lessons/` with a `targets:` list (`{playbook}`, `{playbook}/{step}`, `agent:{id}`, `skill:{name}`), injected by `render-playbook` and by internal agent and skill bodies. Untargeted lessons inject nowhere.
+- **Rules**: `status: accepted` spec rules with `targets:` (`{playbook}`, `{playbook}/{step}`, `agent:{id}`, `skill:{name}`) and `brief:`, read from the three `core.specs` tiers and injected as brief plus link in a `## Rules` section by `render-playbook` and by internal agent and skill bodies; an untargeted rule injects nowhere; `--no-rules` opts out of render-playbook's. See [documentation/playbook.md#rules](documentation/playbook.md#rules).
 - Graph/render problems surface as in-band `**STOP — tell the user:**` / `**Note — tell the user:**` notices at exit 0, never crashes.
 - The driving protocol lives in `src/templates/_partials/_playbook_driving.j2`. Full mechanics: [documentation/playbook.md](documentation/playbook.md).
 
@@ -72,9 +75,9 @@ Each playbook owns its own status vocabulary in its `states:` block — there is
 
 ## Vault (out of framework scope, authored per project)
 
-`plans/`, `retrospectives/`, `codereviews/`, `_lessons/` (targeted), `_playbooks/` (user playbooks), `plan_templates/`, `review_templates/`, `notes/`, `sprints.md` (Obsidian Bases fence, seeded once, written by nothing), `.booping.log` (CLI log at the vault root, gitignored there). Obsidian-ready: markdown + YAML frontmatter only. See [documentation/vault.md](documentation/vault.md). Everything benchmark — registry, runbook, method, `bench-score`, mutations, fixtures, run artifacts, and the scorecard table in its README — lives in the separate [booping-benchmarks](https://github.com/A/booping-benchmarks) repo (local clone `~/Dev/@A/booping-benchmarks/`); only the `model-benchmark` playbook that drives a run stays in this vault's `_playbooks/`.
+`plans/`, `retrospectives/`, `codereviews/`, `_playbooks/` (user playbooks), `plan_templates/`, `review_templates/`, `notes/`, `sprints.md` (Obsidian Bases fence, seeded once, written by nothing), `.booping.log` (CLI log at the vault root, gitignored there). Obsidian-ready: markdown + YAML frontmatter only. See [documentation/vault.md](documentation/vault.md). Everything benchmark — registry, runbook, method, `bench-score`, mutations, fixtures, run artifacts, and the scorecard table in its README — lives in the separate [booping-benchmarks](https://github.com/A/booping-benchmarks) repo (local clone `~/Dev/@A/booping-benchmarks/`); only the `model-benchmark` playbook that drives a run stays in this vault's `_playbooks/`.
 
-This repo's own vault is checked in at `vault/`. Its `docs/_specs/` is the product-vision spec set — read it before writing any documentation surface, and treat it as the authority on what this project ships and for whom: `index.md` the briefing (what it is, who it serves, where it is heading), `roles.md` the audience map, `features.md` the feature index of groups, features and capabilities, `targets.md` the documentation surfaces and their depth ceilings, `glossary.md` the canonical terms, `documented.md` the ledger of documented work. The `docs` playbook maintains it; it is stale exactly as often as that playbook is skipped.
+This repo's own vault is checked in at `vault/`. Its `specs/` holds booping's values, rules, ADRs, stories, ideas, references and runbooks as typed records (format: `src/specs/README.md`, check: `just specs-check`) — the authority on why booping is the way it is; read the values and rules before a design change. The `docs` playbook reads and keeps current the value records, reference/0001–0003 and the story records, its feature index rendered from the stories.
 
 ## Principles
 
@@ -82,8 +85,8 @@ This repo's own vault is checked in at `vault/`. Its `docs/_specs/` is the produ
 - **Less prose, less drift**: cut motivation, restated context, and preambles. The schema is the source of truth; prose decays.
 - **Schema over prose**: structured data lives in `src/config.yaml` and is rendered from there — never restated in body prose.
 - **Reference the source, never the literal**: dynamic values (statuses, queues, agent ids) render from config/query specs.
-- **Wide-domain**: skills and playbooks stay stack-agnostic. Project specifics live in the vault's `_lessons/` and the attached repo's own `CLAUDE.md` — the only two destinations learn writes.
-- **Agent wiring**: the driver owns all vault reads/writes; worker agents touch only repo code. Project-local shaping of an agent or a skill is a targeted lesson (`agent:{id}`, `skill:{name}`), not a separate extension file. External global agents at `~/.claude/agents/` wire in via config — see [documentation/integrating-external-agents.md](documentation/integrating-external-agents.md).
+- **Wide-domain**: skills and playbooks stay stack-agnostic. Project specifics live in the project specs tier (rule records) and the attached repo's own `CLAUDE.md` — the only two destinations learn writes.
+- **Agent wiring**: the driver owns all vault reads/writes; worker agents touch only repo code. Project-local shaping of an agent or a skill is a targeted rule (`agent:{id}`, `skill:{name}`), not a separate extension file. External global agents at `~/.claude/agents/` wire in via config — see [documentation/integrating-external-agents.md](documentation/integrating-external-agents.md).
 
 ## Editing conventions
 

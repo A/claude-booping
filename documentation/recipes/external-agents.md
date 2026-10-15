@@ -4,7 +4,7 @@ booping's playbooks delegate work through Claude Code's `Agent` tool: develop ha
 
 The trick is the **agent-proxy pattern**. Rather than teach a playbook about your external tool, you write a thin proxy agent in `~/.claude/agents/` whose only job is to relay the briefing to the external CLI and return its report, then point the playbook's agent slot at the proxy via vault config. The playbook sees no change — it invokes an agent by name and reads a report back. Everything specific to the external tool lives in the proxy's body, which you author.
 
-Two real proxies below: a minimal relay to Codex, and a full develop worker backed by a headless pi session. The dry mechanics — config merge rules, the lesson system, disabling built-in agents — live in [Integrating external agents](../integrating-external-agents.md); this page shows the shape in motion.
+Two real proxies below: a minimal relay to Codex, and a full develop worker backed by a headless pi session. The dry mechanics — config merge rules, shaping a step with targeted rules, disabling built-in agents — live in [Integrating external agents](../integrating-external-agents.md); this page shows the shape in motion.
 
 ## The pattern in one picture
 
@@ -109,4 +109,4 @@ Strip the two examples down and the recipe is always:
 2. Register it in vault config under the target playbook's `core.{name}_playbook.agents.{id}` with honest `good_for` / `bad_for` bullets.
 3. Start a fresh session and run the playbook — it delegates to your proxy like any other agent.
 
-For briefing shaping via targeted lessons, hiding the built-in workers, and the full config-key tour, see [Integrating external agents](../integrating-external-agents.md).
+For briefing shaping via targeted rules, hiding the built-in workers, and the full config-key tour, see [Integrating external agents](../integrating-external-agents.md).

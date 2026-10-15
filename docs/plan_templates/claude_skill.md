@@ -43,7 +43,7 @@ One file per milestone directory under the plan directory's `milestones/`, named
 
 - [ ] `bin/booping render src/templates/skills/<name>.md.j2` produces clean output (for skill/agent body changes).
 - [ ] Rendered skill body reviewed (no stale state names, no prose that duplicates rendered tables, no `{{placeholder}}` leaks).
-- [ ] Targeted lessons (`skill:{name}`, `agent:{id}`) still inline correctly into the rendered body.
+- [ ] Targeted rules (`skill:{name}`, `agent:{id}`) still inline correctly into the rendered body.
 
 ## Out of scope
 
@@ -81,9 +81,9 @@ Name sections to update, or state "No CLAUDE.md changes required — {justificat
 - [ ] Structured facts (statuses, transitions, task types, agents) go in `src/config.yaml`, not prose.
 - [ ] Single-consumer content lives in the skill body, not config.
 - [ ] Long-form reference content (> a paragraph) is a lazy-load doc under `docs/`, not inlined.
-- [ ] `!`commands`` are used for dynamic content (project context, lessons), not baked facts.
+- [ ] `!`commands`` are used for dynamic content (project context, rules), not baked facts.
 - [ ] No restated flow / state descriptions — the rendered transitions table is the contract.
-- [ ] No stack-specific details in the skill body (Django, React, etc.) — project specifics belong in `~/Claude/{project}/_lessons/`.
+- [ ] No stack-specific details in the skill body (Django, React, etc.) — project specifics belong in rule records in the project specs tier.
 
 ## Anti-patterns (must be absent)
 

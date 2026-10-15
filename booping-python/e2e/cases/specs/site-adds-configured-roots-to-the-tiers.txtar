@@ -1,0 +1,69 @@
+With no `--root`, the tiers come first — here only the core tier, pinned to a fixture dir under `~`
+(the global tier's `~/Claude/_specs` and the project tier are absent) — then
+`core.specs.site.roots`: the existing entry is rendered, the missing one warns and is skipped.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  specs:
+    tiers:
+      core:
+        path: ~/core-specs
+    site:
+      roots:
+        - {name: team, path: team-specs}
+        - {name: gone, path: gone-specs}
+-- fixtures/home/core-specs/value/0001-small-steps.md --
+---
+type: value
+title: Small steps
+summary: Ship in small, reviewable steps.
+kind: value
+---
+
+# Small steps
+-- fixtures/home/Claude/team-specs/rule/0001-one-concern-per-commit.md --
+---
+type: rule
+title: One concern per commit
+summary: A commit carries one concern.
+status: accepted
+values: [booping:value/0001]
+---
+
+# One concern per commit
+-- cmd --
+booping specs site
+-- exit --
+0
+-- stdout --
+specs site: 2 roots, 2 records, 7 pages, 1 warnings -> specs-site
+-- stderr --
+{HOME}/Claude/gone-specs  warning  site  root gone not found, skipped
+-- expected/cwd/specs-site/index.html --
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Specs — specs</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav class="crumbs">
+<span>Specs</span></nav>
+<main>
+<h1>Specs</h1>
+<div class="table-wrap">
+<table>
+<thead>
+<tr><th>Root</th><th>Records</th><th>rule</th><th>value</th><th>[clarify]</th><th>[unknown]</th><th>Unreviewed</th></tr>
+</thead>
+<tbody>
+<tr><td><a href="booping/index.html">booping</a></td><td>1</td><td></td><td><a href="booping/value/index.html">1</a></td><td></td><td></td><td>1</td></tr>
+<tr><td><a href="team/index.html">team</a></td><td>1</td><td><a href="team/rule/index.html">1</a></td><td></td><td></td><td></td><td>1</td></tr>
+</tbody>
+</table>
+</div>
+</main>
+</body>
+</html>

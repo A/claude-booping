@@ -1,0 +1,32 @@
+A record whose `type:` differs from its directory gets a `frontmatter` finding on the `type:`
+key's line. The value schema pins `type: value`, so mdcheck reports the same key as well.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/specs/value/0001-first.md --
+---
+title: First
+type: rule
+summary: The first value.
+kind: value
+created_by: owner
+created_at: 2026-01-01
+updated_at: 2026-01-01
+---
+
+Why the project exists.
+
+## In practice
+
+It shows in every run.
+-- cmd --
+booping specs check
+-- exit --
+1
+-- stdout --
+vault/specs/value/0001-first.md:3  error  frontmatter  type is `rule`, the directory is `value`
+vault/specs/value/0001-first.md:3  error  schema  `type` value `rule` does not match `value`
+-- stderr --
+1 record(s) checked: 2 error(s), 0 warning(s)

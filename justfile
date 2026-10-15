@@ -3,8 +3,8 @@ default:
 
 # Lint both uv projects
 lint:
-    cd booping-python && uv run ruff check .
-    cd booping-tracker && uv run ruff check .
+    cd booping-python && uv run ruff check . && uv run ruff format --check .
+    cd booping-tracker && uv run ruff check . && uv run ruff format --check .
 
 # Type-check both uv projects
 typecheck:
@@ -20,16 +20,21 @@ pytest:
 # Exit 5 is "no tests collected": a -k expression selecting cases in one corpus leaves the
 # other empty, which is a filtered-out corpus rather than a failure.
 [no-exit-message]
+[positional-arguments]
 e2e *args:
-    cd booping-python && uv run pytest e2e {{ args }} || [ $? -eq 5 ]
-    cd booping-tracker && uv run pytest e2e {{ args }} || [ $? -eq 5 ]
+    cd booping-python && uv run pytest e2e "$@" || [ $? -eq 5 ]
+    cd booping-tracker && uv run pytest e2e "$@" || [ $? -eq 5 ]
 
 # Every check CI runs, in order, stopping at the first failure.
-ci: lint typecheck pytest snapshots mdcheck e2e
+ci: lint typecheck pytest snapshots mdcheck specs-check e2e
 
 [doc("Structural checks over the rendered reports")]
 mdcheck:
     @uv run scripts/mdcheck.py
+
+[doc("Check this repo's specs records (project tier) — booping specs check")]
+specs-check:
+    bin/booping specs check
 
 [doc("Check the committed reports against a fresh hermetic render")]
 snapshots:

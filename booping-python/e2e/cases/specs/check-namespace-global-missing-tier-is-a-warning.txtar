@@ -1,0 +1,56 @@
+A namespace whose tier has no specs directory on this machine is a `namespace` warning naming the
+missing root, not a `ref` error.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  specs:
+    tiers:
+      global:
+        namespace: owner
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/specs/value/0001-first.md --
+---
+type: value
+title: First
+summary: The first value.
+kind: value
+created_by: owner
+created_at: 2026-01-01
+updated_at: 2026-01-01
+---
+
+Why the project exists.
+
+## In practice
+
+It shows in every run.
+-- fixtures/cwd/vault/specs/rule/0001-keep-it-short.md --
+---
+type: rule
+title: Keep it short
+summary: Cut what the reader does not need.
+created_by: owner
+created_at: 2026-01-01
+updated_at: 2026-01-01
+status: accepted
+rules: [owner:rule/0001]
+---
+
+## Rule
+
+Keep it short.
+
+## Follows from
+
+- [First](../value/0001-first.md)
+-- cmd --
+booping specs check
+-- exit --
+0
+-- stdout --
+vault/specs/rule/0001-keep-it-short.md:9  warning  namespace  rules: tier `global` has no specs at {HOME}/Claude/_specs
+-- stderr --
+2 record(s) checked: 0 error(s), 1 warning(s)

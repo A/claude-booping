@@ -1,0 +1,25 @@
+# story: specs/story/<NNNN>-<slug>.md — one sentence "As **who**, I want …,
+# so that …" and 1-5 criteria.
+doc: story
+
+rules:
+  - select: FRONTMATTER
+    has:
+      type: story
+      title: '^.+$'
+      summary: '^.{1,200}$'
+      created_by: { enum: [owner, claude] }
+      created_at: '^\d{4}-\d{2}-\d{2}$'
+      updated_at: '^\d{4}-\d{2}-\d{2}$'
+      status: { enum: [done, planned, deferred] }
+
+  - select: H2
+    ordered: [Criteria]
+    strict: true
+
+  - select: DOCUMENT > P[0]
+    match: '(?s)^As\s+\*\*.+\*\*,\s+I\s+want\s.+,\s+so\s+that\s.+'
+
+  - select: SECTION("Criteria") > UL > LI
+    min: 1
+    max: 5

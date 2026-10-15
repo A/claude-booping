@@ -1,0 +1,74 @@
+When a step body is inlined, its step-targeted rule comes with it — the step's `## Rules` block
+follows the body inside the `## Step:` section — while the playbook-targeted rule keeps its own
+section above the step table.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  specs:
+    tiers:
+      core: {namespace: fx, path: ~/core-specs}
+-- fixtures/home/core-specs/rule/0001-playbook-rule.md --
+---
+type: rule
+title: Playbook rule
+status: accepted
+targets: [fx-rule-inline]
+brief: Playbook brief.
+---
+-- fixtures/home/core-specs/rule/0002-step-rule.md --
+---
+type: rule
+title: Step rule
+status: accepted
+targets: [fx-rule-inline/s1]
+brief: Step brief.
+---
+-- fixtures/home/Claude/_playbooks/fx-rule-inline/playbook.md --
+---
+name: fx-rule-inline
+title: Rules
+summary: Rule injection.
+inline_steps: true
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-rule-inline/playbook.yaml --
+graph:
+  s1: []
+-- fixtures/home/Claude/_playbooks/fx-rule-inline/s1/prompt.md --
+---
+name: s1
+summary: Only step.
+---
+
+Step body.
+-- cmd --
+booping render-playbook fx-rule-inline
+-- exit --
+0
+-- stdout --
+Preamble.
+
+## Rules
+
+The following 1 rule(s) apply to this playbook. Never silently violate one; conflict → stop and flag. Read a rule's record when its brief is not enough.
+
+- Playbook brief. [fx:rule/0001]({HOME}/core-specs/rule/0001-playbook-rule.md)
+
+## Playbook Steps
+
+Execute the steps in the most effective order considering their dependencies.
+
+| Step | Dependencies | Summary | Review gate |
+| --- | --- | --- | --- |
+| `s1` | — | Only step. | — |
+
+## Step: S1
+Step body.
+
+## Rules
+
+The following 1 rule(s) apply to this step. Never silently violate one. Read a rule's record when its brief is not enough.
+
+- Step brief. [fx:rule/0002]({HOME}/core-specs/rule/0002-step-rule.md)
+-- stderr --

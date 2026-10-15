@@ -1,0 +1,7 @@
+# Global tier of the migration-004 fixture. Applied from a copy at /tmp/m004 with
+# XDG_CONFIG_HOME=/tmp/m004/home/.config, so home_dir is pinned to that copy.
+home_dir: /tmp/m004/home
+core:
+  specs:
+    tiers:
+      global: {namespace: fixture}

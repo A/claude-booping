@@ -5,24 +5,24 @@ Turn retrospective findings into durable behavior changes routed to exactly one 
 - The run's unit of work is a standalone retrospective, `retrospectives/{slug}.md`; its `plans:` frontmatter lists the plans it covers, for context only.
 - The run workdir is the **vault root**; every `booping playbook-state` / `booping playbook-transition` call passes `--target retrospectives/{slug}.md`, since the machine declares no `artifact:`.
 - Plans are already `done` when learn runs and are never re-read for status or touched by it.
-- Learn writes exactly two destinations: this project's vault `_lessons/` and the attached repo's `CLAUDE.md`.
+- Learn writes exactly two destinations: a rule record in this project's specs tier and the attached repo's `CLAUDE.md`.
 
 ## Single-location rule
 
-Every accepted learning lands in **exactly one** destination. If a candidate would otherwise span both, decompose it into two distinct rows in the review table — one row per destination. The destinations and the lesson target forms live below; do not restate them elsewhere.
+Every accepted learning lands in **exactly one** destination. If a candidate would otherwise span both, decompose it into two distinct rows in the review table — one row per destination. The destinations and the rule target forms live below; do not restate them elsewhere.
 
 ## Targets
 
-A lesson is a markdown file in this project's `_lessons/`; its `targets:` frontmatter list is what wires it to the things it must reach — exact names only, no globs, no wildcards, no negation:
+A rule is a `rule` record in this project's specs tier — `booping specs init --tier project` prints its root (format: `src/specs/README.md`). Its `targets:` frontmatter list is the rule's wiring to the things it must reach — exact names only, no globs, no wildcards, no negation — and its `brief:` is what reaches them:
 
-1. `{playbook}` — the whole playbook. Target it when a lesson affects several of its steps.
-2. `{playbook}/{step}` — one step. Target it when a lesson concerns that step alone.
-3. `agent:{id}` — a core booping agent. Target it when a lesson should guide the agent in everything it does.
-4. `skill:{name}` — one skill. Target it when a lesson tweaks or extends that skill's own method.
+1. `{playbook}` — the whole playbook. Target it when a rule affects several of its steps.
+2. `{playbook}/{step}` — one step. Target it when a rule concerns that step alone.
+3. `agent:{id}` — a core booping agent. Target it when a rule should guide the agent in everything it does.
+4. `skill:{name}` — one skill. Target it when a rule tweaks or extends that skill's own method.
 
-Several entries in one list are one lesson, not a multi-target row. A lesson with no valid target reaches nothing.
+Several entries in one list are one rule, not a multi-target row. A rule with no valid target reaches nothing.
 
-The table of contents below is the whole space. Pick the playbooks a candidate actually touches and fetch their targets — step summaries, lessons already targeting them, addressable agents — with the command on each entry. Several names fetch in one call: `--set targets_for=a,b`.
+The table of contents below is the whole space. Pick the playbooks a candidate actually touches and fetch their targets — step summaries, rules already targeting them, addressable agents — with the command on each entry. Several names fetch in one call: `--set targets_for=a,b`.
 
 Skills are not listed per playbook: `skill:playbook` is the only skill target.
 
@@ -31,60 +31,60 @@ Skills are not listed per playbook: `skill:playbook` is the only skill target.
 Review a confirmed scope — a sprint's plan, the latest commits, or a named target — through a detached findings pass, a human verdict on those findings, and an approved fix pass.
 
 - Steps: `present`, `resolve`, `review`, `scope`
-- Targets: `booping render playbooks/_partials/lesson_target_space.md --set targets_for=code-review`
+- Targets: `booping render playbooks/_partials/target_space.md --set targets_for=code-review`
 
 ### develop
 
 Execute a groomed plan by delegating every task to a worker agent, one milestone group at a time, then hand off a verified sprint to retro.
 
 - Steps: `develop-loop`, `intake`, `provision`, `verify`, `wrap-up`
-- Targets: `booping render playbooks/_partials/lesson_target_space.md --set targets_for=develop`
+- Targets: `booping render playbooks/_partials/target_space.md --set targets_for=develop`
 
 ### groom
 
 Shape a feature, bug, or refactor into a specified, estimated, user-approved plan.
 
 - Steps: `cross-review`, `draft-plan`, `intake`, `present`, `research-codebase`, `research-web`
-- Targets: `booping render playbooks/_partials/lesson_target_space.md --set targets_for=groom`
+- Targets: `booping render playbooks/_partials/target_space.md --set targets_for=groom`
 
 ### learn
 
-Turn retrospective findings into durable behavior changes routed to exactly one target each — extract atomic candidates, sweep for duplicates, confirm a review table with the user, write the accepted items, close the plans out.
+Turn retrospective findings into rules and repo CLAUDE.md facts, each routed to exactly one destination — extract atomic candidates, sweep for duplicates, confirm a review table with the user, write the accepted items, close the plans out.
 
 - Steps: `dedup-sweep`, `extract-candidates`, `intake`, `review-table`, `transition`, `write`
-- Targets: `booping render playbooks/_partials/lesson_target_space.md --set targets_for=learn`
+- Targets: `booping render playbooks/_partials/target_space.md --set targets_for=learn`
 
 ### migrate
 
 Bring a project vault up to date by applying every pending migration the plugin ships, in id order, on one up-front approval.
 
 - Steps: `apply-migration`, `summarize`, `survey`
-- Targets: `booping render playbooks/_partials/lesson_target_space.md --set targets_for=migrate`
+- Targets: `booping render playbooks/_partials/target_space.md --set targets_for=migrate`
 
 ### playbook-authoring
 
 Turn a procedure description into a working playbook — an interviewed brief, a confirmed step decomposition, an early manifest, and then per step a confirmed spec, test plan, fixtures, prompt, suite, and optimizer passes to green.
 
 - Steps: `decompose`, `fixtures`, `interview`, `llm-tests`, `manifest`, `record-decision`, `regress-optimizer`, `smoke-optimizer`, `states`, `step-prompt`, `step-spec`, `step-suite`
-- Targets: `booping render playbooks/_partials/lesson_target_space.md --set targets_for=playbook-authoring`
+- Targets: `booping render playbooks/_partials/target_space.md --set targets_for=playbook-authoring`
 
 ### retro
 
 Generate a project- and plan-specific sprint retrospective — mine session logs, gather the user's raw feedback, triage issues, then save it and hand off to `/playbook learn`.
 
 - Steps: `gather-feedback`, `intake`, `prepare`, `research-issues`, `save`, `synthesize`
-- Targets: `booping render playbooks/_partials/lesson_target_space.md --set targets_for=retro`
+- Targets: `booping render playbooks/_partials/target_space.md --set targets_for=retro`
 
 ### setup
 
 Take a repo from any starting state to a working booping project — machine-level config, then project-level vault — in one driven conversation.
 
 - Steps: `setup-booping`, `setup-project`
-- Targets: `booping render playbooks/_partials/lesson_target_space.md --set targets_for=setup`
+- Targets: `booping render playbooks/_partials/target_space.md --set targets_for=setup`
 
 ## Repo CLAUDE.md
 
-The one non-lesson destination: the attached repo's `CLAUDE.md`. Route a candidate here when it is a project fact that aids fresh-agent project understanding — a layout path, a CLI command, a code-side convention. One-bullet additions; no paragraph rewrites.
+The one non-rule destination: the attached repo's `CLAUDE.md`. Route a candidate here when it is a project fact that aids fresh-agent project understanding — a layout path, a CLI command, a code-side convention. One-bullet additions; no paragraph rewrites.
 
 
 ## Retrospectives awaiting learning
@@ -104,6 +104,12 @@ The one non-lesson destination: the attached repo's `CLAUDE.md`. Route a candida
 - Never manually break markdown lines. Write each paragraph, bullet, or table row as one line and
   let the renderer wrap it — hard line breaks turn into mid-sentence breaks after any later edit.
 
+## Rules
+
+The following 1 rule(s) apply to this playbook. Never silently violate one; conflict → stop and flag. Read a rule's record when its brief is not enough.
+
+- Write every accepted learning as a rule record in the project specs tier (targets, a self-sufficient one-or-two-line brief, Rule and Follows from) or as a repo CLAUDE.md bullet; never as a lesson file. [booping:rule/0001](${CLAUDE_PLUGIN_ROOT}/vault/specs/rule/0001-lessons-are-rules.md)
+
 ## Playbook Steps
 
 Execute the steps in the most effective order considering their dependencies.
@@ -112,10 +118,10 @@ Execute the steps in the most effective order considering their dependencies.
 | --- | --- | --- | --- |
 | `intake` | — | Resolve the run's retrospective — from `$ARGUMENTS` as a `retrospectives/` path, or by picking one from the awaiting-learning list — validate it sits at learn's entry status, then read it in full and each plan in its `plans:` list for context, with the vault root as the workdir. | — |
 | `extract-candidates` | `intake` | Decompose every retrospective insight into atomic candidates — one imperative rule per candidate, single concern, no bare internal IDs, one sentence per review-table cell — and route each to exactly one of the preamble's two destinations, holding the set in context for the sweep. | — |
-| `dedup-sweep` | `extract-candidates` | Sweep every candidate against existing coverage — the vault's lessons and the repo's `CLAUDE.md` — and record a per-candidate verdict: new, update-existing at the target already holding the rule, or a conflict flagged visibly for the review table. | — |
+| `dedup-sweep` | `extract-candidates` | Sweep every candidate against existing coverage — the rule records of the three specs tiers and the repo's `CLAUDE.md` — and record a per-candidate verdict: new, update-existing at the project rule already holding it, covered by a core or global rule, or a conflict flagged visibly for the review table. | — |
 | `review-table` | `dedup-sweep` | Present the unified review table in the format the review-table doc owns — every candidate with its target and sweep verdict, conflicts flagged — and collect the user's accept / reject / add response in a single `AskUserQuestion` call, never per row; the recorded response is the run's consent to write. | — |
-| `write` | `review-table` | Write every accepted row in one pass per destination — new lesson files at the next free number, in-place updates to the file the sweep matched, one-line bullets into the repo's `CLAUDE.md` — with table acceptance as the sole consent and never a write outside the vault and the attached repo. | — |
-| `transition` | `write` | Fire the exit transition from the vault root — `booping playbook-transition learn done --target retrospectives/{slug}.md` — whose hook commits the vault including the written lessons and extensions; commit any repo `CLAUDE.md` addition separately in the repo working tree, then close on a report of items written per target. | — |
+| `write` | `review-table` | Write every accepted row in one pass per destination — new rule records in the project specs tier at the number `booping specs next` hands out, in-place updates to the rule the sweep matched, one-line bullets into the repo's `CLAUDE.md` — with table acceptance as the sole consent and never a write outside the vault, its specs tier and the attached repo. | — |
+| `transition` | `write` | Fire the exit transition from the vault root — `booping playbook-transition learn done --target retrospectives/{slug}.md` — whose hook commits the vault including the written rule records; commit any repo `CLAUDE.md` addition, and the rule records when the vault is outside the repo, separately in the repo working tree, then close on a report of items written per target. | — |
 
 ## State
 
@@ -136,7 +142,7 @@ booping playbook-state learn --workdir <run workdir> --target {path}
 
 | Status | To | When | Gates |
 | --- | --- | --- | --- |
-| `awaiting-learning` | `done` | every accepted row from the confirmed review table is written to its single target | user confirmed the review table — the accept / reject / add response is recorded; every accepted lesson written to its target file |
+| `awaiting-learning` | `done` | every accepted row from the confirmed review table is written to its single target | user confirmed the review table — the accept / reject / add response is recorded; every accepted row written to its single target — rule records pass booping specs check |
 | `done` | *(terminal)* | — | — |
 
 ## Step: Intake
@@ -178,10 +184,11 @@ Each candidate must satisfy:
 
 - **Imperative form** — `do X` or `don't Y`. Not "X happened" or "X is good".
 - **Single concern** — if you can't state the rule without "and", "plus", or `;`, split it.
-- **No bare internal IDs** — when referring to an existing lesson, pair the ID with its title slug (e.g. `lesson 0004 (information-architecture-pattern)`, not just `lesson 0004`). Same for retro-internal codes; restate the underlying mechanic.
-- **One sentence each in the report** — the review-table `Rule` and `Example` cells are one sentence each. The persisted lesson file may elaborate the rule into a compact paragraph after approval.
+- **No bare internal IDs** — when referring to an existing rule or lesson, pair the ID with its title slug (e.g. `rule/0004 (questions-settled-in-grooming)`, not just `rule/0004`). Same for retro-internal codes; restate the underlying mechanic.
+- **One sentence each in the report** — the review-table `Rule` and `Example` cells are one sentence each. The persisted rule record may elaborate the rule into a compact paragraph after approval.
+- **Brief** — every rule candidate carries a `Brief`: one or two self-sufficient lines that reach the target, without restating what the agent checks or knows anyway (`src/specs/README.md`, rule frontmatter).
 
-For each candidate, pick one of the two destinations named in the preamble — a lesson in `_lessons/`, or a bullet in the repo's `CLAUDE.md`. When the destination is a lesson, pick its `targets:` entries from the preamble's `## Targets` section.
+For each candidate, pick one of the two destinations named in the preamble — a rule record in the project specs tier, or a bullet in the repo's `CLAUDE.md`. When the destination is a rule, pick its `targets:` entries from the preamble's `## Targets` section.
 
 Work the target space in two passes: read the table of contents there, shortlist the playbooks the candidates actually touch, then run the fetch command for exactly those (one call, names joined by commas) and pick entries from what comes back. Never guess a step name that the fetched targets did not show.
 
@@ -192,34 +199,22 @@ Before drafting the review table, check whether each candidate duplicates or con
 
 The lookup set is:
 
-- `{home_dir}/_lessons/` — global lessons, shared across projects (the vault-home base is `booping config-get home_dir`). Read-only here; a duplicate found in it still becomes an update to that file.
-- `{vault}/_lessons/` — this project's lessons, shadowing a global lesson of the same filename. The only root this run writes new lessons into.
-- The attached repo's `CLAUDE.md` — the non-lesson destination.
-- The vault's legacy `lessons/`, if it still exists — **read-only, duplicate context only**. Never write here and never route a row to it; a candidate already covered there is reported as such and, if accepted, written into `{vault}/_lessons/` with `targets:`.
+- The rule records of all three specs tiers — `booping specs ls --tier {core,global,project} --type rule`, one call per tier; a tier that does not exist is skipped silently. Only the project tier is ever written.
+- The attached repo's `CLAUDE.md` — the non-rule destination.
 
-Skip silently when a directory is empty or a file is absent.
+Skip silently when a file is absent.
 
 Record a sweep verdict per candidate as one of:
 
-- `new` — no prior coverage at any target.
-- `update existing at target X` — duplicate or refinement of a rule already written at `X`; the candidate becomes an update to `X`, not a fresh write at a different target.
-- `conflict with existing at target X` — surface to the user in the review table as a visible flag.
+- `new` — no prior coverage anywhere in the lookup set.
+- `update existing at rule/NNNN` — duplicate or refinement of a project rule; the candidate becomes an edit of that record in place.
+- `covered by {ref}` — already covered by a core or global rule; shown in the review table and never written.
+- `conflict with {ref}` — contradicts an existing rule; surface it in the review table as a visible flag.
 
 ## Step: Review Table
-Render the review table using the format defined in [review table format](${CLAUDE_PLUGIN_ROOT}/docs/learn_review_table.md), with one added column: **Targets**.
+Render the review table in the [review table format](${CLAUDE_PLUGIN_ROOT}/docs/learn_review_table.md); a row's Targets cell draws on the preamble's `## Targets`.
 
-Every row carries a Targets cell — comma-separated entries from the preamble's target space, using the four entry forms and exact names only, no globs or wildcards:
-
-- `{playbook}` — the lesson applies to the whole playbook
-- `{playbook}/{step}` — it applies to one step of it
-- `agent:{id}` — it applies to one agent
-- `skill:{id}` — it applies to one skill
-
-A `lesson` row's Targets cell is written verbatim into the file's `targets:` frontmatter list, so it must be non-empty. A repo `CLAUDE.md` row carries `—`: the file path is its routing.
-
-Use `AskUserQuestion` once to collect the user's accept / reject / add response.
-
-Do not prompt per row. Do not inline the column-by-column documentation here — the template owns the format, the accept/reject syntax, and the user-added-row split rule.
+Use `AskUserQuestion` once to collect the user's accept / reject / add response. Do not prompt per row.
 
 The confirmed response is what the exit edge's first gate names — record it. Nothing is written in this step.
 
@@ -228,28 +223,49 @@ After the table is accepted, write every accepted row in a single pass per desti
 
 There are exactly two destinations (resolve each placeholder before writing):
 
-- `_lessons/{N}_{kebab}.md` — one rule per file, in this project's vault. `{N}` is the next integer, computed from `ls _lessons/` highest existing prefix + 1 (`1` when the directory is empty or absent — create it); body follows the lesson body shape inlined below. The `targets:` list is the row's Targets cell split on commas — one YAML list item per entry, never several names in one item (`- a, b` and `- a b` are both one invalid target and the lesson injects nowhere). Quote `title:` — a colon in the sentence breaks the frontmatter otherwise. The `retro:` frontmatter points at the run's retrospective, `retrospectives/{slug}.md`.
-- Repo `CLAUDE.md` — the attached repo's `CLAUDE.md`, one-line bullet additions; no paragraph rewrites. **Never** write to the global `~/.claude/CLAUDE.md` or any user-level scope — learn only touches this project's vault and the attached repo.
+- A rule record in this project's specs tier. Run `booping specs init --tier project` first — it creates the tier when absent, and its last stdout line is the tier root. Each new record is `{root}/rule/{NNNN}-{slug}.md`, `{NNNN}` from `booping specs next rule --tier project`, run per record; the record follows the rule record shape below. The `targets:` list is the row's Targets cell split on commas — one YAML list item per entry. Quote `title:`, `summary:` and `brief:`. A re-run after a partial failure reuses the record already written for a row — same `title` in the tier — instead of taking a new number.
+- Repo `CLAUDE.md` — the attached repo's `CLAUDE.md`, one-line bullet additions; no paragraph rewrites. **Never** write to the global `~/.claude/CLAUDE.md` or any user-level scope — learn only touches this project's vault, its specs tier and the attached repo.
 
-An `update existing at target X` row edits the file already holding the rule in place — no fresh file at another target. Extend, don't rewrite: add the row's content in the shape the file already uses, touch only prose the addition makes stale (a count in the title, a sibling reference), and leave everything else — including the existing **Example** — byte-identical.
+Rows by sweep verdict:
 
-After the last file is written, render every playbook a new or updated lesson targets (`booping render-playbook {playbook}`) and read its notices: a `**Note — tell the user:** lesson … has no valid targets` line means a malformed `targets:` list — fix the file and re-render before moving on.
+- `update existing at rule/NNNN` — edit that record in place, no fresh record, and bump `updated_at`. Extend, don't rewrite: add the row's content in the shape the record already uses, touch only prose the addition makes stale, and leave everything else — including the existing **Example** — byte-identical.
+- `covered` — not written.
+- `conflict with {ref}`, accepted — written as a new project rule whose `## Rule` opens with a `[clarify]` sentence naming `{ref}` as the departed rule and asking the owner for an ADR recording the departure.
 
-The retrospective is the backstory, not the lesson: however long the retro finding runs, the persisted lesson body stays a couple of sentences plus its one example. Never copy the retro's narrative, motivation, or timeline into a lesson.
+After the last file is written, run `booping specs check --tier project`: an error on a written record is fixed in the record and the check re-run until it reports none — never by weakening the record's content.
 
+The retrospective is the backstory, not the rule: however long the retro finding runs, the `## Rule` body stays a couple of sentences plus its one example. Never copy the retro's narrative, motivation, or timeline into a record.
 
+The rule record shape:
+
+```
 ---
-id: {{N}}                                      # monotonically-increasing integer; matches the filename prefix
-title: "{{One-sentence rule as a prescriptive statement}}"
-targets:                                       # what this lesson is injected into; exact names only, no globs
-  - {{playbook}}                               # or {{playbook}}/{{step}}, or agent:{{agent-id}}
-retro: retrospectives/{{slug}}.md              # the retro that surfaced this lesson
-created: YYYY-MM-DD                            # date this lesson was extracted
+type: rule
+title: "{one-sentence rule as a prescriptive statement}"
+summary: "{what the rule says and where it applies, one line, at most 200 characters}"
+created_by: claude
+created_at: {YYYY-MM-DD}                     # the run date
+updated_at: {YYYY-MM-DD}                     # the run date; bumped on every in-place edit
+status: accepted
+targets:                                     # the row's Targets cell, one entry per item
+  - {playbook}                               # or {playbook}/{step}, agent:{agent-id}, skill:{name}
+brief: "{the row's Brief cell}"
+sources: [{retrospective path relative to the repo root}]   # omit when the vault is outside the repo
 ---
 
-{{The principle, imperative form. One compact paragraph; a short bullet list is fine when the rule has named sub-checks.}}
+## Rule
 
-**Example**: {{One concrete case that illustrates the rule — what went wrong or right, in one or two lines. No motivation paragraphs, no multi-section "how to apply", no forbidden/edge-case lists. The retro carries the backstory; link it via `retro:` frontmatter.}}
+{The principle, imperative form. One compact paragraph; a short bullet list is fine when the rule has named sub-checks.}
+
+**Example**: {One concrete case — what went wrong or right, in one or two lines.}
+
+## Follows from
+
+- [{value title}]({relative path to the value record}) — {vault inside the repo: the value a project or booping value names; vault outside: a fitting project-tier value}
+- [Retro: {slug}]({relative path to retrospectives/{slug}.md}) — {vault inside the repo, no value names it: the retrospective}
+- [clarify] Learnt from `retrospectives/{slug}.md` in the project vault, which a record outside the vault cannot link — see the [tier README](../README.md); link a value or settle the source.
+  {vault outside the repo, no project-tier value fits: this exact item, the only one}
+```
 
 ## Step: Transition
 # Transition and commit
@@ -258,17 +274,19 @@ Everything accepted is on disk; nothing here re-drafts or re-opens the table.
 
 ## 1. Transition
 
-Once every accepted item is written, advance the run per the `## State` section — from the vault root, passing `--target retrospectives/{slug}.md` for the run's retrospective. The exit edge's hook commits that file together with the `_lessons/` files this run wrote. Plan frontmatter is never touched: the plans closed at develop and learn leaves them alone.
+Once every accepted item is written, advance the run per the `## State` section — from the vault root, passing `--target retrospectives/{slug}.md` for the run's retrospective. The exit edge's hook commits that file together with the rule records this run wrote under the vault's `specs/`; when the vault is outside the repo the records live in the repo and are committed in §2. Plan frontmatter is never touched: the plans closed at develop and learn leaves them alone.
 
-## 2. Repo `CLAUDE.md` commit
+## 2. Repo commit
 
-If `write` also wrote to the attached repo's `CLAUDE.md`, commit that separately in the repo working tree (the transition only touches the vault, never the attached repo):
+If `write` also wrote to the attached repo's `CLAUDE.md`, or — when the vault is outside the repo — wrote rule records under `{repo-path}/specs/`, commit those separately in the repo working tree (the transition only touches the vault, never the attached repo). Stage each written file by path, never `git add -A`:
 
 ```bash
 cd {repo-path}
-git add CLAUDE.md
-git commit -m "docs(claude-md): {short summary}"
+git add CLAUDE.md specs/rule/{NNNN-slug}.md
+git commit -m "docs(specs): {short summary}"
 ```
+
+Without rule records, stage `CLAUDE.md` alone and use `docs(claude-md): {short summary}`.
 
 ## 3. Closing report
 

@@ -2,15 +2,14 @@ Before drafting the review table, check whether each candidate duplicates or con
 
 The lookup set is:
 
-- `{home_dir}/_lessons/` — global lessons, shared across projects (the vault-home base is `booping config-get home_dir`). Read-only here; a duplicate found in it still becomes an update to that file.
-- `{vault}/_lessons/` — this project's lessons, shadowing a global lesson of the same filename. The only root this run writes new lessons into.
-- The attached repo's `CLAUDE.md` — the non-lesson destination.
-- The vault's legacy `lessons/`, if it still exists — **read-only, duplicate context only**. Never write here and never route a row to it; a candidate already covered there is reported as such and, if accepted, written into `{vault}/_lessons/` with `targets:`.
+- The rule records of all three specs tiers — `booping specs ls --tier {core,global,project} --type rule`, one call per tier; a tier that does not exist is skipped silently. Only the project tier is ever written.
+- The attached repo's `CLAUDE.md` — the non-rule destination.
 
-Skip silently when a directory is empty or a file is absent.
+Skip silently when a file is absent.
 
 Record a sweep verdict per candidate as one of:
 
-- `new` — no prior coverage at any target.
-- `update existing at target X` — duplicate or refinement of a rule already written at `X`; the candidate becomes an update to `X`, not a fresh write at a different target.
-- `conflict with existing at target X` — surface to the user in the review table as a visible flag.
+- `new` — no prior coverage anywhere in the lookup set.
+- `update existing at rule/NNNN` — duplicate or refinement of a project rule; the candidate becomes an edit of that record in place.
+- `covered by {ref}` — already covered by a core or global rule; shown in the review table and never written.
+- `conflict with {ref}` — contradicts an existing rule; surface it in the review table as a visible flag.

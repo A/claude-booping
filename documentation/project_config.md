@@ -49,6 +49,13 @@ core:
   tracker:
     driver: cli
 
+  specs:
+    format: src/specs
+    tiers:
+      core: {namespace: booping, path: vault/specs}
+      global: {namespace: null, path: _specs}
+      project: {path: null}
+
   sprint:
     default_threshold_sp: 35
     redecompose_threshold: 5
@@ -146,7 +153,7 @@ core:
     queries:
       scope_candidates:
         where: { status: done }
-        columns: [sp, title, code_reviews]
+        columns: [sp, title, code_reviews, commit]
     agents:
       booping-researcher:
         internal: true
@@ -174,7 +181,6 @@ core:
       plans:   { type: dir }
       retrospectives: { type: dir }
       codereviews: { type: dir }
-      _lessons: { type: dir }
       notes:   { type: dir }
       sprints.md: |
         ```base
@@ -247,6 +253,18 @@ A body calls one with `{{ macro('core.macros.date', '+%H:%M') }}`. The `command:
 For a reproducible render, pin a macro instead of executing it: `--stub-macro DOTTED.PATH=LITERAL` on `booping render`, `booping render-playbook` and `booping scaffold` makes the named macro return the literal without running its command (e.g. `--stub-macro core.macros.date=19700101-00-00`). The flag is repeatable, later pins winning.
 
 Macros are honoured in every tier, project included. A project config arrives with a `git clone`, so treat an unfamiliar vault's `core.macros` block as executable content in a repo.
+
+### `core.specs`
+
+Where the three [specs](specs.md) tiers live and what their namespaces are. Directly under `core` because `booping specs` and rule injection both read it.
+
+- **`core.specs.format`** — the directory holding the format guide and the per-type schemas, relative to the plugin root. Default `src/specs`; the record types are the schema file stems found there.
+- **`core.specs.tiers.core`** — booping's own records: `path` relative to the plugin root (`vault/specs`), `namespace` the prefix other tiers cite them by (`booping`).
+- **`core.specs.tiers.global`** — your records for every project: `path` relative to `home_dir` (`_specs`), `namespace` your prefix. `null` takes the `USER` environment variable. The [setup playbook](install.md#scaffold-the-project-vault) asks for `core.specs.tiers.global.namespace` once, `$USER` as the default, and writes it into the global config beside `home_dir`; a global config already carrying the key is not asked again.
+- **`core.specs.tiers.project`** — the project's own records: `path` relative to the attached repo. `null` resolves to `<vault>/specs` when the vault lives inside the repo, else `specs`. When the vault lives outside the repo, [`booping specs init`](specs.md#booping-specs-init) links `<vault>/specs` to the repo's tier.
+- **`core.specs.site.roots`** — extra roots [`booping specs site`](specs.md#booping-specs-site) renders after the tiers, a list of `{name, path}`: `name` is the root's namespace on the site, `path` relative to `home_dir` like the global tier. Default `[]`; set it in the global config to build one site over every project's specs.
+
+A tier `path` that is absolute or starts with `~` is taken as is.
 
 ## Per-playbook keys, under `core.{name}_playbook`
 
@@ -355,7 +373,7 @@ Trees ride the same core → global → project merge as everything else here, s
     ~/Claude/_playbooks/my-playbook --set name=my-playbook
   ```
 
-- **`core.setup_playbook.scaffold`** — the project vault: `plans/`, `retrospectives/`, `codereviews/`, `_lessons/`, `notes/`, plus the seeded `sprints.md` Obsidian Bases fence and a `.gitignore`. Takes no `--set` variables.
+- **`core.setup_playbook.scaffold`** — the project vault: `plans/`, `retrospectives/`, `codereviews/`, `notes/`, plus the seeded `sprints.md` Obsidian Bases fence and a `.gitignore`. Takes no `--set` variables.
 
 - **`core.groom_playbook.scaffold`** — the tree groom seeds every new plan from, in one `booping scaffold` call: a plan directory holding `index.md` (the plan's identity frontmatter — the sole definition of it, `commit:` stamped with the repo's HEAD at creation — plus the title as an `#` heading) and an empty `request.md`. Takes `--set title=` and `--set type=`.
 
