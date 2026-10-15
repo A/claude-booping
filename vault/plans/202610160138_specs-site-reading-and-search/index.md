@@ -1,7 +1,7 @@
 ---
 title: "Specs site redesign, part 3 — record reading and search"
 type: "feature"
-status: presenting
+status: ready-for-dev
 sp: null
 related_to: null
 created: 2026-10-16 01:39
@@ -20,6 +20,7 @@ tracker_request: null
 tracker_issue: null
 return_to: null
 agents: '{"research-codebase": "a94ca418362743d51", "cross-review": "a843baee827ba90c0"}'
+reviewed_at: 2026-10-16 01:51
 ---
 
 # Specs site redesign, part 3 — record reading and search
