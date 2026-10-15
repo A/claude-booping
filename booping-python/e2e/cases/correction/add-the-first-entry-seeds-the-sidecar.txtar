@@ -1,0 +1,41 @@
+The first add beside a plan seeds `corrections.md` with its H1, writes entry `R1` with the
+stubbed heading time and a link to the artefact, and prints `{sidecar}#R1` alone. With no session
+id the dialogue is not linked and a warning goes to stderr.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+macro_stubs:
+  "core.macros.date +%Y-%m-%d %H:%M": "2026-10-15 15:40"
+-- fixtures/cwd/vault/plans/p/index.md --
+---
+title: P
+---
+
+# P
+-- cmd --
+booping correction add --target plans/p/index.md --step groom/draft-plan --did "proposed one plan over the 35 SP threshold" --said "split it, corrections first" --why "too big to review"
+-- exit --
+0
+-- stdout --
+plans/p/corrections.md#R1
+-- stderr --
+warning: no session id; dialogue not linked
+-- expected/cwd/vault/plans/p/corrections.md --
+# Corrections
+
+## R1 — groom/draft-plan — 2026-10-15 15:40
+
+**Did:** proposed one plan over the 35 SP threshold
+
+**Said:**
+
+> split it, corrections first
+
+**Why:** too big to review
+
+**Dialogue:** not found — no session id
+
+**Artifact:** [index.md](index.md)

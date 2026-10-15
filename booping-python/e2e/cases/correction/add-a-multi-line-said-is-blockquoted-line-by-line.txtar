@@ -1,0 +1,41 @@
+Every line of a multi-line `--said` is blockquoted on its own, never reworded. The newline is
+passed through `printf` under `sh`, since a `cmd` line cannot carry one.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+macro_stubs:
+  "core.macros.date +%Y-%m-%d %H:%M": "2026-10-15 15:40"
+-- fixtures/cwd/vault/plans/p/index.md --
+---
+title: P
+---
+
+# P
+-- cmd --
+sh -c 'booping correction add --target plans/p/index.md --step groom/draft-plan --did "wrote one milestone" --said "$(printf "no.\nsplit it in two")" --why "too big"'
+-- exit --
+0
+-- stdout --
+plans/p/corrections.md#R1
+-- stderr --
+warning: no session id; dialogue not linked
+-- expected/cwd/vault/plans/p/corrections.md --
+# Corrections
+
+## R1 — groom/draft-plan — 2026-10-15 15:40
+
+**Did:** wrote one milestone
+
+**Said:**
+
+> no.
+> split it in two
+
+**Why:** too big
+
+**Dialogue:** not found — no session id
+
+**Artifact:** [index.md](index.md)

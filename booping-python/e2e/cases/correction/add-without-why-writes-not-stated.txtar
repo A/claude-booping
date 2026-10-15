@@ -1,0 +1,39 @@
+Without `--why` the entry's reason reads `not stated`.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+macro_stubs:
+  "core.macros.date +%Y-%m-%d %H:%M": "2026-10-15 15:40"
+-- fixtures/cwd/vault/plans/p/index.md --
+---
+title: P
+---
+
+# P
+-- cmd --
+booping correction add --target plans/p/index.md --step groom/draft-plan --did "proposed one plan" --said "split it"
+-- exit --
+0
+-- stdout --
+plans/p/corrections.md#R1
+-- stderr --
+warning: no session id; dialogue not linked
+-- expected/cwd/vault/plans/p/corrections.md --
+# Corrections
+
+## R1 — groom/draft-plan — 2026-10-15 15:40
+
+**Did:** proposed one plan
+
+**Said:**
+
+> split it
+
+**Why:** not stated
+
+**Dialogue:** not found — no session id
+
+**Artifact:** [index.md](index.md)
