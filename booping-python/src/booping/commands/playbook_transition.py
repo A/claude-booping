@@ -282,36 +282,55 @@ def _dispatch_script(
 
 
 def _run(args: argparse.Namespace) -> None:
-    to_status: str = args.to_status
-    instance: str | None = args.instance
-    target: str | None = args.target
+    report = transition(
+        args.playbook,
+        args.to_status,
+        state=args.state,
+        instance=args.instance,
+        target=args.target,
+        workdir=args.workdir,
+    )
+    print("\n".join(report))
+
+
+def transition(
+    playbook: str,
+    to_status: str,
+    *,
+    state: str | None = None,
+    instance: str | None = None,
+    target: str | None = None,
+    workdir: str | None = None,
+) -> list[str]:
+    """Move one artifact to *to_status* and run the edge's hooks; returns the mutation
+    report lines. The in-process entry other commands share with `playbook-transition`;
+    a refused move prints `error: …` to stderr and exits like the command does."""
     if target is not None and instance is not None:
         _fail("--target and --instance are mutually exclusive")
 
-    workdir_arg: str | None = args.workdir
-    workdir = Path(workdir_arg).expanduser().resolve() if workdir_arg is not None else Path.cwd()
-    if not workdir.is_dir():
-        _fail(f"workdir not found: {workdir}")
+    run_dir = Path(workdir).expanduser().resolve() if workdir is not None else Path.cwd()
+    if not run_dir.is_dir():
+        _fail(f"workdir not found: {run_dir}")
 
-    ctx = Context.assemble(start=workdir)
-    pb = _resolve_playbook(ctx, args.playbook)
-    state_name, machine = _resolve_state(pb, args.state)
+    ctx = Context.assemble(start=run_dir)
+    pb = _resolve_playbook(ctx, playbook)
+    state_name, machine = _resolve_state(pb, state)
 
     # Only an absolute target implies a workdir — a relative one is *defined* against
     # the workdir, so deriving one from it would re-anchor the path under itself.
-    if workdir_arg is None and target is not None and Path(target).expanduser().is_absolute():
+    if workdir is None and target is not None and Path(target).expanduser().is_absolute():
         implied = implied_workdir(Path(target).expanduser(), machine.artifact)
-        if implied is not None and implied != workdir:
+        if implied is not None and implied != run_dir:
             if not implied.is_dir():
                 _fail(f"workdir implied by --target not found: {implied}")
             # Re-assemble: the implied workdir may resolve a different project and a
             # different playbook root than cwd did.
-            workdir = implied
-            ctx = Context.assemble(start=workdir)
-            pb = _resolve_playbook(ctx, args.playbook)
-            state_name, machine = _resolve_state(pb, args.state)
+            run_dir = implied
+            ctx = Context.assemble(start=run_dir)
+            pb = _resolve_playbook(ctx, playbook)
+            state_name, machine = _resolve_state(pb, state)
 
-    artifact, artifact_rel = _resolve_artifact(machine, workdir, instance, target)
+    artifact, artifact_rel = _resolve_artifact(machine, run_dir, instance, target)
 
     report: list[str] = []
     existing = artifact.exists()
@@ -364,14 +383,14 @@ def _run(args: argparse.Namespace) -> None:
                 hook,
                 artifact,
                 hook_project,
-                file_base=workdir,
+                file_base=run_dir,
                 instance=instance,
                 config=ctx.config,
             )
             report.append(format_frontmatter_line(resolved, rel))
         elif hook_name == "script":
             name = _dispatch_script(
-                hook, playbook_dir, pb.search_roots, workdir, artifact, instance
+                hook, playbook_dir, pb.search_roots, run_dir, artifact, instance
             )
             report.append(f"script {name}: ok")
         else:
@@ -384,4 +403,4 @@ def _run(args: argparse.Namespace) -> None:
         message=f"{pb.name} {scope} {from_status}→{to_status}",
     )
 
-    print("\n".join(report))
+    return report

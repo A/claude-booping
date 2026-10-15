@@ -1,0 +1,14 @@
+A vault with no open-items directory has no rows: the single line `no open items`.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+-- cmd --
+booping specs open-items list
+-- exit --
+0
+-- stdout --
+no open items
+-- stderr --

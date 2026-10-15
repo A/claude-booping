@@ -1,0 +1,39 @@
+A second add numbers past the highest existing item, keeping the record it is given.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+macro_stubs:
+  core.macros.date: "2026-10-15"
+-- fixtures/cwd/vault/open-items/OI-0001.md --
+---
+id: OI-0001
+title: "First"
+status: done
+---
+
+# First
+-- cmd --
+booping specs open-items add --title "Second gap" --direction conflict --record rule/0003
+-- exit --
+0
+-- stdout --
+open-items/OI-0002.md
+-- stderr --
+-- expected/cwd/vault/open-items/OI-0002.md --
+---
+id: OI-0002
+title: "Second gap"
+status: open
+direction: conflict
+record: "rule/0003"
+source: manual
+plan: null
+created_at: 2026-10-15
+closed_at: null
+reason: null
+---
+
+# Second gap

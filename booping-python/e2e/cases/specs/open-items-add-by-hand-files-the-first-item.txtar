@@ -1,0 +1,35 @@
+A hand-filed item in a vault without an open-items directory becomes `OI-0001`: the directory
+is created, the file carries the flags, `status: open`, null plan and closure keys and the
+stubbed date, and stdout is its vault-relative path alone.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+macro_stubs:
+  core.macros.date: "2026-10-15"
+-- cmd --
+booping specs open-items add --title "Spec the tracker" --direction code-to-spec --body "Two lines of prose."
+-- exit --
+0
+-- stdout --
+open-items/OI-0001.md
+-- stderr --
+-- expected/cwd/vault/open-items/OI-0001.md --
+---
+id: OI-0001
+title: "Spec the tracker"
+status: open
+direction: code-to-spec
+record: null
+source: manual
+plan: null
+created_at: 2026-10-15
+closed_at: null
+reason: null
+---
+
+# Spec the tracker
+
+Two lines of prose.

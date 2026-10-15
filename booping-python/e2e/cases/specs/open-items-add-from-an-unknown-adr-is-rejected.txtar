@@ -1,0 +1,34 @@
+`--record` naming an ADR the project tier does not hold is a user error.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+macro_stubs:
+  core.macros.date: "2026-10-15"
+-- fixtures/cwd/vault/specs/adr/0007-plans-close-their-items.md --
+---
+id: adr/0007
+summary: Plans close their open items
+status: accepted
+---
+
+# Plans close their open items
+
+## Decision
+
+Closing a plan closes its items.
+
+## Consequences
+
+- Items stay on disk after they close.
+- Confirmation: every plan that reaches develop's done closes the open items linked to it,
+  and a failed or cancelled plan returns them to open. A second sentence follows.
+-- cmd --
+booping specs open-items add --record adr/0099
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: unknown ADR `adr/0099` in the project tier
