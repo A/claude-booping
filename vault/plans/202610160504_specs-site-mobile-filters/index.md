@@ -2,7 +2,7 @@
 title: "Specs site redesign, part 6 — whole-card links, compact filters, phone filter
   sheet"
 type: "feature"
-status: presenting
+status: ready-for-dev
 sp: null
 related_to: null
 created: 2026-10-16 05:04
@@ -20,6 +20,10 @@ tracker_provider: null
 tracker_request: null
 tracker_issue: null
 return_to: null
+agents:
+  research-codebase: ad63f4e30866a11ac
+  cross-review: af8d081b83d831db1
+reviewed_at: 2026-10-16 05:21
 ---
 
 # Specs site redesign, part 6 — whole-card links, compact filters, phone filter sheet

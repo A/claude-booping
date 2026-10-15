@@ -79,3 +79,13 @@ Default (autonomous run):
 - RISK no committed check — folded in partly: M03 adds the pure `filter-format.js` (row text, removable-chip list) under a node-run unit test (+1 SP); the DOM wiring stays held by headless checks, recorded as a departure from value/0010 in `index.md` Decisions.
 - RISK breakpoint 759 vs 760 — not folded: the phone block the plan targets is `@media (max-width: 760px)`; only `dialog.cmt-sheet` uses `759px`/`760px` min. The new rules use the phone block's `760px`.
 - RISK defaults file — folded in: `index.md` names `develop-defaults.md` beside the plan as the place accepted snapshot drift is listed.
+
+## C8 — approval gate — answered
+
+**Asked:** 2026-10-16 — present
+
+**Question:** Is the plan approved for development?
+
+**Answer:**
+
+Default (autonomous run): auto-confirmed per the owner's invocation (2026-10-16: "do not wait at review gates — auto-confirm them yourself"). The run moves to `ready-for-dev`; no split recommended (11 SP, under the 35 SP threshold).
