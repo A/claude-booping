@@ -49,3 +49,11 @@ Decisions the runner took without the owner, per the run's AUTONOMOUS RUN instru
 **Default:** DoD line treated as satisfied ("drift is limited to" holds with zero drift); nothing accepted for migrate.
 
 **Why:** the committed report renders the generic `survey/prompt.md`, not the `opus-5.md` variant M05 edits, so the edit cannot reach it. The generic `prompt.md` was outside M05's file list and left unchanged (it already says "name it, ask"); listed as an open issue.
+
+## D7 — develop/wrap-up — closing commit
+
+**Asked:** documentation the sprint invalidated.
+
+**Default:** none beyond M06 (CLAUDE.md, documentation/project_config.md, documentation/playbook.md, already committed in `09b900d`); no closing commit. No `states:` block changed, so README's Statuses section is untouched.
+
+**Why:** the plan's M06 owned the documentation scope.

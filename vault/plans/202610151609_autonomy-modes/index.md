@@ -2,13 +2,13 @@
 title: "Autonomy modes — core.autonomy supervised | autonomous, gates honour it, migrate
   asks on a dirty branch"
 type: "feature"
-status: in-progress
+status: done
 sp: 18
 related_to: null
 created: 2026-10-15 16:09
 planned: null
 started: 2026-10-15 16:36
-completed: null
+completed: 2026-10-15 17:09
 code_reviews: []
 sessions:
 - f5f0d6c5-5081-40c4-813c-55027756aea0
@@ -23,6 +23,13 @@ tracker_issue: null
 return_to: null
 agents: '{"research-codebase": "a7a093416ced1ac16", "cross-review": "a6060b99f8c0c600d"}'
 reviewed_at: 2026-10-15 16:27
+metrics_active_minutes: 60
+metrics_models:
+- claude-opus-5-5
+metrics_tokens_input: 114
+metrics_tokens_output: 50346
+metrics_tokens_cache_creation: 221830
+metrics_tokens_cache_read: 5238176
 ---
 
 # Autonomy modes — core.autonomy supervised | autonomous, gates honour it, migrate asks on a dirty branch
