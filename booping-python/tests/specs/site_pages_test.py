@@ -88,8 +88,8 @@ def _parse(html: str) -> _Links:
     return parser
 
 
-def test_every_relative_link_lands_on_a_page_and_id(site: Site) -> None:
-    files = build_site(site, TYPES)[0]
+def _check_links(files: dict[str, str | bytes]) -> int:
+    """Every relative href and src lands on a written file, and its fragment on an id."""
     pages = {
         path: _parse(text)
         for path, text in files.items()
@@ -105,9 +105,6 @@ def test_every_relative_link_lands_on_a_page_and_id(site: Site) -> None:
             target, _, fragment = href.partition("#")
             if target:
                 target = posixpath.normpath(posixpath.join(posixpath.dirname(path), target))
-                # Written by later milestones: the review page and the tag pages.
-                if target == "review.html" or "/tags/" in f"/{target}":
-                    continue
                 assert target in files, (path, href)
             else:
                 target = path
@@ -115,7 +112,11 @@ def test_every_relative_link_lands_on_a_page_and_id(site: Site) -> None:
             if fragment and "=" not in fragment:
                 assert fragment in pages[target].ids, (path, href)
             checked += 1
-    assert checked > 20
+    return checked
+
+
+def test_every_relative_link_lands_on_a_page_and_id(site: Site) -> None:
+    assert _check_links(build_site(site, TYPES)[0]) > 20
 
 
 def test_page_map_paths(site: Site) -> None:
@@ -137,6 +138,7 @@ def test_page_map_paths(site: Site) -> None:
         "proj/adr/index.html",
         "proj/index.html",
         "records.html",
+        "review.html",
         "site.js",
         "style.css",
     ]
@@ -205,8 +207,8 @@ def test_value_kind_is_a_raw_row_and_reviewed_hides_unreviewed(site: Site) -> No
 def test_no_page_holds_a_table(site: Site) -> None:
     files = _texts(site)
     home = files["index.html"]
-    assert re.findall(r"<h2>([^<]+)</h2>", home) == ["core", "proj"]
-    assert '<li><a href="core/value/index.html">Values</a>' in home
+    assert re.findall(r"<h2>([^<]+)</h2>", home) == []
+    assert '<ul class="types">' not in home
     assert all("<table" not in html for path, html in files.items() if path.endswith(".html"))
 
 
@@ -489,7 +491,7 @@ def test_record_page_head_facts_and_relations_in_russian(tmp_path: Path) -> None
         '<dt>Служит ценностям</dt>\n<dd><ul class="rel">\n'
         '<li><a href="../../s/value/0001-craft.html">Craft</a> <code class="ref">value/0001</code>'
     ) in page
-    assert '<span class="tag">#robot</span>' in page
+    assert '<a class="tag" href="../../s/tags/robot.html">#robot</a>' in page
     anchor = re.search(r'<a href="#(L\d+)"><span class="b warn">', page)
     assert anchor is not None
     assert anchor.group(1) in _parse(page).ids
@@ -621,7 +623,16 @@ def test_filter_script_is_written_and_loaded_only_by_filtered_pages(site: Site) 
         path for path, html in files.items() if "filter.js" in html and path.endswith(".html")
     )
     filtered = sorted(path for path, html in files.items() if 'class="filters"' in html)
-    assert loading == filtered == ["core/value/index.html", "proj/adr/index.html", "records.html"]
+    assert (
+        loading
+        == filtered
+        == [
+            "core/value/index.html",
+            "proj/adr/index.html",
+            "records.html",
+            "review.html",
+        ]
+    )
     assert '<script src="../../filter.js" defer></script>' in files["proj/adr/index.html"]
 
 
@@ -632,3 +643,237 @@ def test_russian_filter_labels(tmp_path: Path) -> None:
     assert "Ничего не подходит под фильтр." in page
     for english in ("Sort", "By number", "Recently updated", "By title", "Unreviewed", "Needs"):
         assert f">{english}<" not in page
+
+
+def _review_site(tmp_path: Path) -> tuple[dict[str, str], OpenItem]:
+    reviewed = "reviewed: 2026-10-01\n"
+    _write(tmp_path / "s" / "value" / "0001-fresh.md", "---\ntitle: Fresh\n---\nx\n")
+    # Frontmatter is lines 1-4, so the mark's paragraph opens on line 5.
+    _write(
+        tmp_path / "s" / "value" / "0002-murky.md",
+        f"---\ntitle: Murky\n{reviewed}---\nWho [unknown] knows.\n",
+    )
+    _write(
+        tmp_path / "s" / "adr" / "0001-done.md",
+        f"---\ntitle: Done\nstatus: accepted\n{reviewed}---\nx\n",
+    )
+    item = OpenItem("OI-0007", "Clarify murk", "value/0002")
+    files, _ = build_site(
+        load_site([SiteRoot("s", tmp_path / "s")], TYPES), TYPES, open_items=[item], items_root="s"
+    )
+    return {p: t for p, t in files.items() if isinstance(t, str)}, item
+
+
+def test_review_page_lists_the_pool_with_mark_links_and_items(tmp_path: Path) -> None:
+    files, _ = _review_site(tmp_path)
+    page = files["review.html"]
+    assert page.count('<li class="row"') == 3
+    assert re.findall(r'<code class="ref">([^<]+)</code>', page) == [
+        "value/0001",
+        "value/0002",
+        "OI-0007",
+    ]
+    assert "Done" not in page
+    assert '<a href="s/value/0002-murky.html#L5"><span class="b bad">' in page
+    assert (
+        '<code class="ref">OI-0007</code><a class="t" href="s/value/0002-murky.html">'
+        "Clarify murk</a>"
+    ) in page
+    item = re.search(r'<li class="row"([^>]*)><code class="ref">OI-0007', page)
+    assert item is not None
+    assert 'data-flags="open"' in item.group(1)
+    assert 'data-source=""' in item.group(1) and 'data-type=""' in item.group(1)
+    assert 'data-status="open"' in item.group(1) and 'data-order="2"' in item.group(1)
+    assert "<h1>Needs you</h1>" in page
+    assert '<div class="filters" data-default-sort="review">' in page
+    assert re.findall(r'<option value="([a-z]+)"( selected)?>', page) == [
+        ("review", " selected"),
+        ("number", ""),
+        ("updated", ""),
+        ("title", ""),
+    ]
+    assert (
+        '<li><a href="index.html">Overview</a></li>\n'
+        '<li><span aria-current="page">Review</span></li>'
+    ) in page
+    assert _side_links(_side(page))[1] == ("review.html", "Review", "3")
+    murky = _parse(files["s/value/0002-murky.html"])
+    assert "L5" in murky.ids
+
+
+def test_review_flag_facet_shows_present_reasons_with_counts(tmp_path: Path) -> None:
+    files, _ = _review_site(tmp_path)
+    assert _facets(files["review.html"]) == [
+        (
+            "Needs",
+            [
+                ("flag", "unreviewed", "Unreviewed", "1"),
+                ("flag", "unknown", "Has [unknown]", "1"),
+                ("flag", "open", "Open", "1"),
+            ],
+        ),
+    ]
+
+
+def test_review_item_without_a_resolving_record_is_unlinked(site: Site) -> None:
+    files, _ = build_site(site, TYPES, open_items=[OpenItem("OI-0001", "Ask", "adr/0099")])
+    page = files["review.html"]
+    assert isinstance(page, str)
+    assert '<code class="ref">OI-0001</code><span class="t">Ask</span>' in page
+
+
+def test_empty_review_pool_says_nothing_needs_you(tmp_path: Path) -> None:
+    _write(
+        tmp_path / "s" / "value" / "0001-a.md",
+        "---\ntitle: A\nreviewed: 2026-10-01\n---\nx\n",
+    )
+    page = _texts(load_site([SiteRoot("s", tmp_path / "s")], TYPES))["review.html"]
+    assert '<p class="empty">Nothing needs you.</p>' in page
+    assert 'class="filters"' not in page
+    assert "filter.js" not in page
+
+
+def _home_site(tmp_path: Path, lang: str = "en") -> str:
+    reviewed = "reviewed: 2026-10-01\n"
+    _write(
+        tmp_path / "s" / "value" / "0001-why.md",
+        f"---\ntitle: Why\nsummary: We ship small.\n{reviewed}---\nx\n",
+    )
+    # Three records need review: one unreviewed, two carrying a [clarify] mark each.
+    _write(tmp_path / "s" / "adr" / "0001-a.md", "---\ntitle: A\n---\nx\n")
+    _write(tmp_path / "s" / "adr" / "0002-b.md", f"---\ntitle: B\n{reviewed}---\n[clarify] x\n")
+    _write(tmp_path / "s" / "adr" / "0003-c.md", f"---\ntitle: C\n{reviewed}---\n[clarify] y\n")
+    for n in range(4, 16):
+        _write(
+            tmp_path / "s" / "adr" / f"{n:04d}-d{n}.md",
+            f"---\ntitle: D{n}\nupdated_at: 2026-09-{n:02d}\n{reviewed}---\nx\n",
+        )
+    labels, lang, _ = load_labels({"lang": lang})
+    files, _ = build_site(load_site([SiteRoot("s", tmp_path / "s")], TYPES), TYPES, labels, lang)
+    page = files["index.html"]
+    assert isinstance(page, str)
+    return page
+
+
+def test_home_lead_callout_scenarios_and_recent(tmp_path: Path) -> None:
+    home = _home_site(tmp_path)
+    assert '<p class="lead">We ship small.</p>' in home
+    callout = re.search(
+        r'<p class="callout">.*?<span><a href="([^"]+)">([^<]+)</a>([^<]*)</span>', home
+    )
+    assert callout is not None
+    assert callout.groups() == ("review.html", "3 need you →", " · 2 open questions")
+    assert re.findall(
+        r'<a href="(records\.html#type=[a-z]+)"><b>([^<]+) <span class="n">(\d+)', home
+    ) == [
+        ("records.html#type=value", "Values", "1"),
+        ("records.html#type=adr", "ADRs", "15"),
+    ]
+    assert "<h2>Recently updated</h2>" in home
+    recent = home[home.index('<ul class="recent">') :]
+    rows = re.findall(
+        r'<li><code class="ref">([^<]+)</code><a href="[^"]+">[^<]+</a><time datetime="([^"]+)">',
+        recent,
+    )
+    assert rows == [(f"adr/{n:04d}", f"2026-09-{n:02d}") for n in range(15, 5, -1)]
+    assert '<time datetime="2026-09-15">15 September 2026</time>' in recent
+
+
+def test_home_without_value_or_review_has_no_lead_or_callout(tmp_path: Path) -> None:
+    _write(tmp_path / "s" / "adr" / "0001-a.md", "---\ntitle: A\nreviewed: 2026-10-01\n---\nx\n")
+    home = _texts(load_site([SiteRoot("s", tmp_path / "s")], TYPES))["index.html"]
+    assert '<p class="lead">' not in home
+    assert 'class="callout"' not in home
+    assert "Recently updated" not in home
+
+
+def test_home_callout_in_russian_uses_the_few_form(tmp_path: Path) -> None:
+    home = _home_site(tmp_path, "ru")
+    assert '<a href="review.html">3 записи ждут тебя →</a> · 2 открытых вопроса' in home
+    assert "<h2>Недавно изменённое</h2>" in home
+
+
+def _tag_site(tmp_path: Path) -> dict[str, str | bytes]:
+    root = tmp_path / "s"
+    _write(root / "tags.yaml", "a: A\na:b: AB\n")
+    _write(root / "adr" / "0001-one.md", "---\ntitle: One\ntags: [a:b]\n---\nx\n")
+    _write(root / "adr" / "0002-two.md", "---\ntitle: Two\ntags: [a:b:c]\n---\nx\n")
+    _write(root / "value" / "0001-three.md", "---\ntitle: Three\ntags: [x]\n---\nx\n")
+    _write(root / "value" / "0002-odd.md", "---\ntitle: Odd\ntags: q\n---\nx\n")
+    _write(tmp_path / "p" / "adr" / "0001-bare.md", "---\ntitle: Bare\n---\nx\n")
+    roots = [SiteRoot("s", root), SiteRoot("p", tmp_path / "p")]
+    return build_site(load_site(roots, TYPES), TYPES)[0]
+
+
+def _crumbs(page: str) -> list[tuple[str | None, str]]:
+    nav = page[page.index('<nav class="crumbs"') :]
+    nav = nav[: nav.index("</nav>")]
+    return [
+        (href or None, label)
+        for href, label in re.findall(
+            r'<li[^>]*>(?:<a href="([^"]+)">|<span[^>]*>)(?:<code>)?([^<]+)', nav
+        )
+    ]
+
+
+def test_tag_tree_page_nests_nodes_with_counts(tmp_path: Path) -> None:
+    files = _tag_site(tmp_path)
+    page = files["s/tags/index.html"]
+    assert isinstance(page, str)
+    assert "<h1>Tags</h1>" in page
+    assert _crumbs(page) == [
+        ("../../index.html", "Overview"),
+        ("../index.html", "s"),
+        (None, "Tags"),
+    ]
+    tree = page[page.index('<ul class="tag-tree">') : page.index("</main>")]
+    assert re.findall(
+        r'<a href="([^"]+)"><code>([^<]+)</code></a> <span class="n">(\d+)', tree
+    ) == [
+        ("a.html", "a", "2"),
+        ("a.b.html", "a:b", "2"),
+        ("a.b.c.html", "a:b:c", "1"),
+        ("x.html", "x", "1"),
+    ]
+    assert tree.count('<ul class="tag-tree">') == 3
+    assert '<span class="s">AB</span>' in tree
+
+
+def test_tag_page_lists_descendant_records_and_children(tmp_path: Path) -> None:
+    files = _tag_site(tmp_path)
+    page = files["s/tags/a.html"]
+    assert isinstance(page, str)
+    assert "<h1><code>a</code></h1>" in page
+    assert '<p class="lead">A</p>' in page
+    assert re.findall(r'<a class="t" href="([^"]+)">', page) == [
+        "../../s/adr/0001-one.html",
+        "../../s/adr/0002-two.html",
+    ]
+    assert '<a href="a.b.html"><code>a:b</code></a>' in page
+    assert [label for label, _ in _facets(page)] == ["Needs"]
+    assert '<div class="filters" data-default-sort="number">' in page
+
+
+def test_deep_tag_page_crumbs_run_through_its_ancestors(tmp_path: Path) -> None:
+    page = _tag_site(tmp_path)["s/tags/a.b.c.html"]
+    assert isinstance(page, str)
+    assert _crumbs(page) == [
+        ("../../index.html", "Overview"),
+        ("../index.html", "s"),
+        ("index.html", "Tags"),
+        ("a.html", "a"),
+        ("a.b.html", "a:b"),
+        (None, "a:b:c"),
+    ]
+
+
+def test_record_tags_link_their_pages_and_every_link_resolves(tmp_path: Path) -> None:
+    files = _tag_site(tmp_path)
+    one = files["s/adr/0001-one.html"]
+    assert isinstance(one, str)
+    assert '<a class="tag" href="../../s/tags/a.b.html">#a:b</a>' in one
+    odd = files["s/value/0002-odd.html"]
+    assert isinstance(odd, str)
+    assert '<span class="tag">#q</span>' in odd
+    assert not any(path.startswith("p/tags/") for path in files)
+    assert _check_links(files) > 20

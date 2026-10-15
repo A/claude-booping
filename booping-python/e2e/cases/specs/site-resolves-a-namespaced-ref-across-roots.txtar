@@ -25,7 +25,7 @@ booping specs site --root a=a --root b=b
 -- exit --
 0
 -- stdout --
-specs site: 2 roots, 2 records, 8 pages, 0 warnings -> specs-site
+specs site: 2 roots, 2 records, 9 pages, 0 warnings -> specs-site
 -- stderr --
 -- expected/cwd/specs-site/b/rule/0001-one-concern-per-commit.html --
 <!doctype html>

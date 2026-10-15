@@ -264,6 +264,16 @@ core:
             sort_title: By title
             shown: ["{n} record shown", "{n} records shown"]
             nothing_matches: Nothing matches the filter.
+            review_title: Needs you
+            review_lead: Records waiting for your review and open questions. What the agent wrote comes first, then the oldest.
+            nothing_needs_you: Nothing needs you.
+            flag_conflict: Open conflict
+            flag_proposed: Proposed ADR
+            flag_open: Open
+            sort_review: Review order
+            needs_you: ["{n} needs you →", "{n} need you →"]
+            open_questions: ["{n} open question", "{n} open questions"]
+            recently_updated: Recently updated
           types:
             value: {name: Value, plural: Values, scenario: "why the project exists"}
             rule: {name: Rule, plural: Rules, scenario: "what constrains decisions"}
@@ -346,6 +356,16 @@ core:
             sort_title: По названию
             shown: ["Показана {n} запись", "Показаны {n} записи", "Показано {n} записей"]
             nothing_matches: Ничего не подходит под фильтр.
+            review_title: Ждёт тебя
+            review_lead: Записи без твоего ревью и открытые вопросы. Сначала то, что написал агент, потом самое старое.
+            nothing_needs_you: Ничего не ждёт тебя.
+            flag_conflict: Открытый конфликт
+            flag_proposed: Предложенное решение
+            flag_open: Открытые
+            sort_review: Для ревью
+            needs_you: ["{n} запись ждёт тебя →", "{n} записи ждут тебя →", "{n} записей ждут тебя →"]
+            open_questions: ["{n} открытый вопрос", "{n} открытых вопроса", "{n} открытых вопросов"]
+            recently_updated: Недавно изменённое
           types:
             value: {name: Ценность, plural: Ценности, scenario: "Ценности — зачем этот проект и какой он"}
             rule: {name: Правило, plural: Правила, scenario: "Правила — что ограничивает решения"}

@@ -1,9 +1,24 @@
 {% extends "base.html.j2" %}
-{% from "_macros.html.j2" import types_list %}
+{% from "_macros.html.j2" import icon %}
 {% block main %}
 <h1>{{ site_title }}</h1>
-{% for group in roots %}
-<h2>{{ group.root }}</h2>
-{{ types_list(group.types, group.root ~ "/") | trim }}
+{% if lead is not none %}
+<p class="lead">{{ lead }}</p>
+{% endif %}
+{% if needs %}
+<p class="callout">{{ icon("i-clarify") }}<span><a href="review.html">{{ labels.plural("needs_you", needs) }}</a>{% if questions %} · {{ labels.plural("open_questions", questions) }}{% endif %}</span></p>
+{% endif %}
+<ul class="scen">
+{% for t in types %}
+<li><a href="{{ t.href }}"><b>{{ labels.type_plural(t.type) }} <span class="n">{{ t.count }}</span></b>{% set scenario = labels.scenario(t.type) %}{% if scenario %}<span class="s">{{ scenario }}</span>{% endif %}</a></li>
 {% endfor %}
+</ul>
+{% if recent %}
+<h2>{{ labels.ui("recently_updated") }}</h2>
+<ul class="recent">
+{% for r in recent %}
+<li><code class="ref">{{ r.ref }}</code><a href="{{ r.page }}">{{ r.title }}</a><time datetime="{{ r.datetime }}">{{ r.date }}</time></li>
+{% endfor %}
+</ul>
+{% endif %}
 {% endblock %}

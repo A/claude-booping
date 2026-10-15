@@ -39,7 +39,7 @@ booping specs site --root proj=specs
 -- exit --
 0
 -- stdout --
-specs site: 1 roots, 3 records, 9 pages, 0 warnings -> specs-site
+specs site: 1 roots, 3 records, 12 pages, 0 warnings -> specs-site
 -- stderr --
 -- expected/cwd/specs-site/llms.txt --
 # Specs

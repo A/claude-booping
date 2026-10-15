@@ -1,8 +1,9 @@
 The project vault sets `core.specs.site.lang: ru` and labels its tier-own `mechanic` type: the
 ADR page carries `<html lang="ru">`, Russian chrome, «Решения» in the crumbs, the author «агент»,
 the date with a genitive month, the badge «1 вопрос к тебе» and the value relation titled in
-Cyrillic; the mechanic type page is headed «Механики» with its scenario. The core tier is pinned to a
-missing directory so only the project tier renders.
+Cyrillic; the mechanic type page is headed «Механики» with its scenario. The review page, All
+records, the tag tree from `tags.yaml` and the tag page carry only Russian labels. The core tier is
+pinned to a missing directory so only the project tier renders.
 
 -- fixtures/cwd/.booping --
 project_name: probe
@@ -34,6 +35,19 @@ rules:
   - select: H2
     ordered: [Loop]
     strict: true
+-- fixtures/cwd/vault/tags.yaml --
+dvizhenie: Как перемещаются персонажи
+-- fixtures/cwd/vault/idea/0001-dvoinoi-ryvok.md --
+---
+type: idea
+title: Двойной рывок
+summary: Второй рывок в воздухе.
+status: open
+---
+
+# Двойной рывок
+
+[clarify] Нужна ли отдельная перезарядка?
 -- fixtures/cwd/vault/value/0001-malye-shagi.md --
 ---
 type: value
@@ -67,6 +81,7 @@ type: mechanic
 title: Рывок
 summary: Короткое ускорение с перезарядкой.
 status: accepted
+tags: [dvizhenie]
 ---
 
 ## Loop
@@ -77,8 +92,390 @@ booping specs site
 -- exit --
 0
 -- stdout --
-specs site: 1 roots, 3 records, 9 pages, 0 warnings -> specs-site
+specs site: 1 roots, 4 records, 14 pages, 0 warnings -> specs-site
 -- stderr --
+-- expected/cwd/specs-site/review.html --
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>try{var t=localStorage.getItem("specs-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}document.documentElement.classList.add("js")</script>
+<meta name="color-scheme" content="light dark">
+<title>Ждёт тебя — probe</title>
+<link rel="stylesheet" href="fonts.css">
+<link rel="stylesheet" href="style.css">
+<script src="site.js" defer></script>
+<script src="filter.js" defer></script>
+</head>
+<body>
+<svg aria-hidden="true" style="display:none">
+<symbol id="i-accepted" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4.8 8.2l2.1 2.1 4.3-4.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-open" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+<symbol id="i-planned" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2.6 2.2"/></symbol>
+<symbol id="i-rejected" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3.6 12.4l8.8-8.8" stroke="currentColor" stroke-width="1.6"/></symbol>
+<symbol id="i-clarify" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="currentColor"/><path d="M6.1 6.2a2 2 0 1 1 2.6 1.9c-.5.2-.7.6-.7 1.1v.4" fill="none" stroke="var(--surface)" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="11.6" r=".95" fill="var(--surface)"/></symbol>
+<symbol id="i-unknown" viewBox="0 0 16 16"><path d="M8 1.6l6.8 12.2H1.2z" fill="currentColor"/><path d="M8 6v3.6" stroke="var(--surface)" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="11.6" r=".9" fill="var(--surface)"/></symbol>
+<symbol id="i-unreviewed" viewBox="0 0 16 16"><circle cx="8" cy="8" r="4.6" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+<symbol id="i-reviewed" viewBox="0 0 16 16"><circle cx="8" cy="8" r="4.6" fill="currentColor"/></symbol>
+<symbol id="i-menu" viewBox="0 0 20 20"><path d="M3 5.5h14M3 10h14M3 14.5h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+<symbol id="i-search" viewBox="0 0 20 20"><circle cx="8.6" cy="8.6" r="5.6" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M13 13l4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+<symbol id="i-moon" viewBox="0 0 20 20"><path d="M15.5 12.6A6.5 6.5 0 0 1 7.4 4.5a6.5 6.5 0 1 0 8.1 8.1z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+<symbol id="i-sun" viewBox="0 0 16 16"><circle cx="8" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.2v1.6M8 13.2v1.6M1.2 8h1.6M13.2 8h1.6M3.2 3.2l1.1 1.1M11.7 11.7l1.1 1.1M3.2 12.8l1.1-1.1M11.7 4.3l1.1-1.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+<symbol id="i-auto" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.6a6.4 6.4 0 0 0 0 12.8z" fill="currentColor"/></symbol>
+</svg>
+<a class="skip" href="#main">Перейти к содержимому</a>
+<header class="top">
+<button class="iconbtn menu" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Меню"><svg class="ic" aria-hidden="true"><use href="#i-menu"/></svg></button>
+<a class="brand" href="index.html">probe</a>
+<button class="iconbtn theme" type="button" aria-label="Тема: как в системе" title="Тема: как в системе" data-label-auto="Тема: как в системе" data-label-light="Тема: светлая" data-label-dark="Тема: тёмная"><svg class="ic" aria-hidden="true"><use href="#i-auto"/></svg></button>
+</header>
+<div class="body norail">
+<nav class="side" id="drawer" aria-label="Навигация">
+<ul>
+<li><a href="index.html">Обзор</a></li>
+<li><a href="review.html" aria-current="page"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>Ревью<span class="n">4</span></a></li>
+<li><a href="records.html">Все записи<span class="n">4</span></a></li>
+</ul>
+<h4>Разделы</h4>
+<ul>
+<li><a href="records.html#type=adr">Решения<span class="n">1</span></a></li>
+<li><a href="records.html#type=idea">Идеи<span class="n">1</span></a></li>
+<li><a href="records.html#type=value">Ценности<span class="n">1</span></a></li>
+<li><a href="records.html#type=mechanic">Механики<span class="n">1</span></a></li>
+</ul>
+<h4>Теги</h4>
+<ul>
+<li><a href="probe/tags/dvizhenie.html"><code>dvizhenie</code><span class="n">1</span></a></li>
+<li><a href="probe/tags/index.html">Все теги</a></li>
+</ul>
+<h4>Источники</h4>
+<ul>
+<li><a href="probe/index.html">probe<span class="n">4</span></a></li>
+</ul>
+<ul>
+<li><a href="llms.txt">llms.txt</a></li>
+</ul>
+</nav>
+<main id="main">
+<nav class="crumbs" aria-label="breadcrumb">
+<ol>
+<li><a href="index.html">Обзор</a></li>
+<li><span aria-current="page">Ревью</span></li>
+</ol>
+</nav>
+<h1>Ждёт тебя</h1>
+<p class="lead">Записи без твоего ревью и открытые вопросы. Сначала то, что написал агент, потом самое старое.</p>
+<div class="filters" data-default-sort="review">
+<div class="chips" role="group" aria-label="Раздел">
+<button type="button" class="chip" data-key="type" data-value="adr" aria-pressed="false">Решения<span class="n">1</span></button>
+<button type="button" class="chip" data-key="type" data-value="idea" aria-pressed="false">Идеи<span class="n">1</span></button>
+<button type="button" class="chip" data-key="type" data-value="value" aria-pressed="false">Ценности<span class="n">1</span></button>
+<button type="button" class="chip" data-key="type" data-value="mechanic" aria-pressed="false">Механики<span class="n">1</span></button>
+</div>
+<div class="chips" role="group" aria-label="Пометки">
+<button type="button" class="chip" data-key="flag" data-value="unreviewed" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-unreviewed"/></svg>Без ревью<span class="n">4</span></button>
+<button type="button" class="chip" data-key="flag" data-value="clarify" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>Есть [clarify]<span class="n">2</span></button>
+<button type="button" class="chip" data-key="flag" data-value="open" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-open"/></svg>Открытые<span class="n">1</span></button>
+</div>
+<label>Сортировка <select class="sort">
+<option value="review" selected>Для ревью</option>
+<option value="number">По номеру</option>
+<option value="updated">Сначала новые</option>
+<option value="title">По названию</option>
+</select></label>
+<p class="count" role="status" data-forms="[&#34;Показана {n} запись&#34;, &#34;Показаны {n} записи&#34;, &#34;Показано {n} записей&#34;]">Показаны 4 записи</p>
+</div>
+<p class="empty" hidden>Ничего не подходит под фильтр.</p>
+<ul class="rows">
+<li class="row" data-type="adr" data-source="probe" data-status="accepted" data-flags="unreviewed clarify" data-updated="" data-title="Сливаем ветки одним коммитом" data-created-by="claude" data-order="0"><code class="ref">adr/0001</code><a class="t" href="probe/adr/0001-squash-sliyaniya.html">Сливаем ветки одним коммитом</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>принято</span><a href="probe/adr/0001-squash-sliyaniya.html#L15"><span class="b warn"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>1 вопрос к тебе</span></a><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-unreviewed"/></svg>без ревью</span></span><span class="s">Каждая ветка попадает в основную одним коммитом.</span></li>
+<li class="row" data-type="idea" data-source="probe" data-status="open" data-flags="unreviewed clarify open" data-updated="" data-title="Двойной рывок" data-created-by="" data-order="1"><code class="ref">idea/0001</code><a class="t" href="probe/idea/0001-dvoinoi-ryvok.html">Двойной рывок</a><span class="why"><span class="b info"><svg class="ic" aria-hidden="true"><use href="#i-open"/></svg>открыто</span><a href="probe/idea/0001-dvoinoi-ryvok.html#L10"><span class="b warn"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>1 вопрос к тебе</span></a><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-unreviewed"/></svg>без ревью</span></span><span class="s">Второй рывок в воздухе.</span></li>
+<li class="row" data-type="value" data-source="probe" data-status="" data-flags="unreviewed" data-updated="" data-title="Малые шаги" data-created-by="" data-order="2"><code class="ref">value/0001</code><a class="t" href="probe/value/0001-malye-shagi.html">Малые шаги</a><span class="why"><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-unreviewed"/></svg>без ревью</span></span><span class="s">Выпускаем малыми шагами, которые легко проверить.</span></li>
+<li class="row" data-type="mechanic" data-source="probe" data-status="accepted" data-flags="unreviewed" data-updated="" data-title="Рывок" data-created-by="" data-order="3"><code class="ref">mechanic/0001</code><a class="t" href="probe/mechanic/0001-ryvok.html">Рывок</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>принято</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-unreviewed"/></svg>без ревью</span></span><span class="s">Короткое ускорение с перезарядкой.</span></li>
+</ul>
+</main>
+</div>
+<footer>Собрано booping specs site</footer>
+</body>
+</html>
+-- expected/cwd/specs-site/records.html --
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>try{var t=localStorage.getItem("specs-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}document.documentElement.classList.add("js")</script>
+<meta name="color-scheme" content="light dark">
+<title>Все записи — probe</title>
+<link rel="stylesheet" href="fonts.css">
+<link rel="stylesheet" href="style.css">
+<script src="site.js" defer></script>
+<script src="filter.js" defer></script>
+</head>
+<body>
+<svg aria-hidden="true" style="display:none">
+<symbol id="i-accepted" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4.8 8.2l2.1 2.1 4.3-4.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-open" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+<symbol id="i-planned" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2.6 2.2"/></symbol>
+<symbol id="i-rejected" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3.6 12.4l8.8-8.8" stroke="currentColor" stroke-width="1.6"/></symbol>
+<symbol id="i-clarify" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="currentColor"/><path d="M6.1 6.2a2 2 0 1 1 2.6 1.9c-.5.2-.7.6-.7 1.1v.4" fill="none" stroke="var(--surface)" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="11.6" r=".95" fill="var(--surface)"/></symbol>
+<symbol id="i-unknown" viewBox="0 0 16 16"><path d="M8 1.6l6.8 12.2H1.2z" fill="currentColor"/><path d="M8 6v3.6" stroke="var(--surface)" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="11.6" r=".9" fill="var(--surface)"/></symbol>
+<symbol id="i-unreviewed" viewBox="0 0 16 16"><circle cx="8" cy="8" r="4.6" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+<symbol id="i-reviewed" viewBox="0 0 16 16"><circle cx="8" cy="8" r="4.6" fill="currentColor"/></symbol>
+<symbol id="i-menu" viewBox="0 0 20 20"><path d="M3 5.5h14M3 10h14M3 14.5h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+<symbol id="i-search" viewBox="0 0 20 20"><circle cx="8.6" cy="8.6" r="5.6" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M13 13l4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+<symbol id="i-moon" viewBox="0 0 20 20"><path d="M15.5 12.6A6.5 6.5 0 0 1 7.4 4.5a6.5 6.5 0 1 0 8.1 8.1z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+<symbol id="i-sun" viewBox="0 0 16 16"><circle cx="8" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.2v1.6M8 13.2v1.6M1.2 8h1.6M13.2 8h1.6M3.2 3.2l1.1 1.1M11.7 11.7l1.1 1.1M3.2 12.8l1.1-1.1M11.7 4.3l1.1-1.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+<symbol id="i-auto" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.6a6.4 6.4 0 0 0 0 12.8z" fill="currentColor"/></symbol>
+</svg>
+<a class="skip" href="#main">Перейти к содержимому</a>
+<header class="top">
+<button class="iconbtn menu" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Меню"><svg class="ic" aria-hidden="true"><use href="#i-menu"/></svg></button>
+<a class="brand" href="index.html">probe</a>
+<button class="iconbtn theme" type="button" aria-label="Тема: как в системе" title="Тема: как в системе" data-label-auto="Тема: как в системе" data-label-light="Тема: светлая" data-label-dark="Тема: тёмная"><svg class="ic" aria-hidden="true"><use href="#i-auto"/></svg></button>
+</header>
+<div class="body norail">
+<nav class="side" id="drawer" aria-label="Навигация">
+<ul>
+<li><a href="index.html">Обзор</a></li>
+<li><a href="review.html"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>Ревью<span class="n">4</span></a></li>
+<li><a href="records.html" aria-current="page">Все записи<span class="n">4</span></a></li>
+</ul>
+<h4>Разделы</h4>
+<ul>
+<li><a href="records.html#type=adr">Решения<span class="n">1</span></a></li>
+<li><a href="records.html#type=idea">Идеи<span class="n">1</span></a></li>
+<li><a href="records.html#type=value">Ценности<span class="n">1</span></a></li>
+<li><a href="records.html#type=mechanic">Механики<span class="n">1</span></a></li>
+</ul>
+<h4>Теги</h4>
+<ul>
+<li><a href="probe/tags/dvizhenie.html"><code>dvizhenie</code><span class="n">1</span></a></li>
+<li><a href="probe/tags/index.html">Все теги</a></li>
+</ul>
+<h4>Источники</h4>
+<ul>
+<li><a href="probe/index.html">probe<span class="n">4</span></a></li>
+</ul>
+<ul>
+<li><a href="llms.txt">llms.txt</a></li>
+</ul>
+</nav>
+<main id="main">
+<nav class="crumbs" aria-label="breadcrumb">
+<ol>
+<li><a href="index.html">Обзор</a></li>
+<li><span aria-current="page">Все записи</span></li>
+</ol>
+</nav>
+<h1>Все записи</h1>
+<div class="filters" data-default-sort="number">
+<div class="chips" role="group" aria-label="Раздел">
+<button type="button" class="chip" data-key="type" data-value="adr" aria-pressed="false">Решения<span class="n">1</span></button>
+<button type="button" class="chip" data-key="type" data-value="idea" aria-pressed="false">Идеи<span class="n">1</span></button>
+<button type="button" class="chip" data-key="type" data-value="value" aria-pressed="false">Ценности<span class="n">1</span></button>
+<button type="button" class="chip" data-key="type" data-value="mechanic" aria-pressed="false">Механики<span class="n">1</span></button>
+</div>
+<div class="chips" role="group" aria-label="Статус">
+<button type="button" class="chip" data-key="status" data-value="accepted" aria-pressed="false">принято<span class="n">2</span></button>
+<button type="button" class="chip" data-key="status" data-value="open" aria-pressed="false">открыто<span class="n">1</span></button>
+</div>
+<div class="chips" role="group" aria-label="Пометки">
+<button type="button" class="chip" data-key="flag" data-value="unreviewed" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-unreviewed"/></svg>Без ревью<span class="n">4</span></button>
+<button type="button" class="chip" data-key="flag" data-value="clarify" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>Есть [clarify]<span class="n">2</span></button>
+</div>
+<label>Сортировка <select class="sort">
+<option value="number" selected>По номеру</option>
+<option value="updated">Сначала новые</option>
+<option value="title">По названию</option>
+</select></label>
+<p class="count" role="status" data-forms="[&#34;Показана {n} запись&#34;, &#34;Показаны {n} записи&#34;, &#34;Показано {n} записей&#34;]">Показаны 4 записи</p>
+</div>
+<p class="empty" hidden>Ничего не подходит под фильтр.</p>
+<ul class="rows">
+<li class="row" data-type="adr" data-source="probe" data-status="accepted" data-flags="unreviewed clarify" data-updated="" data-title="Сливаем ветки одним коммитом" data-created-by="claude" data-order="0"><code class="ref">adr/0001</code><a class="t" href="probe/adr/0001-squash-sliyaniya.html">Сливаем ветки одним коммитом</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>принято</span><span class="b warn"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>1 вопрос к тебе</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-unreviewed"/></svg>без ревью</span></span><span class="s">Каждая ветка попадает в основную одним коммитом.</span></li>
+<li class="row" data-type="idea" data-source="probe" data-status="open" data-flags="unreviewed clarify open" data-updated="" data-title="Двойной рывок" data-created-by="" data-order="1"><code class="ref">idea/0001</code><a class="t" href="probe/idea/0001-dvoinoi-ryvok.html">Двойной рывок</a><span class="why"><span class="b info"><svg class="ic" aria-hidden="true"><use href="#i-open"/></svg>открыто</span><span class="b warn"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>1 вопрос к тебе</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-unreviewed"/></svg>без ревью</span></span><span class="s">Второй рывок в воздухе.</span></li>
+<li class="row" data-type="value" data-source="probe" data-status="" data-flags="unreviewed" data-updated="" data-title="Малые шаги" data-created-by="" data-order="2"><code class="ref">value/0001</code><a class="t" href="probe/value/0001-malye-shagi.html">Малые шаги</a><span class="why"><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-unreviewed"/></svg>без ревью</span></span><span class="s">Выпускаем малыми шагами, которые легко проверить.</span></li>
+<li class="row" data-type="mechanic" data-source="probe" data-status="accepted" data-flags="unreviewed" data-updated="" data-title="Рывок" data-created-by="" data-order="3"><code class="ref">mechanic/0001</code><a class="t" href="probe/mechanic/0001-ryvok.html">Рывок</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>принято</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-unreviewed"/></svg>без ревью</span></span><span class="s">Короткое ускорение с перезарядкой.</span></li>
+</ul>
+</main>
+</div>
+<footer>Собрано booping specs site</footer>
+</body>
+</html>
+-- expected/cwd/specs-site/probe/tags/index.html --
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>try{var t=localStorage.getItem("specs-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}document.documentElement.classList.add("js")</script>
+<meta name="color-scheme" content="light dark">
+<title>Теги — probe</title>
+<link rel="stylesheet" href="../../fonts.css">
+<link rel="stylesheet" href="../../style.css">
+<script src="../../site.js" defer></script>
+</head>
+<body>
+<svg aria-hidden="true" style="display:none">
+<symbol id="i-accepted" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4.8 8.2l2.1 2.1 4.3-4.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-open" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+<symbol id="i-planned" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2.6 2.2"/></symbol>
+<symbol id="i-rejected" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3.6 12.4l8.8-8.8" stroke="currentColor" stroke-width="1.6"/></symbol>
+<symbol id="i-clarify" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="currentColor"/><path d="M6.1 6.2a2 2 0 1 1 2.6 1.9c-.5.2-.7.6-.7 1.1v.4" fill="none" stroke="var(--surface)" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="11.6" r=".95" fill="var(--surface)"/></symbol>
+<symbol id="i-unknown" viewBox="0 0 16 16"><path d="M8 1.6l6.8 12.2H1.2z" fill="currentColor"/><path d="M8 6v3.6" stroke="var(--surface)" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="11.6" r=".9" fill="var(--surface)"/></symbol>
+<symbol id="i-unreviewed" viewBox="0 0 16 16"><circle cx="8" cy="8" r="4.6" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+<symbol id="i-reviewed" viewBox="0 0 16 16"><circle cx="8" cy="8" r="4.6" fill="currentColor"/></symbol>
+<symbol id="i-menu" viewBox="0 0 20 20"><path d="M3 5.5h14M3 10h14M3 14.5h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+<symbol id="i-search" viewBox="0 0 20 20"><circle cx="8.6" cy="8.6" r="5.6" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M13 13l4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+<symbol id="i-moon" viewBox="0 0 20 20"><path d="M15.5 12.6A6.5 6.5 0 0 1 7.4 4.5a6.5 6.5 0 1 0 8.1 8.1z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+<symbol id="i-sun" viewBox="0 0 16 16"><circle cx="8" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.2v1.6M8 13.2v1.6M1.2 8h1.6M13.2 8h1.6M3.2 3.2l1.1 1.1M11.7 11.7l1.1 1.1M3.2 12.8l1.1-1.1M11.7 4.3l1.1-1.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+<symbol id="i-auto" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.6a6.4 6.4 0 0 0 0 12.8z" fill="currentColor"/></symbol>
+</svg>
+<a class="skip" href="#main">Перейти к содержимому</a>
+<header class="top">
+<button class="iconbtn menu" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Меню"><svg class="ic" aria-hidden="true"><use href="#i-menu"/></svg></button>
+<a class="brand" href="../../index.html">probe</a>
+<button class="iconbtn theme" type="button" aria-label="Тема: как в системе" title="Тема: как в системе" data-label-auto="Тема: как в системе" data-label-light="Тема: светлая" data-label-dark="Тема: тёмная"><svg class="ic" aria-hidden="true"><use href="#i-auto"/></svg></button>
+</header>
+<div class="body norail">
+<nav class="side" id="drawer" aria-label="Навигация">
+<ul>
+<li><a href="../../index.html">Обзор</a></li>
+<li><a href="../../review.html"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>Ревью<span class="n">4</span></a></li>
+<li><a href="../../records.html">Все записи<span class="n">4</span></a></li>
+</ul>
+<h4>Разделы</h4>
+<ul>
+<li><a href="../../records.html#type=adr">Решения<span class="n">1</span></a></li>
+<li><a href="../../records.html#type=idea">Идеи<span class="n">1</span></a></li>
+<li><a href="../../records.html#type=value">Ценности<span class="n">1</span></a></li>
+<li><a href="../../records.html#type=mechanic">Механики<span class="n">1</span></a></li>
+</ul>
+<h4>Теги</h4>
+<ul>
+<li><a href="../../probe/tags/dvizhenie.html"><code>dvizhenie</code><span class="n">1</span></a></li>
+<li><a href="../../probe/tags/index.html" aria-current="page">Все теги</a></li>
+</ul>
+<h4>Источники</h4>
+<ul>
+<li><a href="../../probe/index.html">probe<span class="n">4</span></a></li>
+</ul>
+<ul>
+<li><a href="../../llms.txt">llms.txt</a></li>
+</ul>
+</nav>
+<main id="main">
+<nav class="crumbs" aria-label="breadcrumb">
+<ol>
+<li><a href="../../index.html">Обзор</a></li>
+<li class="mid"><a href="../index.html">probe</a></li>
+<li><span aria-current="page">Теги</span></li>
+</ol>
+</nav>
+<h1>Теги</h1>
+<ul class="tag-tree">
+<li><a href="dvizhenie.html"><code>dvizhenie</code></a> <span class="n">1</span> <span class="s">Как перемещаются персонажи</span></li>
+</ul>
+</main>
+</div>
+<footer>Собрано booping specs site</footer>
+</body>
+</html>
+-- expected/cwd/specs-site/probe/tags/dvizhenie.html --
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>try{var t=localStorage.getItem("specs-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}document.documentElement.classList.add("js")</script>
+<meta name="color-scheme" content="light dark">
+<title>dvizhenie — probe</title>
+<link rel="stylesheet" href="../../fonts.css">
+<link rel="stylesheet" href="../../style.css">
+<script src="../../site.js" defer></script>
+<script src="../../filter.js" defer></script>
+</head>
+<body>
+<svg aria-hidden="true" style="display:none">
+<symbol id="i-accepted" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4.8 8.2l2.1 2.1 4.3-4.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-open" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+<symbol id="i-planned" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2.6 2.2"/></symbol>
+<symbol id="i-rejected" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3.6 12.4l8.8-8.8" stroke="currentColor" stroke-width="1.6"/></symbol>
+<symbol id="i-clarify" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="currentColor"/><path d="M6.1 6.2a2 2 0 1 1 2.6 1.9c-.5.2-.7.6-.7 1.1v.4" fill="none" stroke="var(--surface)" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="11.6" r=".95" fill="var(--surface)"/></symbol>
+<symbol id="i-unknown" viewBox="0 0 16 16"><path d="M8 1.6l6.8 12.2H1.2z" fill="currentColor"/><path d="M8 6v3.6" stroke="var(--surface)" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="11.6" r=".9" fill="var(--surface)"/></symbol>
+<symbol id="i-unreviewed" viewBox="0 0 16 16"><circle cx="8" cy="8" r="4.6" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+<symbol id="i-reviewed" viewBox="0 0 16 16"><circle cx="8" cy="8" r="4.6" fill="currentColor"/></symbol>
+<symbol id="i-menu" viewBox="0 0 20 20"><path d="M3 5.5h14M3 10h14M3 14.5h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+<symbol id="i-search" viewBox="0 0 20 20"><circle cx="8.6" cy="8.6" r="5.6" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M13 13l4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+<symbol id="i-moon" viewBox="0 0 20 20"><path d="M15.5 12.6A6.5 6.5 0 0 1 7.4 4.5a6.5 6.5 0 1 0 8.1 8.1z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+<symbol id="i-sun" viewBox="0 0 16 16"><circle cx="8" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.2v1.6M8 13.2v1.6M1.2 8h1.6M13.2 8h1.6M3.2 3.2l1.1 1.1M11.7 11.7l1.1 1.1M3.2 12.8l1.1-1.1M11.7 4.3l1.1-1.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+<symbol id="i-auto" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.6a6.4 6.4 0 0 0 0 12.8z" fill="currentColor"/></symbol>
+</svg>
+<a class="skip" href="#main">Перейти к содержимому</a>
+<header class="top">
+<button class="iconbtn menu" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Меню"><svg class="ic" aria-hidden="true"><use href="#i-menu"/></svg></button>
+<a class="brand" href="../../index.html">probe</a>
+<button class="iconbtn theme" type="button" aria-label="Тема: как в системе" title="Тема: как в системе" data-label-auto="Тема: как в системе" data-label-light="Тема: светлая" data-label-dark="Тема: тёмная"><svg class="ic" aria-hidden="true"><use href="#i-auto"/></svg></button>
+</header>
+<div class="body norail">
+<nav class="side" id="drawer" aria-label="Навигация">
+<ul>
+<li><a href="../../index.html">Обзор</a></li>
+<li><a href="../../review.html"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>Ревью<span class="n">4</span></a></li>
+<li><a href="../../records.html">Все записи<span class="n">4</span></a></li>
+</ul>
+<h4>Разделы</h4>
+<ul>
+<li><a href="../../records.html#type=adr">Решения<span class="n">1</span></a></li>
+<li><a href="../../records.html#type=idea">Идеи<span class="n">1</span></a></li>
+<li><a href="../../records.html#type=value">Ценности<span class="n">1</span></a></li>
+<li><a href="../../records.html#type=mechanic">Механики<span class="n">1</span></a></li>
+</ul>
+<h4>Теги</h4>
+<ul>
+<li><a href="../../probe/tags/dvizhenie.html" aria-current="page"><code>dvizhenie</code><span class="n">1</span></a></li>
+<li><a href="../../probe/tags/index.html">Все теги</a></li>
+</ul>
+<h4>Источники</h4>
+<ul>
+<li><a href="../../probe/index.html">probe<span class="n">4</span></a></li>
+</ul>
+<ul>
+<li><a href="../../llms.txt">llms.txt</a></li>
+</ul>
+</nav>
+<main id="main">
+<nav class="crumbs" aria-label="breadcrumb">
+<ol>
+<li><a href="../../index.html">Обзор</a></li>
+<li class="mid"><a href="../index.html">probe</a></li>
+<li class="mid"><a href="index.html">Теги</a></li>
+<li><span aria-current="page">dvizhenie</span></li>
+</ol>
+</nav>
+<h1><code>dvizhenie</code></h1>
+<p class="lead">Как перемещаются персонажи</p>
+<div class="filters" data-default-sort="number">
+<div class="chips" role="group" aria-label="Пометки">
+<button type="button" class="chip" data-key="flag" data-value="unreviewed" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-unreviewed"/></svg>Без ревью<span class="n">1</span></button>
+</div>
+<label>Сортировка <select class="sort">
+<option value="number" selected>По номеру</option>
+<option value="updated">Сначала новые</option>
+<option value="title">По названию</option>
+</select></label>
+<p class="count" role="status" data-forms="[&#34;Показана {n} запись&#34;, &#34;Показаны {n} записи&#34;, &#34;Показано {n} записей&#34;]">Показана 1 запись</p>
+</div>
+<p class="empty" hidden>Ничего не подходит под фильтр.</p>
+<ul class="rows">
+<li class="row" data-type="mechanic" data-source="probe" data-status="accepted" data-flags="unreviewed" data-updated="" data-title="Рывок" data-created-by="" data-order="0"><code class="ref">mechanic/0001</code><a class="t" href="../../probe/mechanic/0001-ryvok.html">Рывок</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>принято</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-unreviewed"/></svg>без ревью</span></span><span class="s">Короткое ускорение с перезарядкой.</span></li>
+</ul>
+</main>
+</div>
+<footer>Собрано booping specs site</footer>
+</body>
+</html>
 -- expected/cwd/specs-site/probe/adr/0001-squash-sliyaniya.html --
 <!doctype html>
 <html lang="ru">
@@ -119,18 +516,24 @@ specs site: 1 roots, 3 records, 9 pages, 0 warnings -> specs-site
 <nav class="side" id="drawer" aria-label="Навигация">
 <ul>
 <li><a href="../../index.html">Обзор</a></li>
-<li><a href="../../review.html"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>Ревью<span class="n">3</span></a></li>
-<li><a href="../../records.html">Все записи<span class="n">3</span></a></li>
+<li><a href="../../review.html"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>Ревью<span class="n">4</span></a></li>
+<li><a href="../../records.html">Все записи<span class="n">4</span></a></li>
 </ul>
 <h4>Разделы</h4>
 <ul>
 <li><a href="../../records.html#type=adr">Решения<span class="n">1</span></a></li>
+<li><a href="../../records.html#type=idea">Идеи<span class="n">1</span></a></li>
 <li><a href="../../records.html#type=value">Ценности<span class="n">1</span></a></li>
 <li><a href="../../records.html#type=mechanic">Механики<span class="n">1</span></a></li>
 </ul>
+<h4>Теги</h4>
+<ul>
+<li><a href="../../probe/tags/dvizhenie.html"><code>dvizhenie</code><span class="n">1</span></a></li>
+<li><a href="../../probe/tags/index.html">Все теги</a></li>
+</ul>
 <h4>Источники</h4>
 <ul>
-<li><a href="../../probe/index.html">probe<span class="n">3</span></a></li>
+<li><a href="../../probe/index.html">probe<span class="n">4</span></a></li>
 </ul>
 <ul>
 <li><a href="../../llms.txt">llms.txt</a></li>
@@ -218,18 +621,24 @@ specs site: 1 roots, 3 records, 9 pages, 0 warnings -> specs-site
 <nav class="side" id="drawer" aria-label="Навигация">
 <ul>
 <li><a href="../../index.html">Обзор</a></li>
-<li><a href="../../review.html"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>Ревью<span class="n">3</span></a></li>
-<li><a href="../../records.html">Все записи<span class="n">3</span></a></li>
+<li><a href="../../review.html"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>Ревью<span class="n">4</span></a></li>
+<li><a href="../../records.html">Все записи<span class="n">4</span></a></li>
 </ul>
 <h4>Разделы</h4>
 <ul>
 <li><a href="../../records.html#type=adr">Решения<span class="n">1</span></a></li>
+<li><a href="../../records.html#type=idea">Идеи<span class="n">1</span></a></li>
 <li><a href="../../records.html#type=value">Ценности<span class="n">1</span></a></li>
 <li><a href="../../records.html#type=mechanic">Механики<span class="n">1</span></a></li>
 </ul>
+<h4>Теги</h4>
+<ul>
+<li><a href="../../probe/tags/dvizhenie.html"><code>dvizhenie</code><span class="n">1</span></a></li>
+<li><a href="../../probe/tags/index.html">Все теги</a></li>
+</ul>
 <h4>Источники</h4>
 <ul>
-<li><a href="../../probe/index.html">probe<span class="n">3</span></a></li>
+<li><a href="../../probe/index.html">probe<span class="n">4</span></a></li>
 </ul>
 <ul>
 <li><a href="../../llms.txt">llms.txt</a></li>

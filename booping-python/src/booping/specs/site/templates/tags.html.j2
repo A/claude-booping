@@ -1,0 +1,6 @@
+{% extends "base.html.j2" %}
+{% from "_macros.html.j2" import tag_tree %}
+{% block main %}
+<h1>{{ labels.ui("tags") }}</h1>
+{{ tag_tree(tree) | trim }}
+{% endblock %}

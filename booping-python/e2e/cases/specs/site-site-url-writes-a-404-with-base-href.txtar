@@ -14,7 +14,7 @@ booping specs site --root proj=specs --site-url https://lab.pages.example/proj
 -- exit --
 0
 -- stdout --
-specs site: 1 roots, 1 records, 6 pages, 0 warnings -> specs-site
+specs site: 1 roots, 1 records, 7 pages, 0 warnings -> specs-site
 -- stderr --
 -- expected/cwd/specs-site/404.html --
 <!doctype html>

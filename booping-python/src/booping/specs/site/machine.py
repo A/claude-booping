@@ -43,13 +43,9 @@ def _value(value: Any) -> Any:
     return str(value)
 
 
-def llms_txt(
-    site: Site, states: Mapping[SiteRecord, RecordState], labels: Labels, title: str
-) -> str:
-    """llmstxt.org shape: H1, the first value summary as a blockquote, then one section
-    per root and type, a line per record linking its `.md` copy."""
-    lines = [f"# {title}"]
-    lead = next(
+def lead_summary(site: Site) -> str | None:
+    """The summary of the first value record with one, roots in order — the site's lead."""
+    return next(
         (
             str(r.frontmatter["summary"])
             for r in site.records
@@ -57,6 +53,15 @@ def llms_txt(
         ),
         None,
     )
+
+
+def llms_txt(
+    site: Site, states: Mapping[SiteRecord, RecordState], labels: Labels, title: str
+) -> str:
+    """llmstxt.org shape: H1, the first value summary as a blockquote, then one section
+    per root and type, a line per record linking its `.md` copy."""
+    lines = [f"# {title}"]
+    lead = lead_summary(site)
     if lead is not None:
         lines += ["", f"> {lead}"]
     for root in site.roots:

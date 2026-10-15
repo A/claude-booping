@@ -12,7 +12,7 @@
 <div class="badges">{{ badges }}</div>
 {% endif %}
 {% if r.tags %}
-<div class="tags">{% for tag in r.tags %}{% if not loop.first %} {% endif %}<span class="tag">#{{ tag }}</span>{% endfor %}</div>
+<div class="tags">{% for tag in r.tags %}{% if not loop.first %} {% endif %}{% if tag.href is not none %}<a class="tag" href="{{ tag.href }}">#{{ tag.text }}</a>{% else %}<span class="tag">#{{ tag.text }}</span>{% endif %}{% endfor %}</div>
 {% endif %}
 {% if r.summary is not none %}
 <p class="lead">{{ r.summary }}</p>

@@ -36,7 +36,7 @@ booping specs site
 -- exit --
 0
 -- stdout --
-specs site: 2 roots, 2 records, 8 pages, 1 warnings -> specs-site
+specs site: 2 roots, 2 records, 9 pages, 1 warnings -> specs-site
 -- stderr --
 {HOME}/Claude/gone-specs  warning  site  root gone not found, skipped
 -- expected/cwd/specs-site/index.html --
@@ -102,17 +102,11 @@ specs site: 2 roots, 2 records, 8 pages, 1 warnings -> specs-site
 </ol>
 </nav>
 <h1>Specs</h1>
-<h2>booping</h2>
-<ul class="types">
-<li><a href="booping/value/index.html">Values</a> <span class="n">Records: 1</span>
-<p>why the project exists</p>
-</li>
-</ul>
-<h2>team</h2>
-<ul class="types">
-<li><a href="team/rule/index.html">Rules</a> <span class="n">Records: 1</span>
-<p>what constrains decisions</p>
-</li>
+<p class="lead">Ship in small, reviewable steps.</p>
+<p class="callout"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg><span><a href="review.html">2 need you →</a></span></p>
+<ul class="scen">
+<li><a href="records.html#type=rule"><b>Rules <span class="n">1</span></b><span class="s">what constrains decisions</span></a></li>
+<li><a href="records.html#type=value"><b>Values <span class="n">1</span></b><span class="s">why the project exists</span></a></li>
 </ul>
 </main>
 </div>

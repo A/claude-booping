@@ -1,0 +1,24 @@
+{% extends "base.html.j2" %}
+{% from "_macros.html.j2" import record_row, filter_bar, tag_tree %}
+{% block scripts %}
+{% if rows %}
+<script src="{{ prefix }}filter.js" defer></script>
+{% endif %}
+{% endblock %}
+{% block main %}
+<h1><code>{{ tag }}</code></h1>
+{% if description %}
+<p class="lead">{{ description }}</p>
+{% endif %}
+{% if tree %}
+{{ tag_tree(tree) | trim }}
+{% endif %}
+{% if rows %}
+{{ filter_bar(filters, labels) | trim }}
+<ul class="rows">
+{% for row in rows %}
+{{ record_row(row, labels, prefix) | trim }}
+{% endfor %}
+</ul>
+{% endif %}
+{% endblock %}

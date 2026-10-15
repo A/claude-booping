@@ -10,7 +10,7 @@ from booping.specs.site import pages
 CSS = (Path(pages.__file__).parent / "style.css").read_text()
 TOKENS = (
     "bg surface sunk text muted faint line link link-bg ok ok-bg warn warn-bg bad bad-bg"
-    " info info-bg idle idle-bg sans mono"
+    " info info-bg idle idle-bg chip-on-bg chip-on-text sans mono"
 ).split()
 
 
@@ -84,6 +84,27 @@ def test_text_contrast(theme: dict[str, str], fg: str, bg: str) -> None:
 @pytest.mark.parametrize(("name", "fg", "bg"), _badge_pairs())
 def test_badge_contrast(theme: dict[str, str], name: str, fg: str, bg: str) -> None:
     assert _contrast(theme[fg], theme[bg]) >= 4.5, name
+
+
+@pytest.mark.parametrize("theme", [LIGHT, DARK, DARK_AUTO], ids=["light", "dark", "dark-auto"])
+@pytest.mark.parametrize(
+    ("fg", "bg"),
+    [
+        ("muted", "surface"),
+        ("text", "surface"),
+        ("chip-on-text", "chip-on-bg"),
+        ("warn", "warn-bg"),
+    ],
+    ids=["chip", "chip-hover", "chip-pressed", "callout"],
+)
+def test_filter_and_home_contrast(theme: dict[str, str], fg: str, bg: str) -> None:
+    assert _contrast(theme[fg], theme[bg]) >= 4.5
+
+
+def test_pressed_chip_uses_its_token_pair() -> None:
+    body = _block('.chip[aria-pressed="true"]')
+    assert "background: var(--chip-on-bg)" in body
+    assert "color: var(--chip-on-text)" in body
 
 
 def test_dark_body_text_reaches_aaa() -> None:

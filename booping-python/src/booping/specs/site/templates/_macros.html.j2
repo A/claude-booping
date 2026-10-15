@@ -12,7 +12,7 @@
 
 {% macro badge(css, icon_id, text) %}<span class="b {{ css }}">{{ icon(icon_id) }}{{ text }}</span>{% endmacro %}
 
-{% macro state_badges(state, labels, hide_unreviewed=false, clarify_href=none) %}
+{% macro state_badges(state, labels, hide_unreviewed=false, clarify_href=none, unknown_href=none) %}
 {%- set css = {"accepted": "ok", "done": "ok", "live": "ok", "resolved": "ok", "proposed": "warn", "planned": "warn", "validating": "warn", "open": "info"} -%}
 {%- set icons = {"accepted": "i-accepted", "done": "i-accepted", "live": "i-accepted", "resolved": "i-accepted", "proposed": "i-planned", "planned": "i-planned", "validating": "i-planned", "deferred": "i-planned", "open": "i-open", "rejected": "i-rejected", "retired": "i-rejected", "superseded": "i-rejected"} -%}
 {%- if state.status -%}
@@ -23,7 +23,9 @@
 {%- elif state.clarify -%}
 {{ badge("warn", "i-clarify", labels.plural("clarify", state.clarify)) }}
 {%- endif -%}
-{%- if state.unknown -%}
+{%- if state.unknown and unknown_href is not none -%}
+<a href="{{ unknown_href }}">{{ badge("bad", "i-unknown", labels.ui("unknown")) }}</a>
+{%- elif state.unknown -%}
 {{ badge("bad", "i-unknown", labels.ui("unknown")) }}
 {%- endif -%}
 {%- if state.unreviewed and not hide_unreviewed -%}
@@ -62,8 +64,15 @@
 </ul>
 {% endmacro %}
 
-{% macro record_row(view, labels, prefix, hide_unreviewed=false) %}
-<li class="row"{% for key, value in view.data.items() %} data-{{ key }}="{{ value }}"{% endfor %}><code class="ref">{{ view.ref }}</code><a class="t" href="{{ prefix }}{{ view.page }}">{{ view.title }}</a><span class="why">{{ state_badges(view.state, labels, hide_unreviewed) }}</span>{% if view.summary is not none %}<span class="s">{{ view.summary }}</span>{% endif %}</li>
+{% macro record_row(view, labels, prefix, hide_unreviewed=false, mark_links=false) %}
+{%- set href = prefix ~ view.page -%}
+{%- set clarify_href = (href ~ "#" ~ view.state.first_clarify) if mark_links and view.state.first_clarify else none -%}
+{%- set unknown_href = (href ~ "#" ~ view.state.first_unknown) if mark_links and view.state.first_unknown else none -%}
+<li class="row"{% for key, value in view.data.items() %} data-{{ key }}="{{ value }}"{% endfor %}><code class="ref">{{ view.ref }}</code><a class="t" href="{{ href }}">{{ view.title }}</a><span class="why">{{ state_badges(view.state, labels, hide_unreviewed, clarify_href, unknown_href) }}</span>{% if view.summary is not none %}<span class="s">{{ view.summary }}</span>{% endif %}</li>
+{% endmacro %}
+
+{% macro item_row(view, labels, prefix) %}
+<li class="row"{% for key, value in view.data.items() %} data-{{ key }}="{{ value }}"{% endfor %}><code class="ref">{{ view.ref }}</code>{% if view.page is not none %}<a class="t" href="{{ prefix }}{{ view.page }}">{{ view.title }}</a>{% else %}<span class="t">{{ view.title }}</span>{% endif %}<span class="why">{{ badge("info", "i-open", labels.status("open")) }}</span></li>
 {% endmacro %}
 
 {% macro filter_bar(filters, labels) %}
@@ -83,4 +92,16 @@
 <p class="count" role="status" data-forms="{{ labels.plural_forms('shown') | tojson | forceescape }}">{{ labels.plural("shown", filters.total) }}</p>
 </div>
 <p class="empty" hidden>{{ labels.ui("nothing_matches") }}</p>
+{% endmacro %}
+
+{% macro tag_tree(nodes) %}
+<ul class="tag-tree">
+{% for node in nodes %}
+<li><a href="{{ node.href }}"><code>{{ node.tag }}</code></a> <span class="n">{{ node.count }}</span>{% if node.description %} <span class="s">{{ node.description }}</span>{% endif %}
+{% if node.children %}
+{{ tag_tree(node.children) | trim }}
+{% endif %}
+</li>
+{% endfor %}
+</ul>
 {% endmacro %}

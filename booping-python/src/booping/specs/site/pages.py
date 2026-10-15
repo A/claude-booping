@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime
+import posixpath
 import re
 from collections.abc import Sequence
 from dataclasses import dataclass
@@ -14,7 +15,7 @@ from markupsafe import Markup
 from booping.specs.site.fonts import font_files
 from booping.specs.site.items import OpenItem
 from booping.specs.site.labels import Labels, load_labels
-from booping.specs.site.machine import index_json, llms_txt
+from booping.specs.site.machine import index_json, lead_summary, llms_txt
 from booping.specs.site.markdown import LinkRenderer, Mark, Rendered, render_body
 from booping.specs.site.model import (
     RefMiss,
@@ -25,13 +26,14 @@ from booping.specs.site.model import (
     ref_values,
 )
 from booping.specs.site.state import RecordState, record_state
-from booping.specs.site.tags import tag_page_path, tag_tree
+from booping.specs.site.tags import TagNode, record_tags, tag_page_path, tag_tree, tagged
 
 _HERE = Path(__file__).parent
 _MARK_KINDS = ("clarify", "unknown")
 _PAGE_HEAD_KEYS = ("type", "title", "summary", "status", "tags")
 _FACT_KEYS = ("created_by", "created_at", "updated_at", "reviewed", "sources")
 _ISO_DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
+_RECENT = 10
 
 
 @dataclass(frozen=True)
@@ -51,7 +53,17 @@ class Facet:
 LIST_FACETS = ("type", "source", "status", "flag")
 LIST_FLAGS = ("unreviewed", "clarify", "unknown")
 LIST_SORTS = ("number", "updated", "title")
-_FLAG_ICONS = {"unreviewed": "i-unreviewed", "clarify": "i-clarify", "unknown": "i-unknown"}
+REVIEW_FACETS = ("type", "source", "flag")
+REVIEW_FLAGS = ("unreviewed", "clarify", "unknown", "conflict", "proposed", "open")
+REVIEW_SORTS = ("review", "number", "updated", "title")
+_FLAG_ICONS = {
+    "unreviewed": "i-unreviewed",
+    "clarify": "i-clarify",
+    "unknown": "i-unknown",
+    "conflict": "i-unknown",
+    "proposed": "i-planned",
+    "open": "i-open",
+}
 
 
 def filter_facets(
@@ -90,9 +102,11 @@ def _filters(
     labels: Labels,
     sort: str = "number",
     sorts: Sequence[str] = LIST_SORTS,
+    facets: Sequence[str] = LIST_FACETS,
+    flags: Sequence[str] = LIST_FLAGS,
 ) -> dict[str, Any]:
     return {
-        "facets": filter_facets(rows, LIST_FACETS, LIST_FLAGS, labels),
+        "facets": filter_facets(rows, facets, flags, labels),
         "sort": sort,
         "sorts": list(sorts),
         "total": len(rows),
@@ -281,13 +295,20 @@ def _record_view(
     fm = record.frontmatter
     raw_tags: Any = fm.get("tags") or []
     tags: list[Any] = raw_tags if isinstance(raw_tags, list) else [raw_tags]  # pyright: ignore[reportUnknownVariableType]
+    linked = set(record_tags(record))
     refs = ref_keys(fm)
     skip = {*_PAGE_HEAD_KEYS, *_FACT_KEYS, *refs}
     return {
         "title": _title(record),
         "stem": record.stem,
         "state": state,
-        "tags": [str(t) for t in tags],
+        "tags": [
+            {
+                "text": str(t),
+                "href": f"../../{tag_page_path(record.root, t)}" if t in linked else None,
+            }
+            for t in tags
+        ],
         "summary": _summary(record),
         "facts": _facts(labels, fm),
         "relations": _relations(site, record, labels, warnings),
@@ -333,15 +354,50 @@ def _row(record: SiteRecord, state: RecordState, order: int) -> dict[str, Any]:
     }
 
 
+def _item_row(site: Site, item: OpenItem, items_root: str | None, order: int) -> dict[str, Any]:
+    """An open item's review row: the `record_row` data keys, flag `open`, no type or source."""
+    target = None if item.record is None else site.resolve_ref(item.record, items_root or "")
+    return {
+        "item": True,
+        "ref": item.id,
+        "page": target.page if isinstance(target, SiteRecord) else None,
+        "title": item.title,
+        "data": {
+            "type": "",
+            "source": "",
+            "status": "open",
+            "flags": "open",
+            "updated": "",
+            "title": item.title,
+            "created-by": "",
+            "order": str(order),
+        },
+    }
+
+
+def _tree_view(root: str, nodes: Sequence[TagNode]) -> list[dict[str, Any]]:
+    """Tag nodes for `tag_tree`, each linking its page from inside `{root}/tags/`."""
+    return [
+        {
+            "tag": node.tag,
+            "count": node.count,
+            "description": node.description,
+            "href": posixpath.basename(tag_page_path(root, node.tag)),
+            "children": _tree_view(root, node.children),
+        }
+        for node in nodes
+    ]
+
+
 def _nav(
     site: Site,
     present: list[str],
     states: dict[SiteRecord, RecordState],
     labels: Labels,
     open_items: Sequence[OpenItem],
+    trees: dict[str, list[TagNode]],
 ) -> dict[str, Any]:
     """The sidebar: overview, review, all records, types, tags per root, sources."""
-    trees = [(root, tag_tree(root, site.records)[0]) for root in site.roots]
     return {
         "review": sum(1 for r in site.records if states[r].reasons) + len(open_items),
         "records": len(site.records),
@@ -366,8 +422,8 @@ def _nav(
                     for node in nodes
                 ],
             }
-            for root, nodes in trees
-            if nodes
+            for root in site.roots
+            if (nodes := trees[root.name])
         ],
         "sources": [
             {
@@ -435,7 +491,11 @@ def build_site(
         marks[id(record)] = own.marks
         states[record] = record_state(record, own.marks)
 
-    nav = _nav(site, present, states, labels, open_items)
+    trees: dict[str, list[TagNode]] = {}
+    for root in site.roots:
+        trees[root.name], tree_warnings = tag_tree(root, site.records)
+        warnings.update(tree_warnings)
+    nav = _nav(site, present, states, labels, open_items, trees)
 
     def page(template: str, path: str, title: str, crumbs: list[Crumb], **ctx: Any) -> None:
         prefix = "../" * path.count("/")
@@ -463,7 +523,6 @@ def build_site(
         )
         files[f"{record.root}/{record.type}/{record.stem}.md"] = record.path.read_bytes()
 
-    root_types: list[dict[str, Any]] = []
     for root in site.roots:
         records = [r for r in site.records if r.root == root.name]
         types_: list[dict[str, Any]] = []
@@ -507,7 +566,45 @@ def build_site(
                 if m.kind == kind
             ],
         )
-        root_types.append({"root": root.name, "types": types_})
+
+    for root in site.roots:
+        nodes = trees[root.name]
+        if not nodes:
+            continue
+        overview = Crumb(labels.ui("overview"), "../../index.html")
+        source = Crumb(root.name, "../index.html")
+        page(
+            "tags.html.j2",
+            f"{root.name}/tags/index.html",
+            labels.ui("tags"),
+            [overview, source, Crumb(labels.ui("tags"), None)],
+            tree=_tree_view(root.name, nodes),
+        )
+        own = [r for r in ordered if r.root == root.name]
+        stack = list(nodes)
+        while stack:
+            node = stack.pop()
+            stack.extend(node.children)
+            parts = node.tag.split(":")
+            ancestors = [":".join(parts[:n]) for n in range(1, len(parts))]
+            rows = [_row(r, states[r], n) for n, r in enumerate(tagged(node.tag, own))]
+            page(
+                "tag.html.j2",
+                tag_page_path(root.name, node.tag),
+                node.tag,
+                [
+                    overview,
+                    source,
+                    Crumb(labels.ui("tags"), "index.html"),
+                    *(Crumb(a, posixpath.basename(tag_page_path(root.name, a))) for a in ancestors),
+                    Crumb(node.tag, None),
+                ],
+                tag=node.tag,
+                description=node.description,
+                tree=_tree_view(root.name, node.children),
+                rows=rows,
+                filters=_filters(rows, labels, facets=("type", "status", "flag")),
+            )
 
     all_rows = [_row(r, states[r], n) for n, r in enumerate(ordered)]
     page(
@@ -518,12 +615,48 @@ def build_site(
         rows=all_rows,
         filters=_filters(all_rows, labels),
     )
+    pool = [r for r in ordered if states[r].reasons]
+    review_rows = [_row(r, states[r], n) for n, r in enumerate(pool)]
+    review_rows += [
+        _item_row(site, item, items_root, len(pool) + n) for n, item in enumerate(open_items)
+    ]
+    page(
+        "review.html.j2",
+        "review.html",
+        labels.ui("review_title"),
+        [Crumb(labels.ui("overview"), "index.html"), Crumb(labels.ui("review"), None)],
+        rows=review_rows,
+        filters=_filters(review_rows, labels, "review", REVIEW_SORTS, REVIEW_FACETS, REVIEW_FLAGS),
+    )
+    dated = [(_iso_date(r.frontmatter.get("updated_at")), r) for r in ordered]
+    # Stable sort: equal dates keep page order.
+    recent = sorted((d for d in dated if d[0]), key=lambda d: d[0], reverse=True)[:_RECENT]
     page(
         "index.html.j2",
         "index.html",
         site_title,
         [Crumb(labels.ui("overview"), None)],
-        roots=root_types,
+        lead=lead_summary(site),
+        needs=nav["review"],
+        questions=sum(states[r].clarify for r in site.records),
+        types=[
+            {
+                "type": type_,
+                "count": sum(1 for r in site.records if r.type == type_),
+                "href": f"records.html#type={type_}",
+            }
+            for type_ in present
+        ],
+        recent=[
+            {
+                "ref": r.ref,
+                "page": r.page,
+                "title": _title(r),
+                "datetime": iso,
+                "date": labels.date(iso),
+            }
+            for iso, r in recent
+        ],
     )
     if site_url is not None:
         base = urlsplit(site_url).path
