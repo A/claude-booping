@@ -1,7 +1,7 @@
 ---
 type: adr
 title: One project-manager playbook replaces orchestrate and backlog-run
-summary: A core project-manager playbook is the manager the user talks to; it works items stored in the vault through groom and develop in the project's autonomy mode, and its status report is computed, never a stored handoff.
+summary: A core project-manager playbook is the manager the user talks to; it works vault items through groom and develop, and computes its status instead of a stored handoff.
 created_by: claude
 created_at: 2026-10-15
 updated_at: 2026-10-15
