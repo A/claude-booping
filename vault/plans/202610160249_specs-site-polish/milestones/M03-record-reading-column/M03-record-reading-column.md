@@ -2,7 +2,7 @@
 id: "03"
 title: "Record reading column and relations in the facts grid"
 sp: 3
-status: pending
+status: done
 plan: "/home/anton/Dev/@A/claude-booping-specs/vault/plans/202610160249_specs-site-polish/index.md"
 ---
 
@@ -18,21 +18,21 @@ Tests (integration, `booping-python/tests/specs/site_pages_test.py`): extend `te
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 3.1 | Relations as rows of the facts `dl`; delete `.relations` markup and CSS; compact `.facts ul.rel`; tests. | `booping-python/src/booping/specs/site/templates/record.html.j2`, `booping-python/src/booping/specs/site/style.css`, `booping-python/tests/specs/site_pages_test.py` | 2 | pending |
-| 3.2 | `.measure` around the record article and Referenced by; golden rebaseline. | `booping-python/src/booping/specs/site/templates/record.html.j2`, `booping-python/e2e/cases/specs/site-*.txtar` | 1 | pending |
+| 3.1 | Relations as rows of the facts `dl`; delete `.relations` markup and CSS; compact `.facts ul.rel`; tests. | `booping-python/src/booping/specs/site/templates/record.html.j2`, `booping-python/src/booping/specs/site/style.css`, `booping-python/tests/specs/site_pages_test.py` | 2 | done |
+| 3.2 | `.measure` around the record article and Referenced by; golden rebaseline. | `booping-python/src/booping/specs/site/templates/record.html.j2`, `booping-python/e2e/cases/specs/site-*.txtar` | 1 | done |
 
 ## Definition of Done
 
 ### Task 3.1
 
-- [ ] A record with relations renders one `dl.facts` holding the facts rows then one `dt`/`dd` pair per relation, each `dd` the `ul.rel` list with title link, ref and state badge.
-- [ ] A record with relations and no facts still renders the `dl.facts` with the relation rows.
-- [ ] `grep -rn 'class="relations"\|section.relations\|\.relations\b' booping-python/src/booping/specs/site booping-python/tests` prints nothing.
+- [x] A record with relations renders one `dl.facts` holding the facts rows then one `dt`/`dd` pair per relation, each `dd` the `ul.rel` list with title link, ref and state badge.
+- [x] A record with relations and no facts still renders the `dl.facts` with the relation rows.
+- [x] `grep -rn 'class="relations"\|section.relations\|\.relations\b' booping-python/src/booping/specs/site booping-python/tests` prints nothing.
 
 ### Task 3.2
 
-- [ ] The record `article` and the Referenced-by section sit in one `div.measure`; the rail and sidebar are outside it.
-- [ ] `site-*.txtar` goldens rebaselined with `just e2e -k site --txtar-update`; their diff touches record pages only.
+- [x] The record `article` and the Referenced-by section sit in one `div.measure`; the rail and sidebar are outside it.
+- [x] `site-*.txtar` goldens rebaselined with `just e2e -k site --txtar-update`; their diff touches record pages only.
 
 Return: the list of changed and created files, nothing else.
 

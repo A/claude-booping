@@ -2,7 +2,7 @@
 id: "01"
 title: "Home landing column and callout breakdown"
 sp: 3
-status: pending
+status: done
 plan: "/home/anton/Dev/@A/claude-booping-specs/vault/plans/202610160249_specs-site-polish/index.md"
 ---
 
@@ -18,22 +18,22 @@ Tests (integration, `booping-python/tests/specs/site_pages_test.py`): extend `te
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 1.1 | Callout breakdown: `unreviewed` count, `unreviewed_n` label en/ru, template line; tests. | `booping-python/src/booping/specs/site/pages.py`, `booping-python/src/booping/specs/site/templates/index.html.j2`, `src/config.yaml`, `booping-python/tests/specs/site_pages_test.py` | 2 | pending |
-| 1.2 | `.measure` wrappers on home; phone Recently-updated wrap in CSS; golden rebaseline. | `booping-python/src/booping/specs/site/templates/index.html.j2`, `booping-python/src/booping/specs/site/style.css`, `booping-python/e2e/cases/specs/site-*.txtar` | 1 | pending |
+| 1.1 | Callout breakdown: `unreviewed` count, `unreviewed_n` label en/ru, template line; tests. | `booping-python/src/booping/specs/site/pages.py`, `booping-python/src/booping/specs/site/templates/index.html.j2`, `src/config.yaml`, `booping-python/tests/specs/site_pages_test.py` | 2 | done |
+| 1.2 | `.measure` wrappers on home; phone Recently-updated wrap in CSS; golden rebaseline. | `booping-python/src/booping/specs/site/templates/index.html.j2`, `booping-python/src/booping/specs/site/style.css`, `booping-python/e2e/cases/specs/site-*.txtar` | 1 | done |
 
 ## Definition of Done
 
 ### Task 1.1
 
-- [ ] The callout reads `{needs_you} link` + ` · {unreviewed_n}` + ` · {open_questions}`, a zero part omitted, no callout at `needs` 0; en and ru strings exactly C3.
-- [ ] `unreviewed_n` is in `labels.en.ui` and `labels.ru.ui` of `src/config.yaml` with the forms from C3.
-- [ ] The home test asserts the hand-derived en text; a Russian test asserts the ru text.
+- [x] The callout reads `{needs_you} link` + ` · {unreviewed_n}` + ` · {open_questions}`, a zero part omitted, no callout at `needs` 0; en and ru strings exactly C3.
+- [x] `unreviewed_n` is in `labels.en.ui` and `labels.ru.ui` of `src/config.yaml` with the forms from C3.
+- [x] The home test asserts the hand-derived en text; a Russian test asserts the ru text.
 
 ### Task 1.2
 
-- [ ] Lead + callout and Recently updated each sit in a `div.measure`; `ul.scen` is outside both.
-- [ ] Below 760px a Recently-updated `li` shows the date under the title; at 1300px the row is unchanged.
-- [ ] `site-*.txtar` goldens rebaselined with `just e2e -k site --txtar-update`; their diff touches the home page only.
+- [x] Lead + callout and Recently updated each sit in a `div.measure`; `ul.scen` is outside both.
+- [x] Below 760px a Recently-updated `li` shows the date under the title; at 1300px the row is unchanged.
+- [x] `site-*.txtar` goldens rebaselined with `just e2e -k site --txtar-update`; their diff touches the home page only.
 
 Return: the list of changed and created files, nothing else.
 

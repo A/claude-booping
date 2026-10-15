@@ -2,20 +2,21 @@
 title: "Specs site redesign, part 4 — landing column, reading measure, relations in
   the facts grid"
 type: "feature"
-status: ready-for-dev
-sp: null
+status: in-progress
+sp: 8
 related_to: null
 created: 2026-10-16 02:52
 planned: null
-started: null
+started: 2026-10-16 03:00
 completed: null
 code_reviews: []
 sessions:
 - c768fd6c-5287-467e-b5b6-da56d84b7512
+- 1bc94760-415d-4cb1-91b0-37550e5cd6b7
 retro: null
 summary: 'Specs site part 4: 68ch reading column on home and records, relations in
   the facts grid, callout breakdown, plain sidebar tags'
-commit: b7432f2e1815ad913b1ac441eef78af4de94c6e1
+commit: 674f39b0a38c78faa4dd0934f77072edcd83b3fb
 tracker_provider: null
 tracker_request: null
 tracker_issue: null
@@ -59,11 +60,11 @@ src/config.yaml: labels.{en,ru}.ui.unreviewed_n
 
 ## Milestones
 
-| id | title | sp | status | path | slug |
-| --- | --- | --- | --- | --- | --- |
-| 01 | Home landing column and callout breakdown | 3 | pending | plans/202610160249_specs-site-polish/milestones/M01-home-landing-column/M01-home-landing-column.md | M01-home-landing-column |
-| 02 | Sidebar tags as plain links, empty tags hidden | 2 | pending | plans/202610160249_specs-site-polish/milestones/M02-sidebar-tags/M02-sidebar-tags.md | M02-sidebar-tags |
-| 03 | Record reading column and relations in the facts grid | 3 | pending | plans/202610160249_specs-site-polish/milestones/M03-record-reading-column/M03-record-reading-column.md | M03-record-reading-column |
+| id | title | sp | status |
+| --- | --- | --- | --- |
+| 01 | [Home landing column and callout breakdown](milestones/M01-home-landing-column/M01-home-landing-column.md) | 3 | done |
+| 02 | [Sidebar tags as plain links, empty tags hidden](milestones/M02-sidebar-tags/M02-sidebar-tags.md) | 2 | done |
+| 03 | [Record reading column and relations in the facts grid](milestones/M03-record-reading-column/M03-record-reading-column.md) | 3 | done |
 
 ## Milestone files
 
