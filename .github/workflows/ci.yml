@@ -93,7 +93,12 @@ jobs:
         run: just mdcheck
 
       - name: Specs records
-        run: just specs-check
+        # The .booping marker is per checkout (git-ignored); CI writes one so the project tier
+        # (this repo's in-repo vault) resolves, at the latest shipped migration.
+        run: |
+          latest=$(ls migrations | sort | tail -n 1 | cut -d_ -f1 | sed 's/^0*//')
+          printf 'project_name: claude-booping\nvault_path: vault\nlatest_migration: %s\n' "$latest" > .booping
+          just specs-check
 
       - name: Contract corpus
         run: just e2e
