@@ -1,8 +1,8 @@
 ---
 id: "01"
-title: "site-index \u2014 the index page from a YAML project file"
+title: "site-index — the index page from a YAML project file"
 sp: 4
-status: pending
+status: in-progress
 plan: "plans/202610152242_specs-sites-gitlab-pages/index.md"
 ---
 

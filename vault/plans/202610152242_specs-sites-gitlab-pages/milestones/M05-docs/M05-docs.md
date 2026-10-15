@@ -1,8 +1,8 @@
 ---
 id: "05"
-title: "Docs \u2014 site-index, publishing on GitLab Pages, CLAUDE.md"
+title: "Docs — site-index, publishing on GitLab Pages, CLAUDE.md"
 sp: 2
-status: pending
+status: in-progress
 plan: "plans/202610152242_specs-sites-gitlab-pages/index.md"
 ---
 

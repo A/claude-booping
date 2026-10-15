@@ -1,8 +1,9 @@
 ---
 id: "03"
-title: "GitLab discovery script \u2014 the group\u0027s booping-specs projects as site-index input"
+title: "GitLab discovery script — the group's booping-specs projects as site-index
+  input"
 sp: 3
-status: pending
+status: in-progress
 plan: "plans/202610152242_specs-sites-gitlab-pages/index.md"
 ---
 

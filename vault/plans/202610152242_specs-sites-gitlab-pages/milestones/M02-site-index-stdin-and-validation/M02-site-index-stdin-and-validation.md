@@ -1,8 +1,8 @@
 ---
 id: "02"
-title: "site-index \u2014 stdin JSON and input validation"
+title: "site-index — stdin JSON and input validation"
 sp: 3
-status: pending
+status: in-progress
 plan: "plans/202610152242_specs-sites-gitlab-pages/index.md"
 ---
 

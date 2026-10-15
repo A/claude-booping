@@ -1,20 +1,21 @@
 ---
 title: "Specs sites on GitLab Pages — booping specs site-index and the CI templates"
 type: "feature"
-status: ready-for-dev
-sp: null
+status: in-progress
+sp: 14
 related_to: null
 created: 2026-10-15 22:43
 planned: null
-started: null
+started: 2026-10-15 23:03
 completed: null
 code_reviews: []
 sessions:
 - 908d42c7-d080-4f88-89c0-c354e8d7d15a
+- b862fba8-ca6c-44c1-99a6-f7872113ee50
 retro: null
 summary: booping specs site-index renders a group index page; shipped GitLab CI 
   templates publish specs sites and the index on Pages
-commit: 0d0a7e372f85e537b80b21f672a0b6da2794f0d0
+commit: b7ee8e15bd039974be6872b106a67d147ed2f706
 tracker_provider: null
 tracker_request: null
 tracker_issue: null
@@ -65,11 +66,11 @@ In `booping-python`: `commands/specs.py` registers `site-index`; `specs/site/ind
 
 | id | title | sp | status |
 | --- | --- | --- | --- |
-| 01 | site-index — the index page from a YAML project file | 4 | pending |
-| 02 | site-index — stdin JSON and input validation | 3 | pending |
-| 03 | GitLab discovery script — the group's booping-specs projects as site-index input | 3 | pending |
-| 04 | GitLab CI templates — the project pages job and the index job | 2 | pending |
-| 05 | Docs — site-index, publishing on GitLab Pages, CLAUDE.md | 2 | pending |
+| 01 | [site-index — the index page from a YAML project file](milestones/M01-site-index-from-a-yaml-file/M01-site-index-from-a-yaml-file.md) | 4 | in-progress |
+| 02 | [site-index — stdin JSON and input validation](milestones/M02-site-index-stdin-and-validation/M02-site-index-stdin-and-validation.md) | 3 | in-progress |
+| 03 | [GitLab discovery script — the group's booping-specs projects as site-index input](milestones/M03-gitlab-project-discovery-script/M03-gitlab-project-discovery-script.md) | 3 | in-progress |
+| 04 | [GitLab CI templates — the project pages job and the index job](milestones/M04-gitlab-ci-templates/M04-gitlab-ci-templates.md) | 2 | in-progress |
+| 05 | [Docs — site-index, publishing on GitLab Pages, CLAUDE.md](milestones/M05-docs/M05-docs.md) | 2 | in-progress |
 
 ## Milestone files
 

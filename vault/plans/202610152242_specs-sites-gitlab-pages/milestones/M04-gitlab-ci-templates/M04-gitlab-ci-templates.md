@@ -1,8 +1,8 @@
 ---
 id: "04"
-title: "GitLab CI templates \u2014 the project pages job and the index job"
+title: "GitLab CI templates — the project pages job and the index job"
 sp: 2
-status: pending
+status: in-progress
 plan: "plans/202610152242_specs-sites-gitlab-pages/index.md"
 ---
 
