@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from jinja2.runtime import Context as JinjaContext
 
     from booping.query import Row
+    from booping.specs.tiers import Tier
 
 
 class RenderCycleError(Exception):
@@ -126,7 +127,16 @@ def make_booping_global(context: object) -> Row:
 
     project = getattr(context, "project", None)
     latest = getattr(project, "latest_migration", -1)
-    return Row({"latest_migration": latest if isinstance(latest, int) else -1})
+    tiers = cast("list[Tier]", getattr(context, "specs_tiers", []))
+    return Row(
+        {
+            "latest_migration": latest if isinstance(latest, int) else -1,
+            "specs_tiers": [
+                Row({"name": t.name, "namespace": t.namespace, "root": t.link(t.root)})
+                for t in tiers
+            ],
+        }
+    )
 
 
 def macro_dirs(context: object) -> dict[str, Path | None]:

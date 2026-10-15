@@ -17,6 +17,20 @@ class Tier(BaseModel):
     # Base a tier-relative path (`path`, a record's `sources`) resolves against.
     anchor: Path
 
+    def link(self, path: Path) -> str:
+        """`path` as a rendered body shows it: core under `${CLAUDE_PLUGIN_ROOT}`, project
+        relative to the repo, anything else absolute — so a pinned render stays reproducible."""
+        absolute = _normalized(path)
+        anchor = _normalized(self.anchor)
+        if self.name != "global" and absolute.is_relative_to(anchor):
+            relative = absolute.relative_to(anchor).as_posix()
+            return f"${{CLAUDE_PLUGIN_ROOT}}/{relative}" if self.name == "core" else relative
+        return absolute.as_posix()
+
+
+def _normalized(path: Path) -> Path:
+    return Path(os.path.normpath(path.absolute()))
+
 
 def _tier_settings(config: dict[str, Any], name: str) -> dict[str, Any]:
     node: Any = config

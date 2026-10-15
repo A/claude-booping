@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 from pathlib import Path
 from typing import Any
 
@@ -27,26 +26,13 @@ class RuleSkip(BaseModel):
     reason: str
 
 
-def _normalized(path: Path) -> Path:
-    return Path(os.path.normpath(path.absolute()))
-
-
-def _link(tier: Tier, path: Path) -> str:
-    absolute = _normalized(path)
-    anchor = _normalized(tier.anchor)
-    if tier.name != "global" and absolute.is_relative_to(anchor):
-        relative = absolute.relative_to(anchor).as_posix()
-        return f"${{CLAUDE_PLUGIN_ROOT}}/{relative}" if tier.name == "core" else relative
-    return absolute.as_posix()
-
-
 def _ref(tier: Tier, number: int) -> str:
     ref = f"rule/{number:04d}"
     return f"{tier.namespace}:{ref}" if tier.namespace else ref
 
 
 def _skip(tier: Tier, record: Record, reason: str) -> RuleSkip:
-    return RuleSkip(path=record.path, link=_link(tier, record.path), reason=reason)
+    return RuleSkip(path=record.path, link=tier.link(record.path), reason=reason)
 
 
 def _take(tier: Tier, record: Record) -> TargetedRule | RuleSkip | None:
@@ -75,7 +61,7 @@ def _take(tier: Tier, record: Record) -> TargetedRule | RuleSkip | None:
         ref=_ref(tier, record.number),
         title=str(fm.get("title", record.path.stem)),
         brief=" ".join(brief.split()),
-        link=_link(tier, record.path),
+        link=tier.link(record.path),
         tier=tier.name,
         path=record.path,
         parsed_targets=parsed,
