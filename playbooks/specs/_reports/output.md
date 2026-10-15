@@ -13,7 +13,7 @@ Writing a record:
 - Set `created_by: claude`; never set `reviewed`.
 - Run `booping specs check` after every write and fix what it reports.
 
-The run keeps no state of its own. The `open_item` machine below tracks one open-item file each: its workdir is the vault, and only `booping specs open-items` moves it — never call `booping playbook-transition` for it, and never create a run workdir for it.
+The run keeps no state of its own. The `open_item` machine below tracks one open-item file each: its workdir is the vault, and only `booping items` moves it — never call `booping playbook-transition` for it, and never create a run workdir for it.
 
 
 
@@ -52,17 +52,17 @@ booping playbook-state specs --workdir <run workdir>
 
 | Status | To | When | Gates |
 | --- | --- | --- | --- |
-| `open` | `planned` | `booping specs open-items plan` linked the item to a plan | `plan` names an existing plan file |
-| `open` | `dropped` | `booping specs open-items close --dropped` closed the item without work | — |
-| `planned` | `done` | `booping specs open-items close`, or the linked plan reached develop's `done` | — |
-| `planned` | `dropped` | `booping specs open-items close --dropped` closed the item without work | — |
-| `planned` | `open` | `booping specs open-items reopen`, or the linked plan failed or was cancelled | — |
+| `open` | `planned` | `booping items plan` linked the item to a plan | `plan` names an existing plan file |
+| `open` | `dropped` | `booping items close --dropped` closed the item without work | — |
+| `planned` | `done` | `booping items close`, or the linked plan reached develop's `done` | — |
+| `planned` | `dropped` | `booping items close --dropped` closed the item without work | — |
+| `planned` | `open` | `booping items reopen`, or the linked plan failed or was cancelled | — |
 | `done` | *(terminal)* | — | — |
 | `dropped` | *(terminal)* | — | — |
 
 ## Step: Guide
 Act on the user's request; the scenarios below orient, never restrict — never ask which one to run.
-Flags and their allowed values come from `booping specs open-items {verb} --help`.
+Flags and their allowed values come from `booping items {verb} --help`.
 
 ## Init
 
@@ -79,19 +79,19 @@ guide's order — values first, then the boundaries that follow from them. Next:
 ## Auto-review
 
 Read the values, rules and ADRs. A contradiction the records settle becomes a `conflict` record; one
-the user must settle becomes an item. Next: `booping specs open-items add --direction conflict`.
+the user must settle becomes an item. Next: `booping items add --direction conflict`.
 
 ## Record
 
 A decision → an ADR, only for one choice with a real alternative and a reason the code cannot
 show. An idea → an idea record. A constraint on how the model works → a rule with `targets` and
-`brief`. Next: an ADR with a `Confirmation:` line → `booping specs open-items add --record adr/NNNN`;
+`brief`. Next: an ADR with a `Confirmation:` line → `booping items add --record adr/NNNN`;
 anything else → `booping specs check`.
 
 ## Sync specs and code
 
 Compare the records with the code; each gap becomes one item with the direction it runs:
-`booping specs open-items add --source sync`. Next: `booping specs open-items scan` for the marks
+`booping items add --source sync`. Next: `booping items scan` for the marks
 and check findings.
 
 ## Retro to rules
@@ -101,8 +101,8 @@ written directly. Next: `/playbook learn`, or `booping specs check` after the ru
 
 ## Open items
 
-Show `booping specs open-items list`; the user picks. An item needing no work →
-`booping specs open-items close {ids} --dropped --reason "…"`; a planned item whose plan was
-cancelled outside develop → `booping specs open-items reopen --plan {plan}`.
+Show `booping items list`; the user picks. An item needing no work →
+`booping items close {ids} --dropped --reason "…"`; a planned item whose plan was
+cancelled outside develop → `booping items reopen --plan {plan}`.
 Supervised: next is `/playbook groom` naming the picked ids — groom links them to the plan and stops at its plan review.
 Autonomous: run `/playbook groom` naming the picked ids — none picked, every `open` item — then `/playbook develop` on the plan it readies, in this session, without stopping; a groom that splits develops the first plan and reports the parked stubs.

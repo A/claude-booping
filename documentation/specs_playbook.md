@@ -26,25 +26,41 @@ Every scenario ends by naming the next call.
 
 ## Open items
 
-An open item is one gap between the specs and the code that still needs work: an ADR whose `Confirmation:` line the code does not show yet, a `[clarify]` or `[unknown]` mark in a record, a `booping specs check` finding, a conflict only you can settle, a gap a sync found. Each item is a file `open-items/OI-NNNN.md` in the vault, carrying a `title`, a `direction` (`code-to-spec`, `spec-to-code`, `conflict`, `clarify`), the `record` it is about, the `source` that filed it (`manual`, `adr`, `mark`, `check`, `sync`, `correction` — a logged correction that names a spec record) and the `plan` it is linked to.
+An open item is one piece of work waiting in the vault: something you asked for, or a gap between the specs and the code — an ADR whose `Confirmation:` line the code does not show yet, a `[clarify]` or `[unknown]` mark in a record, a `booping specs check` finding, a conflict only you can settle, a gap a sync found. Each item is a file `open-items/OI-NNNN.md` in the vault, carrying a `title`, the `source` that filed it, a `direction`, the `record` it is about and the `plan` it is linked to.
+
+The `source` says what kind of item it is:
+
+- `request` — your own words, filed as you said them; `backlog` — a task put aside for later. Neither has a direction (`direction: null`); the body is the text exactly as given, and without a `--title` the title is its first sentence.
+- `manual`, `adr`, `mark`, `check`, `sync`, `correction` (a logged correction that names a spec record) — a specs-to-code gap, with a `direction`: `code-to-spec`, `spec-to-code`, `conflict` or `clarify`.
 
 An item moves `open` → `planned` → `done`, or to `dropped` when it needs no work; a planned item can go back to `open`. Closed items stay on disk with `closed_at` and `reason`, out of the default list.
 
-### `booping specs open-items`
+### `booping items`
 
 Run anywhere inside a booping project; paths print vault-relative.
 
 | Verb | What it does |
 |------|--------------|
-| `list [--all]` | The index as a table — `id`, `status`, `direction`, `record`, `title`, `plan`; open and planned items only, every item with `--all`. |
-| `add --title TEXT --direction D [--record REF] [--source S] [--body TEXT]` | Files one item. `add --record adr/NNNN` without `--title` takes the title from the ADR's `Confirmation:` line. |
+| `list [--all]` | The index as a table — `id`, `status`, `source`, `direction`, `record`, `title`, `plan`; open and planned items only, every item with `--all`. |
+| `add --text TEXT [--title TEXT] [--source request\|backlog]` | Files a request (the default) or backlog item with the text as its body, verbatim. `--text -` reads the text from stdin. |
+| `add --title TEXT --direction D [--record REF] [--source S] [--text TEXT]` | Files a specs-to-code gap; `--direction` alone makes it `manual`. `add --record adr/NNNN` without `--title` takes the title from the ADR's `Confirmation:` line. |
 | `scan [--tier T]` | Files one item per `[clarify]` / `[unknown]` mark and per `specs check` finding in the tier; an item already filed for the same thing is skipped. |
 | `plan ID… --plan PATH` | Links open items to a plan and marks them planned. |
 | `close ID… [--dropped] [--reason TEXT]` | Closes planned items as done, or any item still open or planned as dropped. `close --plan PATH` closes every planned item linked to that plan. |
 | `reopen ID…` / `reopen --plan PATH` | Returns planned items to open and clears their plan. |
 
-`booping specs open-items {verb} --help` lists every flag and its allowed values.
+`booping items {verb} --help` lists every flag and its allowed values.
+
+### Filing a request from anywhere
+
+`booping items add --text -` reads the whole of stdin, so anything that can run a command can file a request — a shell script, a chat or mail bridge, a hook:
+
+```sh
+printf 'Ship the tracker sync.\nIt should run nightly.\n' | booping items add --text -
+```
+
+It prints the new item's path (`open-items/OI-NNNN.md`). The text lands byte for byte: blank lines, `---` lines, trailing spaces and template-looking `{{ }}` are kept as typed. Two items filed at the same moment always get different ids.
 
 ### Items and plans
 
-Name the items in a groom request (`/playbook groom — work OI-0003 and OI-0007`) and groom links them to the new plan. From there they follow the plan: develop finishing it at `done` closes them, a failed or cancelled plan returns them to `open`. A plan cancelled some other way leaves its items planned — `booping specs open-items reopen --plan plans/{dir}/index.md` puts them back.
+Name the items in a groom request (`/playbook groom — work OI-0003 and OI-0007`) and groom links them to the new plan. From there they follow the plan: develop finishing it at `done` closes them, a failed or cancelled plan returns them to `open`. A plan cancelled some other way leaves its items planned — `booping items reopen --plan plans/{dir}/index.md` puts them back.

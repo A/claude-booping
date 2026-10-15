@@ -8,7 +8,7 @@ This run has no shell, so the `booping` commands were run for you; their outputs
 - `booping specs ls --tier project` — one record, `specs/value/0001-one-service-to-run.md`.
 - `booping specs next adr --tier project` — `0001`.
 - `booping specs check --tier project` — cannot run here; it checks each record against its type's mdcheck schema (the ADR one is given above) — check the ADR against it yourself.
-- `booping specs open-items add --record adr/0001` — cannot run here; write the file it would create yourself: `open-items/OI-0001.md`, frontmatter `id: OI-0001`, `title` (the ADR's `Confirmation:` text, first sentence), `status: open`, `direction: spec-to-code`, `record: adr/0001#consequences`, `source: adr`, `plan: null`, `created_at: 2026-10-15`, `closed_at: null`, `reason: null`, then `# {title}`.
+- `booping items add --record adr/0001` — cannot run here; write the file it would create yourself: `open-items/OI-0001.md`, frontmatter `id: OI-0001`, `title` (the ADR's `Confirmation:` text, first sentence), `status: open`, `direction: spec-to-code`, `record: adr/0001#consequences`, `source: adr`, `plan: null`, `created_at: 2026-10-15`, `closed_at: null`, `reason: null`, then `# {title}`.
 
 ## Dialogue
 

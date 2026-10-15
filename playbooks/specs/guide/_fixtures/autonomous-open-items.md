@@ -6,7 +6,7 @@ This run has no shell, so the `booping` commands were run for you; their outputs
 
 - Preamble tiers — `project` — `specs/`.
 - Preamble autonomy — Autonomy: `autonomous` (`core.autonomy`).
-- `booping specs open-items list` — cannot run here; it prints the `open` and `planned` items under `open-items/` as a table — read them yourself.
+- `booping items list` — cannot run here; it prints the `open` and `planned` items under `open-items/` as a table — read them yourself.
 - `/playbook` cannot run here either: name each `/playbook` invocation you run, with its arguments, in your reply.
 
 ## Dialogue

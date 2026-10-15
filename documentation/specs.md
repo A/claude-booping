@@ -32,7 +32,7 @@ An accepted rule carrying `targets:` and `brief:` is injected into the playbooks
 
 ## Open items
 
-A gap between the records and the code — an unconfirmed ADR, a `[clarify]` mark, a check finding — is filed as an open item, a file under `open-items/` in the vault that a plan can pick up and close. The [specs playbook](specs_playbook.md#open-items) files and works them, and `booping specs open-items` drives them directly.
+A gap between the records and the code — an unconfirmed ADR, a `[clarify]` mark, a check finding — is filed as an open item, a file under `open-items/` in the vault that a plan can pick up and close; so is a request you file in your own words. The [specs playbook](specs_playbook.md#open-items) files and works them, and `booping items` drives them directly.
 
 ## Commands
 

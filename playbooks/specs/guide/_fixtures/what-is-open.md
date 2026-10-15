@@ -6,7 +6,7 @@ This run has no shell, so the `booping` commands were run for you; their outputs
 
 - Preamble tiers — `project` — `specs/`.
 - Preamble autonomy — Autonomy: `supervised` (`core.autonomy`).
-- `booping specs open-items list` — cannot run here; it prints the `open` and `planned` items under `open-items/` as a table — read them yourself.
+- `booping items list` — cannot run here; it prints the `open` and `planned` items under `open-items/` as a table — read them yourself.
 
 ## Dialogue
 
