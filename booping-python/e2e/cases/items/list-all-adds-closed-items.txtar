@@ -70,10 +70,10 @@ booping items list --all
 -- exit --
 0
 -- stdout --
-| id | status | source | direction | record | title | plan |
-| --- | --- | --- | --- | --- | --- | --- |
-| OI-0001 | open | correction | conflict | rule/0003 | Tests mock the clock | — |
-| OI-0002 | planned | adr | spec-to-code | adr/0025#consequences | Plans close items | plans/202610151409_x/index.md |
-| OI-0003 | done | manual | code-to-spec | — | Spec the tracker | plans/202610010000_y/index.md |
-| OI-0004 | dropped | manual | clarify | — | Stale mark | — |
+| id | status | source | size | direction | record | title | plan |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| OI-0001 | open | correction | — | conflict | rule/0003 | Tests mock the clock | — |
+| OI-0002 | planned | adr | — | spec-to-code | adr/0025#consequences | Plans close items | plans/202610151409_x/index.md |
+| OI-0003 | done | manual | — | code-to-spec | — | Spec the tracker | plans/202610010000_y/index.md |
+| OI-0004 | dropped | manual | — | clarify | — | Stale mark | — |
 -- stderr --

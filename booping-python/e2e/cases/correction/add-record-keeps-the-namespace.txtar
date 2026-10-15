@@ -49,6 +49,7 @@ status: open
 direction: conflict
 record: "booping:rule/0002"
 source: correction
+size: null
 plan: null
 created_at: 2026-10-15
 closed_at: null

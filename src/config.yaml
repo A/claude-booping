@@ -219,7 +219,7 @@ core:
       #  --set title=<t> --set direction=<d|null> --set record=<ref|null> --set source=<s>
       #  --set created_at=<YYYY-MM-DD> [--set body=<text>]`.
       # Sole definition of the item file. `status: open` is the machine's `initial`;
-      # `plan`, `closed_at` and `reason` start null and are written by the CLI and
+      # `size`, `plan`, `closed_at` and `reason` start null and are written by the CLI and
       # the machine's hooks. `title` goes through `tojson` like the plan scaffold's.
       # `direction` is null for request and backlog items. `body` is the item text,
       # written verbatim (a variable's value is never re-parsed as Jinja), ending in
@@ -233,6 +233,7 @@ core:
           direction: {% if direction and direction != 'null' %}{{ direction }}{% else %}null{% endif %}
           record: {% if record and record != 'null' %}{{ record | tojson }}{% else %}null{% endif %}
           source: {{ source }}
+          size: null
           plan: null
           created_at: {{ created_at }}
           closed_at: null
@@ -247,7 +248,7 @@ core:
       index:
         glob: [open-items/OI-*.md]
         sort: id
-        columns: [id, status, source, direction, record, title, plan]
+        columns: [id, status, source, size, direction, record, title, plan]
 
   groom_playbook:
     # Agent that performs the detached second-model review of a drafted plan.
@@ -463,6 +464,15 @@ core:
           - "Classifying an item that needs a wide read of the repo before it is a tiny fix or a plan"
         bad_for:
           - "Single-file reads — call Read directly"
+    # Item sizes and the batches `booping items batch` packs. `sizes` maps each
+    # size `booping items size` accepts to its story points; `direct` lists the
+    # sizes that skip grooming and go to a worker in a batch; `max_sp` caps one
+    # batch's summed points. Open items of a direct size that wait on no question
+    # are packed greedily in id order. An unsized item takes the plan route.
+    batch:
+      sizes: {XS: 1, S: 2, M: 5, L: 13}
+      direct: [XS, S]
+      max_sp: 8
 
   migrate_playbook:
     queries:

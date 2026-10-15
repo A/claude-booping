@@ -1,0 +1,47 @@
+`items batch` with no open item of a direct size — one M, one unsized — prints the
+`no batch` line and exits 0.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+-- fixtures/cwd/vault/open-items/OI-0001.md --
+---
+id: OI-0001
+title: "Item 1"
+status: open
+direction: null
+record: null
+source: request
+size: M
+plan: null
+created_at: 2026-10-15
+closed_at: null
+reason: null
+---
+
+# Item 1
+-- fixtures/cwd/vault/open-items/OI-0002.md --
+---
+id: OI-0002
+title: "Item 2"
+status: open
+direction: null
+record: null
+source: request
+size: null
+plan: null
+created_at: 2026-10-15
+closed_at: null
+reason: null
+---
+
+# Item 2
+-- cmd --
+booping items batch
+-- exit --
+0
+-- stdout --
+no batch: no open item of a direct size
+-- stderr --

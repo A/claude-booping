@@ -1,0 +1,30 @@
+`items size` on a closed item exits 1 naming its status and writes nothing.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+-- fixtures/cwd/vault/open-items/OI-0001.md --
+---
+id: OI-0001
+title: "Item 1"
+status: done
+direction: null
+record: null
+source: request
+size: null
+plan: null
+created_at: 2026-10-15
+closed_at: null
+reason: null
+---
+
+# Item 1
+-- cmd --
+booping items size OI-0001 S
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: item OI-0001 is done

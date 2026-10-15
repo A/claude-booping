@@ -71,8 +71,8 @@ booping items list
 -- exit --
 0
 -- stdout --
-| id | status | source | direction | record | title | plan |
-| --- | --- | --- | --- | --- | --- | --- |
-| OI-0001 | open | correction | conflict | rule/0003 | Tests mock the clock | — |
-| OI-0002 | planned | adr | spec-to-code | adr/0025#consequences | Plans close items | plans/202610151409_x/index.md |
+| id | status | source | size | direction | record | title | plan |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| OI-0001 | open | correction | — | conflict | rule/0003 | Tests mock the clock | — |
+| OI-0002 | planned | adr | — | spec-to-code | adr/0025#consequences | Plans close items | plans/202610151409_x/index.md |
 -- stderr --

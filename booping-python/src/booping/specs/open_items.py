@@ -297,6 +297,77 @@ def move(ctx: Context, item_id: str, to: str, fields: dict[str, str] | None = No
 
 
 @dataclass(frozen=True)
+class BatchSettings:
+    sizes: dict[str, int]
+    direct: list[str]
+    max_sp: int
+
+
+def batch_settings(ctx: Context) -> BatchSettings:
+    settings: dict[str, Any] = (
+        ctx.config.get("core", {}).get("project_manager_playbook", {}).get("batch", {})
+    )
+    sizes = cast("dict[str, Any]", settings.get("sizes") or {})
+    direct = cast("list[Any]", settings.get("direct") or [])
+    return BatchSettings(
+        sizes={str(k): int(v) for k, v in sizes.items()},
+        direct=[str(d) for d in direct],
+        max_sp=int(settings.get("max_sp") or 0),
+    )
+
+
+def set_size(ctx: Context, item_id: str, size: str) -> None:
+    """Write `size:` on an open or planned item; nothing is written on a refusal."""
+    path = item_path(ctx, item_id)
+    if not path.is_file():
+        raise OpenItemError(f"unknown item {item_id}")
+    status = read_status(path)
+    if status not in open_statuses(machine(ctx)):
+        raise OpenItemError(f"item {item_id} is {status}")
+    sizes = batch_settings(ctx).sizes
+    if size not in sizes:
+        raise OpenItemError(f"unknown size {size}: one of {', '.join(sizes)}")
+    update_frontmatter(path, {"size": size})
+
+
+def sized_open_items(ctx: Context) -> list[tuple[str, str | None]]:
+    """`(id, size)` of every item with status `open`, in id order; a file written
+    before sizes existed has no `size:` key and reads as None."""
+    directory = items_dir(ctx)
+    if not directory.is_dir():
+        return []
+    items: list[tuple[str, str | None]] = []
+    for path in sorted(directory.glob("OI-*.md")):
+        fm = parse_frontmatter_only(path)
+        if fm.get("status") == "open":
+            size = fm.get("size")
+            items.append((str(fm.get("id")), None if size is None else str(size)))
+    return items
+
+
+def pack(
+    items: list[tuple[str, str | None]],
+    sizes: dict[str, int],
+    direct: list[str],
+    max_sp: int,
+) -> list[tuple[int, list[str]]]:
+    """Greedy batches of the direct-size *items*, kept in order: the current batch
+    takes the next item while its summed SP stays within *max_sp*, else a new batch
+    starts. Returns `(sp, ids)` per batch."""
+    batches: list[tuple[int, list[str]]] = []
+    for item_id, size in items:
+        if size not in direct:
+            continue
+        sp = sizes[size]
+        if batches and batches[-1][0] + sp <= max_sp:
+            total, ids = batches[-1]
+            batches[-1] = (total + sp, [*ids, item_id])
+        else:
+            batches.append((sp, [item_id]))
+    return batches
+
+
+@dataclass(frozen=True)
 class Candidate:
     """An item `scan` would file; `(source, record, title)` is its dedup key."""
 

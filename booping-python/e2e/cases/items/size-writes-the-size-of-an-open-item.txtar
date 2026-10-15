@@ -1,0 +1,46 @@
+`items size` writes `size:` on an open item and prints its line. The item was filed
+before sizes existed, so it carries no `size:` key: the key is added, no migration needed.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+-- fixtures/cwd/vault/open-items/OI-0001.md --
+---
+id: OI-0001
+title: "Item 1"
+status: open
+direction: null
+record: null
+source: request
+plan: null
+created_at: 2026-10-15
+closed_at: null
+reason: null
+---
+
+# Item 1
+-- cmd --
+booping items size OI-0001 S
+-- exit --
+0
+-- stdout --
+OI-0001: size S
+-- stderr --
+-- expected/cwd/vault/open-items/OI-0001.md --
+---
+id: OI-0001
+title: "Item 1"
+status: open
+direction: null
+record: null
+source: request
+plan: null
+created_at: 2026-10-15
+closed_at: null
+reason: null
+size: S
+---
+
+# Item 1

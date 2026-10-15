@@ -137,6 +137,24 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
     )
     ask.set_defaults(func=_run_ask)
 
+    size = verbs.add_parser(
+        "size",
+        help="Write the size of an open or planned item, one of the sizes"
+        " core.project_manager_playbook.batch lists",
+    )
+    size.add_argument("id", metavar="ID", help="Open or planned item id, e.g. OI-0001")
+    size.add_argument(
+        "size", metavar="SIZE", help="One of the core.project_manager_playbook.batch sizes"
+    )
+    size.set_defaults(func=_run_size)
+
+    batch = verbs.add_parser(
+        "batch",
+        help="Pack the open items of a direct size that wait on no question into batches,"
+        " in id order under the batch SP cap, one line per batch",
+    )
+    batch.set_defaults(func=_run_batch)
+
     answer = verbs.add_parser(
         "answer", help="Record the answer to an item's question and mark it answered"
     )
@@ -306,3 +324,33 @@ def _run_answer(args: argparse.Namespace) -> None:
         _fail(str(exc))
     logger.log(vault=ctx.vault, subcommand="items", message=f"answer {anchor}")
     print(f"{anchor}: answered")
+
+
+def _run_size(args: argparse.Namespace) -> None:
+    ctx = _assemble()[0]
+    try:
+        open_items.set_size(ctx, args.id, args.size)
+    except OpenItemError as exc:
+        _fail(str(exc))
+    logger.log(vault=ctx.vault, subcommand="items", message=f"size {args.id} {args.size}")
+    print(f"{args.id}: size {args.size}")
+
+
+def _run_batch(_args: argparse.Namespace) -> None:
+    ctx = _assemble()[0]
+    try:
+        open_items.require_vault(ctx)
+        settings = open_items.batch_settings(ctx)
+        items = [
+            (item_id, size)
+            for item_id, size in open_items.sized_open_items(ctx)
+            if questions.open_count(ctx, item_id) == 0
+        ]
+    except OpenItemError as exc:
+        _fail(str(exc))
+    batches = open_items.pack(items, settings.sizes, settings.direct, settings.max_sp)
+    logger.log(vault=ctx.vault, subcommand="items", message="batch")
+    if not batches:
+        print("no batch: no open item of a direct size")
+    for number, (sp, ids) in enumerate(batches, 1):
+        print(f"B{number} ({sp} SP): {' '.join(ids)}")

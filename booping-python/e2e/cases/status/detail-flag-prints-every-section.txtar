@@ -72,11 +72,11 @@ booping status --detail
 -- stdout --
 ## items
 
-| id | status | source | direction | record | title | plan |
-| --- | --- | --- | --- | --- | --- | --- |
-| OI-0001 | open | request | — | — | Retire the exporter | — |
-| OI-0002 | planned | adr | spec-to-code | adr/0025#consequences | Plans close items | — |
-| OI-0003 | open | backlog | — | — | Faster sync | — |
+| id | status | source | size | direction | record | title | plan |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| OI-0001 | open | request | — | — | — | Retire the exporter | — |
+| OI-0002 | planned | adr | — | spec-to-code | adr/0025#consequences | Plans close items | — |
+| OI-0003 | open | backlog | — | — | — | Faster sync | — |
 
 ## ideas
 

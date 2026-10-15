@@ -73,9 +73,9 @@ booping status items
 -- stdout --
 ## items
 
-| id | status | source | direction | record | title | plan |
-| --- | --- | --- | --- | --- | --- | --- |
-| OI-0001 | open | request | — | — | Retire the exporter | — |
+| id | status | source | size | direction | record | title | plan |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| OI-0001 | open | request | — | — | — | Retire the exporter | — |
 
 Waiting on you:
 
