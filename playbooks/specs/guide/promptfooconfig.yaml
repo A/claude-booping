@@ -1,0 +1,26 @@
+description: specs guide
+
+prompts:
+  - id: file://prompt.md
+    label: prompt
+
+providers:
+  - id: file://../../_lib/claude_provider.py
+    config:
+      mode: step
+      # The live preamble links the format guide and asks for it before a record is written;
+      # the ADR schema stands in for `booping specs check`, which cannot run without a shell;
+      # dialogue.md replaces the return contract a dialogue step does not have.
+      context:
+        - ../src/specs/README.md
+        - ../src/specs/schemas/adr.yaml
+        - specs/guide/_fixtures/dialogue.md
+      output_mode: files
+      # init offer and what-is-open legitimately write nothing
+      allow_no_files: true
+      model: opus
+      effort: medium
+
+defaultTest: file://../../_lib/grader.yaml
+
+tests: file://tests.yaml

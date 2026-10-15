@@ -31,6 +31,11 @@
 //                  `doc:`/`rules:`; a full rule file (its own `rules:` key) passes through.
 //                  NEVER parsed here — it reaches a temp file verbatim, so the rule language
 //                  stays mdcheck's alone and this module carries no YAML dependency.
+//   rulesFile    : string   path to a rule YAML file, resolved against the plugin root (the
+//                  repo root, found from this module's own location) — e.g. a shipped
+//                  `src/specs/schemas/<type>.yaml`, so the case points at the one source of a
+//                  shape instead of copying it. Read verbatim and handled exactly like `rules`.
+//                  Giving both `rules` and `rulesFile` is an error.
 //   file         : string   regex picking which written file to check out of the files-mode
 //                  manifest. With exactly one written file it may be omitted; with several,
 //                  omitting it is an error — name the one you mean.
@@ -51,6 +56,8 @@ const { spawnSync } = require('node:child_process');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
+
+const PLUGIN_ROOT = path.resolve(__dirname, '..', '..', '..');
 
 const fail = (reason) => ({ pass: false, score: 0, reason });
 const ok = (reason) => ({ pass: true, score: 1, reason });
@@ -89,8 +96,19 @@ function ruleFileText(rules, docName) {
 }
 
 function validate(output, opts = {}) {
-  if (typeof opts.rules !== 'string' || !opts.rules.trim())
-    return fail('mdcheck assert has no `rules:` — the structure spec belongs in the test case');
+  if (opts.rules !== undefined && opts.rulesFile !== undefined)
+    return fail('mdcheck assert has both `rules:` and `rulesFile:` — give exactly one');
+  let rules = opts.rules;
+  if (opts.rulesFile !== undefined) {
+    const rulesFile = path.resolve(PLUGIN_ROOT, opts.rulesFile);
+    try {
+      rules = fs.readFileSync(rulesFile, 'utf8');
+    } catch (e) {
+      return fail('cannot read `rulesFile` ' + opts.rulesFile + ': ' + e.message);
+    }
+  }
+  if (typeof rules !== 'string' || !rules.trim())
+    return fail('mdcheck assert has no `rules:` or `rulesFile:` — the structure spec belongs in the test case');
 
   const on = opts.on || 'file';
   const files = parseManifest(output);
@@ -147,7 +165,7 @@ function validate(output, opts = {}) {
     }
 
     const rulesPath = path.join(root, 'rules.yaml');
-    fs.writeFileSync(rulesPath, ruleFileText(opts.rules, docName), 'utf8');
+    fs.writeFileSync(rulesPath, ruleFileText(rules, docName), 'utf8');
 
     const bin = opts.bin || process.env.MDCHECK_BIN || 'mdcheck';
     const run = spawnSync(bin, [rulesPath, target, '--format', 'json', '--root', tree], {
