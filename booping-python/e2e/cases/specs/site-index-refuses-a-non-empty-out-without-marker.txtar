@@ -1,0 +1,16 @@
+An existing, non-empty out directory without the `.booping-site` marker is refused; its file is
+left as it was.
+
+-- fixtures/cwd/projects.yaml --
+[]
+-- fixtures/cwd/specs-site-index/notes.txt --
+keep me
+-- cmd --
+booping specs site-index --projects projects.yaml
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: out path specs-site-index is not empty and has no .booping-site marker
+-- expected/cwd/specs-site-index/notes.txt --
+keep me

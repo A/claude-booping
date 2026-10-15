@@ -1,0 +1,32 @@
+An empty project list is not an error: the page carries the heading and `No projects.` in place of
+the table.
+
+-- fixtures/cwd/projects.yaml --
+[]
+-- cmd --
+booping specs site-index --projects projects.yaml
+-- exit --
+0
+-- stdout --
+specs site-index: 0 projects -> specs-site-index
+-- stderr --
+-- expected/cwd/specs-site-index/.booping-site --
+booping specs site
+-- expected/cwd/specs-site-index/index.html --
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Specs — specs</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav class="crumbs">
+<span>Specs</span></nav>
+<main>
+<h1>Specs</h1>
+<p>No projects.</p>
+</main>
+</body>
+</html>

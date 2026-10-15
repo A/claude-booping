@@ -1,0 +1,20 @@
+{% extends "base.html.j2" %}
+{% block main %}
+<h1>{{ title }}</h1>
+{% if projects %}
+<div class="table-wrap">
+<table>
+<thead>
+<tr><th>Project</th><th>Description</th></tr>
+</thead>
+<tbody>
+{% for project in projects %}
+<tr><td><a href="{{ project.url }}">{{ project.name }}</a></td><td>{{ project.description }}</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% else %}
+<p>No projects.</p>
+{% endif %}
+{% endblock %}

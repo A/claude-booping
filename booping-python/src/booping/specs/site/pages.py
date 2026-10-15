@@ -28,7 +28,7 @@ class Crumb:
     href: str | None
 
 
-def _env() -> Environment:
+def environment() -> Environment:
     return Environment(
         loader=FileSystemLoader(str(_HERE / "templates")),
         autoescape=True,
@@ -139,7 +139,7 @@ def build_site(site: Site, known_types: list[str]) -> tuple[dict[str, str], list
     """Out-root-relative path → file content, plus the resolution warnings sorted by
     `(path, line)`, each once per record. Types order as `known_types`, then the types
     a root's `_schemas/` added, sorted."""
-    env = _env()
+    env = environment()
     files: dict[str, str] = {"style.css": (_HERE / "style.css").read_text()}
     warnings: set[SiteWarning] = set()
 

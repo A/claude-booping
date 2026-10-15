@@ -1,0 +1,40 @@
+`--title` replaces the page title, the single crumb and the heading; `--out` names the directory.
+
+-- fixtures/cwd/projects.yaml --
+- name: alpha
+  url: https://pages.example.org/alpha
+  description: Alpha specs.
+-- cmd --
+booping specs site-index --projects projects.yaml --title "Lab specs" --out public
+-- exit --
+0
+-- stdout --
+specs site-index: 1 projects -> public
+-- stderr --
+-- expected/cwd/public/index.html --
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lab specs — specs</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav class="crumbs">
+<span>Lab specs</span></nav>
+<main>
+<h1>Lab specs</h1>
+<div class="table-wrap">
+<table>
+<thead>
+<tr><th>Project</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><a href="https://pages.example.org/alpha">alpha</a></td><td>Alpha specs.</td></tr>
+</tbody>
+</table>
+</div>
+</main>
+</body>
+</html>

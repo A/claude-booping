@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import sys
 from pathlib import Path
 from typing import Any, NoReturn, cast
+
+import yaml
 
 from booping import logger
 from booping.context import Context
@@ -13,6 +16,7 @@ from booping.rendering import get_plugin_root
 from booping.specs.check import CheckError, check_tier, display_path, format_finding
 from booping.specs.init import InitError, apply, plan
 from booping.specs.records import Record, load_tier
+from booping.specs.site.index import ProjectsError, build_index, load_projects
 from booping.specs.site.model import SiteRoot, load_site
 from booping.specs.site.pages import build_site
 from booping.specs.site.write import SiteError, write_site
@@ -78,6 +82,31 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
         help="A root to render (repeatable); replaces the tier and config roots",
     )
     site.set_defaults(func=_run_site)
+
+    index = verbs.add_parser(
+        "site-index",
+        help="Render an index page listing projects' specs sites, in the site's look",
+    )
+    index.add_argument(
+        "--projects",
+        default="-",
+        metavar="PATH",
+        help="Project list of {name, url, description}: `-` reads JSON from stdin,"
+        " a path is read as YAML (default: -)",
+    )
+    index.add_argument(
+        "--out",
+        default="specs-site-index",
+        metavar="DIR",
+        help="Output directory (default: specs-site-index)",
+    )
+    index.add_argument(
+        "--title",
+        default="Specs",
+        metavar="TEXT",
+        help="Page title, crumb and heading (default: Specs)",
+    )
+    index.set_defaults(func=_run_site_index)
 
 
 def _add_tier(
@@ -327,3 +356,28 @@ def _run_site(args: argparse.Namespace) -> None:
         f"specs site: {len(roots)} roots, {len(site.records)} records, {pages} pages,"
         f" {len(lines)} warnings -> {args.out}"
     )
+
+
+def _read_projects(source: str) -> Any:
+    try:
+        if source == "-":
+            return json.loads(sys.stdin.read())
+        return yaml.safe_load(Path(source).read_text())
+    except FileNotFoundError:
+        _fail(f"--projects {source}: no such file")
+    except (json.JSONDecodeError, yaml.YAMLError) as exc:
+        _fail(f"--projects {source}: {str(exc).splitlines()[0]}")
+
+
+def _run_site_index(args: argparse.Namespace) -> None:
+    ctx, _, _ = _assemble()
+    logger.log(vault=ctx.vault, subcommand="specs", message=f"site-index --out {args.out}")
+    try:
+        projects = load_projects(_read_projects(args.projects))
+    except ProjectsError as exc:
+        _fail(str(exc))
+    try:
+        write_site(build_index(projects, args.title), Path(args.out), [])
+    except SiteError as exc:
+        _fail(str(exc))
+    print(f"specs site-index: {len(projects)} projects -> {args.out}")

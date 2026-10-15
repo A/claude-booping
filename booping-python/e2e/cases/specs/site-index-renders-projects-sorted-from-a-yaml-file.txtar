@@ -1,0 +1,54 @@
+A YAML project file given out of order renders one row per project sorted by name, case-folded;
+a multi-line description collapses to one line, a missing one is an empty cell, and the name links
+to its escaped URL. The site's stylesheet and marker are written beside the page.
+
+-- fixtures/cwd/projects.yaml --
+- name: zeta
+  url: https://pages.example.org/zeta
+  description: |
+    Specs of the zeta
+      service.
+- name: beta
+  url: https://pages.example.org/beta?a=1&b=2
+  description: Beta tools.
+- name: Alpha
+  url: http://pages.example.org/alpha
+-- cmd --
+booping specs site-index --projects projects.yaml
+test -f specs-site-index/style.css
+-- exit --
+0
+-- stdout --
+specs site-index: 3 projects -> specs-site-index
+-- stderr --
+-- expected/cwd/specs-site-index/.booping-site --
+booping specs site
+-- expected/cwd/specs-site-index/index.html --
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Specs — specs</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav class="crumbs">
+<span>Specs</span></nav>
+<main>
+<h1>Specs</h1>
+<div class="table-wrap">
+<table>
+<thead>
+<tr><th>Project</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><a href="http://pages.example.org/alpha">Alpha</a></td><td></td></tr>
+<tr><td><a href="https://pages.example.org/beta?a=1&amp;b=2">beta</a></td><td>Beta tools.</td></tr>
+<tr><td><a href="https://pages.example.org/zeta">zeta</a></td><td>Specs of the zeta service.</td></tr>
+</tbody>
+</table>
+</div>
+</main>
+</body>
+</html>
