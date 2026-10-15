@@ -51,3 +51,13 @@ Autonomous run (owner unavailable). File name `develop-defaults.md` per the owne
 **Why:** owner's snapshot policy for this run; a harness block is not something a run bypasses
 
 **Artifact:** [index.md](index.md)
+
+## D6 — develop/verify — 2026-10-15 18:24
+
+**Asked:** `just ci` red only on `just snapshots` (lint, typecheck, pytest, mdcheck, specs-check, e2e, docs all green) — accept the four drifted reports and close the run?
+
+**Default:** every drifted hunk judged plan-described, but not accepted — `just snapshots-accept` is blocked by the harness permission classifier (D5). Reports for the owner to accept: `playbooks/migrate/_reports/output.md` (M01 survey row; recorded/latest id 4→5 from M06's fixture marker bump), `playbooks/makemigration/_reports/output.md` (migration 005 in the pending table, next id 5→6, structural model now 005 — M06), `playbooks/setup/_reports/output.md` (example `specs:` line ends at the vault — M09), `playbooks/specs/_reports/output.md` (`project` — `specs` → `.` — M02). Not covered by `just snapshots`: `vault/_playbooks/docs/_reports/output.md` drifts by record paths (M08), the date line and one value row (`value/0015`) the baseline was already missing before this plan — that last hunk is not plan-described. Run left at `in-progress`; wrap-up (green only) not started; `fail` not taken (no two failed fix attempts, no user approval)
+
+**Why:** a harness block is not bypassed by a run; the CI check is not weakened; wrap-up requires a green verify
+
+**Artifact:** [index.md](index.md)
