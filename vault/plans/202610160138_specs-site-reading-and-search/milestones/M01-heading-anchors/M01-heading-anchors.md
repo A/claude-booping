@@ -1,8 +1,8 @@
 ---
 id: "01"
-title: "Headings on Rendered and \u00a7 section anchors"
+title: "Headings on Rendered and § section anchors"
 sp: 3
-status: pending
+status: done
 plan: "plans/202610160138_specs-site-reading-and-search/index.md"
 ---
 
@@ -18,23 +18,23 @@ Tests (integration, `booping-python/tests/specs/site_test.py` via `render_body`)
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 1.1 | `Heading`, `Rendered.headings`, the anchor in `h2`–`h4` and on "Referenced by"; labels; tests. | `booping-python/src/booping/specs/site/markdown.py`, `booping-python/src/booping/specs/site/templates/record.html.j2`, `src/config.yaml`, `booping-python/tests/specs/site_test.py` | 2 | pending |
-| 1.2 | `site.js` copy-link, status element, details-open on hash; `.anchor` CSS; golden rebaseline. | `booping-python/src/booping/specs/site/site.js`, `booping-python/src/booping/specs/site/style.css`, `booping-python/src/booping/specs/site/templates/base.html.j2`, `booping-python/e2e/cases/specs/site-*.txtar` | 1 | pending |
+| 1.1 | `Heading`, `Rendered.headings`, the anchor in `h2`–`h4` and on "Referenced by"; labels; tests. | `booping-python/src/booping/specs/site/markdown.py`, `booping-python/src/booping/specs/site/templates/record.html.j2`, `src/config.yaml`, `booping-python/tests/specs/site_test.py` | 2 | done |
+| 1.2 | `site.js` copy-link, status element, details-open on hash; `.anchor` CSS; golden rebaseline. | `booping-python/src/booping/specs/site/site.js`, `booping-python/src/booping/specs/site/style.css`, `booping-python/src/booping/specs/site/templates/base.html.j2`, `booping-python/e2e/cases/specs/site-*.txtar` | 1 | done |
 
 ## Definition of Done
 
 ### Task 1.1
 
-- [ ] `Rendered.headings` lists every body heading in document order with the id the heading carries.
-- [ ] Every body `h2`–`h4` and the "Referenced by" `h2` end with `<a class="anchor" href="#{id}" aria-label="{section_link}: {text}">§</a>`.
-- [ ] `section_link` and `link_copied` resolve in `en` and `ru`.
+- [x] `Rendered.headings` lists every body heading in document order with the id the heading carries.
+- [x] Every body `h2`–`h4` and the "Referenced by" `h2` end with `<a class="anchor" href="#{id}" aria-label="{section_link}: {text}">§</a>`.
+- [x] `section_link` and `link_copied` resolve in `en` and `ru`.
 
 ### Task 1.2
 
-- [ ] A click on `.anchor` keeps the navigation and, when `navigator.clipboard` exists, copies the absolute URL and announces `link_copied` in one `role="status"` element for 2 s.
-- [ ] On load and on `hashchange`, every closed `<details>` containing the hash target is opened.
-- [ ] `.anchor` is visible on heading hover and focus, always visible under `@media (hover: none)`; colour from existing tokens only (`site_contrast_test.py` unchanged and green).
-- [ ] `site-*.txtar` goldens rebaselined; their diff is anchors only.
+- [x] A click on `.anchor` keeps the navigation and, when `navigator.clipboard` exists, copies the absolute URL and announces `link_copied` in one `role="status"` element for 2 s.
+- [x] On load and on `hashchange`, every closed `<details>` containing the hash target is opened.
+- [x] `.anchor` is visible on heading hover and focus, always visible under `@media (hover: none)`; colour from existing tokens only (`site_contrast_test.py` unchanged and green).
+- [x] `site-*.txtar` goldens rebaselined; their diff is anchors only.
 
 Return: the list of changed and created files, nothing else.
 

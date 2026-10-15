@@ -1,20 +1,21 @@
 ---
 title: "Specs site redesign, part 3 — record reading and search"
 type: "feature"
-status: ready-for-dev
-sp: null
+status: in-progress
+sp: 22
 related_to: null
 created: 2026-10-16 01:39
 planned: null
-started: null
+started: 2026-10-16 02:02
 completed: null
 code_reviews: []
 sessions:
 - 50d35fa2-5b16-450d-a9df-a7507d4ae767
+- 5f67de5e-559c-4b7a-a80c-708055d58a43
 retro: null
 summary: 'Specs site part 3: ToC rail, § anchors, grouped backlinks, ADR option cards,
   Cyrillic-aware vanilla search'
-commit: 253764fb4a3221781faeb3b8ebd6da0926eaba31
+commit: bcc675dc517175034c09256f5a1e243ba4a4a0f0
 tracker_provider: null
 tracker_request: null
 tracker_issue: null
@@ -68,10 +69,10 @@ site/pages.py  build_site — renders every body first, then pages
 
 | id | title | sp | status |
 | --- | --- | --- | --- |
-| 01 | [Headings on Rendered and § section anchors](milestones/M01-heading-anchors/M01-heading-anchors.md) | 3 | pending |
-| 02 | [On this page rail, open questions and the phone details](milestones/M02-toc-rail/M02-toc-rail.md) | 3 | pending |
-| 03 | [Backlinks grouped by type and by section](milestones/M03-grouped-backlinks/M03-grouped-backlinks.md) | 3 | pending |
-| 04 | [ADR option cards](milestones/M04-adr-option-cards/M04-adr-option-cards.md) | 4 | pending |
+| 01 | [Headings on Rendered and § section anchors](milestones/M01-heading-anchors/M01-heading-anchors.md) | 3 | done |
+| 02 | [On this page rail, open questions and the phone details](milestones/M02-toc-rail/M02-toc-rail.md) | 3 | done |
+| 03 | [Backlinks grouped by type and by section](milestones/M03-grouped-backlinks/M03-grouped-backlinks.md) | 3 | done |
+| 04 | [ADR option cards](milestones/M04-adr-option-cards/M04-adr-option-cards.md) | 4 | done |
 | 05 | [Search data — search-index.js and search-body.js](milestones/M05-search-data/M05-search-data.md) | 3 | pending |
 | 06 | [Search UI — header combobox, phone overlay, search.html](milestones/M06-search-ui/M06-search-ui.md) | 4 | pending |
 | 07 | [Docs and the Russian fixture](milestones/M07-docs-and-fixtures/M07-docs-and-fixtures.md) | 2 | pending |

@@ -2,7 +2,7 @@
 id: "03"
 title: "Backlinks grouped by type and by section"
 sp: 3
-status: pending
+status: done
 plan: "plans/202610160138_specs-site-reading-and-search/index.md"
 ---
 
@@ -18,20 +18,20 @@ Tests (integration, new `booping-python/tests/specs/site_backlinks_test.py` over
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 3.1 | `backlinks.py` and its tests. | `booping-python/src/booping/specs/site/backlinks.py`, `booping-python/tests/specs/site_backlinks_test.py` | 2 | pending |
-| 3.2 | Wire into `_record_view` and `record.html.j2`; labels; CSS; golden rebaseline. | `booping-python/src/booping/specs/site/pages.py`, `booping-python/src/booping/specs/site/templates/record.html.j2`, `booping-python/src/booping/specs/site/style.css`, `src/config.yaml`, `booping-python/e2e/cases/specs/site-*.txtar` | 1 | pending |
+| 3.1 | `backlinks.py` and its tests. | `booping-python/src/booping/specs/site/backlinks.py`, `booping-python/tests/specs/site_backlinks_test.py` | 2 | done |
+| 3.2 | Wire into `_record_view` and `record.html.j2`; labels; CSS; golden rebaseline. | `booping-python/src/booping/specs/site/pages.py`, `booping-python/src/booping/specs/site/templates/record.html.j2`, `booping-python/src/booping/specs/site/style.css`, `src/config.yaml`, `booping-python/e2e/cases/specs/site-*.txtar` | 1 | done |
 
 ## Definition of Done
 
 ### Task 3.1
 
-- [ ] By-type groups, `via` lists and by-section entries match C4 on the test fixtures, deterministic order throughout.
+- [x] By-type groups, `via` lists and by-section entries match C4 on the test fixtures, deterministic order throughout.
 
 ### Task 3.2
 
-- [ ] "Referenced by" renders an `h3` per type, each item `rel_item` + `.via` line, then the `by_section` `h3` when non-empty; `nothing_references` when there are no backlinks.
-- [ ] `by_section` and `via` resolve in `en` and `ru`.
-- [ ] `site-*.txtar` goldens rebaselined; their diff is the "Referenced by" section only.
+- [x] "Referenced by" renders an `h3` per type, each item `rel_item` + `.via` line, then the `by_section` `h3` when non-empty; `nothing_references` when there are no backlinks.
+- [x] `by_section` and `via` resolve in `en` and `ru`.
+- [x] `site-*.txtar` goldens rebaselined; their diff is the "Referenced by" section only.
 
 Return: the list of changed and created files, nothing else.
 

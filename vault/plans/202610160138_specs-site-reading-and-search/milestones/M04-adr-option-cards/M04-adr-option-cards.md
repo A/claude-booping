@@ -2,7 +2,7 @@
 id: "04"
 title: "ADR option cards"
 sp: 4
-status: pending
+status: done
 plan: "plans/202610160138_specs-site-reading-and-search/index.md"
 ---
 
@@ -18,22 +18,22 @@ Tests (integration, new `booping-python/tests/specs/site_adr_test.py` via `rende
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 4.1 | `adr.py` token pass, the `alternatives` flag in `render_body`; tests. | `booping-python/src/booping/specs/site/adr.py`, `booping-python/src/booping/specs/site/markdown.py`, `booping-python/tests/specs/site_adr_test.py` | 3 | pending |
-| 4.2 | Wire in `_render`; CSS; labels; golden rebaseline. | `booping-python/src/booping/specs/site/pages.py`, `booping-python/src/booping/specs/site/style.css`, `src/config.yaml`, `booping-python/e2e/cases/specs/site-*.txtar` | 1 | pending |
+| 4.1 | `adr.py` token pass, the `alternatives` flag in `render_body`; tests. | `booping-python/src/booping/specs/site/adr.py`, `booping-python/src/booping/specs/site/markdown.py`, `booping-python/tests/specs/site_adr_test.py` | 3 | done |
+| 4.2 | Wire in `_render`; CSS; labels; golden rebaseline. | `booping-python/src/booping/specs/site/pages.py`, `booping-python/src/booping/specs/site/style.css`, `src/config.yaml`, `booping-python/e2e/cases/specs/site-*.txtar` | 1 | done |
 
 ## Definition of Done
 
 ### Task 4.1
 
-- [ ] Cards, order, `open`, `chosen`, meta and verdict match C5 on the test fixtures.
-- [ ] Any non-matching shape renders exactly as with `alternatives=False` — no exception, no warning.
-- [ ] Table links `#anchor` still land on the option `h3` ids.
+- [x] Cards, order, `open`, `chosen`, meta and verdict match C5 on the test fixtures.
+- [x] Any non-matching shape renders exactly as with `alternatives=False` — no exception, no warning.
+- [x] Table links `#anchor` still land on the option `h3` ids.
 
 ### Task 4.2
 
-- [ ] Only `adr` records get cards; level and name labels resolve in `en` and `ru`.
-- [ ] Below 760px the `alts` table is hidden and the cards fill the width; new colours use existing tokens only (`site_contrast_test.py` green).
-- [ ] `site-*.txtar` goldens rebaselined; their diff touches ADR record pages only.
+- [x] Only `adr` records get cards; level and name labels resolve in `en` and `ru`.
+- [x] Below 760px the `alts` table is hidden and the cards fill the width; new colours use existing tokens only (`site_contrast_test.py` green).
+- [x] `site-*.txtar` goldens rebaselined; their diff touches ADR record pages only.
 
 Return: the list of changed and created files, nothing else.
 
