@@ -224,10 +224,21 @@ The agent id an **assisted** playbook step delegates its bulk reads to. Default 
 
 What happens when the vault is behind on the plugin's [migrations](vault.md#booping). **Default `true`**, and a tier that leaves the key out counts as `true`; set it in any tier. Directly under `core` because every render surface and the `migrate` playbook read it.
 
-- **`true`** — a render prints, in place of its output, an order to the driving agent: *this project is behind on booping migrations (recorded id X, latest shipped Y). Run `/playbook migrate` now without asking the user — `core.auto_migrate` is on — then continue with the original request.* The `migrate` playbook then applies the whole pending set without asking for its up-front approval; its ask to commit uncommitted work first still stands.
+- **`true`** — a render prints, in place of its output, an order to the driving agent: *this project is behind on booping migrations (recorded id X, latest shipped Y). Run `/playbook migrate` now — `core.auto_migrate` is on, so its approval is taken as given; its question about uncommitted work is still asked — then continue with the original request.* The `migrate` playbook then applies the whole pending set without asking for its up-front approval; its ask to commit uncommitted work first still stands.
 - **`false`** — a render prints a **STOP** notice telling you to run `/playbook migrate`, nothing else renders until the vault catches up, and `migrate` asks before applying.
 
 A config tier that cannot be read counts as `false`.
+
+### `core.autonomy`
+
+Who answers a run's review gates and questions. **Default `supervised`**; set it in any tier. Directly under `core` because the driving protocol, the `specs` playbook and `migrate` all read it.
+
+- **`supervised`** — every review gate pauses for your confirmation, and a step's questions are put to you.
+- **`autonomous`** — the run confirms each review gate itself, settles each question with the step's recommended option (else its first, else the most conservative answer the request supports), and continues without waiting. Every gate and question it settled is logged to a `defaults.md` file beside the run's artefact — the plan directory for groom and develop, the review's directory for code-review — one numbered entry each with what was asked, what was decided, why, and a link to the artefact. A run without an artefact lists its defaults in its final report instead.
+
+Two things still stop an `autonomous` run: a **STOP** notice, and a question a step marks as always asked — `migrate`'s question about uncommitted work is one.
+
+Any other value renders a **STOP** notice naming the value and the two it must be; fix it in the tier that sets it.
 
 ### `core.plans.glob`
 
