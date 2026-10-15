@@ -1,0 +1,114 @@
+Under a translated `_schemas/adr.yaml` an accepted Russian ADR with no `accepted` row in
+`Альтернативы` gets the exactly-one finding, named after the translated section.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/_schemas/adr.yaml --
+doc: adr
+
+rules:
+  - select: FRONTMATTER
+    has:
+      type: adr
+      title: '^.+$'
+      summary: '^.{1,200}$'
+      created_by: { enum: [owner, claude] }
+      created_at: '^\d{4}-\d{2}-\d{2}$'
+      updated_at: '^\d{4}-\d{2}-\d{2}$'
+      status: { enum: [proposed, accepted, superseded, rejected] }
+
+  - select: H2
+    ordered: [Контекст, Критерии?, Решение, Альтернативы, Последствия]
+    strict: true
+
+  - select: SECTION("Альтернативы") > TABLE
+    count: 1
+    columns: [Вариант, Статус, Сложность, Обратимость, Вердикт]
+    rows: { min: 2, max: 4 }
+
+  - select: SECTION("Альтернативы") > TABLE > TD[col="Вариант"]
+    match: '^\[[^\]]+\]\(#[^)]+\)$'
+
+  - select: SECTION("Альтернативы") > TABLE > TD[col="Статус"]
+    enum: [accepted, proposed, rejected]
+
+  - select: SECTION("Альтернативы") > TABLE > TD[col="Сложность"]
+    enum: [low, medium, high]
+
+  - select: SECTION("Альтернативы") > TABLE > TD[col="Обратимость"]
+    enum: [low, medium, high]
+
+  - select: SECTION("Альтернативы") > TABLE > TD[col="Вердикт"]
+    no_empty: true
+
+  - select: SECTION("Альтернативы") > SECTION(/.+/)
+    min: 2
+    max: 4
+    each:
+      - select: SECTION > P
+        min: 1
+      - select: UL > LI[text^="**Плюсы:**"]
+        count: 1
+      - select: UL > LI[text^="**Минусы:**"]
+        count: 1
+      - select: UL > LI[text^="**Сложность:**"]
+        count: 1
+      - select: UL > LI[text^="**Обратимость:**"]
+        count: 1
+-- fixtures/cwd/vault/adr/0001-khranilishche.md --
+---
+type: adr
+title: Хранилище
+summary: Где живут записи.
+created_by: owner
+created_at: 2026-01-01
+updated_at: 2026-01-01
+status: accepted
+---
+
+## Контекст
+
+Записям нужен дом.
+
+## Решение
+
+Файлы.
+
+## Альтернативы
+
+| Вариант | Статус | Сложность | Обратимость | Вердикт |
+|---|---|---|---|---|
+| [Файлы](#файлы-на-диске) | proposed | low | high | Просто |
+| [База](#база-данных) | rejected | low | high | Тяжелее |
+
+### Файлы на диске
+
+Файлы в репозитории.
+
+- **Плюсы:** дёшево.
+- **Минусы:** ограниченно.
+- **Сложность:** low.
+- **Обратимость:** high.
+
+### База данных
+
+Отдельная база.
+
+- **Плюсы:** дёшево.
+- **Минусы:** ограниченно.
+- **Сложность:** low.
+- **Обратимость:** high.
+
+## Последствия
+
+- Обычные файлы.
+-- cmd --
+booping specs check
+-- exit --
+1
+-- stdout --
+vault/adr/0001-khranilishche.md:1  error  alternatives  0 options accepted in Альтернативы; a accepted record needs exactly one
+-- stderr --
+1 record(s) checked: 1 error(s), 0 warning(s)
