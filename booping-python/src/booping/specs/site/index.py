@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any, cast
 
 from booping.specs.site.fonts import font_files
-from booping.specs.site.labels import load_labels
+from booping.specs.site.labels import Labels, load_labels
 from booping.specs.site.pages import Crumb, environment
 
 _HERE = Path(__file__).parent
@@ -62,10 +62,14 @@ def load_projects(data: Any) -> list[Project]:
     return projects
 
 
-def build_index(projects: list[Project], title: str) -> dict[str, str | bytes]:
-    """Out-root-relative path → file content of the group index page."""
+def build_index(
+    projects: list[Project], title: str, labels: Labels | None = None, lang: str = "en"
+) -> dict[str, str | bytes]:
+    """Out-root-relative path → file content of the group index page; no labels means
+    the shipped English ones."""
     ordered = sorted(projects, key=lambda p: (p.name.casefold(), p.name))
-    labels, lang, _ = load_labels({})
+    if labels is None:
+        labels, lang, _ = load_labels({})
     html = (
         environment(labels, lang, title)
         .get_template("site_index.html.j2")

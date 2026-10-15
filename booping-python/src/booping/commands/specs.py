@@ -397,8 +397,12 @@ def _run_site_index(args: argparse.Namespace) -> None:
         projects = load_projects(_read_projects(args.projects))
     except ProjectsError as exc:
         _fail(str(exc))
+    site_cfg: dict[str, Any] = ctx.config.get("core", {}).get("specs", {}).get("site") or {}
+    labels, lang, label_warnings = load_labels(site_cfg)
+    for text in label_warnings:
+        print(f"warning: {text}", file=sys.stderr)
     try:
-        write_site(build_index(projects, args.title), Path(args.out), [])
+        write_site(build_index(projects, args.title, labels, lang), Path(args.out), [])
     except SiteError as exc:
         _fail(str(exc))
     print(f"specs site-index: {len(projects)} projects -> {args.out}")

@@ -259,6 +259,8 @@ ul.rows, ul.rel, ul.types { list-style: none; padding: 0; }
 .row .t { font-weight: 600; color: var(--text); }
 .row .s { grid-column: 2; color: var(--muted); font-size: 15px; line-height: 1.45; }
 .row .why { grid-column: 3; grid-row: 1 / span 2; display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; max-width: 240px; }
+.row.noref { grid-template-columns: minmax(0, 1fr); }
+.row.noref .s { grid-column: 1; }
 
 .types {
   display: grid;

@@ -2,18 +2,11 @@
 {% block main %}
 <h1>{{ title }}</h1>
 {% if projects %}
-<div class="table-wrap">
-<table>
-<thead>
-<tr><th>{{ labels.ui("project") }}</th><th>{{ labels.ui("description") }}</th></tr>
-</thead>
-<tbody>
+<ul class="rows">
 {% for project in projects %}
-<tr><td><a href="{{ project.url }}">{{ project.name }}</a></td><td>{{ project.description }}</td></tr>
+<li class="row noref"><a class="t" href="{{ project.url }}">{{ project.name }}</a>{% if project.description %}<span class="s">{{ project.description }}</span>{% endif %}</li>
 {% endfor %}
-</tbody>
-</table>
-</div>
+</ul>
 {% else %}
 <p>{{ labels.ui("no_projects") }}</p>
 {% endif %}

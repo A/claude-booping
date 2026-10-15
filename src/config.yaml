@@ -244,8 +244,6 @@ core:
             unknown: "[unknown]"
             superseded_by: Superseded by
             chosen: chosen
-            project: Project
-            description: Description
             no_projects: No projects.
           types:
             value: {name: Value, plural: Values, scenario: "why the project exists"}
@@ -309,8 +307,6 @@ core:
             unknown: "[unknown]"
             superseded_by: Заменено на
             chosen: выбрано
-            project: Проект
-            description: Описание
             no_projects: Проектов нет.
           types:
             value: {name: Ценность, plural: Ценности, scenario: "Ценности — зачем этот проект и какой он"}
