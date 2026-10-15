@@ -75,3 +75,11 @@
 **Question:** What of adr/0028's item surface lands here?
 
 **Answer:** Default (autonomous run): only the model and `booping items add`. Out: splitting one message into several items and questions on the item (part 4, the project-manager playbook), a channel field, intake bridges, duplicate merging and trackers (adr/0028, not core).
+
+## C10 — plan approval — answered
+
+**Asked:** 2026-10-15 — groom/present
+
+**Question:** The plan is ready for development — approve, or say what to change?
+
+**Answer:** Default (autonomous run): approved as written — 15 SP, under the 35 SP split threshold, so no split; the cross-review (codex) returned no findings. No plan branch: the run stays on `feat/specs` as directed.

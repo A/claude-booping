@@ -2,7 +2,7 @@
 title: "User-request items — source and verbatim text on the item store, booping items
   add"
 type: "feature"
-status: presenting
+status: ready-for-dev
 sp: null
 related_to: null
 created: 2026-10-15 18:25
@@ -20,7 +20,10 @@ tracker_provider: null
 tracker_request: null
 tracker_issue: null
 return_to: null
-agents: '{"research-codebase": "ae1876d1fce75f406", "cross-review": "ab953a5d2c2054308"}'
+agents:
+  research-codebase: ae1876d1fce75f406
+  cross-review: ab953a5d2c2054308
+reviewed_at: 2026-10-15 18:39
 ---
 
 # User-request items — source and verbatim text on the item store, booping items add
