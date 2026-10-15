@@ -50,3 +50,12 @@ Every gate and question this autonomous develop run settled itself.
 - Asked: one commit per milestone; the worker's three open calls
 - Default: G2 → `d833567` (feat: M05, M06 and M07's Russian fixture, which share `pages.py`, `style.css`, `src/config.yaml` and the goldens) and `5abf69f` (docs: M07's `documentation/specs.md`). `search.js` at ~190 lines accepted against C7's "~160" — an estimate, not a limit. `search.html` carries its own pre-filled results form beside the header combobox — accepted as C7's "same form" read. An Alternatives table cell with a status no record uses (`rejected`) renders as plain text while its card shows the label — M04 behaviour, left as an open issue, no scope added.
 - Why: same reasoning as D4; the rest are within the plan's decisions.
+
+## D8 — Snapshot drift not described by the plan: run stopped before wrap-up
+
+- Step: develop/verify
+- Asked: accept `just snapshots` drift under the standing permission
+- Default: not accepted; the run stops at `in-progress`, no `done` transition
+- Why: the only drift is one new `## Rules` bullet, `booping:rule/0032` (approval asked in prose), in `playbooks/code-review`, `develop` and `groom` `_reports/output.md` — from `specs/rule/0032-approval-asked-in-prose.md`, added in `915383a` before this plan; this plan edits no playbook source and describes no such drift, and the invocation says any other drift stops and is reported.
+- Evidence: `just ci` run once by verify — lint, typecheck, pytest (694 + 12) green, `snapshots` red; then `just mdcheck`, `just specs-check`, `just e2e` (572 + 18) run separately, all green. Runner's Final Verification: two builds `diff -r` identical; headless Chromium from `file://` — chosen ADR card first and open, table link opens a closed card, rail marks the section in view, `§` sets the hash, `/` focuses search, `tiers` → `adr/0001`, Down + Enter opens it, `search.html?q=tiers` shows "12 results", no-JS cards, ToC links and form submit hold; swarmlight in `ru` — `даёт`/`дает` same 13 records, `логистик` finds «Логистика»; screenshots at 1280×900 and 390×844, light and dark, no horizontal scroll.
+- To finish: the owner accepts the three reports (`just snapshots-accept code-review develop groom`), reruns `just ci`, then resumes `/playbook develop` on this plan for wrap-up.
