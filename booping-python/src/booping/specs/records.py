@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
-from typing import Any
+from typing import Any, Protocol
 
 import yaml
 from pydantic import BaseModel
@@ -30,6 +30,15 @@ class Record(BaseModel):
     body: str
     frontmatter_error: str | None = None
     frontmatter_error_line: int = 1
+
+
+class _Fronted(Protocol):
+    @property
+    def frontmatter(self) -> dict[str, Any]: ...
+
+
+def unreviewed(record: _Fronted) -> bool:
+    return not record.frontmatter.get("reviewed")
 
 
 def parse_filename(name: str) -> tuple[int, str] | None:

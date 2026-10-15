@@ -7,6 +7,7 @@ from typing import Any, NamedTuple
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 from markupsafe import Markup
 
+from booping.specs.records import unreviewed
 from booping.specs.site.markdown import LinkRenderer, Mark, Rendered, render_body
 from booping.specs.site.model import RefMiss, Site, SiteRecord
 
@@ -94,10 +95,6 @@ def _counts(marks: list[Mark]) -> dict[str, int]:
     return {kind: sum(1 for m in marks if m.kind == kind) for kind in _MARK_KINDS}
 
 
-def _unreviewed(record: SiteRecord) -> bool:
-    return not record.frontmatter.get("reviewed")
-
-
 def _block(
     site: Site,
     record: SiteRecord,
@@ -115,7 +112,7 @@ def _block(
         "ref": record.ref,
         "stem": record.stem,
         "badge": None if badge is None else str(badge),
-        "unreviewed": _unreviewed(record),
+        "unreviewed": unreviewed(record),
         "clarify": counts["clarify"],
         "unknown": counts["unknown"],
         "summary": None if summary is None else str(summary),
@@ -200,7 +197,7 @@ def build_site(site: Site, known_types: list[str]) -> tuple[dict[str, str], list
                     "name": type_,
                     "href": f"{type_}/index.html",
                     "records": len(of_type),
-                    "unreviewed": sum(1 for r in of_type if _unreviewed(r)),
+                    "unreviewed": sum(1 for r in of_type if unreviewed(r)),
                     **_counts(type_marks),
                 }
             )
@@ -255,7 +252,7 @@ def build_site(site: Site, known_types: list[str]) -> tuple[dict[str, str], list
                     }
                     for type_ in present
                 ],
-                "unreviewed": sum(1 for r in records if _unreviewed(r)),
+                "unreviewed": sum(1 for r in records if unreviewed(r)),
                 **_counts(root_marks),
             }
         )

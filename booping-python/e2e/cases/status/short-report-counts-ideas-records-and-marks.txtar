@@ -1,0 +1,89 @@
+The five summary lines over a vault with ideas, records and marks: one open idea nobody
+took (the other is the record of an open item, the third accepted), three unreviewed
+records in schema type order, and one mark of each kind — the quoted one is no mark.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+-- fixtures/cwd/vault/open-items/OI-0001.md --
+---
+id: OI-0001
+title: "Settle the tracked idea"
+status: open
+direction: clarify
+record: "idea/0002#idea"
+source: manual
+plan: null
+created_at: 2026-10-15
+closed_at: null
+reason: null
+---
+
+# Settle the tracked idea
+-- fixtures/cwd/vault/idea/0001-untaken.md --
+---
+type: idea
+title: Nobody took this idea
+created_at: 2026-10-10
+status: open
+---
+
+## Idea
+
+Status is computed.
+-- fixtures/cwd/vault/idea/0002-tracked.md --
+---
+type: idea
+title: An item tracks this idea
+created_at: 2026-10-11
+status: open
+---
+
+## Idea
+
+[clarify] Which tier counts? The rest is settled.
+-- fixtures/cwd/vault/idea/0003-accepted.md --
+---
+type: idea
+title: An accepted idea
+created_at: 2026-10-12
+status: accepted
+reviewed: 2026-10-13
+---
+
+## Idea
+
+Already accepted.
+-- fixtures/cwd/vault/rule/0001-reviewed.md --
+---
+type: rule
+title: A reviewed rule
+status: accepted
+reviewed: 2026-10-14
+---
+
+## Rule
+
+Reviewed. [unknown] Who reads it. A quoted `[clarify]` is no mark.
+-- fixtures/cwd/vault/value/0001-no-status.md --
+---
+type: value
+title: A value without a status
+---
+
+## Value
+
+Nothing to mark.
+-- cmd --
+booping status
+-- exit --
+0
+-- stdout --
+items: 1 open — request 0, backlog 0, spec gap 1
+ideas: 1 open, not taken
+plans: none active
+records: 3 unreviewed — idea 2, value 1
+marks: 2 — clarify 1, unknown 1
+-- stderr --

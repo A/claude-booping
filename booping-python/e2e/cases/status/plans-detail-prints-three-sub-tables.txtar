@@ -1,0 +1,107 @@
+`status plans` prints three sub-tables — active plans by created, done plans without a
+code review, done plans without a retro — each with its spec's columns then `path`.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+-- fixtures/cwd/vault/plans/202610010000_draft/index.md --
+---
+title: "Draft plan"
+status: drafting
+sp: 3
+created: 2026-10-01 10:00
+completed: null
+code_reviews: []
+retro: null
+---
+
+# Draft plan
+-- fixtures/cwd/vault/plans/202610020000_ready/index.md --
+---
+title: "Ready plan"
+status: ready-for-dev
+sp: 5
+created: 2026-10-02 10:00
+completed: null
+code_reviews: []
+retro: null
+---
+
+# Ready plan
+-- fixtures/cwd/vault/plans/202610030000_wip/index.md --
+---
+title: "Work in progress"
+status: in-progress
+sp: 8
+created: 2026-10-03 10:00
+completed: null
+code_reviews: []
+retro: null
+---
+
+# Work in progress
+-- fixtures/cwd/vault/plans/202610040000_gone/index.md --
+---
+title: "Cancelled plan"
+status: cancelled
+sp: 2
+created: 2026-10-04 10:00
+completed: null
+code_reviews: []
+retro: null
+---
+
+# Cancelled plan
+-- fixtures/cwd/vault/plans/202610050000_fresh/index.md --
+---
+title: "Fresh done plan"
+status: done
+sp: 13
+created: 2026-10-05 10:00
+completed: 2026-10-06 10:00
+code_reviews: []
+retro: null
+---
+
+# Fresh done plan
+-- fixtures/cwd/vault/plans/202610070000_closed/index.md --
+---
+title: "Closed plan"
+status: done
+sp: 1
+created: 2026-10-07 10:00
+completed: 2026-10-08 10:00
+code_reviews: [codereviews/202610070000_closed/x.md]
+retro: retrospectives/closed.md
+---
+
+# Closed plan
+-- cmd --
+booping status plans
+-- exit --
+0
+-- stdout --
+## plans
+
+### active
+
+| status | sp | title | path |
+| --- | --- | --- | --- |
+| drafting | 3 | Draft plan | plans/202610010000_draft/index.md |
+| ready-for-dev | 5 | Ready plan | plans/202610020000_ready/index.md |
+| in-progress | 8 | Work in progress | plans/202610030000_wip/index.md |
+
+### without code review
+
+| sp | title | completed | path |
+| --- | --- | --- | --- |
+| 13 | Fresh done plan | 2026-10-06 10:00 | plans/202610050000_fresh/index.md |
+
+### without retro
+
+| status | sp | title | created | completed | path |
+| --- | --- | --- | --- | --- | --- |
+| done | 13 | Fresh done plan | 2026-10-05 10:00 | 2026-10-06 10:00 | plans/202610050000_fresh/index.md |
+-- stderr --

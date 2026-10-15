@@ -1,0 +1,18 @@
+A vault with no items prints `items: none`.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+-- cmd --
+booping status
+-- exit --
+0
+-- stdout --
+items: none
+ideas: none
+plans: none active
+records: none unreviewed
+marks: none
+-- stderr --

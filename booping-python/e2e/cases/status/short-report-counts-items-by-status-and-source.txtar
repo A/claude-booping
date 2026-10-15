@@ -1,0 +1,81 @@
+With no section the report is one summary line per section. The items line counts
+the non-terminal items per status in the `open_item` machine's order, then splits them
+by source: request, backlog, and every other source as a spec gap. The done item is not
+counted.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+-- fixtures/cwd/vault/open-items/OI-0001.md --
+---
+id: OI-0001
+title: "Retire the exporter"
+status: open
+direction: null
+record: null
+source: request
+plan: null
+created_at: 2026-10-15
+closed_at: null
+reason: null
+---
+
+# Retire the exporter
+-- fixtures/cwd/vault/open-items/OI-0002.md --
+---
+id: OI-0002
+title: "Plans close items"
+status: planned
+direction: spec-to-code
+record: "adr/0025#consequences"
+source: adr
+plan: null
+created_at: 2026-10-15
+closed_at: null
+reason: null
+---
+
+# Plans close items
+-- fixtures/cwd/vault/open-items/OI-0003.md --
+---
+id: OI-0003
+title: "Faster sync"
+status: open
+direction: null
+record: null
+source: backlog
+plan: null
+created_at: 2026-10-15
+closed_at: null
+reason: null
+---
+
+# Faster sync
+-- fixtures/cwd/vault/open-items/OI-0004.md --
+---
+id: OI-0004
+title: "Old request"
+status: done
+direction: null
+record: null
+source: request
+plan: null
+created_at: 2026-10-15
+closed_at: null
+reason: null
+---
+
+# Old request
+-- cmd --
+booping status
+-- exit --
+0
+-- stdout --
+items: 2 open, 1 planned — request 1, backlog 1, spec gap 1
+ideas: none
+plans: none active
+records: none unreviewed
+marks: none
+-- stderr --

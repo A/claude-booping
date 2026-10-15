@@ -5,7 +5,8 @@ from pathlib import Path
 from booping.context import Context
 from booping.context import config as config_mod
 from booping.rendering import get_plugin_root
-from booping.specs.open_items import write_item
+from booping.specs.open_items import Mark, marks, write_item
+from booping.specs.records import load_record
 
 TAKEN = '---\nid: OI-0002\ntitle: "Filed by a racing writer"\n---\n'
 
@@ -34,3 +35,22 @@ def test_add_skips_an_id_a_stale_listing_missed(tmp_path: Path) -> None:
     assert path == items / "OI-0003.md"
     assert "id: OI-0003\n" in path.read_text(encoding="utf-8")
     assert (items / "OI-0002.md").read_text(encoding="utf-8") == TAKEN
+
+
+def test_marks_carry_their_kind_and_skip_a_quoted_mark(tmp_path: Path) -> None:
+    ideas = tmp_path / "idea"
+    ideas.mkdir()
+    path = ideas / "0001-probe.md"
+    path.write_text(
+        "---\ntype: idea\n---\n\n## Idea\n\n"
+        "Status is computed. [clarify] Which tier counts? [unknown] Who reads it.\n\n"
+        "A quoted `[clarify]` is no mark.\n",
+        encoding="utf-8",
+    )
+
+    found = marks([load_record(path, "idea")], tmp_path)
+
+    assert found == [
+        Mark("clarify", "idea/0001#idea", "Which tier counts"),
+        Mark("unknown", "idea/0001#idea", "Who reads it"),
+    ]

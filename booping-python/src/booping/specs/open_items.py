@@ -326,10 +326,10 @@ def _inline_text(children: list[Token]) -> str:
     )
 
 
-def _marks_in(children: list[Token]) -> list[str]:
-    """Titles of the marks in one inline block that open it or open a sentence;
-    code spans are separate tokens, so a quoted mark is never one."""
-    titles: list[str] = []
+def _marks_in(children: list[Token]) -> list[tuple[str, str]]:
+    """`(kind, title)` of the marks in one inline block that open it or open a
+    sentence; code spans are separate tokens, so a quoted mark is never one."""
+    marks: list[tuple[str, str]] = []
     for index, child in enumerate(children):
         if child.type != "text":
             continue
@@ -338,13 +338,24 @@ def _marks_in(children: list[Token]) -> list[str]:
             if before and before[-1] not in ".!?":
                 continue
             after = child.content[match.end() :] + _inline_text(children[index + 1 :])
-            titles.append(truncate(first_sentence(_WS.sub(" ", after).strip())))
-    return titles
+            title = truncate(first_sentence(_WS.sub(" ", after).strip()))
+            marks.append((match.group(1), title))
+    return marks
 
 
-def mark_candidates(records: list[Record], tier_root: Path) -> list[Candidate]:
+@dataclass(frozen=True)
+class Mark:
+    """One `[clarify]`/`[unknown]` mark: its kind, the anchored record ref `scan`
+    files it under, and its sentence."""
+
+    kind: str
+    record: str
+    text: str
+
+
+def marks(records: list[Record], tier_root: Path) -> list[Mark]:
     md = MarkdownIt("commonmark", {"html": False}).enable("table")
-    candidates: list[Candidate] = []
+    found: list[Mark] = []
     for record in records:
         ref = record_ref(tier_root, record.path)
         heading: str | None = None
@@ -357,8 +368,12 @@ def mark_candidates(records: list[Record], tier_root: Path) -> list[Candidate]:
                 heading = slug(_inline_text(children))
                 continue
             anchored = f"{ref}#{heading}" if heading else ref
-            candidates += [Candidate("mark", anchored, title) for title in _marks_in(children)]
-    return candidates
+            found += [Mark(kind, anchored, title) for kind, title in _marks_in(children)]
+    return found
+
+
+def mark_candidates(records: list[Record], tier_root: Path) -> list[Candidate]:
+    return [Candidate("mark", m.record, m.text) for m in marks(records, tier_root)]
 
 
 def finding_candidates(findings: list[Finding], tier_root: Path) -> list[Candidate]:

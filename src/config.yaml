@@ -92,6 +92,24 @@ core:
       glob: milestones/*/M*.md
       table_columns: [id, title, sp, status]
 
+  # `booping status` — the computed project status, read by the CLI and the
+  # project-manager alike. Only query specs: the plans section's retro queue is
+  # `core.retro_playbook.queries.candidates`, read in place.
+  status:
+    queries:
+      # Plans in a status the groom or develop `run` machine declares non-terminal.
+      # The status filter is built per call from those machines, never stated here.
+      active_plans:
+        sort: created
+        columns: [status, sp, title]
+      # Done plans no code review has closed on yet.
+      unreviewed_plans:
+        where:
+          status: done
+          code_reviews: []
+        sort: "-created"
+        columns: [sp, title, completed]
+
   sprint:
     default_threshold_sp: 35
     redecompose_threshold: 5

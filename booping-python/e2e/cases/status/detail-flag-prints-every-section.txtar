@@ -1,0 +1,106 @@
+`--detail` prints every section in detail, each under its `##` heading.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+-- fixtures/cwd/vault/open-items/OI-0001.md --
+---
+id: OI-0001
+title: "Retire the exporter"
+status: open
+direction: null
+record: null
+source: request
+plan: null
+created_at: 2026-10-15
+closed_at: null
+reason: null
+---
+
+# Retire the exporter
+-- fixtures/cwd/vault/open-items/OI-0002.md --
+---
+id: OI-0002
+title: "Plans close items"
+status: planned
+direction: spec-to-code
+record: "adr/0025#consequences"
+source: adr
+plan: null
+created_at: 2026-10-15
+closed_at: null
+reason: null
+---
+
+# Plans close items
+-- fixtures/cwd/vault/open-items/OI-0003.md --
+---
+id: OI-0003
+title: "Faster sync"
+status: open
+direction: null
+record: null
+source: backlog
+plan: null
+created_at: 2026-10-15
+closed_at: null
+reason: null
+---
+
+# Faster sync
+-- fixtures/cwd/vault/open-items/OI-0004.md --
+---
+id: OI-0004
+title: "Old request"
+status: done
+direction: null
+record: null
+source: request
+plan: null
+created_at: 2026-10-15
+closed_at: null
+reason: null
+---
+
+# Old request
+-- cmd --
+booping status --detail
+-- exit --
+0
+-- stdout --
+## items
+
+| id | status | source | direction | record | title | plan |
+| --- | --- | --- | --- | --- | --- | --- |
+| OI-0001 | open | request | — | — | Retire the exporter | — |
+| OI-0002 | planned | adr | spec-to-code | adr/0025#consequences | Plans close items | — |
+| OI-0003 | open | backlog | — | — | Faster sync | — |
+
+## ideas
+
+none
+
+## plans
+
+### active
+
+none
+
+### without code review
+
+none
+
+### without retro
+
+none
+
+## records
+
+none
+
+## marks
+
+none
+-- stderr --
