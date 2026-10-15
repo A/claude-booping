@@ -112,7 +112,8 @@ def test_auto_migrate_absent_orders_the_agent_to_migrate_and_resume(tmp_path: Pa
     assert notice.startswith(AUTO_PREFIX)
     assert "recorded id 1" in notice
     assert "latest shipped 2" in notice
-    assert "Run `/playbook migrate` now without asking the user" in notice
+    assert "Run `/playbook migrate` now — `core.auto_migrate` is on" in notice
+    assert "its question about uncommitted work is still asked" in notice
     assert "then continue with the original request" in notice
     assert "STOP" not in notice
     assert notice.count("\n") == 0

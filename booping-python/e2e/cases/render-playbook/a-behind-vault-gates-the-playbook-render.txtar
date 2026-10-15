@@ -26,5 +26,5 @@ booping render-playbook fx-gated
 -- exit --
 0
 -- stdout --
-**Auto-migrate:** this project is behind on booping migrations (recorded id -1, latest shipped [..]). Run `/playbook migrate` now without asking the user — `core.auto_migrate` is on, so its approval is taken as given — then continue with the original request.
+**Auto-migrate:** this project is behind on booping migrations (recorded id -1, latest shipped [..]). Run `/playbook migrate` now — `core.auto_migrate` is on, so its approval is taken as given; its question about uncommitted work is still asked — then continue with the original request.
 -- stderr --

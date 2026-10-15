@@ -21,8 +21,8 @@ _BEHIND = (
 _AUTO = (
     "**Auto-migrate:** this project is behind on booping migrations"
     " (recorded id {recorded}, latest shipped {latest}). Run `/playbook migrate` now"
-    " without asking the user — `core.auto_migrate` is on, so its approval is taken as"
-    " given — then continue with the original request."
+    " — `core.auto_migrate` is on, so its approval is taken as given; its question"
+    " about uncommitted work is still asked — then continue with the original request."
 )
 
 

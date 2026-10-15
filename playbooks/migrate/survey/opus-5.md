@@ -13,15 +13,17 @@ end the run: nothing below resolves without it.
 {% if pending %}
 ## Work in flight
 
-Name what is uncommitted across the repo and the vault — counts plus the notable paths, not a full
-listing — and ask the user to let you commit both before anything is transformed, so every
+Name the current branch and what is uncommitted across the repo and the vault — counts plus the
+notable paths, not a full listing — and ask the user to let you commit both before anything is transformed, so every
 migration lands on a clean slate and stays independently revertable. Commit on confirmation. Skip
 the ask when nothing is uncommitted.
 
 Ask and resolve this here, inside the step: the commit has to land before the first migration runs,
-which is why it cannot wait for the approval below. It is not the review gate and it never blocks —
-a user who declines still proceeds. Detection and committing are yours at execution time; no git
-mechanics belong in this instruction.
+which is why it cannot wait for the approval below. It is not the review gate, and it is always
+asked: name the current branch with the uncommitted work, and wait for the answer whatever
+`core.auto_migrate` and `core.autonomy` say — neither answers it for the user. A user who declines
+still proceeds. Detection and committing are yours at execution time; no git mechanics belong in
+this instruction.
 
 ## The pending set
 
