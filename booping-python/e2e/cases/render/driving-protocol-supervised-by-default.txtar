@@ -1,0 +1,12 @@
+With no tier setting `core.autonomy`, the `/playbook` skill's driving protocol renders the supervised
+step 5 — stop and wait for the user's chat reply — and no `booping defaults add` line anywhere. The
+render is filtered to step 5 and any line naming `booping defaults add`, so the absence of the
+autonomous branch shows as a single matching line.
+
+-- cmd --
+sh -c 'booping render src/templates/skills/playbook.md.j2 | grep -E "^5\. After the batch|booping defaults add"'
+-- exit --
+0
+-- stdout --
+5. After the batch completes, honor each member's `Review gate:` bullet: present that member's returned receipt [..] stop, and wait for the user's chat reply before continuing. Never use `AskUserQuestion` for a gate. In-conversation only — no state is persisted.
+-- stderr --
