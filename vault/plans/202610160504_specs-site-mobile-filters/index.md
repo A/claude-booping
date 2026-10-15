@@ -2,20 +2,21 @@
 title: "Specs site redesign, part 6 — whole-card links, compact filters, phone filter
   sheet"
 type: "feature"
-status: ready-for-dev
-sp: null
+status: in-progress
+sp: 11
 related_to: null
 created: 2026-10-16 05:04
 planned: null
-started: null
+started: 2026-10-16 05:25
 completed: null
 code_reviews: []
 sessions:
 - e9aa21f3-03e1-4516-82ea-59c4a17dbabb
+- 1ff5d136-b8fc-4195-851b-2533d5f5eebf
 retro: null
 summary: 'Specs site part 6: whole-card links, quiet ref line, compact chips, phone
   filter sheet with removable active chips'
-commit: 4b72920370aa176886cc650ca93055ed6f937b6f
+commit: f3990a83c0c0292161e26c361e2398798607f36b
 tracker_provider: null
 tracker_request: null
 tracker_issue: null
@@ -77,9 +78,9 @@ src/config.yaml  labels.{en,ru}.ui: filters, filter_remove, filters_show (M02)
 
 | id | title | sp | status |
 | --- | --- | --- | --- |
-| 01 | [Quiet ref line and whole-card link](milestones/M01-card-ref-and-whole-card-link/M01-card-ref-and-whole-card-link.md) | 3 | pending |
-| 02 | [Compact chips and the filter sheet markup](milestones/M02-compact-chips-and-filter-sheet-markup/M02-compact-chips-and-filter-sheet-markup.md) | 4 | pending |
-| 03 | [Filter sheet, compact row and removable chips behaviour](milestones/M03-filter-sheet-behaviour/M03-filter-sheet-behaviour.md) | 4 | pending |
+| 01 | [Quiet ref line and whole-card link](milestones/M01-card-ref-and-whole-card-link/M01-card-ref-and-whole-card-link.md) | 3 | done |
+| 02 | [Compact chips and the filter sheet markup](milestones/M02-compact-chips-and-filter-sheet-markup/M02-compact-chips-and-filter-sheet-markup.md) | 4 | in-progress |
+| 03 | [Filter sheet, compact row and removable chips behaviour](milestones/M03-filter-sheet-behaviour/M03-filter-sheet-behaviour.md) | 4 | in-progress |
 
 ## Milestone files
 

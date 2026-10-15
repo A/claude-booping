@@ -2,7 +2,7 @@
 id: "01"
 title: "Quiet ref line and whole-card link"
 sp: 3
-status: pending
+status: done
 plan: "/home/anton/Dev/@A/claude-booping-specs/vault/plans/202610160504_specs-site-mobile-filters/index.md"
 ---
 
@@ -22,20 +22,20 @@ Tests: no pytest change — CSS and a DOM handler; the `site-*.txtar` goldens ch
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 1.1 | Quiet `.ref`: drop the inherited `code` fill. | `booping-python/src/booping/specs/site/style.css` | 1 | pending |
-| 1.2 | Stretched title link, raised selectable text, card focus ring, selection-aware click handler; golden rebaseline. | `booping-python/src/booping/specs/site/style.css`, `booping-python/src/booping/specs/site/site.js`, `booping-python/e2e/cases/specs/site-*.txtar` | 2 | pending |
+| 1.1 | Quiet `.ref`: drop the inherited `code` fill. | `booping-python/src/booping/specs/site/style.css` | 1 | done |
+| 1.2 | Stretched title link, raised selectable text, card focus ring, selection-aware click handler; golden rebaseline. | `booping-python/src/booping/specs/site/style.css`, `booping-python/src/booping/specs/site/site.js`, `booping-python/e2e/cases/specs/site-*.txtar` | 2 | done |
 
 ## Definition of Done
 
 ### Task 1.1
 
-- [ ] In headless Chromium on a built site (`bin/booping specs site --out /tmp/specs-site-booping`), the computed `background-color` of `.row .ref` is transparent and its `padding` 0 on `records.html` at 390px and 1300px.
+- [x] In headless Chromium on a built site (`bin/booping specs site --out /tmp/specs-site-booping`), the computed `background-color` of `.row .ref` is transparent and its `padding` 0 on `records.html` at 390px and 1300px.
 
 ### Task 1.2
 
-- [ ] On `records.html` at 390px and 1300px: a click on a card's summary text navigates to that record; a click on the card's padding navigates; a click on a `[clarify]` mark link on `review.html` lands on that mark's anchor; a drag-selection over the summary text selects it and does not navigate.
-- [ ] Tab reaches each card's title link once and the card shows the focus ring; Enter opens the record.
-- [ ] `site-*.txtar` rebaselined with `just e2e -k site --txtar-update`; diff limited to the `style.css` and `site.js` bodies.
+- [x] On `records.html` at 390px and 1300px: a click on a card's summary text navigates to that record; a click on the card's padding navigates; a click on a `[clarify]` mark link on `review.html` lands on that mark's anchor; a drag-selection over the summary text selects it and does not navigate.
+- [x] Tab reaches each card's title link once and the card shows the focus ring; Enter opens the record.
+- [x] `site-*.txtar` rebaselined with `just e2e -k site --txtar-update`; diff limited to the `style.css` and `site.js` bodies.
 
 Return: the list of changed and created files, nothing else.
 

@@ -2,7 +2,7 @@
 id: "02"
 title: "Compact chips and the filter sheet markup"
 sp: 4
-status: pending
+status: in-progress
 plan: "/home/anton/Dev/@A/claude-booping-specs/vault/plans/202610160504_specs-site-mobile-filters/index.md"
 ---
 

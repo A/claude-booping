@@ -2,7 +2,7 @@
 id: "03"
 title: "Filter sheet, compact row and removable chips behaviour"
 sp: 4
-status: pending
+status: in-progress
 plan: "/home/anton/Dev/@A/claude-booping-specs/vault/plans/202610160504_specs-site-mobile-filters/index.md"
 ---
 
