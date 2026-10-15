@@ -77,7 +77,7 @@ booping specs site
 -- exit --
 0
 -- stdout --
-specs site: 1 roots, 3 records, 8 pages, 0 warnings -> specs-site
+specs site: 1 roots, 3 records, 9 pages, 0 warnings -> specs-site
 -- stderr --
 -- expected/cwd/specs-site/probe/adr/0001-squash-sliyaniya.html --
 <!doctype html>
@@ -116,15 +116,24 @@ specs site: 1 roots, 3 records, 8 pages, 0 warnings -> specs-site
 <button class="iconbtn theme" type="button" aria-label="Тема: как в системе" title="Тема: как в системе" data-label-auto="Тема: как в системе" data-label-light="Тема: светлая" data-label-dark="Тема: тёмная"><svg class="ic" aria-hidden="true"><use href="#i-auto"/></svg></button>
 </header>
 <div class="body norail">
-<nav class="side" id="drawer" aria-label="Разделы">
+<nav class="side" id="drawer" aria-label="Навигация">
 <ul>
 <li><a href="../../index.html">Обзор</a></li>
+<li><a href="../../review.html"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>Ревью<span class="n">3</span></a></li>
+<li><a href="../../records.html">Все записи<span class="n">3</span></a></li>
 </ul>
-<h4>probe</h4>
+<h4>Разделы</h4>
 <ul>
-<li><a href="../../probe/adr/index.html">Решения<span class="n">1</span></a></li>
-<li><a href="../../probe/value/index.html">Ценности<span class="n">1</span></a></li>
-<li><a href="../../probe/mechanic/index.html">Механики<span class="n">1</span></a></li>
+<li><a href="../../records.html#type=adr">Решения<span class="n">1</span></a></li>
+<li><a href="../../records.html#type=value">Ценности<span class="n">1</span></a></li>
+<li><a href="../../records.html#type=mechanic">Механики<span class="n">1</span></a></li>
+</ul>
+<h4>Источники</h4>
+<ul>
+<li><a href="../../probe/index.html">probe<span class="n">3</span></a></li>
+</ul>
+<ul>
+<li><a href="../../llms.txt">llms.txt</a></li>
 </ul>
 </nav>
 <main id="main">
@@ -181,6 +190,7 @@ specs site: 1 roots, 3 records, 8 pages, 0 warnings -> specs-site
 <link rel="stylesheet" href="../../fonts.css">
 <link rel="stylesheet" href="../../style.css">
 <script src="../../site.js" defer></script>
+<script src="../../filter.js" defer></script>
 </head>
 <body>
 <svg aria-hidden="true" style="display:none">
@@ -205,15 +215,24 @@ specs site: 1 roots, 3 records, 8 pages, 0 warnings -> specs-site
 <button class="iconbtn theme" type="button" aria-label="Тема: как в системе" title="Тема: как в системе" data-label-auto="Тема: как в системе" data-label-light="Тема: светлая" data-label-dark="Тема: тёмная"><svg class="ic" aria-hidden="true"><use href="#i-auto"/></svg></button>
 </header>
 <div class="body norail">
-<nav class="side" id="drawer" aria-label="Разделы">
+<nav class="side" id="drawer" aria-label="Навигация">
 <ul>
 <li><a href="../../index.html">Обзор</a></li>
+<li><a href="../../review.html"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>Ревью<span class="n">3</span></a></li>
+<li><a href="../../records.html">Все записи<span class="n">3</span></a></li>
 </ul>
-<h4>probe</h4>
+<h4>Разделы</h4>
 <ul>
-<li><a href="../../probe/adr/index.html">Решения<span class="n">1</span></a></li>
-<li><a href="../../probe/value/index.html">Ценности<span class="n">1</span></a></li>
-<li><a href="../../probe/mechanic/index.html" aria-current="page">Механики<span class="n">1</span></a></li>
+<li><a href="../../records.html#type=adr">Решения<span class="n">1</span></a></li>
+<li><a href="../../records.html#type=value">Ценности<span class="n">1</span></a></li>
+<li><a href="../../records.html#type=mechanic">Механики<span class="n">1</span></a></li>
+</ul>
+<h4>Источники</h4>
+<ul>
+<li><a href="../../probe/index.html">probe<span class="n">3</span></a></li>
+</ul>
+<ul>
+<li><a href="../../llms.txt">llms.txt</a></li>
 </ul>
 </nav>
 <main id="main">
@@ -226,8 +245,20 @@ specs site: 1 roots, 3 records, 8 pages, 0 warnings -> specs-site
 </nav>
 <h1>Механики</h1>
 <p class="lead">Механики — как устроен мир</p>
+<div class="filters" data-default-sort="number">
+<div class="chips" role="group" aria-label="Пометки">
+<button type="button" class="chip" data-key="flag" data-value="unreviewed" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-unreviewed"/></svg>Без ревью<span class="n">1</span></button>
+</div>
+<label>Сортировка <select class="sort">
+<option value="number" selected>По номеру</option>
+<option value="updated">Сначала новые</option>
+<option value="title">По названию</option>
+</select></label>
+<p class="count" role="status" data-forms="[&#34;Показана {n} запись&#34;, &#34;Показаны {n} записи&#34;, &#34;Показано {n} записей&#34;]">Показана 1 запись</p>
+</div>
+<p class="empty" hidden>Ничего не подходит под фильтр.</p>
 <ul class="rows">
-<li class="row"><code class="ref">mechanic/0001</code><a class="t" href="0001-ryvok.html">Рывок</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>принято</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-unreviewed"/></svg>без ревью</span></span><span class="s">Короткое ускорение с перезарядкой.</span></li>
+<li class="row" data-type="mechanic" data-source="probe" data-status="accepted" data-flags="unreviewed" data-updated="" data-title="Рывок" data-created-by="" data-order="0"><code class="ref">mechanic/0001</code><a class="t" href="../../probe/mechanic/0001-ryvok.html">Рывок</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>принято</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-unreviewed"/></svg>без ревью</span></span><span class="s">Короткое ускорение с перезарядкой.</span></li>
 </ul>
 </main>
 </div>

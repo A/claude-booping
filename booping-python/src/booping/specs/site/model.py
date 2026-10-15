@@ -5,7 +5,7 @@ from collections.abc import Iterator
 from dataclasses import dataclass, field
 from functools import cached_property
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any, Literal, NamedTuple
 from urllib.parse import unquote
 
 from booping.specs.links import relative_links
@@ -13,6 +13,12 @@ from booping.specs.records import load_record, parse_filename, parse_ref
 from booping.specs.tiers import own_types
 
 _URI_SCHEME = re.compile(r"[A-Za-z][A-Za-z0-9+.-]*:")
+
+
+class SiteWarning(NamedTuple):
+    path: Path
+    line: int
+    message: str
 
 
 @dataclass(frozen=True)

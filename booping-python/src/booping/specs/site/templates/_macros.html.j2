@@ -61,3 +61,26 @@
 {% endfor %}
 </ul>
 {% endmacro %}
+
+{% macro record_row(view, labels, prefix, hide_unreviewed=false) %}
+<li class="row"{% for key, value in view.data.items() %} data-{{ key }}="{{ value }}"{% endfor %}><code class="ref">{{ view.ref }}</code><a class="t" href="{{ prefix }}{{ view.page }}">{{ view.title }}</a><span class="why">{{ state_badges(view.state, labels, hide_unreviewed) }}</span>{% if view.summary is not none %}<span class="s">{{ view.summary }}</span>{% endif %}</li>
+{% endmacro %}
+
+{% macro filter_bar(filters, labels) %}
+<div class="filters" data-default-sort="{{ filters.sort }}">
+{% for facet in filters.facets %}
+<div class="chips" role="group" aria-label="{{ labels.ui('facet_' ~ facet.key) }}">
+{% for chip in facet.chips %}
+<button type="button" class="chip" data-key="{{ facet.key }}" data-value="{{ chip.value }}" aria-pressed="false">{% if chip.icon is not none %}{{ icon(chip.icon) }}{% endif %}{{ chip.label }}<span class="n">{{ chip.count }}</span></button>
+{% endfor %}
+</div>
+{% endfor %}
+<label>{{ labels.ui("sort") }} <select class="sort">
+{% for sort in filters.sorts %}
+<option value="{{ sort }}"{% if sort == filters.sort %} selected{% endif %}>{{ labels.ui("sort_" ~ sort) }}</option>
+{% endfor %}
+</select></label>
+<p class="count" role="status" data-forms="{{ labels.plural_forms('shown') | tojson | forceescape }}">{{ labels.plural("shown", filters.total) }}</p>
+</div>
+<p class="empty" hidden>{{ labels.ui("nothing_matches") }}</p>
+{% endmacro %}

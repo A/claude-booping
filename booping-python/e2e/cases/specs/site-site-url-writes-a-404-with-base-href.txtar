@@ -14,7 +14,7 @@ booping specs site --root proj=specs --site-url https://lab.pages.example/proj
 -- exit --
 0
 -- stdout --
-specs site: 1 roots, 1 records, 5 pages, 0 warnings -> specs-site
+specs site: 1 roots, 1 records, 6 pages, 0 warnings -> specs-site
 -- stderr --
 -- expected/cwd/specs-site/404.html --
 <!doctype html>
@@ -53,13 +53,22 @@ specs site: 1 roots, 1 records, 5 pages, 0 warnings -> specs-site
 <button class="iconbtn theme" type="button" aria-label="Theme: auto" title="Theme: auto" data-label-auto="Theme: auto" data-label-light="Theme: light" data-label-dark="Theme: dark"><svg class="ic" aria-hidden="true"><use href="#i-auto"/></svg></button>
 </header>
 <div class="body norail">
-<nav class="side" id="drawer" aria-label="Types">
+<nav class="side" id="drawer" aria-label="Navigation">
 <ul>
 <li><a href="index.html">Overview</a></li>
+<li><a href="review.html"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>Review<span class="n">1</span></a></li>
+<li><a href="records.html">All records<span class="n">1</span></a></li>
 </ul>
-<h4>proj</h4>
+<h4>Types</h4>
 <ul>
-<li><a href="proj/value/index.html">Values<span class="n">1</span></a></li>
+<li><a href="records.html#type=value">Values<span class="n">1</span></a></li>
+</ul>
+<h4>Sources</h4>
+<ul>
+<li><a href="proj/index.html">proj<span class="n">1</span></a></li>
+</ul>
+<ul>
+<li><a href="llms.txt">llms.txt</a></li>
 </ul>
 </nav>
 <main id="main">

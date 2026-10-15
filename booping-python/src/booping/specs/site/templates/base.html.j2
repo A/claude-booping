@@ -14,6 +14,7 @@
 <link rel="stylesheet" href="{{ prefix }}fonts.css">
 <link rel="stylesheet" href="{{ prefix }}style.css">
 <script src="{{ prefix }}site.js" defer></script>
+{% block scripts %}{% endblock %}
 {% block head %}{% endblock %}
 </head>
 <body>
@@ -28,18 +29,41 @@
 </header>
 <div class="body{% if not nav %} noside{% endif %}{% if not rail_html %} norail{% endif %}">
 {% if nav %}
-<nav class="side" id="drawer" aria-label="{{ labels.ui('types') }}">
+<nav class="side" id="drawer" aria-label="{{ labels.ui('navigation') }}">
 <ul>
 <li><a href="{{ prefix }}index.html"{% if path == "index.html" %} aria-current="page"{% endif %}>{{ labels.ui("overview") }}</a></li>
+<li><a href="{{ prefix }}review.html"{% if path == "review.html" %} aria-current="page"{% endif %}>{{ icon("i-clarify") }}{{ labels.ui("review") }}<span class="n">{{ nav.review }}</span></a></li>
+<li><a href="{{ prefix }}records.html"{% if path == "records.html" %} aria-current="page"{% endif %}>{{ labels.ui("all_records") }}<span class="n">{{ nav.records }}</span></a></li>
 </ul>
-{% for group in nav %}
-<h4>{{ group.root }}</h4>
+<h4>{{ labels.ui("types") }}</h4>
 <ul>
-{% for t in group.types %}
-<li><a href="{{ prefix }}{{ t.href }}"{% if path == t.href %} aria-current="page"{% endif %}>{{ t.label }}<span class="n">{{ t.count }}</span></a></li>
+{% for t in nav.types %}
+<li><a href="{{ prefix }}{{ t.href }}">{{ t.label }}<span class="n">{{ t.count }}</span></a></li>
 {% endfor %}
 </ul>
+{% if nav.tags %}
+<h4>{{ labels.ui("tags") }}</h4>
+{% for group in nav.tags %}
+{% if nav.tags | length > 1 %}
+<h5>{{ group.root }}</h5>
+{% endif %}
+<ul>
+{% for node in group.nodes %}
+<li><a href="{{ prefix }}{{ node.href }}"{% if path == node.href %} aria-current="page"{% endif %}><code>{{ node.tag }}</code><span class="n">{{ node.count }}</span></a></li>
 {% endfor %}
+<li><a href="{{ prefix }}{{ group.href }}"{% if path == group.href %} aria-current="page"{% endif %}>{{ labels.ui("all_tags") }}</a></li>
+</ul>
+{% endfor %}
+{% endif %}
+<h4>{{ labels.ui("sources") }}</h4>
+<ul>
+{% for source in nav.sources %}
+<li><a href="{{ prefix }}{{ source.href }}"{% if path == source.href %} aria-current="page"{% endif %}>{{ source.label }}<span class="n">{{ source.count }}</span></a></li>
+{% endfor %}
+</ul>
+<ul>
+<li><a href="{{ prefix }}llms.txt">llms.txt</a></li>
+</ul>
 </nav>
 {% endif %}
 <main id="main">

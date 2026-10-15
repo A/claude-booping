@@ -321,9 +321,23 @@ def test_record_state_counts_marks_and_review(related: Site) -> None:
         statuses=set(),
     ).marks
     assert record_state(record, marks) == RecordState(
-        status="proposed", kind=None, clarify=2, unknown=1, unreviewed=False, first_mark="L7"
+        status="proposed",
+        kind=None,
+        clarify=2,
+        unknown=1,
+        unreviewed=False,
+        first_mark="L7",
+        first_clarify="L7",
+        first_unknown="L9",
+        reasons=("clarify", "unknown", "proposed"),
     )
     unread = _record(related, "proj", "adr/0002")
     assert record_state(unread, []) == RecordState(
-        status=None, kind=None, clarify=0, unknown=0, unreviewed=True, first_mark=None
+        status=None,
+        kind=None,
+        clarify=0,
+        unknown=0,
+        unreviewed=True,
+        first_mark=None,
+        reasons=("unreviewed",),
     )

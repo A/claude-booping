@@ -245,6 +245,25 @@ core:
             superseded_by: Superseded by
             chosen: chosen
             no_projects: No projects.
+            navigation: Navigation
+            review: Review
+            all_records: All records
+            tags: Tags
+            all_tags: All tags
+            sources: Sources
+            facet_type: Type
+            facet_source: Source
+            facet_status: Status
+            facet_flag: Needs
+            flag_unreviewed: Unreviewed
+            flag_clarify: Has [clarify]
+            flag_unknown: Has [unknown]
+            sort: Sort
+            sort_number: By number
+            sort_updated: Recently updated
+            sort_title: By title
+            shown: ["{n} record shown", "{n} records shown"]
+            nothing_matches: Nothing matches the filter.
           types:
             value: {name: Value, plural: Values, scenario: "why the project exists"}
             rule: {name: Rule, plural: Rules, scenario: "what constrains decisions"}
@@ -308,6 +327,25 @@ core:
             superseded_by: Заменено на
             chosen: выбрано
             no_projects: Проектов нет.
+            navigation: Навигация
+            review: Ревью
+            all_records: Все записи
+            tags: Теги
+            all_tags: Все теги
+            sources: Источники
+            facet_type: Раздел
+            facet_source: Источник
+            facet_status: Статус
+            facet_flag: Пометки
+            flag_unreviewed: Без ревью
+            flag_clarify: Есть [clarify]
+            flag_unknown: Есть [unknown]
+            sort: Сортировка
+            sort_number: По номеру
+            sort_updated: Сначала новые
+            sort_title: По названию
+            shown: ["Показана {n} запись", "Показаны {n} записи", "Показано {n} записей"]
+            nothing_matches: Ничего не подходит под фильтр.
           types:
             value: {name: Ценность, plural: Ценности, scenario: "Ценности — зачем этот проект и какой он"}
             rule: {name: Правило, plural: Правила, scenario: "Правила — что ограничивает решения"}

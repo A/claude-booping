@@ -25,7 +25,7 @@ booping specs site --root a=a --root b=b
 -- exit --
 0
 -- stdout --
-specs site: 2 roots, 2 records, 7 pages, 0 warnings -> specs-site
+specs site: 2 roots, 2 records, 8 pages, 0 warnings -> specs-site
 -- stderr --
 -- expected/cwd/specs-site/b/rule/0001-one-concern-per-commit.html --
 <!doctype html>
@@ -64,17 +64,24 @@ specs site: 2 roots, 2 records, 7 pages, 0 warnings -> specs-site
 <button class="iconbtn theme" type="button" aria-label="Theme: auto" title="Theme: auto" data-label-auto="Theme: auto" data-label-light="Theme: light" data-label-dark="Theme: dark"><svg class="ic" aria-hidden="true"><use href="#i-auto"/></svg></button>
 </header>
 <div class="body norail">
-<nav class="side" id="drawer" aria-label="Types">
+<nav class="side" id="drawer" aria-label="Navigation">
 <ul>
 <li><a href="../../index.html">Overview</a></li>
+<li><a href="../../review.html"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>Review<span class="n">2</span></a></li>
+<li><a href="../../records.html">All records<span class="n">2</span></a></li>
 </ul>
-<h4>a</h4>
+<h4>Types</h4>
 <ul>
-<li><a href="../../a/value/index.html">Values<span class="n">1</span></a></li>
+<li><a href="../../records.html#type=rule">Rules<span class="n">1</span></a></li>
+<li><a href="../../records.html#type=value">Values<span class="n">1</span></a></li>
 </ul>
-<h4>b</h4>
+<h4>Sources</h4>
 <ul>
-<li><a href="../../b/rule/index.html">Rules<span class="n">1</span></a></li>
+<li><a href="../../a/index.html">a<span class="n">1</span></a></li>
+<li><a href="../../b/index.html">b<span class="n">1</span></a></li>
+</ul>
+<ul>
+<li><a href="../../llms.txt">llms.txt</a></li>
 </ul>
 </nav>
 <main id="main">

@@ -17,7 +17,7 @@ sh -c 'booping specs site --root proj=specs && grep -F "<link rel=\"alternate\""
 -- exit --
 0
 -- stdout --
-specs site: 1 roots, 1 records, 4 pages, 0 warnings -> specs-site
+specs site: 1 roots, 1 records, 5 pages, 0 warnings -> specs-site
 <link rel="alternate" type="text/markdown" href="0001-small-steps.md">
 identical
 -- stderr --

@@ -2,20 +2,30 @@ from __future__ import annotations
 
 import datetime
 import re
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, NamedTuple
+from typing import Any
 from urllib.parse import urlsplit
 
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 from markupsafe import Markup
 
 from booping.specs.site.fonts import font_files
+from booping.specs.site.items import OpenItem
 from booping.specs.site.labels import Labels, load_labels
 from booping.specs.site.machine import index_json, llms_txt
 from booping.specs.site.markdown import LinkRenderer, Mark, Rendered, render_body
-from booping.specs.site.model import RefMiss, Site, SiteRecord, ref_keys, ref_values
+from booping.specs.site.model import (
+    RefMiss,
+    Site,
+    SiteRecord,
+    SiteWarning,
+    ref_keys,
+    ref_values,
+)
 from booping.specs.site.state import RecordState, record_state
+from booping.specs.site.tags import tag_page_path, tag_tree
 
 _HERE = Path(__file__).parent
 _MARK_KINDS = ("clarify", "unknown")
@@ -24,10 +34,69 @@ _FACT_KEYS = ("created_by", "created_at", "updated_at", "reviewed", "sources")
 _ISO_DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
 
 
-class SiteWarning(NamedTuple):
-    path: Path
-    line: int
-    message: str
+@dataclass(frozen=True)
+class Chip:
+    value: str
+    label: str
+    count: int
+    icon: str | None = None
+
+
+@dataclass(frozen=True)
+class Facet:
+    key: str
+    chips: list[Chip]
+
+
+LIST_FACETS = ("type", "source", "status", "flag")
+LIST_FLAGS = ("unreviewed", "clarify", "unknown")
+LIST_SORTS = ("number", "updated", "title")
+_FLAG_ICONS = {"unreviewed": "i-unreviewed", "clarify": "i-clarify", "unknown": "i-unknown"}
+
+
+def filter_facets(
+    rows: list[dict[str, Any]], facets: Sequence[str], flags: Sequence[str], labels: Labels
+) -> list[Facet]:
+    """Chips per facet with the number of rows carrying each value, counted on the whole
+    page; a value no row carries has no chip, and a facet of fewer than two chips is
+    dropped — except `flag`, kept with one."""
+    out: list[Facet] = []
+    for key in facets:
+        if key == "flag":
+            carried = [set(row["data"]["flags"].split()) for row in rows]
+            chips = [
+                Chip(flag, labels.ui(f"flag_{flag}"), n, _FLAG_ICONS.get(flag))
+                for flag in flags
+                if (n := sum(1 for c in carried if flag in c))
+            ]
+            if chips:
+                out.append(Facet(key, chips))
+            continue
+        values = [row["data"][key] for row in rows if row["data"][key]]
+        order = list(dict.fromkeys(values))
+        label = {
+            "type": labels.type_plural,
+            "source": str,
+            "status": labels.status,
+        }[key]
+        chips = [Chip(v, label(v), values.count(v)) for v in order]
+        if len(chips) >= 2:
+            out.append(Facet(key, chips))
+    return out
+
+
+def _filters(
+    rows: list[dict[str, Any]],
+    labels: Labels,
+    sort: str = "number",
+    sorts: Sequence[str] = LIST_SORTS,
+) -> dict[str, Any]:
+    return {
+        "facets": filter_facets(rows, LIST_FACETS, LIST_FLAGS, labels),
+        "sort": sort,
+        "sorts": list(sorts),
+        "total": len(rows),
+    }
 
 
 @dataclass(frozen=True)
@@ -45,6 +114,7 @@ def environment(labels: Labels, lang: str, site_title: str) -> Environment:
         lstrip_blocks=True,
         keep_trailing_newline=True,
     )
+    env.policies["json.dumps_kwargs"] = {"ensure_ascii": False, "sort_keys": True}
     shared: dict[str, Any] = {"labels": labels, "lang": lang, "site_title": site_title}
     env.globals.update(shared)
     return env
@@ -231,6 +301,85 @@ def _record_view(
     }
 
 
+def _iso_date(value: Any) -> str:
+    if isinstance(value, datetime.datetime):
+        return value.date().isoformat()
+    if isinstance(value, datetime.date):
+        return value.isoformat()
+    text = "" if value is None else str(value)
+    return text if _ISO_DATE.fullmatch(text) else ""
+
+
+def _row(record: SiteRecord, state: RecordState, order: int) -> dict[str, Any]:
+    """One list row: what `record_row` shows plus the `data-*` the filter reads."""
+    fm = record.frontmatter
+    created_by = fm.get("created_by")
+    return {
+        "ref": record.ref,
+        "page": record.page,
+        "title": _title(record),
+        "summary": _summary(record),
+        "state": state,
+        "data": {
+            "type": record.type,
+            "source": record.root,
+            "status": state.status or "",
+            "flags": " ".join(state.reasons),
+            "updated": _iso_date(fm.get("updated_at")),
+            "title": _title(record),
+            "created-by": "" if created_by is None else str(created_by),
+            "order": str(order),
+        },
+    }
+
+
+def _nav(
+    site: Site,
+    present: list[str],
+    states: dict[SiteRecord, RecordState],
+    labels: Labels,
+    open_items: Sequence[OpenItem],
+) -> dict[str, Any]:
+    """The sidebar: overview, review, all records, types, tags per root, sources."""
+    trees = [(root, tag_tree(root, site.records)[0]) for root in site.roots]
+    return {
+        "review": sum(1 for r in site.records if states[r].reasons) + len(open_items),
+        "records": len(site.records),
+        "types": [
+            {
+                "label": labels.type_plural(type_),
+                "count": sum(1 for r in site.records if r.type == type_),
+                "href": f"records.html#type={type_}",
+            }
+            for type_ in present
+        ],
+        "tags": [
+            {
+                "root": root.name,
+                "href": f"{root.name}/tags/index.html",
+                "nodes": [
+                    {
+                        "tag": node.tag,
+                        "count": node.count,
+                        "href": tag_page_path(root.name, node.tag),
+                    }
+                    for node in nodes
+                ],
+            }
+            for root, nodes in trees
+            if nodes
+        ],
+        "sources": [
+            {
+                "label": root.name,
+                "count": sum(1 for r in site.records if r.root == root.name),
+                "href": f"{root.name}/index.html",
+            }
+            for root in site.roots
+        ],
+    }
+
+
 def _render(site: Site, record: SiteRecord) -> Rendered:
     return render_body(
         record.body,
@@ -247,11 +396,15 @@ def build_site(
     lang: str = "en",
     site_title: str = "Specs",
     site_url: str | None = None,
+    *,
+    open_items: Sequence[OpenItem] = (),
+    items_root: str | None = None,
 ) -> tuple[dict[str, str | bytes], list[SiteWarning]]:
     """Out-root-relative path → file content, plus the resolution warnings sorted by
     `(path, line)`, each once per record. Types order as `known_types`, then the types
     a root's `_schemas/` added, sorted. No `labels` → English. A `site_url` adds a
-    `404.html` resolving its links against the URL's path."""
+    `404.html` resolving its links against the URL's path. `open_items` are the
+    vault's open items, their `record:` refs resolved from root `items_root`."""
     if labels is None:
         labels, lang, _ = load_labels({})
     env = environment(labels, lang, site_title)
@@ -259,29 +412,30 @@ def build_site(
         **font_files(),
         "style.css": (_HERE / "style.css").read_text(),
         "site.js": (_HERE / "site.js").read_text(),
+        "filter.js": (_HERE / "filter.js").read_text(),
     }
     warnings: set[SiteWarning] = set()
 
     added = sorted({r.type for r in site.records} - set(known_types))
     present = [t for t in [*known_types, *added] if any(r.type == t for r in site.records)]
-    nav = [
-        {
-            "root": root.name,
-            "types": [
-                {
-                    "type": type_,
-                    "label": labels.type_plural(type_),
-                    "count": count,
-                    "href": f"{root.name}/{type_}/index.html",
-                }
-                for type_ in present
-                if (
-                    count := sum(1 for r in site.records if r.root == root.name and r.type == type_)
-                )
-            ],
-        }
+    # Page order: roots in order, types in site type order, records by number.
+    ordered = [
+        r
         for root in site.roots
+        for type_ in present
+        for r in site.records
+        if r.root == root.name and r.type == type_
     ]
+
+    marks: dict[int, list[Mark]] = {}
+    states: dict[SiteRecord, RecordState] = {}
+    rendered: dict[int, Rendered] = {}
+    for record in site.records:
+        own = rendered[id(record)] = _render(site, record)
+        marks[id(record)] = own.marks
+        states[record] = record_state(record, own.marks)
+
+    nav = _nav(site, present, states, labels, open_items)
 
     def page(template: str, path: str, title: str, crumbs: list[Crumb], **ctx: Any) -> None:
         prefix = "../" * path.count("/")
@@ -289,12 +443,9 @@ def build_site(
             title=title, prefix=prefix, path=path, crumbs=crumbs, nav=nav, **ctx
         )
 
-    marks: dict[int, list[Mark]] = {}
-    states: dict[SiteRecord, RecordState] = {}
     for record in site.records:
-        own = _render(site, record)
-        marks[id(record)] = own.marks
-        state = states[record] = record_state(record, own.marks)
+        own = rendered[id(record)]
+        state = states[record]
         for line, dest in own.links:
             if site.resolve_link(dest, record).kind == "unresolved":
                 warnings.add(SiteWarning(record.path, line, f"unresolved link {dest}"))
@@ -321,6 +472,7 @@ def build_site(
             if not of_type:
                 continue
             types_.append({"type": type_, "count": len(of_type)})
+            type_rows = [_row(r, states[r], n) for n, r in enumerate(of_type)]
             page(
                 "type.html.j2",
                 f"{root.name}/{type_}/index.html",
@@ -331,16 +483,8 @@ def build_site(
                     Crumb(labels.type_plural(type_), None),
                 ],
                 type=type_,
-                rows=[
-                    {
-                        "ref": r.ref,
-                        "href": f"{r.stem}.html",
-                        "title": _title(r),
-                        "summary": _summary(r),
-                        "state": states[r],
-                    }
-                    for r in of_type
-                ],
+                rows=type_rows,
+                filters=_filters(type_rows, labels),
             )
         page(
             "root.html.j2",
@@ -365,6 +509,15 @@ def build_site(
         )
         root_types.append({"root": root.name, "types": types_})
 
+    all_rows = [_row(r, states[r], n) for n, r in enumerate(ordered)]
+    page(
+        "records.html.j2",
+        "records.html",
+        labels.ui("all_records"),
+        [Crumb(labels.ui("overview"), "index.html"), Crumb(labels.ui("all_records"), None)],
+        rows=all_rows,
+        filters=_filters(all_rows, labels),
+    )
     page(
         "index.html.j2",
         "index.html",

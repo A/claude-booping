@@ -1,14 +1,18 @@
 {% extends "base.html.j2" %}
-{% from "_macros.html.j2" import state_badges %}
+{% from "_macros.html.j2" import record_row, filter_bar %}
+{% block scripts %}
+<script src="{{ prefix }}filter.js" defer></script>
+{% endblock %}
 {% block main %}
 <h1>{{ labels.type_plural(type) }}</h1>
 {% set scenario = labels.scenario(type) %}
 {% if scenario %}
 <p class="lead">{{ scenario }}</p>
 {% endif %}
+{{ filter_bar(filters, labels) | trim }}
 <ul class="rows">
 {% for row in rows %}
-<li class="row"><code class="ref">{{ row.ref }}</code><a class="t" href="{{ row.href }}">{{ row.title }}</a><span class="why">{{ state_badges(row.state, labels) }}</span>{% if row.summary is not none %}<span class="s">{{ row.summary }}</span>{% endif %}</li>
+{{ record_row(row, labels, prefix) | trim }}
 {% endfor %}
 </ul>
 {% endblock %}

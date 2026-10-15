@@ -48,6 +48,13 @@ class Labels:
         text = self._text(id, "ui", id)
         return text.format(**fmt) if fmt else text
 
+    def plural_forms(self, id: str) -> list[str]:
+        """The raw plural forms of `ui.{id}`, for a script choosing one at view time."""
+        forms = self._lookup("ui", id)
+        if not isinstance(forms, list):
+            return [self.ui(id)]
+        return [str(f) for f in cast(list[Any], forms)]
+
     def plural(self, id: str, n: int) -> str:
         forms = self._lookup("ui", id)
         if not isinstance(forms, list) or not forms:

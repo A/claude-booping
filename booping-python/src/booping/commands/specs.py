@@ -17,8 +17,9 @@ from booping.specs.check import CheckError, check_tier, display_path, format_fin
 from booping.specs.init import InitError, apply, plan
 from booping.specs.records import Record, load_tier
 from booping.specs.site.index import ProjectsError, build_index, load_projects
+from booping.specs.site.items import OpenItem, load_open_items
 from booping.specs.site.labels import load_labels
-from booping.specs.site.model import SiteRoot, load_site
+from booping.specs.site.model import SiteRoot, SiteWarning, load_site
 from booping.specs.site.pages import build_site
 from booping.specs.site.write import SiteError, write_site
 from booping.specs.tiers import (
@@ -331,6 +332,17 @@ def _default_roots(
     return roots, skipped
 
 
+def _project_root_name(
+    ctx: Context, root: Path, home_dir: Path, roots: list[SiteRoot]
+) -> str | None:
+    """The rendered root holding the project tier's directory, or None."""
+    tier = next((t for t in _resolve(ctx, root, home_dir) if t.name == "project"), None)
+    if tier is None or not tier.root.is_dir():
+        return None
+    path = tier.root.resolve()
+    return next((r.name for r in roots if r.path.resolve() == path), None)
+
+
 def _run_site(args: argparse.Namespace) -> None:
     ctx, root, home_dir = _assemble()
     logger.log(vault=ctx.vault, subcommand="specs", message=f"site --out {args.out}")
@@ -356,8 +368,27 @@ def _run_site(args: argparse.Namespace) -> None:
         print(f"warning: {text}", file=sys.stderr)
     title = args.title or (ctx.project.name if ctx.project is not None else "Specs")
 
+    open_items: list[OpenItem] = []
+    item_warnings: list[SiteWarning] = []
+    items_root: str | None = None
+    if not args.roots and ctx.vault is not None:
+        items_root = _project_root_name(ctx, root, home_dir, roots)
+        specs_cfg: dict[str, Any] = ctx.config.get("core", {}).get("specs", {})
+        settings: dict[str, Any] = specs_cfg.get("open_items") or {}
+        open_items, item_warnings = load_open_items(ctx.vault / str(settings.get("dir")))
+
     site = load_site(roots, known)
-    files, warnings = build_site(site, known, labels, lang, title, args.site_url)
+    files, warnings = build_site(
+        site,
+        known,
+        labels,
+        lang,
+        title,
+        args.site_url,
+        open_items=open_items,
+        items_root=items_root,
+    )
+    warnings = sorted([*warnings, *item_warnings])
     try:
         write_site(files, Path(args.out), roots)
     except SiteError as exc:

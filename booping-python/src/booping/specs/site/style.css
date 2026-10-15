@@ -373,3 +373,8 @@ img { max-width: 100%; }
   .top, .side, .rail, .crumbs, .skip { display: none; }
   body > .body { display: block; }
 }
+
+/* Without the script the filter bar does nothing: hide it, every row stays listed. */
+html:not(.js) .filters { display: none; }
+/* `.row` sets its own display, which would override the `hidden` the filter writes. */
+.row[hidden] { display: none; }

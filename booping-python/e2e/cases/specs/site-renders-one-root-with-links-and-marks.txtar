@@ -48,7 +48,7 @@ booping specs site --root proj=specs
 -- exit --
 0
 -- stdout --
-specs site: 1 roots, 3 records, 8 pages, 1 warnings -> specs-site
+specs site: 1 roots, 3 records, 9 pages, 1 warnings -> specs-site
 -- stderr --
 specs/adr/0001-adopt-squash-merges.md:15  warning  site  unresolved link ../notes/missing.md
 -- expected/cwd/specs-site/.booping-site --
@@ -89,15 +89,24 @@ booping specs site
 <button class="iconbtn theme" type="button" aria-label="Theme: auto" title="Theme: auto" data-label-auto="Theme: auto" data-label-light="Theme: light" data-label-dark="Theme: dark"><svg class="ic" aria-hidden="true"><use href="#i-auto"/></svg></button>
 </header>
 <div class="body norail">
-<nav class="side" id="drawer" aria-label="Types">
+<nav class="side" id="drawer" aria-label="Navigation">
 <ul>
 <li><a href="index.html" aria-current="page">Overview</a></li>
+<li><a href="review.html"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>Review<span class="n">3</span></a></li>
+<li><a href="records.html">All records<span class="n">3</span></a></li>
 </ul>
-<h4>proj</h4>
+<h4>Types</h4>
 <ul>
-<li><a href="proj/adr/index.html">ADRs<span class="n">1</span></a></li>
-<li><a href="proj/rule/index.html">Rules<span class="n">1</span></a></li>
-<li><a href="proj/value/index.html">Values<span class="n">1</span></a></li>
+<li><a href="records.html#type=adr">ADRs<span class="n">1</span></a></li>
+<li><a href="records.html#type=rule">Rules<span class="n">1</span></a></li>
+<li><a href="records.html#type=value">Values<span class="n">1</span></a></li>
+</ul>
+<h4>Sources</h4>
+<ul>
+<li><a href="proj/index.html">proj<span class="n">3</span></a></li>
+</ul>
+<ul>
+<li><a href="llms.txt">llms.txt</a></li>
 </ul>
 </nav>
 <main id="main">
@@ -161,15 +170,24 @@ booping specs site
 <button class="iconbtn theme" type="button" aria-label="Theme: auto" title="Theme: auto" data-label-auto="Theme: auto" data-label-light="Theme: light" data-label-dark="Theme: dark"><svg class="ic" aria-hidden="true"><use href="#i-auto"/></svg></button>
 </header>
 <div class="body norail">
-<nav class="side" id="drawer" aria-label="Types">
+<nav class="side" id="drawer" aria-label="Navigation">
 <ul>
 <li><a href="../../index.html">Overview</a></li>
+<li><a href="../../review.html"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>Review<span class="n">3</span></a></li>
+<li><a href="../../records.html">All records<span class="n">3</span></a></li>
 </ul>
-<h4>proj</h4>
+<h4>Types</h4>
 <ul>
-<li><a href="../../proj/adr/index.html">ADRs<span class="n">1</span></a></li>
-<li><a href="../../proj/rule/index.html">Rules<span class="n">1</span></a></li>
-<li><a href="../../proj/value/index.html">Values<span class="n">1</span></a></li>
+<li><a href="../../records.html#type=adr">ADRs<span class="n">1</span></a></li>
+<li><a href="../../records.html#type=rule">Rules<span class="n">1</span></a></li>
+<li><a href="../../records.html#type=value">Values<span class="n">1</span></a></li>
+</ul>
+<h4>Sources</h4>
+<ul>
+<li><a href="../../proj/index.html">proj<span class="n">3</span></a></li>
+</ul>
+<ul>
+<li><a href="../../llms.txt">llms.txt</a></li>
 </ul>
 </nav>
 <main id="main">
