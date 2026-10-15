@@ -42,6 +42,14 @@ M07's first attempt resolved tier roots in Jinja, copying `tiers.project_root`'s
 
 `playbook-transition` swallows a hook's stderr when it exits 0, so the warning is asserted by a fourth case running the script directly; the through-a-transition case stays.
 
+## D11 — M09 runs its smoke suite
+
+develop's preamble says eval runs are proposed, never launched; M09's DoD and Verify require `just smoke specs/guide`, and the owner asked for an unattended run. Default applied: the worker ran the smoke tier with `EVAL_PR=0` (no PR comment).
+
+## D12 — mdcheck rulesFile
+
+M09's first attempt copied `src/specs/schemas/adr.yaml` verbatim into `tests.yaml` (value/0003). Default applied: the shared `playbooks/_lib/asserts/mdcheck.js` gains a `rulesFile` param (plugin-root-relative) and the ADR assert points at the schema. Outside M09's file list, needed to meet the value.
+
 ## Accepted snapshot reports
 
 {filled in as accepted}

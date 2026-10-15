@@ -2,7 +2,7 @@
 id: "09"
 title: "Smoke evals for specs/guide"
 sp: 4
-status: pending
+status: done
 plan: "plans/202610151409_specs-playbook-open-items/index.md"
 ---
 
@@ -22,19 +22,19 @@ Tests: this milestone is the test — the smoke tier.
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 9.1 | Suite config and the three fixture vaults. | `playbooks/specs/guide/promptfooconfig.yaml`, `playbooks/specs/guide/_fixtures/` | 2 | pending |
-| 9.2 | The three cases and their asserts. | `playbooks/specs/guide/tests.yaml` | 2 | pending |
+| 9.1 | Suite config and the three fixture vaults. | `playbooks/specs/guide/promptfooconfig.yaml`, `playbooks/specs/guide/_fixtures/` | 2 | done |
+| 9.2 | The three cases and their asserts. | `playbooks/specs/guide/tests.yaml` | 2 | done |
 
 ## Definition of Done
 
 ### Task 9.1
 
-- [ ] `just suites` lists `specs/guide`.
+- [x] `just suites` lists `specs/guide`.
 
 ### Task 9.2
 
-- [ ] Three cases, all `tier: smoke`, only shared asserts from `playbooks/_lib/asserts/`.
-- [ ] `just smoke specs/guide` is green (run with `EVAL_PR=0`).
+- [x] Three cases, all `tier: smoke`, only shared asserts from `playbooks/_lib/asserts/`.
+- [x] `just smoke specs/guide` is green (run with `EVAL_PR=0`).
 
 Return: the list of changed files and the smoke pass count, nothing else.
 

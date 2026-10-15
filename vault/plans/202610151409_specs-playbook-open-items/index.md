@@ -132,8 +132,8 @@ reason: null
 | 06 | [Plans link, close and reopen their items](milestones/M06-plans-close-their-items/M06-plans-close-their-items.md) | 4 | done |
 | 07 | [The specs guide — preamble and scenarios](milestones/M07-specs-guide-body/M07-specs-guide-body.md) | 4 | done |
 | 08 | [The alignment guide doc](milestones/M08-alignment-guide/M08-alignment-guide.md) | 2 | done |
-| 09 | [Smoke evals for specs/guide](milestones/M09-specs-guide-smoke-evals/M09-specs-guide-smoke-evals.md) | 4 | pending |
-| 10 | [Docs, README and CLAUDE.md name the specs playbook and open items](milestones/M10-docs-and-claude-md/M10-docs-and-claude-md.md) | 3 | pending |
+| 09 | [Smoke evals for specs/guide](milestones/M09-specs-guide-smoke-evals/M09-specs-guide-smoke-evals.md) | 4 | done |
+| 10 | [Docs, README and CLAUDE.md name the specs playbook and open items](milestones/M10-docs-and-claude-md/M10-docs-and-claude-md.md) | 3 | done |
 
 ## I/O contract
 

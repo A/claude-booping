@@ -2,7 +2,7 @@
 id: "10"
 title: "Docs, README and CLAUDE.md name the specs playbook and open items"
 sp: 3
-status: pending
+status: done
 plan: "plans/202610151409_specs-playbook-open-items/index.md"
 ---
 
@@ -18,19 +18,19 @@ Tests: none — docs; `just docs` builds.
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 10.1 | Public docs page, nav, specs page section, config reference, README. | `documentation/specs_playbook.md`, `mkdocs.yml`, `documentation/specs.md`, `documentation/project_config.md`, `README.md` | 2 | pending |
-| 10.2 | CLAUDE.md sections. | `CLAUDE.md` | 1 | pending |
+| 10.1 | Public docs page, nav, specs page section, config reference, README. | `documentation/specs_playbook.md`, `mkdocs.yml`, `documentation/specs.md`, `documentation/project_config.md`, `README.md` | 2 | done |
+| 10.2 | CLAUDE.md sections. | `CLAUDE.md` | 1 | done |
 
 ## Definition of Done
 
 ### Task 10.1
 
-- [ ] Only what a user calls or sees: no module names, no e2e cases, no milestone history.
-- [ ] `just docs` builds with no new warning.
+- [x] Only what a user calls or sees: no module names, no e2e cases, no milestone history.
+- [x] `just docs` builds with no new warning.
 
 ### Task 10.2
 
-- [ ] Every CLAUDE.md change listed in `index.md` `## CLAUDE.md impact` is made; no literal statuses typed where the machine is the source.
+- [x] Every CLAUDE.md change listed in `index.md` `## CLAUDE.md impact` is made; no literal statuses typed where the machine is the source.
 
 Return: the list of changed files, nothing else.
 
