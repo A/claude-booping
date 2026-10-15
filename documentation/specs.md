@@ -132,14 +132,14 @@ A `path` is absolute, `~`-prefixed, or relative to `home_dir`.
 
 **Page shell.** Every page has a skip link, a header with the site title (linking home) and a theme toggle, a sidebar, breadcrumbs, and a footer naming the generator — no build date, so rebuilds stay byte-identical. The theme toggle cycles auto → light → dark and remembers the choice in the browser; auto follows the system setting. Text is set in Golos Text, code in JetBrains Mono, both Cyrillic and Latin. Below 760px wide the layout drops to one column, list rows become cards, the filter chips scroll on one line, and the sidebar moves into a drawer opened from a menu button; without JavaScript the sidebar renders in the page flow instead, and every page still reads.
 
-The sidebar, top to bottom: Overview; **Review** with the number of rows waiting for you; **All records** with the total; **Types** — every type that has records, across roots, with its count, each opening All records filtered to it; **Tags** — for each root with tags, its top-level tags that records carry, as plain links with counts, and a link to the root's tag tree (the root's name as a sub-heading when more than one root has tags); **Sources** — each root with its record count; and `llms.txt`.
+The sidebar, top to bottom: Overview; **Review** with the number of rows waiting for you; **All records** with the total; **My comments** with the number of your review comments (below), the number shown when there is at least one; **Types** — every type that has records, across roots, with its count, each opening All records filtered to it; **Tags** — for each root with tags, its top-level tags that records carry, as plain links with counts, and a link to the root's tag tree (the root's name as a sub-heading when more than one root has tags); **Sources** — each root with its record count; and `llms.txt`.
 
 **Pages.**
 
 - `index.html` — home: the site title; the first value record's summary as the lead; when anything waits for you, one callout linking the review page (`3 need you →`) followed by the number of unreviewed records and of open `[clarify]` questions, a zero count left out (`3 need you → · 2 unreviewed · 1 open question`); a card per type with records — name, count and a one-line scenario ("why the project exists" for values) — opening All records filtered to that type; and **Recently updated**, the ten records with the latest `updated_at`. The title, lead, callout and Recently updated sit in one reading column; the cards span the full width.
 - `review.html` — everything that needs you, as a filterable list (below).
 - `records.html` — every record of every root, as a filterable list.
-- `{root}/index.html` — the root's types, each with its name, record count and scenario, then every `[clarify]` and `[unknown]` mark in the root, each linking to its line in the record.
+- `{root}/index.html` — the root's landing, shaped like home and scoped to that root: the root's name as the title; when anything in the root waits for you, the callout with the root's counts, linking the review page filtered to the root (`../review.html#source={root}`); a card per type with records in the root; and **Recently updated**, the root's ten latest records. The root's `[clarify]` and `[unknown]` marks are on the review page and in each record's Open questions block.
 - `{root}/{type}/index.html` — the type's scenario, then a filterable list of its records.
 - `{root}/tags/index.html` — the root's tag tree: every tag nested under its parent (`area` above `area:sub`), with its description and the number of records carrying it or any tag below it. Written only for a root that has tags.
 - `{root}/tags/{tag}.html` — one tag, its `:` written as `.` (`area:sub` → `area.sub.html`): breadcrumbs through its parent tags, the description, the tags below it, then a filterable list of every record carrying the tag or one below it.
@@ -149,6 +149,7 @@ The sidebar, top to bottom: Overview; **Review** with the number of rows waiting
   - **Referenced by, grouped** — the citing records under one heading per type, each followed by *via*: the frontmatter relations naming this record (`Rules`, …) and the `##` sections of the citing record whose text links here. When a link points at one of this record's own sections (`…/0003-x.md#decision`), a **By section** block lists those sections with the records citing each.
   - **ADR option cards** — in an `adr` whose `## Alternatives` holds the shipped options table (Option, Status, Complexity, Reversibility, Verdict) the table stays as the summary, the accepted option's row marked **chosen**, and each `###` option becomes a card: status, complexity and reversibility from its table row, then the verdict and the option's own text. Accepted options come first and open, the rest collapsed in written order; below 760px the table is hidden and the cards carry it. An Alternatives section of any other shape renders as written.
 - `search.html` — every search result for the query in its address, `search.html?q=…` (below).
+- `comments.html` — every review comment you left on the site, grouped by record (below).
 
 A row in a list shows the record's ref, its title linking to the record page, its state badges and its summary.
 
@@ -180,6 +181,41 @@ The data lives in two files at the site root: `search-index.js` (each record's r
 
 When the site renders its default roots for a project with a vault, the vault's [open items](#open-items) with status `open` follow the records — the item's id and title, linking to the record it names when that record is on the site. The review page sorts by **Review order** by default: what the agent wrote first, then the oldest by `updated_at`; it also offers the other sorts. With nothing to review it says so. The sidebar's Review count and the home callout are the number of rows on this page.
 
+**Review comments.** On any record page you can leave a comment on a passage, kept in your browser and copied out as one Markdown block for an agent to act on. Three ways to start one, each opening a box with the passage quoted, a note field, Save and Cancel (Ctrl/Cmd+Enter saves, Esc cancels):
+
+- **a selection** — select text in the body and a **Comment** button appears just below it; after a keyboard selection, Tab reaches it;
+- **a paragraph** — click or tap a paragraph, list item, quote, table cell or code block, and a **Comment on paragraph** button appears beside it;
+- **a section** — every `##` to `####` heading carries a comment button after its `§` link, reachable with Tab.
+
+A comment on a selection or a paragraph is pinned to the nearest heading above it, and its quote holds the exact text. The header's comment button, with this page's count, opens the record's panel — a side sheet on wide screens, a bottom sheet below 760px — listing its comments in the order written: a link to the section, the quote, the note, a **sent** badge once copied, and **Edit** and **Delete**. `comments.html`, linked from the sidebar as **My comments**, lists every comment on the site grouped by record, with the same controls. Editing a note clears its sent badge; Delete removes the comment at once.
+
+**Copy for the model**, in either panel, copies that panel's comments to the clipboard and marks them sent:
+
+```
+## {ref} — {title}
+
+[§ {anchor text}]({anchor url})
+
+> {quote line 1}
+> {quote line 2}
+
+{note}
+
+[§ {anchor text}]({anchor url})
+
+> {quote}
+
+{note}
+
+## {next ref} — {next title}
+
+…
+```
+
+Records come in ref order, each record's comments in the order written. The anchor line links the section the comment sits under; a comment above the record's first heading links the record by its title, `[{title}]({page url})`. Links are absolute — the published `https://` address, or a `file:///` path for a site opened from disk. The block holds no UI words, so it reads the same on a site in any language. **Clear sent** then removes the panel's sent comments, leaving the ones written since.
+
+Comments live in the browser's local storage, one store per site address, in this browser only: nothing is uploaded, nothing reaches the build, and another browser or device does not see them. With storage unavailable the comment controls stay hidden and `comments.html` says comments need browser storage. Chrome and Chromium share one store across a site opened from `file://`; Firefox gives each `file://` page its own, so there a record's panel works but `comments.html` sees only comments made on itself — a published site is unaffected.
+
 **State badges.** Each badge carries an icon and text, never colour alone: the record's status (`accepted`, `proposed`, …), the count of `[clarify]` marks (`2 questions for you`, linking to the first mark on a record page), `[unknown]` when the body has one, and `unreviewed` when `reviewed` is not set.
 
 Relative links and typed refs between records become links to the target's page, across roots too. A link to something that is not a record renders as plain text; a link or ref whose target is missing renders as plain text and prints a warning. The site never fails on a link — `booping specs check` is the validator.
@@ -204,6 +240,7 @@ A label holding counts is a list of plural forms: two (one, other) or three (the
 
 - `style.css`, `site.js` (theme toggle and drawer), `fonts.css` with the fonts embedded — so nested pages opened from `file://` render them too — and the fonts' OFL licences under `fonts/`;
 - `search.js`, `search-index.js` and `search-body.js` — the [search](#booping-specs-site) and its data;
+- `comments.html`, `comments.js` and `comments-format.js` — the review comments: the site-wide list page, and the scripts that capture, store and export comments;
 - `{root}/{type}/{NNNN-slug}.md` — each record's source file, byte for byte, linked from its page as the Markdown alternate;
 - `llms.txt` — the site in the [llms.txt](https://llmstxt.org/) shape: the title, the first value's summary, then one section per root and type with a line per record linking its `.md` copy, with its summary, status and tags;
 - `index.json` — the title, the language and every record's metadata in page order: id (`{root}:{ref}`), type, title, summary, status, tags, author and dates, page and `.md` paths, mark counts, relations, superseded-by and backlinks as ids;
