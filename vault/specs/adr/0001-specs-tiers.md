@@ -40,9 +40,11 @@ The specs format is a core feature of booping, in three tiers:
   ideas, runbooks and the rules that concern only booping — are booping's project
   tier, `vault/specs/`, which is also the dogfood of the format.
 - **global** — `<home_dir>/_specs/`, booping's existing global config level: one person's values and rules for every project.
-- **project** — `specs/` in the project repo, so a spec changes in the same commit as
-  the code; when the vault is in the repo, `<vault>/specs/`. A vault outside the repo
-  reaches the project specs through a symlink.
+- **project** — the project's vault itself: the type directories (`value/`, `rule/`,
+  `adr/` …) sit at the vault root beside `plans/` and `retrospectives/`, with no `specs/`
+  directory in between, so Obsidian shows them directly (owner, 2026-10-15). A project
+  that wants specs to change in the same commit as its code points the tier at a
+  directory in its repo instead, and the vault links to it.
 
 A reference without a namespace points into its own tier. Another tier is named by a
 namespace — `booping:` for core, the user's id for the global tier (default `$USER`,
@@ -108,3 +110,7 @@ Each project keeps its own copy of the format and its own checker.
   reaching every user — rule/0013 and rule/0015 got their targets back as project rules.
 - Confirmation: `just specs-check` validates both tiers; a project set up by the setup
   playbook resolves a `booping:` and a global reference.
+- 2026-10-15: the project tier became the vault root itself — type directories beside
+  `plans/`, no `specs/` in between; specs kept in a repo are the exception, linked
+  into the vault. Specs that live in a notes repo do not change in the same commit as
+  the code; open items and a specs sync catch the drift instead.

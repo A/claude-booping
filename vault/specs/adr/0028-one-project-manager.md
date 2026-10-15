@@ -75,10 +75,10 @@ Both stay user-level playbooks with their own state.
 
 ## Consequences
 
-- Specs stay one directory in the repo; `setup` links it into the project's vault
-  (`<vault>/specs` → the repo's `specs/`) so Obsidian shows specs beside plans. In
-  booping's own repo the vault is in the repo, so its project specs are `vault/specs/`
-  and the shipped core records are `specs/` beside `playbooks/`.
+- A project's specs are its vault ([adr/0001](0001-specs-tiers.md)): type directories
+  at the vault root beside plans and items; a project that keeps specs in its repo has
+  `setup` link them into the vault. booping's shipped core records stay in `specs/`
+  beside `playbooks/`.
 - `orchestrate` and `backlog-run` (with `backlog-manage`) are retired once
   project-manager covers them; hermes-pet's orchestrate specifics move into its specs.
 - Confirmation: in a project with items, `/playbook project-manager` opens with the
