@@ -12,4 +12,4 @@ booping specs open-items list
 -- stdout --
 -- stderr --
 usage: booping specs [-h] <verb> ...
-booping specs: error: argument <verb>: invalid choice: 'open-items' (choose from ls, next, check, init, site)
+booping specs: error: argument <verb>: invalid choice: 'open-items' (choose from ls, next, check, init, site, site-index)
