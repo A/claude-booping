@@ -2,7 +2,7 @@
 id: "05"
 title: "Migrate always asks about uncommitted work on the branch"
 sp: 3
-status: pending
+status: in-progress
 plan: "plans/202610151609_autonomy-modes/index.md"
 ---
 

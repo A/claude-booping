@@ -2,7 +2,7 @@
 id: "06"
 title: "Docs and CLAUDE.md name the mode"
 sp: 2
-status: pending
+status: in-progress
 plan: "plans/202610151609_autonomy-modes/index.md"
 ---
 

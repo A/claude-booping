@@ -33,3 +33,11 @@ Decisions the runner took without the owner, per the run's AUTONOMOUS RUN instru
 **Default:** accept drift only when every hunk is one the plan describes (M04 specs, M05 migrate), per the owner's standing permission for this feature (2026-10-14) restated in the invocation and in the plan's Departures; each accepted report is listed below.
 
 **Why:** the owner's explicit, scoped permission; any other drift stops the run.
+
+## D5 — develop/develop-loop — accepted report: playbooks/specs/_reports/output.md
+
+**Asked:** accept the specs report drift (rule/0013 departure, per D4).
+
+**Default:** accepted with M04's commit `3b684ae`.
+
+**Why:** the drift was exactly two hunks, both M04's: the `Autonomy:` preamble line and the replaced `Next:` sentence (Supervised/Autonomous lines), matching the plan's output contract.
