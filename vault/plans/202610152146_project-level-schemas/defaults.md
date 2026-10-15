@@ -59,3 +59,13 @@
 **Why:** Every commit stays importable; no interactive hunk staging in this harness
 
 **Artifact:** [index.md](index.md)
+
+## D7 — develop/develop-loop — 2026-10-15 22:27
+
+**Asked:** src/specs/README.md carries both M05's English-headings paragraph and M08's tier-schemas text
+
+**Default:** README landed whole in M05's commit; M08's commit carries documentation/ and CLAUDE.md
+
+**Why:** Path-scoped staging cannot split one file between milestones
+
+**Artifact:** [index.md](index.md)

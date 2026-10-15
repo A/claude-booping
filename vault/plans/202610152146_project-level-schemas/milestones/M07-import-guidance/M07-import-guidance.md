@@ -1,8 +1,9 @@
 ---
 id: "07"
-title: "Specs import guidance \u2014 init with a language set, splitting an area file into value records"
+title: "Specs import guidance — init with a language set, splitting an area file into
+  value records"
 sp: 2
-status: pending
+status: done
 plan: "plans/202610152146_project-level-schemas/index.md"
 ---
 
@@ -18,18 +19,18 @@ Tests: none new — prose guidance; the snapshot holds the render. The specs/gui
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 7.1 | The import doc. | `docs/specs-import.md` | 1 | pending |
-| 7.2 | `Import` scenario and the `Init` sentence. | `playbooks/specs/guide/prompt.md` | 1 | pending |
+| 7.1 | The import doc. | `docs/specs-import.md` | 1 | done |
+| 7.2 | `Import` scenario and the `Init` sentence. | `playbooks/specs/guide/prompt.md` | 1 | done |
 
 ## Definition of Done
 
 ### Task 7.1
 
-- [ ] The doc names no project (no swarmlight, no hermes-pet) and restates no schema literal beyond the example labels.
+- [x] The doc names no project (no swarmlight, no hermes-pet) and restates no schema literal beyond the example labels.
 
 ### Task 7.2
 
-- [ ] `bin/booping render-playbook specs --step guide` shows the `## Import` scenario and the link resolves under `${CLAUDE_PLUGIN_ROOT}`.
+- [x] `bin/booping render-playbook specs --step guide` shows the `## Import` scenario and the link resolves under `${CLAUDE_PLUGIN_ROOT}`.
 
 Return: the list of changed and created files, nothing else.
 

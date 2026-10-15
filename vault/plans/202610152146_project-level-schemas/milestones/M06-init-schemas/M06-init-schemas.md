@@ -2,7 +2,7 @@
 id: "06"
 title: "(removed) init --schemas"
 sp: 3
-status: pending
+status: done
 plan: "plans/202610152146_project-level-schemas/index.md"
 ---
 
@@ -12,7 +12,7 @@ plan: "plans/202610152146_project-level-schemas/index.md"
 
 ## Definition of Done
 
-- [ ] No `--schemas` option on `booping specs init`.
+- [x] No `--schemas` option on `booping specs init`.
 
 ## Verify
 

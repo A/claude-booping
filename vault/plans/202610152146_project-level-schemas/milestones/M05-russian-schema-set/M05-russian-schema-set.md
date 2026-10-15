@@ -2,7 +2,7 @@
 id: "05"
 title: "Structural headings are English in every tier"
 sp: 3
-status: pending
+status: done
 plan: "plans/202610152146_project-level-schemas/index.md"
 ---
 
@@ -14,8 +14,8 @@ plan: "plans/202610152146_project-level-schemas/index.md"
 
 ## Definition of Done
 
-- [ ] `src/specs/README.md` states the rule in ≤ 4 lines.
-- [ ] No `src/specs/schemas-ru/` exists.
+- [x] `src/specs/README.md` states the rule in ≤ 4 lines.
+- [x] No `src/specs/schemas-ru/` exists.
 
 ## Verify
 

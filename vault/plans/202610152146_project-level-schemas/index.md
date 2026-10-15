@@ -97,10 +97,10 @@ specs init --schemas SET ─► copy {format}/schemas-SET/*.yaml → {root}/_sch
 | 02 | [Tier types everywhere — ls, next, site, items and status read each tier's own types](milestones/M02-tier-types-everywhere/M02-tier-types-everywhere.md) | 4 | done |
 | 03 | [Tags dictionary — record tags checked against the tier's tags.yaml](milestones/M03-tags-dictionary/M03-tags-dictionary.md) | 3 | done |
 | 04 | [Alternatives check — table rows match H3 options, one accepted, names from the schema](milestones/M04-alternatives-check/M04-alternatives-check.md) | 4 | done |
-| 05 | [Structural headings are English in every tier](milestones/M05-russian-schema-set/M05-russian-schema-set.md) | 3 | pending |
-| 06 | [(removed) init --schemas](milestones/M06-init-schemas/M06-init-schemas.md) | 3 | pending |
-| 07 | [Specs import guidance — init with a language set, splitting an area file into value records](milestones/M07-import-guidance/M07-import-guidance.md) | 2 | pending |
-| 08 | [Documentation — format guide, specs docs, config reference and CLAUDE.md for tier schemas](milestones/M08-docs/M08-docs.md) | 3 | pending |
+| 05 | [Structural headings are English in every tier](milestones/M05-russian-schema-set/M05-russian-schema-set.md) | 3 | done |
+| 06 | [(removed) init --schemas](milestones/M06-init-schemas/M06-init-schemas.md) | 3 | done |
+| 07 | [Specs import guidance — init with a language set, splitting an area file into value records](milestones/M07-import-guidance/M07-import-guidance.md) | 2 | done |
+| 08 | [Documentation — format guide, specs docs, config reference and CLAUDE.md for tier schemas](milestones/M08-docs/M08-docs.md) | 3 | done |
 
 ## I/O contract
 
