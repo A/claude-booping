@@ -2,13 +2,13 @@
 title: "User-request items — source and verbatim text on the item store, booping items
   add"
 type: "feature"
-status: in-progress
+status: done
 sp: 15
 related_to: null
 created: 2026-10-15 18:25
 planned: null
 started: 2026-10-15 18:43
-completed: null
+completed: 2026-10-15 19:03
 code_reviews: []
 sessions:
 - 75e28809-8ea1-4cee-8c48-f7ef5b025853
@@ -24,7 +24,16 @@ return_to: null
 agents:
   research-codebase: ae1876d1fce75f406
   cross-review: ab953a5d2c2054308
+  develop-loop: a28074778276618d7
+  verify: a6a9b4de53c589c27
 reviewed_at: 2026-10-15 18:39
+metrics_active_minutes: 38
+metrics_models:
+- claude-opus-5-5
+metrics_tokens_input: 136
+metrics_tokens_output: 48159
+metrics_tokens_cache_creation: 225812
+metrics_tokens_cache_read: 6480986
 ---
 
 # User-request items — source and verbatim text on the item store, booping items add
