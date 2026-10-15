@@ -1,20 +1,21 @@
 ---
 title: "Specs site redesign, part 2 — landing, review filter, list filters, tags"
 type: "feature"
-status: ready-for-dev
-sp: null
+status: in-progress
+sp: 28
 related_to: null
 created: 2026-10-16 00:42
 planned: null
-started: null
+started: 2026-10-16 01:04
 completed: null
 code_reviews: []
 sessions:
 - c310b57e-c84e-4872-9b76-858b73cd43c6
+- e4ab216c-c520-47cd-8db9-a38c578f5222
 retro: null
 summary: 'Specs site part 2: landing with one needs-you link, review filter, list
   chips+sort in location.hash, Source facet, tag pages, phone cards'
-commit: 6b1712be5b1951e11a5af9a460858794ffe679f3
+commit: aa04da5961d97642a46f37878c9485ea1ecbd13b
 tracker_provider: null
 tracker_request: null
 tracker_issue: null
@@ -75,10 +76,10 @@ Rows carry `data-type data-source data-status data-flags data-updated data-title
 
 | id | title | sp | status |
 | --- | --- | --- | --- |
-| 01 | [Review model — reasons, per-kind mark anchors, open items](milestones/M01-review-model/M01-review-model.md) | 3 | pending |
-| 02 | [Tag model — per-root tree from tags.yaml and used tags](milestones/M02-tag-model/M02-tag-model.md) | 3 | pending |
-| 03 | [List rows with data attributes, All records page, sidebar](milestones/M03-list-rows-and-all-records/M03-list-rows-and-all-records.md) | 4 | pending |
-| 04 | [Filter bar — chips, sort, hash state in filter.js](milestones/M04-filter-bar/M04-filter-bar.md) | 4 | pending |
+| 01 | [Review model — reasons, per-kind mark anchors, open items](milestones/M01-review-model/M01-review-model.md) | 3 | done |
+| 02 | [Tag model — per-root tree from tags.yaml and used tags](milestones/M02-tag-model/M02-tag-model.md) | 3 | done |
+| 03 | [List rows with data attributes, All records page, sidebar](milestones/M03-list-rows-and-all-records/M03-list-rows-and-all-records.md) | 4 | done |
+| 04 | [Filter bar — chips, sort, hash state in filter.js](milestones/M04-filter-bar/M04-filter-bar.md) | 4 | done |
 | 05 | [Review page — the needs-you pool as a filtered list](milestones/M05-review-page/M05-review-page.md) | 3 | pending |
 | 06 | [Home landing — lead, needs-you callout, scenarios, recently updated](milestones/M06-home-landing/M06-home-landing.md) | 3 | pending |
 | 07 | [Tag pages — tag tree, per-tag lists, linked record tags](milestones/M07-tag-pages/M07-tag-pages.md) | 3 | pending |

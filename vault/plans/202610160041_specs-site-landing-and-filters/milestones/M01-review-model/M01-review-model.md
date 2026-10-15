@@ -2,7 +2,7 @@
 id: "01"
 title: "Review model — reasons, per-kind mark anchors, open items"
 sp: 3
-status: pending
+status: done
 plan: "plans/202610160041_specs-site-landing-and-filters/index.md"
 ---
 
@@ -18,20 +18,20 @@ Tests (integration, `booping-python/tests/specs/site_state_test.py` new, `site_i
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 1.1 | Reasons and per-kind first-mark anchors on `RecordState`; tests. | `booping-python/src/booping/specs/site/state.py`, `booping-python/tests/specs/site_state_test.py` | 1 | pending |
-| 1.2 | Open-item reader, `build_site` keyword, wiring in `_run_site`; tests. | `booping-python/src/booping/specs/site/items.py`, `booping-python/src/booping/specs/site/pages.py`, `booping-python/src/booping/commands/specs.py`, `booping-python/tests/specs/site_items_test.py` | 2 | pending |
+| 1.1 | Reasons and per-kind first-mark anchors on `RecordState`; tests. | `booping-python/src/booping/specs/site/state.py`, `booping-python/tests/specs/site_state_test.py` | 1 | done |
+| 1.2 | Open-item reader, `build_site` keyword, wiring in `_run_site`; tests. | `booping-python/src/booping/specs/site/items.py`, `booping-python/src/booping/specs/site/pages.py`, `booping-python/src/booping/commands/specs.py`, `booping-python/tests/specs/site_items_test.py` | 2 | done |
 
 ## Definition of Done
 
 ### Task 1.1
 
-- [ ] `RecordState.reasons` follows C3/C4 and the fixed order; `first_clarify` / `first_unknown` point at the first mark of their kind.
-- [ ] Existing site tests and goldens unchanged (no rendered output changes in this milestone).
+- [x] `RecordState.reasons` follows C3/C4 and the fixed order; `first_clarify` / `first_unknown` point at the first mark of their kind.
+- [x] Existing site tests and goldens unchanged (no rendered output changes in this milestone).
 
 ### Task 1.2
 
-- [ ] `load_open_items` returns only `status: open` items, in id order, and one warning per unparsable file; missing dir → no items, no warnings.
-- [ ] `_run_site` reads items only for default roots with a vault attached.
+- [x] `load_open_items` returns only `status: open` items, in id order, and one warning per unparsable file; missing dir → no items, no warnings.
+- [x] `_run_site` reads items only for default roots with a vault attached.
 
 Return: the list of changed and created files, nothing else.
 

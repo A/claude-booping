@@ -2,7 +2,7 @@
 id: "03"
 title: "List rows with data attributes, All records page, sidebar"
 sp: 4
-status: pending
+status: done
 plan: "plans/202610160041_specs-site-landing-and-filters/index.md"
 ---
 
@@ -18,21 +18,21 @@ Tests (integration, `site_pages_test.py`): every `.row` on a type page and on `r
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 3.1 | `record_row` macro with data attributes; type page uses it; `records.html`. | `booping-python/src/booping/specs/site/templates/_macros.html.j2`, `booping-python/src/booping/specs/site/templates/type.html.j2`, `booping-python/src/booping/specs/site/templates/records.html.j2`, `booping-python/src/booping/specs/site/pages.py` | 2 | pending |
-| 3.2 | Sidebar per C6; labels en/ru; tests; golden rebaseline. | `booping-python/src/booping/specs/site/templates/base.html.j2`, `booping-python/src/booping/specs/site/pages.py`, `src/config.yaml`, `booping-python/tests/specs/site_pages_test.py`, `booping-python/e2e/cases/specs/site-*.txtar` | 2 | pending |
+| 3.1 | `record_row` macro with data attributes; type page uses it; `records.html`. | `booping-python/src/booping/specs/site/templates/_macros.html.j2`, `booping-python/src/booping/specs/site/templates/type.html.j2`, `booping-python/src/booping/specs/site/templates/records.html.j2`, `booping-python/src/booping/specs/site/pages.py` | 2 | done |
+| 3.2 | Sidebar per C6; labels en/ru; tests; golden rebaseline. | `booping-python/src/booping/specs/site/templates/base.html.j2`, `booping-python/src/booping/specs/site/pages.py`, `src/config.yaml`, `booping-python/tests/specs/site_pages_test.py`, `booping-python/e2e/cases/specs/site-*.txtar` | 2 | done |
 
 ## Definition of Done
 
 ### Task 3.1
 
-- [ ] One row macro serves every record list; rows carry the eight `data-*` attributes.
-- [ ] `records.html` lists all records of all roots in page order.
+- [x] One row macro serves every record list; rows carry the eight `data-*` attributes.
+- [x] `records.html` lists all records of all roots in page order.
 
 ### Task 3.2
 
-- [ ] Sidebar matches C6 on every page, desktop and drawer; its Review count includes open items.
-- [ ] New labels exist in `en` and `ru`; `site_labels_test.py` still passes.
-- [ ] Rebaselined goldens differ only by the sidebar, the new page and row attributes.
+- [x] Sidebar matches C6 on every page, desktop and drawer; its Review count includes open items.
+- [x] New labels exist in `en` and `ru`; `site_labels_test.py` still passes.
+- [x] Rebaselined goldens differ only by the sidebar, the new page and row attributes.
 
 Return: the list of changed and created files, nothing else.
 

@@ -2,7 +2,7 @@
 id: "02"
 title: "Tag model — per-root tree from tags.yaml and used tags"
 sp: 3
-status: pending
+status: done
 plan: "plans/202610160041_specs-site-landing-and-filters/index.md"
 ---
 
@@ -18,14 +18,14 @@ Tests (integration, `booping-python/tests/specs/site_tags_test.py` new): a tmp t
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 2.1 | `tag_tree`, `tagged`, `tag_page_path`; tests. | `booping-python/src/booping/specs/site/tags.py`, `booping-python/tests/specs/site_tags_test.py` | 3 | pending |
+| 2.1 | `tag_tree`, `tagged`, `tag_page_path`; tests. | `booping-python/src/booping/specs/site/tags.py`, `booping-python/tests/specs/site_tags_test.py` | 3 | done |
 
 ## Definition of Done
 
 ### Task 2.1
 
-- [ ] Tree, counts, order and fallbacks match C7 on the test cases above.
-- [ ] Output is deterministic for the same input (no set iteration order leaks).
+- [x] Tree, counts, order and fallbacks match C7 on the test cases above.
+- [x] Output is deterministic for the same input (no set iteration order leaks).
 
 Return: the list of changed and created files, nothing else.
 

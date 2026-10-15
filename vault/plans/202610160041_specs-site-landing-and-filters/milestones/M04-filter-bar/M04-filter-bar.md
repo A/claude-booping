@@ -2,7 +2,7 @@
 id: "04"
 title: "Filter bar — chips, sort, hash state in filter.js"
 sp: 4
-status: pending
+status: done
 plan: "plans/202610160041_specs-site-landing-and-filters/index.md"
 ---
 
@@ -18,21 +18,21 @@ Tests (integration, `site_pages_test.py`): a type page's chip set and counts for
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 4.1 | `filter_facets` and `filter_bar` on type pages and `records.html`; labels en/ru; tests. | `booping-python/src/booping/specs/site/pages.py`, `booping-python/src/booping/specs/site/templates/_macros.html.j2`, `booping-python/src/booping/specs/site/templates/type.html.j2`, `booping-python/src/booping/specs/site/templates/records.html.j2`, `src/config.yaml`, `booping-python/tests/specs/site_pages_test.py` | 2 | pending |
-| 4.2 | `filter.js`, loading it from `base.html.j2`, no-JS CSS; golden rebaseline. | `booping-python/src/booping/specs/site/filter.js`, `booping-python/src/booping/specs/site/templates/base.html.j2`, `booping-python/src/booping/specs/site/style.css`, `booping-python/src/booping/specs/site/pages.py`, `booping-python/e2e/cases/specs/site-*.txtar` | 2 | pending |
+| 4.1 | `filter_facets` and `filter_bar` on type pages and `records.html`; labels en/ru; tests. | `booping-python/src/booping/specs/site/pages.py`, `booping-python/src/booping/specs/site/templates/_macros.html.j2`, `booping-python/src/booping/specs/site/templates/type.html.j2`, `booping-python/src/booping/specs/site/templates/records.html.j2`, `src/config.yaml`, `booping-python/tests/specs/site_pages_test.py` | 2 | done |
+| 4.2 | `filter.js`, loading it from `base.html.j2`, no-JS CSS; golden rebaseline. | `booping-python/src/booping/specs/site/filter.js`, `booping-python/src/booping/specs/site/templates/base.html.j2`, `booping-python/src/booping/specs/site/style.css`, `booping-python/src/booping/specs/site/pages.py`, `booping-python/e2e/cases/specs/site-*.txtar` | 2 | done |
 
 ## Definition of Done
 
 ### Task 4.1
 
-- [ ] Chips, counts and facet visibility follow C3 on the test fixtures.
-- [ ] Every chip and sort option label resolves from labels in `en` and `ru`.
+- [x] Chips, counts and facet visibility follow C3 on the test fixtures.
+- [x] Every chip and sort option label resolves from labels in `en` and `ru`.
 
 ### Task 4.2
 
-- [ ] `filter.js` implements C3's semantics, hash format, `replaceState` and `hashchange` handling.
-- [ ] Without the `js` class the filter bar is hidden and every row is visible.
-- [ ] Opening `{root}/{type}/index.html#status=accepted` from `file://` in headless Chromium shows only accepted rows (runner checks in Final Verification).
+- [x] `filter.js` implements C3's semantics, hash format, `replaceState` and `hashchange` handling.
+- [x] Without the `js` class the filter bar is hidden and every row is visible.
+- [x] Opening `{root}/{type}/index.html#status=accepted` from `file://` in headless Chromium shows only accepted rows (runner checks in Final Verification).
 
 Return: the list of changed and created files, nothing else.
 
