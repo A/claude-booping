@@ -15,7 +15,7 @@ When a project needs a core agent or skill to behave differently, it writes a
 record targeted at it — `agent:<id>` or `skill:<name>` — which is injected into
 that agent's or skill's body. It does not add a separate extension file beside the
 agent or skill. The record is a rule with `targets:`
-([booping:rule/0001](../../../specs/rule/0001-lessons-are-rules.md)).
+([booping:rule/0001](../../specs/rule/0001-lessons-are-rules.md)).
 
 ## Follows from
 

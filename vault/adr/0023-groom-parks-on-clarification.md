@@ -14,7 +14,7 @@ sources: [CHANGELOG.md, CLAUDE.md]
 ## Context
 
 Grooming settles open questions with the user before a plan reaches
-`ready-for-dev` ([booping:rule/0004](../../../specs/rule/0004-questions-settled-in-grooming.md)). Some
+`ready-for-dev` ([booping:rule/0004](../../specs/rule/0004-questions-settled-in-grooming.md)). Some
 questions a run cannot answer itself, and a run that waits for them holds the
 user in the conversation. With a task tracker attached,
 the questions also need to reach the issue.

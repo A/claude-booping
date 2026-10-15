@@ -17,5 +17,5 @@ the owner's convention.
 
 ## Follows from
 
-- [CLAUDE.md, Editing conventions](../../../CLAUDE.md) — the source states the convention without a
+- [CLAUDE.md, Editing conventions](../../CLAUDE.md) — the source states the convention without a
   reason.

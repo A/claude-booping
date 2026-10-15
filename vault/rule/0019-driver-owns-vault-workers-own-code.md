@@ -20,7 +20,7 @@ handed to a worker to fix.
 
 ## Follows from
 
-- [CLAUDE.md, Principles and Lifecycle](../../../CLAUDE.md) — the source states the split without
+- [CLAUDE.md, Principles and Lifecycle](../../CLAUDE.md) — the source states the split without
   naming a reason.
-- [Development quality checks](../../../docs/development_quality_checks.md) — a
+- [Development quality checks](../../docs/development_quality_checks.md) — a
   quality failure is delegated to a worker, not patched in the orchestrator.

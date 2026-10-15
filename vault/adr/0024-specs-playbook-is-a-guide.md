@@ -58,7 +58,7 @@ A route step maps the request to one of init, align, record, review, sync, work.
 
 - When planning, groom names the values in play and flags where the plan departs
   from them, so the user sees what drives a choice and can refine a value
-  ([rule/0030](../../../specs/rule/0030-planning-shows-values-in-play.md)).
+  ([rule/0030](../../specs/rule/0030-planning-shows-values-in-play.md)).
 - Confirmation: `/playbook specs` on a repo without specs offers init and the alignment
   guide; on a repo with specs it acts on the user's request without asking which
   action to take.

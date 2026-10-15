@@ -17,5 +17,5 @@ drive.
 
 ## Follows from
 
-- [CLAUDE.md, Editing conventions](../../../CLAUDE.md) — the source states the constraint; its
+- [CLAUDE.md, Editing conventions](../../CLAUDE.md) — the source states the constraint; its
   reason is not named in the source.
