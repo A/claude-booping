@@ -2,7 +2,7 @@
 id: "10"
 title: "site-index in the new design"
 sp: 2
-status: pending
+status: done
 plan: "plans/202610152329_specs-site-redesign/index.md"
 ---
 
@@ -18,18 +18,18 @@ Tests (integration, e2e): rebaseline the `site-index-*.txtar` goldens and read t
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 10.1 | Index page on the shell with labels; `ui no_projects`. | `booping-python/src/booping/specs/site/index.py`, `booping-python/src/booping/specs/site/templates/site_index.html.j2`, `booping-python/src/booping/commands/specs.py`, `src/config.yaml` | 1 | pending |
-| 10.2 | Golden rebaseline of the site-index cases. | `booping-python/e2e/cases/specs/site-index-*.txtar` | 1 | pending |
+| 10.1 | Index page on the shell with labels; `ui no_projects`. | `booping-python/src/booping/specs/site/index.py`, `booping-python/src/booping/specs/site/templates/site_index.html.j2`, `booping-python/src/booping/commands/specs.py`, `src/config.yaml` | 1 | done |
+| 10.2 | Golden rebaseline of the site-index cases. | `booping-python/e2e/cases/specs/site-index-*.txtar` | 1 | done |
 
 ## Definition of Done
 
 ### Task 10.1
 
-- [ ] The index page has the skip link, header, theme toggle and footer of a site page, and no sidebar.
+- [x] The index page has the skip link, header, theme toggle and footer of a site page, and no sidebar.
 
 ### Task 10.2
 
-- [ ] All `site-index-*.txtar` cases pass; their diffs touch markup and file lists only.
+- [x] All `site-index-*.txtar` cases pass; their diffs touch markup and file lists only.
 
 Return: the list of changed and created files, nothing else.
 

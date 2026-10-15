@@ -2,7 +2,7 @@
 id: "11"
 title: "Docs and a Russian fixture case"
 sp: 3
-status: pending
+status: done
 plan: "plans/202610152329_specs-site-redesign/index.md"
 ---
 
@@ -16,20 +16,20 @@ The user docs describe the redesigned site and its new flags and keys, and a Rus
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 11.1 | `documentation/specs.md` and the `src/specs/README.md` line. | `documentation/specs.md`, `src/specs/README.md` | 2 | pending |
-| 11.2 | The Russian e2e case. | `booping-python/e2e/cases/specs/site-renders-russian-labels-and-a-tier-own-type.txtar` | 1 | pending |
+| 11.1 | `documentation/specs.md` and the `src/specs/README.md` line. | `documentation/specs.md`, `src/specs/README.md` | 2 | done |
+| 11.2 | The Russian e2e case. | `booping-python/e2e/cases/specs/site-renders-russian-labels-and-a-tier-own-type.txtar` | 1 | done |
 
 ## Definition of Done
 
 ### Task 11.1
 
-- [ ] Every flag in `booping specs site --help` and `site-index --help` is documented with its default.
-- [ ] No module, function or template name appears in the user docs.
-- [ ] `just docs` builds without warnings.
+- [x] Every flag in `booping specs site --help` and `site-index --help` is documented with its default.
+- [x] No module, function or template name appears in the user docs.
+- [x] `just docs` builds without warnings.
 
 ### Task 11.2
 
-- [ ] The case passes and its expected bytes were read, not only regenerated.
+- [x] The case passes and its expected bytes were read, not only regenerated.
 
 Return: the list of changed and created files, nothing else.
 

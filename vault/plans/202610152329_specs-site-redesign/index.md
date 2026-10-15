@@ -85,8 +85,8 @@ The output tree keeps today's paths (`index.html`, `{root}/index.html`, `{root}/
 | 07 | [List pages — type, root and home pages as record and type lists](milestones/M07-list-pages/M07-list-pages.md) | 3 | done |
 | 08 | [Machine layer — llms.txt and index.json](milestones/M08-llms-and-index-json/M08-llms-and-index-json.md) | 3 | done |
 | 09 | [Machine layer — .md copies and 404 page with --site-url](milestones/M09-md-copies-and-404/M09-md-copies-and-404.md) | 3 | done |
-| 10 | [site-index in the new design](milestones/M10-site-index-design/M10-site-index-design.md) | 2 | pending |
-| 11 | [Docs and a Russian fixture case](milestones/M11-docs-and-russian-fixture/M11-docs-and-russian-fixture.md) | 3 | pending |
+| 10 | [site-index in the new design](milestones/M10-site-index-design/M10-site-index-design.md) | 2 | done |
+| 11 | [Docs and a Russian fixture case](milestones/M11-docs-and-russian-fixture/M11-docs-and-russian-fixture.md) | 3 | done |
 
 ## Final Verification
 
