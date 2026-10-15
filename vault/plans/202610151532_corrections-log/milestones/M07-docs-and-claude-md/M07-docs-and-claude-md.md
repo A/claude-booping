@@ -2,7 +2,7 @@
 id: "07"
 title: "Docs and CLAUDE.md name corrections"
 sp: 2
-status: pending
+status: done
 plan: "plans/202610151532_corrections-log/index.md"
 ---
 
@@ -18,19 +18,19 @@ Tests: none new — the docs build covers the pages.
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 7.1 | CLAUDE.md lines. | `CLAUDE.md` | 1 | pending |
-| 7.2 | Public docs lines. | `documentation/retro.md`, `documentation/vault.md`, `documentation/groom.md`, `documentation/develop.md`, `documentation/code_review.md`, `documentation/specs_playbook.md` | 1 | pending |
+| 7.1 | CLAUDE.md lines. | `CLAUDE.md` | 1 | done |
+| 7.2 | Public docs lines. | `documentation/retro.md`, `documentation/vault.md`, `documentation/groom.md`, `documentation/develop.md`, `documentation/code_review.md`, `documentation/specs_playbook.md` | 1 | done |
 
 ## Definition of Done
 
 ### Task 7.1
 
-- [ ] `CLAUDE.md` `## Commands` lists `correction` with `add` and `list`; `## Lifecycle` has the Corrections bullet of `index.md` `## CLAUDE.md impact`.
+- [x] `CLAUDE.md` `## Commands` lists `correction` with `add` and `list`; `## Lifecycle` has the Corrections bullet of `index.md` `## CLAUDE.md impact`.
 
 ### Task 7.2
 
-- [ ] Each listed page names `corrections.md` once per place it describes; no module path, test path or flag beyond `booping correction add` and `list`.
-- [ ] Every place under `documentation/` that lists the open-item `source` values includes `correction`.
+- [x] Each listed page names `corrections.md` once per place it describes; no module path, test path or flag beyond `booping correction add` and `list`.
+- [x] Every place under `documentation/` that lists the open-item `source` values includes `correction`.
 
 Return: the list of changed files, nothing else.
 

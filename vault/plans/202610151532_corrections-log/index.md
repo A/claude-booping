@@ -128,9 +128,9 @@ A *user message* is a jsonl record with `type: user`, not `isMeta`, not `isSidec
 | 02 | [add links the entry to the dialogue](milestones/M02-dialogue-link-from-the-transcript/M02-dialogue-link-from-the-transcript.md) | 4 | done |
 | 03 | [add --record files an open item](milestones/M03-correction-files-an-open-item/M03-correction-files-an-open-item.md) | 3 | done |
 | 04 | [booping correction list prints a plan's feed](milestones/M04-correction-list-for-a-plan/M04-correction-list-for-a-plan.md) | 3 | done |
-| 05 | [Core rule 0031 and the corrections format doc](milestones/M05-corrections-rule-and-format-doc/M05-corrections-rule-and-format-doc.md) | 2 | pending |
-| 06 | [Retro prepare reads the corrections feed](milestones/M06-retro-reads-the-feed/M06-retro-reads-the-feed.md) | 2 | pending |
-| 07 | [Docs and CLAUDE.md name corrections](milestones/M07-docs-and-claude-md/M07-docs-and-claude-md.md) | 2 | pending |
+| 05 | [Core rule 0031 and the corrections format doc](milestones/M05-corrections-rule-and-format-doc/M05-corrections-rule-and-format-doc.md) | 2 | done |
+| 06 | [Retro prepare reads the corrections feed](milestones/M06-retro-reads-the-feed/M06-retro-reads-the-feed.md) | 2 | done |
+| 07 | [Docs and CLAUDE.md name corrections](milestones/M07-docs-and-claude-md/M07-docs-and-claude-md.md) | 2 | done |
 
 ## I/O contract
 

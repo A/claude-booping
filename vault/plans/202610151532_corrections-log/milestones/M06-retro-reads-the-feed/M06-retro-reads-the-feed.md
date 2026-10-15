@@ -2,7 +2,7 @@
 id: "06"
 title: "Retro prepare reads the corrections feed"
 sp: 2
-status: pending
+status: done
 plan: "plans/202610151532_corrections-log/index.md"
 ---
 
@@ -18,15 +18,15 @@ Tests: none new — retro has no eval suite for `prepare`; `just snapshots` show
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 6.1 | The feed in `prepare`'s body and summary. | `playbooks/retro/prepare/base.md`, `playbooks/retro/prepare/prompt.md` | 2 | pending |
+| 6.1 | The feed in `prepare`'s body and summary. | `playbooks/retro/prepare/base.md`, `playbooks/retro/prepare/prompt.md` | 2 | done |
 
 ## Definition of Done
 
 ### Task 6.1
 
-- [ ] `bin/booping render-playbook retro --step prepare` names `booping correction list --plan` and the `correction` issue source.
-- [ ] The cross-check names the session + uuid duplicate test.
-- [ ] The body grows by at most about six lines (value/0002).
+- [x] `bin/booping render-playbook retro --step prepare` names `booping correction list --plan` and the `correction` issue source.
+- [x] The cross-check names the session + uuid duplicate test.
+- [x] The body grows by at most about six lines (value/0002).
 
 Return: the list of changed files, nothing else.
 

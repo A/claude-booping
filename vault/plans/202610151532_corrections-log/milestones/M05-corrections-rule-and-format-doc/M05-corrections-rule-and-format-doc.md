@@ -2,7 +2,7 @@
 id: "05"
 title: "Core rule 0031 and the corrections format doc"
 sp: 2
-status: pending
+status: done
 plan: "plans/202610151532_corrections-log/index.md"
 ---
 
@@ -18,19 +18,19 @@ Tests: none new — `specs check` holds the record's schema, targets and links.
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 5.1 | The core rule record. | `specs/rule/0031-corrections-are-logged.md` | 1 | pending |
-| 5.2 | The format doc. | `docs/corrections.md` | 1 | pending |
+| 5.1 | The core rule record. | `specs/rule/0031-corrections-are-logged.md` | 1 | done |
+| 5.2 | The format doc. | `docs/corrections.md` | 1 | done |
 
 ## Definition of Done
 
 ### Task 5.1
 
-- [ ] `bin/booping specs check --tier core` reports nothing for `rule/0031`.
-- [ ] `bin/booping render-playbook groom`, `develop` and `code-review` each show the brief in `## Rules`.
+- [x] `bin/booping specs check --tier core` reports nothing for `rule/0031`.
+- [x] `bin/booping render-playbook groom`, `develop` and `code-review` each show the brief in `## Rules`.
 
 ### Task 5.2
 
-- [ ] Every field of `index.md` `### corrections.md` is described once; no flag list restated beyond the command names.
+- [x] Every field of `index.md` `### corrections.md` is described once; no flag list restated beyond the command names.
 
 Return: the list of changed files, nothing else.
 
