@@ -404,6 +404,40 @@ article { margin-bottom: 2.5em; }
 blockquote { padding: 0 1em; border-left: 4px solid var(--line); color: var(--muted); }
 img { max-width: 100%; }
 
+/* Comments: every control waits for the script and working storage (`html.cmt`). */
+html:not(.cmt) .cmt-nav, html:not(.cmt) .cmt-open, html:not(.cmt) .cmt-add, html:not(.cmt) .cmt-float,
+html:not(.cmt) .cmt-groups, html:not(.cmt) .cmt-actions, html:not(.cmt) .cmt-empty { display: none; }
+.cmt-nav[hidden] { display: none; }
+html.js.cmt .iconbtn.cmt-open { display: inline-flex; position: relative; margin-left: auto; }
+.cmt-open ~ .theme { margin-left: 0; }
+.cmt-open .n { position: absolute; top: 4px; right: 2px; min-width: 16px; padding: 0 4px; border-radius: 8px; background: var(--link); color: var(--bg); font-size: 11px; line-height: 16px; text-align: center; font-variant-numeric: tabular-nums; }
+.cmt-open .n:empty, .cmt-nav .n:empty { display: none; }
+.cmt-nostore { display: none; }
+html.js:not(.cmt) .cmt-nostore { display: block; color: var(--muted); }
+
+html.cmt article .body { position: relative; }
+.cmt-add { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; margin-left: 4px; padding: 0; border: 0; border-radius: 6px; background: none; color: var(--faint); cursor: pointer; vertical-align: middle; opacity: 0; }
+.cmt-add svg, .cmt-float svg { width: 16px; height: 16px; }
+.cmt-add:hover { color: var(--link); background: var(--sunk); }
+h2:hover .cmt-add, h3:hover .cmt-add, h4:hover .cmt-add, .cmt-add:focus, .cmt-add:focus-visible { opacity: 1; }
+@media (hover: none) { .cmt-add { opacity: 1; } }
+.cmt-float { position: absolute; z-index: 2; display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 4px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--text); font-size: 14px; white-space: nowrap; box-shadow: 0 2px 8px rgb(0 0 0 / 0.15); cursor: pointer; }
+.cmt-float[hidden] { display: none; }
+.cmt-add:focus-visible, .cmt-float:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
+@media (pointer: coarse) {
+  .cmt-add, .cmt-float, .cmt-actions button { min-width: 44px; min-height: 44px; }
+}
+dialog.cmt-compose { width: min(560px, calc(100vw - 32px)); max-height: 80vh; box-sizing: border-box; padding: 20px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--text); overflow: auto; }
+dialog.cmt-compose::backdrop { background: rgb(0 0 0 / 0.35); }
+.cmt-compose h2 { margin: 0 0 12px; font-size: 18px; }
+.cmt-quote { margin: 0 0 12px; padding: 4px 12px; border-left: 3px solid var(--line); color: var(--muted); max-height: 30vh; overflow: auto; white-space: pre-wrap; }
+.cmt-compose label { display: block; margin: 0 0 4px; font-weight: 600; }
+.cmt-compose textarea { display: block; width: 100%; box-sizing: border-box; padding: 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--text); font: inherit; resize: vertical; }
+.cmt-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 0; }
+.cmt-actions button { min-height: 36px; padding: 6px 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); cursor: pointer; }
+.cmt-actions .cmt-save { border-color: var(--link); background: var(--link); color: var(--bg); }
+.cmt-actions button:disabled { opacity: 0.5; cursor: default; }
+
 /* Narrow: the rail gives way to the `.toc-m` details under the lead. */
 @media (max-width: 1099px) {
   body > .body { grid-template-columns: 232px minmax(0, 1fr); }
@@ -425,6 +459,7 @@ img { max-width: 100%; }
   html.js .search { display: none; }
   html.js .iconbtn.search-btn { display: inline-flex; margin-left: auto; }
   html.js .search-btn ~ .theme { margin-left: 0; }
+  html.js .search-btn ~ .cmt-open { margin-left: 0; }
   html.js.search-open .search { display: flex; flex-wrap: wrap; align-content: flex-start; position: fixed; inset: 0; z-index: 8; max-width: none; padding: 8px 16px; border: 0; border-radius: 0; background: var(--surface); }
   html.js.search-open .search input { min-height: 44px; font-size: 16px; }
   html.js.search-open .search kbd { display: none; }
@@ -460,6 +495,7 @@ img { max-width: 100%; }
   /* The cards carry every column of the options table. */
   main .body table.alts { display: none; }
   .opt .meta { margin-left: 0; width: 100%; }
+  dialog.cmt-compose { width: 100%; max-width: 100%; margin: auto 0 0; border-width: 1px 0 0; border-radius: 12px 12px 0 0; }
 
   /* Without JS the sidebar stays reachable, in flow after the content. */
   html:not(.js) .side { order: 2; border-right: 0; border-top: 1px solid var(--line); }

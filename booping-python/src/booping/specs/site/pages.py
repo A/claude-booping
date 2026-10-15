@@ -17,7 +17,7 @@ from booping.specs.site.fonts import font_files
 from booping.specs.site.items import OpenItem
 from booping.specs.site.labels import Labels, load_labels
 from booping.specs.site.machine import index_json, lead_summary, llms_txt
-from booping.specs.site.markdown import LinkRenderer, Mark, Rendered, render_body
+from booping.specs.site.markdown import LinkRenderer, Rendered, render_body
 from booping.specs.site.model import (
     RefMiss,
     Site,
@@ -328,6 +328,8 @@ def _record_view(
     skip = {*_PAGE_HEAD_KEYS, *_FACT_KEYS, *refs}
     return {
         "title": _title(record),
+        "ref": record.ref,
+        "page": record.page,
         "stem": record.stem,
         "state": state,
         "tags": [
@@ -377,6 +379,43 @@ def _iso_date(value: Any) -> str:
         return value.isoformat()
     text = "" if value is None else str(value)
     return text if _ISO_DATE.fullmatch(text) else ""
+
+
+def _landing(
+    records: Sequence[SiteRecord],
+    states: dict[SiteRecord, RecordState],
+    present: Sequence[str],
+    labels: Labels,
+    needs: int,
+    type_href: str,
+    prefix: str,
+) -> dict[str, Any]:
+    """The Overview landing over `records` (in page order): callout counts, one card per
+    present type holding records, and the latest-updated records. `type_href` is
+    formatted with `type`; `prefix` leads each recent record's page path."""
+    dated = [(_iso_date(r.frontmatter.get("updated_at")), r) for r in records]
+    # Stable sort: equal dates keep page order.
+    recent = sorted((d for d in dated if d[0]), key=lambda d: d[0], reverse=True)[:_RECENT]
+    return {
+        "needs": needs,
+        "unreviewed": sum(states[r].unreviewed for r in records),
+        "questions": sum(states[r].clarify for r in records),
+        "types": [
+            {"type": type_, "count": count, "href": type_href.format(type=type_)}
+            for type_ in present
+            if (count := sum(1 for r in records if r.type == type_))
+        ],
+        "recent": [
+            {
+                "ref": r.ref,
+                "page": f"{prefix}{r.page}",
+                "title": _title(r),
+                "datetime": iso,
+                "date": labels.date(iso),
+            }
+            for iso, r in recent
+        ],
+    }
 
 
 def _row(record: SiteRecord, state: RecordState, order: int) -> dict[str, Any]:
@@ -520,6 +559,8 @@ def build_site(
         "site.js": (_HERE / "site.js").read_text(),
         "filter.js": (_HERE / "filter.js").read_text(),
         "search.js": (_HERE / "search.js").read_text(),
+        "comments-format.js": (_HERE / "comments-format.js").read_text(),
+        "comments.js": (_HERE / "comments.js").read_text(),
     }
     warnings: set[SiteWarning] = set()
 
@@ -534,12 +575,10 @@ def build_site(
         if r.root == root.name and r.type == type_
     ]
 
-    marks: dict[int, list[Mark]] = {}
     states: dict[SiteRecord, RecordState] = {}
     rendered: dict[int, Rendered] = {}
     for record in site.records:
         own = rendered[id(record)] = _render(site, record, labels)
-        marks[id(record)] = own.marks
         states[record] = record_state(record, own.marks)
 
     trees: dict[str, list[TagNode]] = {}
@@ -575,13 +614,11 @@ def build_site(
         files[f"{record.root}/{record.type}/{record.stem}.md"] = record.path.read_bytes()
 
     for root in site.roots:
-        records = [r for r in site.records if r.root == root.name]
-        types_: list[dict[str, Any]] = []
+        records = [r for r in ordered if r.root == root.name]
         for type_ in present:
             of_type = [r for r in records if r.type == type_]
             if not of_type:
                 continue
-            types_.append({"type": type_, "count": len(of_type)})
             type_rows = [_row(r, states[r], n) for n, r in enumerate(of_type)]
             page(
                 "type.html.j2",
@@ -602,20 +639,15 @@ def build_site(
             root.name,
             [Crumb(labels.ui("overview"), "../index.html"), Crumb(root.name, None)],
             root=root.name,
-            types=types_,
-            marks=[
-                {
-                    "kind": kind,
-                    "href": f"{r.type}/{r.stem}.html#L{m.line}",
-                    "ref": r.ref,
-                    "title": _title(r),
-                    "text": m.text,
-                }
-                for kind in _MARK_KINDS
-                for r in records
-                for m in marks[id(r)]
-                if m.kind == kind
-            ],
+            **_landing(
+                records,
+                states,
+                present,
+                labels,
+                sum(1 for r in records if states[r].reasons),
+                "{type}/index.html",
+                "../",
+            ),
         )
 
     for root in site.roots:
@@ -685,36 +717,19 @@ def build_site(
         labels.ui("search"),
         [Crumb(labels.ui("overview"), "index.html"), Crumb(labels.ui("search"), None)],
     )
-    dated = [(_iso_date(r.frontmatter.get("updated_at")), r) for r in ordered]
-    # Stable sort: equal dates keep page order.
-    recent = sorted((d for d in dated if d[0]), key=lambda d: d[0], reverse=True)[:_RECENT]
+    page(
+        "comments.html.j2",
+        "comments.html",
+        labels.ui("my_comments"),
+        [Crumb(labels.ui("overview"), "index.html"), Crumb(labels.ui("my_comments"), None)],
+    )
     page(
         "index.html.j2",
         "index.html",
         site_title,
         [Crumb(labels.ui("overview"), None)],
         lead=lead_summary(site),
-        needs=nav["review"],
-        unreviewed=sum(states[r].unreviewed for r in site.records),
-        questions=sum(states[r].clarify for r in site.records),
-        types=[
-            {
-                "type": type_,
-                "count": sum(1 for r in site.records if r.type == type_),
-                "href": f"records.html#type={type_}",
-            }
-            for type_ in present
-        ],
-        recent=[
-            {
-                "ref": r.ref,
-                "page": r.page,
-                "title": _title(r),
-                "datetime": iso,
-                "date": labels.date(iso),
-            }
-            for iso, r in recent
-        ],
+        **_landing(ordered, states, present, labels, nav["review"], "records.html#type={type}", ""),
     )
     if site_url is not None:
         base = urlsplit(site_url).path

@@ -1,0 +1,25 @@
+{% from "_macros.html.j2" import icon %}
+{% if sheet %}
+<dialog class="cmt-sheet" aria-labelledby="cmt-sheet-h">
+<div class="cmt-head">
+<h2 id="cmt-sheet-h">{{ labels.ui("my_comments") }}</h2>
+<button class="iconbtn cmt-close" type="button" aria-label="{{ labels.ui('close') }}">&times;</button>
+</div>
+<ul class="cmt-list"></ul>
+<p class="cmt-empty">{{ labels.ui("no_comments") }}</p>
+<div class="cmt-actions">
+<button class="cmt-copy" type="button">{{ labels.ui("copy_for_model") }}</button>
+<button class="cmt-clear" type="button">{{ labels.ui("clear_sent") }}</button>
+</div>
+</dialog>
+{% endif %}
+<dialog class="cmt-compose" aria-labelledby="cmt-compose-h" data-comment="{{ labels.ui('comment') }}" data-comment-section="{{ labels.ui('comment_section') }}" data-comment-paragraph="{{ labels.ui('comment_paragraph') }}" data-edit="{{ labels.ui('edit') }}" data-delete="{{ labels.ui('delete') }}" data-save="{{ labels.ui('save') }}" data-cancel="{{ labels.ui('cancel') }}" data-sent="{{ labels.ui('sent') }}" data-deleted="{{ labels.ui('comment_deleted') }}" data-copy-failed="{{ labels.ui('copy_failed') }}" data-copied-forms="{{ labels.plural_forms('comments_copied_n') | tojson | forceescape }}" data-cleared-forms="{{ labels.plural_forms('comments_cleared_n') | tojson | forceescape }}">
+<h2 id="cmt-compose-h">{{ labels.ui("comment") }}</h2>
+<blockquote class="cmt-quote"></blockquote>
+<label for="cmt-note">{{ labels.ui("comment_note") }}</label>
+<textarea id="cmt-note" rows="4"></textarea>
+<div class="cmt-actions">
+<button class="cmt-save" type="button" disabled>{{ labels.ui("save") }}</button>
+<button class="cmt-cancel" type="button">{{ labels.ui("cancel") }}</button>
+</div>
+</dialog>

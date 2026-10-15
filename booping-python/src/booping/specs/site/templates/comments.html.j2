@@ -1,0 +1,16 @@
+{% extends "base.html.j2" %}
+{% block main %}
+<h1>{{ labels.ui("my_comments") }}</h1>
+<p class="lead">{{ labels.ui("comments_lead") }}</p>
+<p class="needs-js">{{ labels.ui("comments_need_js") }}</p>
+<p class="cmt-nostore">{{ labels.ui("comments_need_storage") }}</p>
+<div class="cmt-groups"></div>
+<p class="cmt-empty">{{ labels.ui("no_comments") }}</p>
+<div class="cmt-actions">
+<button class="cmt-copy" type="button">{{ labels.ui("copy_for_model") }}</button>
+<button class="cmt-clear" type="button">{{ labels.ui("clear_sent") }}</button>
+</div>
+{% with sheet = false %}
+{% include "_comments.html.j2" %}
+{% endwith %}
+{% endblock %}

@@ -1,7 +1,10 @@
 {% extends "base.html.j2" %}
-{% from "_macros.html.j2" import state_badges, fact_item, fact_value, rel_item, toc_blocks %}
+{% from "_macros.html.j2" import icon, state_badges, fact_item, fact_value, rel_item, toc_blocks %}
 {% block head %}
 <link rel="alternate" type="text/markdown" href="{{ record.stem }}.md">
+{% endblock %}
+{% block header_actions %}
+<button class="iconbtn cmt-open" type="button" aria-label="{{ labels.ui('my_comments') }}" title="{{ labels.ui('my_comments') }}">{{ icon("i-comment") }}<span class="n"></span></button>
 {% endblock %}
 {% block rail %}
 {% if record.toc or record.questions %}
@@ -11,7 +14,7 @@
 {% block main %}
 {% set r = record %}
 <div class="measure">
-<article>
+<article data-ref="{{ r.ref }}" data-title="{{ r.title }}" data-page="{{ r.page }}">
 <h1>{{ r.title }}</h1>
 {% set badges = state_badges(r.state, labels, clarify_href=("#" ~ r.state.first_mark) if r.state.first_mark else none) | trim %}
 {% if badges %}
@@ -77,5 +80,8 @@
 {% else %}
 <p>{{ labels.ui("nothing_references") }}</p>
 {% endif %}
+{% with sheet = true %}
+{% include "_comments.html.j2" %}
+{% endwith %}
 </div>
 {% endblock %}

@@ -51,17 +51,27 @@
 {%- endif -%}
 {% endmacro %}
 
-{% macro types_list(types, base) %}
-<ul class="types">
+{% macro callout(needs, unreviewed, questions, href) %}
+<p class="callout">{{ icon("i-clarify") }}<span><a href="{{ href }}">{{ labels.plural("needs_you", needs) }}</a>{% if unreviewed %} · {{ labels.plural("unreviewed_n", unreviewed) }}{% endif %}{% if questions %} · {{ labels.plural("open_questions", questions) }}{% endif %}</span></p>
+{% endmacro %}
+
+{% macro scenarios(types) %}
+<ul class="scen">
 {% for t in types %}
-<li><a href="{{ base }}{{ t.type }}/index.html">{{ labels.type_plural(t.type) }}</a> <span class="n">{{ labels.ui("records") }}: {{ t.count }}</span>
-{% set scenario = labels.scenario(t.type) %}
-{% if scenario %}
-<p>{{ scenario }}</p>
-{% endif %}
-</li>
+<li><a href="{{ t.href }}"><b>{{ labels.type_plural(t.type) }} <span class="n">{{ t.count }}</span></b>{% set scenario = labels.scenario(t.type) %}{% if scenario %}<span class="s">{{ scenario }}</span>{% endif %}</a></li>
 {% endfor %}
 </ul>
+{% endmacro %}
+
+{% macro recently_updated(recent) %}
+<div class="measure">
+<h2>{{ labels.ui("recently_updated") }}</h2>
+<ul class="recent">
+{% for r in recent %}
+<li><code class="ref">{{ r.ref }}</code><a href="{{ r.page }}">{{ r.title }}</a><time datetime="{{ r.datetime }}">{{ r.date }}</time></li>
+{% endfor %}
+</ul>
+</div>
 {% endmacro %}
 
 {% macro record_row(view, labels, prefix, hide_unreviewed=false, mark_links=false) %}

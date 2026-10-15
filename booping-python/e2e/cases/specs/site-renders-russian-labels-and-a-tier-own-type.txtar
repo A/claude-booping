@@ -143,7 +143,7 @@ booping specs site
 -- exit --
 0
 -- stdout --
-specs site: 1 roots, 6 records, 18 pages, 0 warnings -> specs-site
+specs site: 1 roots, 6 records, 19 pages, 0 warnings -> specs-site
 -- stderr --
 -- expected/cwd/specs-site/review.html --
 <!doctype html>
@@ -159,6 +159,8 @@ specs site: 1 roots, 6 records, 18 pages, 0 warnings -> specs-site
 <script src="site.js" defer></script>
 <script src="filter.js" defer></script>
 <script src="search.js" defer></script>
+<script src="comments-format.js" defer></script>
+<script src="comments.js" defer></script>
 </head>
 <body>
 <svg aria-hidden="true" style="display:none">
@@ -175,6 +177,7 @@ specs site: 1 roots, 6 records, 18 pages, 0 warnings -> specs-site
 <symbol id="i-moon" viewBox="0 0 20 20"><path d="M15.5 12.6A6.5 6.5 0 0 1 7.4 4.5a6.5 6.5 0 1 0 8.1 8.1z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
 <symbol id="i-sun" viewBox="0 0 16 16"><circle cx="8" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.2v1.6M8 13.2v1.6M1.2 8h1.6M13.2 8h1.6M3.2 3.2l1.1 1.1M11.7 11.7l1.1 1.1M3.2 12.8l1.1-1.1M11.7 4.3l1.1-1.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
 <symbol id="i-auto" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.6a6.4 6.4 0 0 0 0 12.8z" fill="currentColor"/></symbol>
+<symbol id="i-comment" viewBox="0 0 20 20"><path d="M4 4.5h12a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5H9.2l-3.7 3v-3H4A1.5 1.5 0 0 1 2.5 13V6A1.5 1.5 0 0 1 4 4.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
 </svg>
 <a class="skip" href="#main">Перейти к содержимому</a>
 <header class="top">
@@ -196,6 +199,7 @@ specs site: 1 roots, 6 records, 18 pages, 0 warnings -> specs-site
 <li><a href="index.html">Обзор</a></li>
 <li><a href="review.html" aria-current="page"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>Ревью<span class="n">4</span></a></li>
 <li><a href="records.html">Все записи<span class="n">6</span></a></li>
+<li class="cmt-nav" hidden><a href="comments.html">Мои комментарии<span class="n"></span></a></li>
 </ul>
 <h4>Разделы</h4>
 <ul>
@@ -274,6 +278,8 @@ specs site: 1 roots, 6 records, 18 pages, 0 warnings -> specs-site
 <script src="site.js" defer></script>
 <script src="filter.js" defer></script>
 <script src="search.js" defer></script>
+<script src="comments-format.js" defer></script>
+<script src="comments.js" defer></script>
 </head>
 <body>
 <svg aria-hidden="true" style="display:none">
@@ -290,6 +296,7 @@ specs site: 1 roots, 6 records, 18 pages, 0 warnings -> specs-site
 <symbol id="i-moon" viewBox="0 0 20 20"><path d="M15.5 12.6A6.5 6.5 0 0 1 7.4 4.5a6.5 6.5 0 1 0 8.1 8.1z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
 <symbol id="i-sun" viewBox="0 0 16 16"><circle cx="8" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.2v1.6M8 13.2v1.6M1.2 8h1.6M13.2 8h1.6M3.2 3.2l1.1 1.1M11.7 11.7l1.1 1.1M3.2 12.8l1.1-1.1M11.7 4.3l1.1-1.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
 <symbol id="i-auto" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.6a6.4 6.4 0 0 0 0 12.8z" fill="currentColor"/></symbol>
+<symbol id="i-comment" viewBox="0 0 20 20"><path d="M4 4.5h12a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5H9.2l-3.7 3v-3H4A1.5 1.5 0 0 1 2.5 13V6A1.5 1.5 0 0 1 4 4.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
 </svg>
 <a class="skip" href="#main">Перейти к содержимому</a>
 <header class="top">
@@ -311,6 +318,7 @@ specs site: 1 roots, 6 records, 18 pages, 0 warnings -> specs-site
 <li><a href="index.html">Обзор</a></li>
 <li><a href="review.html"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>Ревью<span class="n">4</span></a></li>
 <li><a href="records.html" aria-current="page">Все записи<span class="n">6</span></a></li>
+<li class="cmt-nav" hidden><a href="comments.html">Мои комментарии<span class="n"></span></a></li>
 </ul>
 <h4>Разделы</h4>
 <ul>
@@ -392,6 +400,8 @@ specs site: 1 roots, 6 records, 18 pages, 0 warnings -> specs-site
 <link rel="stylesheet" href="../../style.css">
 <script src="../../site.js" defer></script>
 <script src="../../search.js" defer></script>
+<script src="../../comments-format.js" defer></script>
+<script src="../../comments.js" defer></script>
 </head>
 <body>
 <svg aria-hidden="true" style="display:none">
@@ -408,6 +418,7 @@ specs site: 1 roots, 6 records, 18 pages, 0 warnings -> specs-site
 <symbol id="i-moon" viewBox="0 0 20 20"><path d="M15.5 12.6A6.5 6.5 0 0 1 7.4 4.5a6.5 6.5 0 1 0 8.1 8.1z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
 <symbol id="i-sun" viewBox="0 0 16 16"><circle cx="8" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.2v1.6M8 13.2v1.6M1.2 8h1.6M13.2 8h1.6M3.2 3.2l1.1 1.1M11.7 11.7l1.1 1.1M3.2 12.8l1.1-1.1M11.7 4.3l1.1-1.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
 <symbol id="i-auto" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.6a6.4 6.4 0 0 0 0 12.8z" fill="currentColor"/></symbol>
+<symbol id="i-comment" viewBox="0 0 20 20"><path d="M4 4.5h12a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5H9.2l-3.7 3v-3H4A1.5 1.5 0 0 1 2.5 13V6A1.5 1.5 0 0 1 4 4.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
 </svg>
 <a class="skip" href="#main">Перейти к содержимому</a>
 <header class="top">
@@ -429,6 +440,7 @@ specs site: 1 roots, 6 records, 18 pages, 0 warnings -> specs-site
 <li><a href="../../index.html">Обзор</a></li>
 <li><a href="../../review.html"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>Ревью<span class="n">4</span></a></li>
 <li><a href="../../records.html">Все записи<span class="n">6</span></a></li>
+<li class="cmt-nav" hidden><a href="../../comments.html">Мои комментарии<span class="n"></span></a></li>
 </ul>
 <h4>Разделы</h4>
 <ul>
@@ -483,6 +495,8 @@ specs site: 1 roots, 6 records, 18 pages, 0 warnings -> specs-site
 <script src="../../site.js" defer></script>
 <script src="../../filter.js" defer></script>
 <script src="../../search.js" defer></script>
+<script src="../../comments-format.js" defer></script>
+<script src="../../comments.js" defer></script>
 </head>
 <body>
 <svg aria-hidden="true" style="display:none">
@@ -499,6 +513,7 @@ specs site: 1 roots, 6 records, 18 pages, 0 warnings -> specs-site
 <symbol id="i-moon" viewBox="0 0 20 20"><path d="M15.5 12.6A6.5 6.5 0 0 1 7.4 4.5a6.5 6.5 0 1 0 8.1 8.1z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
 <symbol id="i-sun" viewBox="0 0 16 16"><circle cx="8" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.2v1.6M8 13.2v1.6M1.2 8h1.6M13.2 8h1.6M3.2 3.2l1.1 1.1M11.7 11.7l1.1 1.1M3.2 12.8l1.1-1.1M11.7 4.3l1.1-1.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
 <symbol id="i-auto" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.6a6.4 6.4 0 0 0 0 12.8z" fill="currentColor"/></symbol>
+<symbol id="i-comment" viewBox="0 0 20 20"><path d="M4 4.5h12a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5H9.2l-3.7 3v-3H4A1.5 1.5 0 0 1 2.5 13V6A1.5 1.5 0 0 1 4 4.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
 </svg>
 <a class="skip" href="#main">Перейти к содержимому</a>
 <header class="top">
@@ -520,6 +535,7 @@ specs site: 1 roots, 6 records, 18 pages, 0 warnings -> specs-site
 <li><a href="../../index.html">Обзор</a></li>
 <li><a href="../../review.html"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>Ревью<span class="n">4</span></a></li>
 <li><a href="../../records.html">Все записи<span class="n">6</span></a></li>
+<li class="cmt-nav" hidden><a href="../../comments.html">Мои комментарии<span class="n"></span></a></li>
 </ul>
 <h4>Разделы</h4>
 <ul>
@@ -587,6 +603,8 @@ specs site: 1 roots, 6 records, 18 pages, 0 warnings -> specs-site
 <link rel="stylesheet" href="../../style.css">
 <script src="../../site.js" defer></script>
 <script src="../../search.js" defer></script>
+<script src="../../comments-format.js" defer></script>
+<script src="../../comments.js" defer></script>
 <link rel="alternate" type="text/markdown" href="0001-squash-sliyaniya.md">
 </head>
 <body>
@@ -604,6 +622,7 @@ specs site: 1 roots, 6 records, 18 pages, 0 warnings -> specs-site
 <symbol id="i-moon" viewBox="0 0 20 20"><path d="M15.5 12.6A6.5 6.5 0 0 1 7.4 4.5a6.5 6.5 0 1 0 8.1 8.1z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
 <symbol id="i-sun" viewBox="0 0 16 16"><circle cx="8" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.2v1.6M8 13.2v1.6M1.2 8h1.6M13.2 8h1.6M3.2 3.2l1.1 1.1M11.7 11.7l1.1 1.1M3.2 12.8l1.1-1.1M11.7 4.3l1.1-1.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
 <symbol id="i-auto" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.6a6.4 6.4 0 0 0 0 12.8z" fill="currentColor"/></symbol>
+<symbol id="i-comment" viewBox="0 0 20 20"><path d="M4 4.5h12a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5H9.2l-3.7 3v-3H4A1.5 1.5 0 0 1 2.5 13V6A1.5 1.5 0 0 1 4 4.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
 </svg>
 <a class="skip" href="#main">Перейти к содержимому</a>
 <header class="top">
@@ -617,6 +636,7 @@ specs site: 1 roots, 6 records, 18 pages, 0 warnings -> specs-site
 <ul id="search-list" role="listbox" aria-label="Поиск" hidden></ul>
 </form>
 <button class="iconbtn search-btn" type="button" aria-label="Поиск" title="Поиск"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg></button>
+<button class="iconbtn cmt-open" type="button" aria-label="Мои комментарии" title="Мои комментарии"><svg class="ic" aria-hidden="true"><use href="#i-comment"/></svg><span class="n"></span></button>
 <button class="iconbtn theme" type="button" aria-label="Тема: как в системе" title="Тема: как в системе" data-label-auto="Тема: как в системе" data-label-light="Тема: светлая" data-label-dark="Тема: тёмная"><svg class="ic" aria-hidden="true"><use href="#i-auto"/></svg></button>
 </header>
 <div class="body">
@@ -625,6 +645,7 @@ specs site: 1 roots, 6 records, 18 pages, 0 warnings -> specs-site
 <li><a href="../../index.html">Обзор</a></li>
 <li><a href="../../review.html"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>Ревью<span class="n">4</span></a></li>
 <li><a href="../../records.html">Все записи<span class="n">6</span></a></li>
+<li class="cmt-nav" hidden><a href="../../comments.html">Мои комментарии<span class="n"></span></a></li>
 </ul>
 <h4>Разделы</h4>
 <ul>
@@ -657,7 +678,7 @@ specs site: 1 roots, 6 records, 18 pages, 0 warnings -> specs-site
 </ol>
 </nav>
 <div class="measure">
-<article>
+<article data-ref="adr/0001" data-title="Сливаем ветки одним коммитом" data-page="probe/adr/0001-squash-sliyaniya.html">
 <h1>Сливаем ветки одним коммитом</h1>
 <div class="badges"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>принято</span><a href="#L15"><span class="b warn"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>1 вопрос к тебе</span></a><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-unreviewed"/></svg>без ревью</span></div>
 <p class="lead">Каждая ветка попадает в основную одним коммитом.</p>
@@ -690,6 +711,28 @@ specs site: 1 roots, 6 records, 18 pages, 0 warnings -> specs-site
 </article>
 <h2 id="referenced-by">Ссылаются сюда<a class="anchor" href="#referenced-by" aria-label="Ссылка на раздел: Ссылаются сюда">§</a></h2>
 <p>Сюда никто не ссылается.</p>
+<dialog class="cmt-sheet" aria-labelledby="cmt-sheet-h">
+<div class="cmt-head">
+<h2 id="cmt-sheet-h">Мои комментарии</h2>
+<button class="iconbtn cmt-close" type="button" aria-label="Закрыть">&times;</button>
+</div>
+<ul class="cmt-list"></ul>
+<p class="cmt-empty">Комментариев пока нет.</p>
+<div class="cmt-actions">
+<button class="cmt-copy" type="button">Скопировать для модели</button>
+<button class="cmt-clear" type="button">Удалить отправленные</button>
+</div>
+</dialog>
+<dialog class="cmt-compose" aria-labelledby="cmt-compose-h" data-comment="Комментировать" data-comment-section="Комментировать раздел" data-comment-paragraph="Комментировать абзац" data-edit="Изменить" data-delete="Удалить" data-save="Сохранить" data-cancel="Отмена" data-sent="отправлен" data-deleted="Комментарий удалён" data-copy-failed="Не удалось скопировать" data-copied-forms="[&#34;{n} скопирован&#34;, &#34;{n} скопировано&#34;, &#34;{n} скопировано&#34;]" data-cleared-forms="[&#34;{n} удалён&#34;, &#34;{n} удалено&#34;, &#34;{n} удалено&#34;]">
+<h2 id="cmt-compose-h">Комментировать</h2>
+<blockquote class="cmt-quote"></blockquote>
+<label for="cmt-note">Заметка</label>
+<textarea id="cmt-note" rows="4"></textarea>
+<div class="cmt-actions">
+<button class="cmt-save" type="button" disabled>Сохранить</button>
+<button class="cmt-cancel" type="button">Отмена</button>
+</div>
+</dialog>
 </div>
 </main>
 <aside class="rail">
@@ -718,6 +761,8 @@ specs site: 1 roots, 6 records, 18 pages, 0 warnings -> specs-site
 <link rel="stylesheet" href="../../style.css">
 <script src="../../site.js" defer></script>
 <script src="../../search.js" defer></script>
+<script src="../../comments-format.js" defer></script>
+<script src="../../comments.js" defer></script>
 <link rel="alternate" type="text/markdown" href="0002-rebase.md">
 </head>
 <body>
@@ -735,6 +780,7 @@ specs site: 1 roots, 6 records, 18 pages, 0 warnings -> specs-site
 <symbol id="i-moon" viewBox="0 0 20 20"><path d="M15.5 12.6A6.5 6.5 0 0 1 7.4 4.5a6.5 6.5 0 1 0 8.1 8.1z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
 <symbol id="i-sun" viewBox="0 0 16 16"><circle cx="8" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.2v1.6M8 13.2v1.6M1.2 8h1.6M13.2 8h1.6M3.2 3.2l1.1 1.1M11.7 11.7l1.1 1.1M3.2 12.8l1.1-1.1M11.7 4.3l1.1-1.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
 <symbol id="i-auto" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.6a6.4 6.4 0 0 0 0 12.8z" fill="currentColor"/></symbol>
+<symbol id="i-comment" viewBox="0 0 20 20"><path d="M4 4.5h12a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5H9.2l-3.7 3v-3H4A1.5 1.5 0 0 1 2.5 13V6A1.5 1.5 0 0 1 4 4.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
 </svg>
 <a class="skip" href="#main">Перейти к содержимому</a>
 <header class="top">
@@ -748,6 +794,7 @@ specs site: 1 roots, 6 records, 18 pages, 0 warnings -> specs-site
 <ul id="search-list" role="listbox" aria-label="Поиск" hidden></ul>
 </form>
 <button class="iconbtn search-btn" type="button" aria-label="Поиск" title="Поиск"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg></button>
+<button class="iconbtn cmt-open" type="button" aria-label="Мои комментарии" title="Мои комментарии"><svg class="ic" aria-hidden="true"><use href="#i-comment"/></svg><span class="n"></span></button>
 <button class="iconbtn theme" type="button" aria-label="Тема: как в системе" title="Тема: как в системе" data-label-auto="Тема: как в системе" data-label-light="Тема: светлая" data-label-dark="Тема: тёмная"><svg class="ic" aria-hidden="true"><use href="#i-auto"/></svg></button>
 </header>
 <div class="body">
@@ -756,6 +803,7 @@ specs site: 1 roots, 6 records, 18 pages, 0 warnings -> specs-site
 <li><a href="../../index.html">Обзор</a></li>
 <li><a href="../../review.html"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>Ревью<span class="n">4</span></a></li>
 <li><a href="../../records.html">Все записи<span class="n">6</span></a></li>
+<li class="cmt-nav" hidden><a href="../../comments.html">Мои комментарии<span class="n"></span></a></li>
 </ul>
 <h4>Разделы</h4>
 <ul>
@@ -788,7 +836,7 @@ specs site: 1 roots, 6 records, 18 pages, 0 warnings -> specs-site
 </ol>
 </nav>
 <div class="measure">
-<article>
+<article data-ref="adr/0002" data-title="Перебазируем перед слиянием" data-page="probe/adr/0002-rebase.html">
 <h1>Перебазируем перед слиянием</h1>
 <div class="badges"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>принято</span></div>
 <p class="lead">Ветка перебазируется на основную перед слиянием.</p>
@@ -880,6 +928,28 @@ specs site: 1 roots, 6 records, 18 pages, 0 warnings -> specs-site
 <ul class="rel by-section">
 <li><a href="#контекст">Контекст</a> ← <a href="../../probe/rule/0001-lineinaya-istoriya.html"><code class="ref">rule/0001</code></a></li>
 </ul>
+<dialog class="cmt-sheet" aria-labelledby="cmt-sheet-h">
+<div class="cmt-head">
+<h2 id="cmt-sheet-h">Мои комментарии</h2>
+<button class="iconbtn cmt-close" type="button" aria-label="Закрыть">&times;</button>
+</div>
+<ul class="cmt-list"></ul>
+<p class="cmt-empty">Комментариев пока нет.</p>
+<div class="cmt-actions">
+<button class="cmt-copy" type="button">Скопировать для модели</button>
+<button class="cmt-clear" type="button">Удалить отправленные</button>
+</div>
+</dialog>
+<dialog class="cmt-compose" aria-labelledby="cmt-compose-h" data-comment="Комментировать" data-comment-section="Комментировать раздел" data-comment-paragraph="Комментировать абзац" data-edit="Изменить" data-delete="Удалить" data-save="Сохранить" data-cancel="Отмена" data-sent="отправлен" data-deleted="Комментарий удалён" data-copy-failed="Не удалось скопировать" data-copied-forms="[&#34;{n} скопирован&#34;, &#34;{n} скопировано&#34;, &#34;{n} скопировано&#34;]" data-cleared-forms="[&#34;{n} удалён&#34;, &#34;{n} удалено&#34;, &#34;{n} удалено&#34;]">
+<h2 id="cmt-compose-h">Комментировать</h2>
+<blockquote class="cmt-quote"></blockquote>
+<label for="cmt-note">Заметка</label>
+<textarea id="cmt-note" rows="4"></textarea>
+<div class="cmt-actions">
+<button class="cmt-save" type="button" disabled>Сохранить</button>
+<button class="cmt-cancel" type="button">Отмена</button>
+</div>
+</dialog>
 </div>
 </main>
 <aside class="rail">
@@ -918,6 +988,8 @@ specs site: 1 roots, 6 records, 18 pages, 0 warnings -> specs-site
 <script src="../../site.js" defer></script>
 <script src="../../filter.js" defer></script>
 <script src="../../search.js" defer></script>
+<script src="../../comments-format.js" defer></script>
+<script src="../../comments.js" defer></script>
 </head>
 <body>
 <svg aria-hidden="true" style="display:none">
@@ -934,6 +1006,7 @@ specs site: 1 roots, 6 records, 18 pages, 0 warnings -> specs-site
 <symbol id="i-moon" viewBox="0 0 20 20"><path d="M15.5 12.6A6.5 6.5 0 0 1 7.4 4.5a6.5 6.5 0 1 0 8.1 8.1z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
 <symbol id="i-sun" viewBox="0 0 16 16"><circle cx="8" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.2v1.6M8 13.2v1.6M1.2 8h1.6M13.2 8h1.6M3.2 3.2l1.1 1.1M11.7 11.7l1.1 1.1M3.2 12.8l1.1-1.1M11.7 4.3l1.1-1.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
 <symbol id="i-auto" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.6a6.4 6.4 0 0 0 0 12.8z" fill="currentColor"/></symbol>
+<symbol id="i-comment" viewBox="0 0 20 20"><path d="M4 4.5h12a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5H9.2l-3.7 3v-3H4A1.5 1.5 0 0 1 2.5 13V6A1.5 1.5 0 0 1 4 4.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
 </svg>
 <a class="skip" href="#main">Перейти к содержимому</a>
 <header class="top">
@@ -955,6 +1028,7 @@ specs site: 1 roots, 6 records, 18 pages, 0 warnings -> specs-site
 <li><a href="../../index.html">Обзор</a></li>
 <li><a href="../../review.html"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>Ревью<span class="n">4</span></a></li>
 <li><a href="../../records.html">Все записи<span class="n">6</span></a></li>
+<li class="cmt-nav" hidden><a href="../../comments.html">Мои комментарии<span class="n"></span></a></li>
 </ul>
 <h4>Разделы</h4>
 <ul>

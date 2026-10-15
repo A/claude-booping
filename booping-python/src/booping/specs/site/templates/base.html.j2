@@ -17,6 +17,8 @@
 {% block scripts %}{% endblock %}
 {% if nav %}
 <script src="{{ prefix }}search.js" defer></script>
+<script src="{{ prefix }}comments-format.js" defer></script>
+<script src="{{ prefix }}comments.js" defer></script>
 {% endif %}
 {% block head %}{% endblock %}
 </head>
@@ -38,6 +40,7 @@
 </form>
 <button class="iconbtn search-btn" type="button" aria-label="{{ labels.ui('search') }}" title="{{ labels.ui('search') }}">{{ icon("i-search") }}</button>
 {% endif %}
+{% block header_actions %}{% endblock %}
 <button class="iconbtn theme" type="button" aria-label="{{ labels.ui('theme_auto') }}" title="{{ labels.ui('theme_auto') }}" data-label-auto="{{ labels.ui('theme_auto') }}" data-label-light="{{ labels.ui('theme_light') }}" data-label-dark="{{ labels.ui('theme_dark') }}">{{ icon("i-auto") }}</button>
 </header>
 <div class="body{% if not nav %} noside{% endif %}{% if not rail_html %} norail{% endif %}">
@@ -47,6 +50,7 @@
 <li><a href="{{ prefix }}index.html"{% if path == "index.html" %} aria-current="page"{% endif %}>{{ labels.ui("overview") }}</a></li>
 <li><a href="{{ prefix }}review.html"{% if path == "review.html" %} aria-current="page"{% endif %}>{{ icon("i-clarify") }}{{ labels.ui("review") }}<span class="n">{{ nav.review }}</span></a></li>
 <li><a href="{{ prefix }}records.html"{% if path == "records.html" %} aria-current="page"{% endif %}>{{ labels.ui("all_records") }}<span class="n">{{ nav.records }}</span></a></li>
+<li class="cmt-nav" hidden><a href="{{ prefix }}comments.html"{% if path == "comments.html" %} aria-current="page"{% endif %}>{{ labels.ui("my_comments") }}<span class="n"></span></a></li>
 </ul>
 <h4>{{ labels.ui("types") }}</h4>
 <ul>

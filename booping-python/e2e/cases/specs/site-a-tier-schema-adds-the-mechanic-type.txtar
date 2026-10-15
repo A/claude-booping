@@ -43,5 +43,5 @@ booping specs site --root game=game --root other=other
 -- exit --
 0
 -- stdout --
-specs site: 2 roots, 1 records, 8 pages, 0 warnings -> specs-site
+specs site: 2 roots, 1 records, 9 pages, 0 warnings -> specs-site
 -- stderr --

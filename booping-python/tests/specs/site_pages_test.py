@@ -101,7 +101,7 @@ def _check_links(files: dict[str, str | bytes]) -> int:
         text = files[path]
         assert isinstance(text, str)
         extra = 1 if 'class="filters"' in text else 2 if path == "search.html" else 0
-        assert parsed.scripts == 3 + extra, path
+        assert parsed.scripts == 5 + extra, path
         for href in parsed.hrefs:
             assert "://" not in href and not href.startswith("/"), (path, href)
             target, _, fragment = href.partition("#")
@@ -124,6 +124,9 @@ def test_every_relative_link_lands_on_a_page_and_id(site: Site) -> None:
 def test_page_map_paths(site: Site) -> None:
     files, _ = build_site(site, TYPES)
     assert sorted(files) == [
+        "comments-format.js",
+        "comments.html",
+        "comments.js",
         "core/index.html",
         "core/value/0001-clarity.html",
         "core/value/0001-clarity.md",
@@ -154,18 +157,70 @@ def test_build_is_repeatable(site: Site, roots: list[SiteRoot]) -> None:
     assert build_site(site, TYPES) == build_site(load_site(roots, TYPES), TYPES)
 
 
-def test_root_page_lists_types_with_counts_and_marks_with_links(site: Site) -> None:
-    files = _texts(site)
-    root = files["proj/index.html"]
-    assert (
-        '<ul class="types">\n<li><a href="adr/index.html">ADRs</a>'
-        ' <span class="n">Records: 1</span>\n<p>why it was decided so</p>\n</li>\n</ul>'
-    ) in root
-    rows = re.findall(r'<li class="row">.*?<a class="t" href="([^"]+)">([^<]+)</a>', root)
-    assert rows == [("adr/0001-pick.html#L10", "Pick")]
-    assert '<span class="s">We [clarify] this.</span>' in root
-    target, _, fragment = rows[0][0].partition("#")
-    assert fragment in _parse(files[f"proj/{target}"]).ids
+def _two_root_site(tmp_path: Path) -> dict[str, str]:
+    reviewed = "reviewed: 2026-10-01\n"
+    _write(
+        tmp_path / "a" / "value" / "0001-x.md",
+        f"---\ntitle: X\nupdated_at: 2026-09-01\n{reviewed}---\nx\n",
+    )
+    # Two records of root `a` need review: one unreviewed with a [clarify], one with a [clarify].
+    _write(
+        tmp_path / "a" / "adr" / "0001-p.md",
+        "---\ntitle: P\nupdated_at: 2026-09-03\n---\n[clarify] p\n",
+    )
+    _write(
+        tmp_path / "a" / "adr" / "0002-q.md",
+        f"---\ntitle: Q\nupdated_at: 2026-09-02\n{reviewed}---\n[clarify] q\n",
+    )
+    _write(
+        tmp_path / "b" / "adr" / "0001-r.md",
+        f"---\ntitle: R\nupdated_at: 2026-09-05\n{reviewed}---\nr\n",
+    )
+    roots = [SiteRoot("a", tmp_path / "a"), SiteRoot("b", tmp_path / "b")]
+    return _texts(load_site(roots, TYPES))
+
+
+def test_root_page_is_the_overview_landing_for_that_root(tmp_path: Path) -> None:
+    files = _two_root_site(tmp_path)
+    page = files["a/index.html"]
+    main = page[page.index('<main id="main">') :]
+    callout = re.search(
+        r'<p class="callout">.*?<span><a href="([^"]+)">([^<]+)</a>([^<]*)</span>', main
+    )
+    assert callout is not None
+    assert callout.groups() == (
+        "../review.html#source=a",
+        "2 need you →",
+        " · 1 unreviewed · 2 open questions",
+    )
+    measures = re.findall(r'<div class="measure">\n(.*?)\n</div>', main, flags=re.S)
+    assert len(measures) == 2
+    assert measures[0].startswith("<h1>a</h1>\n")
+    assert 'class="callout"' in measures[0]
+    assert '<p class="lead">' not in main
+    assert re.findall(
+        r'<li><a href="([^"]+)"><b>([^<]+) <span class="n">(\d+)</span></b>', main
+    ) == [("value/index.html", "Values", "1"), ("adr/index.html", "ADRs", "2")]
+    assert "<h2>Recently updated</h2>" in measures[1]
+    assert re.findall(
+        r'<li><code class="ref">([^<]+)</code><a href="([^"]+)">[^<]+</a>'
+        r'<time datetime="([^"]+)">',
+        measures[1],
+    ) == [
+        ("adr/0001", "../a/adr/0001-p.html", "2026-09-03"),
+        ("adr/0002", "../a/adr/0002-q.html", "2026-09-02"),
+        ("value/0001", "../a/value/0001-x.html", "2026-09-01"),
+    ]
+    assert 'class="mark"' not in main
+    assert "Records:" not in main
+
+
+def test_root_page_with_nothing_to_review_has_no_callout(tmp_path: Path) -> None:
+    page = _two_root_site(tmp_path)["b/index.html"]
+    main = page[page.index('<main id="main">') :]
+    assert 'class="callout"' not in main
+    assert re.findall(r'<li><a href="([^"]+)"><b>', main) == ["adr/index.html"]
+    assert '<a href="../b/adr/0001-r.html">R</a>' in main
 
 
 def test_value_page_lists_cross_root_backlink(site: Site) -> None:
@@ -307,13 +362,13 @@ def test_marker_precedes_pages_so_a_failed_run_is_clearable(
     assert sorted(p.name for p in out.iterdir()) == [".booping-site", "index.html"]
 
 
-def test_icon_sprite_holds_thirteen_unique_symbols() -> None:
+def test_icon_sprite_holds_fourteen_unique_symbols() -> None:
     labels, lang, _ = load_labels({})
     sprite = environment(labels, lang, "Specs").get_template("_icons.html.j2").render()
     ids = re.findall(r'<symbol id="([^"]+)"', sprite)
-    assert len(ids) == 13
-    assert len(set(ids)) == 13
-    assert {"i-sun", "i-auto", "i-moon", "i-clarify"} <= set(ids)
+    assert len(ids) == 14
+    assert len(set(ids)) == 14
+    assert {"i-sun", "i-auto", "i-moon", "i-clarify", "i-comment"} <= set(ids)
 
 
 def test_state_badges_pair_every_icon_with_text() -> None:
@@ -379,6 +434,7 @@ def test_sidebar_holds_the_groups_in_order_with_counts(site: Site) -> None:
         ("../../index.html", "Overview", ""),
         ("../../review.html", "Review", "2"),
         ("../../records.html", "All records", "2"),
+        ("../../comments.html", "My comments", ""),
         ("../../records.html#type=value", "Values", "1"),
         ("../../records.html#type=adr", "ADRs", "1"),
         ("../../core/index.html", "core", "1"),
@@ -512,7 +568,7 @@ def test_record_page_head_facts_and_relations_in_russian(tmp_path: Path) -> None
     assert "<section" not in page
     assert page.count("<dl") == 2
     measure = page[page.index('<div class="measure">') :]
-    assert measure.index("<article>") < measure.index('<dl class="facts">')
+    assert measure.index("<article ") < measure.index('<dl class="facts">')
     assert measure.index('<h2 id="referenced-by">') < measure.index("</div>\n</main>")
     assert '<a class="tag" href="../../s/tags/robot.html">#robot</a>' in page
     anchor = re.search(r'<a href="#(L\d+)"><span class="b warn">', page)
@@ -544,7 +600,6 @@ LIST_CLASSES = {
     "tag",
     "facts",
     "rel",
-    "types",
 }
 
 
@@ -565,7 +620,7 @@ def test_list_and_record_classes_the_pages_emit_are_styled(tmp_path: Path) -> No
     selectors = " ".join(selector for selector, _ in _rules(STYLE))
     unstyled = {c for c in LIST_CLASSES if not re.search(rf"\.{c}(?![\w-])", selectors)}
     assert unstyled == set()
-    for ul in ("ul.rows", "ul.rel", "ul.types"):
+    for ul in ("ul.rows", "ul.rel"):
         assert any(
             ul in selector.split(", ") and "list-style: none" in body and "padding: 0" in body
             for selector, body in _rules(STYLE)
@@ -1052,3 +1107,104 @@ def test_search_labels_resolve_in_russian(tmp_path: Path) -> None:
     assert "Для поиска нужен JavaScript." in page
     assert 'data-forms="[&#34;{n} результат&#34;' in page
     assert "Ничего не найдено" in page
+
+
+def _comment_site(tmp_path: Path, lang: str = "en") -> dict[str, str]:
+    _write(
+        tmp_path / "s" / "adr" / "0007-elka.md",
+        '---\ntitle: Ёлка "A" & B\n---\n## Почему\n\nНужна.\n',
+    )
+    labels, lang, _ = load_labels({"lang": lang})
+    files, _ = build_site(load_site([SiteRoot("s", tmp_path / "s")], TYPES), TYPES, labels, lang)
+    return {path: text for path, text in files.items() if isinstance(text, str)}
+
+
+def test_record_article_carries_its_ref_title_and_page(tmp_path: Path) -> None:
+    page = _comment_site(tmp_path)["s/adr/0007-elka.html"]
+    assert (
+        '<article data-ref="adr/0007" data-title="Ёлка &#34;A&#34; &amp; B"'
+        ' data-page="s/adr/0007-elka.html">'
+    ) in page
+
+
+def test_record_page_holds_the_closed_dialogs_and_the_header_button(tmp_path: Path) -> None:
+    page = _comment_site(tmp_path)["s/adr/0007-elka.html"]
+    header = page[page.index('<header class="top">') : page.index("</header>")]
+    assert (
+        '<button class="iconbtn cmt-open" type="button" aria-label="My comments"'
+        ' title="My comments"><svg class="ic" aria-hidden="true"><use href="#i-comment"/></svg>'
+        '<span class="n"></span></button>'
+    ) in header
+    dialogs = re.findall(r"<dialog ([^>]*)>", page)
+    assert [d.split('"')[1] for d in dialogs] == ["cmt-sheet", "cmt-compose"]
+    assert all(" open" not in d for d in dialogs)
+    sheet = page[page.index('<dialog class="cmt-sheet"') : page.index("</dialog>")]
+    assert '<h2 id="cmt-sheet-h">My comments</h2>' in sheet
+    assert '<ul class="cmt-list"></ul>' in sheet
+    assert '<p class="cmt-empty">No comments yet.</p>' in sheet
+    assert '<button class="cmt-copy" type="button">Copy for the model</button>' in sheet
+    assert '<button class="cmt-clear" type="button">Clear sent</button>' in sheet
+    assert 'class="iconbtn cmt-close" type="button" aria-label="Close"' in sheet
+    compose = page[page.index('<dialog class="cmt-compose"') :]
+    assert 'data-comment-section="Comment on this section"' in compose
+    assert 'data-comment-paragraph="Comment on paragraph"' in compose
+    assert 'data-copied-forms="[&#34;{n} copied&#34;, &#34;{n} copied&#34;]"' in compose
+    assert '<label for="cmt-note">Note</label>\n<textarea id="cmt-note" rows="4"></textarea>' in (
+        compose
+    )
+    assert '<button class="cmt-save" type="button" disabled>Save</button>' in compose
+    assert '<button class="cmt-cancel" type="button">Cancel</button>' in compose
+    assert '<script src="../../comments-format.js" defer></script>' in page
+    assert '<script src="../../comments.js" defer></script>' in page
+
+
+def test_non_record_page_has_the_sidebar_entry_and_no_header_button(tmp_path: Path) -> None:
+    page = _comment_site(tmp_path)["records.html"]
+    assert (
+        '<li class="cmt-nav" hidden><a href="comments.html">My comments<span class="n"></span>'
+        "</a></li>"
+    ) in _side(page)
+    assert "cmt-open" not in page
+    assert "<dialog" not in page
+    assert '<script src="comments.js" defer></script>' in page
+
+
+def test_comments_page_is_a_shell_with_the_compose_dialog(tmp_path: Path) -> None:
+    page = _comment_site(tmp_path)["comments.html"]
+    main = page[page.index('<main id="main">') :]
+    assert "<h1>My comments</h1>" in main
+    assert '<p class="lead">Stored in this browser only.</p>' in main
+    assert '<p class="needs-js">Comments need JavaScript.</p>' in main
+    assert '<p class="cmt-nostore">Comments need browser storage.</p>' in main
+    assert '<div class="cmt-groups"></div>' in main
+    assert '<button class="cmt-copy" type="button">Copy for the model</button>' in main
+    assert '<button class="cmt-clear" type="button">Clear sent</button>' in main
+    assert re.findall(r'<dialog class="([^"]+)"', main) == ["cmt-compose"]
+    assert '<a href="comments.html" aria-current="page">' in _side(page)
+
+
+def test_comment_labels_resolve_in_russian(tmp_path: Path) -> None:
+    files = _comment_site(tmp_path, "ru")
+    page = files["s/adr/0007-elka.html"]
+    assert 'aria-label="Мои комментарии"' in page
+    assert '<button class="cmt-copy" type="button">Скопировать для модели</button>' in page
+    assert '<button class="cmt-clear" type="button">Удалить отправленные</button>' in page
+    assert 'data-comment-section="Комментировать раздел"' in page
+    assert (
+        'data-cleared-forms="[&#34;{n} удалён&#34;, &#34;{n} удалено&#34;, &#34;{n} удалено&#34;]"'
+    ) in page
+    assert '<label for="cmt-note">Заметка</label>' in page
+    comments = files["comments.html"]
+    assert "<h1>Мои комментарии</h1>" in comments
+    assert "Хранятся только в этом браузере." in comments
+    assert "Для комментариев нужен JavaScript." in comments
+    assert "Для комментариев нужно хранилище браузера." in comments
+
+
+def test_machine_and_search_files_carry_no_comment_markup(tmp_path: Path) -> None:
+    files = _comment_site(tmp_path)
+    for name in ("search-body.js", "search-index.js", "index.json", "llms.txt"):
+        assert "cmt-" not in files[name], name
+        assert "My comments" not in files[name], name
+        assert "comments.js" not in files[name], name
+        assert "comments-format.js" not in files[name], name

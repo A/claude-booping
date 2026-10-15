@@ -25,7 +25,7 @@ booping specs site --root a=a --root b=b
 -- exit --
 0
 -- stdout --
-specs site: 2 roots, 2 records, 10 pages, 0 warnings -> specs-site
+specs site: 2 roots, 2 records, 11 pages, 0 warnings -> specs-site
 -- stderr --
 -- expected/cwd/specs-site/b/rule/0001-one-concern-per-commit.html --
 <!doctype html>
@@ -40,6 +40,8 @@ specs site: 2 roots, 2 records, 10 pages, 0 warnings -> specs-site
 <link rel="stylesheet" href="../../style.css">
 <script src="../../site.js" defer></script>
 <script src="../../search.js" defer></script>
+<script src="../../comments-format.js" defer></script>
+<script src="../../comments.js" defer></script>
 <link rel="alternate" type="text/markdown" href="0001-one-concern-per-commit.md">
 </head>
 <body>
@@ -57,6 +59,7 @@ specs site: 2 roots, 2 records, 10 pages, 0 warnings -> specs-site
 <symbol id="i-moon" viewBox="0 0 20 20"><path d="M15.5 12.6A6.5 6.5 0 0 1 7.4 4.5a6.5 6.5 0 1 0 8.1 8.1z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
 <symbol id="i-sun" viewBox="0 0 16 16"><circle cx="8" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.2v1.6M8 13.2v1.6M1.2 8h1.6M13.2 8h1.6M3.2 3.2l1.1 1.1M11.7 11.7l1.1 1.1M3.2 12.8l1.1-1.1M11.7 4.3l1.1-1.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
 <symbol id="i-auto" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.6a6.4 6.4 0 0 0 0 12.8z" fill="currentColor"/></symbol>
+<symbol id="i-comment" viewBox="0 0 20 20"><path d="M4 4.5h12a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5H9.2l-3.7 3v-3H4A1.5 1.5 0 0 1 2.5 13V6A1.5 1.5 0 0 1 4 4.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
 </svg>
 <a class="skip" href="#main">Skip to content</a>
 <header class="top">
@@ -70,6 +73,7 @@ specs site: 2 roots, 2 records, 10 pages, 0 warnings -> specs-site
 <ul id="search-list" role="listbox" aria-label="Search" hidden></ul>
 </form>
 <button class="iconbtn search-btn" type="button" aria-label="Search" title="Search"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg></button>
+<button class="iconbtn cmt-open" type="button" aria-label="My comments" title="My comments"><svg class="ic" aria-hidden="true"><use href="#i-comment"/></svg><span class="n"></span></button>
 <button class="iconbtn theme" type="button" aria-label="Theme: auto" title="Theme: auto" data-label-auto="Theme: auto" data-label-light="Theme: light" data-label-dark="Theme: dark"><svg class="ic" aria-hidden="true"><use href="#i-auto"/></svg></button>
 </header>
 <div class="body norail">
@@ -78,6 +82,7 @@ specs site: 2 roots, 2 records, 10 pages, 0 warnings -> specs-site
 <li><a href="../../index.html">Overview</a></li>
 <li><a href="../../review.html"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>Review<span class="n">2</span></a></li>
 <li><a href="../../records.html">All records<span class="n">2</span></a></li>
+<li class="cmt-nav" hidden><a href="../../comments.html">My comments<span class="n"></span></a></li>
 </ul>
 <h4>Types</h4>
 <ul>
@@ -103,7 +108,7 @@ specs site: 2 roots, 2 records, 10 pages, 0 warnings -> specs-site
 </ol>
 </nav>
 <div class="measure">
-<article>
+<article data-ref="rule/0001" data-title="One concern per commit" data-page="b/rule/0001-one-concern-per-commit.html">
 <h1>One concern per commit</h1>
 <div class="badges"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-unreviewed"/></svg>unreviewed</span></div>
 <p class="lead">A commit carries one concern.</p>
@@ -121,6 +126,28 @@ specs site: 2 roots, 2 records, 10 pages, 0 warnings -> specs-site
 </article>
 <h2 id="referenced-by">Referenced by<a class="anchor" href="#referenced-by" aria-label="Link to this section: Referenced by">§</a></h2>
 <p>Nothing references this record.</p>
+<dialog class="cmt-sheet" aria-labelledby="cmt-sheet-h">
+<div class="cmt-head">
+<h2 id="cmt-sheet-h">My comments</h2>
+<button class="iconbtn cmt-close" type="button" aria-label="Close">&times;</button>
+</div>
+<ul class="cmt-list"></ul>
+<p class="cmt-empty">No comments yet.</p>
+<div class="cmt-actions">
+<button class="cmt-copy" type="button">Copy for the model</button>
+<button class="cmt-clear" type="button">Clear sent</button>
+</div>
+</dialog>
+<dialog class="cmt-compose" aria-labelledby="cmt-compose-h" data-comment="Comment" data-comment-section="Comment on this section" data-comment-paragraph="Comment on paragraph" data-edit="Edit" data-delete="Delete" data-save="Save" data-cancel="Cancel" data-sent="sent" data-deleted="Comment deleted" data-copy-failed="Copy failed" data-copied-forms="[&#34;{n} copied&#34;, &#34;{n} copied&#34;]" data-cleared-forms="[&#34;{n} cleared&#34;, &#34;{n} cleared&#34;]">
+<h2 id="cmt-compose-h">Comment</h2>
+<blockquote class="cmt-quote"></blockquote>
+<label for="cmt-note">Note</label>
+<textarea id="cmt-note" rows="4"></textarea>
+<div class="cmt-actions">
+<button class="cmt-save" type="button" disabled>Save</button>
+<button class="cmt-cancel" type="button">Cancel</button>
+</div>
+</dialog>
 </div>
 </main>
 </div>

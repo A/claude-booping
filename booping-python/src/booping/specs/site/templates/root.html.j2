@@ -1,16 +1,14 @@
 {% extends "base.html.j2" %}
-{% from "_macros.html.j2" import icon, types_list %}
+{% from "_macros.html.j2" import callout, scenarios, recently_updated %}
 {% block main %}
+<div class="measure">
 <h1>{{ root }}</h1>
-{{ types_list(types, "") | trim }}
-<h2 id="marks">{{ labels.ui("marks") }}</h2>
-{% if marks %}
-<ul class="rows marks">
-{% for m in marks %}
-<li class="row"><code class="ref">{{ m.ref }}</code><a class="t" href="{{ m.href }}">{{ m.title }}</a><span class="why"><span class="b {{ 'warn' if m.kind == 'clarify' else 'bad' }}">{{ icon("i-" ~ m.kind) }}[{{ m.kind }}]</span></span><span class="s">{{ m.text }}</span></li>
-{% endfor %}
-</ul>
-{% else %}
-<p>{{ labels.ui("none") }}</p>
+{% if needs %}
+{{ callout(needs, unreviewed, questions, "../review.html#source=" ~ root) | trim }}
+{% endif %}
+</div>
+{{ scenarios(types) | trim }}
+{% if recent %}
+{{ recently_updated(recent) | trim }}
 {% endif %}
 {% endblock %}

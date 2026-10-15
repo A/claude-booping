@@ -229,7 +229,6 @@ core:
             on_this_page: On this page
             referenced_by: Referenced by
             nothing_references: Nothing references this record.
-            records: Records
             types: Types
             root: Root
             type: Type
@@ -290,6 +289,26 @@ core:
             search_results: ["{n} result", "{n} results"]
             search_none: Nothing found
             search_needs_js: Search needs JavaScript.
+            my_comments: My comments
+            comment: Comment
+            comment_section: Comment on this section
+            comment_paragraph: Comment on paragraph
+            comment_note: Note
+            save: Save
+            cancel: Cancel
+            edit: Edit
+            delete: Delete
+            copy_for_model: Copy for the model
+            clear_sent: Clear sent
+            sent: sent
+            no_comments: No comments yet.
+            comments_lead: Stored in this browser only.
+            comments_need_js: Comments need JavaScript.
+            comments_need_storage: Comments need browser storage.
+            comment_deleted: Comment deleted
+            copy_failed: Copy failed
+            comments_copied_n: ["{n} copied", "{n} copied"]
+            comments_cleared_n: ["{n} cleared", "{n} cleared"]
           types:
             value: {name: Value, plural: Values, scenario: "why the project exists"}
             rule: {name: Rule, plural: Rules, scenario: "what constrains decisions"}
@@ -337,7 +356,6 @@ core:
             on_this_page: На странице
             referenced_by: Ссылаются сюда
             nothing_references: Сюда никто не ссылается.
-            records: Записи
             types: Разделы
             root: Источник
             type: Раздел
@@ -398,6 +416,26 @@ core:
             search_results: ["{n} результат", "{n} результата", "{n} результатов"]
             search_none: Ничего не найдено
             search_needs_js: Для поиска нужен JavaScript.
+            my_comments: Мои комментарии
+            comment: Комментировать
+            comment_section: Комментировать раздел
+            comment_paragraph: Комментировать абзац
+            comment_note: Заметка
+            save: Сохранить
+            cancel: Отмена
+            edit: Изменить
+            delete: Удалить
+            copy_for_model: Скопировать для модели
+            clear_sent: Удалить отправленные
+            sent: отправлен
+            no_comments: Комментариев пока нет.
+            comments_lead: Хранятся только в этом браузере.
+            comments_need_js: Для комментариев нужен JavaScript.
+            comments_need_storage: Для комментариев нужно хранилище браузера.
+            comment_deleted: Комментарий удалён
+            copy_failed: Не удалось скопировать
+            comments_copied_n: ["{n} скопирован", "{n} скопировано", "{n} скопировано"]
+            comments_cleared_n: ["{n} удалён", "{n} удалено", "{n} удалено"]
           types:
             value: {name: Ценность, plural: Ценности, scenario: "Ценности — зачем этот проект и какой он"}
             rule: {name: Правило, plural: Правила, scenario: "Правила — что ограничивает решения"}
