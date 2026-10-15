@@ -34,8 +34,27 @@ from a rule of a tier above records it in its own ADR or conflict. A tier is cre
 | `reference`| `reference/`       | Facts the code does not show, one subject per file                |
 | `runbook`  | `runbook/`         | An operator procedure the code does not show                      |
 
-The shape of each type is [`schemas/<type>.yaml`](schemas/), a
-[mdcheck](https://github.com/A/markdown-checker) rule file.
+These are the shipped types. The shape of each is [`schemas/<type>.yaml`](schemas/), a
+[mdcheck](https://github.com/A/markdown-checker) rule file; a tier's types are the
+stems of its effective schema set (below).
+
+## Tier schemas
+
+A tier root may hold its own files beside the type directories:
+
+- `_schemas/<type>.yaml` — a mdcheck rule file. A stem the shipped set has overrides
+  that type's shape for this tier; a new stem adds a type, with its own `<type>/`
+  directory. The overlay is per tier: a tier's schemas never reach another tier. The
+  leading underscore keeps it apart from the types — a type is a kebab-case latin
+  stem, and a `_`-prefixed directory is never read as records.
+- `tags.yaml` — the tags dictionary, a mapping `tag: one-line description`. When it
+  exists, every record's optional `tags:` list is checked against it: each tag is
+  `area[:sub]` kebab-case, is a key of the dictionary, and an `area:sub` tag needs
+  `area` there too.
+
+A tier schema may never rename what booping reads: the frontmatter keys `type`,
+`status`, `kind`, `targets`, `brief`, `values`, `rules`, `supersedes`, `sources`,
+`reviewed`, `created_by`, their values, and the status cell of an ADR's alternatives.
 
 ## Files
 
@@ -105,6 +124,10 @@ references are not written.
 - `runbook` — `## When`, optional `## Before you start`, `## Steps` (numbered),
   `## Check`, optional `## Rollback`.
 
+A record's content may be in any language; its structural headings, bold labels, table
+columns and frontmatter keys stay the English ones above, so one schema set serves every
+tier. A tier's own schemas add types and fields — they are not for translation.
+
 A record states only what its source says (`booping:rule/0002`): what the source
 lacks is "not named in the source", a reason that is only a preference is called the
 owner's preference.
@@ -128,7 +151,8 @@ booping specs check --tier core|global|project
 
 Checks one tier (default `project`). Errors:
 
-- `schema` — each record against its type's `schemas/<type>.yaml` (mdcheck);
+- `schema` — each record against its type's schema in the tier's effective set
+  (mdcheck); a tier schema mdcheck cannot load is one finding on that file;
 - `layout` — every record sits in a type directory; a tier rooted at the vault reads only
   type directories and ignores the rest of the vault;
 - `filename` — the name is `<NNNN>-<slug>.md`;
@@ -140,7 +164,12 @@ Checks one tier (default `project`). Errors:
 - `ref` — `values` point at values, `rules` at rules, `supersedes` at ADRs;
 - `sources` — every `sources` path exists, resolved against the tier's anchor (core —
   the plugin root, global — `<home_dir>`, project — the repo root); an entry
-  containing `://` is skipped.
+  containing `://` is skipped;
+- `tags` — every record's `tags:` against the tier's `tags.yaml`, and the dictionary's
+  own shape; no `tags.yaml`, no check;
+- `alternatives` — an ADR's alternatives table and its `###` options match one to one,
+  under the section and column names the ADR schema declares; an `accepted` or
+  `superseded` ADR has exactly one option accepted, any other at most one.
 
 Warning:
 
