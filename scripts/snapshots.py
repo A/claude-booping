@@ -111,10 +111,11 @@ def hermetic_vault(dest: Path) -> Path:
         copy = dest / Path(rel).relative_to(vault)
         copy.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source, copy)
-    marker = yaml.safe_load((ROOT / ".booping").read_text()) or {}
+    marker_path = ROOT / ".booping"
+    marker = (yaml.safe_load(marker_path.read_text()) or {}) if marker_path.is_file() else {}
     (dest / ".booping").write_text(
         yaml.safe_dump(
-            {"project_name": marker.get("project_name"), "latest_migration": latest_migration()}
+            {"project_name": marker.get("project_name") or ROOT.name, "latest_migration": latest_migration()}
         )
     )
     config_path = dest / "config.yaml"
