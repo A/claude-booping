@@ -8,11 +8,13 @@ summary: >-
   and end the
   run when the set is empty.
 review_gate: >-
+  {%- if config.core.auto_migrate is true -%}{%- else -%}
   The user approves applying the whole pending set — the run's only gate, taken once
   and covering
   every listed migration. The in-body commit ask is a safety confirmation resolved
   inside the step,
   not this gate. An empty pending set ends the run with nothing to approve.
+  {%- endif -%}
 reviewed_at: 20260805 09:11
 ---
 

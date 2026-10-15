@@ -290,11 +290,16 @@ def _render_step_fields(
     plugin_root: Path | None = None,
 ) -> tuple[Step, str | None]:
     """Render the frontmatter fields a `jinja: true` playbook may template —
-    `summary` and `detached` — through the step's own loader chain. A `detached`
-    that renders empty (the config key it names is absent) degrades to
-    runner-performed. Returns (step, None) or (step, error message).
+    `summary`, `detached` and `review_gate` — through the step's own loader chain. A
+    `detached` that renders empty (the config key it names is absent) degrades to
+    runner-performed; a `review_gate` that renders empty means no gate. Returns
+    (step, None) or (step, error message).
     """
-    fields = {"summary": step.summary, "detached": step.detached}
+    fields = {
+        "summary": step.summary,
+        "detached": step.detached,
+        "review_gate": step.review_gate,
+    }
     if not any(v and "{" in v for v in fields.values()):
         return step, None
 
@@ -308,8 +313,9 @@ def _render_step_fields(
             rendered[key] = env.from_string(value).render().strip()
         except Exception as exc:
             return step, f"{type(exc).__name__}: {exc}"
-    if "detached" in rendered and not rendered["detached"]:
-        rendered["detached"] = None
+    for key in ("detached", "review_gate"):
+        if key in rendered and not rendered[key]:
+            rendered[key] = None
     return step.model_copy(update=rendered), None
 
 
@@ -705,7 +711,7 @@ def _run(args: argparse.Namespace) -> None:
 
     project_str: str | None = args.project
     vault_override = Path(project_str).expanduser().resolve() if project_str is not None else None
-    notice = migrations.render_gate(args.name, start=vault_override)
+    notice = migrations.render_gate(args.name, start=vault_override, vault_override=vault_override)
     if notice is not None:
         _emit(notice + "\n", args.output)
         return

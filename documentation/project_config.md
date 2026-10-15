@@ -35,6 +35,7 @@ home_dir: ~/Claude/
 
 core:
   research_agent: "booping:booping-researcher"
+  auto_migrate: true
 
   macros:
     date: ["date"]
@@ -218,6 +219,15 @@ The task-type taxonomy groom classifies every request against. Each entry is `{t
 ### `core.research_agent`
 
 The agent id an **assisted** playbook step delegates its bulk reads to. Default `booping:booping-researcher`. Point it at any agent id — a shipped worker or an external agent you registered — and every assisted step's delegated reads route there; nothing else changes. Directly under `core` because more than one playbook reads it (groom's two research steps, retro's session-log mining and issue research).
+
+### `core.auto_migrate`
+
+What happens when the vault is behind on the plugin's [migrations](vault.md#booping). **Default `true`**, and a tier that leaves the key out counts as `true`; set it in any tier. Directly under `core` because every render surface and the `migrate` playbook read it.
+
+- **`true`** — a render prints, in place of its output, an order to the driving agent: *this project is behind on booping migrations (recorded id X, latest shipped Y). Run `/playbook migrate` now without asking the user — `core.auto_migrate` is on — then continue with the original request.* The `migrate` playbook then applies the whole pending set without asking for its up-front approval; its ask to commit uncommitted work first still stands.
+- **`false`** — a render prints a **STOP** notice telling you to run `/playbook migrate`, nothing else renders until the vault catches up, and `migrate` asks before applying.
+
+A config tier that cannot be read counts as `false`.
 
 ### `core.plans.glob`
 

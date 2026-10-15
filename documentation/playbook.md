@@ -190,7 +190,7 @@ When the key it names is absent from the merged config the value renders empty a
 
 By default every body — the manifest preamble and each `prompt.md` — is passed through **verbatim**. Braces, `{{ }}`, and template-looking text are just text.
 
-Set `jinja: true` in the manifest frontmatter to opt the **whole playbook** in (all-or-nothing — there is no per-step flag). Bodies — plus the `summary` and `detached` frontmatter fields of each step — are then rendered as Jinja templates with the same project context the built-in skills get: the attached project, its config, and the shared fragments the plugin ships. Include paths resolve through a chain — the body's own directory, then the playbook directory, then each discovery root (project, global, core), then the plugin's own template root — so a fragment shipped under `playbooks/_partials/` is reachable as `_partials/<file>` whatever level your playbook lives at:
+Set `jinja: true` in the manifest frontmatter to opt the **whole playbook** in (all-or-nothing — there is no per-step flag). Bodies — plus the `summary`, `detached` and `review_gate` frontmatter fields of each step (a `review_gate` that renders empty means the step has no gate) — are then rendered as Jinja templates with the same project context the built-in skills get: the attached project, its config, and the shared fragments the plugin ships. Include paths resolve through a chain — the body's own directory, then the playbook directory, then each discovery root (project, global, core), then the plugin's own template root — so a fragment shipped under `playbooks/_partials/` is reachable as `_partials/<file>` whatever level your playbook lives at:
 
 ```markdown
 ---

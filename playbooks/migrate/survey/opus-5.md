@@ -38,10 +38,16 @@ ask when there is one, then the table above verbatim under a
   stopped and any single migration can be reverted on its own
 - a migration that fails stops the run there: it gets named, with a proposed fix rather than a skip
 
+{% if config.core.auto_migrate is true -%}
+Do not ask for approval: `core.auto_migrate` is on, so applying the whole set is approved as given.
+Close on one line saying so — `Applying all {{ pending | length }} (core.auto_migrate is on).` — and
+continue the run without waiting; nothing is asked per migration afterwards.
+{%- else -%}
 Close on one question covering the whole set — `Apply all {{ pending | length }}?` —
 asked in **prose**, in the message itself, never through `AskUserQuestion`. That approval authorises
 every migration listed; nothing is asked per migration afterwards. Wait for the answer before the
 run continues.
+{%- endif %}
 
 ## Return
 
@@ -51,7 +57,7 @@ run continues.
 ## Notes:
 - pending: {{ pending | length }} — {{ pending | map(attribute='id') | join(', ') }}
 - committed repo and vault before proceeding (user confirmed)
-- approved: apply the whole pending set
+- approved: apply the whole pending set{% if config.core.auto_migrate is true %} (core.auto_migrate){% endif %}
 ```
 
 `## Changed:` stays empty — this step writes no file. Give each pending id its title in the

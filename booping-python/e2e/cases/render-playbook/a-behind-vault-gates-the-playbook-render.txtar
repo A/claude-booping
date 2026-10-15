@@ -26,5 +26,5 @@ booping render-playbook fx-gated
 -- exit --
 0
 -- stdout --
-**STOP — tell the user:** this project is behind on booping migrations (recorded id -1, latest shipped [..]). Run `/playbook migrate` to bring the vault current, then retry.
+**Auto-migrate:** this project is behind on booping migrations (recorded id -1, latest shipped [..]). Run `/playbook migrate` now without asking the user — `core.auto_migrate` is on, so its approval is taken as given — then continue with the original request.
 -- stderr --
