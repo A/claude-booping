@@ -130,14 +130,44 @@ core:
 
 A `path` is absolute, `~`-prefixed, or relative to `home_dir`.
 
-**Page shell.** Every page has a skip link, a header with the site title (linking home) and a theme toggle, a sidebar listing each root's types with their record counts, breadcrumbs, and a footer naming the generator — no build date, so rebuilds stay byte-identical. The theme toggle cycles auto → light → dark and remembers the choice in the browser; auto follows the system setting. Text is set in Golos Text, code in JetBrains Mono, both Cyrillic and Latin. Below 760px wide the layout drops to one column and the sidebar moves into a drawer opened from a menu button; without JavaScript the sidebar renders in the page flow instead, and every page still reads.
+**Page shell.** Every page has a skip link, a header with the site title (linking home) and a theme toggle, a sidebar, breadcrumbs, and a footer naming the generator — no build date, so rebuilds stay byte-identical. The theme toggle cycles auto → light → dark and remembers the choice in the browser; auto follows the system setting. Text is set in Golos Text, code in JetBrains Mono, both Cyrillic and Latin. Below 760px wide the layout drops to one column, list rows become cards, the filter chips scroll on one line, and the sidebar moves into a drawer opened from a menu button; without JavaScript the sidebar renders in the page flow instead, and every page still reads.
+
+The sidebar, top to bottom: Overview; **Review** with the number of rows waiting for you; **All records** with the total; **Types** — every type that has records, across roots, with its count, each opening All records filtered to it; **Tags** — for each root with tags, its top-level tags with counts and a link to the root's tag tree (the root's name as a sub-heading when more than one root has tags); **Sources** — each root with its record count; and `llms.txt`.
 
 **Pages.**
 
-- `index.html` — home: each root with its types, each type showing its name, record count and a one-line scenario ("why the project exists" for values).
-- `{root}/index.html` — the root's types the same way, then every `[clarify]` and `[unknown]` mark in the root, each linking to its line in the record.
-- `{root}/{type}/index.html` — the type's scenario, then one row per record: ref, title linking to the record page, summary and state badges.
-- `{root}/{type}/{NNNN-slug}.html` — one record: title, state badges, tags, summary, then labelled facts — author, created, updated, reviewed, sources — with dates written out in the site's language, then every relation (`values`, `rules`, `supersedes`, …) as titled links with the target's status, plus **Superseded by** when a later record supersedes this one, any other frontmatter key, the body, and **Referenced by** — every record linking to this one, across roots.
+- `index.html` — home: the site title; the first value record's summary as the lead; when anything waits for you, one callout linking the review page (`3 need you →`) with the number of open `[clarify]` questions; a card per type with records — name, count and a one-line scenario ("why the project exists" for values) — opening All records filtered to that type; and **Recently updated**, the ten records with the latest `updated_at`.
+- `review.html` — everything that needs you, as a filterable list (below).
+- `records.html` — every record of every root, as a filterable list.
+- `{root}/index.html` — the root's types, each with its name, record count and scenario, then every `[clarify]` and `[unknown]` mark in the root, each linking to its line in the record.
+- `{root}/{type}/index.html` — the type's scenario, then a filterable list of its records.
+- `{root}/tags/index.html` — the root's tag tree: every tag nested under its parent (`area` above `area:sub`), with its description and the number of records carrying it or any tag below it. Written only for a root that has tags.
+- `{root}/tags/{tag}.html` — one tag, its `:` written as `.` (`area:sub` → `area.sub.html`): breadcrumbs through its parent tags, the description, the tags below it, then a filterable list of every record carrying the tag or one below it.
+- `{root}/{type}/{NNNN-slug}.html` — one record: title, state badges, tags linking to their tag pages, summary, then labelled facts — author, created, updated, reviewed, sources — with dates written out in the site's language, then every relation (`values`, `rules`, `supersedes`, …) as titled links with the target's status, plus **Superseded by** when a later record supersedes this one, any other frontmatter key, the body, and **Referenced by** — every record linking to this one, across roots.
+
+A row in a list shows the record's ref, its title linking to the record page, its state badges and its summary.
+
+A root's tags are the keys of its `tags.yaml` (see [Tier schemas and tags](#tier-schemas-and-tags)), every tag its records carry, and each of those tags' parents; a tag's description comes from `tags.yaml` and is empty for a tag the file does not list. A `tags.yaml` that does not parse prints one warning and the tree is built from the tags the records carry.
+
+**Filters.** A list page carries chips above the rows, grouped by facet — **Type**, **Source** (the root), **Status**, **Needs** — each chip showing how many rows on the page carry its value; a facet with only one value shows no chips, except Needs. Chips in one facet widen the list (any of them), chips in different facets narrow it (all facets). A sort menu orders the rows by number (the default), most recently updated, or title; the count below the chips says how many rows are shown. The state lives in the address, so a filtered list is a link you can share or bookmark:
+
+- `records.html#type=rule` — the rules only;
+- `records.html#source=api` — the records of root `api`;
+- `records.html#status=accepted,proposed` — accepted or proposed records;
+- `records.html#flag=clarify` — records with a `[clarify]` mark;
+- `records.html#type=adr&status=accepted&sort=updated` — accepted ADRs, newest first.
+
+Keys come in the order `type`, `source`, `status`, `flag`, then `sort` when it is not the page's default; several values of one key are comma-separated. A key or value the page does not know is ignored. Without JavaScript the chips are hidden and every row stays listed.
+
+**Review.** `review.html` lists every record that needs you, in All records order, each row showing why with its badges — the clarify and unknown badges link straight to the first such mark in the record. A record is listed when any of these holds, and each is a **Needs** chip on the page:
+
+- **Unreviewed** — `reviewed` is not set;
+- **Has [clarify]** / **Has [unknown]** — the body holds such a mark;
+- **Open conflict** — a `conflict` record with status `open`;
+- **Proposed ADR** — an `adr` with status `proposed`;
+- **Open** — an `idea` with status `open`, or an open item.
+
+When the site renders its default roots for a project with a vault, the vault's [open items](#open-items) with status `open` follow the records — the item's id and title, linking to the record it names when that record is on the site. The review page sorts by **Review order** by default: what the agent wrote first, then the oldest by `updated_at`; it also offers the other sorts. With nothing to review it says so. The sidebar's Review count and the home callout are the number of rows on this page.
 
 **State badges.** Each badge carries an icon and text, never colour alone: the record's status (`accepted`, `proposed`, …), the count of `[clarify]` marks (`2 questions for you`, linking to the first mark on a record page), `[unknown]` when the body has one, and `unreviewed` when `reviewed` is not set.
 
