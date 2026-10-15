@@ -1,20 +1,21 @@
 ---
 title: "Specs playbook and open items"
 type: "feature"
-status: ready-for-dev
+status: in-progress
 sp: 34
 related_to: null
 created: 2026-10-15 14:09
 planned: null
-started: null
+started: 2026-10-15 14:29
 completed: null
 code_reviews: []
 sessions:
 - e47a3e24-2b43-4c07-9bf4-7e3853a04685
+- 6996e136-87a3-4448-a7e3-12485f57a0ac
 retro: null
 summary: Core specs playbook as a guide over every specs scenario, plus open 
   items as a stored index driven by booping specs open-items
-commit: 984e172964f3a93dde550b8d54e53551a47f67bc
+commit: 1e9a8f64482957307e95c6b419ab490ab5f697e7
 tracker_provider: null
 tracker_request: null
 tracker_issue: null
@@ -123,10 +124,10 @@ reason: null
 
 | id | title | sp | status |
 | --- | --- | --- | --- |
-| 01 | [Open-item machine, config and the specs playbook skeleton](milestones/M01-open-item-machine-and-config/M01-open-item-machine-and-config.md) | 3 | pending |
-| 02 | [booping specs open-items add files an item](milestones/M02-open-items-add/M02-open-items-add.md) | 4 | pending |
-| 03 | [booping specs open-items list renders the index](milestones/M03-open-items-list/M03-open-items-list.md) | 2 | pending |
-| 04 | [plan, close and reopen move items through the machine](milestones/M04-open-items-plan-close-reopen/M04-open-items-plan-close-reopen.md) | 4 | pending |
+| 01 | [Open-item machine, config and the specs playbook skeleton](milestones/M01-open-item-machine-and-config/M01-open-item-machine-and-config.md) | 3 | done |
+| 02 | [booping specs open-items add files an item](milestones/M02-open-items-add/M02-open-items-add.md) | 4 | done |
+| 03 | [booping specs open-items list renders the index](milestones/M03-open-items-list/M03-open-items-list.md) | 2 | done |
+| 04 | [plan, close and reopen move items through the machine](milestones/M04-open-items-plan-close-reopen/M04-open-items-plan-close-reopen.md) | 4 | done |
 | 05 | [scan files items from marks and check findings](milestones/M05-open-items-scan/M05-open-items-scan.md) | 4 | pending |
 | 06 | [Plans link, close and reopen their items](milestones/M06-plans-close-their-items/M06-plans-close-their-items.md) | 4 | pending |
 | 07 | [The specs guide — preamble and scenarios](milestones/M07-specs-guide-body/M07-specs-guide-body.md) | 4 | pending |

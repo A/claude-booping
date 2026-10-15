@@ -2,7 +2,7 @@
 id: "02"
 title: "booping specs open-items add files an item"
 sp: 4
-status: pending
+status: done
 plan: "plans/202610151409_specs-playbook-open-items/index.md"
 ---
 
@@ -18,25 +18,25 @@ Tests: integration tier, txtar cases — add by hand prints `open-items/OI-0001.
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 2.1 | `open-items` verb group and `add` by hand, numbering and scaffold. | `booping-python/src/booping/commands/specs.py`, `booping-python/src/booping/specs/open_items.py` | 2 | pending |
-| 2.2 | `add --record adr/NNNN` confirmation extraction and defaults. | `booping-python/src/booping/specs/open_items.py` | 1 | pending |
-| 2.3 | The six txtar cases, expected output hand-written. | `booping-python/e2e/cases/specs/open-items-add-*.txtar` | 1 | pending |
+| 2.1 | `open-items` verb group and `add` by hand, numbering and scaffold. | `booping-python/src/booping/commands/specs.py`, `booping-python/src/booping/specs/open_items.py` | 2 | done |
+| 2.2 | `add --record adr/NNNN` confirmation extraction and defaults. | `booping-python/src/booping/specs/open_items.py` | 1 | done |
+| 2.3 | The six txtar cases, expected output hand-written. | `booping-python/e2e/cases/specs/open-items-add-*.txtar` | 1 | done |
 
 ## Definition of Done
 
 ### Task 2.1
 
-- [ ] `booping specs open-items --help` lists `add`; `add --help` lists `--title --direction --record --source --body`.
-- [ ] The file matches `index.md` "Open item file" key for key; stdout is the vault-relative path alone.
+- [x] `booping specs open-items --help` lists `add`; `add --help` lists `--title --direction --record --source --body`.
+- [x] The file matches `index.md` "Open item file" key for key; stdout is the vault-relative path alone.
 
 ### Task 2.2
 
-- [ ] The title is the confirmation sentence, truncated at 100 chars with `…` when longer.
-- [ ] An explicit `--title`/`--direction`/`--source` overrides the ADR defaults.
+- [x] The title is the confirmation sentence, truncated at 100 chars with `…` when longer.
+- [x] An explicit `--title`/`--direction`/`--source` overrides the ADR defaults.
 
 ### Task 2.3
 
-- [ ] Six cases, one per behaviour named in Tests; each failure case asserts stderr and an empty stdout.
+- [x] Six cases, one per behaviour named in Tests; each failure case asserts stderr and an empty stdout.
 
 Return: the list of changed files, nothing else.
 

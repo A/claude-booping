@@ -2,7 +2,7 @@
 id: "01"
 title: "Open-item machine, config and the specs playbook skeleton"
 sp: 3
-status: pending
+status: done
 plan: "plans/202610151409_specs-playbook-open-items/index.md"
 ---
 
@@ -18,22 +18,28 @@ Tests: integration tier — one txtar case moving a scaffolded item `open → dr
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 1.1 | `core.specs.open_items` — dir, item scaffold tree, index query spec. | `src/config.yaml` | 1 | pending |
-| 1.2 | `specs` playbook skeleton with the `open_item` machine, plus the transition case. | `playbooks/specs/playbook.yaml`, `playbooks/specs/playbook.md`, `playbooks/specs/guide/prompt.md`, `booping-python/e2e/cases/playbook-transition/the-open-item-machine-drops-an-open-item.txtar` | 2 | pending |
+| 1.1 | `core.specs.open_items` — dir, item scaffold tree, index query spec. | `src/config.yaml` | 1 | done |
+| 1.2 | `specs` playbook skeleton with the `open_item` machine, plus the transition case. | `playbooks/specs/playbook.yaml`, `playbooks/specs/playbook.md`, `playbooks/specs/guide/prompt.md`, `booping-python/e2e/cases/playbook-transition/the-open-item-machine-drops-an-open-item.txtar` | 2 | done |
+| 1.3 | Engine: a `standalone: true` key on a `states:` entry loads a per-instance machine no graph scope references (moved only by `--state {name} --instance {id}` invocations), exempt from the subgraph-reference `bad_state` check and the `orphan_state` note; `open_item` sets it; the `## State` render names it standalone instead of a referencing scope. Added at develop (develop-defaults D6). | `booping-python/src/booping/context/playbook.py`, `booping-python/src/booping/commands/render_playbook.py`, `booping-python/tests/`, `booping-python/e2e/cases/render-playbook/`, `documentation/playbook.md` | 1 | done |
 
 ## Definition of Done
 
 ### Task 1.1
 
-- [ ] `bin/booping scaffold core.specs.open_items.scaffold /tmp/oi --set id=OI-0001 --set title=t --set direction=clarify --set record=null --set source=manual --set created_at=2026-10-15` writes `/tmp/oi/OI-0001.md` matching the "Open item file" shape key for key.
-- [ ] `bin/booping query --config core.specs.open_items.index` runs (empty result on a vault with no items).
-- [ ] No status literal outside the machine: the scaffold's `status: open` is the machine's `initial`, commented as such.
+- [x] `bin/booping scaffold core.specs.open_items.scaffold /tmp/oi --set id=OI-0001 --set title=t --set direction=clarify --set record=null --set source=manual --set created_at=2026-10-15` writes `/tmp/oi/OI-0001.md` matching the "Open item file" shape key for key.
+- [x] `bin/booping query --config core.specs.open_items.index` runs (empty result on a vault with no items).
+- [x] No status literal outside the machine: the scaffold's `status: open` is the machine's `initial`, commented as such.
 
 ### Task 1.2
 
-- [ ] `bin/booping render-playbook specs` exits 0 with no STOP notice and a `## State` section for `open_item`.
-- [ ] Every edge of the Architecture table exists, no other edge; `done` and `dropped` are terminal.
-- [ ] The transition case passes.
+- [x] `bin/booping render-playbook specs` exits 0 with no STOP notice and a `## State` section for `open_item`.
+- [x] Every edge of the Architecture table exists, no other edge; `done` and `dropped` are terminal.
+- [x] The transition case passes.
+
+### Task 1.3
+
+- [x] A `standalone: true` state with `{instance}` in `artifact` and no referencing scope loads with no `bad_state` and no `orphan_state`; without the key both checks still fire (unit or e2e cases for both).
+- [x] `documentation/playbook.md` documents the key in its states reference.
 
 Return: the list of changed files, nothing else.
 

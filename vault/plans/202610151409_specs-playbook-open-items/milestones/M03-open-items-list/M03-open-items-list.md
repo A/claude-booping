@@ -2,7 +2,7 @@
 id: "03"
 title: "booping specs open-items list renders the index"
 sp: 2
-status: pending
+status: done
 plan: "plans/202610151409_specs-playbook-open-items/index.md"
 ---
 
@@ -18,15 +18,15 @@ Tests: integration tier, txtar cases — empty vault prints `no open items`; a v
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 3.1 | `list` and `--all` over the index query spec, plus the two cases. | `booping-python/src/booping/commands/specs.py`, `booping-python/src/booping/specs/open_items.py`, `booping-python/e2e/cases/specs/open-items-list-*.txtar` | 2 | pending |
+| 3.1 | `list` and `--all` over the index query spec, plus the two cases. | `booping-python/src/booping/commands/specs.py`, `booping-python/src/booping/specs/open_items.py`, `booping-python/e2e/cases/specs/open-items-list-*.txtar` | 2 | done |
 
 ## Definition of Done
 
 ### Task 3.1
 
-- [ ] Columns exactly `id | status | direction | record | title | plan`, markdown table, sorted by id.
-- [ ] The default filter derives from the machine's terminal statuses, not a hardcoded list.
-- [ ] Both cases pass.
+- [x] Columns exactly `id | status | direction | record | title | plan`, markdown table, sorted by id.
+- [x] The default filter derives from the machine's terminal statuses, not a hardcoded list.
+- [x] Both cases pass.
 
 Return: the list of changed files, nothing else.
 

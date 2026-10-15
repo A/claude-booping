@@ -2,7 +2,7 @@
 id: "04"
 title: "plan, close and reopen move items through the machine"
 sp: 4
-status: pending
+status: done
 plan: "plans/202610151409_specs-playbook-open-items/index.md"
 ---
 
@@ -18,24 +18,24 @@ Tests: integration tier, txtar cases — plan then close (`done`, `closed_at` st
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 4.1 | Expose the transition engine as an in-process function; `playbook-transition` unchanged. | `booping-python/src/booping/commands/playbook_transition.py` | 2 | pending |
-| 4.2 | `plan`, `close`, `reopen` verbs. | `booping-python/src/booping/commands/specs.py`, `booping-python/src/booping/specs/open_items.py` | 1 | pending |
-| 4.3 | The seven cases. | `booping-python/e2e/cases/specs/open-items-plan-*.txtar`, `open-items-close-*.txtar`, `open-items-reopen-*.txtar` | 1 | pending |
+| 4.1 | Expose the transition engine as an in-process function; `playbook-transition` unchanged. | `booping-python/src/booping/commands/playbook_transition.py` | 2 | done |
+| 4.2 | `plan`, `close`, `reopen` verbs. | `booping-python/src/booping/commands/specs.py`, `booping-python/src/booping/specs/open_items.py` | 1 | done |
+| 4.3 | The seven cases. | `booping-python/e2e/cases/specs/open-items-plan-*.txtar`, `open-items-close-*.txtar`, `open-items-reopen-*.txtar` | 1 | done |
 
 ## Definition of Done
 
 ### Task 4.1
 
-- [ ] Every existing `booping-python/e2e/cases/playbook-transition/` case passes unchanged.
+- [x] Every existing `booping-python/e2e/cases/playbook-transition/` case passes unchanged.
 
 ### Task 4.2
 
-- [ ] No verb writes `status:` itself; every status change goes through the engine.
-- [ ] Each verb's `--help` lists its flags.
+- [x] No verb writes `status:` itself; every status change goes through the engine.
+- [x] Each verb's `--help` lists its flags.
 
 ### Task 4.3
 
-- [ ] Seven cases, one per behaviour named in Tests.
+- [x] Seven cases, one per behaviour named in Tests.
 
 Return: the list of changed files, nothing else.
 
