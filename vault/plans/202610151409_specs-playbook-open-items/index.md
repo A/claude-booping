@@ -28,6 +28,10 @@ metrics_tokens_input: 176
 metrics_tokens_output: 75047
 metrics_tokens_cache_creation: 363766
 metrics_tokens_cache_read: 8752490
+agents: '{"develop-loop G1 (attempt 1)": "a8686812c3c0d201d", "develop-loop G1": "afb9c8b55a9b672c9",
+  "develop-loop G2": "abba53ba85d50f1ea", "develop-loop G2 fix": "aea3efd2cf47b285b",
+  "develop-loop G3": "ae68ac62c529b3549", "develop-loop G3 fix": "a31805ab5e0a333eb",
+  "verify": "ac6358b9b907abb8a"}'
 ---
 
 # Specs playbook and open items
