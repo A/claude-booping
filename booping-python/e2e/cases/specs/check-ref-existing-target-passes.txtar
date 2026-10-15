@@ -4,7 +4,7 @@ An un-namespaced ref to a record of the checked tier produces no finding.
 project_name: probe
 vault_path: ./vault
 latest_migration: 9999
--- fixtures/cwd/vault/specs/value/0001-first.md --
+-- fixtures/cwd/vault/value/0001-first.md --
 ---
 type: value
 title: First
@@ -20,7 +20,7 @@ Why the project exists.
 ## In practice
 
 It shows in every run.
--- fixtures/cwd/vault/specs/rule/0001-keep-it-short.md --
+-- fixtures/cwd/vault/rule/0001-keep-it-short.md --
 ---
 type: rule
 title: Keep it short

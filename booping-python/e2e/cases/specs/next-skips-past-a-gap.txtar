@@ -4,12 +4,12 @@ A gap in the numbering is not reused: `next` is the highest number plus one.
 project_name: probe
 vault_path: ./vault
 latest_migration: 9999
--- fixtures/cwd/vault/specs/adr/0001-first.md --
+-- fixtures/cwd/vault/adr/0001-first.md --
 ---
 type: adr
 title: First
 ---
--- fixtures/cwd/vault/specs/adr/0005-fifth.md --
+-- fixtures/cwd/vault/adr/0005-fifth.md --
 ---
 type: adr
 title: Fifth

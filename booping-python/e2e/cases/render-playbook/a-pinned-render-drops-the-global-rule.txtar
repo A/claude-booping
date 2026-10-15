@@ -28,7 +28,7 @@ brief: Global brief.
 project_name: probe
 vault_path: ./vault
 latest_migration: 9999
--- fixtures/cwd/vault/specs/rule/0003-project-rule.md --
+-- fixtures/cwd/vault/rule/0003-project-rule.md --
 ---
 type: rule
 title: Project rule
@@ -67,7 +67,7 @@ Preamble.
 The following 2 rule(s) apply to this playbook. Never silently violate one; conflict → stop and flag. Read a rule's record when its brief is not enough.
 
 - Core brief. [fx:rule/0001]({HOME}/core-specs/rule/0001-core-rule.md)
-- Project brief. [rule/0003](vault/specs/rule/0003-project-rule.md)
+- Project brief. [rule/0003](vault/rule/0003-project-rule.md)
 
 ## Playbook Steps
 

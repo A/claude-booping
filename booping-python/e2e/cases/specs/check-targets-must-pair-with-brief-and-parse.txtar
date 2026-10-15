@@ -6,7 +6,7 @@ finding on line 1.
 project_name: probe
 vault_path: ./vault
 latest_migration: 9999
--- fixtures/cwd/vault/specs/value/0001-first.md --
+-- fixtures/cwd/vault/value/0001-first.md --
 ---
 type: value
 title: First
@@ -22,7 +22,7 @@ Why the project exists.
 ## In practice
 
 It shows in every run.
--- fixtures/cwd/vault/specs/rule/0001-no-brief.md --
+-- fixtures/cwd/vault/rule/0001-no-brief.md --
 ---
 type: rule
 title: Keep it short
@@ -41,7 +41,7 @@ Keep it short.
 ## Follows from
 
 - [First](../value/0001-first.md)
--- fixtures/cwd/vault/specs/rule/0002-no-targets.md --
+-- fixtures/cwd/vault/rule/0002-no-targets.md --
 ---
 type: rule
 title: Keep it short
@@ -60,7 +60,7 @@ Keep it short.
 ## Follows from
 
 - [First](../value/0001-first.md)
--- fixtures/cwd/vault/specs/rule/0003-bad-target.md --
+-- fixtures/cwd/vault/rule/0003-bad-target.md --
 ---
 type: rule
 title: Keep it short
@@ -85,8 +85,8 @@ booping specs check
 -- exit --
 1
 -- stdout --
-vault/specs/rule/0001-no-brief.md:1  error  targets  targets without brief
-vault/specs/rule/0002-no-targets.md:1  error  targets  brief without targets
-vault/specs/rule/0003-bad-target.md:1  error  targets  target `bad target`: not a target expression
+vault/rule/0001-no-brief.md:1  error  targets  targets without brief
+vault/rule/0002-no-targets.md:1  error  targets  brief without targets
+vault/rule/0003-bad-target.md:1  error  targets  target `bad target`: not a target expression
 -- stderr --
 4 record(s) checked: 3 error(s), 0 warning(s)

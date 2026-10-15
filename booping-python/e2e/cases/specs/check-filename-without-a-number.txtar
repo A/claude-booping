@@ -5,7 +5,7 @@ its content is still checked against the schema, which it passes.
 project_name: probe
 vault_path: ./vault
 latest_migration: 9999
--- fixtures/cwd/vault/specs/value/first.md --
+-- fixtures/cwd/vault/value/first.md --
 ---
 type: value
 title: First
@@ -26,6 +26,6 @@ booping specs check
 -- exit --
 1
 -- stdout --
-vault/specs/value/first.md:1  error  filename  file name is not {NNNN}-{slug}.md
+vault/value/first.md:1  error  filename  file name is not {NNNN}-{slug}.md
 -- stderr --
 1 record(s) checked: 1 error(s), 0 warning(s)

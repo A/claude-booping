@@ -8,7 +8,7 @@ latest_migration: 9999
 -- fixtures/cwd/vault/config.yaml --
 macro_stubs:
   core.macros.date: "2026-10-15"
--- fixtures/cwd/vault/specs/value/0001-first.md --
+-- fixtures/cwd/vault/value/0001-first.md --
 ---
 type: value
 title: First

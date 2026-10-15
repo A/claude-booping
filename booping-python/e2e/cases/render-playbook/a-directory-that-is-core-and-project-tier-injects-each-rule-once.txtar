@@ -11,9 +11,9 @@ latest_migration: 9999
 core:
   specs:
     tiers:
-      core: {path: ~/../cwd/vault/specs}
+      core: {path: ~/../cwd/vault}
       project: {path: null}
--- fixtures/cwd/vault/specs/rule/0001-shared-rule.md --
+-- fixtures/cwd/vault/rule/0001-shared-rule.md --
 ---
 type: rule
 title: Shared rule
@@ -51,7 +51,7 @@ Preamble.
 
 The following 1 rule(s) apply to this playbook. Never silently violate one; conflict → stop and flag. Read a rule's record when its brief is not enough.
 
-- Shared brief. [booping:rule/0001]({CWD}/vault/specs/rule/0001-shared-rule.md)
+- Shared brief. [booping:rule/0001]({CWD}/vault/rule/0001-shared-rule.md)
 
 ## Playbook Steps
 

@@ -4,17 +4,17 @@
 project_name: probe
 vault_path: ./vault
 latest_migration: 9999
--- fixtures/cwd/vault/specs/adr/0001-first.md --
+-- fixtures/cwd/vault/adr/0001-first.md --
 ---
 type: adr
 title: First
 ---
--- fixtures/cwd/vault/specs/adr/0002-second.md --
+-- fixtures/cwd/vault/adr/0002-second.md --
 ---
 type: adr
 title: Second
 ---
--- fixtures/cwd/vault/specs/rule/0007-other.md --
+-- fixtures/cwd/vault/rule/0007-other.md --
 ---
 type: rule
 title: Other type

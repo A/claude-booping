@@ -4,7 +4,7 @@ A scanner error inside the frontmatter is anchored at its own file line, not the
 project_name: probe
 vault_path: ./vault
 latest_migration: 9999
--- fixtures/cwd/vault/specs/value/0001-first.md --
+-- fixtures/cwd/vault/value/0001-first.md --
 ---
 type: value
 title: First
@@ -25,6 +25,6 @@ booping specs check
 -- exit --
 1
 -- stdout --
-vault/specs/value/0001-first.md:4  error  frontmatter  found character '@' that cannot start any token, line 4, column 10
+vault/value/0001-first.md:4  error  frontmatter  found character '@' that cannot start any token, line 4, column 10
 -- stderr --
 1 record(s) checked: 1 error(s), 0 warning(s)

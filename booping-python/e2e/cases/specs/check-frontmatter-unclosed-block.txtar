@@ -4,7 +4,7 @@ A frontmatter block opened but never closed is a `frontmatter` error on the reco
 project_name: probe
 vault_path: ./vault
 latest_migration: 9999
--- fixtures/cwd/vault/specs/value/0001-first.md --
+-- fixtures/cwd/vault/value/0001-first.md --
 ---
 type: value
 title: First
@@ -24,8 +24,8 @@ booping specs check
 -- exit --
 1
 -- stdout --
-vault/specs/value/0001-first.md:1  error  frontmatter  frontmatter block is not closed
-vault/specs/value/0001-first.md:1  error  schema  unclosed frontmatter block
-vault/specs/value/0001-first.md:1  error  schema  frontmatter block missing
+vault/value/0001-first.md:1  error  frontmatter  frontmatter block is not closed
+vault/value/0001-first.md:1  error  schema  unclosed frontmatter block
+vault/value/0001-first.md:1  error  schema  frontmatter block missing
 -- stderr --
 1 record(s) checked: 3 error(s), 0 warning(s)

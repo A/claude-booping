@@ -6,7 +6,7 @@ in code on the same record produce nothing.
 project_name: probe
 vault_path: ./vault
 latest_migration: 9999
--- fixtures/cwd/vault/specs/value/0001-first.md --
+-- fixtures/cwd/vault/value/0001-first.md --
 ---
 type: value
 title: First
@@ -29,6 +29,6 @@ booping specs check
 -- exit --
 1
 -- stdout --
-vault/specs/value/0001-first.md:11  error  link  link target `../notes/missing.md#why` does not exist
+vault/value/0001-first.md:11  error  link  link target `../notes/missing.md#why` does not exist
 -- stderr --
 1 record(s) checked: 1 error(s), 0 warning(s)

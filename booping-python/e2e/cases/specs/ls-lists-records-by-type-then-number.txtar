@@ -6,26 +6,26 @@ for a record that carries no `status` (values).
 project_name: probe
 vault_path: ./vault
 latest_migration: 9999
--- fixtures/cwd/vault/specs/value/0002-second.md --
+-- fixtures/cwd/vault/value/0002-second.md --
 ---
 type: value
 title: Second
 summary: The second value.
 ---
--- fixtures/cwd/vault/specs/value/0001-first.md --
+-- fixtures/cwd/vault/value/0001-first.md --
 ---
 type: value
 title: First
 summary: The first value.
 ---
--- fixtures/cwd/vault/specs/adr/0010-tenth.md --
+-- fixtures/cwd/vault/adr/0010-tenth.md --
 ---
 type: adr
 title: Tenth
 summary: A later decision.
 status: proposed
 ---
--- fixtures/cwd/vault/specs/adr/0002-second.md --
+-- fixtures/cwd/vault/adr/0002-second.md --
 ---
 type: adr
 title: Second

@@ -21,7 +21,7 @@ created: 20260101
 ---
 
 Plan body.
--- fixtures/cwd/vault/specs/rule/0001-alpha.md --
+-- fixtures/cwd/vault/rule/0001-alpha.md --
 ---
 type: rule
 title: Alpha rule

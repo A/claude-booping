@@ -7,7 +7,7 @@ vault_path: ./vault
 latest_migration: 9999
 -- fixtures/cwd/vault/notes/kept.md --
 kept
--- fixtures/cwd/vault/specs/value/0001-first.md --
+-- fixtures/cwd/vault/value/0001-first.md --
 ---
 type: value
 title: First
@@ -29,6 +29,6 @@ booping specs check
 -- exit --
 1
 -- stdout --
-vault/specs/value/0001-first.md:9  error  sources  sources: `vault/notes/gone.md` does not exist
+vault/value/0001-first.md:9  error  sources  sources: `vault/notes/gone.md` does not exist
 -- stderr --
 1 record(s) checked: 1 error(s), 0 warning(s)

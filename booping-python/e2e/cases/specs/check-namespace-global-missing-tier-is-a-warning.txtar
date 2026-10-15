@@ -11,7 +11,7 @@ core:
 project_name: probe
 vault_path: ./vault
 latest_migration: 9999
--- fixtures/cwd/vault/specs/value/0001-first.md --
+-- fixtures/cwd/vault/value/0001-first.md --
 ---
 type: value
 title: First
@@ -27,7 +27,7 @@ Why the project exists.
 ## In practice
 
 It shows in every run.
--- fixtures/cwd/vault/specs/rule/0001-keep-it-short.md --
+-- fixtures/cwd/vault/rule/0001-keep-it-short.md --
 ---
 type: rule
 title: Keep it short
@@ -51,6 +51,6 @@ booping specs check
 -- exit --
 0
 -- stdout --
-vault/specs/rule/0001-keep-it-short.md:9  warning  namespace  rules: tier `global` has no specs at {HOME}/Claude/_specs
+vault/rule/0001-keep-it-short.md:9  warning  namespace  rules: tier `global` has no specs at {HOME}/Claude/_specs
 -- stderr --
 2 record(s) checked: 0 error(s), 1 warning(s)

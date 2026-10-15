@@ -6,7 +6,7 @@ vault_path: ./vault
 latest_migration: 9999
 -- fixtures/cwd/vault/notes.md --
 notes
--- fixtures/cwd/vault/specs/value/0001-first.md --
+-- fixtures/cwd/vault/value/0001-first.md --
 ---
 type: value
 title: First
@@ -28,6 +28,6 @@ booping specs check
 -- exit --
 1
 -- stdout --
-vault/specs/value/0001-first.md:9  error  sources  sources: must be a list
+vault/value/0001-first.md:9  error  sources  sources: must be a list
 -- stderr --
 1 record(s) checked: 1 error(s), 0 warning(s)

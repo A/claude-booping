@@ -4,7 +4,7 @@ Two records of one type sharing a number each get an `id` finding naming the oth
 project_name: probe
 vault_path: ./vault
 latest_migration: 9999
--- fixtures/cwd/vault/specs/value/0001-first.md --
+-- fixtures/cwd/vault/value/0001-first.md --
 ---
 type: value
 title: First
@@ -20,7 +20,7 @@ Why the project exists.
 ## In practice
 
 It shows in every run.
--- fixtures/cwd/vault/specs/value/0001-other.md --
+-- fixtures/cwd/vault/value/0001-other.md --
 ---
 type: value
 title: First
@@ -41,7 +41,7 @@ booping specs check
 -- exit --
 1
 -- stdout --
-vault/specs/value/0001-first.md:1  error  id  value/0001 is also used by vault/specs/value/0001-other.md
-vault/specs/value/0001-other.md:1  error  id  value/0001 is also used by vault/specs/value/0001-first.md
+vault/value/0001-first.md:1  error  id  value/0001 is also used by vault/value/0001-other.md
+vault/value/0001-other.md:1  error  id  value/0001 is also used by vault/value/0001-first.md
 -- stderr --
 2 record(s) checked: 2 error(s), 0 warning(s)
