@@ -25,6 +25,9 @@ agents:
   research-codebase: a25593ccb6e015e22
   research-sources: a7b4675d1f20209c6
   cross-review: a56bd798773a71631
+  develop-loop-G1: a315897922f3798f6
+  develop-loop-G2: a01463dfad3af8d36
+  verify: aaff8f222f06df44a
 reviewed_at: 2026-10-15 20:21
 ---
 
