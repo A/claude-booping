@@ -2,17 +2,18 @@
 title: "Project specs tier at the vault root — tier resolution, booping's records
   moved, migration"
 type: "feature"
-status: in-progress
+status: done
 sp: 29
 related_to: null
 created: 2026-10-15 17:27
 planned: null
 started: 2026-10-15 17:46
-completed: null
+completed: 2026-10-15 18:24
 code_reviews: []
 sessions:
 - 0de1a11b-6029-434b-9646-dec9c019459b
 - 313e7b6b-ed34-4cef-9fbc-32cff672c444
+- 36dbf90d-0102-4f43-add1-4a69775c2e2f
 retro: null
 summary: Project specs tier defaults to the vault root; check reads type dirs 
   only; init links repo tiers; migration 005 moves vaults
@@ -25,6 +26,14 @@ agents:
   research-codebase: ac9bca6adbbf5e8ab
   cross-review: ac2fc748a8cbc7c52
 reviewed_at: 2026-10-15 17:41
+metrics_active_minutes: 703
+metrics_models:
+- <synthetic>
+- claude-opus-5-5
+metrics_tokens_input: 778
+metrics_tokens_output: 278240
+metrics_tokens_cache_creation: 2281435
+metrics_tokens_cache_read: 93266830
 ---
 
 # Project specs tier at the vault root — tier resolution, booping's records moved, migration
