@@ -23,8 +23,7 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
 
     add = verbs.add_parser(
         "add",
-        help="Append the next R{n} entry to the target's corrections.md and print"
-        " {sidecar}#R{n}",
+        help="Append the next R{n} entry to the target's corrections.md and print {sidecar}#R{n}",
     )
     add.add_argument(
         "--target",

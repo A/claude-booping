@@ -238,7 +238,10 @@ def read_records(path: Path) -> Iterator[tuple[int, dict[str, object] | None]]:
             except json.JSONDecodeError:
                 yield number, None
                 continue
-            yield number, _mapping(record) if isinstance(record, dict) else None
+            if not isinstance(record, dict):
+                yield number, None
+                continue
+            yield number, _mapping(cast(dict[object, object], record))
 
 
 def _tool_result_text(content: object) -> str:
