@@ -2,7 +2,7 @@
 id: "02"
 title: "Project tier default resolves to the vault root"
 sp: 3
-status: in-progress
+status: done
 plan: "plans/202610151727_project-specs-at-vault-root/index.md"
 ---
 
@@ -20,19 +20,19 @@ Tests: unit tier, `tests/specs/tiers_test.py` — null path with an in-repo vaul
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 2.1 | Resolver default, docstring, config comment. | `booping-python/src/booping/specs/tiers.py`, `src/config.yaml` | 2 | pending |
-| 2.2 | The five resolution cases in Tests; the other three test files follow the new default. | `booping-python/tests/specs/tiers_test.py`, `booping-python/tests/specs/rules_test.py`, `booping-python/tests/rendering_test.py`, `booping-python/tests/templates/test_skill_rules.py` | 1 | pending |
+| 2.1 | Resolver default, docstring, config comment. | `booping-python/src/booping/specs/tiers.py`, `src/config.yaml` | 2 | done |
+| 2.2 | The five resolution cases in Tests; the other three test files follow the new default. | `booping-python/tests/specs/tiers_test.py`, `booping-python/tests/specs/rules_test.py`, `booping-python/tests/rendering_test.py`, `booping-python/tests/templates/test_skill_rules.py` | 1 | done |
 
 ## Definition of Done
 
 ### Task 2.1
 
-- [ ] `bin/booping config-get core.specs.tiers.project` still prints `path: null`; the comment above it is the text in Scope.
-- [ ] `project_root()` returns the vault for a null path whenever a vault is given.
+- [x] `bin/booping config-get core.specs.tiers.project` still prints `path: null`; the comment above it is the text in Scope.
+- [x] `project_root()` returns the vault for a null path whenever a vault is given.
 
 ### Task 2.2
 
-- [ ] One test per resolution case in Tests; no test asserts `vault/specs` as a default any more.
+- [x] One test per resolution case in Tests; no test asserts `vault/specs` as a default any more.
 
 Return: the list of changed files, nothing else.
 

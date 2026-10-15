@@ -66,7 +66,7 @@ This is the first slice of a larger request (`request.md`); the project-manager 
 | id | title | sp | status |
 | --- | --- | --- | --- |
 | 01 | [Migrate survey summary always asks about uncommitted work](milestones/M01-migrate-survey-summary-always-asks/M01-migrate-survey-summary-always-asks.md) | 1 | done |
-| 02 | [Project tier default resolves to the vault root](milestones/M02-project-tier-default-is-the-vault-root/M02-project-tier-default-is-the-vault-root.md) | 3 | in-progress |
+| 02 | [Project tier default resolves to the vault root](milestones/M02-project-tier-default-is-the-vault-root/M02-project-tier-default-is-the-vault-root.md) | 3 | done |
 | 03 | [E2E fixtures seed project records at the vault root](milestones/M03-e2e-fixtures-at-the-vault-root/M03-e2e-fixtures-at-the-vault-root.md) | 3 | in-progress |
 | 04 | [A vault-rooted tier reads only type directories](milestones/M04-vault-rooted-tier-reads-only-type-directories/M04-vault-rooted-tier-reads-only-type-directories.md) | 4 | in-progress |
 | 05 | [specs init — nothing at the vault root, a repo tier linked into the vault](milestones/M05-specs-init-links-a-repo-tier-into-the-vault/M05-specs-init-links-a-repo-tier-into-the-vault.md) | 4 | in-progress |
