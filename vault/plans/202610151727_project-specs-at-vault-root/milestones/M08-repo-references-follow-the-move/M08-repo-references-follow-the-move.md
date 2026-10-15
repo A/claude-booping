@@ -2,7 +2,7 @@
 id: "08"
 title: "Repo references follow the move"
 sp: 4
-status: pending
+status: in-progress
 plan: "plans/202610151727_project-specs-at-vault-root/index.md"
 ---
 

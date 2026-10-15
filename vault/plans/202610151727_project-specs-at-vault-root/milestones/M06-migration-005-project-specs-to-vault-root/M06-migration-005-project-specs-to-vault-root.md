@@ -1,8 +1,8 @@
 ---
 id: "06"
-title: "Migration 005 \u2014 project specs move to the vault root"
+title: "Migration 005 — project specs move to the vault root"
 sp: 4
-status: pending
+status: done
 plan: "plans/202610151727_project-specs-at-vault-root/index.md"
 ---
 
@@ -28,20 +28,20 @@ Tests: the migration body is agent-executed prose; its moves and link re-pointin
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 6.1 | The migration file per Scope. | `migrations/005_project_specs_to_vault_root/migration.md` | 3 | pending |
-| 6.2 | Fixture watermark; migrations test if it pins the id set. | `playbooks/_fixtures/vault/.booping`, `booping-python/tests/migrations_test.py` | 1 | pending |
+| 6.1 | The migration file per Scope. | `migrations/005_project_specs_to_vault_root/migration.md` | 3 | done |
+| 6.2 | Fixture watermark; migrations test if it pins the id set. | `playbooks/_fixtures/vault/.booping`, `booping-python/tests/migrations_test.py` | 1 | done |
 
 ## Definition of Done
 
 ### Task 6.1
 
-- [ ] The five cases appear in the order above, each with its report line.
-- [ ] The link re-pointing is one fenced Python block, standard library only.
-- [ ] No step touches git or the `.booping` marker.
+- [x] The five cases appear in the order above, each with its report line.
+- [x] The link re-pointing is one fenced Python block, standard library only.
+- [x] No step touches git or the `.booping` marker.
 
 ### Task 6.2
 
-- [ ] The fixture marker reads `latest_migration: 5`.
+- [x] The fixture marker reads `latest_migration: 5`.
 
 Return: the list of changed files, nothing else.
 

@@ -70,10 +70,10 @@ This is the first slice of a larger request (`request.md`); the project-manager 
 | 03 | [E2E fixtures seed project records at the vault root](milestones/M03-e2e-fixtures-at-the-vault-root/M03-e2e-fixtures-at-the-vault-root.md) | 3 | done |
 | 04 | [A vault-rooted tier reads only type directories](milestones/M04-vault-rooted-tier-reads-only-type-directories/M04-vault-rooted-tier-reads-only-type-directories.md) | 4 | done |
 | 05 | [specs init — nothing at the vault root, a repo tier linked into the vault](milestones/M05-specs-init-links-a-repo-tier-into-the-vault/M05-specs-init-links-a-repo-tier-into-the-vault.md) | 4 | done |
-| 06 | [Migration 005 — project specs move to the vault root](milestones/M06-migration-005-project-specs-to-vault-root/M06-migration-005-project-specs-to-vault-root.md) | 4 | pending |
-| 07 | [Booping's own records move to the vault root](milestones/M07-booping-records-move-to-the-vault-root/M07-booping-records-move-to-the-vault-root.md) | 3 | pending |
-| 08 | [Repo references follow the move](milestones/M08-repo-references-follow-the-move/M08-repo-references-follow-the-move.md) | 4 | pending |
-| 09 | [Shipped specs guide and public docs](milestones/M09-shipped-guide-and-public-docs/M09-shipped-guide-and-public-docs.md) | 3 | pending |
+| 06 | [Migration 005 — project specs move to the vault root](milestones/M06-migration-005-project-specs-to-vault-root/M06-migration-005-project-specs-to-vault-root.md) | 4 | done |
+| 07 | [Booping's own records move to the vault root](milestones/M07-booping-records-move-to-the-vault-root/M07-booping-records-move-to-the-vault-root.md) | 3 | in-progress |
+| 08 | [Repo references follow the move](milestones/M08-repo-references-follow-the-move/M08-repo-references-follow-the-move.md) | 4 | in-progress |
+| 09 | [Shipped specs guide and public docs](milestones/M09-shipped-guide-and-public-docs/M09-shipped-guide-and-public-docs.md) | 3 | in-progress |
 
 ## I/O contract
 

@@ -2,7 +2,7 @@
 id: "09"
 title: "Shipped specs guide and public docs"
 sp: 3
-status: pending
+status: in-progress
 plan: "plans/202610151727_project-specs-at-vault-root/index.md"
 ---
 

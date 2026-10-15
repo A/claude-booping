@@ -41,3 +41,13 @@ Autonomous run (owner unavailable). File name `develop-defaults.md` per the owne
 **Why:** greedy packing in id order per the step
 
 **Artifact:** [index.md](index.md)
+
+## D5 — develop/develop-loop — 2026-10-15 18:05
+
+**Asked:** `just snapshots` after G1 drifts in `playbooks/migrate/_reports/output.md` (the `survey` row, M01) and `playbooks/specs/_reports/output.md` (tiers line `project — specs` → `project — .`, M02's default rendered under the hermetic fixture) — accept?
+
+**Default:** both hunks judged plan-described (M01 summary; M02 "null path → the vault itself"), the specs report although the plan's Final Verification list did not foresee it. `just snapshots-accept` was then **denied by the harness permission classifier**; not worked around — both reports left unaccepted for the owner, so `just snapshots` (and `just ci`) stays red on them
+
+**Why:** owner's snapshot policy for this run; a harness block is not something a run bypasses
+
+**Artifact:** [index.md](index.md)

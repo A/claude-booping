@@ -1,8 +1,8 @@
 ---
 id: "07"
-title: "Booping\u0027s own records move to the vault root"
+title: "Booping's own records move to the vault root"
 sp: 3
-status: pending
+status: in-progress
 plan: "plans/202610151727_project-specs-at-vault-root/index.md"
 ---
 
