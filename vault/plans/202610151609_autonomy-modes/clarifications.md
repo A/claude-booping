@@ -95,3 +95,11 @@ Autonomous groom run on 2026-10-15: the owner was unavailable, so every question
 **Question:** Does part 4 fit one plan?
 
 **Answer:** Yes — default applied. 18 SP, under the 35 SP threshold; no split, no parked siblings. `project-manager` (adr/0028) was never part of this request (C1).
+
+## C9 — plan approval — answered
+
+**Asked:** 2026-10-15 — present
+
+**Question:** The plan is ready for development — approve, or say what to change?
+
+**Answer:** Approved — default applied by the autonomous run (owner unavailable). Cross-review's five findings were folded in before present: `--set` validated with the final config (M01), the runner-only snapshot acceptance recorded in `## Risk register`, `--target` confined to the vault and values normalised to one line (M02), `{run artefact}` defined in the driving-protocol contract (M03). 18 SP, no split.

@@ -2,7 +2,7 @@
 title: "Autonomy modes — core.autonomy supervised | autonomous, gates honour it, migrate
   asks on a dirty branch"
 type: "feature"
-status: presenting
+status: ready-for-dev
 sp: null
 related_to: null
 created: 2026-10-15 16:09
@@ -20,6 +20,8 @@ tracker_provider: null
 tracker_request: null
 tracker_issue: null
 return_to: null
+agents: '{"research-codebase": "a7a093416ced1ac16", "cross-review": "a6060b99f8c0c600d"}'
+reviewed_at: 2026-10-15 16:27
 ---
 
 # Autonomy modes — core.autonomy supervised | autonomous, gates honour it, migrate asks on a dirty branch
