@@ -14,7 +14,7 @@ from booping import runs
 from booping.context import Context
 from booping.query import QueryError, as_dict, build_spec, resolve_spec, run
 from booping.rendering import get_plugin_root
-from booping.specs import open_items
+from booping.specs import open_items, questions
 from booping.specs.open_items import Mark
 from booping.specs.records import Record, load_tier, unreviewed
 from booping.specs.tiers import Tier, types
@@ -62,6 +62,26 @@ class StatusContext:
     @cached_property
     def items(self) -> Table:
         return open_items.index_rows(self.ctx, {"status:in": self.item_statuses})
+
+    @cached_property
+    def waiting(self) -> list[dict[str, Any]]:
+        """Open or planned items holding at least one open question, by id."""
+        rows: list[dict[str, Any]] = []
+        for row in sorted(self.items[0], key=lambda r: str(r.get("id"))):
+            item_id = str(row.get("id"))
+            count = questions.open_count(self.ctx, item_id)
+            if count:
+                rows.append(
+                    {
+                        "id": item_id,
+                        "title": row.get("title"),
+                        "open questions": count,
+                        "sidecar": open_items.vault_relative(
+                            self.ctx, questions.sidecar_path(self.ctx, item_id)
+                        ),
+                    }
+                )
+        return rows
 
     @cached_property
     def plan_statuses(self) -> list[str]:
@@ -155,11 +175,18 @@ def _items_summary(sc: StatusContext) -> str:
     )
     split = [f"{source} {sources[source]}" for source in open_items.REQUEST_SOURCES]
     split.append(f"spec gap {sources[None]}")
-    return f"items: {statuses} — {', '.join(split)}"
+    line = f"items: {statuses} — {', '.join(split)}"
+    if sc.waiting:
+        line += f" — {len(sc.waiting)} waiting on you"
+    return line
 
 
 def _items_detail(sc: StatusContext) -> str:
-    return _table(sc.items)
+    detail = _table(sc.items)
+    if sc.waiting:
+        waiting = _table((sc.waiting, ["id", "title", "open questions", "sidecar"]))
+        detail += f"\n\nWaiting on you:\n\n{waiting}"
+    return detail
 
 
 def _table(table: Table) -> str:

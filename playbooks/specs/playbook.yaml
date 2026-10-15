@@ -14,6 +14,10 @@ states:
           - to: planned
             when: "`booping items plan` linked the item to a plan"
             gates: ["`plan` names an existing plan file"]
+          - to: done
+            when: "`booping items close` on an open item — a tiny fix, an answered question or a recorded decision closed without a plan"
+            hooks:
+              - frontmatter-update closed_at="{{ macro('core.macros.date', '+%Y-%m-%d') }}"
           - to: dropped
             when: "`booping items close --dropped` closed the item without work"
             hooks:

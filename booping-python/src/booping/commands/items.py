@@ -87,7 +87,7 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
 
     close = verbs.add_parser(
         "close",
-        help="Close planned items as done (or open/planned ones as dropped with --dropped)",
+        help="Close open or planned items as done (or as dropped with --dropped)",
     )
     close.add_argument("ids", nargs="*", metavar="ID", help="Open item id, e.g. OI-0001")
     close.add_argument(
@@ -96,9 +96,7 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
         metavar="PATH",
         help="Instead of ids: every planned item linked to this plan",
     )
-    close.add_argument(
-        "--dropped", action="store_true", help="Close as dropped (no work done); accepts open items"
-    )
+    close.add_argument("--dropped", action="store_true", help="Close as dropped (no work done)")
     close.add_argument("--reason", default=None, metavar="TEXT", help="Why the item closed")
     close.set_defaults(func=_run_close)
 

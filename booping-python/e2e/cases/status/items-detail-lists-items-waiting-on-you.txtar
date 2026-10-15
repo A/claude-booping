@@ -1,0 +1,85 @@
+`status items` follows the items table with a `Waiting on you:` table: one row per waiting
+item, its count of open questions and its sidecar path. The done OI-0002 is not listed.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+-- fixtures/cwd/vault/open-items/OI-0001.md --
+---
+id: OI-0001
+title: "Retire the exporter"
+status: open
+direction: null
+record: null
+source: request
+plan: null
+created_at: 2026-10-15
+closed_at: null
+reason: null
+---
+
+# Retire the exporter
+-- fixtures/cwd/vault/open-items/OI-0002.md --
+---
+id: OI-0002
+title: "Old request"
+status: done
+direction: null
+record: null
+source: request
+plan: null
+created_at: 2026-10-15
+closed_at: null
+reason: null
+---
+
+# Old request
+-- fixtures/cwd/vault/open-items/questions/OI-0001.md --
+# Questions — OI-0001
+
+## C1 — export format — answered
+
+**Asked:** 2026-10-14 — project-manager/work
+
+**Question:** CSV or JSON?
+
+**Answer:**
+
+JSON.
+
+## C2 — retention — open
+
+**Asked:** 2026-10-14 — project-manager/work
+
+**Question:** How long are exports kept?
+
+**Answer:**
+-- fixtures/cwd/vault/open-items/questions/OI-0002.md --
+# Questions — OI-0002
+
+## C1 — scope — open
+
+**Asked:** 2026-10-14 — project-manager/work
+
+**Question:** Still wanted?
+
+**Answer:**
+-- cmd --
+booping status items
+-- exit --
+0
+-- stdout --
+## items
+
+| id | status | source | direction | record | title | plan |
+| --- | --- | --- | --- | --- | --- | --- |
+| OI-0001 | open | request | — | — | Retire the exporter | — |
+
+Waiting on you:
+
+| id | title | open questions | sidecar |
+| --- | --- | --- | --- |
+| OI-0001 | Retire the exporter | 1 | open-items/questions/OI-0001.md |
+-- stderr --

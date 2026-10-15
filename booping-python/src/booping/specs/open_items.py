@@ -285,8 +285,6 @@ def move(ctx: Context, item_id: str, to: str, fields: dict[str, str] | None = No
         {edge.to for edge in resolve_edges(current, state.raw)} if current else set()
     )
     if to not in allowed:
-        if current == state.initial and to == "done":
-            raise OpenItemError(f"{item_id} is open; plan it first or close it with --dropped")
         raise OpenItemError(f"{item_id} is {current}; it cannot move to {to}")
     report = [vault_relative(ctx, path)]
     if fields:
