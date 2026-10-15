@@ -2,7 +2,7 @@
 id: "05"
 title: "Record and site-wide comment panels with copy and clear"
 sp: 4
-status: pending
+status: done
 plan: "/home/anton/Dev/@A/claude-booping-specs/vault/plans/202610160336_specs-site-review-comments/index.md"
 ---
 
@@ -26,21 +26,21 @@ Tests: none new in pytest — DOM-only; the export text is held by M02's test, t
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 5.1 | Record sheet and `comments.html` lists; edit and delete; side/bottom sheet CSS. | `booping-python/src/booping/specs/site/comments.js`, `booping-python/src/booping/specs/site/style.css` | 2 | pending |
-| 5.2 | Copy for the model with fallback and `sent` marking; Clear sent; announcements; golden rebaseline. | `booping-python/src/booping/specs/site/comments.js`, `booping-python/e2e/cases/specs/site-*.txtar` | 2 | pending |
+| 5.1 | Record sheet and `comments.html` lists; edit and delete; side/bottom sheet CSS. | `booping-python/src/booping/specs/site/comments.js`, `booping-python/src/booping/specs/site/style.css` | 2 | done |
+| 5.2 | Copy for the model with fallback and `sent` marking; Clear sent; announcements; golden rebaseline. | `booping-python/src/booping/specs/site/comments.js`, `booping-python/e2e/cases/specs/site-*.txtar` | 2 | done |
 
 ## Definition of Done
 
 ### Task 5.1
 
-- [ ] With two comments on one record and one on another, the record panel lists that record's two and `comments.html` lists all three in two groups, checked by the worker in headless Chromium on a built fixture site.
-- [ ] Edit and Delete change the store and every visible count without reload; stored text containing `<b>` renders as text.
+- [x] With two comments on one record and one on another, the record panel lists that record's two and `comments.html` lists all three in two groups, checked by the worker in headless Chromium on a built fixture site.
+- [x] Edit and Delete change the store and every visible count without reload; stored text containing `<b>` renders as text.
 
 ### Task 5.2
 
-- [ ] Copy puts exactly `SpecsComments.format(...)` of the scope on the clipboard and marks those comments sent; Clear sent removes only sent ones in the scope.
-- [ ] Each action announces its label in `#status`.
-- [ ] `site-*.txtar` rebaselined with `just e2e -k site --txtar-update`; diff limited to `comments.js` and `style.css`.
+- [x] Copy puts exactly `SpecsComments.format(...)` of the scope on the clipboard and marks those comments sent; Clear sent removes only sent ones in the scope.
+- [x] Each action announces its label in `#status`.
+- [x] `site-*.txtar` rebaselined with `just e2e -k site --txtar-update`; diff limited to `comments.js` and `style.css`.
 
 Return: the list of changed and created files, nothing else.
 

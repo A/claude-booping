@@ -2,7 +2,7 @@
 id: "06"
 title: "Document review comments and the root landing"
 sp: 2
-status: pending
+status: done
 plan: "/home/anton/Dev/@A/claude-booping-specs/vault/plans/202610160336_specs-site-review-comments/index.md"
 ---
 
@@ -20,15 +20,15 @@ The public docs describe the site as it now ships: review comments with their ex
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 6.1 | Update the `booping specs site` section per Scope. | `documentation/specs.md` | 2 | pending |
+| 6.1 | Update the `booping specs site` section per Scope. | `documentation/specs.md` | 2 | done |
 
 ## Definition of Done
 
 ### Task 6.1
 
-- [ ] Every bullet of Scope is in the section; nothing about internal modules, tests or the plan.
-- [ ] No sentence still says the root page lists marks or "Records: N".
-- [ ] `just docs` passes.
+- [x] Every bullet of Scope is in the section; nothing about internal modules, tests or the plan.
+- [x] No sentence still says the root page lists marks or "Records: N".
+- [x] `just docs` passes.
 
 Return: the list of changed files, nothing else.
 

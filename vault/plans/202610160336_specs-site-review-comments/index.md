@@ -71,8 +71,8 @@ src/config.yaml: labels.{en,ru}.ui.* for every comment string (M03); `records` l
 | 02 | [Comment export builder and its node test](milestones/M02-export-builder/M02-export-builder.md) | 3 | done |
 | 03 | [Comment hooks in the generated HTML and the storage module](milestones/M03-comment-hooks/M03-comment-hooks.md) | 4 | done |
 | 04 | [Comment affordances and the compose dialog](milestones/M04-comment-capture/M04-comment-capture.md) | 4 | done |
-| 05 | [Record and site-wide comment panels with copy and clear](milestones/M05-comment-panels/M05-comment-panels.md) | 4 | pending |
-| 06 | [Document review comments and the root landing](milestones/M06-comments-docs/M06-comments-docs.md) | 2 | pending |
+| 05 | [Record and site-wide comment panels with copy and clear](milestones/M05-comment-panels/M05-comment-panels.md) | 4 | done |
+| 06 | [Document review comments and the root landing](milestones/M06-comments-docs/M06-comments-docs.md) | 2 | done |
 
 ## Milestone files
 
