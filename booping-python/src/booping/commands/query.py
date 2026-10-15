@@ -17,6 +17,7 @@ from typing import Any, NoReturn
 
 import yaml
 
+from booping.argparser import Parser
 from booping.context import Context
 from booping.query import (
     IN_SUFFIX,
@@ -35,7 +36,7 @@ from booping.query import (
 OUTPUTS = ("table", "json", "yaml", "paths")
 
 
-class _ValueFriendlyParser(argparse.ArgumentParser):
+class _ValueFriendlyParser(Parser):
     """Parser that reads a single-dash token as a value, not an option.
 
     `--sort -created` is the documented descending form; argparse would otherwise
