@@ -1,0 +1,51 @@
+At the default project tier the vault root is the tier root: only directories named after a
+record type are read, so plans, retrospectives, open items, notes and root-level files yield no
+finding.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/plans/p/index.md --
+---
+status: done
+---
+
+# A plan
+-- fixtures/cwd/vault/retrospectives/r.md --
+# A retro
+-- fixtures/cwd/vault/open-items/OI-0001.md --
+---
+status: open
+---
+
+# An item
+-- fixtures/cwd/vault/notes/n.md --
+Loose notes.
+-- fixtures/cwd/vault/sprints.md --
+# Sprints
+-- fixtures/cwd/vault/README.md --
+# Vault
+-- fixtures/cwd/vault/value/0001-x.md --
+---
+type: value
+title: X
+summary: The one value.
+kind: value
+created_by: owner
+created_at: 2026-01-01
+updated_at: 2026-01-01
+---
+
+Why the project exists.
+
+## In practice
+
+It shows in every run.
+-- cmd --
+booping specs check --tier project
+-- exit --
+0
+-- stdout --
+-- stderr --
+1 record(s) checked: 0 error(s), 0 warning(s)

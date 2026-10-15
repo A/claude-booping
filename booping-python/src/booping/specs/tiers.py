@@ -16,6 +16,8 @@ class Tier(BaseModel):
     root: Path
     # Base a tier-relative path (`path`, a record's `sources`) resolves against.
     anchor: Path
+    # The project tier rooted at the vault itself: only type directories hold records.
+    vault_rooted: bool = False
 
     def link(self, path: Path) -> str:
         """`path` as a rendered body shows it: core under `${CLAUDE_PLUGIN_ROOT}`, project
@@ -98,12 +100,14 @@ def resolve_tiers(
     if repo is not None:
         project = _tier_settings(config, "project")
         path = project.get("path")
+        root = project_root(str(path) if path is not None else None, repo, vault)
         tiers.append(
             Tier(
                 name="project",
                 namespace=None,
-                root=project_root(str(path) if path is not None else None, repo, vault),
+                root=root,
                 anchor=repo,
+                vault_rooted=vault is not None and root.resolve() == vault.resolve(),
             )
         )
 

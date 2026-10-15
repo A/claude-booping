@@ -5,6 +5,12 @@ there is no schema to run it against.
 project_name: probe
 vault_path: ./vault
 latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+core:
+  specs:
+    tiers:
+      project:
+        path: vault/specs
 -- fixtures/cwd/vault/specs/value/0001-first.md --
 ---
 type: value

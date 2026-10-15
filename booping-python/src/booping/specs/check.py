@@ -284,7 +284,11 @@ def check_tier(
         raise CheckError("mdcheck not found on PATH — cargo install markdown-checker")
 
     records = load_tier(tier, known)
-    strays = sorted(p for p in tier.root.glob("*.md") if p.is_file() and p.name != "README.md")
+    strays = (
+        []
+        if tier.vault_rooted
+        else sorted(p for p in tier.root.glob("*.md") if p.is_file() and p.name != "README.md")
+    )
     findings = [_error(p, "layout", LAYOUT_MESSAGE) for p in strays]
 
     placed: list[Record] = []

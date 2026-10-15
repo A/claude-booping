@@ -88,10 +88,13 @@ def load_record(path: Path, type_: str) -> Record:
 def load_tier(tier: Tier, types: list[str]) -> list[Record]:
     """Every `*.md` one directory below the tier root, known types first in `types`
     order, then unknown directories by name — they still load so check can report them.
-    Files at the root itself (its README.md) are not records."""
+    Files at the root itself (its README.md) are not records. A vault-rooted tier
+    reads only the known type directories — the rest of the vault is not specs."""
     if not tier.root.is_dir():
         return []
     dirs = [d for d in tier.root.iterdir() if d.is_dir()]
+    if tier.vault_rooted:
+        dirs = [d for d in dirs if d.name in types]
     order = {name: index for index, name in enumerate(types)}
     dirs.sort(key=lambda d: (order.get(d.name, len(order)), d.name))
     return [load_record(p, d.name) for d in dirs for p in sorted(d.glob("*.md"))]
