@@ -29,3 +29,24 @@ Autonomous develop run, 2026-10-15. Every gate and unclear point the runner sett
 **Asked:** rule/0013 forbids a run accepting snapshots; the owner's run instruction grants standing permission for this feature when every drifted hunk is a change the plan describes.
 **Default:** the owner's explicit instruction governs this run; the plan changes no playbook source (C10), so no drift is expected and nothing should need accepting.
 **Why:** the owner's direct, dated permission for this feature.
+
+## D5 — idea status literal
+
+**Step:** develop/develop-loop (M03)
+**Asked:** `status.py` holds `IDEA_OPEN = "open"` — a record-status literal in code.
+**Default:** accepted as delivered.
+**Why:** C4 defines the section by `status: open` and the value is the idea schema's own enum member; M01's and M02's no-literal DoDs cover item and plan statuses only, and both hold.
+
+## D6 — milestone commits
+
+**Step:** develop/develop-loop
+**Asked:** one commit per milestone, but the single G1 worker built M01–M03 into shared files (`status.py`, `e2e/cases/status/`) whose intermediate states no longer exist.
+**Default:** one repo commit covering M01–M03, one for M04.
+**Why:** recreating per-milestone intermediate states would be runner-authored code (rule/0019); the split commit history stays honest about what was built together.
+
+## D7 — worker deviations accepted
+
+**Step:** develop/develop-loop
+**Asked:** the worker passed a `StatusContext` (wrapping `Context`) instead of `Context`, and rendered plan tables with `open_items.index_table` instead of `query.as_table`.
+**Default:** accepted.
+**Why:** `StatusContext` caches the once-per-call reads the architecture asks for; `as_table` appends a `slug` column and renders empty cells blank, breaking the I/O contract's "columns then `path`" and `—` cells.

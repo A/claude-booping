@@ -2,7 +2,7 @@
 id: "01"
 title: "booping status command and the items section"
 sp: 3
-status: in-progress
+status: done
 plan: "plans/202610151903_computed-status-report/index.md"
 ---
 
@@ -20,20 +20,20 @@ Tests (integration tier, e2e corpus `booping-python/e2e/cases/status/`, expectat
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 1.1 | `status.py` with `Section`, `SECTIONS` and the items section; `commands/status.py` parser, printing, logging; registration. | `booping-python/src/booping/status.py`, `booping-python/src/booping/commands/status.py`, `booping-python/src/booping/cli.py` | 2 | pending |
-| 1.2 | e2e cases for the items section, detail, bad section and no project. | `booping-python/e2e/cases/status/*.txtar` | 1 | pending |
+| 1.1 | `status.py` with `Section`, `SECTIONS` and the items section; `commands/status.py` parser, printing, logging; registration. | `booping-python/src/booping/status.py`, `booping-python/src/booping/commands/status.py`, `booping-python/src/booping/cli.py` | 2 | done |
+| 1.2 | e2e cases for the items section, detail, bad section and no project. | `booping-python/e2e/cases/status/*.txtar` | 1 | done |
 
 ## Definition of Done
 
 ### Task 1.1
 
-- [ ] `bin/booping status --help` shows the positional `section` with its choices and `--detail`.
-- [ ] `bin/booping status` in this repo prints one `items:` line in the locked shape.
-- [ ] `status.py` imports from `booping.specs.open_items` and holds no item-status or source literal beyond the constants that module exports.
+- [x] `bin/booping status --help` shows the positional `section` with its choices and `--detail`.
+- [x] `bin/booping status` in this repo prints one `items:` line in the locked shape.
+- [x] `status.py` imports from `booping.specs.open_items` and holds no item-status or source literal beyond the constants that module exports.
 
 ### Task 1.2
 
-- [ ] `booping-python/e2e/cases/status/` holds the six cases above, all passing.
+- [x] `booping-python/e2e/cases/status/` holds the six cases above, all passing.
 
 Return: the list of changed and created files, nothing else.
 

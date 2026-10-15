@@ -2,7 +2,7 @@
 id: "02"
 title: "Plans section"
 sp: 3
-status: in-progress
+status: done
 plan: "plans/202610151903_computed-status-report/index.md"
 ---
 
@@ -20,20 +20,20 @@ Tests (integration tier, e2e `booping-python/e2e/cases/status/`, hand-derived): 
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 2.1 | `core.status.queries` in config; the plans section — active filter from the machines, three specs run in-process, summary and detail. | `src/config.yaml`, `booping-python/src/booping/status.py` | 2 | pending |
-| 2.2 | e2e cases for the plans section. | `booping-python/e2e/cases/status/*.txtar` | 1 | pending |
+| 2.1 | `core.status.queries` in config; the plans section — active filter from the machines, three specs run in-process, summary and detail. | `src/config.yaml`, `booping-python/src/booping/status.py` | 2 | done |
+| 2.2 | e2e cases for the plans section. | `booping-python/e2e/cases/status/*.txtar` | 1 | done |
 
 ## Definition of Done
 
 ### Task 2.1
 
-- [ ] `bin/booping config-get core.status` prints the two query specs.
-- [ ] `bin/booping status` in this repo prints `items:` then `plans:` in the locked shape.
-- [ ] `status.py` names no plan status literal; `done` appears only in `src/config.yaml`.
+- [x] `bin/booping config-get core.status` prints the two query specs.
+- [x] `bin/booping status` in this repo prints `items:` then `plans:` in the locked shape.
+- [x] `status.py` names no plan status literal; `done` appears only in `src/config.yaml`.
 
 ### Task 2.2
 
-- [ ] The two plans cases pass, with every M01 case.
+- [x] The two plans cases pass, with every M01 case.
 
 Return: the list of changed and created files, nothing else.
 

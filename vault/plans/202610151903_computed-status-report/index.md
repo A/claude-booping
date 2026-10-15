@@ -70,10 +70,10 @@ New `booping-python/src/booping/status.py` computes the report: an ordered tuple
 
 | id | title | sp | status |
 | --- | --- | --- | --- |
-| 01 | [booping status command and the items section](milestones/M01-status-command-and-items/M01-status-command-and-items.md) | 3 | in-progress |
-| 02 | [Plans section](milestones/M02-plans-section/M02-plans-section.md) | 3 | in-progress |
-| 03 | [Ideas, records and marks sections](milestones/M03-ideas-records-marks/M03-ideas-records-marks.md) | 4 | in-progress |
-| 04 | [CLAUDE.md and documentation on booping status](milestones/M04-docs/M04-docs.md) | 2 | in-progress |
+| 01 | [booping status command and the items section](milestones/M01-status-command-and-items/M01-status-command-and-items.md) | 3 | done |
+| 02 | [Plans section](milestones/M02-plans-section/M02-plans-section.md) | 3 | done |
+| 03 | [Ideas, records and marks sections](milestones/M03-ideas-records-marks/M03-ideas-records-marks.md) | 4 | done |
+| 04 | [CLAUDE.md and documentation on booping status](milestones/M04-docs/M04-docs.md) | 2 | done |
 
 ## I/O contract
 

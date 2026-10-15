@@ -2,7 +2,7 @@
 id: "04"
 title: "CLAUDE.md and documentation on booping status"
 sp: 2
-status: in-progress
+status: done
 plan: "plans/202610151903_computed-status-report/index.md"
 ---
 
@@ -16,15 +16,15 @@ A reader of `CLAUDE.md` or the docs site finds `booping status` and `core.status
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 4.1 | CLAUDE.md lines, project_config, quick_start, vault docs. | `CLAUDE.md`, `documentation/project_config.md`, `documentation/quick_start.md`, `documentation/vault.md` | 2 | pending |
+| 4.1 | CLAUDE.md lines, project_config, quick_start, vault docs. | `CLAUDE.md`, `documentation/project_config.md`, `documentation/quick_start.md`, `documentation/vault.md` | 2 | done |
 
 ## Definition of Done
 
 ### Task 4.1
 
-- [ ] `grep -n "status" CLAUDE.md` shows `status` in the subcommand list and the `core.status` bullet.
-- [ ] `grep -n "core.status" documentation/project_config.md` shows the subsection.
-- [ ] `just docs` builds without warnings.
+- [x] `grep -n "status" CLAUDE.md` shows `status` in the subcommand list and the `core.status` bullet.
+- [x] `grep -n "core.status" documentation/project_config.md` shows the subsection.
+- [x] `just docs` builds without warnings.
 
 Return: the list of changed files, nothing else.
 

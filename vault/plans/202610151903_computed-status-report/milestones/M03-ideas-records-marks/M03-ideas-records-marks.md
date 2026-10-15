@@ -2,7 +2,7 @@
 id: "03"
 title: "Ideas, records and marks sections"
 sp: 4
-status: in-progress
+status: done
 plan: "plans/202610151903_computed-status-report/index.md"
 ---
 
@@ -24,20 +24,20 @@ Tables go through `booping.query.as_table` or the same cell rendering (`—` for
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 3.1 | Shared `unreviewed`; `marks()` with kinds under `mark_candidates`; unit case. | `booping-python/src/booping/specs/records.py`, `booping-python/src/booping/specs/site/pages.py`, `booping-python/src/booping/specs/open_items.py`, `booping-python/tests/specs/open_items_test.py` | 2 | pending |
-| 3.2 | Project-tier load and the ideas, records and marks sections; e2e cases. | `booping-python/src/booping/status.py`, `booping-python/e2e/cases/status/*.txtar` | 2 | pending |
+| 3.1 | Shared `unreviewed`; `marks()` with kinds under `mark_candidates`; unit case. | `booping-python/src/booping/specs/records.py`, `booping-python/src/booping/specs/site/pages.py`, `booping-python/src/booping/specs/open_items.py`, `booping-python/tests/specs/open_items_test.py` | 2 | done |
+| 3.2 | Project-tier load and the ideas, records and marks sections; e2e cases. | `booping-python/src/booping/status.py`, `booping-python/e2e/cases/status/*.txtar` | 2 | done |
 
 ## Definition of Done
 
 ### Task 3.1
 
-- [ ] `grep -n "_unreviewed" booping-python/src/booping/specs/site/pages.py` prints nothing.
-- [ ] `uv run pytest e2e/cases/items tests/specs` passes unchanged except the new unit case.
+- [x] `grep -n "_unreviewed" booping-python/src/booping/specs/site/pages.py` prints nothing.
+- [x] `uv run pytest e2e/cases/items tests/specs` passes unchanged except the new unit case.
 
 ### Task 3.2
 
-- [ ] `bin/booping status` in this repo prints the five lines in the locked order and shape.
-- [ ] The new status cases pass with every M01–M02 case.
+- [x] `bin/booping status` in this repo prints the five lines in the locked order and shape.
+- [x] The new status cases pass with every M01–M02 case.
 
 Return: the list of changed and created files, nothing else.
 
