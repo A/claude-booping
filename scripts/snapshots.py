@@ -60,7 +60,9 @@ class Target:
 
 
 def repo_vault() -> str:
-    marker = yaml.safe_load((ROOT / ".booping").read_text()) or {}
+    # The marker is per checkout and git-ignored (absent in CI): fall back to the in-repo vault.
+    path = ROOT / ".booping"
+    marker = (yaml.safe_load(path.read_text()) or {}) if path.is_file() else {}
     return str(marker.get("vault_path") or "vault")
 
 
