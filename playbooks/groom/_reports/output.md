@@ -26,12 +26,13 @@ itself stays yours. Never delegate to an agent that is not on this list.
 
 ## Rules
 
-The following 4 rule(s) apply to this playbook. Never silently violate one; conflict → stop and flag. Read a rule's record when its brief is not enough.
+The following 5 rule(s) apply to this playbook. Never silently violate one; conflict → stop and flag. Read a rule's record when its brief is not enough.
 
 - Settle every open question with the user during grooming; in develop, stop only for force majeure, not for what grooming should have asked. [booping:rule/0004](${CLAUDE_PLUGIN_ROOT}/specs/rule/0004-questions-settled-in-grooming.md)
 - Before saving a skill, agent, partial, template or briefing, check every block for scoping, duplication, configurability and hierarchy; cut motivation, restated context and preambles. [booping:rule/0006](${CLAUDE_PLUGIN_ROOT}/specs/rule/0006-information-architecture-pass.md)
 - Name the values that drive the plan's main choices and flag every departure from a value or rule with its reason, so the user can refine the values. [booping:rule/0030](${CLAUDE_PLUGIN_ROOT}/specs/rule/0030-planning-shows-values-in-play.md)
 - When the user corrects you — rejects a proposal, rewrites an output, says it is wrong, answers a gate other than you suggested — run `booping correction add --target {run artefact} --step {playbook}/{step} --did … --said '{the user's words verbatim}'`, with `--why` when the user states it and `--record {ref}` when the correction names a spec record; a plain confirmation is not a correction. [booping:rule/0031](${CLAUDE_PLUGIN_ROOT}/specs/rule/0031-corrections-are-logged.md)
+- Ask for approval at a review gate in prose at the end of your message, never through AskUserQuestion; a change request sends the run back to drafting. [booping:rule/0032](${CLAUDE_PLUGIN_ROOT}/specs/rule/0032-approval-asked-in-prose.md)
 
 ## Playbook Steps
 
