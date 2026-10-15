@@ -2,17 +2,18 @@
 title: "Run registry — booping run groom|develop launches recorded claude -p runs,
   status shows them"
 type: "feature"
-status: in-progress
+status: done
 sp: 12
 related_to: null
 created: 2026-10-15 19:37
 planned: null
 started: 2026-10-15 19:49
-completed: null
+completed: 2026-10-15 20:05
 code_reviews: []
 sessions:
 - 06b18e93-eee0-4ae8-9d7d-3279d4c1bf0d
 - e1804076-b17e-4dad-8154-e49f025d416e
+- 36dbf90d-0102-4f43-add1-4a69775c2e2f
 retro: null
 summary: booping run groom|develop launches claude -p from core.run, records 
   each run with its items under runs/, status shows them
@@ -26,6 +27,14 @@ agents:
   research-web: afcd469e8c683ac34
   cross-review: af594f8f99c0dec9c
 reviewed_at: 2026-10-15 19:49
+metrics_active_minutes: 771
+metrics_models:
+- <synthetic>
+- claude-opus-5-5
+metrics_tokens_input: 776
+metrics_tokens_output: 258252
+metrics_tokens_cache_creation: 2244976
+metrics_tokens_cache_read: 101983395
 ---
 
 # Run registry — booping run groom|develop launches recorded claude -p runs, status shows them
