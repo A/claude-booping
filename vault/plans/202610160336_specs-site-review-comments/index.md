@@ -1,7 +1,7 @@
 ---
 title: "Specs site redesign, part 5 — review comments and the root landing"
 type: "feature"
-status: presenting
+status: ready-for-dev
 sp: null
 related_to: null
 created: 2026-10-16 03:36
@@ -19,6 +19,7 @@ tracker_provider: null
 tracker_request: null
 tracker_issue: null
 return_to: null
+reviewed_at: 2026-10-16 03:49
 ---
 
 # Specs site redesign, part 5 — review comments and the root landing
