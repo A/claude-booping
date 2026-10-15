@@ -2,7 +2,7 @@
 id: "06"
 title: "Smoke suite for project-manager intake"
 sp: 3
-status: pending
+status: done
 plan: "plans/202610152006_project-manager-playbook/index.md"
 ---
 
@@ -20,19 +20,19 @@ A deterministic smoke suite holds `intake`'s contract: one item per request, the
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 6.1 | Suite config and the three fixtures. | `playbooks/project-manager/intake/promptfooconfig.yaml`, `playbooks/project-manager/intake/_fixtures/*.md` | 2 | pending |
-| 6.2 | `tests.yaml` with the asserts above. | `playbooks/project-manager/intake/tests.yaml` | 1 | pending |
+| 6.1 | Suite config and the three fixtures. | `playbooks/project-manager/intake/promptfooconfig.yaml`, `playbooks/project-manager/intake/_fixtures/*.md` | 2 | done |
+| 6.2 | `tests.yaml` with the asserts above. | `playbooks/project-manager/intake/tests.yaml` | 1 | done |
 
 ## Definition of Done
 
 ### Task 6.1
 
-- [ ] `just suites` lists `project-manager/intake`.
+- [x] `just suites` lists `project-manager/intake`.
 
 ### Task 6.2
 
-- [ ] Every case carries `metadata: {playbook: project-manager, step: intake, fixture, tier: smoke}` and only the shared asserts under `playbooks/_lib/asserts/`.
-- [ ] The suite passes.
+- [x] Every case carries `metadata: {playbook: project-manager, step: intake, fixture, tier: smoke}` and only the shared asserts under `playbooks/_lib/asserts/`.
+- [x] The suite passes.
 
 Return: the list of changed and created files and the suite's pass count, nothing else.
 

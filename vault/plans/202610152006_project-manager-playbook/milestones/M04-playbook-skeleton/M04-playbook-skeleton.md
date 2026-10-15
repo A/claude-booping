@@ -2,7 +2,7 @@
 id: "04"
 title: "project-manager playbook — manifest, preamble, on-start and intake"
 sp: 4
-status: in-progress
+status: done
 plan: "plans/202610152006_project-manager-playbook/index.md"
 ---
 
@@ -22,25 +22,25 @@ plan: "plans/202610152006_project-manager-playbook/index.md"
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 4.1 | Manifest, preamble and graph. | `playbooks/project-manager/playbook.md`, `playbooks/project-manager/playbook.yaml` | 2 | pending |
-| 4.2 | `on-start` and `intake` step prompts. | `playbooks/project-manager/on-start/prompt.md`, `playbooks/project-manager/intake/prompt.md` | 1 | pending |
-| 4.3 | `core.project_manager_playbook.agents` config. | `src/config.yaml` | 1 | pending |
+| 4.1 | Manifest, preamble and graph. | `playbooks/project-manager/playbook.md`, `playbooks/project-manager/playbook.yaml` | 2 | done |
+| 4.2 | `on-start` and `intake` step prompts. | `playbooks/project-manager/on-start/prompt.md`, `playbooks/project-manager/intake/prompt.md` | 1 | done |
+| 4.3 | `core.project_manager_playbook.agents` config. | `src/config.yaml` | 1 | done |
 
 ## Definition of Done
 
 ### Task 4.1
 
-- [ ] `bin/booping render-playbook project-manager` prints no STOP or Note notice, the step table lists `on-start`, `intake`, `work` in that order, and no `## State` section.
-- [ ] The preamble renders the autonomy value from config; no status, queue or agent id is written as a literal that config or a query already holds.
+- [x] `bin/booping render-playbook project-manager` prints no STOP or Note notice, the step table lists `on-start`, `intake`, `work` in that order, and no `## State` section.
+- [x] The preamble renders the autonomy value from config; no status, queue or agent id is written as a literal that config or a query already holds.
 
 ### Task 4.2
 
-- [ ] `intake` names `booping items add --source request … --text -` and `booping items answer`; it never paraphrases the user's words.
-- [ ] `on-start` starts with `booping status` and lists the act-on order above.
+- [x] `intake` names `booping items add --source request … --text -` and `booping items answer`; it never paraphrases the user's words.
+- [x] `on-start` starts with `booping status` and lists the act-on order above.
 
 ### Task 4.3
 
-- [ ] `bin/booping config-get core.project_manager_playbook.agents` prints both agents; the rendered playbook shows the agents table.
+- [x] `bin/booping config-get core.project_manager_playbook.agents` prints both agents; the rendered playbook shows the agents table.
 
 Return: the list of changed and created files, nothing else.
 

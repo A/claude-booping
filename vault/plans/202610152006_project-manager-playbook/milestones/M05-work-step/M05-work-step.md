@@ -1,8 +1,8 @@
 ---
 id: "05"
-title: "project-manager work step \u2014 classify, route, review, merge, report"
+title: "project-manager work step — classify, route, review, merge, report"
 sp: 4
-status: pending
+status: done
 plan: "plans/202610152006_project-manager-playbook/index.md"
 ---
 
@@ -26,25 +26,25 @@ Corrections the user makes during the session → `booping correction add` per `
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 5.1 | Classification and the tiny-fix, question and decision routes. | `playbooks/project-manager/work/prompt.md` | 1 | pending |
-| 5.2 | The plan route: groom per mode, develop, code-review, fixes, merge gate, merge. | `playbooks/project-manager/work/prompt.md` | 2 | pending |
-| 5.3 | Runs, report and corrections blocks; IA pass (rule/0006) over the three step prompts and the preamble. | `playbooks/project-manager/work/prompt.md`, `playbooks/project-manager/playbook.md`, `playbooks/project-manager/on-start/prompt.md`, `playbooks/project-manager/intake/prompt.md` | 1 | pending |
+| 5.1 | Classification and the tiny-fix, question and decision routes. | `playbooks/project-manager/work/prompt.md` | 1 | done |
+| 5.2 | The plan route: groom per mode, develop, code-review, fixes, merge gate, merge. | `playbooks/project-manager/work/prompt.md` | 2 | done |
+| 5.3 | Runs, report and corrections blocks; IA pass (rule/0006) over the three step prompts and the preamble. | `playbooks/project-manager/work/prompt.md`, `playbooks/project-manager/playbook.md`, `playbooks/project-manager/on-start/prompt.md`, `playbooks/project-manager/intake/prompt.md` | 1 | done |
 
 ## Definition of Done
 
 ### Task 5.1
 
-- [ ] Each of the four classes has one route ending in a named command; none offers two ways to do one thing.
+- [x] Each of the four classes has one route ending in a named command; none offers two ways to do one thing.
 
 ### Task 5.2
 
-- [ ] Every launch is `booping run {groom|develop|code-review} … --autonomous`, except the supervised groom, which is `/playbook groom` inline.
-- [ ] Merge is local `--no-ff`, never pushed; push/deploy are left to project rules and runbooks.
+- [x] Every launch is `booping run {groom|develop|code-review} … --autonomous`, except the supervised groom, which is `/playbook groom` inline.
+- [x] Merge is local `--no-ff`, never pushed; push/deploy are left to project rules and runbooks.
 
 ### Task 5.3
 
-- [ ] The report block matches the I/O contract's manager-report line word for word in its fields and outcome vocabulary.
-- [ ] No sentence in the four files restates another file's or config's content (rule/0006); no motivation or "you are" preamble.
+- [x] The report block matches the I/O contract's manager-report line word for word in its fields and outcome vocabulary.
+- [x] No sentence in the four files restates another file's or config's content (rule/0006); no motivation or "you are" preamble.
 
 Return: the list of changed and created files, nothing else.
 

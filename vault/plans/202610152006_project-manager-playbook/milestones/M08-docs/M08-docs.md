@@ -2,7 +2,7 @@
 id: "08"
 title: "Documentation, README and CLAUDE.md on the project-manager"
 sp: 3
-status: pending
+status: done
 plan: "plans/202610152006_project-manager-playbook/index.md"
 ---
 
@@ -16,23 +16,23 @@ The public docs, the README and CLAUDE.md describe the project-manager, the item
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 8.1 | `documentation/project_manager.md` and the nav entry. | `documentation/project_manager.md`, `mkdocs.yml` | 1 | pending |
-| 8.2 | Shipped list, items verbs, README list and Statuses. | `documentation/playbook.md`, `documentation/specs.md`, `README.md` | 1 | pending |
-| 8.3 | CLAUDE.md lines above. | `CLAUDE.md` | 1 | pending |
+| 8.1 | `documentation/project_manager.md` and the nav entry. | `documentation/project_manager.md`, `mkdocs.yml` | 1 | done |
+| 8.2 | Shipped list, items verbs, README list and Statuses. | `documentation/playbook.md`, `documentation/specs.md`, `README.md` | 1 | done |
+| 8.3 | CLAUDE.md lines above. | `CLAUDE.md` | 1 | done |
 
 ## Definition of Done
 
 ### Task 8.1
 
-- [ ] The page covers the user-facing surface above and nothing about how it is implemented.
+- [x] The page covers the user-facing surface above and nothing about how it is implemented.
 
 ### Task 8.2
 
-- [ ] Every page that lists the shipped playbooks names `project-manager`; the README Statuses open-item narrative has `open → done`.
+- [x] Every page that lists the shipped playbooks names `project-manager`; the README Statuses open-item narrative has `open → done`.
 
 ### Task 8.3
 
-- [ ] CLAUDE.md names `project-manager`, `items ask|answer`, `run code-review`, the questions sidecar and `core.project_manager_playbook`, one line each where its section lists its peers.
+- [x] CLAUDE.md names `project-manager`, `items ask|answer`, `run code-review`, the questions sidecar and `core.project_manager_playbook`, one line each where its section lists its peers.
 
 Return: the list of changed files, nothing else.
 

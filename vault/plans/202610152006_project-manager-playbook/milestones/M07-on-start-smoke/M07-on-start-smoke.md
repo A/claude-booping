@@ -2,7 +2,7 @@
 id: "07"
 title: "Smoke suite for project-manager on-start"
 sp: 2
-status: pending
+status: done
 plan: "plans/202610152006_project-manager-playbook/index.md"
 ---
 
@@ -19,14 +19,14 @@ A deterministic smoke suite holds `on-start`'s contract: the status first, then 
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 7.1 | Suite config, two fixtures, `tests.yaml`. | `playbooks/project-manager/on-start/promptfooconfig.yaml`, `playbooks/project-manager/on-start/tests.yaml`, `playbooks/project-manager/on-start/_fixtures/*.md` | 2 | pending |
+| 7.1 | Suite config, two fixtures, `tests.yaml`. | `playbooks/project-manager/on-start/promptfooconfig.yaml`, `playbooks/project-manager/on-start/tests.yaml`, `playbooks/project-manager/on-start/_fixtures/*.md` | 2 | done |
 
 ## Definition of Done
 
 ### Task 7.1
 
-- [ ] `just suites` lists `project-manager/on-start`; every case carries the smoke metadata.
-- [ ] The suite passes.
+- [x] `just suites` lists `project-manager/on-start`; every case carries the smoke metadata.
+- [x] The suite passes.
 
 Return: the list of changed and created files and the suite's pass count, nothing else.
 

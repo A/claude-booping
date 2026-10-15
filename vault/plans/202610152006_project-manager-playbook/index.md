@@ -100,11 +100,11 @@ session start ─► on-start ─► booping status ─► work ◄─ booping s
 | 01 | [Questions on an item — booping items ask and answer](milestones/M01-item-questions/M01-item-questions.md) | 4 | done |
 | 02 | [Closing an open item and the waiting-on-you status](milestones/M02-item-close-and-status/M02-item-close-and-status.md) | 3 | done |
 | 03 | [booping run code-review registers the independent review](milestones/M03-run-code-review/M03-run-code-review.md) | 2 | done |
-| 04 | [project-manager playbook — manifest, preamble, on-start and intake](milestones/M04-playbook-skeleton/M04-playbook-skeleton.md) | 4 | in-progress |
-| 05 | [project-manager work step — classify, route, review, merge, report](milestones/M05-work-step/M05-work-step.md) | 4 | pending |
-| 06 | [Smoke suite for project-manager intake](milestones/M06-intake-smoke/M06-intake-smoke.md) | 3 | pending |
-| 07 | [Smoke suite for project-manager on-start](milestones/M07-on-start-smoke/M07-on-start-smoke.md) | 2 | pending |
-| 08 | [Documentation, README and CLAUDE.md on the project-manager](milestones/M08-docs/M08-docs.md) | 3 | pending |
+| 04 | [project-manager playbook — manifest, preamble, on-start and intake](milestones/M04-playbook-skeleton/M04-playbook-skeleton.md) | 4 | done |
+| 05 | [project-manager work step — classify, route, review, merge, report](milestones/M05-work-step/M05-work-step.md) | 4 | done |
+| 06 | [Smoke suite for project-manager intake](milestones/M06-intake-smoke/M06-intake-smoke.md) | 3 | done |
+| 07 | [Smoke suite for project-manager on-start](milestones/M07-on-start-smoke/M07-on-start-smoke.md) | 2 | done |
+| 08 | [Documentation, README and CLAUDE.md on the project-manager](milestones/M08-docs/M08-docs.md) | 3 | done |
 
 ## I/O contract
 
