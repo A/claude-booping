@@ -1,8 +1,8 @@
 ---
 id: "05"
-title: "Search data \u2014 search-index.js and search-body.js"
+title: "Search data — search-index.js and search-body.js"
 sp: 3
-status: pending
+status: done
 plan: "plans/202610160138_specs-site-reading-and-search/index.md"
 ---
 
@@ -18,20 +18,20 @@ Tests (integration, new `booping-python/tests/specs/site_search_test.py`): over 
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 5.1 | `Rendered.text`; `search.py`; wiring in `build_site`; unit tests. | `booping-python/src/booping/specs/site/markdown.py`, `booping-python/src/booping/specs/site/search.py`, `booping-python/src/booping/specs/site/pages.py`, `booping-python/tests/specs/site_search_test.py` | 2 | pending |
-| 5.2 | New e2e case; golden rebaseline. | `booping-python/e2e/cases/specs/site-writes-search-index-and-body.txtar`, `booping-python/e2e/cases/specs/site-*.txtar` | 1 | pending |
+| 5.1 | `Rendered.text`; `search.py`; wiring in `build_site`; unit tests. | `booping-python/src/booping/specs/site/markdown.py`, `booping-python/src/booping/specs/site/search.py`, `booping-python/src/booping/specs/site/pages.py`, `booping-python/tests/specs/site_search_test.py` | 2 | done |
+| 5.2 | New e2e case; golden rebaseline. | `booping-python/e2e/cases/specs/site-writes-search-index-and-body.txtar`, `booping-python/e2e/cases/specs/site-*.txtar` | 1 | done |
 
 ## Definition of Done
 
 ### Task 5.1
 
-- [ ] Both files match C6 byte for byte on the test fixtures, Cyrillic unescaped.
-- [ ] Output is identical across two builds.
+- [x] Both files match C6 byte for byte on the test fixtures, Cyrillic unescaped.
+- [x] Output is identical across two builds.
 
 ### Task 5.2
 
-- [ ] The new txtar case passes and pins both files.
-- [ ] Other `site-*.txtar` goldens rebaselined; their diff is the two new files only.
+- [x] The new txtar case passes and pins both files.
+- [x] Other `site-*.txtar` goldens rebaselined; their diff is the two new files only.
 
 Return: the list of changed and created files, nothing else.
 

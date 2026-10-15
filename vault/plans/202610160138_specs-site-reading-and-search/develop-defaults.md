@@ -43,3 +43,10 @@ Every gate and question this autonomous develop run settled itself.
 - Asked: DoD "goldens rebaselined; diff is Referenced by / ADR pages only"
 - Default: satisfied vacuously — no golden fixture carries backlinks on an expected page or an ADR with `## Alternatives`; unit tests (`site_backlinks_test.py`, `site_adr_test.py`) and a runner render of `adr/0001` (chosen card first and open, two closed) cover the behaviour.
 - Why: adding fixture cases is scope beyond the contract.
+
+## D7 — G2 commits and worker calls
+
+- Step: develop/develop-loop
+- Asked: one commit per milestone; the worker's three open calls
+- Default: G2 → `d833567` (feat: M05, M06 and M07's Russian fixture, which share `pages.py`, `style.css`, `src/config.yaml` and the goldens) and `5abf69f` (docs: M07's `documentation/specs.md`). `search.js` at ~190 lines accepted against C7's "~160" — an estimate, not a limit. `search.html` carries its own pre-filled results form beside the header combobox — accepted as C7's "same form" read. An Alternatives table cell with a status no record uses (`rejected`) renders as plain text while its card shows the label — M04 behaviour, left as an open issue, no scope added.
+- Why: same reasoning as D4; the rest are within the plan's decisions.

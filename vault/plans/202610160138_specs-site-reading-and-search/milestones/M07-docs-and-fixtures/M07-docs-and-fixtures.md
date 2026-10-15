@@ -2,7 +2,7 @@
 id: "07"
 title: "Docs and the Russian fixture"
 sp: 2
-status: pending
+status: done
 plan: "plans/202610160138_specs-site-reading-and-search/index.md"
 ---
 
@@ -18,18 +18,18 @@ Tests: the extended txtar case is the test (e2e tier).
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 7.1 | Docs for record reading and search. | `documentation/specs.md` | 1 | pending |
-| 7.2 | Russian fixture extension and its golden. | `booping-python/e2e/cases/specs/site-renders-russian-labels-and-a-tier-own-type.txtar` | 1 | pending |
+| 7.1 | Docs for record reading and search. | `documentation/specs.md` | 1 | done |
+| 7.2 | Russian fixture extension and its golden. | `booping-python/e2e/cases/specs/site-renders-russian-labels-and-a-tier-own-type.txtar` | 1 | done |
 
 ## Definition of Done
 
 ### Task 7.1
 
-- [ ] Every C2–C7 behaviour a reader sees is documented once in `documentation/specs.md`; nothing internal; `just docs` builds.
+- [x] Every C2–C7 behaviour a reader sees is documented once in `documentation/specs.md`; nothing internal; `just docs` builds.
 
 ### Task 7.2
 
-- [ ] The Russian case renders the ADR cards, grouped backlinks with a `via` section, the rail and the search box with Russian labels, and passes.
+- [x] The Russian case renders the ADR cards, grouped backlinks with a `via` section, the rail and the search box with Russian labels, and passes.
 
 Return: the list of changed and created files, nothing else.
 

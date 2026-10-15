@@ -1,8 +1,8 @@
 ---
 id: "06"
-title: "Search UI \u2014 header combobox, phone overlay, search.html"
+title: "Search UI — header combobox, phone overlay, search.html"
 sp: 4
-status: pending
+status: done
 plan: "plans/202610160138_specs-site-reading-and-search/index.md"
 ---
 
@@ -18,22 +18,22 @@ Tests (integration, `booping-python/tests/specs/site_pages_test.py`): a record p
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 6.1 | Header form, phone button, `search.html.j2`, pages and labels; tests. | `booping-python/src/booping/specs/site/templates/base.html.j2`, `booping-python/src/booping/specs/site/templates/search.html.j2`, `booping-python/src/booping/specs/site/pages.py`, `src/config.yaml`, `booping-python/tests/specs/site_pages_test.py` | 2 | pending |
-| 6.2 | `search.js` — lazy loading, normalise/stem/score, combobox keys, `/`, overlay, `search.html` results; CSS; golden rebaseline. | `booping-python/src/booping/specs/site/search.js`, `booping-python/src/booping/specs/site/style.css`, `booping-python/e2e/cases/specs/site-*.txtar` | 2 | pending |
+| 6.1 | Header form, phone button, `search.html.j2`, pages and labels; tests. | `booping-python/src/booping/specs/site/templates/base.html.j2`, `booping-python/src/booping/specs/site/templates/search.html.j2`, `booping-python/src/booping/specs/site/pages.py`, `src/config.yaml`, `booping-python/tests/specs/site_pages_test.py` | 2 | done |
+| 6.2 | `search.js` — lazy loading, normalise/stem/score, combobox keys, `/`, overlay, `search.html` results; CSS; golden rebaseline. | `booping-python/src/booping/specs/site/search.js`, `booping-python/src/booping/specs/site/style.css`, `booping-python/e2e/cases/specs/site-*.txtar` | 2 | done |
 
 ## Definition of Done
 
 ### Task 6.1
 
-- [ ] Header and `search.html` markup as C7, at every page depth (`prefix` correct), `site-index` untouched.
-- [ ] All new labels resolve in `en` and `ru`.
+- [x] Header and `search.html` markup as C7, at every page depth (`prefix` correct), `site-index` untouched.
+- [x] All new labels resolve in `en` and `ru`.
 
 ### Task 6.2
 
-- [ ] `search.js` implements C7's normalisation, stem, AND matching, weights, order, lazy loading via `<script src>`, keys and overlay; no `fetch`, no dependency.
-- [ ] Without JS the header form submits to `search.html`, which shows `search_needs_js`; everything else on every page is unchanged.
-- [ ] From `file://` in headless Chromium: `решени` finds a record titled «Решение…», `елка` finds «Ёлка», Down/Enter opens the result, `/` focuses the box, at 390px the overlay opens and Esc returns focus — checked by the worker with headless Chromium (`/usr/bin/chromium`) over a site rendered to `/tmp` from a fixture holding those two titles, and again by the runner in Final Verification.
-- [ ] Dropdown and overlay colours use existing tokens only (`site_contrast_test.py` green); `site-*.txtar` goldens rebaselined, diff as stated above.
+- [x] `search.js` implements C7's normalisation, stem, AND matching, weights, order, lazy loading via `<script src>`, keys and overlay; no `fetch`, no dependency.
+- [x] Without JS the header form submits to `search.html`, which shows `search_needs_js`; everything else on every page is unchanged.
+- [x] From `file://` in headless Chromium: `решени` finds a record titled «Решение…», `елка` finds «Ёлка», Down/Enter opens the result, `/` focuses the box, at 390px the overlay opens and Esc returns focus — checked by the worker with headless Chromium (`/usr/bin/chromium`) over a site rendered to `/tmp` from a fixture holding those two titles, and again by the runner in Final Verification.
+- [x] Dropdown and overlay colours use existing tokens only (`site_contrast_test.py` green); `site-*.txtar` goldens rebaselined, diff as stated above.
 
 Return: the list of changed and created files, nothing else.
 

@@ -73,9 +73,9 @@ site/pages.py  build_site — renders every body first, then pages
 | 02 | [On this page rail, open questions and the phone details](milestones/M02-toc-rail/M02-toc-rail.md) | 3 | done |
 | 03 | [Backlinks grouped by type and by section](milestones/M03-grouped-backlinks/M03-grouped-backlinks.md) | 3 | done |
 | 04 | [ADR option cards](milestones/M04-adr-option-cards/M04-adr-option-cards.md) | 4 | done |
-| 05 | [Search data — search-index.js and search-body.js](milestones/M05-search-data/M05-search-data.md) | 3 | pending |
-| 06 | [Search UI — header combobox, phone overlay, search.html](milestones/M06-search-ui/M06-search-ui.md) | 4 | pending |
-| 07 | [Docs and the Russian fixture](milestones/M07-docs-and-fixtures/M07-docs-and-fixtures.md) | 2 | pending |
+| 05 | [Search data — search-index.js and search-body.js](milestones/M05-search-data/M05-search-data.md) | 3 | done |
+| 06 | [Search UI — header combobox, phone overlay, search.html](milestones/M06-search-ui/M06-search-ui.md) | 4 | done |
+| 07 | [Docs and the Russian fixture](milestones/M07-docs-and-fixtures/M07-docs-and-fixtures.md) | 2 | done |
 
 ## Final Verification
 
