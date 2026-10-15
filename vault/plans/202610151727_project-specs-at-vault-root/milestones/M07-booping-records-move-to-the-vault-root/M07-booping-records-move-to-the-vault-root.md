@@ -2,7 +2,7 @@
 id: "07"
 title: "Booping's own records move to the vault root"
 sp: 3
-status: in-progress
+status: done
 plan: "plans/202610151727_project-specs-at-vault-root/index.md"
 ---
 
@@ -20,19 +20,19 @@ Tests: integration — `specs check --tier project` over the moved set, its `lin
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 7.1 | Apply migration 005 to `vault/`; fix the migration file for any step that fails. | `vault/specs/**` → `vault/{type}/**`, `migrations/005_project_specs_to_vault_root/migration.md` | 2 | pending |
-| 7.2 | `vault/specs/README.md` → `vault/README.md`; marker watermark. | `vault/README.md`, `.booping` | 1 | pending |
+| 7.1 | Apply migration 005 to `vault/`; fix the migration file for any step that fails. | `vault/specs/**` → `vault/{type}/**`, `migrations/005_project_specs_to_vault_root/migration.md` | 2 | done |
+| 7.2 | `vault/specs/README.md` → `vault/README.md`; marker watermark. | `vault/README.md`, `.booping` | 1 | done |
 
 ## Definition of Done
 
 ### Task 7.1
 
-- [ ] `vault/specs/` does not exist; every record that was under it sits at `vault/{type}/` with the same file name.
-- [ ] The migration's report lines are pasted into the return.
+- [x] `vault/specs/` does not exist; every record that was under it sits at `vault/{type}/` with the same file name.
+- [x] The migration's report lines are pasted into the return.
 
 ### Task 7.2
 
-- [ ] `vault/README.md` names no `vault/specs/` path; `.booping` reads `latest_migration: 5`.
+- [x] `vault/README.md` names no `vault/specs/` path; `.booping` reads `latest_migration: 5`.
 
 Return: the list of changed files (moves as `old → new` per type directory), plus the migration's report lines.
 
