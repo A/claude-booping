@@ -1,13 +1,13 @@
 ---
 title: "Specs site redesign, part 5 — review comments and the root landing"
 type: "feature"
-status: in-progress
+status: done
 sp: 20
 related_to: null
 created: 2026-10-16 03:36
 planned: null
 started: 2026-10-16 03:51
-completed: null
+completed: 2026-10-16 04:18
 code_reviews: []
 sessions:
 - 8a86d73b-8759-4a61-afb0-73379f041cc4
@@ -21,6 +21,13 @@ tracker_request: null
 tracker_issue: null
 return_to: null
 reviewed_at: 2026-10-16 03:49
+metrics_active_minutes: 42
+metrics_models:
+- claude-opus-5-5
+metrics_tokens_input: 126
+metrics_tokens_output: 55814
+metrics_tokens_cache_creation: 236717
+metrics_tokens_cache_read: 6156684
 ---
 
 # Specs site redesign, part 5 — review comments and the root landing
