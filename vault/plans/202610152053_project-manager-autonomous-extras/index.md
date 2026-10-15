@@ -1,13 +1,13 @@
 ---
 title: "Project-manager autonomous extras — budget gate, time window, size batching"
 type: "feature"
-status: in-progress
+status: done
 sp: 24
 related_to: null
 created: 2026-10-15 20:54
 planned: null
 started: 2026-10-15 21:14
-completed: null
+completed: 2026-10-15 21:40
 code_reviews: []
 sessions:
 - cc8c9973-3ab7-48e7-b1a5-806b0e65eba7
@@ -25,6 +25,13 @@ agents:
   research-codebase: a1d5160b7fc56a628
   cross-review: ad3d63ce1ba1b7168
 reviewed_at: 2026-10-15 21:06
+metrics_active_minutes: 48
+metrics_models:
+- claude-opus-5-5
+metrics_tokens_input: 160
+metrics_tokens_output: 58740
+metrics_tokens_cache_creation: 234734
+metrics_tokens_cache_read: 8136782
 ---
 
 # Project-manager autonomous extras — budget gate, time window, size batching
