@@ -2,7 +2,7 @@
 id: "06"
 title: "Develop-loop gate and project-manager batches, pauses and resumes"
 sp: 3
-status: pending
+status: done
 plan: "plans/202610152053_project-manager-autonomous-extras/index.md"
 ---
 
@@ -20,19 +20,19 @@ Tests: none new — prompt prose; the committed snapshot reports hold it (`just 
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 6.1 | Gate step in develop-loop. | `playbooks/develop/develop-loop/base.md` | 1 | pending |
-| 6.2 | Sizing, batches, paused outcome and resume in the work step. | `playbooks/project-manager/work/prompt.md` | 2 | pending |
+| 6.1 | Gate step in develop-loop. | `playbooks/develop/develop-loop/base.md` | 1 | done |
+| 6.2 | Sizing, batches, paused outcome and resume in the work step. | `playbooks/project-manager/work/prompt.md` | 2 | done |
 
 ## Definition of Done
 
 ### Task 6.1
 
-- [ ] `bin/booping render-playbook develop --step develop-loop` shows the gate as the first step of "Delegating a group", with no STOP or Note notice.
+- [x] `bin/booping render-playbook develop --step develop-loop` shows the gate as the first step of "Delegating a group", with no STOP or Note notice.
 
 ### Task 6.2
 
-- [ ] `bin/booping render-playbook project-manager --step work` shows the four section changes, no STOP or Note notice.
-- [ ] No size letter, SP number, threshold or run status literal appears in the changed prose.
+- [x] `bin/booping render-playbook project-manager --step work` shows the four section changes, no STOP or Note notice.
+- [x] No size letter, SP number, threshold or run status literal appears in the changed prose.
 
 Return: the list of changed files, nothing else.
 

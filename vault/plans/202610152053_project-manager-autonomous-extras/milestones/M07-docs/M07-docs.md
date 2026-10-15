@@ -2,7 +2,7 @@
 id: "07"
 title: "Documentation, CLAUDE.md and config reference for budget, window and batches"
 sp: 3
-status: pending
+status: done
 plan: "plans/202610152053_project-manager-autonomous-extras/index.md"
 ---
 
@@ -18,20 +18,20 @@ Tests: none — docs; `just docs` builds them.
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 7.1 | User docs pages. | `documentation/project_manager.md`, `documentation/project_config.md`, `documentation/develop.md` | 2 | pending |
-| 7.2 | CLAUDE.md lines. | `CLAUDE.md` | 1 | pending |
+| 7.1 | User docs pages. | `documentation/project_manager.md`, `documentation/project_config.md`, `documentation/develop.md` | 2 | done |
+| 7.2 | CLAUDE.md lines. | `CLAUDE.md` | 1 | done |
 
 ## Definition of Done
 
 ### Task 7.1
 
-- [ ] Every key and verb this plan adds is named on exactly one reference page; other pages link to it.
-- [ ] No module path, class name or test name in the user pages.
-- [ ] `just docs` builds with no new warning.
+- [x] Every key and verb this plan adds is named on exactly one reference page; other pages link to it.
+- [x] No module path, class name or test name in the user pages.
+- [x] `just docs` builds with no new warning.
 
 ### Task 7.2
 
-- [ ] The three CLAUDE.md sections name the new surface; no other section changes.
+- [x] The three CLAUDE.md sections name the new surface; no other section changes.
 
 Return: the list of changed files, nothing else.
 

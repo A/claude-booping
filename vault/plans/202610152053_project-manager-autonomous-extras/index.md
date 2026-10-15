@@ -100,9 +100,9 @@ project-manager work: classify ─► tiny fix ─► booping items size ─► 
 | 02 | [Budget gate — ceilings, run allowance and time window in booping budget gate](milestones/M02-budget-gate/M02-budget-gate.md) | 4 | done |
 | 03 | [Paused runs — launch gate, the gate stamps the run record, the paused status](milestones/M03-run-pause/M03-run-pause.md) | 4 | done |
 | 04 | [Paused runs in booping status with next milestone and resume command](milestones/M04-status-paused/M04-status-paused.md) | 3 | done |
-| 05 | [Item sizes and batches — booping items size and items batch](milestones/M05-item-size-batch/M05-item-size-batch.md) | 4 | pending |
-| 06 | [Develop-loop gate and project-manager batches, pauses and resumes](milestones/M06-playbook-wiring/M06-playbook-wiring.md) | 3 | pending |
-| 07 | [Documentation, CLAUDE.md and config reference for budget, window and batches](milestones/M07-docs/M07-docs.md) | 3 | pending |
+| 05 | [Item sizes and batches — booping items size and items batch](milestones/M05-item-size-batch/M05-item-size-batch.md) | 4 | done |
+| 06 | [Develop-loop gate and project-manager batches, pauses and resumes](milestones/M06-playbook-wiring/M06-playbook-wiring.md) | 3 | done |
+| 07 | [Documentation, CLAUDE.md and config reference for budget, window and batches](milestones/M07-docs/M07-docs.md) | 3 | done |
 
 ## I/O contract
 

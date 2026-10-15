@@ -1,8 +1,8 @@
 ---
 id: "05"
-title: "Item sizes and batches \u2014 booping items size and items batch"
+title: "Item sizes and batches — booping items size and items batch"
 sp: 4
-status: pending
+status: done
 plan: "plans/202610152053_project-manager-autonomous-extras/index.md"
 ---
 
@@ -18,24 +18,24 @@ Tests (integration tier, `booping-python/e2e/cases/items/`, hand-derived): `size
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 5.1 | Scaffold field, index column, `batch` config. | `src/config.yaml` | 1 | pending |
-| 5.2 | `items size` and `items batch`. | `booping-python/src/booping/commands/items.py`, `booping-python/src/booping/specs/open_items.py` | 2 | pending |
-| 5.3 | The five new cases; rebaselined `items list` cases. | `booping-python/e2e/cases/items/size-*.txtar`, `booping-python/e2e/cases/items/batch-*.txtar` | 1 | pending |
+| 5.1 | Scaffold field, index column, `batch` config. | `src/config.yaml` | 1 | done |
+| 5.2 | `items size` and `items batch`. | `booping-python/src/booping/commands/items.py`, `booping-python/src/booping/specs/open_items.py` | 2 | done |
+| 5.3 | The five new cases; rebaselined `items list` cases. | `booping-python/e2e/cases/items/size-*.txtar`, `booping-python/e2e/cases/items/batch-*.txtar` | 1 | done |
 
 ## Definition of Done
 
 ### Task 5.1
 
-- [ ] `bin/booping config-get core.project_manager_playbook.batch` prints the three keys.
+- [x] `bin/booping config-get core.project_manager_playbook.batch` prints the three keys.
 
 ### Task 5.2
 
-- [ ] `bin/booping items --help` lists `size` and `batch`; each verb's `--help` matches the contract.
-- [ ] Batch packing is a pure function of (items in id order with sizes, sizes map, direct list, cap).
+- [x] `bin/booping items --help` lists `size` and `batch`; each verb's `--help` matches the contract.
+- [x] Batch packing is a pure function of (items in id order with sizes, sizes map, direct list, cap).
 
 ### Task 5.3
 
-- [ ] The five cases pass; the rebaselined cases differ from before only by the `size` column.
+- [x] The five cases pass; the rebaselined cases differ from before only by the `size` column.
 
 Return: the list of changed and created files, nothing else.
 
