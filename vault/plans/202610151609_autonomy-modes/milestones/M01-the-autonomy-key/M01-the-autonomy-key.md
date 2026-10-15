@@ -2,7 +2,7 @@
 id: "01"
 title: "core.autonomy key, invalid-value STOP, project-context line"
 sp: 3
-status: in-progress
+status: done
 plan: "plans/202610151609_autonomy-modes/index.md"
 ---
 
@@ -18,21 +18,21 @@ Tests: integration tier, txtar cases — `config-get core.autonomy` prints `supe
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 1.1 | Config key with comment; the invalid-value check wired into both render commands; the project-context line. | `src/config.yaml`, new `booping-python/src/booping/autonomy.py`, `booping-python/src/booping/commands/render.py`, `booping-python/src/booping/commands/render_playbook.py`, `src/templates/_partials/_project_context.j2` | 2 | pending |
-| 1.2 | The txtar cases named in Tests. | `booping-python/e2e/cases/config-get/autonomy-*.txtar`, `booping-python/e2e/cases/render-playbook/autonomy-*.txtar`, `booping-python/e2e/cases/render/autonomy-*.txtar` | 1 | pending |
+| 1.1 | Config key with comment; the invalid-value check wired into both render commands; the project-context line. | `src/config.yaml`, new `booping-python/src/booping/autonomy.py`, `booping-python/src/booping/commands/render.py`, `booping-python/src/booping/commands/render_playbook.py`, `src/templates/_partials/_project_context.j2` | 2 | done |
+| 1.2 | The txtar cases named in Tests. | `booping-python/e2e/cases/config-get/autonomy-*.txtar`, `booping-python/e2e/cases/render-playbook/autonomy-*.txtar`, `booping-python/e2e/cases/render/autonomy-*.txtar` | 1 | done |
 
 ## Definition of Done
 
 ### Task 1.1
 
-- [ ] `bin/booping config-get core.autonomy` prints `supervised` in this repo.
-- [ ] The STOP notice matches `index.md` `## Output contract` character for character, with the offending value in it.
-- [ ] `bin/booping render src/templates/skills/playbook.md.j2` shows `autonomy: supervised` in its project-context block.
-- [ ] No other render output changes.
+- [x] `bin/booping config-get core.autonomy` prints `supervised` in this repo.
+- [x] The STOP notice matches `index.md` `## Output contract` character for character, with the offending value in it.
+- [x] `bin/booping render src/templates/skills/playbook.md.j2` shows `autonomy: supervised` in its project-context block.
+- [x] No other render output changes.
 
 ### Task 1.2
 
-- [ ] One case per behaviour named in Tests; each STOP case asserts exit 0, the notice alone on stdout, and that the fixture preamble is absent.
+- [x] One case per behaviour named in Tests; each STOP case asserts exit 0, the notice alone on stdout, and that the fixture preamble is absent.
 
 Return: the list of changed files, nothing else.
 

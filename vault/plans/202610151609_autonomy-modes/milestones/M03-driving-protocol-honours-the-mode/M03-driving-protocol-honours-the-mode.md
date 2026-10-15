@@ -2,7 +2,7 @@
 id: "03"
 title: "The driving protocol renders gates and questions per mode"
 sp: 3
-status: in-progress
+status: done
 plan: "plans/202610151609_autonomy-modes/index.md"
 ---
 
@@ -18,20 +18,20 @@ Tests: integration tier, two txtar cases under `booping-python/e2e/cases/render/
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 3.1 | The conditional and the autonomous text. | `src/templates/_partials/_playbook_driving.j2` | 2 | pending |
-| 3.2 | The two txtar cases. | `booping-python/e2e/cases/render/driving-protocol-*.txtar` | 1 | pending |
+| 3.1 | The conditional and the autonomous text. | `src/templates/_partials/_playbook_driving.j2` | 2 | done |
+| 3.2 | The two txtar cases. | `booping-python/e2e/cases/render/driving-protocol-*.txtar` | 1 | done |
 
 ## Definition of Done
 
 ### Task 3.1
 
-- [ ] With `core.autonomy` unset, `bin/booping render src/templates/skills/playbook.md.j2` is byte-identical to its output before this milestone except the M01 project-context line.
-- [ ] With `--set core.autonomy=autonomous`, the rendered step 5 and questions paragraph equal the contract text.
-- [ ] No other line of the partial changes.
+- [x] With `core.autonomy` unset, `bin/booping render src/templates/skills/playbook.md.j2` is byte-identical to its output before this milestone except the M01 project-context line.
+- [x] With `--set core.autonomy=autonomous`, the rendered step 5 and questions paragraph equal the contract text.
+- [x] No other line of the partial changes.
 
 ### Task 3.2
 
-- [ ] Each case asserts the presence of its branch's text and the absence of the other branch's distinguishing line.
+- [x] Each case asserts the presence of its branch's text and the absence of the other branch's distinguishing line.
 
 Return: the list of changed files, nothing else.
 

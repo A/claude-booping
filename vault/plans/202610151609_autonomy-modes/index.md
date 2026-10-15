@@ -171,10 +171,10 @@ Plain markdown, no frontmatter, seeded with `# Defaults` on the first `add`. One
 
 | id | title | sp | status |
 | --- | --- | --- | --- |
-| 01 | [core.autonomy key, invalid-value STOP, project-context line](milestones/M01-the-autonomy-key/M01-the-autonomy-key.md) | 3 | in-progress |
-| 02 | [booping defaults add writes the defaults sidecar](milestones/M02-defaults-add-writes-the-sidecar/M02-defaults-add-writes-the-sidecar.md) | 4 | in-progress |
-| 03 | [The driving protocol renders gates and questions per mode](milestones/M03-driving-protocol-honours-the-mode/M03-driving-protocol-honours-the-mode.md) | 3 | in-progress |
-| 04 | [The specs open-items scenario honours the mode](milestones/M04-specs-open-items-honour-the-mode/M04-specs-open-items-honour-the-mode.md) | 3 | in-progress |
+| 01 | [core.autonomy key, invalid-value STOP, project-context line](milestones/M01-the-autonomy-key/M01-the-autonomy-key.md) | 3 | done |
+| 02 | [booping defaults add writes the defaults sidecar](milestones/M02-defaults-add-writes-the-sidecar/M02-defaults-add-writes-the-sidecar.md) | 4 | done |
+| 03 | [The driving protocol renders gates and questions per mode](milestones/M03-driving-protocol-honours-the-mode/M03-driving-protocol-honours-the-mode.md) | 3 | done |
+| 04 | [The specs open-items scenario honours the mode](milestones/M04-specs-open-items-honour-the-mode/M04-specs-open-items-honour-the-mode.md) | 3 | done |
 | 05 | [Migrate always asks about uncommitted work on the branch](milestones/M05-migrate-always-asks-on-a-dirty-branch/M05-migrate-always-asks-on-a-dirty-branch.md) | 3 | pending |
 | 06 | [Docs and CLAUDE.md name the mode](milestones/M06-docs-and-claude-md/M06-docs-and-claude-md.md) | 2 | pending |
 

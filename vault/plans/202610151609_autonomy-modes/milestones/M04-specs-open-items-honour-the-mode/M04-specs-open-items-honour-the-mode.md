@@ -2,7 +2,7 @@
 id: "04"
 title: "The specs open-items scenario honours the mode"
 sp: 3
-status: in-progress
+status: done
 plan: "plans/202610151609_autonomy-modes/index.md"
 ---
 
@@ -16,21 +16,21 @@ The specs playbook shows the project's mode and its open-items scenario follows 
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 4.1 | Preamble line and the scenario's two mode lines. | `playbooks/specs/playbook.md`, `playbooks/specs/guide/prompt.md` | 1 | pending |
-| 4.2 | The autonomous smoke case, its fixture, and the supervised line in `what-is-open.md`. | `playbooks/specs/guide/tests.yaml`, `playbooks/specs/guide/_fixtures/autonomous-open-items.md`, `playbooks/specs/guide/_fixtures/what-is-open.md` | 2 | pending |
+| 4.1 | Preamble line and the scenario's two mode lines. | `playbooks/specs/playbook.md`, `playbooks/specs/guide/prompt.md` | 1 | done |
+| 4.2 | The autonomous smoke case, its fixture, and the supervised line in `what-is-open.md`. | `playbooks/specs/guide/tests.yaml`, `playbooks/specs/guide/_fixtures/autonomous-open-items.md`, `playbooks/specs/guide/_fixtures/what-is-open.md` | 2 | done |
 
 ## Definition of Done
 
 ### Task 4.1
 
-- [ ] `bin/booping render-playbook specs` shows `Autonomy: \`supervised\`` in this repo; `--set core.autonomy=autonomous` shows `autonomous`.
-- [ ] The scenario restates nothing groom or develop own (gates, defaults logging) — the driving protocol carries that.
-- [ ] `just snapshots` drift is limited to `playbooks/specs/_reports/output.md`, in these two places.
+- [x] `bin/booping render-playbook specs` shows `Autonomy: \`supervised\`` in this repo; `--set core.autonomy=autonomous` shows `autonomous`.
+- [x] The scenario restates nothing groom or develop own (gates, defaults logging) — the driving protocol carries that.
+- [x] `just snapshots` drift is limited to `playbooks/specs/_reports/output.md`, in these two places.
 
 ### Task 4.2
 
-- [ ] The new case follows `tests.yaml`'s existing case shape: `metadata` with `tier: smoke`, asserts through `_lib/asserts/files.js` and `_lib/asserts/return.js`.
-- [ ] `just smoke specs/guide` passes all four cases.
+- [x] The new case follows `tests.yaml`'s existing case shape: `metadata` with `tier: smoke`, asserts through `_lib/asserts/files.js` and `_lib/asserts/return.js`.
+- [x] `just smoke specs/guide` passes all four cases.
 
 Return: the list of changed files and the smoke result line, nothing else.
 

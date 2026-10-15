@@ -2,7 +2,7 @@
 id: "02"
 title: "booping defaults add writes the defaults sidecar"
 sp: 4
-status: in-progress
+status: done
 plan: "plans/202610151609_autonomy-modes/index.md"
 ---
 
@@ -18,26 +18,26 @@ Tests: integration tier, txtar cases under `booping-python/e2e/cases/defaults/` 
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 2.1 | `defaults` command, `add` verb, seeding, numbering, entry rendering. | `booping-python/src/booping/cli.py`, `booping-python/src/booping/commands/defaults.py`, `booping-python/src/booping/defaults.py` | 2 | pending |
-| 2.2 | The txtar cases named in Tests. | `booping-python/e2e/cases/defaults/add-*.txtar` | 1 | pending |
-| 2.3 | Create the format doc. | `docs/defaults.md` | 1 | pending |
+| 2.1 | `defaults` command, `add` verb, seeding, numbering, entry rendering. | `booping-python/src/booping/cli.py`, `booping-python/src/booping/commands/defaults.py`, `booping-python/src/booping/defaults.py` | 2 | done |
+| 2.2 | The txtar cases named in Tests. | `booping-python/e2e/cases/defaults/add-*.txtar` | 1 | done |
+| 2.3 | Create the format doc. | `docs/defaults.md` | 1 | done |
 
 ## Definition of Done
 
 ### Task 2.1
 
-- [ ] `booping defaults --help` lists `add`; `add --help` lists `--target --step --asked --default --why`.
-- [ ] The written entry matches `index.md` `### defaults.md` line for line; stdout is `{sidecar}#D{n}` alone.
-- [ ] Every error path prints one `error: …` line on stderr, exits 1, leaves stdout empty and the sidecar untouched.
+- [x] `booping defaults --help` lists `add`; `add --help` lists `--target --step --asked --default --why`.
+- [x] The written entry matches `index.md` `### defaults.md` line for line; stdout is `{sidecar}#D{n}` alone.
+- [x] Every error path prints one `error: …` line on stderr, exits 1, leaves stdout empty and the sidecar untouched.
 
 ### Task 2.2
 
-- [ ] Every case pins the heading time through `macro_stubs` in the fixture `vault/config.yaml`.
-- [ ] One case per behaviour named in Tests.
+- [x] Every case pins the heading time through `macro_stubs` in the fixture `vault/config.yaml`.
+- [x] One case per behaviour named in Tests.
 
 ### Task 2.3
 
-- [ ] `docs/defaults.md` restates no flag list — it links `booping defaults add --help` and holds only the format.
+- [x] `docs/defaults.md` restates no flag list — it links `booping defaults add --help` and holds only the format.
 
 Return: the list of changed files, nothing else.
 
