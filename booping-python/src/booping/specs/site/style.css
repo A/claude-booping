@@ -333,8 +333,8 @@ img { max-width: 100%; }
   .theme { margin-left: auto; }
   html.js .iconbtn.menu { display: inline-flex; }
   .brand { display: inline-flex; align-items: center; min-height: 44px; }
-  .crumbs .mid { display: none; }
-  .crumbs a { display: inline-flex; align-items: center; min-height: 44px; }
+  .crumbs li:not(:last-child) { display: none; }
+  .crumbs li:last-child::before { content: none; }
   .row { grid-template-columns: minmax(0, 1fr); padding: 12px 2px; }
   .row .ref { order: -1; }
   .row .s { grid-column: 1; }
@@ -360,7 +360,8 @@ img { max-width: 100%; }
     visibility: hidden;
     transition: transform 0.2s ease, visibility 0.2s;
   }
-  html.js .drawer-open .side { transform: none; visibility: visible; }
+  /* Visible at once on open: focus() on the first link fails while visibility is still transitioning from hidden. */
+  html.js .drawer-open .side { transform: none; visibility: visible; transition: transform 0.2s ease, visibility 0s; }
   .drawer-open .scrim { display: block; position: fixed; inset: 0; z-index: 4; background: rgb(0 0 0 / 0.35); }
 }
 
