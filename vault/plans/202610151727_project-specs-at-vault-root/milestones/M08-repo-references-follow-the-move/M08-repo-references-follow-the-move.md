@@ -2,7 +2,7 @@
 id: "08"
 title: "Repo references follow the move"
 sp: 4
-status: in-progress
+status: done
 plan: "plans/202610151727_project-specs-at-vault-root/index.md"
 ---
 
@@ -25,19 +25,19 @@ Tests: integration — `specs check --tier core` link check; a grep for the old 
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 8.1 | CLAUDE.md, core rule links, adr/0001. | `CLAUDE.md`, `specs/rule/*.md`, `vault/adr/0001-specs-tiers.md` | 2 | pending |
-| 8.2 | Docs playbook step bodies and `commit-docs`. | `vault/_playbooks/docs/*/opus-5.md`, `vault/_playbooks/docs/*/fable-5.md`, `vault/_playbooks/docs/_scripts/commit-docs` | 2 | pending |
+| 8.1 | CLAUDE.md, core rule links, adr/0001. | `CLAUDE.md`, `specs/rule/*.md`, `vault/adr/0001-specs-tiers.md` | 2 | done |
+| 8.2 | Docs playbook step bodies and `commit-docs`. | `vault/_playbooks/docs/*/opus-5.md`, `vault/_playbooks/docs/*/fable-5.md`, `vault/_playbooks/docs/_scripts/commit-docs` | 2 | done |
 
 ## Definition of Done
 
 ### Task 8.1
 
-- [ ] `bin/booping specs check --tier core` exits 0.
-- [ ] CLAUDE.md states the vault-root default once, in the `core.specs` line.
+- [x] `bin/booping specs check --tier core` exits 0.
+- [x] CLAUDE.md states the vault-root default once, in the `core.specs` line.
 
 ### Task 8.2
 
-- [ ] `commit-docs` stages `vault/value`, `vault/rule` … that exist and nothing under a removed `vault/specs`.
+- [x] `commit-docs` stages `vault/value`, `vault/rule` … that exist and nothing under a removed `vault/specs`.
 
 Return: the list of changed files, nothing else.
 
