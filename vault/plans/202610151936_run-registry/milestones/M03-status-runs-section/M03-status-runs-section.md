@@ -2,7 +2,7 @@
 id: "03"
 title: "Runs section in booping status"
 sp: 3
-status: pending
+status: done
 plan: "plans/202610151936_run-registry/index.md"
 ---
 
@@ -18,19 +18,19 @@ Tests (integration tier, e2e `booping-python/e2e/cases/status/`, hand-derived): 
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 3.1 | `runs` section in `status.py`. | `booping-python/src/booping/status.py` | 2 | pending |
-| 3.2 | New status cases; existing status cases moved to six sections. | `booping-python/e2e/cases/status/*.txtar` | 1 | pending |
+| 3.1 | `runs` section in `status.py`. | `booping-python/src/booping/status.py` | 2 | done |
+| 3.2 | New status cases; existing status cases moved to six sections. | `booping-python/e2e/cases/status/*.txtar` | 1 | done |
 
 ## Definition of Done
 
 ### Task 3.1
 
-- [ ] `bin/booping status --help` lists `runs` between `plans` and `records`.
-- [ ] `status.py` holds no run-status literal; every status comes from `booping.runs`.
+- [x] `bin/booping status --help` lists `runs` between `plans` and `records`.
+- [x] `status.py` holds no run-status literal; every status comes from `booping.runs`.
 
 ### Task 3.2
 
-- [ ] All `booping-python/e2e/cases/status/` cases pass, the new ones included.
+- [x] All `booping-python/e2e/cases/status/` cases pass, the new ones included.
 
 Return: the list of changed and created files, nothing else.
 

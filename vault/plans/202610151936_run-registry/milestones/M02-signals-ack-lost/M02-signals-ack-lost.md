@@ -2,7 +2,7 @@
 id: "02"
 title: "Signal forwarding, booping run ack and lost runs"
 sp: 3
-status: pending
+status: done
 plan: "plans/202610151936_run-registry/index.md"
 ---
 
@@ -18,19 +18,19 @@ Tests: integration tier. `booping-python/tests/runs_test.py` (pytest): the wrapp
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 2.1 | Signal forwarding and the killed-run outcome; pytest integration test. | `booping-python/src/booping/commands/run.py`, `booping-python/tests/runs_test.py` | 2 | pending |
-| 2.2 | `effective_status`, `ack` and the `ack` sub-verb; e2e and pytest cases. | `booping-python/src/booping/runs.py`, `booping-python/src/booping/commands/run.py`, `booping-python/e2e/cases/run/*.txtar`, `booping-python/tests/runs_test.py` | 1 | pending |
+| 2.1 | Signal forwarding and the killed-run outcome; pytest integration test. | `booping-python/src/booping/commands/run.py`, `booping-python/tests/runs_test.py` | 2 | done |
+| 2.2 | `effective_status`, `ack` and the `ack` sub-verb; e2e and pytest cases. | `booping-python/src/booping/runs.py`, `booping-python/src/booping/commands/run.py`, `booping-python/e2e/cases/run/*.txtar`, `booping-python/tests/runs_test.py` | 1 | done |
 
 ## Definition of Done
 
 ### Task 2.1
 
-- [ ] SIGTERM to the wrapper ends the child and leaves the record `failed` with `exit_code: 143`.
+- [x] SIGTERM to the wrapper ends the child and leaves the record `failed` with `exit_code: 143`.
 
 ### Task 2.2
 
-- [ ] `bin/booping run ack --help` shows `ID...`; the four ack outcomes above hold.
-- [ ] `effective_status` is the only place `lost` is derived.
+- [x] `bin/booping run ack --help` shows `ID...`; the four ack outcomes above hold.
+- [x] `effective_status` is the only place `lost` is derived.
 
 Return: the list of changed and created files, nothing else.
 

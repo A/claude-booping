@@ -2,20 +2,21 @@
 title: "Run registry — booping run groom|develop launches recorded claude -p runs,
   status shows them"
 type: "feature"
-status: ready-for-dev
-sp: null
+status: in-progress
+sp: 12
 related_to: null
 created: 2026-10-15 19:37
 planned: null
-started: null
+started: 2026-10-15 19:49
 completed: null
 code_reviews: []
 sessions:
 - 06b18e93-eee0-4ae8-9d7d-3279d4c1bf0d
+- e1804076-b17e-4dad-8154-e49f025d416e
 retro: null
 summary: booping run groom|develop launches claude -p from core.run, records 
   each run with its items under runs/, status shows them
-commit: fcfe3622274f7eafdb3d9897aa80785232ca7bfb
+commit: 8547dd7ea96ff5204ed5fb5df2481b648828caf0
 tracker_provider: null
 tracker_request: null
 tracker_issue: null
@@ -69,10 +70,10 @@ New `booping-python/src/booping/runs.py` owns the record: id allocation, `create
 
 | id | title | sp | status |
 | --- | --- | --- | --- |
-| 01 | [booping run groom\|develop launches and records a run](milestones/M01-run-launch-and-record/M01-run-launch-and-record.md) | 4 | pending |
-| 02 | [Signal forwarding, booping run ack and lost runs](milestones/M02-signals-ack-lost/M02-signals-ack-lost.md) | 3 | pending |
-| 03 | [Runs section in booping status](milestones/M03-status-runs-section/M03-status-runs-section.md) | 3 | pending |
-| 04 | [CLAUDE.md and documentation on booping run and core.run](milestones/M04-docs/M04-docs.md) | 2 | pending |
+| 01 | [booping run groom\|develop launches and records a run](milestones/M01-run-launch-and-record/M01-run-launch-and-record.md) | 4 | done |
+| 02 | [Signal forwarding, booping run ack and lost runs](milestones/M02-signals-ack-lost/M02-signals-ack-lost.md) | 3 | done |
+| 03 | [Runs section in booping status](milestones/M03-status-runs-section/M03-status-runs-section.md) | 3 | done |
+| 04 | [CLAUDE.md and documentation on booping run and core.run](milestones/M04-docs/M04-docs.md) | 2 | done |
 
 ## I/O contract
 

@@ -2,7 +2,7 @@
 id: "04"
 title: "CLAUDE.md and documentation on booping run and core.run"
 sp: 2
-status: pending
+status: done
 plan: "plans/202610151936_run-registry/index.md"
 ---
 
@@ -16,19 +16,19 @@ The plugin's own guide and the public docs name `booping run`, `core.run`, the `
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 4.1 | CLAUDE.md commands, config, vault and lifecycle entries. | `CLAUDE.md` | 1 | pending |
-| 4.2 | Public docs entries. | `documentation/project_config.md`, `documentation/quick_start.md`, `documentation/vault.md` | 1 | pending |
+| 4.1 | CLAUDE.md commands, config, vault and lifecycle entries. | `CLAUDE.md` | 1 | done |
+| 4.2 | Public docs entries. | `documentation/project_config.md`, `documentation/quick_start.md`, `documentation/vault.md` | 1 | done |
 
 ## Definition of Done
 
 ### Task 4.1
 
-- [ ] `CLAUDE.md` names `run` in the subcommand list and `core.run` under Config, and `runs/` in the Vault section.
+- [x] `CLAUDE.md` names `run` in the subcommand list and `core.run` under Config, and `runs/` in the Vault section.
 
 ### Task 4.2
 
-- [ ] Each of the three pages carries its entry; none names a Python module, a test or an internal helper.
-- [ ] `just docs` builds without a new warning.
+- [x] Each of the three pages carries its entry; none names a Python module, a test or an internal helper.
+- [x] `just docs` builds without a new warning.
 
 Return: the list of changed files, nothing else.
 

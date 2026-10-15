@@ -2,7 +2,7 @@
 id: "01"
 title: "booping run groom|develop launches and records a run"
 sp: 4
-status: pending
+status: done
 plan: "plans/202610151936_run-registry/index.md"
 ---
 
@@ -18,25 +18,25 @@ Tests (integration tier, e2e corpus `booping-python/e2e/cases/run/`, expectation
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 1.1 | `core.run` config block with comments and the locked preamble. | `src/config.yaml` | 1 | pending |
-| 1.2 | `runs.py` record module; `commands/run.py` groom/develop launch; registration. | `booping-python/src/booping/runs.py`, `booping-python/src/booping/commands/run.py`, `booping-python/src/booping/cli.py` | 2 | pending |
-| 1.3 | e2e cases for launch, outcome, ids and every user error above. | `booping-python/e2e/cases/run/*.txtar` | 1 | pending |
+| 1.1 | `core.run` config block with comments and the locked preamble. | `src/config.yaml` | 1 | done |
+| 1.2 | `runs.py` record module; `commands/run.py` groom/develop launch; registration. | `booping-python/src/booping/runs.py`, `booping-python/src/booping/commands/run.py`, `booping-python/src/booping/cli.py` | 2 | done |
+| 1.3 | e2e cases for launch, outcome, ids and every user error above. | `booping-python/e2e/cases/run/*.txtar` | 1 | done |
 
 ## Definition of Done
 
 ### Task 1.1
 
-- [ ] `bin/booping config-get core.run` prints the five keys with the defaults above; the preamble equals the contract's text.
+- [x] `bin/booping config-get core.run` prints the five keys with the defaults above; the preamble equals the contract's text.
 
 ### Task 1.2
 
-- [ ] `bin/booping run --help` lists `groom` and `develop`; `bin/booping run develop --help` shows `PLAN` and `--autonomous`.
-- [ ] A record's frontmatter keys and order equal the I/O contract; a finished record has `pid: null`.
-- [ ] `runs.py` holds no status literal outside one tuple of the four statuses, and no argv, env or prompt literal — those come from `core.run`.
+- [x] `bin/booping run --help` lists `groom` and `develop`; `bin/booping run develop --help` shows `PLAN` and `--autonomous`.
+- [x] A record's frontmatter keys and order equal the I/O contract; a finished record has `pid: null`.
+- [x] `runs.py` holds no status literal outside one tuple of the four statuses, and no argv, env or prompt literal — those come from `core.run`.
 
 ### Task 1.3
 
-- [ ] `booping-python/e2e/cases/run/` holds the cases above, all passing.
+- [x] `booping-python/e2e/cases/run/` holds the cases above, all passing.
 
 Return: the list of changed and created files, nothing else.
 
