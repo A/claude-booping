@@ -2,7 +2,7 @@
   var root = document.documentElement;
   var form = document.querySelector("form.search[data-prefix]");
   if (!form) return;
-  var siteRoot = new URL(form.getAttribute("data-prefix"), location.href).href;
+  var siteRoot = new URL(form.getAttribute("data-prefix") || "./", location.href).href;
   var KEY = "specs-comments:v1:" + siteRoot;
   var article = document.querySelector("article[data-ref]");
 
@@ -67,6 +67,8 @@
       var ref = article.getAttribute("data-ref");
       setCount(open.querySelector(".n"), list.filter(function (c) { return c.ref === ref; }).length);
     }
+    if (sheet && article && sheet.open) renderSheet();
+    if (groups) renderGroups();
   }
 
   var works = false;
@@ -78,12 +80,264 @@
   } catch (e) {}
   if (!works) return;
   root.classList.add("cmt");
+
+  var compose = document.querySelector("dialog.cmt-compose");
+  var prefix = form.getAttribute("data-prefix");
+  var status = document.getElementById("status");
+  var statusTimer = null;
+  function label(name) {
+    return compose ? compose.getAttribute("data-" + name) || "" : "";
+  }
+  function plural(name, n) {
+    var forms;
+    try {
+      forms = JSON.parse(label(name));
+    } catch (e) {
+      return String(n);
+    }
+    var i;
+    if (forms.length >= 3) {
+      if (n % 10 === 1 && n % 100 !== 11) i = 0;
+      else if (n % 10 >= 2 && n % 10 <= 4 && !(n % 100 >= 12 && n % 100 <= 14)) i = 1;
+      else i = 2;
+    } else i = n === 1 ? 0 : forms.length - 1;
+    return forms[i].replace("{n}", n);
+  }
+  function announce(text) {
+    if (!status) return;
+    status.textContent = text;
+    clearTimeout(statusTimer);
+    statusTimer = setTimeout(function () { status.textContent = ""; }, 2000);
+  }
+  function byCreated(a, b) {
+    return a.created < b.created ? -1 : a.created > b.created ? 1 : a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+  }
+  function el(tag, cls, text) {
+    var node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (text != null) node.textContent = text;
+    return node;
+  }
+  function button(cls, text, onClick) {
+    var b = el("button", cls, text);
+    b.type = "button";
+    b.addEventListener("click", onClick);
+    return b;
+  }
+
+  var editing = null;
+  var editDraft = "";
+  var noteLabel = compose && compose.querySelector("label[for='cmt-note']");
+
+  function item(c, href, onAnchor) {
+    var li = el("li", "cmt-item");
+    li.setAttribute("data-id", c.id);
+    var a = el("a", "cmt-anchor", c.anchor ? "§ " + c.anchorText : c.title);
+    a.href = href;
+    if (onAnchor) a.addEventListener("click", onAnchor);
+    li.appendChild(a);
+    if (c.sent) li.appendChild(el("span", "badge cmt-sent", label("sent")));
+    if (c.quote) li.appendChild(el("blockquote", "cmt-q", c.quote));
+    if (editing === c.id) {
+      var fieldId = "cmt-edit-" + c.id;
+      var lab = el("label", "cmt-edit-label", noteLabel ? noteLabel.textContent : "");
+      lab.setAttribute("for", fieldId);
+      var area = el("textarea", "cmt-edit");
+      area.id = fieldId;
+      area.rows = 4;
+      area.value = editDraft;
+      var save = button("cmt-save", label("save"), function () {
+        if (!area.value.trim()) return;
+        editing = null;
+        update(c.id, { note: area.value, sent: false });
+        var again = document.querySelector(".cmt-item[data-id='" + c.id + "'] .cmt-edit-btn");
+        if (again) again.focus();
+      });
+      save.disabled = !area.value.trim();
+      area.addEventListener("input", function () {
+        editDraft = area.value;
+        save.disabled = !area.value.trim();
+      });
+      var cancel = button("cmt-cancel", label("cancel"), function () {
+        editing = null;
+        refresh();
+        var again = document.querySelector(".cmt-item[data-id='" + c.id + "'] .cmt-edit-btn");
+        if (again) again.focus();
+      });
+      var acts = el("div", "cmt-actions");
+      acts.appendChild(save);
+      acts.appendChild(cancel);
+      li.appendChild(lab);
+      li.appendChild(area);
+      li.appendChild(acts);
+      return li;
+    }
+    li.appendChild(el("p", "cmt-note", c.note));
+    var ops = el("div", "cmt-ops");
+    ops.appendChild(button("cmt-edit-btn", label("edit"), function () {
+      editing = c.id;
+      editDraft = c.note;
+      refresh();
+      var area = document.getElementById("cmt-edit-" + c.id);
+      if (area) area.focus();
+    }));
+    ops.appendChild(button("cmt-del", label("delete"), function () {
+      var container = li.closest(".cmt-groups") || li.closest(".cmt-list");
+      var items = Array.prototype.slice.call(container.querySelectorAll(".cmt-item"));
+      var at = items.indexOf(li);
+      if (editing === c.id) editing = null;
+      remove(c.id);
+      announce(label("deleted"));
+      var next = container.querySelectorAll(".cmt-item")[at];
+      var target = next ? next.querySelector("a") : container.parentNode.querySelector("h1, h2");
+      if (target) {
+        if (!next) target.setAttribute("tabindex", "-1");
+        target.focus();
+      }
+    }));
+    li.appendChild(ops);
+    return li;
+  }
+
+  function copyText(text, done) {
+    function fallback() {
+      var area = document.createElement("textarea");
+      area.value = text;
+      area.setAttribute("readonly", "");
+      area.style.position = "fixed";
+      area.style.top = "0";
+      area.style.left = "-9999px";
+      var host = document.querySelector("dialog[open]") || document.body;
+      host.appendChild(area);
+      area.select();
+      var ok = false;
+      try {
+        ok = document.execCommand("copy");
+      } catch (e) {}
+      host.removeChild(area);
+      done(ok);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { done(true); }, fallback);
+    } else fallback();
+  }
+
+  function wireActions(box, scope) {
+    var copy = box.querySelector(".cmt-copy");
+    var clear = box.querySelector(".cmt-clear");
+    if (copy) copy.addEventListener("click", function () {
+      var list = scope();
+      if (!list.length || !window.SpecsComments) return;
+      copyText(window.SpecsComments.format(list, siteRoot), function (ok) {
+        if (!ok) {
+          announce(label("copy-failed"));
+          return;
+        }
+        var ids = {};
+        list.forEach(function (c) { ids[c.id] = true; });
+        var all = load();
+        all.forEach(function (c) { if (ids[c.id]) c.sent = true; });
+        save(all);
+        refresh();
+        announce(plural("copied-forms", list.length));
+      });
+    });
+    if (clear) clear.addEventListener("click", function () {
+      var ids = {};
+      var n = 0;
+      scope().forEach(function (c) {
+        if (c.sent) {
+          ids[c.id] = true;
+          n++;
+        }
+      });
+      if (!n) return;
+      save(load().filter(function (c) { return !ids[c.id]; }));
+      refresh();
+      announce(plural("cleared-forms", n));
+    });
+  }
+  function setActions(box, list) {
+    var copy = box.querySelector(".cmt-copy");
+    var clear = box.querySelector(".cmt-clear");
+    if (copy) copy.disabled = !list.length;
+    if (clear) clear.disabled = !list.some(function (c) { return c.sent; });
+    var empty = box.querySelector(".cmt-empty");
+    if (empty) empty.hidden = list.length > 0;
+  }
+
+  var sheet = document.querySelector("dialog.cmt-sheet");
+  var openBtn = document.querySelector(".cmt-open");
+  function recordScope() {
+    var ref = article.getAttribute("data-ref");
+    return load().filter(function (c) { return c.ref === ref; }).sort(byCreated);
+  }
+  function renderSheet() {
+    var list = recordScope();
+    var ul = sheet.querySelector(".cmt-list");
+    ul.textContent = "";
+    list.forEach(function (c) {
+      ul.appendChild(item(c, "#" + c.anchor, function () { sheet.close(); }));
+    });
+    setActions(sheet, list);
+  }
+  if (sheet && article) {
+    wireActions(sheet, recordScope);
+    if (openBtn) openBtn.addEventListener("click", function () {
+      renderSheet();
+      sheet.showModal();
+    });
+    sheet.querySelector(".cmt-close").addEventListener("click", function () { sheet.close(); });
+    sheet.addEventListener("close", function () {
+      editing = null;
+      if (openBtn) openBtn.focus();
+    });
+  }
+
+  var groups = document.querySelector(".cmt-groups");
+  var page = groups && groups.parentNode;
+  function allScope() {
+    return load().sort(byCreated);
+  }
+  function renderGroups() {
+    var list = allScope();
+    var byRef = {};
+    var refs = [];
+    list.forEach(function (c) {
+      if (!byRef[c.ref]) {
+        byRef[c.ref] = [];
+        refs.push(c.ref);
+      }
+      byRef[c.ref].push(c);
+    });
+    refs.sort(function (a, b) { return a < b ? -1 : a > b ? 1 : 0; });
+    groups.textContent = "";
+    refs.forEach(function (ref) {
+      var first = byRef[ref][0];
+      var section = el("section", "cmt-group");
+      var h = el("h2");
+      var link = el("a");
+      link.href = prefix + first.page;
+      link.appendChild(el("span", "ref", ref));
+      link.appendChild(document.createTextNode(" " + first.title));
+      h.appendChild(link);
+      section.appendChild(h);
+      var ul = el("ul", "cmt-list");
+      byRef[ref].forEach(function (c) {
+        ul.appendChild(item(c, prefix + c.page + (c.anchor ? "#" + c.anchor : ""), null));
+      });
+      section.appendChild(ul);
+      groups.appendChild(section);
+    });
+    setActions(page, list);
+  }
+  if (groups) wireActions(page, allScope);
+
   refresh();
   window.addEventListener("storage", function (e) {
     if (e.key === null || e.key === KEY) refresh();
   });
 
-  var compose = document.querySelector("dialog.cmt-compose");
   var body = article && article.querySelector(".body");
   if (!compose || !body) return;
   var HEADS = "h2[id], h3[id], h4[id]";
