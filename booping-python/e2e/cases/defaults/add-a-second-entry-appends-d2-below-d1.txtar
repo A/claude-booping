@@ -1,0 +1,57 @@
+With `D1` already in the sidecar, the next add appends `D2` below it and leaves `D1` intact.
+Without `--why` the entry reads `not stated`.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+macro_stubs:
+  "core.macros.date +%Y-%m-%d %H:%M": "2026-10-15 16:40"
+-- fixtures/cwd/vault/plans/p/index.md --
+---
+title: P
+---
+
+# P
+-- fixtures/cwd/vault/plans/p/defaults.md --
+# Defaults
+
+## D1 — groom/draft-plan — 2026-10-15 16:30
+
+**Asked:** One plan or two?
+
+**Default:** one plan
+
+**Why:** not stated
+
+**Artifact:** [index.md](index.md)
+-- cmd --
+booping defaults add --target plans/p/index.md --step groom/present --asked "Approve the plan?" --default "approved as drafted"
+-- exit --
+0
+-- stdout --
+plans/p/defaults.md#D2
+-- stderr --
+-- expected/cwd/vault/plans/p/defaults.md --
+# Defaults
+
+## D1 — groom/draft-plan — 2026-10-15 16:30
+
+**Asked:** One plan or two?
+
+**Default:** one plan
+
+**Why:** not stated
+
+**Artifact:** [index.md](index.md)
+
+## D2 — groom/present — 2026-10-15 16:40
+
+**Asked:** Approve the plan?
+
+**Default:** approved as drafted
+
+**Why:** not stated
+
+**Artifact:** [index.md](index.md)

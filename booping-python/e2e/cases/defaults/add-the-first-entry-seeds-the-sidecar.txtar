@@ -1,0 +1,35 @@
+The first add beside a plan seeds `defaults.md` with its H1, writes entry `D1` with the stubbed
+heading time and a link to the artefact, and prints `{sidecar}#D1` alone.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+macro_stubs:
+  "core.macros.date +%Y-%m-%d %H:%M": "2026-10-15 16:40"
+-- fixtures/cwd/vault/plans/p/index.md --
+---
+title: P
+---
+
+# P
+-- cmd --
+booping defaults add --target plans/p/index.md --step develop/provision --asked "Confirm the branch name `feat/autonomy-modes`?" --default "`feat/autonomy-modes`, the proposed name" --why "core.autonomy is autonomous; the proposal follows the branch conventions"
+-- exit --
+0
+-- stdout --
+plans/p/defaults.md#D1
+-- stderr --
+-- expected/cwd/vault/plans/p/defaults.md --
+# Defaults
+
+## D1 — develop/provision — 2026-10-15 16:40
+
+**Asked:** Confirm the branch name `feat/autonomy-modes`?
+
+**Default:** `feat/autonomy-modes`, the proposed name
+
+**Why:** core.autonomy is autonomous; the proposal follows the branch conventions
+
+**Artifact:** [index.md](index.md)

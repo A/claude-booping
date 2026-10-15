@@ -1,0 +1,35 @@
+A code-review record as target puts the sidecar in its `codereviews/{dir}/`, and the entry's
+artefact link names the review file.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+macro_stubs:
+  "core.macros.date +%Y-%m-%d %H:%M": "2026-10-15 16:40"
+-- fixtures/cwd/vault/codereviews/p/202610151600.md --
+---
+plan: plans/p/index.md
+---
+
+# Review
+-- cmd --
+booping defaults add --target codereviews/p/202610151600.md --step code-review/resolve --asked "Fix the finding or skip it?" --default "fixed" --why "the step recommends fixing"
+-- exit --
+0
+-- stdout --
+codereviews/p/defaults.md#D1
+-- stderr --
+-- expected/cwd/vault/codereviews/p/defaults.md --
+# Defaults
+
+## D1 — code-review/resolve — 2026-10-15 16:40
+
+**Asked:** Fix the finding or skip it?
+
+**Default:** fixed
+
+**Why:** the step recommends fixing
+
+**Artifact:** [202610151600.md](202610151600.md)

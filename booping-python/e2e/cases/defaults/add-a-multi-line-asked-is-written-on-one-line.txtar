@@ -1,0 +1,35 @@
+A multi-line `--asked` is whitespace-normalised to one line, so it cannot open a heading or break
+the entry.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+macro_stubs:
+  "core.macros.date +%Y-%m-%d %H:%M": "2026-10-15 16:40"
+-- fixtures/cwd/vault/plans/p/index.md --
+---
+title: P
+---
+
+# P
+-- cmd --
+sh -c 'booping defaults add --target plans/p/index.md --step groom/present --asked "$(printf "Approve the plan?\n## Not a heading")" --default "approved"'
+-- exit --
+0
+-- stdout --
+plans/p/defaults.md#D1
+-- stderr --
+-- expected/cwd/vault/plans/p/defaults.md --
+# Defaults
+
+## D1 — groom/present — 2026-10-15 16:40
+
+**Asked:** Approve the plan? ## Not a heading
+
+**Default:** approved
+
+**Why:** not stated
+
+**Artifact:** [index.md](index.md)
