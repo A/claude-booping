@@ -13,6 +13,7 @@ Each milestone gets a directory of its own, `milestones/M{nn}-{kebab-title}/`, a
 ```text
 plans/197001010800_widget-search/
 ├── index.md
+├── corrections.md
 └── milestones/
     ├── M01-keyword-index/
     │   └── M01-keyword-index.md
@@ -22,6 +23,8 @@ plans/197001010800_widget-search/
 ```
 
 The milestone file is the contract a `booping-developer` agent is handed — develop passes its path, never its text, with `index.md` alongside as context. It states the goal, the tasks, the Definition of Done and the command that verifies the work. Because the file is named after its directory, a bare wikilink to the milestone resolves to it in Obsidian, and the directory stays free for whatever the sprint accumulates around that milestone. Today that is one sidecar: `feedback.md`, written by develop when it sends an attempt back, carrying what it checked, what was wrong and what the next attempt must do. It is absent on a milestone that landed first time.
+
+`corrections.md` sits beside `index.md` once you have corrected a groom or develop run on that plan: one entry per correction — the step, what the run did, your words verbatim, the reason if you gave one, and a link back into the session transcript. `booping correction add` writes it as the run goes; `booping correction list` prints a plan's log, its code reviews' included, and is what [retro](retro.md) reads first.
 
 Discovery follows the `core.plans.glob` config key — an ordered list of globs, `plans/*/index.md` as shipped; milestones follow `core.plans.milestones.glob`, which matches only the milestone file inside each milestone directory, never a sidecar beside it. A vault laying plans out differently edits those keys and every consumer follows.
 
@@ -50,6 +53,8 @@ That `status:` is the retro track's run state — `awaiting-retro → awaiting-l
 One file per code-review run, written by the [code-review playbook](code_review.md), grouped by what was reviewed: `codereviews/{plan-dirname}/{YYYYMMDDHHmm}.md` when a plan is in scope, `codereviews/{target-slug}/{YYYYMMDDHHmm}.md` for an ad-hoc scope such as the latest commits. Scaffolded for new vaults and created lazily in older ones — no migration needed.
 
 The file records `## Scope`, `## Findings`, `## Verdict` and `## Resolution`. Its frontmatter carries `plan:` — the reviewed plan's vault-relative path, or `null` — and its own `status:`, the code-review track's run state: `in-agent-review → human-review → done`. That status is the review's, never a plan's: the reviewed plan stays at `done` and only gains the review's path in its `code_reviews:` list. The playbook runs with the vault root as its workdir and addresses the file with `--target codereviews/{dir}/{ts}.md`.
+
+Corrections you make during a review land in `codereviews/{dir}/corrections.md`, shared by that directory's reviews, each entry linking the review it came from.
 
 ## `notes/`
 

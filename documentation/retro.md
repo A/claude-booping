@@ -12,12 +12,13 @@ Retro is a **playbook**, not a skill — it is driven by [`/playbook`](playbook.
 
 Retro turns lived experience into a written record: friction that would otherwise evaporate when the session closes becomes the input to a durable rule.
 
-The run draws from **two inputs**:
+The run draws from **three inputs**:
 
 - **User-asked questions.** `gather-feedback` takes your raw open-ended take first — four questions asked one at a time, before any mined finding is mentioned — then walks the mined items with you for accept / dismiss / your own wording.
-- **Session-log mining and a plan-stage lesson check.** `prepare` delegates both in parallel, mining the development session transcript for what you said at the time but never filed — pushback at the agent's choices, mid-sprint change requests, comments you made on the code itself, and places the session shows a loaded lesson ignored — and checking the plan as written against the active lesson set. The code diff is grounding context for these reads, not a separate scan phase. The mined list is **withheld** until your raw take is on record.
+- **The corrections log.** `prepare` first runs `booping correction list` for each plan — the corrections groom, develop and code-review logged to `corrections.md` while you worked. Each becomes a mined item, and its link back into the conversation tells the session-log read where to look.
+- **Session-log mining and a plan-stage lesson check.** `prepare` then delegates both in parallel, mining the development session transcript for what you said at the time but never filed — pushback at the agent's choices, mid-sprint change requests, comments you made on the code itself, and places the session shows a loaded lesson ignored — and checking the plan as written against the active lesson set. The code diff is grounding context for these reads, not a separate scan phase. The mined list is **withheld** until your raw take is on record.
 
-The two inputs are stitched into one `retrospectives/{YYYYMMDDHHMM}_{kebab-title}.md`, a standalone file in the vault — one per run, whatever the size of the working set.
+The inputs are stitched into one `retrospectives/{YYYYMMDDHHMM}_{kebab-title}.md`, a standalone file in the vault — one per run, whatever the size of the working set.
 
 ## What it does
 
@@ -26,7 +27,7 @@ Six steps, in dependency order:
 | Step | What it does |
 |------|--------------|
 | `intake` | Settle the working set — validate the plan is in the retro queue (`status: done`, `retro: null`), offer the others as include / postpone / skip, then read each adopted plan for context |
-| `prepare` | Mine the session logs and run the plan-stage lesson check in parallel; build the issue list without showing it |
+| `prepare` | Read the plans' corrections log, mine the session logs and run the plan-stage lesson check in parallel; build the issue list without showing it |
 | `gather-feedback` | Your raw take first, then the mined items batch by batch; close with a per-plan goal verdict |
 | `research-issues` | Root-cause each accepted issue and design concrete prevention moves |
 | `synthesize` | Draft against the retrospective template, run its self-review checklist, show you a chat summary while holding the draft unwritten |

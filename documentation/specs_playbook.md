@@ -26,7 +26,7 @@ Every scenario ends by naming the next call.
 
 ## Open items
 
-An open item is one gap between the specs and the code that still needs work: an ADR whose `Confirmation:` line the code does not show yet, a `[clarify]` or `[unknown]` mark in a record, a `booping specs check` finding, a conflict only you can settle, a gap a sync found. Each item is a file `open-items/OI-NNNN.md` in the vault, carrying a `title`, a `direction` (`code-to-spec`, `spec-to-code`, `conflict`, `clarify`), the `record` it is about, the `source` that filed it (`manual`, `adr`, `mark`, `check`, `sync`) and the `plan` it is linked to.
+An open item is one gap between the specs and the code that still needs work: an ADR whose `Confirmation:` line the code does not show yet, a `[clarify]` or `[unknown]` mark in a record, a `booping specs check` finding, a conflict only you can settle, a gap a sync found. Each item is a file `open-items/OI-NNNN.md` in the vault, carrying a `title`, a `direction` (`code-to-spec`, `spec-to-code`, `conflict`, `clarify`), the `record` it is about, the `source` that filed it (`manual`, `adr`, `mark`, `check`, `sync`, `correction` — a logged correction that names a spec record) and the `plan` it is linked to.
 
 An item moves `open` → `planned` → `done`, or to `dropped` when it needs no work; a planned item can go back to `open`. Closed items stay on disk with `closed_at` and `reason`, out of the default list.
 

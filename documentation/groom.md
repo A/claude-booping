@@ -31,6 +31,8 @@ Six steps, in dependency order:
 
 Refinement and decomposition happen inside `draft-plan`.
 
+When you correct the run — reject a proposal, rewrite what it wrote, answer a gate differently than it suggested — it logs your words verbatim, with a link back into the conversation, to `corrections.md` in the plan directory. [Retro](retro.md) starts from that log.
+
 ## Starting a run
 
 ```text
