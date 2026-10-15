@@ -13,11 +13,10 @@ from typing import Any
 from booping import runs
 from booping.context import Context
 from booping.query import QueryError, as_dict, build_spec, resolve_spec, run
-from booping.rendering import get_plugin_root
 from booping.specs import open_items, questions
 from booping.specs.open_items import Mark
 from booping.specs.records import Record, load_tier, unreviewed
-from booping.specs.tiers import Tier, types
+from booping.specs.tiers import Tier
 
 PLAN_PLAYBOOKS = ("groom", "develop")
 PLAN_STATE = "run"
@@ -131,8 +130,7 @@ class StatusContext:
 
     @cached_property
     def record_types(self) -> list[str]:
-        specs: dict[str, Any] = self.ctx.config.get("core", {}).get("specs", {})
-        return types(get_plugin_root() / str(specs.get("format")))
+        return self.tier.types if self.tier is not None else []
 
     @cached_property
     def tier(self) -> Tier | None:

@@ -10,6 +10,7 @@ from urllib.parse import unquote
 
 from booping.specs.links import relative_links
 from booping.specs.records import load_record, parse_filename, parse_ref
+from booping.specs.tiers import own_types
 
 _URI_SCHEME = re.compile(r"[A-Za-z][A-Za-z0-9+.-]*:")
 
@@ -152,11 +153,13 @@ def _strings(value: Any) -> Iterator[str]:
 
 
 def load_site(roots: list[SiteRoot], known_types: list[str]) -> Site:
-    """Roots as given, types in `known_types` order, records by number. Unknown type
+    """Roots as given, types in `known_types` order then the types a root's own
+    `_schemas/` adds, records by number. Each root reads its own type set; unknown type
     directories and unparseable filenames are skipped — reporting them is `specs check`'s job."""
     records: list[SiteRecord] = []
     for root in roots:
-        for type_ in known_types:
+        added = [t for t in own_types(root.path) if t not in known_types]
+        for type_ in [*known_types, *added]:
             type_dir = root.path / type_
             if not type_dir.is_dir():
                 continue

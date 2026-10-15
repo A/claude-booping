@@ -137,7 +137,8 @@ def _render(site: Site, record: SiteRecord, id_prefix: str) -> Rendered:
 
 def build_site(site: Site, known_types: list[str]) -> tuple[dict[str, str], list[SiteWarning]]:
     """Out-root-relative path → file content, plus the resolution warnings sorted by
-    `(path, line)`, each once per record."""
+    `(path, line)`, each once per record. Types order as `known_types`, then the types
+    a root's `_schemas/` added, sorted."""
     env = _env()
     files: dict[str, str] = {"style.css": (_HERE / "style.css").read_text()}
     warnings: set[SiteWarning] = set()
@@ -181,7 +182,8 @@ def build_site(site: Site, known_types: list[str]) -> tuple[dict[str, str], list
         in_type = _render(site, record, f"{record.stem}--")
         type_blocks[id(record)] = _block(site, record, in_type, f"{record.stem}.html", warnings)
 
-    present = [t for t in known_types if any(r.type == t for r in site.records)]
+    added = sorted({r.type for r in site.records} - set(known_types))
+    present = [t for t in [*known_types, *added] if any(r.type == t for r in site.records)]
     index_rows: list[dict[str, Any]] = []
     for root in site.roots:
         records = [r for r in site.records if r.root == root.name]
