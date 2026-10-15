@@ -256,6 +256,15 @@ The task tracker a run mirrors itself onto. Directly under `core` because it is 
 
 Mirroring is best-effort by design: a failed push warns, never rolls a status back, and `booping-tracker sync --artifact {plan-dir}/index.md` re-pushes idempotently. Only the plan track's `groom` is wired today; `develop`, `retro` and `code-review` keep their conversation-only behaviour whatever the driver.
 
+### `core.status`
+
+The query specs behind `booping status`, which prints the project's status — items, ideas, plans, records, marks — one line each, or a section in detail with `booping status plans`. Directly under `core` because the CLI and the project-manager share it.
+
+- **`core.status.queries.active_plans`** — plans in a status that groom or develop has not finished with. The status filter is added on each call from those playbooks' states, so the spec carries only `sort` and `columns`.
+- **`core.status.queries.unreviewed_plans`** — done plans no code review has closed on yet.
+
+The plans section also reads `core.retro_playbook.queries.candidates`, the retro queue, for done plans without a retro. Override any of the three [query specs](#query-specs) in a tier to change what the report lists.
+
 ### `core.macros`
 
 Shell-outs a rendered body may call by dotted path. Each entry is an **argv list**, never a shell string, run with `shell=False` — either the bare list, or a mapping carrying it under `command:` plus an optional `cwd:` of `repo` or `vault`: the attached repo or the Project Vault. Omit `cwd:` and the command runs in the process's own working directory.

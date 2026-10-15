@@ -28,6 +28,8 @@ The milestone file is the contract a `booping-developer` agent is handed — dev
 
 Discovery follows the `core.plans.glob` config key — an ordered list of globs, `plans/*/index.md` as shipped; milestones follow `core.plans.milestones.glob`, which matches only the milestone file inside each milestone directory, never a sidecar beside it. A vault laying plans out differently edits those keys and every consumer follows.
 
+`booping status plans` lists the active plans and the done plans still waiting for a code review or a retro.
+
 A plan's `status:` is **run state**, not a shared lifecycle: `index.md` doubles as the run artifact of whichever playbook operates on it, so the vocabulary is the one that playbook declares in its own `states:` block. Groom ends at `ready-for-dev`; develop claims from there and ends at `done`, at `fail` when a blocker survives two fix attempts, or at `cancelled` when you call the run off. All three are terminal. Only `booping playbook-transition` writes the status, and it refuses any move the machine does not declare. See [Playbooks → Run state](playbook.md#run-state).
 
 Each milestone file's `status:` is run state as well — `pending → in-progress → done`, plus `blocked` off `in-progress` — written only by develop's transitions. Every such move regenerates `index.md`'s `## Milestones` table and re-sums the plan's story points from the milestone files, so neither is ever hand-kept.

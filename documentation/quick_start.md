@@ -47,6 +47,8 @@ The fence is seeded once and yours to edit (see [Vault](vault.md)). Outside Obsi
 bin/booping query --config core.plans --where status:in=ready-for-dev,in-progress
 ```
 
+`bin/booping status` prints the short project status (items, ideas, plans, records, marks), `bin/booping status plans` the plan tables.
+
 ## 5. First groom
 
 Spec your first sprint with a free-text description:
