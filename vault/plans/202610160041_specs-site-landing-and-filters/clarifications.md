@@ -110,3 +110,13 @@ A new vanilla `filter.js` beside `site.js`, loaded only by pages carrying a filt
 **Answer:**
 
 Part 1's single 760px breakpoint. Below it a list row becomes a card (border, radius, padding; ref first, then title, badges, summary — mockup `@container` rules), the chips form one horizontally scrolling line, the sort `<select>` takes the full width, the scenario grid is one column. Tap targets ≥ 44px.
+
+## C11 — review gates — answered
+
+**Asked:** 2026-10-16 — intake, present
+
+**Question:** The intake scope gate and the present approval gate need the owner.
+
+**Answer:**
+
+Auto-confirmed by the run per the owner's autonomous-run instruction: scope as C1; the plan approved whole at 28 SP (under the 35 SP split threshold, no split). Cross-review (Codex) findings all folded in: the open-item reader returns its warnings (CRITICAL), the M03 fixture includes an open item, item `record:` refs resolve via `Site.resolve_ref` from the project-tier root, the pressed-chip colour tokens are named, the `open_items` consumers are listed, the tag file-name mapping cites the tag regex.

@@ -1,7 +1,7 @@
 ---
 title: "Specs site redesign, part 2 — landing, review filter, list filters, tags"
 type: "feature"
-status: presenting
+status: ready-for-dev
 sp: null
 related_to: null
 created: 2026-10-16 00:42
@@ -19,6 +19,9 @@ tracker_provider: null
 tracker_request: null
 tracker_issue: null
 return_to: null
+agents: '{"research-codebase": ["a0b8a2b74092960e6", "ab2d304af55ca3f2f"], "cross-review":
+  "a3684efefe36a6f11"}'
+reviewed_at: 2026-10-16 00:54
 ---
 
 # Specs site redesign, part 2 — landing, review filter, list filters, tags
