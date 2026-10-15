@@ -1,0 +1,92 @@
+A second run whose date macro gives the same second takes the next free id, `-2`, and its own
+session id.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+macro_stubs:
+  core.macros.date +%Y%m%d-%H%M%S: "20261015-120000"
+  core.macros.date +%Y-%m-%d %H:%M: "2026-10-15 12:00"
+core:
+  run:
+    command:
+      - sh
+      - -c
+      - |
+        printf 'arg: %s\n' "$@"
+        echo "env: $CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS"
+        if read -r line; then echo "stdin: data"; else echo "stdin: empty"; fi
+        exit 0
+      - fake
+-- fixtures/cwd/vault/plans/p1/index.md --
+---
+title: P1
+status: ready-for-dev
+---
+-- cmd --
+booping run develop vault/plans/p1
+booping run develop vault/plans/p1
+-- exit --
+0
+-- stdout --
+runs/20261015-120000-develop.md
+20261015-120000-develop: finished (exit 0)
+runs/20261015-120000-develop-2.md
+20261015-120000-develop-2: finished (exit 0)
+-- stderr --
+-- expected/cwd/vault/runs/20261015-120000-develop.md --
+---
+id: 20261015-120000-develop
+playbook: develop
+mode: supervised
+target:
+- plans/p1/index.md
+plan: plans/p1/index.md
+items: []
+status: finished
+pid: null
+session_id: cdc127f3-6d68-54bf-9265-1c33ed83cac1
+log: runs/20261015-120000-develop.log
+started_at: 2026-10-15 12:00
+ended_at: 2026-10-15 12:00
+exit_code: 0
+acked_at: null
+---
+
+# 20261015-120000-develop
+
+```text
+/booping:playbook develop {CWD}/vault/plans/p1/index.md
+```
+-- expected/cwd/vault/runs/20261015-120000-develop-2.md --
+---
+id: 20261015-120000-develop-2
+playbook: develop
+mode: supervised
+target:
+- plans/p1/index.md
+plan: plans/p1/index.md
+items: []
+status: finished
+pid: null
+session_id: 2e24e2b2-19e5-5152-823c-51f5ceff7678
+log: runs/20261015-120000-develop-2.log
+started_at: 2026-10-15 12:00
+ended_at: 2026-10-15 12:00
+exit_code: 0
+acked_at: null
+---
+
+# 20261015-120000-develop-2
+
+```text
+/booping:playbook develop {CWD}/vault/plans/p1/index.md
+```
+-- expected/cwd/vault/runs/20261015-120000-develop-2.log --
+arg: --session-id
+arg: 2e24e2b2-19e5-5152-823c-51f5ceff7678
+arg: /booping:playbook develop {CWD}/vault/plans/p1/index.md
+env: 0
+stdin: empty

@@ -110,6 +110,23 @@ core:
         sort: "-created"
         columns: [sp, title, completed]
 
+  # `booping run groom|develop` — the launch shape of a recorded headless run, read
+  # by the CLI and the project-manager alike. No value here is env-interpolated.
+  run:
+    # Vault-relative directory of run records (`{id}.md`) and their gitignored logs.
+    dir: runs
+    # The child's argv; `--session-id {uuid}` and the prompt are appended per run.
+    command: [claude, -p, --permission-mode, auto, --output-format, stream-json, --verbose]
+    # Merged over the inherited environment. `0` keeps `-p` from ending background
+    # tasks — the run's own workers — after 600 s.
+    env:
+      CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS: "0"
+    # `{target}`: the plan's absolute `index.md`, or `{id} ({absolute item path})`
+    # per item joined by `, `.
+    prompt: "/booping:playbook {playbook} {target}"
+    # Appended after a blank line under `--autonomous`.
+    preamble: "AUTONOMOUS RUN, started by booping run — nobody can answer. Do not use AskUserQuestion and do not wait at review gates: confirm each yourself and log it with booping defaults add. Settle an unclear point with a sensible default and log it the same way. A question only the owner can answer parks the run where the playbook allows it; otherwise stop and report it. Never end the run while a background agent or a check you started is still running — wait for it. Never push."
+
   sprint:
     default_threshold_sp: 35
     redecompose_threshold: 5

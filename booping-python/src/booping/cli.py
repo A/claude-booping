@@ -14,6 +14,7 @@ from booping.commands import playbook_transition as playbook_transition_cmd
 from booping.commands import query as query_cmd
 from booping.commands import render as render_cmd
 from booping.commands import render_playbook as render_playbook_cmd
+from booping.commands import run as run_cmd
 from booping.commands import scaffold as scaffold_cmd
 from booping.commands import session_stats as session_stats_cmd
 from booping.commands import specs as specs_cmd
@@ -44,6 +45,7 @@ def build_parser() -> argparse.ArgumentParser:
     defaults_cmd.add_parser(sub)
     items_cmd.add_parser(sub)
     status_cmd.add_parser(sub)
+    run_cmd.add_parser(sub)
 
     return parser
 
