@@ -2,13 +2,13 @@
 title: "Computed status report — booping status over items, ideas, plans, records
   and marks"
 type: "feature"
-status: in-progress
+status: done
 sp: 12
 related_to: null
 created: 2026-10-15 19:04
 planned: null
 started: 2026-10-15 19:19
-completed: null
+completed: 2026-10-15 19:35
 code_reviews: []
 sessions:
 - 61290692-8f20-4ac8-9584-82a338dc496d
@@ -24,7 +24,16 @@ return_to: null
 agents:
   research-codebase: a12e77b90acab7246
   cross-review: a2e1a6ea67e762d8a
+  develop-loop: a56a288df72ec8c91
+  verify: a0962883157c71982
 reviewed_at: 2026-10-15 19:15
+metrics_active_minutes: 32
+metrics_models:
+- claude-opus-5-5
+metrics_tokens_input: 120
+metrics_tokens_output: 41550
+metrics_tokens_cache_creation: 203813
+metrics_tokens_cache_read: 5496037
 ---
 
 # Computed status report — booping status over items, ideas, plans, records and marks
