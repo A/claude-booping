@@ -59,3 +59,8 @@ skill. The measurement does not say which steps the extra cost came from.
   commit — the full graph and the graph without `research-web` and `cross-review` — and
   compare the plans and their cost with `booping session-stats`; equal plans at a clearly
   lower cost say the idea pays.
+
+Follow-up after the variant pick (owner, 2026-10-16): a small, already-decided request should not
+pay for a full groom. Either groom routes it to a light path (request → one-pass develop brief) or
+the new groom is shown to clear it in minutes. Test case: corpus `s3-booping-specs-site-registries`,
+a site change the orchestrator first meant to groom and the owner sent straight to development.
