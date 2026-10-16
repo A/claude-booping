@@ -1,7 +1,7 @@
 ---
 title: "Groom one-pass draft and booping plan split"
 type: "feature"
-status: presenting
+status: ready-for-dev
 sp: 26
 related_to: null
 created: 2026-10-16 13:20
@@ -20,6 +20,7 @@ tracker_request: null
 tracker_issue: null
 return_to: null
 agents: '{"research-codebase": "a0622793ee9abd955", "cross-review": "abde18f33b0a3cdbe"}'
+reviewed_at: 2026-10-16 13:33
 ---
 
 # Groom one-pass draft and booping plan split

@@ -137,3 +137,13 @@ The owner's standing permission for this feature (2026-10-14) overrides it for t
 **Answer:**
 
 Four: one per benchmark task plus one second shape — `m2-V3a-r1`, `m2-V3-r2`, `s1-V3a-r1`, `c1-V3a-r1` from `~/Dev/@A/booping-benchmarks/groom/split/plans.txt`. Before copying, each is grepped for tokens, keys, emails, hostnames and internal URLs; a plan that carries any is replaced by the next plan of the same task, never redacted by hand (a redacted plan no longer tests the real shape). The fixture holds only the draft file.
+
+## C14 — approval gate — answered
+
+**Asked:** 2026-10-16 — present
+
+**Question:** Approve the plan for development (8 milestones, 26 SP, under the 35 SP split threshold, no split recommended)?
+
+**Answer:**
+
+Auto-confirmed by the run per the owner's instruction for this autonomous run ("do not wait at review gates — auto-confirm them yourself"). Cross-review (codex) returned no CRITICAL; its five RISK and two NOTE findings were folded into M02–M06, and M05 was split into M05/M06 when the folded task brought it to the 5 SP re-decompose threshold.
