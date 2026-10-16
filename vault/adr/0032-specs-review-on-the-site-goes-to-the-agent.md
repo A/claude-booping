@@ -1,11 +1,11 @@
 ---
 type: adr
 title: The owner reviews specs on the site and hands the review to an agent
-summary: Proposed — a review panel beside each record collects comments and a reviewed mark in the browser; an Outbox page shows and copies everything for the agent, which edits the records.
+summary: Accepted — a review panel beside each record collects comments and a reviewed mark in the browser; an Outbox page shows and copies everything for the agent, which edits the records.
 created_by: claude
 created_at: 2026-10-16
 updated_at: 2026-10-16
-status: proposed
+status: accepted
 values: [value/0008, value/0011, value/0002]
 issues: []
 ---
@@ -57,7 +57,7 @@ entry already names a different thing: the list of records without a review.
 
 | Option | Status | Complexity | Reversibility | Verdict |
 |---|---|---|---|---|
-| [Review panel and Outbox](#review-panel-and-outbox) | proposed | medium | high | Visible, phone-friendly, the agent stays the only writer |
+| [Review panel and Outbox](#review-panel-and-outbox) | accepted | medium | high | Visible, phone-friendly, the agent stays the only writer |
 | [Keep the floating affordances](#keep-the-floating-affordances) | rejected | low | high | The owner did not find them; no reviewed mark |
 | [Comments as tracker issues](#comments-as-tracker-issues) | rejected | high | medium | Needs a token in the browser or a backend; GitHub and GitLab sites differ |
 | [Edit records in the browser and open a PR](#edit-records-in-the-browser-and-open-a-pr) | rejected | high | medium | Credentials in the browser; skips the agent that keeps records consistent |

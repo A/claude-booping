@@ -1,11 +1,11 @@
 ---
 type: adr
 title: Every playbook carries a base guidance on the specs
-summary: Proposed — every playbook knows what the specs are, the values, and that it reads and writes them through a subagent, applying them where they raise quality; no per-playbook scenarios.
+summary: Accepted — every playbook knows what the specs are, the values, and that it reads and writes them through a subagent, applying them where they raise quality; no per-playbook scenarios.
 created_by: claude
 created_at: 2026-10-16
 updated_at: 2026-10-16
-status: proposed
+status: accepted
 values: [value/0016, value/0002, value/0001, value/0012]
 issues: []
 supersedes: [adr/0033]
@@ -59,7 +59,7 @@ playbook is added only after a measured miss (rule/0030) — first check: re-gro
 
 | Option | Status | Complexity | Reversibility | Verdict |
 |---|---|---|---|---|
-| [Base guidance for every playbook](#base-guidance-for-every-playbook) | proposed | low | high | Covers every playbook and every unscripted moment at a fixed small cost |
+| [Base guidance for every playbook](#base-guidance-for-every-playbook) | accepted | low | high | Covers every playbook and every unscripted moment at a fixed small cost |
 | [Scenarios per playbook](#scenarios-per-playbook) | rejected | medium | high | Covers only what was foreseen, rots as playbooks change |
 | [Mine transcripts after the fact](#mine-transcripts-after-the-fact) | rejected | medium | high | Late and lossy; at most a second net in retro |
 | [Full registry in every session](#full-registry-in-every-session) | rejected | low | high | Context cost rejected in adr/0033 |
