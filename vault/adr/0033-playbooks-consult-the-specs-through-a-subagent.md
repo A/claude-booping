@@ -1,11 +1,11 @@
 ---
 type: adr
 title: Playbooks consult the specs through a subagent
-summary: Proposed — groom, develop, code-review and the orchestrator ask a read-only subagent what the specs already decide, contradict or leave open; only its bounded list enters the main context.
+summary: Accepted — groom, develop, code-review and the orchestrator ask a read-only subagent what the specs already decide, contradict or leave open; only its bounded list enters the main context.
 created_by: claude
 created_at: 2026-10-16
 updated_at: 2026-10-16
-status: proposed
+status: accepted
 values: [value/0002, value/0013, value/0012]
 issues: []
 ---
@@ -58,7 +58,7 @@ in play and flag departures; idea/0008 (open) proposes ADR drafts for a plan's r
 
 | Option | Status | Complexity | Reversibility | Verdict |
 |---|---|---|---|---|
-| [Subagent consult](#subagent-consult) | proposed | medium | high | Bounded context, reads only what bears on the question |
+| [Subagent consult](#subagent-consult) | accepted | medium | high | Bounded context, reads only what bears on the question |
 | [Index inline in the prompt](#index-inline-in-the-prompt) | rejected | low | high | Every step pays for the whole index and judges relevance itself |
 | [Deterministic retrieval](#deterministic-retrieval) | rejected | medium | high | Tags and paths miss records about the same decision in other words |
 | [Rule briefs only](#rule-briefs-only) | rejected | low | high | Today's state: ADRs and values never reach the steps |

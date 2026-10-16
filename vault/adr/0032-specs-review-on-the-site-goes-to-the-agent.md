@@ -40,7 +40,20 @@ entry already names a different thing: the list of records without a review.
    rebuilt site carries that date, the record shows a local "reviewed, not sent" or "sent" badge.
 4. **Names.** The header page is **Outbox** / «К отправке»; the sidebar list of records without a
    review becomes **Awaiting review** / «Ждут ревью». "Review" alone names neither.
-5. Comments and marks live in the browser's localStorage per site, as today.
+5. **Where the review lives and how it ends.**
+   - *Storage:* the browser's localStorage, one key per site (its base URL), so a site rebuild keeps it
+     and two sites never mix. It is per browser and device: nothing syncs, the copied text is the only
+     transfer. In a private window it lasts for that window; clearing site data loses it.
+   - *Reload:* everything is restored — the panel's cards, unsent inputs (saved as typed), the
+     reviewed checkbox and the badges.
+   - *States:* **draft** (written, not copied) → **sent** (Copy all stamps the time; the item stays,
+     read-only with a "sent" badge; editing it makes it a draft again) → **applied** (after a rebuild,
+     the record's `updated_at` is on or after the sent time, or its `reviewed:` on or after the mark's
+     date). Applied items clear themselves on the next page load; the Outbox says how many.
+   - *Clearing by hand:* Delete per item; **Clear sent** removes every sent item at once. Drafts are
+     never cleared automatically.
+   - *Moved text:* when a quote no longer appears in the record, the comment stays with its quote and
+     a "text changed" note instead of a highlight.
 
 ## Alternatives
 
@@ -57,7 +70,8 @@ The decision above.
 
 - **Pros:** the affordance is on screen, not hidden behind hover; free-form notes need no selection;
   the Outbox is a preview of exactly what the agent gets; works offline and from `file://`.
-- **Cons:** a review lives in one browser until it is copied; a cleared browser loses unsent notes.
+- **Cons:** a review lives in one browser until it is copied; a cleared browser loses unsent notes;
+  "applied" is inferred from dates, so a record edited for another reason clears a sent comment too.
 - **Complexity:** medium — a panel, a page, the reviewed mark and its badge.
 - **Reversibility:** high — client-side only; the export format is unchanged.
 
