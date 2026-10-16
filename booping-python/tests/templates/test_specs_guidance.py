@@ -90,11 +90,12 @@ def test_no_project_specs_leaves_the_playbook_skill_unchanged(tmp_path: Path) ->
     assert with_specs.replace(GUIDANCE + VALUES_SECTION, "") == without
 
 
-def test_block_for_this_repo_stays_within_budget() -> None:
+def test_block_for_this_repo_stays_within_budget(tmp_path: Path) -> None:
+    # A marker of its own: the repo's `.booping` is local and absent in CI.
     plugin_root = get_plugin_root()
-    ctx = Context.assemble(
-        start=plugin_root, plugin_root=plugin_root, vault_override=plugin_root / "vault"
-    )
+    vault = plugin_root / "vault"
+    (tmp_path / ".booping").write_text(f"project_name: budget\nvault_path: {vault}\n")
+    ctx = Context.assemble(start=tmp_path, plugin_root=plugin_root, vault_override=vault)
     assert ctx.project_specs
     assert ctx.spec_values
 
