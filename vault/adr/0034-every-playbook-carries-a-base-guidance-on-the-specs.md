@@ -8,6 +8,7 @@ updated_at: 2026-10-16
 status: proposed
 values: [value/0016, value/0002, value/0001, value/0012]
 issues: []
+supersedes: [adr/0033]
 ---
 
 ## Context
@@ -48,8 +49,18 @@ guidance on the specs:
    - Values and anything that drops or weakens a rule stay owner drafts; every other draft follows the
      run's autonomy mode (adr/0027).
 
-adr/0033 stays the mechanism for the named decision points; this ADR is the ground every playbook
-stands on, including the ones adr/0033 does not name.
+4. **The consult** (from adr/0033, which this ADR supersedes). The read-only subagent gets the
+   question and the registry index (`booping specs ls`, one summary line per record across every
+   tier), opens only the records whose summary bears on it, and returns at most 15 lines in four
+   groups: **decided** (ref and how), **contradicted** (ref and why), **values in play**, **silent**.
+   *Decided* is cited instead of re-decided; *contradicted* is shown to the owner at the next review
+   gate, or in an autonomous run recorded with the ref and a `[clarify]` marker and never silently
+   overridden; *silent* is where a new record may be due.
+
+Where a playbook consults is its own judgement under this guidance, not a list of named points. A
+targeted rule (rule/0020) is added for a playbook only when a measured run shows it does not consult
+where it should — first check: re-groom corpus case `s3-booping-specs-site-registries` with the
+guidance alone.
 
 ## Alternatives
 
@@ -68,7 +79,7 @@ The decision above.
   instead of matching a scenario; the values steer every run.
 - **Cons:** judgement can over-fire (drafts for chatter) or miss; the subagent's draft and the
   owner's confirmation are the filter.
-- **Complexity:** low — a rendered block, a capture brief, a size check.
+- **Complexity:** low — a rendered block, the consult and capture briefs, a size check.
 - **Reversibility:** high.
 
 ### Scenarios per playbook

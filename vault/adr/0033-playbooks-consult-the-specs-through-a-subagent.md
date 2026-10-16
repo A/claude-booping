@@ -1,14 +1,17 @@
 ---
 type: adr
 title: Playbooks consult the specs through a subagent
-summary: Accepted — groom, develop, code-review and the orchestrator ask a read-only subagent what the specs already decide, contradict or leave open; only its bounded list enters the main context.
+summary: Superseded by adr/0034 — a read-only subagent tells playbooks what the specs already decide, contradict or leave open.
 created_by: claude
 created_at: 2026-10-16
 updated_at: 2026-10-16
-status: accepted
+status: superseded
 values: [value/0002, value/0013, value/0012]
 issues: []
 ---
+
+Superseded by adr/0034 (2026-10-16): the consult mechanism moved there; the list of named points
+where it runs gave way to the base guidance every playbook carries.
 
 ## Context
 
