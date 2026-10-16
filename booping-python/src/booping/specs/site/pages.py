@@ -807,8 +807,8 @@ def build_site(
     page(
         "comments.html.j2",
         "comments.html",
-        labels.ui("my_comments"),
-        [Crumb(labels.ui("overview"), "index.html"), Crumb(labels.ui("my_comments"), None)],
+        labels.ui("outbox"),
+        [Crumb(labels.ui("overview"), "index.html"), Crumb(labels.ui("outbox"), None)],
     )
     if home is None:
         landing = _landing(

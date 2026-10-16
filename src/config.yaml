@@ -245,7 +245,7 @@ core:
             chosen: chosen
             no_projects: No projects.
             navigation: Navigation
-            review: Review
+            review: Awaiting review
             all_records: All records
             tags: Tags
             all_tags: All tags
@@ -292,26 +292,30 @@ core:
             search_results: ["{n} result", "{n} results"]
             search_none: Nothing found
             search_needs_js: Search needs JavaScript.
-            my_comments: My comments
-            comment: Comment
-            comment_section: Comment on this section
-            comment_paragraph: Comment on paragraph
+            review_panel: Comments
+            mark_reviewed: Reviewed
+            whole_record_note: Comment on the whole record
+            add: Add
+            select_to_comment: Select text in the record to comment on it.
+            whole_record: Whole record
+            text_changed: text changed
+            open_place: Open
             comment_note: Note
-            save: Save
-            cancel: Cancel
-            edit: Edit
             delete: Delete
-            copy_for_model: Copy for the model
-            clear_sent: Clear sent
-            sent: sent
-            no_comments: No comments yet.
-            comments_lead: Stored in this browser only.
+            outbox: Outbox
+            outbox_lead: Every comment and reviewed mark you left on this site, exactly as Copy all puts them on the clipboard for an agent. Stored in this browser only; copying marks nothing, so clear them once the agent has applied them.
+            copy_all: Copy all
+            clear_all: Clear
+            clear_confirm: Remove every comment and reviewed mark from this browser?
+            clear_yes: Remove all
+            cancel: Cancel
+            nothing_to_send: Nothing to send.
             comments_need_js: Comments need JavaScript.
             comments_need_storage: Comments need browser storage.
             comment_deleted: Comment deleted
             copy_failed: Copy failed
-            comments_copied_n: ["{n} copied", "{n} copied"]
-            comments_cleared_n: ["{n} cleared", "{n} cleared"]
+            comments_copied_n: ["{n} item copied", "{n} items copied"]
+            comments_cleared_n: ["{n} item cleared", "{n} items cleared"]
             plans: Plans
             retros: Retrospectives
             all_plans: All plans
@@ -415,7 +419,7 @@ core:
             chosen: выбрано
             no_projects: Проектов нет.
             navigation: Навигация
-            review: Ревью
+            review: Ждут ревью
             all_records: Все записи
             tags: Теги
             all_tags: Все теги
@@ -462,20 +466,24 @@ core:
             search_results: ["{n} результат", "{n} результата", "{n} результатов"]
             search_none: Ничего не найдено
             search_needs_js: Для поиска нужен JavaScript.
-            my_comments: Мои комментарии
-            comment: Комментировать
-            comment_section: Комментировать раздел
-            comment_paragraph: Комментировать абзац
+            review_panel: Комментарии
+            mark_reviewed: Ревью пройдено
+            whole_record_note: Комментарий ко всей записи
+            add: Добавить
+            select_to_comment: Выдели текст в записи, чтобы его прокомментировать.
+            whole_record: Вся запись
+            text_changed: текст изменился
+            open_place: Открыть
             comment_note: Заметка
-            save: Сохранить
-            cancel: Отмена
-            edit: Изменить
             delete: Удалить
-            copy_for_model: Скопировать для модели
-            clear_sent: Удалить отправленные
-            sent: отправлен
-            no_comments: Комментариев пока нет.
-            comments_lead: Хранятся только в этом браузере.
+            outbox: К отправке
+            outbox_lead: Все комментарии и отметки о ревью на этом сайте — ровно в том виде, в каком «Скопировать всё» кладёт их в буфер для агента. Хранятся только в этом браузере; копирование ничего не отмечает, поэтому очисти их, когда агент их применит.
+            copy_all: Скопировать всё
+            clear_all: Очистить
+            clear_confirm: Удалить из этого браузера все комментарии и отметки о ревью?
+            clear_yes: Удалить всё
+            cancel: Отмена
+            nothing_to_send: Отправлять нечего.
             comments_need_js: Для комментариев нужен JavaScript.
             comments_need_storage: Для комментариев нужно хранилище браузера.
             comment_deleted: Комментарий удалён

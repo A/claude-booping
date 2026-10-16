@@ -21,7 +21,7 @@ const vm = require("vm");
 const input = JSON.parse(fs.readFileSync(0, "utf8"));
 const ctx = {};
 vm.runInNewContext(input.source, ctx);
-process.stdout.write(ctx.SpecsComments.format(input.comments, input.siteRoot));
+process.stdout.write(ctx.SpecsComments.format(input.comments, input.siteRoot, input.reviewed));
 """
 
 
@@ -29,13 +29,19 @@ def _source() -> str:
     return files("booping.specs.site").joinpath("comments-format.js").read_text()
 
 
-def _format(comments: list[dict[str, Any]], site_root: str = ROOT) -> str:
+def _format(
+    comments: list[dict[str, Any]],
+    site_root: str = ROOT,
+    reviewed: list[dict[str, Any]] | None = None,
+) -> str:
     node = shutil.which("node")
     if node is None:
         pytest.fail(
             "node is not on PATH: the comment export tests run comments-format.js under node"
         )
-    stdin = json.dumps({"source": _source(), "comments": comments, "siteRoot": site_root})
+    stdin = json.dumps(
+        {"source": _source(), "comments": comments, "siteRoot": site_root, "reviewed": reviewed}
+    )
     done = subprocess.run(
         [node, "-e", _RUNNER], input=stdin, capture_output=True, text=True, check=True
     )
@@ -54,12 +60,11 @@ def _comment(**fields: Any) -> dict[str, Any]:
         "quote": "quoted",
         "note": "noted",
         "created": "2026-10-16T10:00:00.000Z",
-        "sent": False,
     }
     return {**base, **fields}
 
 
-def test_records_by_ref_and_comments_by_created_then_id() -> None:
+def test_newest_record_first_and_comments_newest_first_then_id() -> None:
     comments = [
         _comment(
             id="r1",
@@ -70,6 +75,7 @@ def test_records_by_ref_and_comments_by_created_then_id() -> None:
             anchorText="Why",
             quote="third",
             note="three",
+            created="2026-10-16T10:03:00.000Z",
         ),
         _comment(id="a2", quote="second", note="two", created="2026-10-16T10:05:00.000Z"),
         _comment(id="a9", quote="first", note="one", created="2026-10-16T10:01:00.000Z"),
@@ -80,9 +86,9 @@ def test_records_by_ref_and_comments_by_created_then_id() -> None:
         "\n"
         f"[§ Decision]({ALPHA}#decision)\n"
         "\n"
-        "> first tie\n"
+        "> second\n"
         "\n"
-        "one tie\n"
+        "two\n"
         "\n"
         f"[§ Decision]({ALPHA}#decision)\n"
         "\n"
@@ -92,9 +98,9 @@ def test_records_by_ref_and_comments_by_created_then_id() -> None:
         "\n"
         f"[§ Decision]({ALPHA}#decision)\n"
         "\n"
-        "> second\n"
+        "> first tie\n"
         "\n"
-        "two\n"
+        "one tie\n"
         "\n"
         "## rule/0002 — Beta\n"
         "\n"
@@ -104,6 +110,51 @@ def test_records_by_ref_and_comments_by_created_then_id() -> None:
         "\n"
         "three\n"
     )
+
+
+def test_reviewed_mark_follows_its_record_heading_and_counts_for_record_order() -> None:
+    comments = [_comment(note="Fine.", created="2026-10-16T10:00:00.000Z")]
+    reviewed = [
+        {
+            "ref": "rule/0002",
+            "title": "Beta",
+            "page": "proj/rule/0002-beta.html",
+            "date": "2026-10-16",
+            "created": "2026-10-16T11:00:00.000Z",
+        },
+        {
+            "ref": "adr/0001",
+            "title": "Alpha",
+            "page": "proj/adr/0001-alpha.html",
+            "date": "2026-10-15",
+            "created": "2026-10-15T09:00:00.000Z",
+        },
+    ]
+    assert _format(comments, reviewed=reviewed) == (
+        "## rule/0002 — Beta\n"
+        "\n"
+        "rule/0002 — reviewed 2026-10-16\n"
+        "\n"
+        "## adr/0001 — Alpha\n"
+        "\n"
+        "adr/0001 — reviewed 2026-10-15\n"
+        "\n"
+        f"[§ Decision]({ALPHA}#decision)\n"
+        "\n"
+        "> quoted\n"
+        "\n"
+        "Fine.\n"
+    )
+
+
+def test_whole_record_comment_has_no_quote() -> None:
+    comment = _comment(kind="record", anchor="", anchorText="", quote="", note="Split it.")
+    assert _format([comment]) == f"## adr/0001 — Alpha\n\n[Alpha]({ALPHA})\n\nSplit it.\n"
+
+
+def test_a_card_without_a_note_is_not_sent() -> None:
+    comments = [_comment(id="e", note="  \n"), _comment(id="f", ref="adr/0002", note="")]
+    assert _format(comments) == ""
 
 
 def test_section_comment_quotes_the_heading() -> None:
@@ -165,17 +216,17 @@ def test_cyrillic_anchor_stays_raw_and_parens_and_percent_are_encoded() -> None:
     assert _format(comments) == (
         "## adr/0003 — Решение про ёлку\n"
         "\n"
-        f"[§ Почему так]({url}#почему-так)\n"
-        "\n"
-        "> Ёлка нужна.\n"
-        "\n"
-        "Точно?\n"
-        "\n"
         f"[§ Fix (a) 50% off]({url}#fix-%28a%29-50%25%20off)\n"
         "\n"
         "> Option.\n"
         "\n"
         "Pick it.\n"
+        "\n"
+        f"[§ Почему так]({url}#почему-так)\n"
+        "\n"
+        "> Ёлка нужна.\n"
+        "\n"
+        "Точно?\n"
     )
 
 

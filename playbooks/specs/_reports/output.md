@@ -87,6 +87,13 @@ guide's order — values first, then the boundaries that follow from them. Next:
 Read the values, rules and ADRs. A contradiction the records settle becomes a `conflict` record; one
 the user must settle becomes an item. Next: `booping items add --direction conflict`.
 
+## Site review
+
+The user pastes the specs site's Outbox block (`## {ref} — {title}` groups). Per record, check each
+comment against the record first: apply it, or skip it when the record already says so. A
+`{ref} — reviewed {date}` line sets `reviewed: {date}` — the only case you set `reviewed`, never on
+your own initiative. Next: `booping specs check`.
+
 ## Record
 
 A decision → an ADR, only for one choice with a real alternative and a reason the code cannot

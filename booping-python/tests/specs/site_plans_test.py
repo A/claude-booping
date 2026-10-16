@@ -174,7 +174,9 @@ def test_milestone_and_sibling_pages_sit_under_their_plan(pages: dict[str, str])
     request = pages[f"{BASE}/request.html"]
     assert _crumbs(request) == ["Overview", "Plans", "Alpha plan", "Request"]
     assert 'data-ref="20261002-alpha/request"' in request
-    assert "cmt-compose" in request
+    assert '<section class="rv"' in request
+    assert 'id="rv-reviewed"' not in request
+    assert 'id="rv-reviewed"' not in pages[f"{BASE}/index.html"]
 
 
 def test_retro_page_links_a_plan_named_by_its_old_single_file_path(

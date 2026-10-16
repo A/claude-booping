@@ -87,6 +87,7 @@ specs site: 2 roots, 3 records, 13 pages, 0 warnings -> specs-site
 <symbol id="i-sun" viewBox="0 0 16 16"><circle cx="8" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.2v1.6M8 13.2v1.6M1.2 8h1.6M13.2 8h1.6M3.2 3.2l1.1 1.1M11.7 11.7l1.1 1.1M3.2 12.8l1.1-1.1M11.7 4.3l1.1-1.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
 <symbol id="i-auto" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.6a6.4 6.4 0 0 0 0 12.8z" fill="currentColor"/></symbol>
 <symbol id="i-comment" viewBox="0 0 20 20"><path d="M4 4.5h12a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5H9.2l-3.7 3v-3H4A1.5 1.5 0 0 1 2.5 13V6A1.5 1.5 0 0 1 4 4.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+<symbol id="i-outbox" viewBox="0 0 20 20"><path d="M2.5 11.5v4a1.5 1.5 0 0 0 1.5 1.5h12a1.5 1.5 0 0 0 1.5-1.5v-4M10 13V3.5M6.5 7L10 3.5 13.5 7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 </svg>
 <a class="skip" href="#main">Skip to content</a>
 <header class="top">
@@ -100,15 +101,15 @@ specs site: 2 roots, 3 records, 13 pages, 0 warnings -> specs-site
 <ul id="search-list" role="listbox" aria-label="Search" hidden></ul>
 </form>
 <button class="iconbtn search-btn" type="button" aria-label="Search" title="Search"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg></button>
+<a class="iconbtn outbox" href="comments.html" aria-label="Outbox" title="Outbox"><svg class="ic" aria-hidden="true"><use href="#i-outbox"/></svg><span class="l">Outbox</span><span class="n"></span></a>
 <button class="iconbtn theme" type="button" aria-label="Theme: auto" title="Theme: auto" data-label-auto="Theme: auto" data-label-light="Theme: light" data-label-dark="Theme: dark"><svg class="ic" aria-hidden="true"><use href="#i-auto"/></svg></button>
 </header>
 <div class="body norail">
 <nav class="side" id="drawer" aria-label="Navigation">
 <ul>
 <li><a href="index.html" aria-current="page">Overview</a></li>
-<li><a href="review.html"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>Review<span class="n">1</span></a></li>
+<li><a href="review.html"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>Awaiting review<span class="n">1</span></a></li>
 <li><a href="records.html">All records<span class="n">3</span></a></li>
-<li class="cmt-nav" hidden><a href="comments.html">My comments<span class="n"></span></a></li>
 </ul>
 <h4>Types</h4>
 <ul>
@@ -205,6 +206,7 @@ specs site: 2 roots, 3 records, 13 pages, 0 warnings -> specs-site
 <symbol id="i-sun" viewBox="0 0 16 16"><circle cx="8" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.2v1.6M8 13.2v1.6M1.2 8h1.6M13.2 8h1.6M3.2 3.2l1.1 1.1M11.7 11.7l1.1 1.1M3.2 12.8l1.1-1.1M11.7 4.3l1.1-1.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
 <symbol id="i-auto" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.6a6.4 6.4 0 0 0 0 12.8z" fill="currentColor"/></symbol>
 <symbol id="i-comment" viewBox="0 0 20 20"><path d="M4 4.5h12a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5H9.2l-3.7 3v-3H4A1.5 1.5 0 0 1 2.5 13V6A1.5 1.5 0 0 1 4 4.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+<symbol id="i-outbox" viewBox="0 0 20 20"><path d="M2.5 11.5v4a1.5 1.5 0 0 0 1.5 1.5h12a1.5 1.5 0 0 0 1.5-1.5v-4M10 13V3.5M6.5 7L10 3.5 13.5 7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 </svg>
 <a class="skip" href="#main">Skip to content</a>
 <header class="top">
@@ -218,16 +220,16 @@ specs site: 2 roots, 3 records, 13 pages, 0 warnings -> specs-site
 <ul id="search-list" role="listbox" aria-label="Search" hidden></ul>
 </form>
 <button class="iconbtn search-btn" type="button" aria-label="Search" title="Search"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg></button>
-<button class="iconbtn cmt-open" type="button" aria-label="My comments" title="My comments"><svg class="ic" aria-hidden="true"><use href="#i-comment"/></svg><span class="n"></span></button>
+<button class="iconbtn rv-btn" type="button" aria-controls="rv-panel" aria-expanded="false" aria-label="Comments" title="Comments"><svg class="ic" aria-hidden="true"><use href="#i-comment"/></svg><span class="n"></span></button>
+<a class="iconbtn outbox" href="../../comments.html" aria-label="Outbox" title="Outbox"><svg class="ic" aria-hidden="true"><use href="#i-outbox"/></svg><span class="l">Outbox</span><span class="n"></span></a>
 <button class="iconbtn theme" type="button" aria-label="Theme: auto" title="Theme: auto" data-label-auto="Theme: auto" data-label-light="Theme: light" data-label-dark="Theme: dark"><svg class="ic" aria-hidden="true"><use href="#i-auto"/></svg></button>
 </header>
-<div class="body norail">
+<div class="body rv-page rv-notoc">
 <nav class="side" id="drawer" aria-label="Navigation">
 <ul>
 <li><a href="../../index.html">Overview</a></li>
-<li><a href="../../review.html"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>Review<span class="n">1</span></a></li>
+<li><a href="../../review.html"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>Awaiting review<span class="n">1</span></a></li>
 <li><a href="../../records.html">All records<span class="n">3</span></a></li>
-<li class="cmt-nav" hidden><a href="../../comments.html">My comments<span class="n"></span></a></li>
 </ul>
 <h4>Types</h4>
 <ul>
@@ -272,30 +274,22 @@ specs site: 2 roots, 3 records, 13 pages, 0 warnings -> specs-site
 <ul class="rel backlinks">
 <li><a href="../../probe/rule/0001-linear-history.html">Linear history</a> <code class="ref">rule/0001</code> <span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span> <span class="via">via related</span></li>
 </ul>
-<dialog class="cmt-sheet" aria-labelledby="cmt-sheet-h">
-<div class="cmt-head">
-<h2 id="cmt-sheet-h">My comments</h2>
-<button class="iconbtn cmt-close" type="button" aria-label="Close">&times;</button>
-</div>
-<ul class="cmt-list"></ul>
-<p class="cmt-empty">No comments yet.</p>
-<div class="cmt-actions">
-<button class="cmt-copy" type="button">Copy for the model</button>
-<button class="cmt-clear" type="button">Clear sent</button>
-</div>
-</dialog>
-<dialog class="cmt-compose" aria-labelledby="cmt-compose-h" data-comment="Comment" data-comment-section="Comment on this section" data-comment-paragraph="Comment on paragraph" data-edit="Edit" data-delete="Delete" data-save="Save" data-cancel="Cancel" data-sent="sent" data-deleted="Comment deleted" data-copy-failed="Copy failed" data-copied-forms="[&#34;{n} copied&#34;, &#34;{n} copied&#34;]" data-cleared-forms="[&#34;{n} cleared&#34;, &#34;{n} cleared&#34;]">
-<h2 id="cmt-compose-h">Comment</h2>
-<blockquote class="cmt-quote"></blockquote>
-<label for="cmt-note">Note</label>
-<textarea id="cmt-note" rows="4"></textarea>
-<div class="cmt-actions">
-<button class="cmt-save" type="button" disabled>Save</button>
-<button class="cmt-cancel" type="button">Cancel</button>
-</div>
-</dialog>
 </div>
 </main>
+<aside class="rail rv-rail" id="rv-panel">
+<section class="rv" aria-labelledby="rv-h" data-note="Note" data-delete="Delete" data-open="Open" data-whole="Whole record" data-changed="text changed" data-deleted="Comment deleted" data-copy-failed="Copy failed" data-copied-forms="[&#34;{n} item copied&#34;, &#34;{n} items copied&#34;]" data-cleared-forms="[&#34;{n} item cleared&#34;, &#34;{n} items cleared&#34;]">
+<div class="rv-head">
+<h2 id="rv-h">Comments</h2>
+<button class="iconbtn rv-close" type="button" aria-label="Close">&times;</button>
+</div>
+<label class="rv-reviewed"><input type="checkbox" id="rv-reviewed"> Reviewed</label>
+<label class="rv-label" for="rv-new">Comment on the whole record</label>
+<textarea id="rv-new" rows="3"></textarea>
+<div class="rv-add-row"><button class="rv-add" type="button" disabled>Add</button></div>
+<p class="rv-hint">Select text in the record to comment on it.</p>
+<ul class="rv-list"></ul>
+</section>
+</aside>
 </div>
 <div id="status" class="toast" role="status" data-copied="Link copied"></div>
 <footer>Generated by booping specs site</footer>
@@ -334,6 +328,7 @@ specs site: 2 roots, 3 records, 13 pages, 0 warnings -> specs-site
 <symbol id="i-sun" viewBox="0 0 16 16"><circle cx="8" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.2v1.6M8 13.2v1.6M1.2 8h1.6M13.2 8h1.6M3.2 3.2l1.1 1.1M11.7 11.7l1.1 1.1M3.2 12.8l1.1-1.1M11.7 4.3l1.1-1.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
 <symbol id="i-auto" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.6a6.4 6.4 0 0 0 0 12.8z" fill="currentColor"/></symbol>
 <symbol id="i-comment" viewBox="0 0 20 20"><path d="M4 4.5h12a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5H9.2l-3.7 3v-3H4A1.5 1.5 0 0 1 2.5 13V6A1.5 1.5 0 0 1 4 4.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+<symbol id="i-outbox" viewBox="0 0 20 20"><path d="M2.5 11.5v4a1.5 1.5 0 0 0 1.5 1.5h12a1.5 1.5 0 0 0 1.5-1.5v-4M10 13V3.5M6.5 7L10 3.5 13.5 7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 </svg>
 <a class="skip" href="#main">Skip to content</a>
 <header class="top">
@@ -347,16 +342,16 @@ specs site: 2 roots, 3 records, 13 pages, 0 warnings -> specs-site
 <ul id="search-list" role="listbox" aria-label="Search" hidden></ul>
 </form>
 <button class="iconbtn search-btn" type="button" aria-label="Search" title="Search"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg></button>
-<button class="iconbtn cmt-open" type="button" aria-label="My comments" title="My comments"><svg class="ic" aria-hidden="true"><use href="#i-comment"/></svg><span class="n"></span></button>
+<button class="iconbtn rv-btn" type="button" aria-controls="rv-panel" aria-expanded="false" aria-label="Comments" title="Comments"><svg class="ic" aria-hidden="true"><use href="#i-comment"/></svg><span class="n"></span></button>
+<a class="iconbtn outbox" href="../../comments.html" aria-label="Outbox" title="Outbox"><svg class="ic" aria-hidden="true"><use href="#i-outbox"/></svg><span class="l">Outbox</span><span class="n"></span></a>
 <button class="iconbtn theme" type="button" aria-label="Theme: auto" title="Theme: auto" data-label-auto="Theme: auto" data-label-light="Theme: light" data-label-dark="Theme: dark"><svg class="ic" aria-hidden="true"><use href="#i-auto"/></svg></button>
 </header>
-<div class="body norail">
+<div class="body rv-page rv-notoc">
 <nav class="side" id="drawer" aria-label="Navigation">
 <ul>
 <li><a href="../../index.html">Overview</a></li>
-<li><a href="../../review.html"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>Review<span class="n">1</span></a></li>
+<li><a href="../../review.html"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>Awaiting review<span class="n">1</span></a></li>
 <li><a href="../../records.html">All records<span class="n">3</span></a></li>
-<li class="cmt-nav" hidden><a href="../../comments.html">My comments<span class="n"></span></a></li>
 </ul>
 <h4>Types</h4>
 <ul>
@@ -401,30 +396,22 @@ specs site: 2 roots, 3 records, 13 pages, 0 warnings -> specs-site
 </article>
 <h2 id="referenced-by">Referenced by<a class="anchor" href="#referenced-by" aria-label="Link to this section: Referenced by">§</a></h2>
 <p>Nothing references this record.</p>
-<dialog class="cmt-sheet" aria-labelledby="cmt-sheet-h">
-<div class="cmt-head">
-<h2 id="cmt-sheet-h">My comments</h2>
-<button class="iconbtn cmt-close" type="button" aria-label="Close">&times;</button>
-</div>
-<ul class="cmt-list"></ul>
-<p class="cmt-empty">No comments yet.</p>
-<div class="cmt-actions">
-<button class="cmt-copy" type="button">Copy for the model</button>
-<button class="cmt-clear" type="button">Clear sent</button>
-</div>
-</dialog>
-<dialog class="cmt-compose" aria-labelledby="cmt-compose-h" data-comment="Comment" data-comment-section="Comment on this section" data-comment-paragraph="Comment on paragraph" data-edit="Edit" data-delete="Delete" data-save="Save" data-cancel="Cancel" data-sent="sent" data-deleted="Comment deleted" data-copy-failed="Copy failed" data-copied-forms="[&#34;{n} copied&#34;, &#34;{n} copied&#34;]" data-cleared-forms="[&#34;{n} cleared&#34;, &#34;{n} cleared&#34;]">
-<h2 id="cmt-compose-h">Comment</h2>
-<blockquote class="cmt-quote"></blockquote>
-<label for="cmt-note">Note</label>
-<textarea id="cmt-note" rows="4"></textarea>
-<div class="cmt-actions">
-<button class="cmt-save" type="button" disabled>Save</button>
-<button class="cmt-cancel" type="button">Cancel</button>
-</div>
-</dialog>
 </div>
 </main>
+<aside class="rail rv-rail" id="rv-panel">
+<section class="rv" aria-labelledby="rv-h" data-note="Note" data-delete="Delete" data-open="Open" data-whole="Whole record" data-changed="text changed" data-deleted="Comment deleted" data-copy-failed="Copy failed" data-copied-forms="[&#34;{n} item copied&#34;, &#34;{n} items copied&#34;]" data-cleared-forms="[&#34;{n} item cleared&#34;, &#34;{n} items cleared&#34;]">
+<div class="rv-head">
+<h2 id="rv-h">Comments</h2>
+<button class="iconbtn rv-close" type="button" aria-label="Close">&times;</button>
+</div>
+<label class="rv-reviewed"><input type="checkbox" id="rv-reviewed"> Reviewed</label>
+<label class="rv-label" for="rv-new">Comment on the whole record</label>
+<textarea id="rv-new" rows="3"></textarea>
+<div class="rv-add-row"><button class="rv-add" type="button" disabled>Add</button></div>
+<p class="rv-hint">Select text in the record to comment on it.</p>
+<ul class="rv-list"></ul>
+</section>
+</aside>
 </div>
 <div id="status" class="toast" role="status" data-copied="Link copied"></div>
 <footer>Generated by booping specs site</footer>

@@ -1,7 +1,11 @@
 {% extends "base.html.j2" %}
+{% from "_comments.html.j2" import review_panel %}
 {% from "_macros.html.j2" import icon, state_badges, fact_value, toc_blocks %}
 {% block header_actions %}
-<button class="iconbtn cmt-open" type="button" aria-label="{{ labels.ui('my_comments') }}" title="{{ labels.ui('my_comments') }}">{{ icon("i-comment") }}<span class="n"></span></button>
+<button class="iconbtn rv-btn" type="button" aria-controls="rv-panel" aria-expanded="false" aria-label="{{ labels.ui('review_panel') }}" title="{{ labels.ui('review_panel') }}">{{ icon("i-comment") }}<span class="n"></span></button>
+{% endblock %}
+{% block review %}
+{{ review_panel(labels, false) | trim }}
 {% endblock %}
 {% block rail %}
 {% if doc.toc or doc.questions %}
@@ -58,8 +62,5 @@
 {% endfor %}
 </ul>
 {% endif %}
-{% with sheet = true %}
-{% include "_comments.html.j2" %}
-{% endwith %}
 </div>
 {% endblock %}

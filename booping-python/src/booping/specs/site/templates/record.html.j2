@@ -1,10 +1,14 @@
 {% extends "base.html.j2" %}
+{% from "_comments.html.j2" import review_panel %}
 {% from "_macros.html.j2" import icon, state_badges, fact_item, fact_value, rel_item, toc_blocks %}
 {% block head %}
 <link rel="alternate" type="text/markdown" href="{{ record.stem }}.md">
 {% endblock %}
 {% block header_actions %}
-<button class="iconbtn cmt-open" type="button" aria-label="{{ labels.ui('my_comments') }}" title="{{ labels.ui('my_comments') }}">{{ icon("i-comment") }}<span class="n"></span></button>
+<button class="iconbtn rv-btn" type="button" aria-controls="rv-panel" aria-expanded="false" aria-label="{{ labels.ui('review_panel') }}" title="{{ labels.ui('review_panel') }}">{{ icon("i-comment") }}<span class="n"></span></button>
+{% endblock %}
+{% block review %}
+{{ review_panel(labels, true) | trim }}
 {% endblock %}
 {% block rail %}
 {% if record.toc or record.questions %}
@@ -80,8 +84,5 @@
 {% else %}
 <p>{{ labels.ui("nothing_references") }}</p>
 {% endif %}
-{% with sheet = true %}
-{% include "_comments.html.j2" %}
-{% endwith %}
 </div>
 {% endblock %}

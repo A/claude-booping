@@ -193,6 +193,7 @@ is read in its own sub-agent, and what comes back to you is a row, never the ite
 | Guides to the goal | value | The system is clear to the user and leads them to the goal by the hand, while letting a professional step aside and get there their own way. | value/0013-guides-to-the-goal.md |
 | Comfort for non-technical users | non-value | How comfortable booping is for people without a strong technical background is not optimised for; they are not its audience. | value/0014-comfort-for-non-technical-users.md |
 | Deterministic where it can be | value | Whatever can be computed is computed by code; the model spends tokens only on judgement, so a result does not depend on which model produced it. | value/0015-deterministic-where-it-can-be.md |
+| Specs live with the work | value | Specs are updated as the work happens and applied wherever they raise the quality of a result; they never go stale or depend on the user remembering them. | value/0016-specs-live-with-the-work.md |
 
 
 ## The feature index

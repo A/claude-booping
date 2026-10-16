@@ -1,25 +1,19 @@
-{% from "_macros.html.j2" import icon %}
-{% if sheet %}
-<dialog class="cmt-sheet" aria-labelledby="cmt-sheet-h">
-<div class="cmt-head">
-<h2 id="cmt-sheet-h">{{ labels.ui("my_comments") }}</h2>
-<button class="iconbtn cmt-close" type="button" aria-label="{{ labels.ui('close') }}">&times;</button>
+{% macro cmt_labels(labels) -%}
+data-note="{{ labels.ui('comment_note') }}" data-delete="{{ labels.ui('delete') }}" data-open="{{ labels.ui('open_place') }}" data-whole="{{ labels.ui('whole_record') }}" data-changed="{{ labels.ui('text_changed') }}" data-deleted="{{ labels.ui('comment_deleted') }}" data-copy-failed="{{ labels.ui('copy_failed') }}" data-copied-forms="{{ labels.plural_forms('comments_copied_n') | tojson | forceescape }}" data-cleared-forms="{{ labels.plural_forms('comments_cleared_n') | tojson | forceescape }}"
+{%- endmacro %}
+{% macro review_panel(labels, reviewed) %}
+<section class="rv" aria-labelledby="rv-h" {{ cmt_labels(labels) }}>
+<div class="rv-head">
+<h2 id="rv-h">{{ labels.ui("review_panel") }}</h2>
+<button class="iconbtn rv-close" type="button" aria-label="{{ labels.ui('close') }}">&times;</button>
 </div>
-<ul class="cmt-list"></ul>
-<p class="cmt-empty">{{ labels.ui("no_comments") }}</p>
-<div class="cmt-actions">
-<button class="cmt-copy" type="button">{{ labels.ui("copy_for_model") }}</button>
-<button class="cmt-clear" type="button">{{ labels.ui("clear_sent") }}</button>
-</div>
-</dialog>
+{% if reviewed %}
+<label class="rv-reviewed"><input type="checkbox" id="rv-reviewed"> {{ labels.ui("mark_reviewed") }}</label>
 {% endif %}
-<dialog class="cmt-compose" aria-labelledby="cmt-compose-h" data-comment="{{ labels.ui('comment') }}" data-comment-section="{{ labels.ui('comment_section') }}" data-comment-paragraph="{{ labels.ui('comment_paragraph') }}" data-edit="{{ labels.ui('edit') }}" data-delete="{{ labels.ui('delete') }}" data-save="{{ labels.ui('save') }}" data-cancel="{{ labels.ui('cancel') }}" data-sent="{{ labels.ui('sent') }}" data-deleted="{{ labels.ui('comment_deleted') }}" data-copy-failed="{{ labels.ui('copy_failed') }}" data-copied-forms="{{ labels.plural_forms('comments_copied_n') | tojson | forceescape }}" data-cleared-forms="{{ labels.plural_forms('comments_cleared_n') | tojson | forceescape }}">
-<h2 id="cmt-compose-h">{{ labels.ui("comment") }}</h2>
-<blockquote class="cmt-quote"></blockquote>
-<label for="cmt-note">{{ labels.ui("comment_note") }}</label>
-<textarea id="cmt-note" rows="4"></textarea>
-<div class="cmt-actions">
-<button class="cmt-save" type="button" disabled>{{ labels.ui("save") }}</button>
-<button class="cmt-cancel" type="button">{{ labels.ui("cancel") }}</button>
-</div>
-</dialog>
+<label class="rv-label" for="rv-new">{{ labels.ui("whole_record_note") }}</label>
+<textarea id="rv-new" rows="3"></textarea>
+<div class="rv-add-row"><button class="rv-add" type="button" disabled>{{ labels.ui("add") }}</button></div>
+<p class="rv-hint">{{ labels.ui("select_to_comment") }}</p>
+<ul class="rv-list"></ul>
+</section>
+{% endmacro %}

@@ -70,6 +70,7 @@ specs site: 2 roots, 3 records, 13 pages, 0 warnings -> specs-site
 <symbol id="i-sun" viewBox="0 0 16 16"><circle cx="8" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.2v1.6M8 13.2v1.6M1.2 8h1.6M13.2 8h1.6M3.2 3.2l1.1 1.1M11.7 11.7l1.1 1.1M3.2 12.8l1.1-1.1M11.7 4.3l1.1-1.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
 <symbol id="i-auto" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.6a6.4 6.4 0 0 0 0 12.8z" fill="currentColor"/></symbol>
 <symbol id="i-comment" viewBox="0 0 20 20"><path d="M4 4.5h12a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5H9.2l-3.7 3v-3H4A1.5 1.5 0 0 1 2.5 13V6A1.5 1.5 0 0 1 4 4.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+<symbol id="i-outbox" viewBox="0 0 20 20"><path d="M2.5 11.5v4a1.5 1.5 0 0 0 1.5 1.5h12a1.5 1.5 0 0 0 1.5-1.5v-4M10 13V3.5M6.5 7L10 3.5 13.5 7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 </svg>
 <a class="skip" href="#main">Skip to content</a>
 <header class="top">
@@ -83,15 +84,15 @@ specs site: 2 roots, 3 records, 13 pages, 0 warnings -> specs-site
 <ul id="search-list" role="listbox" aria-label="Search" hidden></ul>
 </form>
 <button class="iconbtn search-btn" type="button" aria-label="Search" title="Search"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg></button>
+<a class="iconbtn outbox" href="comments.html" aria-label="Outbox" title="Outbox"><svg class="ic" aria-hidden="true"><use href="#i-outbox"/></svg><span class="l">Outbox</span><span class="n"></span></a>
 <button class="iconbtn theme" type="button" aria-label="Theme: auto" title="Theme: auto" data-label-auto="Theme: auto" data-label-light="Theme: light" data-label-dark="Theme: dark"><svg class="ic" aria-hidden="true"><use href="#i-auto"/></svg></button>
 </header>
 <div class="body norail">
 <nav class="side" id="drawer" aria-label="Navigation">
 <ul>
 <li><a href="index.html" aria-current="page">Overview</a></li>
-<li><a href="review.html"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>Review<span class="n">3</span></a></li>
+<li><a href="review.html"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>Awaiting review<span class="n">3</span></a></li>
 <li><a href="records.html">All records<span class="n">3</span></a></li>
-<li class="cmt-nav" hidden><a href="comments.html">My comments<span class="n"></span></a></li>
 </ul>
 <h4>Types</h4>
 <ul>

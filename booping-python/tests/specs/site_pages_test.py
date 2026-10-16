@@ -363,13 +363,13 @@ def test_marker_precedes_pages_so_a_failed_run_is_clearable(
     assert sorted(p.name for p in out.iterdir()) == [".booping-site", "index.html"]
 
 
-def test_icon_sprite_holds_fourteen_unique_symbols() -> None:
+def test_icon_sprite_holds_fifteen_unique_symbols() -> None:
     labels, lang, _ = load_labels({})
     sprite = environment(labels, lang, "Specs").get_template("_icons.html.j2").render()
     ids = re.findall(r'<symbol id="([^"]+)"', sprite)
-    assert len(ids) == 14
-    assert len(set(ids)) == 14
-    assert {"i-sun", "i-auto", "i-moon", "i-clarify", "i-comment"} <= set(ids)
+    assert len(ids) == 15
+    assert len(set(ids)) == 15
+    assert {"i-sun", "i-auto", "i-moon", "i-clarify", "i-comment", "i-outbox"} <= set(ids)
 
 
 def test_state_badges_pair_every_icon_with_text() -> None:
@@ -433,9 +433,8 @@ def test_sidebar_holds_the_groups_in_order_with_counts(site: Site) -> None:
     # The ADR is unreviewed with a clarify mark, the value is reviewed: 1 record + 1 item.
     assert _side_links(side) == [
         ("../../index.html", "Overview", ""),
-        ("../../review.html", "Review", "2"),
+        ("../../review.html", "Awaiting review", "2"),
         ("../../records.html", "All records", "2"),
-        ("../../comments.html", "My comments", ""),
         ("../../records.html#type=value", "Values", "1"),
         ("../../records.html#type=adr", "ADRs", "1"),
         ("../../core/index.html", "core", "1"),
@@ -511,7 +510,7 @@ def test_all_records_lists_every_root_in_page_order(site: Site) -> None:
 
 def test_new_navigation_labels_resolve_from_the_russian_table(tmp_path: Path) -> None:
     page = _record_page(tmp_path, "ru")["records.html"]
-    for english in ("Navigation", "Review", "All records", "Tags", "All tags", "Sources"):
+    for english in ("Navigation", "Awaiting review", "All records", "Tags", "All tags", "Sources"):
         assert f">{english}<" not in page
         assert f'"{english}"' not in page
     assert "<h1>Все записи</h1>" in page
@@ -566,7 +565,7 @@ def test_record_page_head_facts_and_relations_in_russian(tmp_path: Path) -> None
         '<dt>Служит ценностям</dt>\n<dd><ul class="rel">\n'
         '<li><a href="../../s/value/0001-craft.html">Craft</a> <code class="ref">value/0001</code>'
     ) in facts
-    assert "<section" not in page
+    assert "<section" not in page[: page.index('<aside class="rail rv-rail"')]
     assert page.count("<dl") == 2
     measure = page[page.index('<div class="measure">') :]
     assert measure.index("<article ") < measure.index('<dl class="facts">')
@@ -836,9 +835,9 @@ def test_review_page_lists_the_pool_with_mark_links_and_items(tmp_path: Path) ->
     ]
     assert (
         '<li><a href="index.html">Overview</a></li>\n'
-        '<li><span aria-current="page">Review</span></li>'
+        '<li><span aria-current="page">Awaiting review</span></li>'
     ) in page
-    assert _side_links(_side(page))[1] == ("review.html", "Review", "3")
+    assert _side_links(_side(page))[1] == ("review.html", "Awaiting review", "3")
     murky = _parse(files["s/value/0002-murky.html"])
     assert "L5" in murky.ids
 
@@ -1102,11 +1101,16 @@ def _toc_blocks(key: str, shift: int = 0) -> str:
     )
 
 
-def test_record_rail_nests_the_toc_and_lists_clarify_before_unknown(tmp_path: Path) -> None:
+def test_record_rail_nests_the_toc_above_the_review_panel(tmp_path: Path) -> None:
     page = _toc_page(tmp_path, RAILED)
-    rail = page[page.index('<aside class="rail">') : page.index("</aside>")]
-    assert rail == '<aside class="rail">\n' + _toc_blocks("rail")
-    assert 'class="body norail"' not in page
+    rail = page[page.index('<aside class="rail rv-rail"') : page.index("</aside>")]
+    assert rail.startswith(
+        '<aside class="rail rv-rail" id="rv-panel">\n'
+        '<details class="rv-toc" open>\n'
+        "<summary>On this page</summary>\n" + _toc_blocks("rail") + "</details>\n"
+        '<section class="rv" aria-labelledby="rv-h" '
+    )
+    assert 'class="body rv-page">' in page
 
 
 def test_record_phone_details_hold_the_same_blocks_after_the_lead(tmp_path: Path) -> None:
@@ -1119,11 +1123,12 @@ def test_record_phone_details_hold_the_same_blocks_after_the_lead(tmp_path: Path
     assert page.index('<p class="lead">Lead.</p>') < page.index('<details class="toc-m">')
 
 
-def test_record_with_one_heading_and_no_marks_has_no_rail(tmp_path: Path) -> None:
+def test_record_with_one_heading_and_no_marks_has_only_the_panel(tmp_path: Path) -> None:
     page = _toc_page(tmp_path, "---\ntitle: Solo\n---\n# Solo\n\nText.\n")
-    assert '<aside class="rail">' not in page
+    assert '<aside class="rail rv-rail" id="rv-panel">\n<section class="rv" ' in page
     assert "toc-m" not in page
-    assert 'class="body norail"' in page
+    assert "rv-toc" not in page
+    assert 'class="body rv-page rv-notoc"' in page
 
 
 def test_record_header_holds_the_search_combobox_and_script(site: Site) -> None:
@@ -1192,84 +1197,97 @@ def test_record_article_carries_its_ref_title_and_page(tmp_path: Path) -> None:
     ) in page
 
 
-def test_record_page_holds_the_closed_dialogs_and_the_header_button(tmp_path: Path) -> None:
+def test_record_page_holds_the_review_panel_and_its_header_button(tmp_path: Path) -> None:
     page = _comment_site(tmp_path)["s/adr/0007-elka.html"]
     header = page[page.index('<header class="top">') : page.index("</header>")]
     assert (
-        '<button class="iconbtn cmt-open" type="button" aria-label="My comments"'
-        ' title="My comments"><svg class="ic" aria-hidden="true"><use href="#i-comment"/></svg>'
+        '<button class="iconbtn rv-btn" type="button" aria-controls="rv-panel"'
+        ' aria-expanded="false" aria-label="Comments" title="Comments">'
+        '<svg class="ic" aria-hidden="true"><use href="#i-comment"/></svg>'
         '<span class="n"></span></button>'
     ) in header
-    dialogs = re.findall(r"<dialog ([^>]*)>", page)
-    assert [d.split('"')[1] for d in dialogs] == ["cmt-sheet", "cmt-compose"]
-    assert all(" open" not in d for d in dialogs)
-    sheet = page[page.index('<dialog class="cmt-sheet"') : page.index("</dialog>")]
-    assert '<h2 id="cmt-sheet-h">My comments</h2>' in sheet
-    assert '<ul class="cmt-list"></ul>' in sheet
-    assert '<p class="cmt-empty">No comments yet.</p>' in sheet
-    assert '<button class="cmt-copy" type="button">Copy for the model</button>' in sheet
-    assert '<button class="cmt-clear" type="button">Clear sent</button>' in sheet
-    assert 'class="iconbtn cmt-close" type="button" aria-label="Close"' in sheet
-    compose = page[page.index('<dialog class="cmt-compose"') :]
-    assert 'data-comment-section="Comment on this section"' in compose
-    assert 'data-comment-paragraph="Comment on paragraph"' in compose
-    assert 'data-copied-forms="[&#34;{n} copied&#34;, &#34;{n} copied&#34;]"' in compose
-    assert '<label for="cmt-note">Note</label>\n<textarea id="cmt-note" rows="4"></textarea>' in (
-        compose
+    assert "<dialog" not in page
+    panel = page[page.index('<section class="rv"') : page.index("</section>")]
+    assert 'data-note="Note" data-delete="Delete"' in panel
+    assert 'data-copied-forms="[&#34;{n} item copied&#34;, &#34;{n} items copied&#34;]"' in panel
+    assert '<h2 id="rv-h">Comments</h2>' in panel
+    assert 'class="iconbtn rv-close" type="button" aria-label="Close"' in panel
+    assert (
+        '<label class="rv-reviewed"><input type="checkbox" id="rv-reviewed"> Reviewed</label>'
+    ) in panel
+    # The free-form input comes first, the cards' list after it.
+    assert panel.index('<textarea id="rv-new" rows="3"></textarea>') < panel.index(
+        '<ul class="rv-list"></ul>'
     )
-    assert '<button class="cmt-save" type="button" disabled>Save</button>' in compose
-    assert '<button class="cmt-cancel" type="button">Cancel</button>' in compose
+    assert '<label class="rv-label" for="rv-new">Comment on the whole record</label>' in panel
+    assert '<button class="rv-add" type="button" disabled>Add</button>' in panel
+    assert '<p class="rv-hint">Select text in the record to comment on it.</p>' in panel
     assert '<script src="../../comments-format.js" defer></script>' in page
     assert '<script src="../../comments.js" defer></script>' in page
 
 
-def test_non_record_page_has_the_sidebar_entry_and_no_header_button(tmp_path: Path) -> None:
+def test_every_page_has_the_outbox_link_and_only_records_the_panel(tmp_path: Path) -> None:
     page = _comment_site(tmp_path)["records.html"]
+    header = page[page.index('<header class="top">') : page.index("</header>")]
     assert (
-        '<li class="cmt-nav" hidden><a href="comments.html">My comments<span class="n"></span>'
-        "</a></li>"
-    ) in _side(page)
-    assert "cmt-open" not in page
-    assert '<dialog class="cmt' not in page
+        '<a class="iconbtn outbox" href="comments.html" aria-label="Outbox" title="Outbox">'
+        '<svg class="ic" aria-hidden="true"><use href="#i-outbox"/></svg>'
+        '<span class="l">Outbox</span><span class="n"></span></a>'
+    ) in header
+    assert "comments.html" not in _side(page)
+    assert "rv-btn" not in page
+    assert '<section class="rv"' not in page
     assert '<script src="comments.js" defer></script>' in page
 
 
-def test_comments_page_is_a_shell_with_the_compose_dialog(tmp_path: Path) -> None:
+def test_outbox_page_is_a_shell_with_copy_all_and_clear(tmp_path: Path) -> None:
     page = _comment_site(tmp_path)["comments.html"]
     main = page[page.index('<main id="main">') :]
-    assert "<h1>My comments</h1>" in main
-    assert '<p class="lead">Stored in this browser only.</p>' in main
+    assert "<h1>Outbox</h1>" in main
+    assert "Stored in this browser only; copying marks nothing" in main
     assert '<p class="needs-js">Comments need JavaScript.</p>' in main
     assert '<p class="cmt-nostore">Comments need browser storage.</p>' in main
-    assert '<div class="cmt-groups"></div>' in main
-    assert '<button class="cmt-copy" type="button">Copy for the model</button>' in main
-    assert '<button class="cmt-clear" type="button">Clear sent</button>' in main
-    assert re.findall(r'<dialog class="([^"]+)"', main) == ["cmt-compose"]
-    assert '<a href="comments.html" aria-current="page">' in _side(page)
+    assert '<div class="ob-groups"></div>' in main
+    assert '<button class="ob-copy" type="button">Copy all</button>' in main
+    assert '<button class="ob-clear" type="button">Clear</button>' in main
+    assert '<p class="cmt-empty">Nothing to send.</p>' in main
+    assert (
+        '<div class="ob-confirm" role="group" aria-labelledby="ob-confirm-q" hidden>\n'
+        '<p id="ob-confirm-q">Remove every comment and reviewed mark from this browser?</p>\n'
+        '<button class="ob-clear-yes" type="button">Remove all</button>\n'
+        '<button class="ob-clear-no" type="button">Cancel</button>\n'
+        "</div>"
+    ) in main
+    assert '<section class="rv"' not in main
+    assert '<a class="iconbtn outbox" href="comments.html" aria-current="page"' in page
 
 
 def test_comment_labels_resolve_in_russian(tmp_path: Path) -> None:
     files = _comment_site(tmp_path, "ru")
     page = files["s/adr/0007-elka.html"]
-    assert 'aria-label="Мои комментарии"' in page
-    assert '<button class="cmt-copy" type="button">Скопировать для модели</button>' in page
-    assert '<button class="cmt-clear" type="button">Удалить отправленные</button>' in page
-    assert 'data-comment-section="Комментировать раздел"' in page
+    assert 'aria-label="Комментарии"' in page
+    assert 'aria-label="К отправке"' in page
+    assert "> Ревью пройдено</label>" in page
+    assert ">Комментарий ко всей записи</label>" in page
     assert (
         'data-cleared-forms="[&#34;{n} удалён&#34;, &#34;{n} удалено&#34;, &#34;{n} удалено&#34;]"'
     ) in page
-    assert '<label for="cmt-note">Заметка</label>' in page
-    comments = files["comments.html"]
-    assert "<h1>Мои комментарии</h1>" in comments
-    assert "Хранятся только в этом браузере." in comments
-    assert "Для комментариев нужен JavaScript." in comments
-    assert "Для комментариев нужно хранилище браузера." in comments
+    assert 'data-note="Заметка"' in page
+    assert ">Ждут ревью<" in _side(page)
+    outbox = files["comments.html"]
+    assert "<h1>К отправке</h1>" in outbox
+    assert ">Скопировать всё</button>" in outbox
+    assert ">Очистить</button>" in outbox
+    assert "Хранятся только в этом браузере" in outbox
+    assert "Для комментариев нужен JavaScript." in outbox
+    assert "Для комментариев нужно хранилище браузера." in outbox
 
 
 def test_machine_and_search_files_carry_no_comment_markup(tmp_path: Path) -> None:
     files = _comment_site(tmp_path)
     for name in ("search-body.js", "search-index.js", "index.json", "llms.txt"):
         assert "cmt-" not in files[name], name
-        assert "My comments" not in files[name], name
+        assert "rv-" not in files[name], name
+        assert "Outbox" not in files[name], name
         assert "comments.js" not in files[name], name
         assert "comments-format.js" not in files[name], name

@@ -117,5 +117,7 @@ def test_only_adr_records_get_cards(tmp_path: Path) -> None:
     adr, rule = files["proj/adr/0001-t.html"], files["proj/rule/0001-t.html"]
     assert isinstance(adr, str) and isinstance(rule, str)
     assert adr.count('<details class="opt') == 4
-    assert "<details" not in rule.replace('<details class="toc-m">', "")
+    assert "<details" not in rule.replace('<details class="toc-m">', "").replace(
+        '<details class="rv-toc" open>', ""
+    )
     assert '<table class="alts">' not in rule
