@@ -28,12 +28,13 @@ entry already names a different thing: the list of records without a review.
 ## Decision
 
 1. **A review panel beside each record** (and plan and retrospective pages): always visible on wide
-   screens, a bottom sheet on phones. It lists the record's comments and keeps a free-form input at
-   the bottom for a comment on the whole record. Selecting text in the body opens a new comment card
+   screens, a bottom sheet on phones. It keeps a free-form input at the top for a comment on the whole
+   record, and lists the record's comments below it, newest first. Selecting text in the body opens a new comment card
    with the quote and focuses its input; clicking a comment focuses it, clicking its quote scrolls to
    the place. A **Reviewed** checkbox marks the whole record.
 2. **Outbox** — a header button with the count of unsent items opens a page with every comment and
-   reviewed mark on the site, grouped by record, in the exact text that will be sent, with **Copy
+   reviewed mark on the site, grouped by record (the record with the newest comment first, comments
+   newest first), in the exact text that will be sent, with **Copy
    all** and **Clear**. It replaces "My comments".
 3. **The agent applies the review.** The owner pastes the block to an agent; the agent edits the
    records and sets `reviewed:` with the date of each `<ref> — reviewed <date>` line. It checks each
