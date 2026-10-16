@@ -17,6 +17,7 @@ from booping.context.skill import Skill
 from booping.rendering import get_plugin_root
 from booping.specs.rules import RuleSkip, TargetedRule, load_targeted_rules
 from booping.specs.tiers import Tier, resolve_tiers
+from booping.specs.values import SpecValue, has_specs, load_values
 
 
 class Context(BaseModel):
@@ -29,6 +30,9 @@ class Context(BaseModel):
     specs_tiers: list[Tier] = []
     targeted_rules: list[TargetedRule] = []
     rule_skips: list[RuleSkip] = []
+    # The project tier exists and holds a type directory: the specs guidance renders.
+    project_specs: bool = False
+    spec_values: list[SpecValue] = []
     plan_templates: list[PlanTemplate] = []
     review_templates: list[ReviewTemplate] = []
     skills: dict[str, Skill] = {}
@@ -107,6 +111,7 @@ class Context(BaseModel):
             vault_override=vault_override is not None,
         )
         targeted_rules, rule_skips = load_targeted_rules(specs_tiers)
+        project_specs = any(t.name == "project" and has_specs(t) for t in specs_tiers)
 
         return cls(
             project=project,
@@ -115,6 +120,8 @@ class Context(BaseModel):
             lessons=lessons,
             targeted_rules=targeted_rules,
             rule_skips=rule_skips,
+            project_specs=project_specs,
+            spec_values=load_values(specs_tiers) if project_specs else [],
             plan_templates=plan_templates,
             review_templates=review_templates,
             skills=skills,

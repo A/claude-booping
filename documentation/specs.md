@@ -45,6 +45,10 @@ A reference without a namespace points into its own tier: `rule/0003`. A referen
 
 An accepted rule carrying `targets:` and `brief:` is injected into the playbooks, steps, agents and skills it targets, from all three tiers: each surface gets a `## Rules` section listing the brief of every matching rule with a link to its record. Target forms, the section shape, the ref and link per tier and the `--no-rules` opt-out are in [Playbooks → Rules](playbook.md#rules).
 
+## Base guidance in every run
+
+When the project has a specs tier, the project context the `/playbook` skill renders for every run ends with a `## Specs` block: what the specs are for, one cue per record type that marks spec material in the work or in what you say, and the principle for working with them — apply them where they add quality or knowledge of past decisions, draft new material as the work produces it (values and anything weakening a rule stay drafts for you; the rest follows [`core.autonomy`](project_config.md#coreautonomy)), and do every read or write through a subagent running the [specs playbook](specs_playbook.md), keeping only its short answer. Below it come the values of the global and project tiers, one line each (`value/NNNN — title: summary`, global ones namespaced). It carries no rules or other records. The fixed part is capped at 18 lines, plus one line per value, by a test.
+
 ## Open items
 
 A gap between the records and the code — an unconfirmed ADR, a `[clarify]` mark, a check finding — is filed as an open item, a file under `open-items/` in the vault that a plan can pick up and close; so is a request you file in your own words. The [specs playbook](specs_playbook.md#open-items) files and works them, and `booping items` drives them directly.

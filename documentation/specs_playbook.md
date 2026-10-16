@@ -21,6 +21,7 @@ The scenarios it knows:
 | Sync specs and code | Compares the records with the code; each gap becomes one open item with the direction it runs. |
 | Retro to rules | A retrospective waiting for learning goes to the [learn playbook](learn.md); a lesson from the conversation becomes a rule directly. |
 | Open items | Shows the open items so you can pick some to plan, drop or reopen. |
+| Handed over | Another playbook's subagent hands over spec material or a question ([base guidance](specs.md#base-guidance-in-every-run)): it writes the material as a draft, or answers from the records, in at most five lines. |
 
 Every scenario ends by naming the next call.
 

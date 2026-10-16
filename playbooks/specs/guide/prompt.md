@@ -6,6 +6,13 @@ review_gate: null
 Act on the user's request; the scenarios below orient, never restrict — never ask which one to run.
 Flags and their allowed values come from `booping items {verb} --help`.
 
+## Handed over
+
+Another playbook hands over a piece of spec material or a question instead of a dialogue. Material:
+write it into the record it belongs to, new or existing — a value, or anything dropping or weakening
+a rule, as an owner draft; anything else per the autonomy mode. A question: answer it from the records.
+Reply in at most five lines: the refs written or found, one line each, then what needs the owner.
+
 ## Init
 
 No project tier yet (the preamble lists none, or `booping specs ls` finds no specs): offer to
