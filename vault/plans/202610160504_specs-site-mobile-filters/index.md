@@ -80,7 +80,7 @@ src/config.yaml  labels.{en,ru}.ui: filters, filter_remove, filters_show (M02)
 | --- | --- | --- | --- |
 | 01 | [Quiet ref line and whole-card link](milestones/M01-card-ref-and-whole-card-link/M01-card-ref-and-whole-card-link.md) | 3 | done |
 | 02 | [Compact chips and the filter sheet markup](milestones/M02-compact-chips-and-filter-sheet-markup/M02-compact-chips-and-filter-sheet-markup.md) | 4 | done |
-| 03 | [Filter sheet, compact row and removable chips behaviour](milestones/M03-filter-sheet-behaviour/M03-filter-sheet-behaviour.md) | 4 | in-progress |
+| 03 | [Filter sheet, compact row and removable chips behaviour](milestones/M03-filter-sheet-behaviour/M03-filter-sheet-behaviour.md) | 4 | done |
 
 ## Milestone files
 

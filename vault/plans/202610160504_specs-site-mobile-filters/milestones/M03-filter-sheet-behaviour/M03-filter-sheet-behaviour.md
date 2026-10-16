@@ -2,7 +2,7 @@
 id: "03"
 title: "Filter sheet, compact row and removable chips behaviour"
 sp: 4
-status: in-progress
+status: done
 plan: "/home/anton/Dev/@A/claude-booping-specs/vault/plans/202610160504_specs-site-mobile-filters/index.md"
 ---
 
@@ -25,26 +25,26 @@ Tests: `site_filter_format_test.py` (unit, node runs the shipped `filter-format.
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 3.1 | `filter-format.js`, shipped and loaded by filtered pages; its node test. | `booping-python/src/booping/specs/site/filter-format.js`, `booping-python/src/booping/specs/site/pages.py`, `booping-python/src/booping/specs/site/templates/*.html.j2` (filtered pages' script tags), `booping-python/tests/specs/site_filter_format_test.py`, `booping-python/tests/specs/site_pages_test.py` | 1 | pending |
-| 3.2 | Compact-row text and the removable active chips. | `booping-python/src/booping/specs/site/filter.js` | 2 | pending |
-| 3.3 | Sheet open/close, focus return, breakpoint close; golden rebaseline. | `booping-python/src/booping/specs/site/filter.js`, `booping-python/e2e/cases/specs/site-*.txtar` | 1 | pending |
+| 3.1 | `filter-format.js`, shipped and loaded by filtered pages; its node test. | `booping-python/src/booping/specs/site/filter-format.js`, `booping-python/src/booping/specs/site/pages.py`, `booping-python/src/booping/specs/site/templates/*.html.j2` (filtered pages' script tags), `booping-python/tests/specs/site_filter_format_test.py`, `booping-python/tests/specs/site_pages_test.py` | 1 | done |
+| 3.2 | Compact-row text and the removable active chips. | `booping-python/src/booping/specs/site/filter.js` | 2 | done |
+| 3.3 | Sheet open/close, focus return, breakpoint close; golden rebaseline. | `booping-python/src/booping/specs/site/filter.js`, `booping-python/e2e/cases/specs/site-*.txtar` | 1 | done |
 
 ## Definition of Done
 
 ### Task 3.1
 
-- [ ] `site_filter_format_test.py` passes and fails when either function's output changes.
-- [ ] `filter-format.js` is written and loaded by exactly the pages that load `filter.js`.
+- [x] `site_filter_format_test.py` passes and fails when either function's output changes.
+- [x] `filter-format.js` is written and loaded by exactly the pages that load `filter.js`.
 
 ### Task 3.2
 
-- [ ] In headless Chromium at 390px on `review.html#flag=unreviewed` (built from this repo), the row reads `Filters (1) · Review order` and one removable chip shows the flag's label; tapping it empties the active row, the row reads `Filters · Review order`, the hash loses `flag=` and every row is visible again.
-- [ ] Pressing two chips in the sheet shows `Filters (2) · …` and two removable chips in chip order.
+- [x] In headless Chromium at 390px on `review.html#flag=unreviewed` (built from this repo), the row reads `Filters (1) · Review order` and one removable chip shows the flag's label; tapping it empties the active row, the row reads `Filters · Review order`, the hash loses `flag=` and every row is visible again.
+- [x] Pressing two chips in the sheet shows `Filters (2) · …` and two removable chips in chip order.
 
 ### Task 3.3
 
-- [ ] The row opens the sheet as a bottom sheet; the close button, the "Show records" button, Escape and a backdrop tap each close it and focus returns to the row; resizing to 1300px with the sheet open closes it and the inline bar shows.
-- [ ] `site-*.txtar` rebaselined with `just e2e -k site --txtar-update`; diff limited to the `filter.js` and `filter-format.js` bodies and the filtered pages' script tags.
+- [x] The row opens the sheet as a bottom sheet; the close button, the "Show records" button, Escape and a backdrop tap each close it and focus returns to the row; resizing to 1300px with the sheet open closes it and the inline bar shows.
+- [x] `site-*.txtar` rebaselined with `just e2e -k site --txtar-update`; diff limited to the `filter.js` and `filter-format.js` bodies and the filtered pages' script tags.
 
 Return: the list of changed and created files, nothing else.
 
