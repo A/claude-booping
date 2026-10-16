@@ -84,6 +84,12 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
         help="A root to render (repeatable); replaces the tier and config roots",
     )
     site.add_argument(
+        "--home",
+        metavar="NAME",
+        help="The root rendered as the project's own registry; the others get their own"
+        " blocks (default: the first --root, else the project tier's root)",
+    )
+    site.add_argument(
         "--title",
         metavar="TEXT",
         help="Site title in the header and every page title"
@@ -370,7 +376,14 @@ def _run_site(args: argparse.Namespace) -> None:
 
     open_items: list[OpenItem] = []
     item_warnings: list[SiteWarning] = []
-    home = None if args.roots else _project_root_name(ctx, root, home_dir, roots)
+    if args.home is not None:
+        if args.home not in names:
+            _fail(f"--home `{args.home}` names no rendered root (roots: {', '.join(names)})", 2)
+        home: str | None = args.home
+    elif args.roots:
+        home = roots[0].name
+    else:
+        home = _project_root_name(ctx, root, home_dir, roots)
     items_root: str | None = None
     if not args.roots and ctx.vault is not None:
         items_root = home

@@ -103,13 +103,14 @@ cargo install markdown-checker --version 0.1.2 --locked
 ### `booping specs site`
 
 ```
-booping specs site [--out DIR] [--root NAME=PATH ...] [--title TEXT] [--site-url URL]
+booping specs site [--out DIR] [--root NAME=PATH ...] [--home NAME] [--title TEXT] [--site-url URL]
 ```
 
 Renders one or several specs roots to a static HTML site you open in a browser straight from disk: no server and no network — fonts, icons and styles ship inside the output. The same input always produces a byte-identical tree.
 
 - **`--out DIR`** — the output directory, default `specs-site` in the working directory.
 - **`--root NAME=PATH`** — a root to render, repeatable: a name (`[A-Za-z0-9][A-Za-z0-9._-]*`) and a directory holding type directories. `~` is expanded. Default: the tier and configured roots, below.
+- **`--home NAME`** — the root rendered as the home registry (below); it must name one of the rendered roots, else the command exits 2. Default: the first `--root` when `--root` is given, else the project tier's root.
 - **`--title TEXT`** — the site title, shown in the header and in every page's `<title>`; default the attached project's name, else `Specs`.
 - **`--site-url URL`** — the public `http://` or `https://` URL the site is served at; default none. Given, the build also writes `404.html` (below).
 
@@ -130,7 +131,7 @@ core:
 
 A `path` is absolute, `~`-prefixed, or relative to `home_dir`.
 
-**Home registry.** When the default roots include the project tier, that root is the site's home registry: the home page, its counters and the sidebar's **Types** cover it alone, and every other root — core, global, configured — is a registry of its own, with its own block on the home page and its own sidebar group. A record of another registry shows its namespaced id (`booping:rule/0032`) wherever an id is shown — list rows, Recently updated, search results, relations, Referenced by, breadcrumbs; the home registry's records keep the bare `rule/0032`. Without a project root — `--root` given, or no project tier on disk — every root counts together on the home page and ids stay bare, except in a record page's relations, where a record of another root than the page's shows its namespace.
+**Home registry.** One root is the site's home registry — `--home` when given, else the first `--root`, else the project tier's root among the default roots: the home page, its counters and the sidebar's **Types** cover it alone, and every other root — core, global, configured — is a registry of its own, with its own block on the home page and its own sidebar group. A record of another registry shows its namespaced id (`booping:rule/0032`) wherever an id is shown — list rows, Recently updated, search results, relations, Referenced by, breadcrumbs; the home registry's records keep the bare `rule/0032`. Without a home registry — default roots with no project tier on disk and no `--home` — every root counts together on the home page and ids stay bare, except in a record page's relations, where a record of another root than the page's shows its namespace. A single root that is the home registry renders the home page with no other blocks.
 
 **Page shell.** Every page has a skip link, a header with the site title (linking home) and a theme toggle, a sidebar, breadcrumbs, and a footer naming the generator — no build date, so rebuilds stay byte-identical. The theme toggle cycles auto → light → dark and remembers the choice in the browser; auto follows the system setting. Text is set in Golos Text, code in JetBrains Mono, both Cyrillic and Latin. Below 760px wide the layout drops to one column, list rows become cards, the filter bar folds into a filter sheet (see **Filters**), and the sidebar moves into a drawer opened from a menu button; without JavaScript the sidebar renders in the page flow instead, and every page still reads.
 

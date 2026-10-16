@@ -1,6 +1,6 @@
-`--root proj=specs` renders one root: the ADR's `values:` ref and its anchored body link resolve to
-the value's page, the `[clarify]` mark lands on the root index, and the link to a missing file is
-the one warning.
+`--root proj=specs` renders one root, the home registry: the ADR's `values:` ref and its anchored
+body link resolve to the value's page, the `[clarify]` mark lands on the Overview, and the link to
+a missing file is the one warning.
 
 -- fixtures/cwd/specs/value/0001-small-steps.md --
 ---
@@ -110,13 +110,9 @@ booping specs site
 </ul>
 <h4>Types</h4>
 <ul>
-<li><a href="records.html#type=adr">ADRs<span class="n">1</span></a></li>
-<li><a href="records.html#type=rule">Rules<span class="n">1</span></a></li>
-<li><a href="records.html#type=value">Values<span class="n">1</span></a></li>
-</ul>
-<h4>Sources</h4>
-<ul>
-<li><a href="proj/index.html">proj<span class="n">3</span></a></li>
+<li><a href="proj/adr/index.html">ADRs<span class="n">1</span></a></li>
+<li><a href="proj/rule/index.html">Rules<span class="n">1</span></a></li>
+<li><a href="proj/value/index.html">Values<span class="n">1</span></a></li>
 </ul>
 <ul>
 <li><a href="llms.txt">llms.txt</a></li>
@@ -131,12 +127,12 @@ booping specs site
 <div class="measure">
 <h1>Specs</h1>
 <p class="lead">Ship in small, reviewable steps.</p>
-<p class="callout"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg><span><a href="review.html">3 need you →</a> · 3 unreviewed · 1 open question</span></p>
+<p class="callout"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg><span><a href="review.html#source=proj">3 need you →</a> · 3 unreviewed · 1 open question</span></p>
 </div>
 <ul class="scen">
-<li><a href="records.html#type=adr"><b>ADRs <span class="n">1</span></b><span class="s">why it was decided so</span></a></li>
-<li><a href="records.html#type=rule"><b>Rules <span class="n">1</span></b><span class="s">what constrains decisions</span></a></li>
-<li><a href="records.html#type=value"><b>Values <span class="n">1</span></b><span class="s">why the project exists</span></a></li>
+<li><a href="proj/adr/index.html"><b>ADRs <span class="n">1</span></b><span class="s">why it was decided so</span></a></li>
+<li><a href="proj/rule/index.html"><b>Rules <span class="n">1</span></b><span class="s">what constrains decisions</span></a></li>
+<li><a href="proj/value/index.html"><b>Values <span class="n">1</span></b><span class="s">why the project exists</span></a></li>
 </ul>
 </main>
 </div>
@@ -203,13 +199,9 @@ booping specs site
 </ul>
 <h4>Types</h4>
 <ul>
-<li><a href="../../records.html#type=adr">ADRs<span class="n">1</span></a></li>
-<li><a href="../../records.html#type=rule">Rules<span class="n">1</span></a></li>
-<li><a href="../../records.html#type=value">Values<span class="n">1</span></a></li>
-</ul>
-<h4>Sources</h4>
-<ul>
-<li><a href="../../proj/index.html">proj<span class="n">3</span></a></li>
+<li><a href="../../proj/adr/index.html">ADRs<span class="n">1</span></a></li>
+<li><a href="../../proj/rule/index.html">Rules<span class="n">1</span></a></li>
+<li><a href="../../proj/value/index.html">Values<span class="n">1</span></a></li>
 </ul>
 <ul>
 <li><a href="../../llms.txt">llms.txt</a></li>
@@ -219,7 +211,6 @@ booping specs site
 <nav class="crumbs" aria-label="breadcrumb">
 <ol>
 <li><a href="../../index.html">Overview</a></li>
-<li class="mid"><a href="../index.html">proj</a></li>
 <li class="mid"><a href="index.html">ADRs</a></li>
 <li><span aria-current="page">adr/0001</span></li>
 </ol>
@@ -351,13 +342,9 @@ booping specs site
 </ul>
 <h4>Types</h4>
 <ul>
-<li><a href="records.html#type=adr">ADRs<span class="n">1</span></a></li>
-<li><a href="records.html#type=rule">Rules<span class="n">1</span></a></li>
-<li><a href="records.html#type=value">Values<span class="n">1</span></a></li>
-</ul>
-<h4>Sources</h4>
-<ul>
-<li><a href="proj/index.html">proj<span class="n">3</span></a></li>
+<li><a href="proj/adr/index.html">ADRs<span class="n">1</span></a></li>
+<li><a href="proj/rule/index.html">Rules<span class="n">1</span></a></li>
+<li><a href="proj/value/index.html">Values<span class="n">1</span></a></li>
 </ul>
 <ul>
 <li><a href="llms.txt">llms.txt</a></li>

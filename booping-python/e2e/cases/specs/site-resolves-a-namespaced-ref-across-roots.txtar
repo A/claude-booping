@@ -86,13 +86,12 @@ specs site: 2 roots, 2 records, 11 pages, 0 warnings -> specs-site
 </ul>
 <h4>Types</h4>
 <ul>
-<li><a href="../../records.html#type=rule">Rules<span class="n">1</span></a></li>
-<li><a href="../../records.html#type=value">Values<span class="n">1</span></a></li>
+<li><a href="../../a/value/index.html">Values<span class="n">1</span></a></li>
 </ul>
-<h4>Sources</h4>
+<h4>b</h4>
 <ul>
-<li><a href="../../a/index.html">a<span class="n">1</span></a></li>
-<li><a href="../../b/index.html">b<span class="n">1</span></a></li>
+<li><a href="../../b/index.html">Overview</a></li>
+<li><a href="../../b/rule/index.html">Rules<span class="n">1</span></a></li>
 </ul>
 <ul>
 <li><a href="../../llms.txt">llms.txt</a></li>
@@ -104,11 +103,11 @@ specs site: 2 roots, 2 records, 11 pages, 0 warnings -> specs-site
 <li><a href="../../index.html">Overview</a></li>
 <li class="mid"><a href="../index.html">b</a></li>
 <li class="mid"><a href="index.html">Rules</a></li>
-<li><span aria-current="page">rule/0001</span></li>
+<li><span aria-current="page">b:rule/0001</span></li>
 </ol>
 </nav>
 <div class="measure">
-<article data-ref="rule/0001" data-title="One concern per commit" data-page="b/rule/0001-one-concern-per-commit.html">
+<article data-ref="b:rule/0001" data-title="One concern per commit" data-page="b/rule/0001-one-concern-per-commit.html">
 <h1>One concern per commit</h1>
 <div class="badges"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-unreviewed"/></svg>unreviewed</span></div>
 <p class="lead">A commit carries one concern.</p>
@@ -117,7 +116,7 @@ specs site: 2 roots, 2 records, 11 pages, 0 warnings -> specs-site
 <dd>not reviewed yet</dd>
 <dt>Serves values</dt>
 <dd><ul class="rel">
-<li><a href="../../a/value/0001-small-steps.html">Small steps</a> <code class="ref">a:value/0001</code></li>
+<li><a href="../../a/value/0001-small-steps.html">Small steps</a> <code class="ref">value/0001</code></li>
 </ul></dd>
 </dl>
 <div class="body">

@@ -74,11 +74,7 @@ specs site: 1 roots, 1 records, 9 pages, 0 warnings -> specs-site
 </ul>
 <h4>Types</h4>
 <ul>
-<li><a href="records.html#type=value">Values<span class="n">1</span></a></li>
-</ul>
-<h4>Sources</h4>
-<ul>
-<li><a href="proj/index.html">proj<span class="n">1</span></a></li>
+<li><a href="proj/value/index.html">Values<span class="n">1</span></a></li>
 </ul>
 <ul>
 <li><a href="llms.txt">llms.txt</a></li>

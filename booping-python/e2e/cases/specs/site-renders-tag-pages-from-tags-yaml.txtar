@@ -89,16 +89,12 @@ specs site: 1 roots, 2 records, 12 pages, 0 warnings -> specs-site
 </ul>
 <h4>Types</h4>
 <ul>
-<li><a href="../../records.html#type=rule">Rules<span class="n">2</span></a></li>
+<li><a href="../../proj/rule/index.html">Rules<span class="n">2</span></a></li>
 </ul>
 <h4>Tags</h4>
 <ul>
 <li><a href="../../proj/tags/ops.html">ops<span class="n">2</span></a></li>
 <li><a href="../../proj/tags/index.html" aria-current="page">All tags</a></li>
-</ul>
-<h4>Sources</h4>
-<ul>
-<li><a href="../../proj/index.html">proj<span class="n">2</span></a></li>
 </ul>
 <ul>
 <li><a href="../../llms.txt">llms.txt</a></li>
@@ -108,7 +104,6 @@ specs site: 1 roots, 2 records, 12 pages, 0 warnings -> specs-site
 <nav class="crumbs" aria-label="breadcrumb">
 <ol>
 <li><a href="../../index.html">Overview</a></li>
-<li class="mid"><a href="../index.html">proj</a></li>
 <li><span aria-current="page">Tags</span></li>
 </ol>
 </nav>
@@ -184,16 +179,12 @@ specs site: 1 roots, 2 records, 12 pages, 0 warnings -> specs-site
 </ul>
 <h4>Types</h4>
 <ul>
-<li><a href="../../records.html#type=rule">Rules<span class="n">2</span></a></li>
+<li><a href="../../proj/rule/index.html">Rules<span class="n">2</span></a></li>
 </ul>
 <h4>Tags</h4>
 <ul>
 <li><a href="../../proj/tags/ops.html" aria-current="page">ops<span class="n">2</span></a></li>
 <li><a href="../../proj/tags/index.html">All tags</a></li>
-</ul>
-<h4>Sources</h4>
-<ul>
-<li><a href="../../proj/index.html">proj<span class="n">2</span></a></li>
 </ul>
 <ul>
 <li><a href="../../llms.txt">llms.txt</a></li>
@@ -203,7 +194,6 @@ specs site: 1 roots, 2 records, 12 pages, 0 warnings -> specs-site
 <nav class="crumbs" aria-label="breadcrumb">
 <ol>
 <li><a href="../../index.html">Overview</a></li>
-<li class="mid"><a href="../index.html">proj</a></li>
 <li class="mid"><a href="index.html">Tags</a></li>
 <li><span aria-current="page">ops</span></li>
 </ol>

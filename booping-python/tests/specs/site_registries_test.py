@@ -176,3 +176,18 @@ def test_open_items_count_toward_the_home_registry(tmp_path: Path) -> None:
         "proj",
         "proj",
     ]
+
+
+def test_a_single_home_root_renders_the_overview_without_other_blocks(tmp_path: Path) -> None:
+    _write(
+        tmp_path / "proj" / "rule" / "0001-linear.md",
+        "---\ntitle: Linear\nstatus: accepted\nupdated_at: 2026-10-02\n---\n",
+    )
+    site = load_site([SiteRoot("proj", tmp_path / "proj")], TYPES)
+    files, _ = build_site(site, TYPES, home="proj")
+    index = files["index.html"]
+    assert isinstance(index, str)
+    main = _main(index)
+    assert '<section class="registry"' not in main
+    assert _cards(main) == [("proj/rule/index.html", "Rules", "1")]
+    assert _refs(main) == ["rule/0001"]
