@@ -205,11 +205,17 @@ def _status_state(record: SiteRecord) -> RecordState:
     )
 
 
-def _rel_item(target: SiteRecord, from_root: str) -> dict[str, Any]:
+def _shown_ref(record: SiteRecord, base: str) -> str:
+    """`record`'s ref as shown on a page whose own root is `base`: bare in `base`,
+    `{root}:{ref}` from any other root."""
+    return record.ref if record.root == base else f"{record.root}:{record.ref}"
+
+
+def _rel_item(target: SiteRecord, base: str) -> dict[str, Any]:
     return {
         "href": _record_href(target),
         "title": _title(target),
-        "ref": target.ref if target.root == from_root else f"{target.root}:{target.ref}",
+        "ref": _shown_ref(target, base),
         "state": _status_state(target),
         "text": None,
         "css": None,
@@ -255,7 +261,7 @@ def _facts(labels: Labels, fm: dict[str, Any]) -> list[dict[str, Any]]:
 
 
 def _relations(
-    site: Site, record: SiteRecord, labels: Labels, warnings: set[SiteWarning]
+    site: Site, record: SiteRecord, labels: Labels, warnings: set[SiteWarning], base: str
 ) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for key in sorted(ref_keys(record.frontmatter)):
@@ -267,7 +273,7 @@ def _relations(
             seen.add(text)
             resolved = site.resolve_ref(text, record.root)
             if isinstance(resolved, SiteRecord):
-                items.append(_rel_item(resolved, record.root))
+                items.append(_rel_item(resolved, base))
             elif isinstance(resolved, RefMiss):
                 if resolved.warn:
                     warnings.add(
@@ -280,7 +286,7 @@ def _relations(
         rows.append(
             {
                 "label": labels.ui("superseded_by"),
-                "items": [_rel_item(r, record.root) for r in superseders],
+                "items": [_rel_item(r, base) for r in superseders],
             }
         )
     return rows
@@ -317,7 +323,9 @@ def _record_view(
     state: RecordState,
     labels: Labels,
     warnings: set[SiteWarning],
+    base: str,
 ) -> dict[str, Any]:
+    """`base` is the root whose refs show bare; any other root's show namespaced."""
     fm = record.frontmatter
     own = rendered[id(record)]
     groups = backlink_groups(site, record, rendered, labels, types)
@@ -328,7 +336,7 @@ def _record_view(
     skip = {*_PAGE_HEAD_KEYS, *_FACT_KEYS, *refs}
     return {
         "title": _title(record),
-        "ref": record.ref,
+        "ref": _shown_ref(record, base),
         "page": record.page,
         "stem": record.stem,
         "state": state,
@@ -341,7 +349,7 @@ def _record_view(
         ],
         "summary": _summary(record),
         "facts": _facts(labels, fm),
-        "relations": _relations(site, record, labels, warnings),
+        "relations": _relations(site, record, labels, warnings, base),
         "raw": [
             {"key": key, "items": _fact_items(site, record, value, warnings)}
             for key, value in fm.items()
@@ -355,8 +363,7 @@ def _record_view(
                 {
                     "label": group.label,
                     "items": [
-                        {"item": _rel_item(b.record, record.root), "via": b.via}
-                        for b in group.items
+                        {"item": _rel_item(b.record, base), "via": b.via} for b in group.items
                     ],
                 }
                 for group in groups.by_type
@@ -364,7 +371,7 @@ def _record_view(
             "by_section": [
                 {
                     "heading": section.heading,
-                    "sources": [_rel_item(src, record.root) for src in section.sources],
+                    "sources": [_rel_item(src, base) for src in section.sources],
                 }
                 for section in groups.by_section
             ],
@@ -389,10 +396,12 @@ def _landing(
     needs: int,
     type_href: str,
     prefix: str,
+    base: str | None,
 ) -> dict[str, Any]:
     """The Overview landing over `records` (in page order): callout counts, one card per
     present type holding records, and the latest-updated records. `type_href` is
-    formatted with `type`; `prefix` leads each recent record's page path."""
+    formatted with `type`; `prefix` leads each recent record's page path; `base` is the
+    root whose refs show bare, None for every root's."""
     dated = [(_iso_date(r.frontmatter.get("updated_at")), r) for r in records]
     # Stable sort: equal dates keep page order.
     recent = sorted((d for d in dated if d[0]), key=lambda d: d[0], reverse=True)[:_RECENT]
@@ -407,7 +416,7 @@ def _landing(
         ],
         "recent": [
             {
-                "ref": r.ref,
+                "ref": _shown_ref(r, base or r.root),
                 "page": f"{prefix}{r.page}",
                 "title": _title(r),
                 "datetime": iso,
@@ -418,12 +427,15 @@ def _landing(
     }
 
 
-def _row(record: SiteRecord, state: RecordState, order: int) -> dict[str, Any]:
-    """One list row: what `record_row` shows plus the `data-*` the filter reads."""
+def _row(
+    record: SiteRecord, state: RecordState, order: int, home: str | None = None
+) -> dict[str, Any]:
+    """One list row: what `record_row` shows plus the `data-*` the filter reads; a record
+    outside a `home` root shows its ref namespaced."""
     fm = record.frontmatter
     created_by = fm.get("created_by")
     return {
-        "ref": record.ref,
+        "ref": _shown_ref(record, home or record.root),
         "page": record.page,
         "title": _title(record),
         "summary": _summary(record),
@@ -441,8 +453,11 @@ def _row(record: SiteRecord, state: RecordState, order: int) -> dict[str, Any]:
     }
 
 
-def _item_row(site: Site, item: OpenItem, items_root: str | None, order: int) -> dict[str, Any]:
-    """An open item's review row: the `record_row` data keys, flag `open`, no type or source."""
+def _item_row(
+    site: Site, item: OpenItem, items_root: str | None, order: int, home: str | None = None
+) -> dict[str, Any]:
+    """An open item's review row: the `record_row` data keys, flag `open`, no type; its
+    source is the `home` root, the vault's own, else none."""
     target = None if item.record is None else site.resolve_ref(item.record, items_root or "")
     return {
         "item": True,
@@ -451,7 +466,7 @@ def _item_row(site: Site, item: OpenItem, items_root: str | None, order: int) ->
         "title": item.title,
         "data": {
             "type": "",
-            "source": "",
+            "source": home or "",
             "status": "open",
             "flags": "open",
             "updated": "",
@@ -483,19 +498,36 @@ def _nav(
     labels: Labels,
     open_items: Sequence[OpenItem],
     trees: dict[str, list[TagNode]],
+    home: str | None = None,
 ) -> dict[str, Any]:
-    """The sidebar: overview, review, all records, types, tags per root, sources."""
+    """The sidebar: overview, review, all records, types, tags per root, sources. With a
+    `home` root the types count that root's records only and link its type pages, and
+    every other root has its own group in place of the sources."""
+    registries: list[dict[str, Any]] = []
+    types: list[dict[str, Any]] = [
+        {
+            "label": labels.type_plural(type_),
+            "count": sum(1 for r in site.records if r.type == type_),
+            "href": f"records.html#type={type_}",
+        }
+        for type_ in present
+    ]
+    if home is not None:
+        types = _root_types(site, home, present, labels)
+        registries = [
+            {
+                "root": root.name,
+                "href": f"{root.name}/index.html",
+                "types": _root_types(site, root.name, present, labels),
+            }
+            for root in site.roots
+            if root.name != home
+        ]
     return {
         "review": sum(1 for r in site.records if states[r].reasons) + len(open_items),
         "records": len(site.records),
-        "types": [
-            {
-                "label": labels.type_plural(type_),
-                "count": sum(1 for r in site.records if r.type == type_),
-                "href": f"records.html#type={type_}",
-            }
-            for type_ in present
-        ],
+        "types": types,
+        "registries": registries,
         "tags": [
             {
                 "root": root.name,
@@ -519,8 +551,21 @@ def _nav(
                 "href": f"{root.name}/index.html",
             }
             for root in site.roots
-        ],
+        ]
+        if home is None
+        else [],
     }
+
+
+def _root_types(
+    site: Site, root: str, present: Sequence[str], labels: Labels
+) -> list[dict[str, Any]]:
+    """Sidebar entries for the types `root` holds records of, each linking its type page."""
+    return [
+        {"label": labels.type_plural(type_), "count": count, "href": f"{root}/{type_}/index.html"}
+        for type_ in present
+        if (count := sum(1 for r in site.records if r.root == root and r.type == type_))
+    ]
 
 
 def _render(site: Site, record: SiteRecord, labels: Labels) -> Rendered:
@@ -544,12 +589,18 @@ def build_site(
     *,
     open_items: Sequence[OpenItem] = (),
     items_root: str | None = None,
+    home: str | None = None,
 ) -> tuple[dict[str, str | bytes], list[SiteWarning]]:
     """Out-root-relative path → file content, plus the resolution warnings sorted by
     `(path, line)`, each once per record. Types order as `known_types`, then the types
     a root's `_schemas/` added, sorted. No `labels` → English. A `site_url` adds a
     `404.html` resolving its links against the URL's path. `open_items` are the
-    vault's open items, their `record:` refs resolved from root `items_root`."""
+    vault's open items, their `record:` refs resolved from root `items_root`.
+
+    `home` names the project's own root: the Overview, its counters and the sidebar
+    types cover that root alone, every other root gets its own Overview block and
+    sidebar group, its records show refs as `{root}:{ref}`, and the home root's page
+    redirects to the Overview. No `home` → every root counts together, refs bare."""
     if labels is None:
         labels, lang, _ = load_labels({})
     env = environment(labels, lang, site_title)
@@ -586,7 +637,10 @@ def build_site(
     for root in site.roots:
         trees[root.name], tree_warnings = tag_tree(root, site.records)
         warnings.update(tree_warnings)
-    nav = _nav(site, present, states, labels, open_items, trees)
+    nav = _nav(site, present, states, labels, open_items, trees, home)
+
+    def root_crumbs(root: str, href: str) -> list[Crumb]:
+        return [] if root == home else [Crumb(root, href)]
 
     def page(template: str, path: str, title: str, crumbs: list[Crumb], **ctx: Any) -> None:
         prefix = "../" * path.count("/")
@@ -606,11 +660,13 @@ def build_site(
             _title(record),
             [
                 Crumb(labels.ui("overview"), "../../index.html"),
-                Crumb(record.root, "../index.html"),
+                *root_crumbs(record.root, "../index.html"),
                 Crumb(labels.type_plural(record.type), "index.html"),
-                Crumb(record.ref, None),
+                Crumb(_shown_ref(record, home or record.root), None),
             ],
-            record=_record_view(site, record, rendered, present, state, labels, warnings),
+            record=_record_view(
+                site, record, rendered, present, state, labels, warnings, home or record.root
+            ),
         )
         files[f"{record.root}/{record.type}/{record.stem}.md"] = record.path.read_bytes()
 
@@ -620,20 +676,25 @@ def build_site(
             of_type = [r for r in records if r.type == type_]
             if not of_type:
                 continue
-            type_rows = [_row(r, states[r], n) for n, r in enumerate(of_type)]
+            type_rows = [_row(r, states[r], n, home) for n, r in enumerate(of_type)]
             page(
                 "type.html.j2",
                 f"{root.name}/{type_}/index.html",
                 labels.type_plural(type_),
                 [
                     Crumb(labels.ui("overview"), "../../index.html"),
-                    Crumb(root.name, "../index.html"),
+                    *root_crumbs(root.name, "../index.html"),
                     Crumb(labels.type_plural(type_), None),
                 ],
                 type=type_,
                 rows=type_rows,
                 filters=_filters(type_rows, labels),
             )
+        if root.name == home:
+            files[f"{root.name}/index.html"] = env.get_template("redirect.html.j2").render(
+                title=site_title, target="../index.html"
+            )
+            continue
         page(
             "root.html.j2",
             f"{root.name}/index.html",
@@ -648,6 +709,7 @@ def build_site(
                 sum(1 for r in records if states[r].reasons),
                 "{type}/index.html",
                 "../",
+                home or root.name,
             ),
         )
 
@@ -656,12 +718,12 @@ def build_site(
         if not nodes:
             continue
         overview = Crumb(labels.ui("overview"), "../../index.html")
-        source = Crumb(root.name, "../index.html")
+        source = root_crumbs(root.name, "../index.html")
         page(
             "tags.html.j2",
             f"{root.name}/tags/index.html",
             labels.ui("tags"),
-            [overview, source, Crumb(labels.ui("tags"), None)],
+            [overview, *source, Crumb(labels.ui("tags"), None)],
             tree=_tree_view(root.name, nodes),
         )
         own = [r for r in ordered if r.root == root.name]
@@ -671,14 +733,14 @@ def build_site(
             stack.extend(node.children)
             parts = node.tag.split(":")
             ancestors = [":".join(parts[:n]) for n in range(1, len(parts))]
-            rows = [_row(r, states[r], n) for n, r in enumerate(tagged(node.tag, own))]
+            rows = [_row(r, states[r], n, home) for n, r in enumerate(tagged(node.tag, own))]
             page(
                 "tag.html.j2",
                 tag_page_path(root.name, node.tag),
                 node.tag,
                 [
                     overview,
-                    source,
+                    *source,
                     Crumb(labels.ui("tags"), "index.html"),
                     *(Crumb(a, posixpath.basename(tag_page_path(root.name, a))) for a in ancestors),
                     Crumb(node.tag, None),
@@ -690,7 +752,7 @@ def build_site(
                 filters=_filters(rows, labels, facets=("type", "status", "flag")),
             )
 
-    all_rows = [_row(r, states[r], n) for n, r in enumerate(ordered)]
+    all_rows = [_row(r, states[r], n, home) for n, r in enumerate(ordered)]
     page(
         "records.html.j2",
         "records.html",
@@ -700,9 +762,9 @@ def build_site(
         filters=_filters(all_rows, labels),
     )
     pool = [r for r in ordered if states[r].reasons]
-    review_rows = [_row(r, states[r], n) for n, r in enumerate(pool)]
+    review_rows = [_row(r, states[r], n, home) for n, r in enumerate(pool)]
     review_rows += [
-        _item_row(site, item, items_root, len(pool) + n) for n, item in enumerate(open_items)
+        _item_row(site, item, items_root, len(pool) + n, home) for n, item in enumerate(open_items)
     ]
     page(
         "review.html.j2",
@@ -724,13 +786,51 @@ def build_site(
         labels.ui("my_comments"),
         [Crumb(labels.ui("overview"), "index.html"), Crumb(labels.ui("my_comments"), None)],
     )
+    if home is None:
+        landing = _landing(
+            ordered, states, present, labels, nav["review"], "records.html#type={type}", "", None
+        )
+        review_href = "review.html"
+    else:
+        home_records = [r for r in ordered if r.root == home]
+        needs = sum(1 for r in home_records if states[r].reasons) + len(open_items)
+        landing = _landing(
+            home_records, states, present, labels, needs, f"{home}/{{type}}/index.html", "", home
+        )
+        review_href = f"review.html#source={home}"
+    registries: list[dict[str, Any]] = []
+    for root in site.roots:
+        if home is None or root.name == home:
+            continue
+        records = [r for r in ordered if r.root == root.name]
+        other = _landing(
+            records,
+            states,
+            present,
+            labels,
+            sum(1 for r in records if states[r].reasons),
+            f"{root.name}/{{type}}/index.html",
+            "",
+            home,
+        )
+        registries.append(
+            {
+                **other,
+                "root": root.name,
+                "href": f"{root.name}/index.html",
+                "total": len(records),
+                "review_href": f"review.html#source={root.name}",
+            }
+        )
     page(
         "index.html.j2",
         "index.html",
         site_title,
         [Crumb(labels.ui("overview"), None)],
-        lead=lead_summary(site),
-        **_landing(ordered, states, present, labels, nav["review"], "records.html#type={type}", ""),
+        lead=lead_summary(site, home),
+        review_href=review_href,
+        registries=registries,
+        **landing,
     )
     if site_url is not None:
         base = urlsplit(site_url).path
@@ -743,6 +843,6 @@ def build_site(
         )
     files["llms.txt"] = llms_txt(site, states, labels, site_title)
     files["index.json"] = index_json(site, states, labels, site_title, lang)
-    files["search-index.js"] = search_index_js(site, labels, states)
+    files["search-index.js"] = search_index_js(site, labels, states, home)
     files["search-body.js"] = search_body_js(site, rendered)
     return files, sorted(warnings)

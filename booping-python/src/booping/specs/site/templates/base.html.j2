@@ -55,9 +55,18 @@
 <h4>{{ labels.ui("types") }}</h4>
 <ul>
 {% for t in nav.types %}
-<li><a href="{{ prefix }}{{ t.href }}">{{ t.label }}<span class="n">{{ t.count }}</span></a></li>
+<li><a href="{{ prefix }}{{ t.href }}"{% if path == t.href %} aria-current="page"{% endif %}>{{ t.label }}<span class="n">{{ t.count }}</span></a></li>
 {% endfor %}
 </ul>
+{% for reg in nav.registries %}
+<h4>{{ reg.root }}</h4>
+<ul>
+<li><a href="{{ prefix }}{{ reg.href }}"{% if path == reg.href %} aria-current="page"{% endif %}>{{ labels.ui("overview") }}</a></li>
+{% for t in reg.types %}
+<li><a href="{{ prefix }}{{ t.href }}"{% if path == t.href %} aria-current="page"{% endif %}>{{ t.label }}<span class="n">{{ t.count }}</span></a></li>
+{% endfor %}
+</ul>
+{% endfor %}
 {% if nav.tags %}
 <h4>{{ labels.ui("tags") }}</h4>
 {% for group in nav.tags %}
@@ -72,12 +81,14 @@
 </ul>
 {% endfor %}
 {% endif %}
+{% if nav.sources %}
 <h4>{{ labels.ui("sources") }}</h4>
 <ul>
 {% for source in nav.sources %}
 <li><a href="{{ prefix }}{{ source.href }}"{% if path == source.href %} aria-current="page"{% endif %}>{{ source.label }}<span class="n">{{ source.count }}</span></a></li>
 {% endfor %}
 </ul>
+{% endif %}
 <ul>
 <li><a href="{{ prefix }}llms.txt">llms.txt</a></li>
 </ul>

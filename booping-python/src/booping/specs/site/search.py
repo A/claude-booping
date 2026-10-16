@@ -32,8 +32,14 @@ def _js(name: str, value: Any) -> str:
     return f"window.{name} = {json.dumps(value, ensure_ascii=False, separators=(',', ':'))};\n"
 
 
-def search_index_js(site: Site, labels: Labels, states: Mapping[SiteRecord, RecordState]) -> str:
-    """`window.SPECS_INDEX`: every record's searchable metadata, in page order."""
+def search_index_js(
+    site: Site,
+    labels: Labels,
+    states: Mapping[SiteRecord, RecordState],
+    home: str | None = None,
+) -> str:
+    """`window.SPECS_INDEX`: every record's searchable metadata, in page order. With a
+    `home` root, a record of another root shows its ref as `{root}:{ref}`."""
     entries: list[dict[str, Any]] = []
     for record in site.records:
         fm = record.frontmatter
@@ -41,7 +47,7 @@ def search_index_js(site: Site, labels: Labels, states: Mapping[SiteRecord, Reco
         entries.append(
             {
                 "id": _id(record),
-                "ref": record.ref,
+                "ref": record.ref if home in (None, record.root) else _id(record),
                 "root": record.root,
                 "type": record.type,
                 "type_label": labels.type_name(record.type),

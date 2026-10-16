@@ -370,9 +370,10 @@ def _run_site(args: argparse.Namespace) -> None:
 
     open_items: list[OpenItem] = []
     item_warnings: list[SiteWarning] = []
+    home = None if args.roots else _project_root_name(ctx, root, home_dir, roots)
     items_root: str | None = None
     if not args.roots and ctx.vault is not None:
-        items_root = _project_root_name(ctx, root, home_dir, roots)
+        items_root = home
         specs_cfg: dict[str, Any] = ctx.config.get("core", {}).get("specs", {})
         settings: dict[str, Any] = specs_cfg.get("open_items") or {}
         open_items, item_warnings = load_open_items(ctx.vault / str(settings.get("dir")))
@@ -387,6 +388,7 @@ def _run_site(args: argparse.Namespace) -> None:
         args.site_url,
         open_items=open_items,
         items_root=items_root,
+        home=home,
     )
     warnings = sorted([*warnings, *item_warnings])
     try:

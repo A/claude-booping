@@ -116,7 +116,7 @@ code { font-size: 15px; line-height: 1.5; background: var(--sunk); padding: 1px 
 pre { font-size: 15px; line-height: 1.5; background: var(--sunk); padding: 12px 16px; border-radius: 8px; overflow-x: auto; }
 pre code { background: none; padding: 0; overflow-wrap: normal; }
 kbd { font-size: 12px; border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; }
-.ref { font-size: 13px; line-height: 1.4; color: var(--muted); overflow-wrap: anywhere; background: none; padding: 0; border-radius: 0; }
+.ref { font-size: 13px; line-height: 1.4; color: var(--muted); white-space: nowrap; background: none; padding: 0; border-radius: 0; }
 
 .skip {
   position: absolute;
@@ -325,6 +325,13 @@ ul.rows, ul.rel, ul.types { list-style: none; padding: 0; }
 .row .why { grid-column: 3; grid-row: 1 / span 2; display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; max-width: 240px; }
 .row.noref { grid-template-columns: minmax(0, 1fr); }
 .row.noref .s { grid-column: 1; }
+/* Rows share one ref column sized to the widest ref, so a namespaced ref stays on one line
+   and every title still lines up. */
+@media (min-width: 761px) {
+  ul.rows { display: grid; grid-template-columns: minmax(96px, max-content) minmax(0, 1fr) auto; column-gap: 16px; }
+  ul.rows > .row { grid-column: 1 / -1; grid-template-columns: subgrid; }
+  ul.rows > .row.noref { grid-template-columns: minmax(0, 1fr); }
+}
 
 .types {
   display: grid;
@@ -349,10 +356,13 @@ ul.scen, ul.recent { list-style: none; padding: 0; }
 .scen b { display: flex; align-items: baseline; gap: 8px; font-size: 17px; }
 .scen .n { font-weight: 400; color: var(--muted); font-size: 14px; font-variant-numeric: tabular-nums; }
 .scen .s { display: block; margin: 4px 0 0; font-size: 15px; line-height: 1.45; color: var(--muted); }
+.registry h2 .n { font-weight: 400; color: var(--muted); font-size: 15px; font-variant-numeric: tabular-nums; }
 .recent { margin: 0; }
 .recent li { display: flex; gap: 12px; align-items: baseline; margin: 0; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 16px; }
-.recent .ref { flex: none; width: 96px; }
+.recent .ref { flex: none; }
 .recent time { margin-left: auto; color: var(--muted); font-size: 13px; white-space: nowrap; }
+ul.recent { display: grid; grid-template-columns: minmax(96px, max-content) minmax(0, 1fr) auto; column-gap: 12px; }
+ul.recent > li { grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; }
 
 /* Record */
 .tags { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 14px; margin: 0 0 16px; }
@@ -529,9 +539,9 @@ dialog.cmt-sheet::backdrop { background: rgb(0 0 0 / 0.35); }
   .row .why { grid-column: 1; grid-row: auto; justify-content: flex-start; max-width: none; }
   .facts { grid-template-columns: minmax(0, 1fr); gap: 0; }
   .facts dd { margin: 0 0 8px; }
-  .recent li { flex-wrap: wrap; row-gap: 2px; }
-  .recent li a { flex: 1 1 0; min-width: 0; }
-  .recent time { flex-basis: calc(100% - 108px); margin-left: 108px; }
+  ul.recent { grid-template-columns: minmax(96px, max-content) minmax(0, 1fr); }
+  .recent li { row-gap: 2px; }
+  .recent time { grid-column: 2; margin-left: 0; }
   .row .t, .rel li a, .types a { display: inline-flex; align-items: center; min-height: 44px; }
   .side a { min-height: 44px; padding: 8px 12px; font-size: 16px; }
   footer { padding: 16px; }

@@ -43,13 +43,16 @@ def _value(value: Any) -> Any:
     return str(value)
 
 
-def lead_summary(site: Site) -> str | None:
-    """The summary of the first value record with one, roots in order — the site's lead."""
+def lead_summary(site: Site, root: str | None = None) -> str | None:
+    """The summary of the first value record with one, roots in order — the site's lead;
+    a `root` limits the search to that root's records."""
     return next(
         (
             str(r.frontmatter["summary"])
             for r in site.records
-            if r.type == "value" and r.frontmatter.get("summary")
+            if r.type == "value"
+            and r.frontmatter.get("summary")
+            and (root is None or r.root == root)
         ),
         None,
     )

@@ -204,20 +204,16 @@ specs site: 1 roots, 6 records, 19 pages, 0 warnings -> specs-site
 </ul>
 <h4>Разделы</h4>
 <ul>
-<li><a href="records.html#type=adr">Решения<span class="n">2</span></a></li>
-<li><a href="records.html#type=idea">Идеи<span class="n">1</span></a></li>
-<li><a href="records.html#type=rule">Правила<span class="n">1</span></a></li>
-<li><a href="records.html#type=value">Ценности<span class="n">1</span></a></li>
-<li><a href="records.html#type=mechanic">Механики<span class="n">1</span></a></li>
+<li><a href="probe/adr/index.html">Решения<span class="n">2</span></a></li>
+<li><a href="probe/idea/index.html">Идеи<span class="n">1</span></a></li>
+<li><a href="probe/rule/index.html">Правила<span class="n">1</span></a></li>
+<li><a href="probe/value/index.html">Ценности<span class="n">1</span></a></li>
+<li><a href="probe/mechanic/index.html">Механики<span class="n">1</span></a></li>
 </ul>
 <h4>Теги</h4>
 <ul>
 <li><a href="probe/tags/dvizhenie.html">dvizhenie<span class="n">1</span></a></li>
 <li><a href="probe/tags/index.html">Все теги</a></li>
-</ul>
-<h4>Источники</h4>
-<ul>
-<li><a href="probe/index.html">probe<span class="n">6</span></a></li>
 </ul>
 <ul>
 <li><a href="llms.txt">llms.txt</a></li>
@@ -335,20 +331,16 @@ specs site: 1 roots, 6 records, 19 pages, 0 warnings -> specs-site
 </ul>
 <h4>Разделы</h4>
 <ul>
-<li><a href="records.html#type=adr">Решения<span class="n">2</span></a></li>
-<li><a href="records.html#type=idea">Идеи<span class="n">1</span></a></li>
-<li><a href="records.html#type=rule">Правила<span class="n">1</span></a></li>
-<li><a href="records.html#type=value">Ценности<span class="n">1</span></a></li>
-<li><a href="records.html#type=mechanic">Механики<span class="n">1</span></a></li>
+<li><a href="probe/adr/index.html">Решения<span class="n">2</span></a></li>
+<li><a href="probe/idea/index.html">Идеи<span class="n">1</span></a></li>
+<li><a href="probe/rule/index.html">Правила<span class="n">1</span></a></li>
+<li><a href="probe/value/index.html">Ценности<span class="n">1</span></a></li>
+<li><a href="probe/mechanic/index.html">Механики<span class="n">1</span></a></li>
 </ul>
 <h4>Теги</h4>
 <ul>
 <li><a href="probe/tags/dvizhenie.html">dvizhenie<span class="n">1</span></a></li>
 <li><a href="probe/tags/index.html">Все теги</a></li>
-</ul>
-<h4>Источники</h4>
-<ul>
-<li><a href="probe/index.html">probe<span class="n">6</span></a></li>
 </ul>
 <ul>
 <li><a href="llms.txt">llms.txt</a></li>
@@ -469,20 +461,16 @@ specs site: 1 roots, 6 records, 19 pages, 0 warnings -> specs-site
 </ul>
 <h4>Разделы</h4>
 <ul>
-<li><a href="../../records.html#type=adr">Решения<span class="n">2</span></a></li>
-<li><a href="../../records.html#type=idea">Идеи<span class="n">1</span></a></li>
-<li><a href="../../records.html#type=rule">Правила<span class="n">1</span></a></li>
-<li><a href="../../records.html#type=value">Ценности<span class="n">1</span></a></li>
-<li><a href="../../records.html#type=mechanic">Механики<span class="n">1</span></a></li>
+<li><a href="../../probe/adr/index.html">Решения<span class="n">2</span></a></li>
+<li><a href="../../probe/idea/index.html">Идеи<span class="n">1</span></a></li>
+<li><a href="../../probe/rule/index.html">Правила<span class="n">1</span></a></li>
+<li><a href="../../probe/value/index.html">Ценности<span class="n">1</span></a></li>
+<li><a href="../../probe/mechanic/index.html">Механики<span class="n">1</span></a></li>
 </ul>
 <h4>Теги</h4>
 <ul>
 <li><a href="../../probe/tags/dvizhenie.html">dvizhenie<span class="n">1</span></a></li>
 <li><a href="../../probe/tags/index.html" aria-current="page">Все теги</a></li>
-</ul>
-<h4>Источники</h4>
-<ul>
-<li><a href="../../probe/index.html">probe<span class="n">6</span></a></li>
 </ul>
 <ul>
 <li><a href="../../llms.txt">llms.txt</a></li>
@@ -492,7 +480,6 @@ specs site: 1 roots, 6 records, 19 pages, 0 warnings -> specs-site
 <nav class="crumbs" aria-label="breadcrumb">
 <ol>
 <li><a href="../../index.html">Обзор</a></li>
-<li class="mid"><a href="../index.html">probe</a></li>
 <li><span aria-current="page">Теги</span></li>
 </ol>
 </nav>
@@ -565,20 +552,16 @@ specs site: 1 roots, 6 records, 19 pages, 0 warnings -> specs-site
 </ul>
 <h4>Разделы</h4>
 <ul>
-<li><a href="../../records.html#type=adr">Решения<span class="n">2</span></a></li>
-<li><a href="../../records.html#type=idea">Идеи<span class="n">1</span></a></li>
-<li><a href="../../records.html#type=rule">Правила<span class="n">1</span></a></li>
-<li><a href="../../records.html#type=value">Ценности<span class="n">1</span></a></li>
-<li><a href="../../records.html#type=mechanic">Механики<span class="n">1</span></a></li>
+<li><a href="../../probe/adr/index.html">Решения<span class="n">2</span></a></li>
+<li><a href="../../probe/idea/index.html">Идеи<span class="n">1</span></a></li>
+<li><a href="../../probe/rule/index.html">Правила<span class="n">1</span></a></li>
+<li><a href="../../probe/value/index.html">Ценности<span class="n">1</span></a></li>
+<li><a href="../../probe/mechanic/index.html">Механики<span class="n">1</span></a></li>
 </ul>
 <h4>Теги</h4>
 <ul>
 <li><a href="../../probe/tags/dvizhenie.html" aria-current="page">dvizhenie<span class="n">1</span></a></li>
 <li><a href="../../probe/tags/index.html">Все теги</a></li>
-</ul>
-<h4>Источники</h4>
-<ul>
-<li><a href="../../probe/index.html">probe<span class="n">6</span></a></li>
 </ul>
 <ul>
 <li><a href="../../llms.txt">llms.txt</a></li>
@@ -588,7 +571,6 @@ specs site: 1 roots, 6 records, 19 pages, 0 warnings -> specs-site
 <nav class="crumbs" aria-label="breadcrumb">
 <ol>
 <li><a href="../../index.html">Обзор</a></li>
-<li class="mid"><a href="../index.html">probe</a></li>
 <li class="mid"><a href="index.html">Теги</a></li>
 <li><span aria-current="page">dvizhenie</span></li>
 </ol>
@@ -685,20 +667,16 @@ specs site: 1 roots, 6 records, 19 pages, 0 warnings -> specs-site
 </ul>
 <h4>Разделы</h4>
 <ul>
-<li><a href="../../records.html#type=adr">Решения<span class="n">2</span></a></li>
-<li><a href="../../records.html#type=idea">Идеи<span class="n">1</span></a></li>
-<li><a href="../../records.html#type=rule">Правила<span class="n">1</span></a></li>
-<li><a href="../../records.html#type=value">Ценности<span class="n">1</span></a></li>
-<li><a href="../../records.html#type=mechanic">Механики<span class="n">1</span></a></li>
+<li><a href="../../probe/adr/index.html">Решения<span class="n">2</span></a></li>
+<li><a href="../../probe/idea/index.html">Идеи<span class="n">1</span></a></li>
+<li><a href="../../probe/rule/index.html">Правила<span class="n">1</span></a></li>
+<li><a href="../../probe/value/index.html">Ценности<span class="n">1</span></a></li>
+<li><a href="../../probe/mechanic/index.html">Механики<span class="n">1</span></a></li>
 </ul>
 <h4>Теги</h4>
 <ul>
 <li><a href="../../probe/tags/dvizhenie.html">dvizhenie<span class="n">1</span></a></li>
 <li><a href="../../probe/tags/index.html">Все теги</a></li>
-</ul>
-<h4>Источники</h4>
-<ul>
-<li><a href="../../probe/index.html">probe<span class="n">6</span></a></li>
 </ul>
 <ul>
 <li><a href="../../llms.txt">llms.txt</a></li>
@@ -708,7 +686,6 @@ specs site: 1 roots, 6 records, 19 pages, 0 warnings -> specs-site
 <nav class="crumbs" aria-label="breadcrumb">
 <ol>
 <li><a href="../../index.html">Обзор</a></li>
-<li class="mid"><a href="../index.html">probe</a></li>
 <li class="mid"><a href="index.html">Решения</a></li>
 <li><span aria-current="page">adr/0001</span></li>
 </ol>
@@ -843,20 +820,16 @@ specs site: 1 roots, 6 records, 19 pages, 0 warnings -> specs-site
 </ul>
 <h4>Разделы</h4>
 <ul>
-<li><a href="../../records.html#type=adr">Решения<span class="n">2</span></a></li>
-<li><a href="../../records.html#type=idea">Идеи<span class="n">1</span></a></li>
-<li><a href="../../records.html#type=rule">Правила<span class="n">1</span></a></li>
-<li><a href="../../records.html#type=value">Ценности<span class="n">1</span></a></li>
-<li><a href="../../records.html#type=mechanic">Механики<span class="n">1</span></a></li>
+<li><a href="../../probe/adr/index.html">Решения<span class="n">2</span></a></li>
+<li><a href="../../probe/idea/index.html">Идеи<span class="n">1</span></a></li>
+<li><a href="../../probe/rule/index.html">Правила<span class="n">1</span></a></li>
+<li><a href="../../probe/value/index.html">Ценности<span class="n">1</span></a></li>
+<li><a href="../../probe/mechanic/index.html">Механики<span class="n">1</span></a></li>
 </ul>
 <h4>Теги</h4>
 <ul>
 <li><a href="../../probe/tags/dvizhenie.html">dvizhenie<span class="n">1</span></a></li>
 <li><a href="../../probe/tags/index.html">Все теги</a></li>
-</ul>
-<h4>Источники</h4>
-<ul>
-<li><a href="../../probe/index.html">probe<span class="n">6</span></a></li>
 </ul>
 <ul>
 <li><a href="../../llms.txt">llms.txt</a></li>
@@ -866,7 +839,6 @@ specs site: 1 roots, 6 records, 19 pages, 0 warnings -> specs-site
 <nav class="crumbs" aria-label="breadcrumb">
 <ol>
 <li><a href="../../index.html">Обзор</a></li>
-<li class="mid"><a href="../index.html">probe</a></li>
 <li class="mid"><a href="index.html">Решения</a></li>
 <li><span aria-current="page">adr/0002</span></li>
 </ol>
@@ -1069,20 +1041,16 @@ specs site: 1 roots, 6 records, 19 pages, 0 warnings -> specs-site
 </ul>
 <h4>Разделы</h4>
 <ul>
-<li><a href="../../records.html#type=adr">Решения<span class="n">2</span></a></li>
-<li><a href="../../records.html#type=idea">Идеи<span class="n">1</span></a></li>
-<li><a href="../../records.html#type=rule">Правила<span class="n">1</span></a></li>
-<li><a href="../../records.html#type=value">Ценности<span class="n">1</span></a></li>
-<li><a href="../../records.html#type=mechanic">Механики<span class="n">1</span></a></li>
+<li><a href="../../probe/adr/index.html">Решения<span class="n">2</span></a></li>
+<li><a href="../../probe/idea/index.html">Идеи<span class="n">1</span></a></li>
+<li><a href="../../probe/rule/index.html">Правила<span class="n">1</span></a></li>
+<li><a href="../../probe/value/index.html">Ценности<span class="n">1</span></a></li>
+<li><a href="../../probe/mechanic/index.html" aria-current="page">Механики<span class="n">1</span></a></li>
 </ul>
 <h4>Теги</h4>
 <ul>
 <li><a href="../../probe/tags/dvizhenie.html">dvizhenie<span class="n">1</span></a></li>
 <li><a href="../../probe/tags/index.html">Все теги</a></li>
-</ul>
-<h4>Источники</h4>
-<ul>
-<li><a href="../../probe/index.html">probe<span class="n">6</span></a></li>
 </ul>
 <ul>
 <li><a href="../../llms.txt">llms.txt</a></li>
@@ -1092,7 +1060,6 @@ specs site: 1 roots, 6 records, 19 pages, 0 warnings -> specs-site
 <nav class="crumbs" aria-label="breadcrumb">
 <ol>
 <li><a href="../../index.html">Обзор</a></li>
-<li class="mid"><a href="../index.html">probe</a></li>
 <li><span aria-current="page">Механики</span></li>
 </ol>
 </nav>
