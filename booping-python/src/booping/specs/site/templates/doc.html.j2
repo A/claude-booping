@@ -1,0 +1,65 @@
+{% extends "base.html.j2" %}
+{% from "_macros.html.j2" import icon, state_badges, fact_value, toc_blocks %}
+{% block header_actions %}
+<button class="iconbtn cmt-open" type="button" aria-label="{{ labels.ui('my_comments') }}" title="{{ labels.ui('my_comments') }}">{{ icon("i-comment") }}<span class="n"></span></button>
+{% endblock %}
+{% block rail %}
+{% if doc.toc or doc.questions %}
+{{ toc_blocks(doc, labels, "rail") | trim }}
+{% endif %}
+{% endblock %}
+{% block main %}
+{% set d = doc %}
+<div class="measure">
+<article data-ref="{{ d.ref }}" data-title="{{ d.title }}" data-page="{{ d.page }}">
+<h1>{{ d.title }}</h1>
+{% set badges = state_badges(d.state, labels) | trim %}
+{% if badges %}
+<div class="badges">{{ badges }}</div>
+{% endif %}
+{% if d.summary is not none %}
+<p class="lead">{{ d.summary }}</p>
+{% endif %}
+{% if d.toc or d.questions %}
+<details class="toc-m">
+<summary>{{ labels.ui("on_this_page") }}{% if d.questions %} · {{ labels.plural("open_questions", d.questions | length) }}{% endif %}</summary>
+{{ toc_blocks(d, labels, "toc-m") | trim }}
+</details>
+{% endif %}
+{% if d.facts %}
+<dl class="facts">
+{% for fact in d.facts %}
+<dt>{{ fact.label }}</dt>
+<dd>{% for item in fact["items"] %}{% if not loop.first %}, {% endif %}{{ fact_value(item) }}{% endfor %}</dd>
+{% endfor %}
+</dl>
+{% endif %}
+<div class="body">
+{{ d.body }}</div>
+</article>
+{% if d.milestones %}
+<h2 id="plan-milestones">{{ labels.ui("milestones") }}<a class="anchor" href="#plan-milestones" aria-label="{{ labels.ui('section_link') }}: {{ labels.ui('milestones') }}">§</a></h2>
+<div class="table-wrap">
+<table class="milestones">
+<thead><tr><th>{{ labels.fact("id") }}</th><th>{{ labels.fact("title") }}</th><th>{{ labels.fact("plan_sp") }}</th><th>{{ labels.fact("status") }}</th></tr></thead>
+<tbody>
+{% for m in d.milestones %}
+<tr><td>{{ m.id }}</td><td><a href="{{ m.href }}">{{ m.title }}</a></td><td>{{ m.sp }}</td><td>{{ state_badges(m.state, labels) }}</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% endif %}
+{% if d.siblings %}
+<h2 id="plan-files">{{ labels.ui("plan_files") }}<a class="anchor" href="#plan-files" aria-label="{{ labels.ui('section_link') }}: {{ labels.ui('plan_files') }}">§</a></h2>
+<ul class="plan-files">
+{% for s in d.siblings %}
+<li><a href="{{ s.href }}">{{ s.label }}</a></li>
+{% endfor %}
+</ul>
+{% endif %}
+{% with sheet = true %}
+{% include "_comments.html.j2" %}
+{% endwith %}
+</div>
+{% endblock %}

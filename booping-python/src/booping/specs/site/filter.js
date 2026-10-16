@@ -79,16 +79,19 @@
     });
   }
   function order(row) { return Number(row.getAttribute("data-order")); }
-  function newestFirst(a, b) {
-    var x = a.getAttribute("data-updated"), y = b.getAttribute("data-updated");
-    if (x === y) return 0;
-    if (!x) return 1;
-    if (!y) return -1;
-    return x < y ? 1 : -1;
+  function newestFirst(attr) {
+    return function (a, b) {
+      var x = a.getAttribute(attr), y = b.getAttribute(attr);
+      if (x === y) return 0;
+      if (!x) return 1;
+      if (!y) return -1;
+      return x < y ? 1 : -1;
+    };
   }
   var SORTS = {
     number: function () { return 0; },
-    updated: newestFirst,
+    updated: newestFirst("data-updated"),
+    date: newestFirst("data-date"),
     title: function (a, b) {
       return a.getAttribute("data-title").localeCompare(b.getAttribute("data-title"), lang);
     },

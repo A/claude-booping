@@ -312,6 +312,24 @@ core:
             copy_failed: Copy failed
             comments_copied_n: ["{n} copied", "{n} copied"]
             comments_cleared_n: ["{n} cleared", "{n} cleared"]
+            plans: Plans
+            retros: Retrospectives
+            all_plans: All plans
+            all_retros: All retrospectives
+            recent_plans: Recent plans
+            plan: Plan
+            retro: Retrospective
+            milestones: Milestones
+            milestones_n: ["{n} milestone", "{n} milestones"]
+            sp_n: "{n} SP"
+            plan_files: Plan files
+            doc_request: Request
+            doc_clarifications: Clarifications
+            doc_develop_defaults: Develop defaults
+            doc_defaults: Defaults
+            entries_shown: ["{n} shown", "{n} shown"]
+            filters_show_entries: Show
+            sort_date: Newest first
           types:
             value: {name: Value, plural: Values, scenario: "why the project exists"}
             rule: {name: Rule, plural: Rules, scenario: "what constrains decisions"}
@@ -334,6 +352,14 @@ core:
             deferred: deferred
             validating: validating
             live: live
+            backlog: backlog
+            in-spec: in spec
+            ready-for-dev: ready for dev
+            in-progress: in progress
+            awaiting-retro: awaiting retro
+            awaiting-learning: awaiting learning
+            cancelled: cancelled
+            fail: failed
           facts:
             created_by: Author
             created_at: Created
@@ -344,6 +370,20 @@ core:
             values: Serves values
             rules: Rules
             supersedes: Supersedes
+            plan_type: Kind
+            plan_sp: SP
+            milestones: Milestones
+            created: Created
+            started: Started
+            completed: Completed
+            goal: Goal
+            retro: Retrospective
+            plan: Plan
+            plans: Plans
+            date: Date
+            id: Id
+            title: Title
+            status: Status
           authors: {owner: owner, claude: agent}
           months: [January, February, March, April, May, June, July, August, September,
             October, November, December]
@@ -442,6 +482,24 @@ core:
             copy_failed: Не удалось скопировать
             comments_copied_n: ["{n} скопирован", "{n} скопировано", "{n} скопировано"]
             comments_cleared_n: ["{n} удалён", "{n} удалено", "{n} удалено"]
+            plans: Планы
+            retros: Ретроспективы
+            all_plans: Все планы
+            all_retros: Все ретроспективы
+            recent_plans: Последние планы
+            plan: План
+            retro: Ретроспектива
+            milestones: Этапы
+            milestones_n: ["{n} этап", "{n} этапа", "{n} этапов"]
+            sp_n: "{n} SP"
+            plan_files: Файлы плана
+            doc_request: Запрос
+            doc_clarifications: Уточнения
+            doc_develop_defaults: Умолчания разработки
+            doc_defaults: Умолчания
+            entries_shown: ["Показан {n}", "Показано {n}", "Показано {n}"]
+            filters_show_entries: Показать
+            sort_date: Сначала новые
           types:
             value: {name: Ценность, plural: Ценности, scenario: "Ценности — зачем этот проект и какой он"}
             rule: {name: Правило, plural: Правила, scenario: "Правила — что ограничивает решения"}
@@ -464,6 +522,14 @@ core:
             deferred: отложено
             validating: проверяется
             live: действует
+            backlog: в бэклоге
+            in-spec: в проработке
+            ready-for-dev: готово к разработке
+            in-progress: в работе
+            awaiting-retro: ждёт ретро
+            awaiting-learning: ждёт выводов
+            cancelled: отменено
+            fail: провалено
           facts:
             created_by: Автор
             created_at: Создано
@@ -474,6 +540,20 @@ core:
             values: Служит ценностям
             rules: Правила
             supersedes: Заменяет
+            plan_type: Вид
+            plan_sp: SP
+            milestones: Этапы
+            created: Создан
+            started: Начат
+            completed: Завершён
+            goal: Итог
+            retro: Ретроспектива
+            plan: План
+            plans: Планы
+            date: Дата
+            id: Id
+            title: Название
+            status: Статус
           authors: {owner: владелец, claude: агент}
           months: [января, февраля, марта, апреля, мая, июня, июля, августа, сентября,
             октября, ноября, декабря]

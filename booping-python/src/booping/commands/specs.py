@@ -21,6 +21,7 @@ from booping.specs.site.items import OpenItem, load_open_items
 from booping.specs.site.labels import load_labels
 from booping.specs.site.model import SiteRoot, SiteWarning, load_site
 from booping.specs.site.pages import build_site
+from booping.specs.site.plans import Work, load_work
 from booping.specs.site.write import SiteError, write_site
 from booping.specs.tiers import (
     Tier,
@@ -391,6 +392,10 @@ def _run_site(args: argparse.Namespace) -> None:
         settings: dict[str, Any] = specs_cfg.get("open_items") or {}
         open_items, item_warnings = load_open_items(ctx.vault / str(settings.get("dir")))
 
+    work = Work()
+    if not args.roots and ctx.vault is not None and home is not None:
+        work = _load_work(ctx, ctx.vault, home)
+
     site = load_site(roots, known)
     files, warnings = build_site(
         site,
@@ -402,6 +407,7 @@ def _run_site(args: argparse.Namespace) -> None:
         open_items=open_items,
         items_root=items_root,
         home=home,
+        work=work,
     )
     warnings = sorted([*warnings, *item_warnings])
     try:
@@ -419,9 +425,33 @@ def _run_site(args: argparse.Namespace) -> None:
     for path, _, rest in sorted(lines):
         print(f"{path}{rest}", file=sys.stderr)
     pages = sum(1 for path in files if path.endswith(".html"))
+    plans = f" {len(work.plans)} plans, {len(work.retros)} retrospectives," if work else ""
     print(
-        f"specs site: {len(roots)} roots, {len(site.records)} records, {pages} pages,"
+        f"specs site: {len(roots)} roots, {len(site.records)} records,{plans} {pages} pages,"
         f" {len(lines)} warnings -> {args.out}"
+    )
+
+
+def _str_list(value: Any) -> list[str]:
+    return [str(v) for v in cast("list[Any]", value)] if isinstance(value, list) else []
+
+
+def _load_work(ctx: Context, vault: Path, home: str) -> Work:
+    """The vault's plans (`core.plans.glob`, milestones by `core.plans.milestones.glob`)
+    and retrospectives (`core.learn_playbook.queries.candidates.glob`)."""
+    core: dict[str, Any] = ctx.config.get("core", {})
+    plans_cfg: dict[str, Any] = core.get("plans") or {}
+    milestones: dict[str, Any] = plans_cfg.get("milestones") or {}
+    learn: dict[str, Any] = core.get("learn_playbook") or {}
+    queries: dict[str, Any] = learn.get("queries") or {}
+    retros: dict[str, Any] = queries.get("candidates") or {}
+    glob = milestones.get("glob")
+    return load_work(
+        vault,
+        home,
+        _str_list(plans_cfg.get("glob")),
+        None if glob is None else str(glob),
+        _str_list(retros.get("glob")),
     )
 
 

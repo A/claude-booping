@@ -20,6 +20,7 @@ nav:
   - Playbooks: playbook.md
   - Project config: project_config.md
   - Specs: specs.md
+  - Specs site: /claude-booping/specs-site/
   - Integrating external agents: integrating-external-agents.md
   - Recipes:
       - Wiring external agents: recipes/external-agents.md

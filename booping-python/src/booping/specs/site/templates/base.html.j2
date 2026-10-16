@@ -58,6 +58,16 @@
 <li><a href="{{ prefix }}{{ t.href }}"{% if path == t.href %} aria-current="page"{% endif %}>{{ t.label }}<span class="n">{{ t.count }}</span></a></li>
 {% endfor %}
 </ul>
+{% if nav.work %}
+{% for group, heading in [("plans", "plans"), ("retros", "retros")] if nav.work[group] %}
+<h4>{{ labels.ui(heading) }}</h4>
+<ul>
+{% for e in nav.work[group] %}
+<li><a href="{{ prefix }}{{ e.href }}"{% if path == e.href %} aria-current="page"{% endif %}>{{ e.label }}<span class="n">{{ e.count }}</span></a></li>
+{% endfor %}
+</ul>
+{% endfor %}
+{% endif %}
 {% for reg in nav.registries %}
 <h4>{{ reg.root }}</h4>
 <ul>

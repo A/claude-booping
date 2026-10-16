@@ -26,6 +26,14 @@ from booping.specs.site.model import (
     ref_keys,
     ref_values,
 )
+from booping.specs.site.plan_pages import (
+    plans_href,
+    recent_plans,
+    render_work,
+    work_nav,
+    work_search_entries,
+)
+from booping.specs.site.plans import Work
 from booping.specs.site.search import search_body_js, search_index_js
 from booping.specs.site.state import RecordState, record_state
 from booping.specs.site.tags import TagNode, record_tags, tag_page_path, tag_tree, tagged
@@ -590,6 +598,7 @@ def build_site(
     open_items: Sequence[OpenItem] = (),
     items_root: str | None = None,
     home: str | None = None,
+    work: Work | None = None,
 ) -> tuple[dict[str, str | bytes], list[SiteWarning]]:
     """Out-root-relative path → file content, plus the resolution warnings sorted by
     `(path, line)`, each once per record. Types order as `known_types`, then the types
@@ -600,7 +609,11 @@ def build_site(
     `home` names the project's own root: the Overview, its counters and the sidebar
     types cover that root alone, every other root gets its own Overview block and
     sidebar group, its records show refs as `{root}:{ref}`, and the home root's page
-    redirects to the Overview. No `home` → every root counts together, refs bare."""
+    redirects to the Overview. No `home` → every root counts together, refs bare.
+
+    `work` is the home vault's plans and retrospectives: list pages, a page per plan,
+    milestone, plan sibling and retrospective, a sidebar group each and the Overview's
+    recent plans; ignored without `home`."""
     if labels is None:
         labels, lang, _ = load_labels({})
     env = environment(labels, lang, site_title)
@@ -638,6 +651,9 @@ def build_site(
         trees[root.name], tree_warnings = tag_tree(root, site.records)
         warnings.update(tree_warnings)
     nav = _nav(site, present, states, labels, open_items, trees, home)
+    if home is None or work is None or not work:
+        work = Work()
+    nav["work"] = work_nav(work, labels, home) if home is not None else None
 
     def root_crumbs(root: str, href: str) -> list[Crumb]:
         return [] if root == home else [Crumb(root, href)]
@@ -752,6 +768,14 @@ def build_site(
                 filters=_filters(rows, labels, facets=("type", "status", "flag")),
             )
 
+    if home is not None and work:
+        work_statuses = {
+            str(doc.frontmatter["status"])
+            for doc in work.docs()
+            if doc.frontmatter.get("status") is not None
+        }
+        render_work(site, work, labels, home, site.statuses | work_statuses, page, _filters, Crumb)
+
     all_rows = [_row(r, states[r], n, home) for n, r in enumerate(ordered)]
     page(
         "records.html.j2",
@@ -830,6 +854,8 @@ def build_site(
         lead=lead_summary(site, home),
         review_href=review_href,
         registries=registries,
+        recent_plans=recent_plans(work, labels),
+        plans_href=plans_href(home) if home is not None else "",
         **landing,
     )
     if site_url is not None:
@@ -843,6 +869,8 @@ def build_site(
         )
     files["llms.txt"] = llms_txt(site, states, labels, site_title)
     files["index.json"] = index_json(site, states, labels, site_title, lang)
-    files["search-index.js"] = search_index_js(site, labels, states, home)
+    files["search-index.js"] = search_index_js(
+        site, labels, states, home, work_search_entries(work, labels)
+    )
     files["search-body.js"] = search_body_js(site, rendered)
     return files, sorted(warnings)

@@ -359,7 +359,7 @@ ul.scen, ul.recent { list-style: none; padding: 0; }
 .registry h2 .n { font-weight: 400; color: var(--muted); font-size: 15px; font-variant-numeric: tabular-nums; }
 .recent { margin: 0; }
 .recent li { display: flex; gap: 12px; align-items: baseline; margin: 0; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 16px; }
-.recent .ref { flex: none; }
+.recent .ref, .recent .st { flex: none; }
 .recent time { margin-left: auto; color: var(--muted); font-size: 13px; white-space: nowrap; }
 ul.recent { display: grid; grid-template-columns: minmax(96px, max-content) minmax(0, 1fr) auto; column-gap: 12px; }
 ul.recent > li { grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; }

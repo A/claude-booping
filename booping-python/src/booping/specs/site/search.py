@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from typing import Any
 
 from booping.specs.site.labels import Labels
@@ -37,9 +37,11 @@ def search_index_js(
     labels: Labels,
     states: Mapping[SiteRecord, RecordState],
     home: str | None = None,
+    extra: Sequence[dict[str, Any]] = (),
 ) -> str:
     """`window.SPECS_INDEX`: every record's searchable metadata, in page order. With a
-    `home` root, a record of another root shows its ref as `{root}:{ref}`."""
+    `home` root, a record of another root shows its ref as `{root}:{ref}`; `extra`
+    entries (plans, retrospectives) follow the records."""
     entries: list[dict[str, Any]] = []
     for record in site.records:
         fm = record.frontmatter
@@ -60,7 +62,7 @@ def search_index_js(
                 "flags": [flag for flag in _FLAGS if flag in state.reasons],
             }
         )
-    return _js("SPECS_INDEX", entries)
+    return _js("SPECS_INDEX", [*entries, *extra])
 
 
 def search_body_js(site: Site, rendered: Mapping[int, Rendered]) -> str:

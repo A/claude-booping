@@ -2,6 +2,8 @@
 
 Specs are typed records of what the code cannot show: why a project exists and what it is like (values), the constraints every decision obeys (rules), the decisions with their rejected alternatives (ADRs), and the conflicts, stories, ideas, references and runbooks around them. Plain markdown with YAML frontmatter, one record per file.
 
+booping's own records, plans and retrospectives are published as a [specs site](https://A.github.io/claude-booping/specs-site/) beside these docs, rendered by [`booping specs site`](#booping-specs-site) on every docs deploy.
+
 ## Format in brief
 
 A tier root holds one directory per type and each record is a file `<type>/<NNNN>-<slug>.md`: a four-digit number running within the type and a kebab-case slug. A record is referred to as `<type>/<NNNN>` (`adr/0001`); in a body, references are ordinary relative markdown links.
@@ -155,6 +157,15 @@ The sidebar, top to bottom: Overview; **Review** with the number of rows waiting
 - `comments.html` — every review comment you left on the site, grouped by record (below).
 
 A row in a list shows the record's ref, its title linking to the record page, its state badges and its summary.
+
+**Plans and retrospectives.** When the site renders its default roots for a project with a vault and a home registry, the vault's plans and retrospectives get pages too; a vault holding neither renders exactly as without them. Plans are the files [`core.plans.glob`](project_config.md#coreplansglob) claims (`plans/*/index.md`) plus the older single-file plans `plans/*.md` beside them — a directory plan wins over a file of the same slug; a plan's milestones are the files `core.plans.milestones.glob` claims inside its directory; retrospectives are the files `core.learn_playbook.queries.candidates.glob` claims (`retrospectives/*.md`). Other run artefacts — code reviews, sprint notes, a plan directory's other files — stay off the site.
+
+- `{home}/plans/index.html` — every plan, newest first by its `created` date (else the slug's leading `YYYYMMDD`): the date, the title, the status badge, and its SP and milestone count; a **Status** filter and a sort by date or title, with the same address syntax as the other lists (`plans/index.html#status=in-progress`).
+- `{home}/plans/{slug}/index.html` — one plan: title, status, summary, then its kind, SP, milestone count, created, started and completed dates and its retrospective (the plan's `retro:` or a retrospective naming the plan), the rendered `index.md`, a **Milestones** table (id, title linking the milestone's page, SP, status) and **Plan files** linking the siblings that exist — `request.md`, `clarifications.md`, `develop-defaults.md`, `defaults.md`. A single-file plan has neither.
+- `{home}/plans/{slug}/{milestone}.html` and `{home}/plans/{slug}/{sibling}.html` — a milestone or sibling file, its breadcrumbs through the plan, linking back to it.
+- `{home}/retrospectives/index.html` and `{home}/retrospectives/{slug}.html` — every retrospective newest first by `date`, and one page each: its `goal_summary` as the lead, the date, the plans it names linking their pages (a plan named by its old single-file path `plans/{slug}.md` still resolves), the body.
+
+Relative links in a plan, milestone or retrospective body resolve like a record's: to a record page, to another plan page, or not at all. The sidebar gains a **Plans** group (All plans, and the plans in progress when any) and a **Retrospectives** group, each with counts; the home page gains **Recent plans**, the five newest. Search covers plan and retrospective titles, not their bodies. Review comments work on these pages as on record pages, keyed by the plan's slug (`{slug}/{milestone}` for a milestone or sibling, `retrospectives/{slug}` for a retrospective). The summary line adds `N plans, N retrospectives` when there are any.
 
 A root's tags are the keys of its `tags.yaml` (see [Tier schemas and tags](#tier-schemas-and-tags)), every tag its records carry, and each of those tags' parents; a tag's description comes from `tags.yaml` and is empty for a tag the file does not list. A `tags.yaml` that does not parse prints one warning and the tree is built from the tags the records carry.
 
