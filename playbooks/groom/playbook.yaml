@@ -1,9 +1,7 @@
 state: run
 graph:
   intake: []
-  research-codebase: [intake]
-  research-web: [research-codebase]
-  draft-plan: [research-codebase, research-web]
+  draft-plan: [intake]
   cross-review: [draft-plan]
   present: [cross-review]
 
@@ -33,15 +31,15 @@ states:
       researching:
         transitions:
           - to: drafting
-            when: "the blast-radius map and the web-research findings are both posted in chat"
+            when: "draft-plan's research stage posted its facts, with file paths, in chat"
             hooks: ["script tracker-sync"]
       drafting:
         transitions:
           - to: cross-reviewing
-            when: "architecture, surface changes and trade-offs are settled with the user in conversation, and draft-plan wrote `index.md`'s body against the template's Plan Body and passed its Quality Checklist"
+            when: "draft-plan wrote `draft.md`, `booping plan split` exited 0 and `booping plan check` passed or its three fix rounds are spent"
             gates:
               - "every call that is the user's is answered"
-              - "no milestone's `sp` is at or over `core.sprint.redecompose_threshold` — one that is gets split before the plan leaves drafting"
+              - "`booping plan check` reports no `sp` finding"
             hooks: ["script tracker-sync"]
           - to: researching
             when: "the design needs blast radius or external practice the research pass missed"
