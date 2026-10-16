@@ -1,13 +1,13 @@
 ---
 title: "Groom one-pass draft and booping plan split"
 type: "feature"
-status: in-progress
+status: done
 sp: 26
 related_to: null
 created: 2026-10-16 13:20
 planned: null
 started: 2026-10-16 13:34
-completed: null
+completed: 2026-10-16 14:11
 code_reviews: []
 sessions:
 - bd1b4f77-6235-4b78-ae72-ccbe54f0c63a
@@ -20,8 +20,17 @@ tracker_provider: null
 tracker_request: null
 tracker_issue: null
 return_to: null
-agents: '{"research-codebase": "a0622793ee9abd955", "cross-review": "abde18f33b0a3cdbe"}'
+agents: '{"research-codebase": "a0622793ee9abd955", "cross-review": "abde18f33b0a3cdbe",
+  "develop-loop-G1": "a9492ca176f2ed638", "develop-loop-G2": "abf41728dc467188d",
+  "verify": "a918f38a8623c96f1", "verify-fix": "ac777054d6218356c"}'
 reviewed_at: 2026-10-16 13:33
+metrics_active_minutes: 52
+metrics_models:
+- claude-opus-5-5
+metrics_tokens_input: 148
+metrics_tokens_output: 79222
+metrics_tokens_cache_creation: 306623
+metrics_tokens_cache_read: 8597562
 ---
 
 # Groom one-pass draft and booping plan split
