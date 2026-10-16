@@ -14,11 +14,11 @@ supersedes: [adr/0033]
 ## Context
 
 Specs stay current only if they are maintained during the work and used where they help (value/0016).
-Today a playbook knows about them only through rule briefs injected into its steps (rule/0020); only
+Today a playbook knows about them only through rule briefs injected into its steps (rule/0020, booping:rule/0001); only
 the specs playbook reads the format guide (adr/0024). So spec material the owner states in passing — a
 value before a groom, a usage scenario, a decision — stays in the transcript, and a run that decides
-does not know what is already settled. adr/0033 adds a consult at named decision points, but it
-depends on a playbook already knowing that specs exist and what they are for. Writing a scenario per
+does not know what is already settled. adr/0033 proposed a consult at named decision points; it still
+depended on a playbook knowing that specs exist and what they are for, and it named its points one by one. Writing a scenario per
 playbook ("groom does X with stories, develop does Y with ADRs") would not cover the next playbook
 and would not cover what the owner says outside those scenarios.
 
@@ -41,26 +41,19 @@ guidance on the specs:
    run, from the specs format guide and the values' summaries; the size is fixed and checked.
 3. **How it works with them.**
    - It applies the specs where they add quality to its result or knowledge of decisions already made,
-     and skips them where they add nothing. When it does, it asks a read-only subagent (the consult of
-     adr/0033) and keeps only the subagent's bounded answer.
+     and skips them where they add nothing.
    - It updates them as the work happens: when its work or the owner's words produce spec material —
-     a decision, a scenario, a departure from a record, a record the work made untrue — it hands that to
-     a subagent that writes a draft or a candidate in the right place and returns a line or two.
+     a decision, a scenario, a departure from a record, a record the work made untrue — a draft or a
+     candidate lands in the right place.
    - Values and anything that drops or weakens a rule stay owner drafts; every other draft follows the
      run's autonomy mode (adr/0027).
+4. **Through a subagent.** Every read or write of the specs goes through a subagent, and the playbook
+   keeps only its short answer. A departure from a record is shown to the owner, or recorded with the
+   ref and a `[clarify]` marker in an autonomous run, never silently overridden.
 
-4. **The consult** (from adr/0033, which this ADR supersedes). The read-only subagent gets the
-   question and the registry index (`booping specs ls`, one summary line per record across every
-   tier), opens only the records whose summary bears on it, and returns at most 15 lines in four
-   groups: **decided** (ref and how), **contradicted** (ref and why), **values in play**, **silent**.
-   *Decided* is cited instead of re-decided; *contradicted* is shown to the owner at the next review
-   gate, or in an autonomous run recorded with the ref and a `[clarify]` marker and never silently
-   overridden; *silent* is where a new record may be due.
-
-Where a playbook consults is its own judgement under this guidance, not a list of named points. A
-targeted rule (rule/0020) is added for a playbook only when a measured run shows it does not consult
-where it should — first check: re-groom corpus case `s3-booping-specs-site-registries` with the
-guidance alone.
+Where and when a playbook does this is its own judgement under this guidance. A targeted rule for a
+playbook is added only after a measured miss (rule/0030) — first check: re-groom corpus case
+`s3-booping-specs-site-registries` with the guidance alone.
 
 ## Alternatives
 

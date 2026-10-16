@@ -16,7 +16,7 @@ where it runs gave way to the base guidance every playbook carries.
 ## Context
 
 Specs reach the playbooks one way today: rules with `targets:` inject their `brief` into the targeted
-step (rule/0001, rule/0020). Values, ADRs, stories and references reach no groom or develop step, and
+step (booping:rule/0001, rule/0020). Values, ADRs, stories and references reach no groom or develop step, and
 no step calls `booping specs`; only the `specs` and `project-manager` playbooks read the registry. So a
 groom re-decides what an accepted ADR settled, a develop worker picks a default an ADR already
 answers, and autonomous runs record defaults with no reference to a record. The orchestrator showed the
@@ -24,8 +24,8 @@ same gap on 2026-10-16: it set out to groom a request whose every decision was a
 adr/0032 after a one-word grep, and its autonomous runs logged defaults without citing records.
 
 Reading the registry inline costs context: 104 project records plus core and global ones, and most
-are irrelevant to any one request (value/0002). Agents already return bounded answers (rule/0009) and
-the driver owns every vault read and write (adr/0012, rule/0019). rule/0030 makes groom name the values
+are irrelevant to any one request (value/0002). Agents already return bounded answers (booping:rule/0009) and
+the driver owns every vault read and write (adr/0012, rule/0019). booping:rule/0030 makes groom name the values
 in play and flag departures; idea/0008 (open) proposes ADR drafts for a plan's real forks.
 
 ## Criteria
@@ -50,7 +50,7 @@ in play and flag departures; idea/0008 (open) proposes ADR drafts for a plan's r
 3. **What happens with the answer.** *Decided* is cited in the plan or the defaults file instead of
    being re-decided. *Contradicted* is shown to the owner at the next review gate, or in an
    autonomous run recorded with the ref and a `[clarify]` marker and never silently overridden.
-   *Values in play* feed rule/0030, whose targets widen from groom to develop and code-review.
+   *Values in play* feed booping:rule/0030, whose targets widen from groom to develop and code-review.
    *Silent* is where a new record may be due: a real fork goes to idea/0008 (still open; this ADR
    gives it a trigger, not its design).
 4. **After develop**, the driver updates the records the sprint touched: an ADR's status, a story it
@@ -109,7 +109,7 @@ Keep injection of rule briefs as the only path.
 ## Consequences
 
 - A consult brief in `src/` (the return contract above) and targeted rules for groom, develop,
-  code-review, project-manager; rule/0030's targets widen.
+  code-review, project-manager; booping:rule/0030's targets widen.
 - The orchestrator's own process follows the same rule (consult before routing and before
   self-accepting); hermes-pet's CLAUDE.md line on updating `specs/` moves into the core as point 4.
 - A measurable check: re-groom corpus case `s3-booping-specs-site-registries` and see whether the
