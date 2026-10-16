@@ -84,10 +84,10 @@ intake ──► draft-plan (runner) ──────────────�
 | 02 | [booping plan split command](milestones/M02-plan-split-command/M02-plan-split-command.md) | 4 | done |
 | 03 | [plan split e2e cases on benchmark plans](milestones/M03-plan-split-e2e-cases/M03-plan-split-e2e-cases.md) | 3 | done |
 | 04 | [booping plan check — the milestone contract as code](milestones/M04-plan-check-command/M04-plan-check-command.md) | 4 | done |
-| 05 | [Groom rewritten around one drafting step](milestones/M05-groom-one-drafting-step/M05-groom-one-drafting-step.md) | 3 | pending |
-| 06 | [Groom partials, present check and snapshot](milestones/M06-groom-partials-present-and-snapshot/M06-groom-partials-present-and-snapshot.md) | 2 | pending |
-| 07 | [Plan templates trimmed to the one-file format](milestones/M07-plan-templates-trimmed/M07-plan-templates-trimmed.md) | 3 | pending |
-| 08 | [Docs for one-pass groom and the plan commands](milestones/M08-docs/M08-docs.md) | 3 | pending |
+| 05 | [Groom rewritten around one drafting step](milestones/M05-groom-one-drafting-step/M05-groom-one-drafting-step.md) | 3 | done |
+| 06 | [Groom partials, present check and snapshot](milestones/M06-groom-partials-present-and-snapshot/M06-groom-partials-present-and-snapshot.md) | 2 | done |
+| 07 | [Plan templates trimmed to the one-file format](milestones/M07-plan-templates-trimmed/M07-plan-templates-trimmed.md) | 3 | done |
+| 08 | [Docs for one-pass groom and the plan commands](milestones/M08-docs/M08-docs.md) | 3 | done |
 
 ## Implementation Order
 

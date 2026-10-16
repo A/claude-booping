@@ -10,4 +10,10 @@ Every gate and question this autonomous develop run settled itself.
 - **D5 — M03 task 3.1, benchmark plan secret check.** All four chosen plans kept, none replaced: `m2-V3a-r1` clean (two "token" hits are prose); `m2-V3-r2` clean, no hits; `s1-V3a-r1` clean (`@pytest.mark` decorators, prose about an OAuth token, a dry-run env flag and a public URL without query string); `c1-V3a-r1` clean (a local docker-compose dev database whose user/password/db are the placeholder `crawler`; "token auth … is deferred" is prose). Default: commit them as e2e fixtures.
 - **D6 — G1 commit split.** `plan/check.py` landed in M02's commit, not M04's, because `commands/plan.py` (M02) imports it; M04's commit carries the check tests and e2e cases. Keeps every commit importable.
 
+- **D7 — M06, learn eval fixture.** The rule/0007 grep in M06's DoD hit `playbooks/learn/extract-candidates/tests.yaml` and its fixture `retro-findings.md`, outside M06's file list; the worker removed groom's two deleted step names there. Default: accepted — the DoD grep requires it.
+- **D8 — README `drafting` status line.** Still described the old drafting (design in conversation, written into `index.md` and milestone directories); not in M08's tasks but invalidated by the sprint (rule/0023). Default: fixed in wrap-up's documentation commit.
+
 ## Accepted snapshot reports
+
+- `playbooks/groom/_reports/output.md` — every hunk is M05/M06: the step table (two research steps removed, draft-plan's new summary and dependency), the `researching → drafting` and `drafting → cross-reviewing` edge prose and gates, the rewritten draft-plan body, the Quality Checklist bullet and one-file line in `plan_templates.md`, the removed milestone-files and milestone-contract sections, and present's `booping plan check` block.
+- `playbooks/learn/_reports/output.md` — one hunk: groom's step list in learn's target space drops `research-codebase` and `research-web`, a direct consequence of M05 deleting those steps.
