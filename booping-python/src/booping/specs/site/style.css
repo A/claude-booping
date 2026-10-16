@@ -254,8 +254,8 @@ footer { border-top: 1px solid var(--line); padding: 16px 40px; font-size: 13px;
   border: 1px solid var(--line);
   background: var(--surface);
   border-radius: 999px;
-  padding: 4px 12px;
-  min-height: 36px;
+  padding: 2px 10px;
+  min-height: 30px;
   font-size: 13px;
   line-height: 1.4;
   color: var(--muted);
@@ -270,6 +270,10 @@ footer { border-top: 1px solid var(--line); padding: 16px 40px; font-size: 13px;
 .chip:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; border-radius: 999px; }
 .chip.mk-clarify { background: var(--warn-bg); color: var(--warn); border-color: transparent; }
 .chip.mk-unknown { background: var(--bad-bg); color: var(--bad); border-color: transparent; }
+@media (pointer: coarse) {
+  .chip { position: relative; }
+  .chip::before { content: ""; position: absolute; inset: -8px -2px; }
+}
 
 .badge {
   display: inline-block;
@@ -387,7 +391,15 @@ ul.scen, ul.recent { list-style: none; padding: 0; }
 .meta { margin: 0 0 8px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .summary { font-size: 19px; line-height: 1.55; color: var(--muted); margin: 0 0 1em; }
 .filters { margin: 8px 0 16px; }
-.chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 8px; min-width: 0; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 8px; min-width: 0; }
+/* One set of chips serves the inline bar and the phone sheet: unless opened modal the dialog is a plain block. */
+dialog.filter-sheet:not(:modal) { display: block; position: static; width: auto; height: auto; margin: 0; padding: 0; border: 0; background: none; color: inherit; max-width: none; max-height: none; overflow: visible; }
+.filter-head, .facet, .filter-done, .filter-open, .filter-active { display: none; }
+.filter-sheet:modal .filter-head { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; }
+.filter-head h2 { flex: 1; margin: 0; font-size: 18px; }
+.filter-sheet .filter-close { display: inline-flex; font-size: 24px; }
+.filter-sheet:modal .facet { display: block; margin: 14px 0 8px; font-size: 13px; line-height: 1.4; font-weight: 600; color: var(--muted); }
+.filter-sheet:modal .filter-done { display: block; }
 .filters label { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; line-height: 1.4; color: var(--muted); }
 .sort { font: inherit; color: var(--text); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 4px 8px; min-height: 36px; }
 .count { display: inline-block; margin: 0 0 0 16px; font-size: 13px; line-height: 1.4; color: var(--muted); font-variant-numeric: tabular-nums; }
@@ -525,12 +537,19 @@ dialog.cmt-sheet::backdrop { background: rgb(0 0 0 / 0.35); }
   footer { padding: 16px; }
   .rows { border-top: 0; }
   .row { min-height: 44px; margin: 0 0 12px; padding: 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
-  .chips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
-  .chips::-webkit-scrollbar { display: none; }
-  .chip { flex: none; min-height: 44px; }
   .filters label { display: flex; width: 100%; }
   .sort { flex: 1; width: 100%; min-height: 44px; }
   .count { display: block; margin: 8px 0 0; }
+  html.js dialog.filter-sheet:not([open]) { display: none; }
+  html.js .filter-open { display: flex; align-items: center; box-sizing: border-box; width: 100%; min-height: 44px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--text); font: inherit; text-align: left; cursor: pointer; }
+  html.js .filter-open:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
+  html.js .filter-active { display: flex; flex-wrap: wrap; gap: 14px 6px; margin: 14px 0 0; }
+  html.js .filter-active:empty { display: none; }
+  html.js dialog.filter-sheet:modal { box-sizing: border-box; width: 100%; max-width: 100%; max-height: 80vh; margin: auto 0 0; padding: 16px 20px 20px; border: 1px solid var(--line); border-width: 1px 0 0; border-radius: 12px 12px 0 0; background: var(--surface); color: var(--text); overflow: auto; overscroll-behavior: contain; animation: cmt-up 0.2s ease; }
+  html.js dialog.filter-sheet::backdrop { background: rgb(0 0 0 / 0.35); }
+  html.js .filter-sheet:modal .chips { flex-wrap: wrap; gap: 14px 6px; margin: 0; }
+  html.js .filter-sheet:modal label { margin: 14px 0 0; }
+  html.js .filter-sheet:modal .filter-done { box-sizing: border-box; width: 100%; min-height: 44px; margin: 16px 0 0; padding: 8px 14px; border: 1px solid var(--link); border-radius: 8px; background: var(--link); color: var(--bg); font: inherit; cursor: pointer; }
   .scen { grid-template-columns: minmax(0, 1fr); }
   .tag-tree a { display: inline-flex; align-items: center; min-height: 44px; }
   .toc-m a { display: flex; align-items: center; min-height: 44px; padding: 0; }
@@ -559,6 +578,7 @@ dialog.cmt-sheet::backdrop { background: rgb(0 0 0 / 0.35); }
 
 @media (prefers-reduced-motion: reduce) {
   html.js .side { transition: none; }
+  html.js dialog.filter-sheet:modal { animation: none; }
 }
 
 @media (prefers-reduced-motion: no-preference) {

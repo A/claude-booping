@@ -254,6 +254,9 @@ core:
             facet_source: Source
             facet_status: Status
             facet_flag: Needs
+            filters: Filters
+            filter_remove: "Remove filter: {label}"
+            filters_show: Show records
             flag_unreviewed: Unreviewed
             flag_clarify: Has [clarify]
             flag_unknown: Has [unknown]
@@ -381,6 +384,9 @@ core:
             facet_source: Источник
             facet_status: Статус
             facet_flag: Пометки
+            filters: Фильтры
+            filter_remove: "Убрать фильтр: {label}"
+            filters_show: Показать записи
             flag_unreviewed: Без ревью
             flag_clarify: Есть [clarify]
             flag_unknown: Есть [unknown]

@@ -713,9 +713,62 @@ def test_filter_script_is_written_and_loaded_only_by_filtered_pages(site: Site) 
     assert '<script src="../../filter.js" defer></script>' in files["proj/adr/index.html"]
 
 
+def _filter_parts(page: str) -> tuple[str, str, str]:
+    """The `.filters` block split into before the sheet, the sheet, and after it."""
+    start = page.index('<div class="filters"')
+    bar = page[start : page.index('<p class="empty"', start)]
+    head, rest = bar.split("<dialog ", 1)
+    sheet, tail = rest.split("</dialog>", 1)
+    return head, "<dialog " + sheet, tail
+
+
+def _assert_filter_sheet(page: str, facets: list[str]) -> None:
+    head, sheet, tail = _filter_parts(page)
+    assert re.search(
+        r'<button type="button" class="filter-open" aria-haspopup="dialog" data-label="Filters">'
+        r"Filters</button>\n"
+        r'<div class="filter-active" data-remove="Remove filter: \{label\}"></div>\n$',
+        head,
+    )
+    assert sheet.startswith('<dialog class="filter-sheet" aria-label="Filters">\n')
+    assert (
+        '<div class="filter-head">\n<h2>Filters</h2>\n'
+        '<button class="iconbtn filter-close" type="button" aria-label="Close">&times;</button>\n'
+        "</div>"
+    ) in sheet
+    assert re.findall(r'<p class="facet">([^<]+)</p>\n<div class="chips"', sheet) == facets
+    assert sheet.count('<div class="chips"') == len(facets)
+    assert '<select class="sort">' in sheet
+    assert sheet.endswith('<button type="button" class="filter-done">Show records</button>\n')
+    assert "chips" not in head + tail and "sort" not in tail
+    assert tail.startswith('\n<p class="count" role="status"')
+    assert tail.rstrip().endswith("</p>\n</div>")
+
+
+def test_records_page_wraps_chips_and_sort_in_the_filter_sheet(site: Site) -> None:
+    _assert_filter_sheet(_texts(site)["records.html"], ["Type", "Source", "Needs"])
+
+
+def test_type_and_review_pages_carry_the_filter_sheet(tmp_path: Path) -> None:
+    files, _ = _review_site(tmp_path)
+    _assert_filter_sheet(files["review.html"], ["Needs"])
+    _write(tmp_path / "t" / "adr" / "0001-a.md", "---\ntitle: A\nstatus: accepted\n---\nx\n")
+    _write(tmp_path / "t" / "adr" / "0002-b.md", "---\ntitle: B\nstatus: proposed\n---\nx\n")
+    page = _texts(load_site([SiteRoot("t", tmp_path / "t")], TYPES))["t/adr/index.html"]
+    _assert_filter_sheet(page, ["Status", "Needs"])
+
+
 def test_russian_filter_labels(tmp_path: Path) -> None:
     page = _record_page(tmp_path, "ru")["records.html"]
     assert [label for label, _ in _facets(page)] == ["Раздел", "Статус", "Пометки"]
+    head, sheet, _ = _filter_parts(page)
+    assert 'data-label="Фильтры">Фильтры</button>' in head
+    assert 'data-remove="Убрать фильтр: {label}"' in head
+    assert '<dialog class="filter-sheet" aria-label="Фильтры">' in sheet
+    assert "<h2>Фильтры</h2>" in sheet and 'aria-label="Закрыть"' in sheet
+    assert '<button type="button" class="filter-done">Показать записи</button>' in sheet
+    for english in ("Filters", "Show records", "Remove filter"):
+        assert english not in page
     assert ">Показаны 3 записи</p>" in page
     assert "Ничего не подходит под фильтр." in page
     for english in ("Sort", "By number", "Recently updated", "By title", "Unreviewed", "Needs"):
@@ -1165,7 +1218,7 @@ def test_non_record_page_has_the_sidebar_entry_and_no_header_button(tmp_path: Pa
         "</a></li>"
     ) in _side(page)
     assert "cmt-open" not in page
-    assert "<dialog" not in page
+    assert '<dialog class="cmt' not in page
     assert '<script src="comments.js" defer></script>' in page
 
 

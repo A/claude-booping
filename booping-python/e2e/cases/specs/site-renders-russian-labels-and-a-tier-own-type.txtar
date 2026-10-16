@@ -232,12 +232,21 @@ specs site: 1 roots, 6 records, 19 pages, 0 warnings -> specs-site
 <h1>Ждёт тебя</h1>
 <p class="lead">Записи без твоего ревью и открытые вопросы. Сначала то, что написал агент, потом самое старое.</p>
 <div class="filters" data-default-sort="review">
+<button type="button" class="filter-open" aria-haspopup="dialog" data-label="Фильтры">Фильтры</button>
+<div class="filter-active" data-remove="Убрать фильтр: {label}"></div>
+<dialog class="filter-sheet" aria-label="Фильтры">
+<div class="filter-head">
+<h2>Фильтры</h2>
+<button class="iconbtn filter-close" type="button" aria-label="Закрыть">&times;</button>
+</div>
+<p class="facet">Раздел</p>
 <div class="chips" role="group" aria-label="Раздел">
 <button type="button" class="chip" data-key="type" data-value="adr" aria-pressed="false">Решения<span class="n">1</span></button>
 <button type="button" class="chip" data-key="type" data-value="idea" aria-pressed="false">Идеи<span class="n">1</span></button>
 <button type="button" class="chip" data-key="type" data-value="value" aria-pressed="false">Ценности<span class="n">1</span></button>
 <button type="button" class="chip" data-key="type" data-value="mechanic" aria-pressed="false">Механики<span class="n">1</span></button>
 </div>
+<p class="facet">Пометки</p>
 <div class="chips" role="group" aria-label="Пометки">
 <button type="button" class="chip" data-key="flag" data-value="unreviewed" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-unreviewed"/></svg>Без ревью<span class="n">4</span></button>
 <button type="button" class="chip" data-key="flag" data-value="clarify" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>Есть [clarify]<span class="n">2</span></button>
@@ -249,6 +258,8 @@ specs site: 1 roots, 6 records, 19 pages, 0 warnings -> specs-site
 <option value="updated">Сначала новые</option>
 <option value="title">По названию</option>
 </select></label>
+<button type="button" class="filter-done">Показать записи</button>
+</dialog>
 <p class="count" role="status" data-forms="[&#34;Показана {n} запись&#34;, &#34;Показаны {n} записи&#34;, &#34;Показано {n} записей&#34;]">Показаны 4 записи</p>
 </div>
 <p class="empty" hidden>Ничего не подходит под фильтр.</p>
@@ -350,6 +361,14 @@ specs site: 1 roots, 6 records, 19 pages, 0 warnings -> specs-site
 </nav>
 <h1>Все записи</h1>
 <div class="filters" data-default-sort="number">
+<button type="button" class="filter-open" aria-haspopup="dialog" data-label="Фильтры">Фильтры</button>
+<div class="filter-active" data-remove="Убрать фильтр: {label}"></div>
+<dialog class="filter-sheet" aria-label="Фильтры">
+<div class="filter-head">
+<h2>Фильтры</h2>
+<button class="iconbtn filter-close" type="button" aria-label="Закрыть">&times;</button>
+</div>
+<p class="facet">Раздел</p>
 <div class="chips" role="group" aria-label="Раздел">
 <button type="button" class="chip" data-key="type" data-value="adr" aria-pressed="false">Решения<span class="n">2</span></button>
 <button type="button" class="chip" data-key="type" data-value="idea" aria-pressed="false">Идеи<span class="n">1</span></button>
@@ -357,10 +376,12 @@ specs site: 1 roots, 6 records, 19 pages, 0 warnings -> specs-site
 <button type="button" class="chip" data-key="type" data-value="value" aria-pressed="false">Ценности<span class="n">1</span></button>
 <button type="button" class="chip" data-key="type" data-value="mechanic" aria-pressed="false">Механики<span class="n">1</span></button>
 </div>
+<p class="facet">Статус</p>
 <div class="chips" role="group" aria-label="Статус">
 <button type="button" class="chip" data-key="status" data-value="accepted" aria-pressed="false">принято<span class="n">4</span></button>
 <button type="button" class="chip" data-key="status" data-value="open" aria-pressed="false">открыто<span class="n">1</span></button>
 </div>
+<p class="facet">Пометки</p>
 <div class="chips" role="group" aria-label="Пометки">
 <button type="button" class="chip" data-key="flag" data-value="unreviewed" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-unreviewed"/></svg>Без ревью<span class="n">4</span></button>
 <button type="button" class="chip" data-key="flag" data-value="clarify" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>Есть [clarify]<span class="n">2</span></button>
@@ -370,6 +391,8 @@ specs site: 1 roots, 6 records, 19 pages, 0 warnings -> specs-site
 <option value="updated">Сначала новые</option>
 <option value="title">По названию</option>
 </select></label>
+<button type="button" class="filter-done">Показать записи</button>
+</dialog>
 <p class="count" role="status" data-forms="[&#34;Показана {n} запись&#34;, &#34;Показаны {n} записи&#34;, &#34;Показано {n} записей&#34;]">Показано 6 записей</p>
 </div>
 <p class="empty" hidden>Ничего не подходит под фильтр.</p>
@@ -570,6 +593,14 @@ specs site: 1 roots, 6 records, 19 pages, 0 warnings -> specs-site
 <h1><code>dvizhenie</code></h1>
 <p class="lead">Как перемещаются персонажи</p>
 <div class="filters" data-default-sort="number">
+<button type="button" class="filter-open" aria-haspopup="dialog" data-label="Фильтры">Фильтры</button>
+<div class="filter-active" data-remove="Убрать фильтр: {label}"></div>
+<dialog class="filter-sheet" aria-label="Фильтры">
+<div class="filter-head">
+<h2>Фильтры</h2>
+<button class="iconbtn filter-close" type="button" aria-label="Закрыть">&times;</button>
+</div>
+<p class="facet">Пометки</p>
 <div class="chips" role="group" aria-label="Пометки">
 <button type="button" class="chip" data-key="flag" data-value="unreviewed" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-unreviewed"/></svg>Без ревью<span class="n">1</span></button>
 </div>
@@ -578,6 +609,8 @@ specs site: 1 roots, 6 records, 19 pages, 0 warnings -> specs-site
 <option value="updated">Сначала новые</option>
 <option value="title">По названию</option>
 </select></label>
+<button type="button" class="filter-done">Показать записи</button>
+</dialog>
 <p class="count" role="status" data-forms="[&#34;Показана {n} запись&#34;, &#34;Показаны {n} записи&#34;, &#34;Показано {n} записей&#34;]">Показана 1 запись</p>
 </div>
 <p class="empty" hidden>Ничего не подходит под фильтр.</p>
@@ -1062,6 +1095,14 @@ specs site: 1 roots, 6 records, 19 pages, 0 warnings -> specs-site
 <h1>Механики</h1>
 <p class="lead">Механики — как устроен мир</p>
 <div class="filters" data-default-sort="number">
+<button type="button" class="filter-open" aria-haspopup="dialog" data-label="Фильтры">Фильтры</button>
+<div class="filter-active" data-remove="Убрать фильтр: {label}"></div>
+<dialog class="filter-sheet" aria-label="Фильтры">
+<div class="filter-head">
+<h2>Фильтры</h2>
+<button class="iconbtn filter-close" type="button" aria-label="Закрыть">&times;</button>
+</div>
+<p class="facet">Пометки</p>
 <div class="chips" role="group" aria-label="Пометки">
 <button type="button" class="chip" data-key="flag" data-value="unreviewed" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-unreviewed"/></svg>Без ревью<span class="n">1</span></button>
 </div>
@@ -1070,6 +1111,8 @@ specs site: 1 roots, 6 records, 19 pages, 0 warnings -> specs-site
 <option value="updated">Сначала новые</option>
 <option value="title">По названию</option>
 </select></label>
+<button type="button" class="filter-done">Показать записи</button>
+</dialog>
 <p class="count" role="status" data-forms="[&#34;Показана {n} запись&#34;, &#34;Показаны {n} записи&#34;, &#34;Показано {n} записей&#34;]">Показана 1 запись</p>
 </div>
 <p class="empty" hidden>Ничего не подходит под фильтр.</p>

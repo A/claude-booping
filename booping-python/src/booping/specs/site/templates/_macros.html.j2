@@ -87,7 +87,15 @@
 
 {% macro filter_bar(filters, labels) %}
 <div class="filters" data-default-sort="{{ filters.sort }}">
+<button type="button" class="filter-open" aria-haspopup="dialog" data-label="{{ labels.ui('filters') }}">{{ labels.ui("filters") }}</button>
+<div class="filter-active" data-remove="{{ labels.ui('filter_remove') }}"></div>
+<dialog class="filter-sheet" aria-label="{{ labels.ui('filters') }}">
+<div class="filter-head">
+<h2>{{ labels.ui("filters") }}</h2>
+<button class="iconbtn filter-close" type="button" aria-label="{{ labels.ui('close') }}">&times;</button>
+</div>
 {% for facet in filters.facets %}
+<p class="facet">{{ labels.ui('facet_' ~ facet.key) }}</p>
 <div class="chips" role="group" aria-label="{{ labels.ui('facet_' ~ facet.key) }}">
 {% for chip in facet.chips %}
 <button type="button" class="chip" data-key="{{ facet.key }}" data-value="{{ chip.value }}" aria-pressed="false">{% if chip.icon is not none %}{{ icon(chip.icon) }}{% endif %}{{ chip.label }}<span class="n">{{ chip.count }}</span></button>
@@ -99,6 +107,8 @@
 <option value="{{ sort }}"{% if sort == filters.sort %} selected{% endif %}>{{ labels.ui("sort_" ~ sort) }}</option>
 {% endfor %}
 </select></label>
+<button type="button" class="filter-done">{{ labels.ui("filters_show") }}</button>
+</dialog>
 <p class="count" role="status" data-forms="{{ labels.plural_forms('shown') | tojson | forceescape }}">{{ labels.plural("shown", filters.total) }}</p>
 </div>
 <p class="empty" hidden>{{ labels.ui("nothing_matches") }}</p>

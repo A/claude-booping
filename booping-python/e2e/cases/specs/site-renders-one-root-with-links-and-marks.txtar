@@ -372,11 +372,20 @@ booping specs site
 <h1>Needs you</h1>
 <p class="lead">Records waiting for your review and open questions. What the agent wrote comes first, then the oldest.</p>
 <div class="filters" data-default-sort="review">
+<button type="button" class="filter-open" aria-haspopup="dialog" data-label="Filters">Filters</button>
+<div class="filter-active" data-remove="Remove filter: {label}"></div>
+<dialog class="filter-sheet" aria-label="Filters">
+<div class="filter-head">
+<h2>Filters</h2>
+<button class="iconbtn filter-close" type="button" aria-label="Close">&times;</button>
+</div>
+<p class="facet">Type</p>
 <div class="chips" role="group" aria-label="Type">
 <button type="button" class="chip" data-key="type" data-value="adr" aria-pressed="false">ADRs<span class="n">1</span></button>
 <button type="button" class="chip" data-key="type" data-value="rule" aria-pressed="false">Rules<span class="n">1</span></button>
 <button type="button" class="chip" data-key="type" data-value="value" aria-pressed="false">Values<span class="n">1</span></button>
 </div>
+<p class="facet">Needs</p>
 <div class="chips" role="group" aria-label="Needs">
 <button type="button" class="chip" data-key="flag" data-value="unreviewed" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-unreviewed"/></svg>Unreviewed<span class="n">3</span></button>
 <button type="button" class="chip" data-key="flag" data-value="clarify" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>Has [clarify]<span class="n">1</span></button>
@@ -387,6 +396,8 @@ booping specs site
 <option value="updated">Recently updated</option>
 <option value="title">By title</option>
 </select></label>
+<button type="button" class="filter-done">Show records</button>
+</dialog>
 <p class="count" role="status" data-forms="[&#34;{n} record shown&#34;, &#34;{n} records shown&#34;]">3 records shown</p>
 </div>
 <p class="empty" hidden>Nothing matches the filter.</p>
