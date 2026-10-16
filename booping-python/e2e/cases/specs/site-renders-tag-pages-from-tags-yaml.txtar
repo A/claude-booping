@@ -137,6 +137,7 @@ specs site: 1 roots, 2 records, 12 pages, 0 warnings -> specs-site
 <link rel="stylesheet" href="../../fonts.css">
 <link rel="stylesheet" href="../../style.css">
 <script src="../../site.js" defer></script>
+<script src="../../filter-format.js" defer></script>
 <script src="../../filter.js" defer></script>
 <script src="../../search.js" defer></script>
 <script src="../../comments-format.js" defer></script>

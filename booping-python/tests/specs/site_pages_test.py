@@ -100,7 +100,7 @@ def _check_links(files: dict[str, str | bytes]) -> int:
     for path, parsed in pages.items():
         text = files[path]
         assert isinstance(text, str)
-        extra = 1 if 'class="filters"' in text else 2 if path == "search.html" else 0
+        extra = 2 if 'class="filters"' in text else 2 if path == "search.html" else 0
         assert parsed.scripts == 5 + extra, path
         for href in parsed.hrefs:
             assert "://" not in href and not href.startswith("/"), (path, href)
@@ -131,6 +131,7 @@ def test_page_map_paths(site: Site) -> None:
         "core/value/0001-clarity.html",
         "core/value/0001-clarity.md",
         "core/value/index.html",
+        "filter-format.js",
         "filter.js",
         "fonts.css",
         "fonts/OFL-golos-text.txt",
@@ -711,6 +712,17 @@ def test_filter_script_is_written_and_loaded_only_by_filtered_pages(site: Site) 
         ]
     )
     assert '<script src="../../filter.js" defer></script>' in files["proj/adr/index.html"]
+    assert "SpecsFilters" in files["filter-format.js"]
+    loading_format = sorted(
+        path
+        for path, html in files.items()
+        if "filter-format.js" in html and path.endswith(".html")
+    )
+    assert loading_format == filtered
+    assert (
+        '<script src="../../filter-format.js" defer></script>\n'
+        '<script src="../../filter.js" defer></script>'
+    ) in files["proj/adr/index.html"]
 
 
 def _filter_parts(page: str) -> tuple[str, str, str]:

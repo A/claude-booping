@@ -2,6 +2,7 @@
 {% from "_macros.html.j2" import record_row, filter_bar, tag_tree %}
 {% block scripts %}
 {% if rows %}
+<script src="{{ prefix }}filter-format.js" defer></script>
 <script src="{{ prefix }}filter.js" defer></script>
 {% endif %}
 {% endblock %}

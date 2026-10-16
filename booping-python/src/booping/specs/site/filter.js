@@ -11,6 +11,9 @@
   var empty = bar.nextElementSibling;
   var forms = JSON.parse(count.getAttribute("data-forms"));
   var fallback = bar.getAttribute("data-default-sort");
+  var openBtn = bar.querySelector("button.filter-open");
+  var activeRow = bar.querySelector("div.filter-active");
+  var sheet = bar.querySelector("dialog.filter-sheet");
 
   function plural(n) {
     var i;
@@ -33,6 +36,47 @@
       (on[key] = on[key] || []).push(chip.getAttribute("data-value"));
     });
     return on;
+  }
+  function chipLabel(chip) {
+    var copy = chip.cloneNode(true);
+    Array.prototype.forEach.call(copy.querySelectorAll(".n, svg"), function (el) { el.remove(); });
+    return copy.textContent.trim();
+  }
+  function pressedChips() {
+    return chips.filter(function (chip) { return chip.getAttribute("aria-pressed") === "true"; });
+  }
+  function renderRow(pressed) {
+    if (!openBtn || !window.SpecsFilters) return;
+    var option = select.options[select.selectedIndex];
+    openBtn.textContent = SpecsFilters.row(
+      openBtn.getAttribute("data-label"), pressed.length, option ? option.textContent : ""
+    );
+  }
+  function renderActive(pressed) {
+    if (!activeRow || !window.SpecsFilters) return;
+    var items = SpecsFilters.removable(pressed.map(function (chip) {
+      return { key: chip.getAttribute("data-key"), value: chip.getAttribute("data-value"), label: chipLabel(chip) };
+    }), activeRow.getAttribute("data-remove") || "{label}");
+    activeRow.textContent = "";
+    items.forEach(function (item, i) {
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "chip chip-x";
+      btn.setAttribute("aria-label", item.aria);
+      btn.appendChild(document.createTextNode(item.text));
+      var x = document.createElement("span");
+      x.setAttribute("aria-hidden", "true");
+      x.textContent = "×";
+      btn.appendChild(x);
+      btn.addEventListener("click", function () {
+        pressed[i].setAttribute("aria-pressed", "false");
+        apply();
+        write();
+        var left = activeRow.querySelectorAll(".chip-x");
+        (left[i] || left[left.length - 1] || openBtn).focus();
+      });
+      activeRow.appendChild(btn);
+    });
   }
   function order(row) { return Number(row.getAttribute("data-order")); }
   function newestFirst(a, b) {
@@ -75,6 +119,9 @@
       .forEach(function (row) { list.appendChild(row); });
     count.textContent = plural(shown);
     empty.hidden = shown > 0;
+    var pressed = pressedChips();
+    renderRow(pressed);
+    renderActive(pressed);
   }
   function write() {
     var on = active();
@@ -112,5 +159,15 @@
   });
   select.addEventListener("change", function () { apply(); write(); });
   window.addEventListener("hashchange", read);
+  if (sheet && openBtn) {
+    openBtn.addEventListener("click", function () { sheet.showModal(); });
+    Array.prototype.forEach.call(sheet.querySelectorAll(".filter-close, .filter-done"), function (btn) {
+      btn.addEventListener("click", function () { sheet.close(); });
+    });
+    sheet.addEventListener("click", function (e) { if (e.target === sheet) sheet.close(); });
+    sheet.addEventListener("close", function () { openBtn.focus(); });
+    var phone = window.matchMedia("(max-width: 760px)");
+    phone.addEventListener("change", function () { if (!phone.matches && sheet.open) sheet.close(); });
+  }
   read();
 })();

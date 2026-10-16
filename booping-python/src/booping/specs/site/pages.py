@@ -558,6 +558,7 @@ def build_site(
         "style.css": (_HERE / "style.css").read_text(),
         "site.js": (_HERE / "site.js").read_text(),
         "filter.js": (_HERE / "filter.js").read_text(),
+        "filter-format.js": (_HERE / "filter-format.js").read_text(),
         "search.js": (_HERE / "search.js").read_text(),
         "comments-format.js": (_HERE / "comments-format.js").read_text(),
         "comments.js": (_HERE / "comments.js").read_text(),

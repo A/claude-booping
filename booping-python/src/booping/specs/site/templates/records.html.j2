@@ -1,6 +1,7 @@
 {% extends "base.html.j2" %}
 {% from "_macros.html.j2" import record_row, filter_bar %}
 {% block scripts %}
+<script src="{{ prefix }}filter-format.js" defer></script>
 <script src="{{ prefix }}filter.js" defer></script>
 {% endblock %}
 {% block main %}
