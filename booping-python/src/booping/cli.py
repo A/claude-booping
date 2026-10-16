@@ -12,6 +12,7 @@ from booping.commands import defaults as defaults_cmd
 from booping.commands import frontmatter_update as frontmatter_update_cmd
 from booping.commands import items as items_cmd
 from booping.commands import marker_set as marker_set_cmd
+from booping.commands import plan as plan_cmd
 from booping.commands import playbook_state as playbook_state_cmd
 from booping.commands import playbook_transition as playbook_transition_cmd
 from booping.commands import query as query_cmd
@@ -46,6 +47,7 @@ def build_parser() -> argparse.ArgumentParser:
     correction_cmd.add_parser(sub)
     defaults_cmd.add_parser(sub)
     items_cmd.add_parser(sub)
+    plan_cmd.add_parser(sub)
     status_cmd.add_parser(sub)
     run_cmd.add_parser(sub)
     budget_cmd.add_parser(sub)

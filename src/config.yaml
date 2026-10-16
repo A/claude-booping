@@ -589,6 +589,11 @@ core:
           ## References
 
           ## Verify
+    split:
+      # The four milestone sub-headings, in order: `booping plan split` writes a
+      # draft's tasks / dod / references / verify sections under them, and
+      # draft-plan's format block renders them as the draft's `####` headings.
+      sections: [Tasks, Definition of Done, References, Verify]
     agents:
       booping-researcher:
         internal: true
