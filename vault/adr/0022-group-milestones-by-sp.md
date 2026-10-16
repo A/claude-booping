@@ -15,10 +15,20 @@ values: [value/0012, value/0002]
 Develop briefs one worker per group of milestones, capped by
 `core.sprint.max_milestones_per_agent: 2`. A worker's real limit is its session
 context; milestone count does not track it, story points roughly do and are the only
-size signal already in the plan. Six benchmark runs of one 3-milestone, 8-SP plan on
-a local 27B model: one delegation for the whole plan against one per milestone gave
-the same code score (95.9 against 94.5), 16% less time, 36% fewer output tokens and
-far less variance. Ten historical plans had a median of about 23 SP over 5–7
+size signal already in the plan. Every clean comparison in `booping-benchmarks`
+(one fixed 3-milestone, 8-SP refactoring plan, local Qwen3.8 27B, 2026-08..09) has one
+delegation for the whole plan match or beat one delegation per milestone, in less time,
+with fewer output tokens and a tighter spread:
+
+| Date | Model | Whole plan (n) | Per milestone (n) | Output tokens | Report |
+|---|---|---|---|---|---|
+| 08-21 | 27B Q8 | 95.9 (3), spread 0.4 | ≈95.6 (8), spread 6.5 | 36–47k vs 55–80k | `reports/20260821-014756-qwen3-8-27b-q8.md` |
+| 08-23 / 09-03 | 27B FP8 | 97.0 (3) | 91.9 (3) | 54–96k vs 74–76k | `reports/20260823-002017-…`, `reports/20260903-044651-…` |
+| 09-13 | 27B, new template | 96.3 (1) | 91.1 (3) | 58k vs 75–88k | `reports/20260913-114521-qwen3-8-27b.md` |
+| 09-16..17 | 27B | 93.8–97.2 (6) | 89.9–92.5 (09-12/13) | — | `reports/20260916-232343-qwen3-8-27b.md` |
+
+The 09-03 against 09-12 pair changed the chat template together with the delegation
+shape; the 09-13 control isolates the delegation and keeps the 5-point gap. Ten historical plans had a median of about 23 SP over 5–7
 milestones; 13 of 59 milestones had sp ≥ 5, and groom ignored the redecompose
 threshold in 5 of 10 plans.
 
