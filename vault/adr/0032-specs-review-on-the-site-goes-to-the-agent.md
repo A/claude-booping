@@ -33,25 +33,22 @@ entry already names a different thing: the list of records without a review.
    with the quote and focuses its input; clicking a comment focuses it, clicking its quote scrolls to
    the place. A **Reviewed** checkbox marks the whole record.
 2. **Outbox** — a header button with the count of unsent items opens a page with every comment and
-   reviewed mark on the site, grouped by record, in the exact text that will be sent, with one
-   **Copy all** (marks everything sent) and **Clear sent**. It replaces "My comments".
+   reviewed mark on the site, grouped by record, in the exact text that will be sent, with **Copy
+   all** and **Clear**. It replaces "My comments".
 3. **The agent applies the review.** The owner pastes the block to an agent; the agent edits the
-   records and sets `reviewed:` with the date of each `<ref> — reviewed <date>` line. Until the
-   rebuilt site carries that date, the record shows a local "reviewed, not sent" or "sent" badge.
+   records and sets `reviewed:` with the date of each `<ref> — reviewed <date>` line. It checks each
+   item against the record first, so an item sent twice is recognised as done and skipped.
 4. **Names.** The header page is **Outbox** / «К отправке»; the sidebar list of records without a
    review becomes **Awaiting review** / «Ждут ревью». "Review" alone names neither.
 5. **Where the review lives and how it ends.**
    - *Storage:* the browser's localStorage, one key per site (its base URL), so a site rebuild keeps it
      and two sites never mix. It is per browser and device: nothing syncs, the copied text is the only
      transfer. In a private window it lasts for that window; clearing site data loses it.
-   - *Reload:* everything is restored — the panel's cards, unsent inputs (saved as typed), the
-     reviewed checkbox and the badges.
-   - *States:* **draft** (written, not copied) → **sent** (Copy all stamps the time; the item stays,
-     read-only with a "sent" badge; editing it makes it a draft again) → **applied** (after a rebuild,
-     the record's `updated_at` is on or after the sent time, or its `reviewed:` on or after the mark's
-     date). Applied items clear themselves on the next page load; the Outbox says how many.
-   - *Clearing by hand:* Delete per item; **Clear sent** removes every sent item at once. Drafts are
-     never cleared automatically.
+   - *Reload:* everything is restored — the panel's cards, typed inputs (saved as you type) and the
+     reviewed checkbox.
+   - *No sent state:* Copy all only copies; nothing is marked. The owner clears when done —
+     **Clear** on the Outbox removes everything, Delete removes one item. Sending an item again is
+     harmless (point 3).
    - *Moved text:* when a quote no longer appears in the record, the comment stays with its quote and
      a "text changed" note instead of a highlight.
 
@@ -71,7 +68,7 @@ The decision above.
 - **Pros:** the affordance is on screen, not hidden behind hover; free-form notes need no selection;
   the Outbox is a preview of exactly what the agent gets; works offline and from `file://`.
 - **Cons:** a review lives in one browser until it is copied; a cleared browser loses unsent notes;
-  "applied" is inferred from dates, so a record edited for another reason clears a sent comment too.
+  nothing tracks what was sent, so clearing is the owner's step.
 - **Complexity:** medium — a panel, a page, the reviewed mark and its badge.
 - **Reversibility:** high — client-side only; the export format is unchanged.
 
