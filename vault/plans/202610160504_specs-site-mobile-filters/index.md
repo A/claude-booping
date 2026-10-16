@@ -2,17 +2,18 @@
 title: "Specs site redesign, part 6 — whole-card links, compact filters, phone filter
   sheet"
 type: "feature"
-status: in-progress
+status: done
 sp: 11
 related_to: null
 created: 2026-10-16 05:04
 planned: null
 started: 2026-10-16 05:25
-completed: null
+completed: 2026-10-16 11:34
 code_reviews: []
 sessions:
 - e9aa21f3-03e1-4516-82ea-59c4a17dbabb
 - 1ff5d136-b8fc-4195-851b-2533d5f5eebf
+- 7bfc6b68-1856-435d-9043-66d3c58f19db
 retro: null
 summary: 'Specs site part 6: whole-card links, quiet ref line, compact chips, phone
   filter sheet with removable active chips'
@@ -25,6 +26,14 @@ agents:
   research-codebase: ad63f4e30866a11ac
   cross-review: af8d081b83d831db1
 reviewed_at: 2026-10-16 05:21
+metrics_active_minutes: 44
+metrics_models:
+- <synthetic>
+- claude-opus-5-5
+metrics_tokens_input: 150
+metrics_tokens_output: 57059
+metrics_tokens_cache_creation: 293073
+metrics_tokens_cache_read: 6809582
 ---
 
 # Specs site redesign, part 6 — whole-card links, compact filters, phone filter sheet
