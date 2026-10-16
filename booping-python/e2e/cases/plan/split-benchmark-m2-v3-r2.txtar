@@ -1,0 +1,985 @@
+The groom benchmark plan m2-V3-r2, split as drafted: index.md and every milestone file
+are asserted in full, so a change to the cut shows up as a diff against a real plan.
+
+-- fixtures/cwd/draft.md --
+---
+title: Voice takes that survive the screen, capped at five minutes, with a live level strip
+type: feature
+sp: 22
+summary: A phone voice message is never cut by sleep or screen-off, stops at 5 min, and the composer shows a live level strip
+---
+
+# Voice takes that survive the screen, capped at five minutes, with a live level strip
+
+## Context
+
+**Current state** (verified in the code at `13e00c7`):
+
+- The Android app is a Compose shell over the headless Go core `client/cmd/petcore` (`libpetcore.so`); the bridge contract is `docs/android-bridge.md`, enforced by `client/internal/bridge/doc_test.go`.
+- The talk button (`android/app/src/main/java/dev/hermespet/ui/chat/MicButton.kt`) runs three kinds of take: **hold** (`talk.down`/`talk.up`), **locked** hold (slide up; the Composer's `locked` flag, a hold take to the core) and **tap** take (`talk.tap` → `Engine.TryTapTake`, ended only by the next tap).
+- Take caps in `client/internal/voice/engine.go`: `maxHold = 60 * time.Second` (hold *and locked* takes — a locked dictation is cut and sent after one minute) and `maxTapTake = 5 * time.Minute` (tap takes). On `holdTimer` the engine calls `release()` and sends whatever was recorded.
+- Screen off / sleep: `MainActivity.onStop` sends `lifecycle {foreground:false}` → `core.SetForeground(false)` (`client/cmd/petcore/core.go:440`) → `audio.StopDevices()` (`client/internal/audio/aaudio_android.go:75`), which closes the AAudio capture stream. The engine stays `listening` but gets no frames: the rest of the message is lost; on return the capture reopens and the take continues with a hole. A hold take is worse: the system cancels the pointer and `MicButton` sends `voice.cancel` — the whole take is dropped (`MicButtonTest.aSystemCancelDropsTheTake` pins this).
+- Nothing keeps the screen on while recording (no `FLAG_KEEP_SCREEN_ON` anywhere under `android/app/src/main`).
+- No foreground service covers a take: `HoldService` is a `shortService` (no microphone access in the background on Android 11+), `ListenService` (type `microphone`) is the leftover wake-word service, not started by anything since Stage A7.
+- `HostLink.Pause(app.HoldAfter)` parks the gateway link 3 min after the pause unless a `HostLink.Lease()` is held (`client/internal/app/hostlink.go:241`), so a take still recording in the background at 3 min would end with no link to send it on.
+- During recording the composer still shows the «Сообщение» placeholder and the camera button; the only sign is a static halo around the mic (`MicButton.drawBehind`) or, when locked, a «Слушаю» row. The core reports no audio level.
+
+**Motivation** — the owner dictates long messages on the phone; the screen times out or they press power, and the end of the message is silently lost. BL-0011 additionally asks for an unmistakable "recording" look in the input area.
+
+**Scope** — this plan covers: one 5-minute cap for every take (hold, locked, tap), a plain notice when the cap sends it; keeping the screen on while listening; keeping the microphone, the process and the gateway link alive when the screen goes off mid-take (microphone foreground service + core-side mic hold + link lease); a `voice.level` bridge event and a composer "recording strip" (level wave flowing out of the mic, timer, countdown in the last 30 s) that hides the placeholder and the photo button; a hold take survives a system pointer cancel by turning into a locked take; an `android-e2e MODE=screenoff` proof; docs.
+
+It does **not** cover: the Brick's UI (the Brick only inherits the 5-min cap), the gateway or protocol v2 (no gateway message changes), the assistant overlay's look (`AssistOverlay` only benefits from keep-screen-on), resuming a take after the process is killed, recording while the app was never in the foreground.
+
+### Assumptions (decided, not asked)
+
+1. "До пяти минут" = a hard cap of exactly 5:00 for every take kind; at the cap the take is **sent**, not discarded (matches today's tap-take behaviour and "never lose the end").
+2. Keep-screen-on applies only while the voice state is `listening` (not thinking/speaking).
+3. Screen off is handled as "app goes to background" — the same path covers the power button, the screen timeout (if keep-screen-on is overridden by the system), and switching apps mid-take.
+4. A take that started in the foreground may continue in the background; a take never *starts* in the background (Android forbids starting a microphone FGS there).
+5. A hold take whose pointer the system cancels (screen off, incoming call, shade pulled) becomes a locked take; the owner's own slide-left still cancels. Disposal of the button (navigation, rotation) still cancels, as today.
+6. The level is an RMS meter on the 16 kHz frames the engine already receives, not a spectrum; 10 updates/s are enough for the wave.
+7. The 30-s warning is visual (red timer) plus one haptic tick; no spoken warning.
+8. The microphone foreground service's notification is the stock deferred one (Android 12+ shows it only after ~10 s), so short takes show no notification flash.
+9. The Brick's hold cap grows from 60 s to 5 min with the shared constant; 5 min of 16 kHz mono PCM is 9.6 MB, acceptable on the Brick.
+
+## Decisions
+
+- **One cap constant**: replace `maxHold` and `maxTapTake` with `maxTake = 5 * time.Minute` used by `listen()` and `tapTakeOn()` — alternative was a separate locked-take cap, but the engine never learns about the UI's lock, and one rule is easier to explain.
+- **Cap sends, with a notice**: on `holdTimer` emit `NoticeTakeLimit` («Запись ограничена 5 минутами — сообщение отправлено») then `release()` — alternative (silent send) leaves the owner guessing why recording stopped.
+- **Level metered in the engine**: `voice.Level{Level, Elapsed, Limit}` computed from the frames in `Engine.run`'s frame case, every 5 frames (100 ms), coalesced in the emitter like `AnswerDelta` — alternative was a second subscription on the capture in petcore, which would need its own lifecycle and could disagree with what the take records.
+- **Level always emitted, no config flag**: the Brick UI ignores unknown events and coalescing keeps the queue at one item — alternative (a `Config` flag plumbed through `app.EngineConfig`) adds plumbing for no measured cost.
+- **`voice.level` is a replaceable bridge type**: added to `Outbox.replaced()` and returned early from `Encoder.Event` (no `syncLog`) — a slow UI only ever needs the newest level, and the turn/voice pump never waits on it.
+- **Core-side mic hold, not "devices stay on"**: new `audio.HoldMic(on)` keeps only the capture open while `gate.stopped`; playback still stops in the background — the A10b deferral (read on open) stays the one rule for audio in the background.
+- **Hold decided in one place**: `core.applyTake()` (petcore), called from `SetForeground` and on every `voice.StateChanged` in `pump`, derives `micHeld = background && engine.State()==Listening` — alternative of toggling from Kotlin would race the core's own state changes.
+- **Link lease for a background take**: `applyTake` takes `HostLink.Lease()` when the mic hold starts and releases it when the voice is idle/error/offline or the app is back — without it a take past 3 min in the background would find the link parked.
+- **`TakeService` (type `microphone`) started at take start while resumed**: alternative was starting it in `onPause` like `HoldService`, but a microphone FGS must start while the app is in the foreground and the screen-off `onPause` is too late to rely on; starting at take start is deterministic and the deferred notification keeps short takes quiet.
+- **TakeService outlives the take only in the background**: in the foreground it stops when listening ends; in the background it stays until the voice is idle (it then does `HoldService`'s job for that turn) and `HoldService` is not started while it runs — alternative of handing over to `HoldService` fails because a short service cannot start from the background.
+- **Keep screen on via the window flag from `MainActivity`'s voice collector**: `FLAG_KEEP_SCREEN_ON` while `voice == "listening"` — alternative (Compose `LocalView.keepScreenOn` in the Composer) would miss assistant-started takes and takes while another tab is shown.
+- **Level reaches Compose through its own `StateFlow`**: `PetViewModel.level`, not `UiState` — 10 Hz through the reducer would recompose every screen.
+- **System cancel of a hold locks the take**: `MicButton` calls `onLockedChange(true)` instead of `voice.cancel` — the screen-off cancel is the main case and losing a dictation is worse than an extra tap to send.
+- **Recording strip replaces the field and the camera button for every listening state**: hold, locked, tap and assistant listen alike — the request wants "recording is going on" to be unmistakable regardless of how it started.
+
+## Architecture
+
+```
+MicButton ──talk.*──► Core.command ──► bridge ──► petcore.core ──► voice.Engine (frames → rec, Level every 100 ms, cap 5 min)
+   ▲                                                    │  ▲                │
+   │ level, voice                                       │  │ StateChanged   │ Level / Notice(take_limit)
+Composer ◄── PetViewModel.level (StateFlow) ◄── Decode ◄┴──┴── bridge.Encoder (voice.level replaceable) ◄┘
+
+MainActivity voice collector:
+  listening              → window FLAG_KEEP_SCREEN_ON; TakeService.start (resumed only)
+  onStop (screen off)    → lifecycle{false} → core.SetForeground(false)
+                              applyTake(): HoldMic(true) + HostLink.Lease()  ← before StopDevices
+                              StopDevices(): playback closes, capture stays (gate.micHeld)
+  take ends in background → engine thinking → applyTake(): HoldMic(false) → capture closes
+  voice idle (background)→ TakeService.stop; applyTake(): lease released → link parks per A10b
+  onResume               → TakeService.stop unless listening; StartDevices; applyTake()
+```
+
+Integration points:
+
+- `client/internal/voice/engine.go` — `maxTake`, `listen()`, `tapTakeOn()`, `handsFreeOn()` (sets `holdStart`), `run()` frame case (meter), `holdTimer` case (notice), `release()` (log `voice: take sent N ms`).
+- `client/internal/voice/events.go` — `Level` event, `NoticeTakeLimit`, emitter coalescing.
+- `client/internal/bridge/{envelope,events,outbox}.go` + `docs/android-bridge.md`.
+- `client/internal/audio/{aaudio_android,gate}.go` — `HoldMic`, `micRunning`.
+- `client/cmd/petcore/{core,jni}.go` — `holdMic` seam, `engine.State()`, `hostLink.Lease()`, `applyTake()`.
+- `android/app/src/main/java/dev/hermespet/{MainActivity,TakeService,HoldService}.kt`, `AndroidManifest.xml`.
+- `android/app/src/main/java/dev/hermespet/core/{CoreEvent,Decode}.kt`, `ui/{PetViewModel,Reduce}.kt`, `ui/chat/{Composer,MicButton,ChatScreen,RecordingStrip}.kt`.
+
+No gateway, protocol v2, schema or SQLite change.
+
+## Milestones
+
+| # | Milestone | SP | Depends on | Status |
+|---|-----------|----|-----------|--------|
+| M1 | Engine: one 5-min cap, cap notice, level meter | 4 | — | pending |
+| M2 | Bridge: `voice.level` event and `take_limit` notice | 2 | M1 | pending |
+| M3 | Core: microphone and link kept for a take in the background | 3 | M1 | pending |
+| M4 | Android shell: TakeService and keep-screen-on | 3 | — | pending |
+| M5 | Android data: decode `voice.level`, level flow | 2 | M2 | pending |
+| M6 | Android composer: recording strip, hold survives system cancel | 5 | M5 | pending |
+| M7 | End to end on the emulator and docs | 3 | M3, M4, M6 | pending |
+
+Total 22 SP. With the vault's `sprint.max_sp: 15`, run M1–M5 (14 SP) as one sprint and M6–M7 (8 SP) as the next.
+
+## Milestone files
+
+Each block below is one milestone file (`milestones/M{n}-…/M{n}-….md`); all paths are relative to the repo root.
+
+---
+
+### M1 — Engine: one 5-min cap, cap notice, level meter
+
+The voice engine caps every take at 5 minutes, says so when the cap sends it, and reports the microphone level and elapsed time every 100 ms while listening.
+
+**Scope** — `client/internal/voice/engine.go`, `client/internal/voice/events.go`, `client/internal/voice/engine_test.go`, `client/internal/voice/notice_test.go`. No bridge or UI change (M2 maps the new event).
+
+#### Tasks
+
+| Task | Description | Files | SP | Status |
+|------|-------------|-------|----|--------|
+| 1.1 | Replace `maxHold` and `maxTapTake` with `maxTake = 5 * time.Minute`; `listen()` and `tapTakeOn()` both arm `holdTimer` with it; `handsFreeOn()` sets `holdStart` (for elapsed) but keeps no timer (the VAD ends it); `release()` logs `voice: take sent %d ms` before `startVoice` | `client/internal/voice/engine.go` | 1 | pending |
+| 1.2 | `NoticeTakeLimit` kind (not a failure); the `holdTimer` case emits `e.notice(NoticeTakeLimit, "Запись ограничена 5 минутами — сообщение отправлено")` then `release()` | `client/internal/voice/events.go`, `client/internal/voice/engine.go` | 1 | pending |
+| 1.3 | `Level` event and meter: in `run()`'s frame case, while `StateListening` (hold, tap and hands-free branches alike), fold each frame's RMS into a 5-frame window and emit `Level{Level, Elapsed, Limit}` per window; `Level` = RMS in dBFS mapped linearly from −60..0 dB to 0..1, clamped; `Limit` = `maxTake` for hold/tap takes, 0 for hands-free; frames the chime mutes count as 0; emitter coalesces a `Level` onto a queued last `Level` | `client/internal/voice/engine.go`, `client/internal/voice/events.go` | 2 | pending |
+
+#### Definition of Done
+
+##### Task 1.1
+- [ ] `grep -n "maxHold\|maxTapTake" client/internal/voice/*.go` prints nothing.
+- [ ] Test `TestHoldTakeSentAtMaxTake`: a `TryTalkDown` take on the fake clock is still `listening` at 60 s and is sent (turn started) at `maxTake`.
+- [ ] The existing tap-take cap test (`engine_test.go` near line 827) is rewritten against `maxTake` and passes.
+
+##### Task 1.2
+- [ ] Test `TestTakeLimitNotice`: advancing the fake clock by `maxTake` during a tap take emits `Notice{Kind: NoticeTakeLimit}` before `StateTranscribing`, and the display log holds the notice line.
+- [ ] `NoticeTakeLimit.Failure()` is false (asserted in `notice_test.go`).
+
+##### Task 1.3
+- [ ] Test `TestLevelWhileListening`: 10 frames of a full-scale square wave yield 2 `Level` events with `Level` ≥ 0.95, 10 zero frames yield `Level` == 0; `Elapsed` grows with the fake clock; `Limit` == `maxTake` for a tap take and 0 for `Listen()`.
+- [ ] Test `TestNoLevelWhenIdle`: frames while idle emit no `Level`.
+- [ ] Test `TestEmitterCoalescesLevel`: two `Level`s queued back to back leave one (the newer) in the queue.
+- [ ] Sketch:
+
+  ```go
+  // Level is the microphone level while listening, every levelEvery frames.
+  type Level struct {
+      Level   float32       // 0..1, −60..0 dBFS
+      Elapsed time.Duration // since the take started
+      Limit   time.Duration // the cap, 0 when none (hands-free)
+  }
+
+  func (e *Engine) meter(f []int16) { ... }
+  ```
+
+#### References
+- `client/internal/voice/engine_test.go` (the tap-take cap test near line 827: fake clock `r.clk.Advance`).
+- `client/internal/voice/events.go` `emitter.emit` (the `AnswerDelta` coalescing to copy).
+
+#### Verify
+- `cd client && just test ./internal/voice/...`
+
+---
+
+### M2 — Bridge: `voice.level` event and `take_limit` notice
+
+The bridge sends `voice.level` (replaceable, never blocking the pump) and names the new notice kind; the contract doc says so.
+
+**Scope** — `client/internal/bridge/envelope.go`, `client/internal/bridge/events.go`, `client/internal/bridge/outbox.go`, `client/internal/bridge/events_test.go`, `client/internal/bridge/outbox_test.go`, `docs/android-bridge.md`.
+
+#### Tasks
+
+| Task | Description | Files | SP | Status |
+|------|-------------|-------|----|--------|
+| 2.1 | `TypeVoiceLevel = "voice.level"` in the type list; `Encoder.Event` handles `voice.Level` first and returns its one envelope `{level (rounded to 2 decimals), elapsed_ms, limit_ms}` without `syncLog`/`turnEnd`; `noticeKinds` maps `NoticeTakeLimit` → `take_limit` | `client/internal/bridge/envelope.go`, `client/internal/bridge/events.go`, `client/internal/bridge/events_test.go` | 1 | pending |
+| 2.2 | `replaced()` includes `TypeVoiceLevel`; `docs/android-bridge.md`: `voice.level` row in Events, `take_limit` in `notice` kinds, the `seq` gap note names `voice.level`, `talk.down` and `talk.tap` rows say every take is sent by itself after 5 min with a `take_limit` notice, `lifecycle` row says a running take keeps the microphone | `client/internal/bridge/outbox.go`, `client/internal/bridge/outbox_test.go`, `docs/android-bridge.md` | 1 | pending |
+
+#### Definition of Done
+
+##### Task 2.1
+- [ ] Test `TestVoiceLevelEnvelope`: `Encoder.Event(voice.Level{0.5, 1500ms, 5min})` returns exactly one envelope `{"type":"voice.level","data":{"level":0.5,"elapsed_ms":1500,"limit_ms":300000}}`.
+- [ ] Test: a `Notice{Kind: NoticeTakeLimit}` encodes `kind: "take_limit"`.
+
+##### Task 2.2
+- [ ] Test `TestOutboxKeepsNewestLevel`: three queued `voice.level` envelopes leave one, the newest; a `transcript` queued between them is kept in order.
+- [ ] `TestBridgeDocMatchesCode` passes with the new row.
+
+#### References
+- `client/internal/bridge/outbox.go` `replaced` (pet / log.reset precedent).
+- `client/internal/bridge/events_test.go` (envelope assertions).
+- Contract: `docs/android-bridge.md` (do not touch `protocol/` — no gateway message changes).
+
+#### Verify
+- `cd client && just test ./internal/bridge/...`
+
+---
+
+### M3 — Core: microphone and link kept for a take in the background
+
+When the app leaves the foreground while a take records, the capture stays open and the gateway link stays unparked until the take's turn is over; otherwise the background behaviour is unchanged.
+
+**Scope** — `client/internal/audio/aaudio_android.go`, `client/internal/audio/gate.go`, `client/internal/audio/gate_test.go`, `client/cmd/petcore/core.go`, `client/cmd/petcore/jni.go`, `client/cmd/petcore/core_test.go`.
+
+#### Tasks
+
+| Task | Description | Files | SP | Status |
+|------|-------------|-------|----|--------|
+| 3.1 | `gate.micHeld`; `HoldMic(on bool)` (via `gateSet`, logs `audio: microphone held for a take: on/off`); pure `micRunning(stopped, held bool) bool` in `gate.go`; the capture's `open()` waits on a state func reporting `micRunning`, `read()` closes the stream only when `!micRunning`; `StopDevices` leaves `micLive` alone while held; the output keeps using `!gate.stopped` | `client/internal/audio/aaudio_android.go`, `client/internal/audio/gate.go`, `client/internal/audio/gate_test.go` | 1 | pending |
+| 3.2 | petcore seams: `holdMic func(bool)` on `core` (set to `audio.HoldMic` in `jni.go` init beside `stopDevices`), `State() voice.State` on the `engine` interface, `Lease() func()` on the `hostLink` interface; `applyTake()` under `c.mu`: `want := background && eng != nil && eng.State()==StateListening`; on change call `holdMic(want)` and log `android: microphone kept for the take` / `released`; take a lease when `want` turns true, release it when the app is foreground or the state is idle/error/offline. `SetForeground(false)` calls `applyTake()` **before** `stopDevices()`; `SetForeground(true)` calls it after `startDevices()`; `pump` calls it on every `voice.StateChanged` | `client/cmd/petcore/core.go`, `client/cmd/petcore/jni.go` | 2 | pending |
+
+#### Definition of Done
+
+##### Task 3.1
+- [ ] `gate_test.go` table test of `micRunning`: (false,false)→true, (true,false)→false, (true,true)→true.
+- [ ] `just android-core ABI=x86_64` builds `libpetcore.so` with the changed android-tagged audio file.
+
+##### Task 3.2
+- [ ] Test `TestBackgroundTakeKeepsTheMicrophone`: fake engine in `StateListening`; `SetForeground(false)` records `holdMic(true)` before `stopDevices`, and `fakeHost` counts one lease; moving the fake engine to `StateThinking` and pumping a `StateChanged` records `holdMic(false)` with the lease still held; `StateIdle` releases the lease.
+- [ ] Test `TestForegroundReleasesTheTakeHold`: `SetForeground(true)` during a held take records `holdMic(false)` and releases the lease.
+- [ ] Test `TestBackgroundWithoutATakeStopsAsBefore`: idle engine, `SetForeground(false)` never calls `holdMic(true)` nor `Lease` (`TestLifecycleParksAndUnparks` still passes).
+- [ ] Sketch:
+
+  ```go
+  type hostLink interface {
+      Pause(after time.Duration)
+      Resume()
+      Lease() (release func())
+      ...
+  }
+
+  // applyTake keeps the microphone and the link for a take running in the background.
+  func (c *core) applyTake() { ... }
+  ```
+
+#### References
+- `client/cmd/petcore/core_test.go` `TestLifecycleParksAndUnparks` and `fakeHost` (extend with `Lease`).
+- `client/internal/app/hostlink.go` `Lease` (semantics of the release func).
+- `client/internal/audio/gate_test.go`.
+
+#### Verify
+- `cd client && just test ./internal/audio/... ./cmd/petcore/...`
+- `just android-core ABI=x86_64` (cross-builds the android-tagged audio file).
+
+---
+
+### M4 — Android shell: TakeService and keep-screen-on
+
+While a take records the screen stays on, and a microphone foreground service started with the take keeps Android from silencing or freezing the app if the screen goes off anyway.
+
+**Scope** — new `android/app/src/main/java/dev/hermespet/TakeService.kt`; `android/app/src/main/java/dev/hermespet/MainActivity.kt`; `android/app/src/main/java/dev/hermespet/HoldService.kt` (the `Hold` object); `android/app/src/main/AndroidManifest.xml`; new test `android/app/src/test/java/dev/hermespet/TakeDecisionTest.kt`; `android/app/src/test/java/dev/hermespet/HoldDecisionTest.kt`.
+
+#### Tasks
+
+| Task | Description | Files | SP | Status |
+|------|-------------|-------|----|--------|
+| 4.1 | `object Take` (pure): `keepScreenOn(voice) = voice == "listening"`; `shouldStart(voice, resumed, running) = voice=="listening" && resumed && !running`; `shouldStop(voice, resumed, running) = running && (if resumed voice != "listening" else voice !in {listening, thinking, speaking})`. `TakeService`: `startForeground(3, n, FOREGROUND_SERVICE_TYPE_MICROPHONE)` with «{Имя} записывает сообщение…» on `Notices.HOLD_CHANNEL`, tap opens the app, `START_NOT_STICKY`; a refused start (`RuntimeException`) logs `take: service not started: …` and stops; companion `start(ctx, name)`, `stop(ctx)`, `running` flag; logs `take: service started` / `stopped` | `android/app/src/main/java/dev/hermespet/TakeService.kt`, `android/app/src/main/AndroidManifest.xml` | 2 | pending |
+| 4.2 | `MainActivity`: the existing `vm.state.map { it.voice }` collector also sets/clears `WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON` per `Take.keepScreenOn`, starts/stops `TakeService` per `Take`; `onResume` applies `Take.shouldStop`; `onPause` starts `HoldService` only when `!TakeService.running`; the collector's HoldService stop is unchanged | `android/app/src/main/java/dev/hermespet/MainActivity.kt`, `android/app/src/test/java/dev/hermespet/TakeDecisionTest.kt` | 1 | pending |
+
+#### Definition of Done
+
+##### Task 4.1
+- [ ] Manifest declares `<service android:name=".TakeService" android:exported="false" android:foregroundServiceType="microphone" />`; `ManifestExportTest` passes unchanged.
+- [ ] `TakeDecisionTest`: `shouldStart("listening", resumed=true, running=false)` true; false when not resumed; `shouldStop("thinking", resumed=true, running=true)` true; `shouldStop("thinking", resumed=false, running=true)` false; `shouldStop("idle", resumed=false, running=true)` true; `keepScreenOn` true only for `listening`.
+
+##### Task 4.2
+- [ ] `HoldDecisionTest` still passes; a new case asserts the pause path skips `HoldService` while a take service runs (via a pure `Hold.shouldStartOnPause(sdk, voice, takeRunning)` added to `Hold`).
+- [ ] Manual check on the emulator recorded in M7's e2e (window flag and service).
+
+#### References
+- `android/app/src/main/java/dev/hermespet/HoldService.kt` (service shape, `Hold` decision object).
+- `android/app/src/main/java/dev/hermespet/ListenService.kt` (microphone-type `startForeground`).
+- `android/app/src/test/java/dev/hermespet/HoldDecisionTest.kt`.
+
+#### Verify
+- `just android-test`
+
+---
+
+### M5 — Android data: decode `voice.level`, level flow
+
+The app decodes `voice.level` into a separate `StateFlow` that resets when listening ends, leaving `UiState` and the reducer untouched by 10 Hz updates.
+
+**Scope** — `android/app/src/main/java/dev/hermespet/core/CoreEvent.kt`, `android/app/src/main/java/dev/hermespet/core/Decode.kt`, `android/app/src/main/java/dev/hermespet/ui/PetViewModel.kt`, `android/app/src/main/java/dev/hermespet/ui/Reduce.kt`, tests `android/app/src/test/java/dev/hermespet/DecodeTest.kt`, `android/app/src/test/java/dev/hermespet/PetViewModelTest.kt`.
+
+#### Tasks
+
+| Task | Description | Files | SP | Status |
+|------|-------------|-------|----|--------|
+| 5.1 | `CoreEvent.VoiceLevel(level: Float, elapsedMs: Long, limitMs: Long)`; `Decode` maps `"voice.level"`; `Reduce` lists it with the no-op events | `android/app/src/main/java/dev/hermespet/core/CoreEvent.kt`, `android/app/src/main/java/dev/hermespet/core/Decode.kt`, `android/app/src/main/java/dev/hermespet/ui/Reduce.kt`, `android/app/src/test/java/dev/hermespet/DecodeTest.kt` | 1 | pending |
+| 5.2 | `PetViewModel.level: StateFlow<CoreEvent.VoiceLevel?>`: `collect()` routes a `VoiceLevel` to it without `change{}`; a `VoiceState` other than `listening` sets it to null | `android/app/src/main/java/dev/hermespet/ui/PetViewModel.kt`, `android/app/src/test/java/dev/hermespet/PetViewModelTest.kt` | 1 | pending |
+
+#### Definition of Done
+
+##### Task 5.1
+- [ ] `DecodeTest`: `{"v":1,"seq":3,"type":"voice.level","data":{"level":0.42,"elapsed_ms":1200,"limit_ms":300000}}` decodes to `VoiceLevel(0.42f, 1200, 300000)`.
+
+##### Task 5.2
+- [ ] `PetViewModelTest`: after `VoiceState("listening")` and a `VoiceLevel`, `vm.level.value` is that level and `vm.state.value` is the same instance as before the level; after `VoiceState("thinking")` `vm.level.value` is null.
+
+#### References
+- `android/app/src/test/java/dev/hermespet/DecodeTest.kt`, `android/app/src/test/java/dev/hermespet/PetViewModelTest.kt`.
+- Contract: `docs/android-bridge.md` `voice.level` row (from M2).
+
+#### Verify
+- `just android-test`
+
+---
+
+### M6 — Android composer: recording strip, hold survives system cancel
+
+While listening, the composer's pill shows a recording strip — a level wave flowing out of the mic, the elapsed time and, in the last 30 s, a red countdown — with the placeholder and the camera button hidden; a system-cancelled hold turns into a locked take.
+
+**Scope** — new `android/app/src/main/java/dev/hermespet/ui/chat/RecordingStrip.kt`; `android/app/src/main/java/dev/hermespet/ui/chat/Composer.kt`; `android/app/src/main/java/dev/hermespet/ui/chat/MicButton.kt`; `android/app/src/main/java/dev/hermespet/ui/chat/ChatScreen.kt`; tests `android/app/src/test/java/dev/hermespet/ComposerTest.kt`, `android/app/src/test/java/dev/hermespet/MicButtonTest.kt`, `android/app/src/test/java/dev/hermespet/ChatScreenShotTest.kt`; goldens `android/app/src/test/screenshots/chat-listening.png` (changes), new `android/app/src/test/screenshots/chat-recording-limit.png`.
+
+#### Tasks
+
+| Task | Description | Files | SP | Status |
+|------|-------------|-------|----|--------|
+| 6.1 | `RecordingStrip(levels: List<Float>, elapsedMs: Long, limitMs: Long, onCancel: (() -> Unit)?)`: optional × cancel at the start, timer `m:ss` (`limitMs > 0` and ≤ 30 s left: «осталось m:ss» in `PetColors.Error`), then a `Canvas` of up to 32 rounded bars right-aligned so the newest bar touches the mic and older ones drift left, bar height = 4 dp + level × (strip height − 8 dp), alpha fading with age; semantics `contentDescription = "Идёт запись"`, `testTag("recording")` | `android/app/src/main/java/dev/hermespet/ui/chat/RecordingStrip.kt` | 2 | pending |
+| 6.2 | `Composer(level: CoreEvent.VoiceLevel? = null, …)`: `recordingNow = micGranted && voice == "listening"`; keeps a ring of the last 32 levels (cleared when recording starts); while recording hides `AttachButton` and the `BasicTextField` (placeholder included) and shows `RecordingStrip` in the field's weight slot (× shown for locked and tap takes: `voice.cancel` and `locked = false`); the old locked «Слушаю» row is replaced by the strip; one `HapticFeedbackType.Reject` tick when the remaining time first drops to ≤ 30 s. `ChatScreen(vm…)` collects `vm.level` with `collectAsStateWithLifecycle` and passes it; the stateless `ChatScreen` gains `level: CoreEvent.VoiceLevel? = null` | `android/app/src/main/java/dev/hermespet/ui/chat/Composer.kt`, `android/app/src/main/java/dev/hermespet/ui/chat/ChatScreen.kt`, `android/app/src/test/java/dev/hermespet/ComposerTest.kt` | 2 | pending |
+| 6.3 | `MicButton`: a system cancel or lost pointer during a hold calls `onLockedChange(true)` (take continues, log `ui: hold cancelled by the system, take locked`) instead of `voice.cancel`; the slide-left cancel and the disposal path are unchanged; the halo radius grows with the level (`HALO + level × 8 dp`) via a new `level: Float = 0f` parameter | `android/app/src/main/java/dev/hermespet/ui/chat/MicButton.kt`, `android/app/src/test/java/dev/hermespet/MicButtonTest.kt` | 1 | pending |
+
+#### Definition of Done
+
+##### Task 6.1
+- [ ] `ComposerTest`: `RecordingStrip(levels, 42_000, 300_000, null)` shows «0:42»; with `elapsedMs = 275_000` shows «осталось 0:25».
+
+##### Task 6.2
+- [ ] `ComposerTest`: with `voice = "listening"` the nodes tagged `ATTACH_TAG` and `COMPOSER_FIELD_TAG` do not exist, the text «Сообщение» does not exist, a node tagged `recording` exists; with `voice = "idle"` the reverse.
+- [ ] `ComposerTest`: a locked take's strip × sends `voice.cancel`.
+- [ ] `ChatScreenShotTest`: `chat-listening` re-recorded (strip instead of the field), new `chat-recording-limit` (elapsed 4:40, fixed level list); `just android-test RECORD=1` changes only these two files (`git status --short android/app/src/test/screenshots` lists exactly them), then `just android-test` passes.
+
+##### Task 6.3
+- [ ] `MicButtonTest.aSystemCancelDropsTheTake` becomes `aSystemCancelLocksTheTake`: commands are `talk.down` only and `onLockedChange(true)` was called; `disposalMidHoldDropsTheTake` and `slideLeftCancels` pass unchanged.
+
+#### References
+- `android/app/src/main/java/dev/hermespet/ui/chat/Composer.kt` (locked row: the slot the strip takes).
+- `android/app/src/test/java/dev/hermespet/ComposerTest.kt`, `android/app/src/test/java/dev/hermespet/MicButtonTest.kt`.
+- `android/app/src/test/java/dev/hermespet/ChatScreenShotTest.kt` (golden naming and setup).
+
+#### Verify
+- `just android-test`
+
+---
+
+### M7 — End to end on the emulator and docs
+
+A real app on the emulator records through a screen-off, sends the whole take on return, and the docs, changelog and CLAUDE.md describe the new behaviour.
+
+**Scope** — `tools/android/e2e.sh`, `Justfile` (`android-e2e` doc comment only), `docs/android.md`, new `docs/decisions/0037-takes-survive-the-screen.md`, `CHANGELOG.md`, `CLAUDE.md`.
+
+#### Tasks
+
+| Task | Description | Files | SP | Status |
+|------|-------------|-------|----|--------|
+| 7.1 | `MODE=screenoff` in `e2e.sh`: after «ui: chat ready», tap the talk button once (tap take), wait for `voice: tap take starts`, assert `dumpsys window` shows `KEEP_SCREEN_ON` for the app window and `dumpsys activity services dev.hermespet` lists `TakeService` as foreground; `input keyevent KEYCODE_SLEEP`; assert logcat `android: foreground false` and `android: microphone kept for the take` and **no** `audio: aaudio input closed while the devices are stopped` before the take ends; wait 8 s; `KEYCODE_WAKEUP`, `wm dismiss-keyguard`, tap again; assert `voice: take sent N ms` with N ≥ 8000, then request.start → transcript → `turn.end` as the ptt mode does; ends «android-e2e screenoff: ok»; update the mode list in the header comment and the `Justfile` recipe comment | `tools/android/e2e.sh`, `Justfile` | 2 | pending |
+| 7.2 | Docs: `docs/android.md` new «Voice takes» section (5-min cap and `take_limit`, keep-screen-on, `TakeService`, mic hold and lease, the strip, system cancel → lock); ADR 0037 (context, decision, consequences: the Brick's hold cap rises to 5 min); `CHANGELOG.md` `[Unreleased]`: **Android:** bullets for the strip, screen-on and screen-off survival, an untagged bullet for the 5-min cap; `CLAUDE.md` rows below | `docs/android.md`, `docs/decisions/0037-takes-survive-the-screen.md`, `CHANGELOG.md`, `CLAUDE.md` | 1 | pending |
+
+#### Definition of Done
+
+##### Task 7.1
+- [ ] `just android-e2e MODE=screenoff` on `emulator-5580` ends with «android-e2e screenoff: ok».
+- [ ] `just android-e2e` (default ptt) still passes.
+- [ ] `just release-tools-test` unaffected; `bash -n tools/android/e2e.sh` clean.
+
+##### Task 7.2
+- [ ] `sed -n '/## \[Unreleased\]/,/## \[0/p' CHANGELOG.md | grep -n 'five minutes'` prints the new untagged bullet.
+- [ ] `grep -n "TakeService" CLAUDE.md docs/android.md` finds both.
+
+#### References
+- `tools/android/e2e.sh` `minimise` block (mode structure, logcat waits) and the ptt block (talk-button tap at the logged centre).
+- `docs/decisions/0036-hold-and-read-on-open.md` (ADR shape).
+
+#### Verify
+- `just android-e2e MODE=screenoff`
+
+---
+
+## Implementation Order
+
+```
+M1 ──┬── M2 ── M5 ── M6 ──┐
+     └── M3 ──────────────┼── M7
+M4 ───────────────────────┘
+```
+
+M4 has no Go dependency and may run in parallel with M1–M3. M2 and M3 may run in parallel after M1. M5 needs M2's event shape; M6 needs M5's flow. M7 last.
+
+## Key Files Reference
+
+| File | Role |
+|------|------|
+| `client/internal/voice/engine.go` | take caps, `holdTimer`, frame loop where the meter lives |
+| `client/internal/voice/events.go` | event types, notice kinds, emitter coalescing |
+| `client/internal/bridge/events.go` | `Encoder.Event`: voice events → envelopes, notice kind names |
+| `client/internal/bridge/outbox.go` | replaceable envelope types |
+| `docs/android-bridge.md` | the Go↔Kotlin contract, enforced by `client/internal/bridge/doc_test.go` |
+| `client/cmd/petcore/core.go` | `SetForeground`, `pump`: where the background take hold is decided |
+| `client/internal/audio/aaudio_android.go` | the device gate that closes the capture in the background |
+| `client/internal/app/hostlink.go` | `Pause`/`Lease`: link parking after `HoldAfter` |
+| `android/app/src/main/java/dev/hermespet/MainActivity.kt` | lifecycle → core, voice collector (services, window flag) |
+| `android/app/src/main/java/dev/hermespet/ui/chat/Composer.kt` | the input pill the strip replaces |
+| `android/app/src/main/java/dev/hermespet/ui/chat/MicButton.kt` | gestures, system-cancel handling, halo |
+
+## Final Verification
+
+- [ ] On a phone or the emulator: start a tap take, let the screen time out — it does not; press power mid-sentence, keep speaking 10 s, wake, tap send — the transcript contains the words spoken while the screen was off.
+- [ ] A take left running is sent at 5:00 with the «Запись ограничена 5 минутами — сообщение отправлено» line; the timer turns red at 4:30.
+- [ ] While recording, the composer shows the wave and timer, no «Сообщение» placeholder and no camera button.
+- [ ] `just android-e2e MODE=screenoff` and `just android-e2e` pass.
+- [ ] `just check` — lint, typecheck, tests (gateway and client), client GL tests, assets, protocol, inventory, release tools, agents bus: all pass.
+- [ ] `just android-test` — JVM tests and Roborazzi goldens pass.
+- [ ] `just client-lint` clean (gofmt, vet, controls doc).
+
+## Testing Strategy
+
+1. **Business-goal acceptance** — the owner dictates a ≥ 2-minute message on the real phone with one screen-off in the middle and one with the screen left alone; the sent transcript holds the last sentence in both, and nothing in the chat shows a gap or a «микрофон не работает» line.
+2. **Fast debug loop** — `cd client && just test ./internal/voice/... ./cmd/petcore/...` (seconds) for cap, meter and hold decisions on the fake clock; `just android-test` for the strip (≈1–2 min); `just android-e2e MODE=screenoff` (≈4 min with a booted emulator) for the device path.
+3. **User-facing validation** — the Roborazzi goldens `chat-listening.png` and `chat-recording-limit.png` (and `just android-shots ONLY="chat-listening"` on the emulator) let the owner judge the strip before shipping.
+
+## Deployment / config impact
+
+N/A — no new env vars, config keys, services or infra. The APK gains a manifest service (`TakeService`, microphone type) under permissions it already holds (`FOREGROUND_SERVICE_MICROPHONE`, `RECORD_AUDIO`); the Brick pak ships the new cap with the next release through the usual `just release` / `release-publish`.
+
+## Authorization / data access
+
+N/A — no gateway endpoint, query or tenant data is touched; the microphone stays under the existing RECORD_AUDIO grant, and the service is not exported (`ManifestExportTest`).
+
+## Out of scope
+
+- The gateway and protocol v2: no new message; a take is still one `request.start`…`request.end` stream.
+- The Brick UI: no level strip or countdown on the Brick (it only inherits the 5-min cap).
+- Starting a take with the app already in the background or over the lock screen (Android forbids the microphone service start; `listen.locked` keeps its unlock wait).
+- Recovering a take after the process is killed by the system or the owner (the PCM lives only in memory).
+- A spoken or notification warning before the cap.
+- Retiring the unused `ListenService`/`BackgroundListen` wake leftovers.
+
+## Risks
+
+- **OEM background killers** (aggressive battery managers) may still stop a microphone foreground service; mitigated by keep-screen-on making screen-off rare, and noted in `docs/android.md`.
+- **`TakeService` start refused** (no RECORD_AUDIO at that instant, a restricted app): logged `take: service not started`; the take then still works in the foreground, and a screen-off falls back to today's behaviour — never worse than now.
+- **Race between `SetForeground(false)` and the engine leaving listening**: `applyTake()` reads `engine.State()` under `c.mu` and runs again on every `StateChanged`, so a stale hold is released on the next state change.
+- **Golden churn**: `RECORD=1` rewrites every golden; M6's DoD requires `git status` to list only the two intended PNGs.
+- **Brick hold cap 60 s → 5 min**: a stuck A button would now record 5 min (9.6 MB PCM) before sending; acceptable, called out in ADR 0037.
+
+## Rollback
+
+All changes are client-side and stateless: revert the milestone commits (Android APK via `just android-install`, the Brick via the next release or a signed downgrade). No migration, no persisted data, no gateway change.
+
+## CLAUDE.md impact
+
+| Section | Change | Owning task |
+|---------|--------|-------------|
+| `## Stack` → **android** bullet | «pause stops the devices» → except the microphone while a take records (`TakeService`, a `microphone` foreground service started with the take; the link leased until its turn ends); keep-screen-on while listening; every take capped at 5 min (`take_limit`); the composer's recording strip (level wave from the mic, timer, last-30-s countdown; placeholder and camera hidden) | M7.2 |
+| `## Command catalogue` → `just android-e2e` row | add `MODE=screenoff`: a tap take through `KEYCODE_SLEEP`, the microphone kept, the whole take sent | M7.2 |
+| `## Layout` → `android/` bullet | add `TakeService` to the listed shell classes | M7.2 |
+-- cmd --
+booping plan split draft.md
+-- expected/cwd/index.md --
+---
+title: Voice takes that survive the screen, capped at five minutes, with a live level strip
+type: feature
+sp: 22
+summary: A phone voice message is never cut by sleep or screen-off, stops at 5 min, and the composer shows a live level strip
+---
+
+# Voice takes that survive the screen, capped at five minutes, with a live level strip
+
+## Context
+
+**Current state** (verified in the code at `13e00c7`):
+
+- The Android app is a Compose shell over the headless Go core `client/cmd/petcore` (`libpetcore.so`); the bridge contract is `docs/android-bridge.md`, enforced by `client/internal/bridge/doc_test.go`.
+- The talk button (`android/app/src/main/java/dev/hermespet/ui/chat/MicButton.kt`) runs three kinds of take: **hold** (`talk.down`/`talk.up`), **locked** hold (slide up; the Composer's `locked` flag, a hold take to the core) and **tap** take (`talk.tap` → `Engine.TryTapTake`, ended only by the next tap).
+- Take caps in `client/internal/voice/engine.go`: `maxHold = 60 * time.Second` (hold *and locked* takes — a locked dictation is cut and sent after one minute) and `maxTapTake = 5 * time.Minute` (tap takes). On `holdTimer` the engine calls `release()` and sends whatever was recorded.
+- Screen off / sleep: `MainActivity.onStop` sends `lifecycle {foreground:false}` → `core.SetForeground(false)` (`client/cmd/petcore/core.go:440`) → `audio.StopDevices()` (`client/internal/audio/aaudio_android.go:75`), which closes the AAudio capture stream. The engine stays `listening` but gets no frames: the rest of the message is lost; on return the capture reopens and the take continues with a hole. A hold take is worse: the system cancels the pointer and `MicButton` sends `voice.cancel` — the whole take is dropped (`MicButtonTest.aSystemCancelDropsTheTake` pins this).
+- Nothing keeps the screen on while recording (no `FLAG_KEEP_SCREEN_ON` anywhere under `android/app/src/main`).
+- No foreground service covers a take: `HoldService` is a `shortService` (no microphone access in the background on Android 11+), `ListenService` (type `microphone`) is the leftover wake-word service, not started by anything since Stage A7.
+- `HostLink.Pause(app.HoldAfter)` parks the gateway link 3 min after the pause unless a `HostLink.Lease()` is held (`client/internal/app/hostlink.go:241`), so a take still recording in the background at 3 min would end with no link to send it on.
+- During recording the composer still shows the «Сообщение» placeholder and the camera button; the only sign is a static halo around the mic (`MicButton.drawBehind`) or, when locked, a «Слушаю» row. The core reports no audio level.
+
+**Motivation** — the owner dictates long messages on the phone; the screen times out or they press power, and the end of the message is silently lost. BL-0011 additionally asks for an unmistakable "recording" look in the input area.
+
+**Scope** — this plan covers: one 5-minute cap for every take (hold, locked, tap), a plain notice when the cap sends it; keeping the screen on while listening; keeping the microphone, the process and the gateway link alive when the screen goes off mid-take (microphone foreground service + core-side mic hold + link lease); a `voice.level` bridge event and a composer "recording strip" (level wave flowing out of the mic, timer, countdown in the last 30 s) that hides the placeholder and the photo button; a hold take survives a system pointer cancel by turning into a locked take; an `android-e2e MODE=screenoff` proof; docs.
+
+It does **not** cover: the Brick's UI (the Brick only inherits the 5-min cap), the gateway or protocol v2 (no gateway message changes), the assistant overlay's look (`AssistOverlay` only benefits from keep-screen-on), resuming a take after the process is killed, recording while the app was never in the foreground.
+
+### Assumptions (decided, not asked)
+
+1. "До пяти минут" = a hard cap of exactly 5:00 for every take kind; at the cap the take is **sent**, not discarded (matches today's tap-take behaviour and "never lose the end").
+2. Keep-screen-on applies only while the voice state is `listening` (not thinking/speaking).
+3. Screen off is handled as "app goes to background" — the same path covers the power button, the screen timeout (if keep-screen-on is overridden by the system), and switching apps mid-take.
+4. A take that started in the foreground may continue in the background; a take never *starts* in the background (Android forbids starting a microphone FGS there).
+5. A hold take whose pointer the system cancels (screen off, incoming call, shade pulled) becomes a locked take; the owner's own slide-left still cancels. Disposal of the button (navigation, rotation) still cancels, as today.
+6. The level is an RMS meter on the 16 kHz frames the engine already receives, not a spectrum; 10 updates/s are enough for the wave.
+7. The 30-s warning is visual (red timer) plus one haptic tick; no spoken warning.
+8. The microphone foreground service's notification is the stock deferred one (Android 12+ shows it only after ~10 s), so short takes show no notification flash.
+9. The Brick's hold cap grows from 60 s to 5 min with the shared constant; 5 min of 16 kHz mono PCM is 9.6 MB, acceptable on the Brick.
+
+## Decisions
+
+- **One cap constant**: replace `maxHold` and `maxTapTake` with `maxTake = 5 * time.Minute` used by `listen()` and `tapTakeOn()` — alternative was a separate locked-take cap, but the engine never learns about the UI's lock, and one rule is easier to explain.
+- **Cap sends, with a notice**: on `holdTimer` emit `NoticeTakeLimit` («Запись ограничена 5 минутами — сообщение отправлено») then `release()` — alternative (silent send) leaves the owner guessing why recording stopped.
+- **Level metered in the engine**: `voice.Level{Level, Elapsed, Limit}` computed from the frames in `Engine.run`'s frame case, every 5 frames (100 ms), coalesced in the emitter like `AnswerDelta` — alternative was a second subscription on the capture in petcore, which would need its own lifecycle and could disagree with what the take records.
+- **Level always emitted, no config flag**: the Brick UI ignores unknown events and coalescing keeps the queue at one item — alternative (a `Config` flag plumbed through `app.EngineConfig`) adds plumbing for no measured cost.
+- **`voice.level` is a replaceable bridge type**: added to `Outbox.replaced()` and returned early from `Encoder.Event` (no `syncLog`) — a slow UI only ever needs the newest level, and the turn/voice pump never waits on it.
+- **Core-side mic hold, not "devices stay on"**: new `audio.HoldMic(on)` keeps only the capture open while `gate.stopped`; playback still stops in the background — the A10b deferral (read on open) stays the one rule for audio in the background.
+- **Hold decided in one place**: `core.applyTake()` (petcore), called from `SetForeground` and on every `voice.StateChanged` in `pump`, derives `micHeld = background && engine.State()==Listening` — alternative of toggling from Kotlin would race the core's own state changes.
+- **Link lease for a background take**: `applyTake` takes `HostLink.Lease()` when the mic hold starts and releases it when the voice is idle/error/offline or the app is back — without it a take past 3 min in the background would find the link parked.
+- **`TakeService` (type `microphone`) started at take start while resumed**: alternative was starting it in `onPause` like `HoldService`, but a microphone FGS must start while the app is in the foreground and the screen-off `onPause` is too late to rely on; starting at take start is deterministic and the deferred notification keeps short takes quiet.
+- **TakeService outlives the take only in the background**: in the foreground it stops when listening ends; in the background it stays until the voice is idle (it then does `HoldService`'s job for that turn) and `HoldService` is not started while it runs — alternative of handing over to `HoldService` fails because a short service cannot start from the background.
+- **Keep screen on via the window flag from `MainActivity`'s voice collector**: `FLAG_KEEP_SCREEN_ON` while `voice == "listening"` — alternative (Compose `LocalView.keepScreenOn` in the Composer) would miss assistant-started takes and takes while another tab is shown.
+- **Level reaches Compose through its own `StateFlow`**: `PetViewModel.level`, not `UiState` — 10 Hz through the reducer would recompose every screen.
+- **System cancel of a hold locks the take**: `MicButton` calls `onLockedChange(true)` instead of `voice.cancel` — the screen-off cancel is the main case and losing a dictation is worse than an extra tap to send.
+- **Recording strip replaces the field and the camera button for every listening state**: hold, locked, tap and assistant listen alike — the request wants "recording is going on" to be unmistakable regardless of how it started.
+
+## Architecture
+
+```
+MicButton ──talk.*──► Core.command ──► bridge ──► petcore.core ──► voice.Engine (frames → rec, Level every 100 ms, cap 5 min)
+   ▲                                                    │  ▲                │
+   │ level, voice                                       │  │ StateChanged   │ Level / Notice(take_limit)
+Composer ◄── PetViewModel.level (StateFlow) ◄── Decode ◄┴──┴── bridge.Encoder (voice.level replaceable) ◄┘
+
+MainActivity voice collector:
+  listening              → window FLAG_KEEP_SCREEN_ON; TakeService.start (resumed only)
+  onStop (screen off)    → lifecycle{false} → core.SetForeground(false)
+                              applyTake(): HoldMic(true) + HostLink.Lease()  ← before StopDevices
+                              StopDevices(): playback closes, capture stays (gate.micHeld)
+  take ends in background → engine thinking → applyTake(): HoldMic(false) → capture closes
+  voice idle (background)→ TakeService.stop; applyTake(): lease released → link parks per A10b
+  onResume               → TakeService.stop unless listening; StartDevices; applyTake()
+```
+
+Integration points:
+
+- `client/internal/voice/engine.go` — `maxTake`, `listen()`, `tapTakeOn()`, `handsFreeOn()` (sets `holdStart`), `run()` frame case (meter), `holdTimer` case (notice), `release()` (log `voice: take sent N ms`).
+- `client/internal/voice/events.go` — `Level` event, `NoticeTakeLimit`, emitter coalescing.
+- `client/internal/bridge/{envelope,events,outbox}.go` + `docs/android-bridge.md`.
+- `client/internal/audio/{aaudio_android,gate}.go` — `HoldMic`, `micRunning`.
+- `client/cmd/petcore/{core,jni}.go` — `holdMic` seam, `engine.State()`, `hostLink.Lease()`, `applyTake()`.
+- `android/app/src/main/java/dev/hermespet/{MainActivity,TakeService,HoldService}.kt`, `AndroidManifest.xml`.
+- `android/app/src/main/java/dev/hermespet/core/{CoreEvent,Decode}.kt`, `ui/{PetViewModel,Reduce}.kt`, `ui/chat/{Composer,MicButton,ChatScreen,RecordingStrip}.kt`.
+
+No gateway, protocol v2, schema or SQLite change.
+
+## Milestones
+
+| id | title | sp | status |
+| --- | --- | --- | --- |
+| 01 | [Engine: one 5-min cap, cap notice, level meter](milestones/M01-engine-one-5-min-cap-cap-notice-level-meter/M01-engine-one-5-min-cap-cap-notice-level-meter.md) | 4 | pending |
+| 02 | [Bridge: `voice.level` event and `take_limit` notice](milestones/M02-bridge-voice-level-event-and-take-limit-notice/M02-bridge-voice-level-event-and-take-limit-notice.md) | 2 | pending |
+| 03 | [Core: microphone and link kept for a take in the background](milestones/M03-core-microphone-and-link-kept-for-a-take-in-the-background/M03-core-microphone-and-link-kept-for-a-take-in-the-background.md) | 3 | pending |
+| 04 | [Android shell: TakeService and keep-screen-on](milestones/M04-android-shell-takeservice-and-keep-screen-on/M04-android-shell-takeservice-and-keep-screen-on.md) | 3 | pending |
+| 05 | [Android data: decode `voice.level`, level flow](milestones/M05-android-data-decode-voice-level-level-flow/M05-android-data-decode-voice-level-level-flow.md) | 2 | pending |
+| 06 | [Android composer: recording strip, hold survives system cancel](milestones/M06-android-composer-recording-strip-hold-survives-system-cancel/M06-android-composer-recording-strip-hold-survives-system-cancel.md) | 5 | pending |
+| 07 | [End to end on the emulator and docs](milestones/M07-end-to-end-on-the-emulator-and-docs/M07-end-to-end-on-the-emulator-and-docs.md) | 3 | pending |
+
+## Groups
+
+| group | milestones | sp |
+| --- | --- | --- |
+| G1 | M01, M02, M03, M04, M05 | 14 |
+| G2 | M06, M07 | 8 |
+
+Total 22 SP. With the vault's `sprint.max_sp: 15`, run M1–M5 (14 SP) as one sprint and M6–M7 (8 SP) as the next.
+
+## Milestone files
+
+Each block below is one milestone file (`milestones/M{n}-…/M{n}-….md`); all paths are relative to the repo root.
+
+---
+
+
+---
+
+## Implementation Order
+
+```
+M1 ──┬── M2 ── M5 ── M6 ──┐
+     └── M3 ──────────────┼── M7
+M4 ───────────────────────┘
+```
+
+M4 has no Go dependency and may run in parallel with M1–M3. M2 and M3 may run in parallel after M1. M5 needs M2's event shape; M6 needs M5's flow. M7 last.
+
+## Key Files Reference
+
+| File | Role |
+|------|------|
+| `client/internal/voice/engine.go` | take caps, `holdTimer`, frame loop where the meter lives |
+| `client/internal/voice/events.go` | event types, notice kinds, emitter coalescing |
+| `client/internal/bridge/events.go` | `Encoder.Event`: voice events → envelopes, notice kind names |
+| `client/internal/bridge/outbox.go` | replaceable envelope types |
+| `docs/android-bridge.md` | the Go↔Kotlin contract, enforced by `client/internal/bridge/doc_test.go` |
+| `client/cmd/petcore/core.go` | `SetForeground`, `pump`: where the background take hold is decided |
+| `client/internal/audio/aaudio_android.go` | the device gate that closes the capture in the background |
+| `client/internal/app/hostlink.go` | `Pause`/`Lease`: link parking after `HoldAfter` |
+| `android/app/src/main/java/dev/hermespet/MainActivity.kt` | lifecycle → core, voice collector (services, window flag) |
+| `android/app/src/main/java/dev/hermespet/ui/chat/Composer.kt` | the input pill the strip replaces |
+| `android/app/src/main/java/dev/hermespet/ui/chat/MicButton.kt` | gestures, system-cancel handling, halo |
+
+## Final Verification
+
+- [ ] On a phone or the emulator: start a tap take, let the screen time out — it does not; press power mid-sentence, keep speaking 10 s, wake, tap send — the transcript contains the words spoken while the screen was off.
+- [ ] A take left running is sent at 5:00 with the «Запись ограничена 5 минутами — сообщение отправлено» line; the timer turns red at 4:30.
+- [ ] While recording, the composer shows the wave and timer, no «Сообщение» placeholder and no camera button.
+- [ ] `just android-e2e MODE=screenoff` and `just android-e2e` pass.
+- [ ] `just check` — lint, typecheck, tests (gateway and client), client GL tests, assets, protocol, inventory, release tools, agents bus: all pass.
+- [ ] `just android-test` — JVM tests and Roborazzi goldens pass.
+- [ ] `just client-lint` clean (gofmt, vet, controls doc).
+
+## Testing Strategy
+
+1. **Business-goal acceptance** — the owner dictates a ≥ 2-minute message on the real phone with one screen-off in the middle and one with the screen left alone; the sent transcript holds the last sentence in both, and nothing in the chat shows a gap or a «микрофон не работает» line.
+2. **Fast debug loop** — `cd client && just test ./internal/voice/... ./cmd/petcore/...` (seconds) for cap, meter and hold decisions on the fake clock; `just android-test` for the strip (≈1–2 min); `just android-e2e MODE=screenoff` (≈4 min with a booted emulator) for the device path.
+3. **User-facing validation** — the Roborazzi goldens `chat-listening.png` and `chat-recording-limit.png` (and `just android-shots ONLY="chat-listening"` on the emulator) let the owner judge the strip before shipping.
+
+## Deployment / config impact
+
+N/A — no new env vars, config keys, services or infra. The APK gains a manifest service (`TakeService`, microphone type) under permissions it already holds (`FOREGROUND_SERVICE_MICROPHONE`, `RECORD_AUDIO`); the Brick pak ships the new cap with the next release through the usual `just release` / `release-publish`.
+
+## Authorization / data access
+
+N/A — no gateway endpoint, query or tenant data is touched; the microphone stays under the existing RECORD_AUDIO grant, and the service is not exported (`ManifestExportTest`).
+
+## Out of scope
+
+- The gateway and protocol v2: no new message; a take is still one `request.start`…`request.end` stream.
+- The Brick UI: no level strip or countdown on the Brick (it only inherits the 5-min cap).
+- Starting a take with the app already in the background or over the lock screen (Android forbids the microphone service start; `listen.locked` keeps its unlock wait).
+- Recovering a take after the process is killed by the system or the owner (the PCM lives only in memory).
+- A spoken or notification warning before the cap.
+- Retiring the unused `ListenService`/`BackgroundListen` wake leftovers.
+
+## Risks
+
+- **OEM background killers** (aggressive battery managers) may still stop a microphone foreground service; mitigated by keep-screen-on making screen-off rare, and noted in `docs/android.md`.
+- **`TakeService` start refused** (no RECORD_AUDIO at that instant, a restricted app): logged `take: service not started`; the take then still works in the foreground, and a screen-off falls back to today's behaviour — never worse than now.
+- **Race between `SetForeground(false)` and the engine leaving listening**: `applyTake()` reads `engine.State()` under `c.mu` and runs again on every `StateChanged`, so a stale hold is released on the next state change.
+- **Golden churn**: `RECORD=1` rewrites every golden; M6's DoD requires `git status` to list only the two intended PNGs.
+- **Brick hold cap 60 s → 5 min**: a stuck A button would now record 5 min (9.6 MB PCM) before sending; acceptable, called out in ADR 0037.
+
+## Rollback
+
+All changes are client-side and stateless: revert the milestone commits (Android APK via `just android-install`, the Brick via the next release or a signed downgrade). No migration, no persisted data, no gateway change.
+
+## CLAUDE.md impact
+
+| Section | Change | Owning task |
+|---------|--------|-------------|
+| `## Stack` → **android** bullet | «pause stops the devices» → except the microphone while a take records (`TakeService`, a `microphone` foreground service started with the take; the link leased until its turn ends); keep-screen-on while listening; every take capped at 5 min (`take_limit`); the composer's recording strip (level wave from the mic, timer, last-30-s countdown; placeholder and camera hidden) | M7.2 |
+| `## Command catalogue` → `just android-e2e` row | add `MODE=screenoff`: a tap take through `KEYCODE_SLEEP`, the microphone kept, the whole take sent | M7.2 |
+| `## Layout` → `android/` bullet | add `TakeService` to the listed shell classes | M7.2 |
+-- expected/cwd/milestones/M01-engine-one-5-min-cap-cap-notice-level-meter/M01-engine-one-5-min-cap-cap-notice-level-meter.md --
+---
+id: "01"
+title: "Engine: one 5-min cap, cap notice, level meter"
+sp: 4
+status: pending
+plan: "index.md"
+---
+
+# M01: Engine: one 5-min cap, cap notice, level meter
+
+## Tasks
+
+The voice engine caps every take at 5 minutes, says so when the cap sends it, and reports the microphone level and elapsed time every 100 ms while listening.
+
+**Scope** — `client/internal/voice/engine.go`, `client/internal/voice/events.go`, `client/internal/voice/engine_test.go`, `client/internal/voice/notice_test.go`. No bridge or UI change (M2 maps the new event).
+
+| Task | Description | Files | SP | Status |
+|------|-------------|-------|----|--------|
+| 1.1 | Replace `maxHold` and `maxTapTake` with `maxTake = 5 * time.Minute`; `listen()` and `tapTakeOn()` both arm `holdTimer` with it; `handsFreeOn()` sets `holdStart` (for elapsed) but keeps no timer (the VAD ends it); `release()` logs `voice: take sent %d ms` before `startVoice` | `client/internal/voice/engine.go` | 1 | pending |
+| 1.2 | `NoticeTakeLimit` kind (not a failure); the `holdTimer` case emits `e.notice(NoticeTakeLimit, "Запись ограничена 5 минутами — сообщение отправлено")` then `release()` | `client/internal/voice/events.go`, `client/internal/voice/engine.go` | 1 | pending |
+| 1.3 | `Level` event and meter: in `run()`'s frame case, while `StateListening` (hold, tap and hands-free branches alike), fold each frame's RMS into a 5-frame window and emit `Level{Level, Elapsed, Limit}` per window; `Level` = RMS in dBFS mapped linearly from −60..0 dB to 0..1, clamped; `Limit` = `maxTake` for hold/tap takes, 0 for hands-free; frames the chime mutes count as 0; emitter coalesces a `Level` onto a queued last `Level` | `client/internal/voice/engine.go`, `client/internal/voice/events.go` | 2 | pending |
+
+## Definition of Done
+
+##### Task 1.1
+- [ ] `grep -n "maxHold\|maxTapTake" client/internal/voice/*.go` prints nothing.
+- [ ] Test `TestHoldTakeSentAtMaxTake`: a `TryTalkDown` take on the fake clock is still `listening` at 60 s and is sent (turn started) at `maxTake`.
+- [ ] The existing tap-take cap test (`engine_test.go` near line 827) is rewritten against `maxTake` and passes.
+
+##### Task 1.2
+- [ ] Test `TestTakeLimitNotice`: advancing the fake clock by `maxTake` during a tap take emits `Notice{Kind: NoticeTakeLimit}` before `StateTranscribing`, and the display log holds the notice line.
+- [ ] `NoticeTakeLimit.Failure()` is false (asserted in `notice_test.go`).
+
+##### Task 1.3
+- [ ] Test `TestLevelWhileListening`: 10 frames of a full-scale square wave yield 2 `Level` events with `Level` ≥ 0.95, 10 zero frames yield `Level` == 0; `Elapsed` grows with the fake clock; `Limit` == `maxTake` for a tap take and 0 for `Listen()`.
+- [ ] Test `TestNoLevelWhenIdle`: frames while idle emit no `Level`.
+- [ ] Test `TestEmitterCoalescesLevel`: two `Level`s queued back to back leave one (the newer) in the queue.
+- [ ] Sketch:
+
+  ```go
+  // Level is the microphone level while listening, every levelEvery frames.
+  type Level struct {
+      Level   float32       // 0..1, −60..0 dBFS
+      Elapsed time.Duration // since the take started
+      Limit   time.Duration // the cap, 0 when none (hands-free)
+  }
+
+  func (e *Engine) meter(f []int16) { ... }
+  ```
+
+## References
+
+- `client/internal/voice/engine_test.go` (the tap-take cap test near line 827: fake clock `r.clk.Advance`).
+- `client/internal/voice/events.go` `emitter.emit` (the `AnswerDelta` coalescing to copy).
+
+## Verify
+
+- `cd client && just test ./internal/voice/...`
+-- expected/cwd/milestones/M02-bridge-voice-level-event-and-take-limit-notice/M02-bridge-voice-level-event-and-take-limit-notice.md --
+---
+id: "02"
+title: "Bridge: `voice.level` event and `take_limit` notice"
+sp: 2
+status: pending
+plan: "index.md"
+---
+
+# M02: Bridge: `voice.level` event and `take_limit` notice
+
+## Tasks
+
+The bridge sends `voice.level` (replaceable, never blocking the pump) and names the new notice kind; the contract doc says so.
+
+**Scope** — `client/internal/bridge/envelope.go`, `client/internal/bridge/events.go`, `client/internal/bridge/outbox.go`, `client/internal/bridge/events_test.go`, `client/internal/bridge/outbox_test.go`, `docs/android-bridge.md`.
+
+| Task | Description | Files | SP | Status |
+|------|-------------|-------|----|--------|
+| 2.1 | `TypeVoiceLevel = "voice.level"` in the type list; `Encoder.Event` handles `voice.Level` first and returns its one envelope `{level (rounded to 2 decimals), elapsed_ms, limit_ms}` without `syncLog`/`turnEnd`; `noticeKinds` maps `NoticeTakeLimit` → `take_limit` | `client/internal/bridge/envelope.go`, `client/internal/bridge/events.go`, `client/internal/bridge/events_test.go` | 1 | pending |
+| 2.2 | `replaced()` includes `TypeVoiceLevel`; `docs/android-bridge.md`: `voice.level` row in Events, `take_limit` in `notice` kinds, the `seq` gap note names `voice.level`, `talk.down` and `talk.tap` rows say every take is sent by itself after 5 min with a `take_limit` notice, `lifecycle` row says a running take keeps the microphone | `client/internal/bridge/outbox.go`, `client/internal/bridge/outbox_test.go`, `docs/android-bridge.md` | 1 | pending |
+
+## Definition of Done
+
+##### Task 2.1
+- [ ] Test `TestVoiceLevelEnvelope`: `Encoder.Event(voice.Level{0.5, 1500ms, 5min})` returns exactly one envelope `{"type":"voice.level","data":{"level":0.5,"elapsed_ms":1500,"limit_ms":300000}}`.
+- [ ] Test: a `Notice{Kind: NoticeTakeLimit}` encodes `kind: "take_limit"`.
+
+##### Task 2.2
+- [ ] Test `TestOutboxKeepsNewestLevel`: three queued `voice.level` envelopes leave one, the newest; a `transcript` queued between them is kept in order.
+- [ ] `TestBridgeDocMatchesCode` passes with the new row.
+
+## References
+
+- `client/internal/bridge/outbox.go` `replaced` (pet / log.reset precedent).
+- `client/internal/bridge/events_test.go` (envelope assertions).
+- Contract: `docs/android-bridge.md` (do not touch `protocol/` — no gateway message changes).
+
+## Verify
+
+- `cd client && just test ./internal/bridge/...`
+-- expected/cwd/milestones/M03-core-microphone-and-link-kept-for-a-take-in-the-background/M03-core-microphone-and-link-kept-for-a-take-in-the-background.md --
+---
+id: "03"
+title: "Core: microphone and link kept for a take in the background"
+sp: 3
+status: pending
+plan: "index.md"
+---
+
+# M03: Core: microphone and link kept for a take in the background
+
+## Tasks
+
+When the app leaves the foreground while a take records, the capture stays open and the gateway link stays unparked until the take's turn is over; otherwise the background behaviour is unchanged.
+
+**Scope** — `client/internal/audio/aaudio_android.go`, `client/internal/audio/gate.go`, `client/internal/audio/gate_test.go`, `client/cmd/petcore/core.go`, `client/cmd/petcore/jni.go`, `client/cmd/petcore/core_test.go`.
+
+| Task | Description | Files | SP | Status |
+|------|-------------|-------|----|--------|
+| 3.1 | `gate.micHeld`; `HoldMic(on bool)` (via `gateSet`, logs `audio: microphone held for a take: on/off`); pure `micRunning(stopped, held bool) bool` in `gate.go`; the capture's `open()` waits on a state func reporting `micRunning`, `read()` closes the stream only when `!micRunning`; `StopDevices` leaves `micLive` alone while held; the output keeps using `!gate.stopped` | `client/internal/audio/aaudio_android.go`, `client/internal/audio/gate.go`, `client/internal/audio/gate_test.go` | 1 | pending |
+| 3.2 | petcore seams: `holdMic func(bool)` on `core` (set to `audio.HoldMic` in `jni.go` init beside `stopDevices`), `State() voice.State` on the `engine` interface, `Lease() func()` on the `hostLink` interface; `applyTake()` under `c.mu`: `want := background && eng != nil && eng.State()==StateListening`; on change call `holdMic(want)` and log `android: microphone kept for the take` / `released`; take a lease when `want` turns true, release it when the app is foreground or the state is idle/error/offline. `SetForeground(false)` calls `applyTake()` **before** `stopDevices()`; `SetForeground(true)` calls it after `startDevices()`; `pump` calls it on every `voice.StateChanged` | `client/cmd/petcore/core.go`, `client/cmd/petcore/jni.go` | 2 | pending |
+
+## Definition of Done
+
+##### Task 3.1
+- [ ] `gate_test.go` table test of `micRunning`: (false,false)→true, (true,false)→false, (true,true)→true.
+- [ ] `just android-core ABI=x86_64` builds `libpetcore.so` with the changed android-tagged audio file.
+
+##### Task 3.2
+- [ ] Test `TestBackgroundTakeKeepsTheMicrophone`: fake engine in `StateListening`; `SetForeground(false)` records `holdMic(true)` before `stopDevices`, and `fakeHost` counts one lease; moving the fake engine to `StateThinking` and pumping a `StateChanged` records `holdMic(false)` with the lease still held; `StateIdle` releases the lease.
+- [ ] Test `TestForegroundReleasesTheTakeHold`: `SetForeground(true)` during a held take records `holdMic(false)` and releases the lease.
+- [ ] Test `TestBackgroundWithoutATakeStopsAsBefore`: idle engine, `SetForeground(false)` never calls `holdMic(true)` nor `Lease` (`TestLifecycleParksAndUnparks` still passes).
+- [ ] Sketch:
+
+  ```go
+  type hostLink interface {
+      Pause(after time.Duration)
+      Resume()
+      Lease() (release func())
+      ...
+  }
+
+  // applyTake keeps the microphone and the link for a take running in the background.
+  func (c *core) applyTake() { ... }
+  ```
+
+## References
+
+- `client/cmd/petcore/core_test.go` `TestLifecycleParksAndUnparks` and `fakeHost` (extend with `Lease`).
+- `client/internal/app/hostlink.go` `Lease` (semantics of the release func).
+- `client/internal/audio/gate_test.go`.
+
+## Verify
+
+- `cd client && just test ./internal/audio/... ./cmd/petcore/...`
+- `just android-core ABI=x86_64` (cross-builds the android-tagged audio file).
+-- expected/cwd/milestones/M04-android-shell-takeservice-and-keep-screen-on/M04-android-shell-takeservice-and-keep-screen-on.md --
+---
+id: "04"
+title: "Android shell: TakeService and keep-screen-on"
+sp: 3
+status: pending
+plan: "index.md"
+---
+
+# M04: Android shell: TakeService and keep-screen-on
+
+## Tasks
+
+While a take records the screen stays on, and a microphone foreground service started with the take keeps Android from silencing or freezing the app if the screen goes off anyway.
+
+**Scope** — new `android/app/src/main/java/dev/hermespet/TakeService.kt`; `android/app/src/main/java/dev/hermespet/MainActivity.kt`; `android/app/src/main/java/dev/hermespet/HoldService.kt` (the `Hold` object); `android/app/src/main/AndroidManifest.xml`; new test `android/app/src/test/java/dev/hermespet/TakeDecisionTest.kt`; `android/app/src/test/java/dev/hermespet/HoldDecisionTest.kt`.
+
+| Task | Description | Files | SP | Status |
+|------|-------------|-------|----|--------|
+| 4.1 | `object Take` (pure): `keepScreenOn(voice) = voice == "listening"`; `shouldStart(voice, resumed, running) = voice=="listening" && resumed && !running`; `shouldStop(voice, resumed, running) = running && (if resumed voice != "listening" else voice !in {listening, thinking, speaking})`. `TakeService`: `startForeground(3, n, FOREGROUND_SERVICE_TYPE_MICROPHONE)` with «{Имя} записывает сообщение…» on `Notices.HOLD_CHANNEL`, tap opens the app, `START_NOT_STICKY`; a refused start (`RuntimeException`) logs `take: service not started: …` and stops; companion `start(ctx, name)`, `stop(ctx)`, `running` flag; logs `take: service started` / `stopped` | `android/app/src/main/java/dev/hermespet/TakeService.kt`, `android/app/src/main/AndroidManifest.xml` | 2 | pending |
+| 4.2 | `MainActivity`: the existing `vm.state.map { it.voice }` collector also sets/clears `WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON` per `Take.keepScreenOn`, starts/stops `TakeService` per `Take`; `onResume` applies `Take.shouldStop`; `onPause` starts `HoldService` only when `!TakeService.running`; the collector's HoldService stop is unchanged | `android/app/src/main/java/dev/hermespet/MainActivity.kt`, `android/app/src/test/java/dev/hermespet/TakeDecisionTest.kt` | 1 | pending |
+
+## Definition of Done
+
+##### Task 4.1
+- [ ] Manifest declares `<service android:name=".TakeService" android:exported="false" android:foregroundServiceType="microphone" />`; `ManifestExportTest` passes unchanged.
+- [ ] `TakeDecisionTest`: `shouldStart("listening", resumed=true, running=false)` true; false when not resumed; `shouldStop("thinking", resumed=true, running=true)` true; `shouldStop("thinking", resumed=false, running=true)` false; `shouldStop("idle", resumed=false, running=true)` true; `keepScreenOn` true only for `listening`.
+
+##### Task 4.2
+- [ ] `HoldDecisionTest` still passes; a new case asserts the pause path skips `HoldService` while a take service runs (via a pure `Hold.shouldStartOnPause(sdk, voice, takeRunning)` added to `Hold`).
+- [ ] Manual check on the emulator recorded in M7's e2e (window flag and service).
+
+## References
+
+- `android/app/src/main/java/dev/hermespet/HoldService.kt` (service shape, `Hold` decision object).
+- `android/app/src/main/java/dev/hermespet/ListenService.kt` (microphone-type `startForeground`).
+- `android/app/src/test/java/dev/hermespet/HoldDecisionTest.kt`.
+
+## Verify
+
+- `just android-test`
+-- expected/cwd/milestones/M05-android-data-decode-voice-level-level-flow/M05-android-data-decode-voice-level-level-flow.md --
+---
+id: "05"
+title: "Android data: decode `voice.level`, level flow"
+sp: 2
+status: pending
+plan: "index.md"
+---
+
+# M05: Android data: decode `voice.level`, level flow
+
+## Tasks
+
+The app decodes `voice.level` into a separate `StateFlow` that resets when listening ends, leaving `UiState` and the reducer untouched by 10 Hz updates.
+
+**Scope** — `android/app/src/main/java/dev/hermespet/core/CoreEvent.kt`, `android/app/src/main/java/dev/hermespet/core/Decode.kt`, `android/app/src/main/java/dev/hermespet/ui/PetViewModel.kt`, `android/app/src/main/java/dev/hermespet/ui/Reduce.kt`, tests `android/app/src/test/java/dev/hermespet/DecodeTest.kt`, `android/app/src/test/java/dev/hermespet/PetViewModelTest.kt`.
+
+| Task | Description | Files | SP | Status |
+|------|-------------|-------|----|--------|
+| 5.1 | `CoreEvent.VoiceLevel(level: Float, elapsedMs: Long, limitMs: Long)`; `Decode` maps `"voice.level"`; `Reduce` lists it with the no-op events | `android/app/src/main/java/dev/hermespet/core/CoreEvent.kt`, `android/app/src/main/java/dev/hermespet/core/Decode.kt`, `android/app/src/main/java/dev/hermespet/ui/Reduce.kt`, `android/app/src/test/java/dev/hermespet/DecodeTest.kt` | 1 | pending |
+| 5.2 | `PetViewModel.level: StateFlow<CoreEvent.VoiceLevel?>`: `collect()` routes a `VoiceLevel` to it without `change{}`; a `VoiceState` other than `listening` sets it to null | `android/app/src/main/java/dev/hermespet/ui/PetViewModel.kt`, `android/app/src/test/java/dev/hermespet/PetViewModelTest.kt` | 1 | pending |
+
+## Definition of Done
+
+##### Task 5.1
+- [ ] `DecodeTest`: `{"v":1,"seq":3,"type":"voice.level","data":{"level":0.42,"elapsed_ms":1200,"limit_ms":300000}}` decodes to `VoiceLevel(0.42f, 1200, 300000)`.
+
+##### Task 5.2
+- [ ] `PetViewModelTest`: after `VoiceState("listening")` and a `VoiceLevel`, `vm.level.value` is that level and `vm.state.value` is the same instance as before the level; after `VoiceState("thinking")` `vm.level.value` is null.
+
+## References
+
+- `android/app/src/test/java/dev/hermespet/DecodeTest.kt`, `android/app/src/test/java/dev/hermespet/PetViewModelTest.kt`.
+- Contract: `docs/android-bridge.md` `voice.level` row (from M2).
+
+## Verify
+
+- `just android-test`
+-- expected/cwd/milestones/M06-android-composer-recording-strip-hold-survives-system-cancel/M06-android-composer-recording-strip-hold-survives-system-cancel.md --
+---
+id: "06"
+title: "Android composer: recording strip, hold survives system cancel"
+sp: 5
+status: pending
+plan: "index.md"
+---
+
+# M06: Android composer: recording strip, hold survives system cancel
+
+## Tasks
+
+While listening, the composer's pill shows a recording strip — a level wave flowing out of the mic, the elapsed time and, in the last 30 s, a red countdown — with the placeholder and the camera button hidden; a system-cancelled hold turns into a locked take.
+
+**Scope** — new `android/app/src/main/java/dev/hermespet/ui/chat/RecordingStrip.kt`; `android/app/src/main/java/dev/hermespet/ui/chat/Composer.kt`; `android/app/src/main/java/dev/hermespet/ui/chat/MicButton.kt`; `android/app/src/main/java/dev/hermespet/ui/chat/ChatScreen.kt`; tests `android/app/src/test/java/dev/hermespet/ComposerTest.kt`, `android/app/src/test/java/dev/hermespet/MicButtonTest.kt`, `android/app/src/test/java/dev/hermespet/ChatScreenShotTest.kt`; goldens `android/app/src/test/screenshots/chat-listening.png` (changes), new `android/app/src/test/screenshots/chat-recording-limit.png`.
+
+| Task | Description | Files | SP | Status |
+|------|-------------|-------|----|--------|
+| 6.1 | `RecordingStrip(levels: List<Float>, elapsedMs: Long, limitMs: Long, onCancel: (() -> Unit)?)`: optional × cancel at the start, timer `m:ss` (`limitMs > 0` and ≤ 30 s left: «осталось m:ss» in `PetColors.Error`), then a `Canvas` of up to 32 rounded bars right-aligned so the newest bar touches the mic and older ones drift left, bar height = 4 dp + level × (strip height − 8 dp), alpha fading with age; semantics `contentDescription = "Идёт запись"`, `testTag("recording")` | `android/app/src/main/java/dev/hermespet/ui/chat/RecordingStrip.kt` | 2 | pending |
+| 6.2 | `Composer(level: CoreEvent.VoiceLevel? = null, …)`: `recordingNow = micGranted && voice == "listening"`; keeps a ring of the last 32 levels (cleared when recording starts); while recording hides `AttachButton` and the `BasicTextField` (placeholder included) and shows `RecordingStrip` in the field's weight slot (× shown for locked and tap takes: `voice.cancel` and `locked = false`); the old locked «Слушаю» row is replaced by the strip; one `HapticFeedbackType.Reject` tick when the remaining time first drops to ≤ 30 s. `ChatScreen(vm…)` collects `vm.level` with `collectAsStateWithLifecycle` and passes it; the stateless `ChatScreen` gains `level: CoreEvent.VoiceLevel? = null` | `android/app/src/main/java/dev/hermespet/ui/chat/Composer.kt`, `android/app/src/main/java/dev/hermespet/ui/chat/ChatScreen.kt`, `android/app/src/test/java/dev/hermespet/ComposerTest.kt` | 2 | pending |
+| 6.3 | `MicButton`: a system cancel or lost pointer during a hold calls `onLockedChange(true)` (take continues, log `ui: hold cancelled by the system, take locked`) instead of `voice.cancel`; the slide-left cancel and the disposal path are unchanged; the halo radius grows with the level (`HALO + level × 8 dp`) via a new `level: Float = 0f` parameter | `android/app/src/main/java/dev/hermespet/ui/chat/MicButton.kt`, `android/app/src/test/java/dev/hermespet/MicButtonTest.kt` | 1 | pending |
+
+## Definition of Done
+
+##### Task 6.1
+- [ ] `ComposerTest`: `RecordingStrip(levels, 42_000, 300_000, null)` shows «0:42»; with `elapsedMs = 275_000` shows «осталось 0:25».
+
+##### Task 6.2
+- [ ] `ComposerTest`: with `voice = "listening"` the nodes tagged `ATTACH_TAG` and `COMPOSER_FIELD_TAG` do not exist, the text «Сообщение» does not exist, a node tagged `recording` exists; with `voice = "idle"` the reverse.
+- [ ] `ComposerTest`: a locked take's strip × sends `voice.cancel`.
+- [ ] `ChatScreenShotTest`: `chat-listening` re-recorded (strip instead of the field), new `chat-recording-limit` (elapsed 4:40, fixed level list); `just android-test RECORD=1` changes only these two files (`git status --short android/app/src/test/screenshots` lists exactly them), then `just android-test` passes.
+
+##### Task 6.3
+- [ ] `MicButtonTest.aSystemCancelDropsTheTake` becomes `aSystemCancelLocksTheTake`: commands are `talk.down` only and `onLockedChange(true)` was called; `disposalMidHoldDropsTheTake` and `slideLeftCancels` pass unchanged.
+
+## References
+
+- `android/app/src/main/java/dev/hermespet/ui/chat/Composer.kt` (locked row: the slot the strip takes).
+- `android/app/src/test/java/dev/hermespet/ComposerTest.kt`, `android/app/src/test/java/dev/hermespet/MicButtonTest.kt`.
+- `android/app/src/test/java/dev/hermespet/ChatScreenShotTest.kt` (golden naming and setup).
+
+## Verify
+
+- `just android-test`
+-- expected/cwd/milestones/M07-end-to-end-on-the-emulator-and-docs/M07-end-to-end-on-the-emulator-and-docs.md --
+---
+id: "07"
+title: "End to end on the emulator and docs"
+sp: 3
+status: pending
+plan: "index.md"
+---
+
+# M07: End to end on the emulator and docs
+
+## Tasks
+
+A real app on the emulator records through a screen-off, sends the whole take on return, and the docs, changelog and CLAUDE.md describe the new behaviour.
+
+**Scope** — `tools/android/e2e.sh`, `Justfile` (`android-e2e` doc comment only), `docs/android.md`, new `docs/decisions/0037-takes-survive-the-screen.md`, `CHANGELOG.md`, `CLAUDE.md`.
+
+| Task | Description | Files | SP | Status |
+|------|-------------|-------|----|--------|
+| 7.1 | `MODE=screenoff` in `e2e.sh`: after «ui: chat ready», tap the talk button once (tap take), wait for `voice: tap take starts`, assert `dumpsys window` shows `KEEP_SCREEN_ON` for the app window and `dumpsys activity services dev.hermespet` lists `TakeService` as foreground; `input keyevent KEYCODE_SLEEP`; assert logcat `android: foreground false` and `android: microphone kept for the take` and **no** `audio: aaudio input closed while the devices are stopped` before the take ends; wait 8 s; `KEYCODE_WAKEUP`, `wm dismiss-keyguard`, tap again; assert `voice: take sent N ms` with N ≥ 8000, then request.start → transcript → `turn.end` as the ptt mode does; ends «android-e2e screenoff: ok»; update the mode list in the header comment and the `Justfile` recipe comment | `tools/android/e2e.sh`, `Justfile` | 2 | pending |
+| 7.2 | Docs: `docs/android.md` new «Voice takes» section (5-min cap and `take_limit`, keep-screen-on, `TakeService`, mic hold and lease, the strip, system cancel → lock); ADR 0037 (context, decision, consequences: the Brick's hold cap rises to 5 min); `CHANGELOG.md` `[Unreleased]`: **Android:** bullets for the strip, screen-on and screen-off survival, an untagged bullet for the 5-min cap; `CLAUDE.md` rows below | `docs/android.md`, `docs/decisions/0037-takes-survive-the-screen.md`, `CHANGELOG.md`, `CLAUDE.md` | 1 | pending |
+
+## Definition of Done
+
+##### Task 7.1
+- [ ] `just android-e2e MODE=screenoff` on `emulator-5580` ends with «android-e2e screenoff: ok».
+- [ ] `just android-e2e` (default ptt) still passes.
+- [ ] `just release-tools-test` unaffected; `bash -n tools/android/e2e.sh` clean.
+
+##### Task 7.2
+- [ ] `sed -n '/## \[Unreleased\]/,/## \[0/p' CHANGELOG.md | grep -n 'five minutes'` prints the new untagged bullet.
+- [ ] `grep -n "TakeService" CLAUDE.md docs/android.md` finds both.
+
+## References
+
+- `tools/android/e2e.sh` `minimise` block (mode structure, logcat waits) and the ptt block (talk-button tap at the logged centre).
+- `docs/decisions/0036-hold-and-read-on-open.md` (ADR shape).
+
+## Verify
+
+- `just android-e2e MODE=screenoff`
+-- exit --
+0
+-- stdout --
+M01-engine-one-5-min-cap-cap-notice-level-meter sp=4 sections=tasks:10,dod:26,references:3,verify:2
+M02-bridge-voice-level-event-and-take-limit-notice sp=2 sections=tasks:9,dod:8,references:4,verify:2
+M03-core-microphone-and-link-kept-for-a-take-in-the-background sp=3 sections=tasks:9,dod:22,references:4,verify:3
+M04-android-shell-takeservice-and-keep-screen-on sp=3 sections=tasks:9,dod:8,references:4,verify:2
+M05-android-data-decode-voice-level-level-flow sp=2 sections=tasks:9,dod:6,references:3,verify:2
+M06-android-composer-recording-strip-hold-survives-system-cancel sp=5 sections=tasks:10,dod:11,references:4,verify:2
+M07-end-to-end-on-the-emulator-and-docs sp=3 sections=tasks:9,dod:9,references:3,verify:1
+group G1: M01, M02, M03, M04, M05 (14 SP)
+group G2: M06, M07 (8 SP)

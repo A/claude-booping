@@ -1,0 +1,21 @@
+Milestone files already under the plan directory and no --replace: exit 2 before anything is
+written — the old milestone stays and no index.md appears.
+
+-- fixtures/cwd/milestones/M01-old/M01-old.md --
+---
+id: "01"
+---
+-- fixtures/cwd/draft.md --
+### M01 — New
+sp: 1
+
+- `a.py`
+-- cmd --
+sh -c 'booping plan split draft.md; s=$?; find . -type f | sort; exit $s'
+-- stderr --
+error: 1 milestone file(s) already exist under .; pass --replace
+-- exit --
+2
+-- stdout --
+./draft.md
+./milestones/M01-old/M01-old.md

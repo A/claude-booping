@@ -1,0 +1,151 @@
+An existing index.md keeps its frontmatter byte for byte, `sp:` restamped with the milestones'
+sum; its body is replaced by the draft's plan lines with the generated Milestones and Groups
+tables where the draft's overview heading stood.
+
+-- fixtures/cwd/index.md --
+---
+title: "Demo"
+status: drafting
+sp: null
+summary: null
+---
+
+# Demo
+-- fixtures/cwd/draft.md --
+# Demo
+
+## Context
+
+Two steps.
+
+## Milestones
+
+### M01 — Parse input
+sp: 2
+depends_on: []
+
+#### Tasks
+
+- parse in `src/parse.py`
+
+#### Definition of Done
+
+- [ ] parses
+
+#### References
+
+- `src/io.py`
+
+#### Verify
+
+`pytest tests/parse_test.py`
+
+### M02 — Print output
+sp: 3
+depends_on: [M01]
+
+#### Tasks
+
+- print from `src/out.py`
+
+#### Definition of Done
+
+- [ ] prints
+
+#### References
+
+#### Verify
+
+`pytest tests/out_test.py`
+
+## Final Verification
+
+- [ ] green
+-- cmd --
+booping plan split draft.md
+-- expected/cwd/index.md --
+---
+title: "Demo"
+status: drafting
+sp: 5
+summary: null
+---
+
+# Demo
+
+## Context
+
+Two steps.
+
+## Milestones
+
+| id | title | sp | status |
+| --- | --- | --- | --- |
+| 01 | [Parse input](milestones/M01-parse-input/M01-parse-input.md) | 2 | pending |
+| 02 | [Print output](milestones/M02-print-output/M02-print-output.md) | 3 | pending |
+
+## Groups
+
+| group | milestones | sp |
+| --- | --- | --- |
+| G1 | M01, M02 | 5 |
+
+## Final Verification
+
+- [ ] green
+-- expected/cwd/milestones/M01-parse-input/M01-parse-input.md --
+---
+id: "01"
+title: "Parse input"
+sp: 2
+status: pending
+plan: "index.md"
+---
+
+# M01: Parse input
+
+## Tasks
+
+- parse in `src/parse.py`
+
+## Definition of Done
+
+- [ ] parses
+
+## References
+
+- `src/io.py`
+
+## Verify
+
+`pytest tests/parse_test.py`
+-- expected/cwd/milestones/M02-print-output/M02-print-output.md --
+---
+id: "02"
+title: "Print output"
+sp: 3
+status: pending
+plan: "index.md"
+---
+
+# M02: Print output
+
+## Tasks
+
+- print from `src/out.py`
+
+## Definition of Done
+
+- [ ] prints
+
+## References
+
+## Verify
+
+`pytest tests/out_test.py`
+-- exit --
+0
+-- stdout --
+M01-parse-input sp=2 sections=tasks:2,dod:2,references:2,verify:2
+M02-print-output sp=3 sections=tasks:2,dod:2,references:0,verify:1
+group G1: M01, M02 (5 SP)
