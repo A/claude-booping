@@ -44,7 +44,7 @@ Execute a groomed plan by delegating every task to a worker agent, one milestone
 
 Shape a feature, bug, or refactor into a specified, estimated, user-approved plan.
 
-- Steps: `cross-review`, `draft-plan`, `intake`, `present`, `research-codebase`, `research-web`
+- Steps: `cross-review`, `draft-plan`, `intake`, `present`
 - Targets: `booping render playbooks/_partials/target_space.md --set targets_for=groom`
 
 ### learn

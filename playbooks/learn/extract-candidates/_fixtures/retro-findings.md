@@ -17,7 +17,7 @@ The target space, already fetched for every playbook this project runs, with the
 
 Shape a feature, bug, or refactor into a specified, estimated, user-approved plan. Grooming owns the plan's content: scope, design, milestones, Definition of Done, and the verification steps a sprint must clear before it closes.
 
-- Steps: `intake`, `research-codebase`, `research-web`, `draft-plan`, `cross-review`, `present`
+- Steps: `intake`, `draft-plan`, `cross-review`, `present`
 - Rules: none
 
 ### develop

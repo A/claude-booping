@@ -47,7 +47,7 @@
       value: |
         const known = new Set(['groom','develop','retro','learn']);
         const steps = {
-          groom: ['intake','research-codebase','research-web','draft-plan','cross-review','present'],
+          groom: ['intake','draft-plan','cross-review','present'],
           develop: ['intake','provision','develop-loop','verify','wrap-up'],
           retro: ['intake','prepare','gather-feedback','research-issues','synthesize','save'],
           learn: ['intake','extract-candidates','dedup-sweep','review-table','write','transition'],

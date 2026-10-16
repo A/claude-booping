@@ -4,6 +4,12 @@ Read the plan's milestone rows — never a hand-kept list — with `{plan-dir}` 
 booping query --glob {plan-dir}/{{ config.core.plans.milestones.glob }} --columns {{ config.core.plans.milestones.table_columns | join(',') }}
 ```
 
+Then check the milestone contract:
+
+```
+booping plan check {plan-dir}
+```
+
 Present user the resulting plan as:
 
 ```
@@ -13,6 +19,8 @@ Status: {status}
 SPs: {sum of the rows' sp}
 
 {the table the query printed}
+
+{the check's output, or "milestone contract: clean" when it printed nothing}
 
 ## Next Steps
 
