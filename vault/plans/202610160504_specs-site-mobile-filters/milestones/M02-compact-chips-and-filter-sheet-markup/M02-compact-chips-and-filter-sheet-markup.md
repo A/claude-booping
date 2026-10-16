@@ -2,7 +2,7 @@
 id: "02"
 title: "Compact chips and the filter sheet markup"
 sp: 4
-status: in-progress
+status: done
 plan: "/home/anton/Dev/@A/claude-booping-specs/vault/plans/202610160504_specs-site-mobile-filters/index.md"
 ---
 
@@ -23,22 +23,22 @@ Tests (integration, the built site — `site_pages_test.py`): on `records.html` 
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 2.1 | `filter_bar` markup and the three labels in both languages; page tests. | `booping-python/src/booping/specs/site/templates/_macros.html.j2`, `src/config.yaml`, `booping-python/tests/specs/site_pages_test.py` | 2 | pending |
-| 2.2 | Compact chips with coarse-pointer hit areas; inline sheet on desktop; phone compact row, active row and bottom sheet CSS; golden rebaseline. | `booping-python/src/booping/specs/site/style.css`, `booping-python/e2e/cases/specs/site-*.txtar` | 2 | pending |
+| 2.1 | `filter_bar` markup and the three labels in both languages; page tests. | `booping-python/src/booping/specs/site/templates/_macros.html.j2`, `src/config.yaml`, `booping-python/tests/specs/site_pages_test.py` | 2 | done |
+| 2.2 | Compact chips with coarse-pointer hit areas; inline sheet on desktop; phone compact row, active row and bottom sheet CSS; golden rebaseline. | `booping-python/src/booping/specs/site/style.css`, `booping-python/e2e/cases/specs/site-*.txtar` | 2 | done |
 
 ## Definition of Done
 
 ### Task 2.1
 
-- [ ] New `site_pages_test.py` cases pass and fail when the dialog wrapper or a label is removed.
-- [ ] `filter.js` still filters and sorts unchanged (it finds `.chip` and `select.sort` by query inside `.filters`).
+- [x] New `site_pages_test.py` cases pass and fail when the dialog wrapper or a label is removed.
+- [x] `filter.js` still filters and sorts unchanged (it finds `.chip` and `select.sort` by query inside `.filters`).
 
 ### Task 2.2
 
-- [ ] In headless Chromium on a built site at 1300px the filter bar looks as before with chips 30px tall (no sheet head, no compact row); at 390px with JS the page shows the compact row and no chip groups or sort select; with JS disabled at 390px the chip groups and sort show inline.
-- [ ] At 390px with touch emulation (`hasTouch`, `isMobile`) each chip's hit area is ≥ 44px tall (`elementFromPoint` 7px above and below the chip's box returns the chip).
-- [ ] `site_contrast_test.py` passes.
-- [ ] `site-*.txtar` rebaselined with `just e2e -k site --txtar-update`; diff limited to the filter markup, the three labels and `style.css`.
+- [x] In headless Chromium on a built site at 1300px the filter bar looks as before with chips 30px tall (no sheet head, no compact row); at 390px with JS the page shows the compact row and no chip groups or sort select; with JS disabled at 390px the chip groups and sort show inline.
+- [x] At 390px with touch emulation (`hasTouch`, `isMobile`) each chip's hit area is ≥ 44px tall (`elementFromPoint` 7px above and below the chip's box returns the chip).
+- [x] `site_contrast_test.py` passes.
+- [x] `site-*.txtar` rebaselined with `just e2e -k site --txtar-update`; diff limited to the filter markup, the three labels and `style.css`.
 
 Return: the list of changed and created files, nothing else.
 
