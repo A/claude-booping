@@ -119,7 +119,7 @@ A plan's frontmatter status is written by groom or develop. Retro and learn writ
 **groom**
 
 - **`framing`** — clarifying the request and settling scope.
-- **`researching`** — the blast-radius and web-research passes are running.
+- **`researching`** — draft-plan's research stage over the code is running.
 - **`drafting`** — design is being settled with you in conversation and written into `index.md` and one milestone directory per milestone.
 - **`awaiting-clarification`** — the run hit a question it can't answer itself, wrote it into a `clarifications.md` file beside the plan, and ended. It's a parking status, not a dead end: answer the questions in that file and the next groom run on the plan picks up where it left off, returning to whichever status parked it (`framing` or `drafting`). Reached only when a run has no live conversation to ask in — a task-tracker-driven run; in chat, groom just asks you.
 - **`cross-reviewing`** — a second model is reviewing the draft (skipped when no reviewer is configured).
@@ -173,7 +173,7 @@ The 1–5 scale:
 - **4 SP** — Complex task, medium risk, may need small research but clear enough.
 - **5 SP** — Research task — developer needs to clarify and decompose further before proceeding.
 
-Sprints over **35 SP** get hard to keep reviewable, so groom suggests a split into sibling sprints above that mark. It's a soft cap, **not a velocity** — booping has no fixed cadence and no per-week capacity. Tasks at 5 SP must be re-decomposed; develop bundles up to two consecutive milestones into a single agent briefing, so milestones are sized against that combined review burden.
+Sprints over **35 SP** get hard to keep reviewable, so groom suggests a split into sibling sprints above that mark. It's a soft cap, **not a velocity** — booping has no fixed cadence and no per-week capacity. Tasks at 5 SP must be re-decomposed; develop packs consecutive milestones into a single agent briefing while their summed SP stays at or under `core.sprint.max_sp` (15 by default), so milestones are sized against that combined review burden.
 
 ## Extensibility
 

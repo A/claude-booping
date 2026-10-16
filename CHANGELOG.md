@@ -2,6 +2,12 @@
 
 Notable user-visible changes, newest first, in the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format; versions follow [semantic versioning](https://semver.org/).
 
+## Unreleased
+
+### Changed
+
+- Groom drafts the whole plan in one pass: `intake → draft-plan → cross-review → present`. `draft-plan` researches the code, writes the plan to `draft.md` in the plan directory, cuts it into `index.md` and the milestone files with the new `booping plan split`, and checks the milestones with the new `booping plan check`, fixing the draft for up to three rounds; `present` shows any findings left. The `research-codebase` and `research-web` steps are gone, and the core plan templates are trimmed to their sections. New config keys: `core.groom_playbook.split.sections` and `core.groom_playbook.split_fallback_agent`.
+
 ## v2.0.0 — 2026-10-15
 
 Specs become a core feature: booping ships a typed-records format for a project's values, rules and decisions, checks it, renders it as a site, and injects targeted rules into playbook steps in place of lessons.

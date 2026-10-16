@@ -10,26 +10,33 @@ Grooming is a **playbook**, not a skill — it is driven by [`/playbook`](playbo
 
 ## What it does
 
-Run states: `framing` → `researching` → `drafting` → `cross-reviewing` → `presenting` → `awaiting-approval` → `ready-for-dev`. Two loopbacks: `drafting → researching` when the design needs blast radius the research pass missed, and `awaiting-approval → drafting` when your change request touches the plan itself.
+Run states: `framing` → `researching` → `drafting` → `cross-reviewing` → `presenting` → `awaiting-approval` → `ready-for-dev`. Two loopbacks: `drafting → researching` when the design needs code the research stage missed, and `awaiting-approval → drafting` when your change request touches the plan itself.
 
-Almost every step runs in your session — inline, or assisted (heavy reads go to the research agent, which returns a bounded summary). The exception is `cross-review`, which hands the drafted plan to a second-model reviewer and does nothing unless you name one. `present` is the run's single approval gate.
+Almost every step runs in your session — inline, or assisted (heavy reads go to the research agent, which returns a bounded summary). `researching` and `drafting` are both stages of the one `draft-plan` step. The exception is `cross-review`, which hands the drafted plan to a second-model reviewer and does nothing unless you name one. `present` is the run's single approval gate.
 
-The output is a plan directory `~/Claude/{project}/plans/{slug}/`. Its `index.md` carries the approach, the scope and the YAML frontmatter the rest of the loop (`develop`, `retro`, `learn`) reads; each milestone gets a directory of its own under `milestones/`, holding a milestone file that repeats the directory's name, and that file — not a section of the index — is what develop hands a coding agent as its contract, with room beside it for what the sprint later writes about that milestone. `index.md`'s `## Milestones` table and the plan's total story points are generated from those files, never hand-kept. Groom creates the directory with one `booping scaffold` call from a config-declared tree, so the fresh `index.md` arrives complete — including a real `commit:` stamped with repo HEAD at creation, and `draft-plan` scaffolds each milestone directory and its file the same way. The intake briefing and any web-research notes land beside it. The directory doubles as the run workdir, so a groom run is **resumable**: its run state lives in the same `index.md`.
+The output is a plan directory `~/Claude/{project}/plans/{slug}/`. Its `index.md` carries the approach, the scope and the YAML frontmatter the rest of the loop (`develop`, `retro`, `learn`) reads; each milestone gets a directory of its own under `milestones/`, holding a milestone file that repeats the directory's name, and that file — not a section of the index — is what develop hands a coding agent as its contract, with room beside it for what the sprint later writes about that milestone. Groom creates the directory with one `booping scaffold` call from a config-declared tree, so the fresh `index.md` arrives complete — including a real `commit:` stamped with repo HEAD at creation. The plan itself is drafted as one file, `draft.md`, beside `index.md`; `booping plan split` cuts it into `index.md`'s body and the milestone files, and generates `index.md`'s `## Milestones` and `## Groups` tables and the plan's total story points — never hand-kept. `draft.md` stays as the drafting source: a fix or a change request edits it and splits again. The intake briefing lands beside it. The directory doubles as the run workdir, so a groom run is **resumable**: its run state lives in the same `index.md`.
 
 A plan is always a directory: `core.plans.glob` resolves `plans/*/index.md` and nothing else, and `core.plans.milestones.glob` resolves the milestone file inside each milestone directory. A vault still holding flat `plans/{slug}.md` files converts them with `/playbook migrate`.
 
-Six steps, in dependency order:
+Four steps, in dependency order:
 
 | Step | What it does |
 |------|--------------|
 | `intake` | Clarify the request, settle scope, scaffold the plan directory — briefing, identity frontmatter, `commit:` at repo HEAD — with one `booping scaffold` call |
-| `research-codebase` | Map the blast radius — files, modules, integrations, prior art (assisted: heavy reads go to the research agent) |
-| `research-web` | Check external practice where the design is uncertain, and verify package versions, image tags, API endpoints and CLI flags against current docs |
-| `draft-plan` | Design with you in conversation, then write the plan against a plan template — `index.md` plus one milestone directory each |
+| `draft-plan` | Research the code the request touches, draft the whole plan into `draft.md` against a plan template, split it into milestone files and check them |
 | `cross-review` | Hand the drafted plan to a second-model reviewer for severity findings — skipped unless `core.groom_playbook.cross_review_agent` names one (unset by default) |
-| `present` | Present approach, milestones and SP totals; the run's single approval gate |
+| `present` | Present approach, milestones, SP totals and the milestone-contract check; the run's single approval gate |
 
-Refinement and decomposition happen inside `draft-plan`.
+### draft-plan
+
+`draft-plan` works in four stages, all in your session:
+
+1. **Research** — reads the code the request touches and what it depends on (bulk reads go to the research agent) and posts the facts, with file paths, in chat. This is the `researching` status.
+2. **Draft** — picks the plan template matching the dominant surface and writes the whole plan to `draft.md`: every template section, and one `### M{nn} — {title}` block per milestone, opened by `sp:` and `depends_on:` lines and holding the four sub-headings named in `core.groom_playbook.split.sections`. What the code and the request settle, it decides and records as an assumption; a call only you can make is asked in chat, or — in an autonomous run — written to `clarifications.md` while the run parks.
+3. **Split** — runs `booping plan split draft.md --replace`. A draft it cannot cut (exit 3 or 4) goes to `core.groom_playbook.split_fallback_agent`, which rewrites it into the format outside the vault; the run copies the result over `draft.md` and splits again.
+4. **Check** — runs `booping plan check` on the plan directory and fixes the milestones it flags in `draft.md`, then splits again — at most three rounds. Findings left after that are shown at `present`.
+
+The one-pass draft and the split are backed by booping's own groom and split benchmarks ([adr/0030](https://github.com/A/claude-booping/blob/master/vault/adr/0030-groom-drafts-the-whole-plan-in-one-pass.md), [adr/0031](https://github.com/A/claude-booping/blob/master/vault/adr/0031-a-script-cuts-the-plan-into-milestone-files.md)).
 
 When you correct the run — reject a proposal, rewrite what it wrote, answer a gate differently than it suggested — it logs your words verbatim, with a link back into the conversation, to `corrections.md` in the plan directory. [Retro](retro.md) starts from that log.
 
@@ -82,6 +89,47 @@ Drop `*.md` files into `~/Claude/{project}/plan_templates/` to extend or overrid
 
 See [Vault](vault.md) for the directory layout.
 
+## booping plan split / plan check
+
+Both run on their own as well as inside `draft-plan` — on a hand-written draft, or to re-check a plan after editing its milestone files.
+
+### `booping plan split DRAFT [--out DIR] [--replace]`
+
+Cuts a one-file plan into `index.md` and one milestone file per `### M{nn} — {title}` block.
+
+- **`DRAFT`** — the one-file plan.
+- **`--out DIR`** — the plan directory to write; defaults to `DRAFT`'s directory.
+- **`--replace`** — remove existing milestone directories under `DIR` (those matching `core.plans.milestones.glob`) before writing.
+
+It writes `DIR/milestones/M{nn}-{kebab}/M{nn}-{kebab}.md` per milestone, each rendered from `core.groom_playbook.milestone_scaffold` with the block's sections under its headings, and `DIR/index.md`: the existing frontmatter kept (else the draft's own, else none), `sp:` restamped with the milestones' sum when the key exists, and the body the draft's plan sections in order, with the generated `## Milestones` table and a `## Groups` table where the draft's milestones stood. Groups pack contiguous milestones, in `id` order, while their summed SP stays at or under `core.sprint.max_sp`; a lone milestone is always a group.
+
+stdin is not read. stdout prints one line per milestone — `M{nn}-{kebab} sp={n|null} sections=tasks:{lines},dod:{lines},references:{lines},verify:{lines}` — then one `group G{k}: M{nn}, … ({sum} SP)` line per group, then `demoted: {n}` when top-level headings inside a milestone were demoted. stderr carries one `flag: {text}` line per flag (a missing `sp`, a `depends_on` naming a later milestone, …) and `error: {message}` on failure.
+
+| Exit | Meaning |
+|------|---------|
+| `0` | written, no flags |
+| `1` | usage or config error |
+| `2` | refused — milestone files exist and `--replace` was not given — or a write failed |
+| `3` | no milestone heading found; nothing written |
+| `4` | written, with flags |
+
+### `booping plan check PLAN_DIR`
+
+Checks every milestone file under `PLAN_DIR` (matching `core.plans.milestones.glob`) against the milestone contract:
+
+- **`verify`** — `## Verify` holds exactly one command.
+- **`files`** — `## Tasks` names at least one file path.
+- **`dod`** — `## Definition of Done` has at least as many checkboxes as there are tasks.
+- **`sp`** — `sp` is set and below `core.sprint.redecompose_threshold`.
+
+stdout prints one `{milestone dir}: {check}: {finding}` line per finding, nothing when clean.
+
+| Exit | Meaning |
+|------|---------|
+| `0` | clean |
+| `1` | findings |
+| `2` | `PLAN_DIR` missing or holding no milestone file |
+
 ## Reviewing the plan
 
 What to check before approving at `present`, the run's **only** review gate:
@@ -119,4 +167,6 @@ The playbook reads these keys from `src/config.yaml`. See [Project config](proje
 - **`core.sprint.scale`** — the 1–5 SP definitions (each a `{sp, meaning}` entry).
 - **`core.task_types`** — list of `{type, description, doc_uri}` entries (`feature`, `bug`, `refactoring`). The request is classified against this list; the matching `doc_uri` lazy-loads detailed guidance for that task type.
 - **`core.groom_playbook.cross_review_agent`** — the agent that cross-reviews the drafted plan. `null` by default, which skips the `cross-reviewing` step entirely.
+- **`core.groom_playbook.split.sections`** — the four milestone sub-headings, in order (tasks, definition of done, references, verify): the draft's `####` headings and the milestone file's `##` headings.
+- **`core.groom_playbook.split_fallback_agent`** — the `model:effort` of the agent that rewrites a draft `booping plan split` cannot cut (default `sonnet:medium`); `null` makes the run rewrite it itself.
 - **`core.research_agent`** — the agent assisted steps hand their bulk reads to (default `booping:booping-researcher`). Shared across playbooks, so it sits directly under `core`.

@@ -85,6 +85,9 @@ core:
       index.md: |
         ...plan identity frontmatter + title heading, seeded with --set title=/type=...
       request.md: ""
+    split_fallback_agent: "sonnet:medium"
+    split:
+      sections: [Tasks, Definition of Done, References, Verify]
     agents:
       booping-researcher:
         internal: true
@@ -352,6 +355,14 @@ How the project-manager sizes tiny fixes and packs them into [batches](project_m
 ### `core.groom_playbook.cross_review_agent`
 
 The agent that performs the detached second-model review of a drafted plan. **Default `null`**, so the reviewing step renders as skipped until a global or project config names an agent.
+
+### `core.groom_playbook.split.sections`
+
+The four milestone sub-headings, in order — tasks, definition of done, references, verify. `booping plan split` writes a draft's milestone sections under them in each milestone file, `booping plan check` finds the sections by them, and groom's `draft-plan` renders them as the draft's `####` headings. **Default `[Tasks, Definition of Done, References, Verify]`**.
+
+### `core.groom_playbook.split_fallback_agent`
+
+The `model:effort` of the agent groom spawns when `booping plan split` cannot cut a draft (exit 3 or 4): it rewrites the draft into the one-file format outside the vault, and the run copies it back and splits again. **Default `"sonnet:medium"`**; `null` makes the run rewrite the draft itself.
 
 ## Where the plan lifecycle lives
 

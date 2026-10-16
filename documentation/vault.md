@@ -13,6 +13,7 @@ Each milestone gets a directory of its own, `milestones/M{nn}-{kebab-title}/`, a
 ```text
 plans/197001010800_widget-search/
 ├── index.md
+├── draft.md
 ├── corrections.md
 └── milestones/
     ├── M01-keyword-index/
@@ -23,6 +24,8 @@ plans/197001010800_widget-search/
 ```
 
 The milestone file is the contract a `booping-developer` agent is handed — develop passes its path, never its text, with `index.md` alongside as context. It states the goal, the tasks, the Definition of Done and the command that verifies the work. Because the file is named after its directory, a bare wikilink to the milestone resolves to it in Obsidian, and the directory stays free for whatever the sprint accumulates around that milestone. Today that is one sidecar: `feedback.md`, written by develop when it sends an attempt back, carrying what it checked, what was wrong and what the next attempt must do. It is absent on a milestone that landed first time.
+
+`draft.md` is the whole plan as groom drafted it, in one file; `booping plan split` cuts it into `index.md`'s body and the milestone files, and groom keeps it as the source it edits and re-splits until you approve the plan. See [groom → booping plan split / plan check](groom.md#booping-plan-split-plan-check).
 
 `corrections.md` sits beside `index.md` once you have corrected a groom or develop run on that plan: one entry per correction — the step, what the run did, your words verbatim, the reason if you gave one, and a link back into the session transcript. `booping correction add` writes it as the run goes; `booping correction list` prints a plan's log, its code reviews' included, and is what [retro](retro.md) reads first.
 
