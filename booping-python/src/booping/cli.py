@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import argparse
+from typing import cast
 
+from booping.argparser import Parser
 from booping.commands import budget as budget_cmd
 from booping.commands import config_get as config_get_cmd
 from booping.commands import correction as correction_cmd
@@ -23,10 +25,9 @@ from booping.commands import status as status_cmd
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        prog="booping",
-        description="booping CLI",
-    )
+    # Subparsers inherit the Parser class at runtime; the commands' add_parser
+    # signatures take the invariant _SubParsersAction[ArgumentParser].
+    parser = cast(argparse.ArgumentParser, Parser(prog="booping", description="booping CLI"))
     sub = parser.add_subparsers(dest="subcommand", metavar="<command>")
     sub.required = True
 
