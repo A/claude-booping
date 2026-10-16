@@ -1,20 +1,21 @@
 ---
 title: "Groom one-pass draft and booping plan split"
 type: "feature"
-status: ready-for-dev
+status: in-progress
 sp: 26
 related_to: null
 created: 2026-10-16 13:20
 planned: null
-started: null
+started: 2026-10-16 13:34
 completed: null
 code_reviews: []
 sessions:
 - bd1b4f77-6235-4b78-ae72-ccbe54f0c63a
+- 9133c28e-b7c8-45c8-9714-09ab884414ba
 retro: null
 summary: Groom drafts one file in a research-then-draft pass; booping plan split
   cuts it into milestone files, plan check enforces the contract
-commit: a899f09f35b7e6aec3006531df72dee7db2e5301
+commit: 5eec81700bb72c353fe05fe2378443f176555715
 tracker_provider: null
 tracker_request: null
 tracker_issue: null
@@ -79,10 +80,10 @@ intake ──► draft-plan (runner) ──────────────�
 
 | id | title | sp | status |
 | --- | --- | --- | --- |
-| 01 | [Draft parser and cut](milestones/M01-draft-parser-and-cut/M01-draft-parser-and-cut.md) | 4 | pending |
-| 02 | [booping plan split command](milestones/M02-plan-split-command/M02-plan-split-command.md) | 4 | pending |
-| 03 | [plan split e2e cases on benchmark plans](milestones/M03-plan-split-e2e-cases/M03-plan-split-e2e-cases.md) | 3 | pending |
-| 04 | [booping plan check — the milestone contract as code](milestones/M04-plan-check-command/M04-plan-check-command.md) | 4 | pending |
+| 01 | [Draft parser and cut](milestones/M01-draft-parser-and-cut/M01-draft-parser-and-cut.md) | 4 | done |
+| 02 | [booping plan split command](milestones/M02-plan-split-command/M02-plan-split-command.md) | 4 | done |
+| 03 | [plan split e2e cases on benchmark plans](milestones/M03-plan-split-e2e-cases/M03-plan-split-e2e-cases.md) | 3 | done |
+| 04 | [booping plan check — the milestone contract as code](milestones/M04-plan-check-command/M04-plan-check-command.md) | 4 | done |
 | 05 | [Groom rewritten around one drafting step](milestones/M05-groom-one-drafting-step/M05-groom-one-drafting-step.md) | 3 | pending |
 | 06 | [Groom partials, present check and snapshot](milestones/M06-groom-partials-present-and-snapshot/M06-groom-partials-present-and-snapshot.md) | 2 | pending |
 | 07 | [Plan templates trimmed to the one-file format](milestones/M07-plan-templates-trimmed/M07-plan-templates-trimmed.md) | 3 | pending |
