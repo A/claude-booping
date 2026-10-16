@@ -1,0 +1,32 @@
+A plan whose milestones all meet the contract: exit 0 and nothing on stdout.
+
+-- fixtures/cwd/plan/milestones/M01-a/M01-a.md --
+---
+id: "01"
+title: "A"
+sp: 2
+status: pending
+---
+
+# M01: A
+
+## Tasks
+
+| Task | Description |
+| --- | --- |
+| 1.1 | edit `src/a.py` |
+
+## Definition of Done
+
+- [ ] a works
+
+## References
+
+## Verify
+
+`pytest tests/a_test.py`
+-- cmd --
+booping plan check plan
+-- exit --
+0
+-- stdout --

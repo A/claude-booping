@@ -1,0 +1,11 @@
+A plan directory holding no milestone file has nothing to check: exit 2 with an error.
+
+-- fixtures/cwd/plan/index.md --
+# Plan
+-- cmd --
+booping plan check plan
+-- stdout --
+-- exit --
+2
+-- stderr --
+error: no milestone file under plan

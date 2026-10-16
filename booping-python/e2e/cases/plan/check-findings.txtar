@@ -1,0 +1,65 @@
+Two milestones break the contract: one line per finding, `{milestone dir}: {check}: {finding}`,
+milestones in id order, exit 1.
+
+-- fixtures/cwd/plan/milestones/M02-b/M02-b.md --
+---
+id: "02"
+title: "B"
+sp: 5
+status: pending
+---
+
+# M02: B
+
+## Tasks
+
+- make it fast
+
+## Definition of Done
+
+- [ ] fast
+
+## References
+
+## Verify
+
+```
+pytest a
+pytest b
+```
+-- fixtures/cwd/plan/milestones/M01-a/M01-a.md --
+---
+id: "01"
+title: "A"
+sp: null
+status: pending
+---
+
+# M01: A
+
+## Tasks
+
+| Task | Description |
+| --- | --- |
+| 1.1 | edit `src/a.py` |
+| 1.2 | edit `src/b.py` |
+
+## Definition of Done
+
+- [ ] a works
+
+## References
+
+## Verify
+
+`pytest tests/a_test.py`
+-- cmd --
+booping plan check plan
+-- exit --
+1
+-- stdout --
+M01-a: dod: 1 DoD checkboxes for 2 tasks
+M01-a: sp: sp is not set
+M02-b: verify: Verify holds 2 commands, expected exactly one
+M02-b: files: Tasks names no file path
+M02-b: sp: sp 5 is at or above the re-decompose threshold 5
