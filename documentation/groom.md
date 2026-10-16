@@ -168,5 +168,5 @@ The playbook reads these keys from `src/config.yaml`. See [Project config](proje
 - **`core.task_types`** — list of `{type, description, doc_uri}` entries (`feature`, `bug`, `refactoring`). The request is classified against this list; the matching `doc_uri` lazy-loads detailed guidance for that task type.
 - **`core.groom_playbook.cross_review_agent`** — the agent that cross-reviews the drafted plan. `null` by default, which skips the `cross-reviewing` step entirely.
 - **`core.groom_playbook.split.sections`** — the four milestone sub-headings, in order (tasks, definition of done, references, verify): the draft's `####` headings and the milestone file's `##` headings.
-- **`core.groom_playbook.split_fallback_agent`** — the `model:effort` of the agent that rewrites a draft `booping plan split` cannot cut (default `sonnet:medium`); `null` makes the run rewrite it itself.
+- **`core.groom_playbook.split_fallback_agent`** — the `model:effort` of the agent that rewrites a draft `booping plan split` cannot cut (default `opus:medium`); `null` makes the run rewrite it itself.
 - **`core.research_agent`** — the agent assisted steps hand their bulk reads to (default `booping:booping-researcher`). Shared across playbooks, so it sits directly under `core`.

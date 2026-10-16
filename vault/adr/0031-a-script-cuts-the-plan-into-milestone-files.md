@@ -46,9 +46,11 @@ diagram on long plans; its line maps drifted by 1–2 lines and put DoD under Ta
 `sp:`, `depends_on:` and the sub-headings Tasks, Definition of Done, References, Verify), byte for
 byte, into `index.md` and the milestone files; it writes the milestone table and the SP groups
 (adr/0022) and never splits a code fence. It exits non-zero when the plan has no milestone headings
-and flags a milestone without `sp`; only such a plan goes to a model (Sonnet) for the split. After
+and flags a milestone without `sp`; only such a plan goes to a model (Opus) for the split. After
 the split booping checks the milestone contract — one Verify command, named files, DoD per task —
 and a failing milestone goes back to the draft with the finding.
+The benchmark below measured Sonnet; the fallback runs on Opus, because rewriting a draft is
+judgement work ([rule/0031](../rule/0031-judgement-runs-on-opus.md)).
 
 ## Alternatives
 

@@ -329,7 +329,7 @@ Take the milestone's blocked edge on the record, and the edge back when the next
 
 Run the project's guardrails over the finished sprint once — tests, lint, typecheck, formatter, whatever else must hold for a PR to open without CI failing — plus the plan's own bookkeeping, every DoD checkbox `[x]` and every milestone `done`, read off disk, and return what passed and what failed; no code-quality judgement, no fixes applied here.
 
-Tell a sub-agent — model sonnet, effort medium — to get its instructions by calling this command: `booping render-playbook develop --step verify`.
+Tell a sub-agent — model opus, effort medium — to get its instructions by calling this command: `booping render-playbook develop --step verify`.
 
 ## Step: Wrap Up
 # Close the sprint

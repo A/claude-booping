@@ -157,7 +157,7 @@ Write the playbook's manifest early — identity, trigger, and the confirmed gra
 
 Review gate: stop after this step — "The user confirms name, trigger, graph, target model and destination root before any per-step file is written"; continue only on explicit user confirmation.
 
-Tell a sub-agent — model sonnet, effort medium — to get its instructions by calling this command: `booping render-playbook playbook-authoring --step manifest`.
+Tell a sub-agent — model opus, effort medium — to get its instructions by calling this command: `booping render-playbook playbook-authoring --step manifest`.
 
 ## Subgraph: step-pipeline
 
@@ -214,7 +214,7 @@ Part of: step-pipeline (repeated)
 
 Review gate: stop after this step — "The user reviews the tree; the optimizer steps that follow take the suite to green"; continue only on explicit user confirmation.
 
-Tell a sub-agent — model sonnet, effort medium — to get its instructions by calling this command: `booping render-playbook playbook-authoring --step step-suite`.
+Tell a sub-agent — model opus, effort medium — to get its instructions by calling this command: `booping render-playbook playbook-authoring --step step-suite`.
 
 ## Step: Smoke Optimizer
 

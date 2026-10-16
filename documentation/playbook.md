@@ -153,7 +153,7 @@ The step **body** is the prompt for that step.
 ```yaml
 ---
 summary: Draft the plan against the approved design
-detached: sonnet:high
+detached: opus:high
 review_gate: Plan draft ready — approve before presenting?
 ---
 ```

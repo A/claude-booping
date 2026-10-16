@@ -679,7 +679,7 @@ core:
           ## Verify
     # model:effort of the agent that rewrites a draft `booping plan split` cannot
     # cut into the one-file format. Null → the driver rewrites it itself.
-    split_fallback_agent: "sonnet:medium"
+    split_fallback_agent: "opus:medium"
     split:
       # The four milestone sub-headings, in order: `booping plan split` writes a
       # draft's tasks / dod / references / verify sections under them, and

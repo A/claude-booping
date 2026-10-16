@@ -185,7 +185,7 @@ depends_on: [M{nn}, …]
 booping plan split {plan-dir}/draft.md --replace
 ```
 
-Exit 3 (no milestone heading) or 4 (written with `flag:` lines) — the draft is off-format. Spawn a `general-purpose` sub-agent with model and effort `sonnet:medium`, handing it `draft.md`'s path, the split's stderr and the format above: it rewrites the draft into that format at `/tmp/booping-split-{slug}/draft.md` and writes nothing in the vault. Copy that file over `{plan-dir}/draft.md` and split again. Exit 1 or 2 — stop and report the `error:` line.
+Exit 3 (no milestone heading) or 4 (written with `flag:` lines) — the draft is off-format. Spawn a `general-purpose` sub-agent with model and effort `opus:medium`, handing it `draft.md`'s path, the split's stderr and the format above: it rewrites the draft into that format at `/tmp/booping-split-{slug}/draft.md` and writes nothing in the vault. Copy that file over `{plan-dir}/draft.md` and split again. Exit 1 or 2 — stop and report the `error:` line.
 
 ## 4. Check
 

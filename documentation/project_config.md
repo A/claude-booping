@@ -85,7 +85,7 @@ core:
       index.md: |
         ...plan identity frontmatter + title heading, seeded with --set title=/type=...
       request.md: ""
-    split_fallback_agent: "sonnet:medium"
+    split_fallback_agent: "opus:medium"
     split:
       sections: [Tasks, Definition of Done, References, Verify]
     agents:
@@ -362,7 +362,7 @@ The four milestone sub-headings, in order — tasks, definition of done, referen
 
 ### `core.groom_playbook.split_fallback_agent`
 
-The `model:effort` of the agent groom spawns when `booping plan split` cannot cut a draft (exit 3 or 4): it rewrites the draft into the one-file format outside the vault, and the run copies it back and splits again. **Default `"sonnet:medium"`**; `null` makes the run rewrite the draft itself.
+The `model:effort` of the agent groom spawns when `booping plan split` cannot cut a draft (exit 3 or 4): it rewrites the draft into the one-file format outside the vault, and the run copies it back and splits again. **Default `"opus:medium"`**; `null` makes the run rewrite the draft itself.
 
 ## Where the plan lifecycle lives
 
