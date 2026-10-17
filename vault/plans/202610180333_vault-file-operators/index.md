@@ -2,13 +2,13 @@
 title: "Vault-file operators — set, transition, state, config, next_id; booping items
   folded in"
 type: "feature"
-status: in-progress
+status: done
 sp: 28
 related_to: null
 created: 2026-10-18 03:33
 planned: null
 started: 2026-10-18 03:45
-completed: null
+completed: 2026-10-18 04:25
 code_reviews: []
 sessions:
 - 955b76a5-4a7f-495d-b87c-25f4e4c2dbc8
@@ -21,6 +21,13 @@ tracker_request: null
 tracker_issue: null
 return_to: null
 reviewed_at: 2026-10-18 03:44
+metrics_active_minutes: 118
+metrics_models:
+- claude-opus-5-5
+metrics_tokens_input: 436
+metrics_tokens_output: 184453
+metrics_tokens_cache_creation: 404983
+metrics_tokens_cache_read: 52803665
 ---
 
 # Vault-file operators — set, transition, state, config, next_id; booping items folded in
