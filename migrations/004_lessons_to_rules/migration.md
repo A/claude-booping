@@ -28,8 +28,8 @@ HOME_DIR="$(booping config-get home_dir)"; HOME_DIR="${HOME_DIR/#\~/$HOME}"; exp
 export CORE_ROOT="$PLUGIN_ROOT/$(booping config-get core.specs.tiers.core.path)"
 # A tier's root when the tier exists, else empty; never creates one.
 tier_root() { booping specs ls --tier "$1" >/dev/null 2>&1 && booping specs init --tier "$1" | tail -n 1; }
-ls -1 "$HOME_DIR"/_lessons/*.md 2>/dev/null || echo "no global lessons"
-ls -1 "$VAULT"/_lessons/*.md 2>/dev/null || echo "no project lessons"
+find "$HOME_DIR/_lessons" -mindepth 1 -maxdepth 1 -name '[!.]*.md' 2>/dev/null | sort | grep . || echo "no global lessons"
+find "$VAULT/_lessons" -mindepth 1 -maxdepth 1 -name '[!.]*.md' 2>/dev/null | sort | grep . || echo "no project lessons"
 ```
 
 Tier anchors — what `sources` entries and every path in the report are relative to: core → the

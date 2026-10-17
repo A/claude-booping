@@ -23,7 +23,7 @@ resolves the config from it. The blocks run in bash or zsh alike — word lists 
 export PLUGIN_ROOT="$(cd <migration-dir>/../.. && pwd)"
 export VAULT="$(cd <vault> && pwd)"
 export REPO="$(pwd)"
-export TYPES="$(ls -1 "$PLUGIN_ROOT"/src/specs/schemas/*.yaml | xargs -n1 basename | sed 's/\.yaml$//' | tr '\n' ' ')"
+export TYPES="$(find "$PLUGIN_ROOT/src/specs/schemas" -mindepth 1 -maxdepth 1 -name '[!.]*.yaml' | sort | xargs -n1 basename | sed 's/\.yaml$//' | tr '\n' ' ')"
 booping config-get core.specs.tiers.project.path
 ls -ld "$VAULT/specs" 2>/dev/null || echo "no $VAULT/specs"
 ```
