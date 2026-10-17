@@ -43,7 +43,7 @@ itself stays yours. Never delegate to an agent that is not on this list.
 
 The following 1 rule(s) apply to this playbook. Never silently violate one; conflict → stop and flag. Read a rule's record when its brief is not enough.
 
-- When the user corrects you — rejects a proposal, rewrites an output, says it is wrong, answers a gate other than you suggested — run `booping correction add --target {run artefact} --step {playbook}/{step} --did … --said '{the user's words verbatim}'`, with `--why` when the user states it and `--record {ref}` when the correction names a spec record; a plain confirmation is not a correction. [booping:rule/0031](${CLAUDE_PLUGIN_ROOT}/specs/rule/0031-corrections-are-logged.md)
+- When the user corrects you — rejects a proposal, rewrites an output, says it is wrong, answers a gate other than you suggested — run `booping create core.corrections.template {vault}/corrections --set name=$(date +%Y%m%d-%H%M%S)-{step} --set step={playbook}/{step} --set did=… --set said='{the user's words verbatim}' --set artifact={run artefact, vault-relative}`, with `--set why=…` when the user states it; a plain confirmation is not a correction. [booping:rule/0031](${CLAUDE_PLUGIN_ROOT}/specs/rule/0031-corrections-are-logged.md)
 
 ## Playbook Steps
 
@@ -274,7 +274,7 @@ The order below is fixed: apply the dispositions, write `## Resolution`, close t
 
 A finding the verdict records `open`, or genuinely leaves open, is not applied: ask in `## Questions:` rather than guess.
 
-Approved means by the user in a supervised run; in an autonomous run, settled by you and logged with `booping defaults add`.
+Approved means by the user in a supervised run; in an autonomous run, settled by you and logged as an agent decision (`core.agent_decisions.template`).
 
 ## Sending small fixes back to the reviewer
 

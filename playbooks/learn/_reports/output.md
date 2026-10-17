@@ -77,7 +77,7 @@ Turn a procedure description into a working playbook — an interviewed brief, a
 
 ### project-manager
 
-The manager the user talks to — files every request as an item and carries each through groom, develop, review and merge in the project's autonomy mode.
+The manager the user talks to — files every request as an item and carries each through groom, develop, review and merge in the session's mode, supervised or autonomous.
 
 - Steps: `intake`, `on-start`, `work`
 - Targets: `booping render playbooks/_partials/target_space.md --set targets_for=project-manager`

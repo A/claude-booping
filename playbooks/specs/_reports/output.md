@@ -5,7 +5,7 @@ Tiers (`core.specs.tiers`; every `booping specs` verb takes `--tier`, default `p
 - `core` — `${CLAUDE_PLUGIN_ROOT}/specs`, namespace `booping`.
 - `project` — `.`.
 
-Autonomy: `supervised` (`core.autonomy`).
+Mode: autonomous when the user told this session to work autonomously, or its launch prompt carries `AUTONOMOUS RUN`; otherwise supervised.
 
 Writing a record:
 
@@ -61,6 +61,8 @@ booping playbook-state specs --workdir <run workdir>
 | `open` | `planned` | `booping items plan` linked the item to a plan | `plan` names an existing plan file |
 | `open` | `done` | `booping items close` on an open item — a tiny fix, an answered question or a recorded decision closed without a plan | — |
 | `open` | `dropped` | `booping items close --dropped` closed the item without work | — |
+| `open` | `clarify` | the item asks the user a question, written in its body | — |
+| `clarify` | `open` | the user answered, the answer written in the item's body | — |
 | `planned` | `done` | `booping items close`, or the linked plan reached develop's `done` | — |
 | `planned` | `dropped` | `booping items close --dropped` closed the item without work | — |
 | `planned` | `open` | `booping items reopen`, or the linked plan failed or was cancelled | — |
@@ -97,8 +99,14 @@ guide's order — values first, then the boundaries that follow from them. Next:
 
 ## Auto-review
 
-Read the values, rules and ADRs. A contradiction the records settle becomes a `conflict` record; one
-the user must settle becomes an item. Next: `booping items add --direction conflict`.
+Read every record type in every tier the project reaches — values, rules, ADRs, conflicts, stories,
+ideas, references, runbooks; stale records hide outside the first three. A fix that only makes a
+record say what is already decided or true: apply it and report it. A contradiction the records
+settle becomes a `conflict` record. Every finding the user must settle becomes an open item at once —
+`booping items add --direction conflict|clarify`, the question in its body, then
+`booping playbook-transition specs clarify --state open_item --target {vault}/open-items/OI-NNNN.md`;
+the user's answer goes into the body and `… specs open …` moves it back. Next: propose Sync specs and
+code; do not run it.
 
 ## Site review
 

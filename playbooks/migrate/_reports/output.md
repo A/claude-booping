@@ -17,7 +17,7 @@ Execute the steps in the most effective order considering their dependencies.
 
 | Step | Dependencies | Summary | Review gate |
 | --- | --- | --- | --- |
-| `survey` | — | Open the run: confirm a project is attached and the recorded migration id is readable; when work is uncommitted, name the current branch and the work and ask to commit repo and vault — always asked, whatever `core.auto_migrate` and `core.autonomy` say — committing on confirmation; present the pending set the rendered body carries and what each migration will do; report "already current" and end the run when the set is empty. | — |
+| `survey` | — | Open the run: confirm a project is attached and the recorded migration id is readable; when work is uncommitted, name the current branch and the work and ask to commit repo and vault — always asked, whatever `core.auto_migrate` says and in an autonomous run too — committing on confirmation; present the pending set the rendered body carries and what each migration will do; report "already current" and end the run when the set is empty. | — |
 | `apply` *(subgraph)* | `survey` | once per pending migration, in ascending id order; strictly one instance at a time — never in parallel — and a failed instance stops the run | — |
 | `apply-migration` *(in apply)* | — | Run one migration's whole cycle — hand its `migration.md`, prompt plus commands, to a context-fresh sub-agent, then advance `latest_migration` and commit everything; on failure halt the sequence, naming the failing id, what failed and a remedy the user can apply by hand. | — |
 | `summarize` | `apply` | Close with a single report of what changed across the whole run — the migrations applied, the commits carrying them, and whether the vault is now current. | — |

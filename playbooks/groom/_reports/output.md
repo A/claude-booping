@@ -31,7 +31,7 @@ The following 4 rule(s) apply to this playbook. Never silently violate one; conf
 - Settle every open question with the user during grooming; in develop, stop only for force majeure, not for what grooming should have asked. [booping:rule/0004](${CLAUDE_PLUGIN_ROOT}/specs/rule/0004-questions-settled-in-grooming.md)
 - Before saving a skill, agent, partial, template or briefing, check every block for scoping, duplication, configurability and hierarchy; cut motivation, restated context and preambles. [booping:rule/0006](${CLAUDE_PLUGIN_ROOT}/specs/rule/0006-information-architecture-pass.md)
 - Name the values that drive the plan's main choices and flag every departure from a value or rule with its reason, so the user can refine the values. [booping:rule/0030](${CLAUDE_PLUGIN_ROOT}/specs/rule/0030-planning-shows-values-in-play.md)
-- When the user corrects you — rejects a proposal, rewrites an output, says it is wrong, answers a gate other than you suggested — run `booping correction add --target {run artefact} --step {playbook}/{step} --did … --said '{the user's words verbatim}'`, with `--why` when the user states it and `--record {ref}` when the correction names a spec record; a plain confirmation is not a correction. [booping:rule/0031](${CLAUDE_PLUGIN_ROOT}/specs/rule/0031-corrections-are-logged.md)
+- When the user corrects you — rejects a proposal, rewrites an output, says it is wrong, answers a gate other than you suggested — run `booping create core.corrections.template {vault}/corrections --set name=$(date +%Y%m%d-%H%M%S)-{step} --set step={playbook}/{step} --set did=… --set said='{the user's words verbatim}' --set artifact={run artefact, vault-relative}`, with `--set why=…` when the user states it; a plain confirmation is not a correction. [booping:rule/0031](${CLAUDE_PLUGIN_ROOT}/specs/rule/0031-corrections-are-logged.md)
 
 ## Playbook Steps
 
@@ -122,7 +122,7 @@ Create it in one call, with `{plan-dir}` the preamble's `Plan dir:` line resolve
 vault and `{title}` the plan's descriptive title:
 
 ```
-booping scaffold core.groom_playbook.scaffold {plan-dir} --set title="{title}" --set type={type}
+booping create core.groom_playbook.template {plan-dir} --set title="{title}" --set type={type}
 ```
 
 The printed diff is the confirmation — do not read the created files back. A target reported as

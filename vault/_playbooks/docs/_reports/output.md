@@ -192,7 +192,7 @@ is read in its own sub-agent, and what comes back to you is a row, never the ite
 | Quality at a rational cost | value | Booping is a work tool for professionals, so the quality of the result matters. | value/0012-quality-at-a-rational-cost.md |
 | Guides to the goal | value | The system is clear to the user and leads them to the goal by the hand, while letting a professional step aside and get there their own way. | value/0013-guides-to-the-goal.md |
 | Comfort for non-technical users | non-value | How comfortable booping is for people without a strong technical background is not optimised for; they are not its audience. | value/0014-comfort-for-non-technical-users.md |
-| Deterministic where it can be | value | Whatever can be computed is computed by code; the model spends tokens only on judgement, so a result does not depend on which model produced it. | value/0015-deterministic-where-code-reads-it.md |
+| Deterministic where code reads it | value | What code reads, and every fact outside the model's view, is produced by code; what only a model or a human reads stays prose with a fixed format until code starts to read it. | value/0015-deterministic-where-code-reads-it.md |
 | Specs live with the work | value | Specs are updated as the work happens and applied wherever they raise the quality of a result; they never go stale or depend on the user remembering them. | value/0016-specs-live-with-the-work.md |
 | Launching and guarding runs is userland | non-value | When and how development runs start — triggers, schedules, tracker and messenger integrations — and guarding usage limits are the user's, not booping's; booping offers an integration surface at most. | value/0017-launching-and-guarding-runs-is-userland.md |
 | A core set for development and self-learning | value | On top of the framework booping ships core playbooks for development, self-learning among them; they are its dogfooding, built only from mechanics a user playbook gets too. | value/0018-a-core-set-for-development-and-self-learning.md |
@@ -205,7 +205,7 @@ is read in its own sub-agent, and what comes back to you is a row, never the ite
 | --- | --- | --- | --- |
 | Playbook driver | The /playbook skill discovers a procedure across the core, global and project levels and drives it to completion. | done | story/0001-playbook-driver.md |
 | Run state machines | A run's state lives in per-playbook states: machines that only the booping CLI advances. | done | story/0002-run-state-machines.md |
-| Layered configuration | Config is a deep merge over the core, global and project levels, and any mapping in it can be a query spec or a scaffold tree. | done | story/0003-layered-configuration.md |
+| Layered configuration | Config is a deep merge over the core, global and project levels, and any mapping in it can be a query spec or a template tree. | done | story/0003-layered-configuration.md |
 | Targeted rules | An accepted rule's brief is injected into exactly the playbooks, steps, agents or skills its targets: list names. | done | story/0004-targeted-rules.md |
 | Plan and review templates | Groom and code-review offer plan and review templates the user authored in the Project Vault or at the global level. | done | story/0005-plan-and-review-templates.md |
 | User playbooks | Playbooks the user authors at the global level or in the Project Vault are discovered and run beside the core ones. | done | story/0006-user-playbooks.md |
@@ -226,6 +226,8 @@ is read in its own sub-agent, and what comes back to you is a row, never the ite
 | Code review | The code-review playbook reviews a confirmed scope, collects the human verdict and applies only approved fixes. | done | story/0021-code-review.md |
 | Task tracker | The booping-tracker CLI carries every interaction with an issue tracker, and groom mirrors its run status and questions onto the tracker issue. | done | story/0022-task-tracker.md |
 | Project manager | One manager the user talks to files every request as an item and carries it through groom, develop, review and merge, with a status computed from the vault. | done | story/0023-project-manager.md |
+| Specs review with the owner | The system reviews the owner's specs, fixes what is plainly stale, and brings the owner only the decisions that are theirs, one at a time and kept across restarts. | done | story/0024-specs-review-with-the-owner.md |
+| Own integration on top of booping | An advanced user wires their own triggers, schedules, tracker flows and usage guards on top of booping's surfaces; the core ships none of them. | done | story/0025-own-integration-on-top.md |
 
 
 ## The fan-out
@@ -339,7 +341,7 @@ driving context whole; the documentation's structure comes from the surfaces rec
 | --- | --- | --- | --- |
 | Playbook driver | The /playbook skill discovers a procedure across the core, global and project levels and drives it to completion. | done | story/0001-playbook-driver.md |
 | Run state machines | A run's state lives in per-playbook states: machines that only the booping CLI advances. | done | story/0002-run-state-machines.md |
-| Layered configuration | Config is a deep merge over the core, global and project levels, and any mapping in it can be a query spec or a scaffold tree. | done | story/0003-layered-configuration.md |
+| Layered configuration | Config is a deep merge over the core, global and project levels, and any mapping in it can be a query spec or a template tree. | done | story/0003-layered-configuration.md |
 | Targeted rules | An accepted rule's brief is injected into exactly the playbooks, steps, agents or skills its targets: list names. | done | story/0004-targeted-rules.md |
 | Plan and review templates | Groom and code-review offer plan and review templates the user authored in the Project Vault or at the global level. | done | story/0005-plan-and-review-templates.md |
 | User playbooks | Playbooks the user authors at the global level or in the Project Vault are discovered and run beside the core ones. | done | story/0006-user-playbooks.md |
@@ -360,6 +362,8 @@ driving context whole; the documentation's structure comes from the surfaces rec
 | Code review | The code-review playbook reviews a confirmed scope, collects the human verdict and applies only approved fixes. | done | story/0021-code-review.md |
 | Task tracker | The booping-tracker CLI carries every interaction with an issue tracker, and groom mirrors its run status and questions onto the tracker issue. | done | story/0022-task-tracker.md |
 | Project manager | One manager the user talks to files every request as an item and carries it through groom, develop, review and merge, with a status computed from the vault. | done | story/0023-project-manager.md |
+| Specs review with the owner | The system reviews the owner's specs, fixes what is plainly stale, and brings the owner only the decisions that are theirs, one at a time and kept across restarts. | done | story/0024-specs-review-with-the-owner.md |
+| Own integration on top of booping | An advanced user wires their own triggers, schedules, tracker flows and usage guards on top of booping's surfaces; the core ships none of them. | done | story/0025-own-integration-on-top.md |
 
 
 A story `sync-specs` created this run is not in the index above — its path is in `sync-specs`'

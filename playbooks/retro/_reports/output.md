@@ -42,7 +42,7 @@ Execute the steps in the most effective order considering their dependencies.
 | Step | Dependencies | Summary | Review gate |
 | --- | --- | --- | --- |
 | `intake` | — | Settle the working set the run covers — validate that every named plan is in the preamble's candidate table, offer every other candidate as include / postpone / skip-retro, apply the skips via `_scripts/drop-plan` (which stamps the `retro: skipped` sentinel), then read each adopted plan in full for context only: scope, story points, dates and decisions on record, never as a source of runner-derived findings. | — |
-| `prepare` | `intake` | Read each adopted plan in full for context only, then build the issue list without showing it — the plans' corrections feed first, its entries issue items and its dialogue links handed on — session-log mining and a plan-stage lesson check delegated in parallel, the lesson set passed verbatim with each brief — and cross-check both returns against the lesson set and the project-local retro extension; the list is withheld until gather-feedback has the user's raw take. | — |
+| `prepare` | `intake` | Read each adopted plan in full for context only, then build the issue list without showing it — the open corrections first, each an issue item, its session handed on — session-log mining and a plan-stage lesson check delegated in parallel, the lesson set passed verbatim with each brief — and cross-check both returns against the lesson set and the project-local retro extension; the list is withheld until gather-feedback has the user's raw take. | — |
 | `gather-feedback` | `prepare` | Take the user's raw open-ended take before any mined finding is mentioned: four questions asked verbatim in prose, one at a time; then walk every mined item in prose, one at a time with a counter, for accept / dismiss / the user's own wording, and close by asking per plan whether the plan's goal was reached, the goal presented verbatim as written. | — |
 | `research-issues` | `gather-feedback` | Do focused root-cause work on each accepted issue: read only the files the trigger or the user's wording implicates, compare documented project conventions against what the code actually does where the issue is a convention drift, research current best practice for the underlying class of problem, and design concrete process-level prevention moves — for lesson-tagged issues also judge whether the lesson's wording, trigger or placement is what failed. | — |
 | `synthesize` | `research-issues` | Draft the retrospective against the retrospective template — wins, per-issue what-happened / root-cause / impact, lesson gaps, and action items split into one-time tasks and standing heuristics — run the template's self-review checklist and fix every `no`, then show the user a chat summary in the pre-save summary format while holding the full draft in context, unwritten. | The run's single review gate — explicit user approval of the draft, asked for in prose in the same message as the summary, never via `AskUserQuestion`. "Save it" counts, silence never does; the approval is what `save` writes on and what the exit edge's first gate names. A refine request loops in place — adjust framing, wording or which issues land, re-post the summary whole with what changed marked as changed, and re-ask; the loop is unbounded, a refine needing new evidence stays in this step, and the run never advances to `save` on its own. A cancel drops the draft and ends the run: nothing written, no transition, the plan left at its entry status. |
@@ -103,7 +103,11 @@ Read each plan in the working set — its `index.md` — for **context only**: s
 
 
 
-**Corrections feed** — before the delegated reads, run `booping correction list --plan {plan}` for each plan in the working set. Each entry becomes an issue item with source `correction`: trigger = its `Said`, interpretation from its `Did` and `Why`. Pass every entry's `Dialogue` link (session + line + uuid) into brief A, to read the conversation around it.
+**Corrections feed** — every correction not yet handled, whichever run logged it (`core.corrections.open`, paths under `{vault}/`):
+
+_No open corrections._
+
+Each entry becomes an issue item with source `correction`: trigger = its `said`, interpretation from its `did` and `why`. Pass every entry's `session` and `said` into brief A, to find the conversation around it. Then mark each entry taken up handled: `booping frontmatter-update {vault}/{path} state=handled`.
 
 In parallel, delegate two reads per the agent roster above. Pass the lesson set verbatim with each brief (use the `Lessons` block already loaded above).
 
@@ -134,7 +138,7 @@ Do not load any other lessons or files. Do not propose fixes; only report gaps.
 
 The output of this step is the **issue list** — every logged correction, and every tension, late change, code-feedback, execution-stage ignored-lesson, and plan-stage lesson-gap item from the agents' deliverables, held in context. Each item carries: source (correction / tension / late change / code feedback / ignored lesson / plan-stage lesson gap), trigger, and a one-line orchestrator interpretation.
 
-**Orchestrator cross-check** (still before `gather-feedback`): re-scan the lesson set and `_booping/skill_retro.md` against both agents' full output. Add any lesson-related item either agent missed; drop or correct any false positive. Drop a mined item whose trigger is a message the feed already links (same session and uuid) as a duplicate of its `correction` item. Use only what is in context — no additional loads.
+**Orchestrator cross-check** (still before `gather-feedback`): re-scan the lesson set and `_booping/skill_retro.md` against both agents' full output. Add any lesson-related item either agent missed; drop or correct any false positive. Drop a mined item whose trigger is a correction the feed already holds (same session, same words) as a duplicate of its `correction` item. Use only what is in context — no additional loads.
 
 Do **not** present this list to the user yet — `gather-feedback` runs first to avoid anchoring.
 

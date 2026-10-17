@@ -1,14 +1,14 @@
-Autonomy: `supervised` (`core.autonomy`).
+Mode: autonomous when the user told this session to work autonomously, or its launch prompt carries `AUTONOMOUS RUN`; otherwise supervised. A child run gets the mode only through `booping run … --autonomous`.
 
 - `supervised` — stop for plan approval inside the inline groom and at the merge gate; nothing else stops.
-- `autonomous` — nothing stops: settle every gate yourself and log it with `booping defaults add`, `--target` the plan's `index.md` when one exists, else the item file.
+- `autonomous` — nothing stops: settle every gate yourself and log it as an agent decision per the driving protocol, `--set artifact=` the plan's `index.md` when one exists, else the item file.
 
 Session loop: every later user message → `intake`, then `work`. While a run is live, start every turn with `booping status runs`.
 
 **Hard rules — hold for the whole session:**
 - The driver owns the vault, every commit (scoped staging by path, never `git add -A`) and every transition; workers edit repo code only. The driver never edits code — every change, a tiny fix included, goes to a worker.
 - Launch `booping run` with the Bash tool's background mode, never `&`; ack it with `booping run ack` once its outcome is acted on.
-- A question you cannot settle goes on the item with `booping items ask`; chat only names the sidecar.
+- A question you cannot settle goes on an open item: append it to the item file's body under `## Question`, then `booping playbook-transition specs clarify --state open_item --target {vault}/open-items/{id}.md`; chat only names the item file.
 - Never push, deploy or release unless a project rule or runbook targeting `project-manager` says how.
 - No item store, handoff file or status file of your own.
 
@@ -32,6 +32,12 @@ itself stays yours. Never delegate to an agent that is not on this list.
 - Never manually break markdown lines. Write each paragraph, bullet, or table row as one line and
   let the renderer wrap it — hard line breaks turn into mid-sentence breaks after any later edit.
 
+## Rules
+
+The following 1 rule(s) apply to this playbook. Never silently violate one; conflict → stop and flag. Read a rule's record when its brief is not enough.
+
+- Items of the same class in a batch — the same kind of mechanism: a log, a register, a launcher, a report — are groomed together in one plan, or one after another with the earlier plan linked in the next brief; never in parallel. [booping:rule/0035](${CLAUDE_PLUGIN_ROOT}/specs/rule/0035-same-class-items-groomed-together.md)
+
 ## Playbook Steps
 
 Execute the steps in the most effective order considering their dependencies.
@@ -40,7 +46,7 @@ Execute the steps in the most effective order considering their dependencies.
 | --- | --- | --- | --- |
 | `on-start` | — | Open the session with the short status and name what to act on. | — |
 | `intake` | `on-start` | File every request in the user's message as an item, in the user's own words. | — |
-| `work` | `intake` | Classify each item taken up and carry it along its route to a report line. | Supervised: two stops — the plan approval inside the inline groom, and the merge gate, asked in prose: merge only on the user's explicit yes ("looks good" counts, silence never does). Autonomous: both settled yourself and each logged with `booping defaults add`. |
+| `work` | `intake` | Classify each item taken up and carry it along its route to a report line. | Supervised: two stops — the plan approval inside the inline groom, and the merge gate, asked in prose: merge only on the user's explicit yes ("looks good" counts, silence never does). Autonomous: both settled yourself and each logged as an agent decision. |
 
 ## Step: On Start
 Run `booping status` and post its lines verbatim.
@@ -48,7 +54,7 @@ Run `booping status` and post its lines verbatim.
 Then name what to act on, in this order:
 
 1. Unacked finished, failed or lost runs.
-2. Items waiting on the user — point at their sidecars.
+2. Items waiting on the user — point at their item files.
 3. Plans at `ready-for-dev` — develop next.
 4. Plans `done` without a code review — review next.
 5. Open items.
@@ -71,12 +77,16 @@ TEXT
 
 stdin carries the user's words for that request character for character — never paraphrased, summarised or corrected.
 
-An answer to an item's question goes on the item, again in the user's words:
+An answer to an item's question goes on the item, again in the user's words, and moves it back to `open`:
 
 ```bash
-booping items answer {id} C{n} --text - <<'TEXT'
+cat >> {vault}/open-items/{id}.md <<'TEXT'
+
+## Answer
+
 {the user's own words}
 TEXT
+booping playbook-transition specs open --state open_item --target {vault}/open-items/{id}.md
 ```
 
 Then post the filed ids, one line each: `{id} {title}`.
@@ -94,7 +104,7 @@ Each item taken up is one of:
 A tiny fix is also sized: `booping items size {id} {size}`, one of the sizes
 `booping config-get core.project_manager_playbook.batch` lists.
 
-Next: the class's route below; a class the item does not let you judge → `booping items ask {id}`.
+Next: the class's route below; a class the item does not let you judge → a question on the item (see the hard rules).
 
 ## Tiny fix
 
@@ -125,7 +135,7 @@ Next: `booping items close {id}` for each item of the batch.
 ## Question
 
 The repo or vault holds the answer → answer in chat. Next: `booping items close {id}`; no answer
-there → `booping items ask {id}`.
+there → a question on the item (see the hard rules).
 
 ## Decision
 
@@ -146,11 +156,11 @@ One groom per item, or one for several items the user framed as one change.
    `booping run code-review {plan} --autonomous`.
 5. Review ends → commit the fixes it left uncommitted (scoped staging), then read `## Findings` and
    `## Verdict` in its artefact, `codereviews/{plan-dirname}/{ts}.md`. An unfixed blocker →
-   `booping items ask` on the plan's items (the `booping items list` rows whose `plan` is this
-   plan); no merge.
+   report the plan's items `waiting on you`, the blocker as the pointer; no merge.
 6. Merge gate (the review gate above). Supervised: list first, numbered, every decision the
-   autonomous runs settled — each `D{n}` in the plan's `defaults.md` and in
-   `codereviews/{plan-dirname}/defaults.md` — one plain line each, marked `(proposal)`.
+   autonomous runs settled — each row of `booping query --config core.agent_decisions.open`
+   — one plain line each, marked `(proposal)`; once the user answers, mark each listed file
+   with `booping frontmatter-update {vault}/{path} state=reviewed`.
 7. Merge the branch develop left checked out into the merge target with `git merge --no-ff`,
    locally, never pushed; develop left the merge target itself checked out → nothing to merge.
 
@@ -173,12 +183,12 @@ After each turn's work, one line per item touched:
 | `done` | the closing commit's short sha; with a plan, the plan's vault path |
 | `planned` | the plan's vault path |
 | `running` | the run record `runs/{run}.md` |
-| `waiting on you` | the sidecar `open-items/questions/{id}.md#C{n}` |
+| `waiting on you` | the item file `open-items/{id}.md`, or the review's blocker |
 | `dropped` | the close reason |
 
 Next: the next action, in one sentence.
 
 ## Corrections
 
-A correction from the user → `booping correction add` per `booping:rule/0031`, `--target` the
+A correction from the user → a correction file per `booping:rule/0031`, `--set artifact=` the
 plan's `index.md`, or the item file when there is no plan.
