@@ -7,9 +7,9 @@ a current file are skipped rather than redone.
 
 - Date & time: 1970-01-01 00:00
 - The run workdir is `{vault}/docs/`; run records live under its `_runs/` subdirectory, never
-  loose in `docs/` beside real documentation. Every `booping playbook-state` / `booping
-  playbook-transition` call passes `--workdir {vault}/docs --target
-  _runs/{YYYYMMDDHHmm}-{title}.md`, since the machine declares no `artifact:`.
+  loose in `docs/` beside real documentation. Every `booping state` / `booping transition` call names the run record
+  `{vault}/docs/_runs/{YYYYMMDDHHmm}-{title}.md` and passes `--playbook docs`, since the machine declares
+  no `artifact:`.
 - The spec set is the project specs tier records: the value records
   (`core.docs_playbook.queries.values`), reference/0001 (audience), reference/0002 (glossary —
   canonical terms every record and destination uses), reference/0003 (surfaces) and the story
@@ -76,20 +76,20 @@ Execute the steps in the most effective order considering their dependencies.
 
 ## State
 
-Run state is persisted in artifacts under the run workdir. Only `booping playbook-transition` writes it — never hand-edit an artifact's `status`.
+Run state is persisted in artifacts under the run workdir. Only `booping transition` writes it — never hand-edit an artifact's `status`.
 
 Read the whole run's frontier before starting or resuming:
 
 ```
-booping playbook-state docs --workdir <run workdir> --target {path}
+booping state {path} --playbook docs
 ```
 
 ### State: run
 
 - Referenced by: outer graph
-- Artifact: named per run — pass `--target {path}` (relative to the run workdir) on every call
+- Artifact: named per run — pass it as `{path}` on every call
 - Initial status: `surveying`
-- Advance: `booping playbook-transition docs <to> --target {path} --workdir <run workdir>`
+- Advance: `booping transition {path} <to> --playbook docs`
 
 | Status | To | When | Gates |
 | --- | --- | --- | --- |
@@ -228,6 +228,7 @@ is read in its own sub-agent, and what comes back to you is a row, never the ite
 | Project manager | One manager the user talks to files every request as an item and carries it through groom, develop, review and merge, with a status computed from the vault. | done | story/0023-project-manager.md |
 | Specs review with the owner | The system reviews the owner's specs, fixes what is plainly stale, and brings the owner only the decisions that are theirs, one at a time and kept across restarts. | done | story/0024-specs-review-with-the-owner.md |
 | Own integration on top of booping | An advanced user wires their own triggers, schedules, tracker flows and usage guards on top of booping's surfaces; the core ships none of them. | done | story/0025-own-integration-on-top.md |
+| Specs first, then code | A decision made in the specs becomes tracked work the code follows, closed with its plan; code that ran ahead of the specs becomes work for the specs. | done | story/0026-specs-first-then-code.md |
 
 
 ## The fan-out
@@ -364,6 +365,7 @@ driving context whole; the documentation's structure comes from the surfaces rec
 | Project manager | One manager the user talks to files every request as an item and carries it through groom, develop, review and merge, with a status computed from the vault. | done | story/0023-project-manager.md |
 | Specs review with the owner | The system reviews the owner's specs, fixes what is plainly stale, and brings the owner only the decisions that are theirs, one at a time and kept across restarts. | done | story/0024-specs-review-with-the-owner.md |
 | Own integration on top of booping | An advanced user wires their own triggers, schedules, tracker flows and usage guards on top of booping's surfaces; the core ships none of them. | done | story/0025-own-integration-on-top.md |
+| Specs first, then code | A decision made in the specs becomes tracked work the code follows, closed with its plan; code that ran ahead of the specs becomes work for the specs. | done | story/0026-specs-first-then-code.md |
 
 
 A story `sync-specs` created this run is not in the index above — its path is in `sync-specs`'

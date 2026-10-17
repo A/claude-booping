@@ -13,7 +13,7 @@ Writing a record:
 - Set `created_by: claude`; never set `reviewed`.
 - Run `booping specs check` after every write and fix what it reports.
 
-The run keeps no state of its own. The `open_item` machine below tracks one open-item file each: its workdir is the vault, and only `booping items` moves it — never call `booping playbook-transition` for it, and never create a run workdir for it.
+The run keeps no state of its own. The `open_item` machine below tracks one open-item file each: its workdir is the vault, `booping transition {item} {status}` moves it, the machine inferred from the path — never create a run workdir for it.
 
 
 
@@ -41,12 +41,12 @@ Execute the steps in the most effective order considering their dependencies.
 
 ## State
 
-Run state is persisted in artifacts under the run workdir. Only `booping playbook-transition` writes it — never hand-edit an artifact's `status`.
+Run state is persisted in artifacts under the run workdir. Only `booping transition` writes it — never hand-edit an artifact's `status`.
 
 Read the whole run's frontier before starting or resuming:
 
 ```
-booping playbook-state specs --workdir <run workdir>
+booping state <run workdir>/open-items/<slug>.md --playbook specs
 ```
 
 ### State: open_item
@@ -54,24 +54,25 @@ booping playbook-state specs --workdir <run workdir>
 - Referenced by: no graph scope — standalone, moved only by `--state open_item` calls
 - Artifact: `open-items/{instance}.md` (relative to the run workdir)
 - Initial status: `open`
-- Advance: `booping playbook-transition specs <to> --state open_item --instance <slug> --workdir <run workdir>`
+- Advance: `booping transition <run workdir>/open-items/<slug>.md <to> --playbook specs --state open_item`
 
 | Status | To | When | Gates |
 | --- | --- | --- | --- |
-| `open` | `planned` | `booping items plan` linked the item to a plan | `plan` names an existing plan file |
-| `open` | `done` | `booping items close` on an open item — a tiny fix, an answered question or a recorded decision closed without a plan | — |
-| `open` | `dropped` | `booping items close --dropped` closed the item without work | — |
+| `open` | `planned` | `booping set {item} plan={plan index}` linked the item to a plan | `plan` names an existing plan file |
+| `open` | `done` | an open item closed without a plan — a tiny fix, an answered question or a recorded decision closed without a plan | — |
+| `open` | `dropped` | the item closed without work, `booping set {item} reason=…` first when there is one | — |
 | `open` | `clarify` | the item asks the user a question, written in its body | — |
 | `clarify` | `open` | the user answered, the answer written in the item's body | — |
-| `planned` | `done` | `booping items close`, or the linked plan reached develop's `done` | — |
-| `planned` | `dropped` | `booping items close --dropped` closed the item without work | — |
-| `planned` | `open` | `booping items reopen`, or the linked plan failed or was cancelled | — |
+| `planned` | `done` | the item closed by hand, or the linked plan reached develop's `done` | — |
+| `planned` | `dropped` | the item closed without work, `booping set {item} reason=…` first when there is one | — |
+| `planned` | `open` | the item reopened by hand, or the linked plan failed or was cancelled | — |
 | `done` | *(terminal)* | — | — |
 | `dropped` | *(terminal)* | — | — |
 
 ## Step: Guide
 Act on the user's request; the scenarios below orient, never restrict — never ask which one to run.
-Flags and their allowed values come from `booping items {verb} --help`.
+An open item is filed with `booping create core.specs.open_items.template {vault}/open-items --set title=… --set source=… [--set direction=…] [--set record=…] [--set body=…]`;
+`direction` is one of `code-to-spec`, `spec-to-code`, `conflict`, `clarify`.
 
 ## Handed over
 
@@ -103,9 +104,9 @@ Read every record type in every tier the project reaches — values, rules, ADRs
 ideas, references, runbooks; stale records hide outside the first three. A fix that only makes a
 record say what is already decided or true: apply it and report it. A contradiction the records
 settle becomes a `conflict` record. Every finding the user must settle becomes an open item at once —
-`booping items add --direction conflict|clarify`, the question in its body, then
-`booping playbook-transition specs clarify --state open_item --target {vault}/open-items/OI-NNNN.md`;
-the user's answer goes into the body and `… specs open …` moves it back. Next: propose Sync specs and
+filed with `--set source=manual --set direction=conflict|clarify`, the question in its body, then
+`booping transition {vault}/open-items/OI-NNNN.md clarify`;
+the user's answer goes into the body and `… open` moves it back. Next: propose Sync specs and
 code; do not run it.
 
 ## Site review
@@ -119,13 +120,14 @@ your own initiative. Next: `booping specs check`.
 
 A decision → an ADR, only for one choice with a real alternative and a reason the code cannot
 show. An idea → an idea record. A constraint on how the model works → a rule with `targets` and
-`brief`. Next: an ADR with a `Confirmation:` line → `booping items add --record adr/NNNN`;
+`brief`. Next: an ADR with a `Confirmation:` line → file an item with `--set source=adr --set record=adr/NNNN
+--set direction=spec-to-code --set title="{the Confirmation: line}"`;
 anything else → `booping specs check`.
 
 ## Sync specs and code
 
 Compare the records with the code; each gap becomes one item with the direction it runs:
-`booping items add --source sync`. Next: `booping items scan` for the marks
+filed with `--set source=sync --set direction=…`. Next: `booping specs scan` for the marks
 and check findings.
 
 ## Retro to rules
@@ -135,8 +137,8 @@ written directly. Next: `/playbook learn`, or `booping specs check` after the ru
 
 ## Open items
 
-Show `booping items list`; the user picks. An item needing no work →
-`booping items close {ids} --dropped --reason "…"`; a planned item whose plan was
-cancelled outside develop → `booping items reopen --plan {plan}`.
+Show `booping query --config core.specs.open_items.index --where status:in=open,planned`; the user picks. An item
+needing no work → `booping set {item} reason="…"` then `booping transition {item} dropped`; a planned
+item whose plan was cancelled outside develop → `booping transition {item} open`.
 Supervised: next is `/playbook groom` naming the picked ids — groom links them to the plan and stops at its plan review.
 Autonomous: run `/playbook groom` naming the picked ids — none picked, every `open` item — then `/playbook develop` on the plan it readies, in this session, without stopping; a groom that splits develops the first plan and reports the parked stubs.

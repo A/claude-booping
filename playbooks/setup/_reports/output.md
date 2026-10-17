@@ -19,11 +19,11 @@ Execute the steps in the most effective order considering their dependencies.
 ## Step: Setup Booping
 # Set booping up on this machine
 
-The run's context report carries the booping-initialized flag and, when booping is initialized, the machine's configured home dir. The flag picks the branch below and is the only thing that answers *whether* booping is configured: `booping config-get home_dir` always prints a value — the core default `~/Claude/` when no config exists — so it answers only *what* the home dir is.
+The run's context report carries the booping-initialized flag and, when booping is initialized, the machine's configured home dir. The flag picks the branch below and is the only thing that answers *whether* booping is configured: `booping config home_dir` always prints a value — the core default `~/Claude/` when no config exists — so it answers only *what* the home dir is.
 
 ## Branch: already initialized
 
-Read the resolved value back with `booping config-get home_dir` and report it. The config is never edited, re-pointed or reformatted — the one exception is adding the namespace key, per **Global specs tier** below. Still make the home dir exist and be a git repo, per **Home dir** below — an existing config says nothing about the directory.
+Read the resolved value back with `booping config home_dir` and report it. The config is never edited, re-pointed or reformatted — the one exception is adding the namespace key, per **Global specs tier** below. Still make the home dir exist and be a git repo, per **Home dir** below — an existing config says nothing about the directory.
 
 ## Branch: not initialized
 
@@ -35,7 +35,7 @@ Then create `${XDG_CONFIG_HOME:-~/.config}/booping/config.yaml`, parent director
 home_dir: ~/Claude/
 ```
 
-Read the value back with `booping config-get home_dir` and report it.
+Read the value back with `booping config home_dir` and report it.
 
 ## Home dir
 
@@ -50,7 +50,7 @@ Report which of the two actually did something. A home dir that already sits ins
 
 ## Global specs tier
 
-Applies on both branches, after **Home dir**. Run `booping config-get core.specs.tiers.global.namespace`; it prints `None` when no tier sets the key. Only then ask the user for the namespace through `AskUserQuestion` — one question, `$USER` (expanded) as the default option, any other id accepted as free input — and add it to `${XDG_CONFIG_HOME:-~/.config}/booping/config.yaml`, keeping every other key as it is:
+Applies on both branches, after **Home dir**. Run `booping config core.specs.tiers.global.namespace`; it prints `None` when no tier sets the key. Only then ask the user for the namespace through `AskUserQuestion` — one question, `$USER` (expanded) as the default option, any other id accepted as free input — and add it to `${XDG_CONFIG_HOME:-~/.config}/booping/config.yaml`, keeping every other key as it is:
 
 ```yaml
 core:
@@ -89,7 +89,7 @@ The run's context report carries the project-initialized flag and the previous s
 Gather in one batch before anything else:
 
 - `git rev-parse --show-toplevel` — the repo root, and the source of the name candidates (its basename, kebab-cased). A non-zero exit means the repo is not under git; the cwd is the root then.
-- `booping config-get home_dir` — the home dir, printed raw and unexpanded; expand `~` yourself.
+- `booping config home_dir` — the home dir, printed raw and unexpanded; expand `~` yourself.
 - `ls {home_dir}` — the project names already taken.
 
 ## The project is not initialized
@@ -102,7 +102,7 @@ Ask first, write after.
 Then, in order:
 
 3. `booping create core.setup_playbook.template {vault_dir}` — the vault tree: `plans/`, `retrospectives/`, `_booping/`, `notes/`, a `sprints.md` Bases view and a `.gitignore`. It takes no `--set` variables. A non-empty destination exits 1; ask before re-running it with `--force` (0 success, 1 user error, 2 OSError).
-4. `{repo_root}/.booping` — `project_name: {name}` always, plus `vault_path: {dir}` resolved against the repo root when the vault lives in the repo. Then, from the repo root, `booping marker-set latest_migration=@latest` — a fresh vault is already current, and without the key every render reports it behind.
+4. `{repo_root}/.booping` — `project_name: {name}` always, plus `vault_path: {dir}` resolved against the repo root when the vault lives in the repo. Then, from the repo root, `booping set .booping latest_migration=@latest` — a fresh vault is already current, and without the key every render reports it behind.
 5. Repo-local vault only: `{home_dir}/{name}` as a symlink to the absolute vault dir. The template tree cannot make it — it declares directories and text files only — so create it here.
 6. The visibility answer: append `.booping` to `{repo_root}/.gitignore` or to `{repo_root}/.git/info/exclude`. Tracked, or the question skipped → neither file is touched.
 7. From the repo root, `booping specs init --tier project` — the project specs tier, placed by the merged config. Report its output: one action line per change, then the absolute tier root.

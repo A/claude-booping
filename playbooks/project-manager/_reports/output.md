@@ -8,7 +8,7 @@ Session loop: every later user message → `intake`, then `work`. While a run is
 **Hard rules — hold for the whole session:**
 - The driver owns the vault, every commit (scoped staging by path, never `git add -A`) and every transition; workers edit repo code only. The driver never edits code — every change, a tiny fix included, goes to a worker.
 - Launch `booping run` with the Bash tool's background mode, never `&`; ack it with `booping run ack` once its outcome is acted on.
-- A question you cannot settle goes on an open item: append it to the item file's body under `## Question`, then `booping playbook-transition specs clarify --state open_item --target {vault}/open-items/{id}.md`; chat only names the item file.
+- A question you cannot settle goes on an open item: append it to the item file's body under `## Question`, then `booping transition {vault}/open-items/{id}.md clarify`; chat only names the item file.
 - Never push, deploy or release unless a project rule or runbook targeting `project-manager` says how.
 - No item store, handoff file or status file of your own.
 
@@ -70,12 +70,13 @@ Split the message into requests — each distinct ask, asides included. A messag
 Per request, one:
 
 ```bash
-booping items add --source request --title "{short title}" --text - <<'TEXT'
+booping create core.specs.open_items.template {vault}/open-items --set source=request --set title="{short title}" --set body="$(cat <<'TEXT'
 {the user's own words for that request}
 TEXT
+)"
 ```
 
-stdin carries the user's words for that request character for character — never paraphrased, summarised or corrected.
+The heredoc carries the user's words for that request character for character — never paraphrased, summarised or corrected. The printed diff names the filed id.
 
 An answer to an item's question goes on the item, again in the user's words, and moves it back to `open`:
 
@@ -86,7 +87,7 @@ cat >> {vault}/open-items/{id}.md <<'TEXT'
 
 {the user's own words}
 TEXT
-booping playbook-transition specs open --state open_item --target {vault}/open-items/{id}.md
+booping transition {vault}/open-items/{id}.md open
 ```
 
 Then post the filed ids, one line each: `{id} {title}`.
@@ -101,15 +102,18 @@ Each item taken up is one of:
 - `question` — the user asks something.
 - `decision` — the user states a choice to record.
 
-A tiny fix is also sized: `booping items size {id} {size}`, one of the sizes
-`booping config-get core.project_manager_playbook.batch` lists.
+A tiny fix is also sized: `booping set {vault}/open-items/{id}.md size={size}`, the size one of
+`XS` (1 SP), `S` (2 SP), `M` (5 SP), `L` (13 SP); then
+`mdcheck ${CLAUDE_PLUGIN_ROOT}/playbooks/specs/_schemas/open_item.yaml {vault}/open-items/{id}.md` and fix what it reports.
 
 Next: the class's route below; a class the item does not let you judge → a question on the item (see the hard rules).
 
 ## Tiny fix
 
-`booping items batch` prints one line per batch; an item it leaves out takes the plan route. Per
-batch line:
+Batch the open items with `booping query --config core.specs.open_items.index --where status=open
+--where size:in=XS,S`: in id order, each item joins the current batch while its
+summed SP stays at or under 8, else it starts the next. An unsized
+item, or one of any other size, takes the plan route. Per batch:
 
 1. Brief the worker from the agents table, exactly this block:
 
@@ -130,17 +134,18 @@ batch line:
    One `## Item {id}` block per item in the batch, in the batch's order.
 2. Verify each item's change; commit each by path with a conventional message naming its id.
 
-Next: `booping items close {id}` for each item of the batch.
+Next: `booping transition {vault}/open-items/{id}.md done` for each item of the batch.
 
 ## Question
 
-The repo or vault holds the answer → answer in chat. Next: `booping items close {id}`; no answer
+The repo or vault holds the answer → answer in chat. Next: `booping transition {vault}/open-items/{id}.md done`; no answer
 there → a question on the item (see the hard rules).
 
 ## Decision
 
 Record it through `/playbook specs` — an ADR or an idea. Next:
-`booping items close {id} --reason "{record ref}"`.
+`booping set {vault}/open-items/{id}.md reason="{record ref}"`, then
+`booping transition {vault}/open-items/{id}.md done`.
 
 ## Plan
 
@@ -160,7 +165,7 @@ One groom per item, or one for several items the user framed as one change.
 6. Merge gate (the review gate above). Supervised: list first, numbered, every decision the
    autonomous runs settled — each row of `booping query --config core.agent_decisions.open`
    — one plain line each, marked `(proposal)`; once the user answers, mark each listed file
-   with `booping frontmatter-update {vault}/{path} state=reviewed`.
+   with `booping set {vault}/{path} state=reviewed`.
 7. Merge the branch develop left checked out into the merge target with `git merge --no-ff`,
    locally, never pushed; develop left the merge target itself checked out → nothing to merge.
 

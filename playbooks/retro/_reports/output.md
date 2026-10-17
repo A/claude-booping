@@ -4,7 +4,7 @@ Produce a project- and plan-specific retrospective grounded in session logs, cod
 
 - Date & time: 1970-01-01 00:00
 - The run's artifact is a standalone retrospective, `retrospectives/197001010000_{kebab-title}.md` — one file per run, whatever the size of the working set.
-- The run workdir is the **vault root**; every `booping playbook-state` / `booping playbook-transition` call passes `--target retrospectives/{slug}.md`, since the machine declares no `artifact:`.
+- The run workdir is the **vault root**; every `booping state` / `booping transition` call names `{vault}/retrospectives/{slug}.md` and `--playbook retro`, since the machine declares no `artifact:`.
 - The retrospective carries `plan:` (the primary plan's path); each covered plan is linked back by the `retro:` key the exit hook stamps. Plan `status:` is never touched here.
 - Candidate plans are the ones the table below lists — the `core.retro_playbook.queries.candidates` query.
 
@@ -46,28 +46,28 @@ Execute the steps in the most effective order considering their dependencies.
 | `gather-feedback` | `prepare` | Take the user's raw open-ended take before any mined finding is mentioned: four questions asked verbatim in prose, one at a time; then walk every mined item in prose, one at a time with a counter, for accept / dismiss / the user's own wording, and close by asking per plan whether the plan's goal was reached, the goal presented verbatim as written. | — |
 | `research-issues` | `gather-feedback` | Do focused root-cause work on each accepted issue: read only the files the trigger or the user's wording implicates, compare documented project conventions against what the code actually does where the issue is a convention drift, research current best practice for the underlying class of problem, and design concrete process-level prevention moves — for lesson-tagged issues also judge whether the lesson's wording, trigger or placement is what failed. | — |
 | `synthesize` | `research-issues` | Draft the retrospective against the retrospective template — wins, per-issue what-happened / root-cause / impact, lesson gaps, and action items split into one-time tasks and standing heuristics — run the template's self-review checklist and fix every `no`, then show the user a chat summary in the pre-save summary format while holding the full draft in context, unwritten. | The run's single review gate — explicit user approval of the draft, asked for in prose in the same message as the summary, never via `AskUserQuestion`. "Save it" counts, silence never does; the approval is what `save` writes on and what the exit edge's first gate names. A refine request loops in place — adjust framing, wording or which issues land, re-post the summary whole with what changed marked as changed, and re-ask; the loop is unbounded, a refine needing new evidence stays in this step, and the run never advances to `save` on its own. A cancel drops the draft and ends the run: nothing written, no transition, the plan left at its entry status. |
-| `save` | `synthesize` | Write the approved draft to `retrospectives/{YYYYMMDDHHMM}_{kebab-title}.md` — frontmatter carrying `plan:`, `plans:`, `title`, `created` and the per-plan `goal_verdicts:`, no `status:` — check it covers the working set, then fire the exit transition with `--target` on that file, whose hooks stamp the retro back-link and goal verdict on every plan; close on the saved-retrospective report and the `/playbook learn` offer, never launched. | — |
+| `save` | `synthesize` | Write the approved draft to `retrospectives/{YYYYMMDDHHMM}_{kebab-title}.md` — frontmatter carrying `plan:`, `plans:`, `title`, `created` and the per-plan `goal_verdicts:`, no `status:` — check it covers the working set, then fire the exit transition on that file, whose hooks stamp the retro back-link and goal verdict on every plan; close on the saved-retrospective report and the `/playbook learn` offer, never launched. | — |
 
 ## State
 
-Run state is persisted in artifacts under the run workdir. Only `booping playbook-transition` writes it — never hand-edit an artifact's `status`.
+Run state is persisted in artifacts under the run workdir. Only `booping transition` writes it — never hand-edit an artifact's `status`.
 
 Read the whole run's frontier before starting or resuming:
 
 ```
-booping playbook-state retro --workdir <run workdir> --target {path}
+booping state {path} --playbook retro
 ```
 
 ### State: run
 
 - Referenced by: outer graph
-- Artifact: named per run — pass `--target {path}` (relative to the run workdir) on every call
+- Artifact: named per run — pass it as `{path}` on every call
 - Initial status: `awaiting-retro`
-- Advance: `booping playbook-transition retro <to> --target {path} --workdir <run workdir>`
+- Advance: `booping transition {path} <to> --playbook retro`
 
 | Status | To | When | Gates |
 | --- | --- | --- | --- |
-| `awaiting-retro` | `awaiting-learning` | save wrote the approved retrospective to `retrospectives/{slug}.md`, the run's `--target` | explicit user approval of the draft captured at synthesize — "save it" counts, silence never does; the retrospective's `plans:` list covers the whole working set and `goal_verdicts:` carries a verdict for each, since the hook script reads both |
+| `awaiting-retro` | `awaiting-learning` | save wrote the approved retrospective to `retrospectives/{slug}.md`, the run's file | explicit user approval of the draft captured at synthesize — "save it" counts, silence never does; the retrospective's `plans:` list covers the whole working set and `goal_verdicts:` carries a verdict for each, since the hook script reads both |
 | `awaiting-learning` | *(terminal)* | — | — |
 
 ## Step: Intake
@@ -107,7 +107,7 @@ Read each plan in the working set — its `index.md` — for **context only**: s
 
 _No open corrections._
 
-Each entry becomes an issue item with source `correction`: trigger = its `said`, interpretation from its `did` and `why`. Pass every entry's `session` and `said` into brief A, to find the conversation around it. Then mark each entry taken up handled: `booping frontmatter-update {vault}/{path} state=handled`.
+Each entry becomes an issue item with source `correction`: trigger = its `said`, interpretation from its `did` and `why`. Pass every entry's `session` and `said` into brief A, to find the conversation around it. Then mark each entry taken up handled: `booping set {vault}/{path} state=handled`.
 
 In parallel, delegate two reads per the agent roster above. Pass the lesson set verbatim with each brief (use the `Lessons` block already loaded above).
 
@@ -324,7 +324,7 @@ Before firing anything: every plan in the working set appears in `plans:`, and e
 
 ## 3. Transition
 
-Once the file is on disk, advance the run per the `## State` section — from the vault root, passing `--target retrospectives/{slug}.md` for the file just written. The exit edge's hooks stamp the `retro:` back-link and the goal verdict on every plan in the working set and commit the vault; nothing here hand-edits plan frontmatter.
+Once the file is on disk, advance the run per the `## State` section — naming `{vault}/retrospectives/{slug}.md`, the file just written. The exit edge's hooks stamp the `retro:` back-link and the goal verdict on every plan in the working set and commit the vault; nothing here hand-edits plan frontmatter.
 
 ## 4. Closing report
 

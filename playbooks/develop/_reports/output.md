@@ -43,7 +43,7 @@ itself stays yours. Never delegate to an agent that is not on this list.
 The following 2 rule(s) apply to this playbook. Never silently violate one; conflict → stop and flag. Read a rule's record when its brief is not enough.
 
 - Settle every open question with the user during grooming; in develop, stop only for force majeure, not for what grooming should have asked. [booping:rule/0004](${CLAUDE_PLUGIN_ROOT}/specs/rule/0004-questions-settled-in-grooming.md)
-- When the user corrects you — rejects a proposal, rewrites an output, says it is wrong, answers a gate other than you suggested — run `booping create core.corrections.template {vault}/corrections --set name=$(date +%Y%m%d-%H%M%S)-{step} --set step={playbook}/{step} --set did=… --set said='{the user's words verbatim}' --set artifact={run artefact, vault-relative}`, with `--set why=…` when the user states it; a plain confirmation is not a correction. [booping:rule/0031](${CLAUDE_PLUGIN_ROOT}/specs/rule/0031-corrections-are-logged.md)
+- When the user corrects you — rejects a proposal, rewrites an output, says it is wrong, answers a gate other than you suggested — run `booping create core.corrections.template {vault}/corrections --set name={step} --set step={playbook}/{step} --set did=… --set said='{the user's words verbatim}' --set artifact={run artefact, vault-relative}`, with `--set why=…` when the user states it; a plain confirmation is not a correction. [booping:rule/0031](${CLAUDE_PLUGIN_ROOT}/specs/rule/0031-corrections-are-logged.md)
 
 ## Playbook Steps
 
@@ -60,12 +60,12 @@ Execute the steps in the most effective order considering their dependencies.
 
 ## State
 
-Run state is persisted in artifacts under the run workdir. Only `booping playbook-transition` writes it — never hand-edit an artifact's `status`.
+Run state is persisted in artifacts under the run workdir. Only `booping transition` writes it — never hand-edit an artifact's `status`.
 
 Read the whole run's frontier before starting or resuming:
 
 ```
-booping playbook-state develop --workdir <run workdir>
+booping state <run workdir>/index.md --playbook develop
 ```
 
 ### State: run
@@ -73,7 +73,7 @@ booping playbook-state develop --workdir <run workdir>
 - Referenced by: outer graph
 - Artifact: `index.md` (relative to the run workdir)
 - Initial status: `awaiting-approval`
-- Advance: `booping playbook-transition develop <to> --workdir <run workdir>`
+- Advance: `booping transition <run workdir>/index.md <to> --playbook develop`
 
 | Status | To | When | Gates |
 | --- | --- | --- | --- |
@@ -93,7 +93,7 @@ booping playbook-state develop --workdir <run workdir>
 - Referenced by: subgraph `milestones`
 - Artifact: `milestones/{instance}/{instance}.md` (relative to the run workdir)
 - Initial status: `pending`
-- Advance: `booping playbook-transition develop <to> --state milestone --instance <slug> --workdir <run workdir>`
+- Advance: `booping transition <run workdir>/milestones/<slug>/<slug>.md <to> --playbook develop --state milestone`
 
 | Status | To | When | Gates |
 | --- | --- | --- | --- |
@@ -242,7 +242,7 @@ Instructions:
 ## Step: Develop Loop
 # Run the sprint, milestone by milestone
 
-This step runs once per milestone, in `id` order; the instance's milestone is the one its `--instance` names. Provision's groups decide only how briefings are batched: a group's **first** instance composes and delegates one briefing covering that whole group, and the group's later instances ride that briefing straight to their own close.
+This step runs once per milestone, in `id` order; the instance's milestone is the one its milestone file path names. Provision's groups decide only how briefings are batched: a group's **first** instance composes and delegates one briefing covering that whole group, and the group's later instances ride that briefing straight to their own close.
 
 Each milestone owns a directory `{plan-dir}/milestones/{instance}/` holding its milestone file `{instance}.md` — the contract — and, once the runner has findings for it, `feedback.md`. `{instance}` is `M{nn}-{kebab}`.
 
@@ -253,7 +253,7 @@ Provision already fired the `ready-for-dev` → `in-progress` edge. On a resume 
 Milestone transitions are the `## State` section's `milestone` machine, invoked as:
 
 ```
-booping playbook-transition develop {to} --state milestone --instance {instance} --workdir {plan-dir}
+booping transition {plan-dir}/milestones/{instance}/{instance}.md {to} --playbook develop --state milestone
 ```
 
 The edge's hook regenerates `index.md`'s `## Milestones` table and its `sp` — never edit either by hand.

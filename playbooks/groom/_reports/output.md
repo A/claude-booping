@@ -31,7 +31,7 @@ The following 4 rule(s) apply to this playbook. Never silently violate one; conf
 - Settle every open question with the user during grooming; in develop, stop only for force majeure, not for what grooming should have asked. [booping:rule/0004](${CLAUDE_PLUGIN_ROOT}/specs/rule/0004-questions-settled-in-grooming.md)
 - Before saving a skill, agent, partial, template or briefing, check every block for scoping, duplication, configurability and hierarchy; cut motivation, restated context and preambles. [booping:rule/0006](${CLAUDE_PLUGIN_ROOT}/specs/rule/0006-information-architecture-pass.md)
 - Name the values that drive the plan's main choices and flag every departure from a value or rule with its reason, so the user can refine the values. [booping:rule/0030](${CLAUDE_PLUGIN_ROOT}/specs/rule/0030-planning-shows-values-in-play.md)
-- When the user corrects you — rejects a proposal, rewrites an output, says it is wrong, answers a gate other than you suggested — run `booping create core.corrections.template {vault}/corrections --set name=$(date +%Y%m%d-%H%M%S)-{step} --set step={playbook}/{step} --set did=… --set said='{the user's words verbatim}' --set artifact={run artefact, vault-relative}`, with `--set why=…` when the user states it; a plain confirmation is not a correction. [booping:rule/0031](${CLAUDE_PLUGIN_ROOT}/specs/rule/0031-corrections-are-logged.md)
+- When the user corrects you — rejects a proposal, rewrites an output, says it is wrong, answers a gate other than you suggested — run `booping create core.corrections.template {vault}/corrections --set name={step} --set step={playbook}/{step} --set did=… --set said='{the user's words verbatim}' --set artifact={run artefact, vault-relative}`, with `--set why=…` when the user states it; a plain confirmation is not a correction. [booping:rule/0031](${CLAUDE_PLUGIN_ROOT}/specs/rule/0031-corrections-are-logged.md)
 
 ## Playbook Steps
 
@@ -46,12 +46,12 @@ Execute the steps in the most effective order considering their dependencies.
 
 ## State
 
-Run state is persisted in artifacts under the run workdir. Only `booping playbook-transition` writes it — never hand-edit an artifact's `status`.
+Run state is persisted in artifacts under the run workdir. Only `booping transition` writes it — never hand-edit an artifact's `status`.
 
 Read the whole run's frontier before starting or resuming:
 
 ```
-booping playbook-state groom --workdir <run workdir>
+booping state <run workdir>/index.md --playbook groom
 ```
 
 ### State: run
@@ -59,7 +59,7 @@ booping playbook-state groom --workdir <run workdir>
 - Referenced by: outer graph
 - Artifact: `index.md` (relative to the run workdir)
 - Initial status: `framing`
-- Advance: `booping playbook-transition groom <to> --workdir <run workdir>`
+- Advance: `booping transition <run workdir>/index.md <to> --playbook groom`
 
 | Status | To | When | Gates |
 | --- | --- | --- | --- |
@@ -129,7 +129,9 @@ The printed diff is the confirmation — do not read the created files back. A t
 already existing was not written; decide what that means for this run.
 
 - A request naming open items (`OI-NNNN`) links each to the new plan once the directory exists:
-  `booping items plan {ids} --plan {plan-dir}/index.md`.
+  `booping set {vault}/open-items/{id}.md plan={plan index}`, then
+  `booping transition {vault}/open-items/{id}.md planned`, `{plan index}` the plan's `index.md`
+  relative to the vault.
 
 ## The brief — written to `request.md`, posted in chat
 
@@ -197,7 +199,7 @@ Exit 1 — fix the milestones its findings name in `draft.md`, then back to stag
 Then set the summary — one line of plain plan intent, ≤ ~120 chars / ~20 words:
 
 ```
-booping frontmatter-update {plan-dir}/index.md summary="{one line}"
+booping set {plan-dir}/index.md summary="{one line}"
 ```
 
 `sp` is not yours — split stamps it.
@@ -238,7 +240,7 @@ The draft is one file, cut into `index.md` and the milestone files by `booping p
 `summary` is yours:
 
 ```
-booping frontmatter-update {plan-dir}/index.md summary="{one line}"
+booping set {plan-dir}/index.md summary="{one line}"
 ```
 
 `sp` is not — never hand-write it.

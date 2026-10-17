@@ -3,7 +3,7 @@ Turn retrospective findings into durable behavior changes routed to exactly one 
 ## Guidance
 
 - The run's unit of work is a standalone retrospective, `retrospectives/{slug}.md`; its `plans:` frontmatter lists the plans it covers, for context only.
-- The run workdir is the **vault root**; every `booping playbook-state` / `booping playbook-transition` call passes `--target retrospectives/{slug}.md`, since the machine declares no `artifact:`.
+- The run workdir is the **vault root**; every `booping state` / `booping transition` call names `{vault}/retrospectives/{slug}.md` and `--playbook learn`, since the machine declares no `artifact:`.
 - Plans are already `done` when learn runs and are never re-read for status or touched by it.
 - Learn writes exactly two destinations: a rule record in this project's specs tier and the attached repo's `CLAUDE.md`.
 
@@ -142,24 +142,24 @@ Execute the steps in the most effective order considering their dependencies.
 | `dedup-sweep` | `extract-candidates` | Sweep every candidate against existing coverage — the rule records of the three specs tiers and the repo's `CLAUDE.md` — and record a per-candidate verdict: new, update-existing at the project rule already holding it, covered by a core or global rule, or a conflict flagged visibly for the review table. | — |
 | `review-table` | `dedup-sweep` | Present the unified review table in the format the review-table doc owns — every candidate with its target and sweep verdict, conflicts flagged — and collect the user's accept / reject / add response asked once in prose, never per row; the recorded response is the run's consent to write. | — |
 | `write` | `review-table` | Write every accepted row in one pass per destination — new rule records in the project specs tier at the number `booping specs next` hands out, in-place updates to the rule the sweep matched, one-line bullets into the repo's `CLAUDE.md` — with table acceptance as the sole consent and never a write outside the vault, its specs tier and the attached repo. | — |
-| `transition` | `write` | Fire the exit transition from the vault root — `booping playbook-transition learn done --target retrospectives/{slug}.md` — whose hook commits the vault including the written rule records; commit any repo `CLAUDE.md` addition, and the rule records when the vault is outside the repo, separately in the repo working tree, then close on a report of items written per target. | — |
+| `transition` | `write` | Fire the exit transition — `booping transition {vault}/retrospectives/{slug}.md done --playbook learn` — whose hook commits the vault including the written rule records; commit any repo `CLAUDE.md` addition, and the rule records when the vault is outside the repo, separately in the repo working tree, then close on a report of items written per target. | — |
 
 ## State
 
-Run state is persisted in artifacts under the run workdir. Only `booping playbook-transition` writes it — never hand-edit an artifact's `status`.
+Run state is persisted in artifacts under the run workdir. Only `booping transition` writes it — never hand-edit an artifact's `status`.
 
 Read the whole run's frontier before starting or resuming:
 
 ```
-booping playbook-state learn --workdir <run workdir> --target {path}
+booping state {path} --playbook learn
 ```
 
 ### State: run
 
 - Referenced by: outer graph
-- Artifact: named per run — pass `--target {path}` (relative to the run workdir) on every call
+- Artifact: named per run — pass it as `{path}` on every call
 - Initial status: `awaiting-learning`
-- Advance: `booping playbook-transition learn <to> --target {path} --workdir <run workdir>`
+- Advance: `booping transition {path} <to> --playbook learn`
 
 | Status | To | When | Gates |
 | --- | --- | --- | --- |
@@ -185,7 +185,7 @@ Validate the selected retrospective's `status:` is the status the `## State` sec
 
 ## Workdir and covered plans
 
-The run workdir is the **vault root**, and the retrospective is addressed by `--target retrospectives/{slug}.md` on every state call.
+The run workdir is the **vault root**, and the retrospective `{vault}/retrospectives/{slug}.md` is the file every state call names.
 
 Read the retrospective in full — it is the sole source the run extracts from. Read each plan in its `plans:` list for context only: scope, decisions on record, what the retro's findings refer to. Plan `status:` is neither checked nor written here.
 
@@ -295,7 +295,7 @@ Everything accepted is on disk; nothing here re-drafts or re-opens the table.
 
 ## 1. Transition
 
-Once every accepted item is written, advance the run per the `## State` section — from the vault root, passing `--target retrospectives/{slug}.md` for the run's retrospective. The exit edge's hook commits that file together with the rule records this run wrote under the vault's `specs/`; when the vault is outside the repo the records live in the repo and are committed in §2. Plan frontmatter is never touched: the plans closed at develop and learn leaves them alone.
+Once every accepted item is written, advance the run per the `## State` section — naming `{vault}/retrospectives/{slug}.md`, the run's retrospective. The exit edge's hook commits that file together with the rule records this run wrote under the vault's `specs/`; when the vault is outside the repo the records live in the repo and are committed in §2. Plan frontmatter is never touched: the plans closed at develop and learn leaves them alone.
 
 ## 2. Repo commit
 

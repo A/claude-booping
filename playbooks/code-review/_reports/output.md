@@ -4,10 +4,10 @@ A run reviews one confirmed scope end to end: `scope` settles what to look at an
 
 - Date & time: 1970-01-01 00:00
 - The run's artifact is one code review per run — `codereviews/{plan-dirname}/197001010000.md` when a plan is in scope, `codereviews/{target-slug}/197001010000.md` otherwise.
-- The run workdir is the **vault root**; every `booping playbook-state` / `booping playbook-transition` call passes `--target codereviews/{dir}/{ts}.md`, since the machine declares no `artifact:`.
+- The run workdir is the **vault root**; every `booping state` / `booping transition` call names the review file `{vault}/codereviews/{dir}/{ts}.md` and `--playbook code-review`, since the machine declares no `artifact:`.
 - The artifact carries `plan:` — the reviewed plan's vault-relative path, or `null` for an ad-hoc scope. The exit hook reads it and appends the artifact to that plan's `code_reviews:` list. Plan `status:` is never touched here.
 
-**Resuming a run** — read the frontier with `booping playbook-state code-review --workdir {vault} --target codereviews/{dir}/{ts}.md`, then re-enter at the reported status:
+**Resuming a run** — read the frontier with `booping state {vault}/codereviews/{dir}/{ts}.md --playbook code-review`, then re-enter at the reported status:
 - `in-agent-review` — the artifact exists and the verdict is still pending: re-run `review` over the scope the artifact's `## Scope` records, and continue from `present`.
 - `human-review` — the findings are on record: re-post them from the artifact's `## Findings` and collect the verdict, or continue from `resolve` when `## Verdict` is already written.
 
@@ -43,7 +43,7 @@ itself stays yours. Never delegate to an agent that is not on this list.
 
 The following 1 rule(s) apply to this playbook. Never silently violate one; conflict → stop and flag. Read a rule's record when its brief is not enough.
 
-- When the user corrects you — rejects a proposal, rewrites an output, says it is wrong, answers a gate other than you suggested — run `booping create core.corrections.template {vault}/corrections --set name=$(date +%Y%m%d-%H%M%S)-{step} --set step={playbook}/{step} --set did=… --set said='{the user's words verbatim}' --set artifact={run artefact, vault-relative}`, with `--set why=…` when the user states it; a plain confirmation is not a correction. [booping:rule/0031](${CLAUDE_PLUGIN_ROOT}/specs/rule/0031-corrections-are-logged.md)
+- When the user corrects you — rejects a proposal, rewrites an output, says it is wrong, answers a gate other than you suggested — run `booping create core.corrections.template {vault}/corrections --set name={step} --set step={playbook}/{step} --set did=… --set said='{the user's words verbatim}' --set artifact={run artefact, vault-relative}`, with `--set why=…` when the user states it; a plain confirmation is not a correction. [booping:rule/0031](${CLAUDE_PLUGIN_ROOT}/specs/rule/0031-corrections-are-logged.md)
 
 ## Playbook Steps
 
@@ -58,24 +58,24 @@ Execute the steps in the most effective order considering their dependencies.
 
 ## State
 
-Run state is persisted in artifacts under the run workdir. Only `booping playbook-transition` writes it — never hand-edit an artifact's `status`.
+Run state is persisted in artifacts under the run workdir. Only `booping transition` writes it — never hand-edit an artifact's `status`.
 
 Read the whole run's frontier before starting or resuming:
 
 ```
-booping playbook-state code-review --workdir <run workdir> --target {path}
+booping state {path} --playbook code-review
 ```
 
 ### State: run
 
 - Referenced by: outer graph
-- Artifact: named per run — pass `--target {path}` (relative to the run workdir) on every call
+- Artifact: named per run — pass it as `{path}` on every call
 - Initial status: `in-agent-review`
-- Advance: `booping playbook-transition code-review <to> --target {path} --workdir <run workdir>`
+- Advance: `booping transition {path} <to> --playbook code-review`
 
 | Status | To | When | Gates |
 | --- | --- | --- | --- |
-| `in-agent-review` | `human-review` | the detached review pass wrote its findings to `codereviews/{dir}/{ts}.md`, the run's `--target`, and the user's verdict is still pending | every finding carries its severity, anchor and proposed fix in the artifact |
+| `in-agent-review` | `human-review` | the detached review pass wrote its findings to `codereviews/{dir}/{ts}.md`, the run's file, and the user's verdict is still pending | every finding carries its severity, anchor and proposed fix in the artifact |
 | `human-review` | `done` | the user's verdict on every finding is resolved — applied, delegated or dropped — and recorded in the artifact | explicit user verdict captured at present — silence never counts; the artifact's `plan:` key holds the vault-relative plan path or `null`, since the hook script reads it |
 | `done` | *(terminal)* | — | — |
 
@@ -117,7 +117,7 @@ Run `git status` on every route: uncommitted work sitting outside the resolved r
 
 ## Open the artifact
 
-The run's workdir is the **vault root**, and every `booping playbook-state` / `booping playbook-transition` call passes `--target` — the machine declares no `artifact:`. Paths below are vault-relative.
+The run's workdir is the **vault root**, and every `booping state` / `booping transition` call names the review file and `--playbook code-review` — the machine declares no `artifact:`. Paths below are vault-relative.
 
 - **A plan is in scope** → `codereviews/{plan-dirname}/197001010000.md`, where `{plan-dirname}` is the plan's own directory name (the parent of its `index.md`).
 - **No plan** — latest commits, a range, a file list, the working tree → `codereviews/{target-slug}/197001010000.md`, where `{target-slug}` is a kebab-cased name for what was resolved: `latest-commits`, `working-tree`, or the range or path kebabbed.
@@ -138,10 +138,10 @@ created: 1970-01-01 00:00
 
 The body opens with an H1 naming the review and a `## Scope` section holding the report below verbatim. `## Findings`, `## Verdict` and `## Resolution` are appended by `present` and `resolve` — never stubbed here.
 
-No `status:` is hand-written. Bootstrap the run from the vault root once the file is on disk, which stamps it:
+No `status:` is hand-written. Bootstrap the run once the file is on disk, which stamps it:
 
 ```
-booping playbook-transition code-review in-agent-review --target codereviews/{dir}/197001010000.md --workdir {vault}
+booping transition {vault}/codereviews/{dir}/197001010000.md in-agent-review --playbook code-review
 ```
 
 ## Report it back — same turn, before any review work is spent
@@ -226,7 +226,7 @@ When `review` returned no findings, the section is written as `_No findings._`.
 
 ## 2. Advance the run — before the user is asked
 
-Once `## Findings` is on disk, transition per the `## State` section, from the vault root, passing the run's `--target`. The verdict is asked for at `human-review`, never at `in-agent-review`.
+Once `## Findings` is on disk, transition per the `## State` section, naming the run's review file. The verdict is asked for at `human-review`, never at `in-agent-review`.
 
 ## 3. Post and ask
 
@@ -307,10 +307,10 @@ A group with no entries is left out.
 
 ## Close the run
 
-From the vault root, passing the run's `--target`:
+Naming the run's review file:
 
 ```
-booping playbook-transition code-review done --target codereviews/{dir}/{ts}.md --workdir {vault}
+booping transition {vault}/codereviews/{dir}/{ts}.md done --playbook code-review
 ```
 
 The exit edge's hooks stamp `reviewed_at:`, append the artifact's path to the linked plan's `code_reviews:` list, and commit the vault. Nothing here hand-edits plan frontmatter, and nothing here commits — the repo's own changes stay uncommitted for the user.
