@@ -15,6 +15,6 @@ As **the owner**, I want the system to review my specs and bring me only what ne
 
 - Reads every record type in every tier the project reaches and puts each record to its type test ([booping:rule/0034](../../specs/rule/0034-specs-review-tests-each-record.md)).
 - Applies a fix that only makes a record say what is already decided or true, and reports it.
-- Files every decision that is mine as a `clarify` item, so a restart picks the queue up from `booping items list`; in the dialogue it asks one at a time in prose, with compact context, its own proposal and a counter ([booping:rule/0032](../../specs/rule/0032-approval-asked-in-prose.md)).
+- Files every decision that is mine as a `clarify` item, so a restart picks the queue up from the open items; in the dialogue it asks one at a time in prose, with compact context, its own proposal and a counter ([booping:rule/0032](../../specs/rule/0032-approval-asked-in-prose.md)).
 - Lists what it is about to take as decided before I accept anything ([booping:rule/0033](../../specs/rule/0033-decisions-listed-for-acceptance.md)).
 - An incident it uncovers is written up as a `reference` tagged `postmortem`: timeline, causes, remedies.

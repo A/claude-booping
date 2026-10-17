@@ -13,7 +13,7 @@ As **an advanced user**, I want to wire my own triggers, schedules, trackers and
 
 ## Criteria
 
-- A run starts from anything that can call `booping run` or `/playbook`: a scheduler, a board event, a messenger hook.
-- Incoming work enters through `booping items add`, whatever channel it came from.
+- A run starts from anything that can launch a playbook run: a scheduler, a board event, a messenger hook.
+- Incoming work enters as an open item, whatever channel it came from.
 - Project or global playbooks, hooks and rules with `targets` shape the core playbooks for the setup.
 - The core ships no scheduler, no trigger, no tracker-specific integration and no usage gate.
