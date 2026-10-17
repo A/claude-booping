@@ -23,15 +23,6 @@ core:
   # it sits directly under `core`.
   auto_migrate: true
 
-  # How much a run decides without the user. `supervised` (also when no tier sets
-  # it): every review gate stops and waits for the user, and step questions are
-  # asked. `autonomous`: the driver presents each gate's receipt, confirms it
-  # itself, settles step questions with the recommended option, and logs each as a
-  # `defaults.md` entry through `booping defaults add`. Any other value stops every
-  # render surface. Read by the driving protocol, `specs` and `migrate`, so it sits
-  # directly under `core`.
-  autonomy: supervised
-
   # Shell-outs a template body may call by dotted path: `{{ macro('core.macros.date', '+%H:%M') }}`.
   # Each value is an argv list (never a shell string) run with shell=False, or a mapping carrying
   # that list under `command:` plus an optional `cwd:` of `repo` or `vault` naming the directory

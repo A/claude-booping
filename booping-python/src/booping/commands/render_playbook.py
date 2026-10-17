@@ -9,7 +9,7 @@ from typing import Any, Protocol, cast
 
 from jinja2 import BaseLoader, ChoiceLoader, DictLoader, Environment, FileSystemLoader
 
-from booping import autonomy, logger, migrations
+from booping import logger, migrations
 from booping.context import Context
 from booping.context.lifecycle import resolve_edges
 from booping.context.playbook import GraphProblem, Playbook, Step, resolve_detached
@@ -731,11 +731,6 @@ def _run(args: argparse.Namespace) -> None:
         ctx = ctx.model_copy(
             update={"config": deep_merge(ctx.config, overrides, shallow_merge_keys=["agents"])}
         )
-
-    notice = autonomy.render_gate(ctx.config)
-    if notice is not None:
-        _emit(notice + "\n", args.output)
-        return
 
     pb = next((p for p in ctx.playbooks if p.name == args.name), None)
     if pb is None:

@@ -33,7 +33,7 @@ GUIDANCE = (
     "Apply them where they add quality or knowledge of decisions already made; skip them "
     "otherwise. When the work produces spec material — a decision, a scenario, a departure, a "
     "record made untrue — have it drafted: values and anything dropping or weakening a rule stay "
-    "owner drafts, other drafts follow `autonomy`.\n"
+    "owner drafts, other drafts follow the run's mode, supervised or autonomous.\n"
     "Every read or write goes through a subagent running `/booping:playbook specs` with the "
     "material or the question; keep only its short answer. A departure from a record is shown to "
     "the user, or in an autonomous run recorded with the record's ref and `[clarify]` — never "

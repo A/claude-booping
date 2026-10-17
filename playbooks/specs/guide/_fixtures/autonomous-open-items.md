@@ -5,13 +5,12 @@ The project is `taskflow`; the current working directory is its vault root, whic
 This run has no shell, so the `booping` commands were run for you; their outputs:
 
 - Preamble tiers — `project` — `specs/`.
-- Preamble autonomy — Autonomy: `autonomous` (`core.autonomy`).
 - `booping items list` — cannot run here; it prints the `open` and `planned` items under `open-items/` as a table — read them yourself.
 - `/playbook` cannot run here either: name each `/playbook` invocation you run, with its arguments, in your reply.
 
 ## Dialogue
 
-**User:** work the open items
+**User:** work the open items autonomously
 
 ## Context files
 

@@ -1,13 +1,13 @@
 ---
 name: project-manager
 title: Project Manager
-summary: The manager the user talks to — files every request as an item and carries each through groom, develop, review and merge in the project's autonomy mode.
+summary: The manager the user talks to — files every request as an item and carries each through groom, develop, review and merge in the session's mode, supervised or autonomous.
 trigger: talking to the project's manager; "what is going on", "take the open items", a message carrying several requests
 jinja: true
 inline_steps: true
 requires_project: true
 ---
-Autonomy: `{{ config.core.autonomy }}` (`core.autonomy`).
+Mode: autonomous when the user told this session to work autonomously, or its launch prompt carries `AUTONOMOUS RUN`; otherwise supervised. A child run gets the mode only through `booping run … --autonomous`.
 
 - `supervised` — stop for plan approval inside the inline groom and at the merge gate; nothing else stops.
 - `autonomous` — nothing stops: settle every gate yourself and log it with `booping defaults add`, `--target` the plan's `index.md` when one exists, else the item file.

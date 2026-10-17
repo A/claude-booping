@@ -46,7 +46,7 @@ guidance on the specs:
      a decision, a scenario, a departure from a record, a record the work made untrue — a draft or a
      candidate lands in the right place.
    - Values and anything that drops or weakens a rule stay owner drafts; every other draft follows the
-     run's autonomy mode (`core.autonomy`).
+     run's autonomy mode (adr/0036).
 4. **Through a subagent.** Every read or write of the specs goes through a subagent, and the playbook
    keeps only its short answer. A departure from a record is shown to the owner, or recorded with the
    ref and a `[clarify]` marker in an autonomous run, never silently overridden.

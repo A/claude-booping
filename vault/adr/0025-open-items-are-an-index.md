@@ -49,7 +49,7 @@ Marks, open conflicts and check findings are collected at query time; nothing st
 ## Consequences
 
 - A specs playbook run can take open items, groom them and build them in the
-  autonomy mode the project sets (`core.autonomy`).
+  run's autonomy mode (adr/0036).
 - Confirmation: creating an ADR with a confirmation line adds an open item; closing its plan closes the item; `booping items list` hides it afterwards.
 - 2026-10-15: the store's command is `booping items`, and items include user requests
   filed verbatim (`source: request`/`backlog`) beside spec gaps

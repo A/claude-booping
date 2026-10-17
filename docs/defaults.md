@@ -1,6 +1,6 @@
 # defaults.md format
 
-Sidecar beside the run artefact, holding every gate and question an `autonomous` run (`core.autonomy`) settled itself instead of asking the user: in the plan directory for groom and develop, in the review's `codereviews/{dir}/` for code-review — shared by that directory's reviews. Plain markdown, no frontmatter, seeded with `# Defaults` on the first entry.
+Sidecar beside the run artefact, holding every gate and question an autonomous run settled itself instead of asking the user: in the plan directory for groom and develop, in the review's `codereviews/{dir}/` for code-review — shared by that directory's reviews. Plain markdown, no frontmatter, seeded with `# Defaults` on the first entry.
 
 `booping defaults add` is its only writer — flags in `booping defaults add --help`. A run with no artefact writes no sidecar: it lists its defaults in its final report instead.
 
@@ -34,7 +34,7 @@ Under the heading, in this order, each value on one line:
 
 **Default:** `feat/autonomy-modes`, the proposed name
 
-**Why:** core.autonomy is autonomous; the proposal follows the branch conventions
+**Why:** an autonomous run; the proposal follows the branch conventions
 
 **Artifact:** [index.md](index.md)
 ```

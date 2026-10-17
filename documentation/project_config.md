@@ -232,17 +232,6 @@ What happens when the vault is behind on the plugin's [migrations](vault.md#boop
 
 A config tier that cannot be read counts as `false`.
 
-### `core.autonomy`
-
-Who answers a run's review gates and questions. **Default `supervised`**; set it in any tier. Directly under `core` because the driving protocol, the `specs` playbook and `migrate` all read it.
-
-- **`supervised`** — every review gate pauses for your confirmation, and a step's questions are put to you.
-- **`autonomous`** — the run confirms each review gate itself, settles each question with the step's recommended option (else its first, else the most conservative answer the request supports), and continues without waiting. Every gate and question it settled is logged to a `defaults.md` file beside the run's artefact — the plan directory for groom and develop, the review's directory for code-review — one numbered entry each with what was asked, what was decided, why, and a link to the artefact. A run without an artefact lists its defaults in its final report instead.
-
-Two things still stop an `autonomous` run: a **STOP** notice, and a question a step marks as always asked — `migrate`'s question about uncommitted work is one.
-
-Any other value renders a **STOP** notice naming the value and the two it must be; fix it in the tier that sets it.
-
 ### `core.plans.glob`
 
 The plan shape as data: an ordered list of vault-relative glob patterns, default `plans/*/index.md`. All plan discovery goes through it — patterns are tried in order, the first to claim a slug wins. A vault laid out differently edits this one key, and every [query spec](#query-specs) without its own `glob` inherits it.

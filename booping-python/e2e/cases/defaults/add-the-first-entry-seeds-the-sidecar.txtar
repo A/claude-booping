@@ -15,7 +15,7 @@ title: P
 
 # P
 -- cmd --
-booping defaults add --target plans/p/index.md --step develop/provision --asked "Confirm the branch name `feat/autonomy-modes`?" --default "`feat/autonomy-modes`, the proposed name" --why "core.autonomy is autonomous; the proposal follows the branch conventions"
+booping defaults add --target plans/p/index.md --step develop/provision --asked "Confirm the branch name `feat/autonomy-modes`?" --default "`feat/autonomy-modes`, the proposed name" --why "an autonomous run; the proposal follows the branch conventions"
 -- exit --
 0
 -- stdout --
@@ -30,6 +30,6 @@ plans/p/defaults.md#D1
 
 **Default:** `feat/autonomy-modes`, the proposed name
 
-**Why:** core.autonomy is autonomous; the proposal follows the branch conventions
+**Why:** an autonomous run; the proposal follows the branch conventions
 
 **Artifact:** [index.md](index.md)

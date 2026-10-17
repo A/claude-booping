@@ -21,7 +21,7 @@ the ask when nothing is uncommitted.
 Ask and resolve this here, inside the step: the commit has to land before the first migration runs,
 which is why it cannot wait for the approval below. It is not the review gate, and it is always
 asked: name the current branch with the uncommitted work, and wait for the answer whatever
-`core.auto_migrate` and `core.autonomy` say — neither answers it for the user. A user who declines
+`core.auto_migrate` says, and in an autonomous run too — neither answers it for the user. A user who declines
 still proceeds. Detection and committing are yours at execution time; no git mechanics belong in
 this instruction.
 

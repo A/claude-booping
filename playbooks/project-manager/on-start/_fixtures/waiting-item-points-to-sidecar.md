@@ -2,8 +2,6 @@
 
 The project is `taskflow`; the current working directory is its vault root. Run date: **2026-10-15**. This run covers the `on-start` step only.
 
-Preamble autonomy — Autonomy: `supervised` (`core.autonomy`).
-
 This run has no shell, so the `booping` commands were run for you; their outputs:
 
 `booping status`:

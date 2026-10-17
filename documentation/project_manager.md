@@ -1,6 +1,6 @@
 # project-manager playbook
 
-The manager you talk to about a project: tell it what you want, in as many requests per message as you like, and it files each one as an **open item**, then carries it through groom, develop, an independent code review and the merge — stopping where your autonomy mode says it should.
+The manager you talk to about a project: tell it what you want, in as many requests per message as you like, and it files each one as an **open item**, then carries it through groom, develop, an independent code review and the merge — stopping where its mode says it should.
 
 ```text
 /playbook project-manager
@@ -47,7 +47,7 @@ Then the next action, in one sentence.
 
 ## Modes
 
-The mode is the project's `core.autonomy` setting (see [project config](project_config.md)).
+The manager is autonomous when you tell it to work autonomously; otherwise it is supervised (see [supervised and autonomous runs](playbook.md#supervised-and-autonomous-runs)). It passes the mode on to the runs it launches only through `booping run … --autonomous`.
 
 - **`supervised`** (default) — two stops: approving the plan, which groom presents in the same session, and the merge. The merge happens only on your explicit yes; "looks good" counts, silence does not.
 - **`autonomous`** — nothing stops. The manager settles both itself and logs each choice with `booping defaults add` — in the plan's `defaults.md` once there is a plan — so you can read afterwards what it decided for you.

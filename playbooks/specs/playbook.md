@@ -18,7 +18,7 @@ Tiers (`core.specs.tiers`; every `booping specs` verb takes `--tier`, default `p
 {% if booping.specs_tiers | selectattr('name', 'equalto', 'project') | list | length == 0 -%}
 - `project` — none: no repo is attached.
 {% endif %}
-Autonomy: `{{ config.core.autonomy }}` (`core.autonomy`).
+Mode: autonomous when the user told this session to work autonomously, or its launch prompt carries `AUTONOMOUS RUN`; otherwise supervised.
 
 Writing a record:
 

@@ -27,7 +27,7 @@ Core playbooks own the main workflow:
 - **`retro`** — capture what shipped versus the spec. See [retro](retro.md).
 - **`learn`** — fold retro findings into durable rules. See [learn](learn.md).
 - **`code-review`** — review a confirmed scope: findings, verdict, approved fixes, recorded in the run's own `codereviews/` artifact. See [code-review](code_review.md).
-- **`project-manager`** — the manager you talk to: files every request as an open item and carries each through groom, develop, code review and a local merge in the project's autonomy mode. See [project-manager](project_manager.md).
+- **`project-manager`** — the manager you talk to: files every request as an open item and carries each through groom, develop, code review and a local merge in the session's mode, supervised or autonomous. See [project-manager](project_manager.md).
 - **`migrate`** — bring a vault up to the plugin's current migration watermark.
 - **`makemigration`** — author a new plugin-shipped vault migration at the next id, for `migrate` to apply.
 - **`playbook-authoring`** — the procedure for writing a new playbook.
@@ -223,7 +223,16 @@ A Jinja body is meaningless until rendered — the `booping render-playbook <nam
 - **`inline_steps` embeds the runner's bodies** — with `inline_steps: true` in the manifest (or `--inline-steps` on the command), a runner-performed step's section carries its rendered body, with that step's rules already appended, in place of *both* the metadata block and the fetch command; its summary, dependencies and review gate stay in the step table. Detached steps keep fetch-form, so their agents still fetch their own body. A body that fails to render is a blocking `STOP` notice like any other.
 - **Delegated steps fetch their own body** — the driver never runs the fetch command for a sub-agent step. It spawns the agent with a bootstrap prompt: the fetch command ("treat its stdout as your full instruction"), a `## Run-time context` block (project, plus `workdir` / `instance` where they apply), a `## Inputs` block assembled from the run-time context and prior steps' receipts, and a uniform `## Return` contract (`artifacts written + outcome, ≤ 5 lines`) — a richer contract belongs in the step body. A step without `detached:` is the only case where the driver runs the fetch itself and executes the stdout.
 - **Steps that can run together must be `detached:`** — a step the runner performs itself can't run in parallel, so steps whose dependencies are satisfied at the same time must all be `detached:`.
-- **Review gates pause after the batch** — once every step running together finishes, each one's gate is presented (labeled by step) and the run waits for your confirmation before the next batch. In an [`autonomous`](project_config.md#coreautonomy) project the run confirms each gate itself, logs it, and continues.
+- **Review gates pause after the batch** — once every step running together finishes, each one's gate is presented (labeled by step) and the run waits for your confirmation before the next batch. In an [autonomous run](#supervised-and-autonomous-runs) the run confirms each gate itself, logs it, and continues.
+
+## Supervised and autonomous runs
+
+A run is **autonomous** when you tell its session to work autonomously, or when it was launched with `booping run … --autonomous`, which appends the [`core.run.preamble`](project_config.md#corerun), opening `AUTONOMOUS RUN`, to the prompt. Otherwise it is **supervised**. No config key sets the mode.
+
+- **Supervised** — every review gate pauses for your confirmation, and a step's questions are put to you.
+- **Autonomous** — the run confirms each review gate itself, settles each question with the step's recommended option (else its first, else the most conservative answer the request supports), and continues without waiting. Every gate and question it settled is logged to a `defaults.md` file beside the run's artefact — the plan directory for groom and develop, the review's directory for code-review — one numbered entry each with what was asked, what was decided, why, and a link to the artefact. A run without an artefact lists its defaults in its final report instead.
+
+Two things still stop an autonomous run: a **STOP** notice, and a question a step marks as always asked — `migrate`'s question about uncommitted work is one.
 
 ## Subgraphs
 

@@ -2,7 +2,7 @@
 summary: >-
   Open the run: confirm a project is attached and the recorded migration id is readable;
   when work is uncommitted, name the current branch and the work and ask to commit repo
-  and vault — always asked, whatever `core.auto_migrate` and `core.autonomy` say —
+  and vault — always asked, whatever `core.auto_migrate` says and in an autonomous run too —
   committing on confirmation; present the pending set the rendered body carries and
   what each migration will do; report "already current" and end the run when the set
   is empty.

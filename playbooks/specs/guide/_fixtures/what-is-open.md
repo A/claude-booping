@@ -5,7 +5,6 @@ The project is `taskflow`; the current working directory is its vault root, whic
 This run has no shell, so the `booping` commands were run for you; their outputs:
 
 - Preamble tiers — `project` — `specs/`.
-- Preamble autonomy — Autonomy: `supervised` (`core.autonomy`).
 - `booping items list` — cannot run here; it prints the `open` and `planned` items under `open-items/` as a table — read them yourself.
 
 ## Dialogue
