@@ -7,7 +7,7 @@ booping query --glob {plan-dir}/{{ config.core.plans.milestones.glob }} --column
 Then check the milestone contract:
 
 ```
-booping plan check {plan-dir}
+mdcheck ${CLAUDE_PLUGIN_ROOT}/playbooks/groom/_schemas/milestone.yaml {plan-dir}/{{ config.core.plans.milestones.glob }}
 ```
 
 Present user the resulting plan as:

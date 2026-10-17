@@ -34,7 +34,7 @@ Four steps, in dependency order:
 1. **Research** — reads the code the request touches and what it depends on (bulk reads go to the research agent) and posts the facts, with file paths, in chat. This is the `researching` status.
 2. **Draft** — picks the plan template matching the dominant surface and writes the whole plan to `draft.md`: every template section, and one `### M{nn} — {title}` block per milestone, opened by `sp:` and `depends_on:` lines and holding the four sub-headings named in `core.groom_playbook.split.sections`. What the code and the request settle, it decides and records as an assumption; a call only you can make is asked in chat, or — in an autonomous run — written to the plan's `clarifications.md` while the run parks.
 3. **Split** — runs `booping plan split draft.md --replace`. A draft it cannot cut (exit 3 or 4) goes to `core.groom_playbook.split_fallback_agent`, which rewrites it into the format outside the vault; the run copies the result over `draft.md` and splits again.
-4. **Check** — runs `booping plan check` on the plan directory and fixes the milestones it flags in `draft.md`, then splits again — at most three rounds. Findings left after that are shown at `present`.
+4. **Check** — runs [mdcheck](install.md#prerequisites) over the milestone files against the groom milestone schema ([below](#the-milestone-check)) and fixes the milestones it flags in `draft.md`, then splits again — at most three rounds. Findings left after that are shown at `present`.
 
 The one-pass draft and the split are backed by booping's own groom and split benchmarks ([adr/0030](https://github.com/A/claude-booping/blob/master/vault/adr/0030-groom-drafts-the-whole-plan-in-one-pass.md), [adr/0031](https://github.com/A/claude-booping/blob/master/vault/adr/0031-a-script-cuts-the-plan-into-milestone-files.md)).
 
@@ -89,9 +89,9 @@ Drop `*.md` files into `~/Claude/{project}/plan_templates/` to extend or overrid
 
 See [Vault](vault.md) for the directory layout.
 
-## booping plan split / plan check
+## booping plan split
 
-Both run on their own as well as inside `draft-plan` — on a hand-written draft, or to re-check a plan after editing its milestone files.
+Runs on its own as well as inside `draft-plan`, on a hand-written draft.
 
 ### `booping plan split DRAFT [--out DIR] [--replace]`
 
@@ -113,22 +113,20 @@ stdin is not read. stdout prints one line per milestone — `M{nn}-{kebab} sp={n
 | `3` | no milestone heading found; nothing written |
 | `4` | written, with flags |
 
-### `booping plan check PLAN_DIR`
+## The milestone check
 
-Checks every milestone file under `PLAN_DIR` (matching `core.plans.milestones.glob`) against the milestone contract:
+`playbooks/groom/_schemas/milestone.yaml` is an mdcheck rule file; run it on its own to re-check a plan after editing its milestone files:
 
-- **`verify`** — `## Verify` holds exactly one command.
-- **`files`** — `## Tasks` names at least one file path.
-- **`dod`** — `## Definition of Done` has at least as many checkboxes as there are tasks.
-- **`sp`** — `sp` is set and below `core.sprint.redecompose_threshold`.
+```text
+mdcheck ${CLAUDE_PLUGIN_ROOT}/playbooks/groom/_schemas/milestone.yaml {plan-dir}/milestones/*/M*.md
+```
 
-stdout prints one `{milestone dir}: {check}: {finding}` line per finding, nothing when clean.
+- **`sp`** — frontmatter `sp` is 1–4, below `core.sprint.redecompose_threshold`; the schema restates the threshold as a static pattern, so a changed threshold needs the schema changed too.
+- **Verify** — the first paragraph of `## Verify` is one inline code span: the milestone's single command.
+- **Tasks** — `## Tasks` names at least one file path, a backticked token holding `/` or a `.ext`.
+- **Definition of Done** — `## Definition of Done` has at least one checkbox item.
 
-| Exit | Meaning |
-|------|---------|
-| `0` | clean |
-| `1` | findings |
-| `2` | `PLAN_DIR` missing or holding no milestone file |
+mdcheck exits `0` when clean, `1` with findings, one line per finding naming the file, the line and the failed rule.
 
 ## Reviewing the plan
 
@@ -154,7 +152,7 @@ booping uses a 1–5 scale for per-task estimates, set in `src/config.yaml`:
 Two thresholds drive the playbook's behaviour, both configurable:
 
 - **`core.sprint.default_threshold_sp` (default `35`)** — soft cap on plan size. Above this, `present` proposes splitting the plan into sibling stubs rather than shipping one mega-sprint.
-- **`core.sprint.redecompose_threshold` (default `5`)** — any task or milestone estimated at ≥ this value must be re-decomposed before the run can leave `drafting`; for milestones it is a hard gate on the `drafting → cross-reviewing` edge.
+- **`core.sprint.redecompose_threshold` (default `5`)** — any task or milestone estimated at ≥ this value must be re-decomposed before the run can leave `drafting`; for milestones it is a hard gate on the `drafting → cross-reviewing` edge, checked by [the milestone check](#the-milestone-check).
 
 Both thresholds are ceilings, not velocity targets. A 12-SP plan is fine; a 38-SP plan is the trigger to consider a split.
 

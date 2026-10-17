@@ -345,7 +345,7 @@ The agent that performs the detached second-model review of a drafted plan. **De
 
 ### `core.groom_playbook.split.sections`
 
-The four milestone sub-headings, in order — tasks, definition of done, references, verify. `booping plan split` writes a draft's milestone sections under them in each milestone file, `booping plan check` finds the sections by them, and groom's `draft-plan` renders them as the draft's `####` headings. **Default `[Tasks, Definition of Done, References, Verify]`**.
+The four milestone sub-headings, in order — tasks, definition of done, references, verify. `booping plan split` writes a draft's milestone sections under them in each milestone file and groom's `draft-plan` renders them as the draft's `####` headings. The groom milestone schema (`playbooks/groom/_schemas/milestone.yaml`) names the default headings literally, so renamed sections fail the milestone check. **Default `[Tasks, Definition of Done, References, Verify]`**.
 
 ### `core.groom_playbook.split_fallback_agent`
 

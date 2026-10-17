@@ -43,7 +43,7 @@ reading the code could bring it to about 4–5 minutes, unmeasured.
 
 ## Decision
 
-Groom runs no separate review step, and the cross-review step leaves the graph together with its `cross-reviewing` status and the `core.groom_playbook.cross_review_agent` key. The one-pass draft is the plan; its only check after drafting is the deterministic `booping plan check` stage (adr/0030, adr/0031). The measured gain of a fresh review is real but not worth 10 minutes a plan, and not worth 4–5 either: the refactor already reached its goal of shorter time at equal or better quality, and adding the review back would trade most of the time saved for a gain inside the plans' own spread (owner, 2026-10-17). The owner asked for no separate step; keeping the step behind its config key was a drafting addition, dropped on 2026-10-17 (owner).
+Groom runs no separate review step, and the cross-review step leaves the graph together with its `cross-reviewing` status and the `core.groom_playbook.cross_review_agent` key. The one-pass draft is the plan; its only check after drafting is the deterministic mdcheck milestone check (adr/0030, adr/0038). The measured gain of a fresh review is real but not worth 10 minutes a plan, and not worth 4–5 either: the refactor already reached its goal of shorter time at equal or better quality, and adding the review back would trade most of the time saved for a gain inside the plans' own spread (owner, 2026-10-17). The owner asked for no separate step; keeping the step behind its config key was a drafting addition, dropped on 2026-10-17 (owner).
 
 ## Alternatives
 

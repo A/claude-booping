@@ -6,7 +6,8 @@ Notable user-visible changes, newest first, in the [Keep a Changelog](https://ke
 
 ### Changed
 
-- Groom drafts the whole plan in one pass: `intake → draft-plan → cross-review → present`. `draft-plan` researches the code, writes the plan to `draft.md` in the plan directory, cuts it into `index.md` and the milestone files with the new `booping plan split`, and checks the milestones with the new `booping plan check`, fixing the draft for up to three rounds; `present` shows any findings left. The `research-codebase` and `research-web` steps are gone, and the core plan templates are trimmed to their sections. New config keys: `core.groom_playbook.split.sections` and `core.groom_playbook.split_fallback_agent`.
+- Groom drafts the whole plan in one pass: `intake → draft-plan → cross-review → present`. `draft-plan` researches the code, writes the plan to `draft.md` in the plan directory, cuts it into `index.md` and the milestone files with the new `booping plan split`, and checks the milestones with mdcheck against the groom milestone schema, fixing the draft for up to three rounds; `present` shows any findings left. The `research-codebase` and `research-web` steps are gone, and the core plan templates are trimmed to their sections. New config keys: `core.groom_playbook.split.sections` and `core.groom_playbook.split_fallback_agent`.
+- **Breaking:** `mdcheck` is a required dependency: `cargo install markdown-checker --version 0.1.2 --locked` (the crate named `mdcheck` is unrelated).
 
 ## v2.0.0 — 2026-10-15
 

@@ -13,9 +13,7 @@ from booping import logger
 from booping.argparser import Parser
 from booping.commands.create import _plan  # pyright: ignore[reportPrivateUsage]
 from booping.context import Context
-from booping.context._yaml import parse_frontmatter_only
 from booping.context.template_tree import TemplateTreeError, load
-from booping.plan.check import CHECKS, check_milestone
 from booping.plan.split import SECTION_KEYS, Cut, Milestone, block, cut_draft, demote, split_lines
 from booping.query import QuerySpec, as_dict, cell, expand
 from booping.query import run as run_query
@@ -31,11 +29,6 @@ MILESTONE_TEMPLATE = "core.groom_playbook.milestone_template"
 SECTIONS_PATH = "core.groom_playbook.split.sections"
 MILESTONES_PATH = "core.plans.milestones"
 MAX_SP_PATH = "core.sprint.max_sp"
-THRESHOLD_PATH = "core.sprint.redecompose_threshold"
-
-CLEAN_EXIT = 0
-FINDINGS_EXIT = 1
-NOTHING_TO_CHECK_EXIT = 2
 
 FRONTMATTER = re.compile(r"\A(---\n)(.*?)(\n---\n)", re.DOTALL)
 SP_LINE = re.compile(r"^sp:.*$", re.MULTILINE)
@@ -51,25 +44,6 @@ exit codes:
   {REFUSED_EXIT}  refused (milestone files exist without --replace) or a write failed
   {NO_MILESTONES_EXIT}  no milestone heading found; nothing written
   {FLAGGED_EXIT}  written, with flags
-"""
-
-
-CHECK_EPILOG = f"""\
-checks:
-  verify  Verify holds exactly one command: one fenced block with one non-blank line,
-          or one line that is a single inline code span
-  files   Tasks names at least one path: a backticked token holding `/` or a `.ext`
-  dod     DoD checkboxes are at least as many as the tasks (rows of the first table
-          with a `Task` column, else top-level list items); no task at all is a finding
-  sp      frontmatter `sp` is set and below core.sprint.redecompose_threshold
-
-stdout: one `{{milestone dir}}: {{check}}: {{finding}}` line per finding, in milestone id
-order; nothing when clean.
-
-exit codes:
-  {CLEAN_EXIT}  clean
-  {FINDINGS_EXIT}  findings
-  {NOTHING_TO_CHECK_EXIT}  PLAN_DIR missing or holding no milestone file
 """
 
 
@@ -108,16 +82,6 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
         help="Remove the existing milestone directories (core.plans.milestones.glob) first",
     )
     split.set_defaults(func=_run_split)
-
-    check = verbs.add_parser(
-        "check",
-        help=f"Check every milestone file of a plan against the milestone contract"
-        f" ({', '.join(CHECKS)})",
-        epilog=CHECK_EPILOG,
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-    )
-    check.add_argument("plan_dir", metavar="PLAN_DIR", type=Path, help="The plan directory")
-    check.set_defaults(func=_run_check)
 
 
 def _fail(message: str, code: int = USAGE_EXIT) -> NoReturn:
@@ -356,34 +320,3 @@ def _run_split(args: argparse.Namespace) -> None:
     for flag in cut.flags:
         print(f"flag: {flag}", file=sys.stderr)
     sys.exit(FLAGGED_EXIT if cut.flags else 0)
-
-
-def _run_check(args: argparse.Namespace) -> None:
-    plan_dir: Path = args.plan_dir
-    if not plan_dir.is_dir():
-        _fail(f"no plan directory at {plan_dir}", NOTHING_TO_CHECK_EXIT)
-    ctx = Context.assemble()
-    config = ctx.config
-    globs = _globs(_config(config, MILESTONES_PATH))
-    threshold: Any = _config(config, THRESHOLD_PATH)
-    if not isinstance(threshold, int) or isinstance(threshold, bool):
-        _fail(f"{THRESHOLD_PATH} must be an integer")
-    names: Any = _config(config, SECTIONS_PATH)
-    if not (
-        isinstance(names, list)
-        and len(cast("list[Any]", names)) == len(SECTION_KEYS)
-        and all(isinstance(n, str) for n in cast("list[Any]", names))
-    ):
-        _fail(f"{SECTIONS_PATH} must list {len(SECTION_KEYS)} heading names")
-    section_names = cast("list[str]", names)
-
-    files = _milestone_files(plan_dir, globs)
-    if not files:
-        _fail(f"no milestone file under {plan_dir}", NOTHING_TO_CHECK_EXIT)
-    ordered = sorted(files, key=lambda f: (str(parse_frontmatter_only(f).get("id", "")), f))
-    found = False
-    for path in ordered:
-        for finding in check_milestone(path.read_text(encoding="utf-8"), section_names, threshold):
-            found = True
-            print(f"{path.parent.name}: {finding.check}: {finding.message}")
-    sys.exit(FINDINGS_EXIT if found else CLEAN_EXIT)

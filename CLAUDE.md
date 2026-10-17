@@ -8,7 +8,7 @@ One shipped skill (`/playbook`); everything procedural is a **playbook** it driv
 
 - `just lint` / `just typecheck` / `just pytest` — ruff / basedpyright / pytest over both uv projects, `booping-python/` then `booping-tracker/`.
 - `just snapshots` — diff committed playbook reports against a fresh hermetic render (writes nothing); a playbook in this repo's `vault/_playbooks/` joins once it commits a `_reports/output.md`, rendered against a stub-pinned temp copy of the vault. `just snapshots-accept [playbook]` — the **only** writer of the committed reports.
-- `just mdcheck` — structural rule checks over the rendered reports. Needs the `mdcheck` binary: `cargo install markdown-checker --version 0.1.2 --locked` (the crate named `mdcheck` is unrelated).
+- `just mdcheck` — structural rule checks over the rendered reports. Needs the `mdcheck` binary: `cargo install markdown-checker --version 0.1.2 --locked` (the crate named `mdcheck` is unrelated). It is a user-facing runtime dependency too: groom checks every milestone file with it against `playbooks/groom/_schemas/milestone.yaml`.
 - `just e2e [pytest args…]` — run both txtar contract corpora through pytest, passing any arguments straight to it (`just e2e -k config-get`, `just e2e --txtar-update`); `--txtar-update` rebaselines the selected cases. Cases run in parallel (pytest-xdist, `-n auto`); `--txtar-update` runs serially. A `-k` expression that selects in one corpus only leaves the other collecting nothing, which is not a failure.
 - `just specs-check` — `bin/booping specs check` over the core tier, `specs/` (records shipped to every user), and this repo's project tier, the type directories in `vault/`; needs `mdcheck` too.
 - `just ci` — everything CI runs, in order: `lint typecheck pytest snapshots mdcheck specs-check e2e`. Run before committing.
@@ -25,7 +25,7 @@ One shipped skill (`/playbook`); everything procedural is a **playbook** it driv
   - `items` (`add`, `list`, `plan`, `close`, `reopen`, `scan`, `size`, `batch`) — file, list, link, close, size and batch open items.
   - `status` — the project status computed from the vault, short or per-section detail.
   - `run` (`groom`, `develop`, `code-review`, `ack`) — launch a recorded headless run, ack a finished one.
-  - `plan` (`split`, `check`) — cut a one-file draft into milestone files; check milestones against the contract.
+  - `plan` (`split`) — cut a one-file draft into milestone files; check milestones against the contract.
   - `specs` (`ls`, `next`, `check`, `init`, `site`, `site-index`) — list, number, check and publish typed spec records of a tier.
 - `bin/booping-tracker <verb> --help` — the task-tracker CLI: `states`, `show`, `comment`, `issue-create`, `issue-update`, `relate`, `sync`. Reference: [booping-tracker/README.md](booping-tracker/README.md).
 

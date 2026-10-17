@@ -47,7 +47,7 @@ diagram on long plans; its line maps drifted by 1–2 lines and put DoD under Ta
 byte, into `index.md` and the milestone files; it writes the milestone table and the SP groups
 (adr/0022) and never splits a code fence. It exits non-zero when the plan has no milestone headings
 and flags a milestone without `sp`; only such a plan goes to a model (Opus) for the split. After
-the split booping checks the milestone contract — one Verify command, named files, DoD per task —
+the split mdcheck checks the milestone contract against its schema (adr/0038) —
 and a failing milestone goes back to the draft with the finding.
 The benchmark below measured Sonnet; the fallback runs on Opus, because rewriting a draft is
 judgement work ([rule/0031](../rule/0031-judgement-runs-on-opus.md)).
@@ -104,7 +104,7 @@ The cheapest model rewrites the plan into the files.
 
 - New `booping plan split`, with e2e cases on real plan shapes including the 12 benchmark plans;
   groom calls it after the draft.
-- `_partials/milestone_contract.md` turns into the post-split check.
+- `_partials/milestone_contract.md` turns into the post-split check, an mdcheck schema since adr/0038.
 - Develop, `pi-developer`, `booping-developer` and `develop-pi` keep reading the
   milestone files as they are.
 - Renaming the milestone file to `milestones/M{nn}-*/index.md` (owner, 2026-10-16) is a separate

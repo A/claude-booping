@@ -68,7 +68,7 @@ booping playbook-state groom --workdir <run workdir>
 | `framing` | `cancelled` | the user cancels the run | — |
 | `researching` | `drafting` | draft-plan's research stage posted its facts, with file paths, in chat | — |
 | `researching` | `cancelled` | the user cancels the run | — |
-| `drafting` | `cross-reviewing` | draft-plan wrote `draft.md`, `booping plan split` exited 0 and `booping plan check` passed or its three fix rounds are spent | every call that is the user's is answered; `booping plan check` reports no `sp` finding |
+| `drafting` | `cross-reviewing` | draft-plan wrote `draft.md`, `booping plan split` exited 0 and the mdcheck milestone check passed or its three fix rounds are spent | every call that is the user's is answered; the mdcheck milestone check reports no finding on the `sp` key |
 | `drafting` | `researching` | the design needs blast radius or external practice the research pass missed | — |
 | `drafting` | `awaiting-clarification` | the run raised questions it cannot answer itself and wrote them to `clarifications.md` | every question in `clarifications.md` is open and attributed — an id, a topic, the date and the step that raised it |
 | `drafting` | `cancelled` | the user cancels the run | — |
@@ -173,8 +173,8 @@ depends_on: [M{nn}, …]
 #### Verify
 ```
 
-- `{nn}` is the milestone's position in execution order, two digits; `sp` is 1–5, `depends_on` is `[]` when nothing precedes it.
-- Each milestone has one Verify command scoped to that milestone; the whole-repo check goes only in Final Verification.
+- `{nn}` is the milestone's position in execution order, two digits; `sp` is 1–4, `depends_on` is `[]` when nothing precedes it.
+- Each milestone has one Verify command scoped to that milestone, written as a single inline code span; the whole-repo check goes only in Final Verification.
 - Decide what the code and the request settle, and record each assumption in the plan. A call only the user can make goes to the user: in a supervised run ask it in chat; in an autonomous run write it to `clarifications.md` (format: `${CLAUDE_PLUGIN_ROOT}/docs/clarifications.md`) and park the run on `awaiting-clarification`.
 - Sprint total past **35 SP** — offer the user a split at a dependency seam (the first slice shippable on its own, each later one useless without it), keep only the first slice that fits the threshold in this plan, and park the rest as sibling stubs to be groomed in their own runs. They may decline and keep one plan.
 
@@ -189,7 +189,7 @@ Exit 3 (no milestone heading) or 4 (written with `flag:` lines) — the draft is
 ## 4. Check
 
 ```
-booping plan check {plan-dir}
+mdcheck ${CLAUDE_PLUGIN_ROOT}/playbooks/groom/_schemas/milestone.yaml {plan-dir}/milestones/*/M*.md
 ```
 
 Exit 1 — fix the milestones its findings name in `draft.md`, then back to stage 3. At most three rounds; findings left after the third are carried to `present`.
@@ -307,7 +307,7 @@ booping query --glob {plan-dir}/milestones/*/M*.md --columns id,title,sp,status
 Then check the milestone contract:
 
 ```
-booping plan check {plan-dir}
+mdcheck ${CLAUDE_PLUGIN_ROOT}/playbooks/groom/_schemas/milestone.yaml {plan-dir}/milestones/*/M*.md
 ```
 
 Present user the resulting plan as:

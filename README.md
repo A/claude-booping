@@ -30,7 +30,7 @@ Drop a `config.yaml` into your vault and it overrides the defaults — sprint sc
 
 ## Dependencies
 
-Required: `uv` and `git`. Optional: a cross-review agent named in your config, for a second-model review of every drafted plan.
+Required: `uv`, `git` and `mdcheck` (from the `markdown-checker` crate — the crate named `mdcheck` is unrelated), which groom checks every milestone with. Optional: a cross-review agent named in your config, for a second-model review of every drafted plan.
 
 ```bash
 # macOS
@@ -39,6 +39,9 @@ brew install uv git
 # Linux (Debian/Ubuntu)
 sudo apt install -y git
 curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# both
+cargo install markdown-checker --version 0.1.2 --locked
 ```
 
 ## Installation
@@ -120,7 +123,7 @@ A plan's frontmatter status is written by groom or develop. Retro and learn writ
 
 - **`framing`** — clarifying the request and settling scope.
 - **`researching`** — draft-plan's research stage over the code is running.
-- **`drafting`** — draft-plan writes the whole plan to `draft.md`, `booping plan split` cuts it into `index.md` and one milestone directory per milestone, and `booping plan check` checks the milestones (up to three fix rounds).
+- **`drafting`** — draft-plan writes the whole plan to `draft.md`, `booping plan split` cuts it into `index.md` and one milestone directory per milestone, and mdcheck checks the milestones against groom's milestone schema (up to three fix rounds).
 - **`awaiting-clarification`** — the run hit a question it can't answer itself, wrote it into a `clarifications.md` file beside the plan, and ended. It's a parking status, not a dead end: answer the questions in that file and the next groom run on the plan picks up where it left off, returning to whichever status parked it (`framing` or `drafting`). Reached only when a run has no live conversation to ask in — a task-tracker-driven run; in chat, groom just asks you.
 - **`cross-reviewing`** — a second model is reviewing the draft (skipped when no reviewer is configured).
 - **`presenting`** — the approval screen is on the table.

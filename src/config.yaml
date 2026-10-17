@@ -173,8 +173,7 @@ core:
     redecompose_threshold: 5
     # SP budget of one develop briefing: milestones pack greedily as a contiguous
     # run in `id` order while the group's summed `sp` stays at or under it. A lone milestone is
-    # always a valid group and never split, even over the cap. Groom gates
-    # milestones on `redecompose_threshold` too.
+    # always a valid group and never split, even over the cap.
     max_sp: 15
     # SP ceiling of a fix the session already holding its whole context applies
     # instead of a fresh worker (develop's driver, code-review's resumed reviewer).

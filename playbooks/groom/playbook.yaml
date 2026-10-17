@@ -36,10 +36,10 @@ states:
       drafting:
         transitions:
           - to: cross-reviewing
-            when: "draft-plan wrote `draft.md`, `booping plan split` exited 0 and `booping plan check` passed or its three fix rounds are spent"
+            when: "draft-plan wrote `draft.md`, `booping plan split` exited 0 and the mdcheck milestone check passed or its three fix rounds are spent"
             gates:
               - "every call that is the user's is answered"
-              - "`booping plan check` reports no `sp` finding"
+              - "the mdcheck milestone check reports no finding on the `sp` key"
             hooks: ["script tracker-sync"]
           - to: researching
             when: "the design needs blast radius or external practice the research pass missed"

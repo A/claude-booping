@@ -6,6 +6,7 @@ Required:
 
 - **`uv`** — drives the plugin's Python tooling. The `bin/booping` wrapper is `uv run --project booping-python booping ...`, so every skill load goes through uv.
 - **`git`** — the plugin assumes a git working tree for branching, diffs, and commit attribution during the develop and code-review playbooks.
+- **`mdcheck`** — the markdown structure checker. The [groom playbook](groom.md) checks every milestone file with it, and `booping specs check` validates records with it. Install it from the `markdown-checker` crate (needs a Rust toolchain); the crate named `mdcheck` is an unrelated tool.
 
 Optional:
 
@@ -20,6 +21,9 @@ brew install uv git
 # Linux (Debian/Ubuntu)
 sudo apt install -y git
 curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# both
+cargo install markdown-checker --version 0.1.2 --locked
 ```
 
 ## Plugin install

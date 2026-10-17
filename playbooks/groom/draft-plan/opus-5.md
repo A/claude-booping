@@ -19,8 +19,8 @@ depends_on: [M{nn}, …]
 #### {{ name }}
 {% endfor %}```
 
-- `{nn}` is the milestone's position in execution order, two digits; `sp` is 1–5, `depends_on` is `[]` when nothing precedes it.
-- Each milestone has one Verify command scoped to that milestone; the whole-repo check goes only in Final Verification.
+- `{nn}` is the milestone's position in execution order, two digits; `sp` is 1–4, `depends_on` is `[]` when nothing precedes it.
+- Each milestone has one Verify command scoped to that milestone, written as a single inline code span; the whole-repo check goes only in Final Verification.
 - Decide what the code and the request settle, and record each assumption in the plan. A call only the user can make goes to the user: in a supervised run ask it in chat; in an autonomous run write it to `clarifications.md` (format: `${CLAUDE_PLUGIN_ROOT}/docs/clarifications.md`) and park the run on `awaiting-clarification`.
 - Sprint total past **{{ config.core.sprint.default_threshold_sp }} SP** — offer the user a split at a dependency seam (the first slice shippable on its own, each later one useless without it), keep only the first slice that fits the threshold in this plan, and park the rest as sibling stubs to be groomed in their own runs. They may decline and keep one plan.
 
@@ -36,7 +36,7 @@ Exit 3 (no milestone heading) or 4 (written with `flag:` lines) — the draft is
 ## 4. Check
 
 ```
-booping plan check {plan-dir}
+mdcheck ${CLAUDE_PLUGIN_ROOT}/playbooks/groom/_schemas/milestone.yaml {plan-dir}/{{ config.core.plans.milestones.glob }}
 ```
 
 Exit 1 — fix the milestones its findings name in `draft.md`, then back to stage 3. At most three rounds; findings left after the third are carried to `present`.
