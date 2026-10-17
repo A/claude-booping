@@ -30,7 +30,7 @@ Committing on the runner's side is what keeps the branch honest across coding ag
 
 When a tree falls short of the DoD, or the agent reports its verification red, the runner writes what it found into a `feedback.md` beside that milestone file — what it checked, what was wrong, what the next attempt must do — and briefs a **fresh** agent with both paths. That file is also where attempts are counted; after two the blocker is unrecoverable, and the run asks you to approve the abort. A milestone the runner has sent back keeps its feedback on disk, so the record survives the session.
 
-When you correct the runner mid-sprint, it logs your words verbatim, with a link back into the conversation, to the plan directory's `corrections.md` — the log [retro](retro.md) starts from.
+When you correct the runner mid-sprint, it logs your words verbatim, with the session id and a link to the plan, as one file under the vault's `corrections/` — the entries [retro](retro.md) starts from.
 
 Every milestone group runs in **one session**.
 

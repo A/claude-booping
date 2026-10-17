@@ -13,7 +13,7 @@ from booping.context._yaml import UnclosedFrontmatterError, safe_load_str, split
 from booping.query import discover
 
 # Sibling files of a plan's index.md rendered as pages, in page order.
-SIBLINGS = ("request", "clarifications", "develop-defaults", "defaults")
+SIBLINGS = ("request", "clarifications", "develop-defaults")
 _SLUG_DATE = re.compile(r"(\d{4})(\d{2})(\d{2})")
 _ISO_DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
 _H1 = re.compile(r"^#\s+(.+?)\s*#*\s*$", re.MULTILINE)

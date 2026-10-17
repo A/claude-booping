@@ -230,7 +230,7 @@ A Jinja body is meaningless until rendered — the `booping render-playbook <nam
 A run is **autonomous** when you tell its session to work autonomously, or when it was launched with `booping run … --autonomous`, which appends the [`core.run.preamble`](project_config.md#corerun), opening `AUTONOMOUS RUN`, to the prompt. Otherwise it is **supervised**. No config key sets the mode.
 
 - **Supervised** — every review gate pauses for your confirmation, and a step's questions are put to you.
-- **Autonomous** — the run confirms each review gate itself, settles each question with the step's recommended option (else its first, else the most conservative answer the request supports), and continues without waiting. Every gate and question it settled is logged to a `defaults.md` file beside the run's artefact — the plan directory for groom and develop, the review's directory for code-review — one numbered entry each with what was asked, what was decided, why, and a link to the artefact. A run without an artefact lists its defaults in its final report instead.
+- **Autonomous** — the run confirms each review gate itself, settles each question with the step's recommended option (else its first, else the most conservative answer the request supports), and continues without waiting. Every gate and question it settled is logged as one file under the vault's `agent-decisions/`, written with `booping scaffold core.agent_decisions.scaffold` — the step, what was asked, what was decided, why, the session, the time, and the run's artefact when it has one.
 
 Two things still stop an autonomous run: a **STOP** notice, and a question a step marks as always asked — `migrate`'s question about uncommitted work is one.
 
@@ -403,7 +403,7 @@ A resume does not need the run that started it. A run driven from outside a conv
 
 - a non-terminal **parking status**, reachable from each status a run may stop in and with one return edge back to each of them;
 - a **`frontmatter-update` hook on every entering edge** stamping where to come back to (groom writes `return_to`), cleared again by the return edges. A hook value cannot be computed from the transition, so the mapping is one literal per edge — which also keeps the frontier report readable;
-- a **sidecar** carrying the content, since frontmatter holds keys and not paragraphs. groom's is `clarifications.md`: one H2 per open question, answered in place, and postable to a tracker verbatim by a `script` hook.
+- a **sidecar** carrying the content, since frontmatter holds keys and not paragraphs. groom's is `clarifications.md`, prose by a [format doc](https://github.com/A/claude-booping/blob/master/docs/clarifications.md): one H2 per question, answered in place, and postable to a tracker verbatim by a `script` hook.
 
 The next invocation reads `playbook-state`, finds the parking status and the recorded return, reads the sidecar, and either takes the return edge or ends again untouched. Every step is a legal transition, so a parked run is indistinguishable from any other resume.
 

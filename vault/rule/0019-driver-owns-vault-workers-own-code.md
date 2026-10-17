@@ -32,7 +32,7 @@ handed to a worker to fix.
 A small fix goes to the session that already holds its whole context instead of a fresh worker: at most `core.sprint.inline_fix_sp` SP on the sprint scale (`core.sprint.scale`), every file it touches already read in that session, nothing left to find out — no file still to read, no research, no open question (owner, 2026-10-17). Anything larger, or with an unknown, goes to a worker.
 
 - **develop** — the driver applies such a fix itself.
-- **code-review** — a finding accepted at the verdict is applied by the reviewer that found it, resumed by its id, never respawned; when it cannot be resumed, the fix goes to a worker, not to the driver. Accepted at the verdict means by the user in a supervised run, or settled by the driver in an autonomous one and logged to `defaults.md`.
+- **code-review** — a finding accepted at the verdict is applied by the reviewer that found it, resumed by its id, never respawned; when it cannot be resumed, the fix goes to a worker, not to the driver. Accepted at the verdict means by the user in a supervised run, or settled by the driver in an autonomous one and logged as an agent decision in `agent-decisions/`.
 - **project-manager** — no exception: its driver delegates every code change, keeping its long-lived context clean.
 
 In an autonomous run, the driver commits such fixes separately from the workers' work, and they pass the same check as a worker's fix; a red check reverts the fix and hands it to a worker.

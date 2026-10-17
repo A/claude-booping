@@ -24,9 +24,9 @@ _NULL_FORMS = {"null", "Null", "NULL", "~"}
 def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:  # type: ignore[type-arg]
     p = subparsers.add_parser(
         "frontmatter-update",
-        help="Update frontmatter keys in a plan file, rendering Jinja macro calls",
+        help="Update frontmatter keys in any markdown file, rendering Jinja macro calls",
     )
-    p.add_argument("plan", type=Path, help="Path to the plan markdown file")
+    p.add_argument("plan", type=Path, help="Path to the markdown file")
     p.add_argument(
         "pairs",
         nargs="*",

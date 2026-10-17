@@ -5,9 +5,7 @@ from typing import cast
 
 from booping.argparser import Parser
 from booping.commands import config_get as config_get_cmd
-from booping.commands import correction as correction_cmd
 from booping.commands import debug as debug_cmd
-from booping.commands import defaults as defaults_cmd
 from booping.commands import frontmatter_update as frontmatter_update_cmd
 from booping.commands import items as items_cmd
 from booping.commands import marker_set as marker_set_cmd
@@ -43,8 +41,6 @@ def build_parser() -> argparse.ArgumentParser:
     frontmatter_update_cmd.add_parser(sub)
     session_stats_cmd.add_parser(sub)
     specs_cmd.add_parser(sub)
-    correction_cmd.add_parser(sub)
-    defaults_cmd.add_parser(sub)
     items_cmd.add_parser(sub)
     plan_cmd.add_parser(sub)
     status_cmd.add_parser(sub)

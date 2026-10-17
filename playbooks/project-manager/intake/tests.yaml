@@ -37,7 +37,7 @@
               - 'the README still says Python 3\.9 is the minimum version, it should say 3\.12'
         noOthers: true
 
-- description: intake smoke — a message that only answers C1 files no item and answers the question
+- description: intake smoke — a message that only answers an item's question files no item and answers it
   vars:
     input: file://_fixtures/answer-only.md
   metadata:
@@ -46,18 +46,19 @@
     fixture: answer-only
     tier: smoke
   assert:
-    # ANSWER-ONLY — the sidecar's C1 is answered in the user's words; no item file written
+    # ANSWER-ONLY — the item's question is answered in its body in the user's words, the item back to open; no other file written
     - type: javascript
       value: file://../../_lib/asserts/files.js
       config:
         onTextMode: fail
         expect:
-          - path: '^open-items/questions/OI-0001\.md$'
+          - path: '^open-items/OI-0001\.md$'
             contains:
-              - '^## C1 — retry limit — answered\s*$'
+              - '^status: open\s*$'
+              - '^## Answer\s*$'
               - 'Make it configurable per job type, with three attempts as the default when a job type sets nothing'
             forbids:
-              - '— open\s*$'
+              - '^status: clarify\s*$'
         noOthers: true
 
 - description: intake smoke — the reply posts each filed id with its title

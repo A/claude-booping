@@ -34,7 +34,7 @@ The `source` says what kind of item it is:
 - `request` — your own words, filed as you said them; `backlog` — a task put aside for later. Neither has a direction (`direction: null`); the body is the text exactly as given, and without a `--title` the title is its first sentence.
 - `manual`, `adr`, `mark`, `check`, `sync`, `correction` (a logged correction that names a spec record) — a specs-to-code gap, with a `direction`: `code-to-spec`, `spec-to-code`, `conflict` or `clarify`.
 
-An item moves `open` → `planned` → `done`, or straight from `open` to `done` when it is settled without a plan, or to `dropped` when it needs no work; a planned item can go back to `open`. Closed items stay on disk with `closed_at` and `reason`, out of the default list.
+An item moves `open` → `planned` → `done`, or straight from `open` to `done` when it is settled without a plan, or to `dropped` when it needs no work; a planned item can go back to `open`. An open item that asks you a question waits in `clarify` until the answer is in its body, then returns to `open`. Closed items stay on disk with `closed_at` and `reason`, out of the default list.
 
 ### `booping items`
 
@@ -42,14 +42,12 @@ Run anywhere inside a booping project; paths print vault-relative.
 
 | Verb | What it does |
 |------|--------------|
-| `list [--all]` | The index as a table — `id`, `status`, `source`, `direction`, `record`, `title`, `plan`; open and planned items only, every item with `--all`. |
+| `list [--all]` | The index as a table — `id`, `status`, `source`, `direction`, `record`, `title`, `plan`; every non-terminal item (`open`, `clarify`, `planned`), every item with `--all`. |
 | `add --text TEXT [--title TEXT] [--source request\|backlog]` | Files a request (the default) or backlog item with the text as its body, verbatim. `--text -` reads the text from stdin. |
 | `add --title TEXT --direction D [--record REF] [--source S] [--text TEXT]` | Files a specs-to-code gap; `--direction` alone makes it `manual`. `add --record adr/NNNN` without `--title` takes the title from the ADR's `Confirmation:` line. |
 | `scan [--tier T]` | Files one item per `[clarify]` / `[unknown]` mark and per `specs check` finding in the tier; an item already filed for the same thing is skipped. |
 | `plan ID… --plan PATH` | Links open items to a plan and marks them planned. |
 | `close ID… [--dropped] [--reason TEXT]` | Closes open or planned items as done, or as dropped with `--dropped`. `close --plan PATH` closes every planned item linked to that plan. |
-| `ask ID --topic TEXT --question TEXT [--option TEXT]…` | Files a question on an open or planned item in its sidecar `open-items/questions/{ID}.md`; the item is then waiting on you. See [project-manager](project_manager.md#questions-on-an-item). |
-| `answer ID C{n} --text TEXT` | Writes the answer to question `C{n}` verbatim (`--text -` reads stdin) and marks it answered. |
 | `reopen ID…` / `reopen --plan PATH` | Returns planned items to open and clears their plan. |
 
 `booping items {verb} --help` lists every flag and its allowed values.

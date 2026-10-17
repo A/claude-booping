@@ -14,7 +14,7 @@ Each milestone gets a directory of its own, `milestones/M{nn}-{kebab-title}/`, a
 plans/197001010800_widget-search/
 ├── index.md
 ├── draft.md
-├── corrections.md
+├── clarifications.md
 └── milestones/
     ├── M01-keyword-index/
     │   └── M01-keyword-index.md
@@ -27,7 +27,7 @@ The milestone file is the contract a `booping-developer` agent is handed — dev
 
 `draft.md` is the whole plan as groom drafted it, in one file; `booping plan split` cuts it into `index.md`'s body and the milestone files, and groom keeps it as the source it edits and re-splits until you approve the plan. See [groom → booping plan split / plan check](groom.md#booping-plan-split-plan-check).
 
-`corrections.md` sits beside `index.md` once you have corrected a groom or develop run on that plan: one entry per correction — the step, what the run did, your words verbatim, the reason if you gave one, and a link back into the session transcript. `booping correction add` writes it as the run goes; `booping correction list` prints a plan's log, its code reviews' included, and is what [retro](retro.md) reads first.
+`clarifications.md` holds the questions a groom run parked on — one H2 per question with its answer and an `open`/`answered` marker ([format](https://github.com/A/claude-booping/blob/master/docs/clarifications.md)).
 
 Discovery follows the `core.plans.glob` config key — an ordered list of globs, `plans/*/index.md` as shipped; milestones follow `core.plans.milestones.glob`, which matches only the milestone file inside each milestone directory, never a sidecar beside it. A vault laying plans out differently edits those keys and every consumer follows.
 
@@ -59,7 +59,14 @@ One file per code-review run, written by the [code-review playbook](code_review.
 
 The file records `## Scope`, `## Findings`, `## Verdict` and `## Resolution`. Its frontmatter carries `plan:` — the reviewed plan's vault-relative path, or `null` — and its own `status:`, the code-review track's run state: `in-agent-review → human-review → done`. That status is the review's, never a plan's: the reviewed plan stays at `done` and only gains the review's path in its `code_reviews:` list. The playbook runs with the vault root as its workdir and addresses the file with `--target codereviews/{dir}/{ts}.md`.
 
-Corrections you make during a review land in `codereviews/{dir}/corrections.md`, shared by that directory's reviews, each entry linking the review it came from.
+## `corrections/` and `agent-decisions/`
+
+One markdown file per entry, frontmatter only, written by `booping scaffold` from [`core.corrections` and `core.agent_decisions`](project_config.md#corecorrections-and-coreagent_decisions) and named `{timestamp}-{step}.md`. Each carries the step, the session id, the time and the artefact it is about.
+
+- `corrections/` — every correction you made during a groom, develop or code-review run: what the run did, your words verbatim, the reason if you gave one. [Retro](retro.md) takes the `open` ones and marks them `handled`.
+- `agent-decisions/` — every gate and question an autonomous run settled for you: what was asked, what it decided and why. `open` until the project-manager's merge gate shows it to you, then `reviewed`.
+
+Obsidian reads them as notes, and a Base can table them like plans.
 
 ## `runs/`
 

@@ -7,7 +7,7 @@ This run has no shell, so the `booping` commands were run for you; their outputs
 `booping status`:
 
 ```
-items: 2 open — request 2, backlog 0, spec gap 0 — 1 waiting on you
+items: 1 open, 1 clarify — request 2, backlog 0, spec gap 0 — 1 waiting on you
 ideas: none
 plans: 1 ready-for-dev
 runs: 1 finished
@@ -22,14 +22,14 @@ marks: none
 
 | id | status | source | direction | record | title | plan |
 | --- | --- | --- | --- | --- | --- | --- |
-| OI-0004 | open | request | — | — | Retry failed jobs | — |
+| OI-0004 | clarify | request | — | — | Retry failed jobs | — |
 | OI-0005 | open | request | — | — | Dark mode for the dashboard | — |
 
 Waiting on you:
 
-| id | title | open questions | sidecar |
-| --- | --- | --- | --- |
-| OI-0004 | Retry failed jobs | 1 | open-items/questions/OI-0004.md |
+| id | title |
+| --- | --- |
+| OI-0004 | Retry failed jobs |
 
 ## plans
 

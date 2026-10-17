@@ -1,0 +1,33 @@
+The `open_item` machine's `clarify` edges: an open item addressed by its absolute path moves to
+`clarify` when it asks the user, and back to `open` once answered; neither edge runs a hook.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/open-items/OI-0001.md --
+---
+id: OI-0001
+title: "t"
+status: open
+---
+
+# t
+-- cmd --
+sh -c 'booping playbook-transition specs clarify --state open_item --target "$PWD/vault/open-items/OI-0001.md" && booping playbook-transition specs open --state open_item --target "$PWD/vault/open-items/OI-0001.md"'
+-- exit --
+0
+-- stdout --
+open → clarify
+frontmatter: status=clarify
+clarify → open
+frontmatter: status=open
+-- stderr --
+-- expected/cwd/vault/open-items/OI-0001.md --
+---
+id: OI-0001
+title: "t"
+status: open
+---
+
+# t

@@ -59,4 +59,4 @@ stopping on any other value.
 - `core.autonomy`, its invalid-value STOP, the `autonomy:` project-context line and their e2e cases are removed.
 - `_playbook_driving.j2`, the project-manager and specs playbooks render no mode branch; they say what an autonomous run does in prose.
 - migrate's question about uncommitted work is asked in every run, autonomous or not.
-- Every gate and question an autonomous run settles is still logged with `booping defaults add`.
+- Every gate and question an autonomous run settles is still logged as an agent decision (adr/0037).

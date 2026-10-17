@@ -12,7 +12,7 @@ A run reviews one confirmed scope end to end: `scope` settles what to look at (a
 
 Every run writes one file under the vault's `codereviews/`: `codereviews/{plan-dirname}/{YYYYMMDDHHmm}.md` when a plan is in scope, `codereviews/{target-slug}/{YYYYMMDDHHmm}.md` for an ad-hoc scope. It holds `## Scope`, `## Findings`, `## Verdict` and `## Resolution`, and its frontmatter carries `plan:` — the reviewed plan's vault-relative path, or `null` when nothing was in scope.
 
-When you correct the run — overrule a finding's severity, reject a proposed fix — it logs your words verbatim, with a link back into the conversation, to `corrections.md` beside the review file, shared by the reviews in that directory. [Retro](retro.md) reads it with the plan's own log.
+When you correct the run — overrule a finding's severity, reject a proposed fix — it logs your words verbatim, with the session id and a link to the review file, as one file under the vault's `corrections/`. [Retro](retro.md) starts from those entries.
 
 The artifact is the run's own state: a stopped review is **resumable**, and a second look after fixes is a new, separately recorded run.
 

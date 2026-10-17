@@ -15,12 +15,16 @@ TEXT
 
 stdin carries the user's words for that request character for character — never paraphrased, summarised or corrected.
 
-An answer to an item's question goes on the item, again in the user's words:
+An answer to an item's question goes on the item, again in the user's words, and moves it back to `open`:
 
 ```bash
-booping items answer {id} C{n} --text - <<'TEXT'
+cat >> {vault}/open-items/{id}.md <<'TEXT'
+
+## Answer
+
 {the user's own words}
 TEXT
+booping playbook-transition specs open --state open_item --target {vault}/open-items/{id}.md
 ```
 
 Then post the filed ids, one line each: `{id} {title}`.

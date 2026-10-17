@@ -1,8 +1,8 @@
 ---
 summary: >-
   Read each adopted plan in full for context only, then build the issue list
-  without showing it — the plans' corrections feed first, its entries issue
-  items and its dialogue links handed on — session-log mining and a
+  without showing it — the open corrections first, each an issue
+  item, its session handed on — session-log mining and a
   plan-stage lesson check delegated in parallel, the lesson set passed
   verbatim with each brief — and
   cross-check both returns against the lesson set and the project-local retro

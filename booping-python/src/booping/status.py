@@ -13,7 +13,7 @@ from typing import Any
 from booping import runs
 from booping.context import Context
 from booping.query import QueryError, as_dict, build_spec, resolve_spec, run
-from booping.specs import open_items, questions
+from booping.specs import open_items
 from booping.specs.open_items import Mark
 from booping.specs.records import Record, load_tier, unreviewed
 from booping.specs.tiers import Tier, status_enum
@@ -26,6 +26,7 @@ RETRO_PLANS = "core.retro_playbook.queries.candidates"
 TIER = "project"
 IDEA_TYPE = "idea"
 MARK_KINDS = ("clarify", "unknown")
+CLARIFY = "clarify"
 RUN_COLUMNS = [
     "id",
     "playbook",
@@ -63,23 +64,9 @@ class StatusContext:
 
     @cached_property
     def waiting(self) -> list[dict[str, Any]]:
-        """Open or planned items holding at least one open question, by id."""
-        rows: list[dict[str, Any]] = []
-        for row in sorted(self.items[0], key=lambda r: str(r.get("id"))):
-            item_id = str(row.get("id"))
-            count = questions.open_count(self.ctx, item_id)
-            if count:
-                rows.append(
-                    {
-                        "id": item_id,
-                        "title": row.get("title"),
-                        "open questions": count,
-                        "sidecar": open_items.vault_relative(
-                            self.ctx, questions.sidecar_path(self.ctx, item_id)
-                        ),
-                    }
-                )
-        return rows
+        """Items in `clarify` — asked the user a question — by id."""
+        rows = [row for row in self.items[0] if row.get("status") == CLARIFY]
+        return sorted(rows, key=lambda r: str(r.get("id")))
 
     @cached_property
     def plan_statuses(self) -> list[str]:
@@ -189,7 +176,7 @@ def _items_summary(sc: StatusContext) -> str:
 def _items_detail(sc: StatusContext) -> str:
     detail = _table(sc.items)
     if sc.waiting:
-        waiting = _table((sc.waiting, ["id", "title", "open questions", "sidecar"]))
+        waiting = _table((sc.waiting, ["id", "title"]))
         detail += f"\n\nWaiting on you:\n\n{waiting}"
     return detail
 

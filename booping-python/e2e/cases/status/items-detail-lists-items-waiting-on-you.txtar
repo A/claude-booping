@@ -1,5 +1,5 @@
-`status items` follows the items table with a `Waiting on you:` table: one row per waiting
-item, its count of open questions and its sidecar path. The done OI-0002 is not listed.
+`status items` follows the items table with a `Waiting on you:` table: one row per item in
+`clarify`, by id. The open OI-0001 and the done OI-0002 are not listed.
 
 -- fixtures/cwd/.booping --
 project_name: probe
@@ -36,36 +36,27 @@ reason: null
 ---
 
 # Old request
--- fixtures/cwd/vault/open-items/questions/OI-0001.md --
-# Questions — OI-0001
+-- fixtures/cwd/vault/open-items/OI-0003.md --
+---
+id: OI-0003
+title: "Export format"
+status: clarify
+direction: null
+record: null
+source: request
+plan: null
+created_at: 2026-10-15
+closed_at: null
+reason: null
+---
 
-## C1 — export format — answered
+# Export format
 
-**Asked:** 2026-10-14 — project-manager/work
+CSV export, please.
 
-**Question:** CSV or JSON?
+## Question
 
-**Answer:**
-
-JSON.
-
-## C2 — retention — open
-
-**Asked:** 2026-10-14 — project-manager/work
-
-**Question:** How long are exports kept?
-
-**Answer:**
--- fixtures/cwd/vault/open-items/questions/OI-0002.md --
-# Questions — OI-0002
-
-## C1 — scope — open
-
-**Asked:** 2026-10-14 — project-manager/work
-
-**Question:** Still wanted?
-
-**Answer:**
+CSV or JSON?
 -- cmd --
 booping status items
 -- exit --
@@ -76,10 +67,11 @@ booping status items
 | id | status | source | size | direction | record | title | plan |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | OI-0001 | open | request | — | — | — | Retire the exporter | — |
+| OI-0003 | clarify | request | — | — | — | Export format | — |
 
 Waiting on you:
 
-| id | title | open questions | sidecar |
-| --- | --- | --- | --- |
-| OI-0001 | Retire the exporter | 1 | open-items/questions/OI-0001.md |
+| id | title |
+| --- | --- |
+| OI-0003 | Export format |
 -- stderr --

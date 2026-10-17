@@ -15,6 +15,6 @@ As **a user**, I want one manager to talk to that turns what I say into tracked 
 
 - Every user message is split into items as it arrives, asides included, each keeping the user's words verbatim ([adr/0025](../adr/0025-open-items-are-an-index.md)).
 - "What is going on" is computed by code from items, plans, runs and unreviewed records — no stored handoff that can go stale.
-- A question lives on its item's sidecar; chat only points to the item.
+- A question lives in its item's body, the item parked in `clarify`; chat only points to the item.
 - Every launched run is recorded with its item, and a finished run surfaces on the next turn.
 - In an autonomous project, small items are batched by size and skip grooming.

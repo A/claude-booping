@@ -15,7 +15,7 @@ Retro turns lived experience into a written record: friction that would otherwis
 The run draws from **three inputs**:
 
 - **User-asked questions.** `gather-feedback` takes your raw open-ended take first — four questions asked one at a time, before any mined finding is mentioned — then walks the mined items with you for accept / dismiss / your own wording.
-- **The corrections log.** `prepare` first runs `booping correction list` for each plan — the corrections groom, develop and code-review logged to `corrections.md` while you worked. Each becomes a mined item, and its link back into the conversation tells the session-log read where to look.
+- **The corrections log.** `prepare` opens on every entry of the `core.corrections.open` query, rendered into its prompt — each correction groom, develop and code-review logged under the vault's `corrections/` that no retro has handled yet. Each becomes a mined item, its session id and quote tell the session-log read where to look, and `prepare` marks it `state: handled`.
 - **Session-log mining and a plan-stage lesson check.** `prepare` then delegates both in parallel, mining the development session transcript for what you said at the time but never filed — pushback at the agent's choices, mid-sprint change requests, comments you made on the code itself, and places the session shows a loaded lesson ignored — and checking the plan as written against the active lesson set. The code diff is grounding context for these reads, not a separate scan phase. The mined list is **withheld** until your raw take is on record.
 
 The inputs are stitched into one `retrospectives/{YYYYMMDDHHMM}_{kebab-title}.md`, a standalone file in the vault — one per run, whatever the size of the working set.

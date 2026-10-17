@@ -2,7 +2,15 @@ Read each plan in the working set — its `index.md` — for **context only**: s
 
 {{ tools.render('src/templates/_partials/_lessons.j2') }}
 
-**Corrections feed** — before the delegated reads, run `booping correction list --plan {plan}` for each plan in the working set. Each entry becomes an issue item with source `correction`: trigger = its `Said`, interpretation from its `Did` and `Why`. Pass every entry's `Dialogue` link (session + line + uuid) into brief A, to read the conversation around it.
+**Corrections feed** — every correction not yet handled, whichever run logged it (`core.corrections.open`, paths under `{vault}/`):
+
+{% set _corrections = 'core.corrections.open' | query -%}
+{% for c in _corrections -%}
+- `{{ c.path }}` — {{ c.step }}, session `{{ c.session or "—" }}`. Did: {{ c.did }}. Said: {{ c.said | replace("\n", " ") }}. Why: {{ c.why or "not stated" }}.
+{% else -%}
+_No open corrections._
+{% endfor %}
+Each entry becomes an issue item with source `correction`: trigger = its `said`, interpretation from its `did` and `why`. Pass every entry's `session` and `said` into brief A, to find the conversation around it. Then mark each entry taken up handled: `booping frontmatter-update {vault}/{path} state=handled`.
 
 In parallel, delegate two reads per the agent roster above. Pass the lesson set verbatim with each brief (use the `Lessons` block already loaded above).
 
@@ -16,6 +24,6 @@ In parallel, delegate two reads per the agent roster above. Pass the lesson set 
 
 The output of this step is the **issue list** — every logged correction, and every tension, late change, code-feedback, execution-stage ignored-lesson, and plan-stage lesson-gap item from the agents' deliverables, held in context. Each item carries: source (correction / tension / late change / code feedback / ignored lesson / plan-stage lesson gap), trigger, and a one-line orchestrator interpretation.
 
-**Orchestrator cross-check** (still before `gather-feedback`): re-scan the lesson set and `_booping/skill_retro.md` against both agents' full output. Add any lesson-related item either agent missed; drop or correct any false positive. Drop a mined item whose trigger is a message the feed already links (same session and uuid) as a duplicate of its `correction` item. Use only what is in context — no additional loads.
+**Orchestrator cross-check** (still before `gather-feedback`): re-scan the lesson set and `_booping/skill_retro.md` against both agents' full output. Add any lesson-related item either agent missed; drop or correct any false positive. Drop a mined item whose trigger is a correction the feed already holds (same session, same words) as a duplicate of its `correction` item. Use only what is in context — no additional loads.
 
 Do **not** present this list to the user yet — `gather-feedback` runs first to avoid anchoring.

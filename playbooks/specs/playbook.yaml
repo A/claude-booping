@@ -2,8 +2,9 @@ graph:
   guide: []
 
 states:
-  # Lifecycle of one open item. The workdir is the vault; only
-  # `booping items` moves it — the `specs` run itself never does.
+  # Lifecycle of one open item. The workdir is the vault; `booping items` moves it,
+  # except the `clarify` edges: `booping playbook-transition specs <to> --state
+  # open_item --target {vault}/open-items/OI-NNNN.md`. The `specs` run never does.
   open_item:
     standalone: true
     artifact: open-items/{instance}.md
@@ -22,6 +23,12 @@ states:
             when: "`booping items close --dropped` closed the item without work"
             hooks:
               - frontmatter-update closed_at="{{ macro('core.macros.date', '+%Y-%m-%d') }}"
+          - to: clarify
+            when: "the item asks the user a question, written in its body"
+      clarify:
+        transitions:
+          - to: open
+            when: "the user answered, the answer written in the item's body"
       planned:
         transitions:
           - to: done

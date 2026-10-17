@@ -14,7 +14,7 @@ The order below is fixed: apply the dispositions, write `## Resolution`, close t
 
 A finding the verdict records `open`, or genuinely leaves open, is not applied: ask in `## Questions:` rather than guess.
 
-Approved means by the user in a supervised run; in an autonomous run, settled by you and logged with `booping defaults add`.
+Approved means by the user in a supervised run; in an autonomous run, settled by you and logged as an agent decision (`core.agent_decisions.scaffold`).
 
 ## Sending small fixes back to the reviewer
 

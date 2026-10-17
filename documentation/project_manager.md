@@ -40,7 +40,7 @@ In `supervised` mode it proposes the first action and waits for you; in `autonom
 | `done` | the closing commit's short sha; with a plan, the plan's path |
 | `planned` | the plan's path |
 | `running` | the run record `runs/{run}.md` |
-| `waiting on you` | the question, `open-items/questions/{id}.md#C{n}` |
+| `waiting on you` | the item file `open-items/{id}.md`, or the review's blocker |
 | `dropped` | the reason it was closed |
 
 Then the next action, in one sentence.
@@ -50,20 +50,15 @@ Then the next action, in one sentence.
 The manager is autonomous when you tell it to work autonomously; otherwise it is supervised (see [supervised and autonomous runs](playbook.md#supervised-and-autonomous-runs)). It passes the mode on to the runs it launches only through `booping run … --autonomous`.
 
 - **`supervised`** (default) — two stops: approving the plan, which groom presents in the same session, and the merge. The merge happens only on your explicit yes; "looks good" counts, silence does not.
-- **`autonomous`** — nothing stops. The manager settles both itself and logs each choice with `booping defaults add` — in the plan's `defaults.md` once there is a plan — so you can read afterwards what it decided for you.
+- **`autonomous`** — nothing stops. The manager settles both itself and logs each choice as one file under the vault's `agent-decisions/`, so you can read afterwards what it decided for you. In a supervised session the merge gate lists the `open` ones and marks them `reviewed` once you answer.
 
 ## Questions on an item
 
-A question the manager cannot settle itself goes on the item, never only in chat: chat names the file, the file keeps the question.
+A question the manager cannot settle itself goes on the item, never only in chat: chat names the item file, the file keeps the question. The manager appends it to the item's body under `## Question` and moves the item to `clarify` with `booping playbook-transition specs clarify --state open_item --target {vault}/open-items/{ID}.md`.
 
-| Command | What it does |
-|---------|--------------|
-| `booping items ask ID --topic TEXT --question TEXT [--option TEXT]…` | Adds the next question `C{n}` to `open-items/questions/{ID}.md` on an open or planned item, with the candidate answers as options; prints `open-items/questions/{ID}.md#C{n}`. |
-| `booping items answer ID C{n} --text TEXT` | Writes your answer verbatim (`--text -` reads stdin) and marks the question answered. |
+You answer by telling the manager — it appends your words verbatim under `## Answer` and moves the item back to `open` — or by editing the file and making the same transition yourself.
 
-The file uses the same format as a plan's clarifications: one `## C{n} — {topic} — open|answered` section per question. You can answer by telling the manager — it records your words with `booping items answer` — or by editing the file yourself.
-
-An item with an unanswered question is **waiting on you**. `booping status` adds ` — {n} waiting on you` to its items line, and `booping status items` lists those items under `Waiting on you:` with their question count and file.
+An item in `clarify` is **waiting on you**. `booping status` adds ` — {n} waiting on you` to its items line, and `booping status items` lists those items under `Waiting on you:`.
 
 ## Runs
 

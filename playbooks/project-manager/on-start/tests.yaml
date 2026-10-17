@@ -33,13 +33,13 @@
     - type: regex
       value: '[Ww]ebhook[- ][Rr]etries'
 
-- description: on-start smoke — only a waiting item, the reply points at its sidecar
+- description: on-start smoke — only a waiting item, the reply points at its item file
   vars:
-    input: file://_fixtures/waiting-item-points-to-sidecar.md
+    input: file://_fixtures/waiting-item-points-to-item.md
   metadata:
     playbook: project-manager
     step: on-start
-    fixture: waiting-item-points-to-sidecar
+    fixture: waiting-item-points-to-item
     tier: smoke
   assert:
     # READ-ONLY
@@ -48,11 +48,11 @@
       config:
         expect: []
         noOthers: true
-    # POINTS-TO-SIDECAR
+    # POINTS-TO-ITEM
     - type: javascript
       value: file://../../_lib/asserts/return.js
       config:
         requireBlock: true
-        entry: 'open-items/questions/OI-0007\.md'
+        entry: 'open-items/OI-0007\.md'
         onlyEntries: false
         minEntries: 1

@@ -16,7 +16,7 @@ wrong is found by root cause and can be learnt from.
 
 - Queues every `done` plan not yet covered (`retro: null`).
 - Mines session logs and the sprint diff for what actually happened.
-- Reads the plan's corrections feed (`corrections.md`, [adr/0026](../adr/0026-corrections-log.md)) first.
+- Reads the open corrections (`corrections/`, [adr/0026](../adr/0026-corrections-log.md)) first and marks what it handled.
 - Gathers the user's raw feedback and triages issues by root cause.
 - Saves `retrospectives/{slug}.md` and stamps each covered plan's `retro:` key, the
   plan staying at `done`.

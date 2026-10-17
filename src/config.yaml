@@ -33,6 +33,8 @@ core:
   # returns the literal without executing.
   macros:
     date: ["date"]
+    # The Claude Code session id, empty outside a session.
+    session: ["sh", "-c", "printf %s \"${CLAUDE_CODE_SESSION_ID:-}\""]
     git_commit:
       command: ["git", "rev-parse", "HEAD"]
       cwd: repo
@@ -116,7 +118,55 @@ core:
     # per item joined by `, `.
     prompt: "/booping:playbook {playbook} {target}"
     # Appended after a blank line under `--autonomous`.
-    preamble: "AUTONOMOUS RUN, started by booping run — nobody can answer. Do not use AskUserQuestion and do not wait at review gates: confirm each yourself and log it with booping defaults add. Settle an unclear point with a sensible default and log it the same way. A question only the owner can answer parks the run where the playbook allows it; otherwise stop and report it. Never end the run while a background agent or a check you started is still running — wait for it. Never push."
+    preamble: "AUTONOMOUS RUN, started by booping run — nobody can answer. Do not use AskUserQuestion and do not wait at review gates: confirm each yourself and log it with booping scaffold core.agent_decisions.scaffold. Settle an unclear point with a sensible default and log it the same way. A question only the owner can answer parks the run where the playbook allows it; otherwise stop and report it. Never end the run while a background agent or a check you started is still running — wait for it. Never push."
+
+  # One vault file per correction the user made during a run, written by
+  # `booping scaffold core.corrections.scaffold {vault}/corrections --set name=<ts>-<step-slug>
+  #  --set step=<playbook/step> --set did=<what the agent did> --set said=<the user's words>
+  #  [--set why=<reason>] [--set artifact=<vault-relative path>]`, `<ts>` from
+  # `date +%Y%m%d-%H%M%S`. Shared: groom, develop and code-review write it, retro reads
+  # `open` and sets `state=handled` with `booping frontmatter-update`. Text goes through
+  # `tojson`; an omitted `why` or `artifact` is null.
+  corrections:
+    scaffold:
+      "{{ name }}.md": |
+        ---
+        step: {{ step | tojson }}
+        did: {{ did | tojson }}
+        said: {{ said | tojson }}
+        why: {{ (why or none) | tojson }}
+        state: open
+        session: {{ (macro('core.macros.session') or none) | tojson }}
+        logged_at: {{ macro('core.macros.date', '+%Y-%m-%d %H:%M') | tojson }}
+        artifact: {{ (artifact or none) | tojson }}
+        ---
+    open:
+      glob: [corrections/*.md]
+      where: {state: open}
+      columns: [step, did, said, why, session, logged_at, artifact]
+
+  # One vault file per gate or question an `autonomous` run settled itself, written by
+  # `booping scaffold core.agent_decisions.scaffold {vault}/agent-decisions --set name=<ts>-<step-slug>
+  #  --set step=<playbook/step> --set asked=<the gate or question> --set decision=<what was
+  #  chosen> --set why=<reason> [--set artifact=<vault-relative path>]`. Shared: every
+  # autonomous run writes it, the project-manager reviews `open` and sets `state=reviewed`.
+  agent_decisions:
+    scaffold:
+      "{{ name }}.md": |
+        ---
+        step: {{ step | tojson }}
+        asked: {{ asked | tojson }}
+        decision: {{ decision | tojson }}
+        why: {{ why | tojson }}
+        state: open
+        session: {{ (macro('core.macros.session') or none) | tojson }}
+        logged_at: {{ macro('core.macros.date', '+%Y-%m-%d %H:%M') | tojson }}
+        artifact: {{ (artifact or none) | tojson }}
+        ---
+    open:
+      glob: [agent-decisions/*.md]
+      where: {state: open}
+      columns: [step, asked, decision, why, session, logged_at, artifact]
 
   sprint:
     default_threshold_sp: 35
@@ -303,7 +353,6 @@ core:
             doc_request: Request
             doc_clarifications: Clarifications
             doc_develop_defaults: Develop defaults
-            doc_defaults: Defaults
             entries_shown: ["{n} shown", "{n} shown"]
             filters_show_entries: Show
             sort_date: Newest first
@@ -477,7 +526,6 @@ core:
             doc_request: Запрос
             doc_clarifications: Уточнения
             doc_develop_defaults: Умолчания разработки
-            doc_defaults: Умолчания
             entries_shown: ["Показан {n}", "Показано {n}", "Показано {n}"]
             filters_show_entries: Показать
             sort_date: Сначала новые
@@ -616,7 +664,7 @@ core:
         # {{ title }}
       request.md: ""
       # Sidecar the run parks its open questions in on `awaiting-clarification`;
-      # seeded empty so the file is postable to the tracker verbatim from the
+      # seeded with its H1 so the file is postable to the tracker verbatim from the
       # first question on. Format: ${CLAUDE_PLUGIN_ROOT}/docs/clarifications.md.
       clarifications.md: |
         # Clarifications

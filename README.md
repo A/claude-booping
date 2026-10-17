@@ -152,9 +152,10 @@ Skipping a plan's retro writes no retrospective at all: the plan is stamped `ret
 - **`human-review`** — the findings are recorded and your verdict on them is pending.
 - **`done`** *(code-review's terminal)* — every finding is applied, delegated or dropped, and the record is closed. Closing stamps `reviewed_at` and appends the review's path to the reviewed plan's `code_reviews:` list; an ad-hoc review (`plan: null`) links to nothing. The plan's own `status:` is never touched.
 
-**specs** — on each open item at `open-items/OI-NNNN.md`, moved only by `booping items`, never by a playbook run.
+**specs** — on each open item at `open-items/OI-NNNN.md`, moved by `booping items` and the project-manager, never by a `specs` run.
 
 - **`open`** — the request or gap is filed and waits for a plan; one settled without a plan — a tiny fix, an answered question, a recorded decision — closes straight to `done`.
+- **`clarify`** — the item asked you a question, written in its body; it waits on you in `booping status` and returns to `open` once your answer is in the body.
 - **`planned`** — linked to a plan; develop finishing that plan closes it, a failed or cancelled plan returns it to `open`.
 - **`done`** *(terminal)* — the work landed.
 - **`dropped`** *(terminal)* — closed without work, with a reason.

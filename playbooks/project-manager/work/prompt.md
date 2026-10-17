@@ -1,6 +1,6 @@
 ---
 summary: Classify each item taken up and carry it along its route to a report line.
-review_gate: "Supervised: two stops — the plan approval inside the inline groom, and the merge gate, asked in prose: merge only on the user's explicit yes (\"looks good\" counts, silence never does). Autonomous: both settled yourself and each logged with `booping defaults add`."
+review_gate: "Supervised: two stops — the plan approval inside the inline groom, and the merge gate, asked in prose: merge only on the user's explicit yes (\"looks good\" counts, silence never does). Autonomous: both settled yourself and each logged as an agent decision."
 ---
 
 ## Classify
@@ -15,7 +15,7 @@ Each item taken up is one of:
 A tiny fix is also sized: `booping items size {id} {size}`, one of the sizes
 `booping config-get core.project_manager_playbook.batch` lists.
 
-Next: the class's route below; a class the item does not let you judge → `booping items ask {id}`.
+Next: the class's route below; a class the item does not let you judge → a question on the item (see the hard rules).
 
 ## Tiny fix
 
@@ -46,7 +46,7 @@ Next: `booping items close {id}` for each item of the batch.
 ## Question
 
 The repo or vault holds the answer → answer in chat. Next: `booping items close {id}`; no answer
-there → `booping items ask {id}`.
+there → a question on the item (see the hard rules).
 
 ## Decision
 
@@ -67,11 +67,11 @@ One groom per item, or one for several items the user framed as one change.
    `booping run code-review {plan} --autonomous`.
 5. Review ends → commit the fixes it left uncommitted (scoped staging), then read `## Findings` and
    `## Verdict` in its artefact, `codereviews/{plan-dirname}/{ts}.md`. An unfixed blocker →
-   `booping items ask` on the plan's items (the `booping items list` rows whose `plan` is this
-   plan); no merge.
+   report the plan's items `waiting on you`, the blocker as the pointer; no merge.
 6. Merge gate (the review gate above). Supervised: list first, numbered, every decision the
-   autonomous runs settled — each `D{n}` in the plan's `defaults.md` and in
-   `codereviews/{plan-dirname}/defaults.md` — one plain line each, marked `(proposal)`.
+   autonomous runs settled — each row of `booping query --config core.agent_decisions.open`
+   — one plain line each, marked `(proposal)`; once the user answers, mark each listed file
+   with `booping frontmatter-update {vault}/{path} state=reviewed`.
 7. Merge the branch develop left checked out into the merge target with `git merge --no-ff`,
    locally, never pushed; develop left the merge target itself checked out → nothing to merge.
 
@@ -94,12 +94,12 @@ After each turn's work, one line per item touched:
 | `done` | the closing commit's short sha; with a plan, the plan's vault path |
 | `planned` | the plan's vault path |
 | `running` | the run record `runs/{run}.md` |
-| `waiting on you` | the sidecar `open-items/questions/{id}.md#C{n}` |
+| `waiting on you` | the item file `open-items/{id}.md`, or the review's blocker |
 | `dropped` | the close reason |
 
 Next: the next action, in one sentence.
 
 ## Corrections
 
-A correction from the user → `booping correction add` per `booping:rule/0031`, `--target` the
+A correction from the user → a correction file per `booping:rule/0031`, `--set artifact=` the
 plan's `index.md`, or the item file when there is no plan.

@@ -1,4 +1,4 @@
-# Input — waiting-item-points-to-sidecar
+# Input — waiting-item-points-to-item
 
 The project is `taskflow`; the current working directory is its vault root. Run date: **2026-10-15**. This run covers the `on-start` step only.
 
@@ -7,7 +7,7 @@ This run has no shell, so the `booping` commands were run for you; their outputs
 `booping status`:
 
 ```
-items: 1 open — request 1, backlog 0, spec gap 0 — 1 waiting on you
+items: 1 clarify — request 1, backlog 0, spec gap 0 — 1 waiting on you
 ideas: none
 plans: none active
 runs: none
@@ -22,13 +22,13 @@ marks: none
 
 | id | status | source | direction | record | title | plan |
 | --- | --- | --- | --- | --- | --- | --- |
-| OI-0007 | open | request | — | — | Retire the CSV exporter | — |
+| OI-0007 | clarify | request | — | — | Retire the CSV exporter | — |
 
 Waiting on you:
 
-| id | title | open questions | sidecar |
-| --- | --- | --- | --- |
-| OI-0007 | Retire the CSV exporter | 1 | open-items/questions/OI-0007.md |
+| id | title |
+| --- | --- |
+| OI-0007 | Retire the CSV exporter |
 ```
 
 ## Dialogue

@@ -1,5 +1,5 @@
 `items batch` packs the open XS and S items in id order: OI-0003 (M) and OI-0008 (unsized)
-take the plan route, OI-0005 waits on an open question. With the cap at 7 SP the first
+take the plan route, OI-0005 is in `clarify`, waiting on the user. With the cap at 7 SP the first
 batch takes 1 + 2 + 2 + 2 = 7; OI-0007 (1 SP) would make 8, so it starts the second batch.
 
 -- fixtures/cwd/.booping --
@@ -79,7 +79,7 @@ reason: null
 ---
 id: OI-0005
 title: "Item 5"
-status: open
+status: clarify
 direction: null
 record: null
 source: request
@@ -139,16 +139,6 @@ reason: null
 ---
 
 # Item 8
--- fixtures/cwd/vault/open-items/questions/OI-0005.md --
-# Questions — OI-0005
-
-## C1 — scope — open
-
-**Asked:** 2026-10-14 — project-manager/work
-
-**Question:** Which page?
-
-**Answer:**
 -- cmd --
 booping items batch
 -- exit --

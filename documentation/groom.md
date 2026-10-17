@@ -32,13 +32,13 @@ Four steps, in dependency order:
 `draft-plan` works in four stages, all in your session:
 
 1. **Research** — reads the code the request touches and what it depends on (bulk reads go to the research agent) and posts the facts, with file paths, in chat. This is the `researching` status.
-2. **Draft** — picks the plan template matching the dominant surface and writes the whole plan to `draft.md`: every template section, and one `### M{nn} — {title}` block per milestone, opened by `sp:` and `depends_on:` lines and holding the four sub-headings named in `core.groom_playbook.split.sections`. What the code and the request settle, it decides and records as an assumption; a call only you can make is asked in chat, or — in an autonomous run — written to `clarifications.md` while the run parks.
+2. **Draft** — picks the plan template matching the dominant surface and writes the whole plan to `draft.md`: every template section, and one `### M{nn} — {title}` block per milestone, opened by `sp:` and `depends_on:` lines and holding the four sub-headings named in `core.groom_playbook.split.sections`. What the code and the request settle, it decides and records as an assumption; a call only you can make is asked in chat, or — in an autonomous run — written to the plan's `clarifications.md` while the run parks.
 3. **Split** — runs `booping plan split draft.md --replace`. A draft it cannot cut (exit 3 or 4) goes to `core.groom_playbook.split_fallback_agent`, which rewrites it into the format outside the vault; the run copies the result over `draft.md` and splits again.
 4. **Check** — runs `booping plan check` on the plan directory and fixes the milestones it flags in `draft.md`, then splits again — at most three rounds. Findings left after that are shown at `present`.
 
 The one-pass draft and the split are backed by booping's own groom and split benchmarks ([adr/0030](https://github.com/A/claude-booping/blob/master/vault/adr/0030-groom-drafts-the-whole-plan-in-one-pass.md), [adr/0031](https://github.com/A/claude-booping/blob/master/vault/adr/0031-a-script-cuts-the-plan-into-milestone-files.md)).
 
-When you correct the run — reject a proposal, rewrite what it wrote, answer a gate differently than it suggested — it logs your words verbatim, with a link back into the conversation, to `corrections.md` in the plan directory. [Retro](retro.md) starts from that log.
+When you correct the run — reject a proposal, rewrite what it wrote, answer a gate differently than it suggested — it logs your words verbatim, with the session id and a link to the plan, as one file under the vault's `corrections/`. [Retro](retro.md) starts from those entries.
 
 ## Starting a run
 

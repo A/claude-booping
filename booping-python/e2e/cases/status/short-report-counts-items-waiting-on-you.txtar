@@ -1,6 +1,5 @@
-The items line appends the count of open or planned items whose questions sidecar holds a
-question failing the answered test: OI-0001 has one answered and one open question and
-counts; the done OI-0002 has an open question and does not.
+The items line appends the count of items in `clarify`: OI-0003 counts, the open OI-0001
+and the done OI-0002 do not.
 
 -- fixtures/cwd/.booping --
 project_name: probe
@@ -37,42 +36,33 @@ reason: null
 ---
 
 # Old request
--- fixtures/cwd/vault/open-items/questions/OI-0001.md --
-# Questions — OI-0001
+-- fixtures/cwd/vault/open-items/OI-0003.md --
+---
+id: OI-0003
+title: "Export format"
+status: clarify
+direction: null
+record: null
+source: request
+plan: null
+created_at: 2026-10-15
+closed_at: null
+reason: null
+---
 
-## C1 — export format — answered
+# Export format
 
-**Asked:** 2026-10-14 — project-manager/work
+CSV export, please.
 
-**Question:** CSV or JSON?
+## Question
 
-**Answer:**
-
-JSON.
-
-## C2 — retention — open
-
-**Asked:** 2026-10-14 — project-manager/work
-
-**Question:** How long are exports kept?
-
-**Answer:**
--- fixtures/cwd/vault/open-items/questions/OI-0002.md --
-# Questions — OI-0002
-
-## C1 — scope — open
-
-**Asked:** 2026-10-14 — project-manager/work
-
-**Question:** Still wanted?
-
-**Answer:**
+CSV or JSON?
 -- cmd --
 booping status
 -- exit --
 0
 -- stdout --
-items: 1 open — request 1, backlog 0, spec gap 0 — 1 waiting on you
+items: 1 open, 1 clarify — request 2, backlog 0, spec gap 0 — 1 waiting on you
 ideas: none
 plans: none active
 runs: none

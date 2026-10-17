@@ -264,8 +264,17 @@ How `booping run groom` and `booping run develop` launch a recorded headless run
 - **`core.run.command`** — the argv of the launched run, `claude -p` with auto permissions and streamed JSON output as shipped. `--session-id {uuid}` and the prompt are appended per run.
 - **`core.run.env`** — variables set on top of the inherited environment. The shipped `CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS: "0"` keeps a headless run from ending its own background workers after ten minutes.
 - **`core.run.prompt`** — the prompt, `/booping:playbook {playbook} {target}`; `{target}` is the plan's absolute `index.md`, or each item as `{id} ({path})`.
-- **`core.run.preamble`** — the autonomy instructions appended after a blank line under `--autonomous`: settle gates and questions without asking, log each with `booping defaults add`, never push.
+- **`core.run.preamble`** — the autonomy instructions appended after a blank line under `--autonomous`: settle gates and questions without asking, log each as an agent decision file, never push.
 - **`core.run.dir`** — the vault directory of run records, `runs` as shipped.
+
+### `core.corrections` and `core.agent_decisions`
+
+One vault file per entry, under `corrections/` and `agent-decisions/`. Directly under `core` because several playbooks write them and retro and the project-manager read them.
+
+- **`scaffold`** — the entry file, keyed `{{ name }}.md`: `booping scaffold core.corrections.scaffold {vault}/corrections --set name={ts}-{step} --set step=… --set did=… --set said=…` (`why` and `artifact` optional); decisions take `asked`, `decision`, `why`. Every entry starts `state: open`; the `core.macros.session` and `core.macros.date` macros stamp `session` and `logged_at`.
+- **`open`** — the query spec of entries still `state: open`, for `booping query --config core.corrections.open` and the `| query` filter. Retro sets a correction `handled`, the project-manager sets a decision `reviewed`, both with `booping frontmatter-update`.
+
+A project changes an entry's fields by overriding the scaffold in its own tier.
 
 ### `core.macros`
 
