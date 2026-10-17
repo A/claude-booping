@@ -5,7 +5,7 @@ keys and the body survive untouched.
 ---
 name: fx-run
 title: Run
-summary: Hookless states-bearing fixture for playbook-transition.
+summary: Hookless states-bearing fixture for transition.
 ---
 
 Preamble.
@@ -65,12 +65,12 @@ title: Run
 
 body
 -- cmd --
-booping playbook-transition fx-run researching --workdir run
+booping transition run/index.md researching --playbook fx-run
 -- exit --
 1
 -- stdout --
 -- stderr --
-error: {CWD}/run/index.md: no frontmatter `status:` key; the only legal target is the initial status 'intaking'
+error: {CWD}/run/index.md (not-started) has no edge to researching; legal: intaking
 -- expected/cwd/run/index.md --
 ---
 title: Run

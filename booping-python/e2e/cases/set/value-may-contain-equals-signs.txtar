@@ -7,7 +7,7 @@ title: Foo
 ---
 # Body
 -- cmd --
-booping frontmatter-update plan.md "goal=a = b"
+booping set plan.md "goal=a = b"
 -- exit --
 0
 -- stderr --

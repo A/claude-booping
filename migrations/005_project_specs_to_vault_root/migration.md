@@ -24,7 +24,7 @@ export PLUGIN_ROOT="$(cd <migration-dir>/../.. && pwd)"
 export VAULT="$(cd <vault> && pwd)"
 export REPO="$(pwd)"
 export TYPES="$(find "$PLUGIN_ROOT/src/specs/schemas" -mindepth 1 -maxdepth 1 -name '[!.]*.yaml' | sort | xargs -n1 basename | sed 's/\.yaml$//' | tr '\n' ' ')"
-booping config-get core.specs.tiers.project.path
+booping config core.specs.tiers.project.path
 ls -ld "$VAULT/specs" 2>/dev/null || echo "no $VAULT/specs"
 ```
 
@@ -33,7 +33,7 @@ first that matches is the only one applied.
 
 ## 1. A repo-pointed tier — left alone
 
-`booping config-get core.specs.tiers.project.path` printed a value other than `None` / `null` /
+`booping config core.specs.tiers.project.path` printed a value other than `None` / `null` /
 empty: the user chose the tier's place. Change nothing.
 
 Report: `left alone: path {value}`.
@@ -51,7 +51,7 @@ realpath --relative-to="$REPO" "$(readlink -f "$VAULT/specs")"
 Set `core.specs.tiers.project.path` to that printed path in `$VAULT/config.yaml`: create the file
 when absent, merge into an existing `core:` / `specs:` / `tiers:` / `project:` mapping when present,
 keep every other key and comment as written. Keep the link.
-`booping config-get core.specs.tiers.project.path` now prints the path.
+`booping config core.specs.tiers.project.path` now prints the path.
 
 Report: `pinned: core.specs.tiers.project.path = {path}`.
 

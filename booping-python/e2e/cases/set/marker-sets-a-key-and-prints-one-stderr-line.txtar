@@ -7,7 +7,7 @@ byte-for-byte: only the appended line is new.
 project_name: "demo"  # quoted on purpose
 vault_path: ./vault
 -- cmd --
-booping marker-set latest_migration=3
+booping set .booping latest_migration=3
 -- exit --
 0
 -- stdout --

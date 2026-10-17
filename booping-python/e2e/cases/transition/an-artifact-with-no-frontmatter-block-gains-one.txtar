@@ -1,11 +1,11 @@
-A `--target` whose file carries no frontmatter block at all gets one written above its body, which
+An artifact that carries no frontmatter block at all gets one written above its body, which
 survives unchanged.
 
 -- fixtures/home/Claude/_playbooks/fx-run/playbook.md --
 ---
 name: fx-run
 title: Run
-summary: Hookless states-bearing fixture for playbook-transition.
+summary: Hookless states-bearing fixture for transition.
 ---
 
 Preamble.
@@ -34,18 +34,18 @@ summary: Intake the request.
 ---
 
 Intake body.
--- fixtures/cwd/run/retro.md --
+-- fixtures/cwd/run/index.md --
 no frontmatter here
 -- cmd --
-booping playbook-transition fx-run intaking --target retro.md --workdir run
+booping transition run/index.md intaking --playbook fx-run
 -- exit --
 0
 -- stdout --
-bootstrapped {CWD}/run/retro.md
+bootstrapped index.md
 not-started → intaking
 frontmatter: status=intaking
 -- stderr --
--- expected/cwd/run/retro.md --
+-- expected/cwd/run/index.md --
 ---
 status: intaking
 ---

@@ -13,7 +13,7 @@ sp: 5
 - [ ] 3 SP: Task one
 - [ ] 2 SP: Task two
 -- cmd --
-booping frontmatter-update plan.md status=in-progress
+booping set plan.md status=in-progress
 -- exit --
 0
 -- stderr --

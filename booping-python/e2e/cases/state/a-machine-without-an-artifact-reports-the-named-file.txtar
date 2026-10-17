@@ -1,11 +1,11 @@
-The same machine that refuses bare reports normally once `--target` names the artifact: the resolved
-path is echoed as the `artifact:` and the frontier comes from that file's status.
+The same machine reports normally once `--playbook` names its playbook, the file standing in as the
+artifact: the resolved path is echoed as the `artifact:` and the frontier comes from that file's status.
 
 -- fixtures/home/Claude/_playbooks/fx-targetless/playbook.md --
 ---
 name: fx-targetless
 title: Targetless
-summary: Machine with no declared artifact, addressed by --target.
+summary: Machine with no declared artifact, addressed by its file.
 ---
 
 Preamble.
@@ -36,12 +36,12 @@ status: reviewing
 
 Body.
 -- cmd --
-booping playbook-state fx-targetless --workdir run --target review.md
+booping state run/review.md --playbook fx-targetless
 -- exit --
 0
 -- stdout --
 playbook: fx-targetless
-workdir: {CWD}/run
+workdir: {CWD}
 states:
   main:
     artifact: {CWD}/run/review.md

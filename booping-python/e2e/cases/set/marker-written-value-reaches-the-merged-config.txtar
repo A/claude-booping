@@ -1,5 +1,5 @@
 The write lands in the config merge, not just on disk: the key lives only in the vault
-beside the marker, so it resolves at all only because marker-set pointed vault_path at that
+beside the marker, so it resolves at all only because set pointed vault_path at that
 vault a line earlier.
 
 -- fixtures/cwd/.booping --
@@ -9,8 +9,8 @@ core:
   probe_playbook:
     threshold: 8
 -- cmd --
-booping marker-set vault_path=./vault
-booping config-get core.probe_playbook.threshold
+booping set .booping vault_path=./vault
+booping config core.probe_playbook.threshold
 -- exit --
 0
 -- stdout --

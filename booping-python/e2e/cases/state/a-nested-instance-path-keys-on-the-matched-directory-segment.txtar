@@ -7,7 +7,7 @@ which differs only in the machine's `artifact:` shape.
 ---
 name: fx-nested
 title: Nested
-summary: Directory-position {instance} fixture for playbook-state.
+summary: Directory-position {instance} fixture for state.
 ---
 
 Preamble.
@@ -44,8 +44,8 @@ summary: Draft the part.
 Draft body.
 -- fixtures/cwd/run/.keep --
 -- cmd --
-booping playbook-transition fx-nested drafting --state part --instance alpha --workdir run
-booping playbook-state fx-nested --workdir run
+booping transition run/parts/alpha/alpha.md drafting --playbook fx-nested --state part
+booping state run/parts/alpha/alpha.md --playbook fx-nested
 -- exit --
 0
 -- stdout --

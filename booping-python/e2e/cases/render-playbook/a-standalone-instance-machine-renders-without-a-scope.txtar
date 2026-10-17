@@ -48,12 +48,12 @@ Execute the steps in the most effective order considering their dependencies.
 
 ## State
 
-Run state is persisted in artifacts under the run workdir. Only `booping playbook-transition` writes it — never hand-edit an artifact's `status`.
+Run state is persisted in artifacts under the run workdir. Only `booping transition` writes it — never hand-edit an artifact's `status`.
 
 Read the whole run's frontier before starting or resuming:
 
 ```
-booping playbook-state fx-standalone-state --workdir <run workdir>
+booping state <run workdir>/items/<slug>.md --playbook fx-standalone-state
 ```
 
 ### State: item
@@ -61,7 +61,7 @@ booping playbook-state fx-standalone-state --workdir <run workdir>
 - Referenced by: no graph scope — standalone, moved only by `--state item` calls
 - Artifact: `items/{instance}.md` (relative to the run workdir)
 - Initial status: `open`
-- Advance: `booping playbook-transition fx-standalone-state <to> --state item --instance <slug> --workdir <run workdir>`
+- Advance: `booping transition <run workdir>/items/<slug>.md <to> --playbook fx-standalone-state --state item`
 
 | Status | To | When | Gates |
 | --- | --- | --- | --- |

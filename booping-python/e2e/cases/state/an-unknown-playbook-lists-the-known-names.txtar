@@ -6,7 +6,7 @@ a new core playbook.
 ---
 name: fx-run
 title: Run
-summary: Single-machine fixture for playbook-state.
+summary: Single-machine fixture for state.
 ---
 
 Preamble.
@@ -48,7 +48,7 @@ summary: Research the request.
 Research body.
 -- fixtures/cwd/run/.keep --
 -- cmd --
-booping playbook-state fx-nope --workdir run
+booping state run/index.md --playbook fx-nope
 -- exit --
 1
 -- stdout --

@@ -6,8 +6,8 @@ incremented nor accumulated into a second entry.
 project_name: "demo"  # quoted on purpose
 vault_path: ./vault
 -- cmd --
-booping marker-set latest_migration=3
-booping marker-set latest_migration=9
+booping set .booping latest_migration=3
+booping set .booping latest_migration=9
 -- exit --
 0
 -- stdout --

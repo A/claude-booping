@@ -14,7 +14,7 @@ title: Foo
 ---
 # Body
 -- cmd --
-booping frontmatter-update plan.md build="{{ macro('core.macros.build') }}"
+booping set plan.md build="{{ macro('core.macros.build') }}"
 -- exit --
 0
 -- stdout --

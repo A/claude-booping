@@ -27,7 +27,7 @@ return_to: framing
 
 30 days.
 -- cmd --
-booping playbook-transition groom framing --workdir run
+booping transition run/index.md framing --playbook groom
 -- exit --
 0
 -- stdout --

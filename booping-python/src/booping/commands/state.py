@@ -1,8 +1,9 @@
-"""Playbook run reporter — read the current status of every run artifact.
+"""Run reporter — read the current status of every run artifact beside a file.
 
-Read-only counterpart of `playbook-transition`: resolves the same artifacts against
-the run workdir and prints, per `states:` entry, the current status plus the edges
-leaving it. Nothing is written except the standard `.booping.log` line.
+Read-only counterpart of `transition`: resolves the playbook(s) whose machines the file
+is an artifact of with the same matcher, takes the run workdir from the file, and
+prints, per `states:` entry of each, the current status plus the edges leaving it.
+Nothing is written except the standard `.booping.log` line.
 """
 
 from __future__ import annotations
@@ -15,10 +16,11 @@ from typing import Any, NoReturn
 import yaml
 
 from booping import logger
-from booping.commands.playbook_transition import (
+from booping.commands.transition import (
     NOT_STARTED,
+    Match,
     read_status,
-    resolve_target,
+    resolve_matches,
 )
 from booping.context import Context
 from booping.context.lifecycle import resolve_edges
@@ -29,26 +31,19 @@ BOOTSTRAP_WHEN = "run not started — bootstrap the artifact"
 
 def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:  # type: ignore[type-arg]
     p = subparsers.add_parser(
-        "playbook-state",
-        help="Report the current status of every playbook run artifact",
+        "state",
+        help="Report the frontier of every run artifact of the playbook(s) a file belongs to",
     )
-    p.add_argument("playbook", help="Playbook name")
+    p.add_argument("file", help="A run artifact; its playbook(s) and run workdir follow from it")
     p.add_argument(
-        "--target",
+        "--playbook",
         type=str,
         default=None,
-        metavar="PATH",
+        metavar="NAME",
         help=(
-            "Artifact to report instead of each machine's declared `artifact:` "
-            "(relative paths resolve against the workdir)"
+            "Report only this playbook (required for a machine declaring no "
+            "`artifact:`, where the file is the target)"
         ),
-    )
-    p.add_argument(
-        "--workdir",
-        type=str,
-        default=None,
-        metavar="PATH",
-        help="Run workspace the artifact paths resolve against (default: cwd)",
     )
     p.set_defaults(func=_run)
 
@@ -56,14 +51,6 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
 def _fail(message: str, code: int = 1) -> NoReturn:
     print(f"error: {message}", file=sys.stderr)
     sys.exit(code)
-
-
-def _resolve_playbook(ctx: Context, name: str) -> Playbook:
-    pb = next((p for p in ctx.playbooks if p.name == name), None)
-    if pb is None:
-        known = ", ".join(sorted(p.name for p in ctx.playbooks)) or "(none)"
-        _fail(f"playbook not found: {name} (known: {known})")
-    return pb
 
 
 def _ordered_states(pb: Playbook) -> list[str]:
@@ -117,46 +104,58 @@ def _instances(machine: StateMachine, workdir: Path) -> dict[str, Any]:
     return {slug: _report_status(found[slug], machine) for slug in sorted(found)}
 
 
-def _run(args: argparse.Namespace) -> None:
-    workdir_arg: str | None = args.workdir
-    workdir = Path(workdir_arg).expanduser().resolve() if workdir_arg is not None else Path.cwd()
-    if not workdir.is_dir():
-        _fail(f"workdir not found: {workdir}")
-
-    ctx = Context.assemble(start=workdir)
-    pb = _resolve_playbook(ctx, args.playbook)
-    if not pb.states:
-        _fail(f"playbook '{pb.name}' declares no states")
-
-    target: str | None = args.target
+def _report(pb: Playbook, workdir: Path, target: Path | None) -> dict[str, Any]:
     states: dict[str, Any] = {}
     for name in _ordered_states(pb):
         machine = pb.states[name]
-        if target is not None:
-            resolved = resolve_target(target, workdir)
-            states[name] = {"artifact": str(resolved), **_report_status(resolved, machine)}
-            continue
         if not machine.artifact:
-            _fail(f"state '{name}' declares no `artifact:`; pass --target PATH")
+            if target is None:
+                _fail(f"state '{name}' declares no `artifact:`; pass a file it targets")
+            states[name] = {"artifact": str(target), **_report_status(target, machine)}
+            continue
         entry: dict[str, Any] = {"artifact": machine.artifact}
         if "{instance}" in machine.artifact:
             entry["instances"] = _instances(machine, workdir)
         else:
             entry.update(_report_status(workdir / machine.artifact, machine))
         states[name] = entry
+    return {"playbook": pb.name, "workdir": str(workdir), "states": states}
 
-    logger.log(
-        vault=ctx.project.directory if ctx.project is not None else None,
-        subcommand="playbook-state",
-        message=f"{pb.name} @ {workdir}",
-    )
+
+def _run(args: argparse.Namespace) -> None:
+    file = Path(args.file).expanduser().resolve()
+    start = next(p for p in file.parents if p.is_dir())
+    ctx = Context.assemble(start=start)
+    playbook: str | None = args.playbook
+    matches = resolve_matches(ctx, file, playbook, None)
+    if not matches:
+        if playbook is not None:
+            _fail(f"{file} matches no machine artifact of playbook '{playbook}'")
+        _fail(f"{file} matches no machine artifact; pass --playbook")
+
+    by_playbook: dict[str, list[Match]] = {}
+    for match in matches:
+        by_playbook.setdefault(match.playbook.name, []).append(match)
+
+    reports: list[dict[str, Any]] = []
+    for group in by_playbook.values():
+        anchored = next((m for m in group if m.machine.artifact), group[0])
+        if not anchored.workdir.is_dir():
+            _fail(f"workdir not found: {anchored.workdir}")
+        target = file if any(not m.machine.artifact for m in group) else None
+        reports.append(_report(anchored.playbook, anchored.workdir, target))
+
+    for report in reports:
+        logger.log(
+            vault=ctx.project.directory if ctx.project is not None else None,
+            subcommand="state",
+            message=f"{report['playbook']} @ {report['workdir']}",
+        )
 
     print(
-        yaml.safe_dump(
-            {"playbook": pb.name, "workdir": str(workdir), "states": states},
-            sort_keys=False,
-            default_flow_style=False,
-            allow_unicode=True,
+        "---\n".join(
+            yaml.safe_dump(report, sort_keys=False, default_flow_style=False, allow_unicode=True)
+            for report in reports
         ),
         end="",
     )

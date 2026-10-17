@@ -1,4 +1,4 @@
-The run appends exactly one [marker-set] line to the attached vault's log, naming the marker
+The run appends exactly one [set] line to the attached vault's log, naming the marker
 it rewrote and the pair it wrote there.
 
 -- fixtures/cwd/.booping --
@@ -6,11 +6,11 @@ it rewrote and the pair it wrote there.
 project_name: "demo"  # quoted on purpose
 vault_path: ./vault
 -- cmd --
-booping marker-set latest_migration=3
+booping set .booping latest_migration=3
 -- exit --
 0
 -- stdout --
 -- stderr --
 marker: latest_migration=3
 -- expected/cwd/vault/.booping.log --
-[..]Z: [marker-set] {CWD}/.booping latest_migration=3
+[..]Z: [set] {CWD}/.booping latest_migration=3

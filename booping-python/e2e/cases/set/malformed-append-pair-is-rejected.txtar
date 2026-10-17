@@ -6,7 +6,7 @@ title: Foo
 ---
 # Body
 -- cmd --
-booping frontmatter-update plan.md --append nope
+booping set plan.md --append nope
 -- exit --
 1
 -- stdout --

@@ -8,7 +8,7 @@ retro: 2026-01-01
 ---
 # Body
 -- cmd --
-booping frontmatter-update plan.md retro=null planned=~
+booping set plan.md retro=null planned=~
 -- exit --
 0
 -- stderr --

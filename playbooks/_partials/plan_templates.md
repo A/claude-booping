@@ -30,7 +30,7 @@ The draft is one file, cut into `index.md` and the milestone files by `booping p
 `summary` is yours:
 
 ```
-booping frontmatter-update {plan-dir}/index.md summary="{one line}"
+booping set {plan-dir}/index.md summary="{one line}"
 ```
 
 `sp` is not — never hand-write it.

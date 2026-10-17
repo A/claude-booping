@@ -1,10 +1,10 @@
 # Set booping up on this machine
 
-The run's context report carries the booping-initialized flag and, when booping is initialized, the machine's configured home dir. The flag picks the branch below and is the only thing that answers *whether* booping is configured: `booping config-get home_dir` always prints a value — the core default `~/Claude/` when no config exists — so it answers only *what* the home dir is.
+The run's context report carries the booping-initialized flag and, when booping is initialized, the machine's configured home dir. The flag picks the branch below and is the only thing that answers *whether* booping is configured: `booping config home_dir` always prints a value — the core default `~/Claude/` when no config exists — so it answers only *what* the home dir is.
 
 ## Branch: already initialized
 
-Read the resolved value back with `booping config-get home_dir` and report it. The config is never edited, re-pointed or reformatted — the one exception is adding the namespace key, per **Global specs tier** below. Still make the home dir exist and be a git repo, per **Home dir** below — an existing config says nothing about the directory.
+Read the resolved value back with `booping config home_dir` and report it. The config is never edited, re-pointed or reformatted — the one exception is adding the namespace key, per **Global specs tier** below. Still make the home dir exist and be a git repo, per **Home dir** below — an existing config says nothing about the directory.
 
 ## Branch: not initialized
 
@@ -16,7 +16,7 @@ Then create `${XDG_CONFIG_HOME:-~/.config}/booping/config.yaml`, parent director
 home_dir: ~/Claude/
 ```
 
-Read the value back with `booping config-get home_dir` and report it.
+Read the value back with `booping config home_dir` and report it.
 
 ## Home dir
 
@@ -31,7 +31,7 @@ Report which of the two actually did something. A home dir that already sits ins
 
 ## Global specs tier
 
-Applies on both branches, after **Home dir**. Run `booping config-get core.specs.tiers.global.namespace`; it prints `None` when no tier sets the key. Only then ask the user for the namespace through `AskUserQuestion` — one question, `$USER` (expanded) as the default option, any other id accepted as free input — and add it to `${XDG_CONFIG_HOME:-~/.config}/booping/config.yaml`, keeping every other key as it is:
+Applies on both branches, after **Home dir**. Run `booping config core.specs.tiers.global.namespace`; it prints `None` when no tier sets the key. Only then ask the user for the namespace through `AskUserQuestion` — one question, `$USER` (expanded) as the default option, any other id accepted as free input — and add it to `${XDG_CONFIG_HOME:-~/.config}/booping/config.yaml`, keeping every other key as it is:
 
 ```yaml
 core:

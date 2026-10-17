@@ -34,7 +34,7 @@ When `review` returned no findings, the section is written as `_No findings._`.
 
 ## 2. Advance the run — before the user is asked
 
-Once `## Findings` is on disk, transition per the `## State` section, from the vault root, passing the run's `--target`. The verdict is asked for at `human-review`, never at `in-agent-review`.
+Once `## Findings` is on disk, transition per the `## State` section, naming the run's review file. The verdict is asked for at `human-review`, never at `in-agent-review`.
 
 ## 3. Post and ask
 

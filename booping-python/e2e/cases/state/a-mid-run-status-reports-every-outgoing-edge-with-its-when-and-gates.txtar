@@ -6,7 +6,7 @@ it, in manifest order, each with its `when` and — only where the manifest decl
 ---
 name: fx-run
 title: Run
-summary: Single-machine fixture for playbook-state.
+summary: Single-machine fixture for state.
 ---
 
 Preamble.
@@ -48,8 +48,8 @@ summary: Research the request.
 Research body.
 -- fixtures/cwd/run/.keep --
 -- cmd --
-booping playbook-transition fx-run intaking --workdir run
-booping playbook-state fx-run --workdir run
+booping transition run/index.md intaking --playbook fx-run
+booping state run/index.md --playbook fx-run
 -- exit --
 0
 -- stdout --

@@ -2,7 +2,7 @@ The shipped tracker driver is `cli`, so a vault that configures nothing gets the
 and every playbook run keeps its interactive behaviour.
 
 -- cmd --
-booping config-get core.tracker.driver
+booping config core.tracker.driver
 -- exit --
 0
 -- stdout --

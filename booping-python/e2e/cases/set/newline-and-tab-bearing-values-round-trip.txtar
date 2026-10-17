@@ -9,7 +9,7 @@ title: Foo
 ---
 # Body
 -- cmd --
-booping frontmatter-update plan.md 'tabbed=a	b' 'lined={{ "x\ny" }}'
+booping set plan.md 'tabbed=a	b' 'lined={{ "x\ny" }}'
 -- exit --
 0
 -- stderr --

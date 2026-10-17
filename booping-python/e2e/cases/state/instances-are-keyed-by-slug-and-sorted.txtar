@@ -6,7 +6,7 @@ while the two still mid-run keep theirs.
 ---
 name: fx-steps
 title: Steps
-summary: Per-instance fixture for playbook-state.
+summary: Per-instance fixture for state.
 ---
 
 Preamble.
@@ -43,11 +43,11 @@ summary: Write the spec.
 Spec body.
 -- fixtures/cwd/run/.keep --
 -- cmd --
-booping playbook-transition fx-steps spec-ing --state step --instance zulu --workdir run
-booping playbook-transition fx-steps spec-ing --state step --instance alpha --workdir run
-booping playbook-transition fx-steps spec-ing --state step --instance mike --workdir run
-booping playbook-transition fx-steps done --state step --instance mike --workdir run
-booping playbook-state fx-steps --workdir run
+booping transition run/steps/zulu/index.md spec-ing --playbook fx-steps --state step
+booping transition run/steps/alpha/index.md spec-ing --playbook fx-steps --state step
+booping transition run/steps/mike/index.md spec-ing --playbook fx-steps --state step
+booping transition run/steps/mike/index.md done --playbook fx-steps --state step
+booping state run/steps/alpha/index.md --playbook fx-steps
 -- exit --
 0
 -- stdout --

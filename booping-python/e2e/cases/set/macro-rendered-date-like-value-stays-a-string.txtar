@@ -16,7 +16,7 @@ title: Foo
 ---
 # Body
 -- cmd --
-booping frontmatter-update plan.md created="{{ macro('core.macros.day') }}" completed="{{ macro('core.macros.stamp') }}"
+booping set plan.md created="{{ macro('core.macros.day') }}" completed="{{ macro('core.macros.stamp') }}"
 -- exit --
 0
 -- stdout --

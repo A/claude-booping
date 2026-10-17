@@ -25,7 +25,7 @@ return_to: null
 
 **Answer:**
 -- cmd --
-booping playbook-transition groom awaiting-clarification --workdir run
+booping transition run/index.md awaiting-clarification --playbook groom
 -- exit --
 0
 -- stdout --

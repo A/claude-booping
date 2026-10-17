@@ -12,7 +12,7 @@ title: Foo
 ---
 # Body
 -- cmd --
-booping frontmatter-update plan.md probe="{{ macro('core.macros.probe') }}"
+booping set plan.md probe="{{ macro('core.macros.probe') }}"
 -- exit --
 0
 -- stdout --

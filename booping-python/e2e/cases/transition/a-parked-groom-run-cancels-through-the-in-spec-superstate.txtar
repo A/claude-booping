@@ -14,7 +14,7 @@ return_to: drafting
 
 # Demo
 -- cmd --
-booping playbook-transition groom cancelled --workdir run
+booping transition run/index.md cancelled --playbook groom
 -- exit --
 0
 -- stdout --

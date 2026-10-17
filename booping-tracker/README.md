@@ -19,7 +19,7 @@ Global flags, accepted by every verb:
 | Flag | Meaning |
 | --- | --- |
 | `--driver NAME` | Override `core.tracker.driver` for this invocation. |
-| `--config-file PATH` | Read the tracker config from this YAML file instead of shelling to `booping config-get` — for tests and for callers outside a vault. |
+| `--config-file PATH` | Read the tracker config from this YAML file instead of shelling to `booping config` — for tests and for callers outside a vault. |
 | `--output text\|json` | Receipt format. Default `text`. |
 | `--dry-run` | Resolve the call, print what it would do, perform no write. Reaches no provider, so it needs no API key. |
 
@@ -71,7 +71,7 @@ The split is what lets a caller retry sensibly: `1` will fail the same way again
 ## Configuration
 
 The three-tier config merge stays single-sourced in booping. This binary does not re-implement
-it — it shells to `bin/booping config-get core.tracker` and parses the YAML, unless
+it — it shells to `bin/booping config core.tracker` and parses the YAML, unless
 `--config-file PATH` names a file to read instead. The keys are documented in
 [Project config → `core.tracker`](../documentation/project_config.md#coretracker).
 

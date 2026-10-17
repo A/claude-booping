@@ -54,12 +54,12 @@ Execute the steps in the most effective order considering their dependencies.
 
 ## State
 
-Run state is persisted in artifacts under the run workdir. Only `booping playbook-transition` writes it — never hand-edit an artifact's `status`.
+Run state is persisted in artifacts under the run workdir. Only `booping transition` writes it — never hand-edit an artifact's `status`.
 
 Read the whole run's frontier before starting or resuming:
 
 ```
-booping playbook-state fx-orphan-state --workdir <run workdir>
+booping state <run workdir>/index.md --playbook fx-orphan-state
 ```
 
 ### State: main
@@ -67,7 +67,7 @@ booping playbook-state fx-orphan-state --workdir <run workdir>
 - Referenced by: outer graph
 - Artifact: `index.md` (relative to the run workdir)
 - Initial status: `start`
-- Advance: `booping playbook-transition fx-orphan-state <to> --workdir <run workdir>`
+- Advance: `booping transition <run workdir>/index.md <to> --playbook fx-orphan-state`
 
 | Status | To | When | Gates |
 | --- | --- | --- | --- |
@@ -79,7 +79,7 @@ booping playbook-state fx-orphan-state --workdir <run workdir>
 - Referenced by: nothing
 - Artifact: `stray.md` (relative to the run workdir)
 - Initial status: `x`
-- Advance: `booping playbook-transition fx-orphan-state <to> --state stray --workdir <run workdir>`
+- Advance: `booping transition <run workdir>/stray.md <to> --playbook fx-orphan-state --state stray`
 
 | Status | To | When | Gates |
 | --- | --- | --- | --- |

@@ -6,7 +6,7 @@ declares the subgraph's `step` machine ahead of the outer `main` one, and the re
 ---
 name: fx-order
 title: Order
-summary: Outer-plus-subgraph fixture for playbook-state.
+summary: Outer-plus-subgraph fixture for state.
 ---
 
 Preamble.
@@ -53,7 +53,7 @@ summary: Write the spec.
 Spec body.
 -- fixtures/cwd/run/.keep --
 -- cmd --
-booping playbook-state fx-order --workdir run
+booping state run/index.md --playbook fx-order
 -- exit --
 0
 -- stdout --

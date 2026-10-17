@@ -19,10 +19,10 @@ A run reviews one confirmed scope end to end: `scope` settles what to look at an
 
 - Date & time: {{ human_ts }}
 - The run's artifact is one code review per run — `codereviews/{plan-dirname}/{{ slug_ts }}.md` when a plan is in scope, `codereviews/{target-slug}/{{ slug_ts }}.md` otherwise.
-- The run workdir is the **vault root**; every `booping playbook-state` / `booping playbook-transition` call passes `--target codereviews/{dir}/{ts}.md`, since the machine declares no `artifact:`.
+- The run workdir is the **vault root**; every `booping state` / `booping transition` call names the review file `{vault}/codereviews/{dir}/{ts}.md` and `--playbook code-review`, since the machine declares no `artifact:`.
 - The artifact carries `plan:` — the reviewed plan's vault-relative path, or `null` for an ad-hoc scope. The exit hook reads it and appends the artifact to that plan's `code_reviews:` list. Plan `status:` is never touched here.
 
-**Resuming a run** — read the frontier with `booping playbook-state code-review --workdir {vault} --target codereviews/{dir}/{ts}.md`, then re-enter at the reported status:
+**Resuming a run** — read the frontier with `booping state {vault}/codereviews/{dir}/{ts}.md --playbook code-review`, then re-enter at the reported status:
 - `in-agent-review` — the artifact exists and the verdict is still pending: re-run `review` over the scope the artifact's `## Scope` records, and continue from `present`.
 - `human-review` — the findings are on record: re-post them from the artifact's `## Findings` and collect the verdict, or continue from `resolve` when `## Verdict` is already written.
 

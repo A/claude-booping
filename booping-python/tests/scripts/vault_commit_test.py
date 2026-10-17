@@ -1,7 +1,7 @@
 """Vault-commit hooks against a vault inside a git work tree.
 
 Each plugin-shipped vault-commit hook runs as a subprocess the way `booping
-playbook-transition` runs it, over real `git` in two layouts: **nested** — the vault is
+transition` runs it, over real `git` in two layouts: **nested** — the vault is
 `repo/vault` inside a larger repository that also holds an unrelated staged change — and
 **own repo** — the vault is the repository.
 """

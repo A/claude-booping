@@ -12,12 +12,12 @@ return_to: framing
 
 # Demo
 -- cmd --
-booping playbook-transition groom cross-reviewing --workdir run
+booping transition run/index.md cross-reviewing --playbook groom
 -- exit --
 1
 -- stdout --
 -- stderr --
-error: cannot transition from 'awaiting-clarification' to 'cross-reviewing' in state 'run'; allowed targets: cancelled, drafting, framing
+error: {CWD}/run/index.md (awaiting-clarification) has no edge to cross-reviewing; legal: cancelled, drafting, framing
 -- expected/cwd/run/index.md --
 ---
 title: "Demo"

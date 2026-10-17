@@ -6,7 +6,7 @@ plugin-shipped playbook, which is not this case's business.
 ---
 name: fx-run
 title: Run
-summary: Hookless states-bearing fixture for playbook-transition.
+summary: Hookless states-bearing fixture for transition.
 ---
 
 Preamble.
@@ -60,7 +60,7 @@ summary: Write the spec.
 Spec body.
 -- fixtures/cwd/run/.keep --
 -- cmd --
-booping playbook-transition fx-nope intaking --workdir run
+booping transition run/index.md intaking --playbook fx-nope
 -- exit --
 1
 -- stdout --

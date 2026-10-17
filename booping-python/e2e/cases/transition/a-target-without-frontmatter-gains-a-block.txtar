@@ -5,7 +5,7 @@ which is preserved unchanged.
 ---
 name: fx-hooks
 title: Hooks
-summary: Hook-bearing fixture for playbook-transition.
+summary: Hook-bearing fixture for transition.
 ---
 
 Preamble.
@@ -23,7 +23,7 @@ states:
         transitions:
           - to: noted
             when: the raw file is reviewed
-            hooks: ["frontmatter-update raw.md reviewed=recorded"]
+            hooks: ["set raw.md reviewed=recorded"]
       noted: {terminal: true}
 -- fixtures/home/Claude/_playbooks/fx-hooks/only/prompt.md --
 ---
@@ -36,8 +36,8 @@ Only body.
 
 Raw body.
 -- cmd --
-booping playbook-transition fx-hooks intaking --workdir run
-booping playbook-transition fx-hooks noted --workdir run
+booping transition run/index.md intaking --playbook fx-hooks
+booping transition run/index.md noted --playbook fx-hooks
 -- exit --
 0
 -- stdout --

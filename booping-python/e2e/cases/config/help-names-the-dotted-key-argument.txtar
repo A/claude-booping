@@ -1,11 +1,11 @@
 `--help` succeeds and documents the single positional argument as a dot-separated key path.
 
 -- cmd --
-booping config-get --help
+booping config --help
 -- exit --
 0
 -- stdout --
-usage: booping config-get [-h] key
+usage: booping config [-h] key
 
 positional arguments:
   key         Dot-separated key path into the merged config (e.g.

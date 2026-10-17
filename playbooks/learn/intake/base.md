@@ -16,7 +16,7 @@ Validate the selected retrospective's `status:` is the status the `## State` sec
 
 ## Workdir and covered plans
 
-The run workdir is the **vault root**, and the retrospective is addressed by `--target retrospectives/{slug}.md` on every state call.
+The run workdir is the **vault root**, and the retrospective `{vault}/retrospectives/{slug}.md` is the file every state call names.
 
 Read the retrospective in full — it is the sole source the run extracts from. Read each plan in its `plans:` list for context only: scope, decisions on record, what the retro's findings refer to. Plan `status:` is neither checked nor written here.
 

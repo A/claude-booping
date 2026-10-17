@@ -24,8 +24,8 @@ resolves the project tier from it. `<vault>` is the vault path from your run-tim
 export PLUGIN_ROOT="$(cd <migration-dir>/../.. && pwd)"
 export VAULT="$(cd <vault> && pwd)"
 export REPO="$(pwd)"
-HOME_DIR="$(booping config-get home_dir)"; HOME_DIR="${HOME_DIR/#\~/$HOME}"; export HOME_DIR="${HOME_DIR%/}"
-export CORE_ROOT="$PLUGIN_ROOT/$(booping config-get core.specs.tiers.core.path)"
+HOME_DIR="$(booping config home_dir)"; HOME_DIR="${HOME_DIR/#\~/$HOME}"; export HOME_DIR="${HOME_DIR%/}"
+export CORE_ROOT="$PLUGIN_ROOT/$(booping config core.specs.tiers.core.path)"
 # A tier's root when the tier exists, else empty; never creates one.
 tier_root() { booping specs ls --tier "$1" >/dev/null 2>&1 && booping specs init --tier "$1" | tail -n 1; }
 find "$HOME_DIR/_lessons" -mindepth 1 -maxdepth 1 -name '[!.]*.md' 2>/dev/null | sort | grep . || echo "no global lessons"

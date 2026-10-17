@@ -1,0 +1,60 @@
+`index.md` is the artifact of both groom's and develop's `run` machine, so with no `--playbook` the
+plan directory reports both playbooks, one YAML document each — develop's instance machine included,
+its milestones found under the same directory.
+
+-- fixtures/cwd/plan/index.md --
+---
+title: Plan
+status: awaiting-approval
+---
+# Plan
+-- fixtures/cwd/plan/milestones/M01-first/M01-first.md --
+---
+id: "01"
+status: pending
+---
+# M01
+-- cmd --
+booping state plan/index.md
+-- exit --
+0
+-- stdout --
+playbook: develop
+workdir: {CWD}/plan
+states:
+  run:
+    artifact: index.md
+    status: awaiting-approval
+    next:
+    - to: ready-for-dev
+      when: the user handed the plan to develop — invoking the run on it is the approval;
+        intake takes this edge immediately, no confirmation asked
+    - to: cancelled
+      when: the user cancels the run
+  milestone:
+    artifact: milestones/{instance}/{instance}.md
+    instances:
+      M01-first:
+        status: pending
+        next:
+        - to: in-progress
+          when: the milestone's group is being handed to a worker
+---
+playbook: groom
+workdir: {CWD}/plan
+states:
+  run:
+    artifact: index.md
+    status: awaiting-approval
+    next:
+    - to: drafting
+      when: the user's change request touches the plan itself — architecture, scope,
+        milestones, tasks or estimates
+    - to: ready-for-dev
+      when: the user explicitly approves the plan — "looks good" counts, silence never
+        does
+      gates:
+      - explicit user approval captured
+    - to: cancelled
+      when: the user cancels the run
+-- stderr --

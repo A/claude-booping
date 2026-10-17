@@ -10,7 +10,7 @@ sessions: null
 ---
 # Body
 -- cmd --
-booping frontmatter-update plan.md status=in-progress --remove stale --append sessions=abc-123
+booping set plan.md status=in-progress --remove stale --append sessions=abc-123
 -- exit --
 0
 -- stdout --

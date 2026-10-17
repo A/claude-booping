@@ -7,7 +7,7 @@ machine's `artifact:` shape.
 ---
 name: fx-flat
 title: Flat
-summary: Filename-position {instance} fixture for playbook-state.
+summary: Filename-position {instance} fixture for state.
 ---
 
 Preamble.
@@ -44,8 +44,8 @@ summary: Draft the note.
 Draft body.
 -- fixtures/cwd/run/.keep --
 -- cmd --
-booping playbook-transition fx-flat drafting --state note --instance alpha --workdir run
-booping playbook-state fx-flat --workdir run
+booping transition run/notes/alpha.md drafting --playbook fx-flat --state note
+booping state run/notes/alpha.md --playbook fx-flat
 -- exit --
 0
 -- stdout --

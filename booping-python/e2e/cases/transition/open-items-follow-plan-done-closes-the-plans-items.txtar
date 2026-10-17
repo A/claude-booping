@@ -12,7 +12,7 @@ macro_stubs:
 ---
 name: fx-follow
 title: Follow
-summary: Open-items follow-plan fixture for playbook-transition.
+summary: Open-items follow-plan fixture for transition.
 ---
 
 Preamble.
@@ -62,7 +62,7 @@ reason: null
 
 # Gap OI-0001
 -- cmd --
-booping playbook-transition fx-follow done --workdir vault/plans/p
+booping transition vault/plans/p/index.md done --playbook fx-follow
 -- exit --
 0
 -- stdout --

@@ -6,7 +6,7 @@ checkout, so its path is wildcarded.
 ---
 name: fx-hooks
 title: Hooks
-summary: Hook-bearing fixture for playbook-transition.
+summary: Hook-bearing fixture for transition.
 ---
 
 Preamble.
@@ -34,8 +34,8 @@ summary: Only step.
 Only body.
 -- fixtures/cwd/run/.keep --
 -- cmd --
-booping playbook-transition fx-hooks intaking --workdir run
-booping playbook-transition fx-hooks noted --workdir run
+booping transition run/index.md intaking --playbook fx-hooks
+booping transition run/index.md noted --playbook fx-hooks
 -- exit --
 2
 -- stdout --

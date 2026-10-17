@@ -2,14 +2,14 @@ The first transition of a run has no artifact to read, so the target status must
 `initial:`. The command writes the artifact, stamps the status onto it, and reports three lines:
 what it created, the `not-started → {initial}` move, and the frontmatter key it wrote.
 
-The run workdir is seeded as `fixtures/cwd/run/.keep` — `playbook-transition` refuses a workdir
+The run workdir is seeded as `fixtures/cwd/run/.keep` — `transition` refuses a workdir
 that does not exist rather than creating one.
 
 -- fixtures/home/Claude/_playbooks/fx-run/playbook.md --
 ---
 name: fx-run
 title: Run
-summary: Hookless states-bearing fixture for playbook-transition.
+summary: Hookless states-bearing fixture for transition.
 ---
 
 Preamble.
@@ -63,7 +63,7 @@ summary: Write the spec.
 Spec body.
 -- fixtures/cwd/run/.keep --
 -- cmd --
-booping playbook-transition fx-run intaking --workdir run
+booping transition run/index.md intaking --playbook fx-run
 -- exit --
 0
 -- stdout --

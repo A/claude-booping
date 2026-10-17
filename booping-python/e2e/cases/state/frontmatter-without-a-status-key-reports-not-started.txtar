@@ -5,7 +5,7 @@ that has not started: the report is `not-started` with the bootstrap edge, not a
 ---
 name: fx-run
 title: Run
-summary: Single-machine fixture for playbook-state.
+summary: Single-machine fixture for state.
 ---
 
 Preamble.
@@ -52,7 +52,7 @@ title: Retro
 
 Body.
 -- cmd --
-booping playbook-state fx-run --workdir run
+booping state run/index.md --playbook fx-run
 -- exit --
 0
 -- stdout --

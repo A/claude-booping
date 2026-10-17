@@ -1,11 +1,11 @@
-With no `--workdir` the reporter resolves every artifact against the process cwd, so the run seeded
-in the `cwd` root is the one reported and `workdir` echoes that directory.
+A file directly in the process cwd makes the cwd its run directory, so the run seeded in the `cwd`
+root is the one reported and `workdir` echoes that directory.
 
 -- fixtures/home/Claude/_playbooks/fx-run/playbook.md --
 ---
 name: fx-run
 title: Run
-summary: Single-machine fixture for playbook-state.
+summary: Single-machine fixture for state.
 ---
 
 Preamble.
@@ -52,7 +52,7 @@ status: intaking
 
 Body.
 -- cmd --
-booping playbook-state fx-run
+booping state index.md --playbook fx-run
 -- exit --
 0
 -- stdout --

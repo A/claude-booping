@@ -13,7 +13,7 @@ Each item taken up is one of:
 - `decision` — the user states a choice to record.
 
 A tiny fix is also sized: `booping items size {id} {size}`, one of the sizes
-`booping config-get core.project_manager_playbook.batch` lists.
+`booping config core.project_manager_playbook.batch` lists.
 
 Next: the class's route below; a class the item does not let you judge → a question on the item (see the hard rules).
 
@@ -71,7 +71,7 @@ One groom per item, or one for several items the user framed as one change.
 6. Merge gate (the review gate above). Supervised: list first, numbered, every decision the
    autonomous runs settled — each row of `booping query --config core.agent_decisions.open`
    — one plain line each, marked `(proposal)`; once the user answers, mark each listed file
-   with `booping frontmatter-update {vault}/{path} state=reviewed`.
+   with `booping set {vault}/{path} state=reviewed`.
 7. Merge the branch develop left checked out into the merge target with `git merge --no-ff`,
    locally, never pushed; develop left the merge target itself checked out → nothing to merge.
 

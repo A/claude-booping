@@ -7,7 +7,7 @@ title: Foo
 ---
 # Body
 -- cmd --
-booping frontmatter-update plan.md x="{{ macro( }}"
+booping set plan.md x="{{ macro( }}"
 -- exit --
 2
 -- stdout --

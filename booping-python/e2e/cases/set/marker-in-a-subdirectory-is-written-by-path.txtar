@@ -1,0 +1,15 @@
+A marker anywhere is addressed by its path; the file's basename, not its location, selects
+the marker write.
+
+-- fixtures/cwd/repo/.booping --
+project_name: demo
+-- cmd --
+booping set repo/.booping latest_migration=4
+-- exit --
+0
+-- stdout --
+-- stderr --
+marker: latest_migration=4
+-- expected/cwd/repo/.booping --
+project_name: demo
+latest_migration: 4

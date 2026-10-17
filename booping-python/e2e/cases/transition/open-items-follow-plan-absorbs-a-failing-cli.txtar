@@ -1,7 +1,7 @@
 With `BOOPING_BIN` pointing at a command that exits 1, the hook absorbs the failure and exits 0,
 so the transition completes and the plan stays advanced; the fake records the argv it was called
 with, showing the override is the binary run. The hook's `warning: open-items follow-plan failed
-(exit 1)` is not relayed here, since `playbook-transition` captures the stderr of a hook that
+(exit 1)` is not relayed here, since `transition` captures the stderr of a hook that
 succeeds. `env` finds `booping` on the venv PATH the test runner runs under.
 
 -- fixtures/cwd/.booping --
@@ -15,7 +15,7 @@ macro_stubs:
 ---
 name: fx-follow
 title: Follow
-summary: Open-items follow-plan fixture for playbook-transition.
+summary: Open-items follow-plan fixture for transition.
 ---
 
 Preamble.
@@ -70,7 +70,7 @@ echo "$@" > fake-argv.txt
 exit 1
 -- cmd --
 chmod +x fake-booping
-env BOOPING_BIN=../../../fake-booping booping playbook-transition fx-follow done --workdir vault/plans/p
+env BOOPING_BIN=../../../fake-booping booping transition vault/plans/p/index.md done --playbook fx-follow
 -- exit --
 0
 -- stdout --

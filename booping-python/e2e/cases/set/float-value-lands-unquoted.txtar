@@ -6,7 +6,7 @@ title: Foo
 ---
 # Body
 -- cmd --
-booping frontmatter-update plan.md ratio=1.5
+booping set plan.md ratio=1.5
 -- exit --
 0
 -- stderr --

@@ -6,7 +6,7 @@ title: Foo
 ---
 # Body
 -- cmd --
-booping frontmatter-update plan.md blocked=true reviewed=false
+booping set plan.md blocked=true reviewed=false
 -- exit --
 0
 -- stderr --

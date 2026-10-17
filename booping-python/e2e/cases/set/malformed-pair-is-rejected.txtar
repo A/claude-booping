@@ -7,7 +7,7 @@ title: Foo
 ---
 # Body
 -- cmd --
-booping frontmatter-update plan.md noequals
+booping set plan.md noequals
 -- exit --
 1
 -- stdout --

@@ -33,7 +33,7 @@ summary: Intake the request.
 Intake body.
 -- fixtures/cwd/run/.keep --
 -- cmd --
-booping playbook-transition fx-nested open --workdir run
+booping transition run/reports/deep/index.md open --playbook fx-nested
 -- exit --
 0
 -- stdout --

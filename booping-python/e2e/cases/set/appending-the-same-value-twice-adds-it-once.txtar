@@ -8,8 +8,8 @@ sessions: null
 ---
 # Body
 -- cmd --
-booping frontmatter-update plan.md --append sessions=abc-123
-booping frontmatter-update plan.md --append sessions=abc-123
+booping set plan.md --append sessions=abc-123
+booping set plan.md --append sessions=abc-123
 -- exit --
 0
 -- stdout --

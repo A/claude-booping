@@ -11,7 +11,7 @@ return_to: framing
 
 # Demo
 -- cmd --
-booping playbook-state groom --workdir run
+booping state run/index.md --playbook groom
 -- exit --
 0
 -- stdout --

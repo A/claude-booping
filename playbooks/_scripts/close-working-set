@@ -5,7 +5,7 @@ Used by the `retro` playbook (`awaiting-retro → awaiting-learning`) and the `l
 playbook (`awaiting-learning → done`); the per-playbook differences live in the hook
 line's argv rather than in a second copy of this file.
 
-Environment (set by `booping playbook-transition`): BOOPING_WORKDIR = the vault root,
+Environment (set by `booping transition`): BOOPING_WORKDIR = the vault root,
 which is also cwd, and BOOPING_ARTIFACT = the run's resolved target, the retrospective
 under `retrospectives/`.
 
@@ -14,7 +14,7 @@ on every plan in it and commits the artifact plus every touched plan.
 
 Flags:
   --status VALUE   status stamped on every plan of the working set (optional; the
-                   artifact's own status is written by `playbook-transition` before
+                   artifact's own status is written by `booping transition` before
                    the hooks run)
   --prefix WORD    commit-message prefix (required)
   --verdicts       require a non-empty `goal_verdicts:` mapping in the artifact and

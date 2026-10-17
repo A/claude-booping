@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Vault-commit hook for the `groom` playbook's superstate-boundary edges.
 
-Environment (set by `booping playbook-transition`): BOOPING_WORKDIR =
+Environment (set by `booping transition`): BOOPING_WORKDIR =
 {vault}/plans/{slug}, which is also cwd.
 
 Stages the run's plan directory and commits it, tagging the message with the
-`status:` `playbook-transition` already wrote to `index.md`. The vault carries no
+`status:` `booping transition` already wrote to `index.md`. The vault carries no
 `.booping` marker, so nothing here shells back into `booping`; the commit goes
 through the shared `_vault_git` helper in `playbooks/_scripts/`, and nothing
 outside the standard library is imported.

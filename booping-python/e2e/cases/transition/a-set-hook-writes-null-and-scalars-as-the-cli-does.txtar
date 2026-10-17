@@ -1,4 +1,4 @@
-A `frontmatter-update` hook types its values exactly as the `frontmatter-update` CLI does:
+A `set` hook types its values exactly as the `set` CLI does:
 `key=null` clears the key to a YAML null, booleans and integers are written unquoted,
 and a string whose plain form would reload as another type stays quoted.
 
@@ -6,7 +6,7 @@ and a string whose plain form would reload as another type stays quoted.
 ---
 name: fx-hooks
 title: Hooks
-summary: Hook-bearing fixture for playbook-transition.
+summary: Hook-bearing fixture for transition.
 ---
 
 Preamble.
@@ -24,7 +24,7 @@ states:
         transitions:
           - to: resumed
             when: the run returns
-            hooks: ["frontmatter-update return_to=null attempts=2 blocked=false label=plain answer=yes"]
+            hooks: ["set return_to=null attempts=2 blocked=false label=plain answer=yes"]
       resumed: {terminal: true}
 -- fixtures/home/Claude/_playbooks/fx-hooks/only/prompt.md --
 ---
@@ -38,7 +38,7 @@ status: parked
 return_to: inbox
 ---
 -- cmd --
-booping playbook-transition fx-hooks resumed --workdir run
+booping transition run/index.md resumed --playbook fx-hooks
 -- exit --
 0
 -- stdout --

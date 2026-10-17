@@ -17,7 +17,7 @@ from markdown_it import MarkdownIt
 from markdown_it.token import Token
 
 from booping.commands.create import _plan  # pyright: ignore[reportPrivateUsage]
-from booping.commands.playbook_transition import (
+from booping.commands.transition import (
     format_frontmatter_line,
     read_status,
     transition,
@@ -290,9 +290,7 @@ def move(ctx: Context, item_id: str, to: str, fields: dict[str, str] | None = No
     if fields:
         update_frontmatter(path, dict(fields))
         report.append(format_frontmatter_line(fields))
-    report += transition(
-        PLAYBOOK, to, state=STATE, instance=item_id, workdir=str(require_vault(ctx))
-    )
+    report += transition(str(path), to, playbook=PLAYBOOK, state=STATE)
     return report
 
 

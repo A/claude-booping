@@ -1,4 +1,4 @@
-The hook run directly, outside `playbook-transition` (which captures the stderr of a hook that
+The hook run directly, outside `transition` (which captures the stderr of a hook that
 exits 0): with `BOOPING_BIN` pointing at a command that exits 1, it exits 0 and stderr carries the
 warning. The script is the plugin's own copy, located through the root `booping` resolves for its
 core playbooks.

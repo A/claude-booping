@@ -7,7 +7,7 @@ title: Foo
 ---
 # Body
 -- cmd --
-booping frontmatter-update plan.md "summary=23 things"
+booping set plan.md "summary=23 things"
 -- exit --
 0
 -- stderr --

@@ -1,7 +1,7 @@
 """Tests for the `code-review` playbook's exit hook script.
 
 The script is plugin-shipped and stdlib-only, so it is exercised as a subprocess the
-way `booping playbook-transition` runs it: cwd and `BOOPING_WORKDIR` at the vault root,
+way `booping transition` runs it: cwd and `BOOPING_WORKDIR` at the vault root,
 `BOOPING_ARTIFACT` at the resolved review.
 """
 

@@ -24,7 +24,7 @@ cat >> {vault}/open-items/{id}.md <<'TEXT'
 
 {the user's own words}
 TEXT
-booping playbook-transition specs open --state open_item --target {vault}/open-items/{id}.md
+booping transition {vault}/open-items/{id}.md open
 ```
 
 Then post the filed ids, one line each: `{id} {title}`.

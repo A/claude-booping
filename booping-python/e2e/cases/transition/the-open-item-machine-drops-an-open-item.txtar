@@ -1,5 +1,5 @@
 The specs playbook's `open_item` machine moves one item file under the vault: an `open` item
-dropped by instance id lands `dropped` with `closed_at` stamped by the edge's hook.
+addressed by its path alone, the machine inferred, lands `dropped` with `closed_at` stamped by the edge's hook.
 
 -- fixtures/cwd/.booping --
 project_name: probe
@@ -24,7 +24,7 @@ reason: null
 
 # t
 -- cmd --
-booping playbook-transition specs dropped --state open_item --instance OI-0001 --workdir vault
+booping transition vault/open-items/OI-0001.md dropped
 -- exit --
 0
 -- stdout --

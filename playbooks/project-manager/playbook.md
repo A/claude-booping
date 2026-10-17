@@ -17,7 +17,7 @@ Session loop: every later user message → `intake`, then `work`. While a run is
 **Hard rules — hold for the whole session:**
 - The driver owns the vault, every commit (scoped staging by path, never `git add -A`) and every transition; workers edit repo code only. The driver never edits code — every change, a tiny fix included, goes to a worker.
 - Launch `booping run` with the Bash tool's background mode, never `&`; ack it with `booping run ack` once its outcome is acted on.
-- A question you cannot settle goes on an open item: append it to the item file's body under `## Question`, then `booping playbook-transition specs clarify --state open_item --target {vault}/open-items/{id}.md`; chat only names the item file.
+- A question you cannot settle goes on an open item: append it to the item file's body under `## Question`, then `booping transition {vault}/open-items/{id}.md clarify`; chat only names the item file.
 - Never push, deploy or release unless a project rule or runbook targeting `project-manager` says how.
 - No item store, handoff file or status file of your own.
 

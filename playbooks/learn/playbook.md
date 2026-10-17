@@ -15,7 +15,7 @@ Turn retrospective findings into durable behavior changes routed to exactly one 
 ## Guidance
 
 - The run's unit of work is a standalone retrospective, `retrospectives/{slug}.md`; its `plans:` frontmatter lists the plans it covers, for context only.
-- The run workdir is the **vault root**; every `booping playbook-state` / `booping playbook-transition` call passes `--target retrospectives/{slug}.md`, since the machine declares no `artifact:`.
+- The run workdir is the **vault root**; every `booping state` / `booping transition` call names `{vault}/retrospectives/{slug}.md` and `--playbook learn`, since the machine declares no `artifact:`.
 - Plans are already `done` when learn runs and are never re-read for status or touched by it.
 - Learn writes exactly two destinations: a rule record in this project's specs tier and the attached repo's `CLAUDE.md`.
 

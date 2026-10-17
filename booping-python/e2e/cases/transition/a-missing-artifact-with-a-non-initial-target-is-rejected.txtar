@@ -5,7 +5,7 @@ initial status. Any other target is refused, naming the artifact path it looked 
 ---
 name: fx-run
 title: Run
-summary: Hookless states-bearing fixture for playbook-transition.
+summary: Hookless states-bearing fixture for transition.
 ---
 
 Preamble.
@@ -59,9 +59,9 @@ summary: Write the spec.
 Spec body.
 -- fixtures/cwd/run/.keep --
 -- cmd --
-booping playbook-transition fx-run researching --workdir run
+booping transition run/index.md researching --playbook fx-run
 -- exit --
 1
 -- stdout --
 -- stderr --
-error: artifact index.md does not exist; the only legal target is the initial status 'intaking'
+error: {CWD}/run/index.md (not-started) has no edge to researching; legal: intaking

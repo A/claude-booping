@@ -37,8 +37,8 @@ ideas, references, runbooks; stale records hide outside the first three. A fix t
 record say what is already decided or true: apply it and report it. A contradiction the records
 settle becomes a `conflict` record. Every finding the user must settle becomes an open item at once —
 `booping items add --direction conflict|clarify`, the question in its body, then
-`booping playbook-transition specs clarify --state open_item --target {vault}/open-items/OI-NNNN.md`;
-the user's answer goes into the body and `… specs open …` moves it back. Next: propose Sync specs and
+`booping transition {vault}/open-items/OI-NNNN.md clarify`;
+the user's answer goes into the body and `… open` moves it back. Next: propose Sync specs and
 code; do not run it.
 
 ## Site review

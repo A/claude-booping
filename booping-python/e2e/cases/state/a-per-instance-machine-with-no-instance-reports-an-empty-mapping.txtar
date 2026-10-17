@@ -5,7 +5,7 @@ nothing on disk that mapping is empty — never a `not-started` status of its ow
 ---
 name: fx-steps
 title: Steps
-summary: Per-instance fixture for playbook-state.
+summary: Per-instance fixture for state.
 ---
 
 Preamble.
@@ -42,7 +42,7 @@ summary: Write the spec.
 Spec body.
 -- fixtures/cwd/run/.keep --
 -- cmd --
-booping playbook-state fx-steps --workdir run
+booping state run/steps/none/index.md --playbook fx-steps
 -- exit --
 0
 -- stdout --

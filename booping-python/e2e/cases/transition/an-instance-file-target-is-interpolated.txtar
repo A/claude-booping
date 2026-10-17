@@ -1,11 +1,11 @@
-A file target carrying `{instance}` is interpolated from `--instance` before the write, so the hook
+A file target carrying `{instance}` is interpolated from the slug read off the artifact path before the write, so the hook
 lands on the slug's own sidecar and the report names the interpolated path.
 
 -- fixtures/home/Claude/_playbooks/fx-hooks/playbook.md --
 ---
 name: fx-hooks
 title: Hooks
-summary: Hook-bearing fixture for playbook-transition.
+summary: Hook-bearing fixture for transition.
 ---
 
 Preamble.
@@ -37,7 +37,7 @@ states:
         transitions:
           - to: done
             when: the instance notes are reviewed
-            hooks: ["frontmatter-update steps/{instance}/notes.md seen=recorded"]
+            hooks: ["set steps/{instance}/notes.md seen=recorded"]
       done: {terminal: true}
 -- fixtures/home/Claude/_playbooks/fx-hooks/only/prompt.md --
 ---
@@ -58,8 +58,8 @@ title: Alpha notes
 
 Notes body.
 -- cmd --
-booping playbook-transition fx-hooks spec-ing --state step --instance alpha --workdir run
-booping playbook-transition fx-hooks done --state step --instance alpha --workdir run
+booping transition run/steps/alpha/index.md spec-ing --playbook fx-hooks --state step
+booping transition run/steps/alpha/index.md done --playbook fx-hooks --state step
 -- exit --
 0
 -- stdout --

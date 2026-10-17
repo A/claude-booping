@@ -1,7 +1,7 @@
 The shared `tracker-sync` hook shipped in the plugin's own `playbooks/_scripts/` resolves from the
 core discovery root and runs `booping-tracker sync` against the artifact. Under the default `cli`
 driver the tracker performs no write and exits 0, so the edge completes and the report names the
-hook. A successful hook's own stdout is captured by `playbook-transition` and never relayed, so the
+hook. A successful hook's own stdout is captured by `transition` and never relayed, so the
 tracker's receipt does not appear here — only `script tracker-sync: ok` does.
 
 -- fixtures/xdg/booping/config.yaml --
@@ -12,7 +12,7 @@ core:
 ---
 name: fx-tracker
 title: Tracker
-summary: Tracker-hook fixture for playbook-transition.
+summary: Tracker-hook fixture for transition.
 ---
 
 Preamble.
@@ -40,8 +40,8 @@ summary: Only step.
 Only body.
 -- fixtures/cwd/run/.keep --
 -- cmd --
-booping playbook-transition fx-tracker intaking --workdir run
-booping playbook-transition fx-tracker noted --workdir run
+booping transition run/index.md intaking --playbook fx-tracker
+booping transition run/index.md noted --playbook fx-tracker
 -- exit --
 0
 -- stdout --

@@ -44,7 +44,7 @@ Exit 1 — fix the milestones its findings name in `draft.md`, then back to stag
 Then set the summary — one line of plain plan intent, ≤ ~120 chars / ~20 words:
 
 ```
-booping frontmatter-update {plan-dir}/index.md summary="{one line}"
+booping set {plan-dir}/index.md summary="{one line}"
 ```
 
 `sp` is not yours — split stamps it.

@@ -12,7 +12,7 @@ states:
       in-agent-review:
         transitions:
           - to: human-review
-            when: "the detached review pass wrote its findings to `codereviews/{dir}/{ts}.md`, the run's `--target`, and the user's verdict is still pending"
+            when: "the detached review pass wrote its findings to `codereviews/{dir}/{ts}.md`, the run's file, and the user's verdict is still pending"
             gates:
               - "every finding carries its severity, anchor and proposed fix in the artifact"
       human-review:
@@ -23,7 +23,7 @@ states:
               - "explicit user verdict captured at present — silence never counts"
               - "the artifact's `plan:` key holds the vault-relative plan path or `null`, since the hook script reads it"
             hooks:
-              - frontmatter-update reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - set reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
               - script close-code-review
       done:
         terminal: true

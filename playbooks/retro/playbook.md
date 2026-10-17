@@ -15,7 +15,7 @@ Produce a project- and plan-specific retrospective grounded in session logs, cod
 
 - Date & time: {{ human_ts }}
 - The run's artifact is a standalone retrospective, `retrospectives/{{ slug_ts }}_{kebab-title}.md` — one file per run, whatever the size of the working set.
-- The run workdir is the **vault root**; every `booping playbook-state` / `booping playbook-transition` call passes `--target retrospectives/{slug}.md`, since the machine declares no `artifact:`.
+- The run workdir is the **vault root**; every `booping state` / `booping transition` call names `{vault}/retrospectives/{slug}.md` and `--playbook retro`, since the machine declares no `artifact:`.
 - The retrospective carries `plan:` (the primary plan's path); each covered plan is linked back by the `retro:` key the exit hook stamps. Plan `status:` is never touched here.
 - Candidate plans are the ones the table below lists — the `core.retro_playbook.queries.candidates` query.
 

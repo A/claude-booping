@@ -125,7 +125,7 @@ core:
   #  --set step=<playbook/step> --set did=<what the agent did> --set said=<the user's words>
   #  [--set why=<reason>] [--set artifact=<vault-relative path>]`, `<ts>` from
   # `date +%Y%m%d-%H%M%S`. Shared: groom, develop and code-review write it, retro reads
-  # `open` and sets `state=handled` with `booping frontmatter-update`. Text goes through
+  # `open` and sets `state=handled` with `booping set`. Text goes through
   # `tojson`; an omitted `why` or `artifact` is null.
   corrections:
     template:
@@ -200,7 +200,7 @@ core:
   # Task-tracker surface. Directly under `core` rather than in a playbook
   # namespace because several playbooks mirror their run outward through it.
   # `bin/booping-tracker` resolves this block by shelling to
-  # `booping config-get core.tracker`, so the three-tier merge stays single-sourced.
+  # `booping config core.tracker`, so the three-tier merge stays single-sourced.
   tracker:
     # Provider the tracker CLI dispatches to. `cli` ships alone: receipts-only
     # no-ops, every interactive run behaves exactly as it does today. Overridable

@@ -9,7 +9,7 @@ latest_migration: 9999
 ---
 name: fx-hooks
 title: Hooks
-summary: Hook-bearing fixture for playbook-transition.
+summary: Hook-bearing fixture for transition.
 ---
 
 Preamble.
@@ -44,8 +44,8 @@ echo "global" >> "$BOOPING_WORKDIR/note.log"
 -- fixtures/cwd/run/.keep --
 -- cmd --
 chmod +x ../home/Claude/_playbooks/_scripts/shared-note
-booping playbook-transition fx-hooks intaking --workdir run
-booping playbook-transition fx-hooks noted --workdir run
+booping transition run/index.md intaking --playbook fx-hooks
+booping transition run/index.md noted --playbook fx-hooks
 -- exit --
 0
 -- stdout --

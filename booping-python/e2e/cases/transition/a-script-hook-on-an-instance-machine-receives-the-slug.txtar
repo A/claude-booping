@@ -1,11 +1,11 @@
-On a per-instance machine the slug passed as `--instance` reaches the hook through
+On a per-instance machine the slug read off the file path reaches the hook through
 `BOOPING_INSTANCE`, and `BOOPING_ARTIFACT` is the interpolated path.
 
 -- fixtures/home/Claude/_playbooks/fx-hooks/playbook.md --
 ---
 name: fx-hooks
 title: Hooks
-summary: Hook-bearing fixture for playbook-transition.
+summary: Hook-bearing fixture for transition.
 ---
 
 Preamble.
@@ -60,8 +60,8 @@ Spec body.
 -- fixtures/cwd/run/.keep --
 -- cmd --
 chmod +x ../home/Claude/_playbooks/fx-hooks/_scripts/slug-note
-booping playbook-transition fx-hooks spec-ing --state step --instance alpha --workdir run
-booping playbook-transition fx-hooks done --state step --instance alpha --workdir run
+booping transition run/steps/alpha/index.md spec-ing --playbook fx-hooks --state step
+booping transition run/steps/alpha/index.md done --playbook fx-hooks --state step
 -- exit --
 0
 -- stdout --

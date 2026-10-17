@@ -10,7 +10,7 @@ Read each plan in the working set — its `index.md` — for **context only**: s
 {% else -%}
 _No open corrections._
 {% endfor %}
-Each entry becomes an issue item with source `correction`: trigger = its `said`, interpretation from its `did` and `why`. Pass every entry's `session` and `said` into brief A, to find the conversation around it. Then mark each entry taken up handled: `booping frontmatter-update {vault}/{path} state=handled`.
+Each entry becomes an issue item with source `correction`: trigger = its `said`, interpretation from its `did` and `why`. Pass every entry's `session` and `said` into brief A, to find the conversation around it. Then mark each entry taken up handled: `booping set {vault}/{path} state=handled`.
 
 In parallel, delegate two reads per the agent roster above. Pass the lesson set verbatim with each brief (use the `Lessons` block already loaded above).
 

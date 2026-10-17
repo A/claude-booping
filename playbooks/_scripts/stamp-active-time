@@ -4,7 +4,7 @@
 Used by the `develop` playbook on its close edges, after `stamp-session`, so the
 closing session's own minutes are counted.
 
-Environment (set by `booping playbook-transition`): BOOPING_ARTIFACT = the run's
+Environment (set by `booping transition`): BOOPING_ARTIFACT = the run's
 resolved target, the plan's `index.md`.
 
 Losing a metric must never block a close, so any failure of the compute is a

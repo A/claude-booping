@@ -1,4 +1,4 @@
-The one token in a `frontmatter-update` hook carrying no `=` is a file target, resolved against the
+The one token in a `set` hook carrying no `=` is a file target, resolved against the
 workdir rather than the artifact. The report names it, the artifact keeps only its status, and the
 target's existing keys and body survive the write.
 
@@ -6,7 +6,7 @@ target's existing keys and body survive the write.
 ---
 name: fx-hooks
 title: Hooks
-summary: Hook-bearing fixture for playbook-transition.
+summary: Hook-bearing fixture for transition.
 ---
 
 Preamble.
@@ -24,7 +24,7 @@ states:
         transitions:
           - to: noted
             when: the brief is reviewed
-            hooks: ["frontmatter-update brief.md reviewed=recorded"]
+            hooks: ["set brief.md reviewed=recorded"]
       noted: {terminal: true}
 -- fixtures/home/Claude/_playbooks/fx-hooks/only/prompt.md --
 ---
@@ -39,8 +39,8 @@ title: Brief
 
 Brief body.
 -- cmd --
-booping playbook-transition fx-hooks intaking --workdir run
-booping playbook-transition fx-hooks noted --workdir run
+booping transition run/index.md intaking --playbook fx-hooks
+booping transition run/index.md noted --playbook fx-hooks
 -- exit --
 0
 -- stdout --

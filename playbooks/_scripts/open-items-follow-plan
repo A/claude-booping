@@ -5,12 +5,12 @@
 #   open-items-follow-plan open  — return the plan's planned items to open
 #
 # Wired onto develop's `→ done`, `→ fail` and `→ cancelled` edges and groom's
-# `→ cancelled` edges. Environment (set by `booping playbook-transition`):
+# `→ cancelled` edges. Environment (set by `booping transition`):
 # BOOPING_ARTIFACT = the plan's `index.md`, absolute; the CLI turns it into the
 # vault-relative `plan:` the items carry.
 #
 # The CLI's exit code is absorbed on purpose: a hook exiting non-zero aborts
-# `playbook-transition` *after* `status:` is already written, which would leave the
+# `booping transition` *after* `status:` is already written, which would leave the
 # plan advanced and its items behind with no way back. A failed follow is a
 # warning; `booping items close|reopen --plan …` by hand is the reconcile.
 #

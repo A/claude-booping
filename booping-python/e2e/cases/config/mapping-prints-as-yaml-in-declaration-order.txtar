@@ -2,7 +2,7 @@ A mapping value prints as YAML, keeping the keys in the order the config declare
 than sorting them.
 
 -- cmd --
-booping config-get core.plans.milestones
+booping config core.plans.milestones
 -- exit --
 0
 -- stdout --

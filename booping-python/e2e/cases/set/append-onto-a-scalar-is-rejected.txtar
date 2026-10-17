@@ -8,7 +8,7 @@ status: backlog
 ---
 # Body
 -- cmd --
-booping frontmatter-update plan.md --append status=done
+booping set plan.md --append status=done
 -- exit --
 1
 -- stdout --

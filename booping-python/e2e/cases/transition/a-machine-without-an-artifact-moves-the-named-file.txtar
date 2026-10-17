@@ -1,5 +1,5 @@
-Given a `--target`, a machine that declares no `artifact:` bootstraps and moves that file like any
-other run artifact.
+Given `--playbook`, a machine that declares no `artifact:` takes the named file as its target, and
+bootstraps and moves it like any other run artifact.
 
 -- fixtures/home/Claude/_playbooks/fx-targetless/playbook.md --
 ---
@@ -31,8 +31,8 @@ summary: Only step.
 Only body.
 -- fixtures/cwd/run/.keep --
 -- cmd --
-booping playbook-transition fx-targetless reviewing --target review.md --workdir run
-booping playbook-transition fx-targetless reviewed --target review.md --workdir run
+booping transition run/review.md reviewing --playbook fx-targetless
+booping transition run/review.md reviewed --playbook fx-targetless
 -- exit --
 0
 -- stdout --

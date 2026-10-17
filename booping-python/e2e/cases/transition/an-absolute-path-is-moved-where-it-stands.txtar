@@ -1,12 +1,12 @@
-An absolute `--target` is used as written rather than anchored at the workdir. A case cannot spell
-the sandbox path out, so the target is written `~/…`: `--target` expands a leading tilde, and `HOME`
-is the sandbox's `home` root. The bootstrap line prints the resolved path, normalized to `{HOME}`.
+An absolute file path is moved as written, its workdir the directory the artifact pattern hangs
+off, wherever that is. A case cannot spell the sandbox path out, so the file is written `~/…`: the
+file argument expands a leading tilde, and `HOME` is the sandbox's `home` root.
 
 -- fixtures/home/Claude/_playbooks/fx-run/playbook.md --
 ---
 name: fx-run
 title: Run
-summary: Hookless states-bearing fixture for playbook-transition.
+summary: Hookless states-bearing fixture for transition.
 ---
 
 Preamble.
@@ -35,20 +35,20 @@ summary: Intake the request.
 ---
 
 Intake body.
--- fixtures/cwd/run/.keep --
+-- fixtures/home/elsewhere/.keep --
 -- cmd --
-booping playbook-transition fx-run intaking --target ~/elsewhere/review.md --workdir run
-booping playbook-transition fx-run researching --target ~/elsewhere/review.md --workdir run
+booping transition ~/elsewhere/index.md intaking --playbook fx-run
+booping transition ~/elsewhere/index.md researching --playbook fx-run
 -- exit --
 0
 -- stdout --
-created {HOME}/elsewhere/review.md
+created index.md
 not-started → intaking
 frontmatter: status=intaking
 intaking → researching
 frontmatter: status=researching
 -- stderr --
--- expected/home/elsewhere/review.md --
+-- expected/home/elsewhere/index.md --
 ---
 status: researching
 ---

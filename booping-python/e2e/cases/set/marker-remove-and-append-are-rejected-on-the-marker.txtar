@@ -1,0 +1,14 @@
+--remove and --append are frontmatter operations; on the marker they are refused before
+anything is written.
+
+-- fixtures/cwd/.booping --
+project_name: demo
+-- cmd --
+booping set .booping --remove project_name
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: --remove and --append apply to frontmatter, not the marker
+-- expected/cwd/.booping --
+project_name: demo

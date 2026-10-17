@@ -3,7 +3,7 @@
 
 Used by the `code-review` playbook (`human-review → done`).
 
-Environment (set by `booping playbook-transition`): BOOPING_WORKDIR = the vault root,
+Environment (set by `booping transition`): BOOPING_WORKDIR = the vault root,
 which is also cwd, and BOOPING_ARTIFACT = the run's resolved target, the review under
 `codereviews/`.
 

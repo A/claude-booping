@@ -14,27 +14,40 @@ from ruamel.yaml.scalarstring import SingleQuotedScalarString
 
 from booping import logger
 from booping.context import Context
-from booping.context._yaml import update_frontmatter
+from booping.context._yaml import update_frontmatter, update_marker
+from booping.context.project import Project
 from booping.macros import MacroError, make_macro
+from booping.migrations import latest_shipped_id
 from booping.utils import diff_report
+
+MARKER_NAME = ".booping"
 
 _NULL_FORMS = {"null", "Null", "NULL", "~"}
 
 
 def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:  # type: ignore[type-arg]
     p = subparsers.add_parser(
-        "frontmatter-update",
-        help="Update frontmatter keys in any markdown file, rendering Jinja macro calls",
+        "set",
+        help=(
+            "Set frontmatter keys of a markdown file, or keys of a `.booping` marker "
+            "when the file is named `.booping`"
+        ),
     )
-    p.add_argument("plan", type=Path, help="Path to the markdown file")
+    p.add_argument(
+        "file",
+        type=Path,
+        help="Markdown file, or a `.booping` marker (bare YAML mapping)",
+    )
     p.add_argument(
         "pairs",
         nargs="*",
         metavar="key=val",
         help=(
-            "Frontmatter key=value pairs; a value is rendered as Jinja with the `macro` "
+            "key=value pairs; a frontmatter value is rendered as Jinja with the `macro` "
             # argparse %-expands help strings, so literal percent signs are doubled.
-            "global (e.g. \"{{ macro('core.macros.date', '+%%Y-%%m-%%d %%H:%%M') }}\")"
+            "global (e.g. \"{{ macro('core.macros.date', '+%%Y-%%m-%%d %%H:%%M') }}\"); "
+            "a marker value is written as given, `latest_migration` as an integer id or "
+            "`@latest` (the newest shipped migration)"
         ),
     )
     p.add_argument(
@@ -154,13 +167,53 @@ def parse_pairs(pairs: list[str]) -> list[tuple[str, str]]:
     return parsed
 
 
+def _marker_value(key: str, value: str) -> object:
+    if key != "latest_migration":
+        return value
+    if value == "@latest":
+        return latest_shipped_id()
+    try:
+        return int(value)
+    except ValueError:
+        print(f"error: latest_migration must be an integer, got {value!r}", file=sys.stderr)
+        sys.exit(1)
+
+
+def _set_marker(marker: Path, pairs: list[str], removals: list[str], appends: list[str]) -> None:
+    if removals or appends:
+        print("error: --remove and --append apply to frontmatter, not the marker", file=sys.stderr)
+        sys.exit(1)
+    if not pairs:
+        print("error: nothing to do: provide key=value pairs", file=sys.stderr)
+        sys.exit(1)
+    updates = {key: _marker_value(key, value) for key, value in parse_pairs(pairs)}
+
+    try:
+        update_marker(marker, updates)
+    except Exception as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        sys.exit(2)
+
+    project = Project.load_cwd_configured(start=marker.resolve().parent)
+    written = " ".join(f"{k}={v}" for k, v in updates.items())
+    logger.log(
+        vault=project.directory if project is not None else None,
+        subcommand="set",
+        message=f"{marker.resolve()} {written}",
+    )
+    print(f"marker: {', '.join(f'{k}={v}' for k, v in updates.items())}", file=sys.stderr)
+
+
 def _run(args: argparse.Namespace) -> None:
-    plan_path: Path = args.plan
+    plan_path: Path = args.file
     if not plan_path.is_file():
-        print(f"error: plan not found: {plan_path}", file=sys.stderr)
+        print(f"error: file not found: {plan_path}", file=sys.stderr)
         sys.exit(1)
 
     removals: list[str] = list(getattr(args, "removals", None) or [])
+    if plan_path.name == MARKER_NAME:
+        _set_marker(plan_path, list(args.pairs), removals, list(args.appends))
+        return
     updates = dict(parse_pairs(args.pairs))
     appends = parse_pairs(list(getattr(args, "appends", None) or []))
 
@@ -201,9 +254,7 @@ def _run(args: argparse.Namespace) -> None:
 
     vault = project.directory if project is not None else None
     changed = [f"-{k}" for k in removals] + list(resolved.keys()) + [k for k, _ in resolved_appends]
-    logger.log(
-        vault=vault, subcommand="frontmatter-update", message=f"{plan_path} {' '.join(changed)}"
-    )
+    logger.log(vault=vault, subcommand="set", message=f"{plan_path} {' '.join(changed)}")
 
     parts = (
         [f"-{k}" for k in removals]

@@ -5,7 +5,7 @@ that deliberately omits the `chmod` `cmd` line — a fixture file is written non
 ---
 name: fx-hooks
 title: Hooks
-summary: Hook-bearing fixture for playbook-transition.
+summary: Hook-bearing fixture for transition.
 ---
 
 Preamble.
@@ -36,8 +36,8 @@ Only body.
 echo "playbook" >> "$BOOPING_WORKDIR/note.log"
 -- fixtures/cwd/run/.keep --
 -- cmd --
-booping playbook-transition fx-hooks intaking --workdir run
-booping playbook-transition fx-hooks noted --workdir run
+booping transition run/index.md intaking --playbook fx-hooks
+booping transition run/index.md noted --playbook fx-hooks
 -- exit --
 2
 -- stdout --

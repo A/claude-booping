@@ -6,7 +6,7 @@ so the bootstrap report is pinned ahead of the move's.
 ---
 name: fx-run
 title: Run
-summary: Hookless states-bearing fixture for playbook-transition.
+summary: Hookless states-bearing fixture for transition.
 ---
 
 Preamble.
@@ -60,8 +60,8 @@ summary: Write the spec.
 Spec body.
 -- fixtures/cwd/run/.keep --
 -- cmd --
-booping playbook-transition fx-run intaking --workdir run
-booping playbook-transition fx-run researching --workdir run
+booping transition run/index.md intaking --playbook fx-run
+booping transition run/index.md researching --playbook fx-run
 -- exit --
 0
 -- stdout --

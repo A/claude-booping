@@ -1,0 +1,23 @@
+groom's and develop's `run` machines share `index.md` and the edge `awaiting-approval →
+ready-for-dev`, each with its own hooks, so a move naming no `--playbook` is refused listing both
+candidates, and the plan keeps its status.
+
+-- fixtures/cwd/plan/index.md --
+---
+title: Plan
+status: awaiting-approval
+---
+# Plan
+-- cmd --
+booping transition plan/index.md ready-for-dev
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: {CWD}/plan/index.md matches more than one machine with an edge awaiting-approval → ready-for-dev: develop/run, groom/run; pass --playbook
+-- expected/cwd/plan/index.md --
+---
+title: Plan
+status: awaiting-approval
+---
+# Plan

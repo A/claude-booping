@@ -6,7 +6,7 @@ marker on disk still carries no watermark.
 project_name: "demo"  # quoted on purpose
 vault_path: ./vault
 -- cmd --
-booping marker-set latest_migration=three
+booping set .booping latest_migration=three
 -- exit --
 1
 -- stdout --

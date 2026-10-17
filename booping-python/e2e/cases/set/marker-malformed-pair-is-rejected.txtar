@@ -6,7 +6,7 @@ left untouched.
 project_name: "demo"  # quoted on purpose
 vault_path: ./vault
 -- cmd --
-booping marker-set latest_migration
+booping set .booping latest_migration
 -- exit --
 1
 -- stdout --

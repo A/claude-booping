@@ -120,7 +120,7 @@ def resolve_hooks(from_status: str, to_status: str, machine: dict[str, Any]) -> 
     """Return the ordered hook list for transitioning *from_status* → *to_status*.
 
     Order:
-    1. ``frontmatter-update status=<to>``  (status-set, prepended for dispatcher)
+    1. ``set status=<to>``  (status-set, prepended for dispatcher)
     2. on_exit boundary hooks — inner→outer, only if boundary crossed
     3. matched edge hooks
     4. on_entry boundary hooks — outer→inner, only if boundary crossed
@@ -143,7 +143,7 @@ def resolve_hooks(from_status: str, to_status: str, machine: dict[str, Any]) -> 
     result: list[str] = []
 
     # 1. Status-set (prepended for the dispatcher)
-    result.append(f"frontmatter-update status={to_status}")
+    result.append(f"set status={to_status}")
 
     # 2. on_exit boundary hooks (inner → outer, only if boundary crossed)
     from_ss = _superstate_for(from_status, superstates)

@@ -47,10 +47,10 @@ A group with no entries is left out.
 
 ## Close the run
 
-From the vault root, passing the run's `--target`:
+Naming the run's review file:
 
 ```
-booping playbook-transition code-review done --target codereviews/{dir}/{ts}.md --workdir {vault}
+booping transition {vault}/codereviews/{dir}/{ts}.md done --playbook code-review
 ```
 
 The exit edge's hooks stamp `reviewed_at:`, append the artifact's path to the linked plan's `code_reviews:` list, and commit the vault. Nothing here hand-edits plan frontmatter, and nothing here commits — the repo's own changes stay uncommitted for the user.

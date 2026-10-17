@@ -19,7 +19,7 @@ summary: The only step.
 Only body.
 -- fixtures/cwd/run/.keep --
 -- cmd --
-booping playbook-transition fx-graph-only whatever --workdir run
+booping transition run/index.md whatever --playbook fx-graph-only
 -- exit --
 1
 -- stdout --

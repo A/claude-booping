@@ -11,7 +11,7 @@ from booping.utils import PathError, resolve_path
 
 def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:  # type: ignore[type-arg]
     p = subparsers.add_parser(
-        "config-get",
+        "config",
         help="Print a resolved (merged) config value by dotted key path",
     )
     p.add_argument(

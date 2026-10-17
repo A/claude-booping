@@ -1,12 +1,12 @@
-`playbook-transition` never creates its run workdir — a `--workdir` that is not a directory is
-refused before the playbook is even resolved. This is the one transition case that does not seed
+`transition` never creates its run workdir — a file whose implied workdir is not a directory is
+refused before anything is written. This is the one transition case that does not seed
 `fixtures/cwd/run/.keep`.
 
 -- fixtures/home/Claude/_playbooks/fx-run/playbook.md --
 ---
 name: fx-run
 title: Run
-summary: Hookless states-bearing fixture for playbook-transition.
+summary: Hookless states-bearing fixture for transition.
 ---
 
 Preamble.
@@ -59,7 +59,7 @@ summary: Write the spec.
 
 Spec body.
 -- cmd --
-booping playbook-transition fx-run intaking --workdir run
+booping transition run/index.md intaking --playbook fx-run
 -- exit --
 1
 -- stdout --

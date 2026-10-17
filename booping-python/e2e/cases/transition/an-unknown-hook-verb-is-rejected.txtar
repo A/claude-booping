@@ -1,4 +1,4 @@
-A hook whose first token is neither `script` nor `frontmatter-update` exits 2 naming the verb. The
+A hook whose first token is neither `script` nor `set` exits 2 naming the verb. The
 status set runs as the edge's first hook, so the artifact already carries the target status when the
 unknown verb aborts the run.
 
@@ -6,7 +6,7 @@ unknown verb aborts the run.
 ---
 name: fx-hooks
 title: Hooks
-summary: Hook-bearing fixture for playbook-transition.
+summary: Hook-bearing fixture for transition.
 ---
 
 Preamble.
@@ -34,8 +34,8 @@ summary: Only step.
 Only body.
 -- fixtures/cwd/run/.keep --
 -- cmd --
-booping playbook-transition fx-hooks intaking --workdir run
-booping playbook-transition fx-hooks noted --workdir run
+booping transition run/index.md intaking --playbook fx-hooks
+booping transition run/index.md noted --playbook fx-hooks
 -- exit --
 2
 -- stdout --

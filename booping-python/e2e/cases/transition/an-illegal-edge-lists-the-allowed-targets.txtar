@@ -5,7 +5,7 @@ The artifact keeps the status it had.
 ---
 name: fx-run
 title: Run
-summary: Hookless states-bearing fixture for playbook-transition.
+summary: Hookless states-bearing fixture for transition.
 ---
 
 Preamble.
@@ -59,8 +59,8 @@ summary: Write the spec.
 Spec body.
 -- fixtures/cwd/run/.keep --
 -- cmd --
-booping playbook-transition fx-run intaking --workdir run
-booping playbook-transition fx-run done --workdir run
+booping transition run/index.md intaking --playbook fx-run
+booping transition run/index.md done --playbook fx-run
 -- exit --
 1
 -- stdout --
@@ -68,7 +68,7 @@ created index.md
 not-started → intaking
 frontmatter: status=intaking
 -- stderr --
-error: cannot transition from 'intaking' to 'done' in state 'main'; allowed targets: parked, researching
+error: {CWD}/run/index.md (intaking) has no edge to done; legal: parked, researching
 -- expected/cwd/run/index.md --
 ---
 status: intaking

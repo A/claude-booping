@@ -1,11 +1,11 @@
-A `frontmatter-update` hook carrying only key=value pairs writes them onto the run artifact itself.
+A `set` hook carrying only key=value pairs writes them onto the run artifact itself.
 Its report line has no target prefix, and it follows the status line the edge always sets first.
 
 -- fixtures/home/Claude/_playbooks/fx-hooks/playbook.md --
 ---
 name: fx-hooks
 title: Hooks
-summary: Hook-bearing fixture for playbook-transition.
+summary: Hook-bearing fixture for transition.
 ---
 
 Preamble.
@@ -23,7 +23,7 @@ states:
         transitions:
           - to: noted
             when: the keys are recorded
-            hooks: ["frontmatter-update noted=recorded reviewer=alpha"]
+            hooks: ["set noted=recorded reviewer=alpha"]
       noted: {terminal: true}
 -- fixtures/home/Claude/_playbooks/fx-hooks/only/prompt.md --
 ---
@@ -33,8 +33,8 @@ summary: Only step.
 Only body.
 -- fixtures/cwd/run/.keep --
 -- cmd --
-booping playbook-transition fx-hooks intaking --workdir run
-booping playbook-transition fx-hooks noted --workdir run
+booping transition run/index.md intaking --playbook fx-hooks
+booping transition run/index.md noted --playbook fx-hooks
 -- exit --
 0
 -- stdout --

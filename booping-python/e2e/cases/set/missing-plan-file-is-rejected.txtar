@@ -7,12 +7,12 @@ title: Foo
 ---
 # Body
 -- cmd --
-booping frontmatter-update nope.md status=in-progress
+booping set nope.md status=in-progress
 -- exit --
 1
 -- stdout --
 -- stderr --
-error: plan not found: nope.md
+error: file not found: nope.md
 -- expected/cwd/plan.md --
 ---
 title: Foo

@@ -1,0 +1,42 @@
+A milestone file is matched by develop's per-instance `milestone` artifact alone, so no
+`--playbook` is needed: the instance is the milestone directory's name, the workdir the plan
+directory the pattern hangs off, and the edge's hook regenerates that plan's milestone table.
+
+-- fixtures/cwd/plan/index.md --
+---
+title: Plan
+status: in-progress
+sp: 0
+---
+# Plan
+
+## Milestones
+
+## Out of scope
+-- fixtures/cwd/plan/milestones/M01-first/M01-first.md --
+---
+id: "01"
+title: First
+sp: 2
+status: pending
+plan: plans/plan/index.md
+---
+# M01: First
+-- cmd --
+booping transition plan/milestones/M01-first/M01-first.md in-progress
+-- exit --
+0
+-- stdout --
+pending → in-progress
+frontmatter: status=in-progress
+script refresh-milestone-table: ok
+-- stderr --
+-- expected/cwd/plan/milestones/M01-first/M01-first.md --
+---
+id: "01"
+title: First
+sp: 2
+status: in-progress
+plan: plans/plan/index.md
+---
+# M01: First

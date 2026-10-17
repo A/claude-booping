@@ -53,7 +53,7 @@ def _add_global_flags(parser: argparse.ArgumentParser, *, suppress: bool) -> Non
     parser.add_argument(
         "--config-file",
         default=default,
-        help="read the tracker config from this YAML file instead of booping config-get",
+        help="read the tracker config from this YAML file instead of booping config",
     )
     parser.add_argument(
         "--output",

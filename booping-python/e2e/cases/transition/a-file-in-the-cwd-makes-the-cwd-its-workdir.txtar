@@ -1,10 +1,11 @@
-Without `--workdir` the artifact path resolves against the directory the command runs in.
+A file named relative to the directory the command runs in, there at the artifact path, makes that
+directory the workdir.
 
 -- fixtures/home/Claude/_playbooks/fx-run/playbook.md --
 ---
 name: fx-run
 title: Run
-summary: Hookless states-bearing fixture for playbook-transition.
+summary: Hookless states-bearing fixture for transition.
 ---
 
 Preamble.
@@ -57,7 +58,7 @@ summary: Write the spec.
 
 Spec body.
 -- cmd --
-booping playbook-transition fx-run intaking
+booping transition index.md intaking --playbook fx-run
 -- exit --
 0
 -- stdout --

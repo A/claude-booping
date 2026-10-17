@@ -5,7 +5,7 @@ declare.
 ---
 name: fx-run
 title: Run
-summary: Hookless states-bearing fixture for playbook-transition.
+summary: Hookless states-bearing fixture for transition.
 ---
 
 Preamble.
@@ -59,7 +59,7 @@ summary: Write the spec.
 Spec body.
 -- fixtures/cwd/run/.keep --
 -- cmd --
-booping playbook-transition fx-run intaking --state nope --workdir run
+booping transition run/index.md intaking --playbook fx-run --state nope
 -- exit --
 1
 -- stdout --

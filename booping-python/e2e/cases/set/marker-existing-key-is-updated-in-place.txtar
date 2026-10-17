@@ -7,7 +7,7 @@ project_name: "demo"  # quoted on purpose
 vault_path: ./vault
 latest_migration: 1
 -- cmd --
-booping marker-set project_name=renamed
+booping set .booping project_name=renamed
 -- exit --
 0
 -- stdout --

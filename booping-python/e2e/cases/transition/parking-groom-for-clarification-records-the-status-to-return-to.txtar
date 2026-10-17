@@ -1,4 +1,4 @@
-groom parks on `awaiting-clarification` from `framing`, and the edge's own `frontmatter-update`
+groom parks on `awaiting-clarification` from `framing`, and the edge's own `set`
 hook records `framing` as the status to come back to — a step body never writes `return_to`. The
 mutation report lists that write ahead of both script hooks, which is the order the edge declares
 them in.
@@ -26,7 +26,7 @@ return_to: null
 
 **Answer:**
 -- cmd --
-booping playbook-transition groom awaiting-clarification --workdir run
+booping transition run/index.md awaiting-clarification --playbook groom
 -- exit --
 0
 -- stdout --

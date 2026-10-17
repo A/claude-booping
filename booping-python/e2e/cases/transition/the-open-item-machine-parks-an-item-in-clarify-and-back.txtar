@@ -1,4 +1,4 @@
-The `open_item` machine's `clarify` edges: an open item addressed by its absolute path moves to
+The `open_item` machine's `clarify` edges: an open item, its machine inferred from its path with no `--playbook`, moves to
 `clarify` when it asks the user, and back to `open` once answered; neither edge runs a hook.
 
 -- fixtures/cwd/.booping --
@@ -14,7 +14,8 @@ status: open
 
 # t
 -- cmd --
-sh -c 'booping playbook-transition specs clarify --state open_item --target "$PWD/vault/open-items/OI-0001.md" && booping playbook-transition specs open --state open_item --target "$PWD/vault/open-items/OI-0001.md"'
+booping transition vault/open-items/OI-0001.md clarify
+booping transition vault/open-items/OI-0001.md open
 -- exit --
 0
 -- stdout --

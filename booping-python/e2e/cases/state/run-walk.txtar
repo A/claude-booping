@@ -4,7 +4,7 @@ frontier is snapshotted mid-run and again at the end. The mid-run snapshot pins 
 with its remaining edge beside a half-finished instance map; the final one pins every machine
 terminal with no `next`. The outer machine's `hooks.post` entry runs after every one of its own
 edges, bootstrap included, and never for the subgraph machine — `hooks.log` records the order. The
-date the edge's `frontmatter-update` hook writes is pinned by a `macro_stubs:` entry so the walk is
+date the edge's `set` hook writes is pinned by a `macro_stubs:` entry so the walk is
 reproducible.
 
 -- fixtures/xdg/booping/config.yaml --
@@ -14,7 +14,7 @@ macro_stubs:
 ---
 name: fx-walk
 title: Walk
-summary: Outer-plus-instance fixture for the playbook-state run walk.
+summary: Outer-plus-instance fixture for the state run walk.
 ---
 
 Preamble.
@@ -41,7 +41,7 @@ states:
             when: intake step complete
             gates: ["request captured in the artifact"]
             hooks:
-              - frontmatter-update researched="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - set researched="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
               - script check-findings
       researching:
         transitions:
@@ -80,15 +80,15 @@ echo "check [$BOOPING_INSTANCE]" >> "$BOOPING_WORKDIR/hooks.log"
 -- cmd --
 chmod +x ../home/Claude/_playbooks/fx-walk/_scripts/post-note
 chmod +x ../home/Claude/_playbooks/fx-walk/_scripts/check-findings
-booping playbook-transition fx-walk intaking --workdir run
-booping playbook-transition fx-walk researching --workdir run
-booping playbook-transition fx-walk spec-ing --state step --instance beta --workdir run
-booping playbook-transition fx-walk spec-ing --state step --instance alpha --workdir run
-booping playbook-transition fx-walk done --state step --instance alpha --workdir run
-booping playbook-state fx-walk --workdir run
-booping playbook-transition fx-walk done --state step --instance beta --workdir run
-booping playbook-transition fx-walk done --workdir run
-booping playbook-state fx-walk --workdir run
+booping transition run/index.md intaking --playbook fx-walk
+booping transition run/index.md researching --playbook fx-walk
+booping transition run/steps/beta/index.md spec-ing --playbook fx-walk --state step
+booping transition run/steps/alpha/index.md spec-ing --playbook fx-walk --state step
+booping transition run/steps/alpha/index.md done --playbook fx-walk --state step
+booping state run/index.md --playbook fx-walk
+booping transition run/steps/beta/index.md done --playbook fx-walk --state step
+booping transition run/index.md done --playbook fx-walk
+booping state run/index.md --playbook fx-walk
 -- exit --
 0
 -- stdout --

@@ -1,5 +1,6 @@
-A state machine that declares no `artifact:` has nothing to address, so an invocation without
-`--target` is refused, naming the state and the flag it wants.
+A state machine that declares no `artifact:` matches no file by its path, so a move naming no
+`--playbook` finds no candidate and is refused, asking for the flag.
+
 
 -- fixtures/home/Claude/_playbooks/fx-targetless/playbook.md --
 ---
@@ -31,9 +32,9 @@ summary: Only step.
 Only body.
 -- fixtures/cwd/run/.keep --
 -- cmd --
-booping playbook-transition fx-targetless reviewing --workdir run
+booping transition run/review.md reviewing
 -- exit --
 1
 -- stdout --
 -- stderr --
-error: state 'main' declares no `artifact:`; pass --target PATH
+error: {CWD}/run/review.md matches no machine artifact; pass --playbook

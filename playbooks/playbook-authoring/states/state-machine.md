@@ -32,13 +32,13 @@ status:
 | State | To | When | Gates | Hooks |
 | -- | -- | -- | -- | -- |
 | `none` | `<initial>` | `<what starts the run>` | | |
-| `drafting` | `awaiting-confirm` | draft written | | `frontmatter-update drafted="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"` |
+| `drafting` | `awaiting-confirm` | draft written | | `set drafted="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"` |
 
 - **When** — the concrete trigger: a step outcome, a user action, an ack. Never a bare arrow.
 - **Gates** — only where the condition isn't trivially true; a condition the source state
   already guarantees stays out of the cell.
 - **Hooks** — machine-readable strings ONLY, translated verbatim into playbook.yaml:
-  `frontmatter-update <key>=<val>` (a value is Jinja-rendered with the `macro` global —
+  `set <key>=<val>` (a value is Jinja-rendered with the `macro` global —
   `"{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"`, the repo HEAD sha being
   `"{{ macro('core.macros.git_commit') }}"`; quote any value carrying
   spaces, the hook string is shlex-tokenised) or
@@ -55,7 +55,7 @@ status:
   chain of confirm checkpoints loses that.
 - Confirmation is a status, not a flag: `… → awaiting-<x>-confirm → …`, the edge out gated
   "explicit user confirmation captured — silence never counts", hook
-  `frontmatter-update <path> reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"` on the reviewed file. The harness's
+  `set <path> reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"` on the reviewed file. The harness's
   transition command is the only writer.
 - The author owns granularity: a parallel wave sits inside ONE status; merge waves a resume
   would replay cheaply anyway.

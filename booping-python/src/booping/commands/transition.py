@@ -1,7 +1,9 @@
-"""Playbook run executor — move a run artifact through a playbook state machine.
+"""Run executor — move a file through the playbook state machine it is an artifact of.
 
-The artifact path of a `states:` entry is relative to the run workdir (default cwd);
-the playbook dir stays read-only source. Every artifact mutation happens here — the
+The machine is inferred: every `states:` entry whose `artifact:` pattern the file
+satisfies (the run workdir is the directory the pattern hangs off), filtered by an edge
+from the file's current status; `--playbook`/`--state` narrow the candidates. The
+playbook dir stays read-only source. Every artifact mutation happens here — the
 printed report is the authoritative record of what changed.
 """
 
@@ -9,15 +11,17 @@ from __future__ import annotations
 
 import argparse
 import os
+import re
 import shlex
 import subprocess
 import sys
 from collections.abc import Mapping
+from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 from typing import Any, NoReturn
 
 from booping import logger
-from booping.commands.frontmatter_update import parse_pairs, resolve_values
+from booping.commands.set import parse_pairs, resolve_values
 from booping.context import Context
 from booping.context._yaml import parse_frontmatter_only, update_frontmatter
 from booping.context.lifecycle import resolve_edges, resolve_hooks
@@ -27,7 +31,7 @@ from booping.context.project import Project
 NOT_STARTED = "not-started"
 
 
-def dispatch_frontmatter_update(
+def dispatch_set(
     hook: str,
     target: Path,
     project: Project | None,
@@ -36,14 +40,14 @@ def dispatch_frontmatter_update(
     instance: str | None = None,
     config: Mapping[str, Any] | None = None,
 ) -> tuple[str | None, dict[str, str]]:
-    """Parse and apply a frontmatter-update hook string against *target*.
+    """Parse and apply a `set` hook string against *target*.
 
-    E.g. ``frontmatter-update status=ready-for-dev`` or, with a file target,
-    ``frontmatter-update _specs/brief.md reviewed="{{ macro('core.macros.date',
+    E.g. ``set status=ready-for-dev`` or, with a file target,
+    ``set _specs/brief.md reviewed="{{ macro('core.macros.date',
     '+%Y-%m-%d') }}"``.
 
     Returns ``(file-target rel-path or None, applied key → interpolated text)``;
-    the written values are typed as the ``frontmatter-update`` CLI types them.
+    the written values are typed as the ``set`` CLI types them.
     """
     # shlex, not str.split: a value carrying a macro call has spaces in it and is
     # quoted in the hook string.
@@ -61,8 +65,7 @@ def dispatch_frontmatter_update(
         if "{instance}" in rel:
             if instance is None:
                 print(
-                    f"error: frontmatter-update target {rel} carries "
-                    "{instance} but no instance is in scope",
+                    f"error: set target {rel} carries {{instance}} but no instance is in scope",
                     file=sys.stderr,
                 )
                 sys.exit(2)
@@ -75,7 +78,7 @@ def dispatch_frontmatter_update(
     try:
         update_frontmatter(target, resolved)
     except Exception as exc:
-        print(f"error: frontmatter-update failed: {exc}", file=sys.stderr)
+        print(f"error: set failed: {exc}", file=sys.stderr)
         sys.exit(2)
 
     return rel, rendered
@@ -89,45 +92,27 @@ def format_frontmatter_line(resolved: dict[str, str], target: str | None = None)
 
 def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:  # type: ignore[type-arg]
     p = subparsers.add_parser(
-        "playbook-transition",
-        help="Move a playbook run artifact to a new status, running its hooks",
+        "transition",
+        help="Move a run artifact to a new status along the machine it matches, running its hooks",
     )
-    p.add_argument("playbook", help="Playbook name")
+    p.add_argument("file", help="The run artifact to move")
     p.add_argument("to_status", metavar="to", help="Target status")
+    p.add_argument(
+        "--playbook",
+        type=str,
+        default=None,
+        metavar="NAME",
+        help=(
+            "Playbook whose machines are the candidates (required for a machine "
+            "declaring no `artifact:`, where the file is the target)"
+        ),
+    )
     p.add_argument(
         "--state",
         type=str,
         default=None,
         metavar="NAME",
-        help="States entry to move (default: the outer graph's state ref)",
-    )
-    p.add_argument(
-        "--instance",
-        type=str,
-        default=None,
-        metavar="SLUG",
-        help="Instance slug, required iff the artifact path carries {instance}",
-    )
-    p.add_argument(
-        "--target",
-        type=str,
-        default=None,
-        metavar="PATH",
-        help=(
-            "Artifact to move instead of the machine's declared `artifact:` "
-            "(relative paths resolve against the workdir; an absolute path ending "
-            "in the declared `artifact:` implies the workdir)"
-        ),
-    )
-    p.add_argument(
-        "--workdir",
-        type=str,
-        default=None,
-        metavar="PATH",
-        help=(
-            "Run workspace the artifact path resolves against "
-            "(default: the workdir an absolute --target implies, else cwd)"
-        ),
+        help="States entry within the candidates to move along",
     )
     p.set_defaults(func=_run)
 
@@ -137,69 +122,97 @@ def _fail(message: str, code: int = 1) -> NoReturn:
     sys.exit(code)
 
 
-def _resolve_playbook(ctx: Context, name: str) -> Playbook:
+@dataclass(frozen=True)
+class Match:
+    """A machine whose artifact pattern the file satisfies, with what the pattern implies."""
+
+    playbook: Playbook
+    state: str
+    machine: StateMachine
+    workdir: Path
+    instance: str | None
+    rel: str
+
+    @property
+    def label(self) -> str:
+        return f"{self.playbook.name}/{self.state}"
+
+
+def _segment_regex(segment: str) -> re.Pattern[str]:
+    prefix, _, suffix = segment.partition("{instance}")
+    return re.compile(f"{re.escape(prefix)}(?P<instance>.+){re.escape(suffix)}")
+
+
+def match_artifact(pattern: str, file: Path) -> tuple[Path, str | None, str] | None:
+    """Match an absolute *file* against a machine's `artifact:` pattern, anchored at its
+    tail. Returns (workdir the pattern hangs off, instance filled from the path, path
+    relative to the workdir), or None; every `{instance}` must capture the same slug."""
+    parts = PurePosixPath(pattern).parts
+    if not parts or len(parts) >= len(file.parts):
+        return None
+    tail = file.parts[-len(parts) :]
+    instance: str | None = None
+    for want, got in zip(parts, tail, strict=True):
+        if "{instance}" not in want:
+            if want != got:
+                return None
+            continue
+        found = _segment_regex(want).fullmatch(got)
+        if found is None or (instance is not None and found["instance"] != instance):
+            return None
+        instance = found["instance"]
+    return file.parents[len(parts) - 1], instance, "/".join(tail)
+
+
+def fallback_workdir(ctx: Context, file: Path) -> Path:
+    """Workdir of a machine declaring no artifact: the vault holding the file, else cwd."""
+    vault = ctx.project.directory.resolve() if ctx.project is not None else None
+    if vault is not None and file.is_relative_to(vault):
+        return vault
+    return Path.cwd()
+
+
+def _playbooks(ctx: Context, name: str | None) -> list[Playbook]:
+    if name is None:
+        return [pb for pb in ctx.playbooks if pb.states]
     pb = next((p for p in ctx.playbooks if p.name == name), None)
     if pb is None:
         known = ", ".join(sorted(p.name for p in ctx.playbooks)) or "(none)"
         _fail(f"playbook not found: {name} (known: {known})")
-    return pb
-
-
-def _resolve_state(pb: Playbook, requested: str | None) -> tuple[str, StateMachine]:
     if not pb.states:
         _fail(f"playbook '{pb.name}' declares no states")
-    name = requested if requested is not None else pb.state_refs.get("")
-    if name is None:
-        _fail(f"playbook '{pb.name}' declares no state for its outer graph; pass --state")
-    if name not in pb.states:
-        known = ", ".join(sorted(pb.states)) or "(none)"
-        _fail(f"unknown state '{name}' in playbook '{pb.name}' (known: {known})")
-    return name, pb.states[name]
+    return [pb]
 
 
-def resolve_target(target: str, workdir: Path) -> Path:
-    """Anchor an explicit `--target` at the workdir; an absolute path is honoured."""
-    path = Path(target).expanduser()
-    return path if path.is_absolute() else workdir / path
+def resolve_matches(
+    ctx: Context, file: Path, playbook: str | None, state: str | None
+) -> list[Match]:
+    """Every machine the file is an artifact of — across all playbooks, or only *playbook*
+    (where a machine declaring no `artifact:` takes the file as its target) — narrowed
+    to *state* when given."""
+    matches: list[Match] = []
+    for pb in _playbooks(ctx, playbook):
+        if state is not None and playbook is not None and state not in pb.states:
+            known = ", ".join(sorted(pb.states)) or "(none)"
+            _fail(f"unknown state '{state}' in playbook '{pb.name}' (known: {known})")
+        for name, machine in pb.states.items():
+            if state is not None and name != state:
+                continue
+            if not machine.artifact:
+                if playbook is not None:
+                    matches.append(
+                        Match(pb, name, machine, fallback_workdir(ctx, file), None, str(file))
+                    )
+                continue
+            found = match_artifact(machine.artifact, file)
+            if found is not None:
+                matches.append(Match(pb, name, machine, *found))
+    return matches
 
 
-def implied_workdir(artifact: Path, rel: str | None) -> Path | None:
-    """The workdir an explicit `--target` implies — the directory the machine's declared
-    `artifact:` hangs off, so `--target {vault}/plans/x/index.md` runs hooks in
-    `{vault}/plans/x` the way `--workdir` would. None when the machine declares no
-    artifact, its path is per-instance, or the target does not end with it."""
-    if not rel or "{instance}" in rel:
-        return None
-    parts = PurePosixPath(rel).parts
-    if len(parts) >= len(artifact.parts) or artifact.parts[-len(parts) :] != parts:
-        return None
-    return artifact.parents[len(parts) - 1]
-
-
-def _resolve_artifact(
-    machine: StateMachine, workdir: Path, instance: str | None, target: str | None
-) -> tuple[Path, str]:
-    """Interpolate `{instance}` into the artifact path and anchor it at the workdir.
-    Returns (absolute path, path as written relative to the workdir)."""
-    if target is not None:
-        resolved = resolve_target(target, workdir)
-        return resolved, str(resolved)
-    if not machine.artifact:
-        _fail(f"state '{machine.name}' declares no `artifact:`; pass --target PATH")
-    rel = machine.artifact
-    if "{instance}" in rel:
-        if instance is None:
-            _fail(
-                f"state '{machine.name}' is per-instance "
-                f"(artifact {machine.artifact}); pass --instance SLUG"
-            )
-        rel = rel.replace("{instance}", instance)
-    elif instance is not None:
-        _fail(
-            f"state '{machine.name}' has no {{instance}} in its artifact path "
-            f"({machine.artifact}); --instance is not accepted"
-        )
-    return workdir / rel, rel
+def _assemble_for(file: Path) -> Context:
+    start = next(p for p in file.parents if p.is_dir())
+    return Context.assemble(start=start)
 
 
 def read_status(artifact: Path) -> str | None:
@@ -282,67 +295,70 @@ def _dispatch_script(
 
 
 def _run(args: argparse.Namespace) -> None:
-    report = transition(
-        args.playbook,
-        args.to_status,
-        state=args.state,
-        instance=args.instance,
-        target=args.target,
-        workdir=args.workdir,
-    )
+    report = transition(args.file, args.to_status, playbook=args.playbook, state=args.state)
     print("\n".join(report))
 
 
+def _accepts(machine: StateMachine, current: str | None, to_status: str) -> bool:
+    if current is None:
+        return to_status == machine.initial
+    if current == to_status:
+        return to_status in machine.statuses
+    return any(edge.to == to_status for edge in resolve_edges(current, machine.raw))
+
+
+def _legal(machine: StateMachine, current: str | None) -> set[str]:
+    if current is None:
+        return {machine.initial}
+    return {edge.to for edge in resolve_edges(current, machine.raw)}
+
+
+def _pick(file: Path, matches: list[Match], to_status: str, playbook: str | None) -> Match:
+    if not matches:
+        if playbook is not None:
+            _fail(f"{file} matches no machine artifact of playbook '{playbook}'")
+        _fail(f"{file} matches no machine artifact; pass --playbook")
+    current = read_status(file)
+    shown = current if current is not None else NOT_STARTED
+    accepted = [m for m in matches if _accepts(m.machine, current, to_status)]
+    if not accepted:
+        legal: set[str] = set()
+        for m in matches:
+            legal |= _legal(m.machine, current)
+        listed = ", ".join(sorted(legal)) or "(none)"
+        _fail(f"{file} ({shown}) has no edge to {to_status}; legal: {listed}")
+    if len(accepted) > 1:
+        labels = ", ".join(sorted(m.label for m in accepted))
+        _fail(
+            f"{file} matches more than one machine with an edge {shown} → {to_status}: "
+            f"{labels}; pass --playbook"
+        )
+    return accepted[0]
+
+
 def transition(
-    playbook: str,
+    file: str,
     to_status: str,
     *,
+    playbook: str | None = None,
     state: str | None = None,
-    instance: str | None = None,
-    target: str | None = None,
-    workdir: str | None = None,
 ) -> list[str]:
-    """Move one artifact to *to_status* and run the edge's hooks; returns the mutation
-    report lines. The in-process entry other commands share with `playbook-transition`;
-    a refused move prints `error: …` to stderr and exits like the command does."""
-    if target is not None and instance is not None:
-        _fail("--target and --instance are mutually exclusive")
-
-    run_dir = Path(workdir).expanduser().resolve() if workdir is not None else Path.cwd()
+    """Move *file* to *to_status* along the one machine it matches and run the edge's
+    hooks; returns the mutation report lines. The in-process entry other commands share
+    with `transition`; a refused move prints `error: …` to stderr and exits like the
+    command does."""
+    artifact = Path(file).expanduser().resolve()
+    ctx = _assemble_for(artifact)
+    match = _pick(artifact, resolve_matches(ctx, artifact, playbook, state), to_status, playbook)
+    pb, state_name, machine = match.playbook, match.state, match.machine
+    run_dir, instance, artifact_rel = match.workdir, match.instance, match.rel
     if not run_dir.is_dir():
         _fail(f"workdir not found: {run_dir}")
-
-    ctx = Context.assemble(start=run_dir)
-    pb = _resolve_playbook(ctx, playbook)
-    state_name, machine = _resolve_state(pb, state)
-
-    # Only an absolute target implies a workdir — a relative one is *defined* against
-    # the workdir, so deriving one from it would re-anchor the path under itself.
-    if workdir is None and target is not None and Path(target).expanduser().is_absolute():
-        implied = implied_workdir(Path(target).expanduser(), machine.artifact)
-        if implied is not None and implied != run_dir:
-            if not implied.is_dir():
-                _fail(f"workdir implied by --target not found: {implied}")
-            # Re-assemble: the implied workdir may resolve a different project and a
-            # different playbook root than cwd did.
-            run_dir = implied
-            ctx = Context.assemble(start=run_dir)
-            pb = _resolve_playbook(ctx, playbook)
-            state_name, machine = _resolve_state(pb, state)
-
-    artifact, artifact_rel = _resolve_artifact(machine, run_dir, instance, target)
 
     report: list[str] = []
     existing = artifact.exists()
     current = read_status(artifact)
     if current is None:
-        if to_status != machine.initial:
-            missing = (
-                f"{artifact}: no frontmatter `status:` key"
-                if existing
-                else f"artifact {artifact_rel} does not exist"
-            )
-            _fail(f"{missing}; the only legal target is the initial status {machine.initial!r}")
         _bootstrap(artifact, machine.initial)
         from_status = NOT_STARTED
         report.append(f"bootstrapped {artifact_rel}" if existing else f"created {artifact_rel}")
@@ -355,14 +371,6 @@ def transition(
             report.append(f"{to_status} → {to_status} (idempotent)")
             hooks = [str(h) for h in machine.raw.get("hooks", {}).get("post", [])]
         else:
-            edges = resolve_edges(from_status, machine.raw)
-            allowed = {e.to for e in edges}
-            if to_status not in allowed:
-                allowed_list = ", ".join(sorted(allowed)) or "(none)"
-                _fail(
-                    f"cannot transition from {from_status!r} to {to_status!r} in state "
-                    f"'{state_name}'; allowed targets: {allowed_list}"
-                )
             report.append(f"{from_status} → {to_status}")
             hooks = resolve_hooks(from_status, to_status, machine.raw)
 
@@ -378,8 +386,8 @@ def transition(
 
     for hook in hooks:
         hook_name = hook.split()[0] if hook.split() else ""
-        if hook_name == "frontmatter-update":
-            rel, resolved = dispatch_frontmatter_update(
+        if hook_name == "set":
+            rel, resolved = dispatch_set(
                 hook,
                 artifact,
                 hook_project,
@@ -399,7 +407,7 @@ def transition(
     scope = f"{state_name}/{instance}" if instance else state_name
     logger.log(
         vault=project.directory if project is not None else None,
-        subcommand="playbook-transition",
+        subcommand="transition",
         message=f"{pb.name} {scope} {from_status}→{to_status}",
     )
 

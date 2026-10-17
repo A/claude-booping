@@ -1,7 +1,7 @@
 {% from "_partials/inline_fix.md" import inline_fix -%}
 # Run the sprint, milestone by milestone
 
-This step runs once per milestone, in `id` order; the instance's milestone is the one its `--instance` names. Provision's groups decide only how briefings are batched: a group's **first** instance composes and delegates one briefing covering that whole group, and the group's later instances ride that briefing straight to their own close.
+This step runs once per milestone, in `id` order; the instance's milestone is the one its milestone file path names. Provision's groups decide only how briefings are batched: a group's **first** instance composes and delegates one briefing covering that whole group, and the group's later instances ride that briefing straight to their own close.
 
 Each milestone owns a directory `{plan-dir}/milestones/{instance}/` holding its milestone file `{instance}.md` — the contract — and, once the runner has findings for it, `feedback.md`. `{instance}` is `M{nn}-{kebab}`.
 
@@ -12,7 +12,7 @@ Provision already fired the `ready-for-dev` → `in-progress` edge. On a resume 
 Milestone transitions are the `## State` section's `milestone` machine, invoked as:
 
 ```
-booping playbook-transition develop {to} --state milestone --instance {instance} --workdir {plan-dir}
+booping transition {plan-dir}/milestones/{instance}/{instance}.md {to} --playbook develop --state milestone
 ```
 
 The edge's hook regenerates `index.md`'s `## Milestones` table and its `sp` — never edit either by hand.

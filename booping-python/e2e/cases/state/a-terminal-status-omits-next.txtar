@@ -5,7 +5,7 @@ the `next` key rather than carrying an empty list.
 ---
 name: fx-run
 title: Run
-summary: Single-machine fixture for playbook-state.
+summary: Single-machine fixture for state.
 ---
 
 Preamble.
@@ -47,9 +47,9 @@ summary: Research the request.
 Research body.
 -- fixtures/cwd/run/.keep --
 -- cmd --
-booping playbook-transition fx-run intaking --workdir run
-booping playbook-transition fx-run parked --workdir run
-booping playbook-state fx-run --workdir run
+booping transition run/index.md intaking --playbook fx-run
+booping transition run/index.md parked --playbook fx-run
+booping state run/index.md --playbook fx-run
 -- exit --
 0
 -- stdout --

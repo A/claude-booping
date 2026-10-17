@@ -25,7 +25,7 @@ states:
             gates:
               - "every question in `clarifications.md` is open and attributed — an id, a topic, the date and the step that raised it"
             hooks:
-              - frontmatter-update index.md return_to=framing
+              - set index.md return_to=framing
               - "script tracker-comment clarifications.md"
               - "script tracker-sync"
       researching:
@@ -49,7 +49,7 @@ states:
             gates:
               - "every question in `clarifications.md` is open and attributed — an id, a topic, the date and the step that raised it"
             hooks:
-              - frontmatter-update index.md return_to=drafting
+              - set index.md return_to=drafting
               - "script tracker-comment clarifications.md"
               - "script tracker-sync"
       awaiting-clarification:
@@ -60,7 +60,7 @@ states:
               - "every question in `clarifications.md` carries an answer"
               - "`return_to` is `framing` — any other value picks the other return edge"
             hooks:
-              - "frontmatter-update index.md return_to=''"
+              - "set index.md return_to=''"
               - "script tracker-sync"
           - to: drafting
             when: "the answers came back and `return_to` names `drafting`"
@@ -68,7 +68,7 @@ states:
               - "every question in `clarifications.md` carries an answer"
               - "`return_to` is `drafting` — any other value picks the other return edge"
             hooks:
-              - "frontmatter-update index.md return_to=''"
+              - "set index.md return_to=''"
               - "script tracker-sync"
       cross-reviewing:
         transitions:
@@ -92,7 +92,7 @@ states:
             gates:
               - "explicit user approval captured"
             hooks:
-              - frontmatter-update index.md reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - set index.md reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
               - "script stamp-session"
               - "script commit-plan"
               - "script tracker-sync"
