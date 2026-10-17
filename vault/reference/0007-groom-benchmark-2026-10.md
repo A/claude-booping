@@ -4,7 +4,7 @@ title: Groom benchmark 2026-10 — variants, rule ablation, plan split
 summary: What the October 2026 groom benchmark measured, what the model does without being told, what it cost and where the data lives.
 created_by: claude
 created_at: 2026-10-16
-updated_at: 2026-10-16
+updated_at: 2026-10-17
 status: live
 sources: [vault/adr/0030-groom-drafts-the-whole-plan-in-one-pass.md, vault/adr/0031-a-script-cuts-the-plan-into-milestone-files.md]
 ---
@@ -31,6 +31,11 @@ sources: [vault/adr/0030-groom-drafts-the-whole-plan-in-one-pass.md, vault/adr/0
   and it never found the m2 defect.
 - Plan split (12 single-file plans): a script cutting on headings passes every threshold on 12/12 at $0;
   Sonnet rewriting 12/12 at $0.71; Haiku mapping line ranges 8/12; Haiku rewriting 6/12.
+- Review as a separate step (`groom/xreview`, 36 plans, Opus fold-in, judged on readiness and on
+  challenging the request): a fresh Opus "double-check" helps (readiness +1.77 / +1.22, challenge
+  +2.27 / +1.42, codex / claude-p) and beats V3's in-session self-review head to head, at +10.4 min a
+  plan; the cross-review prompt on Opus, codex and Gemini show no measurable effect; no reviewer found
+  m2's 60 s cap. Decision: adr/0035 (no review step).
 - Cost of the Claude runs recorded in `result.json`: variants $145 (61 runs), ablation $97 (40),
   split $16 (48) — about $257 and 302 M tokens, mostly cache reads; codex and Gemini judges, the
   `claude -p` judges and the implementation runs are not in that sum.
