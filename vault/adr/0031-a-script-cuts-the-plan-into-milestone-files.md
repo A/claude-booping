@@ -4,7 +4,7 @@ title: A script cuts the drafted plan into milestone files
 summary: The script `booping plan split` cuts the one-file plan on its milestone headings, byte for byte, into index.md and the milestone files; a model splits only what the script flags.
 created_by: claude
 created_at: 2026-10-16
-updated_at: 2026-10-17
+updated_at: 2026-10-18
 status: accepted
 values: [value/0015, value/0012, value/0010]
 issues: []
@@ -105,7 +105,7 @@ The cheapest model rewrites the plan into the files.
 - New `booping plan split`, with e2e cases on real plan shapes including the 12 benchmark plans;
   groom calls it after the draft.
 - `_partials/milestone_contract.md` turns into the post-split check.
-- Develop, `budget.py`, `pi-developer`, `booping-developer` and `develop-pi` keep reading the
+- Develop, `pi-developer`, `booping-developer` and `develop-pi` keep reading the
   milestone files as they are.
 - Renaming the milestone file to `milestones/M{nn}-*/index.md` (owner, 2026-10-16) is a separate
   change with its own migration.

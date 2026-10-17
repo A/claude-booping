@@ -4,7 +4,7 @@ title: Open items are a stored index; closed ones are filtered out
 summary: Every gap between specs and code, open question or conflict is an open item stored in the vault and listed by an explicit command; closed items stay and are filtered.
 created_by: claude
 created_at: 2026-10-15
-updated_at: 2026-10-17
+updated_at: 2026-10-18
 status: accepted
 values: [value/0004, value/0007, value/0009]
 ---
@@ -49,8 +49,8 @@ Marks, open conflicts and check findings are collected at query time; nothing st
 ## Consequences
 
 - A specs playbook run can take open items, groom them and build them in the
-  autonomy mode the project sets ([adr/0027](0027-autonomy-modes.md)).
+  autonomy mode the project sets (`core.autonomy`).
 - Confirmation: creating an ADR with a confirmation line adds an open item; closing its plan closes the item; `booping items list` hides it afterwards.
 - 2026-10-15: the store's command is `booping items`, and items include user requests
   filed verbatim (`source: request`/`backlog`) beside spec gaps
-  ([adr/0028](0028-one-project-manager.md)).
+  ([story/0023](../story/0023-project-manager.md)).

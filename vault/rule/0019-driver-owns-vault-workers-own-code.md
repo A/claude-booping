@@ -4,7 +4,7 @@ title: The driver owns the vault and git; workers touch only repo code
 summary: The driver owns the vault, run state and commits; workers edit only repo code, never git history; a small fix goes to the session already holding its context.
 created_by: claude
 created_at: 2026-10-14
-updated_at: 2026-10-17
+updated_at: 2026-10-18
 status: accepted
 sources: [CLAUDE.md, docs/development_quality_checks.md]
 ---
@@ -13,15 +13,15 @@ sources: [CLAUDE.md, docs/development_quality_checks.md]
 
 The driver of a playbook run owns every vault read and write, the run state and the
 repo commits. A worker agent, of any harness, touches only the repo's code — or, after the user explicitly confirms it for the
-plan, code outside the repo ([adr/0012](../adr/0012-driver-owns-the-vault.md)): it runs
+plan, code outside the repo: it runs
 its milestone's Verify and leaves the work uncommitted, never touching git history.
 The other way round, the driver does not patch code itself — a failing check is
 handed to a worker to fix.
 
 ## Follows from
 
-- [adr/0012](../adr/0012-driver-owns-the-vault.md) — the driver does every vault read and write; workers touch only repo code.
-- [adr/0013](../adr/0013-runner-owns-the-commit.md) — the runner validates the tree against the DoD and makes the commit; workers never commit.
+- [The 2026-04-23 retro](../retrospectives/20260423-skill-refactors-chat-develop-retro.md) and [the 2026-04-22 retro](../retrospectives/20260422-plans-as-data-refactor.md) — agent bodies picked up orchestrator concepts (lessons, plan statuses) they did not need, and the orchestrator bypassed the CLI write path for plan files; the split keeps both out.
+- [v1.0.1 changelog](../../CHANGELOG.md) — when the worker committed, a commit that failed the DoD check could already be on the branch, and a worker driven through a foreign harness had to handle git.
 - [value/0002](../value/0002-minimal-effective-context.md) — a worker gets only what it needs.
 - [value/0003](../value/0003-single-source.md) — each fact, decision and piece of structured data lives in one place and is referenced or rendered from there.
 - [Development quality checks](../../docs/development_quality_checks.md) — a

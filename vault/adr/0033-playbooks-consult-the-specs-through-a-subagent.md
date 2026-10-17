@@ -4,7 +4,7 @@ title: Playbooks consult the specs through a subagent
 summary: A read-only subagent tells playbooks what the specs already decide, contradict or leave open.
 created_by: claude
 created_at: 2026-10-16
-updated_at: 2026-10-17
+updated_at: 2026-10-18
 status: superseded
 values: [value/0002, value/0013, value/0012]
 issues: []
@@ -25,7 +25,7 @@ adr/0032 after a one-word grep, and its autonomous runs logged defaults without 
 
 Reading the registry inline costs context: 104 project records plus core and global ones, and most
 are irrelevant to any one request (value/0002). Agents already return bounded answers (booping:rule/0009) and
-the driver owns every vault read and write (adr/0012, rule/0019). booping:rule/0030 makes groom name the values
+the driver owns every vault read and write (rule/0019). booping:rule/0030 makes groom name the values
 in play and flag departures; idea/0008 (open) proposes ADR drafts for a plan's real forks.
 
 ## Criteria

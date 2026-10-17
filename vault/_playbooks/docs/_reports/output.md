@@ -183,7 +183,7 @@ is read in its own sub-agent, and what comes back to you is a row, never the ite
 | Single source | value | Each fact, decision and piece of structured data lives in one place and is referenced or rendered from there; a decision is kept together with its reason. | value/0003-single-source.md |
 | Analysable history | value | Plans, runs and their outcomes are kept across every project, so the history can be analysed: practices taken over from one project to another, benchmarks, quality comparison, problem analysis. | value/0004-analysable-history.md |
 | Stack-agnostic core | value | The core knows nothing about a stack or a project; specifics live in the global and the project tiers. | value/0005-stack-agnostic-core.md |
-| A constructor, not a fixed solution | value | Booping is a constructor — a framework for playbooks with a set of core mechanics — not a ready solution fixed to one task. | value/0006-a-constructor-not-a-fixed-solution.md |
+| A framework for playbooks | value | Booping is a framework a user digitises their own processes with — config, templates, primitives, the CLI, playbooks and evals for their steps. | value/0006-a-constructor-not-a-fixed-solution.md |
 | Plans run to the end | value | The agent carries a plan through to the end on its own unless force majeure stops it. | value/0007-plans-run-to-the-end.md |
 | Effective human review | value | Every step where a human takes part is convenient and effective for that human. | value/0008-effective-human-review.md |
 | Adjustable control | value | The human can review the system deeply, or give the agent more freedom to act inside the values and boundaries. | value/0009-adjustable-control.md |
@@ -194,6 +194,9 @@ is read in its own sub-agent, and what comes back to you is a row, never the ite
 | Comfort for non-technical users | non-value | How comfortable booping is for people without a strong technical background is not optimised for; they are not its audience. | value/0014-comfort-for-non-technical-users.md |
 | Deterministic where it can be | value | Whatever can be computed is computed by code; the model spends tokens only on judgement, so a result does not depend on which model produced it. | value/0015-deterministic-where-it-can-be.md |
 | Specs live with the work | value | Specs are updated as the work happens and applied wherever they raise the quality of a result; they never go stale or depend on the user remembering them. | value/0016-specs-live-with-the-work.md |
+| Launching and guarding runs is userland | non-value | When and how development runs start — triggers, schedules, tracker and messenger integrations — and guarding usage limits are the user's, not booping's; booping offers an integration surface at most. | value/0017-launching-and-guarding-runs-is-userland.md |
+| A core set for development and self-learning | value | On top of the framework booping ships core playbooks for development, self-learning among them; they are its dogfooding, built only from mechanics a user playbook gets too. | value/0018-a-core-set-for-development-and-self-learning.md |
+| Projects are built along a roadmap | value | Work decomposes into plans and sprints, so a project is written along its roadmap, sprint by sprint, with a manager carrying the work through. | value/0019-projects-are-built-along-a-roadmap.md |
 
 
 ## The feature index
@@ -214,14 +217,15 @@ is read in its own sub-agent, and what comes back to you is a row, never the ite
 | Migration shipping | The plugin ships Project Vault migrations, and every render surface is gated on a vault's applied watermark. | done | story/0012-migration-shipping.md |
 | Documentation site | The public MkDocs reference builds strictly and publishes to gh-pages on push to master. | done | story/0013-documentation-site.md |
 | Project setup | The setup playbook takes a repo from any state to a working booping project and re-runs without changing what is already set up. | done | story/0014-project-setup.md |
-| Project Vault migrations | The migrate playbook brings an existing Project Vault current with the plugin, one approval and one commit per migration. | done | story/0015-vault-migrations.md |
+| Project Vault migrations | The migrate playbook brings an existing Project Vault current with the plugin on one up-front approval, with one commit per migration. | done | story/0015-vault-migrations.md |
 | Groom | Groom shapes a feature, bug or refactor into a specified, estimated plan the user approved, ending at ready-for-dev. | done | story/0016-groom.md |
-| Develop | Develop executes a groomed plan one milestone at a time through a worker agent and closes it at done or fail. | done | story/0017-develop.md |
+| Develop | Develop executes a groomed plan one milestone group at a time through a worker agent and closes it at done or fail. | done | story/0017-develop.md |
 | Retro | Retro mines a finished sprint's session logs, diff and the user's feedback into a standalone retrospective. | done | story/0018-retro.md |
 | Learn | Learn turns retrospective findings the user confirmed into rule records in the project specs tier or CLAUDE.md entries. | done | story/0019-learn.md |
 | Session metrics | A plan carries measured active minutes, tokens and models computed from Claude Code session logs. | done | story/0020-session-metrics.md |
 | Code review | The code-review playbook reviews a confirmed scope, collects the human verdict and applies only approved fixes. | done | story/0021-code-review.md |
 | Task tracker | The booping-tracker CLI carries every interaction with an issue tracker, and groom mirrors its run status and questions onto the tracker issue. | done | story/0022-task-tracker.md |
+| Project manager | One manager the user talks to files every request as an item and carries it through groom, develop, review and merge, with a status computed from the vault. | done | story/0023-project-manager.md |
 
 
 ## The fan-out
@@ -347,14 +351,15 @@ driving context whole; the documentation's structure comes from the surfaces rec
 | Migration shipping | The plugin ships Project Vault migrations, and every render surface is gated on a vault's applied watermark. | done | story/0012-migration-shipping.md |
 | Documentation site | The public MkDocs reference builds strictly and publishes to gh-pages on push to master. | done | story/0013-documentation-site.md |
 | Project setup | The setup playbook takes a repo from any state to a working booping project and re-runs without changing what is already set up. | done | story/0014-project-setup.md |
-| Project Vault migrations | The migrate playbook brings an existing Project Vault current with the plugin, one approval and one commit per migration. | done | story/0015-vault-migrations.md |
+| Project Vault migrations | The migrate playbook brings an existing Project Vault current with the plugin on one up-front approval, with one commit per migration. | done | story/0015-vault-migrations.md |
 | Groom | Groom shapes a feature, bug or refactor into a specified, estimated plan the user approved, ending at ready-for-dev. | done | story/0016-groom.md |
-| Develop | Develop executes a groomed plan one milestone at a time through a worker agent and closes it at done or fail. | done | story/0017-develop.md |
+| Develop | Develop executes a groomed plan one milestone group at a time through a worker agent and closes it at done or fail. | done | story/0017-develop.md |
 | Retro | Retro mines a finished sprint's session logs, diff and the user's feedback into a standalone retrospective. | done | story/0018-retro.md |
 | Learn | Learn turns retrospective findings the user confirmed into rule records in the project specs tier or CLAUDE.md entries. | done | story/0019-learn.md |
 | Session metrics | A plan carries measured active minutes, tokens and models computed from Claude Code session logs. | done | story/0020-session-metrics.md |
 | Code review | The code-review playbook reviews a confirmed scope, collects the human verdict and applies only approved fixes. | done | story/0021-code-review.md |
 | Task tracker | The booping-tracker CLI carries every interaction with an issue tracker, and groom mirrors its run status and questions onto the tracker issue. | done | story/0022-task-tracker.md |
+| Project manager | One manager the user talks to files every request as an item and carries it through groom, develop, review and merge, with a status computed from the vault. | done | story/0023-project-manager.md |
 
 
 A story `sync-specs` created this run is not in the index above — its path is in `sync-specs`'

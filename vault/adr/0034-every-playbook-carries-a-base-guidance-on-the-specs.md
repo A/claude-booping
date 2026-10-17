@@ -4,7 +4,7 @@ title: Every playbook carries a base guidance on the specs
 summary: Every playbook knows what the specs are, the values, and that it reads and writes them through a subagent, applying them where they raise quality; no per-playbook scenarios.
 created_by: claude
 created_at: 2026-10-16
-updated_at: 2026-10-17
+updated_at: 2026-10-18
 status: accepted
 values: [value/0016, value/0002, value/0001, value/0012]
 issues: []
@@ -46,7 +46,7 @@ guidance on the specs:
      a decision, a scenario, a departure from a record, a record the work made untrue — a draft or a
      candidate lands in the right place.
    - Values and anything that drops or weakens a rule stay owner drafts; every other draft follows the
-     run's autonomy mode (adr/0027).
+     run's autonomy mode (`core.autonomy`).
 4. **Through a subagent.** Every read or write of the specs goes through a subagent, and the playbook
    keeps only its short answer. A departure from a record is shown to the owner, or recorded with the
    ref and a `[clarify]` marker in an autonomous run, never silently overridden.

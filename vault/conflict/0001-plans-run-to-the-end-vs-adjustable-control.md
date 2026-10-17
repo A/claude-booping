@@ -4,7 +4,7 @@ title: Plans run to the end ↔ Adjustable control
 summary: An agent that carries a plan to the end on its own pulls against a human who can review deeply and take control back; the project's autonomy mode settles which applies.
 created_by: claude
 created_at: 2026-10-17
-updated_at: 2026-10-17
+updated_at: 2026-10-18
 status: resolved
 values: [value/0007, value/0009]
 ---
@@ -15,4 +15,4 @@ values: [value/0007, value/0009]
 
 ## Resolution
 
-[adr/0027](../adr/0027-autonomy-modes.md): a project config key sets the mode. `supervised` (the default) stops at the runs' review gates and the user drives groom then develop; `autonomous` lets a manager groom and build in batches, auto-confirming gates and recording the defaults it chose, so what the agent did without review stays visible. A state that should not exist, such as uncommitted changes on a branch when a migration runs, is asked about in either mode.
+The project's `core.autonomy` key sets the mode ([value/0009](../value/0009-adjustable-control.md)). `supervised` (the default) stops at the runs' review gates and the user drives groom then develop; `autonomous` lets a manager groom and build in batches, auto-confirming gates and recording the defaults it chose, so what the agent did without review stays visible. A state that should not exist, such as uncommitted changes on a branch when a migration runs, is asked about in either mode.

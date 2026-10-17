@@ -4,7 +4,7 @@ title: What is not in the source is marked, not invented
 summary: A record or artefact states only what its source says; an open point is marked [clarify] or "not named in the source", never filled in by the agent.
 created_by: claude
 created_at: 2026-10-14
-updated_at: 2026-10-14
+updated_at: 2026-10-17
 status: accepted
 ---
 
@@ -14,7 +14,7 @@ A record or a run artefact states only what its source says: the conversation,
 the user's answers, the code, a measurement, a document read. An option, an
 argument or a detail the source lacks is written as "not named in the source";
 a choice the agent made by default is marked `[clarify]` with one sentence on
-what to settle; a reason that is only the user's preference is called that.
+what to settle; a reason that is only the user's preference is called that. A record drafted from a dialogue states as decided only what the user accepted on the decision list ([booping:rule/0033](../../specs/rule/0033-decisions-listed-for-acceptance.md)); the rest is `[clarify]`.
 
 ## Follows from
 
