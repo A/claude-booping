@@ -25,6 +25,12 @@ The run keeps no state of its own. The `open_item` machine below tracks one open
 - Never manually break markdown lines. Write each paragraph, bullet, or table row as one line and
   let the renderer wrap it — hard line breaks turn into mid-sentence breaks after any later edit.
 
+## Rules
+
+The following 1 rule(s) apply to this playbook. Never silently violate one; conflict → stop and flag. Read a rule's record when its brief is not enough.
+
+- On a review or audit of the specs, put every record to the tests in the format guide's "When a record is worth writing" (an ADR needs a real choice, a rule must change behaviour, nothing derivable from config or code, no value restated); list each failure as `{ref} → {type it fits | delete} — {one reason}` for the user to accept. [booping:rule/0034](${CLAUDE_PLUGIN_ROOT}/specs/rule/0034-specs-review-tests-each-record.md)
+
 ## Playbook Steps
 
 Execute the steps in the most effective order considering their dependencies.

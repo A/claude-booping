@@ -38,6 +38,19 @@ These are the shipped types. The shape of each is [`schemas/<type>.yaml`](schema
 [mdcheck](https://github.com/A/markdown-checker) rule file; a tier's types are the
 stems of its effective schema set (below).
 
+## When a record is worth writing
+
+A record holds what nothing else holds. Before writing one, and on every review of the set, put it to the test below; a record that fails goes to the type it fits, or nowhere.
+
+- **No record** — what the config, the code, a state machine or a step body already says unambiguously: a record of it adds no knowledge and is one more place to drift. How a run waits for an answer is its state machine; who makes the commit is the step that makes it.
+- **No record** — a value restated: link the value. "The user sets how much the agent decides alone" is a value; a record saying a config key has two modes because of it adds nothing the key does not.
+- **`adr`** — a real choice: two or more options someone could actually take, analysed against each other, and a reason the code does not show. An option written to fill the table — the decision's negation, the broken way nobody would return to, "leave it as it is" when nobody wanted that — is no option, and without a real one there is no ADR. "It was time to add this" with nothing else on the table is a story or a value, not an ADR. A real one: two prompts measured on the same plans, the cheaper kept because the gain did not pay for its time.
+- **`rule`** — a constraint that changes how the system behaves on every call it targets, worth its place in each of those prompts. A behaviour picked without weighing an alternative is a rule, not an ADR. A one-off mistake that reduces to no such constraint is no rule: fix it, and keep a `reference` if it carries a lesson.
+- **`story`** — a feature or a usage scenario: who wants what and why.
+- **`reference`** — a fact the code does not show: a measurement, an external constraint, a postmortem of an incident.
+
+A tier sharpens these tests for itself with a rule targeting `specs`.
+
 ## Tier schemas
 
 A tier root may hold its own files beside the type directories:

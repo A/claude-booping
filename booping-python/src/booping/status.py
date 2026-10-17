@@ -37,7 +37,6 @@ RUN_COLUMNS = [
     "exit_code",
     "log",
 ]
-PAUSED_COLUMNS = ["id", "plan", "items", "next milestone", "reason", "resume after", "resume"]
 
 
 class StatusError(Exception):
@@ -118,13 +117,11 @@ class StatusContext:
 
     @cached_property
     def runs(self) -> list[dict[str, Any]]:
-        """Run records nobody acked and no later run resumed, by id, each with its
-        effective status."""
-        records = runs.records(self.ctx)
+        """Run records nobody acked, by id, each with its effective status."""
         return [
             record | {"status": runs.effective_status(record)}
-            for record in records
-            if record.get("acked_at") is None and not _resumed(record, records)
+            for record in runs.records(self.ctx)
+            if record.get("acked_at") is None
         ]
 
     @cached_property
@@ -158,16 +155,6 @@ class StatusContext:
     @cached_property
     def marks(self) -> list[Mark]:
         return open_items.marks(self.records, self.tier.root) if self.tier is not None else []
-
-
-def _resumed(record: dict[str, Any], records: list[dict[str, Any]]) -> bool:
-    """A paused run counts as resumed once a later record, by id, names the same plan."""
-    if record.get("status") != runs.PAUSED:
-        return False
-    return any(
-        str(other.get("id")) > str(record.get("id")) and other.get("plan") == record.get("plan")
-        for other in records
-    )
 
 
 @dataclass(frozen=True)
@@ -262,23 +249,7 @@ def _runs_summary(sc: StatusContext) -> str:
 
 
 def _runs_detail(sc: StatusContext) -> str:
-    detail = _table((sc.runs, RUN_COLUMNS))
-    paused = [
-        {
-            "id": r.get("id"),
-            "plan": r.get("plan"),
-            "items": r.get("items"),
-            "next milestone": r.get("next_milestone"),
-            "reason": r.get("paused_reason"),
-            "resume after": r.get("resume_after"),
-            "resume": f"`booping run develop {r.get('plan')} --autonomous`",
-        }
-        for r in sc.runs
-        if r.get("status") == runs.PAUSED
-    ]
-    if paused:
-        detail += f"\n\nPaused:\n\n{_table((paused, PAUSED_COLUMNS))}"
-    return detail
+    return _table((sc.runs, RUN_COLUMNS))
 
 
 def _unreviewed(sc: StatusContext) -> list[Record]:

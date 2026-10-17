@@ -15,7 +15,7 @@ Autonomy: `{{ config.core.autonomy }}` (`core.autonomy`).
 Session loop: every later user message → `intake`, then `work`. While a run is live, start every turn with `booping status runs`.
 
 **Hard rules — hold for the whole session:**
-- The driver owns the vault, every commit (scoped staging by path, never `git add -A`) and every transition; workers edit repo code only.
+- The driver owns the vault, every commit (scoped staging by path, never `git add -A`) and every transition; workers edit repo code only. The driver never edits code — every change, a tiny fix included, goes to a worker.
 - Launch `booping run` with the Bash tool's background mode, never `&`; ack it with `booping run ack` once its outcome is acted on.
 - A question you cannot settle goes on the item with `booping items ask`; chat only names the sidecar.
 - Never push, deploy or release unless a project rule or runbook targeting `project-manager` says how.

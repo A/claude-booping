@@ -10,9 +10,7 @@ from pathlib import Path
 from types import FrameType
 from typing import Any
 
-from booping import budget, logger, runs
-from booping.budget import BudgetError
-from booping.commands.budget import PAUSE_EXIT, verdict_lines
+from booping import logger, runs
 from booping.commands.specs import (
     _assemble,  # pyright: ignore[reportPrivateUsage]
     _fail,  # pyright: ignore[reportPrivateUsage]
@@ -59,7 +57,7 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
         _add_autonomous(verb)
         verb.set_defaults(func=_run_over_plan, playbook=playbook)
 
-    ack = verbs.add_parser("ack", help="Mark finished, paused, failed or lost runs as seen")
+    ack = verbs.add_parser("ack", help="Mark finished, failed or lost runs as seen")
     ack.add_argument("ids", nargs="+", metavar="ID", help="Run id")
     ack.set_defaults(func=_run_ack)
 
@@ -68,8 +66,7 @@ def _add_autonomous(p: argparse.ArgumentParser) -> None:
     p.add_argument(
         "--autonomous",
         action="store_true",
-        help="Append core.run.preamble: the run settles its own gates and questions. Passes"
-        " the budget gate first: on pause prints the verdict, writes no record and exits 3",
+        help="Append core.run.preamble: the run settles its own gates and questions",
     )
 
 
@@ -146,7 +143,6 @@ def _launch(
     if autonomous:
         prompt += f"\n\n{cfg.get('preamble')}"
     env: dict[str, Any] = cfg.get("env") or {}
-    baseline = _launch_gate(ctx) if autonomous else None
     project = ctx.project
     repo = (
         project.repo_directory
@@ -168,7 +164,6 @@ def _launch(
             items=items,
             pid=os.getpid(),
             prompt=prompt,
-            baseline_7d=baseline,
         )
     except RunError as exc:
         _fail(str(exc))
@@ -181,9 +176,7 @@ def _launch(
             child = subprocess.Popen(
                 argv,
                 cwd=repo,
-                env=os.environ
-                | {str(k): str(v) for k, v in env.items()}
-                | {budget.RUN_ID_ENV: run.id},
+                env=os.environ | {str(k): str(v) for k, v in env.items()},
                 stdin=subprocess.DEVNULL,
                 stdout=log,
                 stderr=subprocess.STDOUT,
@@ -199,21 +192,6 @@ def _launch(
     logger.log(vault=ctx.vault, subcommand="run", message=f"{playbook} {run.id} {status}")
     print(f"{run.id}: {status} (exit {code})", flush=True)
     sys.exit(code)
-
-
-def _launch_gate(ctx: Context) -> int | None:
-    """Pass the budget gate before an autonomous launch — exit 3 on pause. Returns the
-    7-day percent the launch passed at, when `core.budget.run_pct` is set."""
-    try:
-        result, reading = budget.evaluate(ctx, is_gated=True, baseline=None)
-    except BudgetError as exc:
-        _fail(str(exc))
-    if not result.allow:
-        print("\n".join(verdict_lines(result)), flush=True)
-        sys.exit(PAUSE_EXIT)
-    if budget.settings(ctx).get("run_pct") is None or reading is None:
-        return None
-    return reading.seven_day.pct
 
 
 def _wait(child: subprocess.Popen[bytes]) -> int:

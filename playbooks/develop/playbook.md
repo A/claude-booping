@@ -20,8 +20,9 @@ both the plan document and the machine's artifact. The machine attaches to whate
 already on the file; it never bootstraps or creates it.
 
 **Hard rules — hold for the whole run:**
-- The runner never writes application code. Every task is delegated to a worker agent, even a
-  one-line change.
+- The runner never writes application code: every task is delegated to a worker agent, even a
+  one-line change. The one exception is a fix to a failing check, under
+  [Fixing a failing check yourself](#fixing-a-failing-check-yourself).
 - No scope additions: the sprint delivers exactly the plan's milestones and tasks, nothing more.
 - `develop-loop` works one milestone group at a time — brief a worker, close the group, then
   move to the next. Never two workers on one sprint branch at once.

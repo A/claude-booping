@@ -30,7 +30,7 @@ A run reviews one confirmed scope end to end: `scope` settles what to look at an
 - No hand commits, no pushes. The repo's changes stay for the user; the vault commit is the exit hook's.
 - Style the project's linter or formatter already enforces is filtered out — it is noise, not review signal.
 - A lesson violation is always a `BLOCKER`. Never softened to `SUGGESTION`.
-- No edit beyond a user-approved trivial nit. Every non-trivial fix routes through the worker agent named below.
+- The driver edits no code. An approved small fix goes back to the reviewer that found it; every other fix routes through the worker agent named below.
 
 Eval runs are proposed, never launched — the user triggers them.
 

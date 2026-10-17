@@ -22,8 +22,7 @@ Next: the class's route below; a class the item does not let you judge → `boop
 `booping items batch` prints one line per batch; an item it leaves out takes the plan route. Per
 batch line:
 
-1. `booping budget gate` — exit 3 → stop the turn and report.
-2. Brief the worker from the agents table, exactly this block:
+1. Brief the worker from the agents table, exactly this block:
 
    ```markdown
    ## Task
@@ -40,7 +39,7 @@ batch line:
    ```
 
    One `## Item {id}` block per item in the batch, in the batch's order.
-3. Verify each item's change; commit each by path with a conventional message naming its id.
+2. Verify each item's change; commit each by path with a conventional message naming its id.
 
 Next: `booping items close {id}` for each item of the batch.
 
@@ -70,7 +69,9 @@ One groom per item, or one for several items the user framed as one change.
    `## Verdict` in its artefact, `codereviews/{plan-dirname}/{ts}.md`. An unfixed blocker →
    `booping items ask` on the plan's items (the `booping items list` rows whose `plan` is this
    plan); no merge.
-6. Merge gate (the review gate above).
+6. Merge gate (the review gate above). Supervised: list first, numbered, every decision the
+   autonomous runs settled — each `D{n}` in the plan's `defaults.md` and in
+   `codereviews/{plan-dirname}/defaults.md` — one plain line each, marked `(proposal)`.
 7. Merge the branch develop left checked out into the merge target with `git merge --no-ff`,
    locally, never pushed; develop left the merge target itself checked out → nothing to merge.
 
@@ -80,10 +81,7 @@ Next: the report line for each of the plan's items.
 
 One develop or code-review run per checkout at a time; groom runs may overlap. Before launching
 one: `booping status runs --detail` — a `running` develop or code-review row → the item queues
-until it ends. `booping run … --autonomous` exiting 3 → the gate is closed: the item stays
-queued, reported `paused`. A `Paused:` row in `booping status runs --detail` whose `resume after`
-has passed, or is empty and `booping budget gate` now allows → run its `resume` command. A run
-that ends → act on its outcome. Next: `booping run ack {id}`.
+until it ends. A run that ends → act on its outcome. Next: `booping run ack {id}`.
 
 ## Report
 
@@ -98,7 +96,6 @@ After each turn's work, one line per item touched:
 | `running` | the run record `runs/{run}.md` |
 | `waiting on you` | the sidecar `open-items/questions/{id}.md#C{n}` |
 | `dropped` | the close reason |
-| `paused` | the run record `runs/{run}.md`, or `gate closed` when no run started |
 
 Next: the next action, in one sentence.
 

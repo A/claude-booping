@@ -18,24 +18,26 @@ Bulleted list, 3–6 items. Each bullet names a concrete decision, move, or outc
 
 ## 4. Issues
 
-Markdown table with columns: `#`, `Issue`, `Cause`, `Impact`, `Lesson touched`.
+Markdown table with columns: `#`, `Issue`, `Cause`, `Impact`, `Lesson touched`, `Source`.
 
 - One row per accepted issue from Phase 2b.
 - `Issue` — short noun phrase (the *what*).
 - `Cause` — one-sentence root cause (the *why*).
 - `Impact` — one-sentence consequence (the *so what*); cite earlier retros / instances if this is a recurrence.
 - `Lesson touched` — `lessons/NNNN_*.md` path if any, else `—`.
+- `Source` — `user` when the user gave the row in their words, `proposal` when any of it is yours.
 
 If there are zero accepted issues, render `_No accepted issues._` instead of an empty table.
 
 ## 5. Action items
 
-Markdown table with columns: `#`, `Action`, `Owner`, `Status`.
+Markdown table with columns: `#`, `Action`, `Owner`, `Status`, `Source`.
 
 - One row per follow-up the user agreed to in Phase 3.
 - `Action` — concrete imperative move; specify scope (file, plan, decision).
 - `Owner` — `User`, `Claude`, or a named role.
 - `Status` — `Planned`, `Planned (carried over)` for items rolled from a prior retro, or `Done` if completed in-session.
+- `Source` — as in the issue table.
 
 If there are zero actions, render `_No action items._` instead of an empty table.
 

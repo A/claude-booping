@@ -278,17 +278,6 @@ How `booping run groom` and `booping run develop` launch a recorded headless run
 - **`core.run.preamble`** — the autonomy instructions appended after a blank line under `--autonomous`: settle gates and questions without asking, log each with `booping defaults add`, never push.
 - **`core.run.dir`** — the vault directory of run records, `runs` as shipped.
 
-### `core.budget`
-
-What the [budget gate](project_manager.md#budget-and-time-window) checks before an autonomous launch and before each develop milestone group. Directly under `core` because the run launcher, develop and the project-manager all read it. No value is env-interpolated.
-
-- **`core.budget.max_age_s`** — how many seconds a run log stays a usable usage reading; with no log that recent, the probe runs. Default `600`.
-- **`core.budget.probe`** — the argv run in the repo for a reading when no fresh log has one: a one-turn `claude -p` on `haiku` with streamed JSON output as shipped. Its output must carry a `rate_limit_event` line, or there is no reading and the gate pauses.
-- **`core.budget.ceiling_5h_pct`** — 5-hour usage percent at or over which the gate pauses. Default `90`.
-- **`core.budget.ceiling_7d_pct`** — 7-day usage percent at or over which the gate pauses. Default `85`.
-- **`core.budget.run_pct`** — 7-day percent points one autonomous run may spend, counted from the reading its launch passed; the gate pauses the run once it has spent them. Default `null`, off.
-- **`core.budget.window`** — `{start: "HH:MM", end: "HH:MM"}` in local time; an end before the start wraps midnight. Outside it the gate pauses until the next start. Default `null`, always open.
-
 ### `core.macros`
 
 Shell-outs a rendered body may call by dotted path. Each entry is an **argv list**, never a shell string, run with `shell=False` — either the bare list, or a mapping carrying it under `command:` plus an optional `cwd:` of `repo` or `vault`: the attached repo or the Project Vault. Omit `cwd:` and the command runs in the process's own working directory.

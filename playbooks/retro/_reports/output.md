@@ -43,7 +43,7 @@ Execute the steps in the most effective order considering their dependencies.
 | --- | --- | --- | --- |
 | `intake` | — | Settle the working set the run covers — validate that every named plan is in the preamble's candidate table, offer every other candidate as include / postpone / skip-retro, apply the skips via `_scripts/drop-plan` (which stamps the `retro: skipped` sentinel), then read each adopted plan in full for context only: scope, story points, dates and decisions on record, never as a source of runner-derived findings. | — |
 | `prepare` | `intake` | Read each adopted plan in full for context only, then build the issue list without showing it — the plans' corrections feed first, its entries issue items and its dialogue links handed on — session-log mining and a plan-stage lesson check delegated in parallel, the lesson set passed verbatim with each brief — and cross-check both returns against the lesson set and the project-local retro extension; the list is withheld until gather-feedback has the user's raw take. | — |
-| `gather-feedback` | `prepare` | Take the user's raw open-ended take before any mined finding is mentioned: four questions asked verbatim, one at a time, each with a free-text option; then walk every mined item in batches for accept / dismiss / the user's own wording, and close by asking per plan whether the plan's goal was reached, the goal presented verbatim as written. | — |
+| `gather-feedback` | `prepare` | Take the user's raw open-ended take before any mined finding is mentioned: four questions asked verbatim in prose, one at a time; then walk every mined item in prose, one at a time with a counter, for accept / dismiss / the user's own wording, and close by asking per plan whether the plan's goal was reached, the goal presented verbatim as written. | — |
 | `research-issues` | `gather-feedback` | Do focused root-cause work on each accepted issue: read only the files the trigger or the user's wording implicates, compare documented project conventions against what the code actually does where the issue is a convention drift, research current best practice for the underlying class of problem, and design concrete process-level prevention moves — for lesson-tagged issues also judge whether the lesson's wording, trigger or placement is what failed. | — |
 | `synthesize` | `research-issues` | Draft the retrospective against the retrospective template — wins, per-issue what-happened / root-cause / impact, lesson gaps, and action items split into one-time tasks and standing heuristics — run the template's self-review checklist and fix every `no`, then show the user a chat summary in the pre-save summary format while holding the full draft in context, unwritten. | The run's single review gate — explicit user approval of the draft, asked for in prose in the same message as the summary, never via `AskUserQuestion`. "Save it" counts, silence never does; the approval is what `save` writes on and what the exit edge's first gate names. A refine request loops in place — adjust framing, wording or which issues land, re-post the summary whole with what changed marked as changed, and re-ask; the loop is unbounded, a refine needing new evidence stays in this step, and the run never advances to `save` on its own. A cancel drops the draft and ends the run: nothing written, no transition, the plan left at its entry status. |
 | `save` | `synthesize` | Write the approved draft to `retrospectives/{YYYYMMDDHHMM}_{kebab-title}.md` — frontmatter carrying `plan:`, `plans:`, `title`, `created` and the per-plan `goal_verdicts:`, no `status:` — check it covers the working set, then fire the exit transition with `--target` on that file, whose hooks stamp the retro back-link and goal verdict on every plan; close on the saved-retrospective report and the `/playbook learn` offer, never launched. | — |
@@ -153,43 +153,41 @@ plans are. A single-plan run skips this and goes straight to the questions.
 
 ## The four questions
 
-One `AskUserQuestion` call per question, one at a time, waiting for each answer before posing the
-next. Ask each **verbatim**, in this order. No `"Free-text:"` prefix, no
-`"(Skip if … use Other.)"` parenthetical, no rephrasing for tone:
+Ask each in chat prose, one per message, waiting for each answer before posing the next. Ask
+each **verbatim**, in this order, with its `[n/4]` counter. No suggested answers, no
+parenthetical, no rephrasing for tone:
 
 1. *"How do you feel about the sprint overall?"*
 2. *"How did the code review go?"*
 3. *"What stood out as a win — any decision, moment, or move that worked notably well?"*
 4. *"Any issues from this sprint you want to bring to the retro?"*
 
-Each call offers a short set of neutral, generic takes on that question plus `Other` for free
-text — so a quick answer is one click. The options are never derived from a mined finding and
-never name a file, a commit or an issue from this sprint; the user's free text wins over any of
-them. A declined question is recorded as no answer and the run moves on — never re-asked, never
-pressed, never filled in.
+The user answers in their own words, at any length. A declined question is recorded as no
+answer and the run moves on — never re-asked, never pressed, never filled in.
 
 A per-plan pass repeats the same four questions under a `### plans/{slug}/index.md` heading per
 plan. Reading the answers waits until the mined items are on the table — the triage below.
 
 ## Issue triage
 
-Walk every item from the issue list `prepare` withheld. Batch up to **5 items per
-`AskUserQuestion` call** (one question per item within the call); split into multiple calls when
-there are more than 5. For each item: cite the source + trigger, then the orchestrator's one-line
-interpretation, then offer two options plus `"Other"`:
+Walk every item from the issue list `prepare` withheld, in chat prose, one item per message
+with a `[n/total]` counter: cite the source + trigger, then the orchestrator's one-line
+interpretation and its proposal, and wait for the user's reply — they may ask back before
+deciding. The reply settles the item as one of:
 
 1. **Accept as-is** — keep the orchestrator's framing untouched; carry into `research-issues`.
 2. **Dismiss** — drop from the retrospective; not a problem worth carrying forward.
-3. **Other** — user types their own take; record their wording into the issue's notes and carry
-   it into `research-issues`.
+3. **Own take** — record the user's wording into the issue's notes and carry it into
+   `research-issues`.
 
-Mark each item with the user's choice and any free-text. Accepted and "Other" items are the
+Mark each item with the user's call and their words. Accepted and own-take items are the
 **accepted issues** for `research-issues`; dismissed items disappear.
 
-After the issue walkthrough, ask the user explicitly per plan via `AskUserQuestion`: *"Was the
-goal of this plan reached?"* — present the plan's stated goal verbatim from frontmatter (or the
-plan's opening paragraph if no `goal:` field) so the user is judging against what was actually
-planned. Options: `success` (goal reached), `partial` (partially reached), `fail` (not reached).
+After the issue walkthrough, ask the user explicitly per plan, in chat prose, one plan per
+message: *"Was the goal of this plan reached?"* — present the plan's stated goal verbatim from
+frontmatter (or the plan's opening paragraph if no `goal:` field) so the user is judging against
+what was actually planned. The reply maps to `success` (goal reached), `partial` (partially
+reached) or `fail` (not reached).
 The user owns this call; the step does not derive it.
 
 ## The record — posted in chat
@@ -254,8 +252,8 @@ items.
 The user reads a compact chat summary — enough to judge framing and decide, never the full body.
 Follow the [retro pre-save summary format](${CLAUDE_PLUGIN_ROOT}/docs/retro_summary_format.md):
 header, verdict line, what went well, the issue table (`#`, `Issue`, `Cause`, `Impact`,
-`Lesson touched`), the action-item table (`#`, `Action`, `Owner`, `Status`), then the takeaways,
-in that order and under ~40 lines. An empty table renders as `_No accepted issues._` /
+`Lesson touched`, `Source`), the action-item table (`#`, `Action`, `Owner`, `Status`, `Source`),
+then the takeaways, in that order and under ~40 lines. An empty table renders as `_No accepted issues._` /
 `_No action items._`.
 
 No frontmatter, no save path, no commit command, no candidate-lessons section — those are `save`'s
@@ -269,8 +267,9 @@ never an `AskUserQuestion` call:
 > Save this retrospective? Approving writes it to the plan directory and moves the plan on.
 > Tell me what to change instead and I will re-draft, or say cancel and nothing is written.
 
-**Approval** — "save it" counts, silence never does. Record it in the user's own words: `save`
-clears the exit edge's first gate on it.
+**Approval** — "save it" counts, silence never does. It accepts the numbered rows only; a row
+the user questioned and left unanswered is saved marked `[clarify]`. Record the approval in the
+user's own words: `save` clears the exit edge's first gate on it.
 
 **Refine** loops in place, unbounded, and never advances on its own: adjust framing, wording or
 which issues land, then re-post the summary **whole** with what changed marked as changed, and

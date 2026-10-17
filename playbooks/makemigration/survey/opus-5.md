@@ -30,7 +30,8 @@ never parsed off a directory name.
 Establish, from the conversation and the repo, the vault layout change this migration converts:
 what an existing vault holds today, what it must hold afterwards, and which plugin change made
 the difference. Read the diff or plan that introduced it when one is named. Ask only for what
-neither source settles — one question at a time, through `AskUserQuestion`.
+neither source settles — in prose, one question at a time, each with its context and your
+proposal.
 
 A migration transforms vault files only. A change that needs code, config defaults or the
 `.booping` marker rewritten is not a migration — say so and end the run.

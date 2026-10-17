@@ -2,9 +2,9 @@
 
 Verify's report arrives as evidence: which guardrails ran, each verdict, and the plan's own
 bookkeeping — every DoD checkbox and every milestone status. Take it as given. Wrap-up starts
-only on a green verdict — a red one goes back to the runner for fixes and a verify re-run, never
-here. Nothing here re-runs a command, re-reads the plan for completeness, or asks the user
-anything: once wrap-up starts it closes without stopping.
+only on a green verdict — a red one goes back to the runner for fixes (its own within
+develop-loop's cap, else a worker's) and a verify re-run, never here. Nothing here re-runs a
+command, re-reads the plan for completeness, or asks the user anything: once wrap-up starts it closes without stopping.
 
 The order below is fixed.
 

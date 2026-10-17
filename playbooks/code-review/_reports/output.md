@@ -15,7 +15,7 @@ A run reviews one confirmed scope end to end: `scope` settles what to look at an
 - No hand commits, no pushes. The repo's changes stay for the user; the vault commit is the exit hook's.
 - Style the project's linter or formatter already enforces is filtered out — it is noise, not review signal.
 - A lesson violation is always a `BLOCKER`. Never softened to `SUGGESTION`.
-- No edit beyond a user-approved trivial nit. Every non-trivial fix routes through the worker agent named below.
+- The driver edits no code. An approved small fix goes back to the reviewer that found it; every other fix routes through the worker agent named below.
 
 Eval runs are proposed, never launched — the user triggers them.
 
@@ -28,7 +28,7 @@ itself stays yours. Never delegate to an agent that is not on this list.
 | agent | good for | bad for |
 | --- | --- | --- |
 | `booping:booping-researcher` | Blast-radius reads on large diffs (≥ ~5 files) aggregated into a compressed summary of touched modules and integration points | Single-file reads — call Read directly; Small greps or existence checks that fit in a few lines of output |
-| `booping:booping-developer` | Applying user-approved non-trivial fixes surfaced by the review (BLOCKER or SUGGESTION) | Trivial inline nits — orchestrator handles those directly |
+| `booping:booping-developer` | Applying user-approved non-trivial fixes surfaced by the review (BLOCKER or SUGGESTION) | Approved small fixes — the resumed reviewer applies those; this agent only when it cannot be resumed |
 
 
 
@@ -41,10 +41,9 @@ itself stays yours. Never delegate to an agent that is not on this list.
 
 ## Rules
 
-The following 2 rule(s) apply to this playbook. Never silently violate one; conflict → stop and flag. Read a rule's record when its brief is not enough.
+The following 1 rule(s) apply to this playbook. Never silently violate one; conflict → stop and flag. Read a rule's record when its brief is not enough.
 
 - When the user corrects you — rejects a proposal, rewrites an output, says it is wrong, answers a gate other than you suggested — run `booping correction add --target {run artefact} --step {playbook}/{step} --did … --said '{the user's words verbatim}'`, with `--why` when the user states it and `--record {ref}` when the correction names a spec record; a plain confirmation is not a correction. [booping:rule/0031](${CLAUDE_PLUGIN_ROOT}/specs/rule/0031-corrections-are-logged.md)
-- Ask for approval at a review gate in prose at the end of your message, never through AskUserQuestion; a change request sends the run back to drafting. [booping:rule/0032](${CLAUDE_PLUGIN_ROOT}/specs/rule/0032-approval-asked-in-prose.md)
 
 ## Playbook Steps
 
@@ -55,7 +54,7 @@ Execute the steps in the most effective order considering their dependencies.
 | `scope` | — | Put every scope candidate on one `AskUserQuestion` call — the plan this session delivered, the latest coherent work on this branch, the eligible plans, and a free-text route — then resolve the answer into a diff range or file list, open the run's artifact on it, and report it back before any review work is spent. | — |
 | `review` | `scope` | Perform the whole review craft over the confirmed scope in one detached pass — stack discovery, checklist selection, blast radius, every loaded checklist, and the lesson-, DoD- and intent-aware dynamic checks — returning each finding classified `BLOCKER` / `SUGGESTION` / `NIT` with its anchor, snippet, proposed fix and rationale. Nothing is written anywhere. | — |
 | `present` | `review` | Write the findings `review` returned into the artifact's `## Findings`, advance the run to the human-review status, post them grouped by severity, and record the user's verdict under `## Verdict` — nothing is re-derived or re-classified here. | — |
-| `resolve` | `present` | Act on the verdict already recorded — approved trivial nits applied inline, approved non-trivial fixes delegated to the worker agent with the finding and its fix, rejected findings dropped without argument — then write `## Resolution` to the artifact, close the run, and report what was applied, delegated and left. | — |
+| `resolve` | `present` | Act on the verdict already recorded — approved small fixes sent back to the reviewer that found them, approved non-trivial fixes delegated to the worker agent with the finding and its fix, rejected findings dropped without argument — then write `## Resolution` to the artifact, close the run, and report what was applied, delegated and left. | — |
 
 ## State
 
@@ -206,21 +205,21 @@ The order below is fixed: write the findings, advance the run, ask, record the v
 
 ## 1. Write the findings
 
-Append `## Findings` to the artifact, grouped by severity — `BLOCKER`, then `SUGGESTION`, then `NIT` — each group headed with its count, an empty group dropped entirely. One entry per finding: file and line, the offending snippet, the proposed fix, and the item or lesson it cites. This block is written once and posted verbatim in step 3 — the artifact and the chat post never diverge.
+Append `## Findings` to the artifact, grouped by severity — `BLOCKER`, then `SUGGESTION`, then `NIT` — each group headed with its count, an empty group dropped entirely. One numbered line per finding, numbered across the groups: file and line, the offending snippet, the proposed fix, and the item or lesson it cites. This block is written once and posted verbatim in step 3 — the artifact and the chat post never diverge.
 
 ```markdown
 ## Findings
 
 **BLOCKER (1)**
-- `src/auth/refresh.py:52` — token compared with `==`: `if token == stored:` → `if secrets.compare_digest(token, stored):` — lesson `0007_constant_time_compare`
+1. `src/auth/refresh.py:52` — token compared with `==`: `if token == stored:` → `if secrets.compare_digest(token, stored):` — lesson `0007_constant_time_compare`
 
 **SUGGESTION (2)**
-- `src/api/routes.py:210` — the 401 branch is duplicated in three handlers; extract `_unauthorized()` — checklist `python:dry`
-- `src/api/routes.py:33` — error envelope drops the request id — checklist `api:errors`
+2. `src/api/routes.py:210` — the 401 branch is duplicated in three handlers; extract `_unauthorized()` — checklist `python:dry`
+3. `src/api/routes.py:33` — error envelope drops the request id — checklist `api:errors`
 
 **NIT (2)**
-- `src/auth/session.py:88` — `tmp` → `refreshed_at` — checklist `python:naming`
-- `src/auth/session.py:141` — comment above `_rotate()` no longer matches the code
+4. `src/auth/session.py:88` — `tmp` → `refreshed_at` — checklist `python:naming`
+5. `src/auth/session.py:141` — comment above `_rotate()` no longer matches the code
 ```
 
 When `review` returned no findings, the section is written as `_No findings._`.
@@ -237,13 +236,13 @@ Post the block from step 1 in chat, headed with the scope:
 ## Review findings — `a1f3c02..HEAD` (plan `202608031402_token-refresh`)
 ```
 
-Close on the ask — which of these should be applied — in prose, in the same message, never through `AskUserQuestion`. Then stop and wait. With no findings, say so and say there is nothing to rule on; the run still passes through here.
+Every proposed fix is the review's proposal, none the user's: say so once above the ask. Close on the ask — which of these should be applied — in prose, in the same message, never through `AskUserQuestion`. Then stop and wait. With no findings, say so and say there is nothing to rule on; the run still passes through here.
 
 Where the project has registered an agent for presenting a review, hand the findings to that agent instead of posting them yourself and take the verdict back from it — what it does with them is carried by its own description, not by this step.
 
 ## 4. Record the verdict
 
-Read the reply as chat text and carry it forward as the user gave it. Do not argue a rejection, do not re-open a finding they settled, and do not start fixing anything — `resolve` owns that. Ask a follow-up only where the reply leaves a finding genuinely unanswered.
+Read the reply as chat text and carry it forward as the user gave it. Do not argue a rejection, do not re-open a finding they settled, and do not start fixing anything — `resolve` owns that. A finding the reply leaves unanswered is not approved: ask a follow-up, and record it `open` if it stays unanswered.
 
 Append `## Verdict` to the artifact — one line per finding, its disposition in the user's own terms, their correction quoted where they gave one:
 
@@ -268,12 +267,18 @@ The order below is fixed: apply the dispositions, write `## Resolution`, close t
 
 ## Each finding's disposition
 
-- **Approved, trivial** — a rename, a stale comment, a small local edit the proposed fix already spells out: apply it yourself with `Edit`.
+- **Approved, small** — at most **2 SP** on the sprint scale (1: Simple text/config change, no risk; 2: Simple task, predictable, no risk), every file it touches already read by the session that applies it, nothing left to find out — no file still to read, no research, no open question: send it back to the reviewer that found it (below).
 - **Approved, non-trivial** — everything else, whatever its severity: delegate it. Never apply it yourself.
 - **Rejected** — drop it. No argument, no counter-proposal, no reworked version of it.
-- **Corrected** — where the user described a fix different from the proposed one, their words win: carry theirs into the edit or the briefing in place of the proposed fix.
+- **Corrected** — where the user described a fix different from the proposed one, their words win: carry theirs into the reviewer's message or the worker's briefing in place of the proposed fix.
 
-Where the verdict genuinely leaves a finding's disposition open, ask in `## Questions:` rather than guess.
+A finding the verdict records `open`, or genuinely leaves open, is not applied: ask in `## Questions:` rather than guess.
+
+Approved means by the user in a supervised run; in an autonomous run, settled by you and logged with `booping defaults add`.
+
+## Sending small fixes back to the reviewer
+
+Resume the `review` step's agent by the id the artifact's `agents:` mapping records under `review` (SendMessage) — never respawn it — with every approved small fix in one message: each finding's anchor and the fix to apply (the user's correction where they gave one). It edits, leaves the work uncommitted and reports the files it changed. An id this conversation did not record from its own spawn is not resumable: those fixes go to the worker below instead, never to you.
 
 ## Delegating a non-trivial fix
 
@@ -286,7 +291,7 @@ Once every disposition is applied, append `## Resolution` to the artifact — th
 ```markdown
 ## Resolution
 
-**Applied here (2)**
+**Applied by the reviewer (2)**
 - `src/auth/session.py:88` — NIT · `tmp` renamed to `refreshed_at`
 - `src/auth/session.py:141` — NIT · stale comment above `_rotate()` dropped
 
@@ -320,7 +325,7 @@ Post it in chat, once, as the last thing the step does — the whole ledger, so 
 Recorded in `codereviews/202608031402_token-refresh/202608041530.md`; the plan's `code_reviews:` list now points at it.
     ← second clause omitted when the run had no plan in scope
 
-**Applied here (2 nits)**
+**Applied by the reviewer (2 nits)**
 - `src/auth/session.py:88` — NIT · `tmp` renamed to `refreshed_at` (checklist `python:naming`)
 - `src/auth/session.py:141` — NIT · stale comment above `_rotate()` dropped
 
@@ -341,14 +346,14 @@ One `[UPDATED]` line per repo file edited, annotated with the finding it closes 
 ```markdown
 ## Changed:
 
-- [UPDATED] src/auth/session.py — NIT `session.py:88` rename, `:141` comment (runner)
+- [UPDATED] src/auth/session.py — NIT `session.py:88` rename, `:141` comment (reviewer)
 - [UPDATED] src/auth/refresh.py — BLOCKER `refresh.py:52` constant-time compare (booping-developer)
 - [UPDATED] src/api/routes.py — SUGGESTION `routes.py:210` 401 branch extracted (booping-developer)
 - [UPDATED] codereviews/202608031402_token-refresh/202608041530.md — `## Resolution`, closed at `done`
 
 ## Notes:
 
-- 2 applied by the runner, 2 delegated to `booping-developer`, 1 dropped on the user's call
+- 2 applied by the resumed reviewer, 2 delegated to `booping-developer`, 1 dropped on the user's call
 - the vault commit is the exit hook's; nothing in the repo was committed or pushed
 
 ## Questions:

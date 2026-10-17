@@ -4,7 +4,6 @@ import argparse
 from typing import cast
 
 from booping.argparser import Parser
-from booping.commands import budget as budget_cmd
 from booping.commands import config_get as config_get_cmd
 from booping.commands import correction as correction_cmd
 from booping.commands import debug as debug_cmd
@@ -50,7 +49,6 @@ def build_parser() -> argparse.ArgumentParser:
     plan_cmd.add_parser(sub)
     status_cmd.add_parser(sub)
     run_cmd.add_parser(sub)
-    budget_cmd.add_parser(sub)
 
     return parser
 

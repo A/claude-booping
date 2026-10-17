@@ -1,4 +1,4 @@
-After the table is accepted, write every accepted row in a single pass per destination. No per-edit `AskUserQuestion` calls; table acceptance is the consent.
+After the table is accepted, write every accepted row in a single pass per destination. No per-edit asks; table acceptance is the consent.
 
 There are exactly two destinations (resolve each placeholder before writing):
 

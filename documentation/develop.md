@@ -32,7 +32,7 @@ When a tree falls short of the DoD, or the agent reports its verification red, t
 
 When you correct the runner mid-sprint, it logs your words verbatim, with a link back into the conversation, to the plan directory's `corrections.md` — the log [retro](retro.md) starts from.
 
-Every milestone group runs in **one session**, and each group first passes the [budget gate](project_manager.md#budget-and-time-window).
+Every milestone group runs in **one session**.
 
 ## Starting a run
 

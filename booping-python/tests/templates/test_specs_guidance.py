@@ -37,7 +37,8 @@ GUIDANCE = (
     "Every read or write goes through a subagent running `/booping:playbook specs` with the "
     "material or the question; keep only its short answer. A departure from a record is shown to "
     "the user, or in an autonomous run recorded with the record's ref and `[clarify]` — never "
-    "silently overridden.\n"
+    "silently overridden. A record drafted from the dialogue states as decided only the lines the "
+    "user accepted on a decision list; the rest is `[clarify]`.\n"
 )
 
 VALUES = [

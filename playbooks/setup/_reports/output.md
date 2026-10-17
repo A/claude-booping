@@ -121,11 +121,11 @@ Project `claude-booping` is already set up.
 
 `specs:` is the project tier root when it exists, else `none — run booping specs init --tier project`.
 
-Then offer the change routes via `AskUserQuestion`: move the vault, rename the project, merge it into another project, or change nothing. The routes are **offered, not scripted** — act on the user's call plus what this run already knows. A rename moves three things together: the vault directory, the marker's `project_name` and the home-dir symlink. Changing nothing writes nothing, and the report above is then the whole outcome.
+Then offer the change routes in prose: move the vault, rename the project, merge it into another project, or change nothing. The routes are **offered, not scripted** — act on the user's call plus what this run already knows. A rename moves three things together: the vault directory, the marker's `project_name` and the home-dir symlink. Changing nothing writes nothing, and the report above is then the whole outcome.
 
 ## Hard rules
 
-- Every decision is the user's, taken in-step via `AskUserQuestion`. Nothing is inferred silently, and nothing outside the vault, the marker, the symlink and the specs tier `booping specs init` creates is written.
+- Every decision is the user's, taken in-step. Nothing is inferred silently, and nothing outside the vault, the marker, the symlink and the specs tier `booping specs init` creates is written.
 - There is no attach route — never wire the repo to a vault this run did not create.
 - Stack detection and `_booping/` extension seeding are out of scope.
 

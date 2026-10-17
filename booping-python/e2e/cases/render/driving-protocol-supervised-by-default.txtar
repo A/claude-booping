@@ -8,5 +8,5 @@ sh -c 'booping render src/templates/skills/playbook.md.j2 | grep -E "^5\. After 
 -- exit --
 0
 -- stdout --
-5. After the batch completes, honor each member's `Review gate:` bullet: present that member's returned receipt [..] stop, and wait for the user's chat reply before continuing. Never use `AskUserQuestion` for a gate. In-conversation only — no state is persisted.
+5. After the batch completes, honor each member's `Review gate:` bullet: present that member's returned receipt [..] then list every decision the approval takes as settled, numbered, one plain line each ending `(user)` for the user's words or `(proposal)` for yours [..] stop, and wait for the user's chat reply before continuing. Never use `AskUserQuestion` for a gate. Approval accepts the listed lines only: a decision never listed, or a question left unanswered, stays open and lands as `[clarify]`. In-conversation only — no state is persisted.
 -- stderr --

@@ -140,7 +140,7 @@ Execute the steps in the most effective order considering their dependencies.
 | `intake` | — | Resolve the run's retrospective — from `$ARGUMENTS` as a `retrospectives/` path, or by picking one from the awaiting-learning list — validate it sits at learn's entry status, then read it in full and each plan in its `plans:` list for context, with the vault root as the workdir. | — |
 | `extract-candidates` | `intake` | Decompose every retrospective insight into atomic candidates — one imperative rule per candidate, single concern, no bare internal IDs, one sentence per review-table cell — and route each to exactly one of the preamble's two destinations, holding the set in context for the sweep. | — |
 | `dedup-sweep` | `extract-candidates` | Sweep every candidate against existing coverage — the rule records of the three specs tiers and the repo's `CLAUDE.md` — and record a per-candidate verdict: new, update-existing at the project rule already holding it, covered by a core or global rule, or a conflict flagged visibly for the review table. | — |
-| `review-table` | `dedup-sweep` | Present the unified review table in the format the review-table doc owns — every candidate with its target and sweep verdict, conflicts flagged — and collect the user's accept / reject / add response in a single `AskUserQuestion` call, never per row; the recorded response is the run's consent to write. | — |
+| `review-table` | `dedup-sweep` | Present the unified review table in the format the review-table doc owns — every candidate with its target and sweep verdict, conflicts flagged — and collect the user's accept / reject / add response asked once in prose, never per row; the recorded response is the run's consent to write. | — |
 | `write` | `review-table` | Write every accepted row in one pass per destination — new rule records in the project specs tier at the number `booping specs next` hands out, in-place updates to the rule the sweep matched, one-line bullets into the repo's `CLAUDE.md` — with table acceptance as the sole consent and never a write outside the vault, its specs tier and the attached repo. | — |
 | `transition` | `write` | Fire the exit transition from the vault root — `booping playbook-transition learn done --target retrospectives/{slug}.md` — whose hook commits the vault including the written rule records; commit any repo `CLAUDE.md` addition, and the rule records when the vault is outside the repo, separately in the repo working tree, then close on a report of items written per target. | — |
 
@@ -235,12 +235,12 @@ Record a sweep verdict per candidate as one of:
 ## Step: Review Table
 Render the review table in the [review table format](${CLAUDE_PLUGIN_ROOT}/docs/learn_review_table.md); a row's Targets cell draws on the preamble's `## Targets`.
 
-Use `AskUserQuestion` once to collect the user's accept / reject / add response. Do not prompt per row.
+Close the message by asking, in prose, for the user's accept / reject / add response over the whole table — never per row — then stop and wait; the user may ask back about a row before answering.
 
 The confirmed response is what the exit edge's first gate names — record it. Nothing is written in this step.
 
 ## Step: Write
-After the table is accepted, write every accepted row in a single pass per destination. No per-edit `AskUserQuestion` calls; table acceptance is the consent.
+After the table is accepted, write every accepted row in a single pass per destination. No per-edit asks; table acceptance is the consent.
 
 There are exactly two destinations (resolve each placeholder before writing):
 

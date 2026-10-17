@@ -1,3 +1,4 @@
+{% from "_partials/inline_fix.md" import inline_fix -%}
 # Act on the verdict and close the run
 
 The user's verdict is already recorded in the run's artifact under `## Verdict`, together with the findings as they were classified and the scope the run opened on. Act on it; the findings are never re-presented, re-grouped or re-classified here, and the verdict is never asked for again or re-litigated.
@@ -6,12 +7,18 @@ The order below is fixed: apply the dispositions, write `## Resolution`, close t
 
 ## Each finding's disposition
 
-- **Approved, trivial** — a rename, a stale comment, a small local edit the proposed fix already spells out: apply it yourself with `Edit`.
+- **Approved, small** — {{ inline_fix }}: send it back to the reviewer that found it (below).
 - **Approved, non-trivial** — everything else, whatever its severity: delegate it. Never apply it yourself.
 - **Rejected** — drop it. No argument, no counter-proposal, no reworked version of it.
-- **Corrected** — where the user described a fix different from the proposed one, their words win: carry theirs into the edit or the briefing in place of the proposed fix.
+- **Corrected** — where the user described a fix different from the proposed one, their words win: carry theirs into the reviewer's message or the worker's briefing in place of the proposed fix.
 
-Where the verdict genuinely leaves a finding's disposition open, ask in `## Questions:` rather than guess.
+A finding the verdict records `open`, or genuinely leaves open, is not applied: ask in `## Questions:` rather than guess.
+
+Approved means by the user in a supervised run; in an autonomous run, settled by you and logged with `booping defaults add`.
+
+## Sending small fixes back to the reviewer
+
+Resume the `review` step's agent by the id the artifact's `agents:` mapping records under `review` (SendMessage) — never respawn it — with every approved small fix in one message: each finding's anchor and the fix to apply (the user's correction where they gave one). It edits, leaves the work uncommitted and reports the files it changed. An id this conversation did not record from its own spawn is not resumable: those fixes go to the worker below instead, never to you.
 
 ## Delegating a non-trivial fix
 
@@ -24,7 +31,7 @@ Once every disposition is applied, append `## Resolution` to the artifact — th
 ```markdown
 ## Resolution
 
-**Applied here (2)**
+**Applied by the reviewer (2)**
 - `src/auth/session.py:88` — NIT · `tmp` renamed to `refreshed_at`
 - `src/auth/session.py:141` — NIT · stale comment above `_rotate()` dropped
 
@@ -58,7 +65,7 @@ Post it in chat, once, as the last thing the step does — the whole ledger, so 
 Recorded in `codereviews/202608031402_token-refresh/202608041530.md`; the plan's `code_reviews:` list now points at it.
     ← second clause omitted when the run had no plan in scope
 
-**Applied here (2 nits)**
+**Applied by the reviewer (2 nits)**
 - `src/auth/session.py:88` — NIT · `tmp` renamed to `refreshed_at` (checklist `python:naming`)
 - `src/auth/session.py:141` — NIT · stale comment above `_rotate()` dropped
 
@@ -79,14 +86,14 @@ One `[UPDATED]` line per repo file edited, annotated with the finding it closes 
 ```markdown
 ## Changed:
 
-- [UPDATED] src/auth/session.py — NIT `session.py:88` rename, `:141` comment (runner)
+- [UPDATED] src/auth/session.py — NIT `session.py:88` rename, `:141` comment (reviewer)
 - [UPDATED] src/auth/refresh.py — BLOCKER `refresh.py:52` constant-time compare (booping-developer)
 - [UPDATED] src/api/routes.py — SUGGESTION `routes.py:210` 401 branch extracted (booping-developer)
 - [UPDATED] codereviews/202608031402_token-refresh/202608041530.md — `## Resolution`, closed at `done`
 
 ## Notes:
 
-- 2 applied by the runner, 2 delegated to `booping-developer`, 1 dropped on the user's call
+- 2 applied by the resumed reviewer, 2 delegated to `booping-developer`, 1 dropped on the user's call
 - the vault commit is the exit hook's; nothing in the repo was committed or pushed
 
 ## Questions:
