@@ -74,16 +74,19 @@ def _add_autonomous(p: argparse.ArgumentParser) -> None:
 
 
 def _plan(ctx: Context, raw: str) -> tuple[str, Path]:
-    """*raw* (an index.md or its directory, absolute or cwd-relative) as the
-    vault-relative and the absolute path of an existing plan inside the vault."""
+    """*raw* (an index.md or its directory) as the vault-relative and the absolute
+    path of an existing plan inside the vault. A relative *raw* resolves against
+    the cwd first, then against the vault root — the form `booping status` prints."""
     vault = open_items.require_vault(ctx).resolve()
-    path = Path(raw).expanduser()
-    path = (path if path.is_absolute() else Path.cwd() / path).resolve()
-    if path.is_dir():
-        path = path / "index.md"
-    if not path.is_file() or not path.is_relative_to(vault):
-        raise OpenItemError(f"plan not found: {raw}")
-    return open_items.vault_path(ctx, str(path)), path
+    given = Path(raw).expanduser()
+    candidates = [given] if given.is_absolute() else [Path.cwd() / given, vault / given]
+    for candidate in candidates:
+        path = candidate.resolve()
+        if path.is_dir():
+            path = path / "index.md"
+        if path.is_file() and path.is_relative_to(vault):
+            return open_items.vault_path(ctx, str(path)), path
+    raise OpenItemError(f"plan not found: {raw}")
 
 
 def _item(ctx: Context, item_id: str) -> Path:
