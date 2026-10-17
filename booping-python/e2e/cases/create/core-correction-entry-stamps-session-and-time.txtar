@@ -1,14 +1,14 @@
-The core corrections template writes one entry file named by `--set name`: text through `tojson`,
+The core corrections template writes one entry file named `R{nnnn}-{name}.md` by `next_id`: text through `tojson`,
 `state: open`, the session and the time from their macros, an omitted `why` and `artifact` null.
 
 -- cmd --
-booping create core.corrections.template corrections --set name=20261018-120000-draft-plan --set step=groom/draft-plan --set did="split the plan" --set said="don't split: keep \"one\" plan" --stub-macro core.macros.session=s-1 --stub-macro core.macros.date=2026-10-18
+booping create core.corrections.template corrections --set name=draft-plan --set step=groom/draft-plan --set did="split the plan" --set said="don't split: keep \"one\" plan" --stub-macro core.macros.session=s-1 --stub-macro core.macros.date=2026-10-18
 -- exit --
 0
 -- stdout --
 created dir corrections
 --- /dev/null
-+++ corrections/20261018-120000-draft-plan.md
++++ corrections/R0001-draft-plan.md
 @@ -0,0 +1,10 @@
 +---
 +step: "groom/draft-plan"
@@ -22,7 +22,7 @@ created dir corrections
 +---
 wrote 2 paths — 1 dirs created, 1 files created, 0 files overwritten
 -- stderr --
--- expected/cwd/corrections/20261018-120000-draft-plan.md --
+-- expected/cwd/corrections/R0001-draft-plan.md --
 ---
 step: "groom/draft-plan"
 did: "split the plan"

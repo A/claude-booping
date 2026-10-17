@@ -13,8 +13,10 @@ from booping import logger
 from booping.context import Context
 from booping.context import config as config_mod
 from booping.rendering import get_plugin_root
+from booping.specs import open_items
 from booping.specs.check import CheckError, check_tier, display_path, format_finding
 from booping.specs.init import InitError, apply, plan
+from booping.specs.open_items import OpenItemError
 from booping.specs.records import Record, load_tier
 from booping.specs.site.index import ProjectsError, build_index, load_projects
 from booping.specs.site.items import OpenItem, load_open_items
@@ -57,6 +59,14 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
     )
     _add_tier(chk)
     chk.set_defaults(func=_run_check)
+
+    scan = verbs.add_parser(
+        "scan",
+        help="File one clarify open item per [clarify]/[unknown] mark and per `specs check`"
+        " finding in a tier, skipping any already tracked",
+    )
+    _add_tier(scan, "Tier to scan (default: project)")
+    scan.set_defaults(func=_run_scan)
 
     init = verbs.add_parser(
         "init",
@@ -260,6 +270,32 @@ def _run_check(args: argparse.Namespace) -> None:
     print(f"{checked} record(s) checked: {errors} error(s), {warnings} warning(s)", file=sys.stderr)
     if errors:
         sys.exit(1)
+
+
+def _run_scan(args: argparse.Namespace) -> None:
+    ctx, root, home_dir = _assemble()
+    try:
+        open_items.require_vault(ctx)
+    except OpenItemError as exc:
+        _fail(str(exc))
+    tier = _select_tier(ctx, root, home_dir, args.tier)
+    known = tier.types
+    records = load_tier(tier, known)
+    try:
+        findings, _ = check_tier(tier, _resolve(ctx, root, home_dir))
+    except CheckError as exc:
+        _fail(str(exc), 2)
+    candidates = open_items.mark_candidates(
+        [r for r in records if r.type in known], tier.root
+    ) + open_items.finding_candidates(findings, tier.root)
+    try:
+        created, skipped = open_items.scan(ctx, candidates)
+    except OpenItemError as exc:
+        _fail(str(exc))
+    for path in created:
+        print(open_items.vault_relative(ctx, path))
+    logger.log(vault=ctx.vault, subcommand="specs", message=f"scan --tier {args.tier}")
+    print(f"{len(created)} created, {skipped} already tracked")
 
 
 def _run_init(args: argparse.Namespace) -> None:

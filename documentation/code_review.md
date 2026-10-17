@@ -24,7 +24,7 @@ The status lives in the artifact, never in the reviewed plan:
 - **`human-review`** — the findings are on record, your verdict is pending.
 - **`done`** — every finding is resolved (applied, delegated or dropped) and recorded.
 
-The run works from the vault root and addresses the review file explicitly; a stopped run resumes with `booping playbook-state code-review --workdir {vault} --target codereviews/{dir}/{ts}.md`.
+The run works from the vault root and addresses the review file explicitly; a stopped run resumes with `booping state {vault}/codereviews/{dir}/{ts}.md --playbook code-review`.
 
 Closing the run stamps `reviewed_at` on the artifact, appends the artifact's path to the reviewed plan's `code_reviews:` list, and commits the vault. An ad-hoc review (`plan: null`) skips the append and only commits. The plan's `status:` is never touched.
 

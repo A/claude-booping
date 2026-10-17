@@ -18,7 +18,7 @@ The manager you talk to about a project: tell it what you want, in as many reque
 
 In `supervised` mode it proposes the first action and waits for you; in `autonomous` mode it starts on that list.
 
-**Every message.** Each request in your message becomes one item, filed with `booping items add --source request` — asides included, in your own words, never paraphrased. A message that only answers a question or confirms a gate files nothing. The manager then lists the ids it filed, one line each.
+**Every message.** Each request in your message becomes one item, filed with `booping create core.specs.open_items.template … --set source=request` — asides included, in your own words, never paraphrased. A message that only answers a question or confirms a gate files nothing. The manager then lists the ids it filed, one line each.
 
 **Working an item.** Each item it takes up is one of four kinds:
 
@@ -54,7 +54,7 @@ The manager is autonomous when you tell it to work autonomously; otherwise it is
 
 ## Questions on an item
 
-A question the manager cannot settle itself goes on the item, never only in chat: chat names the item file, the file keeps the question. The manager appends it to the item's body under `## Question` and moves the item to `clarify` with `booping playbook-transition specs clarify --state open_item --target {vault}/open-items/{ID}.md`.
+A question the manager cannot settle itself goes on the item, never only in chat: chat names the item file, the file keeps the question. The manager appends it to the item's body under `## Question` and moves the item to `clarify` with `booping transition {vault}/open-items/{ID}.md clarify`.
 
 You answer by telling the manager — it appends your words verbatim under `## Answer` and moves the item back to `open` — or by editing the file and making the same transition yourself.
 
@@ -75,17 +75,10 @@ One develop or code-review run per checkout at a time — a second item queues u
 A tiny fix gets a size when the manager classifies it — its judgement, written onto the item:
 
 ```text
-booping items size ID SIZE    # SIZE is one of the sizes in core.project_manager_playbook.batch
+booping set {vault}/open-items/ID.md size=SIZE    # one of the sizes in core.project_manager_playbook.batch
 ```
 
-`booping items list` shows it in the `size` column; an item filed before sizes existed simply has none. `booping items batch` packs the open items whose size skips grooming and that wait on no question, in id order, into batches under a story-point cap, one line each:
-
-```text
-B1 (8 SP): OI-0002 OI-0004 OI-0006 OI-0007
-B2 (1 SP): OI-0009
-```
-
-or `no batch: no open item of a direct size`. Each batch goes to one worker briefing carrying every item's text; the manager checks the result and commits once per item, naming its id, then closes the items. An unsized item, or one of a size that does not skip grooming, takes the plan route. The sizes, their story points, which sizes skip grooming and the cap are `core.project_manager_playbook.batch` in the [project config](project_config.md#coreproject_manager_playbookbatch).
+`mdcheck playbooks/specs/_schemas/open_item.yaml` rejects any other size, and `booping query --config core.specs.open_items.index` shows it in the `size` column; an item filed before sizes existed simply has none. The manager then packs the open items whose size skips grooming, listed with `booping query`, in id order into batches under a story-point cap: each item joins the current batch while its summed points stay within the cap, else it starts the next. Each batch goes to one worker briefing carrying every item's text; the manager checks the result and commits once per item, naming its id, then closes the items. An unsized item, or one of a size that does not skip grooming, takes the plan route. The sizes, their story points, which sizes skip grooming and the cap are `core.project_manager_playbook.batch` in the [project config](project_config.md#coreproject_manager_playbookbatch).
 
 ## Merge, push and deploy
 
@@ -95,4 +88,4 @@ Pushing, opening a pull request, deploying or releasing happens only when the pr
 
 ## Closing an item without a plan
 
-`booping items close ID` closes an open item as `done` — the path a tiny fix, an answered question or a recorded decision takes. `--reason TEXT` says why; `--dropped` closes it without any work done.
+`booping transition {vault}/open-items/ID.md done` closes an open item — the path a tiny fix, an answered question or a recorded decision takes; `dropped` instead closes it without any work done. `booping set {vault}/open-items/ID.md reason=…` beforehand says why.

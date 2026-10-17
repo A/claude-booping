@@ -5,7 +5,7 @@ The project is `taskflow`; the current working directory is its vault root, whic
 This run has no shell, so the `booping` commands were run for you; their outputs:
 
 - Preamble tiers — `project` — `specs/`.
-- `booping items list` — cannot run here; it prints the `open` and `planned` items under `open-items/` as a table — read them yourself.
+- `booping query --config core.specs.open_items.index --where status:in=open,planned` — cannot run here; it prints the `open` and `planned` items under `open-items/` as a table — read them yourself.
 
 ## Dialogue
 

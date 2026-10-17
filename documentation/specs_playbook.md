@@ -31,37 +31,37 @@ An open item is one piece of work waiting in the vault: something you asked for,
 
 The `source` says what kind of item it is:
 
-- `request` — your own words, filed as you said them; `backlog` — a task put aside for later. Neither has a direction (`direction: null`); the body is the text exactly as given, and without a `--title` the title is its first sentence.
+- `request` — your own words, filed as you said them; `backlog` — a task put aside for later. Neither has a direction (`direction: null`); the body is the text exactly as given, under a short title.
 - `manual`, `adr`, `mark`, `check`, `sync`, `correction` (a logged correction that names a spec record) — a specs-to-code gap, with a `direction`: `code-to-spec`, `spec-to-code`, `conflict` or `clarify`.
 
 An item moves `open` → `planned` → `done`, or straight from `open` to `done` when it is settled without a plan, or to `dropped` when it needs no work; a planned item can go back to `open`. An open item that asks you a question waits in `clarify` until the answer is in its body, then returns to `open`. Closed items stay on disk with `closed_at` and `reason`, out of the default list.
 
-### `booping items`
+### Working items from the shell
 
-Run anywhere inside a booping project; paths print vault-relative.
+Items are ordinary vault files, worked with the same operators as everything else; run them anywhere inside a booping project.
 
-| Verb | What it does |
-|------|--------------|
-| `list [--all]` | The index as a table — `id`, `status`, `source`, `direction`, `record`, `title`, `plan`; every non-terminal item (`open`, `clarify`, `planned`), every item with `--all`. |
-| `add --text TEXT [--title TEXT] [--source request\|backlog]` | Files a request (the default) or backlog item with the text as its body, verbatim. `--text -` reads the text from stdin. |
-| `add --title TEXT --direction D [--record REF] [--source S] [--text TEXT]` | Files a specs-to-code gap; `--direction` alone makes it `manual`. `add --record adr/NNNN` without `--title` takes the title from the ADR's `Confirmation:` line. |
-| `scan [--tier T]` | Files one item per `[clarify]` / `[unknown]` mark and per `specs check` finding in the tier; an item already filed for the same thing is skipped. |
-| `plan ID… --plan PATH` | Links open items to a plan and marks them planned. |
-| `close ID… [--dropped] [--reason TEXT]` | Closes open or planned items as done, or as dropped with `--dropped`. `close --plan PATH` closes every planned item linked to that plan. |
-| `reopen ID…` / `reopen --plan PATH` | Returns planned items to open and clears their plan. |
-
-`booping items {verb} --help` lists every flag and its allowed values.
+| Operation | Command |
+|-----------|---------|
+| List | `booping query --config core.specs.open_items.index` — the index as a table, `id`, `status`, `source`, `size`, `direction`, `record`, `title`, `plan`; narrow it with `--where status:in=open,clarify,planned`. |
+| File | `booping create core.specs.open_items.template {vault}/open-items --set title=… --set source=… [--set direction=…] [--set record=…] [--set body=…]` — the next free `OI-NNNN` is taken by `next_id`; a gap from an ADR passes `--set source=adr --set record=adr/NNNN --set direction=spec-to-code` and its `Confirmation:` line as the title. |
+| Scan | `booping specs scan [--tier T]` — files one item per `[clarify]` / `[unknown]` mark and per `specs check` finding in the tier; an item already filed for the same thing is skipped. |
+| Link to a plan | `booping set {item} plan=plans/{dir}/index.md`, then `booping transition {item} planned`. |
+| Size | `booping set {item} size=S` — one of the `core.project_manager_playbook.batch` sizes, checked by `mdcheck playbooks/specs/_schemas/open_item.yaml {item}`. |
+| Close | `booping transition {item} done`, or `dropped` for one needing no work — `booping set {item} reason=…` first to say why. |
+| Reopen | `booping transition {item} open` — returns a planned item to open and clears its plan. |
 
 ### Filing a request from anywhere
 
-`booping items add --text -` reads the whole of stdin, so anything that can run a command can file a request — a shell script, a chat or mail bridge, a hook:
+`booping create` takes the text as a `--set` value, so anything that can run a command can file a request — a shell script, a chat or mail bridge, a hook:
 
 ```sh
-printf 'Ship the tracker sync.\nIt should run nightly.\n' | booping items add --text -
+booping create core.specs.open_items.template "$VAULT/open-items" \
+  --set source=request --set title="Ship the tracker sync" \
+  --set body="$(printf 'Ship the tracker sync.\nIt should run nightly.\n')"
 ```
 
-It prints the new item's path (`open-items/OI-NNNN.md`). The text lands byte for byte: blank lines, `---` lines, trailing spaces and template-looking `{{ }}` are kept as typed. Two items filed at the same moment always get different ids.
+It prints the new item as a diff (`+++ open-items/OI-NNNN.md`). The text lands as given: blank lines, `---` lines, trailing spaces and template-looking `{{ }}` are kept as typed.
 
 ### Items and plans
 
-Name the items in a groom request (`/playbook groom — work OI-0003 and OI-0007`) and groom links them to the new plan. From there they follow the plan: develop finishing it at `done` closes them, a failed or cancelled plan returns them to `open`. A plan cancelled some other way leaves its items planned — `booping items reopen --plan plans/{dir}/index.md` puts them back.
+Name the items in a groom request (`/playbook groom — work OI-0003 and OI-0007`) and groom links them to the new plan. From there they follow the plan: develop finishing it at `done` closes them, a failed or cancelled plan returns them to `open`. A plan cancelled some other way leaves its items planned — `booping transition {item} open` on each puts them back.

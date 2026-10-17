@@ -1,6 +1,6 @@
 # Three smoke cases over the intake step. The run has no shell: each fixture states the
 # `booping` outputs a live run would have read, and stands in for the item and sidecar writes
-# the CLI would have made. The cwd is the vault root.
+# `booping create` would have made. The cwd is the vault root.
 
 - description: intake smoke — two requests and an aside file three items, each in the user's words
   vars:

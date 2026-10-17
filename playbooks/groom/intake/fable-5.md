@@ -27,7 +27,9 @@ The printed diff is the confirmation — do not read the created files back. A t
 already existing was not written; decide what that means for this run.
 
 - A request naming open items (`OI-NNNN`) links each to the new plan once the directory exists:
-  `booping items plan {ids} --plan {plan-dir}/index.md`.
+  `booping set {vault}/open-items/{id}.md plan={plan index}`, then
+  `booping transition {vault}/open-items/{id}.md planned`, `{plan index}` the plan's `index.md`
+  relative to the vault.
 
 ## The brief — written to `request.md`, posted in chat
 

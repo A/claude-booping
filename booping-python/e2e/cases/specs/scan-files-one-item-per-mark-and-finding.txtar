@@ -1,5 +1,7 @@
-An item closed `dropped` still tracks its mark: the scan files the other two and nothing for
-the closed one.
+A tier with a `[clarify]` mark opening a sentence, an `[unknown]` mark opening a list item, a
+mark mid-sentence and a broken link files three `clarify` items: each mark's record carries the
+nearest heading's anchor, the mid-sentence mark files nothing, and the check finding's title is
+`{check}: {message}` on the bare record ref.
 
 -- fixtures/cwd/.booping --
 project_name: probe
@@ -27,30 +29,32 @@ It shows in every run. [clarify] Which runs count as every run? The owner decide
 
 - [unknown] The code skips dry runs; the record says it never does.
 - A mid-sentence [clarify] mark is not one.
--- fixtures/cwd/vault/open-items/OI-0001.md --
----
-id: OI-0001
-title: "Which runs count as every run"
-status: dropped
-direction: clarify
-record: "value/0001#in-practice"
-source: mark
-plan: null
-created_at: 2026-10-15
-closed_at: '2026-10-14'
-reason: resolved
----
-
-# Which runs count as every run
 -- cmd --
-booping items scan
+booping specs scan
 -- exit --
 0
 -- stdout --
+open-items/OI-0001.md
 open-items/OI-0002.md
 open-items/OI-0003.md
-2 created, 1 already tracked
+3 created, 0 already tracked
 -- stderr --
+-- expected/cwd/vault/open-items/OI-0001.md --
+---
+id: OI-0001
+title: "Which runs count as every run"
+status: open
+direction: clarify
+record: "value/0001#in-practice"
+source: mark
+size: null
+plan: null
+created_at: 2026-10-15
+closed_at: null
+reason: null
+---
+
+# Which runs count as every run
 -- expected/cwd/vault/open-items/OI-0002.md --
 ---
 id: OI-0002

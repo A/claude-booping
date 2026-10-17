@@ -1,0 +1,53 @@
+The core open-item template beside an existing `OI-0007.md`: `next_id('OI-')` takes one past the
+highest id among the destination's file names, so the new item is `OI-0008`; non-matching names
+are ignored.
+
+-- fixtures/cwd/open-items/OI-0007.md --
+seven
+-- fixtures/cwd/open-items/OI-0002.md --
+two
+-- fixtures/cwd/open-items/notes.md --
+notes
+-- cmd --
+booping create core.specs.open_items.template open-items --set title="Fix the flaky test" --set source=request --stub-macro core.macros.date=2026-10-18
+-- exit --
+0
+-- stdout --
+--- /dev/null
++++ open-items/OI-0008.md
+@@ -0,0 +1,15 @@
++---
++id: OI-0008
++title: "Fix the flaky test"
++status: open
++direction: null
++record: null
++source: request
++size: null
++plan: null
++created_at: 2026-10-18
++closed_at: null
++reason: null
++---
++
++# Fix the flaky test
+wrote 1 paths — 0 dirs created, 1 files created, 0 files overwritten
+-- stderr --
+-- expected/cwd/open-items/OI-0007.md --
+seven
+-- expected/cwd/open-items/OI-0008.md --
+---
+id: OI-0008
+title: "Fix the flaky test"
+status: open
+direction: null
+record: null
+source: request
+size: null
+plan: null
+created_at: 2026-10-18
+closed_at: null
+reason: null
+---
+
+# Fix the flaky test

@@ -2,9 +2,9 @@ graph:
   guide: []
 
 states:
-  # Lifecycle of one open item. The workdir is the vault; `booping items` moves it,
-  # except the `clarify` edges: `booping transition {vault}/open-items/OI-NNNN.md
-  # <to>`, the machine inferred from the path. The `specs` run never does.
+  # Lifecycle of one open item. The workdir is the vault; every edge is
+  # `booping transition {vault}/open-items/OI-NNNN.md <to>`, the machine inferred
+  # from the path. The `specs` run itself never moves one.
   open_item:
     standalone: true
     artifact: open-items/{instance}.md
@@ -13,14 +13,14 @@ states:
       open:
         transitions:
           - to: planned
-            when: "`booping items plan` linked the item to a plan"
+            when: "`booping set {item} plan={plan index}` linked the item to a plan"
             gates: ["`plan` names an existing plan file"]
           - to: done
-            when: "`booping items close` on an open item — a tiny fix, an answered question or a recorded decision closed without a plan"
+            when: "an open item closed without a plan — a tiny fix, an answered question or a recorded decision closed without a plan"
             hooks:
               - set closed_at="{{ macro('core.macros.date', '+%Y-%m-%d') }}"
           - to: dropped
-            when: "`booping items close --dropped` closed the item without work"
+            when: "the item closed without work, `booping set {item} reason=…` first when there is one"
             hooks:
               - set closed_at="{{ macro('core.macros.date', '+%Y-%m-%d') }}"
           - to: clarify
@@ -32,15 +32,15 @@ states:
       planned:
         transitions:
           - to: done
-            when: "`booping items close`, or the linked plan reached develop's `done`"
+            when: "the item closed by hand, or the linked plan reached develop's `done`"
             hooks:
               - set closed_at="{{ macro('core.macros.date', '+%Y-%m-%d') }}"
           - to: dropped
-            when: "`booping items close --dropped` closed the item without work"
+            when: "the item closed without work, `booping set {item} reason=…` first when there is one"
             hooks:
               - set closed_at="{{ macro('core.macros.date', '+%Y-%m-%d') }}"
           - to: open
-            when: "`booping items reopen`, or the linked plan failed or was cancelled"
+            when: "the item reopened by hand, or the linked plan failed or was cancelled"
             hooks:
               - set plan=null
       done: {terminal: true}

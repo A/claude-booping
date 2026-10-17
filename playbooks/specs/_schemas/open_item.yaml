@@ -1,0 +1,8 @@
+doc: open_item
+rules:
+  - select: FRONTMATTER
+    has:
+      # Restates the keys of `core.project_manager_playbook.batch.sizes` (XS, S, M, L)
+      # as a static regex: mdcheck reads no config. Change both together. An unsized
+      # item carries `size: null`.
+      size: '^(XS|S|M|L|null)$'

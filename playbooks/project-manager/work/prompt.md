@@ -12,15 +12,19 @@ Each item taken up is one of:
 - `question` — the user asks something.
 - `decision` — the user states a choice to record.
 
-A tiny fix is also sized: `booping items size {id} {size}`, one of the sizes
-`booping config core.project_manager_playbook.batch` lists.
+{% set batch = config.core.project_manager_playbook.batch -%}
+A tiny fix is also sized: `booping set {vault}/open-items/{id}.md size={size}`, the size one of
+{% for name, sp in batch.sizes.items() %}`{{ name }}` ({{ sp }} SP){{ ", " if not loop.last }}{% endfor %}; then
+`mdcheck ${CLAUDE_PLUGIN_ROOT}/playbooks/specs/_schemas/open_item.yaml {vault}/open-items/{id}.md` and fix what it reports.
 
 Next: the class's route below; a class the item does not let you judge → a question on the item (see the hard rules).
 
 ## Tiny fix
 
-`booping items batch` prints one line per batch; an item it leaves out takes the plan route. Per
-batch line:
+Batch the open items with `booping query --config core.specs.open_items.index --where status=open
+--where size:in={{ batch.direct | join(',') }}`: in id order, each item joins the current batch while its
+summed SP stays at or under {{ batch.max_sp }}, else it starts the next. An unsized
+item, or one of any other size, takes the plan route. Per batch:
 
 1. Brief the worker from the agents table, exactly this block:
 
@@ -41,17 +45,18 @@ batch line:
    One `## Item {id}` block per item in the batch, in the batch's order.
 2. Verify each item's change; commit each by path with a conventional message naming its id.
 
-Next: `booping items close {id}` for each item of the batch.
+Next: `booping transition {vault}/open-items/{id}.md done` for each item of the batch.
 
 ## Question
 
-The repo or vault holds the answer → answer in chat. Next: `booping items close {id}`; no answer
+The repo or vault holds the answer → answer in chat. Next: `booping transition {vault}/open-items/{id}.md done`; no answer
 there → a question on the item (see the hard rules).
 
 ## Decision
 
 Record it through `/playbook specs` — an ADR or an idea. Next:
-`booping items close {id} --reason "{record ref}"`.
+`booping set {vault}/open-items/{id}.md reason="{record ref}"`, then
+`booping transition {vault}/open-items/{id}.md done`.
 
 ## Plan
 

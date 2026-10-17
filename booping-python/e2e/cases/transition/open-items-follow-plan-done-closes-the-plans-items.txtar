@@ -1,5 +1,5 @@
 An edge carrying `script open-items-follow-plan done` closes the plan's planned item as `done`
-through the open-items CLI; the hook prints nothing of its own and reports ok.
+through `booping query` and `booping transition`; the hook prints nothing of its own and reports ok.
 
 -- fixtures/cwd/.booping --
 project_name: probe

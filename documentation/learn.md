@@ -27,7 +27,7 @@ Six steps, in dependency order:
 | `write` | Write the accepted items, one pass per target type |
 | `transition` | Close the retrospective at `done` and commit |
 
-The run workdir is the **vault root** and every `booping playbook-state` / `booping playbook-transition` call passes `--target retrospectives/{slug}.md`, so a stopped run is resumable.
+The run workdir is the **vault root** and every `booping state` / `booping transition` call names `retrospectives/{slug}.md` with `--playbook learn`, so a stopped run is resumable.
 
 ## What it writes
 

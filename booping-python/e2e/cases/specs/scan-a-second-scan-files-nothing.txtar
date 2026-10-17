@@ -1,7 +1,5 @@
-A tier with a `[clarify]` mark opening a sentence, an `[unknown]` mark opening a list item, a
-mark mid-sentence and a broken link files three `clarify` items: each mark's record carries the
-nearest heading's anchor, the mid-sentence mark files nothing, and the check finding's title is
-`{check}: {message}` on the bare record ref.
+A second scan over the same tier files nothing: every mark and finding matches an item's
+`(source, record, title)`.
 
 -- fixtures/cwd/.booping --
 project_name: probe
@@ -29,17 +27,7 @@ It shows in every run. [clarify] Which runs count as every run? The owner decide
 
 - [unknown] The code skips dry runs; the record says it never does.
 - A mid-sentence [clarify] mark is not one.
--- cmd --
-booping items scan
--- exit --
-0
--- stdout --
-open-items/OI-0001.md
-open-items/OI-0002.md
-open-items/OI-0003.md
-3 created, 0 already tracked
--- stderr --
--- expected/cwd/vault/open-items/OI-0001.md --
+-- fixtures/cwd/vault/open-items/OI-0001.md --
 ---
 id: OI-0001
 title: "Which runs count as every run"
@@ -47,7 +35,6 @@ status: open
 direction: clarify
 record: "value/0001#in-practice"
 source: mark
-size: null
 plan: null
 created_at: 2026-10-15
 closed_at: null
@@ -55,7 +42,7 @@ reason: null
 ---
 
 # Which runs count as every run
--- expected/cwd/vault/open-items/OI-0002.md --
+-- fixtures/cwd/vault/open-items/OI-0002.md --
 ---
 id: OI-0002
 title: "The code skips dry runs; the record says it never does"
@@ -63,7 +50,6 @@ status: open
 direction: clarify
 record: "value/0001#in-practice"
 source: mark
-size: null
 plan: null
 created_at: 2026-10-15
 closed_at: null
@@ -71,7 +57,7 @@ reason: null
 ---
 
 # The code skips dry runs; the record says it never does
--- expected/cwd/vault/open-items/OI-0003.md --
+-- fixtures/cwd/vault/open-items/OI-0003.md --
 ---
 id: OI-0003
 title: "link: link target `../notes/missing.md` does not exist"
@@ -79,7 +65,6 @@ status: open
 direction: clarify
 record: "value/0001"
 source: check
-size: null
 plan: null
 created_at: 2026-10-15
 closed_at: null
@@ -87,3 +72,10 @@ reason: null
 ---
 
 # link: link target `../notes/missing.md` does not exist
+-- cmd --
+booping specs scan
+-- exit --
+0
+-- stdout --
+0 created, 3 already tracked
+-- stderr --

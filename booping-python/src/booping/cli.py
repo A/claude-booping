@@ -7,7 +7,6 @@ from booping.argparser import Parser
 from booping.commands import config as config_cmd
 from booping.commands import create as create_cmd
 from booping.commands import debug as debug_cmd
-from booping.commands import items as items_cmd
 from booping.commands import plan as plan_cmd
 from booping.commands import query as query_cmd
 from booping.commands import render as render_cmd
@@ -39,7 +38,6 @@ def build_parser() -> argparse.ArgumentParser:
     debug_cmd.add_parser(sub)
     session_stats_cmd.add_parser(sub)
     specs_cmd.add_parser(sub)
-    items_cmd.add_parser(sub)
     plan_cmd.add_parser(sub)
     status_cmd.add_parser(sub)
     run_cmd.add_parser(sub)

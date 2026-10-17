@@ -121,15 +121,15 @@ core:
     preamble: "AUTONOMOUS RUN, started by booping run — nobody can answer. Do not use AskUserQuestion and do not wait at review gates: confirm each yourself and log it with booping create core.agent_decisions.template. Settle an unclear point with a sensible default and log it the same way. A question only the owner can answer parks the run where the playbook allows it; otherwise stop and report it. Never end the run while a background agent or a check you started is still running — wait for it. Never push."
 
   # One vault file per correction the user made during a run, written by
-  # `booping create core.corrections.template {vault}/corrections --set name=<ts>-<step-slug>
+  # `booping create core.corrections.template {vault}/corrections --set name=<step-slug>
   #  --set step=<playbook/step> --set did=<what the agent did> --set said=<the user's words>
-  #  [--set why=<reason>] [--set artifact=<vault-relative path>]`, `<ts>` from
-  # `date +%Y%m%d-%H%M%S`. Shared: groom, develop and code-review write it, retro reads
+  #  [--set why=<reason>] [--set artifact=<vault-relative path>]`, the file named
+  # `R{nnnn}-<step-slug>.md` by `next_id`. Shared: groom, develop and code-review write it, retro reads
   # `open` and sets `state=handled` with `booping set`. Text goes through
   # `tojson`; an omitted `why` or `artifact` is null.
   corrections:
     template:
-      "{{ name }}.md": |
+      "{{ next_id('R') }}-{{ name }}.md": |
         ---
         step: {{ step | tojson }}
         did: {{ did | tojson }}
@@ -146,13 +146,14 @@ core:
       columns: [step, did, said, why, session, logged_at, artifact]
 
   # One vault file per gate or question an `autonomous` run settled itself, written by
-  # `booping create core.agent_decisions.template {vault}/agent-decisions --set name=<ts>-<step-slug>
+  # `booping create core.agent_decisions.template {vault}/agent-decisions --set name=<step-slug>
   #  --set step=<playbook/step> --set asked=<the gate or question> --set decision=<what was
-  #  chosen> --set why=<reason> [--set artifact=<vault-relative path>]`. Shared: every
+  #  chosen> --set why=<reason> [--set artifact=<vault-relative path>]`, the file named
+  # `D{nnnn}-<step-slug>.md` by `next_id`. Shared: every
   # autonomous run writes it, the project-manager reviews `open` and sets `state=reviewed`.
   agent_decisions:
     template:
-      "{{ name }}.md": |
+      "{{ next_id('D') }}-{{ name }}.md": |
         ---
         step: {{ step | tojson }}
         asked: {{ asked | tojson }}
@@ -587,15 +588,16 @@ core:
             октября, ноября, декабря]
     # Open items: one file per user request or specs-to-code gap,
     # `{vault}/{dir}/OI-NNNN.md`, moved through the `open_item` machine of
-    # `playbooks/specs/playbook.yaml` by `booping items` only. Shared by that CLI,
-    # the specs playbook and the develop/groom hooks, so it sits under `core.specs`.
+    # `playbooks/specs/playbook.yaml` by `booping transition`. Shared by the specs,
+    # groom and project-manager playbooks and the develop/groom hooks, so it sits under `core.specs`.
     open_items:
       # Vault-relative directory holding the item files; created on first write.
       dir: open-items
       # Template tree written once per item by
-      # `booping create core.specs.open_items.template {vault}/{dir} --set id=OI-NNNN
-      #  --set title=<t> --set direction=<d|null> --set record=<ref|null> --set source=<s>
-      #  --set created_at=<YYYY-MM-DD> [--set body=<text>]`.
+      # `booping create core.specs.open_items.template {vault}/{dir}
+      #  --set title=<t> --set source=<s> [--set direction=<d>] [--set record=<ref>]
+      #  [--set body=<text>]`; `next_id` names it the next free `OI-NNNN` in `{dir}`
+      # and the date macro stamps `created_at`.
       # Sole definition of the item file. `status: open` is the machine's `initial`;
       # `size`, `plan`, `closed_at` and `reason` start null and are written by the CLI and
       # the machine's hooks. `title` goes through `tojson` like the plan template's.
@@ -603,9 +605,9 @@ core:
       # written verbatim (a variable's value is never re-parsed as Jinja), ending in
       # exactly the newlines it brought, or one when it brought none.
       template:
-        "{{ id }}.md": |
+        "{{ next_id('OI-') }}.md": |
           ---
-          id: {{ id }}
+          id: {{ next_id('OI-') }}
           title: {{ title | tojson }}
           status: open
           direction: {% if direction and direction != 'null' %}{{ direction }}{% else %}null{% endif %}
@@ -613,7 +615,7 @@ core:
           source: {{ source }}
           size: null
           plan: null
-          created_at: {{ created_at }}
+          created_at: {{ macro('core.macros.date', '+%Y-%m-%d') }}
           closed_at: null
           reason: null
           ---
@@ -621,8 +623,8 @@ core:
           # {{ title }}
           {% if body %}
           {{ body }}{% if not body.endswith('\n') %}{{ '\n' }}{% endif %}{% endif -%}
-      # The index `booping items list` renders. The glob mirrors `dir`;
-      # the status filter is applied per call from the machine, never stated here.
+      # The item index, `booping query --config core.specs.open_items.index`. The glob
+      # mirrors `dir`; the status filter is applied per call (`--where`), never stated here.
       index:
         glob: [open-items/OI-*.md]
         sort: id
@@ -850,8 +852,9 @@ core:
           - "Classifying an item that needs a wide read of the repo before it is a tiny fix or a plan"
         bad_for:
           - "Single-file reads — call Read directly"
-    # Item sizes and the batches `booping items batch` packs. `sizes` maps each
-    # size `booping items size` accepts to its story points; `direct` lists the
+    # Item sizes and the batches the `work` step packs. `sizes` maps each size
+    # `booping set … size=` writes to its story points — restated as an enum in
+    # `playbooks/specs/_schemas/open_item.yaml`, change both together; `direct` lists the
     # sizes that skip grooming and go to a worker in a batch; `max_sp` caps one
     # batch's summed points. Open items of a direct size that wait on no question
     # are packed greedily in id order. An unsized item takes the plan route.

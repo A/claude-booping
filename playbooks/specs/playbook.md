@@ -26,7 +26,7 @@ Writing a record:
 - Set `created_by: claude`; never set `reviewed`.
 - Run `booping specs check` after every write and fix what it reports.
 
-The run keeps no state of its own. The `open_item` machine below tracks one open-item file each: its workdir is the vault, and only `booping items` moves it — never call `booping transition` for it, and never create a run workdir for it.
+The run keeps no state of its own. The `open_item` machine below tracks one open-item file each: its workdir is the vault, `booping transition {item} {status}` moves it, the machine inferred from the path — never create a run workdir for it.
 
 {% set playbook_agents = config.core.get('specs_playbook', {}) -%}
 {% include "_partials/playbook_agents.md" %}

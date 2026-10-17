@@ -155,7 +155,7 @@ Skipping a plan's retro writes no retrospective at all: the plan is stamped `ret
 - **`human-review`** — the findings are recorded and your verdict on them is pending.
 - **`done`** *(code-review's terminal)* — every finding is applied, delegated or dropped, and the record is closed. Closing stamps `reviewed_at` and appends the review's path to the reviewed plan's `code_reviews:` list; an ad-hoc review (`plan: null`) links to nothing. The plan's own `status:` is never touched.
 
-**specs** — on each open item at `open-items/OI-NNNN.md`, moved by `booping items` and the project-manager, never by a `specs` run.
+**specs** — on each open item at `open-items/OI-NNNN.md`, moved by `booping transition` from the project-manager, groom and develop's hooks, never by a `specs` run.
 
 - **`open`** — the request or gap is filed and waits for a plan; one settled without a plan — a tiny fix, an answered question, a recorded decision — closes straight to `done`.
 - **`clarify`** — the item asked you a question, written in its body; it waits on you in `booping status` and returns to `open` once your answer is in the body.
@@ -187,6 +187,7 @@ Playbooks stay wide-domain and stack-agnostic. Project-specific concerns live en
 - **`~/Claude/{project}/plan_templates/*.md`** — project-local plan templates. Discovered alongside the core templates (`backend`, `frontend`, `claude-skill`, `cli`, `documentation`); can override a core one by sharing its `name`, or add new ones.
 - **`~/Claude/{project}/review_templates/*.md`** — project-local code-review templates. Loaded by `code-review` alongside the core templates (`coding-architecture`, `python`, `security`); it picks the matching subset from the repo's manifests and each template's `description` frontmatter.
 - **`~/Claude/{project}/_playbooks/`** — playbooks of your own, discovered by `/playbook` beside the shipped ones.
+- **The vault-file operators** — the `booping` CLI the shipped playbooks drive, yours too: `create` writes a config-defined file tree (`next_id` numbers it), `query` slices files by frontmatter, `set` writes frontmatter or `.booping` marker keys, `transition` moves a file along its playbook's state machine, `state` reports a run's frontier, `config` prints a merged config value, `specs scan` files open items from spec marks and check findings.
 
 ## Learning
 

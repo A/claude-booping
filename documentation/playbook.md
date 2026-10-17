@@ -277,10 +277,10 @@ Without `states:`, a run lives entirely in one conversation — close it and the
 
 A `states:` entry is a **named state machine**:
 
-- `artifact` — *optional*, path to the markdown file holding this machine's status, **relative to the run workdir**. A `{instance}` placeholder makes the machine per-instance (one artifact per subgraph instance) and is only legal when some subgraph references the machine, or the machine is `standalone`. A machine may declare no `artifact:` at all — useful when the file's path is only known at run time — and is then addressed exclusively with `--target` on every state command.
+- `artifact` — *optional*, path to the markdown file holding this machine's status, **relative to the run workdir**. A `{instance}` placeholder makes the machine per-instance (one artifact per subgraph instance) and is only legal when some subgraph references the machine, or the machine is `standalone`. A machine may declare no `artifact:` at all — useful when the file's path is only known at run time — and is then addressed by naming its file with `--playbook` on every state command.
 - `initial` — the status a freshly bootstrapped artifact starts in. Must be a key of `statuses`.
 - `statuses` — mapping of status name → `{transitions: [...]}` or `{terminal: true}`. Each transition has `to`, and optionally `when` (the trigger prose the driver matches a step outcome against), `gates` (verifiable preconditions the driver judges before firing), and `hooks` (mechanical side effects the CLI runs).
-- `standalone` — *optional*, `true` declares a machine no graph scope references: it is moved only by `playbook-transition --state NAME` calls (with `--instance` when its artifact carries `{instance}`), typically from a CLI or script rather than the playbook's own run. It exempts the machine from the subgraph-reference requirement on `{instance}` and from the unreferenced-machine note; its `## State` block names it standalone instead of a referencing scope.
+- `standalone` — *optional*, `true` declares a machine no graph scope references: it is moved only by `booping transition <file> <to>` calls naming one of its files, typically from a script or another playbook's step rather than the playbook's own run. It exempts the machine from the subgraph-reference requirement on `{instance}` and from the unreferenced-machine note; its `## State` block names it standalone instead of a referencing scope.
 - `superstates` — *optional*, mapping of group name → `{states: [...], transitions: [...]}`. Every status the group lists inherits its transitions, and a status's own edge to the same `to` wins over the inherited one. A group may also carry `on_exit` / `on_entry` hook lists, run when a transition crosses its boundary.
 
 A machine is wired to a graph scope by a `state:` ref: the top-level `state:` governs the outer graph, a subgraph's `state:` governs each of its instances.
@@ -311,14 +311,14 @@ states:
             when: intake step complete
             gates: ["request + scope captured in the artifact"]
             hooks:
-              - frontmatter-update intaken="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - set intaken="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
       researching:
         transitions:
           - to: developing-steps
             when: both research steps returned and design confirmed
             gates: ["research-codebase and research-web done, findings recorded"]
             hooks:
-              - frontmatter-update researched="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}" commit="{{ macro('core.macros.git_commit') }}"
+              - set researched="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}" commit="{{ macro('core.macros.git_commit') }}"
               - script check-findings
       developing-steps:
         transitions:
@@ -326,7 +326,7 @@ states:
             when: every step instance terminal
             gates: ["every steps/*/index.md status: done"]
             hooks:
-              - frontmatter-update completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - set completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
       done: {terminal: true}
   step:
     artifact: steps/{instance}/index.md
@@ -337,14 +337,14 @@ states:
           - to: reviewing
             when: spec written
             hooks:
-              - frontmatter-update spec_done="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - set spec_done="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
       reviewing:
         transitions:
           - to: done
             when: user confirmed the spec
             gates: ["explicit user confirmation captured"]
             hooks:
-              - frontmatter-update confirmed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - set confirmed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
       done: {terminal: true}
 ```
 
@@ -352,12 +352,12 @@ states:
 
 Two hook forms on a transition:
 
-- `frontmatter-update [<file>] <key>=<val> ...` — set frontmatter keys on the artifact, or on `<file>` when a target is given. The hook form takes `key=val` pairs only, no flags.
+- `set [<file>] <key>=<val> ...` — set frontmatter keys on the artifact, or on `<file>` when a target is given. The hook form takes `key=val` pairs only, no flags.
 - `script <name> [args...]` — run the executable named `<name>`, passing every token after it as argv.
 
-The `booping frontmatter-update` **command** carries a flag the hook form does not: `--append <key>=<val>` appends the value to the **list** under `<key>` instead of setting it — a missing key is created as a one-entry list, a value the list already holds is not added again, and a key that already holds a scalar is an error. The flag repeats, one key included: every `--append` lands, in the order given. A `script` hook shelling out to it is how a history key such as `sessions:` grows across transitions without YAML editing.
+The `booping set` **command** carries a flag the hook form does not: `--append <key>=<val>` appends the value to the **list** under `<key>` instead of setting it — a missing key is created as a one-entry list, a value the list already holds is not added again, and a key that already holds a scalar is an error. The flag repeats, one key included: every `--append` lands, in the order given. A `script` hook shelling out to it is how a history key such as `sessions:` grows across transitions without YAML editing.
 
-A hook value is **Jinja-rendered with the `macro` global**, the same one rendered bodies call — a timestamp is `completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"`, with the format at the call site. Because the clock goes through the macro system, a `macro_stubs:` mapping in the merged config pins it — the same config fragment `--stub-macro` merges on a render — so a transition is reproducible the way a render is. The hook string is tokenised with `shlex`, so quote any value carrying spaces. A value with no Jinja in it passes through untouched, and a macro or Jinja error aborts the transition (exit 2) with the offending value on stderr. The rendered value is then typed exactly as the `booping frontmatter-update` command types it: `key=null` (or `~`) clears the key to a YAML `null`, integers, floats and booleans land unquoted, an empty value lands as the empty string `''`, and any other string stays a string — quoted when its plain form would reload as another type.
+A hook value is **Jinja-rendered with the `macro` global**, the same one rendered bodies call — a timestamp is `completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"`, with the format at the call site. Because the clock goes through the macro system, a `macro_stubs:` mapping in the merged config pins it — the same config fragment `--stub-macro` merges on a render — so a transition is reproducible the way a render is. The hook string is tokenised with `shlex`, so quote any value carrying spaces. A value with no Jinja in it passes through untouched, and a macro or Jinja error aborts the transition (exit 2) with the offending value on stderr. The rendered value is then typed exactly as the `booping set` command types it: `key=null` (or `~`) clears the key to a YAML `null`, integers, floats and booleans land unquoted, an empty value lands as the empty string `''`, and any other string stays a string — quoted when its plain form would reload as another type.
 
 The repo's HEAD sha is likewise a macro, `core.macros.git_commit`, which carries `cwd: repo` so it resolves against the repo directory rather than the process cwd (the run workdir during a transition).
 
@@ -387,33 +387,33 @@ A run gets its own workdir; artifact paths resolve against it and the playbook d
 {vault}/_runs/<playbook>/<run-slug>/
 ```
 
-with `<run-slug>` = `{YYYYMMDD}-<kebab-topic>`. Every state command takes `--workdir <path>` (default: cwd).
+with `<run-slug>` = `{YYYYMMDD}-<kebab-topic>`. The state commands take no workdir: it follows from the file they name and the artifact pattern it matches.
 
 ### Commands
 
-`booping playbook-state <playbook> [--target PATH] [--workdir PATH]` — read-only. Prints YAML: the playbook name, the resolved workdir, and per `states:` entry its `artifact`, its current `status` and the `next:` edges leaving it (each with `to` and, when declared, `when` / `gates`). A per-instance entry reports an `instances:` mapping keyed by slug, discovered by globbing the artifact path. `--target PATH` names the artifact outright (workdir-relative or absolute) instead of each machine's declared `artifact:`, and is required for a machine that declares none. An artifact that does not exist yet — or exists without a `status:` key, as a freshly written retrospective does — reports `status: not-started` with a single bootstrap edge to the machine's `initial`. Exits 1 for an unknown playbook, a missing workdir, a playbook with no `states:`, or a machine without `artifact:` and no `--target`.
+`booping state <file> [--playbook NAME]` — read-only. Prints YAML per playbook whose machines' `artifact:` pattern matches `<file>`: the playbook name, the run workdir the match implies, and per `states:` entry its `artifact`, its current `status` and the `next:` edges leaving it (each with `to` and, when declared, `when` / `gates`). A per-instance entry reports an `instances:` mapping keyed by slug, discovered by globbing the artifact path. `--playbook` reports that playbook only, and is required for a machine that declares no `artifact:` — there `<file>` is the artifact itself. An artifact that does not exist yet — or exists without a `status:` key, as a freshly written retrospective does — reports `status: not-started` with a single bootstrap edge to the machine's `initial`. Exits 1 when no machine matches the file or the playbook is unknown.
 
-`booping playbook-transition <playbook> <to> [--state NAME] [--target PATH] [--instance SLUG] [--workdir PATH]` — the only writer of run state. `--state` defaults to the outer graph's `state:` ref; `--instance` is required exactly when the artifact path carries `{instance}`; `--target PATH` names the artifact outright (workdir-relative or absolute), is mutually exclusive with `--instance`, and is required for a machine that declares no `artifact:`. With no `--workdir`, an **absolute** `--target` ending in the machine's declared `artifact:` implies the workdir — `--target {vault}/plans/x/index.md` on a machine declaring `artifact: index.md` runs hooks in `{vault}/plans/x`; a relative target, a non-matching absolute one, or a machine declaring no `artifact:` falls back to cwd. It reads the artifact's current status, checks that `<to>` is reachable from it, sets `status: <to>`, then runs the matched transition's hooks in order. A missing artifact — or one whose frontmatter has no `status:` key yet — is bootstrapped, legal only when `<to>` is the machine's `initial`; bootstrapping an existing file writes `status:` into its frontmatter, keeping the other keys intact. Re-running the same target is idempotent. It prints a **mutation report** (created/`from → to`/each frontmatter line/each script result) which is the authoritative record — the driver relays it and never re-reads the artifact to verify. Illegal transitions exit 1; hook failures exit 2.
+`booping transition <file> <to> [--playbook NAME] [--state NAME]` — the only writer of run state. The candidates are every machine whose `artifact:` pattern matches `<file>` (the instance filled from the path) and whose current status of the file has an edge to `<to>`; a file with no status yet only bootstraps into a candidate's `initial`. One candidate is taken; none exits 1 naming the file's status and the legal targets; several exit 1 listing them as `playbook/state` and asking for `--playbook`. `--playbook` (and `--state` within it) narrows the candidates, and is required for a machine that declares no `artifact:`, where `<file>` is the artifact. The match implies the workdir hooks run in — `{vault}/plans/x/index.md` on a machine declaring `artifact: index.md` runs them in `{vault}/plans/x`. It reads the artifact's current status, checks that `<to>` is reachable from it, sets `status: <to>`, then runs the matched transition's hooks in order. A missing artifact — or one whose frontmatter has no `status:` key yet — is bootstrapped, legal only when `<to>` is the machine's `initial`; bootstrapping an existing file writes `status:` into its frontmatter, keeping the other keys intact. Re-running the same target is idempotent. It prints a **mutation report** (created/`from → to`/each frontmatter line/each script result) which is the authoritative record — the driver relays it and never re-reads the artifact to verify. Illegal transitions exit 1; hook failures exit 2.
 
 ### Resume
 
-`/playbook` runs `booping playbook-state <name> --workdir <workdir>` on entry — first run and every resume — and restarts from the reported frontier: work already past its status is skipped, the first non-terminal status is re-entered, and `not-started` means bootstrap on the first transition. Nothing hand-edits an artifact's `status:` or a hook-written key; only `playbook-transition` mutates run state.
+`/playbook` runs `booping state <artifact> --playbook <name>` on entry — first run and every resume — and restarts from the reported frontier: work already past its status is skipped, the first non-terminal status is re-entered, and `not-started` means bootstrap on the first transition. Nothing hand-edits an artifact's `status:` or a hook-written key; only `booping transition` mutates run state.
 
 A resume does not need the run that started it. A run driven from outside a conversation — one invocation per turn, nothing to ask a question in — **parks** rather than blocks: it writes what it needs into a sidecar beside the artifact, transitions into a status that means *waiting*, and ends. The pattern is three pieces, all of them ordinary state machinery:
 
 - a non-terminal **parking status**, reachable from each status a run may stop in and with one return edge back to each of them;
-- a **`frontmatter-update` hook on every entering edge** stamping where to come back to (groom writes `return_to`), cleared again by the return edges. A hook value cannot be computed from the transition, so the mapping is one literal per edge — which also keeps the frontier report readable;
+- a **`set` hook on every entering edge** stamping where to come back to (groom writes `return_to`), cleared again by the return edges. A hook value cannot be computed from the transition, so the mapping is one literal per edge — which also keeps the frontier report readable;
 - a **sidecar** carrying the content, since frontmatter holds keys and not paragraphs. groom's is `clarifications.md`, prose by a [format doc](https://github.com/A/claude-booping/blob/master/docs/clarifications.md): one H2 per question, answered in place, and postable to a tracker verbatim by a `script` hook.
 
-The next invocation reads `playbook-state`, finds the parking status and the recorded return, reads the sidecar, and either takes the return edge or ends again untouched. Every step is a legal transition, so a parked run is indistinguishable from any other resume.
+The next invocation reads `booping state`, finds the parking status and the recorded return, reads the sidecar, and either takes the return edge or ends again untouched. Every step is a legal transition, so a parked run is indistinguishable from any other resume.
 
 ### Cancellation
 
-A run does not have to reach its success terminal: declare a `cancelled` status — terminal like `done` — and reach it from every status a run may be abandoned in. A `superstates:` group does that in one place: it lists the non-terminal statuses and the `to: cancelled` transition they all inherit, so `booping playbook-transition <name> cancelled …` is legal wherever the run stands without an edge repeated per status. Hooks declared on that transition fire like any other's — stamp the artifact, commit the vault. Once cancelled the run is over: `playbook-state` reports the terminal status with no edges leaving it.
+A run does not have to reach its success terminal: declare a `cancelled` status — terminal like `done` — and reach it from every status a run may be abandoned in. A `superstates:` group does that in one place: it lists the non-terminal statuses and the `to: cancelled` transition they all inherit, so `booping transition <file> cancelled` is legal wherever the run stands without an edge repeated per status. Hooks declared on that transition fire like any other's — stamp the artifact, commit the vault. Once cancelled the run is over: `booping state` reports the terminal status with no edges leaving it.
 
 ### How state renders
 
-A playbook with `states:` renders a `## State` section right after `## Playbook Steps`: the `playbook-state` invocation for that playbook, then per machine its referencing scopes, artifact path, initial status, the exact `playbook-transition` invocation (with `--state` / `--instance` / `--target` where the machine needs them), and a status → `to` / `when` / `gates` table. A playbook without `states:` renders no such section.
+A playbook with `states:` renders a `## State` section right after `## Playbook Steps`: the `booping state` invocation for that playbook, then per machine its referencing scopes, artifact path, initial status, the exact `booping transition` invocation (always with `--playbook`, and `--state` where the machine needs it), and a status → `to` / `when` / `gates` table. A playbook without `states:` renders no such section.
 
 ## Notices
 

@@ -4,7 +4,7 @@ The project is `taskflow`; the current working directory is its vault root. Run 
 
 This run has no shell, so the `booping` commands were run for you; their outputs:
 
-- `booping items list` — one item, `OI-0001`, in `clarify` (below).
+- `booping query --config core.specs.open_items.index` — one item, `OI-0001`, in `clarify` (below).
 - `booping transition open-items/OI-0001.md open` — cannot run here; edit the item file yourself the way it would: its `status:` becomes `open`. Nothing else in the frontmatter changes.
 
 ## Dialogue

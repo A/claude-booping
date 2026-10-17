@@ -51,7 +51,7 @@ When the project has a specs tier, the project context the `/playbook` skill ren
 
 ## Open items
 
-A gap between the records and the code — an unconfirmed ADR, a `[clarify]` mark, a check finding — is filed as an open item, a file under `open-items/` in the vault that a plan can pick up and close; so is a request you file in your own words. The [specs playbook](specs_playbook.md#open-items) files and works them, and `booping items` drives them directly.
+A gap between the records and the code — an unconfirmed ADR, a `[clarify]` mark, a check finding — is filed as an open item, a file under `open-items/` in the vault that a plan can pick up and close; so is a request you file in your own words. The [specs playbook](specs_playbook.md#open-items) files and works them; `booping create`, `booping query`, `booping set` and `booping transition` drive them directly.
 
 ## Commands
 
@@ -250,7 +250,7 @@ core:
             mechanic: {name: Механика, plural: Механики, scenario: "Механики — как устроен мир"}
 ```
 
-A label holding counts is a list of plural forms: two (one, other) or three (the Slavic one, few, many), as in `clarify: ["{n} вопрос к тебе", "{n} вопроса к тебе", "{n} вопросов к тебе"]`. `booping config-get core.specs.site.labels.en` prints every key with its shipped value.
+A label holding counts is a list of plural forms: two (one, other) or three (the Slavic one, few, many), as in `clarify: ["{n} вопрос к тебе", "{n} вопроса к тебе", "{n} вопросов к тебе"]`. `booping config core.specs.site.labels.en` prints every key with its shipped value.
 
 **Output directory.** Besides the pages, every build writes:
 

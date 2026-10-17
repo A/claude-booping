@@ -7,14 +7,14 @@ created_at: 2026-10-15
 updated_at: 2026-10-18
 status: accepted
 targets: [groom, develop, code-review]
-brief: "When the user corrects you — rejects a proposal, rewrites an output, says it is wrong, answers a gate other than you suggested — run `booping create core.corrections.template {vault}/corrections --set name=$(date +%Y%m%d-%H%M%S)-{step} --set step={playbook}/{step} --set did=… --set said='{the user's words verbatim}' --set artifact={run artefact, vault-relative}`, with `--set why=…` when the user states it; a plain confirmation is not a correction."
+brief: "When the user corrects you — rejects a proposal, rewrites an output, says it is wrong, answers a gate other than you suggested — run `booping create core.corrections.template {vault}/corrections --set name={step} --set step={playbook}/{step} --set did=… --set said='{the user's words verbatim}' --set artifact={run artefact, vault-relative}`, with `--set why=…` when the user states it; a plain confirmation is not a correction."
 ---
 
 ## Rule
 
 When the user corrects you — rejects a proposal, rewrites an output, says it is
 wrong, answers a gate other than you suggested — run
-`booping create core.corrections.template {vault}/corrections --set name=$(date +%Y%m%d-%H%M%S)-{step} --set step={playbook}/{step} --set did=… --set said='{the user's words verbatim}' --set artifact={run artefact, vault-relative}`.
+`booping create core.corrections.template {vault}/corrections --set name={step} --set step={playbook}/{step} --set did=… --set said='{the user's words verbatim}' --set artifact={run artefact, vault-relative}`.
 Add `--set why=…` when the user states the reason. A plain confirmation is not a
 correction.
 

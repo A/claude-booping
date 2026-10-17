@@ -1,0 +1,45 @@
+The core open-item template in an empty destination: `next_id('OI-')` names the file and its
+`id` `OI-0001`, and the date macro stamps `created_at`.
+
+-- cmd --
+booping create core.specs.open_items.template open-items --set title="Fix the flaky test" --set source=request --stub-macro core.macros.date=2026-10-18
+-- exit --
+0
+-- stdout --
+created dir open-items
+--- /dev/null
++++ open-items/OI-0001.md
+@@ -0,0 +1,15 @@
++---
++id: OI-0001
++title: "Fix the flaky test"
++status: open
++direction: null
++record: null
++source: request
++size: null
++plan: null
++created_at: 2026-10-18
++closed_at: null
++reason: null
++---
++
++# Fix the flaky test
+wrote 2 paths — 1 dirs created, 1 files created, 0 files overwritten
+-- stderr --
+-- expected/cwd/open-items/OI-0001.md --
+---
+id: OI-0001
+title: "Fix the flaky test"
+status: open
+direction: null
+record: null
+source: request
+size: null
+plan: null
+created_at: 2026-10-18
+closed_at: null
+reason: null
+---
+
+# Fix the flaky test

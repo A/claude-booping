@@ -43,7 +43,7 @@ Every milestone group runs in **one session**.
 
 Bare invocation lists the vault's plans at `ready-for-dev` or `awaiting-approval` and asks you to pick one. Name a plan path to target a specific one.
 
-To resume a sprint already `in-progress`, invoke the playbook against the same plan: `playbook-state` reports the frontier and the run picks up at the first milestone whose `status:` is not `done` — including a blocked one, whose `feedback.md` carries the previous attempt's findings into the next briefing. Each transition also regenerates `index.md`'s `## Milestones` table and re-sums the plan's story points, so the table is a view, never the source of truth.
+To resume a sprint already `in-progress`, invoke the playbook against the same plan: `booping state` reports the frontier and the run picks up at the first milestone whose `status:` is not `done` — including a blocked one, whose `feedback.md` carries the previous attempt's findings into the next briefing. Each transition also regenerates `index.md`'s `## Milestones` table and re-sums the plan's story points, so the table is a view, never the source of truth.
 
 ## Branch
 

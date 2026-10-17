@@ -271,8 +271,8 @@ How `booping run groom` and `booping run develop` launch a recorded headless run
 
 One vault file per entry, under `corrections/` and `agent-decisions/`. Directly under `core` because several playbooks write them and retro and the project-manager read them.
 
-- **`template`** — the entry file, keyed `{{ name }}.md`: `booping create core.corrections.template {vault}/corrections --set name={ts}-{step} --set step=… --set did=… --set said=…` (`why` and `artifact` optional); decisions take `asked`, `decision`, `why`. Every entry starts `state: open`; the `core.macros.session` and `core.macros.date` macros stamp `session` and `logged_at`.
-- **`open`** — the query spec of entries still `state: open`, for `booping query --config core.corrections.open` and the `| query` filter. Retro sets a correction `handled`, the project-manager sets a decision `reviewed`, both with `booping frontmatter-update`.
+- **`template`** — the entry file, keyed `{{ next_id('R') }}-{{ name }}.md` (decisions `D`): `booping create core.corrections.template {vault}/corrections --set name={step} --set step=… --set did=… --set said=…` (`why` and `artifact` optional); decisions take `asked`, `decision`, `why`. Every entry starts `state: open`; the `core.macros.session` and `core.macros.date` macros stamp `session` and `logged_at`.
+- **`open`** — the query spec of entries still `state: open`, for `booping query --config core.corrections.open` and the `| query` filter. Retro sets a correction `handled`, the project-manager sets a decision `reviewed`, both with `booping set`.
 
 A project changes an entry's fields by overriding the template in its own tier.
 
@@ -304,7 +304,7 @@ Where the three [specs](specs.md) tiers live and what their namespaces are. Dire
 - **`core.specs.tiers.global`** — your records for every project: `path` relative to `home_dir` (`_specs`), `namespace` your prefix. `null` takes the `USER` environment variable. The [setup playbook](install.md#create-the-project-vault) asks for `core.specs.tiers.global.namespace` once, `$USER` as the default, and writes it into the global config beside `home_dir`; a global config already carrying the key is not asked again.
 - **`core.specs.tiers.project`** — the project's own records: `path` relative to the attached repo. `null` resolves to the vault root: the type directories sit beside `plans/`. Set `path` to keep the records in the repo instead; [`booping specs init`](specs.md#booping-specs-init) then links `<vault>/specs` to that directory, so the records stay reachable from the vault.
 - **`core.specs.site.roots`** — extra roots [`booping specs site`](specs.md#booping-specs-site) renders after the tiers, a list of `{name, path}`: `name` is the root's namespace on the site, `path` relative to `home_dir` like the global tier. Default `[]`; set it in the global config to build one site over every project's specs.
-- **`core.specs.open_items`** — the [open items](specs_playbook.md#open-items) store: `dir`, the vault-relative directory the item files live in (`open-items`, created on the first item); `template`, the [template tree](#template-trees) one item file is written from; `index`, the [query spec](#query-specs) `booping items list` renders — its columns `id`, `status`, `source`, `size`, `direction`, `record`, `title`, `plan`.
+- **`core.specs.open_items`** — the [open items](specs_playbook.md#open-items) store: `dir`, the vault-relative directory the item files live in (`open-items`, created on the first item); `template`, the [template tree](#template-trees) one item file is written from, named `OI-NNNN.md` by `next_id('OI-')` and stamping `created_at` by the date macro; `index`, the [query spec](#query-specs) `booping query --config core.specs.open_items.index` renders — its columns `id`, `status`, `source`, `size`, `direction`, `record`, `title`, `plan`.
 
 A tier `path` that is absolute or starts with `~` is taken as is.
 
@@ -335,7 +335,7 @@ Develop-only: `commit_message` (the conventional-commit format string for in-spr
 
 How the project-manager sizes tiny fixes and packs them into [batches](project_manager.md#batches) that skip grooming.
 
-- **`core.project_manager_playbook.batch.sizes`** — the sizes `booping items size` accepts, each with its story points. Default `{XS: 1, S: 2, M: 5, L: 13}`.
+- **`core.project_manager_playbook.batch.sizes`** — the sizes an item's `size:` takes (`booping set {item} size=…`, checked by `playbooks/specs/_schemas/open_item.yaml`), each with its story points. Default `{XS: 1, S: 2, M: 5, L: 13}`.
 - **`core.project_manager_playbook.batch.direct`** — the sizes that skip grooming and go into batches; any other size, or none, takes the plan route. Default `[XS, S]`.
 - **`core.project_manager_playbook.batch.max_sp`** — the story-point cap on one batch. Default `8`.
 
@@ -353,7 +353,7 @@ The `model:effort` of the agent groom spawns when `booping plan split` cannot cu
 
 ## Where the plan lifecycle lives
 
-Statuses, transitions, gates and hooks are **not** in this config. Each playbook declares its own vocabulary in its `states:` block in `playbooks/<name>/playbook.yaml`, and `booping playbook-transition` is the only thing that writes a plan's `status:`. See [Playbooks → Run state](playbook.md#run-state) for the machine format, and [Vault → `plans/`](vault.md#plans) for how groom and develop chain their vocabularies through one plan while the retro and code-review tracks join it through frontmatter instead.
+Statuses, transitions, gates and hooks are **not** in this config. Each playbook declares its own vocabulary in its `states:` block in `playbooks/<name>/playbook.yaml`, and `booping transition` is the only thing that writes a plan's `status:`. See [Playbooks → Run state](playbook.md#run-state) for the machine format, and [Vault → `plans/`](vault.md#plans) for how groom and develop chain their vocabularies through one plan while the retro and code-review tracks join it through frontmatter instead.
 
 To reshape a status flow, edit that playbook's `states:` — or fork the playbook under a new name. No config key overrides it.
 
@@ -405,7 +405,7 @@ bin/booping create <config-path> <dest> [--force] [--set KEY=VALUE]... [--stub-m
 
 `<config-path>` is a dotted path into the merged config — the value there *is* the destination directory's contents, no wrapper key. `<dest>` is created with its parents when missing. **A file that exists is skipped**, reported as `skipped existing file {path}` and left byte-for-byte alone; `--force` turns that skip into an overwrite of the files the tree names, never deleting a directory and never touching a path the tree does not name. Exit 0 on success, 1 on a user error (unknown path, malformed tree, bad `--set`, Jinja error in seed content), 2 if a write fails at the OS level. The whole tree is rendered in memory first, so an error leaves the filesystem untouched.
 
-**Stdout contract.** For every file it actually wrote, `create` prints a unified diff — `--- /dev/null` (a new file) or `--- {path}` (an overwrite), then `+++ {path}` and the hunks. A file whose rendered content matches what is already on disk, and a file skipped because it exists, produce no diff; created directories keep their one-line `created dir {path}` report, and the run still ends with the `wrote N paths — …` count line. `booping frontmatter-update` shares this contract: the diff of the change it made on stdout, nothing at all when the file did not change, its `updated {path}: {keys}` summary and any errors on stderr. It writes scalars with their YAML type — ints, floats, booleans and `null` unquoted, everything else a string.
+**Stdout contract.** For every file it actually wrote, `create` prints a unified diff — `--- /dev/null` (a new file) or `--- {path}` (an overwrite), then `+++ {path}` and the hunks. A file whose rendered content matches what is already on disk, and a file skipped because it exists, produce no diff; created directories keep their one-line `created dir {path}` report, and the run still ends with the `wrote N paths — …` count line. `booping set` shares this contract: the diff of the change it made on stdout, nothing at all when the file did not change, its `updated {path}: {keys}` summary and any errors on stderr. It writes scalars with their YAML type — ints, floats, booleans and `null` unquoted, everything else a string.
 
 How a node is read:
 
@@ -421,6 +421,8 @@ How a node is read:
 `type` is reserved: a mapping carrying it is an explicit node descriptor, never a directory named `type`. A filename containing `/`, or equal to `.` or `..`, is rejected before anything is written.
 
 File content is Jinja-rendered, so `{{ config.… }}` and `{{ context.… }}` resolve. **`--set` here binds a bare variable** — `--set name=x` fills `{{ name }}` — unlike `booping render` and `booping render-playbook`, where `--set` merges into the config and you write `{{ config.name }}`.
+
+Names and content can also call **`next_id(prefix, width=4)`**: one past the highest `{prefix}{n}` opening a file name in the destination, zero-padded — `{{ next_id('OI-') }}.md` writes `OI-0001.md` in an empty directory and `OI-0008.md` beside `OI-0007.md`. A name that already exists is skipped and reported like any other, which is how a concurrent writer shows.
 
 Trees ride the same core → global → project merge as everything else here, so a global or project config can add its own tree or override one leaf of a shipped one. Three ship:
 
@@ -459,7 +461,7 @@ The global tier's headline key is **`home_dir`** — the vault-home base under w
 - **Project-tier `home_dir` is a no-op.** By the time the project tier merges, the vault has already been resolved — its location is what tells booping where to read the project config from. Set `home_dir` in the global tier.
 - **First-run seeding.** `/playbook setup` settles `home_dir` before touching the project: if the global config file is absent it asks for the vault-home base (default `~/Claude`) and writes it there, then creates the vault with `booping create core.setup_playbook.template <vault_dir>` and records the location in the repo's `.booping` marker.
 
-Read any resolved value — merged across all three tiers — with `booping config-get <dotted.key>` (e.g. `booping config-get home_dir`). `home_dir` prints its raw, unexpanded value.
+Read any resolved value — merged across all three tiers — with `booping config <dotted.key>` (e.g. `booping config home_dir`). `home_dir` prints its raw, unexpanded value.
 
 ## Overriding for one project
 
@@ -511,4 +513,4 @@ The playbook's `jinja: true` bodies then read `{{ config.core.ship_playbook.regi
 
 ## Verifying the merged config
 
-Run `bin/booping debug-context` from the project directory (the one with the `.booping` marker) to dump the assembled context — including the merged config — as YAML: the authoritative answer to what a skill is actually seeing. For a single value, `bin/booping config-get <dotted.key>` prints that key resolved across the merge (scalars as raw text, mappings/lists as YAML), and works outside any project too (core + global only).
+Run `bin/booping debug-context` from the project directory (the one with the `.booping` marker) to dump the assembled context — including the merged config — as YAML: the authoritative answer to what a skill is actually seeing. For a single value, `bin/booping config <dotted.key>` prints that key resolved across the merge (scalars as raw text, mappings/lists as YAML), and works outside any project too (core + global only).

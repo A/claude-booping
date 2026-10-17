@@ -4,7 +4,8 @@ review_gate: null
 ---
 
 Act on the user's request; the scenarios below orient, never restrict — never ask which one to run.
-Flags and their allowed values come from `booping items {verb} --help`.
+An open item is filed with `booping create core.specs.open_items.template {vault}/open-items --set title=… --set source=… [--set direction=…] [--set record=…] [--set body=…]`;
+`direction` is one of `code-to-spec`, `spec-to-code`, `conflict`, `clarify`.
 
 ## Handed over
 
@@ -36,7 +37,7 @@ Read every record type in every tier the project reaches — values, rules, ADRs
 ideas, references, runbooks; stale records hide outside the first three. A fix that only makes a
 record say what is already decided or true: apply it and report it. A contradiction the records
 settle becomes a `conflict` record. Every finding the user must settle becomes an open item at once —
-`booping items add --direction conflict|clarify`, the question in its body, then
+filed with `--set source=manual --set direction=conflict|clarify`, the question in its body, then
 `booping transition {vault}/open-items/OI-NNNN.md clarify`;
 the user's answer goes into the body and `… open` moves it back. Next: propose Sync specs and
 code; do not run it.
@@ -52,13 +53,14 @@ your own initiative. Next: `booping specs check`.
 
 A decision → an ADR, only for one choice with a real alternative and a reason the code cannot
 show. An idea → an idea record. A constraint on how the model works → a rule with `targets` and
-`brief`. Next: an ADR with a `Confirmation:` line → `booping items add --record adr/NNNN`;
+`brief`. Next: an ADR with a `Confirmation:` line → file an item with `--set source=adr --set record=adr/NNNN
+--set direction=spec-to-code --set title="{the Confirmation: line}"`;
 anything else → `booping specs check`.
 
 ## Sync specs and code
 
 Compare the records with the code; each gap becomes one item with the direction it runs:
-`booping items add --source sync`. Next: `booping items scan` for the marks
+filed with `--set source=sync --set direction=…`. Next: `booping specs scan` for the marks
 and check findings.
 
 ## Retro to rules
@@ -68,8 +70,8 @@ written directly. Next: `/playbook learn`, or `booping specs check` after the ru
 
 ## Open items
 
-Show `booping items list`; the user picks. An item needing no work →
-`booping items close {ids} --dropped --reason "…"`; a planned item whose plan was
-cancelled outside develop → `booping items reopen --plan {plan}`.
+Show `booping query --config core.specs.open_items.index --where status:in=open,planned`; the user picks. An item
+needing no work → `booping set {item} reason="…"` then `booping transition {item} dropped`; a planned
+item whose plan was cancelled outside develop → `booping transition {item} open`.
 Supervised: next is `/playbook groom` naming the picked ids — groom links them to the plan and stops at its plan review.
 Autonomous: run `/playbook groom` naming the picked ids — none picked, every `open` item — then `/playbook develop` on the plan it readies, in this session, without stopping; a groom that splits develops the first plan and reports the parked stubs.

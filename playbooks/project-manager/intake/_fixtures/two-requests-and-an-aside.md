@@ -4,8 +4,8 @@ The project is `taskflow`; the current working directory is its vault root. Run 
 
 This run has no shell, so the `booping` commands were run for you; their outputs:
 
-- `booping items list` — no items; `open-items/` holds no item yet, so the first id is `OI-0001`.
-- `booping items add --source request --title "…" --text -` — cannot run here; write the file it would create yourself, one per call, ids in filing order: `open-items/OI-NNNN.md` with frontmatter `id: OI-NNNN`, `title: "{title}"`, `status: open`, `direction: null`, `record: null`, `source: request`, `plan: null`, `created_at: 2026-10-15`, `closed_at: null`, `reason: null`, then `# {title}`, a blank line, and the stdin text as the body.
+- `booping query --config core.specs.open_items.index` — no items; `open-items/` holds no item yet, so the first id is `OI-0001`.
+- `booping create core.specs.open_items.template open-items --set source=request --set title="…" --set body="…"` — cannot run here; write the file it would create yourself, one per call, ids in filing order: `open-items/OI-NNNN.md` with frontmatter `id: OI-NNNN`, `title: "{title}"`, `status: open`, `direction: null`, `record: null`, `source: request`, `plan: null`, `created_at: 2026-10-15`, `closed_at: null`, `reason: null`, then `# {title}`, a blank line, and the stdin text as the body.
 
 ## Dialogue
 

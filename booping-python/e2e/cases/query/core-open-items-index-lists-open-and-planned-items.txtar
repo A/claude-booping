@@ -1,5 +1,5 @@
-By default the index holds the items in a non-terminal status of the `open_item` machine —
-here the open and the planned one of four — sorted by id, null cells as `—`.
+The open-items index, `core.specs.open_items.index`, narrowed to the open and planned items —
+two of four — sorted by id in its declared columns plus `path` and `slug`, null cells empty.
 
 -- fixtures/cwd/.booping --
 project_name: probe
@@ -14,6 +14,7 @@ status: dropped
 direction: clarify
 record: null
 source: manual
+size: null
 plan: null
 created_at: 2026-10-15
 closed_at: null
@@ -29,6 +30,7 @@ status: planned
 direction: spec-to-code
 record: "adr/0025#consequences"
 source: adr
+size: null
 plan: plans/202610151409_x/index.md
 created_at: 2026-10-15
 closed_at: null
@@ -44,6 +46,7 @@ status: done
 direction: code-to-spec
 record: null
 source: manual
+size: null
 plan: plans/202610010000_y/index.md
 created_at: 2026-10-15
 closed_at: null
@@ -59,6 +62,7 @@ status: open
 direction: conflict
 record: "rule/0003"
 source: correction
+size: null
 plan: null
 created_at: 2026-10-15
 closed_at: null
@@ -67,12 +71,12 @@ reason: null
 
 # Tests mock the clock
 -- cmd --
-booping items list
+booping query --config core.specs.open_items.index --where status:in=open,planned
 -- exit --
 0
 -- stdout --
-| id | status | source | size | direction | record | title | plan |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| OI-0001 | open | correction | — | conflict | rule/0003 | Tests mock the clock | — |
-| OI-0002 | planned | adr | — | spec-to-code | adr/0025#consequences | Plans close items | plans/202610151409_x/index.md |
+| id | status | source | size | direction | record | title | plan | path | slug |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| OI-0001 | open | correction |  | conflict | rule/0003 | Tests mock the clock |  | open-items/OI-0001.md | OI-0001 |
+| OI-0002 | planned | adr |  | spec-to-code | adr/0025#consequences | Plans close items | plans/202610151409_x/index.md | open-items/OI-0002.md | OI-0002 |
 -- stderr --

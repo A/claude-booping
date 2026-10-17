@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import argparse
+import re
 import sys
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, NoReturn
@@ -29,7 +31,8 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
         help=(
             "Write a config-defined file/dir tree into a destination directory,"
             " rendering its names and contents as Jinja templates filled by --set"
-            " values and macros"
+            " values, macros and next_id(prefix, width=4) — one past the highest"
+            " {prefix}{n} file name in the destination"
         ),
     )
     p.add_argument(
@@ -87,6 +90,19 @@ class _Write:
 def _fail(message: str, code: int = 1) -> NoReturn:
     print(f"error: {message}", file=sys.stderr)
     sys.exit(code)
+
+
+def next_id(dest: Path) -> Callable[..., str]:
+    """`next_id(prefix, width=4)` over *dest*: one past the highest `{prefix}{n}`
+    opening a file name there, zero-padded; an empty or missing *dest* yields 1."""
+    names = [p.name for p in dest.iterdir()] if dest.is_dir() else []
+
+    def allocate(prefix: str, width: int = 4) -> str:
+        pattern = re.compile(re.escape(prefix) + r"(\d+)")
+        numbers = [int(m.group(1)) for name in names if (m := pattern.match(name))]
+        return f"{prefix}{max(numbers, default=0) + 1:0{width}d}"
+
+    return allocate
 
 
 def _render_seed(env: Environment, node: FileNode) -> str:
@@ -181,6 +197,7 @@ def _run(args: argparse.Namespace) -> None:
     config = deep_merge(ctx.config, stub_overrides) if stub_overrides else ctx.config
     env = build_source_env(context=ctx, config=config)
     globals_: dict[str, Any] = env.globals  # type: ignore[assignment]
+    globals_["next_id"] = next_id(dest)
     globals_.update(variables)
 
     try:

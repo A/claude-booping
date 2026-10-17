@@ -1,5 +1,5 @@
-A second scan over the same tier files nothing: every mark and finding matches an item's
-`(source, record, title)`.
+An item closed `dropped` still tracks its mark: the scan files the other two and nothing for
+the closed one.
 
 -- fixtures/cwd/.booping --
 project_name: probe
@@ -31,18 +31,27 @@ It shows in every run. [clarify] Which runs count as every run? The owner decide
 ---
 id: OI-0001
 title: "Which runs count as every run"
-status: open
+status: dropped
 direction: clarify
 record: "value/0001#in-practice"
 source: mark
 plan: null
 created_at: 2026-10-15
-closed_at: null
-reason: null
+closed_at: '2026-10-14'
+reason: resolved
 ---
 
 # Which runs count as every run
--- fixtures/cwd/vault/open-items/OI-0002.md --
+-- cmd --
+booping specs scan
+-- exit --
+0
+-- stdout --
+open-items/OI-0002.md
+open-items/OI-0003.md
+2 created, 1 already tracked
+-- stderr --
+-- expected/cwd/vault/open-items/OI-0002.md --
 ---
 id: OI-0002
 title: "The code skips dry runs; the record says it never does"
@@ -50,6 +59,7 @@ status: open
 direction: clarify
 record: "value/0001#in-practice"
 source: mark
+size: null
 plan: null
 created_at: 2026-10-15
 closed_at: null
@@ -57,7 +67,7 @@ reason: null
 ---
 
 # The code skips dry runs; the record says it never does
--- fixtures/cwd/vault/open-items/OI-0003.md --
+-- expected/cwd/vault/open-items/OI-0003.md --
 ---
 id: OI-0003
 title: "link: link target `../notes/missing.md` does not exist"
@@ -65,6 +75,7 @@ status: open
 direction: clarify
 record: "value/0001"
 source: check
+size: null
 plan: null
 created_at: 2026-10-15
 closed_at: null
@@ -72,10 +83,3 @@ reason: null
 ---
 
 # link: link target `../notes/missing.md` does not exist
--- cmd --
-booping items scan
--- exit --
-0
--- stdout --
-0 created, 3 already tracked
--- stderr --
