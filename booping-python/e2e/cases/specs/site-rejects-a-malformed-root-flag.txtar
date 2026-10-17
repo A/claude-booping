@@ -1,0 +1,9 @@
+A `--root` without `=` is rejected before anything is read or written.
+
+-- cmd --
+booping specs site --root nameonly
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: --root `nameonly` is not NAME=PATH

@@ -1,0 +1,13 @@
+The core tier ships with the plugin; `--tier core` is rejected with exit 1.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- cmd --
+booping specs init --tier core
+-- exit --
+1
+-- stdout --
+-- stderr --
+specs init: the core tier ships with the plugin; only global and project are created

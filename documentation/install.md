@@ -6,6 +6,7 @@ Required:
 
 - **`uv`** — drives the plugin's Python tooling. The `bin/booping` wrapper is `uv run --project booping-python booping ...`, so every skill load goes through uv.
 - **`git`** — the plugin assumes a git working tree for branching, diffs, and commit attribution during the develop and code-review playbooks.
+- **`mdcheck`** — the markdown structure checker. The [groom playbook](groom.md) checks every milestone file with it, and `booping specs check` validates records with it. Install it from the `markdown-checker` crate (needs a Rust toolchain); the crate named `mdcheck` is an unrelated tool.
 
 Optional:
 
@@ -20,6 +21,9 @@ brew install uv git
 # Linux (Debian/Ubuntu)
 sudo apt install -y git
 curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# both
+cargo install markdown-checker --version 0.1.2 --locked
 ```
 
 ## Plugin install
@@ -33,7 +37,7 @@ Inside Claude Code, register the marketplace once and install the plugin:
 
 Update later with `/plugin update booping` (or from the `/plugin` UI).
 
-## Scaffold the project vault
+## Create the project vault
 
 `cd` into the target repository and run:
 
@@ -45,14 +49,13 @@ The `setup` playbook takes the repo from any starting state to a working booping
 
 It runs in two steps:
 
-1. **Machine level** — when booping is not yet initialized, it asks for your preferred home dir (default `~/Claude/`), writes the machine config at `${XDG_CONFIG_HOME:-~/.config}/booping/config.yaml`, and makes the home dir exist as a git repo.
-2. **Project level** — it asks where the vault lives (the default `<home_dir>/{project}/`, kept outside the repo, or a **repo-local** directory recorded via the `.booping` marker's `vault_path:` key), the project name, and marker visibility; then scaffolds the vault tree, writes the `.booping` marker, symlinks a repo-local vault into the home dir, and seeds `sprints.md`.
+1. **Machine level** — when booping is not yet initialized, it asks for your preferred home dir (default `~/Claude/`), writes the machine config at `${XDG_CONFIG_HOME:-~/.config}/booping/config.yaml`, and makes the home dir exist as a git repo. When the machine config names no global [specs](specs.md) namespace yet, it asks for one (default `$USER`) and stores it as `core.specs.tiers.global.namespace`; then it creates the global specs tier at `<home_dir>/_specs/`.
+2. **Project level** — it asks where the vault lives (the default `<home_dir>/{project}/`, kept outside the repo, or a **repo-local** directory recorded via the `.booping` marker's `vault_path:` key), the project name, and marker visibility; then creates the vault tree, writes the `.booping` marker, symlinks a repo-local vault into the home dir, and seeds `sprints.md`; last, it sets up the project specs tier — by default the vault root itself, where the record type directories sit beside `plans/`, so nothing is created; a tier you keep in the repo is created there and linked from `<vault>/specs`.
 
-The scaffolded vault:
+The created vault:
 
 - `plans/` — sprint plans authored by the [groom playbook](groom.md), executed by the [develop playbook](develop.md).
 - `retrospectives/` — standalone retrospectives authored by the [retro playbook](retro.md), consumed by the [learn playbook](learn.md).
-- `_lessons/` — durable, targeted rules authored by the [learn playbook](learn.md).
 - `notes/` — your own free-form notes (untouched by booping).
 - `sprints.md` — an Obsidian Bases fence over the vault's `plans/*/index.md` files; seeded once, evaluated live by Obsidian.
 - `.gitignore` — vault-level ignores, including the `.booping.log` the CLI writes at the vault root.
@@ -62,4 +65,4 @@ For the full directory tour (including `plan_templates/`, `review_templates/`, `
 
 ## Verify
 
-After setup, run `/playbook` inside the same repo. It should list the shipped playbooks — `groom`, `develop`, `retro`, `learn`, `code-review`, `setup`, `migrate`, `playbook-authoring` — with no STOP notice, which is your signal that the vault resolved and you're ready to run your first [groom](groom.md).
+After setup, run `/playbook` inside the same repo. It should list the shipped playbooks — `groom`, `develop`, `retro`, `learn`, `code-review`, `project-manager`, `setup`, `migrate`, `playbook-authoring` — with no STOP notice, which is your signal that the vault resolved and you're ready to run your first [groom](groom.md).

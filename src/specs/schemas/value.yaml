@@ -1,0 +1,25 @@
+# value: specs/value/<NNNN>-<slug>.md, one value per record — why the project
+# exists and what it is like. `kind: value` names what we hold to; `kind:
+# non-value` names what we deliberately do not optimise for (no trade-off).
+doc: value
+
+rules:
+  - select: FRONTMATTER
+    has:
+      type: value
+      title: '^.+$'
+      summary: '^.{1,200}$'
+      kind: { enum: [value, non-value] }
+      created_by: { enum: [owner, claude] }
+      created_at: '^\d{4}-\d{2}-\d{2}$'
+      updated_at: '^\d{4}-\d{2}-\d{2}$'
+
+  - select: DOCUMENT > P
+    min: 1
+
+  - select: H2
+    ordered: [In practice, Trade-off?]
+    strict: true
+
+  - select: SECTION("In practice") > P
+    min: 1

@@ -1,0 +1,35 @@
+The core agent-decisions template written outside a Claude Code session: the session macro prints
+nothing, so `session` is null; `artifact` keeps the vault-relative path it was given.
+
+-- cmd --
+booping create core.agent_decisions.template agent-decisions --set name=present --set step=groom/present --set asked="Approve the plan?" --set decision=approved --set why="the plan matches the request" --set artifact=plans/p/index.md --stub-macro core.macros.date=2026-10-18
+-- exit --
+0
+-- stdout --
+created dir agent-decisions
+--- /dev/null
++++ agent-decisions/D0001-present.md
+@@ -0,0 +1,10 @@
++---
++step: "groom/present"
++asked: "Approve the plan?"
++decision: "approved"
++why: "the plan matches the request"
++state: open
++session: null
++logged_at: "2026-10-18"
++artifact: "plans/p/index.md"
++---
+wrote 2 paths — 1 dirs created, 1 files created, 0 files overwritten
+-- stderr --
+-- expected/cwd/agent-decisions/D0001-present.md --
+---
+step: "groom/present"
+asked: "Approve the plan?"
+decision: "approved"
+why: "the plan matches the request"
+state: open
+session: null
+logged_at: "2026-10-18"
+artifact: "plans/p/index.md"
+---

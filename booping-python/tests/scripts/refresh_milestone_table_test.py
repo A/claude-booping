@@ -1,7 +1,7 @@
 """Tests for the `develop` playbook's milestone-table hook script.
 
 The script shells back into `booping`, so it is exercised as a subprocess the way
-`booping playbook-transition` runs it — the plan directory as argv, inside a project
+`booping transition` runs it — the plan directory as argv, inside a project
 whose vault config can redirect the milestone glob and columns.
 """
 

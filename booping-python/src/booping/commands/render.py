@@ -53,9 +53,7 @@ def _run(args: argparse.Namespace) -> None:
         sys.exit(1)
 
     try:
-        overrides = deep_merge(
-            overrides, parse_stub_overrides(args.stub_macros or [])
-        )
+        overrides = deep_merge(overrides, parse_stub_overrides(args.stub_macros or []))
     except ValueError as exc:
         print(
             f"error: malformed --stub-macro pair (expected DOTTED.PATH=LITERAL): {exc}",
@@ -63,7 +61,7 @@ def _run(args: argparse.Namespace) -> None:
         )
         sys.exit(1)
 
-    notice = migrations.render_gate()
+    notice = migrations.render_gate(overrides=overrides)
     if notice is not None:
         _emit(notice + "\n", args.output)
         return
@@ -71,11 +69,7 @@ def _run(args: argparse.Namespace) -> None:
     ctx = Context.assemble()
     if overrides:
         ctx = ctx.model_copy(
-            update={
-                "config": deep_merge(
-                    ctx.config, overrides, shallow_merge_keys=["agents"]
-                )
-            }
+            update={"config": deep_merge(ctx.config, overrides, shallow_merge_keys=["agents"])}
         )
 
     message = str(args.path)

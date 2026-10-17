@@ -1,0 +1,58 @@
+A tier schema mdcheck cannot load (an unknown key) is one `schema` error on the schema file,
+carrying mdcheck's first stderr line; that type's records are not schema-checked, and the
+`_schemas/` directory of a tier not rooted at the vault is neither records nor a layout finding.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  specs:
+    tiers:
+      global:
+        namespace: owner
+-- fixtures/home/Claude/_specs/_schemas/rule.yaml --
+doc: rule
+bogus: 1
+rules: []
+-- fixtures/home/Claude/_specs/rule/0001-keep-it-short.md --
+---
+type: rule
+title: Keep it short
+summary: Cut what the reader does not need.
+created_by: owner
+created_at: 2026-01-01
+updated_at: 2026-01-01
+status: accepted
+---
+
+## Правило
+
+Cut what the reader does not need.
+
+## Следует из ценностей
+
+- [Brevity](https://example.com/brevity)
+-- fixtures/home/Claude/_specs/rule/0002-say-it-once.md --
+---
+type: rule
+title: Say it once
+summary: Never repeat a fact.
+created_by: owner
+created_at: 2026-01-01
+updated_at: 2026-01-01
+status: accepted
+---
+
+## Rule
+
+Never repeat a fact.
+
+## Follows from
+
+- [Brevity](https://example.com/brevity)
+-- cmd --
+booping specs check --tier global
+-- exit --
+1
+-- stdout --
+{HOME}/Claude/_specs/_schemas/rule.yaml:1  error  schema  mdcheck: error: line 2 column 1: unknown field `bogus`, expected one of doc, rules
+-- stderr --
+2 record(s) checked: 1 error(s), 0 warning(s)

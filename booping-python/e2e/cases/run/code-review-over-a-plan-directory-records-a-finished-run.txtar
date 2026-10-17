@@ -1,0 +1,97 @@
+`run code-review` over a plan's directory is validated and recorded as `develop` is: the
+record's `playbook:` is `code-review`, the plan's planned item is recorded, and the prompt
+names `code-review` and the absolute plan path.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+macro_stubs:
+  core.macros.date +%Y%m%d-%H%M%S: "20261015-120000"
+  core.macros.date +%Y-%m-%d %H:%M: "2026-10-15 12:00"
+core:
+  run:
+    command:
+      - sh
+      - -c
+      - |
+        printf 'arg: %s\n' "$@"
+        echo "env: $CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS"
+        if read -r line; then echo "stdin: data"; else echo "stdin: empty"; fi
+        exit 0
+      - fake
+-- fixtures/cwd/vault/plans/p1/index.md --
+---
+title: P1
+status: ready-for-dev
+---
+-- fixtures/cwd/vault/open-items/OI-0001.md --
+---
+id: OI-0001
+title: "Gap OI-0001"
+status: planned
+direction: clarify
+record: null
+source: manual
+plan: plans/p1/index.md
+created_at: 2026-10-01
+closed_at: null
+reason: null
+---
+
+# Gap OI-0001
+-- fixtures/cwd/vault/open-items/OI-0002.md --
+---
+id: OI-0002
+title: "Gap OI-0002"
+status: open
+direction: clarify
+record: null
+source: manual
+plan: null
+created_at: 2026-10-01
+closed_at: null
+reason: null
+---
+
+# Gap OI-0002
+-- cmd --
+booping run code-review vault/plans/p1
+-- exit --
+0
+-- stdout --
+runs/20261015-120000-code-review.md
+20261015-120000-code-review: finished (exit 0)
+-- stderr --
+-- expected/cwd/vault/runs/20261015-120000-code-review.md --
+---
+id: 20261015-120000-code-review
+playbook: code-review
+mode: supervised
+target:
+- plans/p1/index.md
+plan: plans/p1/index.md
+items:
+- OI-0001
+status: finished
+pid: null
+session_id: 24feacdc-42c7-5357-b5dd-c7d90b55e5de
+log: runs/20261015-120000-code-review.log
+started_at: 2026-10-15 12:00
+ended_at: 2026-10-15 12:00
+exit_code: 0
+acked_at: null
+---
+
+# 20261015-120000-code-review
+
+```text
+/booping:playbook code-review {CWD}/vault/plans/p1/index.md
+```
+-- expected/cwd/vault/runs/20261015-120000-code-review.log --
+arg: --session-id
+arg: 24feacdc-42c7-5357-b5dd-c7d90b55e5de
+arg: /booping:playbook code-review {CWD}/vault/plans/p1/index.md
+env: 0
+stdin: empty

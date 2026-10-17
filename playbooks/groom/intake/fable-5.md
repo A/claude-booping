@@ -20,11 +20,16 @@ Create it in one call, with `{plan-dir}` the preamble's `Plan dir:` line resolve
 vault and `{title}` the plan's descriptive title:
 
 ```
-booping scaffold core.groom_playbook.scaffold {plan-dir} --set title="{title}" --set type={type}
+booping create core.groom_playbook.template {plan-dir} --set title="{title}" --set type={type}
 ```
 
 The printed diff is the confirmation — do not read the created files back. A target reported as
 already existing was not written; decide what that means for this run.
+
+- A request naming open items (`OI-NNNN`) links each to the new plan once the directory exists:
+  `booping set {vault}/open-items/{id}.md plan={plan index}`, then
+  `booping transition {vault}/open-items/{id}.md planned`, `{plan index}` the plan's `index.md`
+  relative to the vault.
 
 ## The brief — written to `request.md`, posted in chat
 

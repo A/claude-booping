@@ -1,0 +1,38 @@
+{% extends "base.html.j2" %}
+{% from "_macros.html.j2" import callout, scenarios, recently_updated, state_badges %}
+{% block main %}
+<div class="measure">
+<h1>{{ site_title }}</h1>
+{% if lead is not none %}
+<p class="lead">{{ lead }}</p>
+{% endif %}
+{% if needs %}
+{{ callout(needs, unreviewed, questions, review_href) | trim }}
+{% endif %}
+</div>
+{{ scenarios(types) | trim }}
+{% if recent %}
+{{ recently_updated(recent) | trim }}
+{% endif %}
+{% if recent_plans %}
+<div class="measure">
+<h2><a href="{{ plans_href }}">{{ labels.ui("recent_plans") }}</a></h2>
+<ul class="recent plans">
+{% for p in recent_plans %}
+<li><span class="st">{{ state_badges(p.state, labels) }}</span><a href="{{ p.page }}">{{ p.title }}</a><time datetime="{{ p.datetime }}">{{ p.date }}</time></li>
+{% endfor %}
+</ul>
+</div>
+{% endif %}
+{% for reg in registries %}
+<section class="registry" aria-labelledby="registry-{{ reg.root }}">
+<div class="measure">
+<h2 id="registry-{{ reg.root }}"><a href="{{ reg.href }}">{{ reg.root }}</a> <span class="n">{{ reg.total }}</span></h2>
+{% if reg.needs %}
+{{ callout(reg.needs, reg.unreviewed, reg.questions, reg.review_href) | trim }}
+{% endif %}
+</div>
+{{ scenarios(reg.types) | trim }}
+</section>
+{% endfor %}
+{% endblock %}

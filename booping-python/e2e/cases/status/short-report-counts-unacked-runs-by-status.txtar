@@ -1,0 +1,105 @@
+Unacked run records count by effective status: a `running` record whose pid names no live
+process counts `lost`, an acked record is not counted. The `runs:` line follows `plans:`.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+-- fixtures/cwd/vault/runs/.gitignore --
+*.log
+-- fixtures/cwd/vault/runs/20261015-110000-develop.md --
+---
+id: 20261015-110000-develop
+playbook: develop
+mode: autonomous
+target:
+- plans/p1/index.md
+plan: plans/p1/index.md
+items:
+- OI-0001
+- OI-0002
+status: finished
+pid: null
+session_id: 00000000-0000-0000-0000-000000000001
+log: runs/20261015-110000-develop.log
+started_at: 2026-10-15 11:00
+ended_at: 2026-10-15 11:40
+exit_code: 0
+acked_at: null
+---
+
+# 20261015-110000-develop
+-- fixtures/cwd/vault/runs/20261015-120000-groom.md --
+---
+id: 20261015-120000-groom
+playbook: groom
+mode: supervised
+target:
+- OI-0003
+plan: null
+items:
+- OI-0003
+status: failed
+pid: null
+session_id: 00000000-0000-0000-0000-000000000002
+log: runs/20261015-120000-groom.log
+started_at: 2026-10-15 12:00
+ended_at: 2026-10-15 12:05
+exit_code: 3
+acked_at: null
+---
+
+# 20261015-120000-groom
+-- fixtures/cwd/vault/runs/20261015-130000-develop.md --
+---
+id: 20261015-130000-develop
+playbook: develop
+mode: autonomous
+target:
+- plans/p2/index.md
+plan: plans/p2/index.md
+items: []
+status: finished
+pid: null
+session_id: 00000000-0000-0000-0000-000000000003
+log: runs/20261015-130000-develop.log
+started_at: 2026-10-15 13:00
+ended_at: 2026-10-15 13:30
+exit_code: 0
+acked_at: 2026-10-15 14:00
+---
+
+# 20261015-130000-develop
+-- fixtures/cwd/vault/runs/20261015-140000-develop.md --
+---
+id: 20261015-140000-develop
+playbook: develop
+mode: autonomous
+target:
+- plans/p3/index.md
+plan: plans/p3/index.md
+items: []
+status: running
+pid: 999999999
+session_id: 00000000-0000-0000-0000-000000000004
+log: runs/20261015-140000-develop.log
+started_at: 2026-10-15 14:00
+ended_at: null
+exit_code: null
+acked_at: null
+---
+
+# 20261015-140000-develop
+-- cmd --
+booping status
+-- exit --
+0
+-- stdout --
+items: none
+ideas: none
+plans: none active
+runs: 1 finished, 1 failed, 1 lost
+records: none unreviewed
+marks: none
+-- stderr --

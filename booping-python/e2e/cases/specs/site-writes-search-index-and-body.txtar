@@ -1,0 +1,36 @@
+`booping specs site` writes `search-index.js` and `search-body.js` at the site root: every record's
+searchable metadata in page order, and each record's body as plain text with marks kept as text.
+
+-- fixtures/cwd/specs/value/0001-small-steps.md --
+---
+type: value
+title: Small steps
+summary: Ship in small, reviewable steps.
+reviewed: 2026-10-01
+---
+
+# Small steps
+
+Ship   small.
+-- fixtures/cwd/specs/rule/0001-one-concern.md --
+---
+type: rule
+title: One concern per commit
+status: accepted
+tags: [git]
+---
+
+## Why
+
+A commit carries `one` concern [clarify] here.
+-- cmd --
+booping specs site --root proj=specs
+-- exit --
+0
+-- stdout --
+specs site: 1 roots, 2 records, 12 pages, 0 warnings -> specs-site
+-- stderr --
+-- expected/cwd/specs-site/search-index.js --
+window.SPECS_INDEX = [{"id":"proj:rule/0001","ref":"rule/0001","root":"proj","type":"rule","type_label":"Rule","title":"One concern per commit","summary":null,"status":"accepted","status_label":"accepted","tags":["git"],"url":"proj/rule/0001-one-concern.html","flags":["unreviewed","clarify"]},{"id":"proj:value/0001","ref":"value/0001","root":"proj","type":"value","type_label":"Value","title":"Small steps","summary":"Ship in small, reviewable steps.","status":null,"status_label":null,"tags":[],"url":"proj/value/0001-small-steps.html","flags":[]}];
+-- expected/cwd/specs-site/search-body.js --
+window.SPECS_BODY = {"proj:rule/0001":"Why A commit carries one concern [clarify] here.","proj:value/0001":"Small steps Ship small."};

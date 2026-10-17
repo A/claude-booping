@@ -1,0 +1,16 @@
+doc: milestone
+rules:
+  - select: FRONTMATTER
+    has:
+      # Restates `core.sprint.redecompose_threshold` (5) as a static regex: mdcheck
+      # reads no config. Change both together.
+      sp: '^[1-4]$'
+  - select: SECTION("Verify") > P[0]
+    count: 1
+    match: '^`[^`\n]+`$'
+  - select: SECTION("Tasks")
+    count: 1
+    require: '`[^`\n]*(/|\.[A-Za-z0-9]+)[^`\n]*`'
+  - select: SECTION("Definition of Done") UL > LI
+    min: 1
+    match: '^\[[ xX]\] .+'

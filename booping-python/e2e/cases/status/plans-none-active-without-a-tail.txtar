@@ -1,0 +1,32 @@
+A vault whose plans are all done, reviewed and retro'd has no active plan and no queue:
+`plans: none active` with no tail.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+-- fixtures/cwd/vault/plans/202610070000_closed/index.md --
+---
+title: "Closed plan"
+status: done
+sp: 1
+created: 2026-10-07 10:00
+completed: 2026-10-08 10:00
+code_reviews: [codereviews/202610070000_closed/x.md]
+retro: retrospectives/closed.md
+---
+
+# Closed plan
+-- cmd --
+booping status
+-- exit --
+0
+-- stdout --
+items: none
+ideas: none
+plans: none active
+runs: none
+records: none unreviewed
+marks: none
+-- stderr --

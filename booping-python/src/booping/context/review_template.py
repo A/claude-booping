@@ -58,9 +58,7 @@ class ReviewTemplate(BaseModel):
         """Three tiers, least → most specific: core `docs/review_templates/`, global
         `{home_dir}/review_templates/`, project `{vault}/review_templates/`. A later
         tier's same-`name` template replaces the earlier one in place."""
-        tiers: list[tuple[Source, Path]] = [
-            ("core", plugin_root / "docs" / "review_templates")
-        ]
+        tiers: list[tuple[Source, Path]] = [("core", plugin_root / "docs" / "review_templates")]
         if home_dir is not None:
             tiers.append(("global", home_dir / "review_templates"))
         if vault is not None:

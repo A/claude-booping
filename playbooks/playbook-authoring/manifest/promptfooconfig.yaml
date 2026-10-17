@@ -11,7 +11,7 @@ providers:
       context:
         - _lib/return-contract.md
       output_mode: files
-      model: sonnet
+      model: opus
       effort: medium
 
 defaultTest: file://../../_lib/grader.yaml

@@ -14,8 +14,6 @@ rules:
       - Playbook Steps
       - State
       - "Step: Intake"
-      - "Step: Research Codebase"
-      - "Step: Research Web"
       - "Step: Draft Plan"
       - "Step: Cross Review"
       - "Step: Present"

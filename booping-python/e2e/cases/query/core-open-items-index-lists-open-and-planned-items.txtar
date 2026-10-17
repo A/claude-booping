@@ -1,0 +1,82 @@
+The open-items index, `core.specs.open_items.index`, narrowed to the open and planned items —
+two of four — sorted by id in its declared columns plus `path` and `slug`, null cells empty.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+-- fixtures/cwd/vault/open-items/OI-0004.md --
+---
+id: OI-0004
+title: "Stale mark"
+status: dropped
+direction: clarify
+record: null
+source: manual
+size: null
+plan: null
+created_at: 2026-10-15
+closed_at: null
+reason: null
+---
+
+# Stale mark
+-- fixtures/cwd/vault/open-items/OI-0002.md --
+---
+id: OI-0002
+title: "Plans close items"
+status: planned
+direction: spec-to-code
+record: "adr/0025#consequences"
+source: adr
+size: null
+plan: plans/202610151409_x/index.md
+created_at: 2026-10-15
+closed_at: null
+reason: null
+---
+
+# Plans close items
+-- fixtures/cwd/vault/open-items/OI-0003.md --
+---
+id: OI-0003
+title: "Spec the tracker"
+status: done
+direction: code-to-spec
+record: null
+source: manual
+size: null
+plan: plans/202610010000_y/index.md
+created_at: 2026-10-15
+closed_at: null
+reason: null
+---
+
+# Spec the tracker
+-- fixtures/cwd/vault/open-items/OI-0001.md --
+---
+id: OI-0001
+title: "Tests mock the clock"
+status: open
+direction: conflict
+record: "rule/0003"
+source: correction
+size: null
+plan: null
+created_at: 2026-10-15
+closed_at: null
+reason: null
+---
+
+# Tests mock the clock
+-- cmd --
+booping query --config core.specs.open_items.index --where status:in=open,planned
+-- exit --
+0
+-- stdout --
+| id | status | source | size | direction | record | title | plan | path | slug |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| OI-0001 | open | correction |  | conflict | rule/0003 | Tests mock the clock |  | open-items/OI-0001.md | OI-0001 |
+| OI-0002 | planned | adr |  | spec-to-code | adr/0025#consequences | Plans close items | plans/202610151409_x/index.md | open-items/OI-0002.md | OI-0002 |
+-- stderr --

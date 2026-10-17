@@ -1,0 +1,51 @@
+A tier whose records are well placed, well named and schema-valid prints no finding: stdout stays
+empty, stderr carries only the trailer, exit 0. The rule carries both `targets:` and `brief:` with
+targets that parse, so it raises no `targets` finding either.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/value/0001-first.md --
+---
+type: value
+title: First
+summary: The first value.
+kind: value
+created_by: owner
+created_at: 2026-01-01
+updated_at: 2026-01-01
+---
+
+Why the project exists.
+
+## In practice
+
+It shows in every run.
+-- fixtures/cwd/vault/rule/0001-keep-it-short.md --
+---
+type: rule
+title: Keep it short
+summary: Cut what the reader does not need.
+created_by: owner
+created_at: 2026-01-01
+updated_at: 2026-01-01
+status: accepted
+targets: [groom, develop/run, agent:booping-developer, skill:playbook]
+brief: Cut what the reader does not need.
+---
+
+## Rule
+
+Keep it short.
+
+## Follows from
+
+- [First](../value/0001-first.md)
+-- cmd --
+booping specs check
+-- exit --
+0
+-- stdout --
+-- stderr --
+2 record(s) checked: 0 error(s), 0 warning(s)

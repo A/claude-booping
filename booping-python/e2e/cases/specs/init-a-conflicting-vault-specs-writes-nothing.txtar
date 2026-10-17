@@ -1,0 +1,21 @@
+With the vault outside the repo and the tier pinned to `path: specs`, an existing `{vault}/specs` that is not a symlink to `{repo}/specs`
+is a conflict: exit 1, `{repo}/specs` is not created and the vault directory is left as it was.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+latest_migration: 9999
+-- fixtures/home/Claude/probe/config.yaml --
+core:
+  specs:
+    tiers:
+      project:
+        path: specs
+-- fixtures/home/Claude/probe/specs/rule/0001-keep.md --
+keep
+-- cmd --
+booping specs init
+-- exit --
+1
+-- stdout --
+-- stderr --
+specs init: {HOME}/Claude/probe/specs exists and is not a symlink to {CWD}/specs

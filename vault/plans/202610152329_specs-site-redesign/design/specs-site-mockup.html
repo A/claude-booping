@@ -1,0 +1,361 @@
+<title>Specs Site Mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#f7f8fa; --surface:#ffffff; --sunk:#eff1f4; --text:#1b1d21; --muted:#5b616b; --faint:#8a909a;
+  --line:#e2e5ea; --link:#1f56b3; --link-bg:#e8effb;
+  --ok:#1f7a43; --ok-bg:#e5f4ea; --warn:#9a5600; --warn-bg:#fff1d9; --bad:#b42318; --bad-bg:#fde8e6;
+  --info:#2b5fb4; --info-bg:#e6eefb; --idle:#6b7280; --idle-bg:#eef0f3;
+  --sans: "Golos Text","Segoe UI",Roboto,"Noto Sans","Helvetica Neue",Arial,sans-serif;
+  --mono: "JetBrains Mono","SF Mono","Cascadia Code",Consolas,monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#16181c; --surface:#1c1f24; --sunk:#22262c; --text:#e4e6eb; --muted:#9aa0a6; --faint:#757b84;
+  --line:#2c3038; --link:#86b3ff; --link-bg:#1e2a40;
+  --ok:#6fcf97; --ok-bg:#16301f; --warn:#f0b357; --warn-bg:#382910; --bad:#ff8a7a; --bad-bg:#3a1a17;
+  --info:#8db4ff; --info-bg:#1b2840; --idle:#a0a6b0; --idle-bg:#262a31; color-scheme: dark;}}
+:root[data-theme="dark"]{
+  --bg:#16181c; --surface:#1c1f24; --sunk:#22262c; --text:#e4e6eb; --muted:#9aa0a6; --faint:#757b84;
+  --line:#2c3038; --link:#86b3ff; --link-bg:#1e2a40;
+  --ok:#6fcf97; --ok-bg:#16301f; --warn:#f0b357; --warn-bg:#382910; --bad:#ff8a7a; --bad-bg:#3a1a17;
+  --info:#8db4ff; --info-bg:#1b2840; --idle:#a0a6b0; --idle-bg:#262a31; color-scheme: dark;}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font:17px/1.6 var(--sans);margin:0;padding-inline:16px;padding-block:16px 48px}
+a{color:var(--link);text-decoration:none}
+a:hover{text-decoration:underline}
+:focus-visible{outline:2px solid var(--link);outline-offset:2px;border-radius:4px}
+button{font:inherit;color:inherit}
+.ref{font:13px/1.4 var(--mono);color:var(--muted)}
+
+/* mockup chrome */
+.mock-bar{max-width:1240px;margin:0 auto 14px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;font-size:14px;color:var(--muted)}
+.mock-bar b{color:var(--text)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:none;padding:6px 12px;cursor:pointer;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--sunk);color:var(--text);font-weight:600}
+.stage{max-width:1240px;margin:0 auto}
+.stage.phone .app{max-width:390px;margin:0 auto;border:1px solid var(--line);border-radius:22px;min-height:780px}
+
+/* app */
+.app{background:var(--bg);border:1px solid var(--line);border-radius:12px;overflow:hidden;container-type:inline-size}
+.top{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--surface);position:sticky;top:0;z-index:3}
+.brand{font-weight:650;letter-spacing:-.01em;white-space:nowrap}
+.brand small{font-weight:400;color:var(--faint);margin-left:6px;font-size:13px}
+.search{flex:1;max-width:420px;display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;padding:6px 10px;color:var(--faint);font-size:15px;background:var(--bg)}
+.search kbd{margin-left:auto;font:12px var(--mono);border:1px solid var(--line);border-radius:4px;padding:0 5px}
+.iconbtn{display:none;border:0;background:none;width:44px;height:44px;border-radius:8px;cursor:pointer;color:var(--muted);align-items:center;justify-content:center}
+.iconbtn:hover{background:var(--sunk)}
+.theme{margin-left:auto}
+.body{display:grid;grid-template-columns:232px minmax(0,1fr) 210px}
+.body.norail{grid-template-columns:232px minmax(0,1fr)}
+.body.norail .rail{display:none}
+.side{border-right:1px solid var(--line);padding:18px 10px;font-size:15px;background:var(--surface);min-height:100%}
+.side h4{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);margin:16px 10px 6px;font-weight:600}
+.side a{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:6px;color:var(--text)}
+.side a:hover{background:var(--sunk);text-decoration:none}
+.side a.on{background:var(--link-bg);color:var(--link);font-weight:600}
+.side .n{margin-left:auto;color:var(--faint);font-size:13px;font-variant-numeric:tabular-nums}
+.needs{color:var(--warn)!important}
+main{padding:28px 40px 56px;min-width:0}
+.rail{padding:28px 16px;font-size:14px;color:var(--muted);border-left:1px solid var(--line)}
+.rail h4{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);margin:0 0 8px;font-weight:600}
+.rail a{display:block;color:var(--muted);padding:3px 0}
+.rail .q{margin-top:22px}
+.crumbs{font-size:14px;color:var(--faint);margin-bottom:10px;display:flex;gap:6px;flex-wrap:wrap}
+.crumbs a{color:var(--muted)}
+.measure{max-width:68ch}
+h1{font-size:28px;line-height:1.3;margin:0 0 10px;letter-spacing:-.015em;text-wrap:balance}
+h2{font-size:22px;line-height:1.35;margin:2.2em 0 .6em;letter-spacing:-.01em;text-wrap:balance}
+h3{font-size:18px;line-height:1.4;margin:1.6em 0 .5em}
+.lead{font-size:19px;line-height:1.55;color:var(--muted);margin:0 0 18px}
+p,ul{margin:0 0 1em}
+li{margin:.25em 0}
+
+/* badges */
+.badges{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 8px}
+.tags{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:14px;margin:0 0 18px}
+.tags a{color:var(--muted)}
+.b{display:inline-flex;align-items:center;gap:5px;font-size:13px;line-height:1;padding:5px 8px;border-radius:999px;background:var(--idle-bg);color:var(--idle);white-space:nowrap}
+.b svg{width:14px;height:14px;flex:none}
+.b.ok{background:var(--ok-bg);color:var(--ok)} .b.warn{background:var(--warn-bg);color:var(--warn)}
+.b.bad{background:var(--bad-bg);color:var(--bad)} .b.info{background:var(--info-bg);color:var(--info)}
+.b.plain{background:none;padding-inline:0;color:var(--muted)}
+
+/* home */
+.scen{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin:18px 0 8px}
+.scen a{display:block;padding:14px 16px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--text)}
+.scen a:hover{border-color:var(--link);text-decoration:none}
+.scen b{display:flex;align-items:baseline;gap:8px;font-size:17px}
+.scen b span{font-weight:400;color:var(--faint);font-size:14px;font-variant-numeric:tabular-nums}
+.scen p{margin:4px 0 0;font-size:15px;color:var(--muted);line-height:1.45}
+.callout{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:10px;background:var(--warn-bg);color:var(--warn);font-size:15px;margin:6px 0 4px}
+.callout a{color:inherit;font-weight:600}
+.recent{list-style:none;padding:0;margin:0}
+.recent li{display:flex;gap:10px;align-items:baseline;padding:8px 0;border-bottom:1px solid var(--line);font-size:16px}
+.recent .ref{flex:none;width:76px}
+.recent time{margin-left:auto;color:var(--faint);font-size:13px;white-space:nowrap}
+
+/* list */
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 16px}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:14px;cursor:pointer;color:var(--muted);min-height:36px}
+.chip svg{width:14px;height:14px}
+.chip[aria-pressed="true"]{border-color:var(--link);color:var(--link);background:var(--link-bg);font-weight:600}
+.chip .n{color:var(--faint);font-variant-numeric:tabular-nums}
+.rows{border-top:1px solid var(--line)}
+.row{display:grid;grid-template-columns:96px minmax(0,1fr) auto;gap:4px 14px;padding:12px 4px;border-bottom:1px solid var(--line);align-items:baseline}
+.row:hover{background:var(--surface)}
+.row .t{font-weight:600;color:var(--text)}
+.row .s{grid-column:2;color:var(--muted);font-size:15px;line-height:1.45}
+.row .why{grid-column:3;grid-row:1/span 2;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;max-width:240px}
+.empty{color:var(--faint);padding:20px 4px}
+
+/* record */
+.facts{display:grid;grid-template-columns:max-content 1fr;gap:4px 16px;font-size:14px;color:var(--muted);margin:0 0 6px;padding:12px 14px;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.facts dt{color:var(--faint)} .facts dd{margin:0}
+.mark{background:var(--warn-bg);color:var(--text);border-radius:8px;padding:10px 12px;margin:10px 0;display:flex;gap:10px;font-size:16px}
+.mark svg{color:var(--warn);flex:none;margin-top:4px;width:16px;height:16px}
+.opt{border:1px solid var(--line);border-radius:10px;background:var(--surface);margin:10px 0}
+.opt summary{list-style:none;cursor:pointer;padding:12px 14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.opt summary::-webkit-details-marker{display:none}
+.opt summary b{font-weight:600}
+.opt .meta{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}
+.opt .in{padding:0 14px 12px;font-size:16px}
+.opt.chosen{border-color:var(--ok)}
+.rel{list-style:none;padding:0;margin:0}
+.rel li{display:flex;gap:10px;align-items:baseline;padding:6px 0;border-bottom:1px dashed var(--line);font-size:16px;flex-wrap:wrap}
+.rel .ref{width:86px;flex:none}
+code{font:15px var(--mono);background:var(--sunk);padding:1px 5px;border-radius:4px}
+.toc-m{display:none}
+
+/* drawer (phone) */
+.drawer{display:none}
+
+/* phone layout — container query so the Desktop/Phone switch works */
+@container (max-width: 760px){
+  .body,.body.norail{grid-template-columns:1fr}
+  .side,.rail{display:none}
+  .search{display:none}
+  .iconbtn{display:inline-flex}
+  .theme{margin-left:0}
+  main{padding:18px 16px 40px}
+  h1{font-size:24px}
+  .lead{font-size:17px}
+  .crumbs .mid{display:none}
+  .row{grid-template-columns:1fr;padding:12px 2px}
+  .row .s{grid-column:1}
+  .row .why{grid-column:1;grid-row:auto;justify-content:flex-start;max-width:none}
+  .row .ref{order:-1}
+  .chips{flex-wrap:nowrap;overflow-x:auto;margin-inline:-16px;padding-inline:16px;scrollbar-width:none}
+  .chip{flex:none;min-height:40px}
+  .toc-m{display:block;border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:0 0 14px;font-size:15px;background:var(--surface)}
+  .toc-m summary{cursor:pointer;min-height:32px;display:flex;align-items:center}
+  .opt .meta{margin-left:0;width:100%}
+  .facts{grid-template-columns:1fr;gap:0}
+  .facts dd{margin:0 0 8px}
+  .drawer.open{display:block;position:absolute;inset:0;z-index:5}
+  .drawer .scrim{position:absolute;inset:0;background:rgb(0 0 0 / .35)}
+  .drawer nav{position:absolute;inset:0 18% 0 0;background:var(--surface);padding:14px 10px;overflow:auto;font-size:16px}
+  .drawer nav a{display:flex;align-items:center;gap:8px;padding:11px 10px;border-radius:8px;color:var(--text)}
+  .drawer nav h4{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);margin:14px 10px 4px}
+  .drawer .n{margin-left:auto;color:var(--faint);font-size:13px}
+}
+.app{position:relative}
+.note{max-width:1240px;margin:14px auto 0;font-size:13px;color:var(--faint)}
+@media (prefers-reduced-motion: no-preference){.chip,.scen a{transition:border-color .15s,background .15s}}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-accepted" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4.8 8.2l2.1 2.1 4.3-4.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-open" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-planned" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2.6 2.2"/></symbol>
+  <symbol id="i-rejected" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3.6 12.4l8.8-8.8" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-clarify" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="currentColor"/><path d="M6.1 6.2a2 2 0 1 1 2.6 1.9c-.5.2-.7.6-.7 1.1v.4" fill="none" stroke="var(--surface)" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="11.6" r=".95" fill="var(--surface)"/></symbol>
+  <symbol id="i-unknown" viewBox="0 0 16 16"><path d="M8 1.6l6.8 12.2H1.2z" fill="currentColor"/><path d="M8 6v3.6" stroke="var(--surface)" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="11.6" r=".9" fill="var(--surface)"/></symbol>
+  <symbol id="i-unreviewed" viewBox="0 0 16 16"><circle cx="8" cy="8" r="4.6" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+  <symbol id="i-reviewed" viewBox="0 0 16 16"><circle cx="8" cy="8" r="4.6" fill="currentColor"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 20 20"><path d="M3 5.5h14M3 10h14M3 14.5h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="i-search" viewBox="0 0 20 20"><circle cx="8.6" cy="8.6" r="5.6" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M13 13l4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 20 20"><path d="M15.5 12.6A6.5 6.5 0 0 1 7.4 4.5a6.5 6.5 0 1 0 8.1 8.1z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+</svg>
+
+<div class="mock-bar">
+  <span><b>Прототип сайта спек</b> · данные swarmlight · кликабельно</span>
+  <span style="display:flex;gap:10px;flex-wrap:wrap">
+    <span class="seg" role="group" aria-label="Страница">
+      <button type="button" data-go="home" aria-pressed="true">Главная</button>
+      <button type="button" data-go="list" aria-pressed="false">Список</button>
+      <button type="button" data-go="review" aria-pressed="false">Ждёт тебя</button>
+      <button type="button" data-go="record" aria-pressed="false">Запись</button>
+    </span>
+    <span class="seg" role="group" aria-label="Экран">
+      <button type="button" id="vw-desk" aria-pressed="true">Десктоп</button>
+      <button type="button" id="vw-phone" aria-pressed="false">Телефон</button>
+    </span>
+  </span>
+</div>
+
+<div class="stage" id="stage">
+  <div class="app" id="app">
+    <header class="top">
+      <button class="iconbtn" type="button" id="menu" aria-label="Меню"><svg width="20" height="20"><use href="#i-menu"/></svg></button>
+      <span class="brand">swarmlight<small>спеки</small></span>
+      <span class="search"><svg width="16" height="16"><use href="#i-search"/></svg>Поиск по спекам<kbd>/</kbd></span>
+      <button class="iconbtn" type="button" aria-label="Поиск" style="margin-left:auto"><svg width="20" height="20"><use href="#i-search"/></svg></button>
+      <button class="iconbtn theme" type="button" id="theme" aria-label="Тема" style="display:inline-flex"><svg width="20" height="20"><use href="#i-moon"/></svg></button>
+    </header>
+    <div class="drawer" id="drawer"><div class="scrim" data-close></div><nav id="drawer-nav"></nav></div>
+    <div class="body">
+      <aside class="side" id="side"></aside>
+      <main id="main"></main>
+      <aside class="rail" id="rail"></aside>
+    </div>
+  </div>
+</div>
+<p class="note">Пример на реальных записях swarmlight (часть списка). Иконки — не цветом единым: у каждой рядом текст.</p>
+
+<script>
+const ICON=(id)=>`<svg aria-hidden="true"><use href="#i-${id}"/></svg>`;
+const STATUS={accepted:['ok','accepted','принято'],done:['ok','accepted','сделано'],open:['info','open','открыт'],planned:['plain','planned','в планах'],proposed:['warn','planned','предложено'],rejected:['plain','rejected','отклонено'],retired:['plain','rejected','отменено']};
+const TYPES=[
+ {id:'value',name:'Ценности',hint:'Зачем этот проект и какой он'},
+ {id:'rule',name:'Правила',hint:'Что ограничивает любое решение'},
+ {id:'adr',name:'Решения',hint:'Почему решили так, а не иначе'},
+ {id:'mechanic',name:'Механики',hint:'Как устроен мир игры'},
+ {id:'conflict',name:'Конфликты',hint:'Где ценности тянут в разные стороны'},
+];
+const R=[
+ {r:'value/0001',t:'Игра через LLM',s:'Это игра для тех, кто много работает с LLM.',st:null,d:'15.10'},
+ {r:'value/0002',t:'Сложный мир',s:'Производственные цепочки и песочница-фабрика уровня Dyson Sphere Program и Factorio, экономика уровня Victoria 3.',st:null,d:'15.10'},
+ {r:'value/0003',t:'Сетап против сетапа',s:'Соревнуется не голая модель, а сетап: модель, харнесс, скрипты и человек.',st:null,d:'15.10'},
+ {r:'value/0004',t:'Модель видна насквозь',s:'Понятно, что модель делает, зачем и насколько хорошо — и игроку, и зрителю.',st:null,d:'15.10'},
+ {r:'rule/0001',t:'Ошибки обратимы',s:'Ошибка агента наказывает, иногда жёстко, но не убивает — из любого состояния есть путь назад.',st:'accepted',d:'15.10'},
+ {r:'rule/0002',t:'Мир идёт без агента',s:'Мир идёт непрерывно; агент действует скриптами и заходит по алертам.',st:'accepted',d:'15.10'},
+ {r:'rule/0003',t:'Ресурсы агента ограничены',s:'Вызовы API и токены на сессию ограничены; сила — в том, как распорядиться бюджетом.',st:'accepted',d:'15.10'},
+ {r:'rule/0004',t:'Агент выбирает, что смотреть',s:'Агент получает сводку и сам решает, какие срезы мира запросить, платя за каждый.',st:'accepted',d:'15.10'},
+ {r:'adr/0001',t:'Архитектура примитивов и новый проект после PoC',s:'Игра переписывается от примитивов — композиция способностей, слот, граф энергии, процесс.',st:'accepted',d:'15.10'},
+ {r:'adr/0002',t:'API агента — OpenAPI из кода',s:'Описание HTTP API живёт в коде сервера и выводится как OpenAPI-схема.',st:'accepted',d:'15.10'},
+ {r:'adr/0003',t:'Сборка бота — шасси, слоты и детали-предметы',s:'Бот — неизменное шасси с типизированными слотами S/M/L; детали — предметы.',st:'accepted',c:1,d:'15.10'},
+ {r:'adr/0004',t:'Ход бота — двигатель, ходовая и мощность',s:'Скорость считается из мощности, массы и среды, а не из таблиц цены хода.',st:'accepted',c:1,d:'15.10'},
+ {r:'adr/0006',t:'Энергия — среда, преобразователь, накопитель, потребитель',s:'Шина бота забирает мощность по порядку слотов питания.',st:'accepted',c:1,d:'15.10'},
+ {r:'adr/0011',t:'Зрение — сенсор-деталь с радиусом',s:'Сенсор в слоте видит диск радиуса; увиденное идёт в карту знаний.',st:'accepted',c:1,d:'15.10'},
+ {r:'mechanic/0001',t:'Сборка бота',s:'Шасси со слотами, детали-предметы в слотах и инвентарь.',st:'planned',d:'15.10'},
+ {r:'mechanic/0002',t:'Ход',s:'Скорость — из мощности двигателя, КПД, массы, g и сопротивления среды.',st:'planned',d:'15.10'},
+ {r:'mechanic/0003',t:'Энергия',s:'Среда, преобразователь, накопитель, потребитель.',st:'planned',d:'15.10'},
+ {r:'mechanic/0004',t:'Зрение',s:'Сенсор видит диск радиуса и замечает свой список.',st:'planned',d:'15.10'},
+ {r:'conflict/0001',t:'Неизвестность ↔ Игра через LLM',s:'Модель должна быстро понять, как играть, но правила мира от неё скрыты.',st:'open',d:'15.10'},
+ {r:'conflict/0002',t:'Долгий живой мир ↔ Доступно для агентов',s:'Мир не встаёт ради игрока, а медленной модели нужно, чтобы мир ждал.',st:'open',d:'15.10'},
+];
+R.forEach(x=>{x.type=x.r.split('/')[0];x.unrev=true});
+const COUNTS={value:18,rule:20,adr:12,mechanic:7,conflict:2};
+const NEEDS=59, CLARIFY=4;
+let view='home', listType='adr', filters=new Set();
+
+const badge=(cls,ic,txt)=>`<span class="b ${cls}">${ic?ICON(ic):''}${txt}</span>`;
+function stateBadges(x,full,hideUnrev){
+  const out=[];
+  if(x.st){const [c,ic,l]=STATUS[x.st];out.push(badge(c,ic,l));}
+  if(x.c)out.push(badge('warn','clarify',full?`${x.c} вопрос к тебе`:`${x.c} [clarify]`));
+  if(x.u)out.push(badge('bad','unknown','[unknown]'));
+  if(x.unrev&&!hideUnrev)out.push(badge('plain','unreviewed','без ревью'));
+  return out.join('');
+}
+function sideHTML(active){
+  const t=TYPES.map(y=>`<a href="#" data-type="${y.id}" class="${active===y.id?'on':''}">${y.name}<span class="n">${COUNTS[y.id]}</span></a>`).join('');
+  return `<a href="#" data-go="home" class="${active==='home'?'on':''}">Обзор</a>
+    <a href="#" data-go="review" class="needs ${active==='review'?'on':''}">${ICON('clarify').replace('<svg','<svg width="15" height="15"')}Ждёт тебя<span class="n">${NEEDS}</span></a>
+    <h4>Разделы</h4>${t}
+    <h4>Теги</h4><a href="#">Роботы<span class="n">14</span></a><a href="#">Планета<span class="n">9</span></a><a href="#">Ресурсы<span class="n">6</span></a><a href="#">Архитектура<span class="n">5</span></a>`;
+}
+function home(){
+  const scen=TYPES.map(y=>`<a href="#" data-type="${y.id}"><b>${y.name} <span>${COUNTS[y.id]}</span></b><p>${y.hint}</p></a>`).join('');
+  const recent=R.filter(x=>x.type==='adr').slice(0,5).map(x=>`<li><span class="ref">${x.r}</span><a href="#" data-rec="${x.r}">${x.t}</a><time>15 окт</time></li>`).join('');
+  return `<div class="measure">
+    <h1>swarmlight</h1>
+    <p class="lead">Игра для тех, кто много работает с LLM: сложный мир, в котором соревнуются сетапы — модель, харнесс, скрипты и человек.</p>
+    <div class="callout">${ICON('clarify').replace('<svg','<svg width="18" height="18"')}<span><a href="#" data-go="review">${NEEDS} записей ждут тебя</a> · ${CLARIFY} открытых вопроса в решениях</span></div>
+  </div>
+  <div class="scen">${scen}</div>
+  <div class="measure"><h2>Недавно изменённое</h2><ul class="recent">${recent}</ul></div>`;
+}
+const FILTERS=[
+ {id:'unrev',ic:'unreviewed',l:'Без ревью',f:x=>x.unrev},
+ {id:'clarify',ic:'clarify',l:'Есть [clarify]',f:x=>x.c},
+ {id:'unknown',ic:'unknown',l:'Есть [unknown]',f:x=>x.u},
+ {id:'open',ic:'open',l:'Открытые',f:x=>x.st==='open'},
+ {id:'accepted',ic:'accepted',l:'Принятые',f:x=>x.st==='accepted'},
+];
+function list(review){
+  const pool=review?R:R.filter(x=>x.type===listType);
+  const rows=pool.filter(x=>[...filters].every(id=>FILTERS.find(f=>f.id===id).f(x)));
+  const chips=FILTERS.map(f=>{const n=pool.filter(f.f).length;return n||filters.has(f.id)?`<button type="button" class="chip" data-f="${f.id}" aria-pressed="${filters.has(f.id)}">${ICON(f.ic)}${f.l}<span class="n">${n}</span></button>`:''}).join('');
+  const ty=TYPES.find(y=>y.id===listType);
+  const head=review?`<h1>Ждёт тебя</h1><p class="lead">Записи без твоего ревью и открытые вопросы. Сначала то, что написал агент, потом самое старое.</p>`
+                  :`<div class="crumbs"><a href="#" data-go="home">Обзор</a>›<span>${ty.name}</span></div><h1>${ty.name}</h1><p class="lead">${ty.hint}.</p>`;
+  const body=rows.length?rows.map(x=>`<div class="row"><span class="ref">${x.r}</span><a class="t" href="#" data-rec="${x.r}">${x.t}</a><span class="why">${stateBadges(x,false,filters.has('unrev'))}</span><span class="s">${x.s}</span></div>`).join(''):`<p class="empty">Ничего не подходит под фильтр.</p>`;
+  return `<div class="measure" style="max-width:none">${head}<div class="chips">${chips}</div><div class="rows">${body}</div></div>`;
+}
+function record(){
+  const x=R.find(y=>y.r==='adr/0003');
+  const opt=(name,st,cx,rv,verdict,text,open)=>`<details class="opt ${st==='accepted'?'chosen':''}" ${open?'open':''}><summary><b>${name}</b><span class="meta">${badge(st==='accepted'?'ok':'plain',st==='accepted'?'accepted':'rejected',st==='accepted'?'выбрано':'отклонено')}${badge('plain','','сложность: '+cx)}${badge('plain','','обратимость: '+rv)}</span></summary><div class="in"><p style="color:var(--muted)">${verdict}</p>${text}</div></details>`;
+  return `<div class="measure">
+  <div class="crumbs"><a href="#" data-go="home">Обзор</a><span class="mid">›</span><a class="mid" href="#" data-type="adr">Решения</a><span>›</span><span class="ref" style="font-size:14px">${x.r}</span></div>
+  <h1>${x.t}</h1>
+  <div class="badges">${stateBadges(x,true)}</div><div class="tags"><a href="#">#роботы</a><a href="#">#роботы:конструкция</a><a href="#">#архитектура</a></div>
+  <p class="lead">Бот — неизменное шасси с типизированными слотами S/M/L; детали — предметы; слоты шасси меняет только другой робот.</p>
+  <details class="toc-m"><summary>На странице · 1 вопрос к тебе</summary><a href="#">Контекст</a> · <a href="#">Решение</a> · <a href="#">Варианты</a> · <a href="#">Последствия</a></details>
+  <dl class="facts"><dt>Автор</dt><dd>владелец</dd><dt>Изменено</dt><dd>15 октября 2026</dd><dt>Ревью</dt><dd>ещё не было</dd><dt>Служит ценностям</dt><dd><a href="#">Сложный мир</a>, <a href="#">Машинная цивилизация</a>, <a href="#">Примитивы, а не проводка</a></dd></dl>
+  <h2>Контекст</h2>
+  <p>В PoC юнит — рама с бюджетом очков, шасси со встроенным ходом, модули и CPU. Ход сидел в шасси, поэтому шасси размножились — у каждого своя таблица проходимости и своё правило. Новый проект строит бота композицией, и первый дизайн-срез — сборка бота.</p>
+  <h2>Решение</h2>
+  <ul><li><b>Бот</b> — шасси, детали в слотах шасси и инвентарь.</li><li><b>Шасси</b> выбирается при сборке и не меняется: набор слотов, своя масса и семейство хода.</li><li><b>Слот шасси</b> — тип и размер S, M или L. Деталь встаёт в слот своего типа и не больше его размера.</li><li><b>Способности не хранятся.</b> <code>move_to</code> берёт ходовую, нет её — ошибка «нет ходовой».</li></ul>
+  <div class="mark" id="q1">${ICON('clarify')}<div><b>Вопрос к тебе.</b> Кто и где меняет слоты шасси: бот с сервисным манипулятором на соседней клетке, мастерская, в которой стоит бот, или оба.</div></div>
+  <h2>Варианты</h2>
+  ${opt('Шасси со слотами и деталями-предметами','accepted','средняя','средняя','Одна модель от ленты до сложного робота; сервис — перенос.','<p><b>Плюсы:</b> сборка, замена модуля и вставка батареи в чужого бота — один перенос из слота в слот.</p><p><b>Минусы:</b> у штучных предметов появляется состояние экземпляра.</p>',true)}
+  ${opt('Бюджет очков','rejected','низкая','высокая','Нет позиций и размеров, игроку непонятно, что куда встаёт.','<p>Рама даёт бюджет, детали его тратят (PoC).</p>')}
+  ${opt('Сетка с формами','rejected','высокая','средняя','Раскладка фигур — головоломка, лишняя для модели.','<p>Детали — фигуры на сетке шасси, как экипировка в Factorio.</p>')}
+  ${opt('Ход внутри шасси','rejected','низкая','высокая','Шасси размножаются под каждую среду, как в PoC.','<p>Шасси само задаёт проходимость и скорость.</p>')}
+  <h2>Ссылаются сюда</h2>
+  <ul class="rel"><li><span class="ref">adr/0004</span><a href="#">Ход бота — двигатель, ходовая и мощность</a>${badge('ok','accepted','принято')}</li><li><span class="ref">mechanic/0001</span><a href="#">Сборка бота</a>${badge('plain','planned','в планах')}</li><li><span class="ref">rule/0020</span><a href="#">Сетап меняет другой робот</a>${badge('ok','accepted','принято')}</li></ul>
+  </div>`;
+}
+function rail(){
+  if(view!=='record')return '';
+  return `<h4>На странице</h4><a href="#">Контекст</a><a href="#">Решение</a><a href="#">Варианты</a><a href="#">Ссылаются сюда</a>
+  <div class="q"><h4>Вопросы к тебе</h4><a href="#q1" style="color:var(--warn)">Кто меняет слоты шасси</a></div>`;
+}
+function render(){
+  const main=document.getElementById('main');
+  main.innerHTML=view==='home'?home():view==='record'?record():list(view==='review');
+  const active=view==='list'?listType:view==='review'?'review':view==='home'?'home':'adr';
+  document.getElementById('side').innerHTML=sideHTML(active);
+  document.getElementById('drawer-nav').innerHTML=sideHTML(active);
+  document.getElementById('rail').innerHTML=rail();
+  document.querySelector('.body').classList.toggle('norail',view!=='record');
+  document.querySelectorAll('.mock-bar [data-go]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.go===view||(b.dataset.go==='list'&&view==='list'))));
+}
+function go(v){view=v;filters.clear();if(v==='review')filters.add('unrev');document.getElementById('drawer').classList.remove('open');render();}
+document.addEventListener('click',e=>{
+  const a=e.target.closest('[data-go],[data-type],[data-rec],[data-f],[data-close]');
+  if(!a)return; e.preventDefault();
+  if(a.dataset.go)go(a.dataset.go);
+  else if(a.dataset.type){listType=a.dataset.type;go('list');}
+  else if(a.dataset.rec){go('record');}
+  else if(a.dataset.f){const f=a.dataset.f;filters.has(f)?filters.delete(f):filters.add(f);render();}
+  else if(a.dataset.close!==undefined)document.getElementById('drawer').classList.remove('open');
+});
+document.getElementById('menu').onclick=()=>document.getElementById('drawer').classList.add('open');
+const stage=document.getElementById('stage');
+document.getElementById('vw-desk').onclick=function(){stage.classList.remove('phone');this.setAttribute('aria-pressed','true');document.getElementById('vw-phone').setAttribute('aria-pressed','false')};
+document.getElementById('vw-phone').onclick=function(){stage.classList.add('phone');this.setAttribute('aria-pressed','true');document.getElementById('vw-desk').setAttribute('aria-pressed','false')};
+document.getElementById('theme').onclick=()=>{const r=document.documentElement;const dark=r.dataset.theme==='dark'||(!r.dataset.theme&&matchMedia('(prefers-color-scheme: dark)').matches);r.dataset.theme=dark?'light':'dark'};
+(function(){const h=(location.hash||'').slice(1).split('-');
+ if(h.includes('phone'))document.getElementById('vw-phone').click();
+ if(h.includes('dark'))document.documentElement.dataset.theme='dark';
+ if(h.includes('values')){listType='value';}
+ const v=h.find(x=>['home','list','review','record'].includes(x)||x==='values');
+ if(v==='values')view='list';else if(v)view=v;
+ if(view==='review')filters.add('unrev');})();
+render();
+</script>

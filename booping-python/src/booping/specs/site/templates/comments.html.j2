@@ -1,0 +1,21 @@
+{% extends "base.html.j2" %}
+{% from "_comments.html.j2" import cmt_labels %}
+{% block main %}
+<h1>{{ labels.ui("outbox") }}</h1>
+<p class="lead">{{ labels.ui("outbox_lead") }}</p>
+<p class="needs-js">{{ labels.ui("comments_need_js") }}</p>
+<p class="cmt-nostore">{{ labels.ui("comments_need_storage") }}</p>
+<div class="ob" {{ cmt_labels(labels) }}>
+<div class="cmt-actions">
+<button class="ob-copy" type="button">{{ labels.ui("copy_all") }}</button>
+<button class="ob-clear" type="button">{{ labels.ui("clear_all") }}</button>
+</div>
+<div class="ob-confirm" role="group" aria-labelledby="ob-confirm-q" hidden>
+<p id="ob-confirm-q">{{ labels.ui("clear_confirm") }}</p>
+<button class="ob-clear-yes" type="button">{{ labels.ui("clear_yes") }}</button>
+<button class="ob-clear-no" type="button">{{ labels.ui("cancel") }}</button>
+</div>
+<p class="cmt-empty">{{ labels.ui("nothing_to_send") }}</p>
+<div class="ob-groups"></div>
+</div>
+{% endblock %}

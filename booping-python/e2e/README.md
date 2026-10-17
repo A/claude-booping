@@ -35,13 +35,13 @@ exit code and stderr only. A case that omits `stdout` carries a comment saying w
 ## Executable fixtures
 
 A fixture section carries content, never permissions — a mode is not expressible in a case file. A
-fixture that must be executable, such as a `playbook-transition` `script` hook, is made so by a
+fixture that must be executable, such as a `transition` `script` hook, is made so by a
 leading `cmd` line, since `cmd` lines run raw argv from the `cwd` root:
 
 ```
 -- cmd --
 chmod +x ../home/Claude/_playbooks/fx-hooks/_scripts/note
-booping playbook-transition fx-hooks noted --workdir run
+booping transition run/index.md noted --playbook fx-hooks
 ```
 
 ## Running

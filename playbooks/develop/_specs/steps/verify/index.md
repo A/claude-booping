@@ -63,7 +63,7 @@ suite_reviewed_at: 20260802 09:58
   - the `in-progress` → `awaiting-retro` edge's two conditions are answered by this one report:
     guardrails and Final Verification green, every DoD checkbox `[x]` and every milestone
     `done`. Wrap-up takes the edge; it re-confirms nothing
-- **Delegation** — detached: `detached: "sonnet:medium"` — a generic sub-agent fetches this
+- **Delegation** — detached: `detached: "opus:medium"` — a generic sub-agent fetches this
   step's body itself (`booping render-playbook develop --step verify`) and performs it; the
   runner never reads the instructions and never runs the guardrails in its own conversation.
   The agent needs shell access to run the discovered commands plus reads over the repo; its

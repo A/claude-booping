@@ -1,0 +1,9 @@
+Outside a booping project there is no vault to record in: the error `items list` gives, exit 1.
+
+-- cmd --
+booping run develop plans/p1
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: no booping project here; open items live in its vault

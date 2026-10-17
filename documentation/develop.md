@@ -30,6 +30,8 @@ Committing on the runner's side is what keeps the branch honest across coding ag
 
 When a tree falls short of the DoD, or the agent reports its verification red, the runner writes what it found into a `feedback.md` beside that milestone file — what it checked, what was wrong, what the next attempt must do — and briefs a **fresh** agent with both paths. That file is also where attempts are counted; after two the blocker is unrecoverable, and the run asks you to approve the abort. A milestone the runner has sent back keeps its feedback on disk, so the record survives the session.
 
+When you correct the runner mid-sprint, it logs your words verbatim, with the session id and a link to the plan, as one file under the vault's `corrections/` — the entries [retro](retro.md) starts from.
+
 Every milestone group runs in **one session**.
 
 ## Starting a run
@@ -41,7 +43,7 @@ Every milestone group runs in **one session**.
 
 Bare invocation lists the vault's plans at `ready-for-dev` or `awaiting-approval` and asks you to pick one. Name a plan path to target a specific one.
 
-To resume a sprint already `in-progress`, invoke the playbook against the same plan: `playbook-state` reports the frontier and the run picks up at the first milestone whose `status:` is not `done` — including a blocked one, whose `feedback.md` carries the previous attempt's findings into the next briefing. Each transition also regenerates `index.md`'s `## Milestones` table and re-sums the plan's story points, so the table is a view, never the source of truth.
+To resume a sprint already `in-progress`, invoke the playbook against the same plan: `booping state` reports the frontier and the run picks up at the first milestone whose `status:` is not `done` — including a blocked one, whose `feedback.md` carries the previous attempt's findings into the next briefing. Each transition also regenerates `index.md`'s `## Milestones` table and re-sums the plan's story points, so the table is a view, never the source of truth.
 
 ## Branch
 
@@ -79,7 +81,7 @@ The discipline is the [groom playbook](groom.md)'s for cross-review findings: ev
 
 The playbook reads these keys from `src/config.yaml`. See [Project config](project_config.md) for the deep-merge override mechanics; per-project tweaks live in `~/Claude/{project}/config.yaml`.
 
-- **`core.sprint.max_milestones_per_agent`** — maximum consecutive milestones grouped into a single `booping-developer` briefing; grouping happens only when the milestones share enough context that one agent in sequence beats a fresh agent per milestone. Default `2`.
+- **`core.sprint.max_sp`** — SP budget of one `booping-developer` briefing, see [project config](project_config.md). Grouping changes only the briefing — each milestone is still validated, committed and transitioned on its own.
 - **`core.develop_playbook.fallback_agent`** — the agent a fix briefing is routed to when the milestone was built by some other agent, so an externally built milestone still gets its fixes done in-house. Default `booping:booping-developer`.
 - **`core.develop_playbook.git.branches`** — list of `{branch, when}` entries that map plan `type` (or freeform descriptors) to a branch prefix; `provision` picks from this list.
 - **`core.develop_playbook.git.commit_message`** — message format string used for in-sprint commits. Override per-project to enforce a different commit shape.

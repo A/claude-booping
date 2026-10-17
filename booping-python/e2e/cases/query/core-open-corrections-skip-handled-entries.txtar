@@ -1,0 +1,31 @@
+`core.corrections.open` lists the entries still `open`; a `handled` one is left out.
+
+-- fixtures/cwd/corrections/20261018-120000-draft-plan.md --
+---
+step: "groom/draft-plan"
+did: "split the plan"
+said: "keep one plan"
+why: null
+state: open
+session: "s-1"
+logged_at: "2026-10-18 12:00"
+artifact: null
+---
+-- fixtures/cwd/corrections/20261017-090000-intake.md --
+---
+step: "groom/intake"
+did: "guessed the type"
+said: "it is a bug"
+why: null
+state: handled
+session: "s-0"
+logged_at: "2026-10-17 09:00"
+artifact: null
+---
+-- cmd --
+booping query --config core.corrections.open --project . --output paths
+-- exit --
+0
+-- stdout --
+corrections/20261018-120000-draft-plan.md
+-- stderr --

@@ -1,0 +1,34 @@
+A `--set` override reaches the migrations gate and wins over the tiers: the project tier turns
+`core.auto_migrate` off, but `--set core.auto_migrate=TRUE` — a string, read as a YAML-ish
+boolean — turns the gate back into the auto-migrate order.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+-- fixtures/home/Claude/probe/config.yaml --
+core:
+  auto_migrate: false
+-- fixtures/home/Claude/_playbooks/fx-gated/playbook.md --
+---
+name: fx-gated
+title: Gated
+summary: Must not render while the vault is behind.
+---
+
+Preamble that a working gate suppresses.
+-- fixtures/home/Claude/_playbooks/fx-gated/playbook.yaml --
+graph:
+  only: []
+-- fixtures/home/Claude/_playbooks/fx-gated/only/prompt.md --
+---
+name: only
+summary: Only step.
+---
+
+Only body.
+-- cmd --
+booping render-playbook fx-gated --set core.auto_migrate=TRUE
+-- exit --
+0
+-- stdout --
+**Auto-migrate:** this project is behind on booping migrations (recorded id -1, latest shipped [..]). Run `/playbook migrate` now — `core.auto_migrate` is on, so its approval is taken as given; its question about uncommitted work is still asked — then continue with the original request.
+-- stderr --

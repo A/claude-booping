@@ -1,0 +1,75 @@
+Under the shipped `adr.yaml` an accepted ADR's alternatives are checked across the file: a row
+linking no `###` option, an `###` option no row links, and two `accepted` rows each give one
+`alternatives` error — the count on the second accepted row.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/adr/0001-pick-storage.md --
+---
+type: adr
+title: Pick storage
+summary: Where the records live.
+created_by: owner
+created_at: 2026-01-01
+updated_at: 2026-01-01
+status: accepted
+---
+
+## Context
+
+Records need a home.
+
+## Decision
+
+Files.
+
+## Alternatives
+
+| Option | Status | Complexity | Reversibility | Verdict |
+|---|---|---|---|---|
+| [Option A](#option-a) | accepted | low | high | Simple |
+| [Option B](#option-b) | accepted | low | high | Also simple |
+| [Missing](#missing) | rejected | low | high | Gone |
+
+### Option A
+
+Files on disk.
+
+- **Pros:** cheap.
+- **Cons:** limited.
+- **Complexity:** low.
+- **Reversibility:** high.
+
+### Option B
+
+A database.
+
+- **Pros:** cheap.
+- **Cons:** limited.
+- **Complexity:** low.
+- **Reversibility:** high.
+
+### Option C
+
+A service.
+
+- **Pros:** cheap.
+- **Cons:** limited.
+- **Complexity:** low.
+- **Reversibility:** high.
+
+## Consequences
+
+- Plain files.
+-- cmd --
+booping specs check
+-- exit --
+1
+-- stdout --
+vault/adr/0001-pick-storage.md:24  error  alternatives  2 options accepted in Alternatives; a accepted record needs exactly one
+vault/adr/0001-pick-storage.md:25  error  alternatives  option missing names no ### in Alternatives
+vault/adr/0001-pick-storage.md:45  error  alternatives  ### Option C has no row in Alternatives
+-- stderr --
+1 record(s) checked: 3 error(s), 0 warning(s)

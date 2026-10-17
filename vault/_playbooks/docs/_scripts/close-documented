@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Exit hook for the docs playbook (`recording -> done`): fold the run record's
-`documented:` frontmatter list into the ledger `_specs/documented.md`, seeding the
-ledger when it does not exist yet.
+`documented:` frontmatter list into the ledger `documented.md` at the workdir
+root, seeding the ledger when it does not exist yet.
 
-Environment (set by `booping playbook-transition`): BOOPING_WORKDIR = the run
-workdir `{vault}/docs` (also cwd), BOOPING_ARTIFACT = the run record.
+Environment (set by `booping transition`): BOOPING_ARTIFACT = the run record
+`{vault}/docs/_runs/{name}.md`; the docs workdir is its grandparent.
 
 The ledger is what the next survey's undocumented sweep subtracts, so membership
 is by work-item path; rows already present are left untouched. Runs before
@@ -46,11 +46,11 @@ def documented_items(head: str) -> list[str]:
 
 
 def main() -> None:
-    workdir = Path(os.environ.get("BOOPING_WORKDIR", ".")).resolve()
     raw_artifact = os.environ.get("BOOPING_ARTIFACT")
     if not raw_artifact:
         sys.exit("BOOPING_ARTIFACT is not set")
     artifact = Path(raw_artifact).resolve()
+    workdir = artifact.parent.parent
     if not artifact.is_file():
         sys.exit(f"run record not found: {artifact}")
 
@@ -66,7 +66,7 @@ def main() -> None:
     except ValueError:
         record_rel = artifact.name
 
-    ledger = workdir / "_specs" / "documented.md"
+    ledger = workdir / "documented.md"
     if ledger.is_file():
         lines = ledger.read_text().rstrip("\n").splitlines()
     else:
@@ -84,7 +84,6 @@ def main() -> None:
         lines.append(f"| `{item}` | `{record_rel}` |")
         added += 1
 
-    ledger.parent.mkdir(parents=True, exist_ok=True)
     ledger.write_text("\n".join(lines) + "\n")
     print(f"close-documented: {added} rows appended, {len(items) - added} already present")
 

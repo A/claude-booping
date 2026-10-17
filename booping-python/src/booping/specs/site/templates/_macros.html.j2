@@ -1,0 +1,158 @@
+{% macro fact_item(item) %}
+{%- if item.href is not none -%}
+<a href="{{ item.href }}"><code>{{ item.text }}</code></a>
+{%- elif item.code -%}
+<code{% if item.css is not none %} class="{{ item.css }}"{% endif %}>{{ item.text }}</code>
+{%- else -%}
+{{ item.text }}
+{%- endif -%}
+{% endmacro %}
+
+{% macro icon(id) %}<svg class="ic" aria-hidden="true"><use href="#{{ id }}"/></svg>{% endmacro %}
+
+{% macro badge(css, icon_id, text) %}<span class="b {{ css }}">{{ icon(icon_id) }}{{ text }}</span>{% endmacro %}
+
+{% macro state_badges(state, labels, hide_unreviewed=false, clarify_href=none, unknown_href=none) %}
+{%- set css = {"in-progress": "warn", "accepted": "ok", "done": "ok", "live": "ok", "resolved": "ok", "proposed": "warn", "planned": "warn", "validating": "warn", "open": "info"} -%}
+{%- set icons = {"in-progress": "i-planned", "cancelled": "i-rejected", "fail": "i-rejected", "accepted": "i-accepted", "done": "i-accepted", "live": "i-accepted", "resolved": "i-accepted", "proposed": "i-planned", "planned": "i-planned", "validating": "i-planned", "deferred": "i-planned", "open": "i-open", "rejected": "i-rejected", "retired": "i-rejected", "superseded": "i-rejected"} -%}
+{%- if state.status -%}
+{{ badge(css.get(state.status, "plain"), icons.get(state.status, "i-open"), labels.status(state.status)) }}
+{%- endif -%}
+{%- if state.clarify and clarify_href is not none -%}
+<a href="{{ clarify_href }}">{{ badge("warn", "i-clarify", labels.plural("clarify", state.clarify)) }}</a>
+{%- elif state.clarify -%}
+{{ badge("warn", "i-clarify", labels.plural("clarify", state.clarify)) }}
+{%- endif -%}
+{%- if state.unknown and unknown_href is not none -%}
+<a href="{{ unknown_href }}">{{ badge("bad", "i-unknown", labels.ui("unknown")) }}</a>
+{%- elif state.unknown -%}
+{{ badge("bad", "i-unknown", labels.ui("unknown")) }}
+{%- endif -%}
+{%- if state.unreviewed and not hide_unreviewed -%}
+{{ badge("plain", "i-unreviewed", labels.ui("unreviewed")) }}
+{%- endif -%}
+{% endmacro %}
+
+{% macro rel_item(item) %}
+{%- if item.href is not none -%}
+<a href="{{ item.href }}">{{ item.title }}</a> <code class="ref">{{ item.ref }}</code>{% if item.state.status %} {{ state_badges(item.state, labels) }}{% endif %}
+{%- else -%}
+<code{% if item.css is not none %} class="{{ item.css }}"{% endif %}>{{ item.text }}</code>
+{%- endif -%}
+{% endmacro %}
+
+{% macro fact_value(item) %}
+{%- if item.datetime is not none -%}
+<time datetime="{{ item.datetime }}">{{ item.text }}</time>
+{%- elif item.href is not none -%}
+<a href="{{ item.href }}">{{ item.text }}</a>
+{%- else -%}
+{{ item.text }}
+{%- endif -%}
+{% endmacro %}
+
+{% macro callout(needs, unreviewed, questions, href) %}
+<p class="callout">{{ icon("i-clarify") }}<span><a href="{{ href }}">{{ labels.plural("needs_you", needs) }}</a>{% if unreviewed %} · {{ labels.plural("unreviewed_n", unreviewed) }}{% endif %}{% if questions %} · {{ labels.plural("open_questions", questions) }}{% endif %}</span></p>
+{% endmacro %}
+
+{% macro scenarios(types) %}
+<ul class="scen">
+{% for t in types %}
+<li><a href="{{ t.href }}"><b>{{ labels.type_plural(t.type) }} <span class="n">{{ t.count }}</span></b>{% set scenario = labels.scenario(t.type) %}{% if scenario %}<span class="s">{{ scenario }}</span>{% endif %}</a></li>
+{% endfor %}
+</ul>
+{% endmacro %}
+
+{% macro recently_updated(recent) %}
+<div class="measure">
+<h2>{{ labels.ui("recently_updated") }}</h2>
+<ul class="recent">
+{% for r in recent %}
+<li><code class="ref">{{ r.ref }}</code><a href="{{ r.page }}">{{ r.title }}</a><time datetime="{{ r.datetime }}">{{ r.date }}</time></li>
+{% endfor %}
+</ul>
+</div>
+{% endmacro %}
+
+{% macro record_row(view, labels, prefix, hide_unreviewed=false, mark_links=false) %}
+{%- set href = prefix ~ view.page -%}
+{%- set clarify_href = (href ~ "#" ~ view.state.first_clarify) if mark_links and view.state.first_clarify else none -%}
+{%- set unknown_href = (href ~ "#" ~ view.state.first_unknown) if mark_links and view.state.first_unknown else none -%}
+<li class="row"{% for key, value in view.data.items() %} data-{{ key }}="{{ value }}"{% endfor %}><code class="ref">{{ view.ref }}</code><a class="t" href="{{ href }}">{{ view.title }}</a><span class="why">{{ state_badges(view.state, labels, hide_unreviewed, clarify_href, unknown_href) }}</span>{% if view.summary is not none %}<span class="s">{{ view.summary }}</span>{% endif %}</li>
+{% endmacro %}
+
+{% macro item_row(view, labels, prefix) %}
+<li class="row"{% for key, value in view.data.items() %} data-{{ key }}="{{ value }}"{% endfor %}><code class="ref">{{ view.ref }}</code>{% if view.page is not none %}<a class="t" href="{{ prefix }}{{ view.page }}">{{ view.title }}</a>{% else %}<span class="t">{{ view.title }}</span>{% endif %}<span class="why">{{ badge("info", "i-open", labels.status("open")) }}</span></li>
+{% endmacro %}
+
+{% macro filter_bar(filters, labels, shown="shown", show="filters_show") %}
+<div class="filters" data-default-sort="{{ filters.sort }}">
+<button type="button" class="filter-open" aria-haspopup="dialog" data-label="{{ labels.ui('filters') }}">{{ labels.ui("filters") }}</button>
+<div class="filter-active" data-remove="{{ labels.ui('filter_remove') }}"></div>
+<dialog class="filter-sheet" aria-label="{{ labels.ui('filters') }}">
+<div class="filter-head">
+<h2>{{ labels.ui("filters") }}</h2>
+<button class="iconbtn filter-close" type="button" aria-label="{{ labels.ui('close') }}">&times;</button>
+</div>
+{% for facet in filters.facets %}
+<p class="facet">{{ labels.ui('facet_' ~ facet.key) }}</p>
+<div class="chips" role="group" aria-label="{{ labels.ui('facet_' ~ facet.key) }}">
+{% for chip in facet.chips %}
+<button type="button" class="chip" data-key="{{ facet.key }}" data-value="{{ chip.value }}" aria-pressed="false">{% if chip.icon is not none %}{{ icon(chip.icon) }}{% endif %}{{ chip.label }}<span class="n">{{ chip.count }}</span></button>
+{% endfor %}
+</div>
+{% endfor %}
+<label>{{ labels.ui("sort") }} <select class="sort">
+{% for sort in filters.sorts %}
+<option value="{{ sort }}"{% if sort == filters.sort %} selected{% endif %}>{{ labels.ui("sort_" ~ sort) }}</option>
+{% endfor %}
+</select></label>
+<button type="button" class="filter-done">{{ labels.ui(show) }}</button>
+</dialog>
+<p class="count" role="status" data-forms="{{ labels.plural_forms(shown) | tojson | forceescape }}">{{ labels.plural(shown, filters.total) }}</p>
+</div>
+<p class="empty" hidden>{{ labels.ui("nothing_matches") }}</p>
+{% endmacro %}
+
+{% macro tag_tree(nodes) %}
+<ul class="tag-tree">
+{% for node in nodes %}
+<li><a href="{{ node.href }}"><code>{{ node.tag }}</code></a> <span class="n">{{ node.count }}</span>{% if node.description %} <span class="s">{{ node.description }}</span>{% endif %}
+{% if node.children %}
+{{ tag_tree(node.children) | trim }}
+{% endif %}
+</li>
+{% endfor %}
+</ul>
+{% endmacro %}
+
+{% macro toc_blocks(view, labels, key) %}
+{% if view.toc %}
+<nav class="toc" aria-labelledby="{{ key }}-toc">
+<h4 id="{{ key }}-toc">{{ labels.ui("on_this_page") }}</h4>
+<ul>
+{% for entry in view.toc %}
+<li><a href="{{ entry.href }}">{{ entry.text }}</a>
+{% if entry.children %}
+<ul>
+{% for child in entry.children %}
+<li><a href="{{ child.href }}">{{ child.text }}</a></li>
+{% endfor %}
+</ul>
+{% endif %}
+</li>
+{% endfor %}
+</ul>
+</nav>
+{% endif %}
+{% if view.questions %}
+<div class="q">
+<h4>{{ labels.plural("open_questions", view.questions | length) }}</h4>
+<ul>
+{% for q in view.questions %}
+<li><a class="mk-{{ q.kind }}" href="{{ q.href }}">{{ icon("i-" ~ q.kind) }}{{ q.text }}</a></li>
+{% endfor %}
+</ul>
+</div>
+{% endif %}
+{% endmacro %}

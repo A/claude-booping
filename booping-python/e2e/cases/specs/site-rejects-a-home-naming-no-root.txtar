@@ -1,0 +1,39 @@
+`--home` must name one of the rendered roots; an unknown name exits 2 before anything is written.
+
+-- fixtures/cwd/vault/rule/0001-linear-history.md --
+---
+type: rule
+title: Linear history
+summary: Master stays linear.
+status: accepted
+updated_at: 2026-10-03
+---
+
+# Linear history
+-- fixtures/cwd/vault/value/0001-clarity.md --
+---
+type: value
+title: Clarity
+summary: Say what you mean.
+kind: value
+updated_at: 2026-10-01
+---
+
+# Clarity
+-- fixtures/cwd/core/rule/0032-small-commits.md --
+---
+type: rule
+title: Small commits
+summary: A commit carries one concern.
+status: accepted
+updated_at: 2026-10-02
+---
+
+# Small commits
+-- cmd --
+booping specs site --root a=vault --root booping=core --home nope
+-- exit --
+2
+-- stdout --
+-- stderr --
+error: --home `nope` names no rendered root (roots: a, booping)

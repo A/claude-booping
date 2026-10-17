@@ -4,26 +4,43 @@ You perform this step yourself, in the driving conversation: you own the plan yo
 gate that follows, and that gate always fires.
 
 You have the workdir (`{vault}/docs/`), the run record whose change table the user has just
-extended and confirmed, and a spec set `sync-specs` has already folded those changes into. Read
-the change table directly — each change's id, its type, what it touched. Hand the spec-set reads
-to `booping:booping-researcher`, one brief covering `_specs/targets.md`, `_specs/roles.md` and
-`_specs/features.md`, and ask for exactly what a row needs back: per surface its path, format,
-audience, depth and whether this run seeds it or appends to it; per role its depth ceiling, its
-voice and its withheld set; the feature groups that give the documentation its structure. The
-three files never enter the driving context whole.
+extended and confirmed, the feature index below, and spec records `sync-specs` has already folded
+those changes into. Read the change table directly — each change's id, its type, what it touched,
+and the record its spec-set effect names. Hand the record reads to `booping:booping-researcher`,
+one brief covering the surfaces record `{vault}/reference/0003-documentation-surfaces.md`
+and the audience record `{vault}/reference/0001-audience.md`, and ask for exactly what a row
+needs back: per surface its path, format, audience, depth and whether this run seeds it or appends
+to it; per role its depth ceiling, its voice and its withheld set. The two records never enter the
+driving context whole; the documentation's structure comes from the surfaces record.
+
+## The feature index
+
+{% set features = 'core.docs_playbook.queries.features' | query -%}
+{% if features -%}
+| Story | Summary | Status | Path |
+| --- | --- | --- | --- |
+{% for f in features -%}
+| {{ f.title }} | {{ f.summary }} | {{ f.status }} | {{ f.path }} |
+{% endfor -%}
+{%- else -%}
+_No story records._
+{%- endif %}
+
+A story `sync-specs` created this run is not in the index above — its path is in `sync-specs`'
+return.
 
 ## The section to write
 
 `{vault}/docs/_runs/{YYYYMMDDHHmm}-{title}.md` gains a `## Targeting plan`. Nothing else — no
-destination document is opened or written here, and the spec set is read-only to you even where
-the planning exposes a gap in it.
+destination document is opened or written here, and the spec records are read-only to you even
+where the planning exposes a gap in them.
 
 One table row per destination document:
 
 | Column | Holds |
 | --- | --- |
 | **Destination** | the file's path — a concrete markdown file, never a directory |
-| **Roles** | names taken from the roles file, never invented |
+| **Roles** | names taken from the audience record, never invented |
 | **Changes** | the change table's ids assigned to this file |
 | **Must say** | one clause per assigned change, already pitched at the depth those roles allow |
 | **Progress** | `pending` |
@@ -35,8 +52,9 @@ One table row per destination document:
 - Oversharing is settled here once. A change that matters to a plugin user and not to a
   contributor gets a row for the one surface and not the other, at that role's ceiling, so `write`
   never re-litigates audience fit per file.
-- A change is placed under the group it already belongs to in the feature index — never a home
-  invented for it.
+- A change is placed under the story it moves — for a new-feature row, the story `sync-specs`
+  created for it. A change no story covers is placed by surface alone, its **Must say** clause
+  opening `no story —`; never a home invented for it.
 - A closing `## Not targeted` list names every confirmed change that gets no row, each with the
   reason it needs no document. Changes that land nowhere are stated, never quietly dropped.
 - Write no frontmatter: `targeting_reviewed_at:` is the confirming edge's hook.
@@ -49,7 +67,7 @@ One table row per destination document:
 | Destination | Roles | Changes | Must say | Progress |
 | --- | --- | --- | --- | --- |
 | `README.md` | Plugin user | C1, C3 | C1: the Statuses narrative now describes retro as its own track, plan statuses ending at `done`. C3: code review is queued from plan frontmatter, one line, no mechanics. | pending |
-| `documentation/vault.md` | Playbook author, Plugin user | C2 | `_lessons/` holds flat files carrying `targets:`; describe the current shape only — no per-surface-file narration. | pending |
+| `documentation/vault.md` | Playbook author, Plugin user | C2 | `specs/rule/` records carry `targets:`; describe the current shape only — no per-surface-file narration. | pending |
 
 ## Not targeted
 

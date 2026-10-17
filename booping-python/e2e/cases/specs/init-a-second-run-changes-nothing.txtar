@@ -1,0 +1,25 @@
+A second run on an initialized tier takes no action and prints only the tier root.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+latest_migration: 9999
+-- fixtures/home/Claude/probe/config.yaml --
+core:
+  specs:
+    tiers:
+      project:
+        path: specs
+-- fixtures/home/Claude/probe/sprints.md --
+sprints
+-- cmd --
+booping specs init
+booping specs init
+-- exit --
+0
+-- stdout --
+created dir {CWD}/specs
+created file {CWD}/specs/README.md
+linked {HOME}/Claude/probe/specs -> {CWD}/specs
+{CWD}/specs
+{CWD}/specs
+-- stderr --

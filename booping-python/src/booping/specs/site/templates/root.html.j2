@@ -1,0 +1,14 @@
+{% extends "base.html.j2" %}
+{% from "_macros.html.j2" import callout, scenarios, recently_updated %}
+{% block main %}
+<div class="measure">
+<h1>{{ root }}</h1>
+{% if needs %}
+{{ callout(needs, unreviewed, questions, "../review.html#source=" ~ root) | trim }}
+{% endif %}
+</div>
+{{ scenarios(types) | trim }}
+{% if recent %}
+{{ recently_updated(recent) | trim }}
+{% endif %}
+{% endblock %}

@@ -1,0 +1,10 @@
+With no `.booping` marker the project tier does not resolve, and the default `--tier project` is
+rejected.
+
+-- cmd --
+booping specs ls
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: tier `project` is not available here

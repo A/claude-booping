@@ -1,0 +1,2059 @@
+A synthetic plan in a groom benchmark shape (ten `###` milestones after a `---` rule, each with a
+key/value metadata table, depends_on also in the Milestones table and in prose), split as drafted:
+index.md and every milestone file are asserted in full, so a change to the cut shows up as a diff.
+
+-- fixtures/cwd/draft.md --
+---
+title: Pipeline Architecture — tiered crawler filtering, edition cache, admin rules, compiled record contract
+type: feature
+status: in-spec
+sp: 36
+summary: Admin-curated skip rules and a cached edition tier let the crawler publish only fully compiled, wanted records with edition fields
+created: 2026-10-16
+source: inputs/Pipeline Architecture.md (supersedes inputs/Crawling Model.md)
+---
+
+# Pipeline Architecture — tiered crawler filtering, edition cache, admin rules, compiled record contract
+
+## Context
+
+**Current state** (facts from the repo at `3f9e2c1`):
+
+- `services/shelfnet-crawler` walks the signed catalogue search API (`client.py:search`), fetches the item page
+  (`client.py:get_item_info`, `getiteminfo`) for every record not dropped on year, and publishes a `RawRecord`
+  to the `record-raw` Redis stream (`main.py:_cycle`). The only filter is max age:
+  `filters.py:screen_search_year` (SERP year) + `filters.py:detail_passes` (item-page month). There are no
+  skip rules, no edition lookup, no `editionid`/`workid` handling beyond the raw dict.
+- A failed item-page fetch still publishes a half-ready record built from search fields only (`main.py:428-433`).
+- The seen list is a Redis hash (`seen.py:SeenStore`, key `shelfnet:seen`, TTL prune
+  `shelfnet_seen_ttl_days=30`). There is no crawler-owned database.
+- `event_schemas.models.RawRecord` / `ProcessedRecord` are `extra="forbid"` and carry no provider, no
+  edition ids, no acquisition month, no height/binding/format/pages/cover/audience fields
+  (`packages/event-schemas/src/event_schemas/models.py:21-65`). Envelope `source` is `"shelfnet"` on
+  `record-raw` and `"record-processor"` on `record-processed`.
+- `services/record-processor/src/record_processor/main.py:handle` leaves *every* failure un-acked, including a
+  payload that can never validate, and never calls `Bus.reclaim` — a malformed message is pending forever.
+- Translation is a single-language stub (`translate.py:StubTranslator` → `"[en] …"`, `title_translated`).
+- `services/api` stores `Record` keyed by `(source, source_listing_id)` where `source` is the URL's
+  registrable domain (`ingest.py:marketplace_of`); there is no `Rule` model, no provider table, no
+  edition columns. All endpoints are read-only `AllowAny`.
+
+**Motivation.** The architecture doc fixes the division of labour: *the crawler decides if a record exists
+in our system; the enrichment processor decides what it looks like*. Today the crawler cannot express
+"skip this work / edition / height / loan count" without a code change, it pays an item-page request for
+every listing even when SERP or catalogue data could already reject it, and it can publish half-built
+records. The admin needs to curate skip rules without deploys, and the final record needs the
+catalogue fields (height, binding, format, page count, audience, cover colour, acquisition month) that the
+SPA and later lending work depend on.
+
+**Scope.** This plan covers:
+
+1. Event contract v2: provider identity, edition ids, compiled record fields, en+fr translations, a shared
+   rule contract, committed JSON Schemas.
+2. Soft-fail validation in `record-processor` plus en+fr translation with publisher/city dictionaries.
+3. Django: `Provider`, edition columns on `Record`, admin-curated `Rule`, `GET /api/rules/` with ETag.
+4. A crawler-owned Postgres (`crawler-db`) holding the edition cache and the seen list.
+5. Edition resolution from the item page, cached per `(provider, edition_id)`.
+6. The crawler-internal `RecordFilter` (`pre_filter` / `post_filter`) driven by polled rules, with
+   per-skip audit logging and a `--dry-run` preview.
+7. SPA type/rendering updates for the renamed identity and new fields; CLAUDE.md + docs.
+
+It does **not** cover: removing Redis Streams, FX re-valuation of prices, a real machine translator,
+a dedicated shelfnet edition endpoint, categorical (enum) rule conditions, a persisted skip-audit table,
+or filtering in `shelfnet-scraper` (see Out of scope).
+
+### Source document review
+
+Findings from grooming `Pipeline Architecture.md` against the code — each is resolved in Decisions:
+
+- **"No queue is required"** contradicts the diagram's `record-raw` arrow and the existing, tested Redis
+  Streams seam; the doc argues a queue is unnecessary, not harmful. → keep the streams.
+- **Item page "only when a pending constraint requires it"** vs **"item-page fetch (per surviving record)"** and
+  "the crawler's job is a fully compiled record" — the latter wins: every record that survives SERP/edition
+  filtering gets its item page (covers, ISBN, acquisition month); none for records dropped earlier.
+- **`pre_filter(item) -> NEED_EDITION`** has no defined re-entry. → `pre_filter(item, edition=None)`; called
+  again with the resolved edition it returns only `DROP | PASS`.
+- **`min`/`max` semantics** are not stated. → acceptance bounds: a record in scope is skipped when any
+  known value is `< min` or `> max`; empty bounds disable the whole scope.
+- **Rules use `work_id`/`edition_id` with no provider** — those ids are shelfnet catalogue ids. → `Rule`
+  is scoped to a `Provider`.
+- **`provider` means two things**: the crawler id (`shelfnet-api`) and the Record FK (`shelfnet`). Two
+  crawlers (`shelfnet-crawler`, `shelfnet-scraper`) fill the same listings, so identity must use the
+  marketplace. → envelope `source` = crawler id; payload `provider` = catalogue slug.
+- **Vocabulary lists binding/format** but `Rule` only has numeric `min`/`max`. → this sprint's
+  vocabulary is numeric only; categorical conditions deferred.
+- **No edition endpoint is known in the repo** (only `search` and `getiteminfo` in `client.py:16-17`).
+  → edition fields are derived from the item page and cached per `edition_id`; a dedicated endpoint can
+  replace the miss path later.
+- **Open questions answered:** unknown edition id → fail open (keep); seen list ages out by the existing
+  `SHELFNET_SEEN_TTL_DAYS` prune, now in Postgres; FX table deferred; item-page field coverage is settled by
+  a captured live fixture (Task 7.1) — fields absent from the item page stay `null` and rules on them never
+  fire.
+
+## Decisions
+
+- **Queue at the `record-raw` seam**: keep Redis Streams on both seams — they already give at-least-once
+  delivery with ack/reclaim; removing them would rewrite processor and consumer for no user-visible gain.
+- **Provider identity**: envelope `source` names the emitting crawler (`shelfnet-api`,
+  `shelfnet-scraper`, `player`); a new required payload field `provider` carries the catalogue slug
+  (`shelfnet`) and becomes `Record.provider` — two crawlers of one catalogue must upsert the same row.
+- **Provider model**: Django `Provider(slug PK, name, domain)`; `Record.source` is replaced by
+  `Record.provider` FK — rules need a provider scope anyway, and `domain` makes the data migration
+  lossless in reverse.
+- **API naming**: the API exposes `provider` (slug) and `providers` facet, replacing `source` /
+  `sources`; the SPA is updated in the same sprint — one name per concept beats a back-compat alias
+  with one consumer.
+- **Contract looseness**: `RawRecord` switches to `extra="ignore"` and new fields are optional; the
+  committed JSON Schema is the published field list — a producer adding a field cannot crash the
+  processor, and source extras already ride in `raw`.
+- **Event version**: `Envelope.event_version` default becomes `2`; consumers do not branch on it —
+  it documents the shape change for anyone reading the stream.
+- **Acquisition**: `acquired: date | None`, day fixed to 1 — month-granular data in a type
+  Django and JSON Schema both understand.
+- **Enums**: `Binding`, `Format`, `Audience` `StrEnum`s live in `event_schemas.models`; an
+  unrecognised provider label maps to `None`, never to a guessed value — a wrong enum is worse than
+  a missing one.
+- **Rule contract location**: the pydantic `Rule` / `RulesSnapshot` and the `RuleField` vocabulary live
+  in `event_schemas.rules` — the API serialises with it and the crawler parses with it, so the
+  vocabulary exists once.
+- **Rule semantics**: `min`/`max` are acceptance bounds over a closed numeric vocabulary
+  `year, price (EUR cents), loan_count, height_cm, page_count`; any violated bound or an empty-bounds
+  scope match ⇒ skip, no priorities — matches the doc's examples (`min height_cm 30.0`,
+  `max loan_count 1000`).
+- **Rules endpoint**: `GET /api/rules/?provider=<slug>` returns active rules un-paginated with a strong
+  ETag = sha256 of the body, answering `304` on a matching `If-None-Match` — one query, deterministic,
+  no global middleware change.
+- **Rules polling**: the crawler refreshes at the start of a cycle when `RULES_REFRESH_SECONDS` (600)
+  has elapsed, no background task — the crawler loop is sequential and human-paced, so per-cycle
+  granularity is enough.
+- **Edition source**: on a cache miss the edition is derived from the listing's own item page, which the
+  record needs anyway, and upserted; every item page fetched also warms the cache — no edition endpoint is
+  known, and this keeps the "1 call per distinct editionid" amortisation.
+- **Crawler database**: a separate `crawler-db` container (`postgres:18`, host port 4156) — truly
+  single-tenant, and no `docker-entrypoint-initdb.d` script that silently skips on an existing volume.
+- **Crawler schema management**: `CREATE TABLE IF NOT EXISTS` at startup via `psycopg` (`db.py`), no
+  migration tool — two cache tables whose content is rebuildable from the source.
+- **Seen list storage**: moves from the Redis hash to the crawler DB with the same `SeenStore` surface
+  — the doc assigns it to the crawler DB and Postgres survives a Redis flush.
+- **Seen marking**: publish ⇒ mark; deterministic drops (SERP/edition rule, age, mapping error) ⇒ mark;
+  item-page failure ⇒ not marked, retried next cycle — keeps the "fully seen page stops the walk" heuristic
+  in `discovery.py` working.
+- **Item-page failure**: the record is no longer published from search fields — the half-ready state must
+  not cross the wire.
+- **Skip audit**: every skip logs `listing id + rule id + reason` at INFO on logger
+  `shelfnet_crawler.record_filter`; no DB table — the doc asks for logging, and a table needs a reader.
+- **Dry run**: `python -m shelfnet_crawler --once --dry-run` runs the full funnel, logs verdicts, publishes
+  nothing and marks nothing — lets the admin preview a rule's effect on live inventory.
+- **Translations**: `ProcessedRecord.translations: dict[str, Translation]` with `en` and `fr`, each
+  `{title, author, publisher, city}`; `title_translated` stays as the English title — `Record` search and
+  the SPA already read it.
+- **Dictionaries**: publisher and city dictionaries are JSON data files in `record_processor/data/`; a hit
+  wins, a miss falls back to the `Translator` — stable vocabulary should not depend on an MT backend.
+- **Processor soft-fail**: a message that does not parse/validate is logged and acked; a processing
+  failure stays pending — mirrors `api/catalog/management/commands/consume_records.py:handle`.
+- **Rules endpoint auth**: public read-only like the rest of the API — the system is single-tenant, the
+  API port is dev-local, and rules carry no personal data (revisit with public exposure).
+
+### Assumptions
+
+- A1. The developer environment can reach shelfnet's catalogue API the way the compose `shelfnet-crawler`
+  does today (request signing verified 2026-09-02, `client.py:98-100`). Task 7.1 needs one live
+  search + item-page call; if it fails the milestone is blocked at 7.1.
+- A2. `getiteminfo` carries author/publisher names (`authorname`, `publishername` — already used in
+  `mapping.py:66-67`), `acquireddate` (`filters.py:249`) and `coverlist`; any edition field the fixture
+  lacks is mapped to `None`.
+- A3. The SERP `height` string (`"24cm"`, `"24 cm"`) is centimetres; the `cm` suffix is discarded.
+- A4. Item-page page counts given as front matter plus body (`xii+340`) are summed: `pages = roman + arabic`.
+- A5. Rule `price` is in EUR cents (SERP `price` × 100); `loan_count` in loans (SERP `loans` × 100).
+- A6. `format` collapses audiobook/e-book/PDF to `digital`; only `print` and `digital` exist.
+- A7. `Binding` values: `hardcover, paperback, spiral, board, leather, stapled, other`.
+- A8. Rule edits apply to listings not yet seen; listings already dropped come back after the seen TTL.
+- A9. `shelfnet-scraper` and `player` only stamp `provider`; they get no `RecordFilter`.
+- A10. Streams are drained before deploying the v2 contract (see Deployment); a leftover v1 message is
+  soft-failed, not migrated.
+- A11. The `/playbook groom` multi-file layout (`index.md` + `milestones/*/`) is projected into this single
+  `plan.md` as requested: each milestone is a `###` section carrying its own frontmatter keys table,
+  and the Milestones table is written from those keys instead of generated by `booping query`.
+
+## Architecture
+
+```
+shelfnet-crawler (crawler, shelfnet-api)                            record-processor
+┌──────────────────────────────────────────────────────┐          ┌──────────────────────────────┐
+│ cycle start: RulesClient.refresh_if_due() ──HTTP ETag─┼──▶ api   │ handle(): parse ─fail→ log+ack│
+│ discovery.iter_search_records (SeenStore: crawler-db) │  /api/   │ process():                   │
+│ for item:                                             │  rules/  │   store_covers → rustfs      │
+│   v = RecordFilter.pre_filter(item)     DROP→mark     │          │   translations en+fr         │
+│   NEED_EDITION → EditionCache.get | page→from_detail  │record-raw│     (dictionaries → Translator)│
+│              → pre_filter(item, ed)     DROP→mark     │─stream──▶│ publish ProcessedRecord ─────┼─▶ record-processed
+│   item page (reuse if fetched)  fail → skip, NOT mark │ provider │                              │      │
+│   EditionCache.upsert(edition_from_detail)            │ +payload └──────────────────────────────┘      ▼
+│   rec = search_item_to_raw_record(item, …, detail, ed)│                         api-consumer upsert_record
+│   RecordFilter.post_filter(rec)         DROP→mark     │                         Provider / Record (+ed cols)
+│   publish → SeenStore.mark                            │                         Rule (admin) ──▶ /api/rules/
+└───────────────┬──────────────────────────────────────┘
+          crawler-db (pg :4156): edition, seen
+```
+
+Integration points:
+
+- `packages/event-schemas/src/event_schemas/models.py` — `RawRecord`, `ProcessedRecord`, `Envelope`, new enums
+  and `Translation`; `event_schemas/rules.py` — `RuleField`, `Rule`, `RulesSnapshot`;
+  `export_schema.py:SCHEMAS` gains `rules`; committed output under `packages/event-schemas/schemas/`.
+- `services/shelfnet-crawler/src/shelfnet_crawler/main.py:_cycle` — the funnel; new modules `db.py`,
+  `edition.py`, `normalize.py`, `rules.py`, `record_filter.py`; `seen.py` re-backed by Postgres;
+  `filters.py` folded into `record_filter.py` and deleted.
+- `services/record-processor/src/record_processor/main.py:handle` (soft-fail), `processor.py:process`
+  (passthrough + translations), `translate.py`, new `dictionaries.py` + `data/*.json`.
+- `services/api/src/api/catalog/` — `models.py` (`Provider`, `Record` columns, `Rule`), migrations
+  `0002`–`0004`, `ingest.py:upsert_record`, `serializers.py`, `filters.py`, `views.py` (`facets`, `rules`),
+  `urls.py`, `admin.py`.
+- `docker-compose.yml` — `crawler-db` service, new env vars in `x-service.environment`.
+- `web/src/types.ts`, `web/src/components/RecordDetail.tsx`.
+
+## Milestones
+
+| ID | Milestone | SP | Depends on | Status |
+|----|-----------|----|------------|--------|
+| M1 | Event contract v2 | 5 | — | pending |
+| M2 | Processor soft-fail ingest and en+fr translations | 3 | M1 | pending |
+| M3 | API provider identity and record edition columns | 5 | M1 | pending |
+| M4 | Admin-curated rules and the rules endpoint | 3 | M3 | pending |
+| M5 | SPA follows the provider rename and edition fields | 2 | M3 | pending |
+| M6 | Crawler database: seen list and edition cache | 4 | M1 | pending |
+| M7 | Edition resolution from the item page | 4 | M1, M6 | pending |
+| M8 | Rules client in the crawler | 2 | M1 | pending |
+| M9 | RecordFilter and the tiered crawl funnel | 6 | M6, M7, M8 | pending |
+| M10 | Documentation follows the pipeline | 2 | M2, M4, M5, M9 | pending |
+
+## Milestone files
+
+---
+
+### M1 — Event contract v2
+
+| key | value |
+|-----|-------|
+| id | M1 |
+| file | `milestones/m1-event-contract-v2/m1-event-contract-v2.md` |
+| sp | 5 |
+| depends_on | — |
+| status | pending |
+
+**Goal:** record events carry the catalogue `provider`, edition ids and compiled-record fields, and their
+published field list is a committed JSON Schema.
+
+**Scope:** `packages/event-schemas` (`models.py`, new `rules.py`, `export_schema.py`, committed
+`schemas/`), and every constructor of `RawRecord`/`ProcessedRecord` so the repo stays green:
+`services/player/src/player/generator.py`, `services/shelfnet-scraper/src/shelfnet_scraper/mapping.py`,
+`services/shelfnet-crawler/src/shelfnet_crawler/{mapping,settings}.py`,
+`services/record-processor/src/record_processor/processor.py`, `services/api/src/api/catalog/factories.py`, and
+their specs. No behaviour change beyond stamping and passing the new fields.
+
+#### Tasks
+
+| Task | Description | Files | SP | Status |
+|------|-------------|-------|----|--------|
+| 1.1 | Add `Binding`, `Format`, `Audience`, `Translation`; add `provider` (required) and optional `edition_id, work_id, acquired, height_cm, binding, format, page_count, cover_color, audience` to `RawRecord` and `ProcessedRecord`; `ProcessedRecord.translations`; `RawRecord` → `extra="ignore"`; `event_version` default 2 | `packages/event-schemas/src/event_schemas/models.py`, `packages/event-schemas/src/event_schemas/models_spec.py` | 2 | pending |
+| 1.2 | Rule contract: `RuleField`, `Rule`, `RulesSnapshot`; add `rules` to `SCHEMAS`; commit generated schemas; drift spec | `packages/event-schemas/src/event_schemas/rules.py`, `packages/event-schemas/src/event_schemas/rules_spec.py`, `packages/event-schemas/src/event_schemas/export_schema.py`, `packages/event-schemas/src/event_schemas/export_schema_spec.py`, `packages/event-schemas/schemas/raw_record.schema.json`, `packages/event-schemas/schemas/processed_record.schema.json`, `packages/event-schemas/schemas/rules.schema.json` | 1 | pending |
+| 1.3 | Producers stamp `provider`: player `"player"`, scraper `"shelfnet"`, crawler from new `Settings.provider="shelfnet"`; crawler `Settings.source` default → `"shelfnet-api"` | `services/player/src/player/generator.py`, `services/shelfnet-scraper/src/shelfnet_scraper/mapping.py`, `services/shelfnet-crawler/src/shelfnet_crawler/mapping.py`, `services/shelfnet-crawler/src/shelfnet_crawler/settings.py`, `services/shelfnet-crawler/src/shelfnet_crawler/main.py`, `services/shelfnet-crawler/src/shelfnet_crawler/mapping_spec.py`, `services/shelfnet-scraper/src/shelfnet_scraper/mapping_spec.py`, `services/player/src/player/generator_spec.py` | 1 | pending |
+| 1.4 | Consumers pass new fields through: `process()` copies `provider` and every new optional field; API factory sets `provider="shelfnet"` | `services/record-processor/src/record_processor/processor.py`, `services/record-processor/src/record_processor/processor_spec.py`, `services/api/src/api/catalog/factories.py` | 1 | pending |
+
+#### Definition of Done
+
+##### Task 1.1
+- [ ] `RawRecord(provider=…, <v1 fields>)` validates with every new field omitted; omitting `provider` raises `ValidationError` (spec in `models_spec.py`).
+- [ ] `RawRecord.model_validate({... , "unknown_key": 1})` succeeds and drops the key; `ProcessedRecord` stays `extra="forbid"`.
+- [ ] `acquired` accepts `date(2021, 6, 1)` and serialises as `"2021-06-01"`.
+- [ ] `binding="paperback"` coerces to `Binding.PAPERBACK`; `binding="scroll"` raises.
+- [ ] `ProcessedRecord.translations` defaults to `{}`; `Envelope().event_version == 2`.
+- [ ] `RAW_FIELDS` / `PROCESSED_FIELDS` sets in `models_spec.py` list the new fields.
+- [ ] Sketch:
+  ```python
+  class Binding(StrEnum):
+      HARDCOVER = "hardcover"; PAPERBACK = "paperback"; SPIRAL = "spiral"; BOARD = "board"
+      LEATHER = "leather"; STAPLED = "stapled"; OTHER = "other"
+
+  class Format(StrEnum): PRINT = "print"; DIGITAL = "digital"
+  class Audience(StrEnum): CHILD = "child"; TEEN = "teen"; ADULT = "adult"
+
+  class Translation(BaseModel):
+      title: str; author: str; publisher: str; city: str
+
+  class RawRecord(BaseModel):
+      provider: str = Field(min_length=1)
+      edition_id: int | None = None
+      work_id: int | None = None
+      acquired: date | None = None
+      height_cm: float | None = Field(default=None, ge=0)
+      binding: Binding | None = None
+      format: Format | None = None
+      page_count: int | None = Field(default=None, ge=0)
+      cover_color: str | None = None
+      audience: Audience | None = None
+      ...
+  ```
+
+##### Task 1.2
+- [ ] `Rule.model_validate({"id": 1, "provider": "shelfnet", "work_id": None, "edition_id": None, "min": {"height_cm": 30.0}, "max": {}, "reason": "x"})` succeeds; a key outside `RuleField` in `min`/`max` raises (`rules_spec.py`).
+- [ ] `uv run python -m event_schemas packages/event-schemas/schemas` writes exactly the three committed files and `git diff --exit-code packages/event-schemas/schemas` is clean afterwards.
+- [ ] `export_schema_spec.py` asserts each committed file equals `model_json_schema()` output, so a model change without regenerating fails the suite.
+- [ ] Sketch:
+  ```python
+  RuleField = Literal["year", "price", "loan_count", "height_cm", "page_count"]
+
+  class Rule(BaseModel):
+      model_config = ConfigDict(extra="forbid")
+      id: int
+      provider: str
+      work_id: int | None
+      edition_id: int | None
+      min: dict[RuleField, float]
+      max: dict[RuleField, float]
+      reason: str
+
+  class RulesSnapshot(BaseModel):
+      rules: list[Rule]
+  ```
+
+##### Task 1.3
+- [ ] `generate_raw_record(0).provider == "player"`; `card_to_raw_record(...).provider == "shelfnet"`; `search_item_to_raw_record(..., provider="shelfnet").provider == "shelfnet"` (specs updated).
+- [ ] `Settings().source == "shelfnet-api"` and `Settings().provider == "shelfnet"` defaults; `main.py` passes `settings.provider` to the mapper.
+
+##### Task 1.4
+- [ ] `processor_spec.py::test_process_maps_raw_record_to_processed_record` asserts `provider`, `edition_id`, `acquired`, `height_cm`, `binding`, `format`, `page_count`, `cover_color`, `audience` equal the raw values.
+- [ ] `factories.processed_record()` builds with `provider="shelfnet"`; the existing API specs still pass unchanged.
+
+#### References
+- `packages/event-schemas/src/event_schemas/models.py` — validator/`ConfigDict` style to copy.
+- `packages/event-schemas/src/event_schemas/models_spec.py` — field-set assertion pattern.
+- Contract: `packages/event-schemas/schemas/*.schema.json` is generated by this milestone — never hand-edit.
+
+#### Verify
+```bash
+uv run python -m event_schemas packages/event-schemas/schemas && git diff --exit-code packages/event-schemas/schemas
+uv run pytest -q packages/event-schemas services/player services/shelfnet-scraper/src/shelfnet_scraper/mapping_spec.py services/shelfnet-crawler/src/shelfnet_crawler/mapping_spec.py services/record-processor/src/record_processor/processor_spec.py
+uv run ruff check packages/event-schemas services/player services/shelfnet-scraper services/shelfnet-crawler services/record-processor services/api/src/api/catalog/factories.py
+```
+
+---
+
+### M2 — Processor soft-fail ingest and en+fr translations
+
+| key | value |
+|-----|-------|
+| id | M2 |
+| file | `milestones/m2-processor-softfail-translations/m2-processor-softfail-translations.md` |
+| sp | 3 |
+| depends_on | M1 |
+| status | pending |
+
+**Goal:** `record-processor` acks away messages that cannot validate (logged) and publishes `ProcessedRecord`
+with `en` and `fr` translations of title, author, publisher and city.
+
+**Scope:** `services/record-processor/src/record_processor/` — `main.py:handle`, `translate.py`,
+`processor.py:process`, new `dictionaries.py`, new `data/publishers.json`, `data/cities.json`, specs.
+`ProcessedRecord.translations` and `Translation` come from M1 (`event_schemas.models`).
+
+#### Tasks
+
+| Task | Description | Files | SP | Status |
+|------|-------------|-------|----|--------|
+| 2.1 | Split `handle`: parse/type failure (`ValidationError`, `ValueError`, `KeyError`, `TypeError` from `serde.from_message` / payload check) → `logger.warning` with message id + error, then ack; processing failure keeps the no-ack path | `services/record-processor/src/record_processor/main.py`, `services/record-processor/src/record_processor/main_spec.py` | 1 | pending |
+| 2.2 | `Translator.translate(text, target) -> str`; `Dictionaries` loaded from `data/publishers.json` + `data/cities.json` (de → `{en, fr}`, ≥ 20 publishers and ≥ 20 cities seeded, covering every publisher/city in the existing fixtures); `process()` builds `translations["en"|"fr"]`, `title_translated = translations["en"].title`, `title_lang = "en"` | `services/record-processor/src/record_processor/translate.py`, `services/record-processor/src/record_processor/dictionaries.py`, `services/record-processor/src/record_processor/data/publishers.json`, `services/record-processor/src/record_processor/data/cities.json`, `services/record-processor/src/record_processor/processor.py`, `services/record-processor/src/record_processor/main.py`, `services/record-processor/src/record_processor/translate_spec.py`, `services/record-processor/src/record_processor/dictionaries_spec.py`, `services/record-processor/src/record_processor/processor_spec.py` | 2 | pending |
+
+#### Definition of Done
+
+##### Task 2.1
+- [ ] `main_spec.py` (redis-backed, skips without redis like `services/api/src/api/catalog/consume_spec.py`): a `{"data": "{}"}` entry is acked (`XPENDING` count 0) and nothing is published to `record-processed`.
+- [ ] A valid raw envelope whose cover fetch fails stays pending (`XPENDING` count 1).
+- [ ] Log line for the soft-fail contains the message id and the validation error text.
+
+##### Task 2.2
+- [ ] `Dictionaries.lookup("city", "Wien", "en") == "Vienna"` and `("city", "Wien", "fr") == "Vienne"`; an unknown key returns `None` (`dictionaries_spec.py`).
+- [ ] With `StubTranslator`, `process(raw)` yields `translations["en"].city` from the dictionary and `translations["en"].title == "[en] <title>"`, `translations["fr"].title == "[fr] <title>"`; `translations.keys() == {"en", "fr"}`.
+- [ ] `title_translated == translations["en"].title`.
+- [ ] Sketch:
+  ```python
+  class Translator(Protocol):
+      def translate(self, text: str, target: str) -> str: ...
+
+  class Dictionaries:
+      @classmethod
+      def load(cls, data_dir: Path | None = None) -> Self: ...
+      def lookup(self, kind: Literal["publisher", "city"], de: str, lang: str) -> str | None: ...
+  ```
+
+#### References
+- `services/api/src/api/catalog/management/commands/consume_records.py` — parse-vs-persist ack split to copy.
+- `services/api/src/api/catalog/consume_spec.py` — redis-backed consumer spec with per-test stream.
+- `services/record-processor/src/record_processor/processor_spec.py` — `FakeS3` / `cover_client` fixtures.
+
+#### Verify
+```bash
+uv run pytest -q services/record-processor
+uv run ruff check services/record-processor && uv run basedpyright services/record-processor
+```
+
+---
+
+### M3 — API provider identity and record edition columns
+
+| key | value |
+|-----|-------|
+| id | M3 |
+| file | `milestones/m3-api-provider-edition-columns/m3-api-provider-edition-columns.md` |
+| sp | 5 |
+| depends_on | M1 |
+| status | pending |
+
+**Goal:** a `Record` is keyed by `(provider, source_listing_id)` against a `Provider` table and persists the
+compiled edition fields and translations, all exposed over the existing endpoints.
+
+**Scope:** `services/api/src/api/catalog/` — `models.py`, `migrations/0002_provider.py`,
+`migrations/0003_record_edition_fields.py`, `ingest.py`, `serializers.py`, `filters.py`, `views.py:facets`,
+`admin.py`, specs; `scripts/e2e.py` (reads `record.source`). Tables: `catalog_provider` (new), `catalog_record`
+(column changes). Endpoints: `/api/records/`, `/api/records/{id}/`, `/api/facets/`.
+
+**Persistence change + rollback:** 0002 creates `catalog_provider`, adds `catalog_record.provider_id`, backfills,
+swaps the unique constraint, drops `catalog_record.source`. 0003 adds nullable edition columns and
+`translations`. Rollback: `uv run python -m api migrate catalog 0001` — 0002's `RunPython` reverse restores
+`source` from `Provider.domain`; 0003 is pure `AddField`.
+
+#### Tasks
+
+| Task | Description | Files | SP | Status |
+|------|-------------|-------|----|--------|
+| 3.1 | `Provider(slug PK max 32, name, domain)`; `Record.provider` FK (`PROTECT`, `related_name="records"`); unique `(provider, source_listing_id)` named `uniq_record_provider_listing`; migration 0002: create, add nullable FK, `RunPython` backfill (slug = first label of `source`, `domain = source`) with reverse, make non-null, swap constraint, remove `source`; e2e dump reads `record.provider_id` | `services/api/src/api/catalog/models.py`, `services/api/src/api/catalog/migrations/0002_provider.py`, `services/api/src/api/catalog/migrations_spec.py`, `scripts/e2e.py` | 2 | pending |
+| 3.2 | `Record` columns: `edition_id`, `work_id` (`PositiveIntegerField null, db_index`), `acquired` (`DateField null`), `height_cm` (`FloatField null`), `binding`/`format`/`audience` (`CharField choices` from M1 enums, `blank`), `page_count` (`PositiveIntegerField null`), `cover_color` (`CharField 64 blank`), `translations` (`JSONField default dict`); migration 0003 | `services/api/src/api/catalog/models.py`, `services/api/src/api/catalog/migrations/0003_record_edition_fields.py` | 1 | pending |
+| 3.3 | `upsert_record`: `Provider.objects.get_or_create(slug=processed.provider, defaults={"name": processed.provider, "domain": marketplace_of(processed.url)})`, key on `(provider, source_listing_id)`, write every new field (`None` enum → `""`), `translations` as `{lang: t.model_dump()}` | `services/api/src/api/catalog/ingest.py`, `services/api/src/api/catalog/ingest_spec.py` | 1 | pending |
+| 3.4 | Serializers: list gains `provider` (slug) replacing `source`; detail gains all edition fields + `translations`; filter `provider` (`BaseInFilter` on `provider__slug`) replacing `source`; facets `providers` replacing `sources`; admin `list_filter`/`list_display` use `provider`, add `binding`, `format`; `Provider` registered in admin | `services/api/src/api/catalog/serializers.py`, `services/api/src/api/catalog/filters.py`, `services/api/src/api/catalog/views.py`, `services/api/src/api/catalog/admin.py`, `services/api/src/api/catalog/views_spec.py` | 1 | pending |
+
+#### Definition of Done
+
+##### Task 3.1
+- [ ] `uv run python -m api makemigrations --check --dry-run` reports no changes after 0002.
+- [ ] `migrations_spec.py` (uses `django.db.migrations.executor.MigrationExecutor`, `transaction=True` db mark): a record created at state 0001 with `source="shelfnet.example"` ends at 0002 with `provider_id == "shelfnet"` and `Provider("shelfnet").domain == "shelfnet.example"`; migrating back to 0001 restores `source == "shelfnet.example"`.
+- [ ] Inserting a second `Record` with the same `(provider, source_listing_id)` raises `IntegrityError`.
+
+##### Task 3.2
+- [ ] `makemigrations --check --dry-run` clean after 0003; `uv run python -m api migrate` then `migrate catalog 0002` both succeed against the dev postgres.
+- [ ] `Record._meta.get_field("binding").choices` equals `[(e.value, e.value) for e in Binding]`.
+
+##### Task 3.3
+- [ ] `ingest_spec.py`: upserting `processed_record(provider="shelfnet", height_cm=24.0, binding=Binding.PAPERBACK, acquired=date(2021, 6, 1))` stores those values and creates one `Provider`; a second upsert of the same listing updates in place (`Record.objects.count() == 1`, `Provider.objects.count() == 1`).
+- [ ] Two records with equal `source_listing_id` but providers `shelfnet` and `player` are stored separately.
+- [ ] `test_marketplace_comes_off_the_listing_host` still passes (`marketplace_of` kept for `domain`).
+
+##### Task 3.4
+- [ ] `GET /api/records/?provider=shelfnet` filters; `?provider=shelfnet,player` returns both (`views_spec.py`).
+- [ ] `GET /api/records/{id}/` body contains `provider`, `edition_id`, `work_id`, `acquired`, `height_cm`, `binding`, `format`, `page_count`, `cover_color`, `audience`, `translations`; list body has `provider` and no `source`.
+- [ ] `GET /api/facets/` has `providers` and no `sources`.
+- [ ] `uv run python -m api check` passes (admin config valid).
+
+#### References
+- `services/api/src/api/catalog/migrations/0001_initial.py` — migration style (generated, then trimmed).
+- `services/api/src/api/catalog/ingest_spec.py`, `services/api/src/api/catalog/views_spec.py` — spec shape.
+- Enums: import from `event_schemas.models` (M1) — do not redefine values in Django.
+
+#### Verify
+```bash
+docker compose up -d postgres
+uv run python -m api makemigrations --check --dry-run
+uv run python -m api migrate && uv run python -m api migrate catalog 0001 && uv run python -m api migrate
+uv run pytest -q services/api/src/api/catalog
+uv run ruff check services/api scripts/e2e.py && uv run basedpyright services/api
+```
+
+---
+
+### M4 — Admin-curated rules and the rules endpoint
+
+| key | value |
+|-----|-------|
+| id | M4 |
+| file | `milestones/m4-api-rules/m4-api-rules.md` |
+| sp | 3 |
+| depends_on | M3 |
+| status | pending |
+
+**Goal:** an admin curates skip rules in `/admin/`, and `GET /api/rules/?provider=<slug>` serves the
+active set with an ETag so a poller only downloads changes.
+
+**Scope:** `services/api/src/api/catalog/models.py` (`Rule`), `migrations/0004_rule.py`, `admin.py`,
+`views.py` (`rules` view), `urls.py`, new `rules_spec.py`. Contract: `event_schemas.rules.Rule` /
+`RulesSnapshot` / `RuleField` from M1. Table: `catalog_rule` (new). Rollback:
+`uv run python -m api migrate catalog 0003`.
+
+#### Tasks
+
+| Task | Description | Files | SP | Status |
+|------|-------------|-------|----|--------|
+| 4.1 | `Rule(provider FK PROTECT, work_id null, edition_id null, min JSON default dict, max JSON default dict, reason CharField 255, active bool default True, created_at, updated_at)`; `clean()` validates `min`/`max` via `TypeAdapter(dict[RuleField, float])` and rejects `edition_id` without `work_id`; migration 0004 | `services/api/src/api/catalog/models.py`, `services/api/src/api/catalog/migrations/0004_rule.py`, `services/api/src/api/catalog/rules_spec.py` | 1 | pending |
+| 4.2 | `RuleAdmin`: `list_display` provider, work_id, edition_id, min, max, reason, active, updated_at; `list_filter` provider, active; `search_fields` reason; `list_editable` active | `services/api/src/api/catalog/admin.py` | 1 | pending |
+| 4.3 | `rules` function view at `rules/`: `provider` query param required (400 without), active rules ordered by id, body = `RulesSnapshot(...).model_dump(mode="json")`; `ETag: "<sha256 of canonical JSON>"`; matching `If-None-Match` → 304 empty body | `services/api/src/api/catalog/views.py`, `services/api/src/api/catalog/urls.py`, `services/api/src/api/catalog/rules_spec.py` | 1 | pending |
+
+#### Definition of Done
+
+##### Task 4.1
+- [ ] `Rule(min={"thickness": 1}).full_clean()` raises `ValidationError` on `min`; `Rule(min={"height_cm": 30.0}).full_clean()` passes (with provider/reason set).
+- [ ] `Rule(work_id=None, edition_id=5).full_clean()` raises.
+- [ ] `makemigrations --check --dry-run` clean after 0004.
+
+##### Task 4.2
+- [ ] `uv run python -m api check` passes; `rules_spec.py` logs in an `admin_client` (pytest-django fixture) and gets 200 on `/admin/catalog/rule/` and `/admin/catalog/rule/add/`.
+
+##### Task 4.3
+- [ ] `GET /api/rules/?provider=shelfnet` → 200, body validates as `RulesSnapshot`, inactive and other-provider rules absent.
+- [ ] Repeating with `If-None-Match: <etag>` → 304 and empty body; after editing one rule's `reason` the same header yields 200 with a new ETag.
+- [ ] `GET /api/rules/` (no provider) → 400.
+- [ ] Sketch:
+  ```python
+  def _snapshot(provider: str) -> tuple[bytes, str]: ...
+
+  @api_view(["GET"])
+  def rules(request: Request) -> Response: ...
+  ```
+
+#### References
+- `services/api/src/api/catalog/views.py:facets` — function-view shape.
+- `services/api/src/api/catalog/admin.py:RecordAdmin` — admin typing shim (`TYPE_CHECKING` generic aliases).
+- Contract: `packages/event-schemas/src/event_schemas/rules.py` (M1).
+
+#### Verify
+```bash
+docker compose up -d postgres
+uv run python -m api makemigrations --check --dry-run
+uv run pytest -q services/api/src/api/catalog/rules_spec.py
+uv run ruff check services/api && uv run basedpyright services/api
+```
+
+---
+
+### M5 — SPA follows the provider rename and edition fields
+
+| key | value |
+|-----|-------|
+| id | M5 |
+| file | `milestones/m5-web-provider-edition/m5-web-provider-edition.md` |
+| sp | 2 |
+| depends_on | M3 |
+| status | pending |
+
+**Goal:** the SPA reads `provider`/`providers` and shows a record's edition fields in the detail view.
+
+**Scope:** `web/src/types.ts`, `web/src/components/RecordDetail.tsx`. API shapes from M3 Task 3.4.
+
+#### Tasks
+
+| Task | Description | Files | SP | Status |
+|------|-------------|-------|----|--------|
+| 5.1 | `Record.source` → `provider`; `Facets.sources` → `providers`; `RecordDetail` type gains `edition_id, work_id, acquired, height_cm, binding, format, page_count, cover_color, audience` (all nullable) and `translations: Record<string, {title, author, publisher, city}>`; "Open on {record.provider}" | `web/src/types.ts`, `web/src/components/RecordDetail.tsx` | 1 | pending |
+| 5.2 | Detail view renders an "Edition" `<dl>` with Acquired, Height (`{height_cm} cm`), Binding, Format, Pages (`{page_count} pp`), Audience, Cover — a cell renders only when its value is non-null/non-empty, reusing the existing `Cell` component | `web/src/components/RecordDetail.tsx` | 1 | pending |
+
+#### Definition of Done
+
+##### Task 5.1
+- [ ] `cd web && npm run lint` passes; `grep -rn "\.source\b\|sources" web/src` returns nothing.
+
+##### Task 5.2
+- [ ] `npm run lint` passes; with `just up` and one record carrying `height_cm`, the detail modal at `http://localhost:4155` shows "Height 24 cm"; a record with all edition fields null shows no "Edition" section.
+
+#### References
+- `web/src/components/RecordDetail.tsx` — existing `Cell` grid (Year/Loans/City/Harvested).
+- `web/src/types.ts` — type layout.
+
+#### Verify
+```bash
+cd web && npm install --silent && npm run lint
+```
+
+---
+
+### M6 — Crawler database: seen list and edition cache
+
+| key | value |
+|-----|-------|
+| id | M6 |
+| file | `milestones/m6-crawler-db/m6-crawler-db.md` |
+| sp | 4 |
+| depends_on | M1 |
+| status | pending |
+
+**Goal:** `shelfnet-crawler` owns a Postgres (`crawler-db`) holding its seen list and a `(provider, edition_id)`
+edition cache, replacing the Redis seen hash.
+
+**Scope:** `docker-compose.yml` (`crawler-db` service, `crawler-db-data` volume, `CRAWLER_DATABASE_URL`),
+`.env.example`, `services/shelfnet-crawler/pyproject.toml` (`psycopg[binary]>=3.2`, already locked at 3.3.5),
+new `shelfnet_crawler/db.py`, `shelfnet_crawler/edition.py` (`Edition`, `EditionCache`), re-backed `seen.py`,
+`settings.py`, `main.py:run` wiring, `discovery.py` (type only), specs. Tables (crawler DB):
+`edition(provider text, edition_id int, work_id int null, author text null, publisher text null, binding text null,
+format text null, audience text null, height_cm real null, page_count int null, fetched_at timestamptz,
+PRIMARY KEY (provider, edition_id))`; `seen(provider text, listing_id bigint, first_seen_at timestamptz,
+PRIMARY KEY (provider, listing_id))`. Rollback: `docker compose rm -sf crawler-db && docker volume rm
+<project>_crawler-db-data` — both tables are rebuildable.
+
+#### Tasks
+
+| Task | Description | Files | SP | Status |
+|------|-------------|-------|----|--------|
+| 6.1 | `crawler-db` service: `postgres:18`, user/password/db `crawler`, host port `${CRAWLER_DB_PORT:-4156}:5432`, healthcheck `pg_isready -U crawler`, volume `crawler-db-data`; `CRAWLER_DATABASE_URL: ${CRAWLER_DATABASE_URL:-postgres://crawler:crawler@crawler-db:5432/crawler}` in `x-service.environment`; `shelfnet-crawler` `depends_on` `crawler-db` healthy; append `CRAWLER_DATABASE_URL=postgres://crawler:crawler@localhost:4156/crawler` to `.env.example` | `docker-compose.yml`, `.env.example` | 1 | pending |
+| 6.2 | `db.py`: `connect(url) -> AsyncConnection` (autocommit) and idempotent `ensure_schema(conn)`; `Settings.crawler_database_url` default `postgres://crawler:crawler@localhost:4156/crawler`; add `psycopg[binary]` dependency | `services/shelfnet-crawler/src/shelfnet_crawler/db.py`, `services/shelfnet-crawler/src/shelfnet_crawler/db_spec.py`, `services/shelfnet-crawler/src/shelfnet_crawler/settings.py`, `services/shelfnet-crawler/pyproject.toml`, `uv.lock` | 1 | pending |
+| 6.3 | `SeenStore(conn, provider)` with unchanged `is_seen` / `mark` / `prune` signatures over table `seen` (`mark` = `INSERT … ON CONFLICT DO NOTHING`); drop `shelfnet_seen_key` setting; `run()` opens the connection, calls `ensure_schema`, closes in `finally` | `services/shelfnet-crawler/src/shelfnet_crawler/seen.py`, `services/shelfnet-crawler/src/shelfnet_crawler/seen_spec.py`, `services/shelfnet-crawler/src/shelfnet_crawler/settings.py`, `services/shelfnet-crawler/src/shelfnet_crawler/main.py`, `services/shelfnet-crawler/src/shelfnet_crawler/main_spec.py` | 1 | pending |
+| 6.4 | `Edition` frozen dataclass + `EditionCache(conn, provider)` with `get(edition_id)` and `upsert(edition)` (`ON CONFLICT (provider, edition_id) DO UPDATE`, last-writer-wins) | `services/shelfnet-crawler/src/shelfnet_crawler/edition.py`, `services/shelfnet-crawler/src/shelfnet_crawler/edition_spec.py` | 1 | pending |
+
+#### Definition of Done
+
+##### Task 6.1
+- [ ] `docker compose up -d crawler-db` becomes healthy; `pg_isready -h localhost -p 4156 -U crawler` exits 0.
+- [ ] `grep -n CRAWLER_DATABASE_URL docker-compose.yml .env.example` matches both files.
+
+##### Task 6.2
+- [ ] `db_spec.py` skips when the crawler DB is unreachable (`pytest.skip`, same pattern as the redis specs); otherwise calling `ensure_schema` twice succeeds and both tables exist in `information_schema.tables`.
+
+##### Task 6.3
+- [ ] `seen_spec.py` (Postgres-backed, unique provider per test, rows deleted in teardown): mark → `is_seen` True; a different provider does not see it; `prune(0)` after backdating `first_seen_at` removes it and returns 1.
+- [ ] `main_spec.py::test_a_second_run_publishes_nothing_new_and_stops_after_one_page` passes against Postgres-backed seen; `grep -rn shelfnet_seen_key services/` returns nothing.
+- [ ] Sketch:
+  ```python
+  class SeenStore:
+      def __init__(self, conn: AsyncConnection, provider: str) -> None: ...
+      async def is_seen(self, listing_id: int) -> bool: ...
+      async def mark(self, listing_id: int) -> None: ...
+      async def prune(self, max_age_days: int) -> int: ...
+  ```
+
+##### Task 6.4
+- [ ] `edition_spec.py`: `get` on a miss → `None`; `upsert` then `get` round-trips every field incl. enums; a second `upsert` with a changed `page_count` overwrites.
+- [ ] Sketch:
+  ```python
+  @dataclass(frozen=True)
+  class Edition:
+      provider: str
+      edition_id: int
+      work_id: int | None
+      author: str | None
+      publisher: str | None
+      binding: Binding | None
+      format: Format | None
+      audience: Audience | None
+      height_cm: float | None
+      page_count: int | None
+
+  class EditionCache:
+      def __init__(self, conn: AsyncConnection, provider: str) -> None: ...
+      async def get(self, edition_id: int) -> Edition | None: ...
+      async def upsert(self, edition: Edition) -> None: ...
+  ```
+
+#### References
+- `services/shelfnet-crawler/src/shelfnet_crawler/seen.py` — current `SeenStore` surface to preserve.
+- `services/shelfnet-crawler/src/shelfnet_crawler/seen_spec.py` — skip-when-unreachable fixture pattern.
+- `docker-compose.yml` `postgres` service — container shape to copy.
+
+#### Verify
+```bash
+docker compose up -d redis crawler-db
+uv run pytest -q services/shelfnet-crawler/src/shelfnet_crawler/db_spec.py services/shelfnet-crawler/src/shelfnet_crawler/seen_spec.py services/shelfnet-crawler/src/shelfnet_crawler/edition_spec.py services/shelfnet-crawler/src/shelfnet_crawler/main_spec.py
+uv run ruff check services/shelfnet-crawler && uv run basedpyright services/shelfnet-crawler
+```
+
+---
+
+### M7 — Edition resolution from the item page
+
+| key | value |
+|-----|-------|
+| id | M7 |
+| file | `milestones/m7-edition-from-item-page/m7-edition-from-item-page.md` |
+| sp | 4 |
+| depends_on | M1, M6 |
+| status | pending |
+
+**Goal:** the crawler turns a SERP item + item page into a fully compiled `RawRecord` (edition ids, acquisition,
+height, binding, format, pages, audience, cover colour) with provider labels normalised to the M1 enums.
+
+**Scope:** new `scripts/capture_shelfnet_item.py`, new fixture
+`services/shelfnet-crawler/src/shelfnet_crawler/fixtures/getiteminfo.json`, `docs/shelfnet-recon.md` (field table),
+new `shelfnet_crawler/normalize.py`, `shelfnet_crawler/edition.py` (`edition_from_detail`), `shelfnet_crawler/mapping.py`
+(`search_item_to_raw_record`), specs. `Edition`/`EditionCache` from M6; enums from M1.
+
+#### Tasks
+
+| Task | Description | Files | SP | Status |
+|------|-------------|-------|----|--------|
+| 7.1 | Capture script: one signed search page (`pagesize=1`), then `get_item_info` for its first `itemid`; writes the item-page `result` to `fixtures/getiteminfo.json` (pretty JSON, UTF-8); run it once and commit the fixture; append an "Item-page fields (getiteminfo)" table to the recon doc mapping each key used → `Edition`/`RawRecord` attribute, marking absent fields "absent → null" | `scripts/capture_shelfnet_item.py`, `services/shelfnet-crawler/src/shelfnet_crawler/fixtures/getiteminfo.json`, `docs/shelfnet-recon.md` | 1 | pending |
+| 7.2 | `normalize.py`: `binding(label)`, `format(label)`, `audience(label)` (German labels → enum or `None`), `height_cm(text)` (`"24cm"`/`"24 cm"` → float, `""`/`"0"` → `None`), `page_count(text)` (`xii+340` summed, `S.`/`pp` as pages), `acquired(text)` (`"2021-06"`/`"Juni 2021"` → `date(2021, 6, 1)`) | `services/shelfnet-crawler/src/shelfnet_crawler/normalize.py`, `services/shelfnet-crawler/src/shelfnet_crawler/normalize_spec.py` | 1 | pending |
+| 7.3 | `edition_from_detail(provider, item, detail) -> Edition \| None` (`None` when the item has no `editionid`): ids from the SERP item, names from `authorname`/`publishername`, remaining fields from the item-page keys recorded in 7.1 via `normalize` | `services/shelfnet-crawler/src/shelfnet_crawler/edition.py`, `services/shelfnet-crawler/src/shelfnet_crawler/edition_spec.py` | 1 | pending |
+| 7.4 | `search_item_to_raw_record(item, scraped_at, detail, edition, provider)` — `detail` now required; fills `edition_id`/`work_id` from the item, `acquired` from `detail.acquireddate`, `year = acquired.year` when known else SERP year, `author`/`publisher` from edition then item page then search list, `height_cm` edition then SERP `height`, binding/format/audience/pages from edition, `cover_color` from the key recorded in 7.1 | `services/shelfnet-crawler/src/shelfnet_crawler/mapping.py`, `services/shelfnet-crawler/src/shelfnet_crawler/mapping_spec.py` | 1 | pending |
+
+#### Definition of Done
+
+##### Task 7.1
+- [ ] `uv run python scripts/capture_shelfnet_item.py` exits 0 and `fixtures/getiteminfo.json` parses with `jq -e '.acquireddate' services/shelfnet-crawler/src/shelfnet_crawler/fixtures/getiteminfo.json`.
+- [ ] `docs/shelfnet-recon.md` lists, for each of author, publisher, binding, format, audience, pages, height, cover colour, acquireddate, ISBN, covers, the item-page key or "absent → null".
+
+##### Task 7.2
+- [ ] `normalize_spec.py` parametrised cases: `Gebunden→HARDCOVER`, `Taschenbuch→PAPERBACK`, `Broschur→PAPERBACK`, `Spiralbindung→SPIRAL`, `Pappbilderbuch→BOARD`, `Leder→LEATHER`, `Druck→PRINT`, `E-Book→DIGITAL`, `Hörbuch→DIGITAL`, `Kinder/Kinderbuch→CHILD`, `Jugend→TEEN`, `Erwachsene/Sachbuch→ADULT`, unknown → `None`; `height_cm("21.5cm") == 21.5`; `page_count("xii+340") == 352`; `acquired("unbekannt") is None`.
+
+##### Task 7.3
+- [ ] `edition_from_detail("shelfnet", search_item, getiteminfo_fixture)` returns an `Edition` with `edition_id == 2226`, `work_id == 110` (fixture ids), and the fields 7.1 marked present populated; an item without `editionid` → `None`.
+
+##### Task 7.4
+- [ ] `mapping_spec.py` using both fixtures: the record carries `provider`, `edition_id`, `work_id`, `acquired`, and every field 7.1 marked present; `record.raw == {"search": item, "detail": detail}`.
+- [ ] With `edition=None` and an item page lacking edition keys, `height_cm` comes from SERP `height` (`24.0`) and binding/format/audience/pages are `None`.
+- [ ] Existing "missing field raises `ValueError`" specs still pass.
+
+#### References
+- `services/shelfnet-crawler/src/shelfnet_crawler/client.py` — `ShelfnetApiClient.search` / `get_item_info` used by the capture script.
+- `services/shelfnet-crawler/src/shelfnet_crawler/mapping_spec.py` — fixture-driven mapping specs.
+- `services/shelfnet-crawler/src/shelfnet_crawler/fixtures/search_item.json` — SERP fixture (`editionid` 2226, `workid` 110, `height` "24cm").
+
+#### Verify
+```bash
+uv run pytest -q services/shelfnet-crawler/src/shelfnet_crawler/normalize_spec.py services/shelfnet-crawler/src/shelfnet_crawler/edition_spec.py services/shelfnet-crawler/src/shelfnet_crawler/mapping_spec.py
+uv run ruff check services/shelfnet-crawler scripts/capture_shelfnet_item.py && uv run basedpyright services/shelfnet-crawler scripts/capture_shelfnet_item.py
+```
+
+---
+
+### M8 — Rules client in the crawler
+
+| key | value |
+|-----|-------|
+| id | M8 |
+| file | `milestones/m8-rules-client/m8-rules-client.md` |
+| sp | 2 |
+| depends_on | M1 |
+| status | pending |
+
+**Goal:** the crawler holds a snapshot of its provider's active rules, refreshed over HTTP with ETag,
+failing open on startup and keeping the last snapshot on refresh failure.
+
+**Scope:** new `services/shelfnet-crawler/src/shelfnet_crawler/rules.py`, `rules_spec.py`, `settings.py`
+(`rules_api_url`, `rules_refresh_seconds`), `docker-compose.yml` (`RULES_API_URL`,
+`RULES_REFRESH_SECONDS`), `.env.example`. Contract: `event_schemas.rules.RulesSnapshot` (M1); endpoint
+`GET /api/rules/?provider=` (M4 — specs use `httpx.MockTransport`, so M4 is not required to run them).
+
+#### Tasks
+
+| Task | Description | Files | SP | Status |
+|------|-------------|-------|----|--------|
+| 8.1 | `RulesClient`: `refresh_if_due()` sends `If-None-Match` with the last ETag; 200 → validate `RulesSnapshot`, replace rules + ETag; 304 → keep; any `httpx.HTTPError` / `ValidationError` → `logger.warning`, keep last snapshot (empty before first success); `rules` property returns a tuple | `services/shelfnet-crawler/src/shelfnet_crawler/rules.py`, `services/shelfnet-crawler/src/shelfnet_crawler/rules_spec.py` | 1 | pending |
+| 8.2 | Settings `rules_api_url` default `http://localhost:4154/api/rules/`, `rules_refresh_seconds` default 600; compose `RULES_API_URL: ${RULES_API_URL:-http://api:8000/api/rules/}`, `RULES_REFRESH_SECONDS: ${RULES_REFRESH_SECONDS:-600}`; append both to `.env.example` | `services/shelfnet-crawler/src/shelfnet_crawler/settings.py`, `docker-compose.yml`, `.env.example` | 1 | pending |
+
+#### Definition of Done
+
+##### Task 8.1
+- [ ] `rules_spec.py` with `httpx.MockTransport` + injected clock: first call 200 → two rules; next call before the interval sends no request; after the interval sends `If-None-Match: "<etag>"`, 304 keeps the two rules.
+- [ ] Startup with the transport raising `httpx.ConnectError` → `rules == ()` and no exception; a later 500 after a successful load keeps the loaded rules.
+- [ ] Request carries `provider=shelfnet` query param.
+- [ ] Sketch:
+  ```python
+  class RulesClient:
+      def __init__(
+          self, url: str, provider: str, refresh_seconds: float,
+          transport: httpx.AsyncBaseTransport | None = None,
+          clock: Callable[[], float] = time.monotonic,
+      ) -> None: ...
+      @property
+      def rules(self) -> tuple[Rule, ...]: ...
+      async def refresh_if_due(self) -> None: ...
+      async def aclose(self) -> None: ...
+  ```
+
+##### Task 8.2
+- [ ] `grep -n "RULES_API_URL\|RULES_REFRESH_SECONDS" docker-compose.yml .env.example` matches both files; `Settings()` defaults as stated.
+
+#### References
+- `services/shelfnet-scraper/src/shelfnet_scraper/client_spec.py` — `httpx.MockTransport` spec style.
+- `services/shelfnet-crawler/src/shelfnet_crawler/client.py` — `httpx.AsyncClient` ownership/close pattern.
+
+#### Verify
+```bash
+uv run pytest -q services/shelfnet-crawler/src/shelfnet_crawler/rules_spec.py
+uv run ruff check services/shelfnet-crawler && uv run basedpyright services/shelfnet-crawler
+```
+
+---
+
+### M9 — RecordFilter and the tiered crawl funnel
+
+| key | value |
+|-----|-------|
+| id | M9 |
+| file | `milestones/m9-record-filter-funnel/m9-record-filter-funnel.md` |
+| sp | 6 |
+| depends_on | M6, M7, M8 |
+| status | pending |
+
+**Goal:** each cycle drops records at the cheapest tier that can decide — SERP, then cached edition, then
+item page — logs every skip with its rule and reason, and publishes only fully compiled records.
+
+**Scope:** new `services/shelfnet-crawler/src/shelfnet_crawler/record_filter.py` (+ spec), delete
+`shelfnet_crawler/filters.py` and `filters_spec.py` (their cases move into `record_filter_spec.py`),
+`main.py:_cycle` / `run` / `main` (rules refresh, edition resolution, `--dry-run`), `main_spec.py`.
+Uses `SeenStore`, `Edition`, `EditionCache` (M6), `edition_from_detail`, `search_item_to_raw_record` (M7),
+`RulesClient` (M8), `Rule` (M1).
+
+#### Tasks
+
+| Task | Description | Files | SP | Status |
+|------|-------------|-------|----|--------|
+| 9.1 | `RecordFilter.pre_filter(item, edition=None)`: age on SERP year (`< cutoff.year` → DROP; equal/unparsable → deferred); per rule in scope (`work_id`/`edition_id` vs item `workid`/`editionid`): empty bounds → DROP; field values from SERP (`year`, `price`, `loan_count`, `height_cm` via `height`) else edition (`height_cm`, `page_count`); any violated bound → DROP with that rule; a bound needing the edition with `edition is None` → NEED_EDITION; unresolvable value → bound ignored; never returns NEED_EDITION when `edition` is given | `services/shelfnet-crawler/src/shelfnet_crawler/record_filter.py`, `services/shelfnet-crawler/src/shelfnet_crawler/record_filter_spec.py` | 2 | pending |
+| 9.2 | `RecordFilter.post_filter(record: RawRecord)`: month cutoff for the boundary year (`acquired is None` → DROP "no usable acquireddate"; `< cutoff` → DROP); move `Cutoff`/`cutoff_for` into `record_filter.py`; delete `filters.py` + `filters_spec.py` with their cases ported | `services/shelfnet-crawler/src/shelfnet_crawler/record_filter.py`, `services/shelfnet-crawler/src/shelfnet_crawler/record_filter_spec.py`, `services/shelfnet-crawler/src/shelfnet_crawler/filters.py`, `services/shelfnet-crawler/src/shelfnet_crawler/filters_spec.py` | 1 | pending |
+| 9.3 | Rewire `_cycle`: `rules.refresh_if_due()` → `RecordFilter(rules.rules, cutoff)` → per item `pre_filter`; NEED_EDITION → `EditionCache.get(editionid)` else fetch the item page + `edition_from_detail` + `upsert`, then `pre_filter(item, edition)`; item page (reuse if already fetched; `ShelfnetApiError` → warning, not marked, continue); `upsert` edition from every item page; map; `post_filter`; publish; mark. Every DROP → `logger.info("skip %s: rule=%s reason=%s", itemid, rule_id, reason)` + mark. `run()` owns `RulesClient`; `agerange` param unchanged | `services/shelfnet-crawler/src/shelfnet_crawler/main.py`, `services/shelfnet-crawler/src/shelfnet_crawler/main_spec.py` | 2 | pending |
+| 9.4 | `--dry-run` flag: full funnel incl. item page and edition cache writes, logs `would publish <itemid>` instead of publishing, never calls `SeenStore.mark` | `services/shelfnet-crawler/src/shelfnet_crawler/main.py`, `services/shelfnet-crawler/src/shelfnet_crawler/main_spec.py` | 1 | pending |
+
+#### Definition of Done
+
+##### Task 9.1
+- [ ] `record_filter_spec.py` (pure, no I/O) parametrised over `search_item.json`: rule `max {"loan_count": 1000}` on an item with `loans "18"` (1 800 loans) → DROP with that rule id; `min {"height_cm": 30.0}` with `height "24cm"` → DROP; `min {"page_count": 200}` and `edition=None` → NEED_EDITION; same with `Edition(page_count=250)` → PASS; with `Edition(page_count=None)` → PASS (fail open).
+- [ ] Scope: rule `work_id=110, edition_id=None, min={}, max={}` → DROP; `work_id=999` → PASS; `work_id=110, edition_id=1` on `editionid 2226` → PASS.
+- [ ] Unparsable SERP `loans` (`"k. A."`) with a loan-count rule → PASS.
+- [ ] Sketch:
+  ```python
+  class Action(StrEnum):
+      DROP = "drop"; NEED_EDITION = "need_edition"; PASS = "pass"
+
+  @dataclass(frozen=True)
+  class Verdict:
+      action: Action
+      reason: str = ""
+      rule_id: int | None = None
+
+  class RecordFilter:
+      def __init__(self, rules: Sequence[Rule], cutoff: Cutoff | None) -> None: ...
+      def pre_filter(self, item: dict[str, Any], edition: Edition | None = None) -> Verdict: ...
+      def post_filter(self, record: RawRecord) -> Verdict: ...
+  ```
+
+##### Task 9.2
+- [ ] Every case from the deleted `filters_spec.py` (cutoff 2021-09 for 2026-09-02; SERP 2020 → DROP, 2022 → not dropped, 2021 → deferred; item page 2021-09 pass, 2021-08 drop, missing → drop) exists in `record_filter_spec.py` and passes.
+- [ ] `grep -rn "shelfnet_crawler.filters" services/` returns nothing.
+
+##### Task 9.3
+- [ ] `main_spec.py` (redis + crawler-db, StubClient + a stub `RulesClient` returning fixed rules): a SERP-dropped record triggers no `get_item_info` call and is marked seen; a NEED_EDITION record on a cold cache triggers exactly one `get_item_info` (item page reused, not fetched twice); a second record with the same `editionid` hits the cache.
+- [ ] A `get_item_info` raising `ShelfnetApiError` publishes nothing for that record and leaves it unseen.
+- [ ] Existing age specs (`test_a_record_older_than_the_max_age_is_dropped_without_a_detail_call`, `test_a_cutoff_year_record_is_settled_on_the_detail_month`, `test_a_cutoff_year_record_a_month_too_old_is_dropped`) pass.
+- [ ] With `caplog`, each drop logs one record containing the itemid, `rule=<id>` (or `rule=None` for age) and the reason.
+
+##### Task 9.4
+- [ ] `run(settings, once=True, dry_run=True)` leaves the stream length 0 and the `seen` table without rows for the provider; logs `would publish` per surviving record.
+- [ ] `uv run python -m shelfnet_crawler --help` lists `--dry-run`.
+
+#### References
+- `services/shelfnet-crawler/src/shelfnet_crawler/filters.py` / `filters_spec.py` — age logic and cases to port.
+- `services/shelfnet-crawler/src/shelfnet_crawler/main_spec.py` — `StubClient` and stream fixtures.
+- Contract: `event_schemas.rules.Rule` (M1) — field units documented there.
+
+#### Verify
+```bash
+docker compose up -d redis crawler-db
+uv run pytest -q services/shelfnet-crawler
+uv run ruff check services/shelfnet-crawler && uv run basedpyright services/shelfnet-crawler
+```
+
+---
+
+### M10 — Documentation follows the pipeline
+
+| key | value |
+|-----|-------|
+| id | M10 |
+| file | `milestones/m10-docs/m10-docs.md` |
+| sp | 2 |
+| depends_on | M2, M4, M5, M9 |
+| status | pending |
+
+**Goal:** CLAUDE.md and `docs/` describe the tiered crawler, the crawler DB, rules, and contract v2 as built.
+
+**Scope:** `CLAUDE.md`, new `docs/pipeline-architecture.md`, `docs/architecture.md` (pointer only).
+
+#### Tasks
+
+| Task | Description | Files | SP | Status |
+|------|-------------|-------|----|--------|
+| 10.1 | Update CLAUDE.md sections listed in "CLAUDE.md impact" | `CLAUDE.md` | 1 | pending |
+| 10.2 | Create `docs/pipeline-architecture.md`: the source doc's model, data tiers, RecordFilter, Rules, two DBs, contracts — rewritten to the Decisions of this plan (streams kept, provider vs source, rule semantics and units, edition-from-item-page, seen marking); prepend a one-line pointer to it in `docs/architecture.md` | `docs/pipeline-architecture.md`, `docs/architecture.md` | 1 | pending |
+
+#### Definition of Done
+
+##### Task 10.1
+- [ ] `grep -n "crawler-db\|4156\|RULES_API_URL\|CRAWLER_DATABASE_URL\|/api/rules/\|provider" CLAUDE.md` matches in Ports, Configuration, Topology, API surface and Message wire contract.
+- [ ] `grep -n "shelfnet:seen\|filters.py" CLAUDE.md` returns nothing.
+
+##### Task 10.2
+- [ ] `docs/pipeline-architecture.md` contains sections "Data tiers", "RecordFilter", "Rules", "Databases", "Message contracts", "Enrichment processor", and states that Redis Streams remain at both seams.
+- [ ] First non-heading line of `docs/architecture.md` links `docs/pipeline-architecture.md`.
+
+#### References
+- `CLAUDE.md` — existing section voice (dense prose, tables for ports/config).
+- `docs/shelfnet-recon.md` — doc tone for `docs/`.
+
+#### Verify
+```bash
+grep -c "crawler-db" CLAUDE.md docs/pipeline-architecture.md
+```
+
+## Implementation Order
+
+```
+            M1
+   ┌────────┼─────────┬────────┐
+   M2       M3        M6       M8
+          ┌─┴─┐       │        │
+          M4  M5      M7       │
+          │   │       └───┬────┘
+          │   │           M9
+          └───┴─────┬─────┘
+                   M10
+```
+
+- After M1: **M2, M3, M6, M8 run in parallel** (disjoint services / files; M8 touches
+  `docker-compose.yml` and `.env.example` like M6 — Task 8.2 starts only after Task 6.1 is merged).
+- After M3: **M4 ∥ M5**. After M6: **M7** (parallel with M4/M5/M8).
+- M9 needs M6, M7, M8. M10 last.
+
+## Key Files Reference
+
+| File | Role |
+|------|------|
+| `packages/event-schemas/src/event_schemas/models.py` | Event contract; every service imports it (M1, read by M2, M3, M6, M7, M9) |
+| `packages/event-schemas/src/event_schemas/rules.py` | Rule contract shared by API (M4) and crawler (M8, M9) |
+| `packages/event-schemas/schemas/` | Committed published field list (M1) |
+| `services/shelfnet-crawler/src/shelfnet_crawler/main.py` | Crawl funnel `_cycle` (M1, M6, M9) |
+| `services/shelfnet-crawler/src/shelfnet_crawler/edition.py` | `Edition`, `EditionCache` (M6), `edition_from_detail` (M7), used by M9 |
+| `services/shelfnet-crawler/src/shelfnet_crawler/settings.py` | Crawler config (M1, M6, M8) |
+| `services/api/src/api/catalog/models.py` | `Provider`, `Record`, `Rule` (M3, M4) |
+| `services/record-processor/src/record_processor/processor.py` | Raw → processed mapping (M1, M2) |
+| `docker-compose.yml`, `.env.example` | `crawler-db` + new env vars (M6, M8) |
+| `CLAUDE.md` | Project guide updated in M10 |
+
+## Final Verification
+
+- [ ] `just up` then `docker compose ps` shows `crawler-db`, `api`, `api-consumer`, `record-processor`, `shelfnet-crawler` running/healthy.
+- [ ] `just e2e` passes (player → record-processor → api; `Record.provider_id == "player"`, cover objects exist in rustfs).
+- [ ] Live acceptance: with a rule `provider=shelfnet, max {"loan_count": 500}` created in `/admin/catalog/rule/`, `uv run python -m shelfnet_crawler --once --dry-run` logs `skip … rule=<id>` for every listing over 500 loans and `would publish` only for listings at or under it; the crawler log shows a 304 (or no request) on a second cycle inside 10 minutes.
+- [ ] `just test` — all specs pass with `docker compose up -d redis postgres rustfs crawler-db` running (no skips from missing services).
+- [ ] `just lint` and `just typecheck` — clean.
+- [ ] `uv run python -m api makemigrations --check --dry-run` — no pending migrations.
+- [ ] `uv run python -m event_schemas packages/event-schemas/schemas && git diff --exit-code packages/event-schemas/schemas` — schemas match models.
+- [ ] `cd web && npm run lint` — clean.
+- [ ] `uv run python -m api migrate catalog 0001 && uv run python -m api migrate` round-trips on a database holding e2e rows.
+
+## Testing Strategy
+
+Filtering and edition mapping run over real, messy provider data (label vocabularies, unit strings), so
+correctness is partly empirical.
+
+1. **Business-goal acceptance** — an admin-created rule removes exactly the intended inventory: after
+   one live `--once` cycle with a loan-count or height rule, every `Record` row in `/admin/catalog/record/`
+   created in that cycle satisfies the rule, and every skip log names the rule. Edition fields
+   (`binding`, `format`, `height_cm`) are non-null on ≥ 80 % of records whose item page carried the
+   corresponding key per the M7 recon table.
+2. **Fast debug loop** — fixtures `services/shelfnet-crawler/src/shelfnet_crawler/fixtures/search_item.json`
+   and `fixtures/getiteminfo.json`; `uv run pytest -q services/shelfnet-crawler/src/shelfnet_crawler/record_filter_spec.py
+   services/shelfnet-crawler/src/shelfnet_crawler/normalize_spec.py` — pure functions, no services, < 2 s.
+   New label variants found live are added as parametrised cases in `normalize_spec.py`.
+3. **User-facing validation** — `uv run python -m shelfnet_crawler --once --dry-run` (prints per-listing
+   `skip …` / `would publish …` without touching the stream or the seen list) lets the admin preview a
+   rule before activating it; the Django admin `Rule` changelist (`list_editable` `active`) and the SPA
+   detail "Edition" section show the outcome.
+
+## Deployment / config impact
+
+| Env var / config | docker-compose / deploy | terraform / infra | CI workflow |
+|------------------|-------------------------|-------------------|-------------|
+| `CRAWLER_DATABASE_URL` | `x-service.environment`, default `postgres://crawler:crawler@crawler-db:5432/crawler`; `.env.example` host default `…@localhost:4156/crawler` (M6.1) | none — no terraform in repo | none — no CI workflow in repo |
+| `CRAWLER_DB_PORT` | `crawler-db` port mapping `${CRAWLER_DB_PORT:-4156}:5432` (M6.1) | none | none |
+| `crawler-db` service + `crawler-db-data` volume | new `postgres:18` container (M6.1) | none | none |
+| `RULES_API_URL` | `x-service.environment`, default `http://api:8000/api/rules/` (M8.2) | none | none |
+| `RULES_REFRESH_SECONDS` | `x-service.environment`, default `600` (M8.2) | none | none |
+| `SHELFNET_SEEN_KEY` (internal setting `shelfnet_seen_key`) | removed; Redis hash `shelfnet:seen` becomes orphaned — `docker compose exec redis redis-cli DEL shelfnet:seen` after rollout | none | none |
+
+Rollout order: stop `shelfnet-crawler` and `shelfnet-scraper`; wait until `XPENDING record-raw processors` and
+`XPENDING record-processed api` are 0 (v1 messages would otherwise be soft-failed); deploy; `api-migrate`
+applies 0002–0004; start `crawler-db` before `shelfnet-crawler`. The first cycle against an empty seen
+table re-walks up to `SHELFNET_MAX_WALK_PAGES` pages; re-published records upsert in place.
+
+## Authorization / data access
+
+- [x] Every queryset is documented as public: `/api/records/`, `/api/records/{id}/`, `/api/facets/` stay
+      `AllowAny` read-only; the new `/api/rules/` is `AllowAny` read-only (`GET` only) and filters to
+      `active=True` for the requested provider — the system is single-tenant with no user-owned data.
+- [x] Full surface in scope reviewed: writes to `Rule`, `Provider` and `Record` happen only through the
+      Django admin (staff session auth, unchanged) and the stream consumer; no new write endpoint.
+- [x] No endpoint exposes another tenant's data — there are no tenants. Rule reasons are business config,
+      not personal data. Token auth on `/api/rules/` is deferred until the API is exposed beyond the dev
+      host (Out of scope).
+
+## Out of scope
+
+- Removing Redis Streams at `record-raw` / `record-processed` — kept by decision; revisit if producers and
+  processor get independent lifecycles (the doc's own re-introduction condition, inverted).
+- FX re-valuation ("re-count daily", EUR→USD/GBP) and an FX table — base pair undecided and no consumer
+  of non-EUR prices exists; prices stay EUR cents.
+- A real machine-translation backend — `StubTranslator` remains; dictionaries cover publisher/city.
+- A dedicated shelfnet edition/catalogue endpoint — editions come from the item page; `EditionCache` is the seam.
+- Categorical rule conditions (binding, format, audience) — doc's `Rule` shape is numeric `min`/`max`.
+- A persisted skip-audit table / admin view of dropped listings — skips are logged only.
+- `RecordFilter` / rules / edition cache in `shelfnet-scraper` and `player` — they only stamp `provider`.
+- Calling `Bus.reclaim` from `record-processor` (pre-existing gap: pending messages are never reclaimed).
+- SPA filters for binding/format/audience and French-language display.
+- Auth on `/api/rules/`.
+- Migrating the Redis `shelfnet:seen` hash into Postgres.
+
+## CLAUDE.md impact
+
+| Section | Change | Owning task |
+|---------|--------|-------------|
+| `## Ports` | Add row `4156 · crawler-db · 5432 · CRAWLER_DB_PORT` | M10.1 |
+| `## Topology` | Diagram: `crawler-db` beside `shelfnet-crawler`, rules pulled from `api` over HTTP; replace the `SHELFNET_MAX_AGE_YEARS` paragraph with the RecordFilter tiers (SERP → edition cache → item page), skip logging, `--dry-run`, item-page failure not published; seen list in Postgres | M10.1 |
+| `## Topology` (identity paragraph) | `Record` identity is `(provider, source_listing_id)`; `provider` comes from the payload, envelope `source` names the crawler (`shelfnet-api`) — replaces the "registrable domain" text | M10.1 |
+| `## API surface` | Add `/api/rules/?provider=` (ETag/304); filter `source` → `provider`; facets `providers` | M10.1 |
+| `## Message wire contract` | Committed schemas in `packages/event-schemas/schemas/` (regenerate with `python -m event_schemas …`), `provider` required, `RawRecord` ignores unknown keys, processor soft-fails unparsable messages | M10.1 |
+| `## Configuration` | Add `CRAWLER_DATABASE_URL`, `RULES_API_URL`, `RULES_REFRESH_SECONDS` to the shared env var list | M10.1 |
+| `## Layout — three roots` | `event-schemas` also holds the rule contract; `shelfnet-crawler` owns `crawler-db` | M10.1 |
+-- cmd --
+booping plan split draft.md
+-- expected/cwd/index.md --
+---
+title: Pipeline Architecture — tiered crawler filtering, edition cache, admin rules, compiled record contract
+type: feature
+status: in-spec
+sp: 36
+summary: Admin-curated skip rules and a cached edition tier let the crawler publish only fully compiled, wanted records with edition fields
+created: 2026-10-16
+source: inputs/Pipeline Architecture.md (supersedes inputs/Crawling Model.md)
+---
+
+# Pipeline Architecture — tiered crawler filtering, edition cache, admin rules, compiled record contract
+
+## Context
+
+**Current state** (facts from the repo at `3f9e2c1`):
+
+- `services/shelfnet-crawler` walks the signed catalogue search API (`client.py:search`), fetches the item page
+  (`client.py:get_item_info`, `getiteminfo`) for every record not dropped on year, and publishes a `RawRecord`
+  to the `record-raw` Redis stream (`main.py:_cycle`). The only filter is max age:
+  `filters.py:screen_search_year` (SERP year) + `filters.py:detail_passes` (item-page month). There are no
+  skip rules, no edition lookup, no `editionid`/`workid` handling beyond the raw dict.
+- A failed item-page fetch still publishes a half-ready record built from search fields only (`main.py:428-433`).
+- The seen list is a Redis hash (`seen.py:SeenStore`, key `shelfnet:seen`, TTL prune
+  `shelfnet_seen_ttl_days=30`). There is no crawler-owned database.
+- `event_schemas.models.RawRecord` / `ProcessedRecord` are `extra="forbid"` and carry no provider, no
+  edition ids, no acquisition month, no height/binding/format/pages/cover/audience fields
+  (`packages/event-schemas/src/event_schemas/models.py:21-65`). Envelope `source` is `"shelfnet"` on
+  `record-raw` and `"record-processor"` on `record-processed`.
+- `services/record-processor/src/record_processor/main.py:handle` leaves *every* failure un-acked, including a
+  payload that can never validate, and never calls `Bus.reclaim` — a malformed message is pending forever.
+- Translation is a single-language stub (`translate.py:StubTranslator` → `"[en] …"`, `title_translated`).
+- `services/api` stores `Record` keyed by `(source, source_listing_id)` where `source` is the URL's
+  registrable domain (`ingest.py:marketplace_of`); there is no `Rule` model, no provider table, no
+  edition columns. All endpoints are read-only `AllowAny`.
+
+**Motivation.** The architecture doc fixes the division of labour: *the crawler decides if a record exists
+in our system; the enrichment processor decides what it looks like*. Today the crawler cannot express
+"skip this work / edition / height / loan count" without a code change, it pays an item-page request for
+every listing even when SERP or catalogue data could already reject it, and it can publish half-built
+records. The admin needs to curate skip rules without deploys, and the final record needs the
+catalogue fields (height, binding, format, page count, audience, cover colour, acquisition month) that the
+SPA and later lending work depend on.
+
+**Scope.** This plan covers:
+
+1. Event contract v2: provider identity, edition ids, compiled record fields, en+fr translations, a shared
+   rule contract, committed JSON Schemas.
+2. Soft-fail validation in `record-processor` plus en+fr translation with publisher/city dictionaries.
+3. Django: `Provider`, edition columns on `Record`, admin-curated `Rule`, `GET /api/rules/` with ETag.
+4. A crawler-owned Postgres (`crawler-db`) holding the edition cache and the seen list.
+5. Edition resolution from the item page, cached per `(provider, edition_id)`.
+6. The crawler-internal `RecordFilter` (`pre_filter` / `post_filter`) driven by polled rules, with
+   per-skip audit logging and a `--dry-run` preview.
+7. SPA type/rendering updates for the renamed identity and new fields; CLAUDE.md + docs.
+
+It does **not** cover: removing Redis Streams, FX re-valuation of prices, a real machine translator,
+a dedicated shelfnet edition endpoint, categorical (enum) rule conditions, a persisted skip-audit table,
+or filtering in `shelfnet-scraper` (see Out of scope).
+
+### Source document review
+
+Findings from grooming `Pipeline Architecture.md` against the code — each is resolved in Decisions:
+
+- **"No queue is required"** contradicts the diagram's `record-raw` arrow and the existing, tested Redis
+  Streams seam; the doc argues a queue is unnecessary, not harmful. → keep the streams.
+- **Item page "only when a pending constraint requires it"** vs **"item-page fetch (per surviving record)"** and
+  "the crawler's job is a fully compiled record" — the latter wins: every record that survives SERP/edition
+  filtering gets its item page (covers, ISBN, acquisition month); none for records dropped earlier.
+- **`pre_filter(item) -> NEED_EDITION`** has no defined re-entry. → `pre_filter(item, edition=None)`; called
+  again with the resolved edition it returns only `DROP | PASS`.
+- **`min`/`max` semantics** are not stated. → acceptance bounds: a record in scope is skipped when any
+  known value is `< min` or `> max`; empty bounds disable the whole scope.
+- **Rules use `work_id`/`edition_id` with no provider** — those ids are shelfnet catalogue ids. → `Rule`
+  is scoped to a `Provider`.
+- **`provider` means two things**: the crawler id (`shelfnet-api`) and the Record FK (`shelfnet`). Two
+  crawlers (`shelfnet-crawler`, `shelfnet-scraper`) fill the same listings, so identity must use the
+  marketplace. → envelope `source` = crawler id; payload `provider` = catalogue slug.
+- **Vocabulary lists binding/format** but `Rule` only has numeric `min`/`max`. → this sprint's
+  vocabulary is numeric only; categorical conditions deferred.
+- **No edition endpoint is known in the repo** (only `search` and `getiteminfo` in `client.py:16-17`).
+  → edition fields are derived from the item page and cached per `edition_id`; a dedicated endpoint can
+  replace the miss path later.
+- **Open questions answered:** unknown edition id → fail open (keep); seen list ages out by the existing
+  `SHELFNET_SEEN_TTL_DAYS` prune, now in Postgres; FX table deferred; item-page field coverage is settled by
+  a captured live fixture (Task 7.1) — fields absent from the item page stay `null` and rules on them never
+  fire.
+
+## Decisions
+
+- **Queue at the `record-raw` seam**: keep Redis Streams on both seams — they already give at-least-once
+  delivery with ack/reclaim; removing them would rewrite processor and consumer for no user-visible gain.
+- **Provider identity**: envelope `source` names the emitting crawler (`shelfnet-api`,
+  `shelfnet-scraper`, `player`); a new required payload field `provider` carries the catalogue slug
+  (`shelfnet`) and becomes `Record.provider` — two crawlers of one catalogue must upsert the same row.
+- **Provider model**: Django `Provider(slug PK, name, domain)`; `Record.source` is replaced by
+  `Record.provider` FK — rules need a provider scope anyway, and `domain` makes the data migration
+  lossless in reverse.
+- **API naming**: the API exposes `provider` (slug) and `providers` facet, replacing `source` /
+  `sources`; the SPA is updated in the same sprint — one name per concept beats a back-compat alias
+  with one consumer.
+- **Contract looseness**: `RawRecord` switches to `extra="ignore"` and new fields are optional; the
+  committed JSON Schema is the published field list — a producer adding a field cannot crash the
+  processor, and source extras already ride in `raw`.
+- **Event version**: `Envelope.event_version` default becomes `2`; consumers do not branch on it —
+  it documents the shape change for anyone reading the stream.
+- **Acquisition**: `acquired: date | None`, day fixed to 1 — month-granular data in a type
+  Django and JSON Schema both understand.
+- **Enums**: `Binding`, `Format`, `Audience` `StrEnum`s live in `event_schemas.models`; an
+  unrecognised provider label maps to `None`, never to a guessed value — a wrong enum is worse than
+  a missing one.
+- **Rule contract location**: the pydantic `Rule` / `RulesSnapshot` and the `RuleField` vocabulary live
+  in `event_schemas.rules` — the API serialises with it and the crawler parses with it, so the
+  vocabulary exists once.
+- **Rule semantics**: `min`/`max` are acceptance bounds over a closed numeric vocabulary
+  `year, price (EUR cents), loan_count, height_cm, page_count`; any violated bound or an empty-bounds
+  scope match ⇒ skip, no priorities — matches the doc's examples (`min height_cm 30.0`,
+  `max loan_count 1000`).
+- **Rules endpoint**: `GET /api/rules/?provider=<slug>` returns active rules un-paginated with a strong
+  ETag = sha256 of the body, answering `304` on a matching `If-None-Match` — one query, deterministic,
+  no global middleware change.
+- **Rules polling**: the crawler refreshes at the start of a cycle when `RULES_REFRESH_SECONDS` (600)
+  has elapsed, no background task — the crawler loop is sequential and human-paced, so per-cycle
+  granularity is enough.
+- **Edition source**: on a cache miss the edition is derived from the listing's own item page, which the
+  record needs anyway, and upserted; every item page fetched also warms the cache — no edition endpoint is
+  known, and this keeps the "1 call per distinct editionid" amortisation.
+- **Crawler database**: a separate `crawler-db` container (`postgres:18`, host port 4156) — truly
+  single-tenant, and no `docker-entrypoint-initdb.d` script that silently skips on an existing volume.
+- **Crawler schema management**: `CREATE TABLE IF NOT EXISTS` at startup via `psycopg` (`db.py`), no
+  migration tool — two cache tables whose content is rebuildable from the source.
+- **Seen list storage**: moves from the Redis hash to the crawler DB with the same `SeenStore` surface
+  — the doc assigns it to the crawler DB and Postgres survives a Redis flush.
+- **Seen marking**: publish ⇒ mark; deterministic drops (SERP/edition rule, age, mapping error) ⇒ mark;
+  item-page failure ⇒ not marked, retried next cycle — keeps the "fully seen page stops the walk" heuristic
+  in `discovery.py` working.
+- **Item-page failure**: the record is no longer published from search fields — the half-ready state must
+  not cross the wire.
+- **Skip audit**: every skip logs `listing id + rule id + reason` at INFO on logger
+  `shelfnet_crawler.record_filter`; no DB table — the doc asks for logging, and a table needs a reader.
+- **Dry run**: `python -m shelfnet_crawler --once --dry-run` runs the full funnel, logs verdicts, publishes
+  nothing and marks nothing — lets the admin preview a rule's effect on live inventory.
+- **Translations**: `ProcessedRecord.translations: dict[str, Translation]` with `en` and `fr`, each
+  `{title, author, publisher, city}`; `title_translated` stays as the English title — `Record` search and
+  the SPA already read it.
+- **Dictionaries**: publisher and city dictionaries are JSON data files in `record_processor/data/`; a hit
+  wins, a miss falls back to the `Translator` — stable vocabulary should not depend on an MT backend.
+- **Processor soft-fail**: a message that does not parse/validate is logged and acked; a processing
+  failure stays pending — mirrors `api/catalog/management/commands/consume_records.py:handle`.
+- **Rules endpoint auth**: public read-only like the rest of the API — the system is single-tenant, the
+  API port is dev-local, and rules carry no personal data (revisit with public exposure).
+
+### Assumptions
+
+- A1. The developer environment can reach shelfnet's catalogue API the way the compose `shelfnet-crawler`
+  does today (request signing verified 2026-09-02, `client.py:98-100`). Task 7.1 needs one live
+  search + item-page call; if it fails the milestone is blocked at 7.1.
+- A2. `getiteminfo` carries author/publisher names (`authorname`, `publishername` — already used in
+  `mapping.py:66-67`), `acquireddate` (`filters.py:249`) and `coverlist`; any edition field the fixture
+  lacks is mapped to `None`.
+- A3. The SERP `height` string (`"24cm"`, `"24 cm"`) is centimetres; the `cm` suffix is discarded.
+- A4. Item-page page counts given as front matter plus body (`xii+340`) are summed: `pages = roman + arabic`.
+- A5. Rule `price` is in EUR cents (SERP `price` × 100); `loan_count` in loans (SERP `loans` × 100).
+- A6. `format` collapses audiobook/e-book/PDF to `digital`; only `print` and `digital` exist.
+- A7. `Binding` values: `hardcover, paperback, spiral, board, leather, stapled, other`.
+- A8. Rule edits apply to listings not yet seen; listings already dropped come back after the seen TTL.
+- A9. `shelfnet-scraper` and `player` only stamp `provider`; they get no `RecordFilter`.
+- A10. Streams are drained before deploying the v2 contract (see Deployment); a leftover v1 message is
+  soft-failed, not migrated.
+- A11. The `/playbook groom` multi-file layout (`index.md` + `milestones/*/`) is projected into this single
+  `plan.md` as requested: each milestone is a `###` section carrying its own frontmatter keys table,
+  and the Milestones table is written from those keys instead of generated by `booping query`.
+
+## Architecture
+
+```
+shelfnet-crawler (crawler, shelfnet-api)                            record-processor
+┌──────────────────────────────────────────────────────┐          ┌──────────────────────────────┐
+│ cycle start: RulesClient.refresh_if_due() ──HTTP ETag─┼──▶ api   │ handle(): parse ─fail→ log+ack│
+│ discovery.iter_search_records (SeenStore: crawler-db) │  /api/   │ process():                   │
+│ for item:                                             │  rules/  │   store_covers → rustfs      │
+│   v = RecordFilter.pre_filter(item)     DROP→mark     │          │   translations en+fr         │
+│   NEED_EDITION → EditionCache.get | page→from_detail  │record-raw│     (dictionaries → Translator)│
+│              → pre_filter(item, ed)     DROP→mark     │─stream──▶│ publish ProcessedRecord ─────┼─▶ record-processed
+│   item page (reuse if fetched)  fail → skip, NOT mark │ provider │                              │      │
+│   EditionCache.upsert(edition_from_detail)            │ +payload └──────────────────────────────┘      ▼
+│   rec = search_item_to_raw_record(item, …, detail, ed)│                         api-consumer upsert_record
+│   RecordFilter.post_filter(rec)         DROP→mark     │                         Provider / Record (+ed cols)
+│   publish → SeenStore.mark                            │                         Rule (admin) ──▶ /api/rules/
+└───────────────┬──────────────────────────────────────┘
+          crawler-db (pg :4156): edition, seen
+```
+
+Integration points:
+
+- `packages/event-schemas/src/event_schemas/models.py` — `RawRecord`, `ProcessedRecord`, `Envelope`, new enums
+  and `Translation`; `event_schemas/rules.py` — `RuleField`, `Rule`, `RulesSnapshot`;
+  `export_schema.py:SCHEMAS` gains `rules`; committed output under `packages/event-schemas/schemas/`.
+- `services/shelfnet-crawler/src/shelfnet_crawler/main.py:_cycle` — the funnel; new modules `db.py`,
+  `edition.py`, `normalize.py`, `rules.py`, `record_filter.py`; `seen.py` re-backed by Postgres;
+  `filters.py` folded into `record_filter.py` and deleted.
+- `services/record-processor/src/record_processor/main.py:handle` (soft-fail), `processor.py:process`
+  (passthrough + translations), `translate.py`, new `dictionaries.py` + `data/*.json`.
+- `services/api/src/api/catalog/` — `models.py` (`Provider`, `Record` columns, `Rule`), migrations
+  `0002`–`0004`, `ingest.py:upsert_record`, `serializers.py`, `filters.py`, `views.py` (`facets`, `rules`),
+  `urls.py`, `admin.py`.
+- `docker-compose.yml` — `crawler-db` service, new env vars in `x-service.environment`.
+- `web/src/types.ts`, `web/src/components/RecordDetail.tsx`.
+
+## Milestones
+
+| id | title | sp | status |
+| --- | --- | --- | --- |
+| 01 | [Event contract v2](milestones/M01-event-contract-v2/M01-event-contract-v2.md) | 5 | pending |
+| 02 | [Processor soft-fail ingest and en+fr translations](milestones/M02-processor-soft-fail-ingest-and-en-fr-translations/M02-processor-soft-fail-ingest-and-en-fr-translations.md) | 3 | pending |
+| 03 | [API provider identity and record edition columns](milestones/M03-api-provider-identity-and-record-edition-columns/M03-api-provider-identity-and-record-edition-columns.md) | 5 | pending |
+| 04 | [Admin-curated rules and the rules endpoint](milestones/M04-admin-curated-rules-and-the-rules-endpoint/M04-admin-curated-rules-and-the-rules-endpoint.md) | 3 | pending |
+| 05 | [SPA follows the provider rename and edition fields](milestones/M05-spa-follows-the-provider-rename-and-edition-fields/M05-spa-follows-the-provider-rename-and-edition-fields.md) | 2 | pending |
+| 06 | [Crawler database: seen list and edition cache](milestones/M06-crawler-database-seen-list-and-edition-cache/M06-crawler-database-seen-list-and-edition-cache.md) | 4 | pending |
+| 07 | [Edition resolution from the item page](milestones/M07-edition-resolution-from-the-item-page/M07-edition-resolution-from-the-item-page.md) | 4 | pending |
+| 08 | [Rules client in the crawler](milestones/M08-rules-client-in-the-crawler/M08-rules-client-in-the-crawler.md) | 2 | pending |
+| 09 | [RecordFilter and the tiered crawl funnel](milestones/M09-recordfilter-and-the-tiered-crawl-funnel/M09-recordfilter-and-the-tiered-crawl-funnel.md) | 6 | pending |
+| 10 | [Documentation follows the pipeline](milestones/M10-documentation-follows-the-pipeline/M10-documentation-follows-the-pipeline.md) | 2 | pending |
+
+## Groups
+
+| group | milestones | sp |
+| --- | --- | --- |
+| G1 | M01, M02, M03 | 13 |
+| G2 | M04, M05, M06, M07, M08 | 15 |
+| G3 | M09, M10 | 8 |
+
+## Milestone files
+
+---
+
+
+## Implementation Order
+
+```
+            M1
+   ┌────────┼─────────┬────────┐
+   M2       M3        M6       M8
+          ┌─┴─┐       │        │
+          M4  M5      M7       │
+          │   │       └───┬────┘
+          │   │           M9
+          └───┴─────┬─────┘
+                   M10
+```
+
+- After M1: **M2, M3, M6, M8 run in parallel** (disjoint services / files; M8 touches
+  `docker-compose.yml` and `.env.example` like M6 — Task 8.2 starts only after Task 6.1 is merged).
+- After M3: **M4 ∥ M5**. After M6: **M7** (parallel with M4/M5/M8).
+- M9 needs M6, M7, M8. M10 last.
+
+## Key Files Reference
+
+| File | Role |
+|------|------|
+| `packages/event-schemas/src/event_schemas/models.py` | Event contract; every service imports it (M1, read by M2, M3, M6, M7, M9) |
+| `packages/event-schemas/src/event_schemas/rules.py` | Rule contract shared by API (M4) and crawler (M8, M9) |
+| `packages/event-schemas/schemas/` | Committed published field list (M1) |
+| `services/shelfnet-crawler/src/shelfnet_crawler/main.py` | Crawl funnel `_cycle` (M1, M6, M9) |
+| `services/shelfnet-crawler/src/shelfnet_crawler/edition.py` | `Edition`, `EditionCache` (M6), `edition_from_detail` (M7), used by M9 |
+| `services/shelfnet-crawler/src/shelfnet_crawler/settings.py` | Crawler config (M1, M6, M8) |
+| `services/api/src/api/catalog/models.py` | `Provider`, `Record`, `Rule` (M3, M4) |
+| `services/record-processor/src/record_processor/processor.py` | Raw → processed mapping (M1, M2) |
+| `docker-compose.yml`, `.env.example` | `crawler-db` + new env vars (M6, M8) |
+| `CLAUDE.md` | Project guide updated in M10 |
+
+## Final Verification
+
+- [ ] `just up` then `docker compose ps` shows `crawler-db`, `api`, `api-consumer`, `record-processor`, `shelfnet-crawler` running/healthy.
+- [ ] `just e2e` passes (player → record-processor → api; `Record.provider_id == "player"`, cover objects exist in rustfs).
+- [ ] Live acceptance: with a rule `provider=shelfnet, max {"loan_count": 500}` created in `/admin/catalog/rule/`, `uv run python -m shelfnet_crawler --once --dry-run` logs `skip … rule=<id>` for every listing over 500 loans and `would publish` only for listings at or under it; the crawler log shows a 304 (or no request) on a second cycle inside 10 minutes.
+- [ ] `just test` — all specs pass with `docker compose up -d redis postgres rustfs crawler-db` running (no skips from missing services).
+- [ ] `just lint` and `just typecheck` — clean.
+- [ ] `uv run python -m api makemigrations --check --dry-run` — no pending migrations.
+- [ ] `uv run python -m event_schemas packages/event-schemas/schemas && git diff --exit-code packages/event-schemas/schemas` — schemas match models.
+- [ ] `cd web && npm run lint` — clean.
+- [ ] `uv run python -m api migrate catalog 0001 && uv run python -m api migrate` round-trips on a database holding e2e rows.
+
+## Testing Strategy
+
+Filtering and edition mapping run over real, messy provider data (label vocabularies, unit strings), so
+correctness is partly empirical.
+
+1. **Business-goal acceptance** — an admin-created rule removes exactly the intended inventory: after
+   one live `--once` cycle with a loan-count or height rule, every `Record` row in `/admin/catalog/record/`
+   created in that cycle satisfies the rule, and every skip log names the rule. Edition fields
+   (`binding`, `format`, `height_cm`) are non-null on ≥ 80 % of records whose item page carried the
+   corresponding key per the M7 recon table.
+2. **Fast debug loop** — fixtures `services/shelfnet-crawler/src/shelfnet_crawler/fixtures/search_item.json`
+   and `fixtures/getiteminfo.json`; `uv run pytest -q services/shelfnet-crawler/src/shelfnet_crawler/record_filter_spec.py
+   services/shelfnet-crawler/src/shelfnet_crawler/normalize_spec.py` — pure functions, no services, < 2 s.
+   New label variants found live are added as parametrised cases in `normalize_spec.py`.
+3. **User-facing validation** — `uv run python -m shelfnet_crawler --once --dry-run` (prints per-listing
+   `skip …` / `would publish …` without touching the stream or the seen list) lets the admin preview a
+   rule before activating it; the Django admin `Rule` changelist (`list_editable` `active`) and the SPA
+   detail "Edition" section show the outcome.
+
+## Deployment / config impact
+
+| Env var / config | docker-compose / deploy | terraform / infra | CI workflow |
+|------------------|-------------------------|-------------------|-------------|
+| `CRAWLER_DATABASE_URL` | `x-service.environment`, default `postgres://crawler:crawler@crawler-db:5432/crawler`; `.env.example` host default `…@localhost:4156/crawler` (M6.1) | none — no terraform in repo | none — no CI workflow in repo |
+| `CRAWLER_DB_PORT` | `crawler-db` port mapping `${CRAWLER_DB_PORT:-4156}:5432` (M6.1) | none | none |
+| `crawler-db` service + `crawler-db-data` volume | new `postgres:18` container (M6.1) | none | none |
+| `RULES_API_URL` | `x-service.environment`, default `http://api:8000/api/rules/` (M8.2) | none | none |
+| `RULES_REFRESH_SECONDS` | `x-service.environment`, default `600` (M8.2) | none | none |
+| `SHELFNET_SEEN_KEY` (internal setting `shelfnet_seen_key`) | removed; Redis hash `shelfnet:seen` becomes orphaned — `docker compose exec redis redis-cli DEL shelfnet:seen` after rollout | none | none |
+
+Rollout order: stop `shelfnet-crawler` and `shelfnet-scraper`; wait until `XPENDING record-raw processors` and
+`XPENDING record-processed api` are 0 (v1 messages would otherwise be soft-failed); deploy; `api-migrate`
+applies 0002–0004; start `crawler-db` before `shelfnet-crawler`. The first cycle against an empty seen
+table re-walks up to `SHELFNET_MAX_WALK_PAGES` pages; re-published records upsert in place.
+
+## Authorization / data access
+
+- [x] Every queryset is documented as public: `/api/records/`, `/api/records/{id}/`, `/api/facets/` stay
+      `AllowAny` read-only; the new `/api/rules/` is `AllowAny` read-only (`GET` only) and filters to
+      `active=True` for the requested provider — the system is single-tenant with no user-owned data.
+- [x] Full surface in scope reviewed: writes to `Rule`, `Provider` and `Record` happen only through the
+      Django admin (staff session auth, unchanged) and the stream consumer; no new write endpoint.
+- [x] No endpoint exposes another tenant's data — there are no tenants. Rule reasons are business config,
+      not personal data. Token auth on `/api/rules/` is deferred until the API is exposed beyond the dev
+      host (Out of scope).
+
+## Out of scope
+
+- Removing Redis Streams at `record-raw` / `record-processed` — kept by decision; revisit if producers and
+  processor get independent lifecycles (the doc's own re-introduction condition, inverted).
+- FX re-valuation ("re-count daily", EUR→USD/GBP) and an FX table — base pair undecided and no consumer
+  of non-EUR prices exists; prices stay EUR cents.
+- A real machine-translation backend — `StubTranslator` remains; dictionaries cover publisher/city.
+- A dedicated shelfnet edition/catalogue endpoint — editions come from the item page; `EditionCache` is the seam.
+- Categorical rule conditions (binding, format, audience) — doc's `Rule` shape is numeric `min`/`max`.
+- A persisted skip-audit table / admin view of dropped listings — skips are logged only.
+- `RecordFilter` / rules / edition cache in `shelfnet-scraper` and `player` — they only stamp `provider`.
+- Calling `Bus.reclaim` from `record-processor` (pre-existing gap: pending messages are never reclaimed).
+- SPA filters for binding/format/audience and French-language display.
+- Auth on `/api/rules/`.
+- Migrating the Redis `shelfnet:seen` hash into Postgres.
+
+## CLAUDE.md impact
+
+| Section | Change | Owning task |
+|---------|--------|-------------|
+| `## Ports` | Add row `4156 · crawler-db · 5432 · CRAWLER_DB_PORT` | M10.1 |
+| `## Topology` | Diagram: `crawler-db` beside `shelfnet-crawler`, rules pulled from `api` over HTTP; replace the `SHELFNET_MAX_AGE_YEARS` paragraph with the RecordFilter tiers (SERP → edition cache → item page), skip logging, `--dry-run`, item-page failure not published; seen list in Postgres | M10.1 |
+| `## Topology` (identity paragraph) | `Record` identity is `(provider, source_listing_id)`; `provider` comes from the payload, envelope `source` names the crawler (`shelfnet-api`) — replaces the "registrable domain" text | M10.1 |
+| `## API surface` | Add `/api/rules/?provider=` (ETag/304); filter `source` → `provider`; facets `providers` | M10.1 |
+| `## Message wire contract` | Committed schemas in `packages/event-schemas/schemas/` (regenerate with `python -m event_schemas …`), `provider` required, `RawRecord` ignores unknown keys, processor soft-fails unparsable messages | M10.1 |
+| `## Configuration` | Add `CRAWLER_DATABASE_URL`, `RULES_API_URL`, `RULES_REFRESH_SECONDS` to the shared env var list | M10.1 |
+| `## Layout — three roots` | `event-schemas` also holds the rule contract; `shelfnet-crawler` owns `crawler-db` | M10.1 |
+-- expected/cwd/milestones/M01-event-contract-v2/M01-event-contract-v2.md --
+---
+id: "01"
+title: "Event contract v2"
+sp: 5
+status: pending
+plan: "index.md"
+---
+
+# M01: Event contract v2
+
+## Tasks
+
+**Goal:** record events carry the catalogue `provider`, edition ids and compiled-record fields, and their
+published field list is a committed JSON Schema.
+
+**Scope:** `packages/event-schemas` (`models.py`, new `rules.py`, `export_schema.py`, committed
+`schemas/`), and every constructor of `RawRecord`/`ProcessedRecord` so the repo stays green:
+`services/player/src/player/generator.py`, `services/shelfnet-scraper/src/shelfnet_scraper/mapping.py`,
+`services/shelfnet-crawler/src/shelfnet_crawler/{mapping,settings}.py`,
+`services/record-processor/src/record_processor/processor.py`, `services/api/src/api/catalog/factories.py`, and
+their specs. No behaviour change beyond stamping and passing the new fields.
+
+| Task | Description | Files | SP | Status |
+|------|-------------|-------|----|--------|
+| 1.1 | Add `Binding`, `Format`, `Audience`, `Translation`; add `provider` (required) and optional `edition_id, work_id, acquired, height_cm, binding, format, page_count, cover_color, audience` to `RawRecord` and `ProcessedRecord`; `ProcessedRecord.translations`; `RawRecord` → `extra="ignore"`; `event_version` default 2 | `packages/event-schemas/src/event_schemas/models.py`, `packages/event-schemas/src/event_schemas/models_spec.py` | 2 | pending |
+| 1.2 | Rule contract: `RuleField`, `Rule`, `RulesSnapshot`; add `rules` to `SCHEMAS`; commit generated schemas; drift spec | `packages/event-schemas/src/event_schemas/rules.py`, `packages/event-schemas/src/event_schemas/rules_spec.py`, `packages/event-schemas/src/event_schemas/export_schema.py`, `packages/event-schemas/src/event_schemas/export_schema_spec.py`, `packages/event-schemas/schemas/raw_record.schema.json`, `packages/event-schemas/schemas/processed_record.schema.json`, `packages/event-schemas/schemas/rules.schema.json` | 1 | pending |
+| 1.3 | Producers stamp `provider`: player `"player"`, scraper `"shelfnet"`, crawler from new `Settings.provider="shelfnet"`; crawler `Settings.source` default → `"shelfnet-api"` | `services/player/src/player/generator.py`, `services/shelfnet-scraper/src/shelfnet_scraper/mapping.py`, `services/shelfnet-crawler/src/shelfnet_crawler/mapping.py`, `services/shelfnet-crawler/src/shelfnet_crawler/settings.py`, `services/shelfnet-crawler/src/shelfnet_crawler/main.py`, `services/shelfnet-crawler/src/shelfnet_crawler/mapping_spec.py`, `services/shelfnet-scraper/src/shelfnet_scraper/mapping_spec.py`, `services/player/src/player/generator_spec.py` | 1 | pending |
+| 1.4 | Consumers pass new fields through: `process()` copies `provider` and every new optional field; API factory sets `provider="shelfnet"` | `services/record-processor/src/record_processor/processor.py`, `services/record-processor/src/record_processor/processor_spec.py`, `services/api/src/api/catalog/factories.py` | 1 | pending |
+
+## Definition of Done
+
+##### Task 1.1
+- [ ] `RawRecord(provider=…, <v1 fields>)` validates with every new field omitted; omitting `provider` raises `ValidationError` (spec in `models_spec.py`).
+- [ ] `RawRecord.model_validate({... , "unknown_key": 1})` succeeds and drops the key; `ProcessedRecord` stays `extra="forbid"`.
+- [ ] `acquired` accepts `date(2021, 6, 1)` and serialises as `"2021-06-01"`.
+- [ ] `binding="paperback"` coerces to `Binding.PAPERBACK`; `binding="scroll"` raises.
+- [ ] `ProcessedRecord.translations` defaults to `{}`; `Envelope().event_version == 2`.
+- [ ] `RAW_FIELDS` / `PROCESSED_FIELDS` sets in `models_spec.py` list the new fields.
+- [ ] Sketch:
+  ```python
+  class Binding(StrEnum):
+      HARDCOVER = "hardcover"; PAPERBACK = "paperback"; SPIRAL = "spiral"; BOARD = "board"
+      LEATHER = "leather"; STAPLED = "stapled"; OTHER = "other"
+
+  class Format(StrEnum): PRINT = "print"; DIGITAL = "digital"
+  class Audience(StrEnum): CHILD = "child"; TEEN = "teen"; ADULT = "adult"
+
+  class Translation(BaseModel):
+      title: str; author: str; publisher: str; city: str
+
+  class RawRecord(BaseModel):
+      provider: str = Field(min_length=1)
+      edition_id: int | None = None
+      work_id: int | None = None
+      acquired: date | None = None
+      height_cm: float | None = Field(default=None, ge=0)
+      binding: Binding | None = None
+      format: Format | None = None
+      page_count: int | None = Field(default=None, ge=0)
+      cover_color: str | None = None
+      audience: Audience | None = None
+      ...
+  ```
+
+##### Task 1.2
+- [ ] `Rule.model_validate({"id": 1, "provider": "shelfnet", "work_id": None, "edition_id": None, "min": {"height_cm": 30.0}, "max": {}, "reason": "x"})` succeeds; a key outside `RuleField` in `min`/`max` raises (`rules_spec.py`).
+- [ ] `uv run python -m event_schemas packages/event-schemas/schemas` writes exactly the three committed files and `git diff --exit-code packages/event-schemas/schemas` is clean afterwards.
+- [ ] `export_schema_spec.py` asserts each committed file equals `model_json_schema()` output, so a model change without regenerating fails the suite.
+- [ ] Sketch:
+  ```python
+  RuleField = Literal["year", "price", "loan_count", "height_cm", "page_count"]
+
+  class Rule(BaseModel):
+      model_config = ConfigDict(extra="forbid")
+      id: int
+      provider: str
+      work_id: int | None
+      edition_id: int | None
+      min: dict[RuleField, float]
+      max: dict[RuleField, float]
+      reason: str
+
+  class RulesSnapshot(BaseModel):
+      rules: list[Rule]
+  ```
+
+##### Task 1.3
+- [ ] `generate_raw_record(0).provider == "player"`; `card_to_raw_record(...).provider == "shelfnet"`; `search_item_to_raw_record(..., provider="shelfnet").provider == "shelfnet"` (specs updated).
+- [ ] `Settings().source == "shelfnet-api"` and `Settings().provider == "shelfnet"` defaults; `main.py` passes `settings.provider` to the mapper.
+
+##### Task 1.4
+- [ ] `processor_spec.py::test_process_maps_raw_record_to_processed_record` asserts `provider`, `edition_id`, `acquired`, `height_cm`, `binding`, `format`, `page_count`, `cover_color`, `audience` equal the raw values.
+- [ ] `factories.processed_record()` builds with `provider="shelfnet"`; the existing API specs still pass unchanged.
+
+## References
+
+- `packages/event-schemas/src/event_schemas/models.py` — validator/`ConfigDict` style to copy.
+- `packages/event-schemas/src/event_schemas/models_spec.py` — field-set assertion pattern.
+- Contract: `packages/event-schemas/schemas/*.schema.json` is generated by this milestone — never hand-edit.
+
+## Verify
+
+```bash
+uv run python -m event_schemas packages/event-schemas/schemas && git diff --exit-code packages/event-schemas/schemas
+uv run pytest -q packages/event-schemas services/player services/shelfnet-scraper/src/shelfnet_scraper/mapping_spec.py services/shelfnet-crawler/src/shelfnet_crawler/mapping_spec.py services/record-processor/src/record_processor/processor_spec.py
+uv run ruff check packages/event-schemas services/player services/shelfnet-scraper services/shelfnet-crawler services/record-processor services/api/src/api/catalog/factories.py
+```
+-- expected/cwd/milestones/M02-processor-soft-fail-ingest-and-en-fr-translations/M02-processor-soft-fail-ingest-and-en-fr-translations.md --
+---
+id: "02"
+title: "Processor soft-fail ingest and en+fr translations"
+sp: 3
+status: pending
+plan: "index.md"
+---
+
+# M02: Processor soft-fail ingest and en+fr translations
+
+## Tasks
+
+**Goal:** `record-processor` acks away messages that cannot validate (logged) and publishes `ProcessedRecord`
+with `en` and `fr` translations of title, author, publisher and city.
+
+**Scope:** `services/record-processor/src/record_processor/` — `main.py:handle`, `translate.py`,
+`processor.py:process`, new `dictionaries.py`, new `data/publishers.json`, `data/cities.json`, specs.
+`ProcessedRecord.translations` and `Translation` come from M1 (`event_schemas.models`).
+
+| Task | Description | Files | SP | Status |
+|------|-------------|-------|----|--------|
+| 2.1 | Split `handle`: parse/type failure (`ValidationError`, `ValueError`, `KeyError`, `TypeError` from `serde.from_message` / payload check) → `logger.warning` with message id + error, then ack; processing failure keeps the no-ack path | `services/record-processor/src/record_processor/main.py`, `services/record-processor/src/record_processor/main_spec.py` | 1 | pending |
+| 2.2 | `Translator.translate(text, target) -> str`; `Dictionaries` loaded from `data/publishers.json` + `data/cities.json` (de → `{en, fr}`, ≥ 20 publishers and ≥ 20 cities seeded, covering every publisher/city in the existing fixtures); `process()` builds `translations["en"|"fr"]`, `title_translated = translations["en"].title`, `title_lang = "en"` | `services/record-processor/src/record_processor/translate.py`, `services/record-processor/src/record_processor/dictionaries.py`, `services/record-processor/src/record_processor/data/publishers.json`, `services/record-processor/src/record_processor/data/cities.json`, `services/record-processor/src/record_processor/processor.py`, `services/record-processor/src/record_processor/main.py`, `services/record-processor/src/record_processor/translate_spec.py`, `services/record-processor/src/record_processor/dictionaries_spec.py`, `services/record-processor/src/record_processor/processor_spec.py` | 2 | pending |
+
+## Definition of Done
+
+##### Task 2.1
+- [ ] `main_spec.py` (redis-backed, skips without redis like `services/api/src/api/catalog/consume_spec.py`): a `{"data": "{}"}` entry is acked (`XPENDING` count 0) and nothing is published to `record-processed`.
+- [ ] A valid raw envelope whose cover fetch fails stays pending (`XPENDING` count 1).
+- [ ] Log line for the soft-fail contains the message id and the validation error text.
+
+##### Task 2.2
+- [ ] `Dictionaries.lookup("city", "Wien", "en") == "Vienna"` and `("city", "Wien", "fr") == "Vienne"`; an unknown key returns `None` (`dictionaries_spec.py`).
+- [ ] With `StubTranslator`, `process(raw)` yields `translations["en"].city` from the dictionary and `translations["en"].title == "[en] <title>"`, `translations["fr"].title == "[fr] <title>"`; `translations.keys() == {"en", "fr"}`.
+- [ ] `title_translated == translations["en"].title`.
+- [ ] Sketch:
+  ```python
+  class Translator(Protocol):
+      def translate(self, text: str, target: str) -> str: ...
+
+  class Dictionaries:
+      @classmethod
+      def load(cls, data_dir: Path | None = None) -> Self: ...
+      def lookup(self, kind: Literal["publisher", "city"], de: str, lang: str) -> str | None: ...
+  ```
+
+## References
+
+- `services/api/src/api/catalog/management/commands/consume_records.py` — parse-vs-persist ack split to copy.
+- `services/api/src/api/catalog/consume_spec.py` — redis-backed consumer spec with per-test stream.
+- `services/record-processor/src/record_processor/processor_spec.py` — `FakeS3` / `cover_client` fixtures.
+
+## Verify
+
+```bash
+uv run pytest -q services/record-processor
+uv run ruff check services/record-processor && uv run basedpyright services/record-processor
+```
+-- expected/cwd/milestones/M03-api-provider-identity-and-record-edition-columns/M03-api-provider-identity-and-record-edition-columns.md --
+---
+id: "03"
+title: "API provider identity and record edition columns"
+sp: 5
+status: pending
+plan: "index.md"
+---
+
+# M03: API provider identity and record edition columns
+
+## Tasks
+
+**Goal:** a `Record` is keyed by `(provider, source_listing_id)` against a `Provider` table and persists the
+compiled edition fields and translations, all exposed over the existing endpoints.
+
+**Scope:** `services/api/src/api/catalog/` — `models.py`, `migrations/0002_provider.py`,
+`migrations/0003_record_edition_fields.py`, `ingest.py`, `serializers.py`, `filters.py`, `views.py:facets`,
+`admin.py`, specs; `scripts/e2e.py` (reads `record.source`). Tables: `catalog_provider` (new), `catalog_record`
+(column changes). Endpoints: `/api/records/`, `/api/records/{id}/`, `/api/facets/`.
+
+**Persistence change + rollback:** 0002 creates `catalog_provider`, adds `catalog_record.provider_id`, backfills,
+swaps the unique constraint, drops `catalog_record.source`. 0003 adds nullable edition columns and
+`translations`. Rollback: `uv run python -m api migrate catalog 0001` — 0002's `RunPython` reverse restores
+`source` from `Provider.domain`; 0003 is pure `AddField`.
+
+| Task | Description | Files | SP | Status |
+|------|-------------|-------|----|--------|
+| 3.1 | `Provider(slug PK max 32, name, domain)`; `Record.provider` FK (`PROTECT`, `related_name="records"`); unique `(provider, source_listing_id)` named `uniq_record_provider_listing`; migration 0002: create, add nullable FK, `RunPython` backfill (slug = first label of `source`, `domain = source`) with reverse, make non-null, swap constraint, remove `source`; e2e dump reads `record.provider_id` | `services/api/src/api/catalog/models.py`, `services/api/src/api/catalog/migrations/0002_provider.py`, `services/api/src/api/catalog/migrations_spec.py`, `scripts/e2e.py` | 2 | pending |
+| 3.2 | `Record` columns: `edition_id`, `work_id` (`PositiveIntegerField null, db_index`), `acquired` (`DateField null`), `height_cm` (`FloatField null`), `binding`/`format`/`audience` (`CharField choices` from M1 enums, `blank`), `page_count` (`PositiveIntegerField null`), `cover_color` (`CharField 64 blank`), `translations` (`JSONField default dict`); migration 0003 | `services/api/src/api/catalog/models.py`, `services/api/src/api/catalog/migrations/0003_record_edition_fields.py` | 1 | pending |
+| 3.3 | `upsert_record`: `Provider.objects.get_or_create(slug=processed.provider, defaults={"name": processed.provider, "domain": marketplace_of(processed.url)})`, key on `(provider, source_listing_id)`, write every new field (`None` enum → `""`), `translations` as `{lang: t.model_dump()}` | `services/api/src/api/catalog/ingest.py`, `services/api/src/api/catalog/ingest_spec.py` | 1 | pending |
+| 3.4 | Serializers: list gains `provider` (slug) replacing `source`; detail gains all edition fields + `translations`; filter `provider` (`BaseInFilter` on `provider__slug`) replacing `source`; facets `providers` replacing `sources`; admin `list_filter`/`list_display` use `provider`, add `binding`, `format`; `Provider` registered in admin | `services/api/src/api/catalog/serializers.py`, `services/api/src/api/catalog/filters.py`, `services/api/src/api/catalog/views.py`, `services/api/src/api/catalog/admin.py`, `services/api/src/api/catalog/views_spec.py` | 1 | pending |
+
+## Definition of Done
+
+##### Task 3.1
+- [ ] `uv run python -m api makemigrations --check --dry-run` reports no changes after 0002.
+- [ ] `migrations_spec.py` (uses `django.db.migrations.executor.MigrationExecutor`, `transaction=True` db mark): a record created at state 0001 with `source="shelfnet.example"` ends at 0002 with `provider_id == "shelfnet"` and `Provider("shelfnet").domain == "shelfnet.example"`; migrating back to 0001 restores `source == "shelfnet.example"`.
+- [ ] Inserting a second `Record` with the same `(provider, source_listing_id)` raises `IntegrityError`.
+
+##### Task 3.2
+- [ ] `makemigrations --check --dry-run` clean after 0003; `uv run python -m api migrate` then `migrate catalog 0002` both succeed against the dev postgres.
+- [ ] `Record._meta.get_field("binding").choices` equals `[(e.value, e.value) for e in Binding]`.
+
+##### Task 3.3
+- [ ] `ingest_spec.py`: upserting `processed_record(provider="shelfnet", height_cm=24.0, binding=Binding.PAPERBACK, acquired=date(2021, 6, 1))` stores those values and creates one `Provider`; a second upsert of the same listing updates in place (`Record.objects.count() == 1`, `Provider.objects.count() == 1`).
+- [ ] Two records with equal `source_listing_id` but providers `shelfnet` and `player` are stored separately.
+- [ ] `test_marketplace_comes_off_the_listing_host` still passes (`marketplace_of` kept for `domain`).
+
+##### Task 3.4
+- [ ] `GET /api/records/?provider=shelfnet` filters; `?provider=shelfnet,player` returns both (`views_spec.py`).
+- [ ] `GET /api/records/{id}/` body contains `provider`, `edition_id`, `work_id`, `acquired`, `height_cm`, `binding`, `format`, `page_count`, `cover_color`, `audience`, `translations`; list body has `provider` and no `source`.
+- [ ] `GET /api/facets/` has `providers` and no `sources`.
+- [ ] `uv run python -m api check` passes (admin config valid).
+
+## References
+
+- `services/api/src/api/catalog/migrations/0001_initial.py` — migration style (generated, then trimmed).
+- `services/api/src/api/catalog/ingest_spec.py`, `services/api/src/api/catalog/views_spec.py` — spec shape.
+- Enums: import from `event_schemas.models` (M1) — do not redefine values in Django.
+
+## Verify
+
+```bash
+docker compose up -d postgres
+uv run python -m api makemigrations --check --dry-run
+uv run python -m api migrate && uv run python -m api migrate catalog 0001 && uv run python -m api migrate
+uv run pytest -q services/api/src/api/catalog
+uv run ruff check services/api scripts/e2e.py && uv run basedpyright services/api
+```
+-- expected/cwd/milestones/M04-admin-curated-rules-and-the-rules-endpoint/M04-admin-curated-rules-and-the-rules-endpoint.md --
+---
+id: "04"
+title: "Admin-curated rules and the rules endpoint"
+sp: 3
+status: pending
+plan: "index.md"
+---
+
+# M04: Admin-curated rules and the rules endpoint
+
+## Tasks
+
+**Goal:** an admin curates skip rules in `/admin/`, and `GET /api/rules/?provider=<slug>` serves the
+active set with an ETag so a poller only downloads changes.
+
+**Scope:** `services/api/src/api/catalog/models.py` (`Rule`), `migrations/0004_rule.py`, `admin.py`,
+`views.py` (`rules` view), `urls.py`, new `rules_spec.py`. Contract: `event_schemas.rules.Rule` /
+`RulesSnapshot` / `RuleField` from M1. Table: `catalog_rule` (new). Rollback:
+`uv run python -m api migrate catalog 0003`.
+
+| Task | Description | Files | SP | Status |
+|------|-------------|-------|----|--------|
+| 4.1 | `Rule(provider FK PROTECT, work_id null, edition_id null, min JSON default dict, max JSON default dict, reason CharField 255, active bool default True, created_at, updated_at)`; `clean()` validates `min`/`max` via `TypeAdapter(dict[RuleField, float])` and rejects `edition_id` without `work_id`; migration 0004 | `services/api/src/api/catalog/models.py`, `services/api/src/api/catalog/migrations/0004_rule.py`, `services/api/src/api/catalog/rules_spec.py` | 1 | pending |
+| 4.2 | `RuleAdmin`: `list_display` provider, work_id, edition_id, min, max, reason, active, updated_at; `list_filter` provider, active; `search_fields` reason; `list_editable` active | `services/api/src/api/catalog/admin.py` | 1 | pending |
+| 4.3 | `rules` function view at `rules/`: `provider` query param required (400 without), active rules ordered by id, body = `RulesSnapshot(...).model_dump(mode="json")`; `ETag: "<sha256 of canonical JSON>"`; matching `If-None-Match` → 304 empty body | `services/api/src/api/catalog/views.py`, `services/api/src/api/catalog/urls.py`, `services/api/src/api/catalog/rules_spec.py` | 1 | pending |
+
+## Definition of Done
+
+##### Task 4.1
+- [ ] `Rule(min={"thickness": 1}).full_clean()` raises `ValidationError` on `min`; `Rule(min={"height_cm": 30.0}).full_clean()` passes (with provider/reason set).
+- [ ] `Rule(work_id=None, edition_id=5).full_clean()` raises.
+- [ ] `makemigrations --check --dry-run` clean after 0004.
+
+##### Task 4.2
+- [ ] `uv run python -m api check` passes; `rules_spec.py` logs in an `admin_client` (pytest-django fixture) and gets 200 on `/admin/catalog/rule/` and `/admin/catalog/rule/add/`.
+
+##### Task 4.3
+- [ ] `GET /api/rules/?provider=shelfnet` → 200, body validates as `RulesSnapshot`, inactive and other-provider rules absent.
+- [ ] Repeating with `If-None-Match: <etag>` → 304 and empty body; after editing one rule's `reason` the same header yields 200 with a new ETag.
+- [ ] `GET /api/rules/` (no provider) → 400.
+- [ ] Sketch:
+  ```python
+  def _snapshot(provider: str) -> tuple[bytes, str]: ...
+
+  @api_view(["GET"])
+  def rules(request: Request) -> Response: ...
+  ```
+
+## References
+
+- `services/api/src/api/catalog/views.py:facets` — function-view shape.
+- `services/api/src/api/catalog/admin.py:RecordAdmin` — admin typing shim (`TYPE_CHECKING` generic aliases).
+- Contract: `packages/event-schemas/src/event_schemas/rules.py` (M1).
+
+## Verify
+
+```bash
+docker compose up -d postgres
+uv run python -m api makemigrations --check --dry-run
+uv run pytest -q services/api/src/api/catalog/rules_spec.py
+uv run ruff check services/api && uv run basedpyright services/api
+```
+-- expected/cwd/milestones/M05-spa-follows-the-provider-rename-and-edition-fields/M05-spa-follows-the-provider-rename-and-edition-fields.md --
+---
+id: "05"
+title: "SPA follows the provider rename and edition fields"
+sp: 2
+status: pending
+plan: "index.md"
+---
+
+# M05: SPA follows the provider rename and edition fields
+
+## Tasks
+
+**Goal:** the SPA reads `provider`/`providers` and shows a record's edition fields in the detail view.
+
+**Scope:** `web/src/types.ts`, `web/src/components/RecordDetail.tsx`. API shapes from M3 Task 3.4.
+
+| Task | Description | Files | SP | Status |
+|------|-------------|-------|----|--------|
+| 5.1 | `Record.source` → `provider`; `Facets.sources` → `providers`; `RecordDetail` type gains `edition_id, work_id, acquired, height_cm, binding, format, page_count, cover_color, audience` (all nullable) and `translations: Record<string, {title, author, publisher, city}>`; "Open on {record.provider}" | `web/src/types.ts`, `web/src/components/RecordDetail.tsx` | 1 | pending |
+| 5.2 | Detail view renders an "Edition" `<dl>` with Acquired, Height (`{height_cm} cm`), Binding, Format, Pages (`{page_count} pp`), Audience, Cover — a cell renders only when its value is non-null/non-empty, reusing the existing `Cell` component | `web/src/components/RecordDetail.tsx` | 1 | pending |
+
+## Definition of Done
+
+##### Task 5.1
+- [ ] `cd web && npm run lint` passes; `grep -rn "\.source\b\|sources" web/src` returns nothing.
+
+##### Task 5.2
+- [ ] `npm run lint` passes; with `just up` and one record carrying `height_cm`, the detail modal at `http://localhost:4155` shows "Height 24 cm"; a record with all edition fields null shows no "Edition" section.
+
+## References
+
+- `web/src/components/RecordDetail.tsx` — existing `Cell` grid (Year/Loans/City/Harvested).
+- `web/src/types.ts` — type layout.
+
+## Verify
+
+```bash
+cd web && npm install --silent && npm run lint
+```
+-- expected/cwd/milestones/M06-crawler-database-seen-list-and-edition-cache/M06-crawler-database-seen-list-and-edition-cache.md --
+---
+id: "06"
+title: "Crawler database: seen list and edition cache"
+sp: 4
+status: pending
+plan: "index.md"
+---
+
+# M06: Crawler database: seen list and edition cache
+
+## Tasks
+
+**Goal:** `shelfnet-crawler` owns a Postgres (`crawler-db`) holding its seen list and a `(provider, edition_id)`
+edition cache, replacing the Redis seen hash.
+
+**Scope:** `docker-compose.yml` (`crawler-db` service, `crawler-db-data` volume, `CRAWLER_DATABASE_URL`),
+`.env.example`, `services/shelfnet-crawler/pyproject.toml` (`psycopg[binary]>=3.2`, already locked at 3.3.5),
+new `shelfnet_crawler/db.py`, `shelfnet_crawler/edition.py` (`Edition`, `EditionCache`), re-backed `seen.py`,
+`settings.py`, `main.py:run` wiring, `discovery.py` (type only), specs. Tables (crawler DB):
+`edition(provider text, edition_id int, work_id int null, author text null, publisher text null, binding text null,
+format text null, audience text null, height_cm real null, page_count int null, fetched_at timestamptz,
+PRIMARY KEY (provider, edition_id))`; `seen(provider text, listing_id bigint, first_seen_at timestamptz,
+PRIMARY KEY (provider, listing_id))`. Rollback: `docker compose rm -sf crawler-db && docker volume rm
+<project>_crawler-db-data` — both tables are rebuildable.
+
+| Task | Description | Files | SP | Status |
+|------|-------------|-------|----|--------|
+| 6.1 | `crawler-db` service: `postgres:18`, user/password/db `crawler`, host port `${CRAWLER_DB_PORT:-4156}:5432`, healthcheck `pg_isready -U crawler`, volume `crawler-db-data`; `CRAWLER_DATABASE_URL: ${CRAWLER_DATABASE_URL:-postgres://crawler:crawler@crawler-db:5432/crawler}` in `x-service.environment`; `shelfnet-crawler` `depends_on` `crawler-db` healthy; append `CRAWLER_DATABASE_URL=postgres://crawler:crawler@localhost:4156/crawler` to `.env.example` | `docker-compose.yml`, `.env.example` | 1 | pending |
+| 6.2 | `db.py`: `connect(url) -> AsyncConnection` (autocommit) and idempotent `ensure_schema(conn)`; `Settings.crawler_database_url` default `postgres://crawler:crawler@localhost:4156/crawler`; add `psycopg[binary]` dependency | `services/shelfnet-crawler/src/shelfnet_crawler/db.py`, `services/shelfnet-crawler/src/shelfnet_crawler/db_spec.py`, `services/shelfnet-crawler/src/shelfnet_crawler/settings.py`, `services/shelfnet-crawler/pyproject.toml`, `uv.lock` | 1 | pending |
+| 6.3 | `SeenStore(conn, provider)` with unchanged `is_seen` / `mark` / `prune` signatures over table `seen` (`mark` = `INSERT … ON CONFLICT DO NOTHING`); drop `shelfnet_seen_key` setting; `run()` opens the connection, calls `ensure_schema`, closes in `finally` | `services/shelfnet-crawler/src/shelfnet_crawler/seen.py`, `services/shelfnet-crawler/src/shelfnet_crawler/seen_spec.py`, `services/shelfnet-crawler/src/shelfnet_crawler/settings.py`, `services/shelfnet-crawler/src/shelfnet_crawler/main.py`, `services/shelfnet-crawler/src/shelfnet_crawler/main_spec.py` | 1 | pending |
+| 6.4 | `Edition` frozen dataclass + `EditionCache(conn, provider)` with `get(edition_id)` and `upsert(edition)` (`ON CONFLICT (provider, edition_id) DO UPDATE`, last-writer-wins) | `services/shelfnet-crawler/src/shelfnet_crawler/edition.py`, `services/shelfnet-crawler/src/shelfnet_crawler/edition_spec.py` | 1 | pending |
+
+## Definition of Done
+
+##### Task 6.1
+- [ ] `docker compose up -d crawler-db` becomes healthy; `pg_isready -h localhost -p 4156 -U crawler` exits 0.
+- [ ] `grep -n CRAWLER_DATABASE_URL docker-compose.yml .env.example` matches both files.
+
+##### Task 6.2
+- [ ] `db_spec.py` skips when the crawler DB is unreachable (`pytest.skip`, same pattern as the redis specs); otherwise calling `ensure_schema` twice succeeds and both tables exist in `information_schema.tables`.
+
+##### Task 6.3
+- [ ] `seen_spec.py` (Postgres-backed, unique provider per test, rows deleted in teardown): mark → `is_seen` True; a different provider does not see it; `prune(0)` after backdating `first_seen_at` removes it and returns 1.
+- [ ] `main_spec.py::test_a_second_run_publishes_nothing_new_and_stops_after_one_page` passes against Postgres-backed seen; `grep -rn shelfnet_seen_key services/` returns nothing.
+- [ ] Sketch:
+  ```python
+  class SeenStore:
+      def __init__(self, conn: AsyncConnection, provider: str) -> None: ...
+      async def is_seen(self, listing_id: int) -> bool: ...
+      async def mark(self, listing_id: int) -> None: ...
+      async def prune(self, max_age_days: int) -> int: ...
+  ```
+
+##### Task 6.4
+- [ ] `edition_spec.py`: `get` on a miss → `None`; `upsert` then `get` round-trips every field incl. enums; a second `upsert` with a changed `page_count` overwrites.
+- [ ] Sketch:
+  ```python
+  @dataclass(frozen=True)
+  class Edition:
+      provider: str
+      edition_id: int
+      work_id: int | None
+      author: str | None
+      publisher: str | None
+      binding: Binding | None
+      format: Format | None
+      audience: Audience | None
+      height_cm: float | None
+      page_count: int | None
+
+  class EditionCache:
+      def __init__(self, conn: AsyncConnection, provider: str) -> None: ...
+      async def get(self, edition_id: int) -> Edition | None: ...
+      async def upsert(self, edition: Edition) -> None: ...
+  ```
+
+## References
+
+- `services/shelfnet-crawler/src/shelfnet_crawler/seen.py` — current `SeenStore` surface to preserve.
+- `services/shelfnet-crawler/src/shelfnet_crawler/seen_spec.py` — skip-when-unreachable fixture pattern.
+- `docker-compose.yml` `postgres` service — container shape to copy.
+
+## Verify
+
+```bash
+docker compose up -d redis crawler-db
+uv run pytest -q services/shelfnet-crawler/src/shelfnet_crawler/db_spec.py services/shelfnet-crawler/src/shelfnet_crawler/seen_spec.py services/shelfnet-crawler/src/shelfnet_crawler/edition_spec.py services/shelfnet-crawler/src/shelfnet_crawler/main_spec.py
+uv run ruff check services/shelfnet-crawler && uv run basedpyright services/shelfnet-crawler
+```
+-- expected/cwd/milestones/M07-edition-resolution-from-the-item-page/M07-edition-resolution-from-the-item-page.md --
+---
+id: "07"
+title: "Edition resolution from the item page"
+sp: 4
+status: pending
+plan: "index.md"
+---
+
+# M07: Edition resolution from the item page
+
+## Tasks
+
+**Goal:** the crawler turns a SERP item + item page into a fully compiled `RawRecord` (edition ids, acquisition,
+height, binding, format, pages, audience, cover colour) with provider labels normalised to the M1 enums.
+
+**Scope:** new `scripts/capture_shelfnet_item.py`, new fixture
+`services/shelfnet-crawler/src/shelfnet_crawler/fixtures/getiteminfo.json`, `docs/shelfnet-recon.md` (field table),
+new `shelfnet_crawler/normalize.py`, `shelfnet_crawler/edition.py` (`edition_from_detail`), `shelfnet_crawler/mapping.py`
+(`search_item_to_raw_record`), specs. `Edition`/`EditionCache` from M6; enums from M1.
+
+| Task | Description | Files | SP | Status |
+|------|-------------|-------|----|--------|
+| 7.1 | Capture script: one signed search page (`pagesize=1`), then `get_item_info` for its first `itemid`; writes the item-page `result` to `fixtures/getiteminfo.json` (pretty JSON, UTF-8); run it once and commit the fixture; append an "Item-page fields (getiteminfo)" table to the recon doc mapping each key used → `Edition`/`RawRecord` attribute, marking absent fields "absent → null" | `scripts/capture_shelfnet_item.py`, `services/shelfnet-crawler/src/shelfnet_crawler/fixtures/getiteminfo.json`, `docs/shelfnet-recon.md` | 1 | pending |
+| 7.2 | `normalize.py`: `binding(label)`, `format(label)`, `audience(label)` (German labels → enum or `None`), `height_cm(text)` (`"24cm"`/`"24 cm"` → float, `""`/`"0"` → `None`), `page_count(text)` (`xii+340` summed, `S.`/`pp` as pages), `acquired(text)` (`"2021-06"`/`"Juni 2021"` → `date(2021, 6, 1)`) | `services/shelfnet-crawler/src/shelfnet_crawler/normalize.py`, `services/shelfnet-crawler/src/shelfnet_crawler/normalize_spec.py` | 1 | pending |
+| 7.3 | `edition_from_detail(provider, item, detail) -> Edition \| None` (`None` when the item has no `editionid`): ids from the SERP item, names from `authorname`/`publishername`, remaining fields from the item-page keys recorded in 7.1 via `normalize` | `services/shelfnet-crawler/src/shelfnet_crawler/edition.py`, `services/shelfnet-crawler/src/shelfnet_crawler/edition_spec.py` | 1 | pending |
+| 7.4 | `search_item_to_raw_record(item, scraped_at, detail, edition, provider)` — `detail` now required; fills `edition_id`/`work_id` from the item, `acquired` from `detail.acquireddate`, `year = acquired.year` when known else SERP year, `author`/`publisher` from edition then item page then search list, `height_cm` edition then SERP `height`, binding/format/audience/pages from edition, `cover_color` from the key recorded in 7.1 | `services/shelfnet-crawler/src/shelfnet_crawler/mapping.py`, `services/shelfnet-crawler/src/shelfnet_crawler/mapping_spec.py` | 1 | pending |
+
+## Definition of Done
+
+##### Task 7.1
+- [ ] `uv run python scripts/capture_shelfnet_item.py` exits 0 and `fixtures/getiteminfo.json` parses with `jq -e '.acquireddate' services/shelfnet-crawler/src/shelfnet_crawler/fixtures/getiteminfo.json`.
+- [ ] `docs/shelfnet-recon.md` lists, for each of author, publisher, binding, format, audience, pages, height, cover colour, acquireddate, ISBN, covers, the item-page key or "absent → null".
+
+##### Task 7.2
+- [ ] `normalize_spec.py` parametrised cases: `Gebunden→HARDCOVER`, `Taschenbuch→PAPERBACK`, `Broschur→PAPERBACK`, `Spiralbindung→SPIRAL`, `Pappbilderbuch→BOARD`, `Leder→LEATHER`, `Druck→PRINT`, `E-Book→DIGITAL`, `Hörbuch→DIGITAL`, `Kinder/Kinderbuch→CHILD`, `Jugend→TEEN`, `Erwachsene/Sachbuch→ADULT`, unknown → `None`; `height_cm("21.5cm") == 21.5`; `page_count("xii+340") == 352`; `acquired("unbekannt") is None`.
+
+##### Task 7.3
+- [ ] `edition_from_detail("shelfnet", search_item, getiteminfo_fixture)` returns an `Edition` with `edition_id == 2226`, `work_id == 110` (fixture ids), and the fields 7.1 marked present populated; an item without `editionid` → `None`.
+
+##### Task 7.4
+- [ ] `mapping_spec.py` using both fixtures: the record carries `provider`, `edition_id`, `work_id`, `acquired`, and every field 7.1 marked present; `record.raw == {"search": item, "detail": detail}`.
+- [ ] With `edition=None` and an item page lacking edition keys, `height_cm` comes from SERP `height` (`24.0`) and binding/format/audience/pages are `None`.
+- [ ] Existing "missing field raises `ValueError`" specs still pass.
+
+## References
+
+- `services/shelfnet-crawler/src/shelfnet_crawler/client.py` — `ShelfnetApiClient.search` / `get_item_info` used by the capture script.
+- `services/shelfnet-crawler/src/shelfnet_crawler/mapping_spec.py` — fixture-driven mapping specs.
+- `services/shelfnet-crawler/src/shelfnet_crawler/fixtures/search_item.json` — SERP fixture (`editionid` 2226, `workid` 110, `height` "24cm").
+
+## Verify
+
+```bash
+uv run pytest -q services/shelfnet-crawler/src/shelfnet_crawler/normalize_spec.py services/shelfnet-crawler/src/shelfnet_crawler/edition_spec.py services/shelfnet-crawler/src/shelfnet_crawler/mapping_spec.py
+uv run ruff check services/shelfnet-crawler scripts/capture_shelfnet_item.py && uv run basedpyright services/shelfnet-crawler scripts/capture_shelfnet_item.py
+```
+-- expected/cwd/milestones/M08-rules-client-in-the-crawler/M08-rules-client-in-the-crawler.md --
+---
+id: "08"
+title: "Rules client in the crawler"
+sp: 2
+status: pending
+plan: "index.md"
+---
+
+# M08: Rules client in the crawler
+
+## Tasks
+
+**Goal:** the crawler holds a snapshot of its provider's active rules, refreshed over HTTP with ETag,
+failing open on startup and keeping the last snapshot on refresh failure.
+
+**Scope:** new `services/shelfnet-crawler/src/shelfnet_crawler/rules.py`, `rules_spec.py`, `settings.py`
+(`rules_api_url`, `rules_refresh_seconds`), `docker-compose.yml` (`RULES_API_URL`,
+`RULES_REFRESH_SECONDS`), `.env.example`. Contract: `event_schemas.rules.RulesSnapshot` (M1); endpoint
+`GET /api/rules/?provider=` (M4 — specs use `httpx.MockTransport`, so M4 is not required to run them).
+
+| Task | Description | Files | SP | Status |
+|------|-------------|-------|----|--------|
+| 8.1 | `RulesClient`: `refresh_if_due()` sends `If-None-Match` with the last ETag; 200 → validate `RulesSnapshot`, replace rules + ETag; 304 → keep; any `httpx.HTTPError` / `ValidationError` → `logger.warning`, keep last snapshot (empty before first success); `rules` property returns a tuple | `services/shelfnet-crawler/src/shelfnet_crawler/rules.py`, `services/shelfnet-crawler/src/shelfnet_crawler/rules_spec.py` | 1 | pending |
+| 8.2 | Settings `rules_api_url` default `http://localhost:4154/api/rules/`, `rules_refresh_seconds` default 600; compose `RULES_API_URL: ${RULES_API_URL:-http://api:8000/api/rules/}`, `RULES_REFRESH_SECONDS: ${RULES_REFRESH_SECONDS:-600}`; append both to `.env.example` | `services/shelfnet-crawler/src/shelfnet_crawler/settings.py`, `docker-compose.yml`, `.env.example` | 1 | pending |
+
+## Definition of Done
+
+##### Task 8.1
+- [ ] `rules_spec.py` with `httpx.MockTransport` + injected clock: first call 200 → two rules; next call before the interval sends no request; after the interval sends `If-None-Match: "<etag>"`, 304 keeps the two rules.
+- [ ] Startup with the transport raising `httpx.ConnectError` → `rules == ()` and no exception; a later 500 after a successful load keeps the loaded rules.
+- [ ] Request carries `provider=shelfnet` query param.
+- [ ] Sketch:
+  ```python
+  class RulesClient:
+      def __init__(
+          self, url: str, provider: str, refresh_seconds: float,
+          transport: httpx.AsyncBaseTransport | None = None,
+          clock: Callable[[], float] = time.monotonic,
+      ) -> None: ...
+      @property
+      def rules(self) -> tuple[Rule, ...]: ...
+      async def refresh_if_due(self) -> None: ...
+      async def aclose(self) -> None: ...
+  ```
+
+##### Task 8.2
+- [ ] `grep -n "RULES_API_URL\|RULES_REFRESH_SECONDS" docker-compose.yml .env.example` matches both files; `Settings()` defaults as stated.
+
+## References
+
+- `services/shelfnet-scraper/src/shelfnet_scraper/client_spec.py` — `httpx.MockTransport` spec style.
+- `services/shelfnet-crawler/src/shelfnet_crawler/client.py` — `httpx.AsyncClient` ownership/close pattern.
+
+## Verify
+
+```bash
+uv run pytest -q services/shelfnet-crawler/src/shelfnet_crawler/rules_spec.py
+uv run ruff check services/shelfnet-crawler && uv run basedpyright services/shelfnet-crawler
+```
+-- expected/cwd/milestones/M09-recordfilter-and-the-tiered-crawl-funnel/M09-recordfilter-and-the-tiered-crawl-funnel.md --
+---
+id: "09"
+title: "RecordFilter and the tiered crawl funnel"
+sp: 6
+status: pending
+plan: "index.md"
+---
+
+# M09: RecordFilter and the tiered crawl funnel
+
+## Tasks
+
+**Goal:** each cycle drops records at the cheapest tier that can decide — SERP, then cached edition, then
+item page — logs every skip with its rule and reason, and publishes only fully compiled records.
+
+**Scope:** new `services/shelfnet-crawler/src/shelfnet_crawler/record_filter.py` (+ spec), delete
+`shelfnet_crawler/filters.py` and `filters_spec.py` (their cases move into `record_filter_spec.py`),
+`main.py:_cycle` / `run` / `main` (rules refresh, edition resolution, `--dry-run`), `main_spec.py`.
+Uses `SeenStore`, `Edition`, `EditionCache` (M6), `edition_from_detail`, `search_item_to_raw_record` (M7),
+`RulesClient` (M8), `Rule` (M1).
+
+| Task | Description | Files | SP | Status |
+|------|-------------|-------|----|--------|
+| 9.1 | `RecordFilter.pre_filter(item, edition=None)`: age on SERP year (`< cutoff.year` → DROP; equal/unparsable → deferred); per rule in scope (`work_id`/`edition_id` vs item `workid`/`editionid`): empty bounds → DROP; field values from SERP (`year`, `price`, `loan_count`, `height_cm` via `height`) else edition (`height_cm`, `page_count`); any violated bound → DROP with that rule; a bound needing the edition with `edition is None` → NEED_EDITION; unresolvable value → bound ignored; never returns NEED_EDITION when `edition` is given | `services/shelfnet-crawler/src/shelfnet_crawler/record_filter.py`, `services/shelfnet-crawler/src/shelfnet_crawler/record_filter_spec.py` | 2 | pending |
+| 9.2 | `RecordFilter.post_filter(record: RawRecord)`: month cutoff for the boundary year (`acquired is None` → DROP "no usable acquireddate"; `< cutoff` → DROP); move `Cutoff`/`cutoff_for` into `record_filter.py`; delete `filters.py` + `filters_spec.py` with their cases ported | `services/shelfnet-crawler/src/shelfnet_crawler/record_filter.py`, `services/shelfnet-crawler/src/shelfnet_crawler/record_filter_spec.py`, `services/shelfnet-crawler/src/shelfnet_crawler/filters.py`, `services/shelfnet-crawler/src/shelfnet_crawler/filters_spec.py` | 1 | pending |
+| 9.3 | Rewire `_cycle`: `rules.refresh_if_due()` → `RecordFilter(rules.rules, cutoff)` → per item `pre_filter`; NEED_EDITION → `EditionCache.get(editionid)` else fetch the item page + `edition_from_detail` + `upsert`, then `pre_filter(item, edition)`; item page (reuse if already fetched; `ShelfnetApiError` → warning, not marked, continue); `upsert` edition from every item page; map; `post_filter`; publish; mark. Every DROP → `logger.info("skip %s: rule=%s reason=%s", itemid, rule_id, reason)` + mark. `run()` owns `RulesClient`; `agerange` param unchanged | `services/shelfnet-crawler/src/shelfnet_crawler/main.py`, `services/shelfnet-crawler/src/shelfnet_crawler/main_spec.py` | 2 | pending |
+| 9.4 | `--dry-run` flag: full funnel incl. item page and edition cache writes, logs `would publish <itemid>` instead of publishing, never calls `SeenStore.mark` | `services/shelfnet-crawler/src/shelfnet_crawler/main.py`, `services/shelfnet-crawler/src/shelfnet_crawler/main_spec.py` | 1 | pending |
+
+## Definition of Done
+
+##### Task 9.1
+- [ ] `record_filter_spec.py` (pure, no I/O) parametrised over `search_item.json`: rule `max {"loan_count": 1000}` on an item with `loans "18"` (1 800 loans) → DROP with that rule id; `min {"height_cm": 30.0}` with `height "24cm"` → DROP; `min {"page_count": 200}` and `edition=None` → NEED_EDITION; same with `Edition(page_count=250)` → PASS; with `Edition(page_count=None)` → PASS (fail open).
+- [ ] Scope: rule `work_id=110, edition_id=None, min={}, max={}` → DROP; `work_id=999` → PASS; `work_id=110, edition_id=1` on `editionid 2226` → PASS.
+- [ ] Unparsable SERP `loans` (`"k. A."`) with a loan-count rule → PASS.
+- [ ] Sketch:
+  ```python
+  class Action(StrEnum):
+      DROP = "drop"; NEED_EDITION = "need_edition"; PASS = "pass"
+
+  @dataclass(frozen=True)
+  class Verdict:
+      action: Action
+      reason: str = ""
+      rule_id: int | None = None
+
+  class RecordFilter:
+      def __init__(self, rules: Sequence[Rule], cutoff: Cutoff | None) -> None: ...
+      def pre_filter(self, item: dict[str, Any], edition: Edition | None = None) -> Verdict: ...
+      def post_filter(self, record: RawRecord) -> Verdict: ...
+  ```
+
+##### Task 9.2
+- [ ] Every case from the deleted `filters_spec.py` (cutoff 2021-09 for 2026-09-02; SERP 2020 → DROP, 2022 → not dropped, 2021 → deferred; item page 2021-09 pass, 2021-08 drop, missing → drop) exists in `record_filter_spec.py` and passes.
+- [ ] `grep -rn "shelfnet_crawler.filters" services/` returns nothing.
+
+##### Task 9.3
+- [ ] `main_spec.py` (redis + crawler-db, StubClient + a stub `RulesClient` returning fixed rules): a SERP-dropped record triggers no `get_item_info` call and is marked seen; a NEED_EDITION record on a cold cache triggers exactly one `get_item_info` (item page reused, not fetched twice); a second record with the same `editionid` hits the cache.
+- [ ] A `get_item_info` raising `ShelfnetApiError` publishes nothing for that record and leaves it unseen.
+- [ ] Existing age specs (`test_a_record_older_than_the_max_age_is_dropped_without_a_detail_call`, `test_a_cutoff_year_record_is_settled_on_the_detail_month`, `test_a_cutoff_year_record_a_month_too_old_is_dropped`) pass.
+- [ ] With `caplog`, each drop logs one record containing the itemid, `rule=<id>` (or `rule=None` for age) and the reason.
+
+##### Task 9.4
+- [ ] `run(settings, once=True, dry_run=True)` leaves the stream length 0 and the `seen` table without rows for the provider; logs `would publish` per surviving record.
+- [ ] `uv run python -m shelfnet_crawler --help` lists `--dry-run`.
+
+## References
+
+- `services/shelfnet-crawler/src/shelfnet_crawler/filters.py` / `filters_spec.py` — age logic and cases to port.
+- `services/shelfnet-crawler/src/shelfnet_crawler/main_spec.py` — `StubClient` and stream fixtures.
+- Contract: `event_schemas.rules.Rule` (M1) — field units documented there.
+
+## Verify
+
+```bash
+docker compose up -d redis crawler-db
+uv run pytest -q services/shelfnet-crawler
+uv run ruff check services/shelfnet-crawler && uv run basedpyright services/shelfnet-crawler
+```
+-- expected/cwd/milestones/M10-documentation-follows-the-pipeline/M10-documentation-follows-the-pipeline.md --
+---
+id: "10"
+title: "Documentation follows the pipeline"
+sp: 2
+status: pending
+plan: "index.md"
+---
+
+# M10: Documentation follows the pipeline
+
+## Tasks
+
+**Goal:** CLAUDE.md and `docs/` describe the tiered crawler, the crawler DB, rules, and contract v2 as built.
+
+**Scope:** `CLAUDE.md`, new `docs/pipeline-architecture.md`, `docs/architecture.md` (pointer only).
+
+| Task | Description | Files | SP | Status |
+|------|-------------|-------|----|--------|
+| 10.1 | Update CLAUDE.md sections listed in "CLAUDE.md impact" | `CLAUDE.md` | 1 | pending |
+| 10.2 | Create `docs/pipeline-architecture.md`: the source doc's model, data tiers, RecordFilter, Rules, two DBs, contracts — rewritten to the Decisions of this plan (streams kept, provider vs source, rule semantics and units, edition-from-item-page, seen marking); prepend a one-line pointer to it in `docs/architecture.md` | `docs/pipeline-architecture.md`, `docs/architecture.md` | 1 | pending |
+
+## Definition of Done
+
+##### Task 10.1
+- [ ] `grep -n "crawler-db\|4156\|RULES_API_URL\|CRAWLER_DATABASE_URL\|/api/rules/\|provider" CLAUDE.md` matches in Ports, Configuration, Topology, API surface and Message wire contract.
+- [ ] `grep -n "shelfnet:seen\|filters.py" CLAUDE.md` returns nothing.
+
+##### Task 10.2
+- [ ] `docs/pipeline-architecture.md` contains sections "Data tiers", "RecordFilter", "Rules", "Databases", "Message contracts", "Enrichment processor", and states that Redis Streams remain at both seams.
+- [ ] First non-heading line of `docs/architecture.md` links `docs/pipeline-architecture.md`.
+
+## References
+
+- `CLAUDE.md` — existing section voice (dense prose, tables for ports/config).
+- `docs/shelfnet-recon.md` — doc tone for `docs/`.
+
+## Verify
+
+```bash
+grep -c "crawler-db" CLAUDE.md docs/pipeline-architecture.md
+```
+-- exit --
+0
+-- stdout --
+M01-event-contract-v2 sp=5 sections=tasks:17,dod:63,references:4,verify:6
+M02-processor-soft-fail-ingest-and-en-fr-translations sp=3 sections=tasks:12,dod:20,references:4,verify:5
+M03-api-provider-identity-and-record-edition-columns sp=5 sections=tasks:20,dod:20,references:4,verify:8
+M04-admin-curated-rules-and-the-rules-endpoint sp=3 sections=tasks:14,dod:20,references:4,verify:7
+M05-spa-follows-the-provider-rename-and-edition-fields sp=2 sections=tasks:9,dod:6,references:3,verify:4
+M06-crawler-database-seen-list-and-edition-cache sp=4 sections=tasks:20,dod:42,references:4,verify:6
+M07-edition-resolution-from-the-item-page sp=4 sections=tasks:15,dod:15,references:4,verify:5
+M08-rules-client-in-the-crawler sp=2 sections=tasks:13,dod:21,references:3,verify:5
+M09-recordfilter-and-the-tiered-crawl-funnel sp=6 sections=tasks:16,dod:35,references:4,verify:6
+M10-documentation-follows-the-pipeline sp=2 sections=tasks:9,dod:8,references:3,verify:3
+group G1: M01, M02, M03 (13 SP)
+group G2: M04, M05, M06, M07, M08 (15 SP)
+group G3: M09, M10 (8 SP)

@@ -1,0 +1,26 @@
+A tier namespace becomes a path segment under `--out`, so one that is not a plain root name is
+rejected before anything is written.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  specs:
+    tiers:
+      core:
+        path: ~/core-specs
+        namespace: ../escape
+-- fixtures/home/core-specs/value/0001-small-steps.md --
+---
+type: value
+title: Small steps
+summary: Ship in small, reviewable steps.
+kind: value
+---
+
+# Small steps
+-- cmd --
+booping specs site
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: core.specs.tiers.core.namespace `../escape` must match [A-Za-z0-9][A-Za-z0-9._-]* to name a site root

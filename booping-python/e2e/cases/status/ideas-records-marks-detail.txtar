@@ -1,0 +1,104 @@
+`status ideas records marks` prints the three tables: the untaken open idea, the
+unreviewed records with `—` for a missing status, the marks under the anchored refs
+`items scan` would file.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+-- fixtures/cwd/vault/open-items/OI-0001.md --
+---
+id: OI-0001
+title: "Settle the tracked idea"
+status: open
+direction: clarify
+record: "idea/0002#idea"
+source: manual
+plan: null
+created_at: 2026-10-15
+closed_at: null
+reason: null
+---
+
+# Settle the tracked idea
+-- fixtures/cwd/vault/idea/0001-untaken.md --
+---
+type: idea
+title: Nobody took this idea
+created_at: 2026-10-10
+status: open
+---
+
+## Idea
+
+Status is computed.
+-- fixtures/cwd/vault/idea/0002-tracked.md --
+---
+type: idea
+title: An item tracks this idea
+created_at: 2026-10-11
+status: open
+---
+
+## Idea
+
+[clarify] Which tier counts? The rest is settled.
+-- fixtures/cwd/vault/idea/0003-accepted.md --
+---
+type: idea
+title: An accepted idea
+created_at: 2026-10-12
+status: accepted
+reviewed: 2026-10-13
+---
+
+## Idea
+
+Already accepted.
+-- fixtures/cwd/vault/rule/0001-reviewed.md --
+---
+type: rule
+title: A reviewed rule
+status: accepted
+reviewed: 2026-10-14
+---
+
+## Rule
+
+Reviewed. [unknown] Who reads it. A quoted `[clarify]` is no mark.
+-- fixtures/cwd/vault/value/0001-no-status.md --
+---
+type: value
+title: A value without a status
+---
+
+## Value
+
+Nothing to mark.
+-- cmd --
+booping status marks records ideas marks
+-- exit --
+0
+-- stdout --
+## ideas
+
+| ref | title | created_at |
+| --- | --- | --- |
+| idea/0001 | Nobody took this idea | 2026-10-10 |
+
+## records
+
+| ref | status | title |
+| --- | --- | --- |
+| idea/0001 | open | Nobody took this idea |
+| idea/0002 | open | An item tracks this idea |
+| value/0001 | — | A value without a status |
+
+## marks
+
+| kind | record | text |
+| --- | --- | --- |
+| clarify | idea/0002#idea | Which tier counts |
+| unknown | rule/0001#rule | Who reads it |
+-- stderr --

@@ -1,0 +1,54 @@
+# adr: specs/adr/<NNNN>-<slug>.md, one durable choice per record — context,
+# optional criteria, decision, 2-4 alternatives as a table plus a `###` per row,
+# consequences.
+doc: adr
+
+rules:
+  - select: FRONTMATTER
+    has:
+      type: adr
+      title: '^.+$'
+      summary: '^.{1,200}$'
+      created_by: { enum: [owner, claude] }
+      created_at: '^\d{4}-\d{2}-\d{2}$'
+      updated_at: '^\d{4}-\d{2}-\d{2}$'
+      status: { enum: [proposed, accepted, superseded, rejected] }
+
+  - select: H2
+    ordered: [Context, Criteria?, Decision, Alternatives, Consequences]
+    strict: true
+
+  - select: SECTION("Alternatives") > TABLE
+    count: 1
+    columns: [Option, Status, Complexity, Reversibility, Verdict]
+    rows: { min: 2, max: 4 }
+
+  - select: SECTION("Alternatives") > TABLE > TD[col="Option"]
+    match: '^\[[^\]]+\]\(#[^)]+\)$'
+
+  - select: SECTION("Alternatives") > TABLE > TD[col="Status"]
+    enum: [accepted, proposed, rejected]
+
+  - select: SECTION("Alternatives") > TABLE > TD[col="Complexity"]
+    enum: [low, medium, high]
+
+  - select: SECTION("Alternatives") > TABLE > TD[col="Reversibility"]
+    enum: [low, medium, high]
+
+  - select: SECTION("Alternatives") > TABLE > TD[col="Verdict"]
+    no_empty: true
+
+  - select: SECTION("Alternatives") > SECTION(/.+/)
+    min: 2
+    max: 4
+    each:
+      - select: SECTION > P
+        min: 1
+      - select: UL > LI[text^="**Pros:**"]
+        count: 1
+      - select: UL > LI[text^="**Cons:**"]
+        count: 1
+      - select: UL > LI[text^="**Complexity:**"]
+        count: 1
+      - select: UL > LI[text^="**Reversibility:**"]
+        count: 1

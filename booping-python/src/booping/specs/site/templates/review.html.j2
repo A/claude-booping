@@ -1,0 +1,26 @@
+{% extends "base.html.j2" %}
+{% from "_macros.html.j2" import record_row, item_row, filter_bar %}
+{% block scripts %}
+{% if rows %}
+<script src="{{ prefix }}filter-format.js" defer></script>
+<script src="{{ prefix }}filter.js" defer></script>
+{% endif %}
+{% endblock %}
+{% block main %}
+<h1>{{ labels.ui("review_title") }}</h1>
+<p class="lead">{{ labels.ui("review_lead") }}</p>
+{% if rows %}
+{{ filter_bar(filters, labels) | trim }}
+<ul class="rows">
+{% for row in rows %}
+{% if row.item is defined %}
+{{ item_row(row, labels, prefix) | trim }}
+{% else %}
+{{ record_row(row, labels, prefix, mark_links=true) | trim }}
+{% endif %}
+{% endfor %}
+</ul>
+{% else %}
+<p class="empty">{{ labels.ui("nothing_needs_you") }}</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,128 @@
+With `tags.yaml` at the tier root every record's `tags:` is checked against it, the first
+failure per tag reported on the `tags:` line: a known tag passes; an unknown one, a tag that is
+not kebab-case, a sub-tag missing from the dictionary although its area is present, and a listed
+sub-tag whose area is absent each give one finding; a scalar `tags:` is not a list.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/tags.yaml --
+ui: Interface
+ui:hud: Heads-up display
+net: Networking
+combat:melee: Close combat
+-- fixtures/cwd/vault/value/0001-hud.md --
+---
+type: value
+title: Hud
+summary: The Hud value.
+kind: value
+created_by: owner
+created_at: 2026-01-01
+updated_at: 2026-01-01
+tags: [ui:hud]
+---
+
+Why the project exists.
+
+## In practice
+
+It shows in every run.
+-- fixtures/cwd/vault/value/0002-audio.md --
+---
+type: value
+title: Audio
+summary: The Audio value.
+kind: value
+created_by: owner
+created_at: 2026-01-01
+updated_at: 2026-01-01
+tags: [audio]
+---
+
+Why the project exists.
+
+## In practice
+
+It shows in every run.
+-- fixtures/cwd/vault/value/0003-upper.md --
+---
+type: value
+title: Upper
+summary: The Upper value.
+kind: value
+created_by: owner
+created_at: 2026-01-01
+updated_at: 2026-01-01
+tags: [Ui]
+---
+
+Why the project exists.
+
+## In practice
+
+It shows in every run.
+-- fixtures/cwd/vault/value/0004-sync.md --
+---
+type: value
+title: Sync
+summary: The Sync value.
+kind: value
+created_by: owner
+created_at: 2026-01-01
+updated_at: 2026-01-01
+tags: [net:sync]
+---
+
+Why the project exists.
+
+## In practice
+
+It shows in every run.
+-- fixtures/cwd/vault/value/0005-melee.md --
+---
+type: value
+title: Melee
+summary: The Melee value.
+kind: value
+created_by: owner
+created_at: 2026-01-01
+updated_at: 2026-01-01
+tags: [combat:melee]
+---
+
+Why the project exists.
+
+## In practice
+
+It shows in every run.
+-- fixtures/cwd/vault/value/0006-scalar.md --
+---
+type: value
+title: Scalar
+summary: The Scalar value.
+kind: value
+created_by: owner
+created_at: 2026-01-01
+updated_at: 2026-01-01
+tags: ui
+---
+
+Why the project exists.
+
+## In practice
+
+It shows in every run.
+-- cmd --
+booping specs check
+-- exit --
+1
+-- stdout --
+vault/value/0002-audio.md:9  error  tags  tag audio is not in tags.yaml
+vault/value/0003-upper.md:9  error  tags  tag Ui is not area[:sub] kebab-case
+vault/value/0004-sync.md:9  error  tags  tag net:sync is not in tags.yaml
+vault/value/0005-melee.md:9  error  tags  tag combat:melee needs its area combat in tags.yaml
+vault/value/0006-scalar.md:9  error  tags  tags must be a list of strings
+-- stderr --
+6 record(s) checked: 5 error(s), 0 warning(s)

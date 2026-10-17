@@ -44,7 +44,7 @@ Run `git status` on every route: uncommitted work sitting outside the resolved r
 
 ## Open the artifact
 
-The run's workdir is the **vault root**, and every `booping playbook-state` / `booping playbook-transition` call passes `--target` — the machine declares no `artifact:`. Paths below are vault-relative.
+The run's workdir is the **vault root**, and every `booping state` / `booping transition` call names the review file and `--playbook code-review` — the machine declares no `artifact:`. Paths below are vault-relative.
 
 - **A plan is in scope** → `codereviews/{plan-dirname}/{{ slug_ts }}.md`, where `{plan-dirname}` is the plan's own directory name (the parent of its `index.md`).
 - **No plan** — latest commits, a range, a file list, the working tree → `codereviews/{target-slug}/{{ slug_ts }}.md`, where `{target-slug}` is a kebab-cased name for what was resolved: `latest-commits`, `working-tree`, or the range or path kebabbed.
@@ -65,10 +65,10 @@ created: {{ human_ts }}
 
 The body opens with an H1 naming the review and a `## Scope` section holding the report below verbatim. `## Findings`, `## Verdict` and `## Resolution` are appended by `present` and `resolve` — never stubbed here.
 
-No `status:` is hand-written. Bootstrap the run from the vault root once the file is on disk, which stamps it:
+No `status:` is hand-written. Bootstrap the run once the file is on disk, which stamps it:
 
 ```
-booping playbook-transition code-review in-agent-review --target codereviews/{dir}/{{ slug_ts }}.md --workdir {vault}
+booping transition {vault}/codereviews/{dir}/{{ slug_ts }}.md in-agent-review --playbook code-review
 ```
 
 ## Report it back — same turn, before any review work is spent

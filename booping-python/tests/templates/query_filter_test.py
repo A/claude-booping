@@ -67,8 +67,7 @@ def _render_source(vault: Path, tmp_path: Path, source: str) -> str:
 
 SLUGS = "{{ ('core.plans.all' | query) | map(attribute='slug') | join(',') }}"
 DONE_SLUGS = (
-    "{{ ('core.plans.all' | query(where={'status': 'done'}))"
-    " | map(attribute='slug') | join(',') }}"
+    "{{ ('core.plans.all' | query(where={'status': 'done'})) | map(attribute='slug') | join(',') }}"
 )
 
 
@@ -76,14 +75,12 @@ class TestQueryFilterSurfaces:
     def test_skill_body_gets_rows(self, vault: Path, tmp_path: Path) -> None:
         assert _render_source(vault, tmp_path, SLUGS).strip() == "beta,alpha"
 
-    def test_rows_expose_frontmatter_as_attributes(
-        self, vault: Path, tmp_path: Path
-    ) -> None:
+    def test_rows_expose_frontmatter_as_attributes(self, vault: Path, tmp_path: Path) -> None:
         source = "{% set r = ('core.plans.all' | query) | first %}{{ r.title }}/{{ r.path }}"
         assert _render_source(vault, tmp_path, source) == "Beta | piped/plans/beta.md"
 
-    def test_scaffold_seed_string_gets_rows(self, vault: Path) -> None:
-        """The scaffold seed path: build_source_env + from_string."""
+    def test_create_seed_string_gets_rows(self, vault: Path) -> None:
+        """The `create` seed path: build_source_env + from_string."""
         ctx = _context(vault)
         env = build_source_env(context=ctx, config=ctx.config)
         assert env.from_string(SLUGS).render().strip() == "beta,alpha"
@@ -122,9 +119,7 @@ class TestInlineNarrowing:
         source = DONE_SLUGS
         assert _render_source(vault, tmp_path, source).strip() == "beta"
 
-    def test_narrowing_does_not_leak_into_later_calls(
-        self, vault: Path, tmp_path: Path
-    ) -> None:
+    def test_narrowing_does_not_leak_into_later_calls(self, vault: Path, tmp_path: Path) -> None:
         source = DONE_SLUGS + "|" + SLUGS
         assert _render_source(vault, tmp_path, source).strip() == "beta|beta,alpha"
 
@@ -138,16 +133,21 @@ class TestInlineNarrowing:
 
 
 class TestAsTableFilter:
-    def test_matches_the_command_table_for_the_same_rows(
-        self, vault: Path, tmp_path: Path
-    ) -> None:
+    def test_matches_the_command_table_for_the_same_rows(self, vault: Path, tmp_path: Path) -> None:
         source = "{{ ('core.plans.all' | query) | as_table(columns=['status', 'title']) }}"
         rendered = _render_source(vault, tmp_path, source)
         command = subprocess.run(
             [
-                str(BOOPING_BIN), "query", "--project", str(vault),
-                "--config", "core.plans.all", "--columns", "status,title",
-                "--output", "table",
+                str(BOOPING_BIN),
+                "query",
+                "--project",
+                str(vault),
+                "--config",
+                "core.plans.all",
+                "--columns",
+                "status,title",
+                "--output",
+                "table",
             ],
             cwd=tmp_path,
             capture_output=True,
@@ -174,8 +174,6 @@ class TestFailureIsLoud:
         with pytest.raises(QueryError, match="core.plans.nope"):
             _render_source(vault, tmp_path, "{{ 'core.plans.nope' | query }}")
 
-    def test_non_mapping_value_raises_naming_the_path(
-        self, vault: Path, tmp_path: Path
-    ) -> None:
+    def test_non_mapping_value_raises_naming_the_path(self, vault: Path, tmp_path: Path) -> None:
         with pytest.raises(QueryError, match="core.plans.glob"):
             _render_source(vault, tmp_path, "{{ 'core.plans.glob' | query }}")

@@ -15,6 +15,7 @@ from booping.rendering import (
     build_source_env,
     render,
 )
+from booping.specs.tiers import resolve_tiers
 from booping.tools import Tools
 from tests.helpers import get_fixture_path
 
@@ -181,11 +182,9 @@ def test_booping_global_in_render(tmp_path: object) -> None:
 
 
 def test_booping_global_in_source_env() -> None:
-    """The scaffold seed path: build_source_env + from_string."""
+    """The `create` seed path: build_source_env + from_string."""
     fixture = get_fixture_path("plugin-root-minimal")
-    env = build_source_env(
-        context=_project_context(9), config={}, plugin_root=fixture
-    )
+    env = build_source_env(context=_project_context(9), config={}, plugin_root=fixture)
 
     assert env.from_string("{{ booping.latest_migration }}").render() == "9"
 
@@ -205,8 +204,55 @@ def test_booping_global_in_playbook_env() -> None:
     assert env.from_string("{{ booping.latest_migration }}").render() == "3"
 
 
+def test_booping_global_lists_the_resolved_specs_tiers(
+    tmp_path: object, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from pathlib import Path
+
+    monkeypatch.setenv("USER", "alice")
+    root = Path(str(tmp_path))
+    plugin, home, repo = root / "plugin", root / "home", root / "repo"
+    config = {
+        "core": {
+            "specs": {
+                "tiers": {
+                    "core": {"namespace": "booping", "path": "specs"},
+                    "global": {"namespace": None, "path": "_specs"},
+                    "project": {"path": None},
+                }
+            }
+        }
+    }
+    tiers = resolve_tiers(
+        config, plugin_root=plugin, home_dir=home, repo=repo, vault=repo / "vault"
+    )
+    env = build_source_env(
+        context=Context(specs_tiers=tiers),
+        config={},
+        plugin_root=get_fixture_path("plugin-root-minimal"),
+    )
+
+    rendered = env.from_string(
+        "{% for t in booping.specs_tiers %}"
+        "{{ t.name }}|{{ t.namespace or '-' }}|{{ t.root }};"
+        "{% endfor %}"
+    ).render()
+
+    assert rendered == (
+        f"core|booping|${{CLAUDE_PLUGIN_ROOT}}/specs;global|alice|{home}/_specs;project|-|vault;"
+    )
+
+
+def test_booping_global_has_no_specs_tiers_without_context() -> None:
+    env = build_source_env(
+        context=Context(), config={}, plugin_root=get_fixture_path("plugin-root-minimal")
+    )
+
+    assert env.from_string("[{{ booping.specs_tiers | length }}]").render() == "[0]"
+
+
 def test_playbook_env_without_context_has_no_booping_global_or_query_filter() -> None:
-    """The lesson-rendering branch: neither surface is wired.
+    """The non-Jinja branch: neither surface is wired.
 
     `booping` is an undefined name and renders empty; `query` is an absent filter and
     so fails at compile time — Jinja has no undefined-filter fallback.

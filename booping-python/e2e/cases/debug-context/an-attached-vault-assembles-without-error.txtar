@@ -1,7 +1,7 @@
 stdout is deliberately unasserted: the dump enumerates every shipped playbook, skill and agent, and
 the runner rejects on unequal line counts before any wildcard applies, so adding a core playbook
 would break the case. What is pinned here is assembly — over a vault carrying a marker, a plan, a
-lesson and a local playbook, `Context.assemble()` completes and the process exits clean. That guards
+rule and a local playbook, `Context.assemble()` completes and the process exits clean. That guards
 the class of loader regression where one context field blows up under a given vault shape; it is not
 a contract on the dump's content.
 
@@ -21,13 +21,14 @@ created: 20260101
 ---
 
 Plan body.
--- fixtures/cwd/vault/_lessons/0001_alpha.md --
+-- fixtures/cwd/vault/rule/0001-alpha.md --
 ---
+type: rule
 title: Alpha rule
+status: accepted
 targets: [fx-assembly]
+brief: Alpha brief.
 ---
-
-Alpha body.
 -- fixtures/cwd/vault/_playbooks/fx-assembly/playbook.md --
 ---
 name: fx-assembly

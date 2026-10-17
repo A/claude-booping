@@ -1,0 +1,32 @@
+With `--playbook develop` the shared `awaiting-approval → ready-for-dev` edge is develop's: its one
+hook stamps `reviewed_at` (date pinned by a stub), and none of groom's commit or tracker hooks run.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+macro_stubs:
+  core.macros.date: "2026-01-02 03:04"
+-- fixtures/cwd/vault/plans/p/index.md --
+---
+title: Plan
+status: awaiting-approval
+---
+# Plan
+-- cmd --
+booping transition vault/plans/p/index.md ready-for-dev --playbook develop
+-- exit --
+0
+-- stdout --
+awaiting-approval → ready-for-dev
+frontmatter: status=ready-for-dev
+frontmatter: reviewed_at="2026-01-02 03:04"
+-- stderr --
+-- expected/cwd/vault/plans/p/index.md --
+---
+title: Plan
+status: ready-for-dev
+reviewed_at: 2026-01-02 03:04
+---
+# Plan

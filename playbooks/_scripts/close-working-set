@@ -5,7 +5,7 @@ Used by the `retro` playbook (`awaiting-retro → awaiting-learning`) and the `l
 playbook (`awaiting-learning → done`); the per-playbook differences live in the hook
 line's argv rather than in a second copy of this file.
 
-Environment (set by `booping playbook-transition`): BOOPING_WORKDIR = the vault root,
+Environment (set by `booping transition`): BOOPING_WORKDIR = the vault root,
 which is also cwd, and BOOPING_ARTIFACT = the run's resolved target, the retrospective
 under `retrospectives/`.
 
@@ -14,7 +14,7 @@ on every plan in it and commits the artifact plus every touched plan.
 
 Flags:
   --status VALUE   status stamped on every plan of the working set (optional; the
-                   artifact's own status is written by `playbook-transition` before
+                   artifact's own status is written by `booping transition` before
                    the hooks run)
   --prefix WORD    commit-message prefix (required)
   --verdicts       require a non-empty `goal_verdicts:` mapping in the artifact and
@@ -22,8 +22,9 @@ Flags:
                    every plan in the working set
   --stage DIR...   extra vault directories staged when they exist
 
-Self-contained: the vault carries no `.booping` marker, so nothing here shells back into
-`booping`, and nothing outside the standard library is imported.
+The vault carries no `.booping` marker, so nothing here shells back into `booping`;
+the commit goes through the shared `_vault_git` helper beside this script, and nothing
+outside the standard library is imported.
 
 A missing plan file, a plan missing from `goal_verdicts:` under `--verdicts`, or an
 artifact without the keys it needs exits non-zero, which aborts the transition.
@@ -32,9 +33,12 @@ artifact without the keys it needs exits non-zero, which aborts the transition.
 import argparse
 import os
 import re
-import subprocess
 import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from _vault_git import commit_paths  # noqa: E402
 
 FRONTMATTER = re.compile(r"\A---\n(.*?)\n---\n", re.DOTALL)
 
@@ -99,17 +103,6 @@ def stamp(plan: Path, values: dict[str, str]) -> None:
     plan.write_text(head + sep + body)
 
 
-def _inside_git_worktree(vault: Path) -> bool:
-    """The vault may be a subdirectory of a larger repository, so a `.git` at its root
-    is not the test — ask git."""
-    result = subprocess.run(
-        ["git", "-C", str(vault), "rev-parse", "--is-inside-work-tree"],
-        capture_output=True,
-        text=True,
-    )
-    return result.returncode == 0 and result.stdout.strip() == "true"
-
-
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Close a working set of plans and commit the vault.")
     parser.add_argument("--status")
@@ -172,19 +165,16 @@ def main() -> None:
         summary += "; " + ", ".join(f"{rel} → {args.status}" for rel in moved)
 
     slug = artifact.stem
-    if _inside_git_worktree(vault):
-        stage = [artifact_rel, *(rel for rel, _, _ in targets)]
-        for extra in args.stage:
-            if (vault / extra).exists():
-                stage.append(extra)
-        subprocess.run(["git", "-C", str(vault), "add", *stage], check=True)
-        message = f"{args.prefix}: {slug}"
-        if args.status:
-            message += f" → {args.status}"
-        result = subprocess.run(
-            ["git", "-C", str(vault), "commit", "-q", "-m", message],
-        )
-        summary += "; vault-commit: " + ("ok" if result.returncode == 0 else "nothing to commit")
+    stage = [artifact_rel, *(rel for rel, _, _ in targets)]
+    for extra in args.stage:
+        if (vault / extra).exists():
+            stage.append(extra)
+    message = f"{args.prefix}: {slug}"
+    if args.status:
+        message += f" → {args.status}"
+    outcome = commit_paths(vault, stage, message)
+    if outcome is not None:
+        summary += f"; vault-commit: {outcome}"
 
     print(f"close-working-set: {summary}")
 

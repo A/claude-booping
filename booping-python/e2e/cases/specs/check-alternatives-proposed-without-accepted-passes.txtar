@@ -1,0 +1,60 @@
+A `proposed` ADR may carry no `accepted` option: at most one is required.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/adr/0001-pick-storage.md --
+---
+type: adr
+title: Pick storage
+summary: Where the records live.
+created_by: owner
+created_at: 2026-01-01
+updated_at: 2026-01-01
+status: proposed
+---
+
+## Context
+
+Records need a home.
+
+## Decision
+
+Files.
+
+## Alternatives
+
+| Option | Status | Complexity | Reversibility | Verdict |
+|---|---|---|---|---|
+| [Option A](#option-a) | proposed | low | high | Simple |
+| [Option B](#option-b) | rejected | low | high | Heavier |
+
+### Option A
+
+Files on disk.
+
+- **Pros:** cheap.
+- **Cons:** limited.
+- **Complexity:** low.
+- **Reversibility:** high.
+
+### Option B
+
+A database.
+
+- **Pros:** cheap.
+- **Cons:** limited.
+- **Complexity:** low.
+- **Reversibility:** high.
+
+## Consequences
+
+- Plain files.
+-- cmd --
+booping specs check
+-- exit --
+0
+-- stdout --
+-- stderr --
+1 record(s) checked: 0 error(s), 0 warning(s)

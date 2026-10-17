@@ -1,0 +1,62 @@
+A milestone that states no `sp` is written with `sp: null`, flagged on stderr, and the run
+exits 4 — written, with flags.
+
+-- fixtures/cwd/draft.md --
+# Plan
+
+## Milestones
+
+### M01 — Only step
+
+#### Tasks
+
+- do it in `a.py`
+
+#### Verify
+
+`make check`
+-- cmd --
+booping plan split draft.md
+-- stderr --
+flag: M01: sp not stated anywhere; left null
+-- expected/cwd/index.md --
+# Plan
+
+## Milestones
+
+| id | title | sp | status |
+| --- | --- | --- | --- |
+| 01 | [Only step](milestones/M01-only-step/M01-only-step.md) |  | pending |
+
+## Groups
+
+| group | milestones | sp |
+| --- | --- | --- |
+| G1 | M01 | 0 |
+-- expected/cwd/milestones/M01-only-step/M01-only-step.md --
+---
+id: "01"
+title: "Only step"
+sp: null
+status: pending
+plan: "index.md"
+---
+
+# M01: Only step
+
+## Tasks
+
+- do it in `a.py`
+
+## Definition of Done
+
+## References
+
+## Verify
+
+`make check`
+-- exit --
+4
+-- stdout --
+M01-only-step sp=null sections=tasks:2,dod:0,references:0,verify:1
+group G1: M01 (0 SP)

@@ -1,0 +1,52 @@
+A `core.run.command` that cannot be launched leaves the record `failed` with exit code 127,
+and the wrapper exits 127 after naming the command.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+macro_stubs:
+  core.macros.date +%Y%m%d-%H%M%S: "20261015-120000"
+  core.macros.date +%Y-%m-%d %H:%M: "2026-10-15 12:00"
+core:
+  run:
+    command: [booping-no-such-command]
+-- fixtures/cwd/vault/plans/p1/index.md --
+---
+title: P1
+status: ready-for-dev
+---
+-- cmd --
+booping run develop vault/plans/p1
+-- exit --
+127
+-- stdout --
+runs/20261015-120000-develop.md
+20261015-120000-develop: failed (exit 127)
+-- stderr --
+error: cannot launch booping-no-such-command: [..]
+-- expected/cwd/vault/runs/20261015-120000-develop.md --
+---
+id: 20261015-120000-develop
+playbook: develop
+mode: supervised
+target:
+- plans/p1/index.md
+plan: plans/p1/index.md
+items: []
+status: failed
+pid: null
+session_id: cdc127f3-6d68-54bf-9265-1c33ed83cac1
+log: runs/20261015-120000-develop.log
+started_at: 2026-10-15 12:00
+ended_at: 2026-10-15 12:00
+exit_code: 127
+acked_at: null
+---
+
+# 20261015-120000-develop
+
+```text
+/booping:playbook develop {CWD}/vault/plans/p1/index.md
+```

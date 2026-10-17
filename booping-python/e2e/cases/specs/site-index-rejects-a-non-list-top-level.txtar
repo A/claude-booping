@@ -1,0 +1,11 @@
+A top level that is not a list is rejected; no out directory is created.
+
+-- fixtures/cwd/projects.json --
+{"name": "a", "url": "https://pages.example.org/a"}
+-- cmd --
+sh -c 'booping specs site-index --out site < projects.json; s=$?; test -e site && echo site exists; exit $s'
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: projects: not a list

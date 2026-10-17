@@ -16,7 +16,7 @@ Inside `core` there is one placement rule:
 | owned by exactly one playbook | `core.{name}_playbook.…` |
 | shared by the development loop or several playbooks | `core.…` directly |
 
-`{name}` is the playbook's name with `-` replaced by `_` — `groom` → `core.groom_playbook`, `code-review` → `core.code_review_playbook`. The rule applies literally, including to the three scaffold trees.
+`{name}` is the playbook's name with `-` replaced by `_` — `groom` → `core.groom_playbook`, `code-review` → `core.code_review_playbook`. The rule applies literally, including to the three template trees.
 
 **`core` is the worked example your own playbooks copy.** A playbook you write declares its own namespace the same way and reads it with `{{ config.core.my_playbook.… }}` (or `{{ config.my_namespace.… }}` to sit outside `core` entirely). The placement rule travels with the copy.
 
@@ -35,6 +35,7 @@ home_dir: ~/Claude/
 
 core:
   research_agent: "booping:booping-researcher"
+  auto_migrate: true
 
   macros:
     date: ["date"]
@@ -49,10 +50,17 @@ core:
   tracker:
     driver: cli
 
+  specs:
+    format: src/specs
+    tiers:
+      core: {namespace: booping, path: specs}
+      global: {namespace: null, path: _specs}
+      project: {path: null}
+
   sprint:
     default_threshold_sp: 35
     redecompose_threshold: 5
-    max_milestones_per_agent: 2
+    max_sp: 15
     scale:
       - { sp: 1, meaning: "Simple text/config change, no risk" }
       - { sp: 2, meaning: "Simple task, predictable, no risk" }
@@ -73,10 +81,13 @@ core:
 
   groom_playbook:
     cross_review_agent: null
-    scaffold:
+    template:
       index.md: |
         ...plan identity frontmatter + title heading, seeded with --set title=/type=...
       request.md: ""
+    split_fallback_agent: "opus:medium"
+    split:
+      sections: [Tasks, Definition of Done, References, Verify]
     agents:
       booping-researcher:
         internal: true
@@ -146,7 +157,7 @@ core:
     queries:
       scope_candidates:
         where: { status: done }
-        columns: [sp, title, code_reviews]
+        columns: [sp, title, code_reviews, commit]
     agents:
       booping-researcher:
         internal: true
@@ -170,11 +181,10 @@ core:
         sort: id
 
   setup_playbook:
-    scaffold:
+    template:
       plans:   { type: dir }
       retrospectives: { type: dir }
       codereviews: { type: dir }
-      _lessons: { type: dir }
       notes:   { type: dir }
       sprints.md: |
         ```base
@@ -184,7 +194,7 @@ core:
         .booping.log
 
   playbook_authoring_playbook:
-    scaffold:
+    template:
       playbook.md: |
         ...identity frontmatter + preamble stub, seeded with --set name=...
       playbook.yaml: |
@@ -201,8 +211,8 @@ core:
 Sprint sizing thresholds and the story-point scale.
 
 - **`core.sprint.default_threshold_sp`** — soft cap on total SP per plan. Above this, groom proposes splitting the plan into sibling stubs. Default: `35`.
-- **`core.sprint.redecompose_threshold`** — per-task SP value at or above which groom must re-decompose the task before the run can leave `drafting`. Default: `5`.
-- **`core.sprint.max_milestones_per_agent`** — cap on consecutive milestones grouped into one `booping-developer` briefing by the develop playbook. Default: `2`.
+- **`core.sprint.redecompose_threshold`** — per-task and per-milestone SP value at or above which groom must re-decompose the task or milestone before the run can leave `drafting`. Default: `5`.
+- **`core.sprint.max_sp`** — SP cap on one `booping-developer` briefing: develop packs consecutive milestones in `id` order up to it; a lone milestone over the cap is still its own group. Default: `15`.
 - **`core.sprint.scale`** — the 1–5 SP definitions rendered into groom's body. Each entry is `{sp, meaning}`. Replace wholesale to redefine — lists merge by replacement.
 
 ### `core.task_types`
@@ -212,6 +222,15 @@ The task-type taxonomy groom classifies every request against. Each entry is `{t
 ### `core.research_agent`
 
 The agent id an **assisted** playbook step delegates its bulk reads to. Default `booping:booping-researcher`. Point it at any agent id — a shipped worker or an external agent you registered — and every assisted step's delegated reads route there; nothing else changes. Directly under `core` because more than one playbook reads it (groom's two research steps, retro's session-log mining and issue research).
+
+### `core.auto_migrate`
+
+What happens when the vault is behind on the plugin's [migrations](vault.md#booping). **Default `true`**, and a tier that leaves the key out counts as `true`; set it in any tier. Directly under `core` because every render surface and the `migrate` playbook read it.
+
+- **`true`** — a render prints, in place of its output, an order to the driving agent: *this project is behind on booping migrations (recorded id X, latest shipped Y). Run `/playbook migrate` now — `core.auto_migrate` is on, so its approval is taken as given; its question about uncommitted work is still asked — then continue with the original request.* The `migrate` playbook then applies the whole pending set without asking for its up-front approval; its ask to commit uncommitted work first still stands.
+- **`false`** — a render prints a **STOP** notice telling you to run `/playbook migrate`, nothing else renders until the vault catches up, and `migrate` asks before applying.
+
+A config tier that cannot be read counts as `false`.
 
 ### `core.plans.glob`
 
@@ -229,6 +248,34 @@ The task tracker a run mirrors itself onto. Directly under `core` because it is 
 
 Mirroring is best-effort by design: a failed push warns, never rolls a status back, and `booping-tracker sync --artifact {plan-dir}/index.md` re-pushes idempotently. Only the plan track's `groom` is wired today; `develop`, `retro` and `code-review` keep their conversation-only behaviour whatever the driver.
 
+### `core.status`
+
+The query specs behind `booping status`, which prints the project's status — items, ideas, plans, records, marks — one line each, or a section in detail with `booping status plans`. Directly under `core` because the CLI and the project-manager share it.
+
+- **`core.status.queries.active_plans`** — plans in a status that groom or develop has not finished with. The status filter is added on each call from those playbooks' states, so the spec carries only `sort` and `columns`.
+- **`core.status.queries.unreviewed_plans`** — done plans no code review has closed on yet.
+
+The plans section also reads `core.retro_playbook.queries.candidates`, the retro queue, for done plans without a retro. Override any of the three [query specs](#query-specs) in a tier to change what the report lists.
+
+### `core.run`
+
+How `booping run groom` and `booping run develop` launch a recorded headless run. Directly under `core` because the CLI and the project-manager share it. No value is env-interpolated.
+
+- **`core.run.command`** — the argv of the launched run, `claude -p` with auto permissions and streamed JSON output as shipped. `--session-id {uuid}` and the prompt are appended per run.
+- **`core.run.env`** — variables set on top of the inherited environment. The shipped `CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS: "0"` keeps a headless run from ending its own background workers after ten minutes.
+- **`core.run.prompt`** — the prompt, `/booping:playbook {playbook} {target}`; `{target}` is the plan's absolute `index.md`, or each item as `{id} ({path})`.
+- **`core.run.preamble`** — the autonomy instructions appended after a blank line under `--autonomous`: settle gates and questions without asking, log each as an agent decision file, never push.
+- **`core.run.dir`** — the vault directory of run records, `runs` as shipped.
+
+### `core.corrections` and `core.agent_decisions`
+
+One vault file per entry, under `corrections/` and `agent-decisions/`. Directly under `core` because several playbooks write them and retro and the project-manager read them.
+
+- **`template`** — the entry file, keyed `{{ next_id('R') }}-{{ name }}.md` (decisions `D`): `booping create core.corrections.template {vault}/corrections --set name={step} --set step=… --set did=… --set said=…` (`why` and `artifact` optional); decisions take `asked`, `decision`, `why`. Every entry starts `state: open`; the `core.macros.session` and `core.macros.date` macros stamp `session` and `logged_at`.
+- **`open`** — the query spec of entries still `state: open`, for `booping query --config core.corrections.open` and the `| query` filter. Retro sets a correction `handled`, the project-manager sets a decision `reviewed`, both with `booping set`.
+
+A project changes an entry's fields by overriding the template in its own tier.
+
 ### `core.macros`
 
 Shell-outs a rendered body may call by dotted path. Each entry is an **argv list**, never a shell string, run with `shell=False` — either the bare list, or a mapping carrying it under `command:` plus an optional `cwd:` of `repo` or `vault`: the attached repo or the Project Vault. Omit `cwd:` and the command runs in the process's own working directory.
@@ -244,9 +291,22 @@ core:
 
 A body calls one with `{{ macro('core.macros.date', '+%H:%M') }}`. The `command:` list is a **prefix** — positional arguments at the call site are appended, so `["date"]` and `["date", "+%Y%m%d"]` are the same shape. stdout is stripped and cached per argv tuple and resolved `cwd` for the process, so a macro must be idempotent within one render, and two argument variants are two separate runs.
 
-For a reproducible render, pin a macro instead of executing it: `--stub-macro DOTTED.PATH=LITERAL` on `booping render`, `booping render-playbook` and `booping scaffold` makes the named macro return the literal without running its command (e.g. `--stub-macro core.macros.date=19700101-00-00`). The flag is repeatable, later pins winning.
+For a reproducible render, pin a macro instead of executing it: `--stub-macro DOTTED.PATH=LITERAL` on `booping render`, `booping render-playbook` and `booping create` makes the named macro return the literal without running its command (e.g. `--stub-macro core.macros.date=19700101-00-00`). The flag is repeatable, later pins winning.
 
 Macros are honoured in every tier, project included. A project config arrives with a `git clone`, so treat an unfamiliar vault's `core.macros` block as executable content in a repo.
+
+### `core.specs`
+
+Where the three [specs](specs.md) tiers live and what their namespaces are. Directly under `core` because `booping specs` and rule injection both read it.
+
+- **`core.specs.format`** — the directory holding the format guide and the per-type schemas, relative to the plugin root. Default `src/specs`; the shipped record types are the schema file stems found there. Types are per tier: the shipped stems plus those in the tier's own `<tier root>/_schemas/`, which override or add.
+- **`core.specs.tiers.core`** — booping's own records: `path` relative to the plugin root (`specs`), `namespace` the prefix other tiers cite them by (`booping`).
+- **`core.specs.tiers.global`** — your records for every project: `path` relative to `home_dir` (`_specs`), `namespace` your prefix. `null` takes the `USER` environment variable. The [setup playbook](install.md#create-the-project-vault) asks for `core.specs.tiers.global.namespace` once, `$USER` as the default, and writes it into the global config beside `home_dir`; a global config already carrying the key is not asked again.
+- **`core.specs.tiers.project`** — the project's own records: `path` relative to the attached repo. `null` resolves to the vault root: the type directories sit beside `plans/`. Set `path` to keep the records in the repo instead; [`booping specs init`](specs.md#booping-specs-init) then links `<vault>/specs` to that directory, so the records stay reachable from the vault.
+- **`core.specs.site.roots`** — extra roots [`booping specs site`](specs.md#booping-specs-site) renders after the tiers, a list of `{name, path}`: `name` is the root's namespace on the site, `path` relative to `home_dir` like the global tier. Default `[]`; set it in the global config to build one site over every project's specs.
+- **`core.specs.open_items`** — the [open items](specs_playbook.md#open-items) store: `dir`, the vault-relative directory the item files live in (`open-items`, created on the first item); `template`, the [template tree](#template-trees) one item file is written from, named `OI-NNNN.md` by `next_id('OI-')` and stamping `created_at` by the date macro; `index`, the [query spec](#query-specs) `booping query --config core.specs.open_items.index` renders — its columns `id`, `status`, `source`, `size`, `direction`, `record`, `title`, `plan`.
+
+A tier `path` that is absolute or starts with `~` is taken as is.
 
 ## Per-playbook keys, under `core.{name}_playbook`
 
@@ -271,13 +331,29 @@ A [query spec](#query-specs), living beside the body that renders it.
 
 Develop-only: `commit_message` (the conventional-commit format string for in-sprint commits) and `branches`, a list of `{branch, when}` entries. `branch` is the literal prefix (e.g. `feat/`, `fix/`); `when` is a list of short matches against the plan `type` (`feature`, `bug`, `refactoring`) or freeform descriptors. Develop's `provision` step walks the list to pick the sprint branch prefix.
 
+### `core.project_manager_playbook.batch`
+
+How the project-manager sizes tiny fixes and packs them into [batches](project_manager.md#batches) that skip grooming.
+
+- **`core.project_manager_playbook.batch.sizes`** — the sizes an item's `size:` takes (`booping set {item} size=…`, checked by `playbooks/specs/_schemas/open_item.yaml`), each with its story points. Default `{XS: 1, S: 2, M: 5, L: 13}`.
+- **`core.project_manager_playbook.batch.direct`** — the sizes that skip grooming and go into batches; any other size, or none, takes the plan route. Default `[XS, S]`.
+- **`core.project_manager_playbook.batch.max_sp`** — the story-point cap on one batch. Default `8`.
+
 ### `core.groom_playbook.cross_review_agent`
 
 The agent that performs the detached second-model review of a drafted plan. **Default `null`**, so the reviewing step renders as skipped until a global or project config names an agent.
 
+### `core.groom_playbook.split.sections`
+
+The four milestone sub-headings, in order — tasks, definition of done, references, verify. `booping plan split` writes a draft's milestone sections under them in each milestone file and groom's `draft-plan` renders them as the draft's `####` headings. The groom milestone schema (`playbooks/groom/_schemas/milestone.yaml`) names the default headings literally, so renamed sections fail the milestone check. **Default `[Tasks, Definition of Done, References, Verify]`**.
+
+### `core.groom_playbook.split_fallback_agent`
+
+The `model:effort` of the agent groom spawns when `booping plan split` cannot cut a draft (exit 3 or 4): it rewrites the draft into the one-file format outside the vault, and the run copies it back and splits again. **Default `"opus:medium"`**; `null` makes the run rewrite the draft itself.
+
 ## Where the plan lifecycle lives
 
-Statuses, transitions, gates and hooks are **not** in this config. Each playbook declares its own vocabulary in its `states:` block in `playbooks/<name>/playbook.yaml`, and `booping playbook-transition` is the only thing that writes a plan's `status:`. See [Playbooks → Run state](playbook.md#run-state) for the machine format, and [Vault → `plans/`](vault.md#plans) for how groom and develop chain their vocabularies through one plan while the retro and code-review tracks join it through frontmatter instead.
+Statuses, transitions, gates and hooks are **not** in this config. Each playbook declares its own vocabulary in its `states:` block in `playbooks/<name>/playbook.yaml`, and `booping transition` is the only thing that writes a plan's `status:`. See [Playbooks → Run state](playbook.md#run-state) for the machine format, and [Vault → `plans/`](vault.md#plans) for how groom and develop chain their vocabularies through one plan while the retro and code-review tracks join it through frontmatter instead.
 
 To reshape a status flow, edit that playbook's `states:` — or fork the playbook under a new name. No config key overrides it.
 
@@ -319,17 +395,17 @@ The CLI mirrors every spec key inline: `--where` (repeatable), `--sort FIELD`, a
 
 A spec lives beside its consumer, never in a central registry. Most shipped specs read the vault's plans; `core.learn_playbook.queries.candidates` overrides `glob` to read `retrospectives/*.md` instead, and `core.migrate_playbook.queries.pending` reads outside the vault entirely — `root: core`, listing the migrations the plugin itself ships.
 
-## Scaffold trees
+## Template trees
 
-Any mapping in the merged config — addressed by its dotted path, like a query spec — can describe a **file/dir tree** that `bin/booping scaffold` materialises on disk:
+Any mapping in the merged config — addressed by its dotted path, like a query spec — can describe a **file/dir tree** that `bin/booping create` materialises on disk:
 
 ```
-bin/booping scaffold <config-path> <dest> [--force] [--set KEY=VALUE]... [--stub-macro DOTTED.PATH=LITERAL]...
+bin/booping create <config-path> <dest> [--force] [--set KEY=VALUE]... [--stub-macro DOTTED.PATH=LITERAL]...
 ```
 
 `<config-path>` is a dotted path into the merged config — the value there *is* the destination directory's contents, no wrapper key. `<dest>` is created with its parents when missing. **A file that exists is skipped**, reported as `skipped existing file {path}` and left byte-for-byte alone; `--force` turns that skip into an overwrite of the files the tree names, never deleting a directory and never touching a path the tree does not name. Exit 0 on success, 1 on a user error (unknown path, malformed tree, bad `--set`, Jinja error in seed content), 2 if a write fails at the OS level. The whole tree is rendered in memory first, so an error leaves the filesystem untouched.
 
-**Stdout contract.** For every file it actually wrote, scaffold prints a unified diff — `--- /dev/null` (a new file) or `--- {path}` (an overwrite), then `+++ {path}` and the hunks. A file whose rendered content matches what is already on disk, and a file skipped because it exists, produce no diff; created directories keep their one-line `created dir {path}` report, and the run still ends with the `scaffolded N paths — …` count line. `booping frontmatter-update` shares this contract: the diff of the change it made on stdout, nothing at all when the file did not change, its `updated {path}: {keys}` summary and any errors on stderr. It writes scalars with their YAML type — ints, floats, booleans and `null` unquoted, everything else a string.
+**Stdout contract.** For every file it actually wrote, `create` prints a unified diff — `--- /dev/null` (a new file) or `--- {path}` (an overwrite), then `+++ {path}` and the hunks. A file whose rendered content matches what is already on disk, and a file skipped because it exists, produce no diff; created directories keep their one-line `created dir {path}` report, and the run still ends with the `wrote N paths — …` count line. `booping set` shares this contract: the diff of the change it made on stdout, nothing at all when the file did not change, its `updated {path}: {keys}` summary and any errors on stderr. It writes scalars with their YAML type — ints, floats, booleans and `null` unquoted, everything else a string.
 
 How a node is read:
 
@@ -346,21 +422,23 @@ How a node is read:
 
 File content is Jinja-rendered, so `{{ config.… }}` and `{{ context.… }}` resolve. **`--set` here binds a bare variable** — `--set name=x` fills `{{ name }}` — unlike `booping render` and `booping render-playbook`, where `--set` merges into the config and you write `{{ config.name }}`.
 
+Names and content can also call **`next_id(prefix, width=4)`**: one past the highest `{prefix}{n}` opening a file name in the destination, zero-padded — `{{ next_id('OI-') }}.md` writes `OI-0001.md` in an empty directory and `OI-0008.md` beside `OI-0007.md`. A name that already exists is skipped and reported like any other, which is how a concurrent writer shows.
+
 Trees ride the same core → global → project merge as everything else here, so a global or project config can add its own tree or override one leaf of a shipped one. Three ship:
 
-- **`core.playbook_authoring_playbook.scaffold`** — a playbook skeleton: `playbook.md` (identity frontmatter carrying the name you passed, plus a preamble stub), `playbook.yaml` (an empty `graph:`), and an empty `_references/`.
+- **`core.playbook_authoring_playbook.template`** — a playbook skeleton: `playbook.md` (identity frontmatter carrying the name you passed, plus a preamble stub), `playbook.yaml` (an empty `graph:`), and an empty `_references/`.
 
   ```
-  bin/booping scaffold core.playbook_authoring_playbook.scaffold \
+  bin/booping create core.playbook_authoring_playbook.template \
     ~/Claude/_playbooks/my-playbook --set name=my-playbook
   ```
 
-- **`core.setup_playbook.scaffold`** — the project vault: `plans/`, `retrospectives/`, `codereviews/`, `_lessons/`, `notes/`, plus the seeded `sprints.md` Obsidian Bases fence and a `.gitignore`. Takes no `--set` variables.
+- **`core.setup_playbook.template`** — the project vault: `plans/`, `retrospectives/`, `codereviews/`, `notes/`, plus the seeded `sprints.md` Obsidian Bases fence and a `.gitignore`. Takes no `--set` variables.
 
-- **`core.groom_playbook.scaffold`** — the tree groom seeds every new plan from, in one `booping scaffold` call: a plan directory holding `index.md` (the plan's identity frontmatter — the sole definition of it, `commit:` stamped with the repo's HEAD at creation — plus the title as an `#` heading) and an empty `request.md`. Takes `--set title=` and `--set type=`.
+- **`core.groom_playbook.template`** — the tree groom seeds every new plan from, in one `booping create` call: a plan directory holding `index.md` (the plan's identity frontmatter — the sole definition of it, `commit:` stamped with the repo's HEAD at creation — plus the title as an `#` heading) and an empty `request.md`. Takes `--set title=` and `--set type=`.
 
   ```
-  bin/booping scaffold core.groom_playbook.scaffold \
+  bin/booping create core.groom_playbook.template \
     ~/Claude/my-project/plans/202608091310_my-plan \
     --set title="My plan" --set type=feature
   ```
@@ -377,13 +455,13 @@ Each plan file carries a `summary` field in its YAML frontmatter — a one-line 
 
 Machine-wide defaults live at `${XDG_CONFIG_HOME:-~/.config}/booping/config.yaml` (typically `~/.config/booping/config.yaml`). It deep-merges over the plugin's `src/config.yaml` and is in turn overridden by the per-project file — **core → global → project**. Any key valid in `src/config.yaml` is valid here; the merge rules are identical (dict keys merge, list keys replace wholesale).
 
-The global tier's headline key is **`home_dir`** — the vault-home base under which per-project vaults are scaffolded and resolved (`<home_dir>/<project>/`). It is a raw string (`~` is expanded at vault-resolution time, e.g. `~/Claude/`).
+The global tier's headline key is **`home_dir`** — the vault-home base under which per-project vaults are created and resolved (`<home_dir>/<project>/`). It is a raw string (`~` is expanded at vault-resolution time, e.g. `~/Claude/`).
 
 - **Precedence.** A `.booping` marker carrying a `vault_path:` key wins over `home_dir` — a repo-local vault is resolved directly from the marker. `home_dir` only governs the default `<home_dir>/<project>/` layout.
 - **Project-tier `home_dir` is a no-op.** By the time the project tier merges, the vault has already been resolved — its location is what tells booping where to read the project config from. Set `home_dir` in the global tier.
-- **First-run seeding.** `/playbook setup` settles `home_dir` before touching the project: if the global config file is absent it asks for the vault-home base (default `~/Claude`) and writes it there, then scaffolds the vault with `booping scaffold core.setup_playbook.scaffold <vault_dir>` and records the location in the repo's `.booping` marker.
+- **First-run seeding.** `/playbook setup` settles `home_dir` before touching the project: if the global config file is absent it asks for the vault-home base (default `~/Claude`) and writes it there, then creates the vault with `booping create core.setup_playbook.template <vault_dir>` and records the location in the repo's `.booping` marker.
 
-Read any resolved value — merged across all three tiers — with `booping config-get <dotted.key>` (e.g. `booping config-get home_dir`). `home_dir` prints its raw, unexpanded value.
+Read any resolved value — merged across all three tiers — with `booping config <dotted.key>` (e.g. `booping config home_dir`). `home_dir` prints its raw, unexpanded value.
 
 ## Overriding for one project
 
@@ -435,4 +513,4 @@ The playbook's `jinja: true` bodies then read `{{ config.core.ship_playbook.regi
 
 ## Verifying the merged config
 
-Run `bin/booping debug-context` from the project directory (the one with the `.booping` marker) to dump the assembled context — including the merged config — as YAML: the authoritative answer to what a skill is actually seeing. For a single value, `bin/booping config-get <dotted.key>` prints that key resolved across the merge (scalars as raw text, mappings/lists as YAML), and works outside any project too (core + global only).
+Run `bin/booping debug-context` from the project directory (the one with the `.booping` marker) to dump the assembled context — including the merged config — as YAML: the authoritative answer to what a skill is actually seeing. For a single value, `bin/booping config <dotted.key>` prints that key resolved across the merge (scalars as raw text, mappings/lists as YAML), and works outside any project too (core + global only).

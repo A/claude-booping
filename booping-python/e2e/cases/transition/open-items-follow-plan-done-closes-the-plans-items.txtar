@@ -1,0 +1,87 @@
+An edge carrying `script open-items-follow-plan done` closes the plan's planned item as `done`
+through `booping query` and `booping transition`; the hook prints nothing of its own and reports ok.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+macro_stubs:
+  core.macros.date: "2026-10-15"
+-- fixtures/home/Claude/_playbooks/fx-follow/playbook.md --
+---
+name: fx-follow
+title: Follow
+summary: Open-items follow-plan fixture for transition.
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-follow/playbook.yaml --
+state: main
+graph:
+  only: []
+
+states:
+  main:
+    artifact: index.md
+    initial: building
+    statuses:
+      building:
+        transitions:
+          - to: done
+            when: the plan lands
+            hooks: ["script open-items-follow-plan done"]
+          - to: fail
+            when: the plan fails
+            hooks: ["script open-items-follow-plan open"]
+      done: {terminal: true}
+      fail: {terminal: true}
+-- fixtures/home/Claude/_playbooks/fx-follow/only/prompt.md --
+---
+summary: Only step.
+---
+
+Only body.
+-- fixtures/cwd/vault/plans/p/index.md --
+---
+status: building
+---
+-- fixtures/cwd/vault/open-items/OI-0001.md --
+---
+id: OI-0001
+title: "Gap OI-0001"
+status: planned
+direction: clarify
+record: null
+source: manual
+plan: plans/p/index.md
+created_at: 2026-10-01
+closed_at: null
+reason: null
+---
+
+# Gap OI-0001
+-- cmd --
+booping transition vault/plans/p/index.md done --playbook fx-follow
+-- exit --
+0
+-- stdout --
+building → done
+frontmatter: status=done
+script open-items-follow-plan: ok
+-- stderr --
+-- expected/cwd/vault/open-items/OI-0001.md --
+---
+id: OI-0001
+title: "Gap OI-0001"
+status: done
+direction: clarify
+record: null
+source: manual
+plan: plans/p/index.md
+created_at: 2026-10-01
+closed_at: '2026-10-15'
+reason: null
+---
+
+# Gap OI-0001

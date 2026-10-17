@@ -6,7 +6,7 @@ How the orchestrator handles per-project quality tooling (lint, typecheck, forma
 
 Walk this ladder and stop at the first rung that answers:
 
-1. **A targeted lesson** on `develop` or `develop/verify` naming the canonical quality commands — already injected into this body, no read needed.
+1. **A targeted rule** on `develop` or `develop/verify` naming the canonical quality commands — already injected into this body, no read needed.
 2. **The repo `CLAUDE.md`** naming the canonical commands for either bucket below.
 3. **Discovery** — inspect the attached repo yourself.
 
@@ -21,4 +21,4 @@ Produce one list of manual quality commands to run per milestone. Hook-enforced 
 
 ## Run
 
-Execute the decided manual commands after the milestone's plan-authored Verify command. A failure here blocks the commit the same way a plan-Verify failure does — delegate the fix to a worker agent, do not patch in the orchestrator.
+Execute the decided manual commands after the milestone's plan-authored Verify command. A failure here blocks the commit the same way a plan-Verify failure does, and is fixed the same way: by the orchestrator itself only when the fix is within `core.sprint.inline_fix_sp` on the sprint scale with every file it touches already read and nothing left to find out (develop-loop's *Fixing a failing check yourself*), else by a worker agent.

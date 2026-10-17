@@ -44,8 +44,8 @@ order, same headings, only the passages a check failed rewritten. A document tha
 is left byte-identical, and that is a pass, not a skipped run.
 
 - no source file, ever — repo code, templates and configuration are opened read-only
-- no other destination document (another loop instance owns it) and no spec file — a fact your check
-  proves stale in the briefing, roles, surfaces or feature index is a note, not an edit
+- no other destination document (another loop instance owns it) and no spec record — a fact your
+  check proves stale in the spec records is a note, not an edit
 - the run record is not opened: unresolved findings reach it through your return, the runner
   appending them and advancing the row's Progress, because the vault is the runner's to write and
   loop instances run in parallel against that one file

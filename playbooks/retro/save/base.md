@@ -39,7 +39,7 @@ Before firing anything: every plan in the working set appears in `plans:`, and e
 
 ## 3. Transition
 
-Once the file is on disk, advance the run per the `## State` section — from the vault root, passing `--target retrospectives/{slug}.md` for the file just written. The exit edge's hooks stamp the `retro:` back-link and the goal verdict on every plan in the working set and commit the vault; nothing here hand-edits plan frontmatter.
+Once the file is on disk, advance the run per the `## State` section — naming `{vault}/retrospectives/{slug}.md`, the file just written. The exit edge's hooks stamp the `retro:` back-link and the goal verdict on every plan in the working set and commit the vault; nothing here hand-edits plan frontmatter.
 
 ## 4. Closing report
 

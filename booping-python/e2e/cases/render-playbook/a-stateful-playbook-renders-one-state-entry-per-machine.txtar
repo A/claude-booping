@@ -4,9 +4,9 @@ execution graph rather than by manifest order — this manifest declares `step` 
 the render puts the outer machine first.
 
 Each entry names the scope that references it, its artifact path relative to the run workdir, its
-initial status and the `booping playbook-transition` invocation that advances it: the outer entry
-plain, the subgraph entry carrying `--state` and `--instance` with its `{instance}` placeholder
-left unexpanded. The status table pins every edge — the em-dash cell where a transition declares
+initial status and the `booping transition` invocation that advances it, always naming
+`--playbook`: the outer entry plain, the subgraph entry carrying `--state` and its artifact path
+with `{instance}` written as `<slug>`. The status table pins every edge — the em-dash cell where a transition declares
 no gates, and the `*(terminal)*` row for a status with no exits. Hook lines are the transition
 command's business and never reach the render.
 
@@ -55,7 +55,7 @@ states:
             when: intake step complete
             gates: ["request + scope captured in the artifact"]
             hooks:
-              - frontmatter-update intaken=yes
+              - set intaken=yes
       developing-steps:
         transitions:
           - to: done
@@ -105,12 +105,12 @@ Execute the steps in the most effective order considering their dependencies.
 
 ## State
 
-Run state is persisted in artifacts under the run workdir. Only `booping playbook-transition` writes it — never hand-edit an artifact's `status`.
+Run state is persisted in artifacts under the run workdir. Only `booping transition` writes it — never hand-edit an artifact's `status`.
 
 Read the whole run's frontier before starting or resuming:
 
 ```
-booping playbook-state fx-stateful --workdir <run workdir>
+booping state <run workdir>/index.md --playbook fx-stateful
 ```
 
 ### State: main
@@ -118,7 +118,7 @@ booping playbook-state fx-stateful --workdir <run workdir>
 - Referenced by: outer graph
 - Artifact: `index.md` (relative to the run workdir)
 - Initial status: `intaking`
-- Advance: `booping playbook-transition fx-stateful <to> --workdir <run workdir>`
+- Advance: `booping transition <run workdir>/index.md <to> --playbook fx-stateful`
 
 | Status | To | When | Gates |
 | --- | --- | --- | --- |
@@ -131,7 +131,7 @@ booping playbook-state fx-stateful --workdir <run workdir>
 - Referenced by: subgraph `step-pipeline`
 - Artifact: `steps/{instance}/index.md` (relative to the run workdir)
 - Initial status: `spec-ing`
-- Advance: `booping playbook-transition fx-stateful <to> --state step --instance <slug> --workdir <run workdir>`
+- Advance: `booping transition <run workdir>/steps/<slug>/index.md <to> --playbook fx-stateful --state step`
 
 | Status | To | When | Gates |
 | --- | --- | --- | --- |

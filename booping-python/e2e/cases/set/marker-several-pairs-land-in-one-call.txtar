@@ -1,0 +1,16 @@
+Several pairs land in one call, each on its own line in the order given, reported on one
+stderr line.
+
+-- fixtures/cwd/.booping --
+project_name: demo
+-- cmd --
+booping set .booping vault_path=./vault latest_migration=2
+-- exit --
+0
+-- stdout --
+-- stderr --
+marker: vault_path=./vault, latest_migration=2
+-- expected/cwd/.booping --
+project_name: demo
+vault_path: ./vault
+latest_migration: 2

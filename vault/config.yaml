@@ -1,15 +1,15 @@
 core:
-  sprint:
-    max_milestones_per_agent: 1
-
   model_benchmark_playbook:
     # Second diff reviewer beside the generic `fable:medium` one; null → fable alone.
     review_agent: codex
 
-  code_review_playbook:
-    agents:
-      plannotator-reviewer:
-        good_for:
-          - "Interactive browser review of a diff with AI findings pre-seeded; human confirms/dismisses inline and feedback returns to the harness"
-        bad_for:
-          - "Headless / CI runs, no display available, or a quick chat-only review"
+  docs_playbook:
+    queries:
+      # The feature index, rendered into `research` and `targeting`.
+      features:
+        glob: [story/*.md]
+        columns: [title, summary, status]
+      # The value list, rendered into `briefing` and `research`.
+      values:
+        glob: [value/*.md]
+        columns: [title, kind, summary]

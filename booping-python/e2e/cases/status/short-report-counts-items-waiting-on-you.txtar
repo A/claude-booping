@@ -1,0 +1,71 @@
+The items line appends the count of items in `clarify`: OI-0003 counts, the open OI-0001
+and the done OI-0002 do not.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+-- fixtures/cwd/vault/open-items/OI-0001.md --
+---
+id: OI-0001
+title: "Retire the exporter"
+status: open
+direction: null
+record: null
+source: request
+plan: null
+created_at: 2026-10-15
+closed_at: null
+reason: null
+---
+
+# Retire the exporter
+-- fixtures/cwd/vault/open-items/OI-0002.md --
+---
+id: OI-0002
+title: "Old request"
+status: done
+direction: null
+record: null
+source: request
+plan: null
+created_at: 2026-10-15
+closed_at: null
+reason: null
+---
+
+# Old request
+-- fixtures/cwd/vault/open-items/OI-0003.md --
+---
+id: OI-0003
+title: "Export format"
+status: clarify
+direction: null
+record: null
+source: request
+plan: null
+created_at: 2026-10-15
+closed_at: null
+reason: null
+---
+
+# Export format
+
+CSV export, please.
+
+## Question
+
+CSV or JSON?
+-- cmd --
+booping status
+-- exit --
+0
+-- stdout --
+items: 1 open, 1 clarify — request 2, backlog 0, spec gap 0 — 1 waiting on you
+ideas: none
+plans: none active
+runs: none
+records: none unreviewed
+marks: none
+-- stderr --

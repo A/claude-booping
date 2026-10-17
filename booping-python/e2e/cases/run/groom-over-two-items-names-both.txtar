@@ -1,0 +1,93 @@
+`run groom` over item ids records them as target and items, in the order given, and the prompt
+names each with its absolute path.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+macro_stubs:
+  core.macros.date +%Y%m%d-%H%M%S: "20261015-120000"
+  core.macros.date +%Y-%m-%d %H:%M: "2026-10-15 12:00"
+core:
+  run:
+    command:
+      - sh
+      - -c
+      - |
+        printf 'arg: %s\n' "$@"
+        echo "env: $CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS"
+        if read -r line; then echo "stdin: data"; else echo "stdin: empty"; fi
+        exit 0
+      - fake
+-- fixtures/cwd/vault/open-items/OI-0001.md --
+---
+id: OI-0001
+title: "Gap OI-0001"
+status: open
+direction: clarify
+record: null
+source: manual
+plan: null
+created_at: 2026-10-01
+closed_at: null
+reason: null
+---
+
+# Gap OI-0001
+-- fixtures/cwd/vault/open-items/OI-0002.md --
+---
+id: OI-0002
+title: "Gap OI-0002"
+status: open
+direction: clarify
+record: null
+source: manual
+plan: null
+created_at: 2026-10-01
+closed_at: null
+reason: null
+---
+
+# Gap OI-0002
+-- cmd --
+booping run groom OI-0002 OI-0001
+-- exit --
+0
+-- stdout --
+runs/20261015-120000-groom.md
+20261015-120000-groom: finished (exit 0)
+-- stderr --
+-- expected/cwd/vault/runs/20261015-120000-groom.md --
+---
+id: 20261015-120000-groom
+playbook: groom
+mode: supervised
+target:
+- OI-0002
+- OI-0001
+plan: null
+items:
+- OI-0002
+- OI-0001
+status: finished
+pid: null
+session_id: cd70cdf2-c0ff-5c39-8213-22d91c55f73a
+log: runs/20261015-120000-groom.log
+started_at: 2026-10-15 12:00
+ended_at: 2026-10-15 12:00
+exit_code: 0
+acked_at: null
+---
+
+# 20261015-120000-groom
+
+```text
+/booping:playbook groom OI-0002 ({CWD}/vault/open-items/OI-0002.md), OI-0001 ({CWD}/vault/open-items/OI-0001.md)
+```
+-- expected/cwd/vault/runs/20261015-120000-groom.log --
+arg: --session-id
+arg: cd70cdf2-c0ff-5c39-8213-22d91c55f73a
+arg: /booping:playbook groom OI-0002 ({CWD}/vault/open-items/OI-0002.md), OI-0001 ({CWD}/vault/open-items/OI-0001.md)
+env: 0
+stdin: empty

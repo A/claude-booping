@@ -1,0 +1,168 @@
+# Four smoke cases over the guide step. The run has no shell: each fixture states the
+# `booping` outputs a live run would have read, and stands in for the writes the CLI would
+# have made. The cwd is the vault root; the project tier, when there is one, is `specs/`.
+
+- description: guide smoke — no project tier, the reply offers init and the alignment guide
+  vars:
+    input: file://_fixtures/init-offer.md
+  metadata:
+    playbook: specs
+    step: guide
+    fixture: init-offer
+    tier: smoke
+  assert:
+    # NO-TIER-WRITE — init waits for the user's yes, so nothing lands under a specs/ dir
+    - type: javascript
+      value: file://../../_lib/asserts/files.js
+      config:
+        expect: []
+        allow:
+          - '^(?!(?:.*/)?specs/)'
+        noOthers: true
+    # OFFERS-INIT
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        entry: '\b[Ii]nit'
+        onlyEntries: false
+        minEntries: 1
+    # OFFERS-ALIGNMENT
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        entry: '[Aa]lignment'
+        onlyEntries: false
+        minEntries: 1
+
+- description: guide smoke — a stated decision lands as an ADR plus its open item, unasked
+  vars:
+    input: file://_fixtures/record-decision.md
+  metadata:
+    playbook: specs
+    step: guide
+    fixture: record-decision
+    tier: smoke
+  assert:
+    # WRITE-SET — the ADR and the item its confirmation line files, nothing else
+    - type: javascript
+      value: file://../../_lib/asserts/files.js
+      config:
+        onTextMode: fail
+        expect:
+          - path: '^specs/adr/0001-[a-z0-9-]+\.md$'
+            contains:
+              - '^created_by: claude\s*$'
+              - 'Confirmation:'
+            forbids:
+              - '^reviewed:'
+          - path: '^open-items/OI-0001\.md$'
+            contains:
+              - '^id: OI-0001\s*$'
+              - '^status: open\s*$'
+              - '^source: adr\s*$'
+              - '^record: adr/0001'
+        noOthers: true
+    # ADR-SHAPE — the shipped ADR schema, read from its one source
+    - type: javascript
+      value: file://../../_lib/asserts/mdcheck.js
+      config:
+        file: '^specs/adr/0001-[a-z0-9-]+\.md$'
+        rulesFile: src/specs/schemas/adr.yaml
+    # NO-WHICH-ACTION — the guide acts on the request, never asks which scenario to run
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        entry: '[Ww]hich (action|scenario|one)'
+        onlyEntries: false
+        minEntries: 0
+        maxEntries: 0
+
+- description: guide smoke — what is open lists both open items and writes nothing
+  vars:
+    input: file://_fixtures/what-is-open.md
+  metadata:
+    playbook: specs
+    step: guide
+    fixture: what-is-open
+    tier: smoke
+  assert:
+    # READ-ONLY
+    - type: javascript
+      value: file://../../_lib/asserts/files.js
+      config:
+        expect: []
+        noOthers: true
+    # BOTH-IDS
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        entry: 'OI-0001'
+        onlyEntries: false
+        minEntries: 1
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        entry: 'OI-0002'
+        onlyEntries: false
+        minEntries: 1
+
+- description: guide smoke — autonomous, work the open items chains groom and develop unasked
+  vars:
+    input: file://_fixtures/autonomous-open-items.md
+  metadata:
+    playbook: specs
+    step: guide
+    fixture: autonomous-open-items
+    tier: smoke
+  assert:
+    # NO-SPECS-WRITE — the items go to groom; nothing lands under a specs/ dir
+    - type: javascript
+      value: file://../../_lib/asserts/files.js
+      config:
+        expect: []
+        allow:
+          - '^(?!(?:.*/)?specs/)'
+        noOthers: true
+    # GROOM-THEN-DEVELOP — groom names both ids, develop follows
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        entry: '/playbook groom'
+        onlyEntries: false
+        minEntries: 1
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        entry: 'OI-0001'
+        onlyEntries: false
+        minEntries: 1
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        entry: 'OI-0002'
+        onlyEntries: false
+        minEntries: 1
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        entry: '/playbook develop'
+        onlyEntries: false
+        minEntries: 1
+    # ASKS-NOTHING — no line ends in a question, an item title quoted by id aside
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        entry: '^(?!.*OI-\d{4}).*\?\W*$'
+        onlyEntries: false
+        minEntries: 0
+        maxEntries: 0

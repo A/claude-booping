@@ -15,6 +15,9 @@ from booping.context.project import Project
 from booping.context.review_template import ReviewTemplate
 from booping.context.skill import Skill
 from booping.rendering import get_plugin_root
+from booping.specs.rules import RuleSkip, TargetedRule, load_targeted_rules
+from booping.specs.tiers import Tier, resolve_tiers
+from booping.specs.values import SpecValue, has_specs, load_values
 
 
 class Context(BaseModel):
@@ -23,7 +26,13 @@ class Context(BaseModel):
     # override a pinned render passed. Queries resolve their glob roots against it.
     vault: Path | None = None
     lessons: list[Lesson] = []
-    targeted_lessons: list[Lesson] = []
+    # Resolved by `resolve_tiers`, the same call `booping specs` makes.
+    specs_tiers: list[Tier] = []
+    targeted_rules: list[TargetedRule] = []
+    rule_skips: list[RuleSkip] = []
+    # The project tier exists and holds a type directory: the specs guidance renders.
+    project_specs: bool = False
+    spec_values: list[SpecValue] = []
     plan_templates: list[PlanTemplate] = []
     review_templates: list[ReviewTemplate] = []
     skills: dict[str, Skill] = {}
@@ -93,13 +102,26 @@ class Context(BaseModel):
         skills = Skill.load_all(root)
         agents = Agent.load_all(root)
         playbooks = Playbook.load_all(vault, pinned_home_dir, root)
-        targeted_lessons = Lesson.load_targeted(pinned_home_dir, vault)
+        specs_tiers = resolve_tiers(
+            cfg,
+            plugin_root=root,
+            home_dir=home_dir,
+            repo=project.repo_directory if project is not None else None,
+            vault=vault,
+            vault_override=vault_override is not None,
+        )
+        targeted_rules, rule_skips = load_targeted_rules(specs_tiers)
+        project_specs = any(t.name == "project" and has_specs(t) for t in specs_tiers)
 
         return cls(
             project=project,
             vault=vault,
+            specs_tiers=specs_tiers,
             lessons=lessons,
-            targeted_lessons=targeted_lessons,
+            targeted_rules=targeted_rules,
+            rule_skips=rule_skips,
+            project_specs=project_specs,
+            spec_values=load_values(specs_tiers) if project_specs else [],
             plan_templates=plan_templates,
             review_templates=review_templates,
             skills=skills,

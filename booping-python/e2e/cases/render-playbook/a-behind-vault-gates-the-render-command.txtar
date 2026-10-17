@@ -1,6 +1,7 @@
 A marker with no `latest_migration` records watermark -1, which is behind whatever the plugin ships,
 so `booping render` prints the remedy notice in place of the render — and still exits 0, because the
-caller is a skill-load shell whose only channel is stdout.
+caller is a skill-load shell whose only channel is stdout. No tier overrides the core default
+`core.auto_migrate: true`, so the notice is the order to migrate unattended and resume.
 
 The shipped id is wildcarded: the case depends on at least one migration shipping, never on how many.
 The template is a real one under cwd, named absolutely because a relative path would resolve against
@@ -15,5 +16,5 @@ booping render /proc/self/cwd/probe.md.j2
 -- exit --
 0
 -- stdout --
-**STOP — tell the user:** this project is behind on booping migrations (recorded id -1, latest shipped [..]). Run `/playbook migrate` to bring the vault current, then retry.
+**Auto-migrate:** this project is behind on booping migrations (recorded id -1, latest shipped [..]). Run `/playbook migrate` now — `core.auto_migrate` is on, so its approval is taken as given; its question about uncommitted work is still asked — then continue with the original request.
 -- stderr --

@@ -1,10 +1,11 @@
-Under `jinja: true` the two templatable step frontmatter fields — `summary:` and `detached:` — are
-rendered through the context before the sections are built, so `one`'s evaluated summary shows in
-both the step table and its section, and its evaluated `detached:` picks the named agent.
+Under `jinja: true` the three templatable step frontmatter fields — `summary:`, `detached:` and
+`review_gate:` — are rendered through the context before the sections are built, so `one`'s
+evaluated summary shows in both the step table and its section, its evaluated `detached:` picks the
+named agent, and its evaluated `review_gate:` shows in the table and its delegation order.
 
 `two` names a config key that does not exist: `detached:` renders to the empty string and the step
 degrades to runner-performed — instruction bullets and a fetch line, no delegation sentence and no
-agent with an empty name.
+agent with an empty name. Its `review_gate:` renders empty too, which means no gate at all.
 
 -- fixtures/xdg/booping/config.yaml --
 core:
@@ -28,6 +29,7 @@ graph:
 name: one
 summary: Split past {{ config.core.fx_threshold }} SP
 detached: '{{ config.core.fx_agent }}'
+review_gate: 'confirm past {{ config.core.fx_threshold }} SP'
 ---
 
 One body.
@@ -36,6 +38,7 @@ One body.
 name: two
 summary: Plain summary.
 detached: '{{ config.core.no_such_key }}'
+review_gate: '{{ config.core.no_such_key }}'
 ---
 
 Two body.
@@ -52,12 +55,14 @@ Execute the steps in the most effective order considering their dependencies.
 
 | Step | Dependencies | Summary | Review gate |
 | --- | --- | --- | --- |
-| `one` | — | Split past 7 SP | — |
+| `one` | — | Split past 7 SP | confirm past 7 SP |
 | `two` | `one` | Plain summary. | — |
 
 ## Step: One
 
 Split past 7 SP
+
+Review gate: stop after this step — "confirm past 7 SP"; continue only on explicit user confirmation.
 
 Tell the `fx-runner` agent to get its instructions by calling this command: `booping render-playbook fx-jinja-fields --step one`.
 

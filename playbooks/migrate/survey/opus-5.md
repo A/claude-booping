@@ -13,15 +13,17 @@ end the run: nothing below resolves without it.
 {% if pending %}
 ## Work in flight
 
-Name what is uncommitted across the repo and the vault — counts plus the notable paths, not a full
-listing — and ask the user to let you commit both before anything is transformed, so every
+Name the current branch and what is uncommitted across the repo and the vault — counts plus the
+notable paths, not a full listing — and ask the user to let you commit both before anything is transformed, so every
 migration lands on a clean slate and stays independently revertable. Commit on confirmation. Skip
 the ask when nothing is uncommitted.
 
 Ask and resolve this here, inside the step: the commit has to land before the first migration runs,
-which is why it cannot wait for the approval below. It is not the review gate and it never blocks —
-a user who declines still proceeds. Detection and committing are yours at execution time; no git
-mechanics belong in this instruction.
+which is why it cannot wait for the approval below. It is not the review gate, and it is always
+asked: name the current branch with the uncommitted work, and wait for the answer whatever
+`core.auto_migrate` says, and in an autonomous run too — neither answers it for the user. A user who declines
+still proceeds. Detection and committing are yours at execution time; no git mechanics belong in
+this instruction.
 
 ## The pending set
 
@@ -38,10 +40,16 @@ ask when there is one, then the table above verbatim under a
   stopped and any single migration can be reverted on its own
 - a migration that fails stops the run there: it gets named, with a proposed fix rather than a skip
 
+{% if config.core.auto_migrate is true -%}
+Do not ask for approval: `core.auto_migrate` is on, so applying the whole set is approved as given.
+Close on one line saying so — `Applying all {{ pending | length }} (core.auto_migrate is on).` — and
+continue the run without waiting; nothing is asked per migration afterwards.
+{%- else -%}
 Close on one question covering the whole set — `Apply all {{ pending | length }}?` —
 asked in **prose**, in the message itself, never through `AskUserQuestion`. That approval authorises
 every migration listed; nothing is asked per migration afterwards. Wait for the answer before the
 run continues.
+{%- endif %}
 
 ## Return
 
@@ -51,7 +59,7 @@ run continues.
 ## Notes:
 - pending: {{ pending | length }} — {{ pending | map(attribute='id') | join(', ') }}
 - committed repo and vault before proceeding (user confirmed)
-- approved: apply the whole pending set
+- approved: apply the whole pending set{% if config.core.auto_migrate is true %} (core.auto_migrate){% endif %}
 ```
 
 `## Changed:` stays empty — this step writes no file. Give each pending id its title in the

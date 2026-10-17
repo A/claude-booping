@@ -1,0 +1,40 @@
+A state machine that declares no `artifact:` matches no file by its path, so a move naming no
+`--playbook` finds no candidate and is refused, asking for the flag.
+
+
+-- fixtures/home/Claude/_playbooks/fx-targetless/playbook.md --
+---
+name: fx-targetless
+title: Targetless
+summary: States-bearing fixture whose machine declares no artifact.
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-targetless/playbook.yaml --
+state: main
+graph:
+  only: []
+
+states:
+  main:
+    initial: reviewing
+    statuses:
+      reviewing:
+        transitions:
+          - to: reviewed
+            when: the review is written
+      reviewed: {terminal: true}
+-- fixtures/home/Claude/_playbooks/fx-targetless/only/prompt.md --
+---
+summary: Only step.
+---
+
+Only body.
+-- fixtures/cwd/run/.keep --
+-- cmd --
+booping transition run/review.md reviewing
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: {CWD}/run/review.md matches no machine artifact; pass --playbook

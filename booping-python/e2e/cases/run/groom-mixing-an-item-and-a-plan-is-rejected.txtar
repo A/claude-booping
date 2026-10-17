@@ -1,0 +1,48 @@
+`groom` takes item ids or one plan; an item beside a plan is rejected. Exit 1, no record written.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+macro_stubs:
+  core.macros.date +%Y%m%d-%H%M%S: "20261015-120000"
+  core.macros.date +%Y-%m-%d %H:%M: "2026-10-15 12:00"
+core:
+  run:
+    command:
+      - sh
+      - -c
+      - |
+        printf 'arg: %s\n' "$@"
+        echo "env: $CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS"
+        if read -r line; then echo "stdin: data"; else echo "stdin: empty"; fi
+        exit 0
+      - fake
+-- fixtures/cwd/vault/plans/p1/index.md --
+---
+title: P1
+status: ready-for-dev
+---
+-- fixtures/cwd/vault/open-items/OI-0001.md --
+---
+id: OI-0001
+title: "Gap OI-0001"
+status: open
+direction: clarify
+record: null
+source: manual
+plan: null
+created_at: 2026-10-01
+closed_at: null
+reason: null
+---
+
+# Gap OI-0001
+-- cmd --
+sh -c 'booping run groom OI-0001 vault/plans/p1; s=$?; find . -path "*runs*"; exit $s'
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: groom takes item ids or one plan, not both

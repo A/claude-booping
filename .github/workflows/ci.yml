@@ -34,9 +34,6 @@ jobs:
       - name: Test
         run: just pytest
 
-      - name: Contract corpus
-        run: just e2e
-
   snapshots:
     runs-on: ubuntu-latest
     steps:
@@ -83,14 +80,25 @@ jobs:
       - name: Cache cargo
         uses: Swatinem/rust-cache@v2
         with:
-          key: markdown-checker-0.1.1
+          key: markdown-checker-0.1.2
           cache-targets: false
 
       - name: Install mdcheck
-        run: cargo install markdown-checker --version 0.1.1 --locked
+        run: cargo install markdown-checker --version 0.1.2 --locked
 
       - name: Verify mdcheck is on PATH
         run: mdcheck --version
 
       - name: Structural checks over rendered reports
         run: just mdcheck
+
+      - name: Specs records
+        # The .booping marker is per checkout (git-ignored); CI writes one so the project tier
+        # (this repo's in-repo vault) resolves, at the latest shipped migration.
+        run: |
+          latest=$(ls migrations | sort | tail -n 1 | cut -d_ -f1 | sed 's/^0*//')
+          printf 'project_name: claude-booping\nvault_path: vault\nlatest_migration: %s\n' "$latest" > .booping
+          just specs-check
+
+      - name: Contract corpus
+        run: just e2e

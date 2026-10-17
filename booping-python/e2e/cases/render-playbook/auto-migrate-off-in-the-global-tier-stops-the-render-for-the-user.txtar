@@ -1,0 +1,17 @@
+With `core.auto_migrate: false` in the global tier a behind vault gets today's STOP notice on
+`booping render` — addressed to the user, not an order to migrate unattended — and still exits 0.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  auto_migrate: false
+-- fixtures/cwd/.booping --
+project_name: probe
+-- fixtures/cwd/probe.md.j2 --
+rendered body
+-- cmd --
+booping render /proc/self/cwd/probe.md.j2
+-- exit --
+0
+-- stdout --
+**STOP — tell the user:** this project is behind on booping migrations (recorded id -1, latest shipped [..]). Run `/playbook migrate` to bring the vault current, then retry.
+-- stderr --

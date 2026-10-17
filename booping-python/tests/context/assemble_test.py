@@ -46,9 +46,7 @@ def test_assemble_no_project(tmp_path: Path) -> None:
     assert ctx.config != {}
 
 
-def test_assemble_no_project_merges_global(
-    tmp_path: Path, isolated_xdg_config_home: Path
-) -> None:
+def test_assemble_no_project_merges_global(tmp_path: Path, isolated_xdg_config_home: Path) -> None:
     """No-project branch (outside any .booping) still merges the global tier."""
     plugin_root = get_fixture_path("plugin-root-minimal")
     _write_global(isolated_xdg_config_home, {"sprint": {"default_threshold_sp": 77}})
@@ -57,9 +55,7 @@ def test_assemble_no_project_merges_global(
     assert ctx.config["sprint"]["default_threshold_sp"] == 77
 
 
-def test_assemble_home_dir_drives_vault(
-    tmp_path: Path, isolated_xdg_config_home: Path
-) -> None:
+def test_assemble_home_dir_drives_vault(tmp_path: Path, isolated_xdg_config_home: Path) -> None:
     """Global `home_dir` + no `vault_path:` → Project.directory == <home_dir>/<name>."""
     plugin_root = get_fixture_path("plugin-root-minimal")
     vault_base = tmp_path / "vaults"
@@ -95,54 +91,6 @@ def test_assemble_default_vault_without_global(tmp_path: Path) -> None:
     ctx = Context.assemble(start=repo, plugin_root=plugin_root)
     assert ctx.project is not None
     assert ctx.project.directory == Path.home() / "Claude" / "dproj"
-
-
-def _write_targeted_lesson(root: Path, name: str, target: str) -> None:
-    lessons = root / "_lessons"
-    lessons.mkdir(parents=True, exist_ok=True)
-    (lessons / name).write_text(f"---\ntargets:\n  - {target}\n---\nbody\n")
-
-
-def test_assemble_targeted_lessons_from_both_roots(
-    tmp_path: Path, isolated_xdg_config_home: Path
-) -> None:
-    plugin_root = get_fixture_path("plugin-root-minimal")
-    vault_base = tmp_path / "vaults"
-    _write_global(isolated_xdg_config_home, {"home_dir": str(vault_base)})
-    repo = tmp_path / "repo"
-    repo.mkdir()
-    (repo / ".booping").write_text("project_name: tl\n")
-    vault = vault_base / "tl"
-    vault.mkdir(parents=True)
-    _write_targeted_lesson(vault_base, "0001_global.md", "groom")
-    _write_targeted_lesson(vault, "0002_project.md", "agent:booping-developer")
-
-    ctx = Context.assemble(start=repo, plugin_root=plugin_root)
-    assert [lesson.id for lesson in ctx.targeted_lessons] == ["0001_global", "0002_project"]
-    assert [lesson.scope for lesson in ctx.targeted_lessons] == ["global", "project"]
-
-
-def test_assemble_targeted_lessons_global_only_without_project(
-    tmp_path: Path, isolated_xdg_config_home: Path
-) -> None:
-    plugin_root = get_fixture_path("plugin-root-minimal")
-    vault_base = tmp_path / "vaults"
-    vault_base.mkdir()
-    _write_global(isolated_xdg_config_home, {"home_dir": str(vault_base)})
-    _write_targeted_lesson(vault_base, "0001_global.md", "groom")
-
-    ctx = Context.assemble(start=tmp_path, plugin_root=plugin_root)
-    assert ctx.project is None
-    assert [lesson.id for lesson in ctx.targeted_lessons] == ["0001_global"]
-
-
-def test_assemble_targeted_lessons_empty_without_roots(
-    tmp_path: Path, isolated_xdg_config_home: Path
-) -> None:
-    plugin_root = get_fixture_path("plugin-root-minimal")
-    _write_global(isolated_xdg_config_home, {"home_dir": str(tmp_path / "vaults")})
-    ctx = Context.assemble(start=tmp_path, plugin_root=plugin_root)
-    assert ctx.targeted_lessons == []
 
 
 def _write_playbook(root: Path, name: str) -> None:
@@ -204,27 +152,6 @@ def test_assemble_without_override_keeps_global_playbooks(
     assert [pb.name for pb in ctx.playbooks] == ["global-only"]
 
 
-def test_assemble_vault_override_pins_targeted_lessons(
-    tmp_path: Path, isolated_xdg_config_home: Path
-) -> None:
-    plugin_root = get_fixture_path("plugin-root-minimal")
-    vault_base = tmp_path / "vaults"
-    vault_base.mkdir()
-    _write_global(isolated_xdg_config_home, {"home_dir": str(vault_base)})
-    _write_targeted_lesson(vault_base, "0001_global.md", "groom")
-    vault = tmp_path / "pinned"
-    vault.mkdir()
-    _write_targeted_lesson(vault, "0002_project.md", "groom")
-
-    pinned = Context.assemble(
-        start=tmp_path, plugin_root=plugin_root, vault_override=vault
-    )
-    assert [lesson.id for lesson in pinned.targeted_lessons] == ["0002_project"]
-
-    unpinned = Context.assemble(start=tmp_path, plugin_root=plugin_root)
-    assert [lesson.id for lesson in unpinned.targeted_lessons] == ["0001_global"]
-
-
 def test_assemble_project_tier_home_dir_has_no_effect(
     tmp_path: Path, isolated_xdg_config_home: Path
 ) -> None:
@@ -263,3 +190,41 @@ def test_booping_initialized_true_with_global_config(
     _write_global(isolated_xdg_config_home, {"home_dir": str(tmp_path / "vaults")})
     ctx = Context.assemble(start=tmp_path, plugin_root=plugin_root)
     assert ctx.booping_initialized is True
+
+
+def _write_rule(specs: Path, name: str) -> None:
+    path = specs / "rule" / name
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("---\ntitle: R\nstatus: accepted\ntargets: [groom]\nbrief: B.\n---\n")
+
+
+def test_assemble_vault_override_drops_global_tier_rules(
+    tmp_path: Path, isolated_xdg_config_home: Path
+) -> None:
+    plugin_root = get_fixture_path("plugin-root-minimal")
+    vault_base = tmp_path / "vaults"
+    core_specs = tmp_path / "core-specs"
+    tiers = {
+        "core": {"namespace": "booping", "path": str(core_specs)},
+        "global": {"namespace": "me", "path": "_specs"},
+    }
+    _write_global(
+        isolated_xdg_config_home,
+        {"home_dir": str(vault_base), "core": {"specs": {"tiers": tiers}}},
+    )
+    _write_rule(core_specs, "0001-core.md")
+    _write_rule(vault_base / "_specs", "0002-global.md")
+    vault = tmp_path / "pinned"
+    vault.mkdir()
+    (vault / "config.yaml").write_text(yaml.dump({"core": {"specs": {"tiers": tiers}}}))
+
+    pinned = Context.assemble(start=tmp_path, plugin_root=plugin_root, vault_override=vault)
+    assert [rule.ref for rule in pinned.targeted_rules] == ["booping:rule/0001"]
+
+    unpinned = Context.assemble(start=tmp_path, plugin_root=plugin_root)
+    assert unpinned.project is None
+    assert [rule.ref for rule in unpinned.targeted_rules] == [
+        "booping:rule/0001",
+        "me:rule/0002",
+    ]
+    assert unpinned.rule_skips == []

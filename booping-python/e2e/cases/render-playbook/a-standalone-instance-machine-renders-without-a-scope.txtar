@@ -1,0 +1,76 @@
+A `standalone: true` states entry with `{instance}` in its artifact and no graph scope
+referencing it loads with neither the malformed-entry STOP nor the unreferenced-machine
+Note; its `## State` block names it standalone instead of a referencing scope.
+
+-- fixtures/home/Claude/_playbooks/fx-standalone-state/playbook.md --
+---
+name: fx-standalone-state
+title: Standalone State
+---
+
+Preamble prose for the standalone-state playbook.
+-- fixtures/home/Claude/_playbooks/fx-standalone-state/playbook.yaml --
+graph:
+  a: []
+
+states:
+  item:
+    standalone: true
+    artifact: items/{instance}.md
+    initial: open
+    statuses:
+      open:
+        transitions:
+          - to: closed
+            when: the item was closed
+      closed: {terminal: true}
+-- fixtures/home/Claude/_playbooks/fx-standalone-state/a/prompt.md --
+---
+name: a
+summary: a summary
+---
+
+a body
+-- cmd --
+booping render-playbook fx-standalone-state
+-- exit --
+0
+-- stdout --
+Preamble prose for the standalone-state playbook.
+
+## Playbook Steps
+
+Execute the steps in the most effective order considering their dependencies.
+
+| Step | Dependencies | Summary | Review gate |
+| --- | --- | --- | --- |
+| `a` | — | a summary | — |
+
+## State
+
+Run state is persisted in artifacts under the run workdir. Only `booping transition` writes it — never hand-edit an artifact's `status`.
+
+Read the whole run's frontier before starting or resuming:
+
+```
+booping state <run workdir>/items/<slug>.md --playbook fx-standalone-state
+```
+
+### State: item
+
+- Referenced by: no graph scope — standalone, moved only by `--state item` calls
+- Artifact: `items/{instance}.md` (relative to the run workdir)
+- Initial status: `open`
+- Advance: `booping transition <run workdir>/items/<slug>.md <to> --playbook fx-standalone-state --state item`
+
+| Status | To | When | Gates |
+| --- | --- | --- | --- |
+| `open` | `closed` | the item was closed | — |
+| `closed` | *(terminal)* | — | — |
+
+## Step: A
+Instructions:
+- Summary: a summary
+
+Run `booping render-playbook fx-standalone-state --step a` for content.
+-- stderr --

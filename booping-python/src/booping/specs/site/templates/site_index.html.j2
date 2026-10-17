@@ -1,0 +1,13 @@
+{% extends "base.html.j2" %}
+{% block main %}
+<h1>{{ title }}</h1>
+{% if projects %}
+<ul class="rows">
+{% for project in projects %}
+<li class="row noref"><a class="t" href="{{ project.url }}">{{ project.name }}</a>{% if project.description %}<span class="s">{{ project.description }}</span>{% endif %}</li>
+{% endfor %}
+</ul>
+{% else %}
+<p>{{ labels.ui("no_projects") }}</p>
+{% endif %}
+{% endblock %}

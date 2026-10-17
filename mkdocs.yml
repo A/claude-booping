@@ -19,6 +19,8 @@ nav:
   - Vault: vault.md
   - Playbooks: playbook.md
   - Project config: project_config.md
+  - Specs: specs.md
+  - Specs site: /claude-booping/specs-site/
   - Integrating external agents: integrating-external-agents.md
   - Recipes:
       - Wiring external agents: recipes/external-agents.md
@@ -29,3 +31,5 @@ nav:
       - code-review playbook: code_review.md
       - retro playbook: retro.md
       - learn playbook: learn.md
+      - specs playbook: specs_playbook.md
+      - project-manager playbook: project_manager.md

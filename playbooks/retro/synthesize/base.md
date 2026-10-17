@@ -36,8 +36,8 @@ items.
 The user reads a compact chat summary — enough to judge framing and decide, never the full body.
 Follow the [retro pre-save summary format](${CLAUDE_PLUGIN_ROOT}/docs/retro_summary_format.md):
 header, verdict line, what went well, the issue table (`#`, `Issue`, `Cause`, `Impact`,
-`Lesson touched`), the action-item table (`#`, `Action`, `Owner`, `Status`), then the takeaways,
-in that order and under ~40 lines. An empty table renders as `_No accepted issues._` /
+`Lesson touched`, `Source`), the action-item table (`#`, `Action`, `Owner`, `Status`, `Source`),
+then the takeaways, in that order and under ~40 lines. An empty table renders as `_No accepted issues._` /
 `_No action items._`.
 
 No frontmatter, no save path, no commit command, no candidate-lessons section — those are `save`'s
@@ -51,8 +51,9 @@ never an `AskUserQuestion` call:
 > Save this retrospective? Approving writes it to the plan directory and moves the plan on.
 > Tell me what to change instead and I will re-draft, or say cancel and nothing is written.
 
-**Approval** — "save it" counts, silence never does. Record it in the user's own words: `save`
-clears the exit edge's first gate on it.
+**Approval** — "save it" counts, silence never does. It accepts the numbered rows only; a row
+the user questioned and left unanswered is saved marked `[clarify]`. Record the approval in the
+user's own words: `save` clears the exit edge's first gate on it.
 
 **Refine** loops in place, unbounded, and never advances on its own: adjust framing, wording or
 which issues land, then re-post the summary **whole** with what changed marked as changed, and

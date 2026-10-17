@@ -50,9 +50,7 @@ def test_log_creates_parent_directory(tmp_path: Path) -> None:
     assert (tmp_path / ".booping.log").exists()
 
 
-def test_render_subprocess_integration_log(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_render_subprocess_integration_log(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     repo_dir = tmp_path / "repo"
     repo_dir.mkdir()
     # A marker behind on migrations is gated before it ever renders (and so before it

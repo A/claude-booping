@@ -9,8 +9,9 @@ both the plan document and the machine's artifact. The machine attaches to whate
 already on the file; it never bootstraps or creates it.
 
 **Hard rules — hold for the whole run:**
-- The runner never writes application code. Every task is delegated to a worker agent, even a
-  one-line change.
+- The runner never writes application code: every task is delegated to a worker agent, even a
+  one-line change. The one exception is a fix to a failing check, under
+  [Fixing a failing check yourself](#fixing-a-failing-check-yourself).
 - No scope additions: the sprint delivers exactly the plan's milestones and tasks, nothing more.
 - `develop-loop` works one milestone group at a time — brief a worker, close the group, then
   move to the next. Never two workers on one sprint branch at once.
@@ -25,7 +26,7 @@ itself stays yours. Never delegate to an agent that is not on this list.
 
 | agent | good for | bad for |
 | --- | --- | --- |
-| `booping:booping-developer` | All coding tasks — always delegate; never edit application code from the orchestrator | — |
+| `booping:booping-developer` | All coding tasks — every milestone, and every fix past the small-fix cap (`core.sprint.inline_fix_sp`) the orchestrator may apply itself | — |
 | `booping:booping-researcher` | Phase 0 drift spot-check: given a large set of plan-named files, determine whether actual file shape matches the plan's assumptions | Milestone-diff review — that stays in the skill; Single-file reads — call Read directly |
 
 
@@ -37,6 +38,13 @@ itself stays yours. Never delegate to an agent that is not on this list.
 - Never manually break markdown lines. Write each paragraph, bullet, or table row as one line and
   let the renderer wrap it — hard line breaks turn into mid-sentence breaks after any later edit.
 
+## Rules
+
+The following 2 rule(s) apply to this playbook. Never silently violate one; conflict → stop and flag. Read a rule's record when its brief is not enough.
+
+- Settle every open question with the user during grooming; in develop, stop only for force majeure, not for what grooming should have asked. [booping:rule/0004](${CLAUDE_PLUGIN_ROOT}/specs/rule/0004-questions-settled-in-grooming.md)
+- When the user corrects you — rejects a proposal, rewrites an output, says it is wrong, answers a gate other than you suggested — run `booping create core.corrections.template {vault}/corrections --set name={step} --set step={playbook}/{step} --set did=… --set said='{the user's words verbatim}' --set artifact={run artefact, vault-relative}`, with `--set why=…` when the user states it; a plain confirmation is not a correction. [booping:rule/0031](${CLAUDE_PLUGIN_ROOT}/specs/rule/0031-corrections-are-logged.md)
+
 ## Playbook Steps
 
 Execute the steps in the most effective order considering their dependencies.
@@ -44,7 +52,7 @@ Execute the steps in the most effective order considering their dependencies.
 | Step | Dependencies | Summary | Review gate |
 | --- | --- | --- | --- |
 | `intake` | — | Adopt the plan the preamble resolved — validate its `status:` against an entry transition, advance it to `ready-for-dev` without asking when it entered at `awaiting-approval`, then check plan validity against the repo's current commit: cheap summary first, the plan-named diff only on the user's word; trivial drift patched in place, non-trivial drift halted back to grooming. | — |
-| `provision` | `intake` | Set the sprint up — pick the branch from the plan's task type per the branch conventions, propose a kebab-case name and create it off the repo's current branch only after the user confirms; then settle the milestone groups the briefings will cover, within the configured ceiling, and fire the `ready-for-dev` → `in-progress` transition. | The user confirms the branch name before the branch is created — asked through `AskUserQuestion`, never as chat prose; a name the user rewrites is used verbatim, and nothing touches git until the answer arrives. The milestone groups are internal — settled by the step, reported in its return, never put to the user |
+| `provision` | `intake` | Set the sprint up — pick the branch from the plan's task type per the branch conventions, propose a kebab-case name and create it off the repo's current branch only after the user confirms; then settle the milestone groups the briefings will cover, packed under the configured SP cap, and fire the `ready-for-dev` → `in-progress` transition. | The user confirms the branch name before the branch is created — asked through `AskUserQuestion`, never as chat prose; a name the user rewrites is used verbatim, and nothing touches git until the answer arrives. The milestone groups are internal — settled by the step, reported in its return, never put to the user |
 | `milestones` *(subgraph)* | `provision` | once per milestone file in the plan's `milestones/`, in `id` order | — |
 | `develop-loop` *(in milestones)* | — | Run the sprint group by group — one briefing per group to the worker agent, one worker at a time on the sprint branch; on each report verify against the milestone's DoD and its plan-authored Verify, flip the checkboxes, task rows and milestone status, commit per milestone, refresh and commit the vault snapshot, and report what shipped before the next group. | — |
 | `verify` | `milestones` | Run the project's guardrails over the finished sprint once — tests, lint, typecheck, formatter, whatever else must hold for a PR to open without CI failing — plus the plan's own bookkeeping, every DoD checkbox `[x]` and every milestone `done`, read off disk, and return what passed and what failed; no code-quality judgement, no fixes applied here. | — |
@@ -52,12 +60,12 @@ Execute the steps in the most effective order considering their dependencies.
 
 ## State
 
-Run state is persisted in artifacts under the run workdir. Only `booping playbook-transition` writes it — never hand-edit an artifact's `status`.
+Run state is persisted in artifacts under the run workdir. Only `booping transition` writes it — never hand-edit an artifact's `status`.
 
 Read the whole run's frontier before starting or resuming:
 
 ```
-booping playbook-state develop --workdir <run workdir>
+booping state <run workdir>/index.md --playbook develop
 ```
 
 ### State: run
@@ -65,7 +73,7 @@ booping playbook-state develop --workdir <run workdir>
 - Referenced by: outer graph
 - Artifact: `index.md` (relative to the run workdir)
 - Initial status: `awaiting-approval`
-- Advance: `booping playbook-transition develop <to> --workdir <run workdir>`
+- Advance: `booping transition <run workdir>/index.md <to> --playbook develop`
 
 | Status | To | When | Gates |
 | --- | --- | --- | --- |
@@ -85,7 +93,7 @@ booping playbook-state develop --workdir <run workdir>
 - Referenced by: subgraph `milestones`
 - Artifact: `milestones/{instance}/{instance}.md` (relative to the run workdir)
 - Initial status: `pending`
-- Advance: `booping playbook-transition develop <to> --state milestone --instance <slug> --workdir <run workdir>`
+- Advance: `booping transition <run workdir>/milestones/<slug>/<slug>.md <to> --playbook develop --state milestone`
 
 | Status | To | When | Gates |
 | --- | --- | --- | --- |
@@ -184,9 +192,10 @@ Enumerate the milestones in execution order — never from `index.md`'s table, w
 booping query --glob {plan-dir}/milestones/*/M*.md --columns id,title,sp,status --sort id
 ```
 
-Group consecutive milestones into agent briefings: each briefing covers **up to 2 milestone(s)**.
-Group only when the milestones share enough context that one agent handling them in sequence is
-cheaper than spinning a fresh agent per milestone. Otherwise keep them one-per-briefing.
+Pack milestones into agent briefings greedily, in that order: a group takes the next milestone
+while the group's summed `sp` stays at or under **15 SP**, and closes otherwise.
+A group is a contiguous run of milestones in `id` order. A single milestone is always a valid group
+and is never split, even when its `sp` alone exceeds the cap.
 
 The groups are yours to settle — reported in the return, never put to the user for confirmation.
 Settle them as a table you keep for the return, milestones named by their directory so
@@ -212,7 +221,7 @@ With the branch created and the groups settled, advance the run per the `## Stat
 
 - branch: `{name}` created off the current branch `{base}`, name confirmed by the user
 - transition: {the transition report verbatim}
-- groups: {n} briefings over {m} milestones (ceiling {c}) — G1 `M01-{kebab}`+`M02-{kebab}`, G2 `M03-{kebab}`
+- groups: {n} briefings over {m} milestones (cap {c} SP) — G1 `M01-{kebab}`+`M02-{kebab}`, G2 `M03-{kebab}`
 - drift: {what intake raised and whether anything is outstanding}
 
 ```
@@ -233,18 +242,18 @@ Instructions:
 ## Step: Develop Loop
 # Run the sprint, milestone by milestone
 
-This step runs once per milestone, in `id` order; the instance's milestone is the one its `--instance` names. Provision's groups decide only how briefings are batched: a group's **first** instance composes and delegates one briefing covering that whole group, and the group's later instances ride that briefing straight to their own close.
+This step runs once per milestone, in `id` order; the instance's milestone is the one its milestone file path names. Provision's groups decide only how briefings are batched: a group's **first** instance composes and delegates one briefing covering that whole group, and the group's later instances ride that briefing straight to their own close.
 
 Each milestone owns a directory `{plan-dir}/milestones/{instance}/` holding its milestone file `{instance}.md` — the contract — and, once the runner has findings for it, `feedback.md`. `{instance}` is `M{nn}-{kebab}`.
 
-Milestones run **sequentially** — never two workers on one sprint branch, and never edit application code yourself. Don't use git worktrees.
+Milestones run **sequentially** — never two workers on one sprint branch, and never write a milestone's code yourself. Don't use git worktrees.
 
 Provision already fired the `ready-for-dev` → `in-progress` edge. On a resume that still finds the plan at `ready-for-dev`, take that edge before the first delegation; otherwise never touch it.
 
 Milestone transitions are the `## State` section's `milestone` machine, invoked as:
 
 ```
-booping playbook-transition develop {to} --state milestone --instance {instance} --workdir {plan-dir}
+booping transition {plan-dir}/milestones/{instance}/{instance}.md {to} --playbook develop --state milestone
 ```
 
 The edge's hook regenerates `index.md`'s `## Milestones` table and its `sp` — never edit either by hand.
@@ -273,13 +282,14 @@ The edge's hook regenerates `index.md`'s `## Milestones` table and its `sp` — 
    One block per milestone, in the same order: what was done in one paragraph, the files touched, and the `## Verify` command with its verdict. Leave the work uncommitted — committing is the runner's. No diffs, no pasted code, no command logs.
    ```
 
-   Paths only: never paste a milestone's goal, tasks, DoD or Verify text into the briefing — the worker reads its contract itself. Briefings carry no lesson paths either; the worker gets its lesson context from its own extension file.
+   Paths only: never paste a milestone's goal, tasks, DoD or Verify text into the briefing — the worker reads its contract itself. Briefings carry no rule paths either; the worker gets its project shaping from the `agent:{id}` rules injected into its own body.
+   A code path a milestone's tasks name outside the attached repo is delegated only once the user has confirmed it for this plan; a worker is never handed a vault path to edit.
 4. Delegate the briefing to the worker agent named in [Available Agents](#available-agents) — always delegate, even for a one-line change.
 5. Never resurrect a worker by ID for the next group. Each group gets a fresh agent with empty context.
 
 ## Closing a milestone
 
-Once the briefing that covers this instance's milestone has come back, the worker has already run the milestone's `## Verify` and left its work uncommitted in the working tree. Never re-run that command, and never edit application code yourself — but the commit is yours: nothing reaches the branch that has not passed the DoD.
+Once the briefing that covers this instance's milestone has come back, the worker has already run the milestone's `## Verify` and left its work uncommitted in the working tree. Never re-run that command, and never edit application code yourself outside [Fixing a failing check yourself](#fixing-a-failing-check-yourself) — but the commit is yours: nothing reaches the branch that has not passed the DoD, an autonomous run's own-fix commit order excepted.
 
 1. Validate the working tree against the milestone file's `## Definition of Done` — `git status --short` and `git diff` (plus `git diff --cached`) over the paths the contract names.
 2. Commit the milestone in the attached repo — one commit per milestone, message format `<agent>: <plan title> <message>`, `<agent>` being the worker that built it. Stage the contract's own paths explicitly; never `git add -A`, never a vault path, never push, never switch or create a branch, never `--amend`.
@@ -290,15 +300,25 @@ Once the briefing that covers this instance's milestone has come back, the worke
 
 A worker that reports its milestone green over a working tree with nothing to stage has shipped nothing: that is a failed attempt, not a closed milestone.
 
+## Fixing a failing check yourself
+
+A DoD gap or a red `## Verify` is yours to fix — no feedback entry, no blocked edge — when the fix is at most **2 SP** on the sprint scale (1: Simple text/config change, no risk; 2: Simple task, predictable, no risk), every file it touches already read by the session that applies it, nothing left to find out — no file still to read, no research, no open question. Anything larger, or with an unknown, takes the fix briefing below.
+
+1. Apply the fix and re-run the same check.
+2. Green → close the milestone as above; the fix rides the milestone commit.
+3. Red → undo your edits and take the fix briefing below.
+
+In an autonomous run the fix gets its own commit instead: first commit the worker's tree as the milestone commit (Closing step 2), then apply the fix and re-run the same check. Green → commit the fix alone, same message format, `<agent>` `runner`, staging only its paths, and close from Closing step 3. Red → `git restore` the fix's paths and take the fix briefing below; the worker's fix then lands as its own commit after the milestone commit.
+
 ## When a milestone does not close
 
-A tree that misses the DoD, a `## Verify` the worker reports red, or a green report over an empty tree goes back as a fix briefing — uncommitted, since the commit only happens on a pass. First write your findings into `feedback.md` beside the milestone file — what you checked, what was wrong, what the next attempt must do — headed by the attempt record line:
+A tree that misses the DoD, a `## Verify` the worker reports red, or a green report over an empty tree, when the fix is not yours above, goes back as a fix briefing — uncommitted, since the commit only happens on a pass. First write your findings into `feedback.md` beside the milestone file — what you checked, what was wrong, what the next attempt must do — headed by the attempt record line:
 
 **Blocked (n/2)**: {what failed}
 
 `n` is one more than the number of `**Blocked (` lines already in that file; that file is the only place attempts are counted.
 
-Take the milestone's blocked edge on the record, and the edge back when the next attempt starts. Brief a **fresh** agent for the fix — the same block, the same contract path, now with the feedback path — routed to `booping:booping-developer` when the milestone was built by some other agent. A rejected attempt left no commit behind, so the fix carries the milestone's whole work into one closing commit — never an amend of an earlier one. After two recorded attempts on the same issue the blocker is unrecoverable: ask the user to approve the abort, then take the run machine's `in-progress` → `fail` edge. No scope additions and no runner-authored fix at any point.
+Take the milestone's blocked edge on the record, and the edge back when the next attempt starts. Brief a **fresh** agent for the fix — the same block, the same contract path, now with the feedback path — routed to `booping:booping-developer` when the milestone was built by some other agent. A rejected attempt left no commit behind, so the fix carries the milestone's whole work into one closing commit — never an amend of an earlier one. After two recorded attempts on the same issue the blocker is unrecoverable: ask the user to approve the abort, then take the run machine's `in-progress` → `fail` edge. No scope additions, and no runner-authored fix beyond the cap above.
 
 ## Return format
 
@@ -318,16 +338,16 @@ Take the milestone's blocked edge on the record, and the edge back when the next
 
 Run the project's guardrails over the finished sprint once — tests, lint, typecheck, formatter, whatever else must hold for a PR to open without CI failing — plus the plan's own bookkeeping, every DoD checkbox `[x]` and every milestone `done`, read off disk, and return what passed and what failed; no code-quality judgement, no fixes applied here.
 
-Tell a sub-agent — model sonnet, effort medium — to get its instructions by calling this command: `booping render-playbook develop --step verify`.
+Tell a sub-agent — model opus, effort medium — to get its instructions by calling this command: `booping render-playbook develop --step verify`.
 
 ## Step: Wrap Up
 # Close the sprint
 
 Verify's report arrives as evidence: which guardrails ran, each verdict, and the plan's own
 bookkeeping — every DoD checkbox and every milestone status. Take it as given. Wrap-up starts
-only on a green verdict — a red one goes back to the runner for fixes and a verify re-run, never
-here. Nothing here re-runs a command, re-reads the plan for completeness, or asks the user
-anything: once wrap-up starts it closes without stopping.
+only on a green verdict — a red one goes back to the runner for fixes (its own within
+develop-loop's cap, else a worker's) and a verify re-run, never here. Nothing here re-runs a
+command, re-reads the plan for completeness, or asks the user anything: once wrap-up starts it closes without stopping.
 
 The order below is fixed.
 

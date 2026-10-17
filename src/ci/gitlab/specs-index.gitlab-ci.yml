@@ -1,0 +1,28 @@
+# Rebuilds the group's specs index on GitLab Pages: every group project tagged SPECS_TOPIC.
+# Consume with:
+#   include:
+#     - remote: https://raw.githubusercontent.com/A/claude-booping/master/src/ci/gitlab/specs-index.gitlab-ci.yml
+# Variables: SPECS_INDEX_TOKEN (masked, read_api), BOOPING_REF, SPECS_TOPIC, SPECS_PAGES_BASE (fallback only:
+# each project's URL comes from its Pages API, so unique domains work).
+# Runs on a pipeline schedule or a manual run.
+pages:
+  image: ghcr.io/astral-sh/uv:python3.12-trixie
+  variables:
+    BOOPING_REPO: https://github.com/A/claude-booping.git
+    BOOPING_REF: master
+    UV_CACHE_DIR: $CI_PROJECT_DIR/.uv-cache
+    SPECS_TOPIC: booping-specs
+  cache:
+    key: booping-uv
+    paths:
+      - .uv-cache
+  script:
+    - git clone --depth 1 --branch "$BOOPING_REF" "$BOOPING_REPO" /tmp/booping
+    - uv run --no-project python /tmp/booping/src/ci/gitlab/list-specs-projects.py > projects.json
+    - /tmp/booping/bin/booping specs site-index --projects - --out public < projects.json
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_PIPELINE_SOURCE == "web"

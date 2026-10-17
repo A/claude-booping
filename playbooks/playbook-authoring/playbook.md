@@ -16,7 +16,7 @@ Run state is harness-managed. The workdir is the target playbook dir `<root>/<sl
 (created before the first transition); the machine artifacts are `_specs/index.md` and
 `_specs/steps/<step>/index.md`. Sub-agents writing a machine artifact preserve its
 frontmatter and never write `status:`, `reviewed_at`, or any stamp — `booping
-playbook-transition` is the only writer. There is no `confirmed:` key: confirmation is the
+transition` is the only writer. There is no `confirmed:` key: confirmation is the
 user's explicit chat signal at a gate, captured as the transition out of an
 `awaiting-*-confirm` status — never run past a gate on silence. The transition's exit hooks
 then stamp `reviewed_at` with the date macro (or, for a subject that cannot carry frontmatter, the

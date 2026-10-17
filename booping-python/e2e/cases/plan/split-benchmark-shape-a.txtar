@@ -1,0 +1,884 @@
+A synthetic plan in a groom benchmark shape (one plan file, `###` milestones with yaml metadata fences,
+sp and depends_on in each fence and the Milestones table), split as drafted: index.md and every
+milestone file are asserted in full, so a change to the cut shows up as a diff.
+
+-- fixtures/cwd/draft.md --
+---
+title: Ridgeline Stratus feed as second XML import source
+type: feature
+status: in-spec
+sp: 16
+summary: Ridgeline's Highmoor upland stations sync into Climabase on a schedule, next to the existing Stratus feed
+created: 2026-10-16
+---
+
+# Ridgeline Stratus feed as second XML import source
+
+> Plan layout note: the request asks for a single plan file, so this file is the plan's `index.md` and holds every milestone body under **Milestone files** (one `### M{n}` section per milestone file). The executor treats each `### M{n}` section as that milestone's own file: frontmatter block, Goal, Scope, Tasks, Definition of Done, References and Verify.
+
+## Context
+
+- **Current state** — `run_xml_import_from_url` (`meteo/tasks.py:101`) downloads one Stratus v3 feed, creates an `ImportStationJob` and queues `run_xml_import_job`, which runs `StratusParser` → `StratusDataMapper` → `XMLImportService` into Climabase v1. The feed URL lives only in a `django_celery_beat` `PeriodicTask` row (DB scheduler, `app/settings.py:311`); no feed is in code. The pipeline assumes **one source**:
+  - `ImportedStation.source_id` is globally `unique=True` (`meteo/models/imported_station.py:9`). A `source` column exists (default `"stratus"`), but nothing reads or writes it.
+  - `DjangoImportedStationRepository.find_stale_automation_stations` (`meteo/services/xml_import/repositories.py:60`) returns every automation row not touched in 24 h, whatever its source. `XMLImportJobRunner.run` (`meteo/services/xml_import/job_runner.py:89`) retires them at the end of each full automation run. If two feeds ran, each run would retire the other feed's stations whenever that feed's last run was more than 24 h earlier. This also covers any manual `import_xml` run of a second URL (that command sets `is_automation_job=True`).
+  - `ImportStationJob` does not record which feed it came from, so the admin history in `portal/admin/import_station_history.py` cannot tell jobs apart.
+- **Feed compatibility (from the 17-station sample `inputs/ridgeline-stratus.xml`)** — the format is standard Stratus v3 (`<root><stratus><feed_version>3</feed_version></stratus><station>…`), so `StratusParser.can_parse` accepts it. There is one blocking incompatibility. `Elevation.ground` and `Elevation.mast` in `meteo/integrations/stratus/dtos/station_dto.py:12-14` are `Optional[int]` **without a default**, and Pydantic v2 makes such fields required. 11 of 17 Ridgeline stations have `<elevation><ground>…</ground></elevation>` with no `<mast>`, so `StratusParser.parse` drops them as "Skipping invalid station". Only 6 of 17 would import (3 have no `elevation`, 3 have both values). The existing Stratus fixture always sends `<mast>0</mast>`, which hides this.
+- **Other sample facts** — all 17 rows: `interval=hourly`, `units=metric`, `region=Highmoor`. Types are `automatic` ×10, `manual` ×3, `rooftop` ×3 and `buoy` ×1, and all of them resolve through `map_to_meteo_types` after `normalize_key`. Sites are `Brackenridge` ×15, `Cold Fell` ×1 and `Sainte-Élise` ×1. There is no `<location>` (lat/long) and no `<commissioned>`. Note languages are es/en/de/fr/nl/ru/sv/no (`no` is not in `Notes` and gets dropped). `<image id="n"><url>` matches `Images`. IDs are numeric (e.g. `576417`); refs are short integers (e.g. `823`).
+- **Motivation** — the operators want the Ridgeline Highmoor upland network in Climabase (the source of truth, which `run_import_stations` then back-syncs to the public map) through the same automated, scheduled flow as Stratus, with no manual re-entry.
+- **Scope** — Make the XML import pipeline multi-source: per-source tracking, per-source stale retiring and a source tag on jobs. Fix the Stratus DTO so Ridgeline rows parse. Register Ridgeline as a known source with a scheduled (initially disabled) `PeriodicTask`. Add tests, and update CLAUDE.md. **Not** in scope: a new parser, sensor/instrument mapping, the `no` note language, webcam URLs, forecasts, and per-source operator attribution.
+
+### Assumptions (recorded because no questions were asked)
+
+1. The Ridgeline feed stays Stratus v3 and keeps the sample's shape. The live URL `https://feeds.example.org/ridgeline/stratus/v3/` returns the same document as the sample. It was not fetched while planning; the sample is the contract.
+2. The existing Stratus `PeriodicTask` calls `run_xml_import_from_url` with the URL (positional or `xml_url` kwarg) and no `source`. A default of `source="stratus"` therefore keeps it unchanged.
+3. Every existing `ImportedStation` row comes from the Stratus feed (column default `"stratus"`), so the new `(source, source_id)` unique constraint holds for current data.
+4. Ridgeline stations are owned by the same authenticated Climabase user (`owned_by` from `client.get_current_user()`) and get the same reference scheme `WS-{id:06d}` as Stratus stations.
+5. Ridgeline runs with `is_publish=None`, like the `import_xml` command: create leaves Climabase's default status, and update sets PUBLISH (`XMLImportService._update_station`).
+6. Ridgeline imports daily at 04:00 UTC. Stratus's schedule is in the DB and is not changed. Climabase 429s are already retried (`meteo/integrations/clients/climabase_v1/http_client.py`).
+7. The new `PeriodicTask` ships **disabled**. An operator enables it in Django admin after one dry run against production lookups (see Deployment). This keeps a migration from creating archive stations on its own in every environment.
+8. Climabase's Highmoor region contains sites that resolve from `Brackenridge`, `Cold Fell` and `Sainte-Élise` (via `normalize_key` → `brackenridge`, `cold fell`, `sainte elise`). If production lookups disagree, the dry run in Final Verification shows it under "Unresolved sites". Adding a `SITE_ALIASES` entry is then a follow-up (see Out of scope).
+
+## Decisions
+
+- **Parser**: Reuse `StratusParser`, with no Ridgeline-specific parser — the feed is Stratus v3, and the only gap is a DTO field default that also affects any other Stratus feed. Alternative considered: a `RidgelineParser` subclass, which would duplicate 170 lines just to change two defaults.
+- **Source identity**: Use the existing `ImportedStation.source` column, with a `UniqueConstraint(source, source_id)` replacing `source_id unique=True` — this makes tracking correct by construction and needs no data rewrite. Alternative considered: prefixing Ridgeline IDs (`ridgeline:576417`), which leaves stale-retiring unscoped and relies on string conventions.
+- **Where source scoping lives**: `DjangoImportedStationRepository(source=...)` scopes every query by its constructor's `source` — `XMLImportService`, `XMLImportJobRunner` and the repository Protocol's method signatures stay unchanged. Alternative considered: a `source` argument on every repository method, which touches ~15 call sites and the fake.
+- **Source registry**: Add `XMLFeedSource(StrEnum)` with `STRATUS="stratus"` and `RIDGELINE="ridgeline"` in `meteo/services/xml_import/sources.py`. The task and command reject unknown values, because a typo in `PeriodicTask` kwargs would otherwise create an orphan tracking namespace. Alternative considered: a free-text source, which stays silent on typos.
+- **Feed URL location**: The URL lives in `PeriodicTask.kwargs`, created by a data migration, like the existing Stratus feed (whose URL lives only in the DB). Operators change it in admin, with no deploy. Alternative considered: a settings/env var, which would split feed configuration across two mechanisms.
+- **Job tagging**: Add `ImportStationJob.source` (default `"stratus"`), set by `run_xml_import_from_url` / `import_xml` and read by `run_xml_import_job` — the job row is the only thing passed between the two tasks. Alternative considered: passing `source` as a task kwarg, which would not show up in admin history and gets lost on manual re-queue.
+- **Stored feed filename**: `XMLFeedDownloader` saves the feed as `tmp/stratus_xml/{source}-{slug}.xml`. The Ridgeline URL ends in `/`, so the current logic falls back to the shared name `uploaded.xml`.
+- **Test fixture**: Commit a trimmed 4-station Ridgeline fixture (copied verbatim from the sample), not the full 17-station sample — it covers every shape variant (ground-only, no elevation, ground+mast, accented site) while staying small. The full sample is used in the fast debug loop only.
+
+## Architecture
+
+```
+Celery Beat (DatabaseScheduler, PeriodicTask rows)
+ ├─ "XML import: Stratus"    kwargs {xml_url: <stratus url>}                        (existing, untouched)
+ └─ "XML import: Ridgeline"  kwargs {xml_url: <ridgeline url>, source: "ridgeline"} (new, data migration, disabled)
+        │
+        ▼
+meteo/tasks.py::run_xml_import_from_url(xml_url, is_publish=None, source="stratus")
+   ├─ XMLFeedSource(source)                               ← validate (new)
+   ├─ XMLFeedDownloader.download_and_validate(url, source) → storage "tmp/stratus_xml/{source}-….xml"
+   └─ ImportStationJob(source=source, is_automation_job=True)  ← new column
+        │ .delay(job.pk)
+        ▼
+meteo/tasks.py::run_xml_import_job(job_id)
+   └─ build_xml_import_dependencies(source=job.source)    (services/xml_import/factory.py)
+        └─ DjangoImportedStationRepository(source=…)      ← every query filtered by source
+   XMLImportJobRunner.run → StratusParser → StratusDataMapper → XMLImportService
+        └─ set_retired_stale_stations → repo.find_stale_automation_stations  (now per source)
+```
+
+Integration points:
+- `meteo/integrations/stratus/dtos/station_dto.py::Elevation`: give the fields defaults (M1).
+- `meteo/models/imported_station.py`, `meteo/models/import_station_job.py`, and migration `meteo/migrations/0024_*`: schema (M2).
+- `meteo/services/xml_import/repositories.py::DjangoImportedStationRepository` and `tests/fakes.py::InMemoryImportedStationRepository`: source scoping (M2).
+- `meteo/services/xml_import/factory.py::build_xml_import_dependencies`, `meteo/tasks.py`, `meteo/services/xml_import/feed_downloader.py`, `meteo/management/commands/import_xml.py` and `portal/admin/import_station_history.py`: plumbing (M3).
+- `meteo/migrations/0025_ridgeline_periodic_task.py`: schedule (M5).
+
+## Milestones
+
+| ID | Title | SP | Depends on | Status |
+|----|-------|----|------------|--------|
+| M1 | Stratus DTO accepts Ridgeline elevation shape | 2 | — | pending |
+| M2 | Source-scoped import tracking (schema + repository) | 5 | — | pending |
+| M3 | Thread feed source through tasks, command, downloader, admin | 4 | M2 | pending |
+| M4 | End-to-end multi-source pipeline tests | 2 | M1, M3 | pending |
+| M5 | Ridgeline schedule + CLAUDE.md | 3 | M3 | pending |
+
+## Milestone files
+
+### M1 — Stratus DTO accepts Ridgeline elevation shape
+
+```yaml
+id: M1
+title: Stratus DTO accepts Ridgeline elevation shape
+sp: 2
+status: pending
+depends_on: []
+```
+
+`StratusParser` parses all 17 sample Ridgeline stations (today 11 are dropped because `<mast>` is missing).
+
+**Scope** — `meteo/integrations/stratus/dtos/station_dto.py` (`Elevation`, `Calibration`); new fixture `tests/services/xml_import/fixtures/ridgeline_feed.xml`; append to `tests/services/xml_import/test_stratus_parser.py`. No pipeline/service changes.
+
+#### Tasks
+
+| Task | Description | Files | SP | Status |
+|------|-------------|-------|----|--------|
+| 1.1 | Create the trimmed fixture and append parser tests (write first; they fail on `main`) | `tests/services/xml_import/fixtures/ridgeline_feed.xml`, `tests/services/xml_import/test_stratus_parser.py` | 1 | pending |
+| 1.2 | Give `Elevation.ground`/`mast` and `Calibration.offset`/`drift` a `= None` default | `meteo/integrations/stratus/dtos/station_dto.py` | 1 | pending |
+
+#### Definition of Done
+
+##### Task 1.1
+- [ ] Create `tests/services/xml_import/fixtures/ridgeline_feed.xml`. It holds the header `<?xml version="1.0"?><root><stratus><feed_version>3</feed_version></stratus>…</root>` from `inputs/ridgeline-stratus.xml` and exactly the four `<station>` elements with `<id>` `576417` (rooftop, Brackenridge, ground only), `829016` (automatic, Cold Fell, ground only), `829445` (automatic, Brackenridge, no `elevation`) and `909666` (manual, `Sainte-&#xC9;lise`, ground+mast), copied byte-for-byte with all children kept. Copy with shell tools (no Python on host).
+- [ ] Append `class TestRidgelineFeed` to `tests/services/xml_import/test_stratus_parser.py`, asserting:
+  - [ ] `StratusParser().can_parse(XMLReader.parse(content))` is `True`.
+  - [ ] `parse()` returns 4 `ParsedStation` with source_ids `{"576417","829016","829445","909666"}`.
+  - [ ] `576417`: `ground_m == 140.0`, `mast_m is None`, `station_type_name == "rooftop"`, `site_name == "Brackenridge"`, `region_name == "Highmoor"`, `sample_interval == 3600`, `latitude is None`.
+  - [ ] `909666`: `site_name == "Sainte-Élise"`, `mast_m == 40.0`.
+  - [ ] `829445`: `ground_m is None and mast_m is None`.
+  - [ ] Every parsed station has ≥1 image and a note with `language == "en"` whose `short_note` is ≤255 chars.
+- [ ] Before 1.2, running the test shows the ground-only cases fail (red).
+
+##### Task 1.2
+- [ ] `Elevation.ground: Optional[int] = None`, `Elevation.mast: Optional[int] = None`, `Calibration.offset: Optional[str] = None`, `Calibration.drift: Optional[str] = None`. No other DTO change.
+- [ ] `TestRidgelineFeed` passes, and the existing tests in `tests/services/xml_import/test_stratus_parser.py` still pass.
+
+#### References
+- `tests/services/xml_import/test_stratus_parser.py`: existing test class shape and fixture loading (`Path(__file__).parent / "fixtures"`).
+- `tests/services/xml_import/fixtures/stratus_feed.xml`: Stratus fixture layout.
+- Contract: `inputs/ridgeline-stratus.xml` (sample feed; do not look for an XSD).
+
+#### Verify
+```bash
+docker compose exec api poetry run pytest tests/services/xml_import/test_stratus_parser.py -q
+```
+
+---
+
+### M2 — Source-scoped import tracking (schema + repository)
+
+```yaml
+id: M2
+title: Source-scoped import tracking (schema + repository)
+sp: 5
+status: pending
+depends_on: []
+```
+
+`ImportedStation` is unique per `(source, source_id)`, `ImportStationJob` records its source, and the import repository reads and writes only its own source's rows, stale-retiring included.
+
+**Scope** — models `meteo/models/imported_station.py` and `meteo/models/import_station_job.py`; new migration `meteo/migrations/0024_importedstation_source_unique_importstationjob_source.py`; new `meteo/services/xml_import/sources.py`; `meteo/services/xml_import/repositories.py`; test fake `tests/fakes.py`; new test `tests/services/xml_import/test_repositories.py`. **Persistence change**: drop the unique index on `mt_imported_station.source_id`, add a composite unique constraint, and add a column `mt_import_station_job.source`.
+
+#### Tasks
+
+| Task | Description | Files | SP | Status |
+|------|-------------|-------|----|--------|
+| 2.1 | Add `XMLFeedSource` StrEnum | `meteo/services/xml_import/sources.py` | 1 | pending |
+| 2.2 | Model changes + generated migration 0024 | `meteo/models/imported_station.py`, `meteo/models/import_station_job.py`, `meteo/migrations/0024_importedstation_source_unique_importstationjob_source.py` | 2 | pending |
+| 2.3 | Scope `DjangoImportedStationRepository` and `InMemoryImportedStationRepository` by constructor `source`; add repository DB tests | `meteo/services/xml_import/repositories.py`, `tests/fakes.py`, `tests/services/xml_import/test_repositories.py` | 2 | pending |
+
+#### Definition of Done
+
+##### Task 2.1
+- [ ] `meteo/services/xml_import/sources.py` defines:
+  ```python
+  from enum import StrEnum
+
+  class XMLFeedSource(StrEnum):
+      STRATUS = "stratus"
+      RIDGELINE = "ridgeline"
+  ```
+- [ ] `XMLFeedSource("ridgeline") is XMLFeedSource.RIDGELINE`, and `XMLFeedSource("nope")` raises `ValueError` (asserted in `tests/services/xml_import/test_repositories.py::test_feed_source_enum`).
+
+##### Task 2.2
+- [ ] `ImportedStation.source_id = models.CharField(max_length=100)` (no `unique`). `Meta.constraints = [models.UniqueConstraint(fields=["source", "source_id"], name="uniq_imported_station_source_source_id")]`. `source` stays `CharField(max_length=50, default="stratus")`.
+- [ ] `ImportStationJob.source = models.CharField(max_length=50, default="stratus")`.
+- [ ] Generate the migration with `docker compose exec api poetry run python manage.py makemigrations meteo --name importedstation_source_unique_importstationjob_source`. It depends on `0023_importedstation_is_retired` and contains AlterField(source_id), AddConstraint and AddField(job.source), with no RunPython.
+- [ ] Rollback note: `migrate meteo 0023` reverses cleanly while every `source_id` is globally unique. Once Ridgeline and Stratus rows share a `source_id`, the rollback fails on the re-added unique index, so delete the duplicate `source="ridgeline"` rows first. Record this as a comment at the top of the migration file.
+- [ ] `docker compose exec api poetry run python manage.py makemigrations --check --dry-run` reports no changes.
+
+##### Task 2.3
+- [ ] `DjangoImportedStationRepository.__init__(self, source: str = XMLFeedSource.STRATUS)` stores `self._source`. Each method filters or creates with `source=self._source`: `find_by_source_id`, `create_or_update` (in the `update_or_create` lookup kwargs), `mark_automation`, `get_or_create_stub`, `delete_by_source_id` and `find_stale_automation_stations`. Method signatures and the `ImportedStationRepository` Protocol are unchanged.
+- [ ] `InMemoryImportedStationRepository.__init__(self, source: str = "stratus")` mirrors this. `FakeImportedStation` gains `source: str = "stratus"`. Signature: `__init__(self, source: str = "stratus", store: dict[tuple[str, str], FakeImportedStation] | None = None)`. The store is always keyed `(source, source_id)`, and every method reads and writes only keys whose source is `self._source`. Tests that need two sources pass the same `store` dict to two instances.
+- [ ] `tests/services/xml_import/test_repositories.py` (`@pytest.mark.django_db`) proves:
+  - [ ] Two repos (`stratus`, `ridgeline`) can each `create_or_update("576417", …)` with distinct `climabase_id`s, and the two rows coexist.
+  - [ ] `find_by_source_id` returns only its own source's row.
+  - [ ] `find_stale_automation_stations(cutoff)` on the stratus repo excludes a stale ridgeline automation row, and the reverse also holds.
+  - [ ] Inserting the same `(source, source_id)` twice through `ImportedStation.objects.create` raises `IntegrityError`.
+- [ ] Existing `tests/services/xml_import/` and `tests/e2e/` still pass unchanged (default source `stratus`).
+
+#### References
+- `meteo/migrations/0023_importedstation_is_retired.py`: migration shape.
+- `meteo/migrations/0020_fix_imported_station_source_id_max_length.py`: prior AlterField on `source_id`.
+- `tests/fakes.py::InMemoryImportedStationRepository`: fake to extend.
+
+#### Verify
+```bash
+docker compose exec api poetry run pytest tests/services/xml_import/test_repositories.py tests/services/xml_import/test_import_service.py tests/services/xml_import/test_job_runner.py -q
+```
+
+---
+
+### M3 — Thread feed source through tasks, command, downloader, admin
+
+```yaml
+id: M3
+title: Thread feed source through tasks, command, downloader, admin
+sp: 4
+status: pending
+depends_on: [M2]
+```
+
+A job started for source `ridgeline` (from Celery Beat or `import_xml --source ridgeline`) is tagged with that source, stores its feed file under a source-prefixed name, and imports and retires only Ridgeline-tracked stations.
+
+**Scope** — `meteo/services/xml_import/factory.py::build_xml_import_dependencies`, `meteo/tasks.py` (`run_xml_import_job`, `run_xml_import_from_url`), `meteo/services/xml_import/feed_downloader.py::XMLFeedDownloader.download_and_validate`, `meteo/management/commands/import_xml.py`, `portal/admin/import_station_history.py`, and tests `tests/test_tasks.py` and `tests/services/xml_import/test_feed_downloader.py`. Uses `XMLFeedSource` (`meteo/services/xml_import/sources.py`) and `DjangoImportedStationRepository(source=…)` from M2.
+
+#### Tasks
+
+| Task | Description | Files | SP | Status |
+|------|-------------|-------|----|--------|
+| 3.1 | `build_xml_import_dependencies(..., source=XMLFeedSource.STRATUS)` builds `DjangoImportedStationRepository(source=source)`; `run_xml_import_job` passes `source=job.source` | `meteo/services/xml_import/factory.py`, `meteo/tasks.py`, `tests/test_tasks.py` | 1 | pending |
+| 3.2 | `run_xml_import_from_url(xml_url, is_publish=None, source="stratus")` validates via `XMLFeedSource(source)`, passes source to the downloader, creates the job with `source`; `download_and_validate(url, source="stratus")` saves as `tmp/stratus_xml/{source}-{slug}.xml` | `meteo/tasks.py`, `meteo/services/xml_import/feed_downloader.py`, `tests/test_tasks.py`, `tests/services/xml_import/test_feed_downloader.py` | 1 | pending |
+| 3.3 | `import_xml` gains `--source` (choices = `[s.value for s in XMLFeedSource]`, default `stratus`), passed to the downloader and to `ImportStationJob.objects.create(source=…)` | `meteo/management/commands/import_xml.py` | 1 | pending |
+| 3.4 | Admin import history shows the job source | `portal/admin/import_station_history.py` | 1 | pending |
+
+#### Definition of Done
+
+##### Task 3.1
+- [ ] Signature: `def build_xml_import_dependencies(is_publish=None, is_automation_job=False, source_ids=None, confirm_callback=None, skip_recent_minutes=None, source: str = XMLFeedSource.STRATUS)`.
+- [ ] `run_xml_import_job` calls it with `source=job.source`, and its existing log line `Job %d finished: …` adds `source=%s`.
+- [ ] A test in `tests/test_tasks.py` patches `meteo.services.xml_import.factory.build_xml_import_dependencies` (as the existing `run_xml_import_job` tests do). It creates a job with `source="ridgeline"` and asserts the factory got `source="ridgeline"`.
+
+##### Task 3.2
+- [ ] `run_xml_import_from_url("…", source="bogus")` raises `ValueError` before any download, and no `ImportStationJob` is created (test in `tests/test_tasks.py::TestRunXmlImportFromUrl`).
+- [ ] `run_xml_import_from_url("https://feeds.example.org/ridgeline/stratus/v3/", source="ridgeline")`, with download mocked as in `test_downloads_validates_and_queues`, creates a job with `source == "ridgeline"` and `is_automation_job is True`, and calls `run_xml_import_job.delay(job.pk)` once.
+- [ ] The existing `test_downloads_validates_and_queues` still passes unchanged, and its job has `source == "stratus"` (default).
+- [ ] `tests/services/xml_import/test_feed_downloader.py` asserts that `storage.save` is called with `"tmp/stratus_xml/ridgeline-uploaded.xml"` for URL `https://feeds.example.org/ridgeline/stratus/v3/` with `source="ridgeline"`. It also asserts `"tmp/stratus_xml/stratus-feed.xml"` for `https://example.com/feed.xml` with the default source.
+
+##### Task 3.3
+- [ ] `docker compose exec api poetry run python manage.py import_xml --help` lists `--source {stratus,ridgeline}`.
+- [ ] `--source nope` exits with an argparse error.
+- [ ] The job created by the command has `source` equal to the option value (checked by reading the code path: `ImportStationJob.objects.create(..., source=options["source"])`).
+
+##### Task 3.4
+- [ ] `"source"` is added to `ImportedStationHistoryAdmin.list_display` directly after `"id"`.
+- [ ] `docker compose exec api poetry run python manage.py check` passes.
+
+#### References
+- `tests/test_tasks.py::TestRunXmlImportFromUrl`: mocking pattern for download and storage.
+- `tests/services/xml_import/test_feed_downloader.py`: downloader test shape.
+- `meteo/management/commands/import_xml.py`: existing option style (`--skip-recent-min`).
+
+#### Verify
+```bash
+docker compose exec api poetry run pytest tests/test_tasks.py tests/services/xml_import/test_feed_downloader.py -q
+```
+
+---
+
+### M4 — End-to-end multi-source pipeline tests
+
+```yaml
+id: M4
+title: End-to-end multi-source pipeline tests
+sp: 2
+status: pending
+depends_on: [M1, M3]
+```
+
+An end-to-end test proves that the Ridgeline fixture imports through the full parser → mapper → import service chain under source `ridgeline`, and that a Stratus automation run does not retire Ridgeline stations.
+
+**Scope** — `tests/e2e/fixtures/lookup_sites.json` (add Highmoor sites), `tests/e2e/test_xml_import_pipeline.py` (append). Uses `tests/services/xml_import/fixtures/ridgeline_feed.xml` (M1) and `InMemoryImportedStationRepository(source=…, store=…)` (M2). No production code.
+
+#### Tasks
+
+| Task | Description | Files | SP | Status |
+|------|-------------|-------|----|--------|
+| 4.1 | Add sites `Brackenridge` (id 204), `Cold Fell` (id 205), `Sainte-Élise` (id 206, names `[{"lang":"fr","name":"Sainte-Élise"}]`) under region key `"31"` (Highmoor) | `tests/e2e/fixtures/lookup_sites.json` | 1 | pending |
+| 4.2 | Append `class TestRidgelineFeedPipeline` with an import test and a cross-source stale-isolation test | `tests/e2e/test_xml_import_pipeline.py` | 1 | pending |
+
+#### Definition of Done
+
+##### Task 4.1
+- [ ] The three site objects use the same shape as existing entries (`id`, `name`, `names`). Existing e2e tests still pass.
+
+##### Task 4.2
+- [ ] `test_imports_all_fixture_stations`: parse `ridgeline_feed.xml` with `XMLParserService([StratusParser()])` and map with `StratusDataMapper(lookup_data)` (strict). Import via `XMLImportService(client=fake_client, station_repo=InMemoryImportedStationRepository(source="ridgeline"), owned_by=["operator"], file_downloader=file_downloader)` with `ImportConfig(is_automation_job=True)`. Result: 4 × `"created"`, and every repo row has `source == "ridgeline"`.
+- [ ] `test_stratus_run_does_not_retire_ridgeline`: both repos share one `store`. Import the Ridgeline fixture under `ridgeline` and set every Ridgeline row's `updated_at` to 48 h ago. Run `XMLImportJobRunner` for the Stratus fixture `stratus_feed.xml` with `InMemoryImportedStationRepository(source="stratus", store=shared)`, `is_automation_job=True` and no `source_ids`. Afterwards every Ridgeline row has `is_retired is False`, and `fake_client` got no `set_station_status` call for any Ridgeline `climabase_id`.
+
+#### References
+- `tests/e2e/test_xml_import_pipeline.py`: fixtures `lookup_data`, `file_downloader`, `_make_valid_image_bytes`.
+- `tests/services/xml_import/test_job_runner.py` (lines ~95-120): stale-retiring test pattern.
+
+#### Verify
+```bash
+docker compose exec api poetry run pytest tests/e2e/test_xml_import_pipeline.py -q
+```
+
+---
+
+### M5 — Ridgeline schedule + CLAUDE.md
+
+```yaml
+id: M5
+title: Ridgeline schedule + CLAUDE.md
+sp: 3
+status: pending
+depends_on: [M3]
+```
+
+Every environment has a disabled `PeriodicTask` "XML import: Ridgeline" that calls `run_xml_import_from_url` for the Ridgeline URL with `source="ridgeline"` daily at 04:00 UTC, and CLAUDE.md documents the multi-source pipeline.
+
+**Scope** — new data migration `meteo/migrations/0025_ridgeline_periodic_task.py`, new test `tests/test_ridgeline_schedule.py`, and the `## Station Sync Pipelines` section of `CLAUDE.md`.
+
+#### Tasks
+
+| Task | Description | Files | SP | Status |
+|------|-------------|-------|----|--------|
+| 5.1 | RunPython data migration: `get_or_create` a `CrontabSchedule(minute="0", hour="4", day_of_week="*", day_of_month="*", month_of_year="*", timezone="UTC")` and `update_or_create` `PeriodicTask(name="XML import: Ridgeline")`; reverse deletes that `PeriodicTask` by name | `meteo/migrations/0025_ridgeline_periodic_task.py`, `tests/test_ridgeline_schedule.py` | 2 | pending |
+| 5.2 | Update CLAUDE.md pipeline docs | `CLAUDE.md` | 1 | pending |
+
+#### Definition of Done
+
+##### Task 5.1
+- [ ] The migration depends on `("meteo", "0024_importedstation_source_unique_importstationjob_source")` and on the latest `django_celery_beat` migration. Read its name from `docker compose exec api poetry run python manage.py showmigrations django_celery_beat` (last line); django-celery-beat is pinned at 2.8.1 in `poetry.lock`.
+- [ ] It uses `apps.get_model("django_celery_beat", "PeriodicTask")` / `"CrontabSchedule"` (historical models only). The `PeriodicTask` defaults are `task="meteo.tasks.run_xml_import_from_url"`, `crontab=<schedule>`, `kwargs=json.dumps({"xml_url": "https://feeds.example.org/ridgeline/stratus/v3/", "source": "ridgeline"})`, `args="[]"`, `enabled=False`, and `description="Ridgeline (Highmoor uplands) Stratus v3 feed → Climabase. Enable after a dry run."`.
+- [ ] The forward step is idempotent (`update_or_create` by name). The reverse step deletes the task by name and leaves the crontab, which other tasks may share.
+- [ ] Code sketch:
+  ```python
+  RIDGELINE_TASK_NAME = "XML import: Ridgeline"
+
+  def create_ridgeline_task(apps, schema_editor):
+      ...
+
+  def delete_ridgeline_task(apps, schema_editor):
+      ...
+  ```
+- [ ] `tests/test_ridgeline_schedule.py` (`@pytest.mark.django_db`) asserts that, in the migrated test DB, `PeriodicTask.objects.get(name="XML import: Ridgeline")` has `enabled is False`, `task == "meteo.tasks.run_xml_import_from_url"`, `json.loads(kwargs)["source"] == "ridgeline"`, and `crontab.hour == "4"`.
+- [ ] `docker compose exec api poetry run python manage.py migrate meteo 0024` then `migrate meteo` both succeed, and the task is gone and back again.
+
+##### Task 5.2
+- [ ] In `CLAUDE.md` `## Station Sync Pipelines`, the `run_xml_import_job` bullet says it imports **one or more Stratus XML feeds**. Each feed is a `PeriodicTask` calling `run_xml_import_from_url(xml_url, source=…)`, with sources listed in `meteo/services/xml_import/sources.py::XMLFeedSource` (currently `stratus`, `ridgeline`).
+- [ ] A new bullet "Adding a feed source" covers: add an `XMLFeedSource` member, add a data migration creating a disabled `PeriodicTask`, and dry-run with `import_xml <url> --source <name>` before enabling. It also notes that `ImportedStation` tracking and stale retiring are scoped per source.
+
+#### References
+- `meteo/admin.py`: how `PeriodicTask` is surfaced (custom admin with Run Now).
+- `meteo/migrations/0023_importedstation_is_retired.py`: migration header/dependency style.
+
+#### Verify
+```bash
+docker compose exec api poetry run pytest tests/test_ridgeline_schedule.py -q
+```
+
+## Implementation Order
+
+```
+M1 ───────────────┐
+                  ├── M4
+M2 ──── M3 ───────┤
+                  └── M5
+```
+
+M1 and M2 run in parallel. M4 and M5 run in parallel once M3 is done (M4 also needs M1).
+
+## Key Files Reference
+
+| File | Role |
+|------|------|
+| `meteo/tasks.py` | `run_xml_import_from_url` (Beat entry) and `run_xml_import_job` (worker); the source enters here |
+| `meteo/services/xml_import/factory.py` | Builds the service graph per job; builds the repository per source |
+| `meteo/services/xml_import/repositories.py` | Tracking-table access; the only place source scoping is enforced |
+| `meteo/services/xml_import/job_runner.py` | Calls stale retiring after full automation runs (behaviour unchanged, now scoped via the repo) |
+| `meteo/services/xml_import/import_service.py` | Create/update/retire logic against Climabase v1 (unchanged) |
+| `meteo/services/xml_import/parsers/stratus.py` | Parses both feeds |
+| `meteo/integrations/stratus/dtos/station_dto.py` | Stratus DTOs; the `Elevation` fix |
+| `meteo/services/xml_import/sources.py` | New `XMLFeedSource` registry |
+| `meteo/models/imported_station.py`, `meteo/models/import_station_job.py` | Schema changes |
+| `tests/fakes.py` | In-memory repo/client used by unit and e2e tests |
+| `inputs/ridgeline-stratus.xml` | 17-station sample of the Ridgeline feed (feed contract) |
+
+## Final Verification
+
+- [ ] End-to-end acceptance (operator, needs Climabase OAuth token in Redis): `docker compose exec -e CLIMABASE_CLIENT_V1_DRY=true api poetry run python manage.py import_xml https://feeds.example.org/ridgeline/stratus/v3/ --source ridgeline`. It prints `Parsed 17 stations` (or the live count) and `errors=0`, and logs no "Unresolved sites" line. Every station logs `[DRY RUN] CREATE …`.
+- [ ] Full suite: `docker compose exec api poetry run pytest -q`, all tests pass.
+- [ ] Migrations are consistent: `docker compose exec api poetry run python manage.py makemigrations --check --dry-run` reports "No changes detected".
+- [ ] Django checks: `docker compose exec api poetry run python manage.py check` is clean.
+- [ ] Formatting of new files (black is a dev dependency): `docker compose exec api poetry run black --check meteo/services/xml_import/sources.py tests/services/xml_import/test_repositories.py tests/test_ridgeline_schedule.py`.
+- [ ] `git diff --stat main` touches only files named in M1–M5.
+
+## Testing Strategy
+
+1. **Business-goal acceptance** — After the operator enables "XML import: Ridgeline" and the first scheduled run finishes, the admin "Import Station" history shows a job with `source=ridgeline` and `status=completed`. `total_count` equals the live feed's station count, `create_count + skip_count == total_count`, and `error_count == 0`. Spot-check three stations in the Climabase archive (Brackenridge automatic, Sainte-Élise manual, Cold Fell automatic) for interval, ground/mast height, images and EN/FR notes. Spot-check the Stratus job history the next day: there is no spike in stations retired.
+2. **Fast debug loop** — Parse the full 17-station sample without touching Climabase (~2 s):
+   ```bash
+   docker compose cp inputs/ridgeline-stratus.xml api:/tmp/ridgeline-stratus.xml
+   docker compose exec api poetry run python manage.py shell -c "from meteo.services.xml_import.parsers.stratus import StratusParser; from meteo.services.xml_import.parsers.service import XMLParserService; ps = XMLParserService([StratusParser()]).parse(open('/tmp/ridgeline-stratus.xml').read()); print(len(ps)); [print(p.source_id, p.station_type_name, p.site_name, p.ground_m, p.mast_m, len(p.images), [n.language for n in p.notes]) for p in ps]"
+   ```
+   Expected: `17` after M1 (6 before). Mapping and resolution need the dry-run command in Final Verification, which runs in about a minute.
+3. **User-facing validation** — The dry run (`CLIMABASE_CLIENT_V1_DRY=true`, the default in `app/settings.py:303`) logs one `[DRY RUN] CREATE source_id=… | Brackenridge, Highmoor (automatic) | interval=… ground=… images=… notes=[…]` line per station via `MappedStation.summary()`, plus a final "Unresolved sites" warning if any. A non-engineer reviews that log and the "Import Station" admin list (now with a Source column) before the `PeriodicTask` is enabled.
+
+## Deployment / config impact
+
+| Env var / config | docker-compose / deploy | terraform / infra | CI workflow |
+|------------------|-------------------------|-------------------|-------------|
+| No new env vars | No change | No change | No change (`.github/workflows/test.yml` already runs migrations + pytest) |
+| Migration `0024` (schema) + `0025` (PeriodicTask row, disabled) | Applied by existing `./run migrate` on deploy | N/A | Exercised by the test DB |
+| `PeriodicTask` "XML import: Ridgeline" `enabled` | Operator enables in Django admin `/admin/django_celery_beat/periodictask/` after the Final Verification dry run against production lookups | N/A | N/A |
+
+Rollback: disable the `PeriodicTask`, then `migrate meteo 0023`. This only works while no `source_id` is shared across sources (see M2 Task 2.2); otherwise delete `ImportedStation` rows with `source="ridgeline"` first. Stations already created in Climabase stay. Retire them via the archive if needed.
+
+## Authorization / data access
+
+N/A — no HTTP endpoints, serializers or querysets exposed to users change. The only UI change is one extra column in the staff-only admin list `ImportedStationHistoryAdmin`, which already requires admin login. The new repository filters scope internal tracking rows by feed source, not by user or tenant.
+
+## Out of scope
+
+- Mapping Stratus `<sensors>` / `<rain_gauge>` to Climabase instruments — disabled globally (`StratusDataMapper.map` TODO); a separate decision for both feeds.
+- Importing the Norwegian (`no`) note: `Notes` DTO has no `no` field, and Climabase language support for `no` is unverified.
+- `<webcam_url>`, `<url>` per-language links, and `<site_detail>` beyond the existing `address` mapping.
+- Forecast records (`interval` other than `hourly`): the parser hard-codes `observed=True`, and the sample has none.
+- Adding `SITE_ALIASES` for Ridgeline sites: only needed if the production dry run reports unresolved sites. The fix is then a one-line alias in `meteo/services/xml_import/data_mapping/stratus_mapper.py`, done as a follow-up.
+- Per-source operator attribution (`ownedBy`) and per-source reference prefixes: both feeds use the authenticated user and `WS-…` (Assumption 4).
+- Moving the existing Stratus feed URL out of the DB, or changing its schedule.
+- Cleaning `&nbsp;` / `\r` artefacts in Ridgeline notes.
+
+## CLAUDE.md impact
+
+| Section | Change | Owning task |
+|---------|--------|-------------|
+| `## Station Sync Pipelines` | `run_xml_import_job` handles multiple Stratus feeds keyed by `XMLFeedSource`; per-source tracking and stale retiring; how to add a feed source (enum member + disabled PeriodicTask migration + `import_xml --source` dry run) | M5.2 |
+-- cmd --
+booping plan split draft.md
+-- expected/cwd/index.md --
+---
+title: Ridgeline Stratus feed as second XML import source
+type: feature
+status: in-spec
+sp: 16
+summary: Ridgeline's Highmoor upland stations sync into Climabase on a schedule, next to the existing Stratus feed
+created: 2026-10-16
+---
+
+# Ridgeline Stratus feed as second XML import source
+
+> Plan layout note: the request asks for a single plan file, so this file is the plan's `index.md` and holds every milestone body under **Milestone files** (one `### M{n}` section per milestone file). The executor treats each `### M{n}` section as that milestone's own file: frontmatter block, Goal, Scope, Tasks, Definition of Done, References and Verify.
+
+## Context
+
+- **Current state** — `run_xml_import_from_url` (`meteo/tasks.py:101`) downloads one Stratus v3 feed, creates an `ImportStationJob` and queues `run_xml_import_job`, which runs `StratusParser` → `StratusDataMapper` → `XMLImportService` into Climabase v1. The feed URL lives only in a `django_celery_beat` `PeriodicTask` row (DB scheduler, `app/settings.py:311`); no feed is in code. The pipeline assumes **one source**:
+  - `ImportedStation.source_id` is globally `unique=True` (`meteo/models/imported_station.py:9`). A `source` column exists (default `"stratus"`), but nothing reads or writes it.
+  - `DjangoImportedStationRepository.find_stale_automation_stations` (`meteo/services/xml_import/repositories.py:60`) returns every automation row not touched in 24 h, whatever its source. `XMLImportJobRunner.run` (`meteo/services/xml_import/job_runner.py:89`) retires them at the end of each full automation run. If two feeds ran, each run would retire the other feed's stations whenever that feed's last run was more than 24 h earlier. This also covers any manual `import_xml` run of a second URL (that command sets `is_automation_job=True`).
+  - `ImportStationJob` does not record which feed it came from, so the admin history in `portal/admin/import_station_history.py` cannot tell jobs apart.
+- **Feed compatibility (from the 17-station sample `inputs/ridgeline-stratus.xml`)** — the format is standard Stratus v3 (`<root><stratus><feed_version>3</feed_version></stratus><station>…`), so `StratusParser.can_parse` accepts it. There is one blocking incompatibility. `Elevation.ground` and `Elevation.mast` in `meteo/integrations/stratus/dtos/station_dto.py:12-14` are `Optional[int]` **without a default**, and Pydantic v2 makes such fields required. 11 of 17 Ridgeline stations have `<elevation><ground>…</ground></elevation>` with no `<mast>`, so `StratusParser.parse` drops them as "Skipping invalid station". Only 6 of 17 would import (3 have no `elevation`, 3 have both values). The existing Stratus fixture always sends `<mast>0</mast>`, which hides this.
+- **Other sample facts** — all 17 rows: `interval=hourly`, `units=metric`, `region=Highmoor`. Types are `automatic` ×10, `manual` ×3, `rooftop` ×3 and `buoy` ×1, and all of them resolve through `map_to_meteo_types` after `normalize_key`. Sites are `Brackenridge` ×15, `Cold Fell` ×1 and `Sainte-Élise` ×1. There is no `<location>` (lat/long) and no `<commissioned>`. Note languages are es/en/de/fr/nl/ru/sv/no (`no` is not in `Notes` and gets dropped). `<image id="n"><url>` matches `Images`. IDs are numeric (e.g. `576417`); refs are short integers (e.g. `823`).
+- **Motivation** — the operators want the Ridgeline Highmoor upland network in Climabase (the source of truth, which `run_import_stations` then back-syncs to the public map) through the same automated, scheduled flow as Stratus, with no manual re-entry.
+- **Scope** — Make the XML import pipeline multi-source: per-source tracking, per-source stale retiring and a source tag on jobs. Fix the Stratus DTO so Ridgeline rows parse. Register Ridgeline as a known source with a scheduled (initially disabled) `PeriodicTask`. Add tests, and update CLAUDE.md. **Not** in scope: a new parser, sensor/instrument mapping, the `no` note language, webcam URLs, forecasts, and per-source operator attribution.
+
+### Assumptions (recorded because no questions were asked)
+
+1. The Ridgeline feed stays Stratus v3 and keeps the sample's shape. The live URL `https://feeds.example.org/ridgeline/stratus/v3/` returns the same document as the sample. It was not fetched while planning; the sample is the contract.
+2. The existing Stratus `PeriodicTask` calls `run_xml_import_from_url` with the URL (positional or `xml_url` kwarg) and no `source`. A default of `source="stratus"` therefore keeps it unchanged.
+3. Every existing `ImportedStation` row comes from the Stratus feed (column default `"stratus"`), so the new `(source, source_id)` unique constraint holds for current data.
+4. Ridgeline stations are owned by the same authenticated Climabase user (`owned_by` from `client.get_current_user()`) and get the same reference scheme `WS-{id:06d}` as Stratus stations.
+5. Ridgeline runs with `is_publish=None`, like the `import_xml` command: create leaves Climabase's default status, and update sets PUBLISH (`XMLImportService._update_station`).
+6. Ridgeline imports daily at 04:00 UTC. Stratus's schedule is in the DB and is not changed. Climabase 429s are already retried (`meteo/integrations/clients/climabase_v1/http_client.py`).
+7. The new `PeriodicTask` ships **disabled**. An operator enables it in Django admin after one dry run against production lookups (see Deployment). This keeps a migration from creating archive stations on its own in every environment.
+8. Climabase's Highmoor region contains sites that resolve from `Brackenridge`, `Cold Fell` and `Sainte-Élise` (via `normalize_key` → `brackenridge`, `cold fell`, `sainte elise`). If production lookups disagree, the dry run in Final Verification shows it under "Unresolved sites". Adding a `SITE_ALIASES` entry is then a follow-up (see Out of scope).
+
+## Decisions
+
+- **Parser**: Reuse `StratusParser`, with no Ridgeline-specific parser — the feed is Stratus v3, and the only gap is a DTO field default that also affects any other Stratus feed. Alternative considered: a `RidgelineParser` subclass, which would duplicate 170 lines just to change two defaults.
+- **Source identity**: Use the existing `ImportedStation.source` column, with a `UniqueConstraint(source, source_id)` replacing `source_id unique=True` — this makes tracking correct by construction and needs no data rewrite. Alternative considered: prefixing Ridgeline IDs (`ridgeline:576417`), which leaves stale-retiring unscoped and relies on string conventions.
+- **Where source scoping lives**: `DjangoImportedStationRepository(source=...)` scopes every query by its constructor's `source` — `XMLImportService`, `XMLImportJobRunner` and the repository Protocol's method signatures stay unchanged. Alternative considered: a `source` argument on every repository method, which touches ~15 call sites and the fake.
+- **Source registry**: Add `XMLFeedSource(StrEnum)` with `STRATUS="stratus"` and `RIDGELINE="ridgeline"` in `meteo/services/xml_import/sources.py`. The task and command reject unknown values, because a typo in `PeriodicTask` kwargs would otherwise create an orphan tracking namespace. Alternative considered: a free-text source, which stays silent on typos.
+- **Feed URL location**: The URL lives in `PeriodicTask.kwargs`, created by a data migration, like the existing Stratus feed (whose URL lives only in the DB). Operators change it in admin, with no deploy. Alternative considered: a settings/env var, which would split feed configuration across two mechanisms.
+- **Job tagging**: Add `ImportStationJob.source` (default `"stratus"`), set by `run_xml_import_from_url` / `import_xml` and read by `run_xml_import_job` — the job row is the only thing passed between the two tasks. Alternative considered: passing `source` as a task kwarg, which would not show up in admin history and gets lost on manual re-queue.
+- **Stored feed filename**: `XMLFeedDownloader` saves the feed as `tmp/stratus_xml/{source}-{slug}.xml`. The Ridgeline URL ends in `/`, so the current logic falls back to the shared name `uploaded.xml`.
+- **Test fixture**: Commit a trimmed 4-station Ridgeline fixture (copied verbatim from the sample), not the full 17-station sample — it covers every shape variant (ground-only, no elevation, ground+mast, accented site) while staying small. The full sample is used in the fast debug loop only.
+
+## Architecture
+
+```
+Celery Beat (DatabaseScheduler, PeriodicTask rows)
+ ├─ "XML import: Stratus"    kwargs {xml_url: <stratus url>}                        (existing, untouched)
+ └─ "XML import: Ridgeline"  kwargs {xml_url: <ridgeline url>, source: "ridgeline"} (new, data migration, disabled)
+        │
+        ▼
+meteo/tasks.py::run_xml_import_from_url(xml_url, is_publish=None, source="stratus")
+   ├─ XMLFeedSource(source)                               ← validate (new)
+   ├─ XMLFeedDownloader.download_and_validate(url, source) → storage "tmp/stratus_xml/{source}-….xml"
+   └─ ImportStationJob(source=source, is_automation_job=True)  ← new column
+        │ .delay(job.pk)
+        ▼
+meteo/tasks.py::run_xml_import_job(job_id)
+   └─ build_xml_import_dependencies(source=job.source)    (services/xml_import/factory.py)
+        └─ DjangoImportedStationRepository(source=…)      ← every query filtered by source
+   XMLImportJobRunner.run → StratusParser → StratusDataMapper → XMLImportService
+        └─ set_retired_stale_stations → repo.find_stale_automation_stations  (now per source)
+```
+
+Integration points:
+- `meteo/integrations/stratus/dtos/station_dto.py::Elevation`: give the fields defaults (M1).
+- `meteo/models/imported_station.py`, `meteo/models/import_station_job.py`, and migration `meteo/migrations/0024_*`: schema (M2).
+- `meteo/services/xml_import/repositories.py::DjangoImportedStationRepository` and `tests/fakes.py::InMemoryImportedStationRepository`: source scoping (M2).
+- `meteo/services/xml_import/factory.py::build_xml_import_dependencies`, `meteo/tasks.py`, `meteo/services/xml_import/feed_downloader.py`, `meteo/management/commands/import_xml.py` and `portal/admin/import_station_history.py`: plumbing (M3).
+- `meteo/migrations/0025_ridgeline_periodic_task.py`: schedule (M5).
+
+## Milestones
+
+| id | title | sp | status |
+| --- | --- | --- | --- |
+| 01 | [Stratus DTO accepts Ridgeline elevation shape](milestones/M01-stratus-dto-accepts-ridgeline-elevation-shape/M01-stratus-dto-accepts-ridgeline-elevation-shape.md) | 2 | pending |
+| 02 | [Source-scoped import tracking (schema + repository)](milestones/M02-source-scoped-import-tracking-schema-repository/M02-source-scoped-import-tracking-schema-repository.md) | 5 | pending |
+| 03 | [Thread feed source through tasks, command, downloader, admin](milestones/M03-thread-feed-source-through-tasks-command-downloader-admin/M03-thread-feed-source-through-tasks-command-downloader-admin.md) | 4 | pending |
+| 04 | [End-to-end multi-source pipeline tests](milestones/M04-end-to-end-multi-source-pipeline-tests/M04-end-to-end-multi-source-pipeline-tests.md) | 2 | pending |
+| 05 | [Ridgeline schedule + CLAUDE.md](milestones/M05-ridgeline-schedule-claude-md/M05-ridgeline-schedule-claude-md.md) | 3 | pending |
+
+## Groups
+
+| group | milestones | sp |
+| --- | --- | --- |
+| G1 | M01, M02, M03, M04 | 13 |
+| G2 | M05 | 3 |
+
+## Milestone files
+
+
+## Implementation Order
+
+```
+M1 ───────────────┐
+                  ├── M4
+M2 ──── M3 ───────┤
+                  └── M5
+```
+
+M1 and M2 run in parallel. M4 and M5 run in parallel once M3 is done (M4 also needs M1).
+
+## Key Files Reference
+
+| File | Role |
+|------|------|
+| `meteo/tasks.py` | `run_xml_import_from_url` (Beat entry) and `run_xml_import_job` (worker); the source enters here |
+| `meteo/services/xml_import/factory.py` | Builds the service graph per job; builds the repository per source |
+| `meteo/services/xml_import/repositories.py` | Tracking-table access; the only place source scoping is enforced |
+| `meteo/services/xml_import/job_runner.py` | Calls stale retiring after full automation runs (behaviour unchanged, now scoped via the repo) |
+| `meteo/services/xml_import/import_service.py` | Create/update/retire logic against Climabase v1 (unchanged) |
+| `meteo/services/xml_import/parsers/stratus.py` | Parses both feeds |
+| `meteo/integrations/stratus/dtos/station_dto.py` | Stratus DTOs; the `Elevation` fix |
+| `meteo/services/xml_import/sources.py` | New `XMLFeedSource` registry |
+| `meteo/models/imported_station.py`, `meteo/models/import_station_job.py` | Schema changes |
+| `tests/fakes.py` | In-memory repo/client used by unit and e2e tests |
+| `inputs/ridgeline-stratus.xml` | 17-station sample of the Ridgeline feed (feed contract) |
+
+## Final Verification
+
+- [ ] End-to-end acceptance (operator, needs Climabase OAuth token in Redis): `docker compose exec -e CLIMABASE_CLIENT_V1_DRY=true api poetry run python manage.py import_xml https://feeds.example.org/ridgeline/stratus/v3/ --source ridgeline`. It prints `Parsed 17 stations` (or the live count) and `errors=0`, and logs no "Unresolved sites" line. Every station logs `[DRY RUN] CREATE …`.
+- [ ] Full suite: `docker compose exec api poetry run pytest -q`, all tests pass.
+- [ ] Migrations are consistent: `docker compose exec api poetry run python manage.py makemigrations --check --dry-run` reports "No changes detected".
+- [ ] Django checks: `docker compose exec api poetry run python manage.py check` is clean.
+- [ ] Formatting of new files (black is a dev dependency): `docker compose exec api poetry run black --check meteo/services/xml_import/sources.py tests/services/xml_import/test_repositories.py tests/test_ridgeline_schedule.py`.
+- [ ] `git diff --stat main` touches only files named in M1–M5.
+
+## Testing Strategy
+
+1. **Business-goal acceptance** — After the operator enables "XML import: Ridgeline" and the first scheduled run finishes, the admin "Import Station" history shows a job with `source=ridgeline` and `status=completed`. `total_count` equals the live feed's station count, `create_count + skip_count == total_count`, and `error_count == 0`. Spot-check three stations in the Climabase archive (Brackenridge automatic, Sainte-Élise manual, Cold Fell automatic) for interval, ground/mast height, images and EN/FR notes. Spot-check the Stratus job history the next day: there is no spike in stations retired.
+2. **Fast debug loop** — Parse the full 17-station sample without touching Climabase (~2 s):
+   ```bash
+   docker compose cp inputs/ridgeline-stratus.xml api:/tmp/ridgeline-stratus.xml
+   docker compose exec api poetry run python manage.py shell -c "from meteo.services.xml_import.parsers.stratus import StratusParser; from meteo.services.xml_import.parsers.service import XMLParserService; ps = XMLParserService([StratusParser()]).parse(open('/tmp/ridgeline-stratus.xml').read()); print(len(ps)); [print(p.source_id, p.station_type_name, p.site_name, p.ground_m, p.mast_m, len(p.images), [n.language for n in p.notes]) for p in ps]"
+   ```
+   Expected: `17` after M1 (6 before). Mapping and resolution need the dry-run command in Final Verification, which runs in about a minute.
+3. **User-facing validation** — The dry run (`CLIMABASE_CLIENT_V1_DRY=true`, the default in `app/settings.py:303`) logs one `[DRY RUN] CREATE source_id=… | Brackenridge, Highmoor (automatic) | interval=… ground=… images=… notes=[…]` line per station via `MappedStation.summary()`, plus a final "Unresolved sites" warning if any. A non-engineer reviews that log and the "Import Station" admin list (now with a Source column) before the `PeriodicTask` is enabled.
+
+## Deployment / config impact
+
+| Env var / config | docker-compose / deploy | terraform / infra | CI workflow |
+|------------------|-------------------------|-------------------|-------------|
+| No new env vars | No change | No change | No change (`.github/workflows/test.yml` already runs migrations + pytest) |
+| Migration `0024` (schema) + `0025` (PeriodicTask row, disabled) | Applied by existing `./run migrate` on deploy | N/A | Exercised by the test DB |
+| `PeriodicTask` "XML import: Ridgeline" `enabled` | Operator enables in Django admin `/admin/django_celery_beat/periodictask/` after the Final Verification dry run against production lookups | N/A | N/A |
+
+Rollback: disable the `PeriodicTask`, then `migrate meteo 0023`. This only works while no `source_id` is shared across sources (see M2 Task 2.2); otherwise delete `ImportedStation` rows with `source="ridgeline"` first. Stations already created in Climabase stay. Retire them via the archive if needed.
+
+## Authorization / data access
+
+N/A — no HTTP endpoints, serializers or querysets exposed to users change. The only UI change is one extra column in the staff-only admin list `ImportedStationHistoryAdmin`, which already requires admin login. The new repository filters scope internal tracking rows by feed source, not by user or tenant.
+
+## Out of scope
+
+- Mapping Stratus `<sensors>` / `<rain_gauge>` to Climabase instruments — disabled globally (`StratusDataMapper.map` TODO); a separate decision for both feeds.
+- Importing the Norwegian (`no`) note: `Notes` DTO has no `no` field, and Climabase language support for `no` is unverified.
+- `<webcam_url>`, `<url>` per-language links, and `<site_detail>` beyond the existing `address` mapping.
+- Forecast records (`interval` other than `hourly`): the parser hard-codes `observed=True`, and the sample has none.
+- Adding `SITE_ALIASES` for Ridgeline sites: only needed if the production dry run reports unresolved sites. The fix is then a one-line alias in `meteo/services/xml_import/data_mapping/stratus_mapper.py`, done as a follow-up.
+- Per-source operator attribution (`ownedBy`) and per-source reference prefixes: both feeds use the authenticated user and `WS-…` (Assumption 4).
+- Moving the existing Stratus feed URL out of the DB, or changing its schedule.
+- Cleaning `&nbsp;` / `\r` artefacts in Ridgeline notes.
+
+## CLAUDE.md impact
+
+| Section | Change | Owning task |
+|---------|--------|-------------|
+| `## Station Sync Pipelines` | `run_xml_import_job` handles multiple Stratus feeds keyed by `XMLFeedSource`; per-source tracking and stale retiring; how to add a feed source (enum member + disabled PeriodicTask migration + `import_xml --source` dry run) | M5.2 |
+-- expected/cwd/milestones/M01-stratus-dto-accepts-ridgeline-elevation-shape/M01-stratus-dto-accepts-ridgeline-elevation-shape.md --
+---
+id: "01"
+title: "Stratus DTO accepts Ridgeline elevation shape"
+sp: 2
+status: pending
+plan: "index.md"
+---
+
+# M01: Stratus DTO accepts Ridgeline elevation shape
+
+## Tasks
+
+`StratusParser` parses all 17 sample Ridgeline stations (today 11 are dropped because `<mast>` is missing).
+
+**Scope** — `meteo/integrations/stratus/dtos/station_dto.py` (`Elevation`, `Calibration`); new fixture `tests/services/xml_import/fixtures/ridgeline_feed.xml`; append to `tests/services/xml_import/test_stratus_parser.py`. No pipeline/service changes.
+
+| Task | Description | Files | SP | Status |
+|------|-------------|-------|----|--------|
+| 1.1 | Create the trimmed fixture and append parser tests (write first; they fail on `main`) | `tests/services/xml_import/fixtures/ridgeline_feed.xml`, `tests/services/xml_import/test_stratus_parser.py` | 1 | pending |
+| 1.2 | Give `Elevation.ground`/`mast` and `Calibration.offset`/`drift` a `= None` default | `meteo/integrations/stratus/dtos/station_dto.py` | 1 | pending |
+
+## Definition of Done
+
+##### Task 1.1
+- [ ] Create `tests/services/xml_import/fixtures/ridgeline_feed.xml`. It holds the header `<?xml version="1.0"?><root><stratus><feed_version>3</feed_version></stratus>…</root>` from `inputs/ridgeline-stratus.xml` and exactly the four `<station>` elements with `<id>` `576417` (rooftop, Brackenridge, ground only), `829016` (automatic, Cold Fell, ground only), `829445` (automatic, Brackenridge, no `elevation`) and `909666` (manual, `Sainte-&#xC9;lise`, ground+mast), copied byte-for-byte with all children kept. Copy with shell tools (no Python on host).
+- [ ] Append `class TestRidgelineFeed` to `tests/services/xml_import/test_stratus_parser.py`, asserting:
+  - [ ] `StratusParser().can_parse(XMLReader.parse(content))` is `True`.
+  - [ ] `parse()` returns 4 `ParsedStation` with source_ids `{"576417","829016","829445","909666"}`.
+  - [ ] `576417`: `ground_m == 140.0`, `mast_m is None`, `station_type_name == "rooftop"`, `site_name == "Brackenridge"`, `region_name == "Highmoor"`, `sample_interval == 3600`, `latitude is None`.
+  - [ ] `909666`: `site_name == "Sainte-Élise"`, `mast_m == 40.0`.
+  - [ ] `829445`: `ground_m is None and mast_m is None`.
+  - [ ] Every parsed station has ≥1 image and a note with `language == "en"` whose `short_note` is ≤255 chars.
+- [ ] Before 1.2, running the test shows the ground-only cases fail (red).
+
+##### Task 1.2
+- [ ] `Elevation.ground: Optional[int] = None`, `Elevation.mast: Optional[int] = None`, `Calibration.offset: Optional[str] = None`, `Calibration.drift: Optional[str] = None`. No other DTO change.
+- [ ] `TestRidgelineFeed` passes, and the existing tests in `tests/services/xml_import/test_stratus_parser.py` still pass.
+
+## References
+
+- `tests/services/xml_import/test_stratus_parser.py`: existing test class shape and fixture loading (`Path(__file__).parent / "fixtures"`).
+- `tests/services/xml_import/fixtures/stratus_feed.xml`: Stratus fixture layout.
+- Contract: `inputs/ridgeline-stratus.xml` (sample feed; do not look for an XSD).
+
+## Verify
+
+```bash
+docker compose exec api poetry run pytest tests/services/xml_import/test_stratus_parser.py -q
+```
+-- expected/cwd/milestones/M02-source-scoped-import-tracking-schema-repository/M02-source-scoped-import-tracking-schema-repository.md --
+---
+id: "02"
+title: "Source-scoped import tracking (schema + repository)"
+sp: 5
+status: pending
+plan: "index.md"
+---
+
+# M02: Source-scoped import tracking (schema + repository)
+
+## Tasks
+
+`ImportedStation` is unique per `(source, source_id)`, `ImportStationJob` records its source, and the import repository reads and writes only its own source's rows, stale-retiring included.
+
+**Scope** — models `meteo/models/imported_station.py` and `meteo/models/import_station_job.py`; new migration `meteo/migrations/0024_importedstation_source_unique_importstationjob_source.py`; new `meteo/services/xml_import/sources.py`; `meteo/services/xml_import/repositories.py`; test fake `tests/fakes.py`; new test `tests/services/xml_import/test_repositories.py`. **Persistence change**: drop the unique index on `mt_imported_station.source_id`, add a composite unique constraint, and add a column `mt_import_station_job.source`.
+
+| Task | Description | Files | SP | Status |
+|------|-------------|-------|----|--------|
+| 2.1 | Add `XMLFeedSource` StrEnum | `meteo/services/xml_import/sources.py` | 1 | pending |
+| 2.2 | Model changes + generated migration 0024 | `meteo/models/imported_station.py`, `meteo/models/import_station_job.py`, `meteo/migrations/0024_importedstation_source_unique_importstationjob_source.py` | 2 | pending |
+| 2.3 | Scope `DjangoImportedStationRepository` and `InMemoryImportedStationRepository` by constructor `source`; add repository DB tests | `meteo/services/xml_import/repositories.py`, `tests/fakes.py`, `tests/services/xml_import/test_repositories.py` | 2 | pending |
+
+## Definition of Done
+
+##### Task 2.1
+- [ ] `meteo/services/xml_import/sources.py` defines:
+  ```python
+  from enum import StrEnum
+
+  class XMLFeedSource(StrEnum):
+      STRATUS = "stratus"
+      RIDGELINE = "ridgeline"
+  ```
+- [ ] `XMLFeedSource("ridgeline") is XMLFeedSource.RIDGELINE`, and `XMLFeedSource("nope")` raises `ValueError` (asserted in `tests/services/xml_import/test_repositories.py::test_feed_source_enum`).
+
+##### Task 2.2
+- [ ] `ImportedStation.source_id = models.CharField(max_length=100)` (no `unique`). `Meta.constraints = [models.UniqueConstraint(fields=["source", "source_id"], name="uniq_imported_station_source_source_id")]`. `source` stays `CharField(max_length=50, default="stratus")`.
+- [ ] `ImportStationJob.source = models.CharField(max_length=50, default="stratus")`.
+- [ ] Generate the migration with `docker compose exec api poetry run python manage.py makemigrations meteo --name importedstation_source_unique_importstationjob_source`. It depends on `0023_importedstation_is_retired` and contains AlterField(source_id), AddConstraint and AddField(job.source), with no RunPython.
+- [ ] Rollback note: `migrate meteo 0023` reverses cleanly while every `source_id` is globally unique. Once Ridgeline and Stratus rows share a `source_id`, the rollback fails on the re-added unique index, so delete the duplicate `source="ridgeline"` rows first. Record this as a comment at the top of the migration file.
+- [ ] `docker compose exec api poetry run python manage.py makemigrations --check --dry-run` reports no changes.
+
+##### Task 2.3
+- [ ] `DjangoImportedStationRepository.__init__(self, source: str = XMLFeedSource.STRATUS)` stores `self._source`. Each method filters or creates with `source=self._source`: `find_by_source_id`, `create_or_update` (in the `update_or_create` lookup kwargs), `mark_automation`, `get_or_create_stub`, `delete_by_source_id` and `find_stale_automation_stations`. Method signatures and the `ImportedStationRepository` Protocol are unchanged.
+- [ ] `InMemoryImportedStationRepository.__init__(self, source: str = "stratus")` mirrors this. `FakeImportedStation` gains `source: str = "stratus"`. Signature: `__init__(self, source: str = "stratus", store: dict[tuple[str, str], FakeImportedStation] | None = None)`. The store is always keyed `(source, source_id)`, and every method reads and writes only keys whose source is `self._source`. Tests that need two sources pass the same `store` dict to two instances.
+- [ ] `tests/services/xml_import/test_repositories.py` (`@pytest.mark.django_db`) proves:
+  - [ ] Two repos (`stratus`, `ridgeline`) can each `create_or_update("576417", …)` with distinct `climabase_id`s, and the two rows coexist.
+  - [ ] `find_by_source_id` returns only its own source's row.
+  - [ ] `find_stale_automation_stations(cutoff)` on the stratus repo excludes a stale ridgeline automation row, and the reverse also holds.
+  - [ ] Inserting the same `(source, source_id)` twice through `ImportedStation.objects.create` raises `IntegrityError`.
+- [ ] Existing `tests/services/xml_import/` and `tests/e2e/` still pass unchanged (default source `stratus`).
+
+## References
+
+- `meteo/migrations/0023_importedstation_is_retired.py`: migration shape.
+- `meteo/migrations/0020_fix_imported_station_source_id_max_length.py`: prior AlterField on `source_id`.
+- `tests/fakes.py::InMemoryImportedStationRepository`: fake to extend.
+
+## Verify
+
+```bash
+docker compose exec api poetry run pytest tests/services/xml_import/test_repositories.py tests/services/xml_import/test_import_service.py tests/services/xml_import/test_job_runner.py -q
+```
+-- expected/cwd/milestones/M03-thread-feed-source-through-tasks-command-downloader-admin/M03-thread-feed-source-through-tasks-command-downloader-admin.md --
+---
+id: "03"
+title: "Thread feed source through tasks, command, downloader, admin"
+sp: 4
+status: pending
+plan: "index.md"
+---
+
+# M03: Thread feed source through tasks, command, downloader, admin
+
+## Tasks
+
+A job started for source `ridgeline` (from Celery Beat or `import_xml --source ridgeline`) is tagged with that source, stores its feed file under a source-prefixed name, and imports and retires only Ridgeline-tracked stations.
+
+**Scope** — `meteo/services/xml_import/factory.py::build_xml_import_dependencies`, `meteo/tasks.py` (`run_xml_import_job`, `run_xml_import_from_url`), `meteo/services/xml_import/feed_downloader.py::XMLFeedDownloader.download_and_validate`, `meteo/management/commands/import_xml.py`, `portal/admin/import_station_history.py`, and tests `tests/test_tasks.py` and `tests/services/xml_import/test_feed_downloader.py`. Uses `XMLFeedSource` (`meteo/services/xml_import/sources.py`) and `DjangoImportedStationRepository(source=…)` from M2.
+
+| Task | Description | Files | SP | Status |
+|------|-------------|-------|----|--------|
+| 3.1 | `build_xml_import_dependencies(..., source=XMLFeedSource.STRATUS)` builds `DjangoImportedStationRepository(source=source)`; `run_xml_import_job` passes `source=job.source` | `meteo/services/xml_import/factory.py`, `meteo/tasks.py`, `tests/test_tasks.py` | 1 | pending |
+| 3.2 | `run_xml_import_from_url(xml_url, is_publish=None, source="stratus")` validates via `XMLFeedSource(source)`, passes source to the downloader, creates the job with `source`; `download_and_validate(url, source="stratus")` saves as `tmp/stratus_xml/{source}-{slug}.xml` | `meteo/tasks.py`, `meteo/services/xml_import/feed_downloader.py`, `tests/test_tasks.py`, `tests/services/xml_import/test_feed_downloader.py` | 1 | pending |
+| 3.3 | `import_xml` gains `--source` (choices = `[s.value for s in XMLFeedSource]`, default `stratus`), passed to the downloader and to `ImportStationJob.objects.create(source=…)` | `meteo/management/commands/import_xml.py` | 1 | pending |
+| 3.4 | Admin import history shows the job source | `portal/admin/import_station_history.py` | 1 | pending |
+
+## Definition of Done
+
+##### Task 3.1
+- [ ] Signature: `def build_xml_import_dependencies(is_publish=None, is_automation_job=False, source_ids=None, confirm_callback=None, skip_recent_minutes=None, source: str = XMLFeedSource.STRATUS)`.
+- [ ] `run_xml_import_job` calls it with `source=job.source`, and its existing log line `Job %d finished: …` adds `source=%s`.
+- [ ] A test in `tests/test_tasks.py` patches `meteo.services.xml_import.factory.build_xml_import_dependencies` (as the existing `run_xml_import_job` tests do). It creates a job with `source="ridgeline"` and asserts the factory got `source="ridgeline"`.
+
+##### Task 3.2
+- [ ] `run_xml_import_from_url("…", source="bogus")` raises `ValueError` before any download, and no `ImportStationJob` is created (test in `tests/test_tasks.py::TestRunXmlImportFromUrl`).
+- [ ] `run_xml_import_from_url("https://feeds.example.org/ridgeline/stratus/v3/", source="ridgeline")`, with download mocked as in `test_downloads_validates_and_queues`, creates a job with `source == "ridgeline"` and `is_automation_job is True`, and calls `run_xml_import_job.delay(job.pk)` once.
+- [ ] The existing `test_downloads_validates_and_queues` still passes unchanged, and its job has `source == "stratus"` (default).
+- [ ] `tests/services/xml_import/test_feed_downloader.py` asserts that `storage.save` is called with `"tmp/stratus_xml/ridgeline-uploaded.xml"` for URL `https://feeds.example.org/ridgeline/stratus/v3/` with `source="ridgeline"`. It also asserts `"tmp/stratus_xml/stratus-feed.xml"` for `https://example.com/feed.xml` with the default source.
+
+##### Task 3.3
+- [ ] `docker compose exec api poetry run python manage.py import_xml --help` lists `--source {stratus,ridgeline}`.
+- [ ] `--source nope` exits with an argparse error.
+- [ ] The job created by the command has `source` equal to the option value (checked by reading the code path: `ImportStationJob.objects.create(..., source=options["source"])`).
+
+##### Task 3.4
+- [ ] `"source"` is added to `ImportedStationHistoryAdmin.list_display` directly after `"id"`.
+- [ ] `docker compose exec api poetry run python manage.py check` passes.
+
+## References
+
+- `tests/test_tasks.py::TestRunXmlImportFromUrl`: mocking pattern for download and storage.
+- `tests/services/xml_import/test_feed_downloader.py`: downloader test shape.
+- `meteo/management/commands/import_xml.py`: existing option style (`--skip-recent-min`).
+
+## Verify
+
+```bash
+docker compose exec api poetry run pytest tests/test_tasks.py tests/services/xml_import/test_feed_downloader.py -q
+```
+-- expected/cwd/milestones/M04-end-to-end-multi-source-pipeline-tests/M04-end-to-end-multi-source-pipeline-tests.md --
+---
+id: "04"
+title: "End-to-end multi-source pipeline tests"
+sp: 2
+status: pending
+plan: "index.md"
+---
+
+# M04: End-to-end multi-source pipeline tests
+
+## Tasks
+
+An end-to-end test proves that the Ridgeline fixture imports through the full parser → mapper → import service chain under source `ridgeline`, and that a Stratus automation run does not retire Ridgeline stations.
+
+**Scope** — `tests/e2e/fixtures/lookup_sites.json` (add Highmoor sites), `tests/e2e/test_xml_import_pipeline.py` (append). Uses `tests/services/xml_import/fixtures/ridgeline_feed.xml` (M1) and `InMemoryImportedStationRepository(source=…, store=…)` (M2). No production code.
+
+| Task | Description | Files | SP | Status |
+|------|-------------|-------|----|--------|
+| 4.1 | Add sites `Brackenridge` (id 204), `Cold Fell` (id 205), `Sainte-Élise` (id 206, names `[{"lang":"fr","name":"Sainte-Élise"}]`) under region key `"31"` (Highmoor) | `tests/e2e/fixtures/lookup_sites.json` | 1 | pending |
+| 4.2 | Append `class TestRidgelineFeedPipeline` with an import test and a cross-source stale-isolation test | `tests/e2e/test_xml_import_pipeline.py` | 1 | pending |
+
+## Definition of Done
+
+##### Task 4.1
+- [ ] The three site objects use the same shape as existing entries (`id`, `name`, `names`). Existing e2e tests still pass.
+
+##### Task 4.2
+- [ ] `test_imports_all_fixture_stations`: parse `ridgeline_feed.xml` with `XMLParserService([StratusParser()])` and map with `StratusDataMapper(lookup_data)` (strict). Import via `XMLImportService(client=fake_client, station_repo=InMemoryImportedStationRepository(source="ridgeline"), owned_by=["operator"], file_downloader=file_downloader)` with `ImportConfig(is_automation_job=True)`. Result: 4 × `"created"`, and every repo row has `source == "ridgeline"`.
+- [ ] `test_stratus_run_does_not_retire_ridgeline`: both repos share one `store`. Import the Ridgeline fixture under `ridgeline` and set every Ridgeline row's `updated_at` to 48 h ago. Run `XMLImportJobRunner` for the Stratus fixture `stratus_feed.xml` with `InMemoryImportedStationRepository(source="stratus", store=shared)`, `is_automation_job=True` and no `source_ids`. Afterwards every Ridgeline row has `is_retired is False`, and `fake_client` got no `set_station_status` call for any Ridgeline `climabase_id`.
+
+## References
+
+- `tests/e2e/test_xml_import_pipeline.py`: fixtures `lookup_data`, `file_downloader`, `_make_valid_image_bytes`.
+- `tests/services/xml_import/test_job_runner.py` (lines ~95-120): stale-retiring test pattern.
+
+## Verify
+
+```bash
+docker compose exec api poetry run pytest tests/e2e/test_xml_import_pipeline.py -q
+```
+-- expected/cwd/milestones/M05-ridgeline-schedule-claude-md/M05-ridgeline-schedule-claude-md.md --
+---
+id: "05"
+title: "Ridgeline schedule + CLAUDE.md"
+sp: 3
+status: pending
+plan: "index.md"
+---
+
+# M05: Ridgeline schedule + CLAUDE.md
+
+## Tasks
+
+Every environment has a disabled `PeriodicTask` "XML import: Ridgeline" that calls `run_xml_import_from_url` for the Ridgeline URL with `source="ridgeline"` daily at 04:00 UTC, and CLAUDE.md documents the multi-source pipeline.
+
+**Scope** — new data migration `meteo/migrations/0025_ridgeline_periodic_task.py`, new test `tests/test_ridgeline_schedule.py`, and the `## Station Sync Pipelines` section of `CLAUDE.md`.
+
+| Task | Description | Files | SP | Status |
+|------|-------------|-------|----|--------|
+| 5.1 | RunPython data migration: `get_or_create` a `CrontabSchedule(minute="0", hour="4", day_of_week="*", day_of_month="*", month_of_year="*", timezone="UTC")` and `update_or_create` `PeriodicTask(name="XML import: Ridgeline")`; reverse deletes that `PeriodicTask` by name | `meteo/migrations/0025_ridgeline_periodic_task.py`, `tests/test_ridgeline_schedule.py` | 2 | pending |
+| 5.2 | Update CLAUDE.md pipeline docs | `CLAUDE.md` | 1 | pending |
+
+## Definition of Done
+
+##### Task 5.1
+- [ ] The migration depends on `("meteo", "0024_importedstation_source_unique_importstationjob_source")` and on the latest `django_celery_beat` migration. Read its name from `docker compose exec api poetry run python manage.py showmigrations django_celery_beat` (last line); django-celery-beat is pinned at 2.8.1 in `poetry.lock`.
+- [ ] It uses `apps.get_model("django_celery_beat", "PeriodicTask")` / `"CrontabSchedule"` (historical models only). The `PeriodicTask` defaults are `task="meteo.tasks.run_xml_import_from_url"`, `crontab=<schedule>`, `kwargs=json.dumps({"xml_url": "https://feeds.example.org/ridgeline/stratus/v3/", "source": "ridgeline"})`, `args="[]"`, `enabled=False`, and `description="Ridgeline (Highmoor uplands) Stratus v3 feed → Climabase. Enable after a dry run."`.
+- [ ] The forward step is idempotent (`update_or_create` by name). The reverse step deletes the task by name and leaves the crontab, which other tasks may share.
+- [ ] Code sketch:
+  ```python
+  RIDGELINE_TASK_NAME = "XML import: Ridgeline"
+
+  def create_ridgeline_task(apps, schema_editor):
+      ...
+
+  def delete_ridgeline_task(apps, schema_editor):
+      ...
+  ```
+- [ ] `tests/test_ridgeline_schedule.py` (`@pytest.mark.django_db`) asserts that, in the migrated test DB, `PeriodicTask.objects.get(name="XML import: Ridgeline")` has `enabled is False`, `task == "meteo.tasks.run_xml_import_from_url"`, `json.loads(kwargs)["source"] == "ridgeline"`, and `crontab.hour == "4"`.
+- [ ] `docker compose exec api poetry run python manage.py migrate meteo 0024` then `migrate meteo` both succeed, and the task is gone and back again.
+
+##### Task 5.2
+- [ ] In `CLAUDE.md` `## Station Sync Pipelines`, the `run_xml_import_job` bullet says it imports **one or more Stratus XML feeds**. Each feed is a `PeriodicTask` calling `run_xml_import_from_url(xml_url, source=…)`, with sources listed in `meteo/services/xml_import/sources.py::XMLFeedSource` (currently `stratus`, `ridgeline`).
+- [ ] A new bullet "Adding a feed source" covers: add an `XMLFeedSource` member, add a data migration creating a disabled `PeriodicTask`, and dry-run with `import_xml <url> --source <name>` before enabling. It also notes that `ImportedStation` tracking and stale retiring are scoped per source.
+
+## References
+
+- `meteo/admin.py`: how `PeriodicTask` is surfaced (custom admin with Run Now).
+- `meteo/migrations/0023_importedstation_is_retired.py`: migration header/dependency style.
+
+## Verify
+
+```bash
+docker compose exec api poetry run pytest tests/test_ridgeline_schedule.py -q
+```
+-- exit --
+0
+-- stdout --
+M01-stratus-dto-accepts-ridgeline-elevation-shape sp=2 sections=tasks:9,dod:15,references:4,verify:4
+M02-source-scoped-import-tracking-schema-repository sp=5 sections=tasks:10,dod:28,references:4,verify:4
+M03-thread-feed-source-through-tasks-command-downloader-admin sp=4 sections=tasks:11,dod:20,references:4,verify:4
+M04-end-to-end-multi-source-pipeline-tests sp=2 sections=tasks:9,dod:7,references:3,verify:4
+M05-ridgeline-schedule-claude-md sp=3 sections=tasks:9,dod:21,references:3,verify:3
+group G1: M01, M02, M03, M04 (13 SP)
+group G2: M05 (3 SP)

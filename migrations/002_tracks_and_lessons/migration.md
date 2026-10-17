@@ -61,8 +61,8 @@ Run from the vault root. First look at what is there:
 
 ```bash
 booping query --glob 'plans/*/index.md' --columns status,goal,retro,code_reviews 2>/dev/null \
-  || ls -1 plans/*/index.md 2>/dev/null || echo "no plans in this vault"
-ls -1 plans/*/retro.md 2>/dev/null || echo "no in-plan retrospectives"
+  || find plans -mindepth 2 -maxdepth 2 -path 'plans/[!.]*/index.md' 2>/dev/null | sort | grep . || echo "no plans in this vault"
+find plans -mindepth 2 -maxdepth 2 -path 'plans/[!.]*/retro.md' 2>/dev/null | sort | grep . || echo "no in-plan retrospectives"
 ```
 
 Then convert. The script writes nothing when there is nothing on the old lifecycle:
@@ -187,11 +187,12 @@ PY
 Confirm the result — no plan left on a retro status, no `retro.md` left inside a plan directory:
 
 ```bash
-grep -l -E '^status: (awaiting-retro|awaiting-learning)$' plans/*/index.md 2>/dev/null \
+find plans -mindepth 2 -maxdepth 2 -path 'plans/[!.]*/index.md' \
+  -exec grep -l -E '^status: (awaiting-retro|awaiting-learning)$' {} + 2>/dev/null | sort | grep . \
   && echo "STILL OLD: the plans above were not converted" || echo "no plan left on a retro status"
-ls -1 plans/*/retro.md 2>/dev/null \
+find plans -mindepth 2 -maxdepth 2 -path 'plans/[!.]*/retro.md' 2>/dev/null | sort | grep . \
   && echo "STILL OLD: the retrospectives above were not relocated" || echo "no in-plan retrospectives remain"
-ls -1 retrospectives/*.md 2>/dev/null
+find retrospectives -mindepth 1 -maxdepth 1 -name '[!.]*.md' 2>/dev/null | sort
 ```
 
 Any `SKIPPED`, `STILL OLD:` or `kept existing` line is a failure to report: name the files and what
@@ -260,8 +261,8 @@ report that as success. Re-running this part on a converted vault changes nothin
 Run from the vault root. First look at what is there:
 
 ```bash
-ls -1 _booping/*.md 2>/dev/null || echo "no extension files in this vault"
-ls -1 _lessons/*.md 2>/dev/null || echo "no lessons in this vault yet"
+find _booping -mindepth 1 -maxdepth 1 -name '[!.]*.md' 2>/dev/null | sort | grep . || echo "no extension files in this vault"
+find _lessons -mindepth 1 -maxdepth 1 -name '[!.]*.md' 2>/dev/null | sort | grep . || echo "no lessons in this vault yet"
 ```
 
 Read every file the first command listed, then take the next free lesson number:
@@ -312,11 +313,12 @@ grep -qxF '.booping.log' .gitignore 2>/dev/null \
 ### Verify
 
 ```bash
-ls -1 _booping/skill_*.md _booping/agent_*.md 2>/dev/null \
+find _booping -mindepth 1 -maxdepth 1 \( -name 'skill_*.md' -o -name 'agent_*.md' \) 2>/dev/null \
+  | sort | grep . \
   && echo "STILL OLD: the extension files above were not converted" \
   || echo "no extension files remain"
-ls -1 _lessons/*.md 2>/dev/null
-for f in _lessons/*.md; do [ -e "$f" ] || continue; grep -q '^targets:' "$f" || echo "NO TARGETS: $f"; done
+find _lessons -mindepth 1 -maxdepth 1 -name '[!.]*.md' 2>/dev/null | sort
+find _lessons -mindepth 1 -maxdepth 1 -name '[!.]*.md' 2>/dev/null | sort | while IFS= read -r f; do grep -q '^targets:' "$f" || echo "NO TARGETS: $f"; done
 ls -1 _booping/.booping.log 2>/dev/null && echo "log still under _booping/"
 cat .gitignore 2>/dev/null
 ```

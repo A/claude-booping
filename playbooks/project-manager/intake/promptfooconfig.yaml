@@ -1,0 +1,22 @@
+description: project-manager intake
+
+prompts:
+  - id: file://prompt.md
+    label: prompt
+
+providers:
+  - id: file://../../_lib/claude_provider.py
+    config:
+      mode: step
+      # dialogue.md replaces the return contract a dialogue step does not have.
+      context:
+        - project-manager/intake/_fixtures/dialogue.md
+      output_mode: files
+      # answer-only files no item
+      allow_no_files: true
+      model: opus
+      effort: medium
+
+defaultTest: file://../../_lib/grader.yaml
+
+tests: file://tests.yaml

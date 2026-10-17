@@ -1,0 +1,55 @@
+#!/bin/sh
+# Shared hook: open items follow the plan they are linked to.
+#
+#   open-items-follow-plan done  — move the plan's planned items to done
+#   open-items-follow-plan open  — return the plan's planned items to open
+#
+# Wired onto develop's `→ done`, `→ fail` and `→ cancelled` edges and groom's
+# `→ cancelled` edges. Environment (set by `booping transition`):
+# BOOPING_ARTIFACT = the plan's `index.md`, absolute. The vault is its nearest
+# ancestor holding the items directory (`core.specs.open_items.dir`); items carry
+# `plan:` relative to it.
+#
+# Every failure is absorbed on purpose: a hook exiting non-zero aborts
+# `booping transition` *after* `status:` is already written, which would leave the
+# plan advanced and its items behind with no way back. A failed follow is a
+# warning; `booping transition {item} done|open` by hand is the reconcile.
+#
+# The binary is resolved from this script's own location — cwd is the plan
+# directory, so a relative path would miss.
+set -u
+
+BOOPING="${BOOPING_BIN:-$(cd "$(dirname "$0")/../.." && pwd)/bin/booping}"
+
+warn() {
+    echo "warning: open-items follow-plan failed (exit $1)" >&2
+    exit 0
+}
+
+case "${1:-}" in
+    done | open) to=$1 ;;
+    *)
+        echo "warning: open-items follow-plan: unknown argument '${1:-}' (want done|open)" >&2
+        exit 0
+        ;;
+esac
+
+artifact="${BOOPING_ARTIFACT:-}"
+items_dir=$("$BOOPING" config core.specs.open_items.dir) || warn $?
+
+vault=$(dirname "$artifact")
+while [ ! -d "$vault/$items_dir" ]; do
+    [ "$vault" = / ] || [ "$vault" = . ] && exit 0
+    vault=$(dirname "$vault")
+done
+
+items=$("$BOOPING" query --project "$vault" --config core.specs.open_items.index \
+    --where "plan=${artifact#"$vault"/}" --where status=planned --output paths) || warn $?
+
+failed=0
+for item in $items; do
+    "$BOOPING" transition "$vault/$item" "$to" || failed=$?
+done
+[ "$failed" -eq 0 ] || warn "$failed"
+
+exit 0

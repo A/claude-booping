@@ -1,0 +1,28 @@
+A plan path with no `index.md` behind it is rejected. Exit 1, no record written.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+macro_stubs:
+  core.macros.date +%Y%m%d-%H%M%S: "20261015-120000"
+  core.macros.date +%Y-%m-%d %H:%M: "2026-10-15 12:00"
+core:
+  run:
+    command:
+      - sh
+      - -c
+      - |
+        printf 'arg: %s\n' "$@"
+        echo "env: $CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS"
+        if read -r line; then echo "stdin: data"; else echo "stdin: empty"; fi
+        exit 0
+      - fake
+-- cmd --
+sh -c 'booping run develop vault/plans/nope; s=$?; find . -path "*runs*"; exit $s'
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: plan not found: vault/plans/nope

@@ -4,12 +4,12 @@
 Used by the `groom` and `develop` playbooks on the edges that bound a working
 session, so `booping session-stats` can later mine the transcripts.
 
-Environment (set by `booping playbook-transition`): BOOPING_ARTIFACT = the run's
+Environment (set by `booping transition`): BOOPING_ARTIFACT = the run's
 resolved target, the plan's `index.md`. `CLAUDE_CODE_SESSION_ID` comes from the
 inherited Claude Code environment — it is undocumented, so its absence is a
 warn-to-stderr no-op rather than a failed transition.
 
-Appends via `bin/booping frontmatter-update --append`, which creates the list,
+Appends via `bin/booping set --append`, which creates the list,
 dedupes, and refuses a scalar `sessions:`.
 """
 
@@ -32,7 +32,7 @@ def main() -> None:
         sys.exit("stamp-session: BOOPING_ARTIFACT unset")
 
     subprocess.run(
-        [str(BOOPING), "frontmatter-update", artifact, "--append", f"sessions={session_id}"],
+        [str(BOOPING), "set", artifact, "--append", f"sessions={session_id}"],
         check=True,
     )
     print(f"stamp-session: sessions += {session_id}")
