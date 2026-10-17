@@ -41,7 +41,7 @@ surfaces in the run after it lands rather than never.
 headline for the undocumented set as a whole (`nothing-to-document` when it is empty).
 
 - frontmatter: `title:` — the same headline in sentence case — and nothing else. `status:` is
-  `playbook-transition`'s, `started:` and `commit:` the surveying edge's hooks', every later stamp
+  `booping transition`'s, `started:` and `commit:` the surveying edge's hooks', every later stamp
   its own edge's. Write none of them.
 - H1 repeating the title.
 - `## Spec set` — a `Record | State | Open marks | Gap` table, five rows in the order above: one

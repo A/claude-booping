@@ -3,8 +3,8 @@
 `documented:` frontmatter list into the ledger `documented.md` at the workdir
 root, seeding the ledger when it does not exist yet.
 
-Environment (set by `booping playbook-transition`): BOOPING_WORKDIR = the run
-workdir `{vault}/docs` (also cwd), BOOPING_ARTIFACT = the run record.
+Environment (set by `booping transition`): BOOPING_ARTIFACT = the run record
+`{vault}/docs/_runs/{name}.md`; the docs workdir is its grandparent.
 
 The ledger is what the next survey's undocumented sweep subtracts, so membership
 is by work-item path; rows already present are left untouched. Runs before
@@ -46,11 +46,11 @@ def documented_items(head: str) -> list[str]:
 
 
 def main() -> None:
-    workdir = Path(os.environ.get("BOOPING_WORKDIR", ".")).resolve()
     raw_artifact = os.environ.get("BOOPING_ARTIFACT")
     if not raw_artifact:
         sys.exit("BOOPING_ARTIFACT is not set")
     artifact = Path(raw_artifact).resolve()
+    workdir = artifact.parent.parent
     if not artifact.is_file():
         sys.exit(f"run record not found: {artifact}")
 

@@ -23,9 +23,9 @@ a current file are skipped rather than redone.
 
 - Date & time: {{ human_ts }}
 - The run workdir is `{vault}/docs/`; run records live under its `_runs/` subdirectory, never
-  loose in `docs/` beside real documentation. Every `booping playbook-state` / `booping
-  playbook-transition` call passes `--workdir {vault}/docs --target
-  _runs/{YYYYMMDDHHmm}-{title}.md`, since the machine declares no `artifact:`.
+  loose in `docs/` beside real documentation. Every `booping state` / `booping transition` call names the run record
+  `{vault}/docs/_runs/{YYYYMMDDHHmm}-{title}.md` and passes `--playbook docs`, since the machine declares
+  no `artifact:`.
 - The spec set is the project specs tier records: the value records
   (`core.docs_playbook.queries.values`), reference/0001 (audience), reference/0002 (glossary —
   canonical terms every record and destination uses), reference/0003 (surfaces) and the story

@@ -22,7 +22,7 @@ everything already in it stays exactly as found.
 - frontmatter gains `documented:` — the work items now documented, one entry each, written the way
   the survey and the ledger identify them, none for a withheld one. A run that documents nothing
   writes `documented: []`; the key is always present, since the `close-documented` hook reads it.
-- every other frontmatter key is left untouched: `status:` is `playbook-transition`'s, and
+- every other frontmatter key is left untouched: `status:` is `booping transition`'s, and
   `started:`, `commit:`, the `*_reviewed_at` stamps and `completed:` belong to their own edges.
 - every earlier section is left exactly as found — `## Scope`, `## Changes`, the targeting plan
   with its progress column and `## Verification findings` are not reworded, re-scoped or tidied.
