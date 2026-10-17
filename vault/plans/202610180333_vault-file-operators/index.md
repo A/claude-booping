@@ -2,7 +2,7 @@
 title: "Vault-file operators — set, transition, state, config, next_id; booping items
   folded in"
 type: "feature"
-status: presenting
+status: ready-for-dev
 sp: 28
 related_to: null
 created: 2026-10-18 03:33
@@ -20,6 +20,7 @@ tracker_provider: null
 tracker_request: null
 tracker_issue: null
 return_to: null
+reviewed_at: 2026-10-18 03:44
 ---
 
 # Vault-file operators — set, transition, state, config, next_id; booping items folded in
