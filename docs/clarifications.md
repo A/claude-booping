@@ -1,6 +1,6 @@
 # clarifications.md format
 
-Sidecar beside `index.md` in the plan directory, holding every question a groom run could not answer itself. Seeded by the groom scaffold with its H1; the driver writes the rest by hand. Posted to the tracker verbatim, so it is plain markdown with no frontmatter.
+Sidecar beside `index.md` in the plan directory, holding every question a groom run could not answer itself. Seeded by the groom plan template with its H1; the driver writes the rest by hand. Posted to the tracker verbatim, so it is plain markdown with no frontmatter.
 
 ## Shape
 

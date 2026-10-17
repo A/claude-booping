@@ -21,7 +21,7 @@ Playbooks are discovered from the core, global and project levels:
 
 Core playbooks own the main workflow:
 
-- **`setup`** — machine config, then vault scaffold and `.booping` marker. See [Install](install.md).
+- **`setup`** — machine config, then the vault tree and `.booping` marker. See [Install](install.md).
 - **`groom`** — spec a sprint (intake → codebase and web research → draft → cross-review → present). See [groom](groom.md).
 - **`develop`** — execute a plan (intake → provision → develop-loop → verify → wrap-up). See [develop](develop.md).
 - **`retro`** — capture what shipped versus the spec. See [retro](retro.md).
@@ -230,7 +230,7 @@ A Jinja body is meaningless until rendered — the `booping render-playbook <nam
 A run is **autonomous** when you tell its session to work autonomously, or when it was launched with `booping run … --autonomous`, which appends the [`core.run.preamble`](project_config.md#corerun), opening `AUTONOMOUS RUN`, to the prompt. Otherwise it is **supervised**. No config key sets the mode.
 
 - **Supervised** — every review gate pauses for your confirmation, and a step's questions are put to you.
-- **Autonomous** — the run confirms each review gate itself, settles each question with the step's recommended option (else its first, else the most conservative answer the request supports), and continues without waiting. Every gate and question it settled is logged as one file under the vault's `agent-decisions/`, written with `booping scaffold core.agent_decisions.scaffold` — the step, what was asked, what was decided, why, the session, the time, and the run's artefact when it has one.
+- **Autonomous** — the run confirms each review gate itself, settles each question with the step's recommended option (else its first, else the most conservative answer the request supports), and continues without waiting. Every gate and question it settled is logged as one file under the vault's `agent-decisions/`, written with `booping create core.agent_decisions.template` — the step, what was asked, what was decided, why, the session, the time, and the run's artefact when it has one.
 
 Two things still stop an autonomous run: a **STOP** notice, and a question a step marks as always asked — `migrate`'s question about uncommitted work is one.
 
@@ -436,14 +436,14 @@ Create the directory under your home vault root:
 
 Fill in `playbook.md` with identity frontmatter and a plain-markdown preamble body, `playbook.yaml` with the `graph:` (plus `state:` / `states:` if the run should be resumable), and each `<step>/prompt.md` with its own frontmatter and prompt body. Run `/playbook` in any project and it appears in the listing as a global playbook.
 
-To skip the by-hand part, scaffold the skeleton — `playbook.md`, an empty `playbook.yaml` graph, and `_references/`:
+To skip the by-hand part, create the skeleton — `playbook.md`, an empty `playbook.yaml` graph, and `_references/`:
 
 ```
-bin/booping scaffold core.playbook_authoring_playbook.scaffold ~/Claude/_playbooks/my-playbook \
+bin/booping create core.playbook_authoring_playbook.template ~/Claude/_playbooks/my-playbook \
   --set name=my-playbook
 ```
 
-See [scaffold trees](project_config.md#scaffold-trees) for the tree itself and how to override or extend it.
+See [template trees](project_config.md#template-trees) for the tree itself and how to override or extend it.
 
 ## Authoring a project playbook
 

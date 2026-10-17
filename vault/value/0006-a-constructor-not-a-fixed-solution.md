@@ -12,7 +12,7 @@ Booping is a framework for playbooks. A user extends it by digitising their own 
 
 ## In practice
 
-A project's config extends booping's logic: user playbooks, scripts and templates read their own config keys, and the core mechanics (state machines, hooks, queries, scaffolds, tiers) carry them.
+A project's config extends booping's logic: user playbooks, scripts and templates read their own config keys, and the core mechanics (state machines, hooks, queries, template trees, tiers) carry them.
 
 ## Trade-off
 

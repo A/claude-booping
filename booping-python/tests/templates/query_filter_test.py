@@ -79,8 +79,8 @@ class TestQueryFilterSurfaces:
         source = "{% set r = ('core.plans.all' | query) | first %}{{ r.title }}/{{ r.path }}"
         assert _render_source(vault, tmp_path, source) == "Beta | piped/plans/beta.md"
 
-    def test_scaffold_seed_string_gets_rows(self, vault: Path) -> None:
-        """The scaffold seed path: build_source_env + from_string."""
+    def test_create_seed_string_gets_rows(self, vault: Path) -> None:
+        """The `create` seed path: build_source_env + from_string."""
         ctx = _context(vault)
         env = build_source_env(context=ctx, config=ctx.config)
         assert env.from_string(SLUGS).render().strip() == "beta,alpha"

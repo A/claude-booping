@@ -20,7 +20,7 @@ Create it in one call, with `{plan-dir}` the preamble's `Plan dir:` line resolve
 vault and `{title}` the plan's descriptive title:
 
 ```
-booping scaffold core.groom_playbook.scaffold {plan-dir} --set title="{title}" --set type={type}
+booping create core.groom_playbook.template {plan-dir} --set title="{title}" --set type={type}
 ```
 
 The printed diff is the confirmation — do not read the created files back. A target reported as

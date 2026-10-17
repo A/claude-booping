@@ -35,7 +35,7 @@ Specs come in three tiers, each a tier root of its own:
 
 At the vault root only the type directories are records; plans, retrospectives and everything else in the vault are left alone. To keep the project's records in the repo instead, set the project tier's `path` — `booping specs init` links it into the vault as `<vault>/specs`. A vault that still holds its records under `<vault>/specs/` is moved to the root by `/playbook migrate`, which leaves a tier you pointed at the repo where it is.
 
-Where each tier lives and what it is called is the [`core.specs`](project_config.md#corespecs) config key. The [setup playbook](install.md#scaffold-the-project-vault) sets up the global and project tiers and asks for your global namespace; [`booping specs init`](#booping-specs-init) creates either one on demand.
+Where each tier lives and what it is called is the [`core.specs`](project_config.md#corespecs) config key. The [setup playbook](install.md#create-the-project-vault) sets up the global and project tiers and asks for your global namespace; [`booping specs init`](#booping-specs-init) creates either one on demand.
 
 ## Namespaced refs
 

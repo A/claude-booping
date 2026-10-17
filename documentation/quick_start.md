@@ -17,7 +17,7 @@ Update later with `/plugin update booping` (or from the `/plugin` UI).
 
 See [Install](install.md) for prerequisites (`uv`, `git`).
 
-## 2. Scaffold the project vault
+## 2. Create the project vault
 
 `cd` into the target repository and run:
 

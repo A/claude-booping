@@ -15,7 +15,7 @@ project, so that I can start the loop without wiring anything by hand.
 ## Criteria
 
 - Resolves and writes machine-level config with a working `home_dir`.
-- Scaffolds the Project Vault from the config-declared tree, including `sprints.md` as
+- Creates the Project Vault from the config-declared tree, including `sprints.md` as
   a live Obsidian Bases view seeded once, never regenerated.
 - Writes the marker to attach the repo (`vault_path:` for a repo-local vault) and
   symlinks a repo-local vault into the home dir for Obsidian.

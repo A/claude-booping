@@ -84,8 +84,8 @@ Only `config.yaml` at the vault root. Nothing else in the vault carries config p
 | `plans` | `core.plans` |
 | `git` | `core.develop_playbook.git` |
 | `migrations.pending` | `core.migrate_playbook.queries.pending` |
-| `playbook.scaffold` | `core.playbook_authoring_playbook.scaffold` |
-| `vault.scaffold` | `core.setup_playbook.scaffold` |
+| `playbook.scaffold` | `core.playbook_authoring_playbook.template` |
+| `vault.scaffold` | `core.setup_playbook.template` |
 | `core.cross_review_agent` | `core.groom_playbook.cross_review_agent` |
 | `skills.groom` | `core.groom_playbook` |
 | `skills.develop` | `core.develop_playbook` |
@@ -135,8 +135,8 @@ MOVES = [
     ("plans", "core.plans"),
     ("git", "core.develop_playbook.git"),
     ("migrations.pending", "core.migrate_playbook.queries.pending"),
-    ("playbook.scaffold", "core.playbook_authoring_playbook.scaffold"),
-    ("vault.scaffold", "core.setup_playbook.scaffold"),
+    ("playbook.scaffold", "core.playbook_authoring_playbook.template"),
+    ("vault.scaffold", "core.setup_playbook.template"),
     ("core.cross_review_agent", "core.groom_playbook.cross_review_agent"),
     ("skills.groom", "core.groom_playbook"),
     ("skills.develop", "core.develop_playbook"),

@@ -12,7 +12,7 @@ sources: [CLAUDE.md, CHANGELOG.md, vault/researches/20260802-01-31_framework-cli
 
 ## Context
 
-Booping's structured data — query specs, scaffold trees, macros, sprint scale,
+Booping's structured data — query specs, template trees, macros, sprint scale,
 agents, task types — lives in config and is rendered from there. Users and projects
 need to add and override it: the global tier carries `home_dir`, the project tier
 carries agent registrations and settings such as the cross-review agent. Before
@@ -29,7 +29,7 @@ tiers win; lists replace wholesale. There is no schema gate and no tier restrict
 any key loads in any tier. The top level is `home_dir` plus `core`; a key one
 playbook owns lives at `core.{name}_playbook`, a shared key directly under `core`,
 and a user's own playbook namespace copies that shape. Any mapping can be a query
-spec or a scaffold tree, declared beside its consumer, never in a central registry.
+spec or a template tree, declared beside its consumer, never in a central registry.
 
 ## Alternatives
 

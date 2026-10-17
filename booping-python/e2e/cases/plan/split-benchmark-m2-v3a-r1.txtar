@@ -119,7 +119,7 @@ Projected from the milestone files' frontmatter (derived; regenerate with `boopi
 ## Milestone files
 
 Assumption: the deliverable is this single `plan.md`, so each milestone file is reproduced below under
-its path (`milestones/{dir}/milestone.md`, relative to the plan directory) in the scaffold's shape —
+its path (`milestones/{dir}/milestone.md`, relative to the plan directory) in the template's shape —
 frontmatter, H1, goal, scope, `## Tasks`, `## Definition of Done`, `## References`, `## Verify`.
 A worker reads its own section and the parts of this file above it.
 
@@ -789,7 +789,7 @@ Projected from the milestone files' frontmatter (derived; regenerate with `boopi
 ## Milestone files
 
 Assumption: the deliverable is this single `plan.md`, so each milestone file is reproduced below under
-its path (`milestones/{dir}/milestone.md`, relative to the plan directory) in the scaffold's shape —
+its path (`milestones/{dir}/milestone.md`, relative to the plan directory) in the template's shape —
 frontmatter, H1, goal, scope, `## Tasks`, `## Definition of Done`, `## References`, `## Verify`.
 A worker reads its own section and the parts of this file above it.
 

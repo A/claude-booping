@@ -169,19 +169,19 @@ def test_split_writes_milestones_and_index(
     assert (plan / "index.md").read_text(encoding="utf-8") == SPLIT_INDEX
 
 
-def test_milestone_head_matches_the_scaffold_command(
+def test_milestone_head_matches_the_create_command(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
     plan = _plan_dir(tmp_path, (FIXTURES / "fixed.md").read_text(encoding="utf-8"), monkeypatch)
     assert _booping(["plan", "split", "plans/demo/draft.md"]) == 0
     sets = ["id=01", "slug=parser-core", "title=Parser core", "sp=3", "plan=plans/demo/index.md"]
-    argv = ["scaffold", "core.groom_playbook.milestone_scaffold", "ref"]
+    argv = ["create", "core.groom_playbook.milestone_template", "ref"]
     assert _booping([*argv, *(x for s in sets for x in ("--set", s))]) == 0
     capsys.readouterr()
 
-    scaffolded = (tmp_path / "ref" / "M01-parser-core" / "M01-parser-core.md").read_text()
+    created = (tmp_path / "ref" / "M01-parser-core" / "M01-parser-core.md").read_text()
     written = (plan / "milestones" / "M01-parser-core" / "M01-parser-core.md").read_text()
-    head = scaffolded[: scaffolded.index("# M01: Parser core\n") + len("# M01: Parser core\n")]
+    head = created[: created.index("# M01: Parser core\n") + len("# M01: Parser core\n")]
     assert written.startswith(head)
 
 

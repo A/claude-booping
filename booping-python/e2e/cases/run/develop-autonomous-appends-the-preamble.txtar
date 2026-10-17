@@ -57,13 +57,13 @@ acked_at: null
 ```text
 /booping:playbook develop {CWD}/vault/plans/p1/index.md
 
-AUTONOMOUS RUN, started by booping run — nobody can answer. Do not use AskUserQuestion and do not wait at review gates: confirm each yourself and log it with booping scaffold core.agent_decisions.scaffold. Settle an unclear point with a sensible default and log it the same way. A question only the owner can answer parks the run where the playbook allows it; otherwise stop and report it. Never end the run while a background agent or a check you started is still running — wait for it. Never push.
+AUTONOMOUS RUN, started by booping run — nobody can answer. Do not use AskUserQuestion and do not wait at review gates: confirm each yourself and log it with booping create core.agent_decisions.template. Settle an unclear point with a sensible default and log it the same way. A question only the owner can answer parks the run where the playbook allows it; otherwise stop and report it. Never end the run while a background agent or a check you started is still running — wait for it. Never push.
 ```
 -- expected/cwd/vault/runs/20261015-120000-develop.log --
 arg: --session-id
 arg: cdc127f3-6d68-54bf-9265-1c33ed83cac1
 arg: /booping:playbook develop {CWD}/vault/plans/p1/index.md
 
-AUTONOMOUS RUN, started by booping run — nobody can answer. Do not use AskUserQuestion and do not wait at review gates: confirm each yourself and log it with booping scaffold core.agent_decisions.scaffold. Settle an unclear point with a sensible default and log it the same way. A question only the owner can answer parks the run where the playbook allows it; otherwise stop and report it. Never end the run while a background agent or a check you started is still running — wait for it. Never push.
+AUTONOMOUS RUN, started by booping run — nobody can answer. Do not use AskUserQuestion and do not wait at review gates: confirm each yourself and log it with booping create core.agent_decisions.template. Settle an unclear point with a sensible default and log it the same way. A question only the owner can answer parks the run where the playbook allows it; otherwise stop and report it. Never end the run while a background agent or a check you started is still running — wait for it. Never push.
 env: 0
 stdin: empty

@@ -1,6 +1,6 @@
 """Open items — one file per specs-to-code gap under `{vault}/{core.specs.open_items.dir}`.
 
-Numbering, the item scaffold, ADR confirmation extraction and the index live here;
+Numbering, the item template, ADR confirmation extraction and the index live here;
 `booping.commands.items` is the argparse shell over them. Status moves go through
 the `open_item` machine of the `specs` playbook, never a direct `status:` write.
 """
@@ -16,17 +16,17 @@ from typing import Any, cast
 from markdown_it import MarkdownIt
 from markdown_it.token import Token
 
+from booping.commands.create import _plan  # pyright: ignore[reportPrivateUsage]
 from booping.commands.playbook_transition import (
     format_frontmatter_line,
     read_status,
     transition,
 )
-from booping.commands.scaffold import _plan  # pyright: ignore[reportPrivateUsage]
 from booping.context import Context
 from booping.context._yaml import parse_frontmatter_only, update_frontmatter
 from booping.context.lifecycle import resolve_edges
 from booping.context.playbook import StateMachine
-from booping.context.scaffold import ScaffoldError, load
+from booping.context.template_tree import TemplateTreeError, load
 from booping.query import QueryError, as_dict, build_spec, cell, resolve_spec, run
 from booping.rendering import build_source_env
 from booping.specs.check import Finding
@@ -38,7 +38,7 @@ SOURCES = ("manual", "adr", "mark", "check", "sync", "correction", "request", "b
 REQUEST_SOURCES = ("request", "backlog")
 PLAYBOOK = "specs"
 STATE = "open_item"
-SCAFFOLD_PATH = "core.specs.open_items.scaffold"
+TEMPLATE_PATH = "core.specs.open_items.template"
 INDEX_PATH = "core.specs.open_items.index"
 TITLE_LIMIT = 100
 ID_ATTEMPTS = 100
@@ -187,7 +187,7 @@ def write_item(
     body: str | None,
     listing: Callable[[Path], Iterable[str]] = listed_names,
 ) -> Path:
-    """Scaffold the next numbered item file through `core.specs.open_items.scaffold`."""
+    """Write the next numbered item file through `core.specs.open_items.template`."""
     directory = items_dir(ctx)
     env = build_source_env(context=ctx, config=ctx.config)
     globals_: dict[str, Any] = env.globals  # type: ignore[assignment]
@@ -203,8 +203,8 @@ def write_item(
     def render(item_id: str) -> tuple[Path, str]:
         globals_["id"] = item_id
         try:
-            writes = _plan(load(ctx.config, SCAFFOLD_PATH), directory, env)
-        except ScaffoldError as exc:
+            writes = _plan(load(ctx.config, TEMPLATE_PATH), directory, env)
+        except TemplateTreeError as exc:
             raise OpenItemError(str(exc)) from exc
         for write in writes:
             if write.content is None:

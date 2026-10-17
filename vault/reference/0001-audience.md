@@ -31,7 +31,7 @@ sources: [https://github.com/A/claude-booping/blob/c7e43b43dfe5fc1c0fafe253dd148
   review templates, targeted rules, playbook authoring (graphs, states, hooks) and
   external-agent integration.
 - Advanced-user depth: every user-facing config key, the full playbook manifest
-  surface, query specs and scaffold trees as features; never plugin internals (build
+  surface, query specs and template trees as features; never plugin internals (build
   pipeline, Python source layout, CI gates). Withheld: how the render pipeline is
   implemented, snapshot and eval harness internals, config keys the core reserves for
   itself. Voice: second person, reference style, key tables and manifest shapes over

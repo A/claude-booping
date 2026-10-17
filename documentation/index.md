@@ -40,7 +40,7 @@ Every plan walks this loop once; the next inherits the rules. Setup, grooming, d
 ## Read next
 
 - [Quick start](quick_start.md) — install the plugin, run `/playbook setup`, ship your first plan end-to-end.
-- [Install](install.md) — prerequisites and what `/playbook setup` scaffolds.
+- [Install](install.md) — prerequisites and what `/playbook setup` creates.
 - [Vault](vault.md) — full tour of `~/Claude/{project}/`: what every file and directory is for.
 - [groom playbook](groom.md) — spec a sprint, with cross-review and the user-approval gate.
 - [develop playbook](develop.md) — claim a ready plan and execute milestones.

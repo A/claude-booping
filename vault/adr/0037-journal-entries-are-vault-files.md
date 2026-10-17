@@ -1,7 +1,7 @@
 ---
 type: adr
 title: Journal entries are vault files built from existing primitives
-summary: A correction or an agent decision is one vault file with frontmatter, made by scaffold, moved by frontmatter-update and sliced by query; an item's question is its clarify status; no journal command.
+summary: A correction or an agent decision is one vault file with frontmatter, made by create, moved by frontmatter-update and sliced by query; an item's question is its clarify status; no journal command.
 created_by: owner
 created_at: 2026-10-18
 updated_at: 2026-10-18
@@ -32,7 +32,7 @@ review of agent decisions.
 ## Decision
 
 A journal entry is one vault file with YAML frontmatter, built from primitives booping already has.
-`booping scaffold core.<journal>.scaffold <dir> --set name=… --set …` writes it from a config template,
+`booping create core.<journal>.template <dir> --set name=… --set …` writes it from a config template,
 whose macros stamp the time and the session id; `booping frontmatter-update` moves its `state`;
 `booping query` slices entries by frontmatter, at render time inside a template or on the command line.
 
@@ -62,7 +62,7 @@ can table them with a Base, as it does plans.
 
 The decision above.
 
-- **Pros:** no new code; `scaffold`, `frontmatter-update` and `query` are already tested; entries are
+- **Pros:** no new code; `create`, `frontmatter-update` and `query` are already tested; entries are
   native vault notes.
 - **Cons:** many small files; an entry's id is its file name, given by the caller; fields are not
   validated.

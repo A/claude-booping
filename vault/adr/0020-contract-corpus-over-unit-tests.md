@@ -64,4 +64,4 @@ Tests import modules and assert on functions and rendered strings.
 ## Consequences
 
 - `just e2e` runs both corpora; `--txtar-update` rebaselines the selected cases.
-- `scaffold` is verified in the corpus, not by the unit tests.
+- `create` is verified in the corpus, not by the unit tests.

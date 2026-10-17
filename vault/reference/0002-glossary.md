@@ -55,7 +55,7 @@ sources: [https://github.com/A/claude-booping/blob/c7e43b43dfe5fc1c0fafe253dd148
   active run and carrying its own exit hooks.
 - **Query spec** — a config-declared mapping at any dotted path describing a
   frontmatter query over a markdown directory.
-- **Scaffold tree** — a config-declared file tree `booping scaffold` materialises at a
-  destination.
+- **Template tree** — a config-declared file tree `booping create` writes at a
+  destination, its names and contents rendered as Jinja templates.
 - **Spec set** — the project specs tier records the `docs` playbook reads: the value
   records, reference/0001–0003 and the story records.

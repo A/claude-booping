@@ -1,6 +1,6 @@
 # Vault
 
-Every booping project gets its own Project Vault, scaffolded by the [setup playbook](install.md). By default it lives at `~/Claude/{project}/`; set the `.booping` marker's `vault_path:` key to keep it **inside the repo** instead (a local vault). Plain markdown with YAML frontmatter — open the directory in Obsidian for graph view and backlinks across plans, retros, and code reviews.
+Every booping project gets its own Project Vault, created by the [setup playbook](install.md). By default it lives at `~/Claude/{project}/`; set the `.booping` marker's `vault_path:` key to keep it **inside the repo** instead (a local vault). Plain markdown with YAML frontmatter — open the directory in Obsidian for graph view and backlinks across plans, retros, and code reviews.
 
 Reference for every file and directory inside the vault. For the lifecycle that ties them together, start at [Quick start](quick_start.md).
 
@@ -55,13 +55,13 @@ That `status:` is the retro track's run state — `awaiting-retro → awaiting-l
 
 ## `codereviews/`
 
-One file per code-review run, written by the [code-review playbook](code_review.md), grouped by what was reviewed: `codereviews/{plan-dirname}/{YYYYMMDDHHmm}.md` when a plan is in scope, `codereviews/{target-slug}/{YYYYMMDDHHmm}.md` for an ad-hoc scope such as the latest commits. Scaffolded for new vaults and created lazily in older ones — no migration needed.
+One file per code-review run, written by the [code-review playbook](code_review.md), grouped by what was reviewed: `codereviews/{plan-dirname}/{YYYYMMDDHHmm}.md` when a plan is in scope, `codereviews/{target-slug}/{YYYYMMDDHHmm}.md` for an ad-hoc scope such as the latest commits. Created with new vaults and lazily in older ones — no migration needed.
 
 The file records `## Scope`, `## Findings`, `## Verdict` and `## Resolution`. Its frontmatter carries `plan:` — the reviewed plan's vault-relative path, or `null` — and its own `status:`, the code-review track's run state: `in-agent-review → human-review → done`. That status is the review's, never a plan's: the reviewed plan stays at `done` and only gains the review's path in its `code_reviews:` list. The playbook runs with the vault root as its workdir and addresses the file with `--target codereviews/{dir}/{ts}.md`.
 
 ## `corrections/` and `agent-decisions/`
 
-One markdown file per entry, frontmatter only, written by `booping scaffold` from [`core.corrections` and `core.agent_decisions`](project_config.md#corecorrections-and-coreagent_decisions) and named `{timestamp}-{step}.md`. Each carries the step, the session id, the time and the artefact it is about.
+One markdown file per entry, frontmatter only, written by `booping create` from [`core.corrections` and `core.agent_decisions`](project_config.md#corecorrections-and-coreagent_decisions) and named `{timestamp}-{step}.md`. Each carries the step, the session id, the time and the artefact it is about.
 
 - `corrections/` — every correction you made during a groom, develop or code-review run: what the run did, your words verbatim, the reason if you gave one. [Retro](retro.md) takes the `open` ones and marks them `handled`.
 - `agent-decisions/` — every gate and question an autonomous run settled for you: what was asked, what it decided and why. `open` until the project-manager's merge gate shows it to you, then `reviewed`.
@@ -104,7 +104,7 @@ A later tier overrides an earlier one by `name`, keeping the earlier entry's pos
 
 An at-a-glance view of every plan in the vault — an [Obsidian Bases](https://help.obsidian.md/bases) fence over the `plans/*/index.md` files, its columns led by status and its rows sorted newest-first by `created`. The column set includes the session metrics — `active_minutes`, `models` and three token columns (In, Out, Cached), those last three Bases formulas over the four `metrics_tokens_*` keys — read from the `metrics_*` frontmatter the sprint playbooks stamp on each plan (see [`plans/`](#plans)). Bases resolves every path against the *Obsidian* vault root, so the seeded filter scopes itself with `file.inFolder(this.file.folder + "/plans")` — the folder of the note holding the fence — keeping it correct when the booping vault is nested inside a larger Obsidian vault.
 
-**Seeded once at setup (`booping scaffold core.setup_playbook.scaffold`); no run ever rewrites or regenerates it.** Only a shipped vault migration touches the fence again, and only to bring its columns current — renaming a key in place, appending a column your existing view predates. Obsidian evaluates the query live against the plan files, so the view is never stale. Edit the fence to change columns, sorting or filters — it is yours from the moment it is written.
+**Seeded once at setup (`booping create core.setup_playbook.template`); no run ever rewrites or regenerates it.** Only a shipped vault migration touches the fence again, and only to bring its columns current — renaming a key in place, appending a column your existing view predates. Obsidian evaluates the query live against the plan files, so the view is never stale. Edit the fence to change columns, sorting or filters — it is yours from the moment it is written.
 
 Outside Obsidian the file is an inert code block. For a machine-readable listing of the same data, use `bin/booping query`:
 

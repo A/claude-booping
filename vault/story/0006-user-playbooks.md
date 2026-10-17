@@ -23,5 +23,5 @@ the core ones, so that my own procedures run under `/playbook` like the shipped 
   most-specific-first, and a step can hold per-model prompt variants.
 - A step can carry its own eval suite (`tests.yaml`, `promptfooconfig.yaml`,
   fixtures).
-- The `playbook-authoring` playbook scaffolds a new playbook: brief, decomposition,
+- The `playbook-authoring` playbook creates a new playbook: brief, decomposition,
   manifest, then per step spec, fixtures, prompt and eval suite driven to green.

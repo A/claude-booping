@@ -1,7 +1,7 @@
 ---
 type: story
 title: Layered configuration
-summary: Config is a deep merge over the core, global and project levels, and any mapping in it can be a query spec or a scaffold tree.
+summary: Config is a deep merge over the core, global and project levels, and any mapping in it can be a query spec or a template tree.
 created_by: claude
 created_at: 2026-10-14
 updated_at: 2026-10-14
@@ -17,9 +17,9 @@ level, so that booping fits my machine and my codebase without touching the plug
 - Any key can be overridden in `~/.config/booping/config.yaml` or the Project Vault's
   `config.yaml`, later levels winning.
 - Query specs declared at any config path run with `booping query --config` or the
-  `| query` filter; scaffold trees materialise with `booping scaffold`, skipping an
+  `| query` filter; template trees are written with `booping create`, skipping an
   existing target unless `--force`.
-- `booping scaffold` and `booping frontmatter-update` print every write as a unified
+- `booping create` and `booping frontmatter-update` print every write as a unified
   diff, silent when a file is unchanged.
 - Argv macros under `core.macros` carry a `command:` and a `cwd: repo|vault`, and can be
   stubbed for reproducible renders.

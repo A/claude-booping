@@ -167,7 +167,7 @@ def _build_env(
     globals_: dict[str, Any] = env.globals  # type: ignore[assignment]
     globals_["macro"] = make_macro(config, **macro_dirs(context))
     # The single site the `booping` global is set: every env a body renders through
-    # (`render`, `build_source_env`, and so `render-playbook` and `scaffold`) comes
+    # (`render`, `build_source_env`, and so `render-playbook` and `create`) comes
     # from here.
     globals_["booping"] = make_booping_global(context)
     filters: dict[str, Any] = env.filters  # type: ignore[assignment]

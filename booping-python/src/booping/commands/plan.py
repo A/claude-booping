@@ -11,10 +11,10 @@ from typing import Any, NoReturn, cast
 
 from booping import logger
 from booping.argparser import Parser
-from booping.commands.scaffold import _plan  # pyright: ignore[reportPrivateUsage]
+from booping.commands.create import _plan  # pyright: ignore[reportPrivateUsage]
 from booping.context import Context
 from booping.context._yaml import parse_frontmatter_only
-from booping.context.scaffold import ScaffoldError, load
+from booping.context.template_tree import TemplateTreeError, load
 from booping.plan.check import CHECKS, check_milestone
 from booping.plan.split import SECTION_KEYS, Cut, Milestone, block, cut_draft, demote, split_lines
 from booping.query import QuerySpec, as_dict, cell, expand
@@ -27,7 +27,7 @@ REFUSED_EXIT = 2
 NO_MILESTONES_EXIT = 3
 FLAGGED_EXIT = 4
 
-MILESTONE_SCAFFOLD = "core.groom_playbook.milestone_scaffold"
+MILESTONE_TEMPLATE = "core.groom_playbook.milestone_template"
 SECTIONS_PATH = "core.groom_playbook.split.sections"
 MILESTONES_PATH = "core.plans.milestones"
 MAX_SP_PATH = "core.sprint.max_sp"
@@ -164,7 +164,7 @@ def _section_body(lines: Sequence[str]) -> str:
 
 
 def _fill(content: str, names: Sequence[str], m: Milestone) -> str:
-    """The scaffolded milestone file with each section's lines under its `## {name}`."""
+    """The templated milestone file with each section's lines under its `## {name}`."""
     keys = {f"## {name}": key for name, key in zip(names, SECTION_KEYS, strict=True)}
     lines = split_lines(content)
     out: list[str] = []
@@ -300,7 +300,7 @@ def _run_split(args: argparse.Namespace) -> None:
     plan_ref = _plan_ref(ctx, index_path)
     writes: list[tuple[Path, str | None]] = []
     try:
-        root = load(config, MILESTONE_SCAFFOLD)
+        root = load(config, MILESTONE_TEMPLATE)
         for m in cut.milestones:
             globals_.update(
                 id=m.id,
@@ -315,7 +315,7 @@ def _run_split(args: argparse.Namespace) -> None:
                 if content is not None and any(relative.match(g) for g in globs):
                     content = _fill(content, section_names, m)
                 writes.append((write.path, content))
-    except ScaffoldError as exc:
+    except TemplateTreeError as exc:
         _fail(str(exc))
 
     if index_path.is_file():

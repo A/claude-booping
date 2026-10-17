@@ -33,7 +33,7 @@ Inside Claude Code, register the marketplace once and install the plugin:
 
 Update later with `/plugin update booping` (or from the `/plugin` UI).
 
-## Scaffold the project vault
+## Create the project vault
 
 `cd` into the target repository and run:
 
@@ -46,9 +46,9 @@ The `setup` playbook takes the repo from any starting state to a working booping
 It runs in two steps:
 
 1. **Machine level** — when booping is not yet initialized, it asks for your preferred home dir (default `~/Claude/`), writes the machine config at `${XDG_CONFIG_HOME:-~/.config}/booping/config.yaml`, and makes the home dir exist as a git repo. When the machine config names no global [specs](specs.md) namespace yet, it asks for one (default `$USER`) and stores it as `core.specs.tiers.global.namespace`; then it creates the global specs tier at `<home_dir>/_specs/`.
-2. **Project level** — it asks where the vault lives (the default `<home_dir>/{project}/`, kept outside the repo, or a **repo-local** directory recorded via the `.booping` marker's `vault_path:` key), the project name, and marker visibility; then scaffolds the vault tree, writes the `.booping` marker, symlinks a repo-local vault into the home dir, and seeds `sprints.md`; last, it sets up the project specs tier — by default the vault root itself, where the record type directories sit beside `plans/`, so nothing is created; a tier you keep in the repo is created there and linked from `<vault>/specs`.
+2. **Project level** — it asks where the vault lives (the default `<home_dir>/{project}/`, kept outside the repo, or a **repo-local** directory recorded via the `.booping` marker's `vault_path:` key), the project name, and marker visibility; then creates the vault tree, writes the `.booping` marker, symlinks a repo-local vault into the home dir, and seeds `sprints.md`; last, it sets up the project specs tier — by default the vault root itself, where the record type directories sit beside `plans/`, so nothing is created; a tier you keep in the repo is created there and linked from `<vault>/specs`.
 
-The scaffolded vault:
+The created vault:
 
 - `plans/` — sprint plans authored by the [groom playbook](groom.md), executed by the [develop playbook](develop.md).
 - `retrospectives/` — standalone retrospectives authored by the [retro playbook](retro.md), consumed by the [learn playbook](learn.md).
