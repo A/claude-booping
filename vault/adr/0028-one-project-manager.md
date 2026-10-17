@@ -4,7 +4,7 @@ title: One project-manager playbook replaces orchestrate and backlog-run
 summary: A core project-manager playbook is the manager the user talks to; it works vault items through groom and develop, and computes its status instead of a stored handoff.
 created_by: claude
 created_at: 2026-10-15
-updated_at: 2026-10-15
+updated_at: 2026-10-17
 status: accepted
 values: [value/0007, value/0009, value/0013, value/0015, value/0005]
 ---
@@ -39,8 +39,8 @@ leads — groom and develop — and works in the project's autonomy mode
 - **Questions live on the item** (a sidecar); chat only points to the item.
 - **Runs are registered.** Every launched run is recorded with its item and a
   fallback check, and a finished run surfaces on the next turn.
-- **Autonomous mode** carries over backlog-run's budget and window gates, pause and
-  resume, and size-based batching; a timer can start it.
+- **Autonomous mode** carries over backlog-run's size-based batching. It carries no budget or window gate, no pause and no resume, and nothing in the core starts it on a timer or an event ([value/0017](../value/0017-launching-and-guarding-runs-is-userland.md)).
+- **Not core: usage limits.** Booping is the orchestrator of development — specs, plans, the roadmap and sprints. Guarding the subscription's usage limits, time windows for runs and pause/resume around them are not its problem: it never stops a user from spending their limits, and a user who wants a guard builds it on top (owner, 2026-10-17).
 - **Not core:** intake from other channels (a messenger, a phone, ntfy) and merging
   duplicates, and tracker integrations (GitHub, GitLab, Linear, Multica …) — project or
   global rules and playbooks on top of `booping items add` and the item store.
@@ -83,4 +83,5 @@ Both stay user-level playbooks with their own state.
   project-manager covers them; hermes-pet's orchestrate specifics move into its specs.
 - Confirmation: in a project with items, `/playbook project-manager` opens with the
   computed status; a user message with two requests files two items; an autonomous
-  run takes ready items through groom and develop within the budget gate.
+  run takes ready items through groom and develop.
+- 2026-10-17 (owner): the budget gate, time window and paused runs that plan 202610152053_project-manager-autonomous-extras carried over from backlog-run are out of booping's scope and leave the core; the size batching stays.

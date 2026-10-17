@@ -1,10 +1,10 @@
 ---
 type: adr
 title: The owner reviews specs on the site and hands the review to an agent
-summary: Accepted — a review panel beside each record collects comments and a reviewed mark in the browser; an Outbox page shows and copies everything for the agent, which edits the records.
+summary: A review panel beside each record collects comments and a reviewed mark in the browser; an Outbox page shows and copies everything for the agent, which edits the records.
 created_by: claude
 created_at: 2026-10-16
-updated_at: 2026-10-16
+updated_at: 2026-10-17
 status: accepted
 values: [value/0008, value/0011, value/0002]
 issues: []
@@ -12,7 +12,7 @@ issues: []
 
 ## Context
 
-The owner reads specs on the published site (GitLab and GitHub Pages, adr/0029), often on a phone,
+The owner reads specs on the published site (GitLab Pages, adr/0029), often on a phone,
 and is the only one who may set `reviewed:` on a record. The site is static: no server, no login, no
 write path back to the repo. The first comment feature (a floating Comment button on a selection, §
 buttons on paragraphs, a header sheet and a "My comments" page) was not found by the owner on a real

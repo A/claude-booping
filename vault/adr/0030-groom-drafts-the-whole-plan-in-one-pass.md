@@ -1,10 +1,10 @@
 ---
 type: adr
 title: Groom drafts the whole plan in one staged pass
-summary: Accepted — groom is the plan template plus research then draft (V3a), no self-review step, without the 16 rules the model follows unprompted; the draft is one file.
+summary: Groom is the plan template plus research then draft (V3a), no self-review step, without the 16 rules the model follows unprompted; the draft is one file.
 created_by: claude
 created_at: 2026-10-16
-updated_at: 2026-10-16
+updated_at: 2026-10-17
 status: accepted
 values: [value/0012, value/0002, value/0010]
 issues: []
@@ -100,5 +100,5 @@ The multi-step groom playbook as it is (V0).
 
 - `playbooks/groom` is rewritten around one drafting step; its snapshot reports change.
 - The plan template states the one-file milestone format adr/0031 cuts on.
-- A light path for small, already-decided requests is a follow-up (idea/0003, corpus case
+- A light path for small, already-decided requests is a follow-up (idea/0009, corpus case
   `s3-booping-specs-site-registries`).

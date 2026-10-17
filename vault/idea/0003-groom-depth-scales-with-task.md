@@ -1,29 +1,17 @@
 ---
 type: idea
 title: A faster groom without losing quality
-summary: Try several groom playbook variants and keep the one that runs faster with no loss in plan quality; depth scaled to the task is one of the variants.
+summary: Try several groom playbook variants and keep the one that runs faster with no loss in plan quality.
 created_by: claude
 created_at: 2026-10-14
-updated_at: 2026-10-16
-status: validating
+updated_at: 2026-10-17
+status: accepted
 # also distilled from the owner's local, unpublished notes (vault/notes/ is gitignored): vault/notes/Notes.md, vault/notes/evals groom.md
 ---
 
 ## Idea
 
-The owner wants to try different variants of the groom playbook, with one goal: find a
-groom that runs faster without losing quality (owner, 2026-10-15). Today a plan of 12-29
-SP spends 6-12 minutes in groom on top of 17-43 minutes of develop, and small plans pay
-the same fixed groom cost as large ones. Variants to compare include skipping groom for
-small mechanical plans (straight to develop with a short brief), a lighter graph, and the
-depth-by-task variant below.
-
-Groom picks how much of its chain to run from the task's complexity: a simple task or a
-bug gets a minimal pass, and the deeper roles run when the task is complex or when the
-user asks for it — directly ("plan tests") or indirectly ("do deep research for this
-task"). The source wrote this for the old role agents (techlead, PM, QA); in the playbook
-those roles are gone, and the graph runs `intake`, `research-codebase`, `research-web`,
-`draft-plan`, `cross-review` and `present` for every request.
+The owner wants to try different variants of the groom playbook, with one goal: find a groom that runs faster without losing quality (owner, 2026-10-15). At the time a plan of 12-29 SP spent 6-12 minutes in groom on top of 17-43 minutes of develop, and small plans paid the same fixed groom cost as large ones. Variants to compare included skipping groom for small mechanical plans (straight to develop with a short brief), a lighter graph, and depth scaled to the task, which went on as [idea/0009](0009-groom-light-path-for-small-requests.md).
 
 A measurement ([reference/0006](../reference/0006-groom-playbook-vs-skill-cost.md)) puts the playbook groom at 2.4× the wall
 time, 5.2× the main-thread API calls and 3.0× the output tokens of the old `/groom`
@@ -55,12 +43,7 @@ skill. The measurement does not say which steps the extra cost came from.
   attempts) and cost (`booping session-stats`: wall time, tokens, API calls); a variant
   wins when its cost is clearly lower and quality holds. booping-benchmarks holds the
   harness for such runs.
-- [clarify] The source names no check. Proposed: groom one small bug twice on the same
-  commit — the full graph and the graph without `research-web` and `cross-review` — and
-  compare the plans and their cost with `booping session-stats`; equal plans at a clearly
-  lower cost say the idea pays.
 
-Follow-up after the variant pick (owner, 2026-10-16): a small, already-decided request should not
-pay for a full groom. Either groom routes it to a light path (request → one-pass develop brief) or
-the new groom is shown to clear it in minutes. Test case: corpus `s3-booping-specs-site-registries`,
-a site change the orchestrator first meant to groom and the owner sent straight to development.
+## Verdict
+
+2026-10-17: the benchmark (booping-benchmarks `groom/`, [reference/0007](../reference/0007-groom-benchmark-2026-10.md)) picked one drafting pass on the plan template, research then draft, with no self-review step ([adr/0030](../adr/0030-groom-drafts-the-whole-plan-in-one-pass.md)): about 8 minutes a plan against 13–23 for the old groom, at equal or better judged quality. A script cuts the drafted plan into milestone files ([adr/0031](../adr/0031-a-script-cuts-the-plan-into-milestone-files.md)), and groom runs no separate review step ([adr/0035](../adr/0035-groom-has-no-separate-review-step.md)). The light path for small, already-decided requests and depth scaled to the task are not done yet; they went on as [idea/0009](0009-groom-light-path-for-small-requests.md).

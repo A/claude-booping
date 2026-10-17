@@ -1,10 +1,10 @@
 ---
 type: adr
 title: Develop groups milestones per worker by story points, not by count
-summary: Proposed — replace max_milestones_per_agent with a max_sp cap of 15, packing milestones greedily within one wave, and make sp ≥ 5 a hard groom gate.
+summary: Develop packs milestones per worker greedily within one wave under a max_sp cap of 15 instead of max_milestones_per_agent, and sp ≥ 5 is a hard groom gate.
 created_by: claude
 created_at: 2026-10-14
-updated_at: 2026-10-16
+updated_at: 2026-10-17
 status: accepted
 values: [value/0012, value/0002]
 # also distilled from the owner's local, unpublished notes (vault/notes/ is gitignored): vault/notes/20260821-milestone-grouping-by-sp.md

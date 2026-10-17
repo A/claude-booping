@@ -1,10 +1,10 @@
 ---
 type: adr
 title: Playbooks consult the specs through a subagent
-summary: Superseded by adr/0034 — a read-only subagent tells playbooks what the specs already decide, contradict or leave open.
+summary: A read-only subagent tells playbooks what the specs already decide, contradict or leave open.
 created_by: claude
 created_at: 2026-10-16
-updated_at: 2026-10-16
+updated_at: 2026-10-17
 status: superseded
 values: [value/0002, value/0013, value/0012]
 issues: []

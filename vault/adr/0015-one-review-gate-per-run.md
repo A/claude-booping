@@ -4,7 +4,7 @@ title: A playbook run stops for review at one gate
 summary: Core playbooks take user decisions in-step and stop for approval once — groom at present, retro at synthesize, migrate before applying, develop only to confirm the branch.
 created_by: claude
 created_at: 2026-10-14
-updated_at: 2026-10-14
+updated_at: 2026-10-17
 status: accepted
 values: [value/0008, value/0007, value/0012]
 rules: [rule/0003, booping:rule/0004]
@@ -22,8 +22,7 @@ round-trips. The old groom skill had one approval near the end.
 
 ## Decision
 
-Each core playbook stops for review once; other user decisions are taken in-step
-(`AskUserQuestion`) without a status of their own.
+Each core playbook stops for review once; other user decisions are taken in-step, in prose ([booping:rule/0032](../../specs/rule/0032-approval-asked-in-prose.md)), without a status of their own.
 
 - **groom** — intake posts a framing brief and the user's answers to its scope
   questions are the confirmation; design is aligned in conversation while drafting;

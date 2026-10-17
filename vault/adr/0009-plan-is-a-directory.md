@@ -4,7 +4,7 @@ title: A plan is a directory whose index.md is both plan and run artifact
 summary: A plan lives in plans/{slug}/; index.md is the plan document and the machine's artifact at once, and run sidecars sit beside it — no separate plan.md and no _runs/ workdir.
 created_by: claude
 created_at: 2026-10-14
-updated_at: 2026-10-14
+updated_at: 2026-10-17
 status: accepted
 values: [value/0003, value/0012, value/0011]
 sources: [playbooks/groom/_specs/DECISIONS.md, playbooks/migrate/_specs/DECISIONS.md, CHANGELOG.md, CLAUDE.md]
@@ -25,11 +25,7 @@ edits at 130–157k context. Making `index.md` the only document cut the edits f
 ## Decision
 
 A plan is the directory `plans/{slug}/`, which is also the run workdir. Its
-`index.md` is both the plan document and the machine's artifact. Run sidecars sit
-beside it: `request.md` (the framing brief), `research.md` (only when web research
-was requested), `clarifications.md`, and the milestone directories. The discovery
-shape is the `core.plans.glob` config key. Flat plan files are converted by the
-migration `001_vault_layout`.
+`index.md` is both the plan document and the machine's artifact. Run sidecars sit beside it: `request.md` (the framing brief), `draft.md` (the one-file plan draft before the split, [adr/0030](0030-groom-drafts-the-whole-plan-in-one-pass.md); there is no `research-web` step), `clarifications.md`, and the milestone directories. The discovery shape is the `core.plans.glob` config key. Flat plan files are converted by the migration `001_vault_layout`.
 
 ## Alternatives
 

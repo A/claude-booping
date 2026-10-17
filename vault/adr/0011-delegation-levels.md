@@ -4,7 +4,7 @@ title: A step is inline, assisted or detached, set by one detached field
 summary: The runner performs most steps itself; heavy reads go to a configured researcher that is resumed, not respawned; only a step that must not enter the runner's context is detached.
 created_by: claude
 created_at: 2026-10-14
-updated_at: 2026-10-14
+updated_at: 2026-10-17
 status: accepted
 values: [value/0002, value/0012]
 sources: [playbooks/groom/_specs/DECISIONS.md, playbooks/retro/_specs/index.md, playbooks/code-review/_specs/DECISIONS.md, vault/researches/20260802-01-31_framework-cli-extraction-research.md, CHANGELOG.md, CLAUDE.md]
@@ -33,9 +33,7 @@ Three delegation levels, set by the single `detached:` step field:
 - **detached** — `detached: <model>:<effort>` runs a generic sub-agent,
   any other string a named one; parallel co-members of a wave must be detached.
 
-The `agent:` key is gone, and a leftover one stops the run. Groom runs its steps in
-the driving session; its research steps are assisted and its cross-review is the
-only detached step.
+The `agent:` key is gone, and a leftover one stops the run. Groom runs its steps in the driving session: its graph is `intake` → `draft-plan` → `present`, research is a stage of `draft-plan` that delegates bulk reads to the researcher ([adr/0030](0030-groom-drafts-the-whole-plan-in-one-pass.md)), and the only detached spawn is `draft-plan`'s `split_fallback_agent`; the cross-review step is removed ([adr/0035](0035-groom-has-no-separate-review-step.md)) ([adr/0031](0031-a-script-cuts-the-plan-into-milestone-files.md)).
 
 ## Alternatives
 

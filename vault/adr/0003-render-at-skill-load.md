@@ -4,9 +4,9 @@ title: Bodies render at skill load, with no build stage
 summary: Skill and agent bodies are rendered from templates at load time with full project context; the generated-file build stage is retired.
 created_by: claude
 created_at: 2026-10-14
-updated_at: 2026-10-15
+updated_at: 2026-10-17
 status: accepted
-rules: [rule/0017]
+rules: [rule/0017, rule/0029]
 values: [value/0003, value/0005]
 sources: [CLAUDE.md, vault/retrospectives/20260425-migrate-retro-skill-to-template-pipeline.md, vault/researches/20260802-01-31_framework-cli-extraction-research.md]
 ---

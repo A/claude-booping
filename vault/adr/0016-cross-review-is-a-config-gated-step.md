@@ -4,11 +4,13 @@ title: Groom's cross-review is a detached step gated by one config key
 summary: A second model reviews the drafted plan once, in its own detached step, only when core.groom_playbook.cross_review_agent names an agent; null skips the step.
 created_by: claude
 created_at: 2026-10-14
-updated_at: 2026-10-14
-status: accepted
+updated_at: 2026-10-17
+status: superseded
 values: [value/0012, value/0005]
 sources: [playbooks/groom/_specs/DECISIONS.md, vault/retrospectives/20260423-skill-refactors-chat-develop-retro.md, CHANGELOG.md]
 ---
+
+Superseded by adr/0035 (2026-10-17): groom has no separate review step, and the cross-review step with its config key leaves the graph.
 
 ## Context
 
@@ -81,3 +83,4 @@ A Jinja block at the end of drafting spawns the reviewer when the key is set.
 
 - With no agent configured, the step is skipped entirely and groom runs without a
   second-model review.
+- 2026-10-17: a benchmark measured the plain double-check prompt on Opus as the best form of the step, and the step is off by default (`cross_review_agent: null`); groom has no separate review step ([adr/0035](0035-groom-has-no-separate-review-step.md)).

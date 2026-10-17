@@ -4,7 +4,7 @@ title: Open items are a stored index; closed ones are filtered out
 summary: Every gap between specs and code, open question or conflict is an open item stored in the vault and listed by an explicit command; closed items stay and are filtered.
 created_by: claude
 created_at: 2026-10-15
-updated_at: 2026-10-15
+updated_at: 2026-10-17
 status: accepted
 values: [value/0004, value/0007, value/0009]
 ---
@@ -19,13 +19,7 @@ on the fly, since creating an ADR already creates an item to confirm.
 
 ## Decision
 
-An open item is a file in the vault, `open-items/OI-NNNN.md`, with a status (`open`,
-`planned`, `done`, `dropped`), the record it concerns (with anchor), its direction
-(code to spec, spec to code, conflict, clarify) and the plan that works it. Items
-are created when a record that needs code lands (an ADR with a confirmation line),
-by a specs sync, by `specs check` findings and from marks; closed items stay and are
-filtered. The command is explicit: `booping specs open-items` lists the open ones
-(the index), with subcommands to add and close.
+An open item is a file in the vault, `open-items/OI-NNNN.md`, with a status (`open`, `planned`, `done`, `dropped`), the record it concerns (with anchor), its direction (code to spec, spec to code, conflict, clarify) and the plan that works it. Items are created when a record that needs code lands (an ADR with a confirmation line), by a specs sync, by `specs check` findings and from marks; closed items stay and are filtered. The command is explicit: `booping items list` lists the open ones (the index), with the `booping items` subcommands to add and close.
 
 ## Alternatives
 
@@ -56,8 +50,7 @@ Marks, open conflicts and check findings are collected at query time; nothing st
 
 - A specs playbook run can take open items, groom them and build them in the
   autonomy mode the project sets ([adr/0027](0027-autonomy-modes.md)).
-- Confirmation: creating an ADR with a confirmation line adds an open item; closing
-  its plan closes the item; `booping specs open-items` hides it afterwards.
+- Confirmation: creating an ADR with a confirmation line adds an open item; closing its plan closes the item; `booping items list` hides it afterwards.
 - 2026-10-15: the store's command is `booping items`, and items include user requests
   filed verbatim (`source: request`/`backlog`) beside spec gaps
   ([adr/0028](0028-one-project-manager.md)).

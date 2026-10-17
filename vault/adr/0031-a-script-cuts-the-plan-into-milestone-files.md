@@ -1,10 +1,10 @@
 ---
 type: adr
 title: A script cuts the drafted plan into milestone files
-summary: Accepted — `booping plan split` cuts the one-file plan on its milestone headings, byte for byte, into index.md and the milestone files; a model splits only what the script flags.
+summary: The script `booping plan split` cuts the one-file plan on its milestone headings, byte for byte, into index.md and the milestone files; a model splits only what the script flags.
 created_by: claude
 created_at: 2026-10-16
-updated_at: 2026-10-16
+updated_at: 2026-10-17
 status: accepted
 values: [value/0015, value/0012, value/0010]
 issues: []
@@ -57,7 +57,7 @@ judgement work ([rule/0031](../rule/0031-judgement-runs-on-opus.md)).
 | Option | Status | Complexity | Reversibility | Verdict |
 |---|---|---|---|---|
 | [Script on headings](#script-on-headings) | accepted | medium | high | Exact and free on all 12 plans |
-| [Sonnet writes the files](#sonnet-writes-the-files) | rejected | low | high | Passes, but pays $0.71 a plan for what a script does; kept as the fallback |
+| [Sonnet writes the files](#sonnet-writes-the-files) | rejected | low | high | Passes, but pays $0.71 a plan for what a script does; a model split, on Opus, is kept as the fallback |
 | [Haiku maps, a script cuts](#haiku-maps-a-script-cuts) | rejected | medium | high | Line numbers drift; sections land wrong |
 | [Haiku writes the files](#haiku-writes-the-files) | rejected | low | high | Edits the plan's text on long plans |
 

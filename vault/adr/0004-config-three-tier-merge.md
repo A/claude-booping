@@ -4,9 +4,9 @@ title: Config is a three-tier deep merge with no schema gate
 summary: Config merges core, global and project tiers, later winning and lists replacing; any key loads in any tier, and playbook keys live in the core file under core.{name}_playbook.
 created_by: claude
 created_at: 2026-10-14
-updated_at: 2026-10-14
+updated_at: 2026-10-17
 status: accepted
-values: [value/0005, value/0003]
+values: [value/0005, value/0003, value/0006]
 sources: [CLAUDE.md, CHANGELOG.md, vault/researches/20260802-01-31_framework-cli-extraction-research.md]
 ---
 

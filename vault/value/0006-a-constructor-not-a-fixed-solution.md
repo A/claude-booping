@@ -1,15 +1,14 @@
 ---
 type: value
-title: A constructor, not a fixed solution
-summary: Booping is a constructor — a framework for playbooks with a set of core mechanics — not a ready solution fixed to one task.
+title: A framework for playbooks
+summary: Booping is a framework a user digitises their own processes with — config, templates, primitives, the CLI, playbooks and evals for their steps.
 kind: value
 created_by: owner
 created_at: 2026-10-14
-updated_at: 2026-10-14
+updated_at: 2026-10-17
 ---
 
-Booping is a constructor — a framework for playbooks with a set of core mechanics —
-not a ready solution fixed to one task.
+Booping is a framework for playbooks. A user extends it by digitising their own processes — writing user stories, designing an architecture, any procedure — with the tools booping gives: config, templates, primitives, the CLI, playbooks and evals for their steps. (owner, 2026-10-17)
 
 ## In practice
 

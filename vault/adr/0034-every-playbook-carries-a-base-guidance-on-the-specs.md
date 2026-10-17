@@ -1,10 +1,10 @@
 ---
 type: adr
 title: Every playbook carries a base guidance on the specs
-summary: Accepted — every playbook knows what the specs are, the values, and that it reads and writes them through a subagent, applying them where they raise quality; no per-playbook scenarios.
+summary: Every playbook knows what the specs are, the values, and that it reads and writes them through a subagent, applying them where they raise quality; no per-playbook scenarios.
 created_by: claude
 created_at: 2026-10-16
-updated_at: 2026-10-16
+updated_at: 2026-10-17
 status: accepted
 values: [value/0016, value/0002, value/0001, value/0012]
 issues: []

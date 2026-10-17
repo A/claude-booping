@@ -4,8 +4,9 @@ title: The runner owns the milestone commit; workers never commit
 summary: A worker implements its milestone, runs its Verify and leaves the work uncommitted; the runner validates the tree against the DoD and makes one scoped commit per milestone.
 created_by: claude
 created_at: 2026-10-14
-updated_at: 2026-10-14
+updated_at: 2026-10-17
 status: accepted
+rules: [rule/0019]
 values: [value/0010, value/0005]
 sources: [CHANGELOG.md, CLAUDE.md]
 ---

@@ -4,7 +4,7 @@ title: Session metrics
 summary: A plan carries measured active minutes, tokens and models computed from Claude Code session logs.
 created_by: claude
 created_at: 2026-10-14
-updated_at: 2026-10-14
+updated_at: 2026-10-17
 status: done
 sources: [https://github.com/A/claude-booping/blob/c7e43b43dfe5fc1c0fafe253dd148d7e62ea231e/vault/docs/_specs/features.md]
 ---
@@ -18,6 +18,5 @@ can see what a sprint cost in time, tokens and models.
   waiting on a human.
 - Each session's tokens (input, output, cache-creation, cache-read) are accounted beside
   the model ids that ran the work.
-- The totals are stamped as `metrics_*` plan frontmatter on groom and develop
-  transitions.
+- Groom and develop stamp their session ids on the plan; `stamp-active-time` stamps the totals as `metrics_*` plan frontmatter on develop's `done` and `fail` edges only.
 - Active minutes and models show as `sprints.md` and query columns.

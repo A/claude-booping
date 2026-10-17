@@ -1,10 +1,10 @@
 ---
 type: story
 title: Project Vault migrations
-summary: The migrate playbook brings an existing Project Vault current with the plugin, one approval and one commit per migration.
+summary: The migrate playbook brings an existing Project Vault current with the plugin on one up-front approval, with one commit per migration.
 created_by: claude
 created_at: 2026-10-14
-updated_at: 2026-10-14
+updated_at: 2026-10-17
 status: done
 sources: [https://github.com/A/claude-booping/blob/c7e43b43dfe5fc1c0fafe253dd148d7e62ea231e/vault/docs/_specs/features.md]
 ---
@@ -19,7 +19,6 @@ read.
 - Surveys the pending plugin-shipped migrations against the watermark.
 - Applies each pending migration in id order on one up-front approval, one Project
   Vault commit per migration.
-- Converts an older vault's `_booping/` skill and agent extension files into targeted
-  lessons, removing the originals.
+- Converts an older vault's `_booping/` skill and agent extension files into targeted rules, removing the originals.
 - Halts on a failing migration, naming the id, the failure and a hand-applicable
   remedy.

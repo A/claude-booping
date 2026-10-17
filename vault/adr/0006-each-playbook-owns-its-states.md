@@ -4,8 +4,9 @@ title: Each playbook owns its state machine; no shared lifecycle
 summary: Every artifact moves only through its own playbook's states machine, written solely by playbook-transition; playbooks hand off at a status, not through a shared lifecycle.
 created_by: claude
 created_at: 2026-10-14
-updated_at: 2026-10-14
+updated_at: 2026-10-17
 status: accepted
+rules: [rule/0023, rule/0025]
 values: [value/0003, value/0007]
 sources: [playbooks/groom/_specs/DECISIONS.md, playbooks/develop/_specs/DECISIONS.md, playbooks/develop/_specs/index.md, vault/researches/20260802-01-31_framework-cli-extraction-research.md, CHANGELOG.md, CLAUDE.md]
 ---

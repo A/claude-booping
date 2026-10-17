@@ -4,9 +4,9 @@ title: Core is a playbook framework; domain behaviour lives in playbooks
 summary: The booping CLI offers generic primitives — render, query, scaffold, frontmatter, state machines; plan-specific behaviour such as sprints.md lives in playbooks and their scripts.
 created_by: claude
 created_at: 2026-10-14
-updated_at: 2026-10-14
+updated_at: 2026-10-17
 status: accepted
-values: [value/0005, value/0003, value/0011]
+values: [value/0005, value/0003, value/0011, value/0006]
 sources: [playbooks/groom/_specs/DECISIONS.md, vault/researches/20260802-01-31_framework-cli-extraction-research.md, CHANGELOG.md, CLAUDE.md]
 ---
 

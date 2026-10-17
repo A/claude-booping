@@ -1,11 +1,12 @@
 ---
 type: adr
 title: Groom has no separate review step
-summary: Accepted — a fresh Opus review lifts plan quality but adds about 10 minutes a plan (4–5 at best); the one-pass draft already meets the goal, so groom has no review step.
+summary: A fresh Opus review lifts plan quality but adds about 10 minutes a plan (4–5 at best); the one-pass draft already meets the goal, so groom has no review step.
 created_by: owner
 created_at: 2026-10-17
 updated_at: 2026-10-17
 status: accepted
+supersedes: [adr/0016]
 values: [value/0012, value/0008, value/0010]
 issues: []
 sources: [vault/reference/0007-groom-benchmark-2026-10.md]
@@ -42,13 +43,7 @@ reading the code could bring it to about 4–5 minutes, unmeasured.
 
 ## Decision
 
-Groom runs no separate review step. The one-pass draft is the plan; `core.groom_playbook.
-cross_review_agent` stays off by default and off in the owner's config. The measured gain of a fresh
-review is real but not worth 10 minutes a plan, and not worth 4–5 either: the refactor already reached
-its goal of shorter time at equal or better quality, and adding the review back would trade most of
-the time saved for a gain inside the plans' own spread (owner, 2026-10-17). The step stays available
-behind its config key (adr/0016) for a user who wants it, with the plain double-check prompt on Opus
-as the measured best form.
+Groom runs no separate review step, and the cross-review step leaves the graph together with its `cross-reviewing` status and the `core.groom_playbook.cross_review_agent` key. The one-pass draft is the plan; its only check after drafting is the deterministic `booping plan check` stage (adr/0030, adr/0031). The measured gain of a fresh review is real but not worth 10 minutes a plan, and not worth 4–5 either: the refactor already reached its goal of shorter time at equal or better quality, and adding the review back would trade most of the time saved for a gain inside the plans' own spread (owner, 2026-10-17). The owner asked for no separate step; keeping the step behind its config key was a drafting addition, dropped on 2026-10-17 (owner).
 
 ## Alternatives
 
@@ -98,6 +93,6 @@ The step as it ran before the benchmark.
 
 ## Consequences
 
-- The owner's machine config keeps `cross_review_agent: null` (set 2026-10-17).
-- The cross-review step's prompt becomes the plain double-check for whoever turns it on.
+- The cross-review step, the `cross-reviewing` status, its edges and `cross_review_agent` are removed from groom; the owner's machine config drops the key.
+- adr/0016 is superseded by this record.
 - adr/0030 stays: the one-pass draft without self-review is the groom.
