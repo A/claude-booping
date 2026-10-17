@@ -9,6 +9,8 @@ from pathlib import Path
 
 import pytest
 
+from booping import macros, runs
+from booping.context import Context
 from booping.context._yaml import parse_frontmatter_only
 from booping.runs import effective_status
 
@@ -140,3 +142,17 @@ def test_ack_of_a_running_record_exits_1_and_writes_nothing(tmp_path: Path) -> N
     assert result.stdout == ""
     assert result.stderr == "error: run r1 is still running\n"
     assert record.read_text() == text
+
+
+def test_now_is_fresh_on_every_call(monkeypatch: pytest.MonkeyPatch) -> None:
+    macros.clear_cache()
+    stamps = iter(["2026-10-15 12:00\n", "2026-10-15 12:07\n"])
+
+    def ticking_run(argv: list[str], **_kwargs: object) -> subprocess.CompletedProcess[str]:
+        return subprocess.CompletedProcess(argv, 0, next(stamps), "")
+
+    monkeypatch.setattr(macros.subprocess, "run", ticking_run)
+    ctx = Context(config={"core": {"macros": {"date": ["date"]}}})
+
+    assert runs._now(ctx, runs.STAMP_DATE) == "2026-10-15 12:00"  # pyright: ignore[reportPrivateUsage]
+    assert runs._now(ctx, runs.STAMP_DATE) == "2026-10-15 12:07"  # pyright: ignore[reportPrivateUsage]

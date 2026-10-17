@@ -56,7 +56,8 @@ def runs_dir(ctx: Context) -> Path:
 
 def _now(ctx: Context, fmt: str) -> str:
     env = build_source_env(context=ctx, config=ctx.config)
-    return env.from_string("{{ macro('core.macros.date', fmt) }}").render(fmt=fmt).strip()
+    template = env.from_string("{{ macro('core.macros.date', fmt, fresh=true) }}")
+    return template.render(fmt=fmt).strip()
 
 
 def session_id(run_id: str) -> str:

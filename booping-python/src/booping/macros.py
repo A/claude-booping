@@ -16,7 +16,8 @@ however many bodies ask the same way, and no two such calls in one render
 straddling a minute boundary. Distinct arguments are distinct argv tuples and
 so distinct runs — two formats of the same clock can disagree. A macro is
 expected to be idempotent within one render; a macro that is not must not be
-declared.
+declared. A call passing `fresh=True` bypasses the cache — runs and stores anew —
+for a caller that outlives one render and needs the clock as it is now.
 """
 
 from __future__ import annotations
@@ -114,9 +115,11 @@ def label(dotted: str, args: Sequence[str]) -> str:
     return " ".join([dotted, *args])
 
 
-def run_argv(dotted: str, argv: Sequence[str], cwd: Path | None = None) -> str:
+def run_argv(
+    dotted: str, argv: Sequence[str], cwd: Path | None = None, *, fresh: bool = False
+) -> str:
     key = (str(cwd) if cwd is not None else "", *argv)
-    cached = _cache.get(key)
+    cached = None if fresh else _cache.get(key)
     if cached is not None:
         return cached
     try:
@@ -142,7 +145,8 @@ def make_macro(
 ) -> Callable[..., str]:
     """The `macro` global a rendering env gets.
 
-    Extra positional arguments append to the declared argv prefix.
+    Extra positional arguments append to the declared argv prefix; `fresh=True`
+    bypasses the process cache.
 
     A node's `cwd:` resolves against *repo_dir* / *vault_dir*; a call site that
     knows neither still works until a macro asks for the directory it lacks.
@@ -171,7 +175,7 @@ def make_macro(
             raise MacroError(f"macro {keyed}: cwd: {kind} — no {kind} directory resolved")
         return directory
 
-    def macro(path: str, *args: object) -> str:
+    def macro(path: str, *args: object, fresh: bool = False) -> str:
         dotted = str(path)
         extra = [str(arg) for arg in args]
         keyed = label(dotted, extra)
@@ -179,6 +183,6 @@ def make_macro(
             if key in stubs:
                 return stubs[key]
         argv, cwd_kind = resolve_argv(cfg, dotted)
-        return run_argv(keyed, [*argv, *extra], resolve_cwd(keyed, cwd_kind))
+        return run_argv(keyed, [*argv, *extra], resolve_cwd(keyed, cwd_kind), fresh=fresh)
 
     return macro

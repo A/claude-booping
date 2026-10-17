@@ -35,6 +35,21 @@ def test_repeated_calls_spawn_one_subprocess(monkeypatch: pytest.MonkeyPatch) ->
     assert len(calls) == 1
 
 
+def test_fresh_call_bypasses_the_cache(monkeypatch: pytest.MonkeyPatch) -> None:
+    macros.clear_cache()
+    outputs = iter(["first\n", "second\n", "third\n"])
+
+    def ticking_run(argv: list[str], **_kwargs: Any) -> subprocess.CompletedProcess[str]:
+        return subprocess.CompletedProcess(argv, 0, next(outputs), "")
+
+    monkeypatch.setattr(macros.subprocess, "run", ticking_run)
+    macro = macros.make_macro(_cfg())
+
+    assert macro("macros.now") == "first"
+    assert macro("macros.now", fresh=True) == "second"
+    assert macro("macros.now") == "second"
+
+
 def test_positional_args_append_to_the_declared_prefix() -> None:
     macros.clear_cache()
     macro = macros.make_macro({"macros": {"say": ["echo"]}})
