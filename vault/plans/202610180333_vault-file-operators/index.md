@@ -2,12 +2,12 @@
 title: "Vault-file operators — set, transition, state, config, next_id; booping items
   folded in"
 type: "feature"
-status: ready-for-dev
+status: in-progress
 sp: 28
 related_to: null
 created: 2026-10-18 03:33
 planned: null
-started: null
+started: 2026-10-18 03:45
 completed: null
 code_reviews: []
 sessions:
@@ -15,7 +15,7 @@ sessions:
 retro: null
 summary: One vault-file operator set — set, transition, state, config, next_id 
   in create — with booping items folded into it
-commit: a99be53bbc967f4a58996a0469c970b1ce72e9b9
+commit: 07dde5f8a92b7d2de1bd3679bad34d5425b6aec0
 tracker_provider: null
 tracker_request: null
 tracker_issue: null
@@ -65,11 +65,11 @@ Callers whose expected text changes: `src/templates/_partials/_playbook_driving.
 
 | id | title | sp | status |
 | --- | --- | --- | --- |
-| 01 | [booping set` replaces frontmatter-update and marker-set](milestones/M01-booping-set-replaces-frontmatter-update-and-marker-set/M01-booping-set-replaces-frontmatter-update-and-marker-set.md) | 4 | pending |
-| 02 | [booping config` replaces config-get](milestones/M02-booping-config-replaces-config-get/M02-booping-config-replaces-config-get.md) | 2 | pending |
-| 03 | [booping transition` infers the machine from the file](milestones/M03-booping-transition-infers-the-machine-from-the-file/M03-booping-transition-infers-the-machine-from-the-file.md) | 4 | pending |
-| 04 | [booping state` reports the frontier for a file](milestones/M04-booping-state-reports-the-frontier-for-a-file/M04-booping-state-reports-the-frontier-for-a-file.md) | 2 | pending |
-| 05 | [The driving protocol and every prompt name the new verbs](milestones/M05-the-driving-protocol-and-every-prompt-name-the-new-verbs/M05-the-driving-protocol-and-every-prompt-name-the-new-verbs.md) | 3 | pending |
+| 01 | [booping set` replaces frontmatter-update and marker-set](milestones/M01-booping-set-replaces-frontmatter-update-and-marker-set/M01-booping-set-replaces-frontmatter-update-and-marker-set.md) | 4 | done |
+| 02 | [booping config` replaces config-get](milestones/M02-booping-config-replaces-config-get/M02-booping-config-replaces-config-get.md) | 2 | done |
+| 03 | [booping transition` infers the machine from the file](milestones/M03-booping-transition-infers-the-machine-from-the-file/M03-booping-transition-infers-the-machine-from-the-file.md) | 4 | done |
+| 04 | [booping state` reports the frontier for a file](milestones/M04-booping-state-reports-the-frontier-for-a-file/M04-booping-state-reports-the-frontier-for-a-file.md) | 2 | done |
+| 05 | [The driving protocol and every prompt name the new verbs](milestones/M05-the-driving-protocol-and-every-prompt-name-the-new-verbs/M05-the-driving-protocol-and-every-prompt-name-the-new-verbs.md) | 3 | done |
 | 06 | [next_id` in create; items, corrections and decisions use it](milestones/M06-next-id-in-create-items-corrections-and-decisions-use-it/M06-next-id-in-create-items-corrections-and-decisions-use-it.md) | 3 | pending |
 | 07 | [Item callers move onto the operators](milestones/M07-item-callers-move-onto-the-operators/M07-item-callers-move-onto-the-operators.md) | 4 | pending |
 | 08 | [booping items` removed; scan is `booping specs scan](milestones/M08-booping-items-removed-scan-is-booping-specs-scan/M08-booping-items-removed-scan-is-booping-specs-scan.md) | 3 | pending |

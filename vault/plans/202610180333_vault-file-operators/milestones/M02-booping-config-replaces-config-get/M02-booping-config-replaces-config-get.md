@@ -2,7 +2,7 @@
 id: "02"
 title: "booping config` replaces config-get"
 sp: 2
-status: pending
+status: done
 plan: "plans/202610180333_vault-file-operators/index.md"
 ---
 
@@ -15,15 +15,15 @@ plan: "plans/202610180333_vault-file-operators/index.md"
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 2.1 | Rename the command and its module; switch booping-tracker's shell-out and every script, prompt and migration caller | `booping-python/src/booping/commands/config.py`, `booping-tracker/src/booping_tracker/config.py`, `migrations/004_lessons_to_rules/migration.md` | 1 | pending |
-| 2.2 | Move e2e cases to `cases/config/`; update booping-tracker tests | `booping-python/e2e/cases/config/`, `booping-tracker/tests/config_test.py` | 1 | pending |
+| 2.1 | Rename the command and its module; switch booping-tracker's shell-out and every script, prompt and migration caller | `booping-python/src/booping/commands/config.py`, `booping-tracker/src/booping_tracker/config.py`, `migrations/004_lessons_to_rules/migration.md` | 1 | done |
+| 2.2 | Move e2e cases to `cases/config/`; update booping-tracker tests | `booping-python/e2e/cases/config/`, `booping-tracker/tests/config_test.py` | 1 | done |
 
 Tests: integration tier — existing cases under the new name; booping-tracker's config test against the renamed call.
 
 ## Definition of Done
 
-- [ ] Task 2.1: `booping config core.plans.glob` prints `plans/*/index.md`; `booping config-get` is unknown; `grep -rn 'config-get'` outside history returns nothing.
-- [ ] Task 2.2: `just e2e -k config` and booping-tracker's pytest pass.
+- [x] Task 2.1: `booping config core.plans.glob` prints `plans/*/index.md`; `booping config-get` is unknown; `grep -rn 'config-get'` outside history returns nothing.
+- [x] Task 2.2: `just e2e -k config` and booping-tracker's pytest pass.
 
 ## References
 
