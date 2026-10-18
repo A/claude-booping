@@ -43,9 +43,31 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
     )
     verbs = p.add_subparsers(dest="specs_verb", metavar="<verb>", required=True)
 
-    ls = verbs.add_parser("ls", help="List a tier's records: {type}/{NNNN}  {status}  {summary}")
+    ls = verbs.add_parser(
+        "ls",
+        help="List a tier's records: {type}/{NNNN}  {status}  {summary}"
+        " (--titles: {type}/{NNNN}  {status}  {title}: {summary})",
+    )
     _add_tier(ls)
-    ls.add_argument("--type", dest="record_type", metavar="TYPE", help="Only records of this type")
+    ls.add_argument(
+        "--type",
+        dest="record_types",
+        action="append",
+        metavar="TYPE",
+        help="Only records of this type (repeatable)",
+    )
+    ls.add_argument(
+        "--exclude",
+        action="append",
+        default=[],
+        metavar="REF",
+        help="Drop the record {type}/{NNNN} (repeatable)",
+    )
+    ls.add_argument(
+        "--titles",
+        action="store_true",
+        help="Print each record's title before its summary",
+    )
     ls.set_defaults(func=_run_ls)
 
     nxt = verbs.add_parser("next", help="Print the next free ref of a type in a tier")
@@ -217,21 +239,24 @@ def _run_ls(args: argparse.Namespace) -> None:
     logger.log(vault=ctx.vault, subcommand="specs", message=f"ls --tier {args.tier}")
     tier = _find_tier(ctx, root, home_dir, args.tier)
     known = tier.types
-    if args.record_type is not None:
-        _check_type(args.record_type, known)
+    for type_ in args.record_types or []:
+        _check_type(type_, known)
     _require_dir(tier)
 
     records = _numbered(load_tier(tier, known), known)
-    if args.record_type is not None:
-        records = [r for r in records if r.type == args.record_type]
+    if args.record_types:
+        records = [r for r in records if r.type in args.record_types]
+    excluded = set(args.exclude)
+    records = [r for r in records if f"{r.type}/{r.number:04d}" not in excluded]
     records.sort(key=lambda r: (r.type, r.number))
     for r in records:
         status = r.frontmatter.get("status")
         summary = r.frontmatter.get("summary")
-        print(
-            f"{r.type}/{r.number:04d}  {status if status is not None else '-'}"
-            f"  {summary if summary is not None else ''}"
-        )
+        summary_text = summary if summary is not None else ""
+        if args.titles:
+            title = r.frontmatter.get("title")
+            summary_text = f"{title if title is not None else ''}: {summary_text}"
+        print(f"{r.type}/{r.number:04d}  {status if status is not None else '-'}  {summary_text}")
 
 
 def _run_next(args: argparse.Namespace) -> None:

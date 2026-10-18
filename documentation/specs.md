@@ -79,10 +79,10 @@ The `core` tier ships with the plugin and is never created. An error prints `spe
 ### `booping specs ls`
 
 ```
-booping specs ls [--tier TIER] [--type TYPE]
+booping specs ls [--tier TIER] [--type TYPE]... [--exclude REF]... [--titles]
 ```
 
-Lists the tier's records, one per line: `{type}/{NNNN}  {status}  {summary}`, sorted by type and number. `--type` keeps one type.
+Lists the tier's records, one per line: `{type}/{NNNN}  {status}  {summary}`, sorted by type and number. `--type` keeps that type and repeats to keep several. `--exclude {type}/{NNNN}` drops that record, repeats, and ignores a ref not in the tier. `--titles` puts the title before the summary: `{type}/{NNNN}  {status}  {title}: {summary}`.
 
 ### `booping specs next`
 
