@@ -1,0 +1,20 @@
+Variables reached only through a falsy or default path stay optional: `{% if %}`, `or none`
+and `default(...)` take their fallback when no --set defines them.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  e2e_demo:
+    tree:
+      a.txt: "{{ title | tojson }}|{{ (why or none) | tojson }}|{{ kind | default('plain') }}|{% if body %}{{ body }}{% else %}none{% endif %}\n"
+-- cmd --
+booping create core.e2e_demo.tree . --set title=hi
+-- exit --
+0
+-- stdout --
+--- /dev/null
++++ a.txt
+@@ -0,0 +1 @@
++"hi"|null|plain|none
+wrote 1 paths — 0 dirs created, 1 files created, 0 files overwritten
+-- expected/cwd/a.txt --
+"hi"|null|plain|none

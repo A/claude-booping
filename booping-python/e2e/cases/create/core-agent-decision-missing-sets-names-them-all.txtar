@@ -1,0 +1,12 @@
+The core agent-decisions template with only `name` and `step` set: `asked`, `decision` and
+`why` have no default in it, so the run exits 1 with one line naming all three, sorted, and
+writes nothing — no traceback, and an empty receipt, which a run that created the directory
+could never print.
+
+-- cmd --
+booping create core.agent_decisions.template agent-decisions --set name=present --set step=groom/present
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: core.agent_decisions.template needs --set asked, decision, why

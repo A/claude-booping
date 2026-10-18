@@ -1,0 +1,15 @@
+A filename key's variable is required like a seed's: no --set defining it exits 1 naming it,
+once though the seed renders it too, and the destination is not even created.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  e2e_demo:
+    tree:
+      "{{ slug }}.md": "{{ slug }}\n"
+-- cmd --
+booping create core.e2e_demo.tree out
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: core.e2e_demo.tree needs --set slug

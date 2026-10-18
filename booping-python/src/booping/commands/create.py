@@ -3,12 +3,15 @@ from __future__ import annotations
 import argparse
 import re
 import sys
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, NoReturn
 
-from jinja2 import Environment, TemplateError
+from jinja2 import Environment, TemplateError, Undefined, pass_eval_context
+from jinja2.nodes import EvalContext
+from jinja2.utils import missing
+from markupsafe import Markup
 
 from booping import logger
 from booping.context import Context
@@ -21,7 +24,7 @@ from booping.context.template_tree import (
     load,
 )
 from booping.macros import parse_stub_overrides
-from booping.rendering import build_source_env
+from booping.rendering import LenientUndefined, build_source_env
 from booping.utils import deep_merge, diff_report, parse_set_overrides
 
 
@@ -90,6 +93,42 @@ class _Write:
 def _fail(message: str, code: int = 1) -> NoReturn:
     print(f"error: {message}", file=sys.stderr)
     sys.exit(code)
+
+
+def _recording_undefined(names: set[str]) -> type[LenientUndefined]:
+    """Undefined that records a top-level variable the tree uses with no default:
+    rendering, iterating or serializing it marks the variable required, while a
+    falsy test, `or` and `default(...)` pass through unrecorded."""
+
+    class RecordingUndefined(LenientUndefined):
+        def _record(self) -> str:
+            name = self._undefined_name
+            if self._undefined_obj is missing and name is not None:
+                names.add(name)
+                return name
+            return ""
+
+        def __str__(self) -> str:
+            # The variable's own name, never empty: a missing name must not trip the
+            # filename checks before every missing variable has been collected.
+            return self._record()
+
+        def __iter__(self) -> Iterator[Any]:
+            self._record()
+            return iter([])
+
+    return RecordingUndefined
+
+
+def _tojson(original: Callable[..., Any]) -> Callable[..., Any]:
+    @pass_eval_context
+    def tojson(eval_ctx: EvalContext, value: Any, *args: Any, **kwargs: Any) -> Any:
+        if isinstance(value, Undefined):
+            str(value)
+            return Markup("null")
+        return original(eval_ctx, value, *args, **kwargs)
+
+    return tojson
 
 
 def next_id(dest: Path) -> Callable[..., str]:
@@ -199,11 +238,19 @@ def _run(args: argparse.Namespace) -> None:
     globals_: dict[str, Any] = env.globals  # type: ignore[assignment]
     globals_["next_id"] = next_id(dest)
     globals_.update(variables)
+    required: set[str] = set()
+    env.undefined = _recording_undefined(required)
+    filters: dict[str, Any] = env.filters  # type: ignore[assignment]
+    filters["tojson"] = _tojson(filters["tojson"])
 
     try:
         writes = _plan(load(ctx.config, config_path), dest, env)
     except TemplateTreeError as exc:
-        _fail(str(exc))
+        if not required:
+            _fail(str(exc))
+        writes = []
+    if required:
+        _fail(f"{config_path} needs --set {', '.join(sorted(required))}")
 
     try:
         created_dirs, created_files, overwritten = _apply(writes, args.force)
