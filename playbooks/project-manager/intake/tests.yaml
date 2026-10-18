@@ -1,4 +1,4 @@
-# Three smoke cases over the intake step. The run has no shell: each fixture states the
+# Five smoke cases over the intake step. The run has no shell: each fixture states the
 # `booping` outputs a live run would have read, and stands in for the item and sidecar writes
 # `booping create` would have made. The cwd is the vault root.
 
@@ -81,12 +81,12 @@
             contains:
               - '^source: request\s*$'
         noOthers: true
-    # ONE-LINE-PER-ITEM — each id opens exactly one line, followed by its title
+    # ONE-LINE-PER-ITEM — exactly one `Created {id}: {title}` line per filed id
     - type: javascript
       value: file://../../_lib/asserts/return.js
       config:
         requireBlock: true
-        entry: '^[-*\s`]*OI-0001\b`?\W+\S'
+        entry: '^[-*\s]*Created `?OI-0001`?:\s*\S'
         onlyEntries: false
         minEntries: 1
         maxEntries: 1
@@ -94,7 +94,41 @@
       value: file://../../_lib/asserts/return.js
       config:
         requireBlock: true
-        entry: '^[-*\s`]*OI-0002\b`?\W+\S'
+        entry: '^[-*\s]*Created `?OI-0002`?:\s*\S'
         onlyEntries: false
         minEntries: 1
         maxEntries: 1
+
+- description: intake smoke — a request to be pinged when the release lands is a session instruction and files no item
+  vars:
+    input: file://_fixtures/session-instruction-ping.md
+  metadata:
+    playbook: project-manager
+    step: intake
+    fixture: session-instruction-ping
+    tier: smoke
+  assert:
+    # SESSION-INSTRUCTION — nothing written; a file manifest of any kind fails
+    - type: javascript
+      value: file://../../_lib/asserts/files.js
+      config:
+        onTextMode: pass
+        expect: []
+        noOthers: true
+
+- description: intake smoke — a request to pause pi for two hours is a session instruction and files no item
+  vars:
+    input: file://_fixtures/session-instruction-pause.md
+  metadata:
+    playbook: project-manager
+    step: intake
+    fixture: session-instruction-pause
+    tier: smoke
+  assert:
+    # SESSION-INSTRUCTION — nothing written; a file manifest of any kind fails
+    - type: javascript
+      value: file://../../_lib/asserts/files.js
+      config:
+        onTextMode: pass
+        expect: []
+        noOthers: true
