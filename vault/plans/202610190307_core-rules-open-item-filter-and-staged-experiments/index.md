@@ -2,7 +2,7 @@
 title: "Core rules — open items only for what outlives the session, ids with titles
   in chat, staged experiments"
 type: "feature"
-status: presenting
+status: ready-for-dev
 sp: 18
 related_to: null
 created: 2026-10-19 03:08
@@ -20,6 +20,7 @@ tracker_provider: null
 tracker_request: null
 tracker_issue: null
 return_to: null
+reviewed_at: 2026-10-19 03:12
 ---
 
 # Core rules — open items only for what outlives the session, ids with titles in chat, staged experiments
