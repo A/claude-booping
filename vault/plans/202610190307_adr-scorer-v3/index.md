@@ -65,8 +65,8 @@ Values in play: value/0012 (quality at a rational cost — Opus with the invento
 | --- | --- | --- | --- |
 | 01 | [Inventory flags on booping specs ls](milestones/M01-inventory-flags-on-booping-specs-ls/M01-inventory-flags-on-booping-specs-ls.md) | 5 | done |
 | 02 | [Scorer v3: rubric, agent body, the guide's Record scenario](milestones/M02-scorer-v3-rubric-agent-body-the-guide-s-record-scenario/M02-scorer-v3-rubric-agent-body-the-guide-s-record-scenario.md) | 10 | done |
-| 03 | [Scorer eval suite on v3](milestones/M03-scorer-eval-suite-on-v3/M03-scorer-eval-suite-on-v3.md) | 11 | pending |
-| 04 | [Stale descriptions of scorer v1](milestones/M04-stale-descriptions-of-scorer-v1/M04-stale-descriptions-of-scorer-v1.md) | 2 | pending |
+| 03 | [Scorer eval suite on v3](milestones/M03-scorer-eval-suite-on-v3/M03-scorer-eval-suite-on-v3.md) | 11 | done |
+| 04 | [Stale descriptions of scorer v1](milestones/M04-stale-descriptions-of-scorer-v1/M04-stale-descriptions-of-scorer-v1.md) | 2 | done |
 
 ## Groups
 

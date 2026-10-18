@@ -2,7 +2,7 @@
 id: "04"
 title: "Stale descriptions of scorer v1"
 sp: 2
-status: pending
+status: done
 plan: "plans/202610190307_adr-scorer-v3/index.md"
 ---
 
@@ -14,8 +14,8 @@ plan: "plans/202610190307_adr-scorer-v3/index.md"
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 4.1 | CLAUDE.md Layout bullet on `agents/adr-scorer.md`: static body and allowlist kept, "reads nothing beyond its prompt" kept, nothing on the score contract added | `CLAUDE.md` | 1 | pending |
-| 4.2 | CHANGELOG unreleased entry: the scorer routes a draft ADR, names what it overlaps and the cheap options it misses; a draft that is not an ADR is routed, «Не взвешено:» joins the brief — user-facing only (booping:rule/0008); the v1 line on this release amended | `CHANGELOG.md` | 1 | pending |
+| 4.1 | CLAUDE.md Layout bullet on `agents/adr-scorer.md`: static body and allowlist kept, "reads nothing beyond its prompt" kept, nothing on the score contract added | `CLAUDE.md` | 1 | done |
+| 4.2 | CHANGELOG unreleased entry: the scorer routes a draft ADR, names what it overlaps and the cheap options it misses; a draft that is not an ADR is routed, «Не взвешено:» joins the brief — user-facing only (booping:rule/0008); the v1 line on this release amended | `CHANGELOG.md` | 1 | done |
 
 Test surface: none — text only.
 
@@ -24,10 +24,10 @@ Worker returns: the list of changed files.
 ## Definition of Done
 
 Task 4.1
-- [ ] `git grep -n "score: {0-3}\|score of 1 or less"` over shipped files returns nothing outside `vault/`.
+- [x] `git grep -n "score: {0-3}\|score of 1 or less"` over shipped files returns nothing outside `vault/`.
 
 Task 4.2
-- [ ] CHANGELOG names routing, «Не взвешено:» and the inventory input; no internal file names.
+- [x] CHANGELOG names routing, «Не взвешено:» and the inventory input; no internal file names.
 
 ## References
 
