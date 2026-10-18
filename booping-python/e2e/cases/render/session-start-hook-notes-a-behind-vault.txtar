@@ -1,0 +1,19 @@
+A vault whose marker watermark trails the shipped migrations still gets the session-start block
+from the hook — the playbook table — plus one line pointing at `migrate`, never the migrate gate's
+auto-migrate notice: at session start there is no request to resume after a migration.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 2
+-- fixtures/cwd/vault/config.yaml --
+-- cmd --
+sh -c 'root=$(dirname "$(dirname "$(command -v booping)")"); CLAUDE_PLUGIN_ROOT=$root "$root/hooks/session-start.sh" | grep -E "^(## booping|\| (Playbook|migrate) |This vault|\*\*)"'
+-- exit --
+0
+-- stdout --
+## booping
+| Playbook | Trigger |
+| migrate | a render surface reports the vault is behind and tells the user to run `/playbook migrate`; an explicit ask to migrate or update a vault |
+This vault is behind on booping migrations; `/booping:playbook migrate` brings it up to date.
+-- stderr --

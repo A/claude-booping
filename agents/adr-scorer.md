@@ -1,7 +1,8 @@
 ---
 name: adr-scorer
 description: Scores an ADR's alternatives 0–3 against a rubric. Both the ADR text and the rubric text come pasted in the prompt; the agent reads nothing else.
-tools: []
+# Allowlist, not a denylist: a denylist lets MCP and future tools through, and an empty list is refused at spawn; ListAgents is the harmless minimum.
+tools: ListAgents
 model: opus
 effort: high
 color: yellow

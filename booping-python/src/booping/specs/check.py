@@ -125,6 +125,15 @@ def _check_review(record: Record) -> list[Finding]:
             )
         )
     if "review" not in fm:
+        if "review_evidence" in fm:
+            findings.append(
+                _error(
+                    record.path,
+                    "review",
+                    "review_evidence without review",
+                    _key_line(record.path, "review_evidence"),
+                )
+            )
         return findings
     level = fm["review"]
     line = _key_line(record.path, "review")

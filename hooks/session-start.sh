@@ -8,6 +8,6 @@ while [ ! -e "$dir/.booping" ]; do
   dir="$(dirname "$dir")"
 done
 
-out="$("$CLAUDE_PLUGIN_ROOT/bin/booping" render src/templates/hooks/session_start.md.j2 2>/dev/null)" || exit 0
+out="$("$CLAUDE_PLUGIN_ROOT/bin/booping" render --no-migrate-gate src/templates/hooks/session_start.md.j2 2>/dev/null)" || exit 0
 printf '%s\n' "$out"
 exit 0

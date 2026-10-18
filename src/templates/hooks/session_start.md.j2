@@ -7,3 +7,6 @@ This repo is a booping project. Project work a playbook below fits — a decisio
 {% for pb in context.playbooks -%}
 | {{ pb.name }} | {{ pb.trigger | replace("|", "\\|") | replace("\n", " ") }} |
 {% endfor -%}
+{% if 'core.migrate_playbook.queries.pending' | query(where={'id:gt': booping.latest_migration}) %}
+This vault is behind on booping migrations; `/booping:playbook migrate` brings it up to date.
+{% endif -%}

@@ -1,6 +1,7 @@
 # The adr-scorer agent over three ADRs with hand-derived scores from
 # vault/plans/202610190033_specs-acceptance-and-session-entry/adr-audit-ground-truth.md.
-# smoke: the output contract and zero tool calls; regress: the score within ±1.
+# smoke: the output contract and zero tool calls; regress: the score within ±1, and the
+# ground-truth-1 ADR scored below the ground-truth-3 one.
 
 - description: adr-scorer smoke — ADR 0019, tracker is a best-effort mirror (ground truth 1)
   vars:
@@ -112,3 +113,18 @@
       config:
         check: score
         expect: 3
+
+- description: adr-scorer regress — ADR 0019 (ground truth 1) scores below ADR 0003 (ground truth 3)
+  vars:
+    input: file://_fixtures/adr-0019-score-1.md
+    compare: file://_fixtures/adr-0003-score-3.md
+  metadata:
+    agent: adr-scorer
+    fixture: adr-0019-below-adr-0003
+    tier: regress
+  assert:
+    # ORDER — the weaker ADR scores strictly lower
+    - type: javascript
+      value: file://asserts.js
+      config:
+        check: order

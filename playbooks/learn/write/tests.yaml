@@ -29,7 +29,7 @@
               - '^\s*-\s*groom\s*$'
               - '^brief: "'
             forbids:
-              # vault outside the repo: no sources entry; reviewed is the owner's alone
+              # vault outside the repo: no sources entry; no review level without evidence
               - '^sources:'
               - '^reviewed:'
               - '[Hh]ow to [Aa]pply'
@@ -41,7 +41,7 @@
               - '^\s*-\s*agent:booping-developer\s*$'
               - '^brief: "'
             forbids:
-              # vault outside the repo: no sources entry; reviewed is the owner's alone
+              # vault outside the repo: no sources entry; no review level without evidence
               - '^sources:'
               - '^reviewed:'
               - '[Hh]ow to [Aa]pply'

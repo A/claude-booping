@@ -22,7 +22,7 @@
       value: file://../../_lib/asserts/return.js
       config:
         requireBlock: true
-        entry: '^\W*(items: 2 open — request 2, backlog 0, spec gap 0 — 1 waiting on you|ideas: none|plans: 1 ready-for-dev|runs: 1 finished|records: none unreviewed|marks: none)\W*$'
+        entry: '^\W*(items: 2 open — request 2, backlog 0, spec gap 0 — 1 waiting on you|ideas: none|plans: 1 ready-for-dev|runs: 1 finished|records: none not accepted|marks: none)\W*$'
         onlyEntries: false
         minEntries: 6
     # ACT-ON-ORDER — the run id is named before the waiting item, the waiting item before the plan

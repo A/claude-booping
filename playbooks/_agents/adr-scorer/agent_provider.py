@@ -7,6 +7,8 @@ heading, then the test's `input` var under `config.input_heading`.
 
 Output: `<tool_calls>N</tool_calls>` (tool_use blocks the agent emitted), then the agent's
 reply in a `<return>` block, so `_lib/asserts/return.js` checks the reply's contract.
+A test that also sets a `compare` var runs the agent a second time on it and adds that
+reply in a `<compare>` block, for asserts that relate two scores.
 
 stdlib-only; `call_api` never raises.
 """
@@ -21,11 +23,11 @@ REPO = Path(__file__).parents[3]
 PLAYBOOKS = REPO / "playbooks"
 
 
-def _prompt(config, variables):
+def _prompt(config, text):
     parts = [config.get("preamble", "").strip()]
     for heading, rel in (config.get("paste") or {}).items():
         parts.append(f"## {heading}\n\n{(PLAYBOOKS / rel).read_text(encoding='utf-8').strip()}")
-    parts.append(f"## {config.get('input_heading', 'Input')}\n\n{variables['input'].strip()}")
+    parts.append(f"## {config.get('input_heading', 'Input')}\n\n{text.strip()}")
     return "\n\n".join(p for p in parts if p) + "\n"
 
 
@@ -58,8 +60,24 @@ def _run(prompt, agent):
     usage = result.get("usage") or {}
     prompt_tokens = usage.get("input_tokens", 0) or 0
     completion_tokens = usage.get("output_tokens", 0) or 0
-    output = (f"<tool_calls>{tool_calls}</tool_calls>\n\n"
-              f"<return>\n{(result.get('result') or '').strip()}\n</return>")
+    return {"tool_calls": tool_calls,
+            "reply": (result.get("result") or "").strip(),
+            "prompt": prompt_tokens, "completion": completion_tokens}
+
+
+def _call(config, variables):
+    runs = [_run(_prompt(config, variables["input"]), config["agent"])]
+    if variables.get("compare"):
+        runs.append(_run(_prompt(config, variables["compare"]), config["agent"]))
+    for run in runs:
+        if "error" in run:
+            return run
+    output = (f"<tool_calls>{sum(r['tool_calls'] for r in runs)}</tool_calls>\n\n"
+              f"<return>\n{runs[0]['reply']}\n</return>")
+    if len(runs) > 1:
+        output += f"\n\n<compare>\n{runs[1]['reply']}\n</compare>"
+    prompt_tokens = sum(r["prompt"] for r in runs)
+    completion_tokens = sum(r["completion"] for r in runs)
     return {"output": output,
             "tokenUsage": {"prompt": prompt_tokens, "completion": completion_tokens,
                            "total": prompt_tokens + completion_tokens}}
@@ -71,6 +89,6 @@ def call_api(prompt, options, context):
         variables = (context or {}).get("vars") or {}
         if "input" not in variables:
             return {"error": "the test case sets no `input` var"}
-        return _run(_prompt(config, variables), config["agent"])
+        return _call(config, variables)
     except Exception as e:  # noqa: BLE001 — the provider must never raise
         return {"error": f"provider crashed: {e}"}

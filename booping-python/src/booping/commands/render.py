@@ -38,6 +38,14 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
             " core.macros.date=19700101-00-00); repeatable, later pairs win"
         ),
     )
+    p.add_argument(
+        "--no-migrate-gate",
+        action="store_true",
+        help=(
+            "Render even when the vault is behind on migrations, instead of printing the"
+            " migrate notice; the template reads the watermark itself"
+        ),
+    )
     p.set_defaults(func=_run)
 
 
@@ -61,7 +69,7 @@ def _run(args: argparse.Namespace) -> None:
         )
         sys.exit(1)
 
-    notice = migrations.render_gate(overrides=overrides)
+    notice = None if args.no_migrate_gate else migrations.render_gate(overrides=overrides)
     if notice is not None:
         _emit(notice + "\n", args.output)
         return
