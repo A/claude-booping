@@ -55,16 +55,27 @@ A decision → an ADR, only for one choice with a real alternative and a reason 
 show. An idea → an idea record. A constraint on how the model works → a rule with `targets` and
 `brief`.
 
-An ADR is drafted `status: proposed`, then:
+An ADR is drafted `status: proposed` (its ref from `booping specs next adr`), then:
 
-1. Score it: spawn `booping:adr-scorer` with a prompt that pastes the ADR file's text and the text
-   of [the rubric](${CLAUDE_PLUGIN_ROOT}/playbooks/specs/guide/adr-rubric.md) — the text itself,
-   never a path. A score ≤ 1 → redraft the alternatives from its findings and score again, at
-   most two rounds; then the brief carries the score as it stands.
-2. Show the brief, exactly this shape:
+1. Score it: spawn `booping:adr-scorer` with a prompt that pastes, each under its heading, the
+   text itself and never a path:
+   - the text of [the rubric](${CLAUDE_PLUGIN_ROOT}/playbooks/specs/guide/adr-rubric.md), under its own heading;
+   - `# Guide excerpt` — the format guide's `## Types` and `## When a record is worth writing` sections, verbatim;
+   - `# Records` — the output of `booping specs ls --tier {tier} --type value --type rule --type adr --exclude adr/{NNNN} --titles`, `{tier}` the one the ADR goes to;
+   - `# Primitives` — one line per command or building block the attached repo's `CLAUDE.md` names; none → the heading reads `# Primitives — none named`;
+   - `# Draft ADR` — the ADR's text.
+
+   Its reply is one JSON line: `route`, `route_why`, `overlaps`, `alt_score`, `missing`.
+   - `route` other than `adr` → no ADR is written. Supervised, show the route and `route_why`
+     first; autonomous, log it as an agent decision. Then record the material as the routed type:
+     a `value` as an owner draft, `open-item` filed as an open item, `none` dropped and reported,
+     any other type written as that record.
+   - `alt_score` ≤ 1 → redraft the alternatives from `missing` and score again, at most two
+     rounds; then the brief carries the score as it stands.
+2. Write the ADR and show the brief, exactly this shape:
 
    ```
-   **ADR {NNNN} — {title}** · {status} · оценка альтернатив {score}/3{; findings if < 3}
+   **ADR {NNNN} — {title}** · {status} · оценка альтернатив {alt_score}/3
 
    | | вариант | почему |
    |---|---|---|
@@ -74,7 +85,8 @@ An ADR is drafted `status: proposed`, then:
    Ключевые моменты:
    1. {each point of the chosen decision a reader must see to object to it}
 
-   Задевает: {ADR/value refs and how — "разворачивает ADR N" for a reversal}
+   Не взвешено: {each `missing` entry; the line is omitted when `missing` is empty}
+   Задевает: {ADR/value refs, the scorer's `overlaps` among them, and how — "разворачивает ADR N" for a reversal}
    Решил сам: {each call you made alone, or "ничего"}
 
    Если что-то не так — скажи, поправлю; если всё ок — продолжаю.

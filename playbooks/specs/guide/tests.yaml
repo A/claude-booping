@@ -1,4 +1,4 @@
-# Five smoke cases over the guide step. The run has no shell: each fixture states the
+# Six smoke cases over the guide step. The run has no shell: each fixture states the
 # `booping` outputs a live run would have read, and stands in for the writes the CLI would
 # have made. The cwd is the vault root; the project tier, when there is one, is `specs/`.
 
@@ -213,6 +213,15 @@
         entry: '^[*_\s]*Ключевые моменты:'
         onlyEntries: false
         minEntries: 1
+    # NOT-WEIGHED — the scorer's one `missing` entry on its own line
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        entry: '^[*_\s]*Не взвешено:.*\S'
+        onlyEntries: false
+        minEntries: 1
+        maxEntries: 1
     - type: javascript
       value: file://../../_lib/asserts/return.js
       config:
@@ -233,5 +242,31 @@
       config:
         requireBlock: true
         entry: 'Если что-то не так — скажи, поправлю; если всё ок — продолжаю\.'
+        onlyEntries: false
+        minEntries: 1
+
+- description: guide smoke — a draft the scorer routes to a rule writes no ADR and shows the route
+  vars:
+    input: file://_fixtures/record-adr-routed.md
+  metadata:
+    playbook: specs
+    step: guide
+    fixture: record-adr-routed
+    tier: smoke
+  assert:
+    # NO-ADR — route ≠ adr blocks the ADR file; the routed rule may be drafted
+    - type: javascript
+      value: file://../../_lib/asserts/files.js
+      config:
+        expect: []
+        allow:
+          - '^(?!specs/adr/)'
+        noOthers: true
+    # ROUTE-SHOWN
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        entry: '\b[Rr]ule\b'
         onlyEntries: false
         minEntries: 1

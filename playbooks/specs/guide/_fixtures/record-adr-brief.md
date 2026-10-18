@@ -6,12 +6,19 @@ This run has no shell and no sub-agents, so the `booping` commands and the score
 
 - Preamble tiers — `project` — `specs/`.
 - `booping specs ls --tier project` — one record, `specs/value/0001-one-service-to-run.md`.
-- `booping specs next adr --tier project` — `0001`.
-- `booping specs check --tier project` — cannot run here; it checks each record against its type's mdcheck schema (the ADR one is given above) — check the ADR against it yourself.
-- `booping:adr-scorer`, given the ADR you draft and the rubric — its reply:
+- `booping specs ls --tier project --type value --type rule --type adr --exclude adr/0001 --titles` — one line:
 
   ```
-  score: 3
+  value/0001  -  One service to run: Taskflow runs on one database and one app process; a new stateful service has to pay for its operational cost.
+  ```
+
+- The attached repo's `CLAUDE.md` names no commands or building blocks.
+- `booping specs next adr --tier project` — `0001`.
+- `booping specs check --tier project` — cannot run here; it checks each record against its type's mdcheck schema (the ADR one is given above) — check the ADR against it yourself.
+- `booping:adr-scorer`, given the scorer prompt you assemble — its reply:
+
+  ```
+  {"route":"adr","route_why":"A real choice between three retry policies, with a reason the code does not show.","overlaps":[],"alt_score":2,"missing":["retries left to the job runner's existing retry setting, extended with a backoff list"]}
   ```
 
 ## Dialogue
