@@ -1,0 +1,114 @@
+# The adr-scorer agent over three ADRs with hand-derived scores from
+# vault/plans/202610190033_specs-acceptance-and-session-entry/adr-audit-ground-truth.md.
+# smoke: the output contract and zero tool calls; regress: the score within ±1.
+
+- description: adr-scorer smoke — ADR 0019, tracker is a best-effort mirror (ground truth 1)
+  vars:
+    input: file://_fixtures/adr-0019-score-1.md
+  metadata:
+    agent: adr-scorer
+    fixture: adr-0019-score-1
+    tier: smoke
+  assert:
+    # NO-TOOLS — the agent reads nothing beyond its prompt
+    - type: javascript
+      value: file://asserts.js
+      config:
+        check: tools
+    # CONTRACT — `score: N` first, then one line per finding
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        header: '^score: [0-3]$'
+        entry: '\S'
+        minEntries: 0
+
+- description: adr-scorer regress — ADR 0019, tracker is a best-effort mirror (ground truth 1)
+  vars:
+    input: file://_fixtures/adr-0019-score-1.md
+  metadata:
+    agent: adr-scorer
+    fixture: adr-0019-score-1
+    tier: regress
+  assert:
+    # SCORE — within ±1 of the ground truth
+    - type: javascript
+      value: file://asserts.js
+      config:
+        check: score
+        expect: 1
+
+- description: adr-scorer smoke — ADR 0024, the specs playbook is a guide (ground truth 2)
+  vars:
+    input: file://_fixtures/adr-0024-score-2.md
+  metadata:
+    agent: adr-scorer
+    fixture: adr-0024-score-2
+    tier: smoke
+  assert:
+    # NO-TOOLS — the agent reads nothing beyond its prompt
+    - type: javascript
+      value: file://asserts.js
+      config:
+        check: tools
+    # CONTRACT — `score: N` first, then one line per finding
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        header: '^score: [0-3]$'
+        entry: '\S'
+        minEntries: 0
+
+- description: adr-scorer regress — ADR 0024, the specs playbook is a guide (ground truth 2)
+  vars:
+    input: file://_fixtures/adr-0024-score-2.md
+  metadata:
+    agent: adr-scorer
+    fixture: adr-0024-score-2
+    tier: regress
+  assert:
+    # SCORE — within ±1 of the ground truth
+    - type: javascript
+      value: file://asserts.js
+      config:
+        check: score
+        expect: 2
+
+- description: adr-scorer smoke — ADR 0003, render at skill load (ground truth 3)
+  vars:
+    input: file://_fixtures/adr-0003-score-3.md
+  metadata:
+    agent: adr-scorer
+    fixture: adr-0003-score-3
+    tier: smoke
+  assert:
+    # NO-TOOLS — the agent reads nothing beyond its prompt
+    - type: javascript
+      value: file://asserts.js
+      config:
+        check: tools
+    # CONTRACT — `score: N` first, then one line per finding
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        header: '^score: [0-3]$'
+        entry: '\S'
+        minEntries: 0
+
+- description: adr-scorer regress — ADR 0003, render at skill load (ground truth 3)
+  vars:
+    input: file://_fixtures/adr-0003-score-3.md
+  metadata:
+    agent: adr-scorer
+    fixture: adr-0003-score-3
+    tier: regress
+  assert:
+    # SCORE — within ±1 of the ground truth
+    - type: javascript
+      value: file://asserts.js
+      config:
+        check: score
+        expect: 3
