@@ -1,8 +1,8 @@
 ---
 id: "02"
-title: "Scorer v3: rubric, agent body, the guide\u0027s Record scenario"
+title: "Scorer v3: rubric, agent body, the guide's Record scenario"
 sp: 10
-status: pending
+status: done
 plan: "plans/202610190307_adr-scorer-v3/index.md"
 ---
 
@@ -14,11 +14,11 @@ plan: "plans/202610190307_adr-scorer-v3/index.md"
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 2.1 | Replace the rubric's body with the v3 task text quoted under References, verbatim below an `# ADR scorer task` heading — the text the experiment measured | `playbooks/specs/guide/adr-rubric.md` | 2 | pending |
-| 2.2 | Agent body: names the five pasted parts (task, guide excerpt, records, primitives, draft ADR), says it judges from them alone and has no tool to reach anything else, replies with the task's JSON line and nothing else; frontmatter `description` updated to route + alternatives; `tools: ListAgents` and its comment kept | `agents/adr-scorer.md` | 2 | pending |
-| 2.3 | Append the `open item` bullet to `## When a record is worth writing`: "**open item** — a piece of work or a question for the owner that must outlive the session (a bug, a feature, a gap between specs and code); not a decision, not a constraint." | `src/specs/README.md` | 1 | pending |
-| 2.4 | `## Record` step 1: spawn the scorer with, under fixed headings, the rubric's text, the format guide's `## Types` and `## When a record is worth writing` sections, the output of `booping specs ls --tier {tier} --type value --type rule --type adr --exclude adr/{NNNN} --titles`, the project's primitives (one line per command or building block the attached repo's CLAUDE.md names; none → the heading says so), the ADR's text — text, never paths. Gate per Decisions 11; brief per Decisions 12 (header from `alt_score`, «Не взвешено:» line, `overlaps` refs in «Задевает:») | `playbooks/specs/guide/prompt.md` | 3 | pending |
-| 2.5 | The guide's eval fixtures carry a v3 JSON reply in place of `score: 3`; record-adr-brief's canned reply has one `missing` entry and its brief asserts check the «Не взвешено:» line; one new fixture with `route: rule` checks no ADR file is written and the route is shown | `playbooks/specs/guide/_fixtures/record-adr-brief.md`, `playbooks/specs/guide/_fixtures/record-decision.md`, `playbooks/specs/guide/tests.yaml`, new `playbooks/specs/guide/_fixtures/record-adr-routed.md` | 2 | pending |
+| 2.1 | Replace the rubric's body with the v3 task text quoted under References, verbatim below an `# ADR scorer task` heading — the text the experiment measured | `playbooks/specs/guide/adr-rubric.md` | 2 | done |
+| 2.2 | Agent body: names the five pasted parts (task, guide excerpt, records, primitives, draft ADR), says it judges from them alone and has no tool to reach anything else, replies with the task's JSON line and nothing else; frontmatter `description` updated to route + alternatives; `tools: ListAgents` and its comment kept | `agents/adr-scorer.md` | 2 | done |
+| 2.3 | Append the `open item` bullet to `## When a record is worth writing`: "**open item** — a piece of work or a question for the owner that must outlive the session (a bug, a feature, a gap between specs and code); not a decision, not a constraint." | `src/specs/README.md` | 1 | done |
+| 2.4 | `## Record` step 1: spawn the scorer with, under fixed headings, the rubric's text, the format guide's `## Types` and `## When a record is worth writing` sections, the output of `booping specs ls --tier {tier} --type value --type rule --type adr --exclude adr/{NNNN} --titles`, the project's primitives (one line per command or building block the attached repo's CLAUDE.md names; none → the heading says so), the ADR's text — text, never paths. Gate per Decisions 11; brief per Decisions 12 (header from `alt_score`, «Не взвешено:» line, `overlaps` refs in «Задевает:») | `playbooks/specs/guide/prompt.md` | 3 | done |
+| 2.5 | The guide's eval fixtures carry a v3 JSON reply in place of `score: 3`; record-adr-brief's canned reply has one `missing` entry and its brief asserts check the «Не взвешено:» line; one new fixture with `route: rule` checks no ADR file is written and the route is shown | `playbooks/specs/guide/_fixtures/record-adr-brief.md`, `playbooks/specs/guide/_fixtures/record-decision.md`, `playbooks/specs/guide/tests.yaml`, new `playbooks/specs/guide/_fixtures/record-adr-routed.md` | 2 | done |
 
 Test surface: the specs guide step and the scorer agent; cases — v3 reply shape in the brief, «Не взвешено:» rendered, `route: rule` blocks the ADR; tier — the guide's promptfoo suite (smoke + regress), integration of the prompt with canned scorer replies.
 
@@ -27,24 +27,24 @@ Worker returns: the list of changed files and the Verify exit status.
 ## Definition of Done
 
 Task 2.1
-- [ ] Rubric asks for exactly one JSON line with keys `route`, `route_why`, `overlaps`, `alt_score`, `missing`, the limits ≤ 3 and the route enum `adr|rule|value|story|reference|idea|open-item|none`.
-- [ ] No `score:` line contract remains.
+- [x] Rubric asks for exactly one JSON line with keys `route`, `route_why`, `overlaps`, `alt_score`, `missing`, the limits ≤ 3 and the route enum `adr|rule|value|story|reference|idea|open-item|none`.
+- [x] No `score:` line contract remains.
 
 Task 2.2
-- [ ] Body names the five inputs and the JSON reply; the phrase "you have no tools" is gone; `tools: ListAgents` unchanged.
+- [x] Body names the five inputs and the JSON reply; the phrase "you have no tools" is gone; `tools: ListAgents` unchanged.
 
 Task 2.3
-- [ ] README section ends with the open item bullet; `just specs-check` clean.
+- [x] README section ends with the open item bullet; `just specs-check` clean.
 
 Task 2.4
-- [ ] `## Record` names the five pasted parts and the `specs ls` line with `--exclude` of the draft's ref.
-- [ ] `route ≠ adr` → no ADR written, material recorded as the routed type per Decisions 11; `alt_score ≤ 1` → redraft from `missing`, at most two rounds.
-- [ ] Brief template has «Не взвешено: {missing}» (omitted when empty) and `overlaps` in «Задевает:».
-- [ ] `bin/booping render-playbook specs --step guide` renders clean.
+- [x] `## Record` names the five pasted parts and the `specs ls` line with `--exclude` of the draft's ref.
+- [x] `route ≠ adr` → no ADR written, material recorded as the routed type per Decisions 11; `alt_score ≤ 1` → redraft from `missing`, at most two rounds.
+- [x] Brief template has «Не взвешено: {missing}» (omitted when empty) and `overlaps` in «Задевает:».
+- [x] `bin/booping render-playbook specs --step guide` renders clean.
 
 Task 2.5
-- [ ] No fixture carries `score: N` as a scorer reply.
-- [ ] `just smoke specs/guide` passes.
+- [x] No fixture carries `score: N` as a scorer reply.
+- [x] `just smoke specs/guide` passes.
 
 ## References
 
