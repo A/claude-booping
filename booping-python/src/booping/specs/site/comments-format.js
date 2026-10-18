@@ -32,12 +32,12 @@
     return parts.join("\n\n");
   }
   // A comment without a note is a card still being written: it is not sent.
-  function groups(comments, siteRoot, reviewed) {
+  function groups(comments, siteRoot, accepted) {
     var byRef = {};
     var list = [];
     function group(ref, title, page) {
       if (!own(byRef, ref)) {
-        byRef[ref] = { ref: ref, title: title, page: page, latest: "", reviewed: null, comments: [] };
+        byRef[ref] = { ref: ref, title: title, page: page, latest: "", accepted: null, comments: [] };
         list.push(byRef[ref]);
       }
       return byRef[ref];
@@ -49,11 +49,11 @@
       g.comments.push(c);
       if (c.created > g.latest) g.latest = c.created;
     }
-    var marks = reviewed || [];
+    var marks = accepted || [];
     for (var m = 0; m < marks.length; m++) {
       var r = marks[m];
       var rg = group(r.ref, r.title, r.page);
-      rg.reviewed = r;
+      rg.accepted = r;
       if (r.created > rg.latest) rg.latest = r.created;
     }
     list.sort(function (a, b) {
@@ -66,15 +66,15 @@
       });
       gr.heading = "## " + gr.ref + " — " + gr.title;
       gr.items = [];
-      if (gr.reviewed) gr.items.push({ kind: "reviewed", text: gr.ref + " — reviewed " + gr.reviewed.date });
+      if (gr.accepted) gr.items.push({ kind: "accepted", text: gr.ref + " — accepted " + gr.accepted.date });
       for (var j = 0; j < gr.comments.length; j++) {
         gr.items.push({ kind: "comment", comment: gr.comments[j], text: commentText(gr.comments[j], siteRoot) });
       }
     }
     return list;
   }
-  function format(comments, siteRoot, reviewed) {
-    var list = groups(comments, siteRoot, reviewed);
+  function format(comments, siteRoot, accepted) {
+    var list = groups(comments, siteRoot, accepted);
     var parts = [];
     for (var i = 0; i < list.length; i++) {
       parts.push(list[i].heading);

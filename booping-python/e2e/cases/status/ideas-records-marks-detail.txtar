@@ -1,6 +1,6 @@
 `status ideas records marks` prints the three tables: the untaken open idea, the
-unreviewed records with `—` for a missing status, the marks under the anchored refs
-`items scan` would file.
+records not accepted with `—` for a missing status and their review level, the marks
+under the anchored refs `items scan` would file.
 
 -- fixtures/cwd/.booping --
 project_name: probe
@@ -50,7 +50,8 @@ type: idea
 title: An accepted idea
 created_at: 2026-10-12
 status: accepted
-reviewed: 2026-10-13
+review: accepted
+review_evidence: site review — 2026-10-13
 ---
 
 ## Idea
@@ -61,7 +62,8 @@ Already accepted.
 type: rule
 title: A reviewed rule
 status: accepted
-reviewed: 2026-10-14
+review: accepted
+review_evidence: site review — 2026-10-14
 ---
 
 ## Rule
@@ -89,11 +91,11 @@ booping status marks records ideas marks
 
 ## records
 
-| ref | status | title |
-| --- | --- | --- |
-| idea/0001 | open | Nobody took this idea |
-| idea/0002 | open | An item tracks this idea |
-| value/0001 | — | A value without a status |
+| ref | status | review | title |
+| --- | --- | --- | --- |
+| idea/0001 | open | none | Nobody took this idea |
+| idea/0002 | open | none | An item tracks this idea |
+| value/0001 | — | none | A value without a status |
 
 ## marks
 

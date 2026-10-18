@@ -45,7 +45,7 @@ def test_row_in_russian() -> None:
 def test_removable_keeps_order_and_fills_the_label() -> None:
     pressed = [
         {"key": "source", "value": "claude", "label": "Claude"},
-        {"key": "flag", "value": "unreviewed", "label": "Unreviewed"},
+        {"key": "flag", "value": "not_accepted", "label": "Not accepted"},
     ]
     assert _call("removable", pressed, "Remove filter: {label}") == [
         {
@@ -56,9 +56,9 @@ def test_removable_keeps_order_and_fills_the_label() -> None:
         },
         {
             "key": "flag",
-            "value": "unreviewed",
-            "text": "Unreviewed",
-            "aria": "Remove filter: Unreviewed",
+            "value": "not_accepted",
+            "text": "Not accepted",
+            "aria": "Remove filter: Not accepted",
         },
     ]
 

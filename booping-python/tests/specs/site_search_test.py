@@ -12,11 +12,15 @@ TYPES = ["value", "rule", "adr", "idea"]
 
 RECORDS = {
     "core/value/0001-clarity.md": (
-        "---\ntitle: Clarity\nsummary: Say what you mean.\nreviewed: 2026-10-01\n---\n"
+        "---\ntitle: Clarity\nsummary: Say what you mean.\n"
+        "review: accepted\nreview_evidence: site review — 2026-10-01\n"
+        "---\n"
         "# Clarity\n\nSay   what\nyou *mean*.\n"
     ),
     "proj/rule/0001-small.md": (
-        "---\ntitle: Small steps\nstatus: accepted\nreviewed: 2026-10-01\n---\nUse `git add -p`.\n"
+        "---\ntitle: Small steps\nstatus: accepted\n"
+        "review: accepted\nreview_evidence: site review — 2026-10-01\n"
+        "---\nUse `git add -p`.\n"
     ),
     "proj/adr/0001-elka.md": (
         "---\ntitle: Решение про ёлку\nsummary: Ставим ёлку.\nstatus: proposed\n"
@@ -56,7 +60,7 @@ def test_search_index_js_matches_the_locked_format(site: Site) -> None:
         '{"id":"proj:adr/0001","ref":"adr/0001","root":"proj","type":"adr",'
         '"type_label":"Решение","title":"Решение про ёлку","summary":"Ставим ёлку.",'
         '"status":"proposed","status_label":"предложено","tags":["зима","праздник"],'
-        '"url":"proj/adr/0001-elka.html","flags":["unreviewed","clarify"]}'
+        '"url":"proj/adr/0001-elka.html","flags":["not_accepted","clarify"]}'
         "];\n"
     )
 

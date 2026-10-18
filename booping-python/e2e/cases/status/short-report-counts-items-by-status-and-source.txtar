@@ -77,6 +77,6 @@ items: 2 open, 1 planned — request 1, backlog 1, spec gap 1
 ideas: none
 plans: none active
 runs: none
-records: none unreviewed
+records: none not accepted
 marks: none
 -- stderr --

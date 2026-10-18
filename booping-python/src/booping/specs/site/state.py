@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from booping.specs.records import unreviewed
+from booping.specs.records import accepted, review_level
 from booping.specs.site.markdown import Mark
 from booping.specs.site.model import SiteRecord
 
@@ -13,11 +13,13 @@ class RecordState:
     kind: str | None
     clarify: int
     unknown: int
-    unreviewed: bool
+    not_accepted: bool
     # Anchor id of the record's first mark, the target of the clarify badge.
     first_mark: str | None
     first_clarify: str | None = None
     first_unknown: str | None = None
+    # The record's review level; None on pages that carry no review axis (plans).
+    review: str | None = None
     # Why the record needs the owner, in the fixed flag order of the review filter.
     reasons: tuple[str, ...] = ()
 
@@ -33,9 +35,9 @@ def record_state(record: SiteRecord, marks: list[Mark]) -> RecordState:
     status_text = None if status is None else str(status)
     clarify = sum(1 for m in marks if m.kind == "clarify")
     unknown = sum(1 for m in marks if m.kind == "unknown")
-    is_unreviewed = unreviewed(record)
+    not_accepted = not accepted(record)
     flags = {
-        "unreviewed": is_unreviewed,
+        "not_accepted": not_accepted,
         "clarify": clarify > 0,
         "unknown": unknown > 0,
         "conflict": record.type == "conflict" and status_text == "open",
@@ -47,7 +49,8 @@ def record_state(record: SiteRecord, marks: list[Mark]) -> RecordState:
         kind=None if kind is None else str(kind),
         clarify=clarify,
         unknown=unknown,
-        unreviewed=is_unreviewed,
+        not_accepted=not_accepted,
+        review=review_level(record),
         first_mark=f"L{marks[0].line}" if marks else None,
         first_clarify=_first(marks, "clarify"),
         first_unknown=_first(marks, "unknown"),

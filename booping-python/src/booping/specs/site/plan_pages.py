@@ -36,7 +36,7 @@ def _state(status: Any) -> RecordState:
         kind=None,
         clarify=0,
         unknown=0,
-        unreviewed=False,
+        not_accepted=False,
         first_mark=None,
     )
 

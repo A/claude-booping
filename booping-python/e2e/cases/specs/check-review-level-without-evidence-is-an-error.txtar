@@ -1,0 +1,32 @@
+A level without `review_evidence:` gets a `review` error on the `review:` line — even
+`accepted` is never set without the owner's words behind it.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/value/0001-first.md --
+---
+type: value
+title: First
+summary: The first value.
+kind: value
+created_by: owner
+created_at: 2026-01-01
+updated_at: 2026-01-01
+review: accepted
+---
+
+Why the project exists.
+
+## In practice
+
+It shows in every run.
+-- cmd --
+booping specs check
+-- exit --
+1
+-- stdout --
+vault/value/0001-first.md:9  error  review  review: `accepted` needs review_evidence
+-- stderr --
+1 record(s) checked: 1 error(s), 0 warning(s)

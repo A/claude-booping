@@ -19,7 +19,8 @@ summary: A commit carries one concern.
 status: accepted
 tags: [git]
 values: [value/0001]
-reviewed: 2026-10-01
+review: accepted
+review_evidence: site review — 2026-10-01
 ---
 
 # One concern per commit
@@ -75,7 +76,8 @@ specs site: 1 roots, 3 records, 14 pages, 0 warnings -> specs-site
    "created_by": null,
    "created_at": null,
    "updated_at": null,
-   "reviewed": null,
+   "review": "none",
+   "review_evidence": null,
    "url": "proj/adr/0001-squash.html",
    "md": "proj/adr/0001-squash.md",
    "marks": {
@@ -105,7 +107,8 @@ specs site: 1 roots, 3 records, 14 pages, 0 warnings -> specs-site
    "created_by": null,
    "created_at": null,
    "updated_at": null,
-   "reviewed": "2026-10-01",
+   "review": "accepted",
+   "review_evidence": "site review — 2026-10-01",
    "url": "proj/rule/0001-one-concern.html",
    "md": "proj/rule/0001-one-concern.md",
    "marks": {
@@ -135,7 +138,8 @@ specs site: 1 roots, 3 records, 14 pages, 0 warnings -> specs-site
    "created_by": null,
    "created_at": null,
    "updated_at": null,
-   "reviewed": null,
+   "review": "none",
+   "review_evidence": null,
    "url": "proj/value/0001-small-steps.html",
    "md": "proj/value/0001-small-steps.md",
    "marks": {

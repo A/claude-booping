@@ -15,7 +15,15 @@ from booping.context import Context
 from booping.query import QueryError, as_dict, build_spec, resolve_spec, run
 from booping.specs import open_items
 from booping.specs.open_items import Mark
-from booping.specs.records import Record, load_tier, unreviewed
+from booping.specs.records import (
+    ACCEPTED,
+    NO_REVIEW,
+    REVIEW_LEVELS,
+    Record,
+    accepted,
+    load_tier,
+    review_level,
+)
 from booping.specs.tiers import Tier, status_enum
 
 PLAN_PLAYBOOKS = ("groom", "develop")
@@ -239,17 +247,21 @@ def _runs_detail(sc: StatusContext) -> str:
     return _table((sc.runs, RUN_COLUMNS))
 
 
-def _unreviewed(sc: StatusContext) -> list[Record]:
-    return [r for r in sc.records if unreviewed(r)]
+def _not_accepted(sc: StatusContext) -> list[Record]:
+    return [r for r in sc.records if not accepted(r)]
 
 
 def _records_summary(sc: StatusContext) -> str:
-    records = _unreviewed(sc)
+    records = _not_accepted(sc)
     if not records:
-        return "records: none unreviewed"
+        return "records: none not accepted"
+    levels = Counter(review_level(r) for r in records)
+    by_level = ", ".join(
+        f"{level} {levels[level]}" for level in (NO_REVIEW, *REVIEW_LEVELS) if level != ACCEPTED
+    )
     counted = Counter(r.type for r in records)
     by_type = ", ".join(f"{t} {counted[t]}" for t in sc.record_types if counted[t])
-    return f"records: {len(records)} unreviewed — {by_type}"
+    return f"records: {len(records)} not accepted — {by_level}; {by_type}"
 
 
 def _records_detail(sc: StatusContext) -> str:
@@ -257,11 +269,12 @@ def _records_detail(sc: StatusContext) -> str:
         {
             "ref": sc.ref(r),
             "status": r.frontmatter.get("status"),
+            "review": review_level(r),
             "title": r.frontmatter.get("title"),
         }
-        for r in _unreviewed(sc)
+        for r in _not_accepted(sc)
     ]
-    return _table((rows, ["ref", "status", "title"]))
+    return _table((rows, ["ref", "status", "review", "title"]))
 
 
 def _marks_summary(sc: StatusContext) -> str:

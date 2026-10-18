@@ -1,14 +1,14 @@
 {% macro cmt_labels(labels) -%}
 data-note="{{ labels.ui('comment_note') }}" data-delete="{{ labels.ui('delete') }}" data-open="{{ labels.ui('open_place') }}" data-whole="{{ labels.ui('whole_record') }}" data-changed="{{ labels.ui('text_changed') }}" data-deleted="{{ labels.ui('comment_deleted') }}" data-copy-failed="{{ labels.ui('copy_failed') }}" data-copied-forms="{{ labels.plural_forms('comments_copied_n') | tojson | forceescape }}" data-cleared-forms="{{ labels.plural_forms('comments_cleared_n') | tojson | forceescape }}"
 {%- endmacro %}
-{% macro review_panel(labels, reviewed) %}
+{% macro review_panel(labels, acceptable) %}
 <section class="rv" aria-labelledby="rv-h" {{ cmt_labels(labels) }}>
 <div class="rv-head">
 <h2 id="rv-h">{{ labels.ui("review_panel") }}</h2>
 <button class="iconbtn rv-close" type="button" aria-label="{{ labels.ui('close') }}">&times;</button>
 </div>
-{% if reviewed %}
-<label class="rv-reviewed"><input type="checkbox" id="rv-reviewed"> {{ labels.ui("mark_reviewed") }}</label>
+{% if acceptable %}
+<label class="rv-accepted"><input type="checkbox" id="rv-accepted"> {{ labels.ui("mark_accepted") }}</label>
 {% endif %}
 <label class="rv-label" for="rv-new">{{ labels.ui("whole_record_note") }}</label>
 <textarea id="rv-new" rows="3"></textarea>
