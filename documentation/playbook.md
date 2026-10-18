@@ -27,7 +27,7 @@ Core playbooks own the main workflow:
 - **`retro`** — capture what shipped versus the spec. See [retro](retro.md).
 - **`learn`** — fold retro findings into durable rules. See [learn](learn.md).
 - **`code-review`** — review a confirmed scope: findings, verdict, approved fixes, recorded in the run's own `codereviews/` artifact. See [code-review](code_review.md).
-- **`project-manager`** — the manager you talk to: files every request as an open item and carries each through groom, develop, code review and a local merge in the session's mode, supervised or autonomous. See [project-manager](project_manager.md).
+- **`project-manager`** — the manager you talk to: files what must outlive the session — work for later, questions waiting on you — as open items and carries each through groom, develop, code review and a local merge in the session's mode, supervised or autonomous. See [project-manager](project_manager.md).
 - **`migrate`** — bring a vault up to the plugin's current migration watermark.
 - **`makemigration`** — author a new plugin-shipped vault migration at the next id, for `migrate` to apply.
 - **`playbook-authoring`** — the procedure for writing a new playbook.

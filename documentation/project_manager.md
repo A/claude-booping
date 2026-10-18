@@ -1,6 +1,6 @@
 # project-manager playbook
 
-The manager you talk to about a project: tell it what you want, in as many requests per message as you like, and it files each one as an **open item**, then carries it through groom, develop, an independent code review and the merge — stopping where its mode says it should.
+The manager you talk to about a project: tell it what you want, in as many requests per message as you like, and it files what must outlive the session as an **open item**, then carries each through groom, develop, an independent code review and the merge — stopping where its mode says it should.
 
 ```text
 /playbook project-manager
