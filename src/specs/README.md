@@ -48,6 +48,7 @@ A record holds what nothing else holds. Before writing one, and on every review 
 - **`rule`** — a constraint that changes how the system behaves on every call it targets, worth its place in each of those prompts. A behaviour picked without weighing an alternative is a rule, not an ADR. A one-off mistake that reduces to no such constraint is no rule: fix it, and keep a `reference` if it carries a lesson.
 - **`story`** — a feature or a usage scenario: who wants what and why.
 - **`reference`** — a fact the code does not show: a measurement, an external constraint, a postmortem of an incident.
+- **open item** — a piece of work or a question for the owner that must outlive the session (a bug, a feature, a gap between specs and code); not a decision, not a constraint.
 
 A tier sharpens these tests for itself with a rule targeting `specs`.
 

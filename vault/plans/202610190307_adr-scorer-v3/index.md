@@ -2,25 +2,38 @@
 title: "ADR scorer v3 — routing, overlaps and missing options from the guide and the
   record inventory"
 type: "feature"
-status: ready-for-dev
+status: done
 sp: 28
 related_to: null
 created: 2026-10-19 03:08
 planned: null
-started: null
-completed: null
-code_reviews: []
+started: 2026-10-19 03:35
+completed: 2026-10-19 04:08
+code_reviews:
+  - codereviews/202610190307_adr-scorer-v3/202610190409.md
 sessions:
 - 0c3f5735-fd95-5891-a767-80fb60a7872b
+- 8ad47d44-8fe9-5ed6-bf18-7c9966c47b57
 retro: null
 summary: 'ADR scorer v3: guide excerpt + record inventory in, one JSON line out; gate
   on route and alt_score, missing joins the brief'
-commit: 5f93b3a3840bc789b8fd7a246f8d12bf21d797bd
+commit: 22bd66ee450a0d362c8e2053045838cd7cc4f378
 tracker_provider: null
 tracker_request: null
 tracker_issue: null
 return_to: null
 reviewed_at: 2026-10-19 03:13
+agents:
+- develop-loop/G1:a01a7f26eee2c10e7
+- develop-loop/G2:aa03af6d3ffcef7e2
+- verify:a33d6e14dfba21445
+metrics_active_minutes: 41
+metrics_models:
+- claude-opus-5-5
+metrics_tokens_input: 118
+metrics_tokens_output: 42325
+metrics_tokens_cache_creation: 211016
+metrics_tokens_cache_read: 5211484
 ---
 
 # ADR scorer v3 — routing, overlaps and missing options from the guide and the record inventory
@@ -62,10 +75,10 @@ Values in play: value/0012 (quality at a rational cost — Opus with the invento
 
 | id | title | sp | status |
 | --- | --- | --- | --- |
-| 01 | [Inventory flags on booping specs ls](milestones/M01-inventory-flags-on-booping-specs-ls/M01-inventory-flags-on-booping-specs-ls.md) | 5 | pending |
-| 02 | [Scorer v3: rubric, agent body, the guide's Record scenario](milestones/M02-scorer-v3-rubric-agent-body-the-guide-s-record-scenario/M02-scorer-v3-rubric-agent-body-the-guide-s-record-scenario.md) | 10 | pending |
-| 03 | [Scorer eval suite on v3](milestones/M03-scorer-eval-suite-on-v3/M03-scorer-eval-suite-on-v3.md) | 11 | pending |
-| 04 | [Stale descriptions of scorer v1](milestones/M04-stale-descriptions-of-scorer-v1/M04-stale-descriptions-of-scorer-v1.md) | 2 | pending |
+| 01 | [Inventory flags on booping specs ls](milestones/M01-inventory-flags-on-booping-specs-ls/M01-inventory-flags-on-booping-specs-ls.md) | 5 | done |
+| 02 | [Scorer v3: rubric, agent body, the guide's Record scenario](milestones/M02-scorer-v3-rubric-agent-body-the-guide-s-record-scenario/M02-scorer-v3-rubric-agent-body-the-guide-s-record-scenario.md) | 10 | done |
+| 03 | [Scorer eval suite on v3](milestones/M03-scorer-eval-suite-on-v3/M03-scorer-eval-suite-on-v3.md) | 11 | done |
+| 04 | [Stale descriptions of scorer v1](milestones/M04-stale-descriptions-of-scorer-v1/M04-stale-descriptions-of-scorer-v1.md) | 2 | done |
 
 ## Groups
 

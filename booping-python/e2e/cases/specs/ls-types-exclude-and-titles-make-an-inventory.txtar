@@ -1,0 +1,51 @@
+Repeated `--type` keeps those types sorted by type then number, `--exclude` drops a
+named record and ignores a ref not in the tier, and `--titles` prints the title before
+the summary.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/value/0001-first.md --
+---
+type: value
+title: First
+summary: The first value.
+---
+-- fixtures/cwd/vault/rule/0001-only.md --
+---
+type: rule
+title: Only rule
+summary: A constraint.
+status: accepted
+---
+-- fixtures/cwd/vault/adr/0001-first.md --
+---
+type: adr
+title: First choice
+summary: A decision.
+status: accepted
+---
+-- fixtures/cwd/vault/adr/0002-second.md --
+---
+type: adr
+title: Second choice
+summary: The draft.
+status: proposed
+---
+-- fixtures/cwd/vault/adr/0003-third.md --
+---
+type: adr
+title: Third choice
+summary: Another decision.
+status: accepted
+---
+-- cmd --
+booping specs ls --type value --type adr --exclude adr/0002 --exclude adr/0099 --titles
+-- exit --
+0
+-- stdout --
+adr/0001  accepted  First choice: A decision.
+adr/0003  accepted  Third choice: Another decision.
+value/0001  -  First: The first value.
+-- stderr --

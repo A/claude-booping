@@ -7,7 +7,7 @@ Notable user-visible changes, newest first, in the [Keep a Changelog](https://ke
 ### Added
 
 - A `SessionStart` hook: a session opened inside a booping project starts with a short block naming the playbooks and their triggers, so project work is offered to the playbook it belongs to — `project-manager` when nothing narrower fits. Silent outside a project and on any failure; no playbook is loaded at start.
-- Recording an ADR in the `specs` playbook ends with a brief — chosen and rejected options, key points, what it touches, what the agent decided alone — and an objection window; core rule `booping:rule/0036` carries it. Before the brief, the new `adr-scorer` agent (Opus, no tools) scores the ADR's alternatives 0–3 from its text alone; a score of 1 or less sends the draft back, at most two rounds.
+- Recording an ADR in the `specs` playbook ends with a brief — chosen and rejected options, key points, what it touches, what the agent decided alone — and an objection window; core rule `booping:rule/0036` carries it. Before the brief, the new `adr-scorer` agent (Opus, reads nothing but its prompt) reviews the draft against the format guide's record types and the tier's inventory of values, rules and ADRs — one line each, from `booping specs ls --type … --exclude … --titles`, new flags — plus the project's commands. A draft that is not an ADR is routed instead: recorded as the rule, value or other record it is, filed as an open item, or dropped. A real ADR gets its alternatives scored 0–3, one at 1 or below sent back for a redraft, at most two rounds; the brief lists the cheap options it never weighed under «Не взвешено:» and the records it overlaps under «Задевает:».
 
 ### Changed
 

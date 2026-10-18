@@ -2,7 +2,7 @@
 id: "01"
 title: "Inventory flags on booping specs ls"
 sp: 5
-status: pending
+status: done
 plan: "plans/202610190307_adr-scorer-v3/index.md"
 ---
 
@@ -14,9 +14,9 @@ plan: "plans/202610190307_adr-scorer-v3/index.md"
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 1.1 | `--type` becomes repeatable (`action="append"`), each value checked as today; `--exclude REF` (repeatable, `{type}/{NNNN}`) drops those records; `--titles` prints `{type}/{NNNN}  {status}  {title}: {summary}`. Help line of `ls` names the `--titles` shape | `booping-python/src/booping/commands/specs.py` | 2 | pending |
-| 1.2 | e2e txtar case(s) under the existing specs cases: two types plus an exclude plus `--titles` over a small tier; an unknown type in a repeated `--type` still errors as today | `booping-python/e2e/cases/specs/` | 2 | pending |
-| 1.3 | The `specs ls` entry in the public docs names the three flags | `documentation/specs.md` | 1 | pending |
+| 1.1 | `--type` becomes repeatable (`action="append"`), each value checked as today; `--exclude REF` (repeatable, `{type}/{NNNN}`) drops those records; `--titles` prints `{type}/{NNNN}  {status}  {title}: {summary}`. Help line of `ls` names the `--titles` shape | `booping-python/src/booping/commands/specs.py` | 2 | done |
+| 1.2 | e2e txtar case(s) under the existing specs cases: two types plus an exclude plus `--titles` over a small tier; an unknown type in a repeated `--type` still errors as today | `booping-python/e2e/cases/specs/` | 2 | done |
+| 1.3 | The `specs ls` entry in the public docs names the three flags | `documentation/specs.md` | 1 | done |
 
 Test surface: the `booping specs ls` CLI; cases — repeated type, exclude, titles line, unknown type; tier — e2e (txtar, integration).
 
@@ -25,15 +25,15 @@ Worker returns: the list of changed files and the Verify exit status.
 ## Definition of Done
 
 Task 1.1
-- [ ] `booping specs ls --type value --type adr` lists both types, sorted by type then number.
-- [ ] `--exclude adr/0003` removes exactly that record; a ref not in the tier is ignored.
-- [ ] `--titles` line is `{type}/{NNNN}  {status}  {title}: {summary}`; without it output is byte-identical to today.
+- [x] `booping specs ls --type value --type adr` lists both types, sorted by type then number.
+- [x] `--exclude adr/0003` removes exactly that record; a ref not in the tier is ignored.
+- [x] `--titles` line is `{type}/{NNNN}  {status}  {title}: {summary}`; without it output is byte-identical to today.
 
 Task 1.2
-- [ ] New txtar case passes; existing specs cases pass unchanged.
+- [x] New txtar case passes; existing specs cases pass unchanged.
 
 Task 1.3
-- [ ] `documentation/specs.md` names `--type` (repeatable), `--exclude`, `--titles` and the titles line shape; no internal churn (rule booping:rule/0008).
+- [x] `documentation/specs.md` names `--type` (repeatable), `--exclude`, `--titles` and the titles line shape; no internal churn (rule booping:rule/0008).
 
 ## References
 
