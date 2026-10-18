@@ -9,7 +9,8 @@ created: 2026-10-19 03:08
 planned: null
 started: 2026-10-19 03:35
 completed: 2026-10-19 04:08
-code_reviews: []
+code_reviews:
+  - codereviews/202610190307_adr-scorer-v3/202610190409.md
 sessions:
 - 0c3f5735-fd95-5891-a767-80fb60a7872b
 - 8ad47d44-8fe9-5ed6-bf18-7c9966c47b57
