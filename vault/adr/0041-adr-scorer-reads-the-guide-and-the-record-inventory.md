@@ -1,14 +1,20 @@
 ---
 type: adr
 title: The ADR scorer reads the specs guide and the tier's record inventory
-summary: The adr-scorer gets the specs guide excerpt, the tier's value/rule/ADR inventory and the project's primitives, on Opus without tools, and answers route, overlaps, alt_score and missing.
+summary: The adr-scorer gets the specs guide excerpt, the tier's value/rule/ADR 
+  inventory and the project's primitives, on Opus without tools, and answers 
+  route, overlaps, alt_score and missing.
 created_by: claude
 created_at: 2026-10-19
 updated_at: 2026-10-19
 status: accepted
 values: [value/0010, value/0012, value/0002]
 rules: [rule/0033]
-sources: [vault/open-items/OI-0035.md, vault/plans/202610190307_adr-scorer-v3/index.md]
+sources: [vault/open-items/OI-0035.md, 
+    vault/plans/202610190307_adr-scorer-v3/index.md]
+review: accepted
+review_evidence: «С, очевидно, надо брать» … «Ну все газ, вроде ок все» — 
+  2026-10-19, chat
 ---
 
 ## Context
