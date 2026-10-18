@@ -2,20 +2,21 @@
 title: "Core rules — open items only for what outlives the session, ids with titles
   in chat, staged experiments"
 type: "feature"
-status: ready-for-dev
+status: in-progress
 sp: 18
 related_to: null
 created: 2026-10-19 03:08
 planned: null
-started: null
+started: 2026-10-19 03:15
 completed: null
 code_reviews: []
 sessions:
 - 4e6bc07e-78db-5a84-9b90-8cf66430bb73
+- 6b1a350c-f2b9-578a-8dd5-509a79cd2988
 retro: null
 summary: 'Core rules: open items only for what outlives the session, ids in chat with
   titles, experiments in staged screens'
-commit: 5f93b3a3840bc789b8fd7a246f8d12bf21d797bd
+commit: 1cc3de8662c78440c5fa7aa84852ad723f02d85a
 tracker_provider: null
 tracker_request: null
 tracker_issue: null
@@ -61,8 +62,8 @@ Values in play: value/0002 Minimal effective context (open items stay a short in
 
 | id | title | sp | status |
 | --- | --- | --- | --- |
-| 01 | [Three core rule records](milestones/M01-three-core-rule-records/M01-three-core-rule-records.md) | 5 | pending |
-| 02 | [Driving protocol and session start carry the untargeted rules](milestones/M02-driving-protocol-and-session-start-carry-the-untargeted-rules/M02-driving-protocol-and-session-start-carry-the-untargeted-rules.md) | 5 | pending |
+| 01 | [Three core rule records](milestones/M01-three-core-rule-records/M01-three-core-rule-records.md) | 5 | done |
+| 02 | [Driving protocol and session start carry the untargeted rules](milestones/M02-driving-protocol-and-session-start-carry-the-untargeted-rules/M02-driving-protocol-and-session-start-carry-the-untargeted-rules.md) | 5 | done |
 | 03 | [Project-manager intake files only what outlives the session](milestones/M03-project-manager-intake-files-only-what-outlives-the-session/M03-project-manager-intake-files-only-what-outlives-the-session.md) | 6 | pending |
 | 04 | [Docs say only what outlives the session is filed](milestones/M04-docs-say-only-what-outlives-the-session-is-filed/M04-docs-say-only-what-outlives-the-session-is-filed.md) | 2 | pending |
 
