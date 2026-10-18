@@ -2,7 +2,9 @@
 
 ## Request
 
-> groom OI-0033 (/home/anton/Dev/@A/claude-booping/vault/open-items/OI-0033.md), OI-0034 (/home/anton/Dev/@A/claude-booping/vault/open-items/OI-0034.md)
+> groom OI-0033 ({vault}/open-items/OI-0033.md), OI-0034 ({vault}/open-items/OI-0034.md)
+
+Local absolute paths in the quote are shortened to `{vault}/` (rule/0033 — Private sources stay in vault/notes).
 
 The owner's own words and the decisions settled with them live in the items: [OI-0033](../../open-items/OI-0033.md) — "Open items: only what outlives the session; ids in chat carry a short summary"; [OI-0034](../../open-items/OI-0034.md) — "Experiments run in stages: a cheap screen first, then a shortlist, then significance".
 
