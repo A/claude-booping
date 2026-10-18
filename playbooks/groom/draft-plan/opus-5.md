@@ -19,7 +19,7 @@ depends_on: [M{nn}, …]
 #### {{ name }}
 {% endfor %}```
 
-- `{nn}` is the milestone's position in execution order, two digits; `sp` is 1–4, `depends_on` is `[]` when nothing precedes it.
+- `{nn}` is the milestone's position in execution order, two digits; `sp` is the sum of its tasks' SP, at most 15, each task 1–4, `depends_on` is `[]` when nothing precedes it.
 - Each milestone has one Verify command scoped to that milestone, written as a single inline code span; the whole-repo check goes only in Final Verification.
 - Decide what the code and the request settle, and record each assumption in the plan. A call only the user can make goes to the user: in a supervised run ask it in chat; in an autonomous run write it to `clarifications.md` (format: `${CLAUDE_PLUGIN_ROOT}/docs/clarifications.md`) and park the run on `awaiting-clarification`.
 - Sprint total past **{{ config.core.sprint.default_threshold_sp }} SP** — offer the user a split at a dependency seam (the first slice shippable on its own, each later one useless without it), keep only the first slice that fits the threshold in this plan, and park the rest as sibling stubs to be groomed in their own runs. They may decline and keep one plan.

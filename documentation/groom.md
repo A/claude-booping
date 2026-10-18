@@ -121,7 +121,7 @@ stdin is not read. stdout prints one line per milestone — `M{nn}-{kebab} sp={n
 mdcheck ${CLAUDE_PLUGIN_ROOT}/playbooks/groom/_schemas/milestone.yaml {plan-dir}/milestones/*/M*.md
 ```
 
-- **`sp`** — frontmatter `sp` is 1–4, below `core.sprint.redecompose_threshold`; the schema restates the threshold as a static pattern, so a changed threshold needs the schema changed too.
+- **SP** — each task's SP cell in the `## Tasks` table is 1–4, below `core.sprint.redecompose_threshold`, and the milestone's frontmatter `sp` is at most `core.sprint.max_sp` (15); the schema restates both as static patterns, so a changed value needs the schema changed too.
 - **Verify** — the first paragraph of `## Verify` is one inline code span: the milestone's single command.
 - **Tasks** — `## Tasks` names at least one file path, a backticked token holding `/` or a `.ext`.
 - **Definition of Done** — `## Definition of Done` has at least one checkbox item.
@@ -152,7 +152,7 @@ booping uses a 1–5 scale for per-task estimates, set in `src/config.yaml`:
 Two thresholds drive the playbook's behaviour, both configurable:
 
 - **`core.sprint.default_threshold_sp` (default `35`)** — soft cap on plan size. Above this, `present` proposes splitting the plan into sibling stubs rather than shipping one mega-sprint.
-- **`core.sprint.redecompose_threshold` (default `5`)** — any task or milestone estimated at ≥ this value must be re-decomposed before the run can leave `drafting`; for milestones it is a hard gate on the `drafting → cross-reviewing` edge, checked by [the milestone check](#the-milestone-check).
+- **`core.sprint.redecompose_threshold` (default `5`)** — a task estimated at ≥ this value is research and must be split before the run can leave `drafting`; a hard gate on the `drafting → cross-reviewing` edge, checked by [the milestone check](#the-milestone-check). A milestone is the sum of its tasks, capped by `core.sprint.max_sp`.
 
 Both thresholds are ceilings, not velocity targets. A 12-SP plan is fine; a 38-SP plan is the trigger to consider a split.
 
@@ -161,7 +161,7 @@ Both thresholds are ceilings, not velocity targets. A 12-SP plan is fine; a 38-S
 The playbook reads these keys from `src/config.yaml`. See [Project config](project_config.md) for the deep-merge override mechanics; per-project tweaks live in `~/Claude/{project}/config.yaml`.
 
 - **`core.sprint.default_threshold_sp`** — soft cap on total SP per plan; above this the run proposes a split.
-- **`core.sprint.redecompose_threshold`** — per-task and per-milestone SP value at or above which the task or milestone must be re-decomposed.
+- **`core.sprint.redecompose_threshold`** — per-task SP value at or above which the task must be split.
 - **`core.sprint.scale`** — the 1–5 SP definitions (each a `{sp, meaning}` entry).
 - **`core.task_types`** — list of `{type, description, doc_uri}` entries (`feature`, `bug`, `refactoring`). The request is classified against this list; the matching `doc_uri` lazy-loads detailed guidance for that task type.
 - **`core.groom_playbook.cross_review_agent`** — the agent that cross-reviews the drafted plan. `null` by default, which skips the `cross-reviewing` step entirely.

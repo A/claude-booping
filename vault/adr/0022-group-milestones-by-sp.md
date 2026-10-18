@@ -4,7 +4,7 @@ title: Develop groups milestones per worker by story points, not by count
 summary: Develop packs milestones per worker greedily within one wave under a max_sp cap of 15 instead of max_milestones_per_agent, and sp ≥ 5 is a hard groom gate.
 created_by: claude
 created_at: 2026-10-14
-updated_at: 2026-10-17
+updated_at: 2026-10-18
 status: accepted
 values: [value/0012, value/0002]
 # also distilled from the owner's local, unpublished notes (vault/notes/ is gitignored): vault/notes/20260821-milestone-grouping-by-sp.md
@@ -91,3 +91,4 @@ A cap range rather than one number.
   a milestone at or over `redecompose_threshold` from leaving drafting (BL-0015).
 - Planned calibration: re-groom a 31-SP plan with sp-8 milestones and run it as a
   second benchmark in two groups of about 15.
+- 2026-10-18 (owner): `redecompose_threshold` (5 SP) is a threshold on one task — a task at it is research and must be split — and never was one on a milestone. A milestone is the sum of its tasks, grouping an isolated large piece of work, capped only by the group budget `max_sp`. The milestone-level gate this record introduced is a mistake; groom gates tasks at 5 instead, and `playbooks/groom/_schemas/milestone.yaml` stops holding milestone `sp` to 1-4. Measured effect of the old gate: 70% of milestones at 3-4 SP and 92% of tasks at 1-2 SP (OI-0027).

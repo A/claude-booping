@@ -39,7 +39,7 @@ states:
             when: "draft-plan wrote `draft.md`, `booping plan split` exited 0 and the mdcheck milestone check passed or its three fix rounds are spent"
             gates:
               - "every call that is the user's is answered"
-              - "the mdcheck milestone check reports no finding on the `sp` key"
+              - "the mdcheck milestone check reports no finding on a task's SP or the milestone `sp`"
             hooks: ["script tracker-sync"]
           - to: researching
             when: "the design needs blast radius or external practice the research pass missed"

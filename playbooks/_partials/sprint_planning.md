@@ -24,7 +24,7 @@ review burden.
 ### Thresholds
 
 {% if config.core.sprint.redecompose_threshold -%}
-- **{{ config.core.sprint.redecompose_threshold }} SP re-decompose threshold** — a task or a milestone at or over it is split before
+- **{{ config.core.sprint.redecompose_threshold }} SP re-decompose threshold** — a task at or over it is research and is split before
   the plan leaves drafting. Cut at a seam in its own work, never at its midpoint; each half stands
   alone with its own DoD and Verify, and the milestone and sprint totals are re-summed from the new
   leaves.

@@ -27,8 +27,7 @@ which adr/0030 measured missing.
 
 The milestone contract is `playbooks/groom/_schemas/milestone.yaml`, and groom runs
 `mdcheck <schema> {plan-dir}/milestones/*/M*.md` directly. The contract narrows to what the schema can
-state: Verify is one inline code span as its first paragraph, DoD holds at least one checkbox, `sp` is
-1–4. `booping plan check` and its code are removed. mdcheck becomes a required dependency of every
+state: Verify is one inline code span as its first paragraph, DoD holds at least one checkbox, each task's SP is 1–4 and the milestone `sp`, their sum, is at most 15 (corrected 2026-10-18: the 5 SP threshold is a task's, never a milestone's — adr/0022). `booping plan check` and its code are removed. mdcheck becomes a required dependency of every
 install, not only of projects with specs.
 
 ## Alternatives
