@@ -104,8 +104,8 @@ This repo is a booping project. Project work a playbook below fits — a decisio
 | id | title | sp | status |
 | --- | --- | --- | --- |
 | 01 | [Review levels replace reviewed](milestones/M01-review-levels-replace-reviewed/M01-review-levels-replace-reviewed.md) | 11 | done |
-| 02 | [ADR brief and the objection window](milestones/M02-adr-brief-and-the-objection-window/M02-adr-brief-and-the-objection-window.md) | 8 | pending |
-| 03 | [ADR scorer](milestones/M03-adr-scorer/M03-adr-scorer.md) | 7 | pending |
+| 02 | [ADR brief and the objection window](milestones/M02-adr-brief-and-the-objection-window/M02-adr-brief-and-the-objection-window.md) | 8 | done |
+| 03 | [ADR scorer](milestones/M03-adr-scorer/M03-adr-scorer.md) | 7 | done |
 | 04 | [Session start points to playbooks](milestones/M04-session-start-points-to-playbooks/M04-session-start-points-to-playbooks.md) | 8 | pending |
 
 ## Groups
