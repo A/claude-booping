@@ -1,12 +1,12 @@
 ---
 id: "01"
-title: "Inventory flags on `booping specs ls"
+title: "Inventory flags on booping specs ls"
 sp: 5
 status: pending
 plan: "plans/202610190307_adr-scorer-v3/index.md"
 ---
 
-# M01: Inventory flags on `booping specs ls
+# M01: Inventory flags on booping specs ls
 
 ## Tasks
 

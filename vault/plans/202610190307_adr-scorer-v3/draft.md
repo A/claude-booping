@@ -35,7 +35,7 @@ Values in play: value/0012 (quality at a rational cost — Opus with the invento
 
 ## Milestones
 
-### M01 — Inventory flags on `booping specs ls`
+### M01 — Inventory flags on booping specs ls
 
 sp: 5
 depends_on: []
@@ -76,7 +76,7 @@ Task 1.3
 
 `just e2e -k specs`
 
-### M02 — Scorer v3: rubric, agent body, the guide's `## Record`
+### M02 — Scorer v3: rubric, agent body, the guide's Record scenario
 
 sp: 10
 depends_on: [M01]
