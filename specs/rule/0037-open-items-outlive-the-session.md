@@ -12,17 +12,11 @@ brief: "File an open item only for what outlives the session — work for later 
 
 ## Rule
 
-An open item is filed only for what must outlive the session: work for later — a feature, a bug, a
-fix, a scope question — or a question for the owner that waits for an answer.
+An open item is filed only for what must outlive the session: work for later — a feature, a bug, a fix, a scope question — or a question for the owner that waits for an answer.
 
-Four kinds of ask are never items. An instruction for this session ("ping me", "wait", "do it now")
-and an answer to a gate or a UAT confirmation are done by the agent or kept in the session. A
-standing policy becomes a rule through the `specs` playbook. A decision becomes an ADR.
+Four kinds of ask are never items. An instruction for this session ("ping me", "wait", "do it now") and an answer to a gate or a UAT confirmation are done by the agent or kept in the session. A standing policy becomes a rule through the `specs` playbook. A decision becomes an ADR.
 
 ## Follows from
 
-- [Minimal effective context](../../vault/value/0002-minimal-effective-context.md) — the open items
-  stay a short index of real work; an audit of another booping project: 11 of 34 open items were
-  never work (private note, not published).
-- [Single source](../../vault/value/0003-single-source.md) — a policy lives in a rule and a decision
-  in an ADR, not duplicated into an item.
+- [Minimal effective context](../../vault/value/0002-minimal-effective-context.md) — the open items stay a short index of real work; an audit of another booping project: 11 of 34 open items were never work (private note, not published).
+- [Single source](../../vault/value/0003-single-source.md) — a policy lives in a rule and a decision in an ADR, not duplicated into an item.
