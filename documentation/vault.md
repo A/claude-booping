@@ -76,7 +76,7 @@ One record per `booping run groom` or `booping run develop`: `runs/{id}.md`, wri
 
 ## `notes/`
 
-Free-form user notes — plan-review comments, code-review threads, ideas for next sprints, anything else. **Skills and agents do not read this directory.** A scratchpad for you, kept in the same vault for convenience and Obsidian graph visibility.
+Free-form user notes — plan-review comments, code-review threads, ideas for next sprints, anything else. **Skills and agents do not read this directory.** A scratchpad for you, kept in the same vault for convenience and Obsidian graph visibility. In this repo's own vault it is gitignored and is the one place for what must never be published — other projects' data, local paths, raw experiment inputs — with references under `notes/references/`; a tracked record names such a source as a private note instead of linking it.
 
 ## `.booping.log`
 
