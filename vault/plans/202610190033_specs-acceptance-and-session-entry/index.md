@@ -9,7 +9,8 @@ created: 2026-10-19 00:29
 planned: null
 started: 2026-10-19 00:54
 completed: 2026-10-19 01:22
-code_reviews: []
+code_reviews:
+  - codereviews/202610190033_specs-acceptance-and-session-entry/202610190125.md
 sessions:
 - 7dec7bb9-8bf9-4660-a129-8472076ab1bb
 - 9dda877a-edbb-599f-a8d2-e9ce64a7f339
