@@ -2,13 +2,13 @@
 title: "ADR scorer v3 — routing, overlaps and missing options from the guide and the
   record inventory"
 type: "feature"
-status: in-progress
+status: done
 sp: 28
 related_to: null
 created: 2026-10-19 03:08
 planned: null
 started: 2026-10-19 03:35
-completed: null
+completed: 2026-10-19 04:08
 code_reviews: []
 sessions:
 - 0c3f5735-fd95-5891-a767-80fb60a7872b
@@ -22,6 +22,17 @@ tracker_request: null
 tracker_issue: null
 return_to: null
 reviewed_at: 2026-10-19 03:13
+agents:
+- develop-loop/G1:a01a7f26eee2c10e7
+- develop-loop/G2:aa03af6d3ffcef7e2
+- verify:a33d6e14dfba21445
+metrics_active_minutes: 41
+metrics_models:
+- claude-opus-5-5
+metrics_tokens_input: 118
+metrics_tokens_output: 42325
+metrics_tokens_cache_creation: 211016
+metrics_tokens_cache_read: 5211484
 ---
 
 # ADR scorer v3 — routing, overlaps and missing options from the guide and the record inventory
