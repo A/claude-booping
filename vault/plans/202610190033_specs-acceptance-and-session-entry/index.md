@@ -2,13 +2,13 @@
 title: "Specs acceptance — ADR brief, review levels, ADR scoring, session entry to
   playbooks"
 type: "feature"
-status: in-progress
+status: done
 sp: 34
 related_to: null
 created: 2026-10-19 00:29
 planned: null
 started: 2026-10-19 00:54
-completed: null
+completed: 2026-10-19 01:22
 code_reviews: []
 sessions:
 - 7dec7bb9-8bf9-4660-a129-8472076ab1bb
@@ -22,6 +22,13 @@ tracker_request: null
 tracker_issue: null
 return_to: null
 reviewed_at: 2026-10-19 00:53
+metrics_active_minutes: 51
+metrics_models:
+- claude-opus-5-5
+metrics_tokens_input: 248
+metrics_tokens_output: 99617
+metrics_tokens_cache_creation: 318050
+metrics_tokens_cache_read: 17909422
 ---
 
 # Specs acceptance — ADR brief, review levels, ADR scoring, session entry to playbooks
