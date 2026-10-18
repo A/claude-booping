@@ -1,6 +1,6 @@
 ---
 id: "01"
-title: "Review levels replace `reviewed"
+title: "Review levels replace reviewed"
 sp: 11
 status: pending
 plan: "plans/202610190033_specs-acceptance-and-session-entry/index.md"

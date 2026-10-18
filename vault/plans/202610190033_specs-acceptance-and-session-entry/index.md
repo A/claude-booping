@@ -2,7 +2,7 @@
 title: "Specs acceptance — ADR brief, review levels, ADR scoring, session entry to
   playbooks"
 type: "feature"
-status: presenting
+status: drafting
 sp: 34
 related_to: null
 created: 2026-10-19 00:29
