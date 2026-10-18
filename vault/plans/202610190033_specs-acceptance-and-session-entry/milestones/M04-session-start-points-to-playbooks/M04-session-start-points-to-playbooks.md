@@ -2,7 +2,7 @@
 id: "04"
 title: "Session start points to playbooks"
 sp: 8
-status: pending
+status: done
 plan: "plans/202610190033_specs-acceptance-and-session-entry/index.md"
 ---
 
@@ -15,26 +15,26 @@ plan: "plans/202610190033_specs-acceptance-and-session-entry/index.md"
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 4.1 | `hooks/session-start.sh`: walk up from the cwd for `.booping`; none → exit 0 silent; found → `"$CLAUDE_PLUGIN_ROOT/bin/booping" render src/templates/hooks/session_start.md.j2`; any failure → exit 0, no output. `plugin.json` gains `hooks.SessionStart` with a 10 s timeout (shape: the caveman plugin's) | `hooks/session-start.sh`, `.claude-plugin/plugin.json` | 2 | pending |
-| 4.2 | Template: the locked session-start block over `context.playbooks`, two columns | `src/templates/hooks/session_start.md.j2` | 2 | pending |
-| 4.3 | e2e: the template renders the block with project and global playbooks inside a project; the script prints nothing outside a project and nothing on a failing render | `booping-python/e2e/cases/render/session-start-*.txtar` | 2 | pending |
-| 4.4 | Docs: a "Session start" section in `documentation/playbook.md` (what it injects, how a project starts as the manager via its CLAUDE.md); README mention; CLAUDE.md Layout gains `hooks/` | `documentation/playbook.md`, `README.md`, `CLAUDE.md` | 2 | pending |
+| 4.1 | `hooks/session-start.sh`: walk up from the cwd for `.booping`; none → exit 0 silent; found → `"$CLAUDE_PLUGIN_ROOT/bin/booping" render src/templates/hooks/session_start.md.j2`; any failure → exit 0, no output. `plugin.json` gains `hooks.SessionStart` with a 10 s timeout (shape: the caveman plugin's) | `hooks/session-start.sh`, `.claude-plugin/plugin.json` | 2 | done |
+| 4.2 | Template: the locked session-start block over `context.playbooks`, two columns | `src/templates/hooks/session_start.md.j2` | 2 | done |
+| 4.3 | e2e: the template renders the block with project and global playbooks inside a project; the script prints nothing outside a project and nothing on a failing render | `booping-python/e2e/cases/render/session-start-*.txtar` | 2 | done |
+| 4.4 | Docs: a "Session start" section in `documentation/playbook.md` (what it injects, how a project starts as the manager via its CLAUDE.md); README mention; CLAUDE.md Layout gains `hooks/` | `documentation/playbook.md`, `README.md`, `CLAUDE.md` | 2 | done |
 
 Test surface: the template render and the hook script, integration tier through e2e txtar — inside a project, outside, failing render.
 
 ## Definition of Done
 
 Task 4.1
-- [ ] `cd /tmp && CLAUDE_PLUGIN_ROOT=$PWD/… hooks/session-start.sh` prints nothing and exits 0; inside this repo it prints the block.
+- [x] `cd /tmp && CLAUDE_PLUGIN_ROOT=$PWD/… hooks/session-start.sh` prints nothing and exits 0; inside this repo it prints the block.
 
 Task 4.2
-- [ ] The rendered block matches the locked output; no column beyond Playbook and Trigger.
+- [x] The rendered block matches the locked output; no column beyond Playbook and Trigger.
 
 Task 4.3
-- [ ] `just e2e -k session-start` passes.
+- [x] `just e2e -k session-start` passes.
 
 Task 4.4
-- [ ] The docs say how a project opts into the manager at start; CLAUDE.md Layout lists `hooks/`.
+- [x] The docs say how a project opts into the manager at start; CLAUDE.md Layout lists `hooks/`.
 
 Return: the files changed and the Verify verdict, nothing else.
 
