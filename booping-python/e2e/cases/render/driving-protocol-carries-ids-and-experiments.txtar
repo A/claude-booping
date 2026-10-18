@@ -1,0 +1,12 @@
+The `/playbook` skill's driving protocol carries the two untargeted chat-output rules as prose:
+every id said in chat comes with its short title, filed items listed in the user's language, and an
+experiment matrix runs in sized stages. The render is filtered to those two lines.
+
+-- cmd --
+sh -c 'booping render src/templates/skills/playbook.md.j2 | grep -E "^Every id you say in chat|^An experiment, eval or benchmark matrix"'
+-- exit --
+0
+-- stdout --
+Every id you say in chat — an open item, an ADR, a rule, a plan — is followed by its short title; newly filed items are listed one per line, `Создан {id}: {title}` or `Created {id}: {title}` in the user's language ([booping:rule/0038](${CLAUDE_PLUGIN_ROOT}/specs/rule/0038-ids-carry-their-title.md)).
+An experiment, eval or benchmark matrix runs in stages — cheap screen → shortlist → significance — and before each stage you name its size (calls, rough cost) and what it decides ([booping:rule/0039](${CLAUDE_PLUGIN_ROOT}/specs/rule/0039-experiments-run-in-stages.md)).
+-- stderr --

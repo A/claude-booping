@@ -2,6 +2,8 @@
 
 This repo is a booping project. Project work a playbook below fits — a decision or ADR, a spec record, a plan, a sprint, a review, a retro — goes through that playbook: offer it to the user by name and, once they agree, run `/booping:playbook {name}`; its render brings the project's rules. Project work nothing narrower fits → offer `project-manager`. Questions, explanations and debugging need no playbook.
 
+Experiments, evals and benchmark matrices run in stages — cheap screen → shortlist → significance — with each stage's size (calls, rough cost) and what it decides named before launch ([booping:rule/0039](${CLAUDE_PLUGIN_ROOT}/specs/rule/0039-experiments-run-in-stages.md)).
+
 | Playbook | Trigger |
 | --- | --- |
 {% for pb in context.playbooks -%}
