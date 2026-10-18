@@ -28,9 +28,9 @@ Records: adr/0039 (session start points to playbooks) and adr/0040 (review level
 9. A record still carrying `reviewed:` is an error in `booping specs check`, naming the replacement; no migration ships — no known record carries the key (0 here, 0 in the other booping projects on this machine). (proposal)
 10. `booping status` counts records not explicitly accepted, split by level: `records: {n} not accepted — none {a}, shown {b}, discussed {c}` plus the per-type breakdown it already prints. (proposal)
 11. In an autonomous run the brief is logged as an agent decision instead of shown; the ADR is accepted with no `review` key. (proposal, follows adr/0036)
-12. The ADR scorer runs inside the guide's `## Record` scenario before the brief: a subagent sees only the ADR file and the rubric, returns a 0–3 score and one line per finding; ≤ 1 sends the draft back for at most two rounds, then the brief carries the score as it stands. (user for the scorer; threshold and rounds proposal)
+12. The ADR scorer runs inside the guide's `## Record` scenario before the brief: an agent gets the ADR text and the rubric inline in its prompt and has no tools, so it reads no file and loads no project context; it returns a 0–3 score and one line per finding; ≤ 1 sends the draft back for at most two rounds, then the brief carries the score as it stands. (user: Opus, no file reads; threshold and rounds proposal)
 13. The scorer's rubric is yesterday's audit rubric (plan file `adr-audit-ground-truth.md`), with the guide's cheap options — prose, extending an existing primitive, building nothing — named in it. (user: "с учетом вчерашнего опыта")
-14. The scorer's model is chosen by measurement: Haiku, Sonnet and Opus score the unchanged ADRs of the ground truth; the cheapest whose scores match within the tolerance in M03 wins. This departs from rule/0031 (judgement runs on Opus; a cheaper model is not benchmarked for judgement work) — the owner asked for a cheap subagent; rule/0031 targets only `playbook-authoring`, but its text is general. (user asked cheap; departure flagged)
+14. The scorer runs on Opus, per rule/0031; no cheaper model is measured. (user)
 15. The `SessionStart` hook is silent outside a project with a `.booping` marker and never blocks a session: any failure exits 0 with no output. (proposal)
 16. The hook injects prose on when to use playbooks and a two-column table, Playbook | Trigger (~3 KB here), rendered from the same playbook list as `/playbook`; the manager is the default offer; it is never loaded at start — a project that wants it says so in its CLAUDE.md. (user; the two columns and the not-loaded default proposal)
 17. A core rule record carries the brief-before-acceptance rule, targeting `specs`. (proposal from the ADR drafting pass)
@@ -177,17 +177,17 @@ depends_on: [M02]
 
 #### Tasks
 
-**Goal:** a new ADR is scored 0–3 by a context-free subagent on a cheap model chosen by measurement, before the brief.
-**Scope:** a rubric file beside the guide step, the `## Record` scenario, a measurement script, a reference record with the result.
+**Goal:** a new ADR is scored 0–3 before the brief by an Opus agent that gets the ADR text and the rubric inline and has no tool to read anything else.
+**Scope:** a rubric file beside the guide step, a new internal agent, the `## Record` scenario, an eval suite for the agent.
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
 | 3.1 | Rubric: the audit rubric verbatim from `adr-audit-ground-truth.md`, plus the three cheap options by name and the output contract — first line `score: {0-3}`, then one line per finding | `playbooks/specs/guide/adr-rubric.md` | 1 | pending |
-| 3.2 | Measurement: a script runs the rubric over the ground-truth ADRs unchanged since `2597086`, each ADR alone, through `claude -p --model {model}` for haiku, sonnet and opus, twice per model; it prints per model the exact-match rate and the count of 1↔3 swaps against the ground truth | `scripts/adr-scorer-bench.sh` | 3 | pending |
-| 3.3 | Run it; record the table and the pick in a reference record — the cheapest model with exact-match ≥ 70 % and no 1↔3 swap; none passes → Opus | `vault/reference/{next}-adr-scorer-model.md` | 1 | pending |
-| 3.4 | `## Record`: before the brief, spawn a `general-purpose` subagent on the picked model with only the ADR path and the rubric path; ≤ 1 → redraft, at most two rounds; the brief's header carries the score | `playbooks/specs/guide/prompt.md` | 2 | pending |
+| 3.2 | Agent `adr-scorer`: model opus, no tools at all — check the Claude Code agent frontmatter for how a definition grants zero tools and use that; a static body (no render step, it could not run one) saying it scores only the text in its prompt against the rubric there and returns the output contract | `agents/adr-scorer.md` | 2 | pending |
+| 3.3 | `## Record`: before the brief, spawn `booping:adr-scorer` with the ADR file's text and the rubric's text pasted into the prompt — no paths; ≤ 1 → redraft, at most two rounds; the brief's header carries the score | `playbooks/specs/guide/prompt.md` | 2 | pending |
+| 3.4 | Eval suite for the agent: three ground-truth ADRs scored 1, 2 and 3; smoke asserts the output contract and that the agent made no tool call, regress asserts each score within ±1 of the ground truth | `agents/_evals/adr-scorer/` or the repo's existing place for agent evals | 2 | pending |
 
-Test surface: the measurement itself is the test of the scorer (real model calls, ground truth hand-derived yesterday); the guide's eval fixture from M02 gains the score in the header.
+Test surface: the scorer agent, eval smoke (contract, zero tool calls) and regress (score against the hand-derived ground truth).
 
 #### Definition of Done
 
@@ -195,24 +195,24 @@ Task 3.1
 - [ ] The rubric file holds the four score lines, the three cheap options and the output contract.
 
 Task 3.2
-- [ ] The script exits 0 and prints one row per model with the two numbers.
+- [ ] The agent definition grants no tool and names `model: opus`; its body names no file to read.
 
 Task 3.3
-- [ ] The reference record holds the table, the threshold and the pick; `just specs-check` passes.
+- [ ] `## Record` passes the ADR and the rubric as text, names the threshold and the round limit, and never passes a path.
 
 Task 3.4
-- [ ] `## Record` names the model from the reference, the inputs (two paths only), the threshold and the round limit.
+- [ ] The smoke tier passes; the regress tier result is reported.
 
-Return: the files changed, the measurement table and the Verify verdict, nothing else.
+Return: the files changed, the regress scores and the Verify verdict, nothing else.
 
 #### References
 
 - `vault/plans/202610190033_specs-acceptance-and-session-entry/adr-audit-ground-truth.md` — rubric and scores.
-- `scripts/eval-*.sh` — how scripts call `claude -p` on subscription auth.
+- `agents/booping-researcher.md` — agent frontmatter shape.
 
 #### Verify
 
-`bash scripts/adr-scorer-bench.sh --dry-run && just specs-check`
+`just smoke adr-scorer || just suites | grep -i scorer`
 
 ### M04 — Session start points to playbooks
 
@@ -270,6 +270,7 @@ Return: the files changed and the Verify verdict, nothing else.
 - A schema rule forcing cheap-option rows in `adr.yaml` — the scorer covers it.
 - Loading the manager at session start.
 - A migration for `reviewed:`.
+- Measuring a cheaper scorer model.
 
 ## CLAUDE.md impact
 

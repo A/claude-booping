@@ -10,17 +10,17 @@ plan: "plans/202610190033_specs-acceptance-and-session-entry/index.md"
 
 ## Tasks
 
-**Goal:** a new ADR is scored 0–3 by a context-free subagent on a cheap model chosen by measurement, before the brief.
-**Scope:** a rubric file beside the guide step, the `## Record` scenario, a measurement script, a reference record with the result.
+**Goal:** a new ADR is scored 0–3 before the brief by an Opus agent that gets the ADR text and the rubric inline and has no tool to read anything else.
+**Scope:** a rubric file beside the guide step, a new internal agent, the `## Record` scenario, an eval suite for the agent.
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
 | 3.1 | Rubric: the audit rubric verbatim from `adr-audit-ground-truth.md`, plus the three cheap options by name and the output contract — first line `score: {0-3}`, then one line per finding | `playbooks/specs/guide/adr-rubric.md` | 1 | pending |
-| 3.2 | Measurement: a script runs the rubric over the ground-truth ADRs unchanged since `2597086`, each ADR alone, through `claude -p --model {model}` for haiku, sonnet and opus, twice per model; it prints per model the exact-match rate and the count of 1↔3 swaps against the ground truth | `scripts/adr-scorer-bench.sh` | 3 | pending |
-| 3.3 | Run it; record the table and the pick in a reference record — the cheapest model with exact-match ≥ 70 % and no 1↔3 swap; none passes → Opus | `vault/reference/{next}-adr-scorer-model.md` | 1 | pending |
-| 3.4 | `## Record`: before the brief, spawn a `general-purpose` subagent on the picked model with only the ADR path and the rubric path; ≤ 1 → redraft, at most two rounds; the brief's header carries the score | `playbooks/specs/guide/prompt.md` | 2 | pending |
+| 3.2 | Agent `adr-scorer`: model opus, no tools at all — check the Claude Code agent frontmatter for how a definition grants zero tools and use that; a static body (no render step, it could not run one) saying it scores only the text in its prompt against the rubric there and returns the output contract | `agents/adr-scorer.md` | 2 | pending |
+| 3.3 | `## Record`: before the brief, spawn `booping:adr-scorer` with the ADR file's text and the rubric's text pasted into the prompt — no paths; ≤ 1 → redraft, at most two rounds; the brief's header carries the score | `playbooks/specs/guide/prompt.md` | 2 | pending |
+| 3.4 | Eval suite for the agent: three ground-truth ADRs scored 1, 2 and 3; smoke asserts the output contract and that the agent made no tool call, regress asserts each score within ±1 of the ground truth | `agents/_evals/adr-scorer/` or the repo's existing place for agent evals | 2 | pending |
 
-Test surface: the measurement itself is the test of the scorer (real model calls, ground truth hand-derived yesterday); the guide's eval fixture from M02 gains the score in the header.
+Test surface: the scorer agent, eval smoke (contract, zero tool calls) and regress (score against the hand-derived ground truth).
 
 ## Definition of Done
 
@@ -28,21 +28,21 @@ Task 3.1
 - [ ] The rubric file holds the four score lines, the three cheap options and the output contract.
 
 Task 3.2
-- [ ] The script exits 0 and prints one row per model with the two numbers.
+- [ ] The agent definition grants no tool and names `model: opus`; its body names no file to read.
 
 Task 3.3
-- [ ] The reference record holds the table, the threshold and the pick; `just specs-check` passes.
+- [ ] `## Record` passes the ADR and the rubric as text, names the threshold and the round limit, and never passes a path.
 
 Task 3.4
-- [ ] `## Record` names the model from the reference, the inputs (two paths only), the threshold and the round limit.
+- [ ] The smoke tier passes; the regress tier result is reported.
 
-Return: the files changed, the measurement table and the Verify verdict, nothing else.
+Return: the files changed, the regress scores and the Verify verdict, nothing else.
 
 ## References
 
 - `vault/plans/202610190033_specs-acceptance-and-session-entry/adr-audit-ground-truth.md` — rubric and scores.
-- `scripts/eval-*.sh` — how scripts call `claude -p` on subscription auth.
+- `agents/booping-researcher.md` — agent frontmatter shape.
 
 ## Verify
 
-`bash scripts/adr-scorer-bench.sh --dry-run && just specs-check`
+`just smoke adr-scorer || just suites | grep -i scorer`

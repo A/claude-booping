@@ -2,7 +2,7 @@
 title: "Specs acceptance — ADR brief, review levels, ADR scoring, session entry to
   playbooks"
 type: "feature"
-status: drafting
+status: presenting
 sp: 34
 related_to: null
 created: 2026-10-19 00:29
@@ -52,9 +52,9 @@ Records: adr/0039 (session start points to playbooks) and adr/0040 (review level
 9. A record still carrying `reviewed:` is an error in `booping specs check`, naming the replacement; no migration ships — no known record carries the key (0 here, 0 in the other booping projects on this machine). (proposal)
 10. `booping status` counts records not explicitly accepted, split by level: `records: {n} not accepted — none {a}, shown {b}, discussed {c}` plus the per-type breakdown it already prints. (proposal)
 11. In an autonomous run the brief is logged as an agent decision instead of shown; the ADR is accepted with no `review` key. (proposal, follows adr/0036)
-12. The ADR scorer runs inside the guide's `## Record` scenario before the brief: a subagent sees only the ADR file and the rubric, returns a 0–3 score and one line per finding; ≤ 1 sends the draft back for at most two rounds, then the brief carries the score as it stands. (user for the scorer; threshold and rounds proposal)
+12. The ADR scorer runs inside the guide's `## Record` scenario before the brief: an agent gets the ADR text and the rubric inline in its prompt and has no tools, so it reads no file and loads no project context; it returns a 0–3 score and one line per finding; ≤ 1 sends the draft back for at most two rounds, then the brief carries the score as it stands. (user: Opus, no file reads; threshold and rounds proposal)
 13. The scorer's rubric is yesterday's audit rubric (plan file `adr-audit-ground-truth.md`), with the guide's cheap options — prose, extending an existing primitive, building nothing — named in it. (user: "с учетом вчерашнего опыта")
-14. The scorer's model is chosen by measurement: Haiku, Sonnet and Opus score the unchanged ADRs of the ground truth; the cheapest whose scores match within the tolerance in M03 wins. This departs from rule/0031 (judgement runs on Opus; a cheaper model is not benchmarked for judgement work) — the owner asked for a cheap subagent; rule/0031 targets only `playbook-authoring`, but its text is general. (user asked cheap; departure flagged)
+14. The scorer runs on Opus, per rule/0031; no cheaper model is measured. (user)
 15. The `SessionStart` hook is silent outside a project with a `.booping` marker and never blocks a session: any failure exits 0 with no output. (proposal)
 16. The hook injects prose on when to use playbooks and a two-column table, Playbook | Trigger (~3 KB here), rendered from the same playbook list as `/playbook`; the manager is the default offer; it is never loaded at start — a project that wants it says so in its CLAUDE.md. (user; the two columns and the not-loaded default proposal)
 17. A core rule record carries the brief-before-acceptance rule, targeting `specs`. (proposal from the ADR drafting pass)
@@ -126,6 +126,7 @@ This repo is a booping project. Project work a playbook below fits — a decisio
 - A schema rule forcing cheap-option rows in `adr.yaml` — the scorer covers it.
 - Loading the manager at session start.
 - A migration for `reviewed:`.
+- Measuring a cheaper scorer model.
 
 ## CLAUDE.md impact
 
