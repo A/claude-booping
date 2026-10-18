@@ -22,6 +22,7 @@ tracker_request: null
 tracker_issue: null
 return_to: null
 reviewed_at: 2026-10-19 03:12
+agents: '{"develop-loop-G1": "a07de547e56912a52", "develop-loop-G2": "a072e5616c347544c"}'
 ---
 
 # Core rules — open items only for what outlives the session, ids with titles in chat, staged experiments
@@ -64,8 +65,8 @@ Values in play: value/0002 Minimal effective context (open items stay a short in
 | --- | --- | --- | --- |
 | 01 | [Three core rule records](milestones/M01-three-core-rule-records/M01-three-core-rule-records.md) | 5 | done |
 | 02 | [Driving protocol and session start carry the untargeted rules](milestones/M02-driving-protocol-and-session-start-carry-the-untargeted-rules/M02-driving-protocol-and-session-start-carry-the-untargeted-rules.md) | 5 | done |
-| 03 | [Project-manager intake files only what outlives the session](milestones/M03-project-manager-intake-files-only-what-outlives-the-session/M03-project-manager-intake-files-only-what-outlives-the-session.md) | 6 | pending |
-| 04 | [Docs say only what outlives the session is filed](milestones/M04-docs-say-only-what-outlives-the-session-is-filed/M04-docs-say-only-what-outlives-the-session-is-filed.md) | 2 | pending |
+| 03 | [Project-manager intake files only what outlives the session](milestones/M03-project-manager-intake-files-only-what-outlives-the-session/M03-project-manager-intake-files-only-what-outlives-the-session.md) | 6 | done |
+| 04 | [Docs say only what outlives the session is filed](milestones/M04-docs-say-only-what-outlives-the-session-is-filed/M04-docs-say-only-what-outlives-the-session-is-filed.md) | 2 | done |
 
 ## Groups
 
