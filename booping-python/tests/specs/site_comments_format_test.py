@@ -21,7 +21,7 @@ const vm = require("vm");
 const input = JSON.parse(fs.readFileSync(0, "utf8"));
 const ctx = {};
 vm.runInNewContext(input.source, ctx);
-process.stdout.write(ctx.SpecsComments.format(input.comments, input.siteRoot, input.reviewed));
+process.stdout.write(ctx.SpecsComments.format(input.comments, input.siteRoot, input.accepted));
 """
 
 
@@ -32,7 +32,7 @@ def _source() -> str:
 def _format(
     comments: list[dict[str, Any]],
     site_root: str = ROOT,
-    reviewed: list[dict[str, Any]] | None = None,
+    accepted: list[dict[str, Any]] | None = None,
 ) -> str:
     node = shutil.which("node")
     if node is None:
@@ -40,7 +40,7 @@ def _format(
             "node is not on PATH: the comment export tests run comments-format.js under node"
         )
     stdin = json.dumps(
-        {"source": _source(), "comments": comments, "siteRoot": site_root, "reviewed": reviewed}
+        {"source": _source(), "comments": comments, "siteRoot": site_root, "accepted": accepted}
     )
     done = subprocess.run(
         [node, "-e", _RUNNER], input=stdin, capture_output=True, text=True, check=True
@@ -112,9 +112,9 @@ def test_newest_record_first_and_comments_newest_first_then_id() -> None:
     )
 
 
-def test_reviewed_mark_follows_its_record_heading_and_counts_for_record_order() -> None:
+def test_accepted_mark_follows_its_record_heading_and_counts_for_record_order() -> None:
     comments = [_comment(note="Fine.", created="2026-10-16T10:00:00.000Z")]
-    reviewed = [
+    accepted = [
         {
             "ref": "rule/0002",
             "title": "Beta",
@@ -130,14 +130,14 @@ def test_reviewed_mark_follows_its_record_heading_and_counts_for_record_order() 
             "created": "2026-10-15T09:00:00.000Z",
         },
     ]
-    assert _format(comments, reviewed=reviewed) == (
+    assert _format(comments, accepted=accepted) == (
         "## rule/0002 — Beta\n"
         "\n"
-        "rule/0002 — reviewed 2026-10-16\n"
+        "rule/0002 — accepted 2026-10-16\n"
         "\n"
         "## adr/0001 — Alpha\n"
         "\n"
-        "adr/0001 — reviewed 2026-10-15\n"
+        "adr/0001 — accepted 2026-10-15\n"
         "\n"
         f"[§ Decision]({ALPHA}#decision)\n"
         "\n"

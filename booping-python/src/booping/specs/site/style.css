@@ -289,7 +289,7 @@ footer { border-top: 1px solid var(--line); padding: 16px 40px; font-size: 13px;
 .st-proposed, .st-planned, .st-validating { background: var(--warn-bg); color: var(--warn); }
 .st-open { background: var(--info-bg); color: var(--info); }
 .st-retired, .st-rejected, .st-superseded, .st-deferred { background: none; padding-inline: 0; color: var(--muted); }
-.badge.unreviewed { background: none; padding-inline: 0; color: var(--muted); }
+.badge.not-accepted { background: none; padding-inline: 0; color: var(--muted); }
 
 mark.mk { padding: 0 4px; border-radius: 4px; font-size: 0.9em; white-space: nowrap; }
 mark.mk-clarify { background: var(--warn-bg); color: var(--warn); }
@@ -462,9 +462,9 @@ html.cmt .outbox ~ .theme { margin-left: 0; }
 .rv-head { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; }
 .rv-head h2 { flex: 1; margin: 0; font-size: 17px; }
 .rv .rv-close { display: none; font-size: 24px; }
-.rv-reviewed { display: flex; align-items: center; gap: 10px; min-height: 44px; margin: 0 0 8px; padding: 0 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); font-weight: 600; cursor: pointer; }
-.rv-reviewed input { width: 20px; height: 20px; margin: 0; accent-color: var(--link); }
-.rv-reviewed:has(input:checked) { border-color: var(--link); background: var(--link-bg); color: var(--link); }
+.rv-accepted { display: flex; align-items: center; gap: 10px; min-height: 44px; margin: 0 0 8px; padding: 0 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); font-weight: 600; cursor: pointer; }
+.rv-accepted input { width: 20px; height: 20px; margin: 0; accent-color: var(--link); }
+.rv-accepted:has(input:checked) { border-color: var(--link); background: var(--link-bg); color: var(--link); }
 .rv-label { display: block; margin: 8px 0 4px; font-size: 14px; font-weight: 600; }
 .rv textarea { display: block; width: 100%; box-sizing: border-box; padding: 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--text); font: inherit; font-size: 15px; resize: vertical; }
 .rv textarea:focus { outline: 2px solid var(--link); outline-offset: 0; border-color: var(--link); }
@@ -522,7 +522,7 @@ button.rv-quote:hover { border-left-color: var(--link); color: var(--text); }
   html.cmt.rv-sheet-open .rv-scrim { display: block; position: fixed; inset: 0; z-index: 5; background: rgb(0 0 0 / 0.35); }
   .rv-rail .rv-toc { display: none; }
   .rv .rv-close { display: inline-flex; }
-  .rv-card, .rv-reviewed { background: var(--bg); }
+  .rv-card, .rv-accepted { background: var(--bg); }
   .toc-m { display: block; border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; margin: 0 0 16px; font-size: 15px; background: var(--surface); }
   .toc-m summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; }
 }

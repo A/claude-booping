@@ -49,7 +49,9 @@ def _roots(tmp_path: Path) -> list[SiteRoot]:
 def roots(tmp_path: Path) -> list[SiteRoot]:
     _write(
         tmp_path / "core" / "value" / "0001-clarity.md",
-        "---\ntitle: Clarity\nkind: value\nreviewed: 2026-10-01\n---\n"
+        "---\ntitle: Clarity\nkind: value\n"
+        "review: accepted\nreview_evidence: site review — 2026-10-01\n"
+        "---\n"
         "# Clarity\n\n## Why\n\nBecause.\n",
     )
     _write(tmp_path / "proj" / "adr" / "0001-pick.md", ADR)
@@ -159,23 +161,23 @@ def test_build_is_repeatable(site: Site, roots: list[SiteRoot]) -> None:
 
 
 def _two_root_site(tmp_path: Path) -> dict[str, str]:
-    reviewed = "reviewed: 2026-10-01\n"
+    accepted = "review: accepted\nreview_evidence: site review — 2026-10-01\n"
     _write(
         tmp_path / "a" / "value" / "0001-x.md",
-        f"---\ntitle: X\nupdated_at: 2026-09-01\n{reviewed}---\nx\n",
+        f"---\ntitle: X\nupdated_at: 2026-09-01\n{accepted}---\nx\n",
     )
-    # Two records of root `a` need review: one unreviewed with a [clarify], one with a [clarify].
+    # Two records of root `a` need review: one not accepted with a [clarify], one with a [clarify].
     _write(
         tmp_path / "a" / "adr" / "0001-p.md",
         "---\ntitle: P\nupdated_at: 2026-09-03\n---\n[clarify] p\n",
     )
     _write(
         tmp_path / "a" / "adr" / "0002-q.md",
-        f"---\ntitle: Q\nupdated_at: 2026-09-02\n{reviewed}---\n[clarify] q\n",
+        f"---\ntitle: Q\nupdated_at: 2026-09-02\n{accepted}---\n[clarify] q\n",
     )
     _write(
         tmp_path / "b" / "adr" / "0001-r.md",
-        f"---\ntitle: R\nupdated_at: 2026-09-05\n{reviewed}---\nr\n",
+        f"---\ntitle: R\nupdated_at: 2026-09-05\n{accepted}---\nr\n",
     )
     roots = [SiteRoot("a", tmp_path / "a"), SiteRoot("b", tmp_path / "b")]
     return _texts(load_site(roots, TYPES))
@@ -192,7 +194,7 @@ def test_root_page_is_the_overview_landing_for_that_root(tmp_path: Path) -> None
     assert callout.groups() == (
         "../review.html#source=a",
         "2 need you →",
-        " · 1 unreviewed · 2 open questions",
+        " · 1 not accepted · 2 open questions",
     )
     measures = re.findall(r'<div class="measure">\n(.*?)\n</div>', main, flags=re.S)
     assert len(measures) == 2
@@ -244,7 +246,7 @@ def test_record_page_links_refs_and_body(site: Site) -> None:
     assert '<a href="../../core/value/0001-clarity.html#why">why</a>' in page
     assert '<span class="unresolved">gone</span>' in page
     badges = re.findall(r"<span class=\"b ([a-z]+)\">(?:<svg[^>]*>.*?</svg>)([^<]+)</span>", page)
-    assert badges == [("ok", "accepted"), ("warn", "1 question for you"), ("plain", "unreviewed")]
+    assert badges == [("ok", "accepted"), ("warn", "1 question for you"), ("plain", "not accepted")]
 
 
 def test_type_page_is_one_row_per_record_without_bodies(tmp_path: Path) -> None:
@@ -259,10 +261,14 @@ def test_type_page_is_one_row_per_record_without_bodies(tmp_path: Path) -> None:
     assert "<article" not in page
 
 
-def test_value_kind_is_a_raw_row_and_reviewed_hides_unreviewed(site: Site) -> None:
+def test_value_kind_is_a_raw_row_and_accepted_hides_not_accepted(site: Site) -> None:
     page = _texts(site)["core/value/0001-clarity.html"]
     assert "<dt>kind</dt>\n<dd>value</dd>" in page
-    assert '<dt>Reviewed</dt>\n<dd><time datetime="2026-10-01">1 October 2026</time></dd>' in page
+    assert (
+        '<dt>Review</dt>\n<dd><svg class="ic" aria-hidden="true">'
+        '<use href="#i-review-accepted"/></svg>accepted</dd>'
+    ) in page
+    assert "<dt>Evidence</dt>\n<dd>site review — 2026-10-01</dd>" in page
     assert '<div class="badges">' not in page
 
 
@@ -379,14 +385,14 @@ def test_state_badges_pair_every_icon_with_text() -> None:
         .from_string(
             '{% from "_macros.html.j2" import state_badges %}{{ state_badges(state, labels) }}'
         )
-        .render(state={"status": "accepted", "clarify": 3, "unknown": 1, "unreviewed": True})
+        .render(state={"status": "accepted", "clarify": 3, "unknown": 1, "not_accepted": True})
     )
     badges = re.findall(r'<span class="b ([a-z]+)">(<svg[^>]*>.*?</svg>)([^<]+)</span>', html)
     assert [(css, text) for css, _, text in badges] == [
         ("ok", "принято"),
         ("warn", "3 вопроса к тебе"),
         ("bad", "[unknown]"),
-        ("plain", "без ревью"),
+        ("plain", "не принято"),
     ]
     assert all('aria-hidden="true"' in svg for _, svg, _ in badges)
 
@@ -430,7 +436,7 @@ def test_sidebar_holds_the_groups_in_order_with_counts(site: Site) -> None:
     assert isinstance(page, str)
     side = _side(page)
     assert re.findall(r"<h4>([^<]+)</h4>", side) == ["Types", "Sources"]
-    # The ADR is unreviewed with a clarify mark, the value is reviewed: 1 record + 1 item.
+    # The ADR is not accepted and has a clarify mark, the value is accepted: 1 record + 1 item.
     assert _side_links(side) == [
         ("../../index.html", "Overview", ""),
         ("../../review.html", "Awaiting review", "2"),
@@ -484,9 +490,9 @@ ROW_DATA = re.compile(
 
 def test_rows_carry_the_filter_data(tmp_path: Path) -> None:
     pages = _record_page(tmp_path)
-    robot = ("adr", "s", "superseded", "unreviewed clarify", "2026-10-15", "Robot", "claude")
-    chassis = ("adr", "s", "", "unreviewed", "", "Chassis", "")
-    craft = ("value", "s", "accepted", "unreviewed", "", "Craft", "")
+    robot = ("adr", "s", "superseded", "not_accepted clarify", "2026-10-15", "Robot", "claude")
+    chassis = ("adr", "s", "", "not_accepted", "", "Chassis", "")
+    craft = ("value", "s", "accepted", "not_accepted", "", "Craft", "")
     type_page = pages["s/adr/index.html"]
     assert ROW_DATA.findall(type_page) == [(*robot, "0"), (*chassis, "1")]
     assert type_page.count('<li class="row"') == 2
@@ -560,7 +566,7 @@ def test_record_page_head_facts_and_relations_in_russian(tmp_path: Path) -> None
     ]
     assert "<dd>агент</dd>" in facts
     assert '<dd><time datetime="2026-10-15">15 октября 2026</time></dd>' in facts
-    assert "<dd>ещё не было</dd>" in facts
+    assert "не показано</dd>" in facts
     assert (
         '<dt>Служит ценностям</dt>\n<dd><ul class="rel">\n'
         '<li><a href="../../s/value/0001-craft.html">Craft</a> <code class="ref">value/0001</code>'
@@ -642,12 +648,12 @@ def _facets(page: str) -> list[tuple[str, list[tuple[str, str, str, str]]]]:
 
 
 def test_type_page_chips_and_counts(tmp_path: Path) -> None:
-    reviewed = "reviewed: 2026-10-01\n"
+    accepted = "review: accepted\nreview_evidence: site review — 2026-10-01\n"
     _write(
-        tmp_path / "s" / "adr" / "0001-a.md", f"---\ntitle: A\nstatus: accepted\n{reviewed}---\nx\n"
+        tmp_path / "s" / "adr" / "0001-a.md", f"---\ntitle: A\nstatus: accepted\n{accepted}---\nx\n"
     )
     _write(
-        tmp_path / "s" / "adr" / "0002-b.md", f"---\ntitle: B\nstatus: accepted\n{reviewed}---\nx\n"
+        tmp_path / "s" / "adr" / "0002-b.md", f"---\ntitle: B\nstatus: accepted\n{accepted}---\nx\n"
     )
     _write(
         tmp_path / "s" / "adr" / "0003-c.md", "---\ntitle: C\nstatus: proposed\n---\n[clarify] x\n"
@@ -661,7 +667,7 @@ def test_type_page_chips_and_counts(tmp_path: Path) -> None:
         (
             "Needs",
             [
-                ("flag", "unreviewed", "Unreviewed", "1"),
+                ("flag", "not_accepted", "Not accepted", "1"),
                 ("flag", "clarify", "Has [clarify]", "1"),
             ],
         ),
@@ -782,21 +788,21 @@ def test_russian_filter_labels(tmp_path: Path) -> None:
         assert english not in page
     assert ">Показаны 3 записи</p>" in page
     assert "Ничего не подходит под фильтр." in page
-    for english in ("Sort", "By number", "Recently updated", "By title", "Unreviewed", "Needs"):
+    for english in ("Sort", "By number", "Recently updated", "By title", "Not accepted", "Needs"):
         assert f">{english}<" not in page
 
 
 def _review_site(tmp_path: Path) -> tuple[dict[str, str], OpenItem]:
-    reviewed = "reviewed: 2026-10-01\n"
+    accepted = "review: accepted\nreview_evidence: site review — 2026-10-01\n"
     _write(tmp_path / "s" / "value" / "0001-fresh.md", "---\ntitle: Fresh\n---\nx\n")
     # Frontmatter is lines 1-4, so the mark's paragraph opens on line 5.
     _write(
         tmp_path / "s" / "value" / "0002-murky.md",
-        f"---\ntitle: Murky\n{reviewed}---\nWho [unknown] knows.\n",
+        f"---\ntitle: Murky\n{accepted}---\nWho [unknown] knows.\n",
     )
     _write(
         tmp_path / "s" / "adr" / "0001-done.md",
-        f"---\ntitle: Done\nstatus: accepted\n{reviewed}---\nx\n",
+        f"---\ntitle: Done\nstatus: accepted\n{accepted}---\nx\n",
     )
     item = OpenItem("OI-0007", "Clarify murk", "value/0002")
     files, _ = build_site(
@@ -815,7 +821,7 @@ def test_review_page_lists_the_pool_with_mark_links_and_items(tmp_path: Path) ->
         "OI-0007",
     ]
     assert "Done" not in page
-    assert '<a href="s/value/0002-murky.html#L5"><span class="b bad">' in page
+    assert '<a href="s/value/0002-murky.html#L6"><span class="b bad">' in page
     assert (
         '<code class="ref">OI-0007</code><a class="t" href="s/value/0002-murky.html">'
         "Clarify murk</a>"
@@ -839,7 +845,7 @@ def test_review_page_lists_the_pool_with_mark_links_and_items(tmp_path: Path) ->
     ) in page
     assert _side_links(_side(page))[1] == ("review.html", "Awaiting review", "3")
     murky = _parse(files["s/value/0002-murky.html"])
-    assert "L5" in murky.ids
+    assert "L6" in murky.ids
 
 
 def test_review_flag_facet_shows_present_reasons_with_counts(tmp_path: Path) -> None:
@@ -848,7 +854,7 @@ def test_review_flag_facet_shows_present_reasons_with_counts(tmp_path: Path) -> 
         (
             "Needs",
             [
-                ("flag", "unreviewed", "Unreviewed", "1"),
+                ("flag", "not_accepted", "Not accepted", "1"),
                 ("flag", "unknown", "Has [unknown]", "1"),
                 ("flag", "open", "Open", "1"),
             ],
@@ -866,7 +872,7 @@ def test_review_item_without_a_resolving_record_is_unlinked(site: Site) -> None:
 def test_empty_review_pool_says_nothing_needs_you(tmp_path: Path) -> None:
     _write(
         tmp_path / "s" / "value" / "0001-a.md",
-        "---\ntitle: A\nreviewed: 2026-10-01\n---\nx\n",
+        "---\ntitle: A\nreview: accepted\nreview_evidence: site review — 2026-10-01\n---\nx\n",
     )
     page = _texts(load_site([SiteRoot("s", tmp_path / "s")], TYPES))["review.html"]
     assert '<p class="empty">Nothing needs you.</p>' in page
@@ -875,19 +881,19 @@ def test_empty_review_pool_says_nothing_needs_you(tmp_path: Path) -> None:
 
 
 def _home_site(tmp_path: Path, lang: str = "en") -> str:
-    reviewed = "reviewed: 2026-10-01\n"
+    accepted = "review: accepted\nreview_evidence: site review — 2026-10-01\n"
     _write(
         tmp_path / "s" / "value" / "0001-why.md",
-        f"---\ntitle: Why\nsummary: We ship small.\n{reviewed}---\nx\n",
+        f"---\ntitle: Why\nsummary: We ship small.\n{accepted}---\nx\n",
     )
-    # Three records need review: one unreviewed, two carrying a [clarify] mark each.
+    # Three records need review: one not accepted, two carrying a [clarify] mark each.
     _write(tmp_path / "s" / "adr" / "0001-a.md", "---\ntitle: A\n---\nx\n")
-    _write(tmp_path / "s" / "adr" / "0002-b.md", f"---\ntitle: B\n{reviewed}---\n[clarify] x\n")
-    _write(tmp_path / "s" / "adr" / "0003-c.md", f"---\ntitle: C\n{reviewed}---\n[clarify] y\n")
+    _write(tmp_path / "s" / "adr" / "0002-b.md", f"---\ntitle: B\n{accepted}---\n[clarify] x\n")
+    _write(tmp_path / "s" / "adr" / "0003-c.md", f"---\ntitle: C\n{accepted}---\n[clarify] y\n")
     for n in range(4, 16):
         _write(
             tmp_path / "s" / "adr" / f"{n:04d}-d{n}.md",
-            f"---\ntitle: D{n}\nupdated_at: 2026-09-{n:02d}\n{reviewed}---\nx\n",
+            f"---\ntitle: D{n}\nupdated_at: 2026-09-{n:02d}\n{accepted}---\nx\n",
         )
     labels, lang, _ = load_labels({"lang": lang})
     files, _ = build_site(load_site([SiteRoot("s", tmp_path / "s")], TYPES), TYPES, labels, lang)
@@ -903,11 +909,11 @@ def test_home_lead_callout_scenarios_and_recent(tmp_path: Path) -> None:
         r'<p class="callout">.*?<span><a href="([^"]+)">([^<]+)</a>([^<]*)</span>', home
     )
     assert callout is not None
-    # One record lacks `reviewed:`; the two [clarify] marks are the open questions.
+    # One record lacks `review: accepted`; the two [clarify] marks are the open questions.
     assert callout.groups() == (
         "review.html",
         "3 need you →",
-        " · 1 unreviewed · 2 open questions",
+        " · 1 not accepted · 2 open questions",
     )
     measures = re.findall(r'<div class="measure">\n(.*?)\n</div>', home, flags=re.S)
     assert len(measures) == 2
@@ -935,18 +941,23 @@ def test_home_lead_callout_scenarios_and_recent(tmp_path: Path) -> None:
     assert '<time datetime="2026-09-15">15 September 2026</time>' in recent
 
 
-def test_home_callout_omits_unreviewed_when_every_record_is_reviewed(tmp_path: Path) -> None:
+def test_home_callout_omits_not_accepted_when_every_record_is_accepted(tmp_path: Path) -> None:
     _write(
         tmp_path / "s" / "adr" / "0001-a.md",
-        "---\ntitle: A\nreviewed: 2026-10-01\n---\n[clarify] x\n",
+        "---\ntitle: A\n"
+        "review: accepted\nreview_evidence: site review — 2026-10-01\n"
+        "---\n[clarify] x\n",
     )
     home = _texts(load_site([SiteRoot("s", tmp_path / "s")], TYPES))["index.html"]
     assert '<a href="review.html">1 needs you →</a> · 1 open question</span>' in home
-    assert " unreviewed" not in home
+    assert " not accepted" not in home
 
 
 def test_home_without_value_or_review_has_no_lead_or_callout(tmp_path: Path) -> None:
-    _write(tmp_path / "s" / "adr" / "0001-a.md", "---\ntitle: A\nreviewed: 2026-10-01\n---\nx\n")
+    _write(
+        tmp_path / "s" / "adr" / "0001-a.md",
+        "---\ntitle: A\nreview: accepted\nreview_evidence: site review — 2026-10-01\n---\nx\n",
+    )
     home = _texts(load_site([SiteRoot("s", tmp_path / "s")], TYPES))["index.html"]
     assert '<p class="lead">' not in home
     assert 'class="callout"' not in home
@@ -956,7 +967,7 @@ def test_home_without_value_or_review_has_no_lead_or_callout(tmp_path: Path) -> 
 def test_home_callout_in_russian_uses_the_few_form(tmp_path: Path) -> None:
     home = _home_site(tmp_path, "ru")
     assert (
-        '<a href="review.html">3 записи ждут тебя →</a> · 1 без ревью · 2 открытых вопроса</span>'
+        '<a href="review.html">3 записи ждут тебя →</a> · 1 не принята · 2 открытых вопроса</span>'
     ) in home
     assert "<h2>Недавно изменённое</h2>" in home
 
@@ -1213,7 +1224,7 @@ def test_record_page_holds_the_review_panel_and_its_header_button(tmp_path: Path
     assert '<h2 id="rv-h">Comments</h2>' in panel
     assert 'class="iconbtn rv-close" type="button" aria-label="Close"' in panel
     assert (
-        '<label class="rv-reviewed"><input type="checkbox" id="rv-reviewed"> Reviewed</label>'
+        '<label class="rv-accepted"><input type="checkbox" id="rv-accepted"> Accepted</label>'
     ) in panel
     # The free-form input comes first, the cards' list after it.
     assert panel.index('<textarea id="rv-new" rows="3"></textarea>') < panel.index(
@@ -1253,7 +1264,7 @@ def test_outbox_page_is_a_shell_with_copy_all_and_clear(tmp_path: Path) -> None:
     assert '<p class="cmt-empty">Nothing to send.</p>' in main
     assert (
         '<div class="ob-confirm" role="group" aria-labelledby="ob-confirm-q" hidden>\n'
-        '<p id="ob-confirm-q">Remove every comment and reviewed mark from this browser?</p>\n'
+        '<p id="ob-confirm-q">Remove every comment and accepted mark from this browser?</p>\n'
         '<button class="ob-clear-yes" type="button">Remove all</button>\n'
         '<button class="ob-clear-no" type="button">Cancel</button>\n'
         "</div>"
@@ -1267,7 +1278,7 @@ def test_comment_labels_resolve_in_russian(tmp_path: Path) -> None:
     page = files["s/adr/0007-elka.html"]
     assert 'aria-label="Комментарии"' in page
     assert 'aria-label="К отправке"' in page
-    assert "> Ревью пройдено</label>" in page
+    assert "> Принято</label>" in page
     assert ">Комментарий ко всей записи</label>" in page
     assert (
         'data-cleared-forms="[&#34;{n} удалён&#34;, &#34;{n} удалено&#34;, &#34;{n} удалено&#34;]"'

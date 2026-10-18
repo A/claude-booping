@@ -8,7 +8,7 @@ Work the project's [specs](specs.md) records from one place: set up a tier, sett
 
 ## What it does
 
-The playbook is a guide, not a menu: say what you want in plain words and it acts on it — it never asks which action to run. It reads the [specs format guide](specs.md#format-in-brief) before writing a record, numbers records with `booping specs next`, marks what it writes `created_by: claude` (never `reviewed` — that stays yours), and runs `booping specs check` after every write.
+The playbook is a guide, not a menu: say what you want in plain words and it acts on it — it never asks which action to run. It reads the [specs format guide](specs.md#format-in-brief) before writing a record, numbers records with `booping specs next`, marks what it writes `created_by: claude`, sets a `review` level only with its evidence — never `accepted` without your words quoted, and runs `booping specs check` after every write.
 
 The scenarios it knows:
 

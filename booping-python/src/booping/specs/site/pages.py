@@ -12,6 +12,7 @@ from urllib.parse import urlsplit
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 from markupsafe import Markup
 
+from booping.specs.records import ACCEPTED, NO_REVIEW
 from booping.specs.site.backlinks import backlink_groups
 from booping.specs.site.fonts import font_files
 from booping.specs.site.items import OpenItem
@@ -41,7 +42,7 @@ from booping.specs.site.tags import TagNode, record_tags, tag_page_path, tag_tre
 _HERE = Path(__file__).parent
 _MARK_KINDS = ("clarify", "unknown")
 _PAGE_HEAD_KEYS = ("type", "title", "summary", "status", "tags")
-_FACT_KEYS = ("created_by", "created_at", "updated_at", "reviewed", "sources")
+_FACT_KEYS = ("created_by", "created_at", "updated_at", "review", "review_evidence", "sources")
 _ISO_DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
 _RECENT = 10
 
@@ -61,13 +62,13 @@ class Facet:
 
 
 LIST_FACETS = ("type", "source", "status", "flag")
-LIST_FLAGS = ("unreviewed", "clarify", "unknown")
+LIST_FLAGS = ("not_accepted", "clarify", "unknown")
 LIST_SORTS = ("number", "updated", "title")
 REVIEW_FACETS = ("type", "source", "flag")
-REVIEW_FLAGS = ("unreviewed", "clarify", "unknown", "conflict", "proposed", "open")
+REVIEW_FLAGS = ("not_accepted", "clarify", "unknown", "conflict", "proposed", "open")
 REVIEW_SORTS = ("review", "number", "updated", "title")
 _FLAG_ICONS = {
-    "unreviewed": "i-unreviewed",
+    "not_accepted": "i-not-accepted",
     "clarify": "i-clarify",
     "unknown": "i-unknown",
     "conflict": "i-unknown",
@@ -208,7 +209,7 @@ def _status_state(record: SiteRecord) -> RecordState:
         kind=None,
         clarify=0,
         unknown=0,
-        unreviewed=False,
+        not_accepted=False,
         first_mark=None,
     )
 
@@ -246,14 +247,20 @@ def _date_item(labels: Labels, value: Any) -> dict[str, Any]:
     return {"text": labels.date(value), "href": None, "datetime": iso}
 
 
-def _facts(labels: Labels, fm: dict[str, Any]) -> list[dict[str, Any]]:
+def _facts(labels: Labels, fm: dict[str, Any], review: str | None) -> list[dict[str, Any]]:
     facts: list[dict[str, Any]] = []
     for key in _FACT_KEYS:
         value = fm.get(key)
-        if key == "reviewed" and not value:
-            items = [{"text": labels.ui("not_reviewed"), "href": None, "datetime": None}]
+        if key == "review":
+            level = review or NO_REVIEW
+            icon = "i-review-accepted" if level == ACCEPTED else "i-not-accepted"
+            items = [
+                {"text": labels.ui(f"review_{level}"), "href": None, "datetime": None, "icon": icon}
+            ]
         elif value is None or value == "" or value == []:
             continue
+        elif key == "review_evidence":
+            items = [{"text": str(value), "href": None, "datetime": None}]
         elif key == "created_by":
             items = [{"text": labels.author(str(value)), "href": None, "datetime": None}]
         elif key == "sources":
@@ -356,7 +363,7 @@ def _record_view(
             for t in tags
         ],
         "summary": _summary(record),
-        "facts": _facts(labels, fm),
+        "facts": _facts(labels, fm, state.review),
         "relations": _relations(site, record, labels, warnings, base),
         "raw": [
             {"key": key, "items": _fact_items(site, record, value, warnings)}
@@ -415,7 +422,7 @@ def _landing(
     recent = sorted((d for d in dated if d[0]), key=lambda d: d[0], reverse=True)[:_RECENT]
     return {
         "needs": needs,
-        "unreviewed": sum(states[r].unreviewed for r in records),
+        "not_accepted": sum(states[r].not_accepted for r in records),
         "questions": sum(states[r].clarify for r in records),
         "types": [
             {"type": type_, "count": count, "href": type_href.format(type=type_)}

@@ -57,6 +57,8 @@ Update later via `/plugin update booping` (or from the `/plugin` UI).
 
 After installing, `cd` into the target repo and run `/playbook setup`. It settles the machine config, then creates the vault (`plans/`, `retrospectives/`, `codereviews/`, `notes/`) and writes the `.booping` marker. Anything already in place is detected and skipped. The `booping` CLI logs its invocations to `.booping.log` at the vault root.
 
+From then on every Claude Code session started inside the repo opens with a short block listing the playbooks and their triggers, so project work is offered the playbook it belongs to ([session start](documentation/playbook.md#session-start)).
+
 ## Quick start
 
 For a hand-holding walkthrough and per-command reference, see the [docs site](https://A.github.io/claude-booping/). Its recipes section holds guides for non-trivial uses — [wiring external agents](https://A.github.io/claude-booping/recipes/external-agents/) and [running model benchmarks](https://A.github.io/claude-booping/recipes/benchmarks/).

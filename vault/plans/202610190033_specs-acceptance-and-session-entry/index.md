@@ -2,25 +2,34 @@
 title: "Specs acceptance — ADR brief, review levels, ADR scoring, session entry to
   playbooks"
 type: "feature"
-status: ready-for-dev
+status: done
 sp: 34
 related_to: null
 created: 2026-10-19 00:29
 planned: null
-started: null
-completed: null
-code_reviews: []
+started: 2026-10-19 00:54
+completed: 2026-10-19 01:22
+code_reviews:
+  - codereviews/202610190033_specs-acceptance-and-session-entry/202610190125.md
 sessions:
 - 7dec7bb9-8bf9-4660-a129-8472076ab1bb
+- 9dda877a-edbb-599f-a8d2-e9ce64a7f339
 retro: null
 summary: ADR accepted after a brief with an objection window, review levels with
   evidence, a cheap ADR scorer, session start points to playbooks
-commit: aaa23efc32d1b6c1d93bf4c41c412bebc1c4fde3
+commit: de14fdcbee1f25f2647d64d37422b4542651b7a0
 tracker_provider: null
 tracker_request: null
 tracker_issue: null
 return_to: null
 reviewed_at: 2026-10-19 00:53
+metrics_active_minutes: 51
+metrics_models:
+- claude-opus-5-5
+metrics_tokens_input: 248
+metrics_tokens_output: 99617
+metrics_tokens_cache_creation: 318050
+metrics_tokens_cache_read: 17909422
 ---
 
 # Specs acceptance — ADR brief, review levels, ADR scoring, session entry to playbooks
@@ -102,10 +111,10 @@ This repo is a booping project. Project work a playbook below fits — a decisio
 
 | id | title | sp | status |
 | --- | --- | --- | --- |
-| 01 | [Review levels replace `reviewed](milestones/M01-review-levels-replace-reviewed/M01-review-levels-replace-reviewed.md) | 11 | pending |
-| 02 | [ADR brief and the objection window](milestones/M02-adr-brief-and-the-objection-window/M02-adr-brief-and-the-objection-window.md) | 8 | pending |
-| 03 | [ADR scorer](milestones/M03-adr-scorer/M03-adr-scorer.md) | 7 | pending |
-| 04 | [Session start points to playbooks](milestones/M04-session-start-points-to-playbooks/M04-session-start-points-to-playbooks.md) | 8 | pending |
+| 01 | [Review levels replace reviewed](milestones/M01-review-levels-replace-reviewed/M01-review-levels-replace-reviewed.md) | 11 | done |
+| 02 | [ADR brief and the objection window](milestones/M02-adr-brief-and-the-objection-window/M02-adr-brief-and-the-objection-window.md) | 8 | done |
+| 03 | [ADR scorer](milestones/M03-adr-scorer/M03-adr-scorer.md) | 7 | done |
+| 04 | [Session start points to playbooks](milestones/M04-session-start-points-to-playbooks/M04-session-start-points-to-playbooks.md) | 8 | done |
 
 ## Groups
 

@@ -11,7 +11,7 @@ items: 1 open, 1 clarify — request 2, backlog 0, spec gap 0 — 1 waiting on y
 ideas: none
 plans: 1 ready-for-dev
 runs: 1 finished
-records: none unreviewed
+records: none not accepted
 marks: none
 ```
 

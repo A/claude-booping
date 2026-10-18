@@ -1,0 +1,10 @@
+The `SessionStart` hook walks up from the cwd for a `.booping` marker; with none it exits 0 and
+prints nothing, never reaching the render. The script is located beside `bin/booping`, which leads
+PATH.
+
+-- cmd --
+sh -c 'root=$(dirname "$(dirname "$(command -v booping)")"); CLAUDE_PLUGIN_ROOT=$root "$root/hooks/session-start.sh"'
+-- exit --
+0
+-- stdout --
+-- stderr --

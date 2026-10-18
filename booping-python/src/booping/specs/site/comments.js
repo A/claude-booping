@@ -4,9 +4,9 @@
   if (!form) return;
   var prefix = form.getAttribute("data-prefix");
   var siteRoot = new URL(prefix || "./", location.href).href;
-  // Comments keep their v1 key and shape; reviewed marks and unsent drafts sit beside them.
+  // Comments keep their v1 key and shape; accepted marks and unsent drafts sit beside them.
   var KEY = "specs-comments:v1:" + siteRoot;
-  var REVIEWED_KEY = "specs-reviewed:v1:" + siteRoot;
+  var ACCEPTED_KEY = "specs-accepted:v1:" + siteRoot;
   var DRAFTS_KEY = "specs-drafts:v1:" + siteRoot;
 
   function read(key, empty) {
@@ -32,9 +32,9 @@
   root.classList.add("cmt");
 
   function loadComments() { return read(KEY, []); }
-  function loadReviewed() { return read(REVIEWED_KEY, {}); }
+  function loadAccepted() { return read(ACCEPTED_KEY, {}); }
   function loadDrafts() { return read(DRAFTS_KEY, {}); }
-  function reviewedList(marks) {
+  function acceptedList(marks) {
     var out = [];
     for (var ref in marks) if (Object.prototype.hasOwnProperty.call(marks, ref)) out.push(marks[ref]);
     return out;
@@ -115,8 +115,8 @@
 
   function counts() {
     var comments = allComments().filter(hasNote);
-    var marks = loadReviewed();
-    var total = comments.length + reviewedList(marks).length;
+    var marks = loadAccepted();
+    var total = comments.length + acceptedList(marks).length;
     var link = document.querySelector(".outbox");
     if (link) setCount(link.querySelector(".n"), total);
     var btn = document.querySelector(".rv-btn");
@@ -202,7 +202,7 @@
   if (panel && article) setupPanel();
   counts();
   window.addEventListener("storage", function (e) {
-    if (e.key !== null && e.key !== KEY && e.key !== REVIEWED_KEY && e.key !== DRAFTS_KEY) return;
+    if (e.key !== null && e.key !== KEY && e.key !== ACCEPTED_KEY && e.key !== DRAFTS_KEY) return;
     counts();
     if (outbox) renderOutbox();
     if (panel && !panel.contains(document.activeElement)) renderPanel();
@@ -218,7 +218,7 @@
       return groups.reduce(function (n, g) { return n + g.items.length; }, 0);
     }
     function current() {
-      return window.SpecsComments.groups(allComments(), siteRoot, reviewedList(loadReviewed()));
+      return window.SpecsComments.groups(allComments(), siteRoot, acceptedList(loadAccepted()));
     }
     renderOutbox = function () {
       var groups = current();
@@ -248,9 +248,9 @@
               write(DRAFTS_KEY, drafts);
             } else if (item.kind === "comment") removeComment(item.comment.id);
             else {
-              var marks = loadReviewed();
+              var marks = loadAccepted();
               delete marks[g.ref];
-              write(REVIEWED_KEY, marks);
+              write(ACCEPTED_KEY, marks);
             }
             renderOutbox();
             counts();
@@ -271,7 +271,7 @@
       var groups = current();
       var n = itemCount(groups);
       if (!n) return;
-      copyText(window.SpecsComments.format(allComments(), siteRoot, reviewedList(loadReviewed())), function (ok) {
+      copyText(window.SpecsComments.format(allComments(), siteRoot, acceptedList(loadAccepted())), function (ok) {
         announce(ok ? plural("copied-forms", n) : label("copy-failed"));
       });
     });
@@ -290,7 +290,7 @@
       confirmBox.hidden = true;
       try {
         localStorage.removeItem(KEY);
-        localStorage.removeItem(REVIEWED_KEY);
+        localStorage.removeItem(ACCEPTED_KEY);
         localStorage.removeItem(DRAFTS_KEY);
       } catch (e) {}
       renderOutbox();
@@ -307,7 +307,7 @@
     var body = article.querySelector(".body");
     var aside = document.getElementById("rv-panel");
     var list = panel.querySelector(".rv-list");
-    var reviewedBox = panel.querySelector("#rv-reviewed");
+    var acceptedBox = panel.querySelector("#rv-accepted");
     var draftArea = panel.querySelector("#rv-new");
     var addBtn = panel.querySelector(".rv-add");
     var openBtn = document.querySelector(".rv-btn");
@@ -513,18 +513,18 @@
       ranges = {};
       list.textContent = "";
       own.forEach(function (c) { list.appendChild(card(c)); });
-      if (reviewedBox) reviewedBox.checked = !!loadReviewed()[ref];
+      if (acceptedBox) acceptedBox.checked = !!loadAccepted()[ref];
       var draft = loadDrafts()[ref];
       if (document.activeElement !== draftArea) draftArea.value = (draft && draft.note) || "";
       addBtn.disabled = !draftArea.value.trim();
       paintHighlights(null);
     };
 
-    if (reviewedBox) reviewedBox.addEventListener("change", function () {
-      var marks = loadReviewed();
-      if (reviewedBox.checked) marks[ref] = { ref: ref, title: title, page: page, date: localDate(), created: new Date().toISOString() };
+    if (acceptedBox) acceptedBox.addEventListener("change", function () {
+      var marks = loadAccepted();
+      if (acceptedBox.checked) marks[ref] = { ref: ref, title: title, page: page, date: localDate(), created: new Date().toISOString() };
       else delete marks[ref];
-      write(REVIEWED_KEY, marks);
+      write(ACCEPTED_KEY, marks);
       counts();
     });
     draftArea.addEventListener("input", function () {

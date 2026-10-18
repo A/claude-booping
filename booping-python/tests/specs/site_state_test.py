@@ -38,16 +38,20 @@ def test_reasons_follow_the_fixed_order_and_marks_anchor_per_kind(tmp_path: Path
     )
     _write(
         tmp_path / "s" / "conflict" / "0001-clash.md",
-        "---\ntitle: Clash\nstatus: open\nreviewed: 2026-10-01\n---\nx\n",
+        "---\ntitle: Clash\nstatus: open\n"
+        "review: accepted\nreview_evidence: site review — 2026-10-01\n"
+        "---\nx\n",
     )
     _write(
         tmp_path / "s" / "adr" / "0002-done.md",
-        "---\ntitle: Done\nstatus: accepted\nreviewed: 2026-10-01\n---\nx\n",
+        "---\ntitle: Done\nstatus: accepted\n"
+        "review: accepted\nreview_evidence: site review — 2026-10-01\n"
+        "---\nx\n",
     )
     states = _states(tmp_path)
 
     pick = states["adr/0001"]
-    assert pick.reasons == ("unreviewed", "clarify", "unknown")
+    assert pick.reasons == ("not_accepted", "clarify", "unknown")
     assert pick.first_unknown == "L7"
     assert pick.first_clarify == "L9"
     assert pick.first_mark == "L7"
@@ -58,15 +62,21 @@ def test_reasons_follow_the_fixed_order_and_marks_anchor_per_kind(tmp_path: Path
 def test_proposed_adr_and_open_idea_are_reasons(tmp_path: Path) -> None:
     _write(
         tmp_path / "s" / "adr" / "0001-maybe.md",
-        "---\ntitle: Maybe\nstatus: proposed\nreviewed: 2026-10-01\n---\nx\n",
+        "---\ntitle: Maybe\nstatus: proposed\n"
+        "review: accepted\nreview_evidence: site review — 2026-10-01\n"
+        "---\nx\n",
     )
     _write(
         tmp_path / "s" / "idea" / "0001-spark.md",
-        "---\ntitle: Spark\nstatus: open\nreviewed: 2026-10-01\n---\nx\n",
+        "---\ntitle: Spark\nstatus: open\n"
+        "review: accepted\nreview_evidence: site review — 2026-10-01\n"
+        "---\nx\n",
     )
     _write(
         tmp_path / "s" / "conflict" / "0001-settled.md",
-        "---\ntitle: Settled\nstatus: resolved\nreviewed: 2026-10-01\n---\nx\n",
+        "---\ntitle: Settled\nstatus: resolved\n"
+        "review: accepted\nreview_evidence: site review — 2026-10-01\n"
+        "---\nx\n",
     )
     states = _states(tmp_path)
 

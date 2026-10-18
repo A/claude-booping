@@ -9,7 +9,7 @@ from booping.specs.site.markdown import Rendered
 from booping.specs.site.model import Site, SiteRecord
 from booping.specs.site.state import RecordState
 
-_FLAGS = ("unreviewed", "clarify", "unknown")
+_FLAGS = ("not_accepted", "clarify", "unknown")
 
 
 def _id(record: SiteRecord) -> str:

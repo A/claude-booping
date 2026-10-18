@@ -67,7 +67,7 @@ A tier root may hold its own files beside the type directories:
 
 A tier schema may never rename what booping reads: the frontmatter keys `type`,
 `status`, `kind`, `targets`, `brief`, `values`, `rules`, `supersedes`, `sources`,
-`reviewed`, `created_by`, their values, and the status cell of an ADR's alternatives.
+`review`, `review_evidence`, `created_by`, their values, and the status cell of an ADR's alternatives.
 
 ## Files
 
@@ -89,9 +89,17 @@ Common to every type:
 - `summary` — one line up to 200 characters: what is claimed, not what it is about;
 - `created_by` — `owner` or `claude`;
 - `created_at`, `updated_at` — `YYYY-MM-DD`;
-- `reviewed` — optional, the date the owner read the record, as a `YYYY-MM-DD`
-  string; only the owner sets it, never an agent. Empty — the owner has not read it
-  yet, so what an agent did alone stays visible;
+- `review` — optional, how far the owner engaged with the record, an axis beside
+  `status`: no key — not shown to the owner, so what an agent did alone stays
+  visible; `shown` — the owner was shown it; `discussed` — the owner discussed it;
+  `accepted` — the owner explicitly accepted it. An agent may set a level only with
+  its evidence, and never `accepted` without a quote of the owner;
+- `review_evidence` — required with `review`, one string: for `shown`, the date and
+  where it was shown (`2026-10-19, chat`); for `discussed`, the owner's words quoted,
+  the date, where, and the discussion's gist; for `accepted`, the owner's words
+  quoted, the date and where (`«ок, принимаем» — 2026-10-19, chat`). An Outbox line
+  `{ref} — accepted {date}` from the site becomes `review: accepted` with evidence
+  `site review — {date}`;
 - `sources` — optional, the vault artefacts or files a record was distilled from
   (`[playbooks/groom/_specs/DECISIONS.md, retrospectives/…]`).
 

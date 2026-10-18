@@ -4,7 +4,14 @@ Notable user-visible changes, newest first, in the [Keep a Changelog](https://ke
 
 ## Unreleased
 
+### Added
+
+- A `SessionStart` hook: a session opened inside a booping project starts with a short block naming the playbooks and their triggers, so project work is offered to the playbook it belongs to — `project-manager` when nothing narrower fits. Silent outside a project and on any failure; no playbook is loaded at start.
+- Recording an ADR in the `specs` playbook ends with a brief — chosen and rejected options, key points, what it touches, what the agent decided alone — and an objection window; core rule `booping:rule/0036` carries it. Before the brief, the new `adr-scorer` agent (Opus, no tools) scores the ADR's alternatives 0–3 from its text alone; a score of 1 or less sends the draft back, at most two rounds.
+
 ### Changed
+
+- **Breaking:** a spec record's `reviewed:` key is replaced by `review:` (`shown` / `discussed` / `accepted`) plus `review_evidence:`; `booping specs check` reports a remaining `reviewed:` as an error. `booping status` counts records not accepted, split by level, and the specs site's "mark reviewed" control is now "Accepted", emitting `{ref} — accepted {date}` in the Outbox.
 
 - Groom drafts the whole plan in one pass: `intake → draft-plan → cross-review → present`. `draft-plan` researches the code, writes the plan to `draft.md` in the plan directory, cuts it into `index.md` and the milestone files with the new `booping plan split`, and checks the milestones with mdcheck against the groom milestone schema, fixing the draft for up to three rounds; `present` shows any findings left. The `research-codebase` and `research-web` steps are gone, and the core plan templates are trimmed to their sections. New config keys: `core.groom_playbook.split.sections` and `core.groom_playbook.split_fallback_agent`.
 - **Breaking:** the vault-file commands are renamed, with no aliases: `booping frontmatter-update` and `booping marker-set` → `booping set <file> k=v` (`booping set .booping latest_migration=…` for the marker), `booping playbook-transition <playbook> <to> --target …` → `booping transition <file> <to> [--playbook …]`, `booping playbook-state <playbook>` → `booping state <file> [--playbook …]`, `booping config-get` → `booping config`; the `frontmatter-update` hook in a playbook's `hooks:` list is now `set`. `booping items` is removed: file an item with `booping create core.specs.open_items.template`, list them with `booping query --config core.specs.open_items.index`, size, link and close them with `booping set` and `booping transition`, and scan with `booping specs scan`. `create` trees can number a file with `next_id(prefix)`.

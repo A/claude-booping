@@ -343,7 +343,12 @@ def test_record_state_counts_marks_and_review(related: Site) -> None:
         number=3,
         slug="s",
         path=Path("/x/0003-s.md"),
-        frontmatter={"status": "proposed", "kind": None, "reviewed": "2026-10-01"},
+        frontmatter={
+            "status": "proposed",
+            "kind": None,
+            "review": "accepted",
+            "review_evidence": "site review — 2026-10-01",
+        },
         body="",
         body_first_line=1,
     )
@@ -358,11 +363,12 @@ def test_record_state_counts_marks_and_review(related: Site) -> None:
         kind=None,
         clarify=2,
         unknown=1,
-        unreviewed=False,
+        not_accepted=False,
         first_mark="L7",
         first_clarify="L7",
         first_unknown="L9",
         reasons=("clarify", "unknown", "proposed"),
+        review="accepted",
     )
     unread = _record(related, "proj", "adr/0002")
     assert record_state(unread, []) == RecordState(
@@ -370,7 +376,8 @@ def test_record_state_counts_marks_and_review(related: Site) -> None:
         kind=None,
         clarify=0,
         unknown=0,
-        unreviewed=True,
+        not_accepted=True,
         first_mark=None,
-        reasons=("unreviewed",),
+        reasons=("not_accepted",),
+        review="none",
     )

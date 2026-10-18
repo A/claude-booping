@@ -11,7 +11,7 @@ from pydantic import BaseModel
 
 from booping.specs import alternatives, tags
 from booping.specs.links import relative_links
-from booping.specs.records import Record, load_tier, parse_ref
+from booping.specs.records import REVIEW_LEVELS, Record, load_tier, parse_ref
 from booping.specs.targets import TargetRejection, parse_target
 from booping.specs.tiers import Tier
 
@@ -109,6 +109,41 @@ def _check_targets(record: Record) -> list[Finding]:
             findings.append(
                 _error(record.path, "targets", f"target `{result.entry}`: {result.reason}")
             )
+    return findings
+
+
+def _check_review(record: Record) -> list[Finding]:
+    fm = record.frontmatter
+    findings: list[Finding] = []
+    if "reviewed" in fm:
+        findings.append(
+            _error(
+                record.path,
+                "review",
+                "`reviewed:` is replaced by `review:` and `review_evidence:`",
+                _key_line(record.path, "reviewed"),
+            )
+        )
+    if "review" not in fm:
+        if "review_evidence" in fm:
+            findings.append(
+                _error(
+                    record.path,
+                    "review",
+                    "review_evidence without review",
+                    _key_line(record.path, "review_evidence"),
+                )
+            )
+        return findings
+    level = fm["review"]
+    line = _key_line(record.path, "review")
+    if level not in REVIEW_LEVELS:
+        message = f"review: `{level}` is not one of {', '.join(REVIEW_LEVELS)}"
+    elif not fm.get("review_evidence"):
+        message = f"review: `{level}` needs review_evidence"
+    else:
+        return findings
+    findings.append(_error(record.path, "review", message, line))
     return findings
 
 
@@ -338,6 +373,7 @@ def check_tier(tier: Tier, tiers: list[Tier]) -> tuple[list[Finding], int]:
         findings += _check_filename(record)
         findings += _check_frontmatter(record)
         findings += _check_targets(record)
+        findings += _check_review(record)
         schema = tier.schemas[record.type]
         if record.type not in broken:
             try:

@@ -415,6 +415,12 @@ A run does not have to reach its success terminal: declare a `cancelled` status 
 
 A playbook with `states:` renders a `## State` section right after `## Playbook Steps`: the `booping state` invocation for that playbook, then per machine its referencing scopes, artifact path, initial status, the exact `booping transition` invocation (always with `--playbook`, and `--state` where the machine needs it), and a status → `to` / `when` / `gates` table. A playbook without `states:` renders no such section.
 
+## Session start
+
+The plugin declares a `SessionStart` hook, `hooks/session-start.sh`. It walks up from the session's working directory for a `.booping` marker; with none it prints nothing. Inside a project it injects the `src/templates/hooks/session_start.md.j2` render: a short `## booping` block saying that project work a playbook fits goes through that playbook — offered by name, run with `/booping:playbook {name}` once the user agrees, `project-manager` when nothing narrower fits — and a `Playbook | Trigger` table over the same playbook list `/playbook` shows, project and global playbooks included. The hook never blocks a session: any failure exits 0 with no output.
+
+The block offers playbooks; it loads none. A project that wants every session to start as the manager says so in its own `CLAUDE.md`, e.g. "At session start, run `/booping:playbook project-manager`."
+
 ## Notices
 
 Problems in the manifest surface as in-band notices when you render (or run) the playbook:

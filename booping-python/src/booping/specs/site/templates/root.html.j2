@@ -4,7 +4,7 @@
 <div class="measure">
 <h1>{{ root }}</h1>
 {% if needs %}
-{{ callout(needs, unreviewed, questions, "../review.html#source=" ~ root) | trim }}
+{{ callout(needs, not_accepted, questions, "../review.html#source=" ~ root) | trim }}
 {% endif %}
 </div>
 {{ scenarios(types) | trim }}

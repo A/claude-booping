@@ -20,11 +20,13 @@ def _write(path: Path, text: str) -> None:
 
 
 def _site(tmp_path: Path, open_items: list[OpenItem]) -> dict[str, str]:
-    """Core root `booping` (a reviewed value, an unreviewed rule) and the home root
-    `proj` (a reviewed rule citing booping's rule, an ADR with a question)."""
+    """Core root `booping` (an accepted value, a not accepted rule) and the home root
+    `proj` (an accepted rule citing booping's rule, an ADR with a question)."""
     _write(
         tmp_path / "core" / "value" / "0001-clarity.md",
-        "---\ntitle: Clarity\nkind: value\nreviewed: 2026-10-01\nupdated_at: 2026-10-05\n---\n",
+        "---\ntitle: Clarity\nkind: value\n"
+        "review: accepted\nreview_evidence: site review — 2026-10-01\n"
+        "updated_at: 2026-10-05\n---\n",
     )
     _write(
         tmp_path / "core" / "rule" / "0001-small.md",
@@ -32,12 +34,16 @@ def _site(tmp_path: Path, open_items: list[OpenItem]) -> dict[str, str]:
     )
     _write(
         tmp_path / "proj" / "rule" / "0001-linear.md",
-        "---\ntitle: Linear\nstatus: accepted\nreviewed: 2026-10-02\nupdated_at: 2026-10-02\n"
+        "---\ntitle: Linear\nstatus: accepted\n"
+        "review: accepted\nreview_evidence: site review — 2026-10-02\n"
+        "updated_at: 2026-10-02\n"
         "related: [booping:rule/0001]\n---\n",
     )
     _write(
         tmp_path / "proj" / "adr" / "0001-pick.md",
-        "---\ntitle: Pick\nstatus: accepted\nreviewed: 2026-10-03\nupdated_at: 2026-10-03\n---\n"
+        "---\ntitle: Pick\nstatus: accepted\n"
+        "review: accepted\nreview_evidence: site review — 2026-10-03\n"
+        "updated_at: 2026-10-03\n---\n"
         "We [clarify] this.\n",
     )
     site = load_site(
@@ -92,7 +98,7 @@ def test_overview_counts_the_home_registry_and_gives_another_root_its_own_block(
     ]
     assert re.findall(
         r'<p class="callout">.*?<a href="([^"]+)">([^<]+)</a>(.*?)</span>', other
-    ) == [("review.html#source=booping", "1 needs you →", " · 1 unreviewed")]
+    ) == [("review.html#source=booping", "1 needs you →", " · 1 not accepted")]
     assert "recent" not in other
 
 

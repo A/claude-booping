@@ -1,5 +1,5 @@
 The five summary lines over a vault with ideas, records and marks: one open idea nobody
-took (the other is the record of an open item, the third accepted), three unreviewed
+took (the other is the record of an open item, the third accepted), three not accepted
 records in schema type order, and one mark of each kind — the quoted one is no mark.
 
 -- fixtures/cwd/.booping --
@@ -50,7 +50,8 @@ type: idea
 title: An accepted idea
 created_at: 2026-10-12
 status: accepted
-reviewed: 2026-10-13
+review: accepted
+review_evidence: site review — 2026-10-13
 ---
 
 ## Idea
@@ -61,7 +62,8 @@ Already accepted.
 type: rule
 title: A reviewed rule
 status: accepted
-reviewed: 2026-10-14
+review: accepted
+review_evidence: site review — 2026-10-14
 ---
 
 ## Rule
@@ -85,6 +87,6 @@ items: 1 open — request 0, backlog 0, spec gap 1
 ideas: 1 open, not taken
 plans: none active
 runs: none
-records: 3 unreviewed — idea 2, value 1
+records: 3 not accepted — none 3, shown 0, discussed 0; idea 2, value 1
 marks: 2 — clarify 1, unknown 1
 -- stderr --

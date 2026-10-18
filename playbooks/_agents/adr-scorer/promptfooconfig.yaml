@@ -1,0 +1,20 @@
+description: adr-scorer agent
+
+# The prompt is unused: agent_provider.py builds the live caller's prompt from `input`.
+prompts:
+  - id: '{{input}}'
+    label: prompt
+
+providers:
+  - id: file://agent_provider.py
+    config:
+      agent: booping:adr-scorer
+      # mirrors playbooks/specs/guide/prompt.md `## Record`: the rubric and the ADR pasted, no paths
+      preamble: Score this ADR against the rubric.
+      paste:
+        Rubric: specs/guide/adr-rubric.md
+      input_heading: ADR
+
+defaultTest: file://../../_lib/grader.yaml
+
+tests: file://tests.yaml

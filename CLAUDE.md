@@ -37,7 +37,8 @@ One shipped skill (`/playbook`); everything procedural is a **playbook** it driv
 - `src/ci/` — shipped CI templates and their helper script (`gitlab/`: the specs-site and specs-index `pages` jobs, `list-specs-projects.py`), consumed by URL, not by the CLI.
 - `src/config.yaml` — runtime config, single source of truth for structured data (macros, query specs, template trees, task types, sprint scale, per-playbook agents). Heavily commented — read it for key semantics.
 - `src/templates/` — runtime skill/agent templates + `_partials/`, rendered at skill-load time. Edits are **live**, no rebuild.
-- `skills/<name>/SKILL.md`, `agents/<name>.md` — hand-authored thin shells: frontmatter (including `effort:`) plus one `!`booping render src/templates/…`` line that pulls in the body at load time.
+- `hooks/` — plugin hooks declared in `.claude-plugin/plugin.json`: `session-start.sh` (`SessionStart`) walks up for `.booping` and injects the `src/templates/hooks/session_start.md.j2` render, silent outside a project and on any failure.
+- `skills/<name>/SKILL.md`, `agents/<name>.md` — hand-authored thin shells: frontmatter (including `effort:`) plus one `!`booping render src/templates/…`` line that pulls in the body at load time. Exception: `agents/adr-scorer.md` has a static body and a `tools: ListAgents` allowlist (a denylist lets MCP tools through, an empty list is refused at spawn) — it must read nothing beyond its prompt, so it cannot run a render.
 - `src/specs/` — the shipped specs format: `README.md` (the guide) and `schemas/<type>.yaml` (one mdcheck rule file per shipped record type). A tier overlays its own `{tier root}/_schemas/<type>.yaml` (override or add, no cascade) and may carry `tags.yaml`; no translated `schemas-{lang}/` sets — structural headings stay English.
 - `playbooks/<name>/` — core playbooks. Also: `_partials/` (shared fragments), `_scripts/` (shared hook scripts), `_lib/` (eval harness), `_fixtures/vault/` (hermetic render fixture). Each playbook commits its rendered report at `playbooks/<name>/_reports/output.md`.
 - `specs/` — the core specs tier (`core.specs.tiers.core.path`): rules shipped with the plugin whose `targets` steer core playbooks for every user. Their `## Follows from` links point into `vault/value/`.
@@ -114,7 +115,7 @@ This repo's own vault is checked in at `vault/`. Its type directories (`vault/va
 
 - `src/templates/**` edits are live — no rebuild step anywhere in the repo.
 - Playbook source edits (manifests, step `prompt.md`, shared partials) drift the committed reports. Loop: edit → `just snapshots` (read the diff) → `just snapshots-accept` → commit source and report together.
-- Eval suites sit beside their step (`tests.yaml` + `promptfooconfig.yaml` + `_fixtures/`); two tiers per fixture, `smoke` (deterministic) and `regress` (llm-rubric judges). Shared asserts, graders and rubric prompts live in `playbooks/_lib/`.
+- Eval suites sit beside their step (`tests.yaml` + `promptfooconfig.yaml` + `_fixtures/`); two tiers per fixture, `smoke` (deterministic) and `regress` (llm-rubric judges). Shared asserts, graders and rubric prompts live in `playbooks/_lib/`. An agent's own suite sits at `playbooks/_agents/{agent}/` (`just smoke _agents/{agent}`), never under `agents/`, where Claude Code would load its fixture `.md` files as agents.
 - No comments that restate code — only WHY for non-obvious bits.
 - Conventional commits with scope: `feat(booping): …`, `fix(groom): …`.
 - README's Statuses section is hand-maintained narrative over the per-playbook `states:` blocks — revisit it when one changes.

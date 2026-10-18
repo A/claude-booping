@@ -6,7 +6,8 @@ searchable metadata in page order, and each record's body as plain text with mar
 type: value
 title: Small steps
 summary: Ship in small, reviewable steps.
-reviewed: 2026-10-01
+review: accepted
+review_evidence: site review — 2026-10-01
 ---
 
 # Small steps
@@ -31,6 +32,6 @@ booping specs site --root proj=specs
 specs site: 1 roots, 2 records, 12 pages, 0 warnings -> specs-site
 -- stderr --
 -- expected/cwd/specs-site/search-index.js --
-window.SPECS_INDEX = [{"id":"proj:rule/0001","ref":"rule/0001","root":"proj","type":"rule","type_label":"Rule","title":"One concern per commit","summary":null,"status":"accepted","status_label":"accepted","tags":["git"],"url":"proj/rule/0001-one-concern.html","flags":["unreviewed","clarify"]},{"id":"proj:value/0001","ref":"value/0001","root":"proj","type":"value","type_label":"Value","title":"Small steps","summary":"Ship in small, reviewable steps.","status":null,"status_label":null,"tags":[],"url":"proj/value/0001-small-steps.html","flags":[]}];
+window.SPECS_INDEX = [{"id":"proj:rule/0001","ref":"rule/0001","root":"proj","type":"rule","type_label":"Rule","title":"One concern per commit","summary":null,"status":"accepted","status_label":"accepted","tags":["git"],"url":"proj/rule/0001-one-concern.html","flags":["not_accepted","clarify"]},{"id":"proj:value/0001","ref":"value/0001","root":"proj","type":"value","type_label":"Value","title":"Small steps","summary":"Ship in small, reviewable steps.","status":null,"status_label":null,"tags":[],"url":"proj/value/0001-small-steps.html","flags":[]}];
 -- expected/cwd/specs-site/search-body.js --
 window.SPECS_BODY = {"proj:rule/0001":"Why A commit carries one concern [clarify] here.","proj:value/0001":"Small steps Ship small."};

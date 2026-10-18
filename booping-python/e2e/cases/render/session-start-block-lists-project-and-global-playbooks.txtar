@@ -1,0 +1,60 @@
+The session-start template renders the locked block — heading, prose, a two-column Playbook |
+Trigger table — over the same playbook list `/playbook` iterates, so inside a project both the
+vault's own playbook and the global one appear. Core playbooks are rows too; the render is filtered
+to the fixture rows so the case depends on shipped playbooks only through their existence.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+-- fixtures/cwd/vault/_playbooks/fx-local/playbook.md --
+---
+name: fx-local
+title: Local
+summary: Project fixture.
+trigger: do the local thing; the local | piped thing
+---
+
+Preamble.
+-- fixtures/cwd/vault/_playbooks/fx-local/playbook.yaml --
+graph:
+  only: []
+-- fixtures/cwd/vault/_playbooks/fx-local/only/prompt.md --
+---
+name: only
+summary: Only step.
+---
+
+Only body.
+-- fixtures/home/Claude/_playbooks/fx-global/playbook.md --
+---
+name: fx-global
+title: Global
+summary: Global fixture.
+trigger: do the global thing
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-global/playbook.yaml --
+graph:
+  only: []
+-- fixtures/home/Claude/_playbooks/fx-global/only/prompt.md --
+---
+name: only
+summary: Only step.
+---
+
+Only body.
+-- cmd --
+sh -c 'booping render src/templates/hooks/session_start.md.j2 | grep -E "^(## booping|This repo|\| (Playbook|---|fx-))"'
+-- exit --
+0
+-- stdout --
+## booping
+This repo is a booping project. Project work a playbook below fits — a decision or ADR, a spec record, a plan, a sprint, a review, a retro — goes through that playbook: offer it to the user by name and, once they agree, run `/booping:playbook {name}`; its render brings the project's rules. Project work nothing narrower fits → offer `project-manager`. Questions, explanations and debugging need no playbook.
+| Playbook | Trigger |
+| --- | --- |
+| fx-global | do the global thing |
+| fx-local | do the local thing; the local \| piped thing |
+-- stderr --

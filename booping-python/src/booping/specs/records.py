@@ -37,8 +37,20 @@ class _Fronted(Protocol):
     def frontmatter(self) -> dict[str, Any]: ...
 
 
-def unreviewed(record: _Fronted) -> bool:
-    return not record.frontmatter.get("reviewed")
+REVIEW_LEVELS = ("shown", "discussed", "accepted")
+NO_REVIEW = "none"
+ACCEPTED = "accepted"
+
+
+def review_level(record: _Fronted) -> str:
+    """`none` when the record carries no `review:` key; an unknown value reads as
+    `none` too — `booping specs check` reports it."""
+    level = record.frontmatter.get("review")
+    return level if level in REVIEW_LEVELS else NO_REVIEW
+
+
+def accepted(record: _Fronted) -> bool:
+    return review_level(record) == ACCEPTED
 
 
 def parse_filename(name: str) -> tuple[int, str] | None:

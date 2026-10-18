@@ -1,0 +1,49 @@
+The records line counts every record not explicitly accepted, split by review level — no
+`review:` key reads as `none` — then by type in schema type order; the accepted record is
+left out of both.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+-- fixtures/cwd/vault/adr/0001-never-shown.md --
+---
+type: adr
+title: Never shown
+status: proposed
+---
+-- fixtures/cwd/vault/rule/0001-shown.md --
+---
+type: rule
+title: Shown
+status: accepted
+review: shown
+review_evidence: 2026-10-19, chat
+---
+-- fixtures/cwd/vault/value/0001-discussed.md --
+---
+type: value
+title: Discussed
+review: discussed
+review_evidence: «keep it short» — 2026-10-19, chat; scope only
+---
+-- fixtures/cwd/vault/value/0002-accepted.md --
+---
+type: value
+title: Accepted
+review: accepted
+review_evidence: «ok, accepted» — 2026-10-19, chat
+---
+-- cmd --
+booping status
+-- exit --
+0
+-- stdout --
+items: none
+ideas: none
+plans: none active
+runs: none
+records: 3 not accepted — none 1, shown 1, discussed 1; adr 1, rule 1, value 1
+marks: none
+-- stderr --

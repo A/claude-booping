@@ -100,6 +100,6 @@ items: none
 ideas: none
 plans: none active
 runs: 1 finished, 1 failed, 1 lost
-records: none unreviewed
+records: none not accepted
 marks: none
 -- stderr --

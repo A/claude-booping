@@ -46,14 +46,50 @@ code; do not run it.
 
 The user pastes the specs site's Outbox block (`## {ref} — {title}` groups). Per record, check each
 comment against the record first: apply it, or skip it when the record already says so. A
-`{ref} — reviewed {date}` line sets `reviewed: {date}` — the only case you set `reviewed`, never on
-your own initiative. Next: `booping specs check`.
+`{ref} — accepted {date}` line sets `review: accepted` and `review_evidence: "site review — {date}"`.
+Next: `booping specs check`.
 
 ## Record
 
 A decision → an ADR, only for one choice with a real alternative and a reason the code cannot
 show. An idea → an idea record. A constraint on how the model works → a rule with `targets` and
-`brief`. Next: an ADR with a `Confirmation:` line → file an item with `--set source=adr --set record=adr/NNNN
+`brief`.
+
+An ADR is drafted `status: proposed`, then:
+
+1. Score it: spawn `booping:adr-scorer` with a prompt that pastes the ADR file's text and the text
+   of [the rubric](${CLAUDE_PLUGIN_ROOT}/playbooks/specs/guide/adr-rubric.md) — the text itself,
+   never a path. A score ≤ 1 → redraft the alternatives from its findings and score again, at
+   most two rounds; then the brief carries the score as it stands.
+2. Show the brief, exactly this shape:
+
+   ```
+   **ADR {NNNN} — {title}** · {status} · оценка альтернатив {score}/3{; findings if < 3}
+
+   | | вариант | почему |
+   |---|---|---|
+   | ✔ | {chosen option} | {its reason} |
+   | ✘ | {rejected option} | {why rejected} |
+
+   Ключевые моменты:
+   1. {each point of the chosen decision a reader must see to object to it}
+
+   Задевает: {ADR/value refs and how — "разворачивает ADR N" for a reversal}
+   Решил сам: {each call you made alone, or "ничего"}
+
+   Если что-то не так — скажи, поправлю; если всё ок — продолжаю.
+   ```
+
+3. The user's answer sets the level, with its evidence (the format guide's `review_evidence`):
+   - no objection → `status: accepted`, `review: shown`, evidence the date and where it was shown;
+   - an explicit yes → `status: accepted`, `review: accepted`, evidence the user's words quoted, the date and where;
+   - a discussion that ends in agreement → `status: accepted`, `review: discussed`, evidence the user's words quoted, the date, where and the gist;
+   - an objection → back to the draft, then score and brief again.
+
+Autonomous: log the brief as an agent decision instead of showing it, then set `status: accepted`
+with no `review` key.
+
+Next: an ADR with a `Confirmation:` line → file an item with `--set source=adr --set record=adr/NNNN
 --set direction=spec-to-code --set title="{the Confirmation: line}"`;
 anything else → `booping specs check`.
 
