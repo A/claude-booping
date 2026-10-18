@@ -239,13 +239,14 @@ def _run_ls(args: argparse.Namespace) -> None:
     logger.log(vault=ctx.vault, subcommand="specs", message=f"ls --tier {args.tier}")
     tier = _find_tier(ctx, root, home_dir, args.tier)
     known = tier.types
-    for type_ in args.record_types or []:
+    record_types: list[str] = args.record_types or []
+    for type_ in record_types:
         _check_type(type_, known)
     _require_dir(tier)
 
     records = _numbered(load_tier(tier, known), known)
-    if args.record_types:
-        records = [r for r in records if r.type in args.record_types]
+    if record_types:
+        records = [r for r in records if r.type in record_types]
     excluded = set(args.exclude)
     records = [r for r in records if f"{r.type}/{r.number:04d}" not in excluded]
     records.sort(key=lambda r: (r.type, r.number))
