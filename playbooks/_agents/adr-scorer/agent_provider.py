@@ -2,13 +2,19 @@
 
 `claude -p --plugin-dir <repo> --agent <config.agent>` — the agent's own frontmatter decides
 its tools and model, exactly as when a driver spawns it. The prompt is built the way the
-live caller builds it: `config.preamble`, then each `config.paste` file's text under its
-heading, then the test's `input` var under `config.input_heading`.
+live caller builds it, each part under a `# {heading}`: `config.preamble`, then each
+`config.paste` entry, then each `config.vars` var, then the test's `input` var under
+`config.input_heading`.
+
+A `config.paste` value is a repo-relative file, or `{file}#{heading}[,{heading}]` for only
+those H2 sections of it, in the order named. A pasted text that already opens with its
+`# {heading}` is not given a second one. `config.vars` maps a test var to its heading; a var
+the test leaves empty reads `# {heading} — none named`.
 
 Output: `<tool_calls>N</tool_calls>` (tool_use blocks the agent emitted), then the agent's
-reply in a `<return>` block, so `_lib/asserts/return.js` checks the reply's contract.
-A test that also sets a `compare` var runs the agent a second time on it and adds that
-reply in a `<compare>` block, for asserts that relate two scores.
+reply in a `<return>` block. A test that also sets a `compare` var runs the agent a second
+time on it — with `compare_{var}` in place of each `config.vars` var it sets — and adds that
+reply in a `<compare>` block, for asserts that relate two replies.
 
 stdlib-only; `call_api` never raises.
 """
@@ -20,14 +26,49 @@ import tempfile
 from pathlib import Path
 
 REPO = Path(__file__).parents[3]
-PLAYBOOKS = REPO / "playbooks"
 
 
-def _prompt(config, text):
+def _sections(text, headings):
+    found = {}
+    current = None
+    for line in text.splitlines():
+        if line.startswith("## ") or line.startswith("# "):
+            current = line[3:].strip() if line.startswith("## ") else None
+            if current is not None:
+                found[current] = [line]
+            continue
+        if current is not None:
+            found[current].append(line)
+    missing = [h for h in headings if h not in found]
+    if missing:
+        raise ValueError(f"no H2 section(s) {missing}")
+    return "\n\n".join("\n".join(found[h]).strip() for h in headings)
+
+
+def _paste(spec):
+    rel, _, heads = spec.partition("#")
+    text = (REPO / rel).read_text(encoding="utf-8")
+    if heads:
+        return _sections(text, [h.strip() for h in heads.split(",")])
+    return text.strip()
+
+
+def _part(heading, text):
+    text = (text or "").strip()
+    if not text:
+        return f"# {heading} — none named"
+    if text.startswith(f"# {heading}\n"):
+        return text
+    return f"# {heading}\n\n{text}"
+
+
+def _prompt(config, variables, text):
     parts = [config.get("preamble", "").strip()]
-    for heading, rel in (config.get("paste") or {}).items():
-        parts.append(f"## {heading}\n\n{(PLAYBOOKS / rel).read_text(encoding='utf-8').strip()}")
-    parts.append(f"## {config.get('input_heading', 'Input')}\n\n{text.strip()}")
+    for heading, spec in (config.get("paste") or {}).items():
+        parts.append(_part(heading, _paste(spec)))
+    for var, heading in (config.get("vars") or {}).items():
+        parts.append(_part(heading, variables.get(var)))
+    parts.append(_part(config.get("input_heading", "Input"), text))
     return "\n\n".join(p for p in parts if p) + "\n"
 
 
@@ -66,9 +107,11 @@ def _run(prompt, agent):
 
 
 def _call(config, variables):
-    runs = [_run(_prompt(config, variables["input"]), config["agent"])]
+    runs = [_run(_prompt(config, variables, variables["input"]), config["agent"])]
     if variables.get("compare"):
-        runs.append(_run(_prompt(config, variables["compare"]), config["agent"]))
+        compare_vars = {var: variables.get(f"compare_{var}", variables.get(var))
+                        for var in (config.get("vars") or {})}
+        runs.append(_run(_prompt(config, compare_vars, variables["compare"]), config["agent"]))
     for run in runs:
         if "error" in run:
             return run

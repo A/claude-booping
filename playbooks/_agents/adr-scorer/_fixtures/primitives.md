@@ -1,0 +1,20 @@
+- `just lint` / `just typecheck` / `just pytest` — ruff, basedpyright and pytest over both uv projects.
+- `just snapshots` — diff committed playbook reports against a fresh hermetic render; `just snapshots-accept` writes them.
+- `just mdcheck` — structural rule checks over the rendered reports with the `mdcheck` binary.
+- `just e2e` — the txtar contract corpora through pytest.
+- `just specs-check` — `booping specs check` over the core and project tiers.
+- `just ci` — everything CI runs, in order.
+- `just eval|smoke|regress <suite>` — promptfoo eval suites, advisory, never in CI.
+- `just docs` / `just docs-serve` — build or preview the public docs site.
+- `booping create <config.path> <dest> --set k=v` — writes a config-defined file tree from Jinja templates, macros and `next_id(prefix)`.
+- `booping query` — filters, sorts and projects markdown files by frontmatter; the same specs run at render time as the `| query` filter.
+- `booping set <file> k=v` — sets, appends or removes frontmatter keys of any file, or keys of the `.booping` marker.
+- `booping render` / `render-playbook` — render a template, or a playbook's composed procedure, with full project context.
+- `booping transition <file> <status>` / `state <file>` — move a file along its `states:` machine, hooks included; report a run's frontier.
+- `booping config <key>` / `debug-context` — print a merged config value; dump the assembled context.
+- `booping session-stats` — active minutes, tokens and models from artefacts' stamped sessions.
+- `booping status` — the project status computed from the vault.
+- `booping run` (`groom`, `develop`, `code-review`, `ack`) — launch a recorded headless run, ack a finished one.
+- `booping plan` (`split`) — cut a one-file draft into milestone files; check milestones against the contract.
+- `booping specs` (`ls`, `next`, `check`, `scan`, `init`, `site`, `site-index`) — list, number, check and publish typed spec records of a tier.
+- `booping-tracker` (`states`, `show`, `comment`, `issue-create`, `issue-update`, `relate`, `sync`) — the task-tracker CLI.

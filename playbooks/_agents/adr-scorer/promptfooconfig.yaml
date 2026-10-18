@@ -9,11 +9,15 @@ providers:
   - id: file://agent_provider.py
     config:
       agent: booping:adr-scorer
-      # mirrors playbooks/specs/guide/prompt.md `## Record`: the rubric and the ADR pasted, no paths
-      preamble: Score this ADR against the rubric.
+      # mirrors playbooks/specs/guide/prompt.md `## Record`: the parts pasted in its order, under
+      # its headings, no paths; the rubric file carries its own heading
       paste:
-        Rubric: specs/guide/adr-rubric.md
-      input_heading: ADR
+        ADR scorer task: playbooks/specs/guide/adr-rubric.md
+        Guide excerpt: 'src/specs/README.md#Types,When a record is worth writing'
+      vars:
+        inventory: Records
+        primitives: Primitives
+      input_heading: Draft ADR
 
 defaultTest: file://../../_lib/grader.yaml
 
