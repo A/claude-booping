@@ -43,9 +43,9 @@ batch does not change the cost per plan.
 Groom is one drafting pass on the plan template with two stages, research then draft, and no
 separate self-review step (V3a). The 16 rules the ablation shows the model follows unprompted and the
 anti-pattern list leave the prompt; the template's sections stay. The draft is the whole plan in
-one file, milestones included; how it becomes milestone files is adr/0031. The 9 milestone-shape
+one file, milestones included; how it becomes milestone files is a separate decision. The 9 milestone-shape
 rules the model misses even when told are not repeated in the prompt either: they are checked after
-the split (adr/0031).
+the split.
 
 ## Alternatives
 
@@ -87,6 +87,6 @@ shape before improvising, self-contained milestones, assumption lines, a short s
 ## Consequences
 
 - `playbooks/groom` is rewritten around one drafting step; its snapshot reports change.
-- The plan template states the one-file milestone format adr/0031 cuts on.
+- The plan template states the one-file milestone format the split cuts on.
 - A light path for small, already-decided requests is a follow-up (idea/0009, corpus case
   `s3-booping-specs-site-registries`).

@@ -4,12 +4,15 @@
 # adr-0003, adr-0019, adr-0024 and the sources of the mutant-* fixtures from commit 5ea9393, verbatim.
 # A mutant cuts one cheap option — its Alternatives row, its section and its Context line — and
 # names the cut in `metadata.cut`; mutant-0033 is also shown as a draft (status proposed, the
-# superseded note dropped) and one other project's name is neutralised.
+# superseded note dropped) and one other project's name is neutralised; mutant-0030's forward
+# refs to adr/0031, written after it, are reworded to prose.
 #
 # Inventory: inventory-adr-{NNNN}.txt is the output of
 #   bin/booping specs ls --tier project --type value --type rule --type adr --titles --exclude adr/{NNNN}
 # run in a tree of the fixture ADR's commit (19a984f^ or 5ea9393, with the repo's .booping marker),
-# with every line whose record `created_at` is after the ADR's dropped.
+# with every line whose record `created_at` is after the ADR's dropped, and — `created_at` being
+# day-precision — every adr numbered above the fixture's; statuses are the ones in force when the
+# ADR was written (adr/0016 accepted: superseded by adr/0035 on 2026-10-17).
 # Primitives: primitives.md, one line per command or building block of CLAUDE.md `## Commands`.
 #
 # Expectations are hand-derived: the deleted ADRs route to rule / none / value; the kept ones

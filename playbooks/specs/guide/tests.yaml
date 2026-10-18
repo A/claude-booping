@@ -262,11 +262,20 @@
         allow:
           - '^(?!specs/adr/)'
         noOthers: true
-    # ROUTE-SHOWN
+    # NO-BRIEF — a routed draft gets no ADR brief
     - type: javascript
       value: file://../../_lib/asserts/return.js
       config:
         requireBlock: true
-        entry: '\b[Rr]ule\b'
+        entry: '^\s*\*\*ADR \d{4} —'
+        onlyEntries: false
+        minEntries: 0
+        maxEntries: 0
+    # ROUTE-SHOWN — a line naming the route and its reason
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        entry: '\b[Rr]ule\b.{20,}'
         onlyEntries: false
         minEntries: 1

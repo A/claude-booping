@@ -256,7 +256,7 @@ def _run_ls(args: argparse.Namespace) -> None:
         summary_text = summary if summary is not None else ""
         if args.titles:
             title = r.frontmatter.get("title")
-            summary_text = f"{title if title is not None else ''}: {summary_text}"
+            summary_text = f"{title}: {summary_text}" if title is not None else summary_text
         print(f"{r.type}/{r.number:04d}  {status if status is not None else '-'}  {summary_text}")
 
 
