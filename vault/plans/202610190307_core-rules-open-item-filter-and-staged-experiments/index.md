@@ -2,13 +2,13 @@
 title: "Core rules — open items only for what outlives the session, ids with titles
   in chat, staged experiments"
 type: "feature"
-status: in-progress
+status: done
 sp: 18
 related_to: null
 created: 2026-10-19 03:08
 planned: null
 started: 2026-10-19 03:15
-completed: null
+completed: 2026-10-19 03:27
 code_reviews: []
 sessions:
 - 4e6bc07e-78db-5a84-9b90-8cf66430bb73
@@ -23,6 +23,13 @@ tracker_issue: null
 return_to: null
 reviewed_at: 2026-10-19 03:12
 agents: '{"develop-loop-G1": "a07de547e56912a52", "develop-loop-G2": "a072e5616c347544c"}'
+metrics_active_minutes: 18
+metrics_models:
+- claude-opus-5-5
+metrics_tokens_input: 120
+metrics_tokens_output: 38038
+metrics_tokens_cache_creation: 189098
+metrics_tokens_cache_read: 4861651
 ---
 
 # Core rules — open items only for what outlives the session, ids with titles in chat, staged experiments
