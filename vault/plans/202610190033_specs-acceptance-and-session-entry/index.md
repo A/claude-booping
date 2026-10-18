@@ -2,7 +2,7 @@
 title: "Specs acceptance — ADR brief, review levels, ADR scoring, session entry to
   playbooks"
 type: "feature"
-status: presenting
+status: ready-for-dev
 sp: 34
 related_to: null
 created: 2026-10-19 00:29
@@ -20,6 +20,7 @@ tracker_provider: null
 tracker_request: null
 tracker_issue: null
 return_to: null
+reviewed_at: 2026-10-19 00:53
 ---
 
 # Specs acceptance — ADR brief, review levels, ADR scoring, session entry to playbooks
