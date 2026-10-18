@@ -67,7 +67,7 @@ Name every vault and repo file by its absolute path in briefings and reports.
 - [Retro: 202610031129_flat-paths](../../retrospectives/202610031129_flat-paths.md)
 ```
 
-Every target named in `targets:` receives the `brief:` together with a link to the record, in a `## Rules` section of its rendered body — see [Playbooks → Rules](playbook.md#rules). `created_by: claude` marks the record as learnt; `reviewed` is never written by learn, only by you. `sources:` is present only when the vault lives inside the repo; `## Follows from` links the value the rule follows from when one fits, else the retrospective.
+Every target named in `targets:` receives the `brief:` together with a link to the record, in a `## Rules` section of its rendered body — see [Playbooks → Rules](playbook.md#rules). `created_by: claude` marks the record as learnt; learn sets a `review` level only with its evidence, and never `accepted` without your words quoted. `sources:` is present only when the vault lives inside the repo; `## Follows from` links the value the rule follows from when one fits, else the retrospective.
 
 ### Targets are fetched, never guessed
 

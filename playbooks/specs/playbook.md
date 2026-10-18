@@ -23,7 +23,7 @@ Mode: autonomous when the user told this session to work autonomously, or its la
 Writing a record:
 
 - Number it with `booping specs next {type}`.
-- Set `created_by: claude`; never set `reviewed`.
+- Set `created_by: claude`; set a `review` level only with its `review_evidence`, and never `accepted` without a quote of the owner.
 - Run `booping specs check` after every write and fix what it reports.
 
 The run keeps no state of its own. The `open_item` machine below tracks one open-item file each: its workdir is the vault, `booping transition {item} {status}` moves it, the machine inferred from the path — never create a run workdir for it.
