@@ -1,6 +1,6 @@
 # project-manager playbook
 
-The manager you talk to about a project: tell it what you want, in as many requests per message as you like, and it files each one as an **open item**, then carries it through groom, develop, an independent code review and the merge — stopping where its mode says it should.
+The manager you talk to about a project: tell it what you want, in as many requests per message as you like, and it files what must outlive the session as an **open item**, then carries each through groom, develop, an independent code review and the merge — stopping where its mode says it should.
 
 ```text
 /playbook project-manager
@@ -18,7 +18,7 @@ The manager you talk to about a project: tell it what you want, in as many reque
 
 In `supervised` mode it proposes the first action and waits for you; in `autonomous` mode it starts on that list.
 
-**Every message.** Each request in your message becomes one item, filed with `booping create core.specs.open_items.template … --set source=request` — asides included, in your own words, never paraphrased. A message that only answers a question or confirms a gate files nothing. The manager then lists the ids it filed, one line each.
+**Every message.** Only what must outlive the session becomes an item — work for later, or a question waiting on you — filed in your own words, never paraphrased. An instruction for this session ("ping me when the release is out", "pause for two hours"), an answer to a question or a gate confirmation files nothing and is handled in the session; a standing policy becomes a rule and a decision an ADR, through the `specs` playbook. The manager then lists the items it filed, one line each with its title: `Created OI-0007: {title}`, in your language.
 
 **Working an item.** Each item it takes up is one of four kinds:
 

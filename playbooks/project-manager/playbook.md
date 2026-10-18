@@ -1,7 +1,7 @@
 ---
 name: project-manager
 title: Project Manager
-summary: The manager the user talks to — files every request as an item and carries each through groom, develop, review and merge in the session's mode, supervised or autonomous.
+summary: The manager the user talks to — files what must outlive the session as an item and carries each through groom, develop, review and merge in the session's mode, supervised or autonomous.
 trigger: talking to the project's manager; "what is going on", "take the open items", a message carrying several requests
 jinja: true
 inline_steps: true

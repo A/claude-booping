@@ -46,6 +46,10 @@ Pass each step's output through unchanged to the user and into later sections th
 
 A step return carrying questions for the user (a `## Questions:` block or equivalent) in a supervised run → present the rest of the return as normal output first, then ask each decision the user needs context to make — an approval, a conflict, a design fork, a review finding, a departure from a record, accepting a proposal — in chat prose, one per message: its compact context (what the records say, what the code does, where it came from), your own proposal, and a `[n/total]` counter when several are queued. Stop and wait; the user may ask back before deciding. `AskUserQuestion` only for a mechanical pick whose answer needs no context — a branch name, which of two files, a path default, items from a list. In an autonomous run, those questions and any the run would otherwise park → settle each yourself: the step's recommended option, else its first, else the most conservative answer the request supports; log each as an agent decision as in step 5, and continue — except a question the step marks as always asked, which is asked as in a supervised run.
 
+Every id you say in chat — an open item, an ADR, a rule, a plan — is followed by its short title; newly filed items are listed one per line, `Создан {id}: {title}` or `Created {id}: {title}` in the user's language ([booping:rule/0038](${CLAUDE_PLUGIN_ROOT}/specs/rule/0038-ids-carry-their-title.md)).
+
+An experiment, eval or benchmark matrix runs in stages — cheap screen → shortlist → significance — and before each stage you name its size (calls, rough cost) and what it decides ([booping:rule/0039](${CLAUDE_PLUGIN_ROOT}/specs/rule/0039-experiments-run-in-stages.md)).
+
 ### Agent ids
 
 Record the id of every agent you spawn — delegated step or delegated reads alike — in the run artifact's `agents:` frontmatter mapping, keyed by step name. Looping back to a step within this conversation → resume its agent by that id (SendMessage) instead of spawning a fresh one, so its context carries over.

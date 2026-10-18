@@ -1,9 +1,9 @@
 ---
-summary: File every request in the user's message as an item, in the user's own words.
+summary: File each request that must outlive the session as an item, in the user's own words.
 review_gate: null
 ---
 
-Split the message into requests — each distinct ask, asides included. A message that only answers a pending question or confirms a gate is no request.
+Split the message into requests and file only what must outlive the session: work for later — a feature, a bug, a fix, a scope question — or a question waiting on the owner. The rest files nothing: an instruction for this session ("ping me", "wait", "do it now") is done or kept in the session; an answer to a gate or a UAT confirmation stays in the session; a standing policy goes to a rule through the `specs` playbook; a decision goes to an ADR.
 
 Per request, one:
 
@@ -28,4 +28,4 @@ TEXT
 booping transition {vault}/open-items/{id}.md open
 ```
 
-Then post the filed ids, one line each: `{id} {title}`.
+Then post the filed items, one line each, in the user's language: `Создан {id}: {title}` / `Created {id}: {title}`.

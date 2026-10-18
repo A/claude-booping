@@ -2,7 +2,7 @@
 id: "04"
 title: "Docs say only what outlives the session is filed"
 sp: 2
-status: pending
+status: done
 plan: "plans/202610190307_core-rules-open-item-filter-and-staged-experiments/index.md"
 ---
 
@@ -16,13 +16,13 @@ plan: "plans/202610190307_core-rules-open-item-filter-and-staged-experiments/ind
 
 | Task | Description | Files | SP | Status |
 |------|-------------|-------|----|--------|
-| 4.1 | Rewrite the "Every message" paragraph: only what outlives the session becomes an item; session instructions, gate answers, policies and decisions do not; filed ids listed with their titles. Align README's project-manager sentence and the playbook `summary:`. | `documentation/project_manager.md`, `README.md`, `playbooks/project-manager/playbook.md` | 2 | pending |
+| 4.1 | Rewrite the "Every message" paragraph: only what outlives the session becomes an item; session instructions, gate answers, policies and decisions do not; filed ids listed with their titles. Align README's project-manager sentence and the playbook `summary:`. | `documentation/project_manager.md`, `README.md`, `playbooks/project-manager/playbook.md` | 2 | done |
 
 ## Definition of Done
 
 Task 4.1
-- [ ] Audience filter: only what a user of the manager sees — which messages become items, how ids appear; no rule ids, no internal step names beyond `project-manager`.
-- [ ] "asides included" and "every request" appear in none of the three files.
+- [x] Audience filter: only what a user of the manager sees — which messages become items, how ids appear; no rule ids, no internal step names beyond `project-manager`.
+- [x] "asides included" and "every request" appear in none of the three files.
 
 ## References
 
