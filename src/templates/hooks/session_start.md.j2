@@ -1,0 +1,9 @@
+## booping
+
+This repo is a booping project. Project work a playbook below fits — a decision or ADR, a spec record, a plan, a sprint, a review, a retro — goes through that playbook: offer it to the user by name and, once they agree, run `/booping:playbook {name}`; its render brings the project's rules. Project work nothing narrower fits → offer `project-manager`. Questions, explanations and debugging need no playbook.
+
+| Playbook | Trigger |
+| --- | --- |
+{% for pb in context.playbooks -%}
+| {{ pb.name }} | {{ pb.trigger | replace("|", "\\|") | replace("\n", " ") }} |
+{% endfor -%}
