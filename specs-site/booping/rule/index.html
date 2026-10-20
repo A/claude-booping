@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>try{var t=localStorage.getItem("specs-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}document.documentElement.classList.add("js")</script>
+<meta name="color-scheme" content="light dark">
+<title>Rules — claude-booping</title>
+<link rel="stylesheet" href="../../fonts.css">
+<link rel="stylesheet" href="../../style.css">
+<script src="../../site.js" defer></script>
+<script src="../../filter-format.js" defer></script>
+<script src="../../filter.js" defer></script>
+<script src="../../search.js" defer></script>
+<script src="../../comments-format.js" defer></script>
+<script src="../../comments.js" defer></script>
+</head>
+<body>
+<svg aria-hidden="true" style="display:none">
+<symbol id="i-accepted" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4.8 8.2l2.1 2.1 4.3-4.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-open" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+<symbol id="i-planned" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2.6 2.2"/></symbol>
+<symbol id="i-rejected" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3.6 12.4l8.8-8.8" stroke="currentColor" stroke-width="1.6"/></symbol>
+<symbol id="i-clarify" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="currentColor"/><path d="M6.1 6.2a2 2 0 1 1 2.6 1.9c-.5.2-.7.6-.7 1.1v.4" fill="none" stroke="var(--surface)" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="11.6" r=".95" fill="var(--surface)"/></symbol>
+<symbol id="i-unknown" viewBox="0 0 16 16"><path d="M8 1.6l6.8 12.2H1.2z" fill="currentColor"/><path d="M8 6v3.6" stroke="var(--surface)" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="11.6" r=".9" fill="var(--surface)"/></symbol>
+<symbol id="i-not-accepted" viewBox="0 0 16 16"><circle cx="8" cy="8" r="4.6" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+<symbol id="i-review-accepted" viewBox="0 0 16 16"><circle cx="8" cy="8" r="4.6" fill="currentColor"/></symbol>
+<symbol id="i-menu" viewBox="0 0 20 20"><path d="M3 5.5h14M3 10h14M3 14.5h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+<symbol id="i-search" viewBox="0 0 20 20"><circle cx="8.6" cy="8.6" r="5.6" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M13 13l4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+<symbol id="i-moon" viewBox="0 0 20 20"><path d="M15.5 12.6A6.5 6.5 0 0 1 7.4 4.5a6.5 6.5 0 1 0 8.1 8.1z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+<symbol id="i-sun" viewBox="0 0 16 16"><circle cx="8" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.2v1.6M8 13.2v1.6M1.2 8h1.6M13.2 8h1.6M3.2 3.2l1.1 1.1M11.7 11.7l1.1 1.1M3.2 12.8l1.1-1.1M11.7 4.3l1.1-1.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+<symbol id="i-auto" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.6a6.4 6.4 0 0 0 0 12.8z" fill="currentColor"/></symbol>
+<symbol id="i-comment" viewBox="0 0 20 20"><path d="M4 4.5h12a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5H9.2l-3.7 3v-3H4A1.5 1.5 0 0 1 2.5 13V6A1.5 1.5 0 0 1 4 4.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+<symbol id="i-outbox" viewBox="0 0 20 20"><path d="M2.5 11.5v4a1.5 1.5 0 0 0 1.5 1.5h12a1.5 1.5 0 0 0 1.5-1.5v-4M10 13V3.5M6.5 7L10 3.5 13.5 7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+<button class="iconbtn menu" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Menu"><svg class="ic" aria-hidden="true"><use href="#i-menu"/></svg></button>
+<a class="brand" href="../../index.html">claude-booping</a>
+<form class="search" role="search" action="../../search.html" data-prefix="../../" data-all="All results">
+<svg class="ic" aria-hidden="true"><use href="#i-search"/></svg>
+<input type="search" name="q" role="combobox" aria-label="Search" aria-autocomplete="list" aria-expanded="false" aria-controls="search-list" autocomplete="off" placeholder="Search the specs">
+<kbd>/</kbd>
+<button class="iconbtn search-close" type="button" aria-label="Close">&times;</button>
+<ul id="search-list" role="listbox" aria-label="Search" hidden></ul>
+</form>
+<button class="iconbtn search-btn" type="button" aria-label="Search" title="Search"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg></button>
+<a class="iconbtn outbox" href="../../comments.html" aria-label="Outbox" title="Outbox"><svg class="ic" aria-hidden="true"><use href="#i-outbox"/></svg><span class="l">Outbox</span><span class="n"></span></a>
+<button class="iconbtn theme" type="button" aria-label="Theme: auto" title="Theme: auto" data-label-auto="Theme: auto" data-label-light="Theme: light" data-label-dark="Theme: dark"><svg class="ic" aria-hidden="true"><use href="#i-auto"/></svg></button>
+</header>
+<div class="body norail">
+<nav class="side" id="drawer" aria-label="Navigation">
+<ul>
+<li><a href="../../index.html">Overview</a></li>
+<li><a href="../../review.html"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>Awaiting review<span class="n">143</span></a></li>
+<li><a href="../../records.html">All records<span class="n">147</span></a></li>
+</ul>
+<h4>Types</h4>
+<ul>
+<li><a href="../../claude-booping/adr/index.html">ADRs<span class="n">36</span></a></li>
+<li><a href="../../claude-booping/conflict/index.html">Conflicts<span class="n">2</span></a></li>
+<li><a href="../../claude-booping/idea/index.html">Ideas<span class="n">9</span></a></li>
+<li><a href="../../claude-booping/reference/index.html">References<span class="n">11</span></a></li>
+<li><a href="../../claude-booping/rule/index.html">Rules<span class="n">22</span></a></li>
+<li><a href="../../claude-booping/runbook/index.html">Runbooks<span class="n">3</span></a></li>
+<li><a href="../../claude-booping/story/index.html">Stories<span class="n">26</span></a></li>
+<li><a href="../../claude-booping/value/index.html">Values<span class="n">19</span></a></li>
+</ul>
+<h4>booping</h4>
+<ul>
+<li><a href="../../booping/index.html">Overview</a></li>
+<li><a href="../../booping/rule/index.html" aria-current="page">Rules<span class="n">19</span></a></li>
+</ul>
+<h4>Tags</h4>
+<ul>
+<li><a href="../../claude-booping/tags/postmortem.html">postmortem<span class="n">3</span></a></li>
+<li><a href="../../claude-booping/tags/probe.html">probe<span class="n">1</span></a></li>
+<li><a href="../../claude-booping/tags/index.html">All tags</a></li>
+</ul>
+<ul>
+<li><a href="../../llms.txt">llms.txt</a></li>
+</ul>
+</nav>
+<main id="main">
+<nav class="crumbs" aria-label="breadcrumb">
+<ol>
+<li><a href="../../index.html">Overview</a></li>
+<li class="mid"><a href="../index.html">booping</a></li>
+<li><span aria-current="page">Rules</span></li>
+</ol>
+</nav>
+<h1>Rules</h1>
+<p class="lead">what constrains decisions</p>
+<div class="filters" data-default-sort="number">
+<button type="button" class="filter-open" aria-haspopup="dialog" data-label="Filters">Filters</button>
+<div class="filter-active" data-remove="Remove filter: {label}"></div>
+<dialog class="filter-sheet" aria-label="Filters">
+<div class="filter-head">
+<h2>Filters</h2>
+<button class="iconbtn filter-close" type="button" aria-label="Close">&times;</button>
+</div>
+<p class="facet">Needs</p>
+<div class="chips" role="group" aria-label="Needs">
+<button type="button" class="chip" data-key="flag" data-value="not_accepted" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>Not accepted<span class="n">18</span></button>
+</div>
+<label>Sort <select class="sort">
+<option value="number" selected>By number</option>
+<option value="updated">Recently updated</option>
+<option value="title">By title</option>
+</select></label>
+<button type="button" class="filter-done">Show records</button>
+</dialog>
+<p class="count" role="status" data-forms="[&#34;{n} record shown&#34;, &#34;{n} records shown&#34;]">19 records shown</p>
+</div>
+<p class="empty" hidden>Nothing matches the filter.</p>
+<ul class="rows">
+<li class="row" data-type="rule" data-source="booping" data-status="accepted" data-flags="not_accepted" data-updated="2026-10-14" data-title="A lesson is a rule" data-created-by="claude" data-order="0"><code class="ref">booping:rule/0001</code><a class="t" href="../../booping/rule/0001-lessons-are-rules.html">A lesson is a rule</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">What a run teaches is recorded as a rule with targets and a brief; only the brief reaches the targeted step, the body is read on demand.</span></li>
+<li class="row" data-type="rule" data-source="booping" data-status="accepted" data-flags="not_accepted" data-updated="2026-10-14" data-title="Open questions are settled in grooming, not in develop" data-created-by="claude" data-order="1"><code class="ref">booping:rule/0004</code><a class="t" href="../../booping/rule/0004-questions-settled-in-grooming.html">Open questions are settled in grooming, not in develop</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">Grooming hunts for open questions and settles them with the user before ready-for-dev; develop stops only for force majeure.</span></li>
+<li class="row" data-type="rule" data-source="booping" data-status="accepted" data-flags="not_accepted" data-updated="2026-10-14" data-title="Every prompt artefact passes the information-architecture check" data-created-by="claude" data-order="2"><code class="ref">booping:rule/0006</code><a class="t" href="../../booping/rule/0006-information-architecture-pass.html">Every prompt artefact passes the information-architecture check</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">Before a prompt-bearing artefact is saved, every block passes four checks — scoping, duplication, configurability, hierarchy — and prose that only restates or motivates is cut.</span></li>
+<li class="row" data-type="rule" data-source="booping" data-status="accepted" data-flags="not_accepted" data-updated="2026-10-14" data-title="References a plan invalidates are cleaned up in the same sprint" data-created-by="claude" data-order="3"><code class="ref">booping:rule/0007</code><a class="t" href="../../booping/rule/0007-stale-references-cleaned-in-sprint.html">References a plan invalidates are cleaned up in the same sprint</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">When a plan deletes or renames something others reference, the cleanup is a milestone task of the same sprint with its own DoD, never a follow-up sweep.</span></li>
+<li class="row" data-type="rule" data-source="booping" data-status="accepted" data-flags="not_accepted" data-updated="2026-10-14" data-title="Generated content is scoped to its audience" data-created-by="claude" data-order="4"><code class="ref">booping:rule/0008</code><a class="t" href="../../booping/rule/0008-audience-scoped-content.html">Generated content is scoped to its audience</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">User-facing output — release notes, user docs, changelogs — includes only what that audience touches; the audience filter is specced into the task&#39;s DoD.</span></li>
+<li class="row" data-type="rule" data-source="booping" data-status="accepted" data-flags="not_accepted" data-updated="2026-10-14" data-title="An agent briefing bounds what the agent returns" data-created-by="claude" data-order="5"><code class="ref">booping:rule/0009</code><a class="t" href="../../booping/rule/0009-bounded-agent-return-contract.html">An agent briefing bounds what the agent returns</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">Every agent briefing states the exact shape of the agent&#39;s reply, limited to what the orchestrator needs; groom bounds it in the task so develop&#39;s briefings inherit it.</span></li>
+<li class="row" data-type="rule" data-source="booping" data-status="accepted" data-flags="not_accepted" data-updated="2026-10-14" data-title="The content of a user-facing output is locked in grooming" data-created-by="claude" data-order="6"><code class="ref">booping:rule/0010</code><a class="t" href="../../booping/rule/0010-output-content-locked-in-grooming.html">The content of a user-facing output is locked in grooming</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">When a plan defines a user-facing output or log format, its exact content — fields, truncation, trailers — is settled with the user in grooming, not iterated in develop.</span></li>
+<li class="row" data-type="rule" data-source="booping" data-status="accepted" data-flags="not_accepted" data-updated="2026-10-15" data-title="Planning shows the values in play and every departure from them" data-created-by="claude" data-order="7"><code class="ref">booping:rule/0030</code><a class="t" href="../../booping/rule/0030-planning-shows-values-in-play.html">Planning shows the values in play and every departure from them</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">A plan names the values that drive its choices and flags where it departs from a value or rule, so the user sees what works and can refine the values.</span></li>
+<li class="row" data-type="rule" data-source="booping" data-status="accepted" data-flags="not_accepted" data-updated="2026-10-18" data-title="Corrections are logged as they happen" data-created-by="claude" data-order="8"><code class="ref">booping:rule/0031</code><a class="t" href="../../booping/rule/0031-corrections-are-logged.html">Corrections are logged as they happen</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">When the user corrects the driver, it logs the correction verbatim as a file under the vault&#39;s corrections/, so retro starts from a ready list of what is not yet handled.</span></li>
+<li class="row" data-type="rule" data-source="booping" data-status="accepted" data-flags="not_accepted" data-updated="2026-10-17" data-title="Decisions are asked in prose" data-created-by="claude" data-order="9"><code class="ref">booping:rule/0032</code><a class="t" href="../../booping/rule/0032-approval-asked-in-prose.html">Decisions are asked in prose</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">An approval, or any decision the user must understand the context to make, is asked in prose, one at a time with compact context and a counter; a multiple-choice tool only for mechanical picks.</span></li>
+<li class="row" data-type="rule" data-source="booping" data-status="accepted" data-flags="not_accepted" data-updated="2026-10-17" data-title="Decisions are listed for acceptance" data-created-by="claude" data-order="10"><code class="ref">booping:rule/0033</code><a class="t" href="../../booping/rule/0033-decisions-listed-for-acceptance.html">Decisions are listed for acceptance</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">Before the user accepts anything, the agent lists every decision it takes as settled, one numbered line each, marking its own proposals; an unanswered item is never accepted.</span></li>
+<li class="row" data-type="rule" data-source="booping" data-status="accepted" data-flags="not_accepted" data-updated="2026-10-18" data-title="A specs review tests each record against its type" data-created-by="claude" data-order="11"><code class="ref">booping:rule/0034</code><a class="t" href="../../booping/rule/0034-specs-review-tests-each-record.html">A specs review tests each record against its type</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">A review of the specs puts every record to the type tests of the format guide and lists each failure — the type it fits or deletion — for the user to accept.</span></li>
+<li class="row" data-type="rule" data-source="booping" data-status="accepted" data-flags="not_accepted" data-updated="2026-10-18" data-title="Items of one class are groomed together, never in parallel" data-created-by="claude" data-order="12"><code class="ref">booping:rule/0035</code><a class="t" href="../../booping/rule/0035-same-class-items-groomed-together.html">Items of one class are groomed together, never in parallel</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">The manager grooms items of the same class in one plan, or one after another with the earlier plan in the next brief — never in parallel, where each builds its own copy of the mechanism.</span></li>
+<li class="row" data-type="rule" data-source="booping" data-status="accepted" data-flags="not_accepted" data-updated="2026-10-19" data-title="An ADR is accepted after a brief" data-created-by="claude" data-order="13"><code class="ref">booping:rule/0036</code><a class="t" href="../../booping/rule/0036-adr-accepted-after-a-brief.html">An ADR is accepted after a brief</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">An ADR is drafted proposed and accepted only after the owner was shown its brief and given a window to object; the answer sets the review level with its evidence.</span></li>
+<li class="row" data-type="rule" data-source="booping" data-status="accepted" data-flags="not_accepted" data-updated="2026-10-19" data-title="Open items hold only what outlives the session" data-created-by="claude" data-order="14"><code class="ref">booping:rule/0037</code><a class="t" href="../../booping/rule/0037-open-items-outlive-the-session.html">Open items hold only what outlives the session</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">An open item is filed only for work for later or a question that waits for the owner; session instructions, gate answers, policies and decisions are never items.</span></li>
+<li class="row" data-type="rule" data-source="booping" data-status="accepted" data-flags="not_accepted" data-updated="2026-10-19" data-title="Ids in chat carry their title" data-created-by="claude" data-order="15"><code class="ref">booping:rule/0038</code><a class="t" href="../../booping/rule/0038-ids-carry-their-title.html">Ids in chat carry their title</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">Every id said in chat — an open item, an ADR, a rule, a plan — is followed by its short title; newly filed items are listed one per line with their title.</span></li>
+<li class="row" data-type="rule" data-source="booping" data-status="accepted" data-flags="not_accepted" data-updated="2026-10-19" data-title="Experiments run in stages" data-created-by="claude" data-order="16"><code class="ref">booping:rule/0039</code><a class="t" href="../../booping/rule/0039-experiments-run-in-stages.html">Experiments run in stages</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">An experiment, eval or benchmark matrix runs a cheap screen, then a shortlist, then significance for finalists only, each stage sized before launch.</span></li>
+<li class="row" data-type="rule" data-source="booping" data-status="accepted" data-flags="not_accepted" data-updated="2026-10-19" data-title="The ADR scorer judges its prompt alone" data-created-by="claude" data-order="17"><code class="ref">booping:rule/0040</code><a class="t" href="../../booping/rule/0040-adr-scorer-judges-its-prompt-alone.html">The ADR scorer judges its prompt alone</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">The adr-scorer runs only its body render and judges a draft ADR from the pasted parts alone; nothing it was not shown exists for it.</span></li>
+<li class="row" data-type="rule" data-source="booping" data-status="accepted" data-flags="" data-updated="2026-10-20" data-title="The manager delegates heavy reads" data-created-by="claude" data-order="18"><code class="ref">booping:rule/0041</code><a class="t" href="../../booping/rule/0041-manager-delegates-heavy-reads.html">The manager delegates heavy reads</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span></span><span class="s">The project manager never reviews an artefact, reads a long file or scans many files or logs itself; a subagent does it under a bounded return contract and the manager keeps only the verdict.</span></li>
+</ul>
+</main>
+</div>
+<div id="status" class="toast" role="status" data-copied="Link copied"></div>
+<footer>Generated by booping specs site</footer>
+</body>
+</html>

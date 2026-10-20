@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://A.github.io/claude-booping/project_manager/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>project-manager playbook - booping</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "project-manager playbook";
+        var mkdocs_page_input_path = "project_manager.md";
+        var mkdocs_page_url = "/claude-booping/project_manager/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> booping
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../quick_start/">Quick start</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../install/">Install</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../vault/">Vault</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../playbook/">Playbooks</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../project_config/">Project config</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../specs/">Specs</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="/claude-booping/specs-site/">Specs site</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../integrating-external-agents/">Integrating external agents</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Recipes</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../recipes/external-agents/">Wiring external agents</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../recipes/benchmarks/">Model benchmarks</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Workflow</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../groom/">groom playbook</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../develop/">develop playbook</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../code_review/">code-review playbook</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../retro/">retro playbook</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../learn/">learn playbook</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../specs_playbook/">specs playbook</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">project-manager playbook</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#a-session">A session</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#modes">Modes</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#questions-on-an-item">Questions on an item</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#runs">Runs</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#batches">Batches</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#merge-push-and-deploy">Merge, push and deploy</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#closing-an-item-without-a-plan">Closing an item without a plan</a>
+    </li>
+    </ul>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">booping</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Workflow</li>
+      <li class="breadcrumb-item active">project-manager playbook</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/A/claude-booping/edit/master/docs/project_manager.md">Edit on A/claude-booping</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="project-manager-playbook">project-manager playbook</h1>
+<p>The manager you talk to about a project: tell it what you want, in as many requests per message as you like, and it files what must outlive the session as an <strong>open item</strong>, then carries each through groom, develop, an independent code review and the merge — stopping where its mode says it should.</p>
+<pre><code class="language-text">/playbook project-manager
+</code></pre>
+<h2 id="a-session">A session</h2>
+<p><strong>Opening.</strong> The manager runs <code>booping status</code> and posts its lines as printed, then names what to act on, in this order:</p>
+<ol>
+<li>runs that finished, failed or were lost and that nobody has acted on yet;</li>
+<li>items waiting on you, with the file holding their questions;</li>
+<li>plans at <code>ready-for-dev</code> — develop next;</li>
+<li>finished plans without a code review — review next;</li>
+<li>open items.</li>
+</ol>
+<p>In <code>supervised</code> mode it proposes the first action and waits for you; in <code>autonomous</code> mode it starts on that list.</p>
+<p><strong>Every message.</strong> Only what must outlive the session becomes an item — work for later, or a question waiting on you — filed in your own words, never paraphrased. An instruction for this session ("ping me when the release is out", "pause for two hours"), an answer to a question or a gate confirmation files nothing and is handled in the session; a standing policy becomes a rule and a decision an ADR, through the <code>specs</code> playbook. The manager then lists the items it filed, one line each with its title: <code>Created OI-0007: {title}</code>, in your language.</p>
+<p><strong>Working an item.</strong> Each item it takes up is one of four kinds:</p>
+<table>
+<thead>
+<tr>
+<th>Kind</th>
+<th>What happens</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>tiny fix</td>
+<td>A few lines, obvious from the text: the manager sizes it and works it in a <a href="#batches">batch</a> — a worker agent makes the changes, the manager checks them, commits each naming its item id and closes the items.</td>
+</tr>
+<tr>
+<td>plan</td>
+<td>Anything with a design choice or more than one sitting: groom, develop, code review, merge — see <a href="#runs">Runs</a>. Several items you framed as one change share one plan.</td>
+</tr>
+<tr>
+<td>question</td>
+<td>You asked something: answered in chat when the repo or vault holds the answer, otherwise filed back to you as a question on the item.</td>
+</tr>
+<tr>
+<td>decision</td>
+<td>You stated a choice: recorded through the <a href="../specs_playbook/">specs playbook</a> as an ADR or an idea, and the item closed with a reference to that record.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Reporting.</strong> After each turn, one line per item it touched:</p>
+<pre><code class="language-text">{id} {title} — {outcome} — {pointer}
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>outcome</th>
+<th>pointer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>done</code></td>
+<td>the closing commit's short sha; with a plan, the plan's path</td>
+</tr>
+<tr>
+<td><code>planned</code></td>
+<td>the plan's path</td>
+</tr>
+<tr>
+<td><code>running</code></td>
+<td>the run record <code>runs/{run}.md</code></td>
+</tr>
+<tr>
+<td><code>waiting on you</code></td>
+<td>the item file <code>open-items/{id}.md</code>, or the review's blocker</td>
+</tr>
+<tr>
+<td><code>dropped</code></td>
+<td>the reason it was closed</td>
+</tr>
+</tbody>
+</table>
+<p>Then the next action, in one sentence.</p>
+<h2 id="modes">Modes</h2>
+<p>The manager is autonomous when you tell it to work autonomously; otherwise it is supervised (see <a href="../playbook/#supervised-and-autonomous-runs">supervised and autonomous runs</a>). It passes the mode on to the runs it launches only through <code>booping run … --autonomous</code>.</p>
+<ul>
+<li><strong><code>supervised</code></strong> (default) — two stops: approving the plan, which groom presents in the same session, and the merge. The merge happens only on your explicit yes; "looks good" counts, silence does not.</li>
+<li><strong><code>autonomous</code></strong> — nothing stops. The manager settles both itself and logs each choice as one file under the vault's <code>agent-decisions/</code>, so you can read afterwards what it decided for you. In a supervised session the merge gate lists the <code>open</code> ones and marks them <code>reviewed</code> once you answer.</li>
+</ul>
+<h2 id="questions-on-an-item">Questions on an item</h2>
+<p>A question the manager cannot settle itself goes on the item, never only in chat: chat names the item file, the file keeps the question. The manager appends it to the item's body under <code>## Question</code> and moves the item to <code>clarify</code> with <code>booping transition {vault}/open-items/{ID}.md clarify</code>.</p>
+<p>You answer by telling the manager — it appends your words verbatim under <code>## Answer</code> and moves the item back to <code>open</code> — or by editing the file and making the same transition yourself.</p>
+<p>An item in <code>clarify</code> is <strong>waiting on you</strong>. <code>booping status</code> adds <code>— {n} waiting on you</code> to its items line, and <code>booping status items</code> lists those items under <code>Waiting on you:</code>.</p>
+<h2 id="runs">Runs</h2>
+<p>Planned work runs headless, as registered runs you can follow with <code>booping status runs</code>:</p>
+<ul>
+<li><code>booping run groom {items} --autonomous</code> — autonomous mode only; in supervised mode groom runs in the same session, so you can approve the plan there. A groom that parks on a question points you at the plan's <code>clarifications.md</code>.</li>
+<li><code>booping run develop {plan} --autonomous</code> — once the plan is <code>ready-for-dev</code>, in both modes.</li>
+<li><code>booping run code-review {plan} --autonomous</code> — once develop finishes the plan. The manager commits the fixes the review leaves, reads its findings, and turns an unfixed blocker into a question on the plan's items instead of merging.</li>
+</ul>
+<p>One develop or code-review run per checkout at a time — a second item queues until the running one ends; groom runs may overlap. A develop run that fails is reported with its log, never retried silently. Once the manager has acted on a run's outcome it acknowledges it with <code>booping run ack</code>, which hides it from <code>booping status</code>.</p>
+<h2 id="batches">Batches</h2>
+<p>A tiny fix gets a size when the manager classifies it — its judgement, written onto the item:</p>
+<pre><code class="language-text">booping set {vault}/open-items/ID.md size=SIZE    # one of the sizes in core.project_manager_playbook.batch
+</code></pre>
+<p><code>mdcheck playbooks/specs/_schemas/open_item.yaml</code> rejects any other size, and <code>booping query --config core.specs.open_items.index</code> shows it in the <code>size</code> column; an item filed before sizes existed simply has none. The manager then packs the open items whose size skips grooming, listed with <code>booping query</code>, in id order into batches under a story-point cap: each item joins the current batch while its summed points stay within the cap, else it starts the next. Each batch goes to one worker briefing carrying every item's text; the manager checks the result and commits once per item, naming its id, then closes the items. An unsized item, or one of a size that does not skip grooming, takes the plan route. The sizes, their story points, which sizes skip grooming and the cap are <code>core.project_manager_playbook.batch</code> in the <a href="../project_config/#coreproject_manager_playbookbatch">project config</a>.</p>
+<h2 id="merge-push-and-deploy">Merge, push and deploy</h2>
+<p>The merge stays local: the branch develop worked on is merged with <code>git merge --no-ff</code> into the branch that was checked out when develop started, and nothing is pushed.</p>
+<p>Pushing, opening a pull request, deploying or releasing happens only when the project says how. Add a <a href="../specs/">rule</a> record with <code>targets: [project-manager]</code> and a <code>brief:</code> naming the step — "after the merge, push <code>main</code> to <code>gh</code>", "deploy with <code>just deploy</code> once merged" — or a runbook record the rule points at.</p>
+<h2 id="closing-an-item-without-a-plan">Closing an item without a plan</h2>
+<p><code>booping transition {vault}/open-items/ID.md done</code> closes an open item — the path a tiny fix, an answered question or a recorded decision takes; <code>dropped</code> instead closes it without any work done. <code>booping set {vault}/open-items/ID.md reason=…</code> beforehand says why.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../specs_playbook/" class="btn btn-neutral float-left" title="specs playbook"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/A/claude-booping" class="fa fa-code-fork" style="color: #fcfcfc"> A/claude-booping</a>
+        </span>
+    
+    
+      <span><a href="../specs_playbook/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

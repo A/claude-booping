@@ -64,6 +64,14 @@
                 </li>
               </ul>
               <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../specs/">Specs</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="/claude-booping/specs-site/">Specs site</a>
+                </li>
+              </ul>
+              <ul>
                 <li class="toctree-l1"><a class="reference internal" href="../integrating-external-agents/">Integrating external agents</a>
                 </li>
               </ul>
@@ -106,6 +114,10 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../learn/">learn playbook</a>
                   </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../specs_playbook/">specs playbook</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../project_manager/">project-manager playbook</a>
+                  </li>
               </ul>
       </div>
     </div>
@@ -139,12 +151,13 @@
 </code></pre>
 <h2 id="why">Why</h2>
 <p>Retro turns lived experience into a written record: friction that would otherwise evaporate when the session closes becomes the input to a durable rule.</p>
-<p>The run draws from <strong>two inputs</strong>:</p>
+<p>The run draws from <strong>three inputs</strong>:</p>
 <ul>
 <li><strong>User-asked questions.</strong> <code>gather-feedback</code> takes your raw open-ended take first — four questions asked one at a time, before any mined finding is mentioned — then walks the mined items with you for accept / dismiss / your own wording.</li>
-<li><strong>Session-log mining and a plan-stage lesson check.</strong> <code>prepare</code> delegates both in parallel, mining the development session transcript for what you said at the time but never filed — pushback at the agent's choices, mid-sprint change requests, comments you made on the code itself, and places the session shows a loaded lesson ignored — and checking the plan as written against the active lesson set. The code diff is grounding context for these reads, not a separate scan phase. The mined list is <strong>withheld</strong> until your raw take is on record.</li>
+<li><strong>The corrections log.</strong> <code>prepare</code> opens on every entry of the <code>core.corrections.open</code> query, rendered into its prompt — each correction groom, develop and code-review logged under the vault's <code>corrections/</code> that no retro has handled yet. Each becomes a mined item, its session id and quote tell the session-log read where to look, and <code>prepare</code> marks it <code>state: handled</code>.</li>
+<li><strong>Session-log mining and a plan-stage lesson check.</strong> <code>prepare</code> then delegates both in parallel, mining the development session transcript for what you said at the time but never filed — pushback at the agent's choices, mid-sprint change requests, comments you made on the code itself, and places the session shows a loaded lesson ignored — and checking the plan as written against the active lesson set. The code diff is grounding context for these reads, not a separate scan phase. The mined list is <strong>withheld</strong> until your raw take is on record.</li>
 </ul>
-<p>The two inputs are stitched into one <code>retrospectives/{YYYYMMDDHHMM}_{kebab-title}.md</code>, a standalone file in the vault — one per run, whatever the size of the working set.</p>
+<p>The inputs are stitched into one <code>retrospectives/{YYYYMMDDHHMM}_{kebab-title}.md</code>, a standalone file in the vault — one per run, whatever the size of the working set.</p>
 <h2 id="what-it-does">What it does</h2>
 <p>Six steps, in dependency order:</p>
 <table>
@@ -161,7 +174,7 @@
 </tr>
 <tr>
 <td><code>prepare</code></td>
-<td>Mine the session logs and run the plan-stage lesson check in parallel; build the issue list without showing it</td>
+<td>Read the plans' corrections log, mine the session logs and run the plan-stage lesson check in parallel; build the issue list without showing it</td>
 </tr>
 <tr>
 <td><code>gather-feedback</code></td>
@@ -181,7 +194,7 @@
 </tr>
 </tbody>
 </table>
-<p>Retro runs as its <strong>own track</strong> over that standalone <code>retrospectives/{slug}.md</code> artifact — never another move on the plan. The file is created at <code>awaiting-retro</code>, advances to <code>awaiting-learning</code> once it is written and you have signed off, and <a href="../learn/">learn</a> later closes it at <code>done</code>. The covered plans stay at <code>done</code> throughout; the only mark retro leaves on a plan is the <code>retro:</code> back-link in its frontmatter, and the retro queue is exactly the plans still missing that link — every <code>status: done</code> plan with <code>retro: null</code>. The workdir is the vault root; every <code>booping playbook-state</code> / <code>booping playbook-transition</code> call passes <code>--target retrospectives/{slug}.md</code>, so state lives in that file and a stopped run is resumable.</p>
+<p>Retro runs as its <strong>own track</strong> over that standalone <code>retrospectives/{slug}.md</code> artifact — never another move on the plan. The file is created at <code>awaiting-retro</code>, advances to <code>awaiting-learning</code> once it is written and you have signed off, and <a href="../learn/">learn</a> later closes it at <code>done</code>. The covered plans stay at <code>done</code> throughout; the only mark retro leaves on a plan is the <code>retro:</code> back-link in its frontmatter, and the retro queue is exactly the plans still missing that link — every <code>status: done</code> plan with <code>retro: null</code>. The workdir is the vault root; every <code>booping state</code> / <code>booping transition</code> call names <code>retrospectives/{slug}.md</code> with <code>--playbook retro</code>, so state lives in that file and a stopped run is resumable.</p>
 <h3 id="multiple-plans-in-one-run">Multiple plans in one run</h3>
 <p>A retro can cover more than one plan. <code>intake</code> offers every other queued plan — <code>status: done</code> with <code>retro: null</code> — as <strong>include</strong>, <strong>postpone</strong> (leave it queued), or <strong>skip</strong>.</p>
 <p>The written retrospective carries <code>plan:</code> (the primary), <code>plans:</code> as a YAML list (even for a single plan) and a <code>goal_verdicts:</code> mapping with your per-plan verdict. Every covered plan points back through its own <code>retro:</code> key.</p>
@@ -200,7 +213,7 @@
 <p>Read the written retrospective before letting <a href="../learn/">learn</a> act on it, separating <strong>durable findings</strong> from <strong>one-off complaints</strong>.</p>
 <p>What to keep:</p>
 <ul>
-<li><strong>Durable findings</strong> — patterns that will recur across sprints. "The agent picks the wrong test runner when both pytest and unittest are present" is a project rule worth lifting into a targeted lesson.</li>
+<li><strong>Durable findings</strong> — patterns that will recur across sprints. "The agent picks the wrong test runner when both pytest and unittest are present" is a project rule worth lifting into a targeted rule.</li>
 <li><strong>Process gaps</strong> — places where the lifecycle itself failed you. "I wanted to stop after milestone 2 but did not realise I had to say so up front" is feedback for the prompt habits you bring to groom and develop runs.</li>
 </ul>
 <p>What to mark as one-off:</p>

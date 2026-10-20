@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://A.github.io/claude-booping/specs_playbook/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>specs playbook - booping</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "specs playbook";
+        var mkdocs_page_input_path = "specs_playbook.md";
+        var mkdocs_page_url = "/claude-booping/specs_playbook/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> booping
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../quick_start/">Quick start</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../install/">Install</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../vault/">Vault</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../playbook/">Playbooks</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../project_config/">Project config</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../specs/">Specs</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="/claude-booping/specs-site/">Specs site</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../integrating-external-agents/">Integrating external agents</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Recipes</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../recipes/external-agents/">Wiring external agents</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../recipes/benchmarks/">Model benchmarks</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Workflow</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../groom/">groom playbook</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../develop/">develop playbook</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../code_review/">code-review playbook</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../retro/">retro playbook</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../learn/">learn playbook</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">specs playbook</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#what-it-does">What it does</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#open-items">Open items</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#working-items-from-the-shell">Working items from the shell</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#filing-a-request-from-anywhere">Filing a request from anywhere</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#items-and-plans">Items and plans</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../project_manager/">project-manager playbook</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">booping</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Workflow</li>
+      <li class="breadcrumb-item active">specs playbook</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/A/claude-booping/edit/master/docs/specs_playbook.md">Edit on A/claude-booping</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="specs-playbook">specs playbook</h1>
+<p>Work the project's <a href="../specs/">specs</a> records from one place: set up a tier, settle values, record decisions, ideas and rules, review the set, sync it with the code, and work the gaps between specs and code as <strong>open items</strong>.</p>
+<pre><code class="language-text">/playbook specs
+</code></pre>
+<h2 id="what-it-does">What it does</h2>
+<p>The playbook is a guide, not a menu: say what you want in plain words and it acts on it — it never asks which action to run. It reads the <a href="../specs/#format-in-brief">specs format guide</a> before writing a record, numbers records with <code>booping specs next</code>, marks what it writes <code>created_by: claude</code>, sets a <code>review</code> level only with its evidence — never <code>accepted</code> without your words quoted, and runs <code>booping specs check</code> after every write.</p>
+<p>The scenarios it knows:</p>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>What happens</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Init</td>
+<td>The repo has no project tier yet: it offers to create one with <code>booping specs init --tier project</code>, then walks you through the alignment guide.</td>
+</tr>
+<tr>
+<td>Alignment</td>
+<td>An interview that settles your values first, then the conflicts between them, then the rules that follow, then the decisions already made — one question at a time.</td>
+</tr>
+<tr>
+<td>Auto-review</td>
+<td>Reads the values, rules and ADRs for contradictions: one the records settle becomes a <code>conflict</code> record, one only you can settle becomes an open item.</td>
+</tr>
+<tr>
+<td>Record</td>
+<td>A decision becomes an ADR (only for one choice with a real alternative and a reason the code cannot show), an idea an idea record, a constraint on how the model works a rule with <code>targets</code> and <code>brief</code>.</td>
+</tr>
+<tr>
+<td>Sync specs and code</td>
+<td>Compares the records with the code; each gap becomes one open item with the direction it runs.</td>
+</tr>
+<tr>
+<td>Retro to rules</td>
+<td>A retrospective waiting for learning goes to the <a href="../learn/">learn playbook</a>; a lesson from the conversation becomes a rule directly.</td>
+</tr>
+<tr>
+<td>Open items</td>
+<td>Shows the open items so you can pick some to plan, drop or reopen.</td>
+</tr>
+<tr>
+<td>Handed over</td>
+<td>Another playbook's subagent hands over spec material or a question (<a href="../specs/#base-guidance-in-every-run">base guidance</a>): it writes the material as a draft, or answers from the records, in at most five lines.</td>
+</tr>
+</tbody>
+</table>
+<p>Every scenario ends by naming the next call.</p>
+<h2 id="open-items">Open items</h2>
+<p>An open item is one piece of work waiting in the vault: something you asked for, or a gap between the specs and the code — an ADR whose <code>Confirmation:</code> line the code does not show yet, a <code>[clarify]</code> or <code>[unknown]</code> mark in a record, a <code>booping specs check</code> finding, a conflict only you can settle, a gap a sync found. Each item is a file <code>open-items/OI-NNNN.md</code> in the vault, carrying a <code>title</code>, the <code>source</code> that filed it, a <code>direction</code>, the <code>record</code> it is about and the <code>plan</code> it is linked to.</p>
+<p>The <code>source</code> says what kind of item it is:</p>
+<ul>
+<li><code>request</code> — your own words, filed as you said them; <code>backlog</code> — a task put aside for later. Neither has a direction (<code>direction: null</code>); the body is the text exactly as given, under a short title.</li>
+<li><code>manual</code>, <code>adr</code>, <code>mark</code>, <code>check</code>, <code>sync</code>, <code>correction</code> (a logged correction that names a spec record) — a specs-to-code gap, with a <code>direction</code>: <code>code-to-spec</code>, <code>spec-to-code</code>, <code>conflict</code> or <code>clarify</code>.</li>
+</ul>
+<p>An item moves <code>open</code> → <code>planned</code> → <code>done</code>, or straight from <code>open</code> to <code>done</code> when it is settled without a plan, or to <code>dropped</code> when it needs no work; a planned item can go back to <code>open</code>. An open item that asks you a question waits in <code>clarify</code> until the answer is in its body, then returns to <code>open</code>. Closed items stay on disk with <code>closed_at</code> and <code>reason</code>, out of the default list.</p>
+<h3 id="working-items-from-the-shell">Working items from the shell</h3>
+<p>Items are ordinary vault files, worked with the same operators as everything else; run them anywhere inside a booping project.</p>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Command</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>List</td>
+<td><code>booping query --config core.specs.open_items.index</code> — the index as a table, <code>id</code>, <code>status</code>, <code>source</code>, <code>size</code>, <code>direction</code>, <code>record</code>, <code>title</code>, <code>plan</code>; narrow it with <code>--where status:in=open,clarify,planned</code>.</td>
+</tr>
+<tr>
+<td>File</td>
+<td><code>booping create core.specs.open_items.template {vault}/open-items --set title=… --set source=… [--set direction=…] [--set record=…] [--set body=…]</code> — the next free <code>OI-NNNN</code> is taken by <code>next_id</code>; a gap from an ADR passes <code>--set source=adr --set record=adr/NNNN --set direction=spec-to-code</code> and its <code>Confirmation:</code> line as the title.</td>
+</tr>
+<tr>
+<td>Scan</td>
+<td><code>booping specs scan [--tier T]</code> — files one item per <code>[clarify]</code> / <code>[unknown]</code> mark and per <code>specs check</code> finding in the tier; an item already filed for the same thing is skipped.</td>
+</tr>
+<tr>
+<td>Link to a plan</td>
+<td><code>booping set {item} plan=plans/{dir}/index.md</code>, then <code>booping transition {item} planned</code>.</td>
+</tr>
+<tr>
+<td>Size</td>
+<td><code>booping set {item} size=S</code> — one of the <code>core.project_manager_playbook.batch</code> sizes, checked by <code>mdcheck playbooks/specs/_schemas/open_item.yaml {item}</code>.</td>
+</tr>
+<tr>
+<td>Close</td>
+<td><code>booping transition {item} done</code>, or <code>dropped</code> for one needing no work — <code>booping set {item} reason=…</code> first to say why.</td>
+</tr>
+<tr>
+<td>Reopen</td>
+<td><code>booping transition {item} open</code> — returns a planned item to open and clears its plan.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="filing-a-request-from-anywhere">Filing a request from anywhere</h3>
+<p><code>booping create</code> takes the text as a <code>--set</code> value, so anything that can run a command can file a request — a shell script, a chat or mail bridge, a hook:</p>
+<pre><code class="language-sh">booping create core.specs.open_items.template &quot;$VAULT/open-items&quot; \
+  --set source=request --set title=&quot;Ship the tracker sync&quot; \
+  --set body=&quot;$(printf 'Ship the tracker sync.\nIt should run nightly.\n')&quot;
+</code></pre>
+<p>It prints the new item as a diff (<code>+++ open-items/OI-NNNN.md</code>). The text lands as given: blank lines, <code>---</code> lines, trailing spaces and template-looking <code>{{ }}</code> are kept as typed.</p>
+<h3 id="items-and-plans">Items and plans</h3>
+<p>Name the items in a groom request (<code>/playbook groom — work OI-0003 and OI-0007</code>) and groom links them to the new plan. From there they follow the plan: develop finishing it at <code>done</code> closes them, a failed or cancelled plan returns them to <code>open</code>. A plan cancelled some other way leaves its items planned — <code>booping transition {item} open</code> on each puts them back.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../learn/" class="btn btn-neutral float-left" title="learn playbook"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../project_manager/" class="btn btn-neutral float-right" title="project-manager playbook">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/A/claude-booping" class="fa fa-code-fork" style="color: #fcfcfc"> A/claude-booping</a>
+        </span>
+    
+    
+      <span><a href="../learn/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../project_manager/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>try{var t=localStorage.getItem("specs-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}document.documentElement.classList.add("js")</script>
+<meta name="color-scheme" content="light dark">
+<title>Prose or code probes 2026-10 — claude-booping</title>
+<link rel="stylesheet" href="../../fonts.css">
+<link rel="stylesheet" href="../../style.css">
+<script src="../../site.js" defer></script>
+<script src="../../search.js" defer></script>
+<script src="../../comments-format.js" defer></script>
+<script src="../../comments.js" defer></script>
+<link rel="alternate" type="text/markdown" href="0009-prose-or-code-probes-2026-10.md">
+</head>
+<body>
+<svg aria-hidden="true" style="display:none">
+<symbol id="i-accepted" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4.8 8.2l2.1 2.1 4.3-4.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-open" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+<symbol id="i-planned" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2.6 2.2"/></symbol>
+<symbol id="i-rejected" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3.6 12.4l8.8-8.8" stroke="currentColor" stroke-width="1.6"/></symbol>
+<symbol id="i-clarify" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="currentColor"/><path d="M6.1 6.2a2 2 0 1 1 2.6 1.9c-.5.2-.7.6-.7 1.1v.4" fill="none" stroke="var(--surface)" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="11.6" r=".95" fill="var(--surface)"/></symbol>
+<symbol id="i-unknown" viewBox="0 0 16 16"><path d="M8 1.6l6.8 12.2H1.2z" fill="currentColor"/><path d="M8 6v3.6" stroke="var(--surface)" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="11.6" r=".9" fill="var(--surface)"/></symbol>
+<symbol id="i-not-accepted" viewBox="0 0 16 16"><circle cx="8" cy="8" r="4.6" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+<symbol id="i-review-accepted" viewBox="0 0 16 16"><circle cx="8" cy="8" r="4.6" fill="currentColor"/></symbol>
+<symbol id="i-menu" viewBox="0 0 20 20"><path d="M3 5.5h14M3 10h14M3 14.5h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+<symbol id="i-search" viewBox="0 0 20 20"><circle cx="8.6" cy="8.6" r="5.6" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M13 13l4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+<symbol id="i-moon" viewBox="0 0 20 20"><path d="M15.5 12.6A6.5 6.5 0 0 1 7.4 4.5a6.5 6.5 0 1 0 8.1 8.1z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+<symbol id="i-sun" viewBox="0 0 16 16"><circle cx="8" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.2v1.6M8 13.2v1.6M1.2 8h1.6M13.2 8h1.6M3.2 3.2l1.1 1.1M11.7 11.7l1.1 1.1M3.2 12.8l1.1-1.1M11.7 4.3l1.1-1.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+<symbol id="i-auto" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.6a6.4 6.4 0 0 0 0 12.8z" fill="currentColor"/></symbol>
+<symbol id="i-comment" viewBox="0 0 20 20"><path d="M4 4.5h12a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5H9.2l-3.7 3v-3H4A1.5 1.5 0 0 1 2.5 13V6A1.5 1.5 0 0 1 4 4.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+<symbol id="i-outbox" viewBox="0 0 20 20"><path d="M2.5 11.5v4a1.5 1.5 0 0 0 1.5 1.5h12a1.5 1.5 0 0 0 1.5-1.5v-4M10 13V3.5M6.5 7L10 3.5 13.5 7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+<button class="iconbtn menu" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Menu"><svg class="ic" aria-hidden="true"><use href="#i-menu"/></svg></button>
+<a class="brand" href="../../index.html">claude-booping</a>
+<form class="search" role="search" action="../../search.html" data-prefix="../../" data-all="All results">
+<svg class="ic" aria-hidden="true"><use href="#i-search"/></svg>
+<input type="search" name="q" role="combobox" aria-label="Search" aria-autocomplete="list" aria-expanded="false" aria-controls="search-list" autocomplete="off" placeholder="Search the specs">
+<kbd>/</kbd>
+<button class="iconbtn search-close" type="button" aria-label="Close">&times;</button>
+<ul id="search-list" role="listbox" aria-label="Search" hidden></ul>
+</form>
+<button class="iconbtn search-btn" type="button" aria-label="Search" title="Search"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg></button>
+<button class="iconbtn rv-btn" type="button" aria-controls="rv-panel" aria-expanded="false" aria-label="Comments" title="Comments"><svg class="ic" aria-hidden="true"><use href="#i-comment"/></svg><span class="n"></span></button>
+<a class="iconbtn outbox" href="../../comments.html" aria-label="Outbox" title="Outbox"><svg class="ic" aria-hidden="true"><use href="#i-outbox"/></svg><span class="l">Outbox</span><span class="n"></span></a>
+<button class="iconbtn theme" type="button" aria-label="Theme: auto" title="Theme: auto" data-label-auto="Theme: auto" data-label-light="Theme: light" data-label-dark="Theme: dark"><svg class="ic" aria-hidden="true"><use href="#i-auto"/></svg></button>
+</header>
+<div class="body rv-page">
+<nav class="side" id="drawer" aria-label="Navigation">
+<ul>
+<li><a href="../../index.html">Overview</a></li>
+<li><a href="../../review.html"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>Awaiting review<span class="n">143</span></a></li>
+<li><a href="../../records.html">All records<span class="n">147</span></a></li>
+</ul>
+<h4>Types</h4>
+<ul>
+<li><a href="../../claude-booping/adr/index.html">ADRs<span class="n">36</span></a></li>
+<li><a href="../../claude-booping/conflict/index.html">Conflicts<span class="n">2</span></a></li>
+<li><a href="../../claude-booping/idea/index.html">Ideas<span class="n">9</span></a></li>
+<li><a href="../../claude-booping/reference/index.html">References<span class="n">11</span></a></li>
+<li><a href="../../claude-booping/rule/index.html">Rules<span class="n">22</span></a></li>
+<li><a href="../../claude-booping/runbook/index.html">Runbooks<span class="n">3</span></a></li>
+<li><a href="../../claude-booping/story/index.html">Stories<span class="n">26</span></a></li>
+<li><a href="../../claude-booping/value/index.html">Values<span class="n">19</span></a></li>
+</ul>
+<h4>booping</h4>
+<ul>
+<li><a href="../../booping/index.html">Overview</a></li>
+<li><a href="../../booping/rule/index.html">Rules<span class="n">19</span></a></li>
+</ul>
+<h4>Tags</h4>
+<ul>
+<li><a href="../../claude-booping/tags/postmortem.html">postmortem<span class="n">3</span></a></li>
+<li><a href="../../claude-booping/tags/probe.html">probe<span class="n">1</span></a></li>
+<li><a href="../../claude-booping/tags/index.html">All tags</a></li>
+</ul>
+<ul>
+<li><a href="../../llms.txt">llms.txt</a></li>
+</ul>
+</nav>
+<main id="main">
+<nav class="crumbs" aria-label="breadcrumb">
+<ol>
+<li><a href="../../index.html">Overview</a></li>
+<li class="mid"><a href="index.html">References</a></li>
+<li><span aria-current="page">reference/0009</span></li>
+</ol>
+</nav>
+<div class="measure">
+<article data-ref="reference/0009" data-title="Prose or code probes 2026-10" data-page="claude-booping/reference/0009-prose-or-code-probes-2026-10.html">
+<h1>Prose or code probes 2026-10</h1>
+<div class="badges"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>live</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></div>
+<div class="tags"><a class="tag" href="../../claude-booping/tags/probe.html">#probe</a></div>
+<p class="lead">Three cheap probes on 2026-10-18 — which rule wording makes a fresh model pick prose, an existing primitive or a new CLI correctly, and how sibling items should be groomed.</p>
+<details class="toc-m">
+<summary>On this page</summary>
+<nav class="toc" aria-labelledby="toc-m-toc">
+<h4 id="toc-m-toc">On this page</h4>
+<ul>
+<li><a href="#facts">Facts</a>
+</li>
+<li><a href="#how-to-check">How to check</a>
+</li>
+<li><a href="#referenced-by">Referenced by</a>
+</li>
+</ul>
+</nav>
+</details>
+<dl class="facts">
+<dt>Author</dt>
+<dd>agent</dd>
+<dt>Created</dt>
+<dd><time datetime="2026-10-18">18 October 2026</time></dd>
+<dt>Updated</dt>
+<dd><time datetime="2026-10-18">18 October 2026</time></dd>
+<dt>Review</dt>
+<dd><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not shown</dd>
+</dl>
+<div class="body">
+<h2 id="facts">Facts<a class="anchor" href="#facts" aria-label="Link to this section: Facts">§</a></h2>
+<p>Setup: <code>claude -p --model claude-opus-5-5 --setting-sources &quot;&quot; --tools &quot;&quot;</code>, no booping context beyond
+a fixed description of the driver, the vault and the CLI's subcommands. Scenarios and their expected
+answers were written by the agent after the owner's decisions of the day (adr/0036, adr/0037), so
+they are a signal, not a proof; 2–3 repeats a cell.</p>
+<p><strong>Probe 1 — which wording decides prose (A), an extended existing primitive (B) or a new CLI or
+config key (C).</strong> Eleven scenarios: autonomy mode (expected A), an agent-decisions log with a
+corrections CLI already present (A/B), item questions read by <code>status</code> (B), idea capture (A/B), and
+controls — transitions, a run registry, plan split, a status report, entry timestamps and session id,
+a render-time slice of open entries (B/C), milestone feedback (A).</p>
+<table>
+<thead>
+<tr>
+<th>Wording</th>
+<th>Right</th>
+<th>Autonomy</th>
+<th>Feedback</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>none</td>
+<td>14/16</td>
+<td>C C</td>
+<td>A A</td>
+</tr>
+<tr>
+<td>value/0015 + rule/0025 + rule/0030 as of 2026-10-17</td>
+<td>12/16</td>
+<td>C C</td>
+<td>B B</td>
+</tr>
+<tr>
+<td>&quot;a mechanism earns its place&quot;</td>
+<td>14/16</td>
+<td>C C</td>
+<td>A A</td>
+</tr>
+<tr>
+<td>ladder: prose → extend existing → new</td>
+<td>14/16</td>
+<td>C B</td>
+<td>A A</td>
+</tr>
+<tr>
+<td>old texts + ladder</td>
+<td>14/16</td>
+<td>B B</td>
+<td>B B</td>
+</tr>
+<tr>
+<td>old texts + &quot;fewest mechanisms&quot; value</td>
+<td>13/16</td>
+<td>C C</td>
+<td>A B</td>
+</tr>
+<tr>
+<td>&quot;who reads the result&quot;</td>
+<td>16/16, and 33/33 on all eleven × 3</td>
+<td>A A</td>
+<td>A A</td>
+</tr>
+<tr>
+<td>old texts + &quot;who reads the result&quot;</td>
+<td>15/16</td>
+<td>C C</td>
+<td>A A</td>
+</tr>
+<tr>
+<td>&quot;who reads&quot; + examples + &quot;when unsure, prose&quot;</td>
+<td>31/33</td>
+<td>C A C</td>
+<td>A A A</td>
+</tr>
+<tr>
+<td>the above + &quot;count only readers that exist or are asked for&quot; (rule/0025 now)</td>
+<td>33/33</td>
+<td>A A A</td>
+<td>A A A</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>The old wording pushed a prose task into code: &quot;only the findings text needs judgement; capturing,
+persisting and handing over are computable → code&quot; (milestone feedback as a validated transition
+payload).</li>
+<li>Beside the old texts the new wording loses the autonomy case: the old texts must be replaced, not
+joined.</li>
+<li>Adding &quot;a prompt filled in at render time&quot; as a code reader let the model justify a config key by
+the template branch it would itself add — the shape <code>core.autonomy</code> had. The &quot;readers that exist
+or are asked for&quot; clause closed it.</li>
+</ul>
+<p><strong>Probe 2 — groom an item with a sibling of the same shape.</strong> Pairs: corrections → agent decisions,
+flaky-test register → rejected review findings; control: run registry → per-plan cost.</p>
+<table>
+<thead>
+<tr>
+<th>Brief</th>
+<th>Same-shape pairs (6 runs)</th>
+<th>Control (3 runs)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>the item alone</td>
+<td>no new CLI: open items with a kind, query at render, <code>items close</code></td>
+<td>extends <code>session-stats</code></td>
+</tr>
+<tr>
+<td>+ the sibling's groomed plan (which adds a CLI)</td>
+<td>6/6 generalise the sibling's CLI into one (<code>ledger</code>, <code>register</code>)</td>
+<td>3/3 reuse, no forced merge</td>
+</tr>
+<tr>
+<td>+ &quot;same batch, similar shape&quot; from the manager</td>
+<td>same as above</td>
+<td>2 reuse, 1 separate</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Probe 3 — both items groomed together in one plan.</strong> Same pairs: 6/6 one mechanism for both, 5/6
+with no new CLI (open items with a kind, or a note per entry through <code>scaffold</code>, <code>frontmatter-update</code>
+and a render-time query); control 3/3 one design (cost rolled up from run records), sensible rather
+than forced.</p>
+<ul>
+<li>A sibling's plan anchors the next one: it generalises the sibling's new CLI instead of returning to
+an existing primitive. Grooming together sees the shared shape first and does not anchor.</li>
+<li>Parallel grooming without the sibling is how the corrections, defaults and questions CLIs came to
+exist side by side (plans 202610151532 and 202610151609, groomed the same afternoon).</li>
+</ul>
+<h2 id="how-to-check">How to check<a class="anchor" href="#how-to-check" aria-label="Link to this section: How to check">§</a></h2>
+<ul>
+<li>Prompts, variants and raw answers: <code>~/.tmp/booping-probes-2026-10-18/exp</code> (probe 1, <code>run1.sh</code>,
+<code>sc/</code>, <code>var/</code>, <code>out/</code>) and <code>exp2</code> (probes 2 and 3, <code>run1.sh</code>, <code>runT.sh</code>, <code>out/</code>).</li>
+<li>Re-run one cell: <code>./run1.sh &lt;scenario&gt; &lt;variant&gt; &lt;rep&gt;</code> from that directory.</li>
+</ul>
+</div>
+</article>
+<h2 id="referenced-by">Referenced by<a class="anchor" href="#referenced-by" aria-label="Link to this section: Referenced by">§</a></h2>
+<h3>Rules</h3>
+<ul class="rel backlinks">
+<li><a href="../../booping/rule/0035-same-class-items-groomed-together.html">Items of one class are groomed together, never in parallel</a> <code class="ref">booping:rule/0035</code> <span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span> <span class="via">via Follows from</span></li>
+<li><a href="../../claude-booping/rule/0025-who-reads-the-result-decides.html">Who reads the result decides prose or code</a> <code class="ref">rule/0025</code> <span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span> <span class="via">via Follows from</span></li>
+</ul>
+</div>
+</main>
+<aside class="rail rv-rail" id="rv-panel">
+<details class="rv-toc" open>
+<summary>On this page</summary>
+<nav class="toc" aria-labelledby="rail-toc">
+<h4 id="rail-toc">On this page</h4>
+<ul>
+<li><a href="#facts">Facts</a>
+</li>
+<li><a href="#how-to-check">How to check</a>
+</li>
+<li><a href="#referenced-by">Referenced by</a>
+</li>
+</ul>
+</nav>
+</details>
+<section class="rv" aria-labelledby="rv-h" data-note="Note" data-delete="Delete" data-open="Open" data-whole="Whole record" data-changed="text changed" data-deleted="Comment deleted" data-copy-failed="Copy failed" data-copied-forms="[&#34;{n} item copied&#34;, &#34;{n} items copied&#34;]" data-cleared-forms="[&#34;{n} item cleared&#34;, &#34;{n} items cleared&#34;]">
+<div class="rv-head">
+<h2 id="rv-h">Comments</h2>
+<button class="iconbtn rv-close" type="button" aria-label="Close">&times;</button>
+</div>
+<label class="rv-accepted"><input type="checkbox" id="rv-accepted"> Accepted</label>
+<label class="rv-label" for="rv-new">Comment on the whole record</label>
+<textarea id="rv-new" rows="3"></textarea>
+<div class="rv-add-row"><button class="rv-add" type="button" disabled>Add</button></div>
+<p class="rv-hint">Select text in the record to comment on it.</p>
+<ul class="rv-list"></ul>
+</section>
+</aside>
+</div>
+<div id="status" class="toast" role="status" data-copied="Link copied"></div>
+<footer>Generated by booping specs site</footer>
+</body>
+</html>

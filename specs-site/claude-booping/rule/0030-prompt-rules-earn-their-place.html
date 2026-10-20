@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>try{var t=localStorage.getItem("specs-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}document.documentElement.classList.add("js")</script>
+<meta name="color-scheme" content="light dark">
+<title>A prompt rule earns its place by a measured miss — claude-booping</title>
+<link rel="stylesheet" href="../../fonts.css">
+<link rel="stylesheet" href="../../style.css">
+<script src="../../site.js" defer></script>
+<script src="../../search.js" defer></script>
+<script src="../../comments-format.js" defer></script>
+<script src="../../comments.js" defer></script>
+<link rel="alternate" type="text/markdown" href="0030-prompt-rules-earn-their-place.md">
+</head>
+<body>
+<svg aria-hidden="true" style="display:none">
+<symbol id="i-accepted" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4.8 8.2l2.1 2.1 4.3-4.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-open" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+<symbol id="i-planned" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2.6 2.2"/></symbol>
+<symbol id="i-rejected" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3.6 12.4l8.8-8.8" stroke="currentColor" stroke-width="1.6"/></symbol>
+<symbol id="i-clarify" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="currentColor"/><path d="M6.1 6.2a2 2 0 1 1 2.6 1.9c-.5.2-.7.6-.7 1.1v.4" fill="none" stroke="var(--surface)" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="11.6" r=".95" fill="var(--surface)"/></symbol>
+<symbol id="i-unknown" viewBox="0 0 16 16"><path d="M8 1.6l6.8 12.2H1.2z" fill="currentColor"/><path d="M8 6v3.6" stroke="var(--surface)" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="11.6" r=".9" fill="var(--surface)"/></symbol>
+<symbol id="i-not-accepted" viewBox="0 0 16 16"><circle cx="8" cy="8" r="4.6" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+<symbol id="i-review-accepted" viewBox="0 0 16 16"><circle cx="8" cy="8" r="4.6" fill="currentColor"/></symbol>
+<symbol id="i-menu" viewBox="0 0 20 20"><path d="M3 5.5h14M3 10h14M3 14.5h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+<symbol id="i-search" viewBox="0 0 20 20"><circle cx="8.6" cy="8.6" r="5.6" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M13 13l4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+<symbol id="i-moon" viewBox="0 0 20 20"><path d="M15.5 12.6A6.5 6.5 0 0 1 7.4 4.5a6.5 6.5 0 1 0 8.1 8.1z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+<symbol id="i-sun" viewBox="0 0 16 16"><circle cx="8" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.2v1.6M8 13.2v1.6M1.2 8h1.6M13.2 8h1.6M3.2 3.2l1.1 1.1M11.7 11.7l1.1 1.1M3.2 12.8l1.1-1.1M11.7 4.3l1.1-1.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+<symbol id="i-auto" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.6a6.4 6.4 0 0 0 0 12.8z" fill="currentColor"/></symbol>
+<symbol id="i-comment" viewBox="0 0 20 20"><path d="M4 4.5h12a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5H9.2l-3.7 3v-3H4A1.5 1.5 0 0 1 2.5 13V6A1.5 1.5 0 0 1 4 4.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+<symbol id="i-outbox" viewBox="0 0 20 20"><path d="M2.5 11.5v4a1.5 1.5 0 0 0 1.5 1.5h12a1.5 1.5 0 0 0 1.5-1.5v-4M10 13V3.5M6.5 7L10 3.5 13.5 7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+<button class="iconbtn menu" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Menu"><svg class="ic" aria-hidden="true"><use href="#i-menu"/></svg></button>
+<a class="brand" href="../../index.html">claude-booping</a>
+<form class="search" role="search" action="../../search.html" data-prefix="../../" data-all="All results">
+<svg class="ic" aria-hidden="true"><use href="#i-search"/></svg>
+<input type="search" name="q" role="combobox" aria-label="Search" aria-autocomplete="list" aria-expanded="false" aria-controls="search-list" autocomplete="off" placeholder="Search the specs">
+<kbd>/</kbd>
+<button class="iconbtn search-close" type="button" aria-label="Close">&times;</button>
+<ul id="search-list" role="listbox" aria-label="Search" hidden></ul>
+</form>
+<button class="iconbtn search-btn" type="button" aria-label="Search" title="Search"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg></button>
+<button class="iconbtn rv-btn" type="button" aria-controls="rv-panel" aria-expanded="false" aria-label="Comments" title="Comments"><svg class="ic" aria-hidden="true"><use href="#i-comment"/></svg><span class="n"></span></button>
+<a class="iconbtn outbox" href="../../comments.html" aria-label="Outbox" title="Outbox"><svg class="ic" aria-hidden="true"><use href="#i-outbox"/></svg><span class="l">Outbox</span><span class="n"></span></a>
+<button class="iconbtn theme" type="button" aria-label="Theme: auto" title="Theme: auto" data-label-auto="Theme: auto" data-label-light="Theme: light" data-label-dark="Theme: dark"><svg class="ic" aria-hidden="true"><use href="#i-auto"/></svg></button>
+</header>
+<div class="body rv-page">
+<nav class="side" id="drawer" aria-label="Navigation">
+<ul>
+<li><a href="../../index.html">Overview</a></li>
+<li><a href="../../review.html"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>Awaiting review<span class="n">143</span></a></li>
+<li><a href="../../records.html">All records<span class="n">147</span></a></li>
+</ul>
+<h4>Types</h4>
+<ul>
+<li><a href="../../claude-booping/adr/index.html">ADRs<span class="n">36</span></a></li>
+<li><a href="../../claude-booping/conflict/index.html">Conflicts<span class="n">2</span></a></li>
+<li><a href="../../claude-booping/idea/index.html">Ideas<span class="n">9</span></a></li>
+<li><a href="../../claude-booping/reference/index.html">References<span class="n">11</span></a></li>
+<li><a href="../../claude-booping/rule/index.html">Rules<span class="n">22</span></a></li>
+<li><a href="../../claude-booping/runbook/index.html">Runbooks<span class="n">3</span></a></li>
+<li><a href="../../claude-booping/story/index.html">Stories<span class="n">26</span></a></li>
+<li><a href="../../claude-booping/value/index.html">Values<span class="n">19</span></a></li>
+</ul>
+<h4>booping</h4>
+<ul>
+<li><a href="../../booping/index.html">Overview</a></li>
+<li><a href="../../booping/rule/index.html">Rules<span class="n">19</span></a></li>
+</ul>
+<h4>Tags</h4>
+<ul>
+<li><a href="../../claude-booping/tags/postmortem.html">postmortem<span class="n">3</span></a></li>
+<li><a href="../../claude-booping/tags/probe.html">probe<span class="n">1</span></a></li>
+<li><a href="../../claude-booping/tags/index.html">All tags</a></li>
+</ul>
+<ul>
+<li><a href="../../llms.txt">llms.txt</a></li>
+</ul>
+</nav>
+<main id="main">
+<nav class="crumbs" aria-label="breadcrumb">
+<ol>
+<li><a href="../../index.html">Overview</a></li>
+<li class="mid"><a href="index.html">Rules</a></li>
+<li><span aria-current="page">rule/0030</span></li>
+</ol>
+</nav>
+<div class="measure">
+<article data-ref="rule/0030" data-title="A prompt rule earns its place by a measured miss" data-page="claude-booping/rule/0030-prompt-rules-earn-their-place.html">
+<h1>A prompt rule earns its place by a measured miss</h1>
+<div class="badges"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></div>
+<p class="lead">An instruction enters a prompt or a targeted rule only after a minimal probe shows the model missing it; evals and benchmarks run only when the owner agrees.</p>
+<details class="toc-m">
+<summary>On this page</summary>
+<nav class="toc" aria-labelledby="toc-m-toc">
+<h4 id="toc-m-toc">On this page</h4>
+<ul>
+<li><a href="#rule">Rule</a>
+</li>
+<li><a href="#follows-from">Follows from</a>
+</li>
+<li><a href="#exceptions">Exceptions</a>
+</li>
+<li><a href="#referenced-by">Referenced by</a>
+</li>
+</ul>
+</nav>
+</details>
+<dl class="facts">
+<dt>Author</dt>
+<dd>agent</dd>
+<dt>Created</dt>
+<dd><time datetime="2026-10-16">16 October 2026</time></dd>
+<dt>Updated</dt>
+<dd><time datetime="2026-10-16">16 October 2026</time></dd>
+<dt>Review</dt>
+<dd><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not shown</dd>
+<dt>Sources</dt>
+<dd>vault/reference/0007-groom-benchmark-2026-10.md</dd>
+</dl>
+<dl class="facts">
+<dt>targets</dt>
+<dd>playbook-authoring, learn</dd>
+<dt>brief</dt>
+<dd>Add an instruction only after a minimal probe — one input, the prompt, one model call — shows the miss; ask the owner before any eval suite or benchmark; a rule the model ignores even when told becomes a check.</dd>
+</dl>
+<div class="body">
+<h2 id="rule">Rule<a class="anchor" href="#rule" aria-label="Link to this section: Rule">§</a></h2>
+<p>An instruction goes into a playbook prompt, a partial or a targeted rule only when the model is
+shown getting that thing wrong without it. The evidence is the smallest that settles it, like a unit
+test: one input, the prompt, one model call, and a look at the answer — or a correction already
+recorded. A larger eval suite or a benchmark costs hours and money and runs only when the owner
+agrees to it; propose it with its cost and what it would settle (owner, 2026-10-16).
+What the model does unprompted stays out of the prompt. An instruction the model misses even when told
+moves out of prose into a deterministic check or a structural step. Removing instructions is checked the same
+way, smallest evidence first.</p>
+<h2 id="follows-from">Follows from<a class="anchor" href="#follows-from" aria-label="Link to this section: Follows from">§</a></h2>
+<ul>
+<li><a href="../../claude-booping/value/0002-minimal-effective-context.html">Minimal effective context</a> — 16 of 45 groom rules were
+instructions the model follows anyway.</li>
+<li><a href="../../claude-booping/value/0012-quality-at-a-rational-cost.html">Quality at a rational cost</a> — five extra rules made
+the groom variant cheaper and worse (reference/0007).</li>
+<li><a href="../../claude-booping/value/0010-proven-to-work.html">Proven to work</a> — an instruction is kept for a measured reason, not
+for how plausible it sounds.</li>
+</ul>
+<h2 id="exceptions">Exceptions<a class="anchor" href="#exceptions" aria-label="Link to this section: Exceptions">§</a></h2>
+<ul>
+<li>Owner decisions and safety constraints (secrets, irreversible actions) are stated without waiting
+for a miss.</li>
+</ul>
+</div>
+</article>
+<h2 id="referenced-by">Referenced by<a class="anchor" href="#referenced-by" aria-label="Link to this section: Referenced by">§</a></h2>
+<p>Nothing references this record.</p>
+</div>
+</main>
+<aside class="rail rv-rail" id="rv-panel">
+<details class="rv-toc" open>
+<summary>On this page</summary>
+<nav class="toc" aria-labelledby="rail-toc">
+<h4 id="rail-toc">On this page</h4>
+<ul>
+<li><a href="#rule">Rule</a>
+</li>
+<li><a href="#follows-from">Follows from</a>
+</li>
+<li><a href="#exceptions">Exceptions</a>
+</li>
+<li><a href="#referenced-by">Referenced by</a>
+</li>
+</ul>
+</nav>
+</details>
+<section class="rv" aria-labelledby="rv-h" data-note="Note" data-delete="Delete" data-open="Open" data-whole="Whole record" data-changed="text changed" data-deleted="Comment deleted" data-copy-failed="Copy failed" data-copied-forms="[&#34;{n} item copied&#34;, &#34;{n} items copied&#34;]" data-cleared-forms="[&#34;{n} item cleared&#34;, &#34;{n} items cleared&#34;]">
+<div class="rv-head">
+<h2 id="rv-h">Comments</h2>
+<button class="iconbtn rv-close" type="button" aria-label="Close">&times;</button>
+</div>
+<label class="rv-accepted"><input type="checkbox" id="rv-accepted"> Accepted</label>
+<label class="rv-label" for="rv-new">Comment on the whole record</label>
+<textarea id="rv-new" rows="3"></textarea>
+<div class="rv-add-row"><button class="rv-add" type="button" disabled>Add</button></div>
+<p class="rv-hint">Select text in the record to comment on it.</p>
+<ul class="rv-list"></ul>
+</section>
+</aside>
+</div>
+<div id="status" class="toast" role="status" data-copied="Link copied"></div>
+<footer>Generated by booping specs site</footer>
+</body>
+</html>

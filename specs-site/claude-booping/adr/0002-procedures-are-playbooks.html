@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>try{var t=localStorage.getItem("specs-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}document.documentElement.classList.add("js")</script>
+<meta name="color-scheme" content="light dark">
+<title>Procedures are playbooks behind one skill — claude-booping</title>
+<link rel="stylesheet" href="../../fonts.css">
+<link rel="stylesheet" href="../../style.css">
+<script src="../../site.js" defer></script>
+<script src="../../search.js" defer></script>
+<script src="../../comments-format.js" defer></script>
+<script src="../../comments.js" defer></script>
+<link rel="alternate" type="text/markdown" href="0002-procedures-are-playbooks.md">
+</head>
+<body>
+<svg aria-hidden="true" style="display:none">
+<symbol id="i-accepted" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4.8 8.2l2.1 2.1 4.3-4.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-open" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+<symbol id="i-planned" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2.6 2.2"/></symbol>
+<symbol id="i-rejected" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3.6 12.4l8.8-8.8" stroke="currentColor" stroke-width="1.6"/></symbol>
+<symbol id="i-clarify" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="currentColor"/><path d="M6.1 6.2a2 2 0 1 1 2.6 1.9c-.5.2-.7.6-.7 1.1v.4" fill="none" stroke="var(--surface)" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="11.6" r=".95" fill="var(--surface)"/></symbol>
+<symbol id="i-unknown" viewBox="0 0 16 16"><path d="M8 1.6l6.8 12.2H1.2z" fill="currentColor"/><path d="M8 6v3.6" stroke="var(--surface)" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="11.6" r=".9" fill="var(--surface)"/></symbol>
+<symbol id="i-not-accepted" viewBox="0 0 16 16"><circle cx="8" cy="8" r="4.6" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+<symbol id="i-review-accepted" viewBox="0 0 16 16"><circle cx="8" cy="8" r="4.6" fill="currentColor"/></symbol>
+<symbol id="i-menu" viewBox="0 0 20 20"><path d="M3 5.5h14M3 10h14M3 14.5h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+<symbol id="i-search" viewBox="0 0 20 20"><circle cx="8.6" cy="8.6" r="5.6" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M13 13l4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+<symbol id="i-moon" viewBox="0 0 20 20"><path d="M15.5 12.6A6.5 6.5 0 0 1 7.4 4.5a6.5 6.5 0 1 0 8.1 8.1z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+<symbol id="i-sun" viewBox="0 0 16 16"><circle cx="8" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.2v1.6M8 13.2v1.6M1.2 8h1.6M13.2 8h1.6M3.2 3.2l1.1 1.1M11.7 11.7l1.1 1.1M3.2 12.8l1.1-1.1M11.7 4.3l1.1-1.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+<symbol id="i-auto" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.6a6.4 6.4 0 0 0 0 12.8z" fill="currentColor"/></symbol>
+<symbol id="i-comment" viewBox="0 0 20 20"><path d="M4 4.5h12a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5H9.2l-3.7 3v-3H4A1.5 1.5 0 0 1 2.5 13V6A1.5 1.5 0 0 1 4 4.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+<symbol id="i-outbox" viewBox="0 0 20 20"><path d="M2.5 11.5v4a1.5 1.5 0 0 0 1.5 1.5h12a1.5 1.5 0 0 0 1.5-1.5v-4M10 13V3.5M6.5 7L10 3.5 13.5 7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+<button class="iconbtn menu" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Menu"><svg class="ic" aria-hidden="true"><use href="#i-menu"/></svg></button>
+<a class="brand" href="../../index.html">claude-booping</a>
+<form class="search" role="search" action="../../search.html" data-prefix="../../" data-all="All results">
+<svg class="ic" aria-hidden="true"><use href="#i-search"/></svg>
+<input type="search" name="q" role="combobox" aria-label="Search" aria-autocomplete="list" aria-expanded="false" aria-controls="search-list" autocomplete="off" placeholder="Search the specs">
+<kbd>/</kbd>
+<button class="iconbtn search-close" type="button" aria-label="Close">&times;</button>
+<ul id="search-list" role="listbox" aria-label="Search" hidden></ul>
+</form>
+<button class="iconbtn search-btn" type="button" aria-label="Search" title="Search"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg></button>
+<button class="iconbtn rv-btn" type="button" aria-controls="rv-panel" aria-expanded="false" aria-label="Comments" title="Comments"><svg class="ic" aria-hidden="true"><use href="#i-comment"/></svg><span class="n"></span></button>
+<a class="iconbtn outbox" href="../../comments.html" aria-label="Outbox" title="Outbox"><svg class="ic" aria-hidden="true"><use href="#i-outbox"/></svg><span class="l">Outbox</span><span class="n"></span></a>
+<button class="iconbtn theme" type="button" aria-label="Theme: auto" title="Theme: auto" data-label-auto="Theme: auto" data-label-light="Theme: light" data-label-dark="Theme: dark"><svg class="ic" aria-hidden="true"><use href="#i-auto"/></svg></button>
+</header>
+<div class="body rv-page">
+<nav class="side" id="drawer" aria-label="Navigation">
+<ul>
+<li><a href="../../index.html">Overview</a></li>
+<li><a href="../../review.html"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>Awaiting review<span class="n">143</span></a></li>
+<li><a href="../../records.html">All records<span class="n">147</span></a></li>
+</ul>
+<h4>Types</h4>
+<ul>
+<li><a href="../../claude-booping/adr/index.html">ADRs<span class="n">36</span></a></li>
+<li><a href="../../claude-booping/conflict/index.html">Conflicts<span class="n">2</span></a></li>
+<li><a href="../../claude-booping/idea/index.html">Ideas<span class="n">9</span></a></li>
+<li><a href="../../claude-booping/reference/index.html">References<span class="n">11</span></a></li>
+<li><a href="../../claude-booping/rule/index.html">Rules<span class="n">22</span></a></li>
+<li><a href="../../claude-booping/runbook/index.html">Runbooks<span class="n">3</span></a></li>
+<li><a href="../../claude-booping/story/index.html">Stories<span class="n">26</span></a></li>
+<li><a href="../../claude-booping/value/index.html">Values<span class="n">19</span></a></li>
+</ul>
+<h4>booping</h4>
+<ul>
+<li><a href="../../booping/index.html">Overview</a></li>
+<li><a href="../../booping/rule/index.html">Rules<span class="n">19</span></a></li>
+</ul>
+<h4>Tags</h4>
+<ul>
+<li><a href="../../claude-booping/tags/postmortem.html">postmortem<span class="n">3</span></a></li>
+<li><a href="../../claude-booping/tags/probe.html">probe<span class="n">1</span></a></li>
+<li><a href="../../claude-booping/tags/index.html">All tags</a></li>
+</ul>
+<ul>
+<li><a href="../../llms.txt">llms.txt</a></li>
+</ul>
+</nav>
+<main id="main">
+<nav class="crumbs" aria-label="breadcrumb">
+<ol>
+<li><a href="../../index.html">Overview</a></li>
+<li class="mid"><a href="index.html">ADRs</a></li>
+<li><span aria-current="page">adr/0002</span></li>
+</ol>
+</nav>
+<div class="measure">
+<article data-ref="adr/0002" data-title="Procedures are playbooks behind one skill" data-page="claude-booping/adr/0002-procedures-are-playbooks.html">
+<h1>Procedures are playbooks behind one skill</h1>
+<div class="badges"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></div>
+<p class="lead">Every booping procedure ships as a playbook driven by the single /playbook skill; a new skill is written only for a surface /playbook cannot drive.</p>
+<details class="toc-m">
+<summary>On this page</summary>
+<nav class="toc" aria-labelledby="toc-m-toc">
+<h4 id="toc-m-toc">On this page</h4>
+<ul>
+<li><a href="#context">Context</a>
+</li>
+<li><a href="#decision">Decision</a>
+</li>
+<li><a href="#alternatives">Alternatives</a>
+<ul>
+<li><a href="#one-playbook-skill">One playbook skill</a></li>
+<li><a href="#a-skill-per-procedure">A skill per procedure</a></li>
+<li><a href="#playbooks-beside-the-skills">Playbooks beside the skills</a></li>
+</ul>
+</li>
+<li><a href="#consequences">Consequences</a>
+</li>
+<li><a href="#referenced-by">Referenced by</a>
+</li>
+</ul>
+</nav>
+</details>
+<dl class="facts">
+<dt>Author</dt>
+<dd>agent</dd>
+<dt>Created</dt>
+<dd><time datetime="2026-10-14">14 October 2026</time></dd>
+<dt>Updated</dt>
+<dd><time datetime="2026-10-14">14 October 2026</time></dd>
+<dt>Review</dt>
+<dd><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not shown</dd>
+<dt>Sources</dt>
+<dd>playbooks/groom/_specs/DECISIONS.md, playbooks/code-review/_specs/DECISIONS.md, CHANGELOG.md, CLAUDE.md</dd>
+<dt>Rules</dt>
+<dd><ul class="rel">
+<li><a href="../../claude-booping/rule/0024-new-procedures-are-playbooks.html">A new procedure is a playbook, not a skill</a> <code class="ref">rule/0024</code> <span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span></li>
+</ul></dd>
+<dt>Serves values</dt>
+<dd><ul class="rel">
+<li><a href="../../claude-booping/value/0007-plans-run-to-the-end.html">Plans run to the end</a> <code class="ref">value/0007</code></li>
+<li><a href="../../claude-booping/value/0005-stack-agnostic-core.html">Stack-agnostic core</a> <code class="ref">value/0005</code></li>
+<li><a href="../../claude-booping/value/0002-minimal-effective-context.html">Minimal effective context</a> <code class="ref">value/0002</code></li>
+<li><a href="../../claude-booping/value/0012-quality-at-a-rational-cost.html">Quality at a rational cost</a> <code class="ref">value/0012</code></li>
+</ul></dd>
+</dl>
+<div class="body">
+<h2 id="context">Context<a class="anchor" href="#context" aria-label="Link to this section: Context">§</a></h2>
+<p>Booping's procedures started as skills: <code>/groom</code>, <code>/develop</code>, <code>/retro</code>, <code>/learn</code>,
+<code>/chat</code>, <code>/help</code>, <code>/install</code>, <code>/code-review</code>. A skill has no run state, so an
+interrupted procedure cannot resume in another session. The groom skill was ported
+to a playbook and ran in parallel with it during beta; the other skills followed.
+At authoring time the stateless <code>/code-review</code> skill was kept because it took an
+arbitrary scope with no plan, which a playbook step could not handle then.</p>
+<p>Five runs grooming the same feature measured the cost of the playbook shape. The
+third playbook version against the second skill run: +61% API calls, +38% cache
+read, about 1.75× wall-clock, final context −7%, user wait −48%. The remaining gap
+is call count — transitions and gate round-trips — which the note calls the state
+machine's floor.</p>
+<h2 id="decision">Decision<a class="anchor" href="#decision" aria-label="Link to this section: Decision">§</a></h2>
+<p><code>/playbook</code> is the only skill the plugin ships. Groom, develop, code-review, retro,
+learn, setup, migrate and playbook-authoring are core playbooks, discovered beside
+the user's global and project playbooks. A playbook carries run state in its own
+artifact and resumes across sessions; step bodies load one at a time. A new
+procedure is a playbook; a skill is written only for a surface <code>/playbook</code> cannot
+drive. Code review of an ad-hoc scope moved into the code-review playbook
+(<code>plan: null</code>), so the stateless skill went too.</p>
+<h2 id="alternatives">Alternatives<a class="anchor" href="#alternatives" aria-label="Link to this section: Alternatives">§</a></h2>
+<table class="alts">
+<thead>
+<tr>
+<th>Option</th>
+<th>Status</th>
+<th>Complexity</th>
+<th>Reversibility</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr class="chosen">
+<td><a href="#one-playbook-skill">One playbook skill</a></td>
+<td><span class="badge st-accepted">accepted</span> <span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>chosen</span></td>
+<td>high</td>
+<td>low</td>
+<td>Run state, resume, user-extensible procedures</td>
+</tr>
+<tr>
+<td><a href="#a-skill-per-procedure">A skill per procedure</a></td>
+<td>rejected</td>
+<td>low</td>
+<td>high</td>
+<td>No run state; cheaper per run</td>
+</tr>
+<tr>
+<td><a href="#playbooks-beside-the-skills">Playbooks beside the skills</a></td>
+<td>rejected</td>
+<td>medium</td>
+<td>high</td>
+<td>The beta shape; two copies of each procedure</td>
+</tr>
+</tbody>
+</table>
+<details class="opt chosen" open>
+<summary><h3 id="one-playbook-skill">One playbook skill<a class="anchor" href="#one-playbook-skill" aria-label="Link to this section: One playbook skill">§</a></h3>
+<span class="meta"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>chosen</span><span class="b plain">complexity: high</span><span class="b plain">reversibility: low</span></span></summary>
+<div class="in">
+<p class="verdict">Run state, resume, user-extensible procedures</p>
+<p>Every procedure is a playbook; <code>/playbook</code> lists, selects and drives them.</p>
+<ul>
+<li><strong>Pros:</strong> run state persisted per artifact and resumable; the user adds procedures
+in their own tiers; one driving protocol instead of one per skill.</li>
+<li><strong>Cons:</strong> more API calls and about 1.75× wall-clock against the skill on the
+measured groom runs.</li>
+<li><strong>Complexity:</strong> high — a playbook engine, state machines, a driving protocol.</li>
+<li><strong>Reversibility:</strong> low — every procedure and the user's own playbooks depend on it.</li>
+</ul>
+</div>
+</details>
+<details class="opt">
+<summary><h3 id="a-skill-per-procedure">A skill per procedure<a class="anchor" href="#a-skill-per-procedure" aria-label="Link to this section: A skill per procedure">§</a></h3>
+<span class="meta"><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-rejected"/></svg>rejected</span><span class="b plain">complexity: low</span><span class="b plain">reversibility: high</span></span></summary>
+<div class="in">
+<p class="verdict">No run state; cheaper per run</p>
+<p>Each procedure is one skill body rendered at load.</p>
+<ul>
+<li><strong>Pros:</strong> fewer calls; shorter wall-clock on the measured runs.</li>
+<li><strong>Cons:</strong> no persisted run state, so no resume across sessions; every skill
+repeats its own driving logic.</li>
+<li><strong>Complexity:</strong> low.</li>
+<li><strong>Reversibility:</strong> high.</li>
+</ul>
+</div>
+</details>
+<details class="opt">
+<summary><h3 id="playbooks-beside-the-skills">Playbooks beside the skills<a class="anchor" href="#playbooks-beside-the-skills" aria-label="Link to this section: Playbooks beside the skills">§</a></h3>
+<span class="meta"><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-rejected"/></svg>rejected</span><span class="b plain">complexity: medium</span><span class="b plain">reversibility: high</span></span></summary>
+<div class="in">
+<p class="verdict">The beta shape; two copies of each procedure</p>
+<p>The playbook ships next to the untouched skill, as during the groom, develop and
+retro ports.</p>
+<ul>
+<li><strong>Pros:</strong> a fallback while the playbook is in beta.</li>
+<li><strong>Cons:</strong> two copies of each procedure to keep in step.</li>
+<li><strong>Complexity:</strong> medium.</li>
+<li><strong>Reversibility:</strong> high.</li>
+</ul>
+</div>
+</details>
+<h2 id="consequences">Consequences<a class="anchor" href="#consequences" aria-label="Link to this section: Consequences">§</a></h2>
+<ul>
+<li><code>/chat</code> and <code>/help</code> were retired; <code>skills/</code> holds only <code>playbook</code>.</li>
+<li>A run costs more calls than the old skill did; further squeezing is batching
+transitions with work, which the metrics note calls diminishing returns.</li>
+<li>Authoring a procedure goes through the playbook-authoring playbook.</li>
+</ul>
+</div>
+</article>
+<h2 id="referenced-by">Referenced by<a class="anchor" href="#referenced-by" aria-label="Link to this section: Referenced by">§</a></h2>
+<h3>Rules</h3>
+<ul class="rel backlinks">
+<li><a href="../../claude-booping/rule/0024-new-procedures-are-playbooks.html">A new procedure is a playbook, not a skill</a> <code class="ref">rule/0024</code> <span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span> <span class="via">via Follows from</span></li>
+</ul>
+</div>
+</main>
+<aside class="rail rv-rail" id="rv-panel">
+<details class="rv-toc" open>
+<summary>On this page</summary>
+<nav class="toc" aria-labelledby="rail-toc">
+<h4 id="rail-toc">On this page</h4>
+<ul>
+<li><a href="#context">Context</a>
+</li>
+<li><a href="#decision">Decision</a>
+</li>
+<li><a href="#alternatives">Alternatives</a>
+<ul>
+<li><a href="#one-playbook-skill">One playbook skill</a></li>
+<li><a href="#a-skill-per-procedure">A skill per procedure</a></li>
+<li><a href="#playbooks-beside-the-skills">Playbooks beside the skills</a></li>
+</ul>
+</li>
+<li><a href="#consequences">Consequences</a>
+</li>
+<li><a href="#referenced-by">Referenced by</a>
+</li>
+</ul>
+</nav>
+</details>
+<section class="rv" aria-labelledby="rv-h" data-note="Note" data-delete="Delete" data-open="Open" data-whole="Whole record" data-changed="text changed" data-deleted="Comment deleted" data-copy-failed="Copy failed" data-copied-forms="[&#34;{n} item copied&#34;, &#34;{n} items copied&#34;]" data-cleared-forms="[&#34;{n} item cleared&#34;, &#34;{n} items cleared&#34;]">
+<div class="rv-head">
+<h2 id="rv-h">Comments</h2>
+<button class="iconbtn rv-close" type="button" aria-label="Close">&times;</button>
+</div>
+<label class="rv-accepted"><input type="checkbox" id="rv-accepted"> Accepted</label>
+<label class="rv-label" for="rv-new">Comment on the whole record</label>
+<textarea id="rv-new" rows="3"></textarea>
+<div class="rv-add-row"><button class="rv-add" type="button" disabled>Add</button></div>
+<p class="rv-hint">Select text in the record to comment on it.</p>
+<ul class="rv-list"></ul>
+</section>
+</aside>
+</div>
+<div id="status" class="toast" role="status" data-copied="Link copied"></div>
+<footer>Generated by booping specs site</footer>
+</body>
+</html>

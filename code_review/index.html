@@ -64,6 +64,14 @@
                 </li>
               </ul>
               <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../specs/">Specs</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="/claude-booping/specs-site/">Specs site</a>
+                </li>
+              </ul>
+              <ul>
                 <li class="toctree-l1"><a class="reference internal" href="../integrating-external-agents/">Integrating external agents</a>
                 </li>
               </ul>
@@ -95,6 +103,10 @@
                   <li class="toctree-l1"><a class="reference internal" href="../retro/">retro playbook</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../learn/">learn playbook</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../specs_playbook/">specs playbook</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../project_manager/">project-manager playbook</a>
                   </li>
               </ul>
       </div>
@@ -129,6 +141,7 @@
 <p>A run reviews one confirmed scope end to end: <code>scope</code> settles what to look at (any <code>done</code> plan, the latest commits, or a named target) and opens the artifact, <code>review</code> returns severity-classified findings from a detached pass, <code>present</code> writes them and collects your verdict, <code>resolve</code> acts on it and closes the run.</p>
 <h2 id="the-review-artifact">The review artifact</h2>
 <p>Every run writes one file under the vault's <code>codereviews/</code>: <code>codereviews/{plan-dirname}/{YYYYMMDDHHmm}.md</code> when a plan is in scope, <code>codereviews/{target-slug}/{YYYYMMDDHHmm}.md</code> for an ad-hoc scope. It holds <code>## Scope</code>, <code>## Findings</code>, <code>## Verdict</code> and <code>## Resolution</code>, and its frontmatter carries <code>plan:</code> — the reviewed plan's vault-relative path, or <code>null</code> when nothing was in scope.</p>
+<p>When you correct the run — overrule a finding's severity, reject a proposed fix — it logs your words verbatim, with the session id and a link to the review file, as one file under the vault's <code>corrections/</code>. <a href="../retro/">Retro</a> starts from those entries.</p>
 <p>The artifact is the run's own state: a stopped review is <strong>resumable</strong>, and a second look after fixes is a new, separately recorded run.</p>
 <h2 id="statuses">Statuses</h2>
 <p>The status lives in the artifact, never in the reviewed plan:</p>
@@ -137,7 +150,7 @@
 <li><strong><code>human-review</code></strong> — the findings are on record, your verdict is pending.</li>
 <li><strong><code>done</code></strong> — every finding is resolved (applied, delegated or dropped) and recorded.</li>
 </ul>
-<p>The run works from the vault root and addresses the review file explicitly; a stopped run resumes with <code>booping playbook-state code-review --workdir {vault} --target codereviews/{dir}/{ts}.md</code>.</p>
+<p>The run works from the vault root and addresses the review file explicitly; a stopped run resumes with <code>booping state {vault}/codereviews/{dir}/{ts}.md --playbook code-review</code>.</p>
 <p>Closing the run stamps <code>reviewed_at</code> on the artifact, appends the artifact's path to the reviewed plan's <code>code_reviews:</code> list, and commits the vault. An ad-hoc review (<code>plan: null</code>) skips the append and only commits. The plan's <code>status:</code> is never touched.</p>
 <h2 id="the-queue">The queue</h2>
 <p><code>scope</code> offers every plan at <code>status: done</code>, listed with its <code>code_reviews:</code> history — a reviewed plan stays on the list, so re-reviewing is first-class. See <code>core.code_review_playbook.queries.scope_candidates</code> in <a href="../project_config/">Project config</a>.</p>

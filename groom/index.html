@@ -64,6 +64,14 @@
                 </li>
               </ul>
               <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../specs/">Specs</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="/claude-booping/specs-site/">Specs site</a>
+                </li>
+              </ul>
+              <ul>
                 <li class="toctree-l1"><a class="reference internal" href="../integrating-external-agents/">Integrating external agents</a>
                 </li>
               </ul>
@@ -79,6 +87,10 @@
                   <li class="toctree-l1 current"><a class="reference internal current" href="#">groom playbook</a>
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#what-it-does">What it does</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#draft-plan">draft-plan</a>
+    </li>
+        </ul>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#starting-a-run">Starting a run</a>
     </li>
@@ -91,6 +103,14 @@
     <li class="toctree-l3"><a class="reference internal" href="#define-your-own-plan-templates">Define your own plan templates</a>
     </li>
         </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#booping-plan-split">booping plan split</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#booping-plan-split-draft-out-dir-replace">booping plan split DRAFT [--out DIR] [--replace]</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#the-milestone-check">The milestone check</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#reviewing-the-plan">Reviewing the plan</a>
     </li>
@@ -107,6 +127,10 @@
                   <li class="toctree-l1"><a class="reference internal" href="../retro/">retro playbook</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../learn/">learn playbook</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../specs_playbook/">specs playbook</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../project_manager/">project-manager playbook</a>
                   </li>
               </ul>
       </div>
@@ -140,11 +164,11 @@
 <pre><code class="language-text">/playbook groom
 </code></pre>
 <h2 id="what-it-does">What it does</h2>
-<p>Run states: <code>framing</code> → <code>researching</code> → <code>drafting</code> → <code>cross-reviewing</code> → <code>presenting</code> → <code>awaiting-approval</code> → <code>ready-for-dev</code>. Two loopbacks: <code>drafting → researching</code> when the design needs blast radius the research pass missed, and <code>awaiting-approval → drafting</code> when your change request touches the plan itself.</p>
-<p>Almost every step runs in your session — inline, or assisted (heavy reads go to the research agent, which returns a bounded summary). The exception is <code>cross-review</code>, which hands the drafted plan to a second-model reviewer and does nothing unless you name one. <code>present</code> is the run's single approval gate.</p>
-<p>The output is a plan directory <code>~/Claude/{project}/plans/{slug}/</code>. Its <code>index.md</code> carries the approach, the scope and the YAML frontmatter the rest of the loop (<code>develop</code>, <code>retro</code>, <code>learn</code>) reads; each milestone gets a directory of its own under <code>milestones/</code>, holding a milestone file that repeats the directory's name, and that file — not a section of the index — is what develop hands a coding agent as its contract, with room beside it for what the sprint later writes about that milestone. <code>index.md</code>'s <code>## Milestones</code> table and the plan's total story points are generated from those files, never hand-kept. Groom creates the directory with one <code>booping scaffold</code> call from a config-declared tree, so the fresh <code>index.md</code> arrives complete — including a real <code>commit:</code> stamped with repo HEAD at creation, and <code>draft-plan</code> scaffolds each milestone directory and its file the same way. The intake briefing and any web-research notes land beside it. The directory doubles as the run workdir, so a groom run is <strong>resumable</strong>: its run state lives in the same <code>index.md</code>.</p>
+<p>Run states: <code>framing</code> → <code>researching</code> → <code>drafting</code> → <code>cross-reviewing</code> → <code>presenting</code> → <code>awaiting-approval</code> → <code>ready-for-dev</code>. Two loopbacks: <code>drafting → researching</code> when the design needs code the research stage missed, and <code>awaiting-approval → drafting</code> when your change request touches the plan itself.</p>
+<p>Almost every step runs in your session — inline, or assisted (heavy reads go to the research agent, which returns a bounded summary). <code>researching</code> and <code>drafting</code> are both stages of the one <code>draft-plan</code> step. The exception is <code>cross-review</code>, which hands the drafted plan to a second-model reviewer and does nothing unless you name one. <code>present</code> is the run's single approval gate.</p>
+<p>The output is a plan directory <code>~/Claude/{project}/plans/{slug}/</code>. Its <code>index.md</code> carries the approach, the scope and the YAML frontmatter the rest of the loop (<code>develop</code>, <code>retro</code>, <code>learn</code>) reads; each milestone gets a directory of its own under <code>milestones/</code>, holding a milestone file that repeats the directory's name, and that file — not a section of the index — is what develop hands a coding agent as its contract, with room beside it for what the sprint later writes about that milestone. Groom creates the directory with one <code>booping create</code> call from a config-declared tree, so the fresh <code>index.md</code> arrives complete — including a real <code>commit:</code> stamped with repo HEAD at creation. The plan itself is drafted as one file, <code>draft.md</code>, beside <code>index.md</code>; <code>booping plan split</code> cuts it into <code>index.md</code>'s body and the milestone files, and generates <code>index.md</code>'s <code>## Milestones</code> and <code>## Groups</code> tables and the plan's total story points — never hand-kept. <code>draft.md</code> stays as the drafting source: a fix or a change request edits it and splits again. The intake briefing lands beside it. The directory doubles as the run workdir, so a groom run is <strong>resumable</strong>: its run state lives in the same <code>index.md</code>.</p>
 <p>A plan is always a directory: <code>core.plans.glob</code> resolves <code>plans/*/index.md</code> and nothing else, and <code>core.plans.milestones.glob</code> resolves the milestone file inside each milestone directory. A vault still holding flat <code>plans/{slug}.md</code> files converts them with <code>/playbook migrate</code>.</p>
-<p>Six steps, in dependency order:</p>
+<p>Four steps, in dependency order:</p>
 <table>
 <thead>
 <tr>
@@ -155,19 +179,11 @@
 <tbody>
 <tr>
 <td><code>intake</code></td>
-<td>Clarify the request, settle scope, scaffold the plan directory — briefing, identity frontmatter, <code>commit:</code> at repo HEAD — with one <code>booping scaffold</code> call</td>
-</tr>
-<tr>
-<td><code>research-codebase</code></td>
-<td>Map the blast radius — files, modules, integrations, prior art (assisted: heavy reads go to the research agent)</td>
-</tr>
-<tr>
-<td><code>research-web</code></td>
-<td>Check external practice where the design is uncertain, and verify package versions, image tags, API endpoints and CLI flags against current docs</td>
+<td>Clarify the request, settle scope, create the plan directory — briefing, identity frontmatter, <code>commit:</code> at repo HEAD — with one <code>booping create</code> call</td>
 </tr>
 <tr>
 <td><code>draft-plan</code></td>
-<td>Design with you in conversation, then write the plan against a plan template — <code>index.md</code> plus one milestone directory each</td>
+<td>Research the code the request touches, draft the whole plan into <code>draft.md</code> against a plan template, split it into milestone files and check them</td>
 </tr>
 <tr>
 <td><code>cross-review</code></td>
@@ -175,11 +191,20 @@
 </tr>
 <tr>
 <td><code>present</code></td>
-<td>Present approach, milestones and SP totals; the run's single approval gate</td>
+<td>Present approach, milestones, SP totals and the milestone-contract check; the run's single approval gate</td>
 </tr>
 </tbody>
 </table>
-<p>Refinement and decomposition happen inside <code>draft-plan</code>.</p>
+<h3 id="draft-plan">draft-plan</h3>
+<p><code>draft-plan</code> works in four stages, all in your session:</p>
+<ol>
+<li><strong>Research</strong> — reads the code the request touches and what it depends on (bulk reads go to the research agent) and posts the facts, with file paths, in chat. This is the <code>researching</code> status.</li>
+<li><strong>Draft</strong> — picks the plan template matching the dominant surface and writes the whole plan to <code>draft.md</code>: every template section, and one <code>### M{nn} — {title}</code> block per milestone, opened by <code>sp:</code> and <code>depends_on:</code> lines and holding the four sub-headings named in <code>core.groom_playbook.split.sections</code>. What the code and the request settle, it decides and records as an assumption; a call only you can make is asked in chat, or — in an autonomous run — written to the plan's <code>clarifications.md</code> while the run parks.</li>
+<li><strong>Split</strong> — runs <code>booping plan split draft.md --replace</code>. A draft it cannot cut (exit 3 or 4) goes to <code>core.groom_playbook.split_fallback_agent</code>, which rewrites it into the format outside the vault; the run copies the result over <code>draft.md</code> and splits again.</li>
+<li><strong>Check</strong> — runs <a href="../install/#prerequisites">mdcheck</a> over the milestone files against the groom milestone schema (<a href="#the-milestone-check">below</a>) and fixes the milestones it flags in <code>draft.md</code>, then splits again — at most three rounds. Findings left after that are shown at <code>present</code>.</li>
+</ol>
+<p>The one-pass draft and the split are backed by booping's own groom and split benchmarks (<a href="https://github.com/A/claude-booping/blob/master/vault/adr/0030-groom-drafts-the-whole-plan-in-one-pass.md">adr/0030</a>, <a href="https://github.com/A/claude-booping/blob/master/vault/adr/0031-a-script-cuts-the-plan-into-milestone-files.md">adr/0031</a>).</p>
+<p>When you correct the run — reject a proposal, rewrite what it wrote, answer a gate differently than it suggested — it logs your words verbatim, with the session id and a link to the plan, as one file under the vault's <code>corrections/</code>. <a href="../retro/">Retro</a> starts from those entries.</p>
 <h2 id="starting-a-run">Starting a run</h2>
 <pre><code class="language-text">/playbook groom
 </code></pre>
@@ -189,7 +214,7 @@
 <p>Everything you say in the invocation reaches <code>intake</code> verbatim.</p>
 <h2 id="best-practices">Best practices</h2>
 <h3 id="more-detail-in-the-prompt-sharper-plan">More detail in the prompt = sharper plan</h3>
-<p>The playbook works from your request, the codebase, and accumulated lessons. The request is the only knob fully under your control — the more concrete it is, the less the run has to guess.</p>
+<p>The playbook works from your request, the codebase, and the accumulated rules. The request is the only knob fully under your control — the more concrete it is, the less the run has to guess.</p>
 <p>Brief request — lots of room for misalignment:</p>
 <pre><code class="language-text">/playbook groom — add rate limiting
 </code></pre>
@@ -208,6 +233,58 @@ existing one in apps/api/middleware/.
 <h3 id="define-your-own-plan-templates">Define your own plan templates</h3>
 <p>Drop <code>*.md</code> files into <code>~/Claude/{project}/plan_templates/</code> to extend or override the templates that ship with the plugin. Each template needs frontmatter (<code>name</code>, <code>description</code>) and two top-level sections (<code># Plan Body</code>, <code># Quality Checklist</code>). A project-local template with the same <code>name</code> as a core template overrides it.</p>
 <p>See <a href="../vault/">Vault</a> for the directory layout.</p>
+<h2 id="booping-plan-split">booping plan split</h2>
+<p>Runs on its own as well as inside <code>draft-plan</code>, on a hand-written draft.</p>
+<h3 id="booping-plan-split-draft-out-dir-replace"><code>booping plan split DRAFT [--out DIR] [--replace]</code></h3>
+<p>Cuts a one-file plan into <code>index.md</code> and one milestone file per <code>### M{nn} — {title}</code> block.</p>
+<ul>
+<li><strong><code>DRAFT</code></strong> — the one-file plan.</li>
+<li><strong><code>--out DIR</code></strong> — the plan directory to write; defaults to <code>DRAFT</code>'s directory.</li>
+<li><strong><code>--replace</code></strong> — remove existing milestone directories under <code>DIR</code> (those matching <code>core.plans.milestones.glob</code>) before writing.</li>
+</ul>
+<p>It writes <code>DIR/milestones/M{nn}-{kebab}/M{nn}-{kebab}.md</code> per milestone, each rendered from <code>core.groom_playbook.milestone_template</code> with the block's sections under its headings, and <code>DIR/index.md</code>: the existing frontmatter kept (else the draft's own, else none), <code>sp:</code> restamped with the milestones' sum when the key exists, and the body the draft's plan sections in order, with the generated <code>## Milestones</code> table and a <code>## Groups</code> table where the draft's milestones stood. Groups pack contiguous milestones, in <code>id</code> order, while their summed SP stays at or under <code>core.sprint.max_sp</code>; a lone milestone is always a group.</p>
+<p>stdin is not read. stdout prints one line per milestone — <code>M{nn}-{kebab} sp={n|null} sections=tasks:{lines},dod:{lines},references:{lines},verify:{lines}</code> — then one <code>group G{k}: M{nn}, … ({sum} SP)</code> line per group, then <code>demoted: {n}</code> when top-level headings inside a milestone were demoted. stderr carries one <code>flag: {text}</code> line per flag (a missing <code>sp</code>, a <code>depends_on</code> naming a later milestone, …) and <code>error: {message}</code> on failure.</p>
+<table>
+<thead>
+<tr>
+<th>Exit</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>0</code></td>
+<td>written, no flags</td>
+</tr>
+<tr>
+<td><code>1</code></td>
+<td>usage or config error</td>
+</tr>
+<tr>
+<td><code>2</code></td>
+<td>refused — milestone files exist and <code>--replace</code> was not given — or a write failed</td>
+</tr>
+<tr>
+<td><code>3</code></td>
+<td>no milestone heading found; nothing written</td>
+</tr>
+<tr>
+<td><code>4</code></td>
+<td>written, with flags</td>
+</tr>
+</tbody>
+</table>
+<h2 id="the-milestone-check">The milestone check</h2>
+<p><code>playbooks/groom/_schemas/milestone.yaml</code> is an mdcheck rule file; run it on its own to re-check a plan after editing its milestone files:</p>
+<pre><code class="language-text">mdcheck ${CLAUDE_PLUGIN_ROOT}/playbooks/groom/_schemas/milestone.yaml {plan-dir}/milestones/*/M*.md
+</code></pre>
+<ul>
+<li><strong>SP</strong> — each task's SP cell in the <code>## Tasks</code> table is 1–4, below <code>core.sprint.redecompose_threshold</code>, and the milestone's frontmatter <code>sp</code> is at most <code>core.sprint.max_sp</code> (15); the schema restates both as static patterns, so a changed value needs the schema changed too.</li>
+<li><strong>Verify</strong> — the first paragraph of <code>## Verify</code> is one inline code span: the milestone's single command.</li>
+<li><strong>Tasks</strong> — <code>## Tasks</code> names at least one file path, a backticked token holding <code>/</code> or a <code>.ext</code>.</li>
+<li><strong>Definition of Done</strong> — <code>## Definition of Done</code> has at least one checkbox item.</li>
+</ul>
+<p>mdcheck exits <code>0</code> when clean, <code>1</code> with findings, one line per finding naming the file, the line and the failed rule.</p>
 <h2 id="reviewing-the-plan">Reviewing the plan</h2>
 <p>What to check before approving at <code>present</code>, the run's <strong>only</strong> review gate:</p>
 <ul>
@@ -229,17 +306,19 @@ existing one in apps/api/middleware/.
 <p>Two thresholds drive the playbook's behaviour, both configurable:</p>
 <ul>
 <li><strong><code>core.sprint.default_threshold_sp</code> (default <code>35</code>)</strong> — soft cap on plan size. Above this, <code>present</code> proposes splitting the plan into sibling stubs rather than shipping one mega-sprint.</li>
-<li><strong><code>core.sprint.redecompose_threshold</code> (default <code>5</code>)</strong> — any task estimated at ≥ this value must be re-decomposed before the run can leave <code>drafting</code>.</li>
+<li><strong><code>core.sprint.redecompose_threshold</code> (default <code>5</code>)</strong> — a task estimated at ≥ this value is research and must be split before the run can leave <code>drafting</code>; a hard gate on the <code>drafting → cross-reviewing</code> edge, checked by <a href="#the-milestone-check">the milestone check</a>. A milestone is the sum of its tasks, capped by <code>core.sprint.max_sp</code>.</li>
 </ul>
 <p>Both thresholds are ceilings, not velocity targets. A 12-SP plan is fine; a 38-SP plan is the trigger to consider a split.</p>
 <h2 id="config">Config</h2>
 <p>The playbook reads these keys from <code>src/config.yaml</code>. See <a href="../project_config/">Project config</a> for the deep-merge override mechanics; per-project tweaks live in <code>~/Claude/{project}/config.yaml</code>.</p>
 <ul>
 <li><strong><code>core.sprint.default_threshold_sp</code></strong> — soft cap on total SP per plan; above this the run proposes a split.</li>
-<li><strong><code>core.sprint.redecompose_threshold</code></strong> — per-task SP value at or above which the task must be re-decomposed.</li>
+<li><strong><code>core.sprint.redecompose_threshold</code></strong> — per-task SP value at or above which the task must be split.</li>
 <li><strong><code>core.sprint.scale</code></strong> — the 1–5 SP definitions (each a <code>{sp, meaning}</code> entry).</li>
 <li><strong><code>core.task_types</code></strong> — list of <code>{type, description, doc_uri}</code> entries (<code>feature</code>, <code>bug</code>, <code>refactoring</code>). The request is classified against this list; the matching <code>doc_uri</code> lazy-loads detailed guidance for that task type.</li>
 <li><strong><code>core.groom_playbook.cross_review_agent</code></strong> — the agent that cross-reviews the drafted plan. <code>null</code> by default, which skips the <code>cross-reviewing</code> step entirely.</li>
+<li><strong><code>core.groom_playbook.split.sections</code></strong> — the four milestone sub-headings, in order (tasks, definition of done, references, verify): the draft's <code>####</code> headings and the milestone file's <code>##</code> headings.</li>
+<li><strong><code>core.groom_playbook.split_fallback_agent</code></strong> — the <code>model:effort</code> of the agent that rewrites a draft <code>booping plan split</code> cannot cut (default <code>opus:medium</code>); <code>null</code> makes the run rewrite it itself.</li>
 <li><strong><code>core.research_agent</code></strong> — the agent assisted steps hand their bulk reads to (default <code>booping:booping-researcher</code>). Shared across playbooks, so it sits directly under <code>core</code>.</li>
 </ul>
               

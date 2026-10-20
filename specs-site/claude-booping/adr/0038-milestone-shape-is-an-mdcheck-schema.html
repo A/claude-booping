@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>try{var t=localStorage.getItem("specs-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}document.documentElement.classList.add("js")</script>
+<meta name="color-scheme" content="light dark">
+<title>Milestone shape is an mdcheck schema — claude-booping</title>
+<link rel="stylesheet" href="../../fonts.css">
+<link rel="stylesheet" href="../../style.css">
+<script src="../../site.js" defer></script>
+<script src="../../search.js" defer></script>
+<script src="../../comments-format.js" defer></script>
+<script src="../../comments.js" defer></script>
+<link rel="alternate" type="text/markdown" href="0038-milestone-shape-is-an-mdcheck-schema.md">
+</head>
+<body>
+<svg aria-hidden="true" style="display:none">
+<symbol id="i-accepted" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4.8 8.2l2.1 2.1 4.3-4.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-open" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+<symbol id="i-planned" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2.6 2.2"/></symbol>
+<symbol id="i-rejected" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3.6 12.4l8.8-8.8" stroke="currentColor" stroke-width="1.6"/></symbol>
+<symbol id="i-clarify" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="currentColor"/><path d="M6.1 6.2a2 2 0 1 1 2.6 1.9c-.5.2-.7.6-.7 1.1v.4" fill="none" stroke="var(--surface)" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="11.6" r=".95" fill="var(--surface)"/></symbol>
+<symbol id="i-unknown" viewBox="0 0 16 16"><path d="M8 1.6l6.8 12.2H1.2z" fill="currentColor"/><path d="M8 6v3.6" stroke="var(--surface)" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="11.6" r=".9" fill="var(--surface)"/></symbol>
+<symbol id="i-not-accepted" viewBox="0 0 16 16"><circle cx="8" cy="8" r="4.6" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+<symbol id="i-review-accepted" viewBox="0 0 16 16"><circle cx="8" cy="8" r="4.6" fill="currentColor"/></symbol>
+<symbol id="i-menu" viewBox="0 0 20 20"><path d="M3 5.5h14M3 10h14M3 14.5h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+<symbol id="i-search" viewBox="0 0 20 20"><circle cx="8.6" cy="8.6" r="5.6" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M13 13l4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+<symbol id="i-moon" viewBox="0 0 20 20"><path d="M15.5 12.6A6.5 6.5 0 0 1 7.4 4.5a6.5 6.5 0 1 0 8.1 8.1z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+<symbol id="i-sun" viewBox="0 0 16 16"><circle cx="8" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.2v1.6M8 13.2v1.6M1.2 8h1.6M13.2 8h1.6M3.2 3.2l1.1 1.1M11.7 11.7l1.1 1.1M3.2 12.8l1.1-1.1M11.7 4.3l1.1-1.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+<symbol id="i-auto" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.6a6.4 6.4 0 0 0 0 12.8z" fill="currentColor"/></symbol>
+<symbol id="i-comment" viewBox="0 0 20 20"><path d="M4 4.5h12a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5H9.2l-3.7 3v-3H4A1.5 1.5 0 0 1 2.5 13V6A1.5 1.5 0 0 1 4 4.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+<symbol id="i-outbox" viewBox="0 0 20 20"><path d="M2.5 11.5v4a1.5 1.5 0 0 0 1.5 1.5h12a1.5 1.5 0 0 0 1.5-1.5v-4M10 13V3.5M6.5 7L10 3.5 13.5 7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+<button class="iconbtn menu" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Menu"><svg class="ic" aria-hidden="true"><use href="#i-menu"/></svg></button>
+<a class="brand" href="../../index.html">claude-booping</a>
+<form class="search" role="search" action="../../search.html" data-prefix="../../" data-all="All results">
+<svg class="ic" aria-hidden="true"><use href="#i-search"/></svg>
+<input type="search" name="q" role="combobox" aria-label="Search" aria-autocomplete="list" aria-expanded="false" aria-controls="search-list" autocomplete="off" placeholder="Search the specs">
+<kbd>/</kbd>
+<button class="iconbtn search-close" type="button" aria-label="Close">&times;</button>
+<ul id="search-list" role="listbox" aria-label="Search" hidden></ul>
+</form>
+<button class="iconbtn search-btn" type="button" aria-label="Search" title="Search"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg></button>
+<button class="iconbtn rv-btn" type="button" aria-controls="rv-panel" aria-expanded="false" aria-label="Comments" title="Comments"><svg class="ic" aria-hidden="true"><use href="#i-comment"/></svg><span class="n"></span></button>
+<a class="iconbtn outbox" href="../../comments.html" aria-label="Outbox" title="Outbox"><svg class="ic" aria-hidden="true"><use href="#i-outbox"/></svg><span class="l">Outbox</span><span class="n"></span></a>
+<button class="iconbtn theme" type="button" aria-label="Theme: auto" title="Theme: auto" data-label-auto="Theme: auto" data-label-light="Theme: light" data-label-dark="Theme: dark"><svg class="ic" aria-hidden="true"><use href="#i-auto"/></svg></button>
+</header>
+<div class="body rv-page">
+<nav class="side" id="drawer" aria-label="Navigation">
+<ul>
+<li><a href="../../index.html">Overview</a></li>
+<li><a href="../../review.html"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>Awaiting review<span class="n">143</span></a></li>
+<li><a href="../../records.html">All records<span class="n">147</span></a></li>
+</ul>
+<h4>Types</h4>
+<ul>
+<li><a href="../../claude-booping/adr/index.html">ADRs<span class="n">36</span></a></li>
+<li><a href="../../claude-booping/conflict/index.html">Conflicts<span class="n">2</span></a></li>
+<li><a href="../../claude-booping/idea/index.html">Ideas<span class="n">9</span></a></li>
+<li><a href="../../claude-booping/reference/index.html">References<span class="n">11</span></a></li>
+<li><a href="../../claude-booping/rule/index.html">Rules<span class="n">22</span></a></li>
+<li><a href="../../claude-booping/runbook/index.html">Runbooks<span class="n">3</span></a></li>
+<li><a href="../../claude-booping/story/index.html">Stories<span class="n">26</span></a></li>
+<li><a href="../../claude-booping/value/index.html">Values<span class="n">19</span></a></li>
+</ul>
+<h4>booping</h4>
+<ul>
+<li><a href="../../booping/index.html">Overview</a></li>
+<li><a href="../../booping/rule/index.html">Rules<span class="n">19</span></a></li>
+</ul>
+<h4>Tags</h4>
+<ul>
+<li><a href="../../claude-booping/tags/postmortem.html">postmortem<span class="n">3</span></a></li>
+<li><a href="../../claude-booping/tags/probe.html">probe<span class="n">1</span></a></li>
+<li><a href="../../claude-booping/tags/index.html">All tags</a></li>
+</ul>
+<ul>
+<li><a href="../../llms.txt">llms.txt</a></li>
+</ul>
+</nav>
+<main id="main">
+<nav class="crumbs" aria-label="breadcrumb">
+<ol>
+<li><a href="../../index.html">Overview</a></li>
+<li class="mid"><a href="index.html">ADRs</a></li>
+<li><span aria-current="page">adr/0038</span></li>
+</ol>
+</nav>
+<div class="measure">
+<article data-ref="adr/0038" data-title="Milestone shape is an mdcheck schema" data-page="claude-booping/adr/0038-milestone-shape-is-an-mdcheck-schema.html">
+<h1>Milestone shape is an mdcheck schema</h1>
+<div class="badges"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></div>
+<p class="lead">Groom checks each milestone file with mdcheck against a schema in the groom playbook; `booping plan check` and its code go, and mdcheck becomes a required dependency.</p>
+<details class="toc-m">
+<summary>On this page</summary>
+<nav class="toc" aria-labelledby="toc-m-toc">
+<h4 id="toc-m-toc">On this page</h4>
+<ul>
+<li><a href="#context">Context</a>
+</li>
+<li><a href="#decision">Decision</a>
+</li>
+<li><a href="#alternatives">Alternatives</a>
+<ul>
+<li><a href="#mdcheck-schema-run-directly">mdcheck schema run directly</a></li>
+<li><a href="#a-booping-check-wrapper">A booping check wrapper</a></li>
+<li><a href="#keep-plan-check">Keep plan check</a></li>
+</ul>
+</li>
+<li><a href="#consequences">Consequences</a>
+</li>
+<li><a href="#referenced-by">Referenced by</a>
+</li>
+</ul>
+</nav>
+</details>
+<dl class="facts">
+<dt>Author</dt>
+<dd>owner</dd>
+<dt>Created</dt>
+<dd><time datetime="2026-10-18">18 October 2026</time></dd>
+<dt>Updated</dt>
+<dd><time datetime="2026-10-18">18 October 2026</time></dd>
+<dt>Review</dt>
+<dd><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not shown</dd>
+<dt>Sources</dt>
+<dd>vault/adr/0030-groom-drafts-the-whole-plan-in-one-pass.md</dd>
+<dt>Rules</dt>
+<dd><ul class="rel">
+<li><a href="../../claude-booping/rule/0025-who-reads-the-result-decides.html">Who reads the result decides prose or code</a> <code class="ref">rule/0025</code> <span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span></li>
+</ul></dd>
+<dt>Serves values</dt>
+<dd><ul class="rel">
+<li><a href="../../claude-booping/value/0015-deterministic-where-code-reads-it.html">Deterministic where code reads it</a> <code class="ref">value/0015</code></li>
+<li><a href="../../claude-booping/value/0012-quality-at-a-rational-cost.html">Quality at a rational cost</a> <code class="ref">value/0012</code></li>
+</ul></dd>
+</dl>
+<dl class="facts">
+<dt>issues</dt>
+<dd></dd>
+</dl>
+<div class="body">
+<h2 id="context">Context<a class="anchor" href="#context" aria-label="Link to this section: Context">§</a></h2>
+<p>The model misses milestone-shape rules even when told (adr/0030), so groom's gate needs a check that
+code runs. <code>booping plan check</code> did it in 143 lines of its own: one Verify command, a path in Tasks,
+at least as many DoD checkboxes as tasks, <code>sp</code> below <code>core.sprint.redecompose_threshold</code>. mdcheck
+already checks every specs record against a schema. A schema with the same four rules, run over the
+218 milestones in this vault, reported every finding <code>plan check</code> reported except the
+checkbox-to-task comparison, which mdcheck cannot express; it also flagged 59 fenced Verify blocks,
+which <code>plan check</code> accepted alongside a single inline code span. Building nothing means prose rules,
+which adr/0030 measured missing.</p>
+<h2 id="decision">Decision<a class="anchor" href="#decision" aria-label="Link to this section: Decision">§</a></h2>
+<p>The milestone contract is <code>playbooks/groom/_schemas/milestone.yaml</code>, and groom runs
+<code>mdcheck &lt;schema&gt; {plan-dir}/milestones/*/M*.md</code> directly. The contract narrows to what the schema can
+state: Verify is one inline code span as its first paragraph, DoD holds at least one checkbox, each task's SP is 1–4 and the milestone <code>sp</code>, their sum, is at most 15 (corrected 2026-10-18: the 5 SP threshold is a task's, never a milestone's — adr/0022). <code>booping plan check</code> and its code are removed. mdcheck becomes a required dependency of every
+install, not only of projects with specs.</p>
+<h2 id="alternatives">Alternatives<a class="anchor" href="#alternatives" aria-label="Link to this section: Alternatives">§</a></h2>
+<table class="alts">
+<thead>
+<tr>
+<th>Option</th>
+<th>Status</th>
+<th>Complexity</th>
+<th>Reversibility</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr class="chosen">
+<td><a href="#mdcheck-schema-run-directly">mdcheck schema run directly</a></td>
+<td><span class="badge st-accepted">accepted</span> <span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>chosen</span></td>
+<td>low</td>
+<td>high</td>
+<td>Reuses the checker specs already depend on</td>
+</tr>
+<tr>
+<td><a href="#a-booping-check-wrapper">A booping check wrapper</a></td>
+<td>rejected</td>
+<td>medium</td>
+<td>high</td>
+<td>A command with no reader beyond what mdcheck prints</td>
+</tr>
+<tr>
+<td><a href="#keep-plan-check">Keep plan check</a></td>
+<td>rejected</td>
+<td>low</td>
+<td>high</td>
+<td>143 lines for what a schema states</td>
+</tr>
+</tbody>
+</table>
+<details class="opt chosen" open>
+<summary><h3 id="mdcheck-schema-run-directly">mdcheck schema run directly<a class="anchor" href="#mdcheck-schema-run-directly" aria-label="Link to this section: mdcheck schema run directly">§</a></h3>
+<span class="meta"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>chosen</span><span class="b plain">complexity: low</span><span class="b plain">reversibility: high</span></span></summary>
+<div class="in">
+<p class="verdict">Reuses the checker specs already depend on</p>
+<p>The decision above.</p>
+<ul>
+<li><strong>Pros:</strong> no booping code; one checker and one rule language for records and milestones; findings
+carry line numbers.</li>
+<li><strong>Cons:</strong> a required install step for every user; the DoD-to-task comparison and the
+config-driven <code>sp</code> threshold are lost; fenced Verify blocks become findings.</li>
+<li><strong>Complexity:</strong> low.</li>
+<li><strong>Reversibility:</strong> high.</li>
+</ul>
+</div>
+</details>
+<details class="opt">
+<summary><h3 id="a-booping-check-wrapper">A booping check wrapper<a class="anchor" href="#a-booping-check-wrapper" aria-label="Link to this section: A booping check wrapper">§</a></h3>
+<span class="meta"><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-rejected"/></svg>rejected</span><span class="b plain">complexity: medium</span><span class="b plain">reversibility: high</span></span></summary>
+<div class="in">
+<p class="verdict">A command with no reader beyond what mdcheck prints</p>
+<p><code>booping check &lt;path&gt;</code> picks the schema by the file's type and runs mdcheck, folding <code>specs check</code> in.</p>
+<ul>
+<li><strong>Pros:</strong> one command for every structural check; could read the threshold from config.</li>
+<li><strong>Cons:</strong> new code whose only reader is the model reading mdcheck's own findings.</li>
+<li><strong>Complexity:</strong> medium.</li>
+<li><strong>Reversibility:</strong> high.</li>
+</ul>
+</div>
+</details>
+<details class="opt">
+<summary><h3 id="keep-plan-check">Keep plan check<a class="anchor" href="#keep-plan-check" aria-label="Link to this section: Keep plan check">§</a></h3>
+<span class="meta"><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-rejected"/></svg>rejected</span><span class="b plain">complexity: low</span><span class="b plain">reversibility: high</span></span></summary>
+<div class="in">
+<p class="verdict">143 lines for what a schema states</p>
+<p>The command as it was.</p>
+<ul>
+<li><strong>Pros:</strong> the exact checks, no new dependency.</li>
+<li><strong>Cons:</strong> its own parser for sections, fences and lists, beside a checker that already does it.</li>
+<li><strong>Complexity:</strong> low.</li>
+<li><strong>Reversibility:</strong> high.</li>
+</ul>
+</div>
+</details>
+<h2 id="consequences">Consequences<a class="anchor" href="#consequences" aria-label="Link to this section: Consequences">§</a></h2>
+<ul>
+<li>Groom's draft-plan, present and gate text name the mdcheck call; the install guide lists mdcheck as
+required.</li>
+<li>Plans written before 2026-10-18 with fenced Verify blocks fail the schema; they are history and are
+not re-checked.</li>
+</ul>
+</div>
+</article>
+<h2 id="referenced-by">Referenced by<a class="anchor" href="#referenced-by" aria-label="Link to this section: Referenced by">§</a></h2>
+<h3>Stories</h3>
+<ul class="rel backlinks">
+<li><a href="../../claude-booping/story/0016-groom.html">Groom</a> <code class="ref">story/0016</code> <span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>done</span> <span class="via">via Criteria</span></li>
+</ul>
+</div>
+</main>
+<aside class="rail rv-rail" id="rv-panel">
+<details class="rv-toc" open>
+<summary>On this page</summary>
+<nav class="toc" aria-labelledby="rail-toc">
+<h4 id="rail-toc">On this page</h4>
+<ul>
+<li><a href="#context">Context</a>
+</li>
+<li><a href="#decision">Decision</a>
+</li>
+<li><a href="#alternatives">Alternatives</a>
+<ul>
+<li><a href="#mdcheck-schema-run-directly">mdcheck schema run directly</a></li>
+<li><a href="#a-booping-check-wrapper">A booping check wrapper</a></li>
+<li><a href="#keep-plan-check">Keep plan check</a></li>
+</ul>
+</li>
+<li><a href="#consequences">Consequences</a>
+</li>
+<li><a href="#referenced-by">Referenced by</a>
+</li>
+</ul>
+</nav>
+</details>
+<section class="rv" aria-labelledby="rv-h" data-note="Note" data-delete="Delete" data-open="Open" data-whole="Whole record" data-changed="text changed" data-deleted="Comment deleted" data-copy-failed="Copy failed" data-copied-forms="[&#34;{n} item copied&#34;, &#34;{n} items copied&#34;]" data-cleared-forms="[&#34;{n} item cleared&#34;, &#34;{n} items cleared&#34;]">
+<div class="rv-head">
+<h2 id="rv-h">Comments</h2>
+<button class="iconbtn rv-close" type="button" aria-label="Close">&times;</button>
+</div>
+<label class="rv-accepted"><input type="checkbox" id="rv-accepted"> Accepted</label>
+<label class="rv-label" for="rv-new">Comment on the whole record</label>
+<textarea id="rv-new" rows="3"></textarea>
+<div class="rv-add-row"><button class="rv-add" type="button" disabled>Add</button></div>
+<p class="rv-hint">Select text in the record to comment on it.</p>
+<ul class="rv-list"></ul>
+</section>
+</aside>
+</div>
+<div id="status" class="toast" role="status" data-copied="Link copied"></div>
+<footer>Generated by booping specs site</footer>
+</body>
+</html>

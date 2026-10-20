@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>try{var t=localStorage.getItem("specs-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}document.documentElement.classList.add("js")</script>
+<meta name="color-scheme" content="light dark">
+<title>A script cuts the drafted plan into milestone files — claude-booping</title>
+<link rel="stylesheet" href="../../fonts.css">
+<link rel="stylesheet" href="../../style.css">
+<script src="../../site.js" defer></script>
+<script src="../../search.js" defer></script>
+<script src="../../comments-format.js" defer></script>
+<script src="../../comments.js" defer></script>
+<link rel="alternate" type="text/markdown" href="0031-a-script-cuts-the-plan-into-milestone-files.md">
+</head>
+<body>
+<svg aria-hidden="true" style="display:none">
+<symbol id="i-accepted" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4.8 8.2l2.1 2.1 4.3-4.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-open" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+<symbol id="i-planned" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2.6 2.2"/></symbol>
+<symbol id="i-rejected" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3.6 12.4l8.8-8.8" stroke="currentColor" stroke-width="1.6"/></symbol>
+<symbol id="i-clarify" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="currentColor"/><path d="M6.1 6.2a2 2 0 1 1 2.6 1.9c-.5.2-.7.6-.7 1.1v.4" fill="none" stroke="var(--surface)" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="11.6" r=".95" fill="var(--surface)"/></symbol>
+<symbol id="i-unknown" viewBox="0 0 16 16"><path d="M8 1.6l6.8 12.2H1.2z" fill="currentColor"/><path d="M8 6v3.6" stroke="var(--surface)" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="11.6" r=".9" fill="var(--surface)"/></symbol>
+<symbol id="i-not-accepted" viewBox="0 0 16 16"><circle cx="8" cy="8" r="4.6" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+<symbol id="i-review-accepted" viewBox="0 0 16 16"><circle cx="8" cy="8" r="4.6" fill="currentColor"/></symbol>
+<symbol id="i-menu" viewBox="0 0 20 20"><path d="M3 5.5h14M3 10h14M3 14.5h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+<symbol id="i-search" viewBox="0 0 20 20"><circle cx="8.6" cy="8.6" r="5.6" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M13 13l4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+<symbol id="i-moon" viewBox="0 0 20 20"><path d="M15.5 12.6A6.5 6.5 0 0 1 7.4 4.5a6.5 6.5 0 1 0 8.1 8.1z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+<symbol id="i-sun" viewBox="0 0 16 16"><circle cx="8" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.2v1.6M8 13.2v1.6M1.2 8h1.6M13.2 8h1.6M3.2 3.2l1.1 1.1M11.7 11.7l1.1 1.1M3.2 12.8l1.1-1.1M11.7 4.3l1.1-1.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+<symbol id="i-auto" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.6a6.4 6.4 0 0 0 0 12.8z" fill="currentColor"/></symbol>
+<symbol id="i-comment" viewBox="0 0 20 20"><path d="M4 4.5h12a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5H9.2l-3.7 3v-3H4A1.5 1.5 0 0 1 2.5 13V6A1.5 1.5 0 0 1 4 4.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+<symbol id="i-outbox" viewBox="0 0 20 20"><path d="M2.5 11.5v4a1.5 1.5 0 0 0 1.5 1.5h12a1.5 1.5 0 0 0 1.5-1.5v-4M10 13V3.5M6.5 7L10 3.5 13.5 7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+<button class="iconbtn menu" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Menu"><svg class="ic" aria-hidden="true"><use href="#i-menu"/></svg></button>
+<a class="brand" href="../../index.html">claude-booping</a>
+<form class="search" role="search" action="../../search.html" data-prefix="../../" data-all="All results">
+<svg class="ic" aria-hidden="true"><use href="#i-search"/></svg>
+<input type="search" name="q" role="combobox" aria-label="Search" aria-autocomplete="list" aria-expanded="false" aria-controls="search-list" autocomplete="off" placeholder="Search the specs">
+<kbd>/</kbd>
+<button class="iconbtn search-close" type="button" aria-label="Close">&times;</button>
+<ul id="search-list" role="listbox" aria-label="Search" hidden></ul>
+</form>
+<button class="iconbtn search-btn" type="button" aria-label="Search" title="Search"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg></button>
+<button class="iconbtn rv-btn" type="button" aria-controls="rv-panel" aria-expanded="false" aria-label="Comments" title="Comments"><svg class="ic" aria-hidden="true"><use href="#i-comment"/></svg><span class="n"></span></button>
+<a class="iconbtn outbox" href="../../comments.html" aria-label="Outbox" title="Outbox"><svg class="ic" aria-hidden="true"><use href="#i-outbox"/></svg><span class="l">Outbox</span><span class="n"></span></a>
+<button class="iconbtn theme" type="button" aria-label="Theme: auto" title="Theme: auto" data-label-auto="Theme: auto" data-label-light="Theme: light" data-label-dark="Theme: dark"><svg class="ic" aria-hidden="true"><use href="#i-auto"/></svg></button>
+</header>
+<div class="body rv-page">
+<nav class="side" id="drawer" aria-label="Navigation">
+<ul>
+<li><a href="../../index.html">Overview</a></li>
+<li><a href="../../review.html"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>Awaiting review<span class="n">143</span></a></li>
+<li><a href="../../records.html">All records<span class="n">147</span></a></li>
+</ul>
+<h4>Types</h4>
+<ul>
+<li><a href="../../claude-booping/adr/index.html">ADRs<span class="n">36</span></a></li>
+<li><a href="../../claude-booping/conflict/index.html">Conflicts<span class="n">2</span></a></li>
+<li><a href="../../claude-booping/idea/index.html">Ideas<span class="n">9</span></a></li>
+<li><a href="../../claude-booping/reference/index.html">References<span class="n">11</span></a></li>
+<li><a href="../../claude-booping/rule/index.html">Rules<span class="n">22</span></a></li>
+<li><a href="../../claude-booping/runbook/index.html">Runbooks<span class="n">3</span></a></li>
+<li><a href="../../claude-booping/story/index.html">Stories<span class="n">26</span></a></li>
+<li><a href="../../claude-booping/value/index.html">Values<span class="n">19</span></a></li>
+</ul>
+<h4>booping</h4>
+<ul>
+<li><a href="../../booping/index.html">Overview</a></li>
+<li><a href="../../booping/rule/index.html">Rules<span class="n">19</span></a></li>
+</ul>
+<h4>Tags</h4>
+<ul>
+<li><a href="../../claude-booping/tags/postmortem.html">postmortem<span class="n">3</span></a></li>
+<li><a href="../../claude-booping/tags/probe.html">probe<span class="n">1</span></a></li>
+<li><a href="../../claude-booping/tags/index.html">All tags</a></li>
+</ul>
+<ul>
+<li><a href="../../llms.txt">llms.txt</a></li>
+</ul>
+</nav>
+<main id="main">
+<nav class="crumbs" aria-label="breadcrumb">
+<ol>
+<li><a href="../../index.html">Overview</a></li>
+<li class="mid"><a href="index.html">ADRs</a></li>
+<li><span aria-current="page">adr/0031</span></li>
+</ol>
+</nav>
+<div class="measure">
+<article data-ref="adr/0031" data-title="A script cuts the drafted plan into milestone files" data-page="claude-booping/adr/0031-a-script-cuts-the-plan-into-milestone-files.html">
+<h1>A script cuts the drafted plan into milestone files</h1>
+<div class="badges"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></div>
+<p class="lead">The script `booping plan split` cuts the one-file plan on its milestone headings, byte for byte, into index.md and the milestone files; a model splits only what the script flags.</p>
+<details class="toc-m">
+<summary>On this page</summary>
+<nav class="toc" aria-labelledby="toc-m-toc">
+<h4 id="toc-m-toc">On this page</h4>
+<ul>
+<li><a href="#context">Context</a>
+</li>
+<li><a href="#criteria">Criteria</a>
+</li>
+<li><a href="#decision">Decision</a>
+</li>
+<li><a href="#alternatives">Alternatives</a>
+<ul>
+<li><a href="#script-on-headings">Script on headings</a></li>
+<li><a href="#sonnet-writes-the-files">Sonnet writes the files</a></li>
+<li><a href="#haiku-maps-a-script-cuts">Haiku maps, a script cuts</a></li>
+<li><a href="#haiku-writes-the-files">Haiku writes the files</a></li>
+</ul>
+</li>
+<li><a href="#consequences">Consequences</a>
+</li>
+<li><a href="#referenced-by">Referenced by</a>
+</li>
+</ul>
+</nav>
+</details>
+<dl class="facts">
+<dt>Author</dt>
+<dd>agent</dd>
+<dt>Created</dt>
+<dd><time datetime="2026-10-16">16 October 2026</time></dd>
+<dt>Updated</dt>
+<dd><time datetime="2026-10-18">18 October 2026</time></dd>
+<dt>Review</dt>
+<dd><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not shown</dd>
+<dt>Sources</dt>
+<dd>vault/idea/0003-groom-depth-scales-with-task.md</dd>
+<dt>Serves values</dt>
+<dd><ul class="rel">
+<li><a href="../../claude-booping/value/0015-deterministic-where-code-reads-it.html">Deterministic where code reads it</a> <code class="ref">value/0015</code></li>
+<li><a href="../../claude-booping/value/0012-quality-at-a-rational-cost.html">Quality at a rational cost</a> <code class="ref">value/0012</code></li>
+<li><a href="../../claude-booping/value/0010-proven-to-work.html">Proven to work</a> <code class="ref">value/0010</code></li>
+</ul></dd>
+</dl>
+<dl class="facts">
+<dt>issues</dt>
+<dd></dd>
+</dl>
+<div class="body">
+<h2 id="context">Context<a class="anchor" href="#context" aria-label="Link to this section: Context">§</a></h2>
+<p>Groom drafts the whole plan as one file (adr/0030), while develop reads <code>index.md</code> plus one file
+per milestone (<code>milestones/M{nn}-*/</code>) for per-milestone status, feedback and delegation, and packs
+milestones into briefings by SP (adr/0022). Something has to turn the draft into that layout without
+changing the plan's text. The 9 milestone-shape rules the model misses even when told (adr/0030)
+also need a place other than the prompt.</p>
+<p>A split benchmark (<code>booping-benchmarks/groom/split/report.md</code>) took 12 single-file plans from the
+groom benchmark (V3 and V3a on s1, m2, c1) and scored each way of splitting: structure of the files,
+coverage of the plan's lines, invented lines, SP groups, cost.</p>
+<table>
+<thead>
+<tr>
+<th>Way</th>
+<th>Plans passing every threshold</th>
+<th>Coverage / invention</th>
+<th>Cost / time per plan</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Script on the plan's headings</td>
+<td>12 / 12</td>
+<td>100% / 0%</td>
+<td>$0 / under 1 s</td>
+</tr>
+<tr>
+<td>Sonnet writes the files</td>
+<td>12 / 12</td>
+<td>99.8% / 0.1%</td>
+<td>$0.71 / 4.6 min</td>
+</tr>
+<tr>
+<td>Haiku maps line ranges, a script cuts</td>
+<td>8 / 12</td>
+<td>99.8% / 0%</td>
+<td>$0.34 / 3.6 min</td>
+</tr>
+<tr>
+<td>Haiku writes the files</td>
+<td>6 / 12</td>
+<td>98.2% / 1.5%</td>
+<td>$0.25 / 4 min</td>
+</tr>
+</tbody>
+</table>
+<p>All 12 plans carried milestone headings with Tasks / DoD / References / Verify sub-headings; SP came
+from frontmatter or the milestone table. Haiku rewriting dropped labels, joined lines and garbled a
+diagram on long plans; its line maps drifted by 1–2 lines and put DoD under Tasks.</p>
+<h2 id="criteria">Criteria<a class="anchor" href="#criteria" aria-label="Link to this section: Criteria">§</a></h2>
+<ul>
+<li>The plan's text reaches the milestone files unchanged.</li>
+<li>Develop and the worker agents read the same layout as today.</li>
+<li>Cheap enough to run on every plan.</li>
+</ul>
+<h2 id="decision">Decision<a class="anchor" href="#decision" aria-label="Link to this section: Decision">§</a></h2>
+<p><code>booping plan split</code> cuts the drafted plan on its milestone headings (<code>### M{nn} — &lt;title&gt;</code> with
+<code>sp:</code>, <code>depends_on:</code> and the sub-headings Tasks, Definition of Done, References, Verify), byte for
+byte, into <code>index.md</code> and the milestone files; it writes the milestone table and the SP groups
+(adr/0022) and never splits a code fence. It exits non-zero when the plan has no milestone headings
+and flags a milestone without <code>sp</code>; only such a plan goes to a model (Opus) for the split. After
+the split mdcheck checks the milestone contract against its schema (adr/0038) —
+and a failing milestone goes back to the draft with the finding.
+The benchmark below measured Sonnet; the fallback runs on Opus, because rewriting a draft is
+judgement work (<a href="../../claude-booping/rule/0031-judgement-runs-on-opus.html">rule/0031</a>).</p>
+<h2 id="alternatives">Alternatives<a class="anchor" href="#alternatives" aria-label="Link to this section: Alternatives">§</a></h2>
+<table class="alts">
+<thead>
+<tr>
+<th>Option</th>
+<th>Status</th>
+<th>Complexity</th>
+<th>Reversibility</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr class="chosen">
+<td><a href="#script-on-headings">Script on headings</a></td>
+<td><span class="badge st-accepted">accepted</span> <span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>chosen</span></td>
+<td>medium</td>
+<td>high</td>
+<td>Exact and free on all 12 plans</td>
+</tr>
+<tr>
+<td><a href="#sonnet-writes-the-files">Sonnet writes the files</a></td>
+<td>rejected</td>
+<td>low</td>
+<td>high</td>
+<td>Passes, but pays $0.71 a plan for what a script does; a model split, on Opus, is kept as the fallback</td>
+</tr>
+<tr>
+<td><a href="#haiku-maps-a-script-cuts">Haiku maps, a script cuts</a></td>
+<td>rejected</td>
+<td>medium</td>
+<td>high</td>
+<td>Line numbers drift; sections land wrong</td>
+</tr>
+<tr>
+<td><a href="#haiku-writes-the-files">Haiku writes the files</a></td>
+<td>rejected</td>
+<td>low</td>
+<td>high</td>
+<td>Edits the plan's text on long plans</td>
+</tr>
+</tbody>
+</table>
+<details class="opt chosen" open>
+<summary><h3 id="script-on-headings">Script on headings<a class="anchor" href="#script-on-headings" aria-label="Link to this section: Script on headings">§</a></h3>
+<span class="meta"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>chosen</span><span class="b plain">complexity: medium</span><span class="b plain">reversibility: high</span></span></summary>
+<div class="in">
+<p class="verdict">Exact and free on all 12 plans</p>
+<p>A deterministic cut on the headings the draft prompt fixes.</p>
+<ul>
+<li><strong>Pros:</strong> 100% coverage and 0% invention by construction; free; testable with e2e cases on real
+plan shapes; failures are explicit exit codes.</li>
+<li><strong>Cons:</strong> the plan format is a hard contract for the drafting model; placement inside a milestone
+is only as right as the draft's own sub-headings.</li>
+<li><strong>Complexity:</strong> medium — a new command, its tests, the contract check.</li>
+<li><strong>Reversibility:</strong> high.</li>
+</ul>
+</div>
+</details>
+<details class="opt">
+<summary><h3 id="sonnet-writes-the-files">Sonnet writes the files<a class="anchor" href="#sonnet-writes-the-files" aria-label="Link to this section: Sonnet writes the files">§</a></h3>
+<span class="meta"><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-rejected"/></svg>rejected</span><span class="b plain">complexity: low</span><span class="b plain">reversibility: high</span></span></summary>
+<div class="in">
+<p class="verdict">Passes, but pays $0.71 a plan for what a script does; a model split, on Opus, is kept as the fallback</p>
+<p>A model reads the plan and writes <code>index.md</code> and the milestone files.</p>
+<ul>
+<li><strong>Pros:</strong> passes every threshold on all 12; needs no fixed format.</li>
+<li><strong>Cons:</strong> $0.71 and 4.6 minutes on every plan; a model copy can still drift.</li>
+<li><strong>Complexity:</strong> low.</li>
+<li><strong>Reversibility:</strong> high.</li>
+</ul>
+</div>
+</details>
+<details class="opt">
+<summary><h3 id="haiku-maps-a-script-cuts">Haiku maps, a script cuts<a class="anchor" href="#haiku-maps-a-script-cuts" aria-label="Link to this section: Haiku maps, a script cuts">§</a></h3>
+<span class="meta"><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-rejected"/></svg>rejected</span><span class="b plain">complexity: medium</span><span class="b plain">reversibility: high</span></span></summary>
+<div class="in">
+<p class="verdict">Line numbers drift; sections land wrong</p>
+<p>Haiku returns line ranges per milestone section and the groups; a script slices them.</p>
+<ul>
+<li><strong>Pros:</strong> no rewritten text (0% invention).</li>
+<li><strong>Cons:</strong> no first map met the every-line-once rule; boundaries drift by 1–2 lines, splitting
+code fences and putting DoD under Tasks; 8/12.</li>
+<li><strong>Complexity:</strong> medium.</li>
+<li><strong>Reversibility:</strong> high.</li>
+</ul>
+</div>
+</details>
+<details class="opt">
+<summary><h3 id="haiku-writes-the-files">Haiku writes the files<a class="anchor" href="#haiku-writes-the-files" aria-label="Link to this section: Haiku writes the files">§</a></h3>
+<span class="meta"><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-rejected"/></svg>rejected</span><span class="b plain">complexity: low</span><span class="b plain">reversibility: high</span></span></summary>
+<div class="in">
+<p class="verdict">Edits the plan's text on long plans</p>
+<p>The cheapest model rewrites the plan into the files.</p>
+<ul>
+<li><strong>Pros:</strong> cheapest model call.</li>
+<li><strong>Cons:</strong> removes labels, joins lines, rewords assumptions, garbles diagrams on long plans; 6/12.</li>
+<li><strong>Complexity:</strong> low.</li>
+<li><strong>Reversibility:</strong> high.</li>
+</ul>
+</div>
+</details>
+<h2 id="consequences">Consequences<a class="anchor" href="#consequences" aria-label="Link to this section: Consequences">§</a></h2>
+<ul>
+<li>New <code>booping plan split</code>, with e2e cases on real plan shapes including the 12 benchmark plans;
+groom calls it after the draft.</li>
+<li><code>_partials/milestone_contract.md</code> turns into the post-split check, an mdcheck schema since adr/0038.</li>
+<li>Develop, <code>pi-developer</code>, <code>booping-developer</code> and <code>develop-pi</code> keep reading the
+milestone files as they are.</li>
+<li>Renaming the milestone file to <code>milestones/M{nn}-*/index.md</code> (owner, 2026-10-16) is a separate
+change with its own migration.</li>
+</ul>
+</div>
+</article>
+<h2 id="referenced-by">Referenced by<a class="anchor" href="#referenced-by" aria-label="Link to this section: Referenced by">§</a></h2>
+<h3>ADRs</h3>
+<ul class="rel backlinks">
+<li><a href="../../claude-booping/adr/0011-delegation-levels.html">A step is inline, assisted or detached, set by one detached field</a> <code class="ref">adr/0011</code> <span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span> <span class="via">via Decision</span></li>
+</ul>
+<h3>Ideas</h3>
+<ul class="rel backlinks">
+<li><a href="../../claude-booping/idea/0003-groom-depth-scales-with-task.html">A faster groom without losing quality</a> <code class="ref">idea/0003</code> <span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span> <span class="via">via Verdict</span></li>
+</ul>
+<h3>Stories</h3>
+<ul class="rel backlinks">
+<li><a href="../../claude-booping/story/0016-groom.html">Groom</a> <code class="ref">story/0016</code> <span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>done</span> <span class="via">via Criteria</span></li>
+</ul>
+</div>
+</main>
+<aside class="rail rv-rail" id="rv-panel">
+<details class="rv-toc" open>
+<summary>On this page</summary>
+<nav class="toc" aria-labelledby="rail-toc">
+<h4 id="rail-toc">On this page</h4>
+<ul>
+<li><a href="#context">Context</a>
+</li>
+<li><a href="#criteria">Criteria</a>
+</li>
+<li><a href="#decision">Decision</a>
+</li>
+<li><a href="#alternatives">Alternatives</a>
+<ul>
+<li><a href="#script-on-headings">Script on headings</a></li>
+<li><a href="#sonnet-writes-the-files">Sonnet writes the files</a></li>
+<li><a href="#haiku-maps-a-script-cuts">Haiku maps, a script cuts</a></li>
+<li><a href="#haiku-writes-the-files">Haiku writes the files</a></li>
+</ul>
+</li>
+<li><a href="#consequences">Consequences</a>
+</li>
+<li><a href="#referenced-by">Referenced by</a>
+</li>
+</ul>
+</nav>
+</details>
+<section class="rv" aria-labelledby="rv-h" data-note="Note" data-delete="Delete" data-open="Open" data-whole="Whole record" data-changed="text changed" data-deleted="Comment deleted" data-copy-failed="Copy failed" data-copied-forms="[&#34;{n} item copied&#34;, &#34;{n} items copied&#34;]" data-cleared-forms="[&#34;{n} item cleared&#34;, &#34;{n} items cleared&#34;]">
+<div class="rv-head">
+<h2 id="rv-h">Comments</h2>
+<button class="iconbtn rv-close" type="button" aria-label="Close">&times;</button>
+</div>
+<label class="rv-accepted"><input type="checkbox" id="rv-accepted"> Accepted</label>
+<label class="rv-label" for="rv-new">Comment on the whole record</label>
+<textarea id="rv-new" rows="3"></textarea>
+<div class="rv-add-row"><button class="rv-add" type="button" disabled>Add</button></div>
+<p class="rv-hint">Select text in the record to comment on it.</p>
+<ul class="rv-list"></ul>
+</section>
+</aside>
+</div>
+<div id="status" class="toast" role="status" data-copied="Link copied"></div>
+<footer>Generated by booping specs site</footer>
+</body>
+</html>

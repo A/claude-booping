@@ -64,6 +64,14 @@
                 </li>
               </ul>
               <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../specs/">Specs</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="/claude-booping/specs-site/">Specs site</a>
+                </li>
+              </ul>
+              <ul>
                 <li class="toctree-l1"><a class="reference internal" href="../integrating-external-agents/">Integrating external agents</a>
                 </li>
               </ul>
@@ -92,6 +100,8 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#what-it-writes">What it writes</a>
         <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#what-a-learnt-rule-looks-like">What a learnt rule looks like</a>
+    </li>
     <li class="toctree-l3"><a class="reference internal" href="#targets-are-fetched-never-guessed">Targets are fetched, never guessed</a>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#update-vs-create-sweep">Update-vs-create sweep</a>
@@ -109,6 +119,10 @@
         </ul>
     </li>
     </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../specs_playbook/">specs playbook</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../project_manager/">project-manager playbook</a>
                   </li>
               </ul>
       </div>
@@ -137,7 +151,7 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="learn-playbook">learn playbook</h1>
-<p>Compress retro findings into durable, actionable rules: targeted lessons that reach the playbooks, steps, agents and skills they name, plus one-line project facts in the repo's own <code>CLAUDE.md</code>.</p>
+<p>Compress retro findings into durable, actionable rules: rule records in the project's <a href="../specs/">specs</a> tier that reach the playbooks, steps, agents and skills they target, plus one-line project facts in the repo's own <code>CLAUDE.md</code>.</p>
 <p>Learning is a <strong>playbook</strong>, not a skill — it is driven by <a href="../playbook/"><code>/playbook</code></a>:</p>
 <pre><code class="language-text">/playbook learn
 </code></pre>
@@ -164,7 +178,7 @@
 </tr>
 <tr>
 <td><code>dedup-sweep</code></td>
-<td>Filtered read of existing lessons and the repo <code>CLAUDE.md</code> — update vs create vs conflict</td>
+<td>Filtered read of the rules of all three specs tiers and the repo <code>CLAUDE.md</code> — update vs create vs covered vs conflict</td>
 </tr>
 <tr>
 <td><code>review-table</code></td>
@@ -180,51 +194,104 @@
 </tr>
 </tbody>
 </table>
-<p>The run workdir is the <strong>vault root</strong> and every <code>booping playbook-state</code> / <code>booping playbook-transition</code> call passes <code>--target retrospectives/{slug}.md</code>, so a stopped run is resumable.</p>
+<p>The run workdir is the <strong>vault root</strong> and every <code>booping state</code> / <code>booping transition</code> call names <code>retrospectives/{slug}.md</code> with <code>--playbook learn</code>, so a stopped run is resumable.</p>
 <h2 id="what-it-writes">What it writes</h2>
 <p>Two destinations, and every accepted finding lands in <strong>exactly one</strong> of them. A candidate that would span both is decomposed into one row per destination before writing.</p>
 <ul>
-<li><strong>Targeted lessons</strong> at <code>{vault}/_lessons/{N}_{title}.md</code> — each carrying a <code>targets:</code> frontmatter list naming the playbooks, playbook steps, agents and skills the rule applies to. A rule that should only reach one worker agent or one skill is a lesson targeting it, not a separate file. <code>N</code> is a monotonic counter, keeping the directory chronological.</li>
-<li><strong>The repo's own <code>CLAUDE.md</code></strong> — a finding that is a project fact aiding fresh-agent project understanding (a layout path, a CLI command, a code-side convention) becomes a one-line bullet there. Those edits are committed in the repo working tree, not the vault, and never touch the global <code>~/.claude/CLAUDE.md</code>.</li>
+<li><strong>A rule record in the project specs tier</strong> at <code>rule/{NNNN}-{slug}.md</code> under the tier root — each carrying a <code>targets:</code> list naming the playbooks, playbook steps, agents and skills the rule applies to, and a <code>brief:</code> of one or two lines that is what those targets receive. A rule that should only reach one worker agent or one skill is a rule targeting it, not a separate file. When the project has no specs tier yet, the run creates it first with <a href="../specs/#booping-specs-init"><code>booping specs init --tier project</code></a>; <code>{NNNN}</code> is the next free number from <code>booping specs next rule</code>. After writing, <code>booping specs check --tier project</code> must report no error on the new records.</li>
+<li><strong>The repo's own <code>CLAUDE.md</code></strong> — a finding that is a project fact aiding fresh-agent project understanding (a layout path, a CLI command, a code-side convention) becomes a one-line bullet there. Those edits stay in the repo working tree for you to commit, and never touch the global <code>~/.claude/CLAUDE.md</code>.</li>
 </ul>
-<p>See <a href="../vault/#_lessons">Vault</a> for the directory layout and how each file reaches the active context.</p>
-<h3 id="targets-are-fetched-never-guessed">Targets are fetched, never guessed</h3>
-<p>A <code>_lessons/</code> file with no valid <code>targets:</code> reaches nothing, so routing has to be exact. Before proposing, the run reads the <strong>target space</strong>: a table of contents of every discovered playbook, then a targets fetch for only the playbooks a candidate touches, listing their step names and addressable agents. Entries come from that fetch, and the exact <code>targets:</code> entry each lesson carries is assigned in the review table before the lesson is written into the vault's <code>_lessons/</code>.</p>
+<p>Learn writes only the project tier. A finding the shipped (<code>core</code>) or your <code>global</code> tier already covers is shown as <code>covered</code> and not written; a finding that departs from one of their rules is written as a project rule that opens with a <code>[clarify]</code> sentence naming the departed rule, so you can record the departure in an ADR. See <a href="../specs/#tiers">Specs → Tiers</a> for where each tier lives.</p>
+<h3 id="what-a-learnt-rule-looks-like">What a learnt rule looks like</h3>
 <pre><code class="language-markdown">---
-id: 7
-title: Name every artifact path absolutely
+type: rule
+title: &quot;Name every artifact path absolutely&quot;
+summary: &quot;Briefings and reports name vault and repo files by absolute path, never relative to a guessed cwd.&quot;
+created_by: claude
+created_at: 2026-10-14
+updated_at: 2026-10-14
+status: accepted
 targets:
   - groom/draft-plan
   - agent:booping-developer
-retro: retrospectives/202608031129_flat-lessons.md
-created: 2026-08-03
+brief: &quot;Name every artifact by absolute path; a relative path breaks once the worker's cwd differs.&quot;
+sources: [vault/retrospectives/202610031129_flat-paths.md]
 ---
+
+## Rule
+
+Name every vault and repo file by its absolute path in briefings and reports.
+
+**Example**: A briefing that said `plans/x/index.md` sent the worker to read a file under the repo, not the vault.
+
+## Follows from
+
+- [Retro: 202610031129_flat-paths](../../retrospectives/202610031129_flat-paths.md)
 </code></pre>
-<p>Target forms are <code>{playbook}</code>, <code>{playbook}/{step}</code>, <code>agent:{id}</code> and <code>skill:{name}</code> — exact names only, no globs. See <a href="../playbook/#lessons">Playbooks → Lessons</a> for where each one surfaces.</p>
-<div class="admonition note">
-<p class="admonition-title">Legacy <code>lessons/</code></p>
-<p><code>{vault}/lessons/</code> is read by nothing and written by nothing — only a <code>_lessons/</code> file with a valid <code>targets:</code> list reaches a run. Nothing moves between the two on its own; while the legacy directory still holds files, a render of any playbook emits a non-blocking note asking you to migrate them.</p>
-</div>
+<p>Every target named in <code>targets:</code> receives the <code>brief:</code> together with a link to the record, in a <code>## Rules</code> section of its rendered body — see <a href="../playbook/#rules">Playbooks → Rules</a>. <code>created_by: claude</code> marks the record as learnt; learn sets a <code>review</code> level only with its evidence, and never <code>accepted</code> without your words quoted. <code>sources:</code> is present only when the vault lives inside the repo; <code>## Follows from</code> links the value the rule follows from when one fits, else the retrospective.</p>
+<h3 id="targets-are-fetched-never-guessed">Targets are fetched, never guessed</h3>
+<p>A rule with no valid <code>targets:</code> reaches nothing, so routing has to be exact. Before proposing, the run reads the <strong>target space</strong>: a table of contents of every discovered playbook, then a targets fetch for only the playbooks a candidate touches, listing their step names and addressable agents. Entries come from that fetch, and the exact <code>targets:</code> list each rule carries is assigned in the review table before the record is written.</p>
+<p>Target forms are <code>{playbook}</code>, <code>{playbook}/{step}</code>, <code>agent:{id}</code> and <code>skill:{name}</code> — exact names only, no globs.</p>
 <h3 id="update-vs-create-sweep">Update-vs-create sweep</h3>
-<p>Before drafting proposals, <code>dedup-sweep</code> reads the existing lessons and the repo <code>CLAUDE.md</code> to check whether each candidate is genuinely new. A candidate that duplicates or refines an existing rule becomes an <strong>update</strong> to that rule rather than a near-duplicate; one that contradicts a rule is flagged a <strong>conflict</strong> for you to resolve in the review table — that is what keeps the lesson set from accumulating redundant or self-contradicting rules over many sprints.</p>
+<p>Before drafting proposals, <code>dedup-sweep</code> reads the rules of the three specs tiers and the repo <code>CLAUDE.md</code> to check whether each candidate is genuinely new. A candidate that duplicates or refines a project rule becomes an <strong>update</strong> to that record, edited in place, rather than a near-duplicate. A candidate a <code>core</code> or <code>global</code> rule already holds is <strong>covered</strong>; one that contradicts a rule is flagged a <strong>conflict</strong> for you to resolve in the review table. That is what keeps the rule set from accumulating redundant or self-contradicting rules over many sprints.</p>
 <h3 id="the-review-table">The review table</h3>
-<p>Every candidate appears in a single review table before anything is written — one row per landing site, with columns <code>#</code>, <code>Target</code>, <code>Type</code>, <code>Rule</code>, <code>Example</code> and <code>Targets</code>. <code>Target</code> is the exact destination path — a <code>_lessons/</code> file, or the repo's <code>CLAUDE.md</code>. The <code>Targets</code> column carries the exact <code>targets:</code> entries the lesson will be written with — a playbook, a <code>{playbook}/{step}</code>, an <code>agent:{id}</code> or a <code>skill:{name}</code>, drawn from the fetched target space and copied verbatim into the file's <code>targets:</code> list — so the routing is assigned here, before anything lands in <code>_lessons/</code>; a <code>CLAUDE.md</code> row carries <code>—</code>, since its path is its routing. You accept all, reject rows by number (e.g. <code>2 5</code>), or append your own row in the same shape. Nothing is written until you respond; table acceptance is the consent for the whole write pass — there are no per-row prompts.</p>
+<p>Every candidate appears in a single review table before anything is written — one row per landing site, with columns <code>#</code>, <code>Target</code>, <code>Type</code>, <code>Targets</code>, <code>Brief</code>, <code>Rule</code> and <code>Example</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Holds</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>#</code></td>
+<td>A stable row number, used to reject rows.</td>
+</tr>
+<tr>
+<td><code>Target</code></td>
+<td>Where the row lands: <code>rule/{NNNN}-{slug}.md</code> for a new rule (the number is provisional until write), the existing <code>rule/NNNN</code> for an update, <code>CLAUDE.md</code>, or the covering rule's ref.</td>
+</tr>
+<tr>
+<td><code>Type</code></td>
+<td><code>rule</code>, <code>claude-md</code> or <code>covered</code> — a <code>covered</code> row is shown, never written.</td>
+</tr>
+<tr>
+<td><code>Targets</code></td>
+<td>The exact <code>targets:</code> entries the rule is written with, drawn from the fetched target space; <code>—</code> for <code>claude-md</code> and <code>covered</code>.</td>
+</tr>
+<tr>
+<td><code>Brief</code></td>
+<td>The one or two lines injected into each target; <code>—</code> for <code>claude-md</code> and <code>covered</code>.</td>
+</tr>
+<tr>
+<td><code>Rule</code></td>
+<td>One imperative sentence, one concern.</td>
+</tr>
+<tr>
+<td><code>Example</code></td>
+<td>One concrete sentence — what went wrong or right.</td>
+</tr>
+</tbody>
+</table>
+<p>You accept all, reject rows by number (e.g. <code>2 5</code>), or append your own row in the same shape; a row of yours carrying two rules is split into two before writing. Nothing is written until you respond; table acceptance is the consent for the whole write pass — there are no per-row prompts.</p>
 <h2 id="best-practices">Best practices</h2>
 <h3 id="review-every-proposed-update">Review every proposed update</h3>
-<p>The run proposes — you commit. Read each proposed lesson and <code>CLAUDE.md</code> bullet before approving. Three things to check:</p>
+<p>The run proposes — you commit. Read each proposed rule — its brief above all, since that is what the targets receive — and each <code>CLAUDE.md</code> bullet before approving. Three things to check:</p>
 <ul>
-<li><strong>Actionability.</strong> A lesson should tell a future run what to do, not just describe the past. "Be careful with migrations" is a description; "Run <code>manage.py migrate --plan</code> before applying any migration generated this session" is a rule.</li>
-<li><strong>Right home.</strong> A rule that only matters for one step belongs in a lesson targeting that step, not one targeting the whole playbook where every run pays the context cost.</li>
-<li><strong>Direction.</strong> A lesson should point forward. If the proposed update is really a complaint about the past plan, send it back — it is retro material, not lesson material.</li>
+<li><strong>Actionability.</strong> A rule should tell a future run what to do, not just describe the past. "Be careful with migrations" is a description; "Run <code>manage.py migrate --plan</code> before applying any migration generated this session" is a rule.</li>
+<li><strong>Right home.</strong> A rule that only matters for one step targets that step, not one targeting the whole playbook where every run pays the context cost.</li>
+<li><strong>Direction.</strong> A rule should point forward. If the proposed update is really a complaint about the past plan, send it back — it is retro material, not rule material.</li>
 </ul>
 <h3 id="shit-in-shit-out">Shit in, shit out</h3>
-<p>Proposals come from whatever the retro says. Accepting them blindly produces conflicting and useless rules: redundant overlaps, contradictions with existing lessons, vague platitudes that fire on every plan and steer none. Review every proposal as if you were writing it — because once you approve, you are.</p>
-<p>The second half of the same warning as <a href="../retro/#shit-in-shit-out">retro</a>: a sloppy retro produces sloppy lesson proposals, and a rubber-stamped write pass puts those proposals on disk where they steer every future sprint.</p>
+<p>Proposals come from whatever the retro says. Accepting them blindly produces conflicting and useless rules: redundant overlaps, contradictions with existing rules, vague platitudes that fire on every plan and steer none. Review every proposal as if you were writing it — because once you approve, you are.</p>
+<p>The second half of the same warning as <a href="../retro/#shit-in-shit-out">retro</a>: a sloppy retro produces sloppy rule proposals, and a rubber-stamped write pass puts those proposals on disk where they steer every future sprint.</p>
               
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
         <a href="../retro/" class="btn btn-neutral float-left" title="retro playbook"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../specs_playbook/" class="btn btn-neutral float-right" title="specs playbook">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>
@@ -253,6 +320,8 @@ created: 2026-08-03
     
       <span><a href="../retro/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
+    
+      <span><a href="../specs_playbook/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>

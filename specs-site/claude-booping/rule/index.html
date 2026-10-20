@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>try{var t=localStorage.getItem("specs-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}document.documentElement.classList.add("js")</script>
+<meta name="color-scheme" content="light dark">
+<title>Rules — claude-booping</title>
+<link rel="stylesheet" href="../../fonts.css">
+<link rel="stylesheet" href="../../style.css">
+<script src="../../site.js" defer></script>
+<script src="../../filter-format.js" defer></script>
+<script src="../../filter.js" defer></script>
+<script src="../../search.js" defer></script>
+<script src="../../comments-format.js" defer></script>
+<script src="../../comments.js" defer></script>
+</head>
+<body>
+<svg aria-hidden="true" style="display:none">
+<symbol id="i-accepted" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4.8 8.2l2.1 2.1 4.3-4.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-open" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+<symbol id="i-planned" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2.6 2.2"/></symbol>
+<symbol id="i-rejected" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3.6 12.4l8.8-8.8" stroke="currentColor" stroke-width="1.6"/></symbol>
+<symbol id="i-clarify" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="currentColor"/><path d="M6.1 6.2a2 2 0 1 1 2.6 1.9c-.5.2-.7.6-.7 1.1v.4" fill="none" stroke="var(--surface)" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="11.6" r=".95" fill="var(--surface)"/></symbol>
+<symbol id="i-unknown" viewBox="0 0 16 16"><path d="M8 1.6l6.8 12.2H1.2z" fill="currentColor"/><path d="M8 6v3.6" stroke="var(--surface)" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="11.6" r=".9" fill="var(--surface)"/></symbol>
+<symbol id="i-not-accepted" viewBox="0 0 16 16"><circle cx="8" cy="8" r="4.6" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+<symbol id="i-review-accepted" viewBox="0 0 16 16"><circle cx="8" cy="8" r="4.6" fill="currentColor"/></symbol>
+<symbol id="i-menu" viewBox="0 0 20 20"><path d="M3 5.5h14M3 10h14M3 14.5h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+<symbol id="i-search" viewBox="0 0 20 20"><circle cx="8.6" cy="8.6" r="5.6" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M13 13l4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+<symbol id="i-moon" viewBox="0 0 20 20"><path d="M15.5 12.6A6.5 6.5 0 0 1 7.4 4.5a6.5 6.5 0 1 0 8.1 8.1z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+<symbol id="i-sun" viewBox="0 0 16 16"><circle cx="8" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.2v1.6M8 13.2v1.6M1.2 8h1.6M13.2 8h1.6M3.2 3.2l1.1 1.1M11.7 11.7l1.1 1.1M3.2 12.8l1.1-1.1M11.7 4.3l1.1-1.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+<symbol id="i-auto" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.6a6.4 6.4 0 0 0 0 12.8z" fill="currentColor"/></symbol>
+<symbol id="i-comment" viewBox="0 0 20 20"><path d="M4 4.5h12a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5H9.2l-3.7 3v-3H4A1.5 1.5 0 0 1 2.5 13V6A1.5 1.5 0 0 1 4 4.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+<symbol id="i-outbox" viewBox="0 0 20 20"><path d="M2.5 11.5v4a1.5 1.5 0 0 0 1.5 1.5h12a1.5 1.5 0 0 0 1.5-1.5v-4M10 13V3.5M6.5 7L10 3.5 13.5 7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+<button class="iconbtn menu" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Menu"><svg class="ic" aria-hidden="true"><use href="#i-menu"/></svg></button>
+<a class="brand" href="../../index.html">claude-booping</a>
+<form class="search" role="search" action="../../search.html" data-prefix="../../" data-all="All results">
+<svg class="ic" aria-hidden="true"><use href="#i-search"/></svg>
+<input type="search" name="q" role="combobox" aria-label="Search" aria-autocomplete="list" aria-expanded="false" aria-controls="search-list" autocomplete="off" placeholder="Search the specs">
+<kbd>/</kbd>
+<button class="iconbtn search-close" type="button" aria-label="Close">&times;</button>
+<ul id="search-list" role="listbox" aria-label="Search" hidden></ul>
+</form>
+<button class="iconbtn search-btn" type="button" aria-label="Search" title="Search"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg></button>
+<a class="iconbtn outbox" href="../../comments.html" aria-label="Outbox" title="Outbox"><svg class="ic" aria-hidden="true"><use href="#i-outbox"/></svg><span class="l">Outbox</span><span class="n"></span></a>
+<button class="iconbtn theme" type="button" aria-label="Theme: auto" title="Theme: auto" data-label-auto="Theme: auto" data-label-light="Theme: light" data-label-dark="Theme: dark"><svg class="ic" aria-hidden="true"><use href="#i-auto"/></svg></button>
+</header>
+<div class="body norail">
+<nav class="side" id="drawer" aria-label="Navigation">
+<ul>
+<li><a href="../../index.html">Overview</a></li>
+<li><a href="../../review.html"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>Awaiting review<span class="n">143</span></a></li>
+<li><a href="../../records.html">All records<span class="n">147</span></a></li>
+</ul>
+<h4>Types</h4>
+<ul>
+<li><a href="../../claude-booping/adr/index.html">ADRs<span class="n">36</span></a></li>
+<li><a href="../../claude-booping/conflict/index.html">Conflicts<span class="n">2</span></a></li>
+<li><a href="../../claude-booping/idea/index.html">Ideas<span class="n">9</span></a></li>
+<li><a href="../../claude-booping/reference/index.html">References<span class="n">11</span></a></li>
+<li><a href="../../claude-booping/rule/index.html" aria-current="page">Rules<span class="n">22</span></a></li>
+<li><a href="../../claude-booping/runbook/index.html">Runbooks<span class="n">3</span></a></li>
+<li><a href="../../claude-booping/story/index.html">Stories<span class="n">26</span></a></li>
+<li><a href="../../claude-booping/value/index.html">Values<span class="n">19</span></a></li>
+</ul>
+<h4>booping</h4>
+<ul>
+<li><a href="../../booping/index.html">Overview</a></li>
+<li><a href="../../booping/rule/index.html">Rules<span class="n">19</span></a></li>
+</ul>
+<h4>Tags</h4>
+<ul>
+<li><a href="../../claude-booping/tags/postmortem.html">postmortem<span class="n">3</span></a></li>
+<li><a href="../../claude-booping/tags/probe.html">probe<span class="n">1</span></a></li>
+<li><a href="../../claude-booping/tags/index.html">All tags</a></li>
+</ul>
+<ul>
+<li><a href="../../llms.txt">llms.txt</a></li>
+</ul>
+</nav>
+<main id="main">
+<nav class="crumbs" aria-label="breadcrumb">
+<ol>
+<li><a href="../../index.html">Overview</a></li>
+<li><span aria-current="page">Rules</span></li>
+</ol>
+</nav>
+<h1>Rules</h1>
+<p class="lead">what constrains decisions</p>
+<div class="filters" data-default-sort="number">
+<button type="button" class="filter-open" aria-haspopup="dialog" data-label="Filters">Filters</button>
+<div class="filter-active" data-remove="Remove filter: {label}"></div>
+<dialog class="filter-sheet" aria-label="Filters">
+<div class="filter-head">
+<h2>Filters</h2>
+<button class="iconbtn filter-close" type="button" aria-label="Close">&times;</button>
+</div>
+<p class="facet">Status</p>
+<div class="chips" role="group" aria-label="Status">
+<button type="button" class="chip" data-key="status" data-value="accepted" aria-pressed="false">accepted<span class="n">21</span></button>
+<button type="button" class="chip" data-key="status" data-value="retired" aria-pressed="false">retired<span class="n">1</span></button>
+</div>
+<p class="facet">Needs</p>
+<div class="chips" role="group" aria-label="Needs">
+<button type="button" class="chip" data-key="flag" data-value="not_accepted" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>Not accepted<span class="n">22</span></button>
+<button type="button" class="chip" data-key="flag" data-value="clarify" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>Has [clarify]<span class="n">1</span></button>
+</div>
+<label>Sort <select class="sort">
+<option value="number" selected>By number</option>
+<option value="updated">Recently updated</option>
+<option value="title">By title</option>
+</select></label>
+<button type="button" class="filter-done">Show records</button>
+</dialog>
+<p class="count" role="status" data-forms="[&#34;{n} record shown&#34;, &#34;{n} records shown&#34;]">22 records shown</p>
+</div>
+<p class="empty" hidden>Nothing matches the filter.</p>
+<ul class="rows">
+<li class="row" data-type="rule" data-source="claude-booping" data-status="accepted" data-flags="not_accepted" data-updated="2026-10-17" data-title="What is not in the source is marked, not invented" data-created-by="claude" data-order="0"><code class="ref">rule/0002</code><a class="t" href="../../claude-booping/rule/0002-unknown-is-marked.html">What is not in the source is marked, not invented</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">A record or artefact states only what its source says; an open point is marked [clarify] or &#34;not named in the source&#34;, never filled in by the agent.</span></li>
+<li class="row" data-type="rule" data-source="claude-booping" data-status="accepted" data-flags="not_accepted" data-updated="2026-10-14" data-title="The compact artefact is reviewed before the detail" data-created-by="claude" data-order="1"><code class="ref">rule/0003</code><a class="t" href="../../claude-booping/rule/0003-compact-artefact-first.html">The compact artefact is reviewed before the detail</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">Where a human reviews, a run first produces a compact artefact the human can read and reorder, and builds the expensive detail only on the reviewed one.</span></li>
+<li class="row" data-type="rule" data-source="claude-booping" data-status="accepted" data-flags="not_accepted" data-updated="2026-10-14" data-title="Every step ends by naming the next one" data-created-by="claude" data-order="2"><code class="ref">rule/0005</code><a class="t" href="../../claude-booping/rule/0005-next-step-is-named.html">Every step ends by naming the next one</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">A playbook step or a run that hands back to the user ends by naming the next step and how to call it; a premature call says what is missing.</span></li>
+<li class="row" data-type="rule" data-source="claude-booping" data-status="retired" data-flags="not_accepted" data-updated="2026-10-14" data-title="Every diff is reviewed in Plannotator, never in chat" data-created-by="claude" data-order="3"><code class="ref">rule/0012</code><a class="t" href="../../claude-booping/rule/0012-every-diff-reviewed-in-plannotator.html">Every diff is reviewed in Plannotator, never in chat</a><span class="why"><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-rejected"/></svg>retired</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">In this project the code-review human step always runs through the plannotator-reviewer agent; a missing agent or a dead surface stops the run, never falls back to chat.</span></li>
+<li class="row" data-type="rule" data-source="claude-booping" data-status="accepted" data-flags="not_accepted" data-updated="2026-10-17" data-title="Snapshot baselines are accepted by the user, never by a run" data-created-by="claude" data-order="4"><code class="ref">rule/0013</code><a class="t" href="../../claude-booping/rule/0013-snapshot-baselines-accepted-by-user.html">Snapshot baselines are accepted by the user, never by a run</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">A run never runs just snapshots-accept or writes the committed playbook reports; it leaves the drift uncommitted and names it in its final report for the user to accept.</span></li>
+<li class="row" data-type="rule" data-source="claude-booping" data-status="accepted" data-flags="not_accepted" data-updated="2026-10-14" data-title="Code review covers code files only" data-created-by="claude" data-order="5"><code class="ref">rule/0015</code><a class="t" href="../../claude-booping/rule/0015-review-covers-code-only.html">Code review covers code files only</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">A code review surfaces findings on code files only; documentation, plans and other prose in the diff pass unreviewed.</span></li>
+<li class="row" data-type="rule" data-source="claude-booping" data-status="accepted" data-flags="not_accepted" data-updated="2026-10-14" data-title="Structured data is rendered from config, never restated in prose" data-created-by="claude" data-order="6"><code class="ref">rule/0017</code><a class="t" href="../../claude-booping/rule/0017-structured-data-rendered-not-restated.html">Structured data is rendered from config, never restated in prose</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">Statuses, queues, agent ids, globs and other structured values live in config or query specs and are rendered into bodies; prose never copies a literal.</span></li>
+<li class="row" data-type="rule" data-source="claude-booping" data-status="accepted" data-flags="not_accepted" data-updated="2026-10-15" data-title="Project specifics stay out of the core" data-created-by="claude" data-order="7"><code class="ref">rule/0018</code><a class="t" href="../../claude-booping/rule/0018-project-specifics-stay-out-of-core.html">Project specifics stay out of the core</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">Core skills and playbooks stay stack-agnostic; whatever is specific to a project is written into that project&#39;s tier, never into the core or a user-level scope by a run.</span></li>
+<li class="row" data-type="rule" data-source="claude-booping" data-status="accepted" data-flags="not_accepted" data-updated="2026-10-18" data-title="The driver owns the vault and git; workers touch only repo code" data-created-by="claude" data-order="8"><code class="ref">rule/0019</code><a class="t" href="../../claude-booping/rule/0019-driver-owns-vault-workers-own-code.html">The driver owns the vault and git; workers touch only repo code</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">The driver owns the vault, run state and commits; workers edit only repo code, never git history; a small fix goes to the session already holding its context.</span></li>
+<li class="row" data-type="rule" data-source="claude-booping" data-status="accepted" data-flags="not_accepted" data-updated="2026-10-15" data-title="Project shaping of an agent or skill is a targeted record" data-created-by="claude" data-order="9"><code class="ref">rule/0020</code><a class="t" href="../../claude-booping/rule/0020-agent-shaping-is-targeted.html">Project shaping of an agent or skill is a targeted record</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">A project adjusts a core agent or skill through a targeted rule (agent:&lt;id&gt;, skill:&lt;name&gt;), never through a separate extension file.</span></li>
+<li class="row" data-type="rule" data-source="claude-booping" data-status="accepted" data-flags="not_accepted" data-updated="2026-10-14" data-title="Commits are conventional with a scope" data-created-by="claude" data-order="10"><code class="ref">rule/0022</code><a class="t" href="../../claude-booping/rule/0022-conventional-commits-with-scope.html">Commits are conventional with a scope</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">Commit messages follow Conventional Commits with a scope, such as feat(booping) or fix(groom).</span></li>
+<li class="row" data-type="rule" data-source="claude-booping" data-status="accepted" data-flags="not_accepted clarify" data-updated="2026-10-14" data-title="The README Statuses section follows the states blocks" data-created-by="claude" data-order="11"><code class="ref">rule/0023</code><a class="t" href="../../claude-booping/rule/0023-readme-statuses-follow-states.html">The README Statuses section follows the states blocks</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span><span class="b warn"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>1 question for you</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">The README&#39;s Statuses section is a hand-kept narrative over each playbook&#39;s states block; a change to a states block revisits it in the same change.</span></li>
+<li class="row" data-type="rule" data-source="claude-booping" data-status="accepted" data-flags="not_accepted" data-updated="2026-10-17" data-title="A new procedure is a playbook, not a skill" data-created-by="claude" data-order="12"><code class="ref">rule/0024</code><a class="t" href="../../claude-booping/rule/0024-new-procedures-are-playbooks.html">A new procedure is a playbook, not a skill</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">Anything procedural is added as a playbook driven by /playbook; a new skill is added only for a surface /playbook cannot drive.</span></li>
+<li class="row" data-type="rule" data-source="claude-booping" data-status="accepted" data-flags="not_accepted" data-updated="2026-10-18" data-title="Who reads the result decides prose or code" data-created-by="claude" data-order="13"><code class="ref">rule/0025</code><a class="t" href="../../claude-booping/rule/0025-who-reads-the-result-decides.html">Who reads the result decides prose or code</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">A command, key or check exists when code reads its result or it supplies a fact the model cannot see; the rest is prose, the default when unsure.</span></li>
+<li class="row" data-type="rule" data-source="claude-booping" data-status="accepted" data-flags="not_accepted" data-updated="2026-10-14" data-title="Step bodies are fetched on demand, not pasted into spawn prompts" data-created-by="claude" data-order="14"><code class="ref">rule/0026</code><a class="t" href="../../claude-booping/rule/0026-step-bodies-fetched-on-demand.html">Step bodies are fetched on demand, not pasted into spawn prompts</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">A step&#39;s body is fetched when the step runs rather than pasted into a spawn prompt, so a run&#39;s context grows with its graph, not with the sum of its step bodies.</span></li>
+<li class="row" data-type="rule" data-source="claude-booping" data-status="accepted" data-flags="not_accepted" data-updated="2026-10-14" data-title="A hermetic render repeats byte for byte" data-created-by="claude" data-order="15"><code class="ref">rule/0027</code><a class="t" href="../../claude-booping/rule/0027-renders-reproducible.html">A hermetic render repeats byte for byte</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">With macros stubbed and the config merge pinned to core and project levels, a render is identical on any machine.</span></li>
+<li class="row" data-type="rule" data-source="claude-booping" data-status="accepted" data-flags="not_accepted" data-updated="2026-10-14" data-title="Vault artefacts are plain markdown with YAML frontmatter" data-created-by="claude" data-order="16"><code class="ref">rule/0028</code><a class="t" href="../../claude-booping/rule/0028-vault-artefacts-plain-markdown.html">Vault artefacts are plain markdown with YAML frontmatter</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">Every artefact a run writes into the project vault is plain markdown with YAML frontmatter, readable in Obsidian.</span></li>
+<li class="row" data-type="rule" data-source="claude-booping" data-status="accepted" data-flags="not_accepted" data-updated="2026-10-14" data-title="Graph and render problems are reported in band, never as crashes" data-created-by="claude" data-order="17"><code class="ref">rule/0029</code><a class="t" href="../../claude-booping/rule/0029-failures-reported-in-band.html">Graph and render problems are reported in band, never as crashes</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">A graph or render problem surfaces as a STOP or Note notice in the rendered output at exit 0, never as a crash.</span></li>
+<li class="row" data-type="rule" data-source="claude-booping" data-status="accepted" data-flags="not_accepted" data-updated="2026-10-16" data-title="A prompt rule earns its place by a measured miss" data-created-by="claude" data-order="18"><code class="ref">rule/0030</code><a class="t" href="../../claude-booping/rule/0030-prompt-rules-earn-their-place.html">A prompt rule earns its place by a measured miss</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">An instruction enters a prompt or a targeted rule only after a minimal probe shows the model missing it; evals and benchmarks run only when the owner agrees.</span></li>
+<li class="row" data-type="rule" data-source="claude-booping" data-status="accepted" data-flags="not_accepted" data-updated="2026-10-17" data-title="Judgement runs on Opus; cheaper models only for routine with a known output" data-created-by="claude" data-order="19"><code class="ref">rule/0031</code><a class="t" href="../../claude-booping/rule/0031-judgement-runs-on-opus.html">Judgement runs on Opus; cheaper models only for routine with a known output</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">Every step, agent or fallback that decides — drafts, reviews, verifies a DoD, writes tests — runs on Opus; the researcher on Sonnet high; else only mechanical steps.</span></li>
+<li class="row" data-type="rule" data-source="claude-booping" data-status="accepted" data-flags="not_accepted" data-updated="2026-10-18" data-title="The booping CLI holds only generic primitives" data-created-by="claude" data-order="20"><code class="ref">rule/0032</code><a class="t" href="../../claude-booping/rule/0032-cli-holds-only-generic-primitives.html">The booping CLI holds only generic primitives</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">A booping CLI command is a primitive any playbook can use; behaviour of one playbook&#39;s domain is that playbook&#39;s script, run through its hooks.</span></li>
+<li class="row" data-type="rule" data-source="claude-booping" data-status="accepted" data-flags="not_accepted" data-updated="2026-10-18" data-title="Private sources stay in vault/notes" data-created-by="claude" data-order="21"><code class="ref">rule/0033</code><a class="t" href="../../claude-booping/rule/0033-private-sources-stay-in-vault-notes.html">Private sources stay in vault/notes</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">This repo is public; another project&#39;s data, local paths and raw experiment inputs are written only under the gitignored vault/notes/, and tracked records name them without linking.</span></li>
+</ul>
+</main>
+</div>
+<div id="status" class="toast" role="status" data-copied="Link copied"></div>
+<footer>Generated by booping specs site</footer>
+</body>
+</html>

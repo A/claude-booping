@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>try{var t=localStorage.getItem("specs-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}document.documentElement.classList.add("js")</script>
+<meta name="color-scheme" content="light dark">
+<title>The ADR scorer reads the specs guide and the tier&#39;s record inventory — claude-booping</title>
+<link rel="stylesheet" href="../../fonts.css">
+<link rel="stylesheet" href="../../style.css">
+<script src="../../site.js" defer></script>
+<script src="../../search.js" defer></script>
+<script src="../../comments-format.js" defer></script>
+<script src="../../comments.js" defer></script>
+<link rel="alternate" type="text/markdown" href="0041-adr-scorer-reads-the-guide-and-the-record-inventory.md">
+</head>
+<body>
+<svg aria-hidden="true" style="display:none">
+<symbol id="i-accepted" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4.8 8.2l2.1 2.1 4.3-4.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-open" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+<symbol id="i-planned" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2.6 2.2"/></symbol>
+<symbol id="i-rejected" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3.6 12.4l8.8-8.8" stroke="currentColor" stroke-width="1.6"/></symbol>
+<symbol id="i-clarify" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="currentColor"/><path d="M6.1 6.2a2 2 0 1 1 2.6 1.9c-.5.2-.7.6-.7 1.1v.4" fill="none" stroke="var(--surface)" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="11.6" r=".95" fill="var(--surface)"/></symbol>
+<symbol id="i-unknown" viewBox="0 0 16 16"><path d="M8 1.6l6.8 12.2H1.2z" fill="currentColor"/><path d="M8 6v3.6" stroke="var(--surface)" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="11.6" r=".9" fill="var(--surface)"/></symbol>
+<symbol id="i-not-accepted" viewBox="0 0 16 16"><circle cx="8" cy="8" r="4.6" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+<symbol id="i-review-accepted" viewBox="0 0 16 16"><circle cx="8" cy="8" r="4.6" fill="currentColor"/></symbol>
+<symbol id="i-menu" viewBox="0 0 20 20"><path d="M3 5.5h14M3 10h14M3 14.5h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+<symbol id="i-search" viewBox="0 0 20 20"><circle cx="8.6" cy="8.6" r="5.6" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M13 13l4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+<symbol id="i-moon" viewBox="0 0 20 20"><path d="M15.5 12.6A6.5 6.5 0 0 1 7.4 4.5a6.5 6.5 0 1 0 8.1 8.1z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+<symbol id="i-sun" viewBox="0 0 16 16"><circle cx="8" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.2v1.6M8 13.2v1.6M1.2 8h1.6M13.2 8h1.6M3.2 3.2l1.1 1.1M11.7 11.7l1.1 1.1M3.2 12.8l1.1-1.1M11.7 4.3l1.1-1.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+<symbol id="i-auto" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.6a6.4 6.4 0 0 0 0 12.8z" fill="currentColor"/></symbol>
+<symbol id="i-comment" viewBox="0 0 20 20"><path d="M4 4.5h12a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5H9.2l-3.7 3v-3H4A1.5 1.5 0 0 1 2.5 13V6A1.5 1.5 0 0 1 4 4.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+<symbol id="i-outbox" viewBox="0 0 20 20"><path d="M2.5 11.5v4a1.5 1.5 0 0 0 1.5 1.5h12a1.5 1.5 0 0 0 1.5-1.5v-4M10 13V3.5M6.5 7L10 3.5 13.5 7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+<button class="iconbtn menu" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Menu"><svg class="ic" aria-hidden="true"><use href="#i-menu"/></svg></button>
+<a class="brand" href="../../index.html">claude-booping</a>
+<form class="search" role="search" action="../../search.html" data-prefix="../../" data-all="All results">
+<svg class="ic" aria-hidden="true"><use href="#i-search"/></svg>
+<input type="search" name="q" role="combobox" aria-label="Search" aria-autocomplete="list" aria-expanded="false" aria-controls="search-list" autocomplete="off" placeholder="Search the specs">
+<kbd>/</kbd>
+<button class="iconbtn search-close" type="button" aria-label="Close">&times;</button>
+<ul id="search-list" role="listbox" aria-label="Search" hidden></ul>
+</form>
+<button class="iconbtn search-btn" type="button" aria-label="Search" title="Search"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg></button>
+<button class="iconbtn rv-btn" type="button" aria-controls="rv-panel" aria-expanded="false" aria-label="Comments" title="Comments"><svg class="ic" aria-hidden="true"><use href="#i-comment"/></svg><span class="n"></span></button>
+<a class="iconbtn outbox" href="../../comments.html" aria-label="Outbox" title="Outbox"><svg class="ic" aria-hidden="true"><use href="#i-outbox"/></svg><span class="l">Outbox</span><span class="n"></span></a>
+<button class="iconbtn theme" type="button" aria-label="Theme: auto" title="Theme: auto" data-label-auto="Theme: auto" data-label-light="Theme: light" data-label-dark="Theme: dark"><svg class="ic" aria-hidden="true"><use href="#i-auto"/></svg></button>
+</header>
+<div class="body rv-page">
+<nav class="side" id="drawer" aria-label="Navigation">
+<ul>
+<li><a href="../../index.html">Overview</a></li>
+<li><a href="../../review.html"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>Awaiting review<span class="n">143</span></a></li>
+<li><a href="../../records.html">All records<span class="n">147</span></a></li>
+</ul>
+<h4>Types</h4>
+<ul>
+<li><a href="../../claude-booping/adr/index.html">ADRs<span class="n">36</span></a></li>
+<li><a href="../../claude-booping/conflict/index.html">Conflicts<span class="n">2</span></a></li>
+<li><a href="../../claude-booping/idea/index.html">Ideas<span class="n">9</span></a></li>
+<li><a href="../../claude-booping/reference/index.html">References<span class="n">11</span></a></li>
+<li><a href="../../claude-booping/rule/index.html">Rules<span class="n">22</span></a></li>
+<li><a href="../../claude-booping/runbook/index.html">Runbooks<span class="n">3</span></a></li>
+<li><a href="../../claude-booping/story/index.html">Stories<span class="n">26</span></a></li>
+<li><a href="../../claude-booping/value/index.html">Values<span class="n">19</span></a></li>
+</ul>
+<h4>booping</h4>
+<ul>
+<li><a href="../../booping/index.html">Overview</a></li>
+<li><a href="../../booping/rule/index.html">Rules<span class="n">19</span></a></li>
+</ul>
+<h4>Tags</h4>
+<ul>
+<li><a href="../../claude-booping/tags/postmortem.html">postmortem<span class="n">3</span></a></li>
+<li><a href="../../claude-booping/tags/probe.html">probe<span class="n">1</span></a></li>
+<li><a href="../../claude-booping/tags/index.html">All tags</a></li>
+</ul>
+<ul>
+<li><a href="../../llms.txt">llms.txt</a></li>
+</ul>
+</nav>
+<main id="main">
+<nav class="crumbs" aria-label="breadcrumb">
+<ol>
+<li><a href="../../index.html">Overview</a></li>
+<li class="mid"><a href="index.html">ADRs</a></li>
+<li><span aria-current="page">adr/0041</span></li>
+</ol>
+</nav>
+<div class="measure">
+<article data-ref="adr/0041" data-title="The ADR scorer reads the specs guide and the tier&#39;s record inventory" data-page="claude-booping/adr/0041-adr-scorer-reads-the-guide-and-the-record-inventory.html">
+<h1>The ADR scorer reads the specs guide and the tier&#39;s record inventory</h1>
+<div class="badges"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span><a href="#L95"><span class="b warn"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>1 question for you</span></a></div>
+<p class="lead">The adr-scorer gets the specs guide excerpt, the tier&#39;s value/rule/ADR inventory and the project&#39;s primitives, on Opus without tools, and answers route, overlaps, alt_score and missing.</p>
+<details class="toc-m">
+<summary>On this page · 1 open question</summary>
+<nav class="toc" aria-labelledby="toc-m-toc">
+<h4 id="toc-m-toc">On this page</h4>
+<ul>
+<li><a href="#context">Context</a>
+</li>
+<li><a href="#criteria">Criteria</a>
+</li>
+<li><a href="#decision">Decision</a>
+</li>
+<li><a href="#alternatives">Alternatives</a>
+<ul>
+<li><a href="#guide-and-record-inventory-on-opus">Guide and record inventory on Opus</a></li>
+<li><a href="#the-rubric-with-or-without-the-guide-excerpt">The rubric, with or without the guide excerpt</a></li>
+<li><a href="#guide-and-inventory-on-sonnet">Guide and inventory on Sonnet</a></li>
+<li><a href="#opus-with-read-access-to-the-repo">Opus with read access to the repo</a></li>
+</ul>
+</li>
+<li><a href="#consequences">Consequences</a>
+</li>
+<li><a href="#referenced-by">Referenced by</a>
+</li>
+</ul>
+</nav>
+<div class="q">
+<h4>1 open question</h4>
+<ul>
+<li><a class="mk-clarify" href="#L95"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>[clarify] The record is accepted on the owner&#39;s choice of option C; the plan that builds it, adr-scorer v3, is not yet developed.</a></li>
+</ul>
+</div>
+</details>
+<dl class="facts">
+<dt>Author</dt>
+<dd>agent</dd>
+<dt>Created</dt>
+<dd><time datetime="2026-10-19">19 October 2026</time></dd>
+<dt>Updated</dt>
+<dd><time datetime="2026-10-19">19 October 2026</time></dd>
+<dt>Review</dt>
+<dd><svg class="ic" aria-hidden="true"><use href="#i-review-accepted"/></svg>accepted</dd>
+<dt>Evidence</dt>
+<dd>«С, очевидно, надо брать» … «Ну все газ, вроде ок все» — 2026-10-19, chat</dd>
+<dt>Rules</dt>
+<dd><ul class="rel">
+<li><a href="../../claude-booping/rule/0033-private-sources-stay-in-vault-notes.html">Private sources stay in vault/notes</a> <code class="ref">rule/0033</code> <span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span></li>
+</ul></dd>
+<dt>Serves values</dt>
+<dd><ul class="rel">
+<li><a href="../../claude-booping/value/0010-proven-to-work.html">Proven to work</a> <code class="ref">value/0010</code></li>
+<li><a href="../../claude-booping/value/0012-quality-at-a-rational-cost.html">Quality at a rational cost</a> <code class="ref">value/0012</code></li>
+<li><a href="../../claude-booping/value/0002-minimal-effective-context.html">Minimal effective context</a> <code class="ref">value/0002</code></li>
+</ul></dd>
+</dl>
+<div class="body">
+<h2 id="context">Context<a class="anchor" href="#context" aria-label="Link to this section: Context">§</a></h2>
+<p>The specs playbook scores every drafted ADR with the <code>booping:adr-scorer</code> agent before its brief (<a href="../../booping/rule/0036-adr-accepted-after-a-brief.html">booping:rule/0036</a>). Today the agent gets the ADR text and the rubric only, and scores the alternatives 0–3. On 2026-10-18 the owner deleted six ADRs as not-ADRs — records that were a rule, a value or nothing — which the scorer had not flagged: judging the text alone, it cannot tell that a record belongs to another type or restates a record that exists, and it cannot name a cheap option that is an existing primitive it has never seen.</p>
+<p>The options were measured on 12 labelled ADRs, the 6 the owner deleted and 6 kept (private note, not published). Routing counts are the deleted ADRs sent to the type they fit, out of 6.</p>
+<p>Cheap options: building nothing is option A; prose is option B, the guide's own tests pasted into the prompt; extending an existing primitive is the inventory, the <code>ref — title: summary</code> lines <code>booping specs ls</code> already prints.</p>
+<h2 id="criteria">Criteria<a class="anchor" href="#criteria" aria-label="Link to this section: Criteria">§</a></h2>
+<ul>
+<li>Routes a not-ADR to the type it fits, or to none.</li>
+<li>Names the cheap option an ADR left out.</li>
+<li>Cost per ADR, in tokens and in time.</li>
+</ul>
+<h2 id="decision">Decision<a class="anchor" href="#decision" aria-label="Link to this section: Decision">§</a></h2>
+<p>Option C (owner, 2026-10-19: &quot;С, очевидно, надо брать&quot;). The scorer's prompt carries, beside the ADR text and the rubric:</p>
+<ol>
+<li>the specs guide excerpt — Types and When a record is worth writing;</li>
+<li>the tier's record inventory — one <code>ref — title: summary</code> line per value, rule and ADR, holding only the records that exist when the ADR is written;</li>
+<li>the project's primitives.</li>
+</ol>
+<p>It runs on Opus and keeps <code>tools: ListAgents</code> — it reads nothing beyond its prompt; its body stops saying it has no tools. It replies with one JSON line: <code>route</code>, <code>route_why</code>, <code>overlaps</code> (at most 3 bare refs), <code>alt_score</code> (0–3), <code>missing</code> (at most 3, each naming the existing primitive or record).</p>
+<p>The gate: route ≠ <code>adr</code> or <code>alt_score</code> ≤ 1 → block; otherwise pass, with <code>missing</code> in the brief as &quot;Не взвешено:&quot; and <code>overlaps</code> in &quot;Задевает:&quot;. The list, not the score, is the signal: with one cheap option cut from a good ADR, the cut option was named in <code>missing</code> 4 times of 4 and the score dropped once of 4.</p>
+<p>Cost per ADR is about 7K tokens in and 650 out on Opus.</p>
+<h2 id="alternatives">Alternatives<a class="anchor" href="#alternatives" aria-label="Link to this section: Alternatives">§</a></h2>
+<table class="alts">
+<thead>
+<tr>
+<th>Option</th>
+<th>Status</th>
+<th>Complexity</th>
+<th>Reversibility</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr class="chosen">
+<td><a href="#guide-and-record-inventory-on-opus">Guide and record inventory on Opus</a></td>
+<td><span class="badge st-accepted">accepted</span> <span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>chosen</span></td>
+<td>medium</td>
+<td>high</td>
+<td>Routes 4.5/6 and catches 6/6 at about 7K tokens an ADR</td>
+</tr>
+<tr>
+<td><a href="#the-rubric-with-or-without-the-guide-excerpt">The rubric, with or without the guide excerpt</a></td>
+<td>rejected</td>
+<td>low</td>
+<td>high</td>
+<td>Text alone cannot route; the guide alone routes 2.5/6</td>
+</tr>
+<tr>
+<td><a href="#guide-and-inventory-on-sonnet">Guide and inventory on Sonnet</a></td>
+<td>rejected</td>
+<td>medium</td>
+<td>high</td>
+<td>Cheaper, but misses 3/6</td>
+</tr>
+<tr>
+<td><a href="#opus-with-read-access-to-the-repo">Opus with read access to the repo</a></td>
+<td>rejected</td>
+<td>low</td>
+<td>high</td>
+<td>Costs about ×6 and routes 1/6</td>
+</tr>
+</tbody>
+</table>
+<details class="opt chosen" open>
+<summary><h3 id="guide-and-record-inventory-on-opus">Guide and record inventory on Opus<a class="anchor" href="#guide-and-record-inventory-on-opus" aria-label="Link to this section: Guide and record inventory on Opus">§</a></h3>
+<span class="meta"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>chosen</span><span class="b plain">complexity: medium</span><span class="b plain">reversibility: high</span></span></summary>
+<div class="in">
+<p class="verdict">Routes 4.5/6 and catches 6/6 at about 7K tokens an ADR</p>
+<p>Option C: the decision above.</p>
+<ul>
+<li><strong>Pros:</strong> routes 4.5/6 and catches all 6 deleted ADRs; names a cut cheap option 4/4; the inventory comes from a command that exists; the agent still reads nothing beyond its prompt.</li>
+<li><strong>Cons:</strong> the prompt grows to about 7K tokens; the inventory must be rendered at the ADR's creation time, filtered by <code>created_at</code>, or later records leak in; the routing calls on the deleted set are still 4.5 of 6.</li>
+<li><strong>Complexity:</strong> medium.</li>
+<li><strong>Reversibility:</strong> high.</li>
+</ul>
+</div>
+</details>
+<details class="opt">
+<summary><h3 id="the-rubric-with-or-without-the-guide-excerpt">The rubric, with or without the guide excerpt<a class="anchor" href="#the-rubric-with-or-without-the-guide-excerpt" aria-label="Link to this section: The rubric, with or without the guide excerpt">§</a></h3>
+<span class="meta"><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-rejected"/></svg>rejected</span><span class="b plain">complexity: low</span><span class="b plain">reversibility: high</span></span></summary>
+<div class="in">
+<p class="verdict">Text alone cannot route; the guide alone routes 2.5/6</p>
+<p>Option A is today's scorer, the ADR text and the rubric: building nothing. Option B adds the guide's Types and When a record is worth writing, prose only.</p>
+<ul>
+<li><strong>Pros:</strong> A costs nothing more; B is a pasted excerpt, no new input to render.</li>
+<li><strong>Cons:</strong> A cannot route at all; B routes 2.5/6; neither knows which records and primitives exist, so neither can name an overlap or a missing primitive.</li>
+<li><strong>Complexity:</strong> low.</li>
+<li><strong>Reversibility:</strong> high.</li>
+</ul>
+</div>
+</details>
+<details class="opt">
+<summary><h3 id="guide-and-inventory-on-sonnet">Guide and inventory on Sonnet<a class="anchor" href="#guide-and-inventory-on-sonnet" aria-label="Link to this section: Guide and inventory on Sonnet">§</a></h3>
+<span class="meta"><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-rejected"/></svg>rejected</span><span class="b plain">complexity: medium</span><span class="b plain">reversibility: high</span></span></summary>
+<div class="in">
+<p class="verdict">Cheaper, but misses 3/6</p>
+<p>Option D: option C's input on Sonnet.</p>
+<ul>
+<li><strong>Pros:</strong> cheaper and faster per ADR than Opus.</li>
+<li><strong>Cons:</strong> misses 3 of the 6 deleted ADRs.</li>
+<li><strong>Complexity:</strong> medium.</li>
+<li><strong>Reversibility:</strong> high.</li>
+</ul>
+</div>
+</details>
+<details class="opt">
+<summary><h3 id="opus-with-read-access-to-the-repo">Opus with read access to the repo<a class="anchor" href="#opus-with-read-access-to-the-repo" aria-label="Link to this section: Opus with read access to the repo">§</a></h3>
+<span class="meta"><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-rejected"/></svg>rejected</span><span class="b plain">complexity: low</span><span class="b plain">reversibility: high</span></span></summary>
+<div class="in">
+<p class="verdict">Costs about ×6 and routes 1/6</p>
+<p>Option E: Opus finds the records and primitives itself with Read, Glob and Grep.</p>
+<ul>
+<li><strong>Pros:</strong> no input to render; it sees whatever it reads.</li>
+<li><strong>Cons:</strong> costs about ×6 of option C and routes 1/6; opens the agent's tool list, which today reads nothing beyond its prompt.</li>
+<li><strong>Complexity:</strong> low.</li>
+<li><strong>Reversibility:</strong> high.</li>
+</ul>
+</div>
+</details>
+<h2 id="consequences">Consequences<a class="anchor" href="#consequences" aria-label="Link to this section: Consequences">§</a></h2>
+<ul>
+<li>The specs playbook's Record scenario renders the inventory and the primitives into the scorer prompt, gates on <code>route</code> and <code>alt_score</code>, and adds &quot;Не взвешено:&quot; to the brief.</li>
+<li>The <code>adr-scorer</code> agent body and the rubric's output contract change to the JSON line; its eval fixtures stay booping-only, since the repo is public (<a href="../../claude-booping/rule/0033-private-sources-stay-in-vault-notes.html">rule/0033</a>).</li>
+<li id="L95"><mark class="mk mk-clarify"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>[clarify]</mark> The record is <code>accepted</code> on the owner's choice of option C; the plan that builds it, adr-scorer v3, is not yet developed.</li>
+</ul>
+</div>
+</article>
+<h2 id="referenced-by">Referenced by<a class="anchor" href="#referenced-by" aria-label="Link to this section: Referenced by">§</a></h2>
+<h3>Rules</h3>
+<ul class="rel backlinks">
+<li><a href="../../booping/rule/0040-adr-scorer-judges-its-prompt-alone.html">The ADR scorer judges its prompt alone</a> <code class="ref">booping:rule/0040</code> <span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span> <span class="via">via Follows from</span></li>
+</ul>
+</div>
+</main>
+<aside class="rail rv-rail" id="rv-panel">
+<details class="rv-toc" open>
+<summary>On this page</summary>
+<nav class="toc" aria-labelledby="rail-toc">
+<h4 id="rail-toc">On this page</h4>
+<ul>
+<li><a href="#context">Context</a>
+</li>
+<li><a href="#criteria">Criteria</a>
+</li>
+<li><a href="#decision">Decision</a>
+</li>
+<li><a href="#alternatives">Alternatives</a>
+<ul>
+<li><a href="#guide-and-record-inventory-on-opus">Guide and record inventory on Opus</a></li>
+<li><a href="#the-rubric-with-or-without-the-guide-excerpt">The rubric, with or without the guide excerpt</a></li>
+<li><a href="#guide-and-inventory-on-sonnet">Guide and inventory on Sonnet</a></li>
+<li><a href="#opus-with-read-access-to-the-repo">Opus with read access to the repo</a></li>
+</ul>
+</li>
+<li><a href="#consequences">Consequences</a>
+</li>
+<li><a href="#referenced-by">Referenced by</a>
+</li>
+</ul>
+</nav>
+<div class="q">
+<h4>1 open question</h4>
+<ul>
+<li><a class="mk-clarify" href="#L95"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>[clarify] The record is accepted on the owner&#39;s choice of option C; the plan that builds it, adr-scorer v3, is not yet developed.</a></li>
+</ul>
+</div>
+</details>
+<section class="rv" aria-labelledby="rv-h" data-note="Note" data-delete="Delete" data-open="Open" data-whole="Whole record" data-changed="text changed" data-deleted="Comment deleted" data-copy-failed="Copy failed" data-copied-forms="[&#34;{n} item copied&#34;, &#34;{n} items copied&#34;]" data-cleared-forms="[&#34;{n} item cleared&#34;, &#34;{n} items cleared&#34;]">
+<div class="rv-head">
+<h2 id="rv-h">Comments</h2>
+<button class="iconbtn rv-close" type="button" aria-label="Close">&times;</button>
+</div>
+<label class="rv-accepted"><input type="checkbox" id="rv-accepted"> Accepted</label>
+<label class="rv-label" for="rv-new">Comment on the whole record</label>
+<textarea id="rv-new" rows="3"></textarea>
+<div class="rv-add-row"><button class="rv-add" type="button" disabled>Add</button></div>
+<p class="rv-hint">Select text in the record to comment on it.</p>
+<ul class="rv-list"></ul>
+</section>
+</aside>
+</div>
+<div id="status" class="toast" role="status" data-copied="Link copied"></div>
+<footer>Generated by booping specs site</footer>
+</body>
+</html>

@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://A.github.io/claude-booping/specs/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Specs - booping</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Specs";
+        var mkdocs_page_input_path = "specs.md";
+        var mkdocs_page_url = "/claude-booping/specs/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> booping
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../quick_start/">Quick start</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../install/">Install</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../vault/">Vault</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../playbook/">Playbooks</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../project_config/">Project config</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Specs</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#format-in-brief">Format in brief</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#tier-schemas-and-tags">Tier schemas and tags</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#tiers">Tiers</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#namespaced-refs">Namespaced refs</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#injection">Injection</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#base-guidance-in-every-run">Base guidance in every run</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#open-items">Open items</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#commands">Commands</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#booping-specs-init">booping specs init</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#booping-specs-ls">booping specs ls</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#booping-specs-next">booping specs next</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#booping-specs-check">booping specs check</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#booping-specs-site">booping specs site</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#booping-specs-site-index">booping specs site-index</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#exit-codes">Exit codes</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#publishing-on-gitlab-pages">Publishing on GitLab Pages</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="/claude-booping/specs-site/">Specs site</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../integrating-external-agents/">Integrating external agents</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Recipes</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../recipes/external-agents/">Wiring external agents</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../recipes/benchmarks/">Model benchmarks</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Workflow</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../groom/">groom playbook</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../develop/">develop playbook</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../code_review/">code-review playbook</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../retro/">retro playbook</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../learn/">learn playbook</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../specs_playbook/">specs playbook</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../project_manager/">project-manager playbook</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">booping</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Specs</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/A/claude-booping/edit/master/docs/specs.md">Edit on A/claude-booping</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="specs">Specs</h1>
+<p>Specs are typed records of what the code cannot show: why a project exists and what it is like (values), the constraints every decision obeys (rules), the decisions with their rejected alternatives (ADRs), and the conflicts, stories, ideas, references and runbooks around them. Plain markdown with YAML frontmatter, one record per file.</p>
+<p>booping's own records, plans and retrospectives are published as a <a href="https://A.github.io/claude-booping/specs-site/">specs site</a> beside these docs, rendered by <a href="#booping-specs-site"><code>booping specs site</code></a> on every docs deploy.</p>
+<h2 id="format-in-brief">Format in brief</h2>
+<p>A tier root holds one directory per type and each record is a file <code>&lt;type&gt;/&lt;NNNN&gt;-&lt;slug&gt;.md</code>: a four-digit number running within the type and a kebab-case slug. A record is referred to as <code>&lt;type&gt;/&lt;NNNN&gt;</code> (<code>adr/0001</code>); in a body, references are ordinary relative markdown links.</p>
+<p>The full format — frontmatter keys, the body sections each type requires, marks for open questions — is the shipped guide: <a href="https://github.com/A/claude-booping/blob/master/src/specs/README.md"><code>src/specs/README.md</code></a>. Each type's shape is an <a href="https://github.com/A/markdown-checker">mdcheck</a> rule file beside it under <code>src/specs/schemas/</code>.</p>
+<p>booping ships eight types — <code>value</code>, <code>rule</code>, <code>adr</code>, <code>conflict</code>, <code>story</code>, <code>idea</code>, <code>reference</code>, <code>runbook</code> — and a tier can override or add to them (see <a href="#tier-schemas-and-tags">Tier schemas and tags</a>), so a tier's types are whatever its effective schema set holds.</p>
+<p>Write a record's content in any language, but keep its structural headings, bold labels, table columns and frontmatter keys the shipped English ones: one schema set serves every tier.</p>
+<h2 id="tier-schemas-and-tags">Tier schemas and tags</h2>
+<p>A tier root can carry two files of its own beside its type directories:</p>
+<ul>
+<li><strong><code>_schemas/&lt;type&gt;.yaml</code></strong> — an mdcheck rule file. A type the shipped set has gets this shape instead in this tier; a new name adds a type, whose records go in <code>&lt;type&gt;/</code>. It applies to that tier only — a global-tier schema never reaches a project. Use it for your own types and fields, not to translate headings.</li>
+<li><strong><code>tags.yaml</code></strong> — a mapping <code>tag: one-line description</code>. Once it exists, every record's optional <code>tags:</code> list must use its keys: <code>area</code> or <code>area:sub</code> in kebab-case, with <code>area</code> itself listed for every <code>area:sub</code>.</li>
+</ul>
+<p>A tier schema must keep the frontmatter keys and values booping reads — <code>type</code>, <code>status</code>, <code>kind</code>, <code>targets</code>, <code>brief</code>, <code>values</code>, <code>rules</code>, <code>supersedes</code>, <code>sources</code>, <code>review</code>, <code>review_evidence</code>, <code>created_by</code>, and an ADR's alternatives status cell — as they are.</p>
+<h2 id="tiers">Tiers</h2>
+<p>Specs come in three tiers, each a tier root of its own:</p>
+<table>
+<thead>
+<tr>
+<th>Tier</th>
+<th>Where</th>
+<th>Holds</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>core</code></td>
+<td>shipped with the plugin, at <code>specs/</code></td>
+<td>booping's rules for every project</td>
+</tr>
+<tr>
+<td><code>global</code></td>
+<td><code>&lt;home_dir&gt;/_specs/</code></td>
+<td>your values and rules for every project</td>
+</tr>
+<tr>
+<td><code>project</code></td>
+<td>the vault root, type directories beside <code>plans/</code>; or a repo directory you choose</td>
+<td>the project's own records</td>
+</tr>
+</tbody>
+</table>
+<p>At the vault root only the type directories are records; plans, retrospectives and everything else in the vault are left alone. To keep the project's records in the repo instead, set the project tier's <code>path</code> — <code>booping specs init</code> links it into the vault as <code>&lt;vault&gt;/specs</code>. A vault that still holds its records under <code>&lt;vault&gt;/specs/</code> is moved to the root by <code>/playbook migrate</code>, which leaves a tier you pointed at the repo where it is.</p>
+<p>Where each tier lives and what it is called is the <a href="../project_config/#corespecs"><code>core.specs</code></a> config key. The <a href="../install/#create-the-project-vault">setup playbook</a> sets up the global and project tiers and asks for your global namespace; <a href="#booping-specs-init"><code>booping specs init</code></a> creates either one on demand.</p>
+<h2 id="namespaced-refs">Namespaced refs</h2>
+<p>A reference without a namespace points into its own tier: <code>rule/0003</code>. A reference into another tier names that tier's namespace in front: <code>booping:rule/0003</code> for core, <code>&lt;user&gt;:rule/0003</code> for the global tier, where the namespace is the one you gave setup — your <code>$USER</code> when none is set. A project that departs from a rule of a tier above records that in its own ADR or conflict, citing the rule by its namespaced ref.</p>
+<h2 id="injection">Injection</h2>
+<p>An accepted rule carrying <code>targets:</code> and <code>brief:</code> is injected into the playbooks, steps, agents and skills it targets, from all three tiers: each surface gets a <code>## Rules</code> section listing the brief of every matching rule with a link to its record. Target forms, the section shape, the ref and link per tier and the <code>--no-rules</code> opt-out are in <a href="../playbook/#rules">Playbooks → Rules</a>.</p>
+<h2 id="base-guidance-in-every-run">Base guidance in every run</h2>
+<p>When the project has a specs tier, the project context the <code>/playbook</code> skill renders for every run ends with a <code>## Specs</code> block: what the specs are for, one cue per record type that marks spec material in the work or in what you say, and the principle for working with them — apply them where they add quality or knowledge of past decisions, draft new material as the work produces it (values and anything weakening a rule stay drafts for you; the rest follows the run's <a href="../playbook/#supervised-and-autonomous-runs">mode</a>), and do every read or write through a subagent running the <a href="../specs_playbook/">specs playbook</a>, keeping only its short answer. Below it come the values of the global and project tiers, one line each (<code>value/NNNN — title: summary</code>, global ones namespaced). It carries no rules or other records. The fixed part is capped at 18 lines, plus one line per value, by a test.</p>
+<h2 id="open-items">Open items</h2>
+<p>A gap between the records and the code — an unconfirmed ADR, a <code>[clarify]</code> mark, a check finding — is filed as an open item, a file under <code>open-items/</code> in the vault that a plan can pick up and close; so is a request you file in your own words. The <a href="../specs_playbook/#open-items">specs playbook</a> files and works them; <code>booping create</code>, <code>booping query</code>, <code>booping set</code> and <code>booping transition</code> drive them directly.</p>
+<h2 id="commands">Commands</h2>
+<p>Every verb but <code>site</code> takes <code>--tier core|global|project</code>, default <code>project</code>.</p>
+<h3 id="booping-specs-init"><code>booping specs init</code></h3>
+<pre><code>booping specs init [--tier global|project]
+</code></pre>
+<p>Creates the tier root and its <code>README.md</code> when absent. The default project tier is the vault root, so there <code>init</code> creates nothing and prints only the root. A project tier kept in the repo is created there and linked from <code>&lt;vault&gt;/specs</code>, so the records sit with the code and stay reachable from the vault. Safe to re-run: it changes only what is missing.</p>
+<p>Prints one line per change, in the order made, then the absolute tier root as the last line — on a re-run with nothing to do, only that last line. For a project tier kept at <code>specs/</code> in the repo:</p>
+<pre><code>created dir /home/me/Dev/app/specs
+created file /home/me/Dev/app/specs/README.md
+linked /home/me/Claude/app/specs -&gt; /home/me/Dev/app/specs
+/home/me/Dev/app/specs
+</code></pre>
+<p>The <code>core</code> tier ships with the plugin and is never created. An error prints <code>specs init: {message}</code> on stderr — the core tier asked for, a path in the way that is not a directory, or a <code>&lt;vault&gt;/specs</code> that is not a link to the tier — and nothing is written.</p>
+<h3 id="booping-specs-ls"><code>booping specs ls</code></h3>
+<pre><code>booping specs ls [--tier TIER] [--type TYPE]... [--exclude REF]... [--titles]
+</code></pre>
+<p>Lists the tier's records, one per line: <code>{type}/{NNNN}  {status}  {summary}</code>, sorted by type and number. <code>--type</code> keeps that type and repeats to keep several. <code>--exclude {type}/{NNNN}</code> drops that record, repeats, and ignores a ref not in the tier. <code>--titles</code> puts the title before the summary: <code>{type}/{NNNN}  {status}  {title}: {summary}</code>.</p>
+<h3 id="booping-specs-next"><code>booping specs next</code></h3>
+<pre><code>booping specs next TYPE [--tier TIER]
+</code></pre>
+<p>Prints the next free ref of a type in the tier — the highest number plus one, e.g. <code>adr/0004</code>. Use it to name a new record.</p>
+<h3 id="booping-specs-check"><code>booping specs check</code></h3>
+<pre><code>booping specs check [--tier TIER]
+</code></pre>
+<p>Validates every record of the tier: its type's schema (the tier's own from <code>_schemas/</code> when it has one), the directory layout and file names, unique numbers, frontmatter, rule targets, relative link targets, typed refs, <code>sources</code> paths, <code>tags</code> against the tier's <code>tags.yaml</code>, and each ADR's alternatives — every table row matches one <code>###</code> option and exactly one option is accepted (at most one while the ADR is not accepted or superseded). A tier schema mdcheck cannot load is reported as an error on that file. Each finding prints as <code>{path}:{line}  {level}  {check}  {message}</code>, followed by a count on stderr. A cross-tier ref whose namespace no configured tier answers to, or whose tier is absent on this machine, is a warning, not an error.</p>
+<p>The check needs the <code>mdcheck</code> binary on <code>PATH</code>:</p>
+<pre><code>cargo install markdown-checker --version 0.1.2 --locked
+</code></pre>
+<h3 id="booping-specs-site"><code>booping specs site</code></h3>
+<pre><code>booping specs site [--out DIR] [--root NAME=PATH ...] [--home NAME] [--title TEXT] [--site-url URL]
+</code></pre>
+<p>Renders one or several specs roots to a static HTML site you open in a browser straight from disk: no server and no network — fonts, icons and styles ship inside the output. The same input always produces a byte-identical tree.</p>
+<ul>
+<li><strong><code>--out DIR</code></strong> — the output directory, default <code>specs-site</code> in the working directory.</li>
+<li><strong><code>--root NAME=PATH</code></strong> — a root to render, repeatable: a name (<code>[A-Za-z0-9][A-Za-z0-9._-]*</code>) and a directory holding type directories. <code>~</code> is expanded. Default: the tier and configured roots, below.</li>
+<li><strong><code>--home NAME</code></strong> — the root rendered as the home registry (below); it must name one of the rendered roots, else the command exits 2. Default: the first <code>--root</code> when <code>--root</code> is given, else the project tier's root.</li>
+<li><strong><code>--title TEXT</code></strong> — the site title, shown in the header and in every page's <code>&lt;title&gt;</code>; default the attached project's name, else <code>Specs</code>.</li>
+<li><strong><code>--site-url URL</code></strong> — the public <code>http://</code> or <code>https://</code> URL the site is served at; default none. Given, the build also writes <code>404.html</code> (below).</li>
+</ul>
+<p><strong>Root selection.</strong> Given <code>--root</code> at least once, exactly those roots are rendered, in the order given. Otherwise the roots are the three <a href="#tiers">tiers</a> — core, global, project, each named by its namespace, the project tier by the project's name — followed by every entry of <a href="../project_config/#corespecs"><code>core.specs.site.roots</code></a>. A tier whose directory does not exist is left out silently; a configured root whose directory does not exist is skipped with a warning. A root resolving to a directory already selected is skipped, so a tier that is also a configured root renders once. A root's name is its namespace on the site: <code>name:type/NNNN</code> refs resolve against it, so give a configured root the namespace its records are cited by.</p>
+<p>To build one site over every project's specs, list them in the global config and run the command from <code>home_dir</code>:</p>
+<pre><code class="language-yaml"># ~/.config/booping/config.yaml
+home_dir: ~/Claude
+core:
+  specs:
+    site:
+      roots:
+        - {name: app, path: ../Dev/app/specs}
+        - {name: api, path: /home/me/Dev/api/specs}
+</code></pre>
+<p>A <code>path</code> is absolute, <code>~</code>-prefixed, or relative to <code>home_dir</code>.</p>
+<p><strong>Home registry.</strong> One root is the site's home registry — <code>--home</code> when given, else the first <code>--root</code>, else the project tier's root among the default roots: the home page, its counters and the sidebar's <strong>Types</strong> cover it alone, and every other root — core, global, configured — is a registry of its own, with its own block on the home page and its own sidebar group. A record of another registry shows its namespaced id (<code>booping:rule/0032</code>) wherever an id is shown — list rows, Recently updated, search results, relations, Referenced by, breadcrumbs; the home registry's records keep the bare <code>rule/0032</code>. Without a home registry — default roots with no project tier on disk and no <code>--home</code> — every root counts together on the home page and ids stay bare, except in a record page's relations, where a record of another root than the page's shows its namespace. A single root that is the home registry renders the home page with no other blocks.</p>
+<p><strong>Page shell.</strong> Every page has a skip link, a header with the site title (linking home) and a theme toggle, a sidebar, breadcrumbs, and a footer naming the generator — no build date, so rebuilds stay byte-identical. The theme toggle cycles auto → light → dark and remembers the choice in the browser; auto follows the system setting. Text is set in Golos Text, code in JetBrains Mono, both Cyrillic and Latin. Below 760px wide the layout drops to one column, list rows become cards, the filter bar folds into a filter sheet (see <strong>Filters</strong>), and the sidebar moves into a drawer opened from a menu button; without JavaScript the sidebar renders in the page flow instead, and every page still reads.</p>
+<p>The sidebar, top to bottom: Overview; <strong>Awaiting review</strong> with the number of rows waiting for you; <strong>All records</strong> with the total; <strong>Types</strong> — every type that has records, across roots, with its count, each opening All records filtered to it (with a home registry: the home registry's types and counts, each opening its type page); with a home registry, one group per other registry, headed by its name, linking its landing and its type pages with counts; <strong>Tags</strong> — for each root with tags, its top-level tags that records carry, as plain links with counts, and a link to the root's tag tree (the root's name as a sub-heading when more than one root has tags); <strong>Sources</strong> — each root with its record count, linking its landing (without a home registry only); and <code>llms.txt</code>.</p>
+<p><strong>Pages.</strong></p>
+<ul>
+<li><code>index.html</code> — home: the site title; the first value record's summary as the lead; when anything waits for you, one callout linking the review page (<code>3 need you →</code>) followed by the number of records not accepted and of open <code>[clarify]</code> questions, a zero count left out (<code>3 need you → · 2 not accepted · 1 open question</code>); a card per type with records — name, count and a one-line scenario ("why the project exists" for values) — opening All records filtered to that type; and <strong>Recently updated</strong>, the ten records with the latest <code>updated_at</code>. The title, lead, callout and Recently updated sit in one reading column; the cards span the full width. With a home registry the lead, callout (counting the vault's open items too and linking <code>review.html#source={home}</code>), cards (opening the home registry's type pages) and Recently updated cover the home registry only; each other registry follows in a block headed by its name and record count, linking its landing, with its own callout and type cards.</li>
+<li><code>review.html</code> — everything that needs you, as a filterable list (below).</li>
+<li><code>records.html</code> — every record of every root, as a filterable list.</li>
+<li><code>{root}/index.html</code> — for the home registry, a redirect to <code>index.html</code> (meta refresh and a link), so old links keep working; for any other root, the root's landing, shaped like home and scoped to that root: the root's name as the title; when anything in the root waits for you, the callout with the root's counts, linking the review page filtered to the root (<code>../review.html#source={root}</code>); a card per type with records in the root; and <strong>Recently updated</strong>, the root's ten latest records. The root's <code>[clarify]</code> and <code>[unknown]</code> marks are on the review page and in each record's Open questions block.</li>
+<li><code>{root}/{type}/index.html</code> — the type's scenario, then a filterable list of its records.</li>
+<li><code>{root}/tags/index.html</code> — the root's tag tree: every tag nested under its parent (<code>area</code> above <code>area:sub</code>), with its description and the number of records carrying it or any tag below it. Written only for a root that has tags.</li>
+<li><code>{root}/tags/{tag}.html</code> — one tag, its <code>:</code> written as <code>.</code> (<code>area:sub</code> → <code>area.sub.html</code>): breadcrumbs through its parent tags, the description, the tags below it, then a filterable list of every record carrying the tag or one below it.</li>
+<li><code>{root}/{type}/{NNNN-slug}.html</code> — one record: title, state badges, tags linking to their tag pages, summary, then labelled facts — author, created, updated, review level (with an icon: filled for <code>accepted</code>, hollow below it), review evidence, sources — with dates written out in the site's language, then, as rows of the same facts list, every relation (<code>values</code>, <code>rules</code>, <code>supersedes</code>, …) as titled links with the target's status, plus <strong>Superseded by</strong> when a later record supersedes this one, any other frontmatter key, the body, and <strong>Referenced by</strong> — every record linking to this one, across roots — all in one reading column. Around the body:</li>
+<li><strong>On this page</strong> — a rail beside the text, at 1100px and wider, listing the body's <code>##</code> sections with their <code>###</code> sections nested, then Referenced by, and highlighting the section you are reading as you scroll. When the body holds <code>[clarify]</code> or <code>[unknown]</code> marks, an <strong>Open questions</strong> block below it lists each mark — clarify first — linking to its line. The rail shows when the body has a <code>##</code> or <code>###</code> heading or any mark; narrower screens get the same blocks in a collapsed panel under the summary.</li>
+<li><strong><code>§</code> section links</strong> — every <code>##</code> to <code>####</code> heading, and Referenced by, ends with a <code>§</code> link to itself, shown on hover or focus (always on touch screens). Clicking it moves the address to that section and copies the full link to the clipboard, <code>file://</code> included; a collapsed panel holding the target opens itself.</li>
+<li><strong>Referenced by, grouped</strong> — the citing records under one heading per type, each followed by <em>via</em>: the frontmatter relations naming this record (<code>Rules</code>, …) and the <code>##</code> sections of the citing record whose text links here. When a link points at one of this record's own sections (<code>…/0003-x.md#decision</code>), a <strong>By section</strong> block lists those sections with the records citing each.</li>
+<li><strong>ADR option cards</strong> — in an <code>adr</code> whose <code>## Alternatives</code> holds the shipped options table (Option, Status, Complexity, Reversibility, Verdict) the table stays as the summary, the accepted option's row marked <strong>chosen</strong>, and each <code>###</code> option becomes a card: status, complexity and reversibility from its table row, then the verdict and the option's own text. Accepted options come first and open, the rest collapsed in written order; below 760px the table is hidden and the cards carry it. An Alternatives section of any other shape renders as written.</li>
+<li><code>search.html</code> — every search result for the query in its address, <code>search.html?q=…</code> (below).</li>
+<li><code>comments.html</code> — the <strong>Outbox</strong>: every review comment and accepted mark you left on the site, as the text an agent gets (below).</li>
+</ul>
+<p>A row in a list shows the record's ref, its title linking to the record page, its state badges and its summary.</p>
+<p><strong>Plans and retrospectives.</strong> When the site renders its default roots for a project with a vault and a home registry, the vault's plans and retrospectives get pages too; a vault holding neither renders exactly as without them. Plans are the files <a href="../project_config/#coreplansglob"><code>core.plans.glob</code></a> claims (<code>plans/*/index.md</code>) plus the older single-file plans <code>plans/*.md</code> beside them — a directory plan wins over a file of the same slug; a plan's milestones are the files <code>core.plans.milestones.glob</code> claims inside its directory; retrospectives are the files <code>core.learn_playbook.queries.candidates.glob</code> claims (<code>retrospectives/*.md</code>). Other run artefacts — code reviews, sprint notes, a plan directory's other files — stay off the site.</p>
+<ul>
+<li><code>{home}/plans/index.html</code> — every plan, newest first by its <code>created</code> date (else the slug's leading <code>YYYYMMDD</code>): the date, the title, the status badge, and its SP and milestone count; a <strong>Status</strong> filter and a sort by date or title, with the same address syntax as the other lists (<code>plans/index.html#status=in-progress</code>).</li>
+<li><code>{home}/plans/{slug}/index.html</code> — one plan: title, status, summary, then its kind, SP, milestone count, created, started and completed dates and its retrospective (the plan's <code>retro:</code> or a retrospective naming the plan), the rendered <code>index.md</code>, a <strong>Milestones</strong> table (id, title linking the milestone's page, SP, status) and <strong>Plan files</strong> linking the siblings that exist — <code>request.md</code>, <code>clarifications.md</code>, <code>develop-defaults.md</code>. A single-file plan has neither.</li>
+<li><code>{home}/plans/{slug}/{milestone}.html</code> and <code>{home}/plans/{slug}/{sibling}.html</code> — a milestone or sibling file, its breadcrumbs through the plan, linking back to it.</li>
+<li><code>{home}/retrospectives/index.html</code> and <code>{home}/retrospectives/{slug}.html</code> — every retrospective newest first by <code>date</code>, and one page each: its <code>goal_summary</code> as the lead, the date, the plans it names linking their pages (a plan named by its old single-file path <code>plans/{slug}.md</code> still resolves), the body.</li>
+</ul>
+<p>Relative links in a plan, milestone or retrospective body resolve like a record's: to a record page, to another plan page, or not at all. The sidebar gains a <strong>Plans</strong> group (All plans, and the plans in progress when any) and a <strong>Retrospectives</strong> group, each with counts; the home page gains <strong>Recent plans</strong>, the five newest. Search covers plan and retrospective titles, not their bodies. The review panel works on these pages as on record pages, keyed by the plan's slug (<code>{slug}/{milestone}</code> for a milestone or sibling, <code>retrospectives/{slug}</code> for a retrospective). The summary line adds <code>N plans, N retrospectives</code> when there are any.</p>
+<p>A root's tags are the keys of its <code>tags.yaml</code> (see <a href="#tier-schemas-and-tags">Tier schemas and tags</a>), every tag its records carry, and each of those tags' parents; a tag's description comes from <code>tags.yaml</code> and is empty for a tag the file does not list. A <code>tags.yaml</code> that does not parse prints one warning and the tree is built from the tags the records carry.</p>
+<p><strong>Filters.</strong> A list page carries chips above the rows, grouped by facet — <strong>Type</strong>, <strong>Source</strong> (the root), <strong>Status</strong>, <strong>Needs</strong> — each chip showing how many rows on the page carry its value; a facet with only one value shows no chips, except Needs. Chips in one facet widen the list (any of them), chips in different facets narrow it (all facets). A sort menu orders the rows by number (the default), most recently updated, or title; the count below the chips says how many rows are shown. Below 760px wide the chips and sort move into a bottom sheet opened from a compact <strong>Filters</strong> row, which names how many chips are pressed and the current sort; the pressed chips show under that row as small chips that remove themselves on tap, and chips and sort in the sheet apply as you tap. The state lives in the address, so a filtered list is a link you can share or bookmark:</p>
+<ul>
+<li><code>records.html#type=rule</code> — the rules only;</li>
+<li><code>records.html#source=api</code> — the records of root <code>api</code>;</li>
+<li><code>records.html#status=accepted,proposed</code> — accepted or proposed records;</li>
+<li><code>records.html#flag=clarify</code> — records with a <code>[clarify]</code> mark;</li>
+<li><code>records.html#type=adr&amp;status=accepted&amp;sort=updated</code> — accepted ADRs, newest first.</li>
+</ul>
+<p>Keys come in the order <code>type</code>, <code>source</code>, <code>status</code>, <code>flag</code>, then <code>sort</code> when it is not the page's default; several values of one key are comma-separated. A key or value the page does not know is ignored. Without JavaScript the chips are hidden and every row stays listed.</p>
+<p><strong>Search.</strong> Every page's header carries a search box; press <code>/</code> anywhere outside a text field to jump into it. Typing opens a dropdown of the first eight matches — ref, title, status — and a last line, <strong>All results →</strong>, opening <code>search.html?q=…</code>. Down and Up move through the list, Enter opens the highlighted result or, with none highlighted, the results page; Esc closes the list, a second Esc clears the box. Below 760px the box gives way to a search button in the header that opens it full-screen; Esc or the close button returns you to the page. <code>search.html</code> lists every match as list rows with their summary and a count.</p>
+<p>Matching ignores case and treats <code>ё</code> as <code>е</code>. A query word matches a record field when a word of the field starts with the query word minus a crude ending (a word longer than seven letters loses its last three, longer than five its last two), so <code>решени</code> finds «Решение» and <code>елка</code> finds «Ёлка». Every query word must match somewhere. Results rank by where they matched — ref, then title, tags, summary, body — and then in All records order.</p>
+<p>The data lives in two files at the site root: <code>search-index.js</code> (each record's ref, title, summary, status, tags and page) and <code>search-body.js</code> (each record's body as plain text). A page loads them only when you first use the box — the body file once you type — as plain <code>&lt;script&gt;</code> files, so search works from <code>file://</code> with no server. Without JavaScript the box submits to <code>search.html</code>, which says that search needs JavaScript and links All records.</p>
+<p><strong>Review.</strong> <code>review.html</code> lists every record that needs you, in All records order, each row showing why with its badges — the clarify and unknown badges link straight to the first such mark in the record. A record is listed when any of these holds, and each is a <strong>Needs</strong> chip on the page:</p>
+<ul>
+<li><strong>Not accepted</strong> — <code>review</code> is not <code>accepted</code>: no key, <code>shown</code> or <code>discussed</code>;</li>
+<li><strong>Has [clarify]</strong> / <strong>Has [unknown]</strong> — the body holds such a mark;</li>
+<li><strong>Open conflict</strong> — a <code>conflict</code> record with status <code>open</code>;</li>
+<li><strong>Proposed ADR</strong> — an <code>adr</code> with status <code>proposed</code>;</li>
+<li><strong>Open</strong> — an <code>idea</code> with status <code>open</code>, or an open item.</li>
+</ul>
+<p>When the site renders its default roots for a project with a vault, the vault's <a href="#open-items">open items</a> with status <code>open</code> follow the records — the item's id and title, linking to the record it names when that record is on the site. The review page sorts by <strong>Review order</strong> by default: what the agent wrote first, then the oldest by <code>updated_at</code>; it also offers the other sorts. With nothing to review it says so. The sidebar's Awaiting review count and the home callout are the number of rows on this page.</p>
+<p><strong>Review panel.</strong> Every record, plan and retrospective page carries a panel beside the body — always visible from 1100px up, under the page outline (now a collapsible <strong>On this page</strong> at the panel's top); narrower, a bottom sheet opened by the header's comment button, which shows the page's count. Top to bottom:</p>
+<ul>
+<li><strong>Accepted</strong> (record pages only — plans and retrospectives have no <code>review:</code>) — a checkbox for the whole record; it is sent as a <code>{ref} — accepted {YYYY-MM-DD}</code> line with the day you ticked it, with or without comments;</li>
+<li><strong>Comment on the whole record</strong> — a free-form box (no quote); write as you like: what you type is saved as you type and already counts as the record's whole-record comment; <strong>Add</strong> (or Ctrl/Cmd+Enter) pins it as a card and empties the box for the next one;</li>
+<li>the page's comment cards, newest first. Selecting text in the body — with the mouse, by touch, or with Shift and the arrows — makes a card with the quote and the nearest heading above it, and puts the cursor in its note. Clicking a card edits its note; clicking its quote scrolls to the place and flashes it. Notes save as you type; <strong>Delete</strong> removes a card; a card left with an empty note is dropped, so a selection made only to copy text leaves nothing behind. Quoted passages are highlighted in the body; a quote no longer found there (the record changed) keeps its text with a <strong>text changed</strong> note.</li>
+</ul>
+<p><strong>Outbox.</strong> The header's <strong>Outbox</strong> button, on every page, carries the count of comments and accepted marks on the site and opens <code>comments.html</code>: every item grouped by record, the record with the newest item first and its items newest first, each shown as the exact text it adds to the block, with <strong>Open</strong> (the place) and <strong>Delete</strong>. <strong>Copy all</strong> copies the block below and marks nothing; <strong>Clear</strong>, after a confirmation in the page, removes every comment, accepted mark and unsent draft from the browser. There is no sent state: clear once the agent has applied the review — an item sent twice is harmless, the agent checks each against the record first.</p>
+<pre><code>## {ref} — {title}
+
+{ref} — accepted {YYYY-MM-DD}
+
+[§ {anchor text}]({anchor url})
+
+&gt; {quote line 1}
+&gt; {quote line 2}
+
+{note}
+
+[{title}]({page url})
+
+{note on the whole record}
+
+## {next ref} — {next title}
+
+…
+</code></pre>
+<p>The anchor line links the section the comment sits under; a comment on the whole record, or above the record's first heading, links the record by its title. Links are absolute — the published <code>https://</code> address, or a <code>file:///</code> path for a site opened from disk. The block holds no UI words, so it reads the same on a site in any language. The agent that gets it edits the records and turns each <code>accepted</code> line into <code>review: accepted</code> with <code>review_evidence: site review — {YYYY-MM-DD}</code> — never on its own initiative.</p>
+<p>Comments live in the browser's local storage, one store per site address, in this browser only: nothing is uploaded, nothing reaches the build, and another browser or device does not see them. Comments keep the <code>specs-comments:v1:{site address}</code> key; accepted marks and unsent drafts sit beside it under <code>specs-accepted:v1:</code> and <code>specs-drafts:v1:</code>, so comments saved by the earlier comment UI show up in the panel and the Outbox unchanged. With storage unavailable the panel and the Outbox button stay hidden and <code>comments.html</code> says comments need browser storage. Chrome and Chromium share one store across a site opened from <code>file://</code>; Firefox gives each <code>file://</code> page its own, so there a record's panel works but the Outbox sees only items made on itself — a published site is unaffected.</p>
+<p><strong>State badges.</strong> Each badge carries an icon and text, never colour alone: the record's status (<code>accepted</code>, <code>proposed</code>, …), the count of <code>[clarify]</code> marks (<code>2 questions for you</code>, linking to the first mark on a record page), <code>[unknown]</code> when the body has one, and <code>not accepted</code> when <code>review</code> is not <code>accepted</code>.</p>
+<p>Relative links and typed refs between records become links to the target's page, across roots too. A link to something that is not a record renders as plain text; a link or ref whose target is missing renders as plain text and prints a warning. The site never fails on a link — <code>booping specs check</code> is the validator.</p>
+<p><strong>Language and labels.</strong> Page text — UI strings, type names and scenarios, statuses, fact names, author names and month names — comes from the label table for <code>core.specs.site.lang</code> (default <code>en</code>; <code>en</code> and <code>ru</code> ship), which also sets <code>&lt;html lang&gt;</code>. A project whose records are written in another language sets it in its vault config — content language is not detected, so a Russian vault left on the default publishes Russian text under <code>lang="en"</code>. A language with no table renders with English labels, keeps its <code>&lt;html lang&gt;</code> and prints one warning. <code>core.specs.site.labels.{lang}</code> overrides or adds labels key by key through the usual config merge, falling back to <code>en</code> and then to the raw id, so a project names its own types without restating the rest. A project tier with a <code>_schemas/mechanic.yaml</code> type, published in Russian:</p>
+<pre><code class="language-yaml"># {vault}/config.yaml
+core:
+  specs:
+    site:
+      lang: ru
+      labels:
+        ru:
+          types:
+            mechanic: {name: Механика, plural: Механики, scenario: &quot;Механики — как устроен мир&quot;}
+</code></pre>
+<p>A label holding counts is a list of plural forms: two (one, other) or three (the Slavic one, few, many), as in <code>clarify: ["{n} вопрос к тебе", "{n} вопроса к тебе", "{n} вопросов к тебе"]</code>. <code>booping config core.specs.site.labels.en</code> prints every key with its shipped value.</p>
+<p><strong>Output directory.</strong> Besides the pages, every build writes:</p>
+<ul>
+<li><code>style.css</code>, <code>site.js</code> (theme toggle and drawer), <code>fonts.css</code> with the fonts embedded — so nested pages opened from <code>file://</code> render them too — and the fonts' OFL licences under <code>fonts/</code>;</li>
+<li><code>search.js</code>, <code>search-index.js</code> and <code>search-body.js</code> — the <a href="#booping-specs-site">search</a> and its data;</li>
+<li><code>comments.html</code>, <code>comments.js</code> and <code>comments-format.js</code> — the review: the Outbox page, and the scripts behind the review panel, its storage and the export;</li>
+<li><code>{root}/{type}/{NNNN-slug}.md</code> — each record's source file, byte for byte, linked from its page as the Markdown alternate;</li>
+<li><code>llms.txt</code> — the site in the <a href="https://llmstxt.org/">llms.txt</a> shape: the title, the first value's summary, then one section per root and type with a line per record linking its <code>.md</code> copy, with its summary, status and tags;</li>
+<li><code>index.json</code> — the title, the language and every record's metadata in page order: id (<code>{root}:{ref}</code>), type, title, summary, status, tags, author and dates, page and <code>.md</code> paths, mark counts, relations, superseded-by and backlinks as ids;</li>
+<li><code>404.html</code>, only with <code>--site-url</code> — a not-found page whose links resolve against the URL's path, so it works at any depth the host serves it from;</li>
+<li>the <code>.booping-site</code> marker.</li>
+</ul>
+<p>The command refuses — and writes nothing — when the out path is a file, lies inside one of the rendered roots, or is a non-empty directory without the marker. A directory carrying the marker is cleared and rewritten, so re-running into the same <code>--out</code> is safe.</p>
+<p><strong>Output.</strong> On success, stdout gets one line:</p>
+<pre><code>specs site: 3 roots, 42 records, 51 pages, 2 warnings -&gt; specs-site
+</code></pre>
+<p>Warnings go to stderr, sorted by path then line:</p>
+<pre><code>/home/me/Dev/old/specs  warning  site  root old not found, skipped
+vault/adr/0002-ports.md:5  warning  site  unresolved ref booping:rule/0099
+vault/adr/0002-ports.md:14  warning  site  unresolved link ../rule/0099-gone.md
+</code></pre>
+<p>An error prints one <code>error: {message}</code> line on stderr.</p>
+<h3 id="booping-specs-site-index"><code>booping specs site-index</code></h3>
+<pre><code>booping specs site-index [--projects PATH|-] [--out DIR] [--title TEXT]
+</code></pre>
+<p>Renders one index page in the site's design that links to several projects' specs sites — the page at the root of a <a href="#publishing-on-gitlab-pages">GitLab Pages group</a>. Reads no specs root; its language and labels come from <code>core.specs.site.lang</code> and <code>core.specs.site.labels</code>, as for <a href="#booping-specs-site"><code>booping specs site</code></a>. The same input always produces a byte-identical tree.</p>
+<ul>
+<li><strong><code>--projects PATH|-</code></strong> — the project list, default <code>-</code>: <code>-</code> reads it as JSON from stdin, a path reads the file as YAML.</li>
+<li><strong><code>--out DIR</code></strong> — the output directory, default <code>specs-site-index</code> in the working directory.</li>
+<li><strong><code>--title TEXT</code></strong> — the site title in the header, the page heading, its single crumb and its <code>&lt;title&gt;</code>, default <code>Specs</code>.</li>
+</ul>
+<p><strong>Input.</strong> A list of entries, each a mapping with exactly these keys:</p>
+<ul>
+<li><code>name</code> — required, a non-empty string, unique across the list.</li>
+<li><code>url</code> — required, starting <code>http://</code> or <code>https://</code>.</li>
+<li><code>description</code> — optional, a string or null.</li>
+</ul>
+<p>Any other key, a top level that is not a list, an entry that is not a mapping, and every violation above is an error naming the entry by its 0-based position in the input (<code>projects[3]: …</code>); so is unreadable input — a missing file or a YAML or JSON syntax error.</p>
+<p><strong>Page.</strong> The same shell as a site page — skip link, header with the theme toggle, breadcrumbs, footer — without the sidebar. The heading, then one row per entry: the name linking to its URL, its description below. Rows are sorted by name, case-insensitively; input order never shows. A description's whitespace — newlines included — collapses to single spaces, so each renders on one line; a missing or null description leaves the row with the name only. An empty list renders the heading and <code>No projects.</code> (in the configured language) and still succeeds.</p>
+<p><strong>Output directory.</strong> <code>index.html</code>, the site's <code>style.css</code>, <code>site.js</code>, <code>fonts.css</code> and font licences, and the <code>.booping-site</code> marker, under the same rules as <a href="#booping-specs-site"><code>booping specs site</code></a>: a non-empty directory without the marker is refused, one carrying it is cleared and rewritten.</p>
+<p><strong>Output.</strong> Piping a two-project list on stdin:</p>
+<pre><code class="language-json">[
+  {&quot;name&quot;: &quot;api&quot;, &quot;url&quot;: &quot;https://{group}.{pages-domain}/api&quot;, &quot;description&quot;: &quot;Payments API.&quot;},
+  {&quot;name&quot;: &quot;app&quot;, &quot;url&quot;: &quot;https://{group}.{pages-domain}/app&quot;, &quot;description&quot;: null}
+]
+</code></pre>
+<pre><code>$ booping specs site-index --out public &lt; projects.json
+specs site-index: 2 projects -&gt; public
+</code></pre>
+<p>An error prints one <code>error: {message}</code> line on stderr and writes nothing.</p>
+<h3 id="exit-codes">Exit codes</h3>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th><code>init</code></th>
+<th><code>ls</code>, <code>next</code></th>
+<th><code>check</code></th>
+<th><code>site</code></th>
+<th><code>site-index</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>tier in place</td>
+<td>printed</td>
+<td>no errors (warnings may be printed)</td>
+<td>site written (warnings may be printed)</td>
+<td>index written</td>
+</tr>
+<tr>
+<td>1</td>
+<td>the tier is <code>core</code> or unavailable, or a path is in the way</td>
+<td>unknown type, or the tier is unavailable or has no directory</td>
+<td>at least one error, or the tier is unavailable or has no directory</td>
+<td>a malformed <code>--root</code> or one that is not a directory, a bad configured root entry, duplicate root names, no roots, a <code>--site-url</code> that is not <code>http(s)</code>, or the out directory refused</td>
+<td>an unreadable or invalid project list, or the out directory refused</td>
+</tr>
+<tr>
+<td>2</td>
+<td>config could not be loaded</td>
+<td>config could not be loaded</td>
+<td>the check could not run: config not loaded, <code>mdcheck</code> missing or failing</td>
+<td>config could not be loaded</td>
+<td>config could not be loaded</td>
+</tr>
+</tbody>
+</table>
+<h2 id="publishing-on-gitlab-pages">Publishing on GitLab Pages</h2>
+<p>Each project publishes its own specs site on GitLab Pages, and one index project at the group's Pages root lists every project of the group carrying a topic, linking to each site. booping ships both CI jobs as templates a project includes by URL.</p>
+<p><strong>A project's site.</strong> The project keeps its specs in a <a href="../vault/#booping">repo-local vault</a>. Its <code>.gitlab-ci.yml</code> includes the site template, which adds a <code>pages</code> job on the default branch running <code>booping specs site --out public --site-url "$CI_PAGES_URL"</code> — so the site gets its <code>404.html</code>:</p>
+<pre><code class="language-yaml">include:
+  - remote: https://raw.githubusercontent.com/A/claude-booping/master/src/ci/gitlab/specs-site.gitlab-ci.yml
+
+pages:
+  variables:
+    BOOPING_REF: v1.1.1  # a release tag
+</code></pre>
+<p><code>BOOPING_REF</code> defaults to <code>master</code>; pin it to a release tag so a booping change reaches the site only when you move the pin. <code>BOOPING_REPO</code> overrides the clone URL. The site is served at <code>https://{group}.{pages-domain}/{project}</code>.</p>
+<p><strong>The index.</strong> Create a project named <code>{group}.{pages-domain}</code> in the group — GitLab serves its Pages at the group's Pages root, <code>https://{group}.{pages-domain}/</code>. Its <code>.gitlab-ci.yml</code> includes the index template:</p>
+<pre><code class="language-yaml">include:
+  - remote: https://raw.githubusercontent.com/A/claude-booping/master/src/ci/gitlab/specs-index.gitlab-ci.yml
+</code></pre>
+<p>Then, in that project's settings:</p>
+<ul>
+<li>a project access token with the <code>read_api</code> scope, stored as the masked CI variable <code>SPECS_INDEX_TOKEN</code>;</li>
+<li>a pipeline schedule — the job runs on a schedule and on a manual pipeline run, never on push.</li>
+</ul>
+<p>The job lists the group's non-archived projects carrying the topic through the GitLab API and pipes them into <code>booping specs site-index --projects - --out public</code>. Optional variables:</p>
+<ul>
+<li><code>SPECS_TOPIC</code> — the topic that marks a project for the index, default <code>booping-specs</code>.</li>
+<li><code>SPECS_PAGES_BASE</code> — optional fallback base URL (<code>{base}/{project path}</code>) for a project whose Pages URL the API does not return; normally each project's link is its own Pages URL from <code>GET /projects/:id/pages</code>, so unique Pages domains work. A project without Pages is left out of the index.</li>
+</ul>
+<p><strong>Adding a project</strong> to the index is setting the topic on it; the next scheduled run lists it.</p>
+<p><strong>How the jobs get booping.</strong> Both run on the <code>ghcr.io/astral-sh/uv:python3.12-trixie</code> image, which carries uv, Python and git, shallow-clone booping at <code>BOOPING_REF</code> and run its <code>bin/booping</code>; the uv cache is kept between runs. Neither job needs <code>mdcheck</code> — only <code>booping specs check</code> does. A project adding its own <code>specs check</code> job installs it with:</p>
+<pre><code>cargo install markdown-checker --version 0.1.2 --locked
+</code></pre>
+<p><strong>Limits.</strong> Projects in subgroups are not listed — only the group's own projects. Archived projects are skipped.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../project_config/" class="btn btn-neutral float-left" title="Project config"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../integrating-external-agents/" class="btn btn-neutral float-right" title="Integrating external agents">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/A/claude-booping" class="fa fa-code-fork" style="color: #fcfcfc"> A/claude-booping</a>
+        </span>
+    
+    
+      <span><a href="../project_config/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../integrating-external-agents/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

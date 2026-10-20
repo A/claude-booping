@@ -72,6 +72,14 @@
                 </li>
               </ul>
               <ul>
+                <li class="toctree-l1"><a class="reference internal" href="specs/">Specs</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="/claude-booping/specs-site/">Specs site</a>
+                </li>
+              </ul>
+              <ul>
                 <li class="toctree-l1"><a class="reference internal" href="integrating-external-agents/">Integrating external agents</a>
                 </li>
               </ul>
@@ -93,6 +101,10 @@
                   <li class="toctree-l1"><a class="reference internal" href="retro/">retro playbook</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="learn/">learn playbook</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="specs_playbook/">specs playbook</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="project_manager/">project-manager playbook</a>
                   </li>
               </ul>
       </div>
@@ -120,7 +132,7 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="booping">booping</h1>
-<p>A self-learning, project-scoped sprint workflow for Claude Code. booping turns a feature idea into a durable, on-disk loop — <strong>groom → develop → retro → learn</strong> — spread across sub-agents to avoid context rot, with an optional second-model cross-review of every plan. Plans, retros, code reviews and lessons live in the per-project vault (<code>~/Claude/{project}/</code> by default, or a repo-local directory), one folder per codebase, so weeks-long programs stay legible.</p>
+<p>A self-learning, project-scoped sprint workflow for Claude Code. booping turns a feature idea into a durable, on-disk loop — <strong>groom → develop → retro → learn</strong> — spread across sub-agents to avoid context rot, with an optional second-model cross-review of every plan. Plans, retros and code reviews live in the per-project vault (<code>~/Claude/{project}/</code> by default, or a repo-local directory), one folder per codebase, so weeks-long programs stay legible.</p>
 <p>The vault is plain markdown with YAML frontmatter, so Obsidian renders it natively as Properties. No database, no lock-in — files you can grep, version, and edit by hand.</p>
 <h2 id="the-loop">The loop</h2>
 <pre><code class="language-text">        ┌─────────┐
@@ -140,13 +152,13 @@
        │ retrospectives/{slug}.md
        ▼
   ┌────────┐
-  │  learn │  fold findings into targeted lessons
+  │  learn │  fold findings into targeted rules
   └────────┘
 </code></pre>
-<p>Every plan walks this loop once; the next inherits the lessons. Setup, grooming, development, code review, retro and learn are all <strong>playbooks</strong>, driven by <code>/playbook</code> — the plugin's only shipped skill. develop closes the plan at <code>done</code>; retro + learn and code-review then run as separate tracks over their own standalone artifacts — <code>retrospectives/{slug}.md</code> and per-review files under <code>codereviews/</code> — while the plan stays <code>done</code>.</p>
+<p>Every plan walks this loop once; the next inherits the rules. Setup, grooming, development, code review, retro and learn are all <strong>playbooks</strong>, driven by <code>/playbook</code> — the plugin's only shipped skill. develop closes the plan at <code>done</code>; retro + learn and code-review then run as separate tracks over their own standalone artifacts — <code>retrospectives/{slug}.md</code> and per-review files under <code>codereviews/</code> — while the plan stays <code>done</code>.</p>
 <h2 id="why-booping">Why booping</h2>
 <ul>
-<li><strong>Artifacts as a meta-source.</strong> Plans, retros and lessons are durable on-disk markdown you can mine for documentation, onboarding material, research notes, or a historical trace of how a codebase actually evolved.</li>
+<li><strong>Artifacts as a meta-source.</strong> Plans, retros and rules are durable on-disk markdown you can mine for documentation, onboarding material, research notes, or a historical trace of how a codebase actually evolved.</li>
 <li><strong>A benchmarking surface.</strong> Plans are reproducible files: run the same one with different models (Opus vs. Sonnet vs. GLM) and compare the diffs — the controlled inputs an honest comparison needs.</li>
 <li><strong>Agile-iteration scaffolding made durable.</strong> Sprint cadence, reviews, retrospectives and lessons are social rituals that decay unwritten; booping gives each a concrete file and a concrete command, so the loop survives sessions, machines and weeks of context loss.</li>
 <li><strong>Story points as a personal estimation track record.</strong> Every plan carries an SP estimate; every retro records what actually shipped. Over many sprints that accumulates into honest data on your estimates versus reality on this specific codebase — a private calibration log no ticket tracker gives you.</li>
@@ -154,7 +166,7 @@
 <h2 id="read-next">Read next</h2>
 <ul>
 <li><a href="quick_start/">Quick start</a> — install the plugin, run <code>/playbook setup</code>, ship your first plan end-to-end.</li>
-<li><a href="install/">Install</a> — prerequisites and what <code>/playbook setup</code> scaffolds.</li>
+<li><a href="install/">Install</a> — prerequisites and what <code>/playbook setup</code> creates.</li>
 <li><a href="vault/">Vault</a> — full tour of <code>~/Claude/{project}/</code>: what every file and directory is for.</li>
 <li><a href="groom/">groom playbook</a> — spec a sprint, with cross-review and the user-approval gate.</li>
 <li><a href="develop/">develop playbook</a> — claim a ready plan and execute milestones.</li>
@@ -216,5 +228,5 @@
 
 <!--
 MkDocs version : 1.6.1
-Build Date UTC : 2026-10-08 16:14:33.446370+00:00
+Build Date UTC : 2026-10-20 19:28:02.138973+00:00
 -->

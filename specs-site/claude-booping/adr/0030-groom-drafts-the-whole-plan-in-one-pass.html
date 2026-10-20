@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>try{var t=localStorage.getItem("specs-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}document.documentElement.classList.add("js")</script>
+<meta name="color-scheme" content="light dark">
+<title>Groom drafts the whole plan in one staged pass — claude-booping</title>
+<link rel="stylesheet" href="../../fonts.css">
+<link rel="stylesheet" href="../../style.css">
+<script src="../../site.js" defer></script>
+<script src="../../search.js" defer></script>
+<script src="../../comments-format.js" defer></script>
+<script src="../../comments.js" defer></script>
+<link rel="alternate" type="text/markdown" href="0030-groom-drafts-the-whole-plan-in-one-pass.md">
+</head>
+<body>
+<svg aria-hidden="true" style="display:none">
+<symbol id="i-accepted" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4.8 8.2l2.1 2.1 4.3-4.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-open" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+<symbol id="i-planned" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2.6 2.2"/></symbol>
+<symbol id="i-rejected" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3.6 12.4l8.8-8.8" stroke="currentColor" stroke-width="1.6"/></symbol>
+<symbol id="i-clarify" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="currentColor"/><path d="M6.1 6.2a2 2 0 1 1 2.6 1.9c-.5.2-.7.6-.7 1.1v.4" fill="none" stroke="var(--surface)" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="11.6" r=".95" fill="var(--surface)"/></symbol>
+<symbol id="i-unknown" viewBox="0 0 16 16"><path d="M8 1.6l6.8 12.2H1.2z" fill="currentColor"/><path d="M8 6v3.6" stroke="var(--surface)" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="11.6" r=".9" fill="var(--surface)"/></symbol>
+<symbol id="i-not-accepted" viewBox="0 0 16 16"><circle cx="8" cy="8" r="4.6" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+<symbol id="i-review-accepted" viewBox="0 0 16 16"><circle cx="8" cy="8" r="4.6" fill="currentColor"/></symbol>
+<symbol id="i-menu" viewBox="0 0 20 20"><path d="M3 5.5h14M3 10h14M3 14.5h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+<symbol id="i-search" viewBox="0 0 20 20"><circle cx="8.6" cy="8.6" r="5.6" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M13 13l4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+<symbol id="i-moon" viewBox="0 0 20 20"><path d="M15.5 12.6A6.5 6.5 0 0 1 7.4 4.5a6.5 6.5 0 1 0 8.1 8.1z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+<symbol id="i-sun" viewBox="0 0 16 16"><circle cx="8" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.2v1.6M8 13.2v1.6M1.2 8h1.6M13.2 8h1.6M3.2 3.2l1.1 1.1M11.7 11.7l1.1 1.1M3.2 12.8l1.1-1.1M11.7 4.3l1.1-1.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+<symbol id="i-auto" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.6a6.4 6.4 0 0 0 0 12.8z" fill="currentColor"/></symbol>
+<symbol id="i-comment" viewBox="0 0 20 20"><path d="M4 4.5h12a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5H9.2l-3.7 3v-3H4A1.5 1.5 0 0 1 2.5 13V6A1.5 1.5 0 0 1 4 4.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+<symbol id="i-outbox" viewBox="0 0 20 20"><path d="M2.5 11.5v4a1.5 1.5 0 0 0 1.5 1.5h12a1.5 1.5 0 0 0 1.5-1.5v-4M10 13V3.5M6.5 7L10 3.5 13.5 7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+<button class="iconbtn menu" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Menu"><svg class="ic" aria-hidden="true"><use href="#i-menu"/></svg></button>
+<a class="brand" href="../../index.html">claude-booping</a>
+<form class="search" role="search" action="../../search.html" data-prefix="../../" data-all="All results">
+<svg class="ic" aria-hidden="true"><use href="#i-search"/></svg>
+<input type="search" name="q" role="combobox" aria-label="Search" aria-autocomplete="list" aria-expanded="false" aria-controls="search-list" autocomplete="off" placeholder="Search the specs">
+<kbd>/</kbd>
+<button class="iconbtn search-close" type="button" aria-label="Close">&times;</button>
+<ul id="search-list" role="listbox" aria-label="Search" hidden></ul>
+</form>
+<button class="iconbtn search-btn" type="button" aria-label="Search" title="Search"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg></button>
+<button class="iconbtn rv-btn" type="button" aria-controls="rv-panel" aria-expanded="false" aria-label="Comments" title="Comments"><svg class="ic" aria-hidden="true"><use href="#i-comment"/></svg><span class="n"></span></button>
+<a class="iconbtn outbox" href="../../comments.html" aria-label="Outbox" title="Outbox"><svg class="ic" aria-hidden="true"><use href="#i-outbox"/></svg><span class="l">Outbox</span><span class="n"></span></a>
+<button class="iconbtn theme" type="button" aria-label="Theme: auto" title="Theme: auto" data-label-auto="Theme: auto" data-label-light="Theme: light" data-label-dark="Theme: dark"><svg class="ic" aria-hidden="true"><use href="#i-auto"/></svg></button>
+</header>
+<div class="body rv-page">
+<nav class="side" id="drawer" aria-label="Navigation">
+<ul>
+<li><a href="../../index.html">Overview</a></li>
+<li><a href="../../review.html"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>Awaiting review<span class="n">143</span></a></li>
+<li><a href="../../records.html">All records<span class="n">147</span></a></li>
+</ul>
+<h4>Types</h4>
+<ul>
+<li><a href="../../claude-booping/adr/index.html">ADRs<span class="n">36</span></a></li>
+<li><a href="../../claude-booping/conflict/index.html">Conflicts<span class="n">2</span></a></li>
+<li><a href="../../claude-booping/idea/index.html">Ideas<span class="n">9</span></a></li>
+<li><a href="../../claude-booping/reference/index.html">References<span class="n">11</span></a></li>
+<li><a href="../../claude-booping/rule/index.html">Rules<span class="n">22</span></a></li>
+<li><a href="../../claude-booping/runbook/index.html">Runbooks<span class="n">3</span></a></li>
+<li><a href="../../claude-booping/story/index.html">Stories<span class="n">26</span></a></li>
+<li><a href="../../claude-booping/value/index.html">Values<span class="n">19</span></a></li>
+</ul>
+<h4>booping</h4>
+<ul>
+<li><a href="../../booping/index.html">Overview</a></li>
+<li><a href="../../booping/rule/index.html">Rules<span class="n">19</span></a></li>
+</ul>
+<h4>Tags</h4>
+<ul>
+<li><a href="../../claude-booping/tags/postmortem.html">postmortem<span class="n">3</span></a></li>
+<li><a href="../../claude-booping/tags/probe.html">probe<span class="n">1</span></a></li>
+<li><a href="../../claude-booping/tags/index.html">All tags</a></li>
+</ul>
+<ul>
+<li><a href="../../llms.txt">llms.txt</a></li>
+</ul>
+</nav>
+<main id="main">
+<nav class="crumbs" aria-label="breadcrumb">
+<ol>
+<li><a href="../../index.html">Overview</a></li>
+<li class="mid"><a href="index.html">ADRs</a></li>
+<li><span aria-current="page">adr/0030</span></li>
+</ol>
+</nav>
+<div class="measure">
+<article data-ref="adr/0030" data-title="Groom drafts the whole plan in one staged pass" data-page="claude-booping/adr/0030-groom-drafts-the-whole-plan-in-one-pass.html">
+<h1>Groom drafts the whole plan in one staged pass</h1>
+<div class="badges"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></div>
+<p class="lead">Groom is the plan template plus research then draft (V3a), no self-review step, without the 16 rules the model follows unprompted; the draft is one file.</p>
+<details class="toc-m">
+<summary>On this page</summary>
+<nav class="toc" aria-labelledby="toc-m-toc">
+<h4 id="toc-m-toc">On this page</h4>
+<ul>
+<li><a href="#context">Context</a>
+</li>
+<li><a href="#criteria">Criteria</a>
+</li>
+<li><a href="#decision">Decision</a>
+</li>
+<li><a href="#alternatives">Alternatives</a>
+<ul>
+<li><a href="#v3a-research-then-draft">V3a: research then draft</a></li>
+<li><a href="#v3-with-self-review">V3 with self-review</a></li>
+<li><a href="#v3-with-the-old-grooms-rules">V3 with the old groom&#39;s rules</a></li>
+<li><a href="#keep-the-current-groom">Keep the current groom</a></li>
+</ul>
+</li>
+<li><a href="#consequences">Consequences</a>
+</li>
+<li><a href="#referenced-by">Referenced by</a>
+</li>
+</ul>
+</nav>
+</details>
+<dl class="facts">
+<dt>Author</dt>
+<dd>agent</dd>
+<dt>Created</dt>
+<dd><time datetime="2026-10-16">16 October 2026</time></dd>
+<dt>Updated</dt>
+<dd><time datetime="2026-10-17">17 October 2026</time></dd>
+<dt>Review</dt>
+<dd><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not shown</dd>
+<dt>Sources</dt>
+<dd>vault/idea/0003-groom-depth-scales-with-task.md</dd>
+<dt>Serves values</dt>
+<dd><ul class="rel">
+<li><a href="../../claude-booping/value/0012-quality-at-a-rational-cost.html">Quality at a rational cost</a> <code class="ref">value/0012</code></li>
+<li><a href="../../claude-booping/value/0002-minimal-effective-context.html">Minimal effective context</a> <code class="ref">value/0002</code></li>
+<li><a href="../../claude-booping/value/0010-proven-to-work.html">Proven to work</a> <code class="ref">value/0010</code></li>
+</ul></dd>
+</dl>
+<dl class="facts">
+<dt>issues</dt>
+<dd></dd>
+</dl>
+<div class="body">
+<h2 id="context">Context<a class="anchor" href="#context" aria-label="Link to this section: Context">§</a></h2>
+<p>The current groom playbook (V0) spends 13–23 minutes and $4.25–5.62 per plan across many detached
+steps. A benchmark in <code>booping-benchmarks/groom</code> (idea/0003) ran variants on six past tasks in
+isolated environments; round 2 judged 12 plans per task (V2, V3, V3a, V5 × 3) on s1 (small), m2
+(medium) and c1 (complex) with codex and a neutral <code>claude -p</code>, no rubric and no final solution,
+plus a mechanical incidents metric (what a plan would have prevented of what really went wrong).
+Each variant writes the whole plan as one file.</p>
+<table>
+<thead>
+<tr>
+<th>Variant</th>
+<th>Mean judge score (6 cells)</th>
+<th>Incidents s1 / m2</th>
+<th>Cost / time per plan</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>V3 — template + research → draft → self-review</td>
+<td>6.7</td>
+<td>73% / 70%</td>
+<td>$3.09 / 9.1 min</td>
+</tr>
+<tr>
+<td>V3a — V3 without self-review</td>
+<td>6.6</td>
+<td>72% / 62%</td>
+<td>$2.75 / 7.9 min</td>
+</tr>
+<tr>
+<td>V2 — template only</td>
+<td>5.8</td>
+<td>70% / 62%</td>
+<td>$2.92 / 8.9 min</td>
+</tr>
+<tr>
+<td>V5 — V3 + 5 rules kept from the old groom</td>
+<td>5.3</td>
+<td>65% / 52%</td>
+<td>$2.62 / 7.1 min</td>
+</tr>
+</tbody>
+</table>
+<p>Only the staged variants found m2's hidden defect (the gateway truncates a take at 60 s, confirmed
+against the code by codex and Gemini); spread inside one variant (V3 scored both 9 and 4 on s1) is
+larger than between V3 and V3a. A rule ablation on V3 (45 rules in 9 batches, 40 runs,
+<code>groom/ablation/report.md</code>) found 16 rules the model follows without being told, 16 carried by the
+template's sections, and 9 milestone-shape rules it misses even when told (36–58%); removing a
+batch does not change the cost per plan.</p>
+<h2 id="criteria">Criteria<a class="anchor" href="#criteria" aria-label="Link to this section: Criteria">§</a></h2>
+<ul>
+<li>Plan quality at least that of V3 on the benchmark tasks.</li>
+<li>Cost and wall time well under V0's.</li>
+</ul>
+<h2 id="decision">Decision<a class="anchor" href="#decision" aria-label="Link to this section: Decision">§</a></h2>
+<p>Groom is one drafting pass on the plan template with two stages, research then draft, and no
+separate self-review step (V3a). The 16 rules the ablation shows the model follows unprompted and the
+anti-pattern list leave the prompt; the template's sections stay. The draft is the whole plan in
+one file, milestones included; how it becomes milestone files is adr/0031. The 9 milestone-shape
+rules the model misses even when told are not repeated in the prompt either: they are checked after
+the split (adr/0031).</p>
+<h2 id="alternatives">Alternatives<a class="anchor" href="#alternatives" aria-label="Link to this section: Alternatives">§</a></h2>
+<table class="alts">
+<thead>
+<tr>
+<th>Option</th>
+<th>Status</th>
+<th>Complexity</th>
+<th>Reversibility</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr class="chosen">
+<td><a href="#v3a-research-then-draft">V3a: research then draft</a></td>
+<td><span class="badge st-accepted">accepted</span> <span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>chosen</span></td>
+<td>medium</td>
+<td>high</td>
+<td>Quality of V3 at less cost and time</td>
+</tr>
+<tr>
+<td><a href="#v3-with-self-review">V3 with self-review</a></td>
+<td>rejected</td>
+<td>medium</td>
+<td>high</td>
+<td>+0.1 points for +12% cost and +15% time</td>
+</tr>
+<tr>
+<td><a href="#v3-with-the-old-grooms-rules">V3 with the old groom's rules</a></td>
+<td>rejected</td>
+<td>low</td>
+<td>high</td>
+<td>Last of the four on judges and incidents</td>
+</tr>
+<tr>
+<td><a href="#keep-the-current-groom">Keep the current groom</a></td>
+<td>rejected</td>
+<td>low</td>
+<td>high</td>
+<td>Twice the time and cost; judged lower on s1 and m2</td>
+</tr>
+</tbody>
+</table>
+<details class="opt chosen" open>
+<summary><h3 id="v3a-research-then-draft">V3a: research then draft<a class="anchor" href="#v3a-research-then-draft" aria-label="Link to this section: V3a: research then draft">§</a></h3>
+<span class="meta"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>chosen</span><span class="b plain">complexity: medium</span><span class="b plain">reversibility: high</span></span></summary>
+<div class="in">
+<p class="verdict">Quality of V3 at less cost and time</p>
+<p>The template plus a research stage over the code and a drafting stage, in one session.</p>
+<ul>
+<li><strong>Pros:</strong> quality on par with V3; about 2× faster and 1.7× cheaper than V0; the shortest prompt.</li>
+<li><strong>Cons:</strong> judged on three tasks with n = 3 per variant; spread inside a variant is large.</li>
+<li><strong>Complexity:</strong> medium — the groom playbook is rewritten around one drafting step.</li>
+<li><strong>Reversibility:</strong> high — the old playbook stays in git.</li>
+</ul>
+</div>
+</details>
+<details class="opt">
+<summary><h3 id="v3-with-self-review">V3 with self-review<a class="anchor" href="#v3-with-self-review" aria-label="Link to this section: V3 with self-review">§</a></h3>
+<span class="meta"><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-rejected"/></svg>rejected</span><span class="b plain">complexity: medium</span><span class="b plain">reversibility: high</span></span></summary>
+<div class="in">
+<p class="verdict">+0.1 points for +12% cost and +15% time</p>
+<p>The same drafting pass with a self-review stage at the end.</p>
+<ul>
+<li><strong>Pros:</strong> highest mean score, best incidents on m2.</li>
+<li><strong>Cons:</strong> the gain over V3a is inside the noise; the step costs money and time on every plan.</li>
+<li><strong>Complexity:</strong> medium.</li>
+<li><strong>Reversibility:</strong> high.</li>
+</ul>
+</div>
+</details>
+<details class="opt">
+<summary><h3 id="v3-with-the-old-grooms-rules">V3 with the old groom's rules<a class="anchor" href="#v3-with-the-old-grooms-rules" aria-label="Link to this section: V3 with the old groom&#x27;s rules">§</a></h3>
+<span class="meta"><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-rejected"/></svg>rejected</span><span class="b plain">complexity: low</span><span class="b plain">reversibility: high</span></span></summary>
+<div class="in">
+<p class="verdict">Last of the four on judges and incidents</p>
+<p>V3 plus five rules from the current groom the one-shot variants had missed (scoped Verify, a section
+shape before improvising, self-contained milestones, assumption lines, a short summary).</p>
+<ul>
+<li><strong>Pros:</strong> names what reviewers asked for before.</li>
+<li><strong>Cons:</strong> last of the four on both judges and incidents; never found m2's defect; the run is the
+fastest, which suggests the rules pull effort from research into form.</li>
+<li><strong>Complexity:</strong> low.</li>
+<li><strong>Reversibility:</strong> high.</li>
+</ul>
+</div>
+</details>
+<details class="opt">
+<summary><h3 id="keep-the-current-groom">Keep the current groom<a class="anchor" href="#keep-the-current-groom" aria-label="Link to this section: Keep the current groom">§</a></h3>
+<span class="meta"><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-rejected"/></svg>rejected</span><span class="b plain">complexity: low</span><span class="b plain">reversibility: high</span></span></summary>
+<div class="in">
+<p class="verdict">Twice the time and cost; judged lower on s1 and m2</p>
+<p>The multi-step groom playbook as it is (V0).</p>
+<ul>
+<li><strong>Pros:</strong> no work.</li>
+<li><strong>Cons:</strong> 13–23 minutes and $4.25–5.62 per plan; last on s1 and m2 in round-1 judging (codex ranked
+it first on c1).</li>
+<li><strong>Complexity:</strong> low.</li>
+<li><strong>Reversibility:</strong> high.</li>
+</ul>
+</div>
+</details>
+<h2 id="consequences">Consequences<a class="anchor" href="#consequences" aria-label="Link to this section: Consequences">§</a></h2>
+<ul>
+<li><code>playbooks/groom</code> is rewritten around one drafting step; its snapshot reports change.</li>
+<li>The plan template states the one-file milestone format adr/0031 cuts on.</li>
+<li>A light path for small, already-decided requests is a follow-up (idea/0009, corpus case
+<code>s3-booping-specs-site-registries</code>).</li>
+</ul>
+</div>
+</article>
+<h2 id="referenced-by">Referenced by<a class="anchor" href="#referenced-by" aria-label="Link to this section: Referenced by">§</a></h2>
+<h3>ADRs</h3>
+<ul class="rel backlinks">
+<li><a href="../../claude-booping/adr/0009-plan-is-a-directory.html">A plan is a directory whose index.md is both plan and run artifact</a> <code class="ref">adr/0009</code> <span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span> <span class="via">via Decision</span></li>
+<li><a href="../../claude-booping/adr/0011-delegation-levels.html">A step is inline, assisted or detached, set by one detached field</a> <code class="ref">adr/0011</code> <span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span> <span class="via">via Decision</span></li>
+</ul>
+<h3>Ideas</h3>
+<ul class="rel backlinks">
+<li><a href="../../claude-booping/idea/0003-groom-depth-scales-with-task.html">A faster groom without losing quality</a> <code class="ref">idea/0003</code> <span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span> <span class="via">via Verdict</span></li>
+<li><a href="../../claude-booping/idea/0009-groom-light-path-for-small-requests.html">Groom depth scales with the task</a> <code class="ref">idea/0009</code> <span class="b info"><svg class="ic" aria-hidden="true"><use href="#i-open"/></svg>open</span> <span class="via">via Idea</span></li>
+</ul>
+<h3>Stories</h3>
+<ul class="rel backlinks">
+<li><a href="../../claude-booping/story/0016-groom.html">Groom</a> <code class="ref">story/0016</code> <span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>done</span> <span class="via">via Criteria</span></li>
+</ul>
+</div>
+</main>
+<aside class="rail rv-rail" id="rv-panel">
+<details class="rv-toc" open>
+<summary>On this page</summary>
+<nav class="toc" aria-labelledby="rail-toc">
+<h4 id="rail-toc">On this page</h4>
+<ul>
+<li><a href="#context">Context</a>
+</li>
+<li><a href="#criteria">Criteria</a>
+</li>
+<li><a href="#decision">Decision</a>
+</li>
+<li><a href="#alternatives">Alternatives</a>
+<ul>
+<li><a href="#v3a-research-then-draft">V3a: research then draft</a></li>
+<li><a href="#v3-with-self-review">V3 with self-review</a></li>
+<li><a href="#v3-with-the-old-grooms-rules">V3 with the old groom&#39;s rules</a></li>
+<li><a href="#keep-the-current-groom">Keep the current groom</a></li>
+</ul>
+</li>
+<li><a href="#consequences">Consequences</a>
+</li>
+<li><a href="#referenced-by">Referenced by</a>
+</li>
+</ul>
+</nav>
+</details>
+<section class="rv" aria-labelledby="rv-h" data-note="Note" data-delete="Delete" data-open="Open" data-whole="Whole record" data-changed="text changed" data-deleted="Comment deleted" data-copy-failed="Copy failed" data-copied-forms="[&#34;{n} item copied&#34;, &#34;{n} items copied&#34;]" data-cleared-forms="[&#34;{n} item cleared&#34;, &#34;{n} items cleared&#34;]">
+<div class="rv-head">
+<h2 id="rv-h">Comments</h2>
+<button class="iconbtn rv-close" type="button" aria-label="Close">&times;</button>
+</div>
+<label class="rv-accepted"><input type="checkbox" id="rv-accepted"> Accepted</label>
+<label class="rv-label" for="rv-new">Comment on the whole record</label>
+<textarea id="rv-new" rows="3"></textarea>
+<div class="rv-add-row"><button class="rv-add" type="button" disabled>Add</button></div>
+<p class="rv-hint">Select text in the record to comment on it.</p>
+<ul class="rv-list"></ul>
+</section>
+</aside>
+</div>
+<div id="status" class="toast" role="status" data-copied="Link copied"></div>
+<footer>Generated by booping specs site</footer>
+</body>
+</html>

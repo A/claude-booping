@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>try{var t=localStorage.getItem("specs-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}document.documentElement.classList.add("js")</script>
+<meta name="color-scheme" content="light dark">
+<title>Every request in a booping session enters through the project-manager — claude-booping</title>
+<link rel="stylesheet" href="../../fonts.css">
+<link rel="stylesheet" href="../../style.css">
+<script src="../../site.js" defer></script>
+<script src="../../search.js" defer></script>
+<script src="../../comments-format.js" defer></script>
+<script src="../../comments.js" defer></script>
+<link rel="alternate" type="text/markdown" href="0042-project-work-enters-through-the-project-manager.md">
+</head>
+<body>
+<svg aria-hidden="true" style="display:none">
+<symbol id="i-accepted" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4.8 8.2l2.1 2.1 4.3-4.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-open" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+<symbol id="i-planned" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2.6 2.2"/></symbol>
+<symbol id="i-rejected" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3.6 12.4l8.8-8.8" stroke="currentColor" stroke-width="1.6"/></symbol>
+<symbol id="i-clarify" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="currentColor"/><path d="M6.1 6.2a2 2 0 1 1 2.6 1.9c-.5.2-.7.6-.7 1.1v.4" fill="none" stroke="var(--surface)" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="11.6" r=".95" fill="var(--surface)"/></symbol>
+<symbol id="i-unknown" viewBox="0 0 16 16"><path d="M8 1.6l6.8 12.2H1.2z" fill="currentColor"/><path d="M8 6v3.6" stroke="var(--surface)" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="11.6" r=".9" fill="var(--surface)"/></symbol>
+<symbol id="i-not-accepted" viewBox="0 0 16 16"><circle cx="8" cy="8" r="4.6" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+<symbol id="i-review-accepted" viewBox="0 0 16 16"><circle cx="8" cy="8" r="4.6" fill="currentColor"/></symbol>
+<symbol id="i-menu" viewBox="0 0 20 20"><path d="M3 5.5h14M3 10h14M3 14.5h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+<symbol id="i-search" viewBox="0 0 20 20"><circle cx="8.6" cy="8.6" r="5.6" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M13 13l4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+<symbol id="i-moon" viewBox="0 0 20 20"><path d="M15.5 12.6A6.5 6.5 0 0 1 7.4 4.5a6.5 6.5 0 1 0 8.1 8.1z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+<symbol id="i-sun" viewBox="0 0 16 16"><circle cx="8" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.2v1.6M8 13.2v1.6M1.2 8h1.6M13.2 8h1.6M3.2 3.2l1.1 1.1M11.7 11.7l1.1 1.1M3.2 12.8l1.1-1.1M11.7 4.3l1.1-1.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+<symbol id="i-auto" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.6a6.4 6.4 0 0 0 0 12.8z" fill="currentColor"/></symbol>
+<symbol id="i-comment" viewBox="0 0 20 20"><path d="M4 4.5h12a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5H9.2l-3.7 3v-3H4A1.5 1.5 0 0 1 2.5 13V6A1.5 1.5 0 0 1 4 4.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+<symbol id="i-outbox" viewBox="0 0 20 20"><path d="M2.5 11.5v4a1.5 1.5 0 0 0 1.5 1.5h12a1.5 1.5 0 0 0 1.5-1.5v-4M10 13V3.5M6.5 7L10 3.5 13.5 7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+<button class="iconbtn menu" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Menu"><svg class="ic" aria-hidden="true"><use href="#i-menu"/></svg></button>
+<a class="brand" href="../../index.html">claude-booping</a>
+<form class="search" role="search" action="../../search.html" data-prefix="../../" data-all="All results">
+<svg class="ic" aria-hidden="true"><use href="#i-search"/></svg>
+<input type="search" name="q" role="combobox" aria-label="Search" aria-autocomplete="list" aria-expanded="false" aria-controls="search-list" autocomplete="off" placeholder="Search the specs">
+<kbd>/</kbd>
+<button class="iconbtn search-close" type="button" aria-label="Close">&times;</button>
+<ul id="search-list" role="listbox" aria-label="Search" hidden></ul>
+</form>
+<button class="iconbtn search-btn" type="button" aria-label="Search" title="Search"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg></button>
+<button class="iconbtn rv-btn" type="button" aria-controls="rv-panel" aria-expanded="false" aria-label="Comments" title="Comments"><svg class="ic" aria-hidden="true"><use href="#i-comment"/></svg><span class="n"></span></button>
+<a class="iconbtn outbox" href="../../comments.html" aria-label="Outbox" title="Outbox"><svg class="ic" aria-hidden="true"><use href="#i-outbox"/></svg><span class="l">Outbox</span><span class="n"></span></a>
+<button class="iconbtn theme" type="button" aria-label="Theme: auto" title="Theme: auto" data-label-auto="Theme: auto" data-label-light="Theme: light" data-label-dark="Theme: dark"><svg class="ic" aria-hidden="true"><use href="#i-auto"/></svg></button>
+</header>
+<div class="body rv-page">
+<nav class="side" id="drawer" aria-label="Navigation">
+<ul>
+<li><a href="../../index.html">Overview</a></li>
+<li><a href="../../review.html"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>Awaiting review<span class="n">143</span></a></li>
+<li><a href="../../records.html">All records<span class="n">147</span></a></li>
+</ul>
+<h4>Types</h4>
+<ul>
+<li><a href="../../claude-booping/adr/index.html">ADRs<span class="n">36</span></a></li>
+<li><a href="../../claude-booping/conflict/index.html">Conflicts<span class="n">2</span></a></li>
+<li><a href="../../claude-booping/idea/index.html">Ideas<span class="n">9</span></a></li>
+<li><a href="../../claude-booping/reference/index.html">References<span class="n">11</span></a></li>
+<li><a href="../../claude-booping/rule/index.html">Rules<span class="n">22</span></a></li>
+<li><a href="../../claude-booping/runbook/index.html">Runbooks<span class="n">3</span></a></li>
+<li><a href="../../claude-booping/story/index.html">Stories<span class="n">26</span></a></li>
+<li><a href="../../claude-booping/value/index.html">Values<span class="n">19</span></a></li>
+</ul>
+<h4>booping</h4>
+<ul>
+<li><a href="../../booping/index.html">Overview</a></li>
+<li><a href="../../booping/rule/index.html">Rules<span class="n">19</span></a></li>
+</ul>
+<h4>Tags</h4>
+<ul>
+<li><a href="../../claude-booping/tags/postmortem.html">postmortem<span class="n">3</span></a></li>
+<li><a href="../../claude-booping/tags/probe.html">probe<span class="n">1</span></a></li>
+<li><a href="../../claude-booping/tags/index.html">All tags</a></li>
+</ul>
+<ul>
+<li><a href="../../llms.txt">llms.txt</a></li>
+</ul>
+</nav>
+<main id="main">
+<nav class="crumbs" aria-label="breadcrumb">
+<ol>
+<li><a href="../../index.html">Overview</a></li>
+<li class="mid"><a href="index.html">ADRs</a></li>
+<li><span aria-current="page">adr/0042</span></li>
+</ol>
+</nav>
+<div class="measure">
+<article data-ref="adr/0042" data-title="Every request in a booping session enters through the project-manager" data-page="claude-booping/adr/0042-project-work-enters-through-the-project-manager.html">
+<h1>Every request in a booping session enters through the project-manager</h1>
+<div class="badges"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span></div>
+<p class="lead">Every request in a booping project session, questions and debugging included, goes to the project-manager, which routes it and launches and orchestrates the other playbooks.</p>
+<details class="toc-m">
+<summary>On this page</summary>
+<nav class="toc" aria-labelledby="toc-m-toc">
+<h4 id="toc-m-toc">On this page</h4>
+<ul>
+<li><a href="#context">Context</a>
+</li>
+<li><a href="#criteria">Criteria</a>
+</li>
+<li><a href="#decision">Decision</a>
+</li>
+<li><a href="#alternatives">Alternatives</a>
+<ul>
+<li><a href="#hook-routes-straight-to-the-narrow-playbooks">Hook routes straight to the narrow playbooks</a></li>
+<li><a href="#the-playbook-skill-routes-with-a-targeted-rule">The /playbook skill routes, with a targeted rule</a></li>
+<li><a href="#a-dedicated-entry-an-intro-playbook-or-a-config-key">A dedicated entry: an intro playbook or a config key</a></li>
+<li><a href="#always-the-project-manager">Always the project-manager</a></li>
+</ul>
+</li>
+<li><a href="#consequences">Consequences</a>
+</li>
+<li><a href="#referenced-by">Referenced by</a>
+</li>
+</ul>
+</nav>
+</details>
+<dl class="facts">
+<dt>Author</dt>
+<dd>agent</dd>
+<dt>Created</dt>
+<dd><time datetime="2026-10-19">19 October 2026</time></dd>
+<dt>Updated</dt>
+<dd><time datetime="2026-10-19">19 October 2026</time></dd>
+<dt>Review</dt>
+<dd><svg class="ic" aria-hidden="true"><use href="#i-review-accepted"/></svg>accepted</dd>
+<dt>Evidence</dt>
+<dd>«Да, все супер, принимаем» — 2026-10-19, chat (decision lines 1–8)</dd>
+<dt>Rules</dt>
+<dd><ul class="rel">
+<li><a href="../../claude-booping/rule/0025-who-reads-the-result-decides.html">Who reads the result decides prose or code</a> <code class="ref">rule/0025</code> <span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span></li>
+<li><a href="../../claude-booping/rule/0033-private-sources-stay-in-vault-notes.html">Private sources stay in vault/notes</a> <code class="ref">rule/0033</code> <span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>accepted</span></li>
+</ul></dd>
+<dt>Supersedes</dt>
+<dd><ul class="rel">
+<li><a href="../../claude-booping/adr/0039-session-start-points-to-playbooks.html">A session in a booping project starts pointed at the playbooks</a> <code class="ref">adr/0039</code> <span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-rejected"/></svg>superseded</span></li>
+</ul></dd>
+<dt>Serves values</dt>
+<dd><ul class="rel">
+<li><a href="../../claude-booping/value/0013-guides-to-the-goal.html">Guides to the goal</a> <code class="ref">value/0013</code></li>
+<li><a href="../../claude-booping/value/0019-projects-are-built-along-a-roadmap.html">Projects are built along a roadmap</a> <code class="ref">value/0019</code></li>
+<li><a href="../../claude-booping/value/0009-adjustable-control.html">Adjustable control</a> <code class="ref">value/0009</code></li>
+<li><a href="../../claude-booping/value/0002-minimal-effective-context.html">Minimal effective context</a> <code class="ref">value/0002</code></li>
+<li><a href="../../claude-booping/value/0003-single-source.html">Single source</a> <code class="ref">value/0003</code></li>
+<li><a href="../../claude-booping/value/0010-proven-to-work.html">Proven to work</a> <code class="ref">value/0010</code></li>
+</ul></dd>
+</dl>
+<div class="body">
+<h2 id="context">Context<a class="anchor" href="#context" aria-label="Link to this section: Context">§</a></h2>
+<p><a href="../../claude-booping/adr/0039-session-start-points-to-playbooks.html">ADR 0039</a> made the session-start hook inject the playbook table and tell the session to offer the fitting playbook, the project-manager when nothing narrower fits. In a live session on 2026-10-19 the agent picked the right playbook but neither ran it nor offered it properly, and gathered the project status by hand instead: the routing was right, the hand-off never happened.</p>
+<p>Someone has to route an opening request to a playbook and then carry the work through. The candidates are the session itself (the hook's prose), the <code>/playbook</code> skill, a dedicated entry playbook, a config key, or the project-manager.</p>
+<p>A screen on 2026-10-19 measured routing alone: one Opus call per request, 18 opening requests, isolated <code>claude -p</code> with no tools, JSON output (private note, not published). The bare <code>/playbook</code> router chose the expected playbook for 16 of 18, the other 2 acceptable alternatives (a feature routed to groom, a typo fix to no playbook); with a targeted rule added, 18 of 18. Neither asked which playbook to run. Not measured: whether the session actually invokes the playbook rather than doing the work by hand, repeats, and hard or ambiguous requests.</p>
+<p>Cheap options: prose in a prompt is option A (today's hook) and option B (a targeted rule on the skill); extending an existing primitive is option E (the project-manager playbook gains a route) and option D (the config tiers); building nothing is option A.</p>
+<h2 id="criteria">Criteria<a class="anchor" href="#criteria" aria-label="Link to this section: Criteria">§</a></h2>
+<ul>
+<li>A project-work request reaches a playbook that runs, not just an offer.</li>
+<li>The work is managed past the first playbook — groom → develop → review → merge — not routed once and dropped.</li>
+<li>No new code for the entry now (<a href="../../claude-booping/rule/0025-who-reads-the-result-decides.html">rule/0025</a>: prose first, a CLI over it is a later optimisation).</li>
+<li>Context cost per session entry.</li>
+</ul>
+<h2 id="decision">Decision<a class="anchor" href="#decision" aria-label="Link to this section: Decision">§</a></h2>
+<p>Option E (owner, 2026-10-19: «мы всегда запускаем PM»).</p>
+<ol>
+<li>Every request in a booping project session enters through the <code>project-manager</code> playbook — questions, explanations and debugging included; there is no no-playbook exception (owner: «иначе это все будет работать мимо спека, мимо известной информации»).</li>
+<li>The project-manager is the smarter router: it routes, manages the work, and launches the specific playbooks itself — groom, develop, code-review, specs, retro, docs, pr-description, backlog-manage, model-benchmark, playbook-authoring, migrate and the rest — and orchestrates them (owner: «это его задача»). The change to the manager is OI-0036.</li>
+<li>For now the wiring is prose: the session-start hook tells the session to run <code>/booping:playbook project-manager</code> on every request; no new code for a direct entry.</li>
+<li>Rendering the manager and the playbook table straight into session start is a later optimisation, OI-0037, done only once the manager entry proves itself.</li>
+</ol>
+<p>Why (owner, 2026-10-19):</p>
+<ul>
+<li>Many projects run as a series of sprints, plus other work such as updating the specs. Narrow entries make every session a separate session for one narrow task. Working with a project manager is far more convenient: one contact the owner talks everything through with, who organises the work — &quot;groom this task&quot;, or &quot;groom a scope bigger than one sprint and start it right away&quot; — grooms, and escalates to the owner when needed. The owner no longer drives tasks that are already being handled.</li>
+<li>Stricter work goes through the manager too — &quot;research this carefully, groom, I review, first iteration, ping me, second iteration…&quot;: the meta-level of the work moves to the manager.</li>
+<li>The manager knows the specs and how to work with them out of the box: it escalates a conflict it sees in a decision, files open items for the tails left behind, and given &quot;I have an hour&quot; walks the open items and the specs, collects the conflicts and surfaces the critical ones for the owner to answer.</li>
+<li>Observed on 2026-10-19: a session that chatted without running a playbook had not read the specs or the details and its suggestions were poor; once the playbook ran, quality rose sharply. So the manager starts right away; about 5K tokens per entry is not a cost worth weighing against that.</li>
+<li>The manager's handling of edge cases is tuned later, instead of tuning plain routing.</li>
+</ul>
+<p>This record supersedes <a href="../../claude-booping/adr/0039-session-start-points-to-playbooks.html">ADR 0039</a> (owner: «мы переосмыслили это»): its hook and its table stay; its &quot;offer the fitting playbook&quot;, its &quot;questions and debugging need no playbook&quot; and its rejection of &quot;load the project-manager on every session start&quot; are reversed.</p>
+<h2 id="alternatives">Alternatives<a class="anchor" href="#alternatives" aria-label="Link to this section: Alternatives">§</a></h2>
+<table class="alts">
+<thead>
+<tr>
+<th>Option</th>
+<th>Status</th>
+<th>Complexity</th>
+<th>Reversibility</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="#hook-routes-straight-to-the-narrow-playbooks">Hook routes straight to the narrow playbooks</a></td>
+<td>rejected</td>
+<td>low</td>
+<td>high</td>
+<td>Did not work in practice; routing without orchestration</td>
+</tr>
+<tr>
+<td><a href="#the-playbook-skill-routes-with-a-targeted-rule">The /playbook skill routes, with a targeted rule</a></td>
+<td>rejected</td>
+<td>low</td>
+<td>high</td>
+<td>Routing only, no orchestration</td>
+</tr>
+<tr>
+<td><a href="#a-dedicated-entry-an-intro-playbook-or-a-config-key">A dedicated entry: an intro playbook or a config key</a></td>
+<td>rejected</td>
+<td>medium</td>
+<td>high</td>
+<td>Routing only, no orchestration</td>
+</tr>
+<tr class="chosen">
+<td><a href="#always-the-project-manager">Always the project-manager</a></td>
+<td><span class="badge st-accepted">accepted</span> <span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>chosen</span></td>
+<td>medium</td>
+<td>high</td>
+<td>One contact that routes, orchestrates and escalates; meaningful work starts at once</td>
+</tr>
+</tbody>
+</table>
+<details class="opt chosen" open>
+<summary><h3 id="always-the-project-manager">Always the project-manager<a class="anchor" href="#always-the-project-manager" aria-label="Link to this section: Always the project-manager">§</a></h3>
+<span class="meta"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>chosen</span><span class="b plain">complexity: medium</span><span class="b plain">reversibility: high</span></span></summary>
+<div class="in">
+<p class="verdict">One contact that routes, orchestrates and escalates; meaningful work starts at once</p>
+<p>Option E: the decision above.</p>
+<ul>
+<li><strong>Pros:</strong> one contact that routes, organises and carries the work through groom, develop, review and merge, escalating to the owner when needed (<a href="../../claude-booping/value/0019-projects-are-built-along-a-roadmap.html">value/0019</a>); knows the specs out of the box; meaningful work starts at once; reuses an existing playbook; the hook change is prose only.</li>
+<li><strong>Cons:</strong> the manager today classifies only tiny fix, plan, question and decision, so until OI-0036 narrow requests — a retro, docs, a PR description, a benchmark — are squeezed into those classes; about 5K tokens per entry, the manager render plus a <code>booping status</code> call (<a href="../../claude-booping/value/0002-minimal-effective-context.html">value/0002</a>) — not worth weighing against the quality gain (owner); two routing tables, the skill's and the manager's, until OI-0037 merges them (<a href="../../claude-booping/value/0003-single-source.html">value/0003</a>).</li>
+<li><strong>Complexity:</strong> medium.</li>
+<li><strong>Reversibility:</strong> high.</li>
+</ul>
+</div>
+</details>
+<details class="opt">
+<summary><h3 id="hook-routes-straight-to-the-narrow-playbooks">Hook routes straight to the narrow playbooks<a class="anchor" href="#hook-routes-straight-to-the-narrow-playbooks" aria-label="Link to this section: Hook routes straight to the narrow playbooks">§</a></h3>
+<span class="meta"><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-rejected"/></svg>rejected</span><span class="b plain">complexity: low</span><span class="b plain">reversibility: high</span></span></summary>
+<div class="in">
+<p class="verdict">Did not work in practice; routing without orchestration</p>
+<p>Option A, the state before this record (<a href="../../claude-booping/adr/0039-session-start-points-to-playbooks.html">ADR 0039</a>): the hook tells the session to offer the fitting playbook and run it once the user agrees, else offer the project-manager. Building nothing. Its variants fall under the same verdict: hook prose that runs the fitting narrow playbook straight away instead of offering it, and a split entry where single-shot requests (a retro, docs, a PR description) go straight to their playbook and only plan-track or unclear work goes to the manager.</p>
+<ul>
+<li><strong>Pros:</strong> nothing to build; the cheapest per entry — no manager render, no status call; a narrow request goes straight to its playbook.</li>
+<li><strong>Cons:</strong> did not work in practice — in a live session on 2026-10-19 the agent named the right playbook but neither ran nor offered it and gathered status by hand; the variants route without orchestrating, so every session narrows to one task (owner).</li>
+<li><strong>Complexity:</strong> low.</li>
+<li><strong>Reversibility:</strong> high.</li>
+</ul>
+</div>
+</details>
+<details class="opt">
+<summary><h3 id="the-playbook-skill-routes-with-a-targeted-rule">The /playbook skill routes, with a targeted rule<a class="anchor" href="#the-playbook-skill-routes-with-a-targeted-rule" aria-label="Link to this section: The /playbook skill routes, with a targeted rule">§</a></h3>
+<span class="meta"><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-rejected"/></svg>rejected</span><span class="b plain">complexity: low</span><span class="b plain">reversibility: high</span></span></summary>
+<div class="in">
+<p class="verdict">Routing only, no orchestration</p>
+<p>Option B: the <code>/playbook</code> skill is the router, sharpened by a <code>skill:playbook</code> rule — no narrow match or several playbooks → project-manager; questions, explanations, debugging → no playbook.</p>
+<ul>
+<li><strong>Pros:</strong> prose only, on an existing primitive; the screen routed 16/18 bare and 18/18 with the rule, never asking which playbook.</li>
+<li><strong>Cons:</strong> routing only, no orchestration (owner): adding orchestration is what improves the experience, because meaningful work starts at once; the screen also measured the routing answer only, not whether the session invokes the playbook.</li>
+<li><strong>Complexity:</strong> low.</li>
+<li><strong>Reversibility:</strong> high.</li>
+</ul>
+</div>
+</details>
+<details class="opt">
+<summary><h3 id="a-dedicated-entry-an-intro-playbook-or-a-config-key">A dedicated entry: an intro playbook or a config key<a class="anchor" href="#a-dedicated-entry-an-intro-playbook-or-a-config-key" aria-label="Link to this section: A dedicated entry: an intro playbook or a config key">§</a></h3>
+<span class="meta"><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-rejected"/></svg>rejected</span><span class="b plain">complexity: medium</span><span class="b plain">reversibility: high</span></span></summary>
+<div class="in">
+<p class="verdict">Routing only, no orchestration</p>
+<p>Option C: a new <code>intro</code> playbook as the session's entry, routing to the others. Option D: a key <code>core.entry_playbook</code> naming the playbook the hook sends project work to.</p>
+<ul>
+<li><strong>Pros:</strong> C is an entry shaped only for routing, light to render; D is overridable per tier today, unlike rules, which have no cross-tier override, so a project or user could pick its own entry.</li>
+<li><strong>Cons:</strong> routing only, no orchestration (owner); C is also a new playbook to author and test, D a new config key.</li>
+<li><strong>Complexity:</strong> medium.</li>
+<li><strong>Reversibility:</strong> high.</li>
+</ul>
+</div>
+</details>
+<h2 id="consequences">Consequences<a class="anchor" href="#consequences" aria-label="Link to this section: Consequences">§</a></h2>
+<ul>
+<li>The session-start hook's prose sends every request in the session, questions and debugging included, to <code>/booping:playbook project-manager</code> instead of offering a playbook.</li>
+<li>OI-0036 must deliver: the project-manager gains a route &quot;a narrow playbook fits → run it&quot; and launches and orchestrates every other playbook; it escalates a conflict it sees in a decision to the owner; it files open items for the tails a piece of work leaves behind; given &quot;I have an hour&quot;, it walks the open items and the specs, collects the conflicts and surfaces the critical ones for the owner to answer.</li>
+<li>OI-0037: soldering the manager render and the playbook table into session start waits until the manager entry proves itself.</li>
+<li>&quot;Proves itself&quot; for OI-0037 is the owner's call after about three days of working with the manager entry, with no numeric measure; feedback during those days comes as corrections, and OI-0038 asks the owner on 2026-10-22 whether the entry works and whether to solder it in, unless the feedback has overturned the concept by then (<a href="../../claude-booping/value/0010-proven-to-work.html">value/0010</a>).</li>
+<li>Projects carry different levels of responsibility, so the manager's behaviour differs per project (<a href="../../claude-booping/value/0009-adjustable-control.html">value/0009</a>): a home pet project or a product-fit experiment, where breakage costs little and the agent writes as much as it can — the owner only stays aligned by looking at the ADRs and the corpus of records the decisions rest on, and corrects them; a project past proof of concept, where the owner works closer to the code and wants more control; and a production system handling money, attribution and payouts, where a loss is very costly and the owner reviews everything by eye. This is set per project through project-tier rules targeted at <code>project-manager</code>; no new mechanism is needed now (owner, 2026-10-19).</li>
+</ul>
+</div>
+</article>
+<h2 id="referenced-by">Referenced by<a class="anchor" href="#referenced-by" aria-label="Link to this section: Referenced by">§</a></h2>
+<p>Nothing references this record.</p>
+</div>
+</main>
+<aside class="rail rv-rail" id="rv-panel">
+<details class="rv-toc" open>
+<summary>On this page</summary>
+<nav class="toc" aria-labelledby="rail-toc">
+<h4 id="rail-toc">On this page</h4>
+<ul>
+<li><a href="#context">Context</a>
+</li>
+<li><a href="#criteria">Criteria</a>
+</li>
+<li><a href="#decision">Decision</a>
+</li>
+<li><a href="#alternatives">Alternatives</a>
+<ul>
+<li><a href="#hook-routes-straight-to-the-narrow-playbooks">Hook routes straight to the narrow playbooks</a></li>
+<li><a href="#the-playbook-skill-routes-with-a-targeted-rule">The /playbook skill routes, with a targeted rule</a></li>
+<li><a href="#a-dedicated-entry-an-intro-playbook-or-a-config-key">A dedicated entry: an intro playbook or a config key</a></li>
+<li><a href="#always-the-project-manager">Always the project-manager</a></li>
+</ul>
+</li>
+<li><a href="#consequences">Consequences</a>
+</li>
+<li><a href="#referenced-by">Referenced by</a>
+</li>
+</ul>
+</nav>
+</details>
+<section class="rv" aria-labelledby="rv-h" data-note="Note" data-delete="Delete" data-open="Open" data-whole="Whole record" data-changed="text changed" data-deleted="Comment deleted" data-copy-failed="Copy failed" data-copied-forms="[&#34;{n} item copied&#34;, &#34;{n} items copied&#34;]" data-cleared-forms="[&#34;{n} item cleared&#34;, &#34;{n} items cleared&#34;]">
+<div class="rv-head">
+<h2 id="rv-h">Comments</h2>
+<button class="iconbtn rv-close" type="button" aria-label="Close">&times;</button>
+</div>
+<label class="rv-accepted"><input type="checkbox" id="rv-accepted"> Accepted</label>
+<label class="rv-label" for="rv-new">Comment on the whole record</label>
+<textarea id="rv-new" rows="3"></textarea>
+<div class="rv-add-row"><button class="rv-add" type="button" disabled>Add</button></div>
+<p class="rv-hint">Select text in the record to comment on it.</p>
+<ul class="rv-list"></ul>
+</section>
+</aside>
+</div>
+<div id="status" class="toast" role="status" data-copied="Link copied"></div>
+<footer>Generated by booping specs site</footer>
+</body>
+</html>

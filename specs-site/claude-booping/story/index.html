@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>try{var t=localStorage.getItem("specs-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}document.documentElement.classList.add("js")</script>
+<meta name="color-scheme" content="light dark">
+<title>Stories — claude-booping</title>
+<link rel="stylesheet" href="../../fonts.css">
+<link rel="stylesheet" href="../../style.css">
+<script src="../../site.js" defer></script>
+<script src="../../filter-format.js" defer></script>
+<script src="../../filter.js" defer></script>
+<script src="../../search.js" defer></script>
+<script src="../../comments-format.js" defer></script>
+<script src="../../comments.js" defer></script>
+</head>
+<body>
+<svg aria-hidden="true" style="display:none">
+<symbol id="i-accepted" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4.8 8.2l2.1 2.1 4.3-4.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-open" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+<symbol id="i-planned" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2.6 2.2"/></symbol>
+<symbol id="i-rejected" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3.6 12.4l8.8-8.8" stroke="currentColor" stroke-width="1.6"/></symbol>
+<symbol id="i-clarify" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="currentColor"/><path d="M6.1 6.2a2 2 0 1 1 2.6 1.9c-.5.2-.7.6-.7 1.1v.4" fill="none" stroke="var(--surface)" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="11.6" r=".95" fill="var(--surface)"/></symbol>
+<symbol id="i-unknown" viewBox="0 0 16 16"><path d="M8 1.6l6.8 12.2H1.2z" fill="currentColor"/><path d="M8 6v3.6" stroke="var(--surface)" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="11.6" r=".9" fill="var(--surface)"/></symbol>
+<symbol id="i-not-accepted" viewBox="0 0 16 16"><circle cx="8" cy="8" r="4.6" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+<symbol id="i-review-accepted" viewBox="0 0 16 16"><circle cx="8" cy="8" r="4.6" fill="currentColor"/></symbol>
+<symbol id="i-menu" viewBox="0 0 20 20"><path d="M3 5.5h14M3 10h14M3 14.5h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+<symbol id="i-search" viewBox="0 0 20 20"><circle cx="8.6" cy="8.6" r="5.6" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M13 13l4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+<symbol id="i-moon" viewBox="0 0 20 20"><path d="M15.5 12.6A6.5 6.5 0 0 1 7.4 4.5a6.5 6.5 0 1 0 8.1 8.1z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+<symbol id="i-sun" viewBox="0 0 16 16"><circle cx="8" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.2v1.6M8 13.2v1.6M1.2 8h1.6M13.2 8h1.6M3.2 3.2l1.1 1.1M11.7 11.7l1.1 1.1M3.2 12.8l1.1-1.1M11.7 4.3l1.1-1.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+<symbol id="i-auto" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.6a6.4 6.4 0 0 0 0 12.8z" fill="currentColor"/></symbol>
+<symbol id="i-comment" viewBox="0 0 20 20"><path d="M4 4.5h12a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5H9.2l-3.7 3v-3H4A1.5 1.5 0 0 1 2.5 13V6A1.5 1.5 0 0 1 4 4.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+<symbol id="i-outbox" viewBox="0 0 20 20"><path d="M2.5 11.5v4a1.5 1.5 0 0 0 1.5 1.5h12a1.5 1.5 0 0 0 1.5-1.5v-4M10 13V3.5M6.5 7L10 3.5 13.5 7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+<button class="iconbtn menu" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Menu"><svg class="ic" aria-hidden="true"><use href="#i-menu"/></svg></button>
+<a class="brand" href="../../index.html">claude-booping</a>
+<form class="search" role="search" action="../../search.html" data-prefix="../../" data-all="All results">
+<svg class="ic" aria-hidden="true"><use href="#i-search"/></svg>
+<input type="search" name="q" role="combobox" aria-label="Search" aria-autocomplete="list" aria-expanded="false" aria-controls="search-list" autocomplete="off" placeholder="Search the specs">
+<kbd>/</kbd>
+<button class="iconbtn search-close" type="button" aria-label="Close">&times;</button>
+<ul id="search-list" role="listbox" aria-label="Search" hidden></ul>
+</form>
+<button class="iconbtn search-btn" type="button" aria-label="Search" title="Search"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg></button>
+<a class="iconbtn outbox" href="../../comments.html" aria-label="Outbox" title="Outbox"><svg class="ic" aria-hidden="true"><use href="#i-outbox"/></svg><span class="l">Outbox</span><span class="n"></span></a>
+<button class="iconbtn theme" type="button" aria-label="Theme: auto" title="Theme: auto" data-label-auto="Theme: auto" data-label-light="Theme: light" data-label-dark="Theme: dark"><svg class="ic" aria-hidden="true"><use href="#i-auto"/></svg></button>
+</header>
+<div class="body norail">
+<nav class="side" id="drawer" aria-label="Navigation">
+<ul>
+<li><a href="../../index.html">Overview</a></li>
+<li><a href="../../review.html"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>Awaiting review<span class="n">143</span></a></li>
+<li><a href="../../records.html">All records<span class="n">147</span></a></li>
+</ul>
+<h4>Types</h4>
+<ul>
+<li><a href="../../claude-booping/adr/index.html">ADRs<span class="n">36</span></a></li>
+<li><a href="../../claude-booping/conflict/index.html">Conflicts<span class="n">2</span></a></li>
+<li><a href="../../claude-booping/idea/index.html">Ideas<span class="n">9</span></a></li>
+<li><a href="../../claude-booping/reference/index.html">References<span class="n">11</span></a></li>
+<li><a href="../../claude-booping/rule/index.html">Rules<span class="n">22</span></a></li>
+<li><a href="../../claude-booping/runbook/index.html">Runbooks<span class="n">3</span></a></li>
+<li><a href="../../claude-booping/story/index.html" aria-current="page">Stories<span class="n">26</span></a></li>
+<li><a href="../../claude-booping/value/index.html">Values<span class="n">19</span></a></li>
+</ul>
+<h4>booping</h4>
+<ul>
+<li><a href="../../booping/index.html">Overview</a></li>
+<li><a href="../../booping/rule/index.html">Rules<span class="n">19</span></a></li>
+</ul>
+<h4>Tags</h4>
+<ul>
+<li><a href="../../claude-booping/tags/postmortem.html">postmortem<span class="n">3</span></a></li>
+<li><a href="../../claude-booping/tags/probe.html">probe<span class="n">1</span></a></li>
+<li><a href="../../claude-booping/tags/index.html">All tags</a></li>
+</ul>
+<ul>
+<li><a href="../../llms.txt">llms.txt</a></li>
+</ul>
+</nav>
+<main id="main">
+<nav class="crumbs" aria-label="breadcrumb">
+<ol>
+<li><a href="../../index.html">Overview</a></li>
+<li><span aria-current="page">Stories</span></li>
+</ol>
+</nav>
+<h1>Stories</h1>
+<p class="lead">who wants what and why</p>
+<div class="filters" data-default-sort="number">
+<button type="button" class="filter-open" aria-haspopup="dialog" data-label="Filters">Filters</button>
+<div class="filter-active" data-remove="Remove filter: {label}"></div>
+<dialog class="filter-sheet" aria-label="Filters">
+<div class="filter-head">
+<h2>Filters</h2>
+<button class="iconbtn filter-close" type="button" aria-label="Close">&times;</button>
+</div>
+<p class="facet">Needs</p>
+<div class="chips" role="group" aria-label="Needs">
+<button type="button" class="chip" data-key="flag" data-value="not_accepted" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>Not accepted<span class="n">26</span></button>
+<button type="button" class="chip" data-key="flag" data-value="clarify" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>Has [clarify]<span class="n">1</span></button>
+</div>
+<label>Sort <select class="sort">
+<option value="number" selected>By number</option>
+<option value="updated">Recently updated</option>
+<option value="title">By title</option>
+</select></label>
+<button type="button" class="filter-done">Show records</button>
+</dialog>
+<p class="count" role="status" data-forms="[&#34;{n} record shown&#34;, &#34;{n} records shown&#34;]">26 records shown</p>
+</div>
+<p class="empty" hidden>Nothing matches the filter.</p>
+<ul class="rows">
+<li class="row" data-type="story" data-source="claude-booping" data-status="done" data-flags="not_accepted" data-updated="2026-10-20" data-title="Playbook driver" data-created-by="claude" data-order="0"><code class="ref">story/0001</code><a class="t" href="../../claude-booping/story/0001-playbook-driver.html">Playbook driver</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>done</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">The /playbook skill discovers a procedure across the core, global and project levels and drives it to completion.</span></li>
+<li class="row" data-type="story" data-source="claude-booping" data-status="done" data-flags="not_accepted" data-updated="2026-10-20" data-title="Run state machines" data-created-by="claude" data-order="1"><code class="ref">story/0002</code><a class="t" href="../../claude-booping/story/0002-run-state-machines.html">Run state machines</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>done</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">A run&#39;s state lives in per-playbook states: machines that only the booping CLI advances.</span></li>
+<li class="row" data-type="story" data-source="claude-booping" data-status="done" data-flags="not_accepted" data-updated="2026-10-20" data-title="Layered configuration" data-created-by="claude" data-order="2"><code class="ref">story/0003</code><a class="t" href="../../claude-booping/story/0003-layered-configuration.html">Layered configuration</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>done</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">Config is a deep merge over the core, global and project levels, and any mapping in it can be a query spec or a template tree.</span></li>
+<li class="row" data-type="story" data-source="claude-booping" data-status="done" data-flags="not_accepted" data-updated="2026-10-20" data-title="Targeted rules" data-created-by="claude" data-order="3"><code class="ref">story/0004</code><a class="t" href="../../claude-booping/story/0004-targeted-rules.html">Targeted rules</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>done</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">An accepted rule&#39;s brief is injected into exactly the playbooks, steps, agents or skills its targets: list names.</span></li>
+<li class="row" data-type="story" data-source="claude-booping" data-status="done" data-flags="not_accepted" data-updated="2026-10-20" data-title="Plan and review templates" data-created-by="claude" data-order="4"><code class="ref">story/0005</code><a class="t" href="../../claude-booping/story/0005-plan-and-review-templates.html">Plan and review templates</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>done</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">Groom and code-review offer plan and review templates the user authored in the Project Vault or at the global level.</span></li>
+<li class="row" data-type="story" data-source="claude-booping" data-status="done" data-flags="not_accepted" data-updated="2026-10-20" data-title="User playbooks" data-created-by="claude" data-order="5"><code class="ref">story/0006</code><a class="t" href="../../claude-booping/story/0006-user-playbooks.html">User playbooks</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>done</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">Playbooks the user authors at the global level or in the Project Vault are discovered and run beside the core ones.</span></li>
+<li class="row" data-type="story" data-source="claude-booping" data-status="done" data-flags="not_accepted" data-updated="2026-10-20" data-title="External agents" data-created-by="claude" data-order="6"><code class="ref">story/0007</code><a class="t" href="../../claude-booping/story/0007-external-agents.html">External agents</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>done</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">Agents the plugin does not ship are wired into playbook agent slots through config and shaped per project by targeted rules.</span></li>
+<li class="row" data-type="story" data-source="claude-booping" data-status="done" data-flags="not_accepted" data-updated="2026-10-20" data-title="Template pipeline" data-created-by="claude" data-order="7"><code class="ref">story/0008</code><a class="t" href="../../claude-booping/story/0008-template-pipeline.html">Template pipeline</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>done</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">Skill and agent bodies render in one runtime stage from src/templates/ with full project context, reproducibly when pinned.</span></li>
+<li class="row" data-type="story" data-source="claude-booping" data-status="done" data-flags="not_accepted" data-updated="2026-10-20" data-title="Quality gates" data-created-by="claude" data-order="8"><code class="ref">story/0009</code><a class="t" href="../../claude-booping/story/0009-quality-gates.html">Quality gates</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>done</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">just ci runs lint, typecheck, pytest, snapshots, mdcheck and e2e in order, holding the plugin&#39;s behaviour.</span></li>
+<li class="row" data-type="story" data-source="claude-booping" data-status="done" data-flags="not_accepted" data-updated="2026-10-20" data-title="pytest-txtar" data-created-by="claude" data-order="9"><code class="ref">story/0010</code><a class="t" href="../../claude-booping/story/0010-pytest-txtar.html">pytest-txtar</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>done</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">The e2e corpus&#39;s case format and sandboxed runner ship as a standalone pytest plugin on PyPI.</span></li>
+<li class="row" data-type="story" data-source="claude-booping" data-status="done" data-flags="not_accepted" data-updated="2026-10-20" data-title="Eval suites" data-created-by="claude" data-order="10"><code class="ref">story/0011</code><a class="t" href="../../claude-booping/story/0011-eval-suites.html">Eval suites</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>done</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">Promptfoo suites beside each step guard its contract in a deterministic and an llm-rubric tier.</span></li>
+<li class="row" data-type="story" data-source="claude-booping" data-status="done" data-flags="not_accepted" data-updated="2026-10-20" data-title="Migration shipping" data-created-by="claude" data-order="11"><code class="ref">story/0012</code><a class="t" href="../../claude-booping/story/0012-migration-shipping.html">Migration shipping</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>done</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">The plugin ships Project Vault migrations, and every render surface is gated on a vault&#39;s applied watermark.</span></li>
+<li class="row" data-type="story" data-source="claude-booping" data-status="done" data-flags="not_accepted clarify" data-updated="2026-10-20" data-title="Documentation site" data-created-by="claude" data-order="12"><code class="ref">story/0013</code><a class="t" href="../../claude-booping/story/0013-documentation-site.html">Documentation site</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>done</span><span class="b warn"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>1 question for you</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">The public MkDocs reference builds strictly and publishes to gh-pages on push to master.</span></li>
+<li class="row" data-type="story" data-source="claude-booping" data-status="done" data-flags="not_accepted" data-updated="2026-10-20" data-title="Project setup" data-created-by="claude" data-order="13"><code class="ref">story/0014</code><a class="t" href="../../claude-booping/story/0014-project-setup.html">Project setup</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>done</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">The setup playbook takes a repo from any state to a working booping project and re-runs without changing what is already set up.</span></li>
+<li class="row" data-type="story" data-source="claude-booping" data-status="done" data-flags="not_accepted" data-updated="2026-10-20" data-title="Project Vault migrations" data-created-by="claude" data-order="14"><code class="ref">story/0015</code><a class="t" href="../../claude-booping/story/0015-vault-migrations.html">Project Vault migrations</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>done</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">The migrate playbook brings an existing Project Vault current with the plugin on one up-front approval, with one commit per migration.</span></li>
+<li class="row" data-type="story" data-source="claude-booping" data-status="done" data-flags="not_accepted" data-updated="2026-10-20" data-title="Groom" data-created-by="claude" data-order="15"><code class="ref">story/0016</code><a class="t" href="../../claude-booping/story/0016-groom.html">Groom</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>done</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">Groom shapes a feature, bug or refactor into a specified, estimated plan the user approved, ending at ready-for-dev.</span></li>
+<li class="row" data-type="story" data-source="claude-booping" data-status="done" data-flags="not_accepted" data-updated="2026-10-20" data-title="Develop" data-created-by="claude" data-order="16"><code class="ref">story/0017</code><a class="t" href="../../claude-booping/story/0017-develop.html">Develop</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>done</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">Develop executes a groomed plan one milestone group at a time through a worker agent and closes it at done or fail.</span></li>
+<li class="row" data-type="story" data-source="claude-booping" data-status="done" data-flags="not_accepted" data-updated="2026-10-20" data-title="Retro" data-created-by="claude" data-order="17"><code class="ref">story/0018</code><a class="t" href="../../claude-booping/story/0018-retro.html">Retro</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>done</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">Retro mines a finished sprint&#39;s session logs, diff and the user&#39;s feedback into a standalone retrospective.</span></li>
+<li class="row" data-type="story" data-source="claude-booping" data-status="done" data-flags="not_accepted" data-updated="2026-10-20" data-title="Learn" data-created-by="claude" data-order="18"><code class="ref">story/0019</code><a class="t" href="../../claude-booping/story/0019-learn.html">Learn</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>done</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">Learn turns retrospective findings the user confirmed into rule records in the project specs tier or CLAUDE.md entries.</span></li>
+<li class="row" data-type="story" data-source="claude-booping" data-status="done" data-flags="not_accepted" data-updated="2026-10-20" data-title="Session metrics" data-created-by="claude" data-order="19"><code class="ref">story/0020</code><a class="t" href="../../claude-booping/story/0020-session-metrics.html">Session metrics</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>done</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">A plan carries measured active minutes, tokens and models computed from Claude Code session logs.</span></li>
+<li class="row" data-type="story" data-source="claude-booping" data-status="done" data-flags="not_accepted" data-updated="2026-10-20" data-title="Code review" data-created-by="claude" data-order="20"><code class="ref">story/0021</code><a class="t" href="../../claude-booping/story/0021-code-review.html">Code review</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>done</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">The code-review playbook reviews a confirmed scope, collects the human verdict and applies only approved fixes.</span></li>
+<li class="row" data-type="story" data-source="claude-booping" data-status="done" data-flags="not_accepted" data-updated="2026-10-20" data-title="Task tracker" data-created-by="claude" data-order="21"><code class="ref">story/0022</code><a class="t" href="../../claude-booping/story/0022-task-tracker.html">Task tracker</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>done</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">The booping-tracker CLI carries every interaction with an issue tracker, and groom mirrors its run status and questions onto the tracker issue.</span></li>
+<li class="row" data-type="story" data-source="claude-booping" data-status="done" data-flags="not_accepted" data-updated="2026-10-20" data-title="Project manager" data-created-by="claude" data-order="22"><code class="ref">story/0023</code><a class="t" href="../../claude-booping/story/0023-project-manager.html">Project manager</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>done</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">One manager the user talks to files every request as an item and carries it through groom, develop, review and merge, with a status computed from the vault.</span></li>
+<li class="row" data-type="story" data-source="claude-booping" data-status="done" data-flags="not_accepted" data-updated="2026-10-20" data-title="Specs review with the owner" data-created-by="claude" data-order="23"><code class="ref">story/0024</code><a class="t" href="../../claude-booping/story/0024-specs-review-with-the-owner.html">Specs review with the owner</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>done</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">The system reviews the owner&#39;s specs, fixes what is plainly stale, and brings the owner only the decisions that are theirs, one at a time and kept across restarts.</span></li>
+<li class="row" data-type="story" data-source="claude-booping" data-status="done" data-flags="not_accepted" data-updated="2026-10-20" data-title="Own integration on top of booping" data-created-by="claude" data-order="24"><code class="ref">story/0025</code><a class="t" href="../../claude-booping/story/0025-own-integration-on-top.html">Own integration on top of booping</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>done</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">An advanced user wires their own triggers, schedules, tracker flows and usage guards on top of booping&#39;s surfaces; the core ships none of them.</span></li>
+<li class="row" data-type="story" data-source="claude-booping" data-status="done" data-flags="not_accepted" data-updated="2026-10-20" data-title="Specs first, then code" data-created-by="claude" data-order="25"><code class="ref">story/0026</code><a class="t" href="../../claude-booping/story/0026-specs-first-then-code.html">Specs first, then code</a><span class="why"><span class="b ok"><svg class="ic" aria-hidden="true"><use href="#i-accepted"/></svg>done</span><span class="b plain"><svg class="ic" aria-hidden="true"><use href="#i-not-accepted"/></svg>not accepted</span></span><span class="s">A decision made in the specs becomes tracked work the code follows, closed with its plan; code that ran ahead of the specs becomes work for the specs.</span></li>
+</ul>
+</main>
+</div>
+<div id="status" class="toast" role="status" data-copied="Link copied"></div>
+<footer>Generated by booping specs site</footer>
+</body>
+</html>

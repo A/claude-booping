@@ -64,6 +64,14 @@
                 </li>
               </ul>
               <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../specs/">Specs</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="/claude-booping/specs-site/">Specs site</a>
+                </li>
+              </ul>
+              <ul>
                 <li class="toctree-l1"><a class="reference internal" href="../integrating-external-agents/">Integrating external agents</a>
                 </li>
               </ul>
@@ -107,6 +115,10 @@
                   <li class="toctree-l1"><a class="reference internal" href="../retro/">retro playbook</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../learn/">learn playbook</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../specs_playbook/">specs playbook</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../project_manager/">project-manager playbook</a>
                   </li>
               </ul>
       </div>
@@ -176,13 +188,14 @@
 <p>The split at each milestone is deliberate. The <strong>agent</strong> implements the contract, runs the milestone's own verification command until it is green, and stops there — it writes code, never git history. The <strong>runner</strong> never re-runs that command and never edits application code: it reads the working tree against the Definition of Done, and only once the DoD holds does it commit — one commit per milestone, staged from the contract's own paths — then ticks the checkboxes the diff earns, takes the milestone's transition, and commits the plan in the vault. Whoever ran the command is the one who saw it run; whoever validated the work is the one who lands it.</p>
 <p>Committing on the runner's side is what keeps the branch honest across coding agents: only DoD-green state ever reaches it, a rejected attempt leaves nothing behind to amend or revert, and an agent driven through a foreign harness — one with its own rules about git — needs no git at all.</p>
 <p>When a tree falls short of the DoD, or the agent reports its verification red, the runner writes what it found into a <code>feedback.md</code> beside that milestone file — what it checked, what was wrong, what the next attempt must do — and briefs a <strong>fresh</strong> agent with both paths. That file is also where attempts are counted; after two the blocker is unrecoverable, and the run asks you to approve the abort. A milestone the runner has sent back keeps its feedback on disk, so the record survives the session.</p>
+<p>When you correct the runner mid-sprint, it logs your words verbatim, with the session id and a link to the plan, as one file under the vault's <code>corrections/</code> — the entries <a href="../retro/">retro</a> starts from.</p>
 <p>Every milestone group runs in <strong>one session</strong>.</p>
 <h2 id="starting-a-run">Starting a run</h2>
 <pre><code class="language-text">/playbook develop
 /playbook develop — plans/202604301120_src-files-build-pipeline/index.md
 </code></pre>
 <p>Bare invocation lists the vault's plans at <code>ready-for-dev</code> or <code>awaiting-approval</code> and asks you to pick one. Name a plan path to target a specific one.</p>
-<p>To resume a sprint already <code>in-progress</code>, invoke the playbook against the same plan: <code>playbook-state</code> reports the frontier and the run picks up at the first milestone whose <code>status:</code> is not <code>done</code> — including a blocked one, whose <code>feedback.md</code> carries the previous attempt's findings into the next briefing. Each transition also regenerates <code>index.md</code>'s <code>## Milestones</code> table and re-sums the plan's story points, so the table is a view, never the source of truth.</p>
+<p>To resume a sprint already <code>in-progress</code>, invoke the playbook against the same plan: <code>booping state</code> reports the frontier and the run picks up at the first milestone whose <code>status:</code> is not <code>done</code> — including a blocked one, whose <code>feedback.md</code> carries the previous attempt's findings into the next briefing. Each transition also regenerates <code>index.md</code>'s <code>## Milestones</code> table and re-sums the plan's story points, so the table is a view, never the source of truth.</p>
 <h2 id="branch">Branch</h2>
 <p><code>provision</code> picks the branch prefix from <code>core.develop_playbook.git.branches</code> using the plan's <code>type</code>, proposes a kebab-case name, and asks through <code>AskUserQuestion</code> — <strong>nothing touches git until you answer</strong>, and a name you rewrite is used verbatim. A branch that already exists for the sprint is reused rather than recreated. In multi-repo projects the same branch name is reused across repos unless you say otherwise.</p>
 <p>That confirmation is the playbook's single review gate.</p>
@@ -205,7 +218,7 @@
 <h2 id="config">Config</h2>
 <p>The playbook reads these keys from <code>src/config.yaml</code>. See <a href="../project_config/">Project config</a> for the deep-merge override mechanics; per-project tweaks live in <code>~/Claude/{project}/config.yaml</code>.</p>
 <ul>
-<li><strong><code>core.sprint.max_milestones_per_agent</code></strong> — maximum consecutive milestones grouped into a single <code>booping-developer</code> briefing; grouping happens only when the milestones share enough context that one agent in sequence beats a fresh agent per milestone. Default <code>2</code>.</li>
+<li><strong><code>core.sprint.max_sp</code></strong> — SP budget of one <code>booping-developer</code> briefing, see <a href="../project_config/">project config</a>. Grouping changes only the briefing — each milestone is still validated, committed and transitioned on its own.</li>
 <li><strong><code>core.develop_playbook.fallback_agent</code></strong> — the agent a fix briefing is routed to when the milestone was built by some other agent, so an externally built milestone still gets its fixes done in-house. Default <code>booping:booping-developer</code>.</li>
 <li><strong><code>core.develop_playbook.git.branches</code></strong> — list of <code>{branch, when}</code> entries that map plan <code>type</code> (or freeform descriptors) to a branch prefix; <code>provision</code> picks from this list.</li>
 <li><strong><code>core.develop_playbook.git.commit_message</code></strong> — message format string used for in-sprint commits. Override per-project to enforce a different commit shape.</li>

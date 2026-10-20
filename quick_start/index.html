@@ -48,7 +48,7 @@
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#1-install-the-plugin">1. Install the plugin</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#2-scaffold-the-project-vault">2. Scaffold the project vault</a>
+    <li class="toctree-l2"><a class="reference internal" href="#2-create-the-project-vault">2. Create the project vault</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#3-see-what-is-available">3. See what is available</a>
     </li>
@@ -86,6 +86,14 @@
                 </li>
               </ul>
               <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../specs/">Specs</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="" href="/claude-booping/specs-site/">Specs site</a>
+                </li>
+              </ul>
+              <ul>
                 <li class="toctree-l1"><a class="reference internal" href="../integrating-external-agents/">Integrating external agents</a>
                 </li>
               </ul>
@@ -107,6 +115,10 @@
                   <li class="toctree-l1"><a class="reference internal" href="../retro/">retro playbook</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../learn/">learn playbook</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../specs_playbook/">specs playbook</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../project_manager/">project-manager playbook</a>
                   </li>
               </ul>
       </div>
@@ -143,11 +155,11 @@
 </code></pre>
 <p>Update later with <code>/plugin update booping</code> (or from the <code>/plugin</code> UI).</p>
 <p>See <a href="../install/">Install</a> for prerequisites (<code>uv</code>, <code>git</code>).</p>
-<h2 id="2-scaffold-the-project-vault">2. Scaffold the project vault</h2>
+<h2 id="2-create-the-project-vault">2. Create the project vault</h2>
 <p><code>cd</code> into the target repository and run:</p>
 <pre><code class="language-text">/playbook setup
 </code></pre>
-<p>The <code>setup</code> playbook settles the machine level (home dir + machine config), then the project level: it asks for the vault location — the default <code>&lt;home_dir&gt;/{project}/</code> or a repo-local directory (wired via the <code>.booping</code> marker's <code>vault_path:</code> key) — and creates the vault with <code>plans/</code>, <code>retrospectives/</code>, <code>codereviews/</code>, <code>_lessons/</code>, <code>notes/</code>, plus a <code>.booping</code> marker file in the repo. Anything already in place is detected and skipped. See <a href="../vault/">Vault</a> for what each directory is for.</p>
+<p>The <code>setup</code> playbook settles the machine level (home dir + machine config), then the project level: it asks for the vault location — the default <code>&lt;home_dir&gt;/{project}/</code> or a repo-local directory (wired via the <code>.booping</code> marker's <code>vault_path:</code> key) — and creates the vault with <code>plans/</code>, <code>retrospectives/</code>, <code>codereviews/</code>, <code>notes/</code>, plus a <code>.booping</code> marker file in the repo. It also asks once for your global namespace (default <code>$USER</code>) and creates both <a href="../specs/">specs</a> tiers your rules live in: the global one at <code>&lt;home_dir&gt;/_specs/</code> and the project one. Anything already in place is detected and skipped. See <a href="../vault/">Vault</a> for what each directory is for.</p>
 <h2 id="3-see-what-is-available">3. See what is available</h2>
 <p><code>/playbook</code> is the only skill booping ships — every procedure in this walkthrough is a playbook it drives. With no argument it lists every playbook booping discovered, shipped or written in your vault, with its trigger and scope:</p>
 <pre><code class="language-text">/playbook
@@ -158,6 +170,11 @@
 <p>The fence is seeded once and yours to edit (see <a href="../vault/">Vault</a>). Outside Obsidian, <code>bin/booping query --config core.plans</code> prints the same listing, and <code>--where</code> narrows it — <code>k=v</code>, <code>k!=v</code>, <code>k:in=a,b</code>, <code>k:gt=n</code>, <code>k:lt=n</code>, repeatable and all applying at once:</p>
 <pre><code class="language-bash">bin/booping query --config core.plans --where status:in=ready-for-dev,in-progress
 </code></pre>
+<p><code>bin/booping status</code> prints the short project status (items, ideas, plans, runs, records, marks), <code>bin/booping status plans</code> the plan tables.</p>
+<p>To run a groomed plan headless, launch it from the repo and leave it in the background:</p>
+<pre><code class="language-bash">bin/booping run develop plans/{slug}/index.md --autonomous &amp;
+</code></pre>
+<p>It records the run under <code>runs/</code> in the vault — plan, items, session id, a log of the run's output, and how it ended — and <code>bin/booping status runs</code> lists it until <code>bin/booping run ack {id}</code> marks it seen.</p>
 <h2 id="5-first-groom">5. First groom</h2>
 <p>Spec your first sprint with a free-text description:</p>
 <pre><code class="language-text">/playbook groom — add per-tenant rate limiting to the public API
@@ -186,7 +203,7 @@
 <p>Fold the retro into durable rules:</p>
 <pre><code class="language-text">/playbook learn
 </code></pre>
-<p>The <a href="../learn/">learn playbook</a> proposes targeted lessons (<code>~/Claude/{project}/_lessons/{N}_{kebab-title}.md</code>, each carrying a <code>targets:</code> list) and one-line bullets for the repo's own <code>CLAUDE.md</code>, in one review table for your confirmation. Approved lessons are injected into the playbooks, steps, agents and skills they name.</p>
+<p>The <a href="../learn/">learn playbook</a> proposes rule records for the project's <a href="../specs/">specs</a> tier (<code>rule/{NNNN}-{slug}.md</code>, each carrying a <code>targets:</code> list and a <code>brief:</code>) and one-line bullets for the repo's own <code>CLAUDE.md</code>, in one review table for your confirmation. An approved rule's brief is injected into the playbooks, steps, agents and skills it targets.</p>
 <p>When learn finishes, the retrospective reaches <code>done</code> and your first loop is complete. The next groom run inherits everything you just learned.</p>
               
             </div>

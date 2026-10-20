@@ -1,0 +1,4266 @@
+{
+ "title": "claude-booping",
+ "lang": "en",
+ "records": [
+  {
+   "id": "booping:rule/0001",
+   "root": "booping",
+   "ref": "rule/0001",
+   "type": "rule",
+   "title": "A lesson is a rule",
+   "summary": "What a run teaches is recorded as a rule with targets and a brief; only the brief reaches the targeted step, the body is read on demand.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "booping/rule/0001-lessons-are-rules.html",
+   "md": "booping/rule/0001-lessons-are-rules.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": [
+    "claude-booping:adr/0001",
+    "claude-booping:rule/0018",
+    "claude-booping:rule/0020"
+   ]
+  },
+  {
+   "id": "booping:rule/0004",
+   "root": "booping",
+   "ref": "rule/0004",
+   "type": "rule",
+   "title": "Open questions are settled in grooming, not in develop",
+   "summary": "Grooming hunts for open questions and settles them with the user before ready-for-dev; develop stops only for force majeure.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "booping/rule/0004-questions-settled-in-grooming.html",
+   "md": "booping/rule/0004-questions-settled-in-grooming.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": [
+    "booping:rule/0010",
+    "claude-booping:adr/0015"
+   ]
+  },
+  {
+   "id": "booping:rule/0006",
+   "root": "booping",
+   "ref": "rule/0006",
+   "type": "rule",
+   "title": "Every prompt artefact passes the information-architecture check",
+   "summary": "Before a prompt-bearing artefact is saved, every block passes four checks — scoping, duplication, configurability, hierarchy — and prose that only restates or motivates is cut.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "booping/rule/0006-information-architecture-pass.html",
+   "md": "booping/rule/0006-information-architecture-pass.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "booping:rule/0007",
+   "root": "booping",
+   "ref": "rule/0007",
+   "type": "rule",
+   "title": "References a plan invalidates are cleaned up in the same sprint",
+   "summary": "When a plan deletes or renames something others reference, the cleanup is a milestone task of the same sprint with its own DoD, never a follow-up sweep.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "booping/rule/0007-stale-references-cleaned-in-sprint.html",
+   "md": "booping/rule/0007-stale-references-cleaned-in-sprint.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "booping:rule/0008",
+   "root": "booping",
+   "ref": "rule/0008",
+   "type": "rule",
+   "title": "Generated content is scoped to its audience",
+   "summary": "User-facing output — release notes, user docs, changelogs — includes only what that audience touches; the audience filter is specced into the task's DoD.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "booping/rule/0008-audience-scoped-content.html",
+   "md": "booping/rule/0008-audience-scoped-content.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "booping:rule/0009",
+   "root": "booping",
+   "ref": "rule/0009",
+   "type": "rule",
+   "title": "An agent briefing bounds what the agent returns",
+   "summary": "Every agent briefing states the exact shape of the agent's reply, limited to what the orchestrator needs; groom bounds it in the task so develop's briefings inherit it.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "booping/rule/0009-bounded-agent-return-contract.html",
+   "md": "booping/rule/0009-bounded-agent-return-contract.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": [
+    "booping:rule/0041"
+   ]
+  },
+  {
+   "id": "booping:rule/0010",
+   "root": "booping",
+   "ref": "rule/0010",
+   "type": "rule",
+   "title": "The content of a user-facing output is locked in grooming",
+   "summary": "When a plan defines a user-facing output or log format, its exact content — fields, truncation, trailers — is settled with the user in grooming, not iterated in develop.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "booping/rule/0010-output-content-locked-in-grooming.html",
+   "md": "booping/rule/0010-output-content-locked-in-grooming.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "booping:rule/0030",
+   "root": "booping",
+   "ref": "rule/0030",
+   "type": "rule",
+   "title": "Planning shows the values in play and every departure from them",
+   "summary": "A plan names the values that drive its choices and flags where it departs from a value or rule, so the user sees what works and can refine the values.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-15",
+   "updated_at": "2026-10-15",
+   "review": "none",
+   "review_evidence": null,
+   "url": "booping/rule/0030-planning-shows-values-in-play.html",
+   "md": "booping/rule/0030-planning-shows-values-in-play.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": [
+    "claude-booping:adr/0024"
+   ]
+  },
+  {
+   "id": "booping:rule/0031",
+   "root": "booping",
+   "ref": "rule/0031",
+   "type": "rule",
+   "title": "Corrections are logged as they happen",
+   "summary": "When the user corrects the driver, it logs the correction verbatim as a file under the vault's corrections/, so retro starts from a ready list of what is not yet handled.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-15",
+   "updated_at": "2026-10-18",
+   "review": "none",
+   "review_evidence": null,
+   "url": "booping/rule/0031-corrections-are-logged.html",
+   "md": "booping/rule/0031-corrections-are-logged.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "booping:rule/0032",
+   "root": "booping",
+   "ref": "rule/0032",
+   "type": "rule",
+   "title": "Decisions are asked in prose",
+   "summary": "An approval, or any decision the user must understand the context to make, is asked in prose, one at a time with compact context and a counter; a multiple-choice tool only for mechanical picks.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-16",
+   "updated_at": "2026-10-17",
+   "review": "none",
+   "review_evidence": null,
+   "url": "booping/rule/0032-approval-asked-in-prose.html",
+   "md": "booping/rule/0032-approval-asked-in-prose.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": [
+    "claude-booping:adr/0015",
+    "claude-booping:adr/0039",
+    "claude-booping:story/0024"
+   ]
+  },
+  {
+   "id": "booping:rule/0033",
+   "root": "booping",
+   "ref": "rule/0033",
+   "type": "rule",
+   "title": "Decisions are listed for acceptance",
+   "summary": "Before the user accepts anything, the agent lists every decision it takes as settled, one numbered line each, marking its own proposals; an unanswered item is never accepted.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-17",
+   "updated_at": "2026-10-17",
+   "review": "none",
+   "review_evidence": null,
+   "url": "booping/rule/0033-decisions-listed-for-acceptance.html",
+   "md": "booping/rule/0033-decisions-listed-for-acceptance.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": [
+    "booping:rule/0032",
+    "booping:rule/0034",
+    "claude-booping:adr/0039",
+    "claude-booping:rule/0002",
+    "claude-booping:story/0024"
+   ]
+  },
+  {
+   "id": "booping:rule/0034",
+   "root": "booping",
+   "ref": "rule/0034",
+   "type": "rule",
+   "title": "A specs review tests each record against its type",
+   "summary": "A review of the specs puts every record to the type tests of the format guide and lists each failure — the type it fits or deletion — for the user to accept.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-18",
+   "updated_at": "2026-10-18",
+   "review": "none",
+   "review_evidence": null,
+   "url": "booping/rule/0034-specs-review-tests-each-record.html",
+   "md": "booping/rule/0034-specs-review-tests-each-record.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": [
+    "claude-booping:story/0024"
+   ]
+  },
+  {
+   "id": "booping:rule/0035",
+   "root": "booping",
+   "ref": "rule/0035",
+   "type": "rule",
+   "title": "Items of one class are groomed together, never in parallel",
+   "summary": "The manager grooms items of the same class in one plan, or one after another with the earlier plan in the next brief — never in parallel, where each builds its own copy of the mechanism.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-18",
+   "updated_at": "2026-10-18",
+   "review": "none",
+   "review_evidence": null,
+   "url": "booping/rule/0035-same-class-items-groomed-together.html",
+   "md": "booping/rule/0035-same-class-items-groomed-together.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "booping:rule/0036",
+   "root": "booping",
+   "ref": "rule/0036",
+   "type": "rule",
+   "title": "An ADR is accepted after a brief",
+   "summary": "An ADR is drafted proposed and accepted only after the owner was shown its brief and given a window to object; the answer sets the review level with its evidence.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-19",
+   "updated_at": "2026-10-19",
+   "review": "none",
+   "review_evidence": null,
+   "url": "booping/rule/0036-adr-accepted-after-a-brief.html",
+   "md": "booping/rule/0036-adr-accepted-after-a-brief.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": [
+    "claude-booping:adr/0041"
+   ]
+  },
+  {
+   "id": "booping:rule/0037",
+   "root": "booping",
+   "ref": "rule/0037",
+   "type": "rule",
+   "title": "Open items hold only what outlives the session",
+   "summary": "An open item is filed only for work for later or a question that waits for the owner; session instructions, gate answers, policies and decisions are never items.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-19",
+   "updated_at": "2026-10-19",
+   "review": "none",
+   "review_evidence": null,
+   "url": "booping/rule/0037-open-items-outlive-the-session.html",
+   "md": "booping/rule/0037-open-items-outlive-the-session.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "booping:rule/0038",
+   "root": "booping",
+   "ref": "rule/0038",
+   "type": "rule",
+   "title": "Ids in chat carry their title",
+   "summary": "Every id said in chat — an open item, an ADR, a rule, a plan — is followed by its short title; newly filed items are listed one per line with their title.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-19",
+   "updated_at": "2026-10-19",
+   "review": "none",
+   "review_evidence": null,
+   "url": "booping/rule/0038-ids-carry-their-title.html",
+   "md": "booping/rule/0038-ids-carry-their-title.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "booping:rule/0039",
+   "root": "booping",
+   "ref": "rule/0039",
+   "type": "rule",
+   "title": "Experiments run in stages",
+   "summary": "An experiment, eval or benchmark matrix runs a cheap screen, then a shortlist, then significance for finalists only, each stage sized before launch.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-19",
+   "updated_at": "2026-10-19",
+   "review": "none",
+   "review_evidence": null,
+   "url": "booping/rule/0039-experiments-run-in-stages.html",
+   "md": "booping/rule/0039-experiments-run-in-stages.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "booping:rule/0040",
+   "root": "booping",
+   "ref": "rule/0040",
+   "type": "rule",
+   "title": "The ADR scorer judges its prompt alone",
+   "summary": "The adr-scorer runs only its body render and judges a draft ADR from the pasted parts alone; nothing it was not shown exists for it.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-19",
+   "updated_at": "2026-10-19",
+   "review": "none",
+   "review_evidence": null,
+   "url": "booping/rule/0040-adr-scorer-judges-its-prompt-alone.html",
+   "md": "booping/rule/0040-adr-scorer-judges-its-prompt-alone.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "booping:rule/0041",
+   "root": "booping",
+   "ref": "rule/0041",
+   "type": "rule",
+   "title": "The manager delegates heavy reads",
+   "summary": "The project manager never reviews an artefact, reads a long file or scans many files or logs itself; a subagent does it under a bounded return contract and the manager keeps only the verdict.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-20",
+   "updated_at": "2026-10-20",
+   "review": "accepted",
+   "review_evidence": "owner, 2026-10-20: «Ты project manager, а не team lead или researcher, ты должен был это делегировать, очевидно, запиши… core правила, что project manager делегирует.»",
+   "url": "booping/rule/0041-manager-delegates-heavy-reads.html",
+   "md": "booping/rule/0041-manager-delegates-heavy-reads.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:adr/0001",
+   "root": "claude-booping",
+   "ref": "adr/0001",
+   "type": "adr",
+   "title": "Specs are a core feature in three tiers",
+   "summary": "Booping ships the specs format and its own specs; a global tier in the home dir and a project tier in the repo add their records, cross-tier refs go by namespace.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-15",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/adr/0001-specs-tiers.html",
+   "md": "claude-booping/adr/0001-specs-tiers.md",
+   "marks": {
+    "clarify": 1,
+    "unknown": 0
+   },
+   "relations": {
+    "rules": [
+     "booping:rule/0001"
+    ],
+    "values": [
+     "claude-booping:value/0003",
+     "claude-booping:value/0005",
+     "claude-booping:value/0011",
+     "claude-booping:value/0001"
+    ]
+   },
+   "superseded_by": [],
+   "backlinks": [
+    "claude-booping:reference/0002"
+   ]
+  },
+  {
+   "id": "claude-booping:adr/0002",
+   "root": "claude-booping",
+   "ref": "adr/0002",
+   "type": "adr",
+   "title": "Procedures are playbooks behind one skill",
+   "summary": "Every booping procedure ships as a playbook driven by the single /playbook skill; a new skill is written only for a surface /playbook cannot drive.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/adr/0002-procedures-are-playbooks.html",
+   "md": "claude-booping/adr/0002-procedures-are-playbooks.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {
+    "rules": [
+     "claude-booping:rule/0024"
+    ],
+    "values": [
+     "claude-booping:value/0007",
+     "claude-booping:value/0005",
+     "claude-booping:value/0002",
+     "claude-booping:value/0012"
+    ]
+   },
+   "superseded_by": [],
+   "backlinks": [
+    "claude-booping:rule/0024"
+   ]
+  },
+  {
+   "id": "claude-booping:adr/0003",
+   "root": "claude-booping",
+   "ref": "adr/0003",
+   "type": "adr",
+   "title": "Bodies render at skill load, with no build stage",
+   "summary": "Skill and agent bodies are rendered from templates at load time with full project context; the generated-file build stage is retired.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-17",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/adr/0003-render-at-skill-load.html",
+   "md": "claude-booping/adr/0003-render-at-skill-load.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {
+    "rules": [
+     "claude-booping:rule/0017",
+     "claude-booping:rule/0029"
+    ],
+    "values": [
+     "claude-booping:value/0003",
+     "claude-booping:value/0005"
+    ]
+   },
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:adr/0004",
+   "root": "claude-booping",
+   "ref": "adr/0004",
+   "type": "adr",
+   "title": "Config is a three-tier deep merge with no schema gate",
+   "summary": "Config merges core, global and project tiers, later winning and lists replacing; any key loads in any tier, and playbook keys live in the core file under core.{name}_playbook.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-17",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/adr/0004-config-three-tier-merge.html",
+   "md": "claude-booping/adr/0004-config-three-tier-merge.md",
+   "marks": {
+    "clarify": 1,
+    "unknown": 0
+   },
+   "relations": {
+    "values": [
+     "claude-booping:value/0005",
+     "claude-booping:value/0003",
+     "claude-booping:value/0006"
+    ]
+   },
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:adr/0006",
+   "root": "claude-booping",
+   "ref": "adr/0006",
+   "type": "adr",
+   "title": "Each playbook owns its state machine; no shared lifecycle",
+   "summary": "Every artifact moves only through its own playbook's states machine, written solely by playbook-transition; playbooks hand off at a status, not through a shared lifecycle.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-17",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/adr/0006-each-playbook-owns-its-states.html",
+   "md": "claude-booping/adr/0006-each-playbook-owns-its-states.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {
+    "rules": [
+     "claude-booping:rule/0023",
+     "claude-booping:rule/0025"
+    ],
+    "values": [
+     "claude-booping:value/0003",
+     "claude-booping:value/0007"
+    ]
+   },
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:adr/0007",
+   "root": "claude-booping",
+   "ref": "adr/0007",
+   "type": "adr",
+   "title": "Run-state persistence is an authored tier, and confirmation is a status",
+   "summary": "A playbook's state machine is authored at one of three tiers — ephemeral, minimal, rich — never derived from the graph; a confirmation that must persist is a status transition, not a flag.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/adr/0007-run-state-persistence-is-authored.html",
+   "md": "claude-booping/adr/0007-run-state-persistence-is-authored.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {
+    "values": [
+     "claude-booping:value/0007",
+     "claude-booping:value/0009",
+     "claude-booping:value/0012"
+    ]
+   },
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:adr/0008",
+   "root": "claude-booping",
+   "ref": "adr/0008",
+   "type": "adr",
+   "title": "Retro and code review are separate tracks joined by plan frontmatter",
+   "summary": "A plan ends at develop's done and never moves again; retro and code review keep their own artifacts and machines and join the plan through retro and code_reviews keys.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/adr/0008-tracks-join-by-frontmatter.html",
+   "md": "claude-booping/adr/0008-tracks-join-by-frontmatter.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {
+    "values": [
+     "claude-booping:value/0004",
+     "claude-booping:value/0003"
+    ]
+   },
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:adr/0009",
+   "root": "claude-booping",
+   "ref": "adr/0009",
+   "type": "adr",
+   "title": "A plan is a directory whose index.md is both plan and run artifact",
+   "summary": "A plan lives in plans/{slug}/; index.md is the plan document and the machine's artifact at once, and run sidecars sit beside it — no separate plan.md and no _runs/ workdir.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-17",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/adr/0009-plan-is-a-directory.html",
+   "md": "claude-booping/adr/0009-plan-is-a-directory.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {
+    "values": [
+     "claude-booping:value/0003",
+     "claude-booping:value/0012",
+     "claude-booping:value/0011"
+    ]
+   },
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:adr/0010",
+   "root": "claude-booping",
+   "ref": "adr/0010",
+   "type": "adr",
+   "title": "A milestone is a file handed to the worker by path",
+   "summary": "Each milestone is its own file in its own directory with status and feedback beside it; develop hands a worker that file's path, never a slice of the plan body.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/adr/0010-milestones-are-files.html",
+   "md": "claude-booping/adr/0010-milestones-are-files.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {
+    "values": [
+     "claude-booping:value/0002",
+     "claude-booping:value/0003",
+     "claude-booping:value/0007"
+    ]
+   },
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:adr/0011",
+   "root": "claude-booping",
+   "ref": "adr/0011",
+   "type": "adr",
+   "title": "A step is inline, assisted or detached, set by one detached field",
+   "summary": "The runner performs most steps itself; heavy reads go to a configured researcher that is resumed, not respawned; only a step that must not enter the runner's context is detached.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-17",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/adr/0011-delegation-levels.html",
+   "md": "claude-booping/adr/0011-delegation-levels.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {
+    "values": [
+     "claude-booping:value/0002",
+     "claude-booping:value/0012"
+    ]
+   },
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:adr/0014",
+   "root": "claude-booping",
+   "ref": "adr/0014",
+   "type": "adr",
+   "title": "External agents and surfaces wire in through config; core names no external tool",
+   "summary": "An external worker or review surface is a plain agent registered in config and steered by a targeted rule; core ships no wrapper for it and no playbook names it.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-15",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/adr/0014-external-tools-wire-in-through-config.html",
+   "md": "claude-booping/adr/0014-external-tools-wire-in-through-config.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {
+    "values": [
+     "claude-booping:value/0005",
+     "claude-booping:value/0009"
+    ]
+   },
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:adr/0015",
+   "root": "claude-booping",
+   "ref": "adr/0015",
+   "type": "adr",
+   "title": "A playbook run stops for review at one gate",
+   "summary": "Core playbooks take user decisions in-step and stop for approval once — groom at present, retro at synthesize, migrate before applying, develop only to confirm the branch.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-17",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/adr/0015-one-review-gate-per-run.html",
+   "md": "claude-booping/adr/0015-one-review-gate-per-run.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {
+    "rules": [
+     "claude-booping:rule/0003",
+     "booping:rule/0004"
+    ],
+    "values": [
+     "claude-booping:value/0008",
+     "claude-booping:value/0007",
+     "claude-booping:value/0012"
+    ]
+   },
+   "superseded_by": [],
+   "backlinks": [
+    "claude-booping:conflict/0002"
+   ]
+  },
+  {
+   "id": "claude-booping:adr/0016",
+   "root": "claude-booping",
+   "ref": "adr/0016",
+   "type": "adr",
+   "title": "Groom's cross-review is a detached step gated by one config key",
+   "summary": "A second model reviews the drafted plan once, in its own detached step, only when core.groom_playbook.cross_review_agent names an agent; null skips the step.",
+   "status": "superseded",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-17",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/adr/0016-cross-review-is-a-config-gated-step.html",
+   "md": "claude-booping/adr/0016-cross-review-is-a-config-gated-step.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {
+    "values": [
+     "claude-booping:value/0012",
+     "claude-booping:value/0005"
+    ]
+   },
+   "superseded_by": [
+    "claude-booping:adr/0035"
+   ],
+   "backlinks": [
+    "claude-booping:adr/0035"
+   ]
+  },
+  {
+   "id": "claude-booping:adr/0017",
+   "root": "claude-booping",
+   "ref": "adr/0017",
+   "type": "adr",
+   "title": "Vault migrations ship with the plugin, keyed by a frontmatter id",
+   "summary": "Migrations live in the plugin's migrations/ directory; the id in migration.md frontmatter is the only authority, and the .booping marker's latest_migration is the applied watermark.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/adr/0017-migrations-ship-with-the-plugin.html",
+   "md": "claude-booping/adr/0017-migrations-ship-with-the-plugin.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {
+    "values": [
+     "claude-booping:value/0003",
+     "claude-booping:value/0013"
+    ]
+   },
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:adr/0018",
+   "root": "claude-booping",
+   "ref": "adr/0018",
+   "type": "adr",
+   "title": "Migrations apply strictly in sequence, one commit each, after one gate",
+   "summary": "Migrate asks once over the whole pending set, then applies each migration in id order through a fresh sub-agent, advancing the watermark and committing before the next; a failure stops the run.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/adr/0018-migrations-apply-in-sequence.html",
+   "md": "claude-booping/adr/0018-migrations-apply-in-sequence.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {
+    "values": [
+     "claude-booping:value/0008",
+     "claude-booping:value/0002",
+     "claude-booping:value/0009"
+    ]
+   },
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:adr/0019",
+   "root": "claude-booping",
+   "ref": "adr/0019",
+   "type": "adr",
+   "title": "The task tracker is a best-effort mirror of the vault",
+   "summary": "The vault stays authoritative; tracker hooks run in a separate CLI, absorb the tracker's failures with a warning, and booping-tracker sync reconciles by hand.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/adr/0019-tracker-is-a-best-effort-mirror.html",
+   "md": "claude-booping/adr/0019-tracker-is-a-best-effort-mirror.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {
+    "values": [
+     "claude-booping:value/0011",
+     "claude-booping:value/0007"
+    ]
+   },
+   "superseded_by": [],
+   "backlinks": [
+    "claude-booping:adr/0006"
+   ]
+  },
+  {
+   "id": "claude-booping:adr/0020",
+   "root": "claude-booping",
+   "ref": "adr/0020",
+   "type": "adr",
+   "title": "CLI behaviour is tested by a contract corpus, not by internal unit tests",
+   "summary": "Each CLI subcommand is specified by language-neutral cases run through bin/booping; unit tests cover only algorithmic hotspots, and prose is owned by snapshots and mdcheck.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/adr/0020-contract-corpus-over-unit-tests.html",
+   "md": "claude-booping/adr/0020-contract-corpus-over-unit-tests.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {
+    "values": [
+     "claude-booping:value/0010",
+     "claude-booping:value/0003"
+    ]
+   },
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:adr/0021",
+   "root": "claude-booping",
+   "ref": "adr/0021",
+   "type": "adr",
+   "title": "Prompt behaviour is checked by per-step eval suites, advisory and outside CI",
+   "summary": "Each playbook step can carry a promptfoo suite with a deterministic smoke tier and a judged regress tier; runs are proposed, not launched by steps, and post an advisory PR comment.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/adr/0021-per-step-prompt-evals.html",
+   "md": "claude-booping/adr/0021-per-step-prompt-evals.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {
+    "values": [
+     "claude-booping:value/0010",
+     "claude-booping:value/0012"
+    ]
+   },
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:adr/0022",
+   "root": "claude-booping",
+   "ref": "adr/0022",
+   "type": "adr",
+   "title": "Develop groups milestones per worker by story points, not by count",
+   "summary": "Develop packs milestones per worker greedily within one wave under a max_sp cap of 15 instead of max_milestones_per_agent, and sp ≥ 5 is a hard groom gate.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-18",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/adr/0022-group-milestones-by-sp.html",
+   "md": "claude-booping/adr/0022-group-milestones-by-sp.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {
+    "values": [
+     "claude-booping:value/0012",
+     "claude-booping:value/0002"
+    ]
+   },
+   "superseded_by": [],
+   "backlinks": [
+    "claude-booping:story/0017"
+   ]
+  },
+  {
+   "id": "claude-booping:adr/0024",
+   "root": "claude-booping",
+   "ref": "adr/0024",
+   "type": "adr",
+   "title": "The specs playbook is a guide, not a menu of actions",
+   "summary": "One specs playbook explains every record type and principle plus the user's typical scenarios, and the model works out from the dialogue what to do.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-15",
+   "updated_at": "2026-10-17",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/adr/0024-specs-playbook-is-a-guide.html",
+   "md": "claude-booping/adr/0024-specs-playbook-is-a-guide.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {
+    "values": [
+     "claude-booping:value/0002",
+     "claude-booping:value/0013",
+     "claude-booping:value/0012"
+    ]
+   },
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:adr/0025",
+   "root": "claude-booping",
+   "ref": "adr/0025",
+   "type": "adr",
+   "title": "Open items are a stored index; closed ones are filtered out",
+   "summary": "Every gap between specs and code, open question or conflict is an open item stored in the vault and listed by an explicit command; closed items stay and are filtered.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-15",
+   "updated_at": "2026-10-18",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/adr/0025-open-items-are-an-index.html",
+   "md": "claude-booping/adr/0025-open-items-are-an-index.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {
+    "values": [
+     "claude-booping:value/0004",
+     "claude-booping:value/0007",
+     "claude-booping:value/0009"
+    ]
+   },
+   "superseded_by": [],
+   "backlinks": [
+    "claude-booping:story/0023"
+   ]
+  },
+  {
+   "id": "claude-booping:adr/0026",
+   "root": "claude-booping",
+   "ref": "adr/0026",
+   "type": "adr",
+   "title": "Corrections are logged where they happen",
+   "summary": "Each time the user corrects the model in groom, develop or code-review, a short entry with a link back to the dialogue goes into the run's corrections sidecar — the feed retro and learn read.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-15",
+   "updated_at": "2026-10-18",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/adr/0026-corrections-log.html",
+   "md": "claude-booping/adr/0026-corrections-log.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {
+    "values": [
+     "claude-booping:value/0001",
+     "claude-booping:value/0004",
+     "claude-booping:value/0015"
+    ]
+   },
+   "superseded_by": [],
+   "backlinks": [
+    "booping:rule/0031",
+    "claude-booping:story/0018"
+   ]
+  },
+  {
+   "id": "claude-booping:adr/0029",
+   "root": "claude-booping",
+   "ref": "adr/0029",
+   "type": "adr",
+   "title": "Each project publishes its specs site on GitLab Pages, under one index",
+   "summary": "A project whose vault is in its repo builds its specs site in CI to Pages; an index at the group's Pages root lists them, rebuilt on a schedule from the projects that carry a topic.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-15",
+   "updated_at": "2026-10-15",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/adr/0029-specs-sites-on-gitlab-pages.html",
+   "md": "claude-booping/adr/0029-specs-sites-on-gitlab-pages.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {
+    "values": [
+     "claude-booping:value/0011",
+     "claude-booping:value/0015"
+    ]
+   },
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:adr/0030",
+   "root": "claude-booping",
+   "ref": "adr/0030",
+   "type": "adr",
+   "title": "Groom drafts the whole plan in one staged pass",
+   "summary": "Groom is the plan template plus research then draft (V3a), no self-review step, without the 16 rules the model follows unprompted; the draft is one file.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-16",
+   "updated_at": "2026-10-17",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/adr/0030-groom-drafts-the-whole-plan-in-one-pass.html",
+   "md": "claude-booping/adr/0030-groom-drafts-the-whole-plan-in-one-pass.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {
+    "values": [
+     "claude-booping:value/0012",
+     "claude-booping:value/0002",
+     "claude-booping:value/0010"
+    ]
+   },
+   "superseded_by": [],
+   "backlinks": [
+    "claude-booping:adr/0009",
+    "claude-booping:adr/0011",
+    "claude-booping:idea/0003",
+    "claude-booping:idea/0009",
+    "claude-booping:story/0016"
+   ]
+  },
+  {
+   "id": "claude-booping:adr/0031",
+   "root": "claude-booping",
+   "ref": "adr/0031",
+   "type": "adr",
+   "title": "A script cuts the drafted plan into milestone files",
+   "summary": "The script `booping plan split` cuts the one-file plan on its milestone headings, byte for byte, into index.md and the milestone files; a model splits only what the script flags.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-16",
+   "updated_at": "2026-10-18",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/adr/0031-a-script-cuts-the-plan-into-milestone-files.html",
+   "md": "claude-booping/adr/0031-a-script-cuts-the-plan-into-milestone-files.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {
+    "values": [
+     "claude-booping:value/0015",
+     "claude-booping:value/0012",
+     "claude-booping:value/0010"
+    ]
+   },
+   "superseded_by": [],
+   "backlinks": [
+    "claude-booping:adr/0011",
+    "claude-booping:idea/0003",
+    "claude-booping:story/0016"
+   ]
+  },
+  {
+   "id": "claude-booping:adr/0032",
+   "root": "claude-booping",
+   "ref": "adr/0032",
+   "type": "adr",
+   "title": "The owner reviews specs on the site and hands the review to an agent",
+   "summary": "A review panel beside each record collects comments and a reviewed mark in the browser; an Outbox page shows and copies everything for the agent, which edits the records.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-16",
+   "updated_at": "2026-10-17",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/adr/0032-specs-review-on-the-site-goes-to-the-agent.html",
+   "md": "claude-booping/adr/0032-specs-review-on-the-site-goes-to-the-agent.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {
+    "values": [
+     "claude-booping:value/0008",
+     "claude-booping:value/0011",
+     "claude-booping:value/0002"
+    ]
+   },
+   "superseded_by": [],
+   "backlinks": [
+    "claude-booping:adr/0040"
+   ]
+  },
+  {
+   "id": "claude-booping:adr/0033",
+   "root": "claude-booping",
+   "ref": "adr/0033",
+   "type": "adr",
+   "title": "Playbooks consult the specs through a subagent",
+   "summary": "A read-only subagent tells playbooks what the specs already decide, contradict or leave open.",
+   "status": "superseded",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-16",
+   "updated_at": "2026-10-18",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/adr/0033-playbooks-consult-the-specs-through-a-subagent.html",
+   "md": "claude-booping/adr/0033-playbooks-consult-the-specs-through-a-subagent.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {
+    "values": [
+     "claude-booping:value/0002",
+     "claude-booping:value/0013",
+     "claude-booping:value/0012"
+    ]
+   },
+   "superseded_by": [
+    "claude-booping:adr/0034"
+   ],
+   "backlinks": [
+    "claude-booping:adr/0034"
+   ]
+  },
+  {
+   "id": "claude-booping:adr/0034",
+   "root": "claude-booping",
+   "ref": "adr/0034",
+   "type": "adr",
+   "title": "Every playbook carries a base guidance on the specs",
+   "summary": "Every playbook knows what the specs are, the values, and that it reads and writes them through a subagent, applying them where they raise quality; no per-playbook scenarios.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-16",
+   "updated_at": "2026-10-18",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/adr/0034-every-playbook-carries-a-base-guidance-on-the-specs.html",
+   "md": "claude-booping/adr/0034-every-playbook-carries-a-base-guidance-on-the-specs.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {
+    "supersedes": [
+     "claude-booping:adr/0033"
+    ],
+    "values": [
+     "claude-booping:value/0016",
+     "claude-booping:value/0002",
+     "claude-booping:value/0001",
+     "claude-booping:value/0012"
+    ]
+   },
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:adr/0035",
+   "root": "claude-booping",
+   "ref": "adr/0035",
+   "type": "adr",
+   "title": "Groom has no separate review step",
+   "summary": "A fresh Opus review lifts plan quality but adds about 10 minutes a plan (4–5 at best); the one-pass draft already meets the goal, so groom has no review step.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "owner",
+   "created_at": "2026-10-17",
+   "updated_at": "2026-10-17",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/adr/0035-groom-has-no-separate-review-step.html",
+   "md": "claude-booping/adr/0035-groom-has-no-separate-review-step.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {
+    "supersedes": [
+     "claude-booping:adr/0016"
+    ],
+    "values": [
+     "claude-booping:value/0012",
+     "claude-booping:value/0008",
+     "claude-booping:value/0010"
+    ]
+   },
+   "superseded_by": [],
+   "backlinks": [
+    "claude-booping:adr/0011",
+    "claude-booping:adr/0016",
+    "claude-booping:conflict/0002",
+    "claude-booping:idea/0003",
+    "claude-booping:story/0016"
+   ]
+  },
+  {
+   "id": "claude-booping:adr/0036",
+   "root": "claude-booping",
+   "ref": "adr/0036",
+   "type": "adr",
+   "title": "Autonomy is settled in prose",
+   "summary": "A run is autonomous because the user or its launch prompt says so, not because a config key does; there is no core.autonomy.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "owner",
+   "created_at": "2026-10-18",
+   "updated_at": "2026-10-18",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/adr/0036-autonomy-is-settled-in-prose.html",
+   "md": "claude-booping/adr/0036-autonomy-is-settled-in-prose.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {
+    "values": [
+     "claude-booping:value/0009",
+     "claude-booping:value/0002",
+     "claude-booping:value/0015"
+    ]
+   },
+   "superseded_by": [],
+   "backlinks": [
+    "claude-booping:conflict/0001"
+   ]
+  },
+  {
+   "id": "claude-booping:adr/0037",
+   "root": "claude-booping",
+   "ref": "adr/0037",
+   "type": "adr",
+   "title": "Journal entries are vault files built from existing primitives",
+   "summary": "A correction or an agent decision is one vault file with frontmatter, made by create, moved by frontmatter-update and sliced by query; an item's question is its clarify status; no journal command.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "owner",
+   "created_at": "2026-10-18",
+   "updated_at": "2026-10-18",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/adr/0037-journal-entries-are-vault-files.html",
+   "md": "claude-booping/adr/0037-journal-entries-are-vault-files.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {
+    "rules": [
+     "claude-booping:rule/0025"
+    ],
+    "values": [
+     "claude-booping:value/0015",
+     "claude-booping:value/0012",
+     "claude-booping:value/0011"
+    ]
+   },
+   "superseded_by": [],
+   "backlinks": [
+    "booping:rule/0031",
+    "claude-booping:adr/0026",
+    "claude-booping:adr/0040"
+   ]
+  },
+  {
+   "id": "claude-booping:adr/0038",
+   "root": "claude-booping",
+   "ref": "adr/0038",
+   "type": "adr",
+   "title": "Milestone shape is an mdcheck schema",
+   "summary": "Groom checks each milestone file with mdcheck against a schema in the groom playbook; `booping plan check` and its code go, and mdcheck becomes a required dependency.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "owner",
+   "created_at": "2026-10-18",
+   "updated_at": "2026-10-18",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/adr/0038-milestone-shape-is-an-mdcheck-schema.html",
+   "md": "claude-booping/adr/0038-milestone-shape-is-an-mdcheck-schema.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {
+    "rules": [
+     "claude-booping:rule/0025"
+    ],
+    "values": [
+     "claude-booping:value/0015",
+     "claude-booping:value/0012"
+    ]
+   },
+   "superseded_by": [],
+   "backlinks": [
+    "claude-booping:story/0016"
+   ]
+  },
+  {
+   "id": "claude-booping:adr/0039",
+   "root": "claude-booping",
+   "ref": "adr/0039",
+   "type": "adr",
+   "title": "A session in a booping project starts pointed at the playbooks",
+   "summary": "In a project with a .booping marker a SessionStart hook injects when to use playbooks and the rendered playbook table; the agent offers the fitting one, the manager by default.",
+   "status": "superseded",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-19",
+   "updated_at": "2026-10-19",
+   "review": "accepted",
+   "review_evidence": "«Давай opus сразу… В остальном, да, все правильно» — 2026-10-19, chat (plan + ADR briefs)",
+   "url": "claude-booping/adr/0039-session-start-points-to-playbooks.html",
+   "md": "claude-booping/adr/0039-session-start-points-to-playbooks.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {
+    "values": [
+     "claude-booping:value/0009",
+     "claude-booping:value/0008",
+     "claude-booping:value/0013",
+     "claude-booping:value/0016",
+     "claude-booping:value/0002"
+    ]
+   },
+   "superseded_by": [
+    "claude-booping:adr/0042"
+   ],
+   "backlinks": [
+    "claude-booping:adr/0042"
+   ]
+  },
+  {
+   "id": "claude-booping:adr/0040",
+   "root": "claude-booping",
+   "ref": "adr/0040",
+   "type": "adr",
+   "title": "Records carry a review level with evidence",
+   "summary": "A spec record's review is its own axis beside status — none, shown, discussed, accepted — and accepted carries the owner's words and where they were said; it replaces the reviewed date.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-19",
+   "updated_at": "2026-10-19",
+   "review": "accepted",
+   "review_evidence": "«Давай opus сразу… В остальном, да, все правильно» — 2026-10-19, chat (plan + ADR briefs)",
+   "url": "claude-booping/adr/0040-review-levels-with-evidence.html",
+   "md": "claude-booping/adr/0040-review-levels-with-evidence.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {
+    "values": [
+     "claude-booping:value/0008",
+     "claude-booping:value/0009"
+    ]
+   },
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:adr/0041",
+   "root": "claude-booping",
+   "ref": "adr/0041",
+   "type": "adr",
+   "title": "The ADR scorer reads the specs guide and the tier's record inventory",
+   "summary": "The adr-scorer gets the specs guide excerpt, the tier's value/rule/ADR inventory and the project's primitives, on Opus without tools, and answers route, overlaps, alt_score and missing.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-19",
+   "updated_at": "2026-10-19",
+   "review": "accepted",
+   "review_evidence": "«С, очевидно, надо брать» … «Ну все газ, вроде ок все» — 2026-10-19, chat",
+   "url": "claude-booping/adr/0041-adr-scorer-reads-the-guide-and-the-record-inventory.html",
+   "md": "claude-booping/adr/0041-adr-scorer-reads-the-guide-and-the-record-inventory.md",
+   "marks": {
+    "clarify": 1,
+    "unknown": 0
+   },
+   "relations": {
+    "rules": [
+     "claude-booping:rule/0033"
+    ],
+    "values": [
+     "claude-booping:value/0010",
+     "claude-booping:value/0012",
+     "claude-booping:value/0002"
+    ]
+   },
+   "superseded_by": [],
+   "backlinks": [
+    "booping:rule/0040"
+   ]
+  },
+  {
+   "id": "claude-booping:adr/0042",
+   "root": "claude-booping",
+   "ref": "adr/0042",
+   "type": "adr",
+   "title": "Every request in a booping session enters through the project-manager",
+   "summary": "Every request in a booping project session, questions and debugging included, goes to the project-manager, which routes it and launches and orchestrates the other playbooks.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-19",
+   "updated_at": "2026-10-19",
+   "review": "accepted",
+   "review_evidence": "«Да, все супер, принимаем» — 2026-10-19, chat (decision lines 1–8)",
+   "url": "claude-booping/adr/0042-project-work-enters-through-the-project-manager.html",
+   "md": "claude-booping/adr/0042-project-work-enters-through-the-project-manager.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {
+    "rules": [
+     "claude-booping:rule/0025",
+     "claude-booping:rule/0033"
+    ],
+    "supersedes": [
+     "claude-booping:adr/0039"
+    ],
+    "values": [
+     "claude-booping:value/0013",
+     "claude-booping:value/0019",
+     "claude-booping:value/0009",
+     "claude-booping:value/0002",
+     "claude-booping:value/0003",
+     "claude-booping:value/0010"
+    ]
+   },
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:conflict/0001",
+   "root": "claude-booping",
+   "ref": "conflict/0001",
+   "type": "conflict",
+   "title": "Plans run to the end ↔ Adjustable control",
+   "summary": "An agent that carries a plan to the end on its own pulls against a human who can review deeply and take control back; the run's autonomy mode settles which applies.",
+   "status": "resolved",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-17",
+   "updated_at": "2026-10-18",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/conflict/0001-plans-run-to-the-end-vs-adjustable-control.html",
+   "md": "claude-booping/conflict/0001-plans-run-to-the-end-vs-adjustable-control.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {
+    "values": [
+     "claude-booping:value/0007",
+     "claude-booping:value/0009"
+    ]
+   },
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:conflict/0002",
+   "root": "claude-booping",
+   "ref": "conflict/0002",
+   "type": "conflict",
+   "title": "Effective human review ↔ Plans run to the end ↔ Quality at a rational cost",
+   "summary": "More review checkpoints make review effective but cost run time and stops; core playbooks stop for review once, and groom runs no separate review step.",
+   "status": "resolved",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-17",
+   "updated_at": "2026-10-17",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/conflict/0002-effective-review-vs-time-and-cost.html",
+   "md": "claude-booping/conflict/0002-effective-review-vs-time-and-cost.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {
+    "values": [
+     "claude-booping:value/0008",
+     "claude-booping:value/0007",
+     "claude-booping:value/0012"
+    ]
+   },
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:idea/0001",
+   "root": "claude-booping",
+   "ref": "idea/0001",
+   "type": "idea",
+   "title": "Groom offers past plans and retros as context before planning",
+   "summary": "Before planning, groom has a cheap researcher list past plans and retros related to the request, and reads the ones the user picks in depth.",
+   "status": "open",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/idea/0001-groom-reads-past-plans-and-retros.html",
+   "md": "claude-booping/idea/0001-groom-reads-past-plans-and-retros.md",
+   "marks": {
+    "clarify": 1,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:idea/0002",
+   "root": "claude-booping",
+   "ref": "idea/0002",
+   "type": "idea",
+   "title": "Learn prefers guidance to validators",
+   "summary": "Learn should propose guidance that steers a step away from an issue, and propose a validator or sub-agent check only for critical cases.",
+   "status": "open",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-17",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/idea/0002-learn-prefers-guidance-over-validators.html",
+   "md": "claude-booping/idea/0002-learn-prefers-guidance-over-validators.md",
+   "marks": {
+    "clarify": 1,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:idea/0003",
+   "root": "claude-booping",
+   "ref": "idea/0003",
+   "type": "idea",
+   "title": "A faster groom without losing quality",
+   "summary": "Try several groom playbook variants and keep the one that runs faster with no loss in plan quality.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-17",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/idea/0003-groom-depth-scales-with-task.html",
+   "md": "claude-booping/idea/0003-groom-depth-scales-with-task.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": [
+    "claude-booping:idea/0008",
+    "claude-booping:idea/0009"
+   ]
+  },
+  {
+   "id": "claude-booping:idea/0004",
+   "root": "claude-booping",
+   "ref": "idea/0004",
+   "type": "idea",
+   "title": "Trim template fields that do not help",
+   "summary": "Drop the business-goal logic from grooming and replace the retro action table's Owner column with \"when to do it\".",
+   "status": "open",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/idea/0004-trim-unhelpful-template-fields.html",
+   "md": "claude-booping/idea/0004-trim-unhelpful-template-fields.md",
+   "marks": {
+    "clarify": 1,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:idea/0005",
+   "root": "claude-booping",
+   "ref": "idea/0005",
+   "type": "idea",
+   "title": "Booping as a web service with thin skills",
+   "summary": "A web service owns playbook management, artefacts and execution; skills become thin clients, a tracker such as Linear is a driver, and a sandbox runs the workers.",
+   "status": "open",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/idea/0005-web-booping-service.html",
+   "md": "claude-booping/idea/0005-web-booping-service.md",
+   "marks": {
+    "clarify": 1,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:idea/0006",
+   "root": "claude-booping",
+   "ref": "idea/0006",
+   "type": "idea",
+   "title": "Merged OSS PRs as benchmark tasks",
+   "summary": "Re-create small merged PRs from OSS repos as booping plans and score groom and develop by the repo's own tests.",
+   "status": "open",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/idea/0006-merged-oss-prs-as-benchmark-tasks.html",
+   "md": "claude-booping/idea/0006-merged-oss-prs-as-benchmark-tasks.md",
+   "marks": {
+    "clarify": 1,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:idea/0007",
+   "root": "claude-booping",
+   "ref": "idea/0007",
+   "type": "idea",
+   "title": "Claude wires a worker agent into booping on request",
+   "summary": "The user asks Claude Code to add a native agent or a CLI-backed agent to a playbook, and Claude writes the agent, the config entry and the targeted rule.",
+   "status": "open",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-15",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/idea/0007-guided-agent-wiring.html",
+   "md": "claude-booping/idea/0007-guided-agent-wiring.md",
+   "marks": {
+    "clarify": 1,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:idea/0008",
+   "root": "claude-booping",
+   "ref": "idea/0008",
+   "type": "idea",
+   "title": "Plans draft ADRs for their real forks",
+   "summary": "Where a plan meets a real design fork, groom writes an ADR draft with the alternatives and its choice, and offers it to the owner for review unless the run is autonomous.",
+   "status": "open",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-16",
+   "updated_at": "2026-10-16",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/idea/0008-plans-draft-adrs.html",
+   "md": "claude-booping/idea/0008-plans-draft-adrs.md",
+   "marks": {
+    "clarify": 1,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:idea/0009",
+   "root": "claude-booping",
+   "ref": "idea/0009",
+   "type": "idea",
+   "title": "Groom depth scales with the task",
+   "summary": "A small, already-decided request takes a light path to develop instead of a full groom, and groom runs its deeper work only when the task or the user asks for it.",
+   "status": "open",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-17",
+   "updated_at": "2026-10-17",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/idea/0009-groom-light-path-for-small-requests.html",
+   "md": "claude-booping/idea/0009-groom-light-path-for-small-requests.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": [
+    "claude-booping:idea/0003"
+   ]
+  },
+  {
+   "id": "claude-booping:reference/0001",
+   "root": "claude-booping",
+   "ref": "reference/0001",
+   "type": "reference",
+   "title": "Audience",
+   "summary": "Booping is read by three roles — users, advanced users and contributors — each coming for different things at a different depth, in a different voice.",
+   "status": "live",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-15",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/reference/0001-audience.html",
+   "md": "claude-booping/reference/0001-audience.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:reference/0002",
+   "root": "claude-booping",
+   "ref": "reference/0002",
+   "type": "reference",
+   "title": "Glossary",
+   "summary": "The canonical names for booping's concepts — one term per concept, never a synonym, used across records, docs and step bodies.",
+   "status": "live",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-15",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/reference/0002-glossary.html",
+   "md": "claude-booping/reference/0002-glossary.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:reference/0003",
+   "root": "claude-booping",
+   "ref": "reference/0003",
+   "type": "reference",
+   "title": "Documentation surfaces",
+   "summary": "Booping's markdown documentation surfaces, each with its audience and the depth ceiling past which content belongs elsewhere; executed or generated markdown is not a surface.",
+   "status": "live",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-15",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/reference/0003-documentation-surfaces.html",
+   "md": "claude-booping/reference/0003-documentation-surfaces.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:reference/0004",
+   "root": "claude-booping",
+   "ref": "reference/0004",
+   "type": "reference",
+   "title": "Develop model comparison, April 2026",
+   "summary": "One develop diff each from Claude Opus 4.7, Minimax 2.7 and GLM 5.1 scored 9.7, 7.2 and 6.4 of 10; only Opus produced a correct, plan-compliant diff.",
+   "status": "live",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/reference/0004-develop-model-comparison-2026-04.html",
+   "md": "claude-booping/reference/0004-develop-model-comparison-2026-04.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:reference/0005",
+   "root": "claude-booping",
+   "ref": "reference/0005",
+   "type": "reference",
+   "title": "Bench finding — develop follows the plan's code sketch over a lesson",
+   "summary": "In claude-booping-bench, /develop copied the casing of the plan's code sketch instead of a loaded naming lesson in 3 of 3 reps (judgment 0.2).",
+   "status": "live",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/reference/0005-bench-develop-follows-plan-sketch-over-lesson.html",
+   "md": "claude-booping/reference/0005-bench-develop-follows-plan-sketch-over-lesson.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:reference/0006",
+   "root": "claude-booping",
+   "ref": "reference/0006",
+   "type": "reference",
+   "title": "Groom cost — playbook versus the old skill",
+   "summary": "On one measured request the playbook groom took 2.4× the wall time, 5.2× the main-thread API calls and 3.0× the output tokens of the old /groom skill.",
+   "status": "live",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/reference/0006-groom-playbook-vs-skill-cost.html",
+   "md": "claude-booping/reference/0006-groom-playbook-vs-skill-cost.md",
+   "marks": {
+    "clarify": 1,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": [
+    "claude-booping:idea/0003"
+   ]
+  },
+  {
+   "id": "claude-booping:reference/0007",
+   "root": "claude-booping",
+   "ref": "reference/0007",
+   "type": "reference",
+   "title": "Groom benchmark 2026-10 — variants, rule ablation, plan split",
+   "summary": "What the October 2026 groom benchmark measured, what the model does without being told, what it cost and where the data lives.",
+   "status": "live",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-16",
+   "updated_at": "2026-10-17",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/reference/0007-groom-benchmark-2026-10.html",
+   "md": "claude-booping/reference/0007-groom-benchmark-2026-10.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": [
+    "claude-booping:idea/0003"
+   ]
+  },
+  {
+   "id": "claude-booping:reference/0008",
+   "root": "claude-booping",
+   "ref": "reference/0008",
+   "type": "reference",
+   "title": "Postmortem: the budget gate slipped into the core unasked",
+   "summary": "On 2026-10-15 a usage-limit gate the owner never asked for reached the core through a one-line mention, a package approval and autonomous runs; removed on 2026-10-17.",
+   "status": "live",
+   "kind": null,
+   "tags": [
+    "postmortem"
+   ],
+   "created_by": "claude",
+   "created_at": "2026-10-17",
+   "updated_at": "2026-10-18",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/reference/0008-postmortem-budget-gate-slipped-into-core.html",
+   "md": "claude-booping/reference/0008-postmortem-budget-gate-slipped-into-core.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": [
+    "booping:rule/0033"
+   ]
+  },
+  {
+   "id": "claude-booping:reference/0009",
+   "root": "claude-booping",
+   "ref": "reference/0009",
+   "type": "reference",
+   "title": "Prose or code probes 2026-10",
+   "summary": "Three cheap probes on 2026-10-18 — which rule wording makes a fresh model pick prose, an existing primitive or a new CLI correctly, and how sibling items should be groomed.",
+   "status": "live",
+   "kind": null,
+   "tags": [
+    "probe"
+   ],
+   "created_by": "claude",
+   "created_at": "2026-10-18",
+   "updated_at": "2026-10-18",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/reference/0009-prose-or-code-probes-2026-10.html",
+   "md": "claude-booping/reference/0009-prose-or-code-probes-2026-10.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": [
+    "booping:rule/0035",
+    "claude-booping:rule/0025"
+   ]
+  },
+  {
+   "id": "claude-booping:reference/0010",
+   "root": "claude-booping",
+   "ref": "reference/0010",
+   "type": "reference",
+   "title": "Postmortem: mechanisms built without a reader",
+   "summary": "Between 2026-10-15 and 2026-10-18 booping grew a config key and three journal CLIs that nothing needed; removed on 2026-10-18, with the rule wording and the ADR guide that let them in.",
+   "status": "live",
+   "kind": null,
+   "tags": [
+    "postmortem"
+   ],
+   "created_by": "claude",
+   "created_at": "2026-10-18",
+   "updated_at": "2026-10-18",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/reference/0010-postmortem-mechanisms-without-a-reader.html",
+   "md": "claude-booping/reference/0010-postmortem-mechanisms-without-a-reader.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:reference/0011",
+   "root": "claude-booping",
+   "ref": "reference/0011",
+   "type": "reference",
+   "title": "Postmortem: CLI commands removed under live runs",
+   "summary": "On 2026-10-17/18 booping removed the budget, correction and defaults commands while autonomous runs in another project still called them, and those runs failed.",
+   "status": "live",
+   "kind": null,
+   "tags": [
+    "postmortem"
+   ],
+   "created_by": "claude",
+   "created_at": "2026-10-18",
+   "updated_at": "2026-10-18",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/reference/0011-postmortem-cli-removed-under-live-runs.html",
+   "md": "claude-booping/reference/0011-postmortem-cli-removed-under-live-runs.md",
+   "marks": {
+    "clarify": 1,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:rule/0002",
+   "root": "claude-booping",
+   "ref": "rule/0002",
+   "type": "rule",
+   "title": "What is not in the source is marked, not invented",
+   "summary": "A record or artefact states only what its source says; an open point is marked [clarify] or \"not named in the source\", never filled in by the agent.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-17",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/rule/0002-unknown-is-marked.html",
+   "md": "claude-booping/rule/0002-unknown-is-marked.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:rule/0003",
+   "root": "claude-booping",
+   "ref": "rule/0003",
+   "type": "rule",
+   "title": "The compact artefact is reviewed before the detail",
+   "summary": "Where a human reviews, a run first produces a compact artefact the human can read and reorder, and builds the expensive detail only on the reviewed one.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/rule/0003-compact-artefact-first.html",
+   "md": "claude-booping/rule/0003-compact-artefact-first.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": [
+    "claude-booping:adr/0015"
+   ]
+  },
+  {
+   "id": "claude-booping:rule/0005",
+   "root": "claude-booping",
+   "ref": "rule/0005",
+   "type": "rule",
+   "title": "Every step ends by naming the next one",
+   "summary": "A playbook step or a run that hands back to the user ends by naming the next step and how to call it; a premature call says what is missing.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/rule/0005-next-step-is-named.html",
+   "md": "claude-booping/rule/0005-next-step-is-named.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:rule/0012",
+   "root": "claude-booping",
+   "ref": "rule/0012",
+   "type": "rule",
+   "title": "Every diff is reviewed in Plannotator, never in chat",
+   "summary": "In this project the code-review human step always runs through the plannotator-reviewer agent; a missing agent or a dead surface stops the run, never falls back to chat.",
+   "status": "retired",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/rule/0012-every-diff-reviewed-in-plannotator.html",
+   "md": "claude-booping/rule/0012-every-diff-reviewed-in-plannotator.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:rule/0013",
+   "root": "claude-booping",
+   "ref": "rule/0013",
+   "type": "rule",
+   "title": "Snapshot baselines are accepted by the user, never by a run",
+   "summary": "A run never runs just snapshots-accept or writes the committed playbook reports; it leaves the drift uncommitted and names it in its final report for the user to accept.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-17",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/rule/0013-snapshot-baselines-accepted-by-user.html",
+   "md": "claude-booping/rule/0013-snapshot-baselines-accepted-by-user.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:rule/0015",
+   "root": "claude-booping",
+   "ref": "rule/0015",
+   "type": "rule",
+   "title": "Code review covers code files only",
+   "summary": "A code review surfaces findings on code files only; documentation, plans and other prose in the diff pass unreviewed.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/rule/0015-review-covers-code-only.html",
+   "md": "claude-booping/rule/0015-review-covers-code-only.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:rule/0017",
+   "root": "claude-booping",
+   "ref": "rule/0017",
+   "type": "rule",
+   "title": "Structured data is rendered from config, never restated in prose",
+   "summary": "Statuses, queues, agent ids, globs and other structured values live in config or query specs and are rendered into bodies; prose never copies a literal.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/rule/0017-structured-data-rendered-not-restated.html",
+   "md": "claude-booping/rule/0017-structured-data-rendered-not-restated.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": [
+    "claude-booping:adr/0003"
+   ]
+  },
+  {
+   "id": "claude-booping:rule/0018",
+   "root": "claude-booping",
+   "ref": "rule/0018",
+   "type": "rule",
+   "title": "Project specifics stay out of the core",
+   "summary": "Core skills and playbooks stay stack-agnostic; whatever is specific to a project is written into that project's tier, never into the core or a user-level scope by a run.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-15",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/rule/0018-project-specifics-stay-out-of-core.html",
+   "md": "claude-booping/rule/0018-project-specifics-stay-out-of-core.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:rule/0019",
+   "root": "claude-booping",
+   "ref": "rule/0019",
+   "type": "rule",
+   "title": "The driver owns the vault and git; workers touch only repo code",
+   "summary": "The driver owns the vault, run state and commits; workers edit only repo code, never git history; a small fix goes to the session already holding its context.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-18",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/rule/0019-driver-owns-vault-workers-own-code.html",
+   "md": "claude-booping/rule/0019-driver-owns-vault-workers-own-code.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:rule/0020",
+   "root": "claude-booping",
+   "ref": "rule/0020",
+   "type": "rule",
+   "title": "Project shaping of an agent or skill is a targeted record",
+   "summary": "A project adjusts a core agent or skill through a targeted rule (agent:<id>, skill:<name>), never through a separate extension file.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-15",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/rule/0020-agent-shaping-is-targeted.html",
+   "md": "claude-booping/rule/0020-agent-shaping-is-targeted.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:rule/0022",
+   "root": "claude-booping",
+   "ref": "rule/0022",
+   "type": "rule",
+   "title": "Commits are conventional with a scope",
+   "summary": "Commit messages follow Conventional Commits with a scope, such as feat(booping) or fix(groom).",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/rule/0022-conventional-commits-with-scope.html",
+   "md": "claude-booping/rule/0022-conventional-commits-with-scope.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:rule/0023",
+   "root": "claude-booping",
+   "ref": "rule/0023",
+   "type": "rule",
+   "title": "The README Statuses section follows the states blocks",
+   "summary": "The README's Statuses section is a hand-kept narrative over each playbook's states block; a change to a states block revisits it in the same change.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/rule/0023-readme-statuses-follow-states.html",
+   "md": "claude-booping/rule/0023-readme-statuses-follow-states.md",
+   "marks": {
+    "clarify": 1,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": [
+    "claude-booping:adr/0006"
+   ]
+  },
+  {
+   "id": "claude-booping:rule/0024",
+   "root": "claude-booping",
+   "ref": "rule/0024",
+   "type": "rule",
+   "title": "A new procedure is a playbook, not a skill",
+   "summary": "Anything procedural is added as a playbook driven by /playbook; a new skill is added only for a surface /playbook cannot drive.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-17",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/rule/0024-new-procedures-are-playbooks.html",
+   "md": "claude-booping/rule/0024-new-procedures-are-playbooks.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": [
+    "claude-booping:adr/0002"
+   ]
+  },
+  {
+   "id": "claude-booping:rule/0025",
+   "root": "claude-booping",
+   "ref": "rule/0025",
+   "type": "rule",
+   "title": "Who reads the result decides prose or code",
+   "summary": "A command, key or check exists when code reads its result or it supplies a fact the model cannot see; the rest is prose, the default when unsure.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-18",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/rule/0025-who-reads-the-result-decides.html",
+   "md": "claude-booping/rule/0025-who-reads-the-result-decides.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": [
+    "claude-booping:adr/0006",
+    "claude-booping:adr/0037",
+    "claude-booping:adr/0038",
+    "claude-booping:adr/0042"
+   ]
+  },
+  {
+   "id": "claude-booping:rule/0026",
+   "root": "claude-booping",
+   "ref": "rule/0026",
+   "type": "rule",
+   "title": "Step bodies are fetched on demand, not pasted into spawn prompts",
+   "summary": "A step's body is fetched when the step runs rather than pasted into a spawn prompt, so a run's context grows with its graph, not with the sum of its step bodies.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/rule/0026-step-bodies-fetched-on-demand.html",
+   "md": "claude-booping/rule/0026-step-bodies-fetched-on-demand.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:rule/0027",
+   "root": "claude-booping",
+   "ref": "rule/0027",
+   "type": "rule",
+   "title": "A hermetic render repeats byte for byte",
+   "summary": "With macros stubbed and the config merge pinned to core and project levels, a render is identical on any machine.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/rule/0027-renders-reproducible.html",
+   "md": "claude-booping/rule/0027-renders-reproducible.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": [
+    "claude-booping:adr/0039"
+   ]
+  },
+  {
+   "id": "claude-booping:rule/0028",
+   "root": "claude-booping",
+   "ref": "rule/0028",
+   "type": "rule",
+   "title": "Vault artefacts are plain markdown with YAML frontmatter",
+   "summary": "Every artefact a run writes into the project vault is plain markdown with YAML frontmatter, readable in Obsidian.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/rule/0028-vault-artefacts-plain-markdown.html",
+   "md": "claude-booping/rule/0028-vault-artefacts-plain-markdown.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:rule/0029",
+   "root": "claude-booping",
+   "ref": "rule/0029",
+   "type": "rule",
+   "title": "Graph and render problems are reported in band, never as crashes",
+   "summary": "A graph or render problem surfaces as a STOP or Note notice in the rendered output at exit 0, never as a crash.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/rule/0029-failures-reported-in-band.html",
+   "md": "claude-booping/rule/0029-failures-reported-in-band.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": [
+    "claude-booping:adr/0003"
+   ]
+  },
+  {
+   "id": "claude-booping:rule/0030",
+   "root": "claude-booping",
+   "ref": "rule/0030",
+   "type": "rule",
+   "title": "A prompt rule earns its place by a measured miss",
+   "summary": "An instruction enters a prompt or a targeted rule only after a minimal probe shows the model missing it; evals and benchmarks run only when the owner agrees.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-16",
+   "updated_at": "2026-10-16",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/rule/0030-prompt-rules-earn-their-place.html",
+   "md": "claude-booping/rule/0030-prompt-rules-earn-their-place.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:rule/0031",
+   "root": "claude-booping",
+   "ref": "rule/0031",
+   "type": "rule",
+   "title": "Judgement runs on Opus; cheaper models only for routine with a known output",
+   "summary": "Every step, agent or fallback that decides — drafts, reviews, verifies a DoD, writes tests — runs on Opus; the researcher on Sonnet high; else only mechanical steps.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-17",
+   "updated_at": "2026-10-17",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/rule/0031-judgement-runs-on-opus.html",
+   "md": "claude-booping/rule/0031-judgement-runs-on-opus.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": [
+    "claude-booping:adr/0031"
+   ]
+  },
+  {
+   "id": "claude-booping:rule/0032",
+   "root": "claude-booping",
+   "ref": "rule/0032",
+   "type": "rule",
+   "title": "The booping CLI holds only generic primitives",
+   "summary": "A booping CLI command is a primitive any playbook can use; behaviour of one playbook's domain is that playbook's script, run through its hooks.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-18",
+   "updated_at": "2026-10-18",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/rule/0032-cli-holds-only-generic-primitives.html",
+   "md": "claude-booping/rule/0032-cli-holds-only-generic-primitives.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:rule/0033",
+   "root": "claude-booping",
+   "ref": "rule/0033",
+   "type": "rule",
+   "title": "Private sources stay in vault/notes",
+   "summary": "This repo is public; another project's data, local paths and raw experiment inputs are written only under the gitignored vault/notes/, and tracked records name them without linking.",
+   "status": "accepted",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-18",
+   "updated_at": "2026-10-18",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/rule/0033-private-sources-stay-in-vault-notes.html",
+   "md": "claude-booping/rule/0033-private-sources-stay-in-vault-notes.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": [
+    "claude-booping:adr/0040",
+    "claude-booping:adr/0041",
+    "claude-booping:adr/0042"
+   ]
+  },
+  {
+   "id": "claude-booping:runbook/0001",
+   "root": "claude-booping",
+   "ref": "runbook/0001",
+   "type": "runbook",
+   "title": "Cut a plugin release",
+   "summary": "A release is a release/X.Y.Z branch bumping plugin.json and CHANGELOG.md, merged by PR into master, then tagged vX.Y.Z with a GitHub release on the merge commit.",
+   "status": "live",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/runbook/0001-cut-a-release.html",
+   "md": "claude-booping/runbook/0001-cut-a-release.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:runbook/0002",
+   "root": "claude-booping",
+   "ref": "runbook/0002",
+   "type": "runbook",
+   "title": "Run the eval suites and read the PR comment",
+   "summary": "Evals run locally on subscription auth via just smoke/regress/eval; results land as one sticky advisory PR comment, never a gate.",
+   "status": "live",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/runbook/0002-run-eval-suites.html",
+   "md": "claude-booping/runbook/0002-run-eval-suites.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 1
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:runbook/0003",
+   "root": "claude-booping",
+   "ref": "runbook/0003",
+   "type": "runbook",
+   "title": "Accept new snapshot and contract baselines",
+   "summary": "After an intentional change, the user reads the snapshot or txtar drift and accepts it; a run or a worker never accepts a baseline itself.",
+   "status": "live",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/runbook/0003-accept-new-baselines.html",
+   "md": "claude-booping/runbook/0003-accept-new-baselines.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:story/0001",
+   "root": "claude-booping",
+   "ref": "story/0001",
+   "type": "story",
+   "title": "Playbook driver",
+   "summary": "The /playbook skill discovers a procedure across the core, global and project levels and drives it to completion.",
+   "status": "done",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-20",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/story/0001-playbook-driver.html",
+   "md": "claude-booping/story/0001-playbook-driver.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:story/0002",
+   "root": "claude-booping",
+   "ref": "story/0002",
+   "type": "story",
+   "title": "Run state machines",
+   "summary": "A run's state lives in per-playbook states: machines that only the booping CLI advances.",
+   "status": "done",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-20",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/story/0002-run-state-machines.html",
+   "md": "claude-booping/story/0002-run-state-machines.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:story/0003",
+   "root": "claude-booping",
+   "ref": "story/0003",
+   "type": "story",
+   "title": "Layered configuration",
+   "summary": "Config is a deep merge over the core, global and project levels, and any mapping in it can be a query spec or a template tree.",
+   "status": "done",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-20",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/story/0003-layered-configuration.html",
+   "md": "claude-booping/story/0003-layered-configuration.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:story/0004",
+   "root": "claude-booping",
+   "ref": "story/0004",
+   "type": "story",
+   "title": "Targeted rules",
+   "summary": "An accepted rule's brief is injected into exactly the playbooks, steps, agents or skills its targets: list names.",
+   "status": "done",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-20",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/story/0004-targeted-rules.html",
+   "md": "claude-booping/story/0004-targeted-rules.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:story/0005",
+   "root": "claude-booping",
+   "ref": "story/0005",
+   "type": "story",
+   "title": "Plan and review templates",
+   "summary": "Groom and code-review offer plan and review templates the user authored in the Project Vault or at the global level.",
+   "status": "done",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-20",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/story/0005-plan-and-review-templates.html",
+   "md": "claude-booping/story/0005-plan-and-review-templates.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:story/0006",
+   "root": "claude-booping",
+   "ref": "story/0006",
+   "type": "story",
+   "title": "User playbooks",
+   "summary": "Playbooks the user authors at the global level or in the Project Vault are discovered and run beside the core ones.",
+   "status": "done",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-20",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/story/0006-user-playbooks.html",
+   "md": "claude-booping/story/0006-user-playbooks.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:story/0007",
+   "root": "claude-booping",
+   "ref": "story/0007",
+   "type": "story",
+   "title": "External agents",
+   "summary": "Agents the plugin does not ship are wired into playbook agent slots through config and shaped per project by targeted rules.",
+   "status": "done",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-20",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/story/0007-external-agents.html",
+   "md": "claude-booping/story/0007-external-agents.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:story/0008",
+   "root": "claude-booping",
+   "ref": "story/0008",
+   "type": "story",
+   "title": "Template pipeline",
+   "summary": "Skill and agent bodies render in one runtime stage from src/templates/ with full project context, reproducibly when pinned.",
+   "status": "done",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-20",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/story/0008-template-pipeline.html",
+   "md": "claude-booping/story/0008-template-pipeline.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:story/0009",
+   "root": "claude-booping",
+   "ref": "story/0009",
+   "type": "story",
+   "title": "Quality gates",
+   "summary": "just ci runs lint, typecheck, pytest, snapshots, mdcheck and e2e in order, holding the plugin's behaviour.",
+   "status": "done",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-20",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/story/0009-quality-gates.html",
+   "md": "claude-booping/story/0009-quality-gates.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:story/0010",
+   "root": "claude-booping",
+   "ref": "story/0010",
+   "type": "story",
+   "title": "pytest-txtar",
+   "summary": "The e2e corpus's case format and sandboxed runner ship as a standalone pytest plugin on PyPI.",
+   "status": "done",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-20",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/story/0010-pytest-txtar.html",
+   "md": "claude-booping/story/0010-pytest-txtar.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:story/0011",
+   "root": "claude-booping",
+   "ref": "story/0011",
+   "type": "story",
+   "title": "Eval suites",
+   "summary": "Promptfoo suites beside each step guard its contract in a deterministic and an llm-rubric tier.",
+   "status": "done",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-20",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/story/0011-eval-suites.html",
+   "md": "claude-booping/story/0011-eval-suites.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:story/0012",
+   "root": "claude-booping",
+   "ref": "story/0012",
+   "type": "story",
+   "title": "Migration shipping",
+   "summary": "The plugin ships Project Vault migrations, and every render surface is gated on a vault's applied watermark.",
+   "status": "done",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-20",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/story/0012-migration-shipping.html",
+   "md": "claude-booping/story/0012-migration-shipping.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:story/0013",
+   "root": "claude-booping",
+   "ref": "story/0013",
+   "type": "story",
+   "title": "Documentation site",
+   "summary": "The public MkDocs reference builds strictly and publishes to gh-pages on push to master.",
+   "status": "done",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-20",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/story/0013-documentation-site.html",
+   "md": "claude-booping/story/0013-documentation-site.md",
+   "marks": {
+    "clarify": 1,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:story/0014",
+   "root": "claude-booping",
+   "ref": "story/0014",
+   "type": "story",
+   "title": "Project setup",
+   "summary": "The setup playbook takes a repo from any state to a working booping project and re-runs without changing what is already set up.",
+   "status": "done",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-20",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/story/0014-project-setup.html",
+   "md": "claude-booping/story/0014-project-setup.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:story/0015",
+   "root": "claude-booping",
+   "ref": "story/0015",
+   "type": "story",
+   "title": "Project Vault migrations",
+   "summary": "The migrate playbook brings an existing Project Vault current with the plugin on one up-front approval, with one commit per migration.",
+   "status": "done",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-20",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/story/0015-vault-migrations.html",
+   "md": "claude-booping/story/0015-vault-migrations.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:story/0016",
+   "root": "claude-booping",
+   "ref": "story/0016",
+   "type": "story",
+   "title": "Groom",
+   "summary": "Groom shapes a feature, bug or refactor into a specified, estimated plan the user approved, ending at ready-for-dev.",
+   "status": "done",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-20",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/story/0016-groom.html",
+   "md": "claude-booping/story/0016-groom.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:story/0017",
+   "root": "claude-booping",
+   "ref": "story/0017",
+   "type": "story",
+   "title": "Develop",
+   "summary": "Develop executes a groomed plan one milestone group at a time through a worker agent and closes it at done or fail.",
+   "status": "done",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-20",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/story/0017-develop.html",
+   "md": "claude-booping/story/0017-develop.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:story/0018",
+   "root": "claude-booping",
+   "ref": "story/0018",
+   "type": "story",
+   "title": "Retro",
+   "summary": "Retro mines a finished sprint's session logs, diff and the user's feedback into a standalone retrospective.",
+   "status": "done",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-20",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/story/0018-retro.html",
+   "md": "claude-booping/story/0018-retro.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:story/0019",
+   "root": "claude-booping",
+   "ref": "story/0019",
+   "type": "story",
+   "title": "Learn",
+   "summary": "Learn turns retrospective findings the user confirmed into rule records in the project specs tier or CLAUDE.md entries.",
+   "status": "done",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-20",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/story/0019-learn.html",
+   "md": "claude-booping/story/0019-learn.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:story/0020",
+   "root": "claude-booping",
+   "ref": "story/0020",
+   "type": "story",
+   "title": "Session metrics",
+   "summary": "A plan carries measured active minutes, tokens and models computed from Claude Code session logs.",
+   "status": "done",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-20",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/story/0020-session-metrics.html",
+   "md": "claude-booping/story/0020-session-metrics.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:story/0021",
+   "root": "claude-booping",
+   "ref": "story/0021",
+   "type": "story",
+   "title": "Code review",
+   "summary": "The code-review playbook reviews a confirmed scope, collects the human verdict and applies only approved fixes.",
+   "status": "done",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-20",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/story/0021-code-review.html",
+   "md": "claude-booping/story/0021-code-review.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:story/0022",
+   "root": "claude-booping",
+   "ref": "story/0022",
+   "type": "story",
+   "title": "Task tracker",
+   "summary": "The booping-tracker CLI carries every interaction with an issue tracker, and groom mirrors its run status and questions onto the tracker issue.",
+   "status": "done",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-20",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/story/0022-task-tracker.html",
+   "md": "claude-booping/story/0022-task-tracker.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:story/0023",
+   "root": "claude-booping",
+   "ref": "story/0023",
+   "type": "story",
+   "title": "Project manager",
+   "summary": "One manager the user talks to files every request as an item and carries it through groom, develop, review and merge, with a status computed from the vault.",
+   "status": "done",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-18",
+   "updated_at": "2026-10-20",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/story/0023-project-manager.html",
+   "md": "claude-booping/story/0023-project-manager.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": [
+    "claude-booping:adr/0025"
+   ]
+  },
+  {
+   "id": "claude-booping:story/0024",
+   "root": "claude-booping",
+   "ref": "story/0024",
+   "type": "story",
+   "title": "Specs review with the owner",
+   "summary": "The system reviews the owner's specs, fixes what is plainly stale, and brings the owner only the decisions that are theirs, one at a time and kept across restarts.",
+   "status": "done",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-18",
+   "updated_at": "2026-10-20",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/story/0024-specs-review-with-the-owner.html",
+   "md": "claude-booping/story/0024-specs-review-with-the-owner.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:story/0025",
+   "root": "claude-booping",
+   "ref": "story/0025",
+   "type": "story",
+   "title": "Own integration on top of booping",
+   "summary": "An advanced user wires their own triggers, schedules, tracker flows and usage guards on top of booping's surfaces; the core ships none of them.",
+   "status": "done",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-18",
+   "updated_at": "2026-10-20",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/story/0025-own-integration-on-top.html",
+   "md": "claude-booping/story/0025-own-integration-on-top.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:story/0026",
+   "root": "claude-booping",
+   "ref": "story/0026",
+   "type": "story",
+   "title": "Specs first, then code",
+   "summary": "A decision made in the specs becomes tracked work the code follows, closed with its plan; code that ran ahead of the specs becomes work for the specs.",
+   "status": "done",
+   "kind": null,
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-18",
+   "updated_at": "2026-10-20",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/story/0026-specs-first-then-code.html",
+   "md": "claude-booping/story/0026-specs-first-then-code.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": []
+  },
+  {
+   "id": "claude-booping:value/0001",
+   "root": "claude-booping",
+   "ref": "value/0001",
+   "type": "value",
+   "title": "Curated self-learning",
+   "summary": "The system gets better from its own runs, but only through the user and when the user wants it: a lesson becomes a rule after the user takes it, not after every run.",
+   "status": null,
+   "kind": "value",
+   "tags": [],
+   "created_by": "owner",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/value/0001-curated-self-learning.html",
+   "md": "claude-booping/value/0001-curated-self-learning.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": [
+    "booping:rule/0001",
+    "booping:rule/0031",
+    "claude-booping:adr/0001",
+    "claude-booping:adr/0026",
+    "claude-booping:adr/0034",
+    "claude-booping:value/0018"
+   ]
+  },
+  {
+   "id": "claude-booping:value/0002",
+   "root": "claude-booping",
+   "ref": "value/0002",
+   "type": "value",
+   "title": "Minimal effective context",
+   "summary": "A step gets only what it needs.",
+   "status": null,
+   "kind": "value",
+   "tags": [],
+   "created_by": "owner",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/value/0002-minimal-effective-context.html",
+   "md": "claude-booping/value/0002-minimal-effective-context.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": [
+    "booping:rule/0001",
+    "booping:rule/0006",
+    "booping:rule/0008",
+    "booping:rule/0009",
+    "booping:rule/0037",
+    "booping:rule/0040",
+    "booping:rule/0041",
+    "claude-booping:adr/0002",
+    "claude-booping:adr/0010",
+    "claude-booping:adr/0011",
+    "claude-booping:adr/0018",
+    "claude-booping:adr/0022",
+    "claude-booping:adr/0024",
+    "claude-booping:adr/0030",
+    "claude-booping:adr/0032",
+    "claude-booping:adr/0033",
+    "claude-booping:adr/0034",
+    "claude-booping:adr/0036",
+    "claude-booping:adr/0039",
+    "claude-booping:adr/0041",
+    "claude-booping:adr/0042",
+    "claude-booping:rule/0019",
+    "claude-booping:rule/0024",
+    "claude-booping:rule/0026",
+    "claude-booping:rule/0030"
+   ]
+  },
+  {
+   "id": "claude-booping:value/0003",
+   "root": "claude-booping",
+   "ref": "value/0003",
+   "type": "value",
+   "title": "Single source",
+   "summary": "Each fact, decision and piece of structured data lives in one place and is referenced or rendered from there; a decision is kept together with its reason.",
+   "status": null,
+   "kind": "value",
+   "tags": [],
+   "created_by": "owner",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/value/0003-single-source.html",
+   "md": "claude-booping/value/0003-single-source.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": [
+    "booping:rule/0001",
+    "booping:rule/0006",
+    "booping:rule/0007",
+    "booping:rule/0034",
+    "booping:rule/0037",
+    "claude-booping:adr/0001",
+    "claude-booping:adr/0003",
+    "claude-booping:adr/0004",
+    "claude-booping:adr/0006",
+    "claude-booping:adr/0008",
+    "claude-booping:adr/0009",
+    "claude-booping:adr/0010",
+    "claude-booping:adr/0017",
+    "claude-booping:adr/0020",
+    "claude-booping:adr/0039",
+    "claude-booping:adr/0042",
+    "claude-booping:rule/0017",
+    "claude-booping:rule/0019",
+    "claude-booping:rule/0020",
+    "claude-booping:rule/0023"
+   ]
+  },
+  {
+   "id": "claude-booping:value/0004",
+   "root": "claude-booping",
+   "ref": "value/0004",
+   "type": "value",
+   "title": "Analysable history",
+   "summary": "Plans, runs and their outcomes are kept across every project, so the history can be analysed: practices taken over from one project to another, benchmarks, quality comparison, problem analysis.",
+   "status": null,
+   "kind": "value",
+   "tags": [],
+   "created_by": "owner",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/value/0004-analysable-history.html",
+   "md": "claude-booping/value/0004-analysable-history.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": [
+    "booping:rule/0031",
+    "claude-booping:adr/0008",
+    "claude-booping:adr/0025",
+    "claude-booping:adr/0026",
+    "claude-booping:rule/0028"
+   ]
+  },
+  {
+   "id": "claude-booping:value/0005",
+   "root": "claude-booping",
+   "ref": "value/0005",
+   "type": "value",
+   "title": "Stack-agnostic core",
+   "summary": "The core knows nothing about a stack or a project; specifics live in the global and the project tiers.",
+   "status": null,
+   "kind": "value",
+   "tags": [],
+   "created_by": "owner",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/value/0005-stack-agnostic-core.html",
+   "md": "claude-booping/value/0005-stack-agnostic-core.md",
+   "marks": {
+    "clarify": 1,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": [
+    "claude-booping:adr/0001",
+    "claude-booping:adr/0002",
+    "claude-booping:adr/0003",
+    "claude-booping:adr/0004",
+    "claude-booping:adr/0014",
+    "claude-booping:adr/0016",
+    "claude-booping:rule/0018",
+    "claude-booping:rule/0020",
+    "claude-booping:rule/0024"
+   ]
+  },
+  {
+   "id": "claude-booping:value/0006",
+   "root": "claude-booping",
+   "ref": "value/0006",
+   "type": "value",
+   "title": "A framework for playbooks",
+   "summary": "Booping is a framework a user digitises their own processes with — config, templates, primitives, the CLI, playbooks and evals for their steps.",
+   "status": null,
+   "kind": "value",
+   "tags": [],
+   "created_by": "owner",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-17",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/value/0006-a-constructor-not-a-fixed-solution.html",
+   "md": "claude-booping/value/0006-a-constructor-not-a-fixed-solution.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": [
+    "claude-booping:adr/0004",
+    "claude-booping:rule/0032",
+    "claude-booping:value/0018"
+   ]
+  },
+  {
+   "id": "claude-booping:value/0007",
+   "root": "claude-booping",
+   "ref": "value/0007",
+   "type": "value",
+   "title": "Plans run to the end",
+   "summary": "The agent carries a plan through to the end on its own unless force majeure stops it.",
+   "status": null,
+   "kind": "value",
+   "tags": [],
+   "created_by": "owner",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/value/0007-plans-run-to-the-end.html",
+   "md": "claude-booping/value/0007-plans-run-to-the-end.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": [
+    "booping:rule/0004",
+    "booping:rule/0010",
+    "claude-booping:adr/0002",
+    "claude-booping:adr/0006",
+    "claude-booping:adr/0007",
+    "claude-booping:adr/0010",
+    "claude-booping:adr/0015",
+    "claude-booping:adr/0019",
+    "claude-booping:adr/0025",
+    "claude-booping:conflict/0001",
+    "claude-booping:conflict/0002",
+    "claude-booping:rule/0013"
+   ]
+  },
+  {
+   "id": "claude-booping:value/0008",
+   "root": "claude-booping",
+   "ref": "value/0008",
+   "type": "value",
+   "title": "Effective human review",
+   "summary": "Every step where a human takes part is convenient and effective for that human.",
+   "status": null,
+   "kind": "value",
+   "tags": [],
+   "created_by": "owner",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/value/0008-effective-human-review.html",
+   "md": "claude-booping/value/0008-effective-human-review.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": [
+    "booping:rule/0004",
+    "booping:rule/0030",
+    "booping:rule/0032",
+    "booping:rule/0033",
+    "booping:rule/0036",
+    "booping:rule/0038",
+    "claude-booping:adr/0015",
+    "claude-booping:adr/0018",
+    "claude-booping:adr/0032",
+    "claude-booping:adr/0035",
+    "claude-booping:adr/0039",
+    "claude-booping:adr/0040",
+    "claude-booping:conflict/0002",
+    "claude-booping:rule/0002",
+    "claude-booping:rule/0003",
+    "claude-booping:rule/0012"
+   ]
+  },
+  {
+   "id": "claude-booping:value/0009",
+   "root": "claude-booping",
+   "ref": "value/0009",
+   "type": "value",
+   "title": "Adjustable control",
+   "summary": "The human can review the system deeply, or give the agent more freedom to act inside the values and boundaries.",
+   "status": null,
+   "kind": "value",
+   "tags": [],
+   "created_by": "owner",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/value/0009-adjustable-control.html",
+   "md": "claude-booping/value/0009-adjustable-control.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": [
+    "booping:rule/0030",
+    "booping:rule/0032",
+    "booping:rule/0033",
+    "booping:rule/0036",
+    "claude-booping:adr/0007",
+    "claude-booping:adr/0014",
+    "claude-booping:adr/0018",
+    "claude-booping:adr/0025",
+    "claude-booping:adr/0036",
+    "claude-booping:adr/0039",
+    "claude-booping:adr/0040",
+    "claude-booping:adr/0042",
+    "claude-booping:conflict/0001",
+    "claude-booping:rule/0002",
+    "claude-booping:rule/0013"
+   ]
+  },
+  {
+   "id": "claude-booping:value/0010",
+   "root": "claude-booping",
+   "ref": "value/0010",
+   "type": "value",
+   "title": "Proven to work",
+   "summary": "We know the system works as it should and can guarantee it high enough to call it reliable.",
+   "status": null,
+   "kind": "value",
+   "tags": [],
+   "created_by": "owner",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/value/0010-proven-to-work.html",
+   "md": "claude-booping/value/0010-proven-to-work.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": [
+    "booping:rule/0039",
+    "booping:rule/0040",
+    "claude-booping:adr/0020",
+    "claude-booping:adr/0021",
+    "claude-booping:adr/0030",
+    "claude-booping:adr/0031",
+    "claude-booping:adr/0035",
+    "claude-booping:adr/0041",
+    "claude-booping:adr/0042",
+    "claude-booping:rule/0013",
+    "claude-booping:rule/0027",
+    "claude-booping:rule/0030",
+    "claude-booping:rule/0031"
+   ]
+  },
+  {
+   "id": "claude-booping:value/0011",
+   "root": "claude-booping",
+   "ref": "value/0011",
+   "type": "value",
+   "title": "Everything in one place",
+   "summary": "Everything is plain files, easy to look at from one place — for example Obsidian; symlinks back to the project repos keep it together.",
+   "status": null,
+   "kind": "value",
+   "tags": [],
+   "created_by": "owner",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/value/0011-everything-in-one-place.html",
+   "md": "claude-booping/value/0011-everything-in-one-place.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": [
+    "claude-booping:adr/0001",
+    "claude-booping:adr/0009",
+    "claude-booping:adr/0019",
+    "claude-booping:adr/0029",
+    "claude-booping:adr/0032",
+    "claude-booping:adr/0037",
+    "claude-booping:rule/0028",
+    "claude-booping:rule/0033"
+   ]
+  },
+  {
+   "id": "claude-booping:value/0012",
+   "root": "claude-booping",
+   "ref": "value/0012",
+   "type": "value",
+   "title": "Quality at a rational cost",
+   "summary": "Booping is a work tool for professionals, so the quality of the result matters.",
+   "status": null,
+   "kind": "value",
+   "tags": [],
+   "created_by": "owner",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/value/0012-quality-at-a-rational-cost.html",
+   "md": "claude-booping/value/0012-quality-at-a-rational-cost.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": [
+    "booping:rule/0035",
+    "booping:rule/0039",
+    "claude-booping:adr/0002",
+    "claude-booping:adr/0007",
+    "claude-booping:adr/0009",
+    "claude-booping:adr/0011",
+    "claude-booping:adr/0015",
+    "claude-booping:adr/0016",
+    "claude-booping:adr/0021",
+    "claude-booping:adr/0022",
+    "claude-booping:adr/0024",
+    "claude-booping:adr/0030",
+    "claude-booping:adr/0031",
+    "claude-booping:adr/0033",
+    "claude-booping:adr/0034",
+    "claude-booping:adr/0035",
+    "claude-booping:adr/0037",
+    "claude-booping:adr/0038",
+    "claude-booping:adr/0041",
+    "claude-booping:conflict/0002",
+    "claude-booping:rule/0025",
+    "claude-booping:rule/0030",
+    "claude-booping:rule/0031"
+   ]
+  },
+  {
+   "id": "claude-booping:value/0013",
+   "root": "claude-booping",
+   "ref": "value/0013",
+   "type": "value",
+   "title": "Guides to the goal",
+   "summary": "The system is clear to the user and leads them to the goal by the hand, while letting a professional step aside and get there their own way.",
+   "status": null,
+   "kind": "value",
+   "tags": [],
+   "created_by": "owner",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/value/0013-guides-to-the-goal.html",
+   "md": "claude-booping/value/0013-guides-to-the-goal.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": [
+    "booping:rule/0033",
+    "booping:rule/0038",
+    "claude-booping:adr/0017",
+    "claude-booping:adr/0024",
+    "claude-booping:adr/0033",
+    "claude-booping:adr/0039",
+    "claude-booping:adr/0042",
+    "claude-booping:rule/0005",
+    "claude-booping:rule/0029"
+   ]
+  },
+  {
+   "id": "claude-booping:value/0014",
+   "root": "claude-booping",
+   "ref": "value/0014",
+   "type": "value",
+   "title": "Comfort for non-technical users",
+   "summary": "How comfortable booping is for people without a strong technical background is not optimised for; they are not its audience.",
+   "status": null,
+   "kind": "non-value",
+   "tags": [],
+   "created_by": "owner",
+   "created_at": "2026-10-14",
+   "updated_at": "2026-10-14",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/value/0014-comfort-for-non-technical-users.html",
+   "md": "claude-booping/value/0014-comfort-for-non-technical-users.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": [
+    "claude-booping:reference/0001"
+   ]
+  },
+  {
+   "id": "claude-booping:value/0015",
+   "root": "claude-booping",
+   "ref": "value/0015",
+   "type": "value",
+   "title": "Deterministic where code reads it",
+   "summary": "What code reads, and every fact outside the model's view, is produced by code; what only a model or a human reads stays prose with a fixed format until code starts to read it.",
+   "status": null,
+   "kind": "value",
+   "tags": [],
+   "created_by": "owner",
+   "created_at": "2026-10-15",
+   "updated_at": "2026-10-18",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/value/0015-deterministic-where-code-reads-it.html",
+   "md": "claude-booping/value/0015-deterministic-where-code-reads-it.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": [
+    "claude-booping:adr/0026",
+    "claude-booping:adr/0029",
+    "claude-booping:adr/0031",
+    "claude-booping:adr/0036",
+    "claude-booping:adr/0037",
+    "claude-booping:adr/0038",
+    "claude-booping:rule/0025"
+   ]
+  },
+  {
+   "id": "claude-booping:value/0016",
+   "root": "claude-booping",
+   "ref": "value/0016",
+   "type": "value",
+   "title": "Specs live with the work",
+   "summary": "Specs are updated as the work happens and applied wherever they raise the quality of a result; they never go stale or depend on the user remembering them.",
+   "status": null,
+   "kind": "value",
+   "tags": [],
+   "created_by": "owner",
+   "created_at": "2026-10-16",
+   "updated_at": "2026-10-16",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/value/0016-specs-live-with-the-work.html",
+   "md": "claude-booping/value/0016-specs-live-with-the-work.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": [
+    "booping:rule/0034",
+    "claude-booping:adr/0034",
+    "claude-booping:adr/0039"
+   ]
+  },
+  {
+   "id": "claude-booping:value/0017",
+   "root": "claude-booping",
+   "ref": "value/0017",
+   "type": "value",
+   "title": "Launching and guarding runs is userland",
+   "summary": "When and how development runs start — triggers, schedules, tracker and messenger integrations — and guarding usage limits are the user's, not booping's; booping offers an integration surface at most.",
+   "status": null,
+   "kind": "non-value",
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-17",
+   "updated_at": "2026-10-17",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/value/0017-launching-and-guarding-runs-is-userland.html",
+   "md": "claude-booping/value/0017-launching-and-guarding-runs-is-userland.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": [
+    "claude-booping:story/0025"
+   ]
+  },
+  {
+   "id": "claude-booping:value/0018",
+   "root": "claude-booping",
+   "ref": "value/0018",
+   "type": "value",
+   "title": "A core set for development and self-learning",
+   "summary": "On top of the framework booping ships core playbooks for development, self-learning among them; they are its dogfooding, built only from mechanics a user playbook gets too.",
+   "status": null,
+   "kind": "value",
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-17",
+   "updated_at": "2026-10-17",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/value/0018-a-core-set-for-development-and-self-learning.html",
+   "md": "claude-booping/value/0018-a-core-set-for-development-and-self-learning.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": [
+    "claude-booping:rule/0032"
+   ]
+  },
+  {
+   "id": "claude-booping:value/0019",
+   "root": "claude-booping",
+   "ref": "value/0019",
+   "type": "value",
+   "title": "Projects are built along a roadmap",
+   "summary": "Work decomposes into plans and sprints, so a project is written along its roadmap, sprint by sprint, with a manager carrying the work through.",
+   "status": null,
+   "kind": "value",
+   "tags": [],
+   "created_by": "claude",
+   "created_at": "2026-10-18",
+   "updated_at": "2026-10-18",
+   "review": "none",
+   "review_evidence": null,
+   "url": "claude-booping/value/0019-projects-are-built-along-a-roadmap.html",
+   "md": "claude-booping/value/0019-projects-are-built-along-a-roadmap.md",
+   "marks": {
+    "clarify": 0,
+    "unknown": 0
+   },
+   "relations": {},
+   "superseded_by": [],
+   "backlinks": [
+    "claude-booping:adr/0042"
+   ]
+  }
+ ]
+}
