@@ -1,5 +1,5 @@
 A playbook whose manifest declares no `states:` renders steps only — the `## State` section, its
-`booping playbook-state` read-back line and the per-machine entries are absent entirely.
+`booping state` read-back line and the per-machine entries are absent entirely.
 
 -- fixtures/home/Claude/_playbooks/fx-stateless/playbook.md --
 ---

@@ -1,0 +1,42 @@
+A feature-sized story — the English As-who opening, `priority`, scenarios, edge cases and
+criteria in order — passes the shipped story schema.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/story/0001-export.md --
+---
+type: story
+title: Export
+summary: The owner exports a report.
+created_by: owner
+created_at: 2026-01-01
+updated_at: 2026-01-01
+status: done
+priority: P1
+plans: [plans/202601010000_export/index.md]
+---
+
+As **the owner**, I want to export a report, so that I can share it.
+
+## Scenarios
+
+1. The owner opens the report.
+2. The owner picks a format and exports it.
+
+## Edge cases
+
+- The report is empty: the export holds only the header.
+
+## Criteria
+
+- The export opens in a spreadsheet.
+- An empty report still exports.
+-- cmd --
+booping specs check
+-- exit --
+0
+-- stdout --
+-- stderr --
+1 record(s) checked: 0 error(s), 0 warning(s)

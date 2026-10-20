@@ -46,7 +46,8 @@ Two things, independently:
 Run from the vault root. First look at what is there:
 
 ```bash
-grep -l -E '^(active_minutes|models):' plans/*/index.md 2>/dev/null || echo "no plan carries the old keys"
+find plans -mindepth 2 -maxdepth 2 -path 'plans/[!.]*/index.md' -exec grep -l -E '^(active_minutes|models):' {} + 2>/dev/null | sort | grep . \
+  || echo "no plan carries the old keys"
 cat sprints.md 2>/dev/null || echo "no sprints.md in this vault"
 ```
 
@@ -222,11 +223,11 @@ PY
 ## Verify
 
 ```bash
-grep -n -E '^(active_minutes|models):' plans/*/index.md 2>/dev/null \
+find plans -mindepth 2 -maxdepth 2 -path 'plans/[!.]*/index.md' -exec grep -n -E '^(active_minutes|models):' {} + 2>/dev/null | grep . \
   && echo "STILL OLD: the lines above keep an unprefixed key" \
   || echo "no plan carries the old keys"
-grep -c -E '^metrics_(active_minutes|models):' plans/*/index.md 2>/dev/null
-awk 'FNR==1{n=0} /^---$/{n++; next} n==1 && /^metrics_(active_minutes|models):/{seen[FILENAME" "$1]++} END{d=0; for (k in seen) if (seen[k] > 1) {print "DUPLICATE: " k; d=1} if (!d) print "every plan carries each metrics_ key at most once"}' plans/*/index.md 2>/dev/null
+find plans -mindepth 2 -maxdepth 2 -path 'plans/[!.]*/index.md' -exec grep -c -E '^metrics_(active_minutes|models):' {} + 2>/dev/null
+find plans -mindepth 2 -maxdepth 2 -path 'plans/[!.]*/index.md' -exec awk 'FNR==1{n=0} /^---$/{n++; next} n==1 && /^metrics_(active_minutes|models):/{seen[FILENAME" "$1]++} END{d=0; for (k in seen) if (seen[k] > 1) {print "DUPLICATE: " k; d=1} if (!d) print "every plan carries each metrics_ key at most once"}' {} + 2>/dev/null
 cat sprints.md 2>/dev/null
 for column in metrics_active_minutes metrics_models metrics_tokens_input metrics_tokens_output metrics_tokens_cache_creation metrics_tokens_cache_read; do
   grep -qF "$column" sprints.md 2>/dev/null \

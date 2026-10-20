@@ -12,12 +12,13 @@ Retro is a **playbook**, not a skill — it is driven by [`/playbook`](playbook.
 
 Retro turns lived experience into a written record: friction that would otherwise evaporate when the session closes becomes the input to a durable rule.
 
-The run draws from **two inputs**:
+The run draws from **three inputs**:
 
 - **User-asked questions.** `gather-feedback` takes your raw open-ended take first — four questions asked one at a time, before any mined finding is mentioned — then walks the mined items with you for accept / dismiss / your own wording.
-- **Session-log mining and a plan-stage lesson check.** `prepare` delegates both in parallel, mining the development session transcript for what you said at the time but never filed — pushback at the agent's choices, mid-sprint change requests, comments you made on the code itself, and places the session shows a loaded lesson ignored — and checking the plan as written against the active lesson set. The code diff is grounding context for these reads, not a separate scan phase. The mined list is **withheld** until your raw take is on record.
+- **The corrections log.** `prepare` opens on every entry of the `core.corrections.open` query, rendered into its prompt — each correction groom, develop and code-review logged under the vault's `corrections/` that no retro has handled yet. Each becomes a mined item, its session id and quote tell the session-log read where to look, and `prepare` marks it `state: handled`.
+- **Session-log mining and a plan-stage lesson check.** `prepare` then delegates both in parallel, mining the development session transcript for what you said at the time but never filed — pushback at the agent's choices, mid-sprint change requests, comments you made on the code itself, and places the session shows a loaded lesson ignored — and checking the plan as written against the active lesson set. The code diff is grounding context for these reads, not a separate scan phase. The mined list is **withheld** until your raw take is on record.
 
-The two inputs are stitched into one `retrospectives/{YYYYMMDDHHMM}_{kebab-title}.md`, a standalone file in the vault — one per run, whatever the size of the working set.
+The inputs are stitched into one `retrospectives/{YYYYMMDDHHMM}_{kebab-title}.md`, a standalone file in the vault — one per run, whatever the size of the working set.
 
 ## What it does
 
@@ -26,13 +27,13 @@ Six steps, in dependency order:
 | Step | What it does |
 |------|--------------|
 | `intake` | Settle the working set — validate the plan is in the retro queue (`status: done`, `retro: null`), offer the others as include / postpone / skip, then read each adopted plan for context |
-| `prepare` | Mine the session logs and run the plan-stage lesson check in parallel; build the issue list without showing it |
+| `prepare` | Read the plans' corrections log, mine the session logs and run the plan-stage lesson check in parallel; build the issue list without showing it |
 | `gather-feedback` | Your raw take first, then the mined items batch by batch; close with a per-plan goal verdict |
 | `research-issues` | Root-cause each accepted issue and design concrete prevention moves |
 | `synthesize` | Draft against the retrospective template, run its self-review checklist, show you a chat summary while holding the draft unwritten |
 | `save` | Write `retrospectives/{slug}.md`, fire the exit transition, stamp the `retro:` back-link and goal verdict on every plan in the working set |
 
-Retro runs as its **own track** over that standalone `retrospectives/{slug}.md` artifact — never another move on the plan. The file is created at `awaiting-retro`, advances to `awaiting-learning` once it is written and you have signed off, and [learn](learn.md) later closes it at `done`. The covered plans stay at `done` throughout; the only mark retro leaves on a plan is the `retro:` back-link in its frontmatter, and the retro queue is exactly the plans still missing that link — every `status: done` plan with `retro: null`. The workdir is the vault root; every `booping playbook-state` / `booping playbook-transition` call passes `--target retrospectives/{slug}.md`, so state lives in that file and a stopped run is resumable.
+Retro runs as its **own track** over that standalone `retrospectives/{slug}.md` artifact — never another move on the plan. The file is created at `awaiting-retro`, advances to `awaiting-learning` once it is written and you have signed off, and [learn](learn.md) later closes it at `done`. The covered plans stay at `done` throughout; the only mark retro leaves on a plan is the `retro:` back-link in its frontmatter, and the retro queue is exactly the plans still missing that link — every `status: done` plan with `retro: null`. The workdir is the vault root; every `booping state` / `booping transition` call names `retrospectives/{slug}.md` with `--playbook retro`, so state lives in that file and a stopped run is resumable.
 
 ### Multiple plans in one run
 
@@ -62,7 +63,7 @@ Read the written retrospective before letting [learn](learn.md) act on it, separ
 
 What to keep:
 
-- **Durable findings** — patterns that will recur across sprints. "The agent picks the wrong test runner when both pytest and unittest are present" is a project rule worth lifting into a targeted lesson.
+- **Durable findings** — patterns that will recur across sprints. "The agent picks the wrong test runner when both pytest and unittest are present" is a project rule worth lifting into a targeted rule.
 - **Process gaps** — places where the lifecycle itself failed you. "I wanted to stop after milestone 2 but did not realise I had to say so up front" is feedback for the prompt habits you bring to groom and develop runs.
 
 What to mark as one-off:

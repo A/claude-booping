@@ -1,0 +1,11 @@
+A URL that is not http(s) is rejected with the entry's index; no out directory is created.
+
+-- fixtures/cwd/projects.json --
+[{"name": "ok", "url": "https://pages.example.org/ok"}, {"name": "evil", "url": "javascript:alert(1)"}]
+-- cmd --
+sh -c 'booping specs site-index --out site < projects.json; s=$?; test -e site && echo site exists; exit $s'
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: projects[1]: `url` must be an http:// or https:// URL

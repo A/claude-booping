@@ -34,14 +34,13 @@ The file's content — frontmatter included — is moved verbatim; nothing insid
 Run from the vault root. First look at what is there:
 
 ```bash
-ls -1 plans/*.md 2>/dev/null
+find plans -mindepth 1 -maxdepth 1 -name '[!.]*.md' 2>/dev/null | sort
 ```
 
 Then move each one, refusing any slug whose destination is already taken:
 
 ```bash
-for file in plans/*.md; do
-  [ -e "$file" ] || continue
+find plans -mindepth 1 -maxdepth 1 -name '[!.]*.md' 2>/dev/null | sort | while IFS= read -r file; do
   dir="plans/$(basename "$file" .md)"
   if [ -e "$dir/index.md" ]; then
     echo "CONFLICT: $dir/index.md already exists — $file not moved"
@@ -54,7 +53,7 @@ done
 Confirm the result — this should list one `index.md` per plan and no flat files:
 
 ```bash
-ls -1 plans/*.md 2>/dev/null; ls -1 plans/*/index.md 2>/dev/null
+find plans -mindepth 1 -maxdepth 1 -name '[!.]*.md' 2>/dev/null | sort; find plans -mindepth 2 -maxdepth 2 -path 'plans/[!.]*/index.md' 2>/dev/null | sort
 ```
 
 Any `CONFLICT:` line, or a flat `plans/*.md` still present at the end, is a failure: report which
@@ -85,8 +84,8 @@ Only `config.yaml` at the vault root. Nothing else in the vault carries config p
 | `plans` | `core.plans` |
 | `git` | `core.develop_playbook.git` |
 | `migrations.pending` | `core.migrate_playbook.queries.pending` |
-| `playbook.scaffold` | `core.playbook_authoring_playbook.scaffold` |
-| `vault.scaffold` | `core.setup_playbook.scaffold` |
+| `playbook.scaffold` | `core.playbook_authoring_playbook.template` |
+| `vault.scaffold` | `core.setup_playbook.template` |
 | `core.cross_review_agent` | `core.groom_playbook.cross_review_agent` |
 | `skills.groom` | `core.groom_playbook` |
 | `skills.develop` | `core.develop_playbook` |
@@ -136,8 +135,8 @@ MOVES = [
     ("plans", "core.plans"),
     ("git", "core.develop_playbook.git"),
     ("migrations.pending", "core.migrate_playbook.queries.pending"),
-    ("playbook.scaffold", "core.playbook_authoring_playbook.scaffold"),
-    ("vault.scaffold", "core.setup_playbook.scaffold"),
+    ("playbook.scaffold", "core.playbook_authoring_playbook.template"),
+    ("vault.scaffold", "core.setup_playbook.template"),
     ("core.cross_review_agent", "core.groom_playbook.cross_review_agent"),
     ("skills.groom", "core.groom_playbook"),
     ("skills.develop", "core.develop_playbook"),

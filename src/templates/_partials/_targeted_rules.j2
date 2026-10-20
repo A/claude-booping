@@ -1,0 +1,19 @@
+{#-
+  Renders the `## Rules` section for an internal booping agent or skill body.
+
+  kind — agent | skill; also the surface noun of the section
+  id   — matched against the `{kind}:{id}` targets of `context.targeted_rules`
+  self_contained — optional, passed to `_rules.j2`
+-#}
+{%- set _tr_kind = kwargs.kind -%}
+{%- set _tr_id = kwargs.id -%}
+{%- set _tr_matched = [] -%}
+{%- for rule in context.targeted_rules -%}
+{%- if rule.parsed_targets | selectattr("kind", "equalto", _tr_kind) | selectattr(_tr_kind, "equalto", _tr_id) | list -%}
+{%- set _ = _tr_matched.append(rule) -%}
+{%- endif -%}
+{%- endfor -%}
+{%- if _tr_matched -%}
+{%- with rules = _tr_matched, surface = _tr_kind, self_contained = kwargs.self_contained -%}
+{% include "_partials/_rules.j2" %}{% endwith -%}
+{%- endif -%}

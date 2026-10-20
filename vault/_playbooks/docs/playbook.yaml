@@ -4,8 +4,7 @@ graph:
   briefing: [survey]
   roles: [briefing]
   targets: [briefing]
-  feature-index: [briefing]
-  research: [roles, targets, feature-index]
+  research: [roles, targets]
   sync-specs: [research]
   targeting: [sync-specs]
   update:
@@ -27,25 +26,25 @@ states:
           - to: awaiting-scope-confirm
             when: "survey opened the run record with the spec-set state and the undocumented set"
             hooks:
-              - frontmatter-update started="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
-              - frontmatter-update commit="{{ macro('core.macros.git_commit') }}"
+              - set started="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - set commit="{{ macro('core.macros.git_commit') }}"
       awaiting-scope-confirm:
         transitions:
           - to: surveying
-            when: "the user's scope answer needs a fresh survey — a different item range, or spec files the survey did not inspect"
+            when: "the user's scope answer needs a fresh survey — a different item range, or spec records the survey did not inspect"
           - to: briefing
-            when: "the user settled which spec files to refresh and which delivered items to cover, and at least one spec file needs work"
+            when: "the user settled which spec records to refresh and which delivered items to cover, and at least one spec record needs work"
             gates:
               - "explicit user confirmation captured — silence never counts"
             hooks:
-              - frontmatter-update scope_reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - set scope_reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
           - to: researching
-            when: "the user settled the scope and every spec file is present and current — the spec waves are skipped"
+            when: "the user settled the scope and every spec record is present and current — the spec waves are skipped"
             gates:
               - "explicit user confirmation captured"
-              - "the survey found no missing or incomplete spec file"
+              - "the survey found no missing or incomplete spec record"
             hooks:
-              - frontmatter-update scope_reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - set scope_reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
               - "script commit-docs"
           - to: done
             when: "the survey found nothing to do — spec set current, undocumented set empty — and the user closed the run"
@@ -53,13 +52,13 @@ states:
               - "explicit user confirmation captured"
               - "the undocumented set is empty"
             hooks:
-              - frontmatter-update scope_reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
-              - frontmatter-update completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - set scope_reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - set completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
               - "script commit-docs"
       briefing:
         transitions:
           - to: awaiting-briefing-confirm
-            when: "briefing wrote `_specs/index.md`, naming any vision shift against the previous one"
+            when: "briefing wrote the run record's `## Briefing` section, naming any vision shift against the previous run record's"
       awaiting-briefing-confirm:
         transitions:
           - to: briefing
@@ -69,32 +68,21 @@ states:
             gates:
               - "explicit user confirmation captured — a vision shift is acknowledged in the answer, silence never counts"
             hooks:
-              - frontmatter-update _specs/index.md reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - set briefing_reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
       spec-building:
         transitions:
           - to: awaiting-roles-targets-confirm
-            when: "roles, targets and feature-index each wrote their file"
+            when: "roles and targets each refreshed their record"
       awaiting-roles-targets-confirm:
         transitions:
           - to: spec-building
             when: "the user wants roles or surfaces refined"
-          - to: awaiting-features-confirm
+          - to: researching
             when: "the user confirms roles and surfaces, presented together"
             gates:
               - "explicit user confirmation captured — silence never counts"
             hooks:
-              - frontmatter-update _specs/roles.md reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
-              - frontmatter-update _specs/targets.md reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
-      awaiting-features-confirm:
-        transitions:
-          - to: spec-building
-            when: "the user wants features, capabilities or groups refined"
-          - to: researching
-            when: "the user confirms the feature index"
-            gates:
-              - "explicit user confirmation captured"
-            hooks:
-              - frontmatter-update _specs/features.md reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - set specs_reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
               - "script commit-docs"
       researching:
         transitions:
@@ -111,11 +99,11 @@ states:
             gates:
               - "explicit user confirmation captured — silence never counts"
             hooks:
-              - frontmatter-update changes_reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - set changes_reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
       syncing-specs:
         transitions:
           - to: targeting
-            when: "sync-specs folded the confirmed table into briefing, roles, surfaces and feature index"
+            when: "sync-specs folded the confirmed table into the spec records"
       targeting:
         transitions:
           - to: awaiting-targeting-confirm
@@ -131,7 +119,7 @@ states:
             gates:
               - "explicit user confirmation captured — silence never counts"
             hooks:
-              - frontmatter-update targeting_reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - set targeting_reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
               - "script commit-docs"
       updating:
         transitions:
@@ -150,7 +138,7 @@ states:
             gates:
               - "the run record's `documented:` list names every covered work item, and its landed table every destination written — `close-documented` reads the list"
             hooks:
-              - frontmatter-update completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - set completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
               - "script close-documented"
               - "script commit-docs"
       done:
@@ -167,12 +155,11 @@ states:
           - awaiting-briefing-confirm
           - spec-building
           - awaiting-roles-targets-confirm
-          - awaiting-features-confirm
         transitions:
           - to: cancelled
             when: "the user cancels the run"
             hooks:
-              - frontmatter-update completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - set completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
               - "script commit-docs"
       change-set:
         states:
@@ -185,7 +172,7 @@ states:
           - to: cancelled
             when: "the user cancels the run"
             hooks:
-              - frontmatter-update completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - set completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
               - "script commit-docs"
       producing:
         states:
@@ -196,7 +183,7 @@ states:
           - to: cancelled
             when: "the user cancels the run"
             hooks:
-              - frontmatter-update completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - set completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
               - "script commit-docs"
       terminal:
         states:

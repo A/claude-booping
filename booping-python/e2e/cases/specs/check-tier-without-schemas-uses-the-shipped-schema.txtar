@@ -1,0 +1,38 @@
+A tier with no `_schemas/` checks its records by the shipped schema, so a rule under translated
+headings fails it.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/rule/0001-keep-it-short.md --
+---
+type: rule
+title: Keep it short
+summary: Cut what the reader does not need.
+created_by: owner
+created_at: 2026-01-01
+updated_at: 2026-01-01
+status: accepted
+---
+
+## Правило
+
+Cut what the reader does not need.
+
+## Следует из ценностей
+
+- [Brevity](https://example.com/brevity)
+-- cmd --
+booping specs check
+-- exit --
+1
+-- stdout --
+vault/rule/0001-keep-it-short.md:1  error  schema  required section `Rule` missing
+vault/rule/0001-keep-it-short.md:1  error  schema  required section `Follows from` missing
+vault/rule/0001-keep-it-short.md:1  error  schema  `SECTION("Rule") > P`: 0 matches, expected ≥ 1
+vault/rule/0001-keep-it-short.md:1  error  schema  `SECTION("Follows from") > UL > LI`: 0 matches, expected ≥ 1
+vault/rule/0001-keep-it-short.md:11  error  schema  section `Правило` not allowed (strict)
+vault/rule/0001-keep-it-short.md:15  error  schema  section `Следует из ценностей` not allowed (strict)
+-- stderr --
+1 record(s) checked: 6 error(s), 0 warning(s)

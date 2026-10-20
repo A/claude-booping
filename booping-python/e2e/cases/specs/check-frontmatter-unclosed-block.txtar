@@ -1,0 +1,31 @@
+A frontmatter block opened but never closed is a `frontmatter` error on the record's first line.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/value/0001-first.md --
+---
+type: value
+title: First
+summary: The first value.
+kind: value
+created_by: owner
+created_at: 2026-01-01
+updated_at: 2026-01-01
+
+Why the project exists.
+
+## In practice
+
+It shows in every run.
+-- cmd --
+booping specs check
+-- exit --
+1
+-- stdout --
+vault/value/0001-first.md:1  error  frontmatter  frontmatter block is not closed
+vault/value/0001-first.md:1  error  schema  unclosed frontmatter block
+vault/value/0001-first.md:1  error  schema  frontmatter block missing
+-- stderr --
+1 record(s) checked: 3 error(s), 0 warning(s)

@@ -1,0 +1,26 @@
+An existing tier README is never overwritten: with `{repo}/specs/README.md` already present, only
+the missing vault symlink is created and the README keeps its content.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+latest_migration: 9999
+-- fixtures/home/Claude/probe/config.yaml --
+core:
+  specs:
+    tiers:
+      project:
+        path: specs
+-- fixtures/cwd/specs/README.md --
+# Our specs
+
+Hand-written, not the template.
+-- fixtures/home/Claude/probe/sprints.md --
+sprints
+-- cmd --
+booping specs init
+-- exit --
+0
+-- stdout --
+linked {HOME}/Claude/probe/specs -> {CWD}/specs
+{CWD}/specs
+-- stderr --

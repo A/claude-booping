@@ -1,0 +1,30 @@
+A tier without `tags.yaml` checks no tags: a record tagged with any tag passes.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/value/0001-audio.md --
+---
+type: value
+title: Audio
+summary: The Audio value.
+kind: value
+created_by: owner
+created_at: 2026-01-01
+updated_at: 2026-01-01
+tags: [audio]
+---
+
+Why the project exists.
+
+## In practice
+
+It shows in every run.
+-- cmd --
+booping specs check
+-- exit --
+0
+-- stdout --
+-- stderr --
+1 record(s) checked: 0 error(s), 0 warning(s)

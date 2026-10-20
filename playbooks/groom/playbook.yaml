@@ -1,9 +1,7 @@
 state: run
 graph:
   intake: []
-  research-codebase: [intake]
-  research-web: [research-codebase]
-  draft-plan: [research-codebase, research-web]
+  draft-plan: [intake]
   cross-review: [draft-plan]
   present: [cross-review]
 
@@ -21,26 +19,27 @@ states:
             when: "intake posted the framing brief in chat, created `index.md` with its identity frontmatter, and the user's answers settled the scope questions — clear intent is enough"
             gates:
               - "answers that change the task type, the restated problem or a boundary re-run intake first"
-            hooks: ["script stamp-session", "script commit-plan", "script tracker-sync"]
+            hooks: ["script stamp-session", "script commit-workdir groom", "script tracker-sync"]
           - to: awaiting-clarification
             when: "the run raised questions it cannot answer itself and wrote them to `clarifications.md`"
             gates:
               - "every question in `clarifications.md` is open and attributed — an id, a topic, the date and the step that raised it"
             hooks:
-              - frontmatter-update index.md return_to=framing
+              - set index.md return_to=framing
               - "script tracker-comment clarifications.md"
               - "script tracker-sync"
       researching:
         transitions:
           - to: drafting
-            when: "the blast-radius map and the web-research findings are both posted in chat"
+            when: "draft-plan's research stage posted its facts, with file paths, in chat"
             hooks: ["script tracker-sync"]
       drafting:
         transitions:
           - to: cross-reviewing
-            when: "architecture, surface changes and trade-offs are settled with the user in conversation, and draft-plan wrote `index.md`'s body against the template's Plan Body and passed its Quality Checklist"
+            when: "draft-plan wrote `draft.md`, `booping plan split` exited 0 and the mdcheck milestone check passed or its three fix rounds are spent"
             gates:
               - "every call that is the user's is answered"
+              - "the mdcheck milestone check reports no finding on a task's SP or the milestone `sp`"
             hooks: ["script tracker-sync"]
           - to: researching
             when: "the design needs blast radius or external practice the research pass missed"
@@ -50,7 +49,7 @@ states:
             gates:
               - "every question in `clarifications.md` is open and attributed — an id, a topic, the date and the step that raised it"
             hooks:
-              - frontmatter-update index.md return_to=drafting
+              - set index.md return_to=drafting
               - "script tracker-comment clarifications.md"
               - "script tracker-sync"
       awaiting-clarification:
@@ -61,7 +60,7 @@ states:
               - "every question in `clarifications.md` carries an answer"
               - "`return_to` is `framing` — any other value picks the other return edge"
             hooks:
-              - "frontmatter-update index.md return_to=''"
+              - "set index.md return_to=''"
               - "script tracker-sync"
           - to: drafting
             when: "the answers came back and `return_to` names `drafting`"
@@ -69,7 +68,7 @@ states:
               - "every question in `clarifications.md` carries an answer"
               - "`return_to` is `drafting` — any other value picks the other return edge"
             hooks:
-              - "frontmatter-update index.md return_to=''"
+              - "set index.md return_to=''"
               - "script tracker-sync"
       cross-reviewing:
         transitions:
@@ -77,7 +76,7 @@ states:
             when: "the cross-review pass disposed of every finding, or no `core.groom_playbook.cross_review_agent` is configured and the pass was skipped"
             gates:
               - "every CRITICAL finding folded in or recorded as a deferral — vacuously satisfied with no `core.groom_playbook.cross_review_agent` configured"
-            hooks: ["script commit-plan", "script tracker-sync"]
+            hooks: ["script commit-workdir groom", "script tracker-sync"]
       presenting:
         transitions:
           - to: awaiting-approval
@@ -87,15 +86,15 @@ states:
         transitions:
           - to: drafting
             when: "the user's change request touches the plan itself — architecture, scope, milestones, tasks or estimates"
-            hooks: ["script commit-plan", "script tracker-sync"]
+            hooks: ["script commit-workdir groom", "script tracker-sync"]
           - to: ready-for-dev
             when: 'the user explicitly approves the plan — "looks good" counts, silence never does'
             gates:
               - "explicit user approval captured"
             hooks:
-              - frontmatter-update index.md reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - set index.md reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
               - "script stamp-session"
-              - "script commit-plan"
+              - "script commit-workdir groom"
               - "script tracker-sync"
       ready-for-dev:
         terminal: true
@@ -113,7 +112,7 @@ states:
         transitions:
           - to: cancelled
             when: "the user cancels the run"
-            hooks: ["script commit-plan", "script tracker-sync"]
+            hooks: ["script open-items-follow-plan open", "script commit-workdir groom", "script tracker-sync"]
       awaiting-plan-review:
         states:
           - presenting
@@ -121,7 +120,7 @@ states:
         transitions:
           - to: cancelled
             when: "the user cancels the run"
-            hooks: ["script commit-plan", "script tracker-sync"]
+            hooks: ["script open-items-follow-plan open", "script commit-workdir groom", "script tracker-sync"]
       terminal:
         states:
           - ready-for-dev

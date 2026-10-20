@@ -1,0 +1,26 @@
+`--type` narrows the listing to one type's records.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/value/0001-first.md --
+---
+type: value
+title: First
+summary: The first value.
+---
+-- fixtures/cwd/vault/adr/0001-first.md --
+---
+type: adr
+title: First
+summary: A decision.
+status: accepted
+---
+-- cmd --
+booping specs ls --type adr
+-- exit --
+0
+-- stdout --
+adr/0001  accepted  A decision.
+-- stderr --

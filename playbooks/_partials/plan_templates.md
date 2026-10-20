@@ -16,8 +16,7 @@ Each template is one file with two top-level sections:
 
 - `# Plan Body` — the structure the plan is written against, section for section, in its order.
   None dropped, none extra.
-- `# Quality Checklist` — walked item by item against the plan as written, before the plan is
-  returned. An unsatisfied item is fixed, not reported as satisfied.
+- `# Quality Checklist` — constraints the plan meets; read with the body, not walked as a separate pass.
 
 Read the chosen file before drafting: neither section can be guessed from its catalogue line.
 
@@ -26,12 +25,12 @@ it — frontmatter (`name`, `description`) plus both top-level sections, generic
 class: placeholders throughout, no path, milestone or story-point value from this run baked in.
 Never draft into a bad-fit template, never improvise a shape and name a template after it.
 
-A plan is two surfaces: the run's `index.md`, already carrying its frontmatter and title, holding the template's top-level sections under them; and one file per milestone, written as [Write the milestone files](#write-the-milestone-files) describes, against the template's milestone-file section.
+The draft is one file, cut into `index.md` and the milestone files by `booping plan split`.
 
 `summary` is yours:
 
 ```
-booping frontmatter-update {plan-dir}/index.md summary="{one line}"
+booping set {plan-dir}/index.md summary="{one line}"
 ```
 
 `sp` is not — never hand-write it.

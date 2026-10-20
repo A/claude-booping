@@ -1,0 +1,35 @@
+# runbook: specs/runbook/<NNNN>-<slug>.md — an operator procedure the code does
+# not show: when, prerequisites, numbered steps, check, rollback.
+doc: runbook
+
+rules:
+  - select: FRONTMATTER
+    has:
+      type: runbook
+      title: '^.+$'
+      summary: '^.{1,200}$'
+      created_by: { enum: [owner, claude] }
+      created_at: '^\d{4}-\d{2}-\d{2}$'
+      updated_at: '^\d{4}-\d{2}-\d{2}$'
+      status: { enum: [live, retired] }
+
+  - select: H2
+    ordered: [When, Before you start?, Steps, Check, Rollback?]
+    strict: true
+
+  - select: SECTION("When") > P
+    min: 1
+
+  - select: SECTION("Before you start") > UL > LI
+    optional: true
+    min: 1
+
+  - select: SECTION("Steps") > OL > LI
+    min: 1
+
+  - select: SECTION("Check") > UL > LI
+    min: 1
+
+  - select: SECTION("Rollback") > UL > LI
+    optional: true
+    min: 1

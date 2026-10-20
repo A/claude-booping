@@ -1,0 +1,43 @@
+A story with the Russian As-who opening and the optional `## Out of scope` between edge
+cases and criteria passes the shipped story schema; structural headings stay English.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/story/0001-eksport.md --
+---
+type: story
+title: Экспорт
+summary: Владелец выгружает отчёт.
+created_by: owner
+created_at: 2026-01-01
+updated_at: 2026-01-01
+status: planned
+priority: P2
+---
+
+Как **владелец**, я хочу выгрузить отчёт, чтобы поделиться им.
+
+## Scenarios
+
+Владелец открывает отчёт, выбирает формат и выгружает его.
+
+## Edge cases
+
+- Пустой отчёт выгружается с одним заголовком.
+
+## Out of scope
+
+- Выгрузка по расписанию.
+
+## Criteria
+
+- Выгрузка открывается в таблице.
+-- cmd --
+booping specs check
+-- exit --
+0
+-- stdout --
+-- stderr --
+1 record(s) checked: 0 error(s), 0 warning(s)

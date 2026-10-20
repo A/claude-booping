@@ -1,0 +1,18 @@
+A type naming no shipped schema is rejected with the list of known types.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/value/0001-first.md --
+---
+type: value
+title: First
+---
+-- cmd --
+booping specs next nope
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: unknown type `nope`; known: adr, conflict, idea, reference, rule, runbook, story, value

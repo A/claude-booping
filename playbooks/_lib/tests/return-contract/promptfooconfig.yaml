@@ -8,7 +8,7 @@ providers:
     config:
       entry: _lib/return-contract.md
       output_mode: files
-      model: sonnet
+      model: opus
       effort: low
 
 defaultTest: file://../../grader.yaml

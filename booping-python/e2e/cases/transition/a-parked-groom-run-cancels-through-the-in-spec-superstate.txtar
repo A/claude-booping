@@ -1,0 +1,34 @@
+`awaiting-clarification` is a member of the `in-spec` superstate, so a run parked on unanswered
+questions can be cancelled without the status declaring a `cancelled` edge of its own.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  tracker:
+    driver: cli
+-- fixtures/cwd/run/index.md --
+---
+title: "Demo"
+status: awaiting-clarification
+return_to: drafting
+---
+
+# Demo
+-- cmd --
+booping transition run/index.md cancelled --playbook groom
+-- exit --
+0
+-- stdout --
+awaiting-clarification → cancelled
+frontmatter: status=cancelled
+script open-items-follow-plan: ok
+script commit-workdir: ok
+script tracker-sync: ok
+-- stderr --
+-- expected/cwd/run/index.md --
+---
+title: "Demo"
+status: cancelled
+return_to: drafting
+---
+
+# Demo

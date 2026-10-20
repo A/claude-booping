@@ -1,0 +1,41 @@
+`--no-rules` drops the step's `## Rules` block on the `--step` surface, leaving the bare body.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  specs:
+    tiers:
+      core: {namespace: fx, path: ~/core-specs}
+-- fixtures/home/core-specs/rule/0001-step-rule.md --
+---
+type: rule
+title: Step rule
+status: accepted
+targets: [fx-rule-step-off/s1]
+brief: Step brief.
+---
+-- fixtures/home/Claude/_playbooks/fx-rule-step-off/playbook.md --
+---
+name: fx-rule-step-off
+title: Rules
+summary: Rule injection.
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-rule-step-off/playbook.yaml --
+graph:
+  s1: []
+-- fixtures/home/Claude/_playbooks/fx-rule-step-off/s1/prompt.md --
+---
+name: s1
+summary: Only step.
+detached: sonnet:medium
+---
+
+Step body.
+-- cmd --
+booping render-playbook fx-rule-step-off --step s1 --no-rules
+-- exit --
+0
+-- stdout --
+Step body.
+-- stderr --

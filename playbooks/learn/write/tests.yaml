@@ -1,10 +1,12 @@
-# Case 1 (accepted-table): three accepted rows, none touching an existing lesson -> two new
-# lessons at the next free numbers (0004 seeded -> 5 and 6) plus one bullet into repo/CLAUDE.md.
-# The seeded retro and _lessons/0004 must stay untouched (seeded files only count as output
-# when modified).
-# Case 2 (refine-existing): a single update-in-place row refining seeded lesson 0004.
+# Records land in the project specs tier the fixture's `booping specs init` output names
+# (`specs/`), at the numbers its `booping specs next` output hands out. The vault is outside
+# the repo, so a record carries no `sources:` and its `## Follows from` links a value or the
+# tier README. Seeded files count as output only when modified.
+# Case 1 (accepted-table): two new rule rows -> specs/rule/0003 and 0004, one `covered` row
+# that writes nothing, one bullet into repo/CLAUDE.md; seeded rule 0002 untouched.
+# Case 2 (refine-existing): one `update existing at rule/0002` row edited in place.
 
-- description: write smoke — independent rows land as fresh files, seeds untouched
+- description: write smoke — new rows land as rule records, covered writes nothing
   vars:
     input: file://_fixtures/accepted-table.md
   metadata:
@@ -13,66 +15,96 @@
     fixture: accepted-table
     tier: smoke
   assert:
-    # WRITE-SET — lessons 5 and 6 created, CLAUDE.md updated; 0004 absent from the manifest.
-    # files.js keeps what mdcheck cannot reach: the manifest set, line caps, the targets LIST
-    # value (list frontmatter serializes empty to mdcheck `has:`), and the word bans.
+    # WRITE-SET — rules 0003 and 0004 created, CLAUDE.md updated; noOthers fails a file for
+    # the covered row, an edit to seeded 0002, or a write anywhere else
     - type: javascript
       value: file://../../_lib/asserts/files.js
       config:
         onTextMode: fail
         expect:
-          - path: '_lessons/0{0,3}5_[a-z0-9-]+\.md$'
-            maxLines: 16
+          - path: '^specs/rule/0003-[a-z0-9-]+\.md$'
+            maxLines: 30
             contains:
+              # targets: is a list, one item per Targets entry — mdcheck `has:` cannot read lists
               - '^\s*-\s*groom\s*$'
+              - '^brief: "'
             forbids:
+              # vault outside the repo: no sources entry; no review level without evidence
+              - '^sources:'
+              - '^reviewed:'
               - '[Hh]ow to [Aa]pply'
-              - '\*\*[Ww]hy'
-          - path: '_lessons/0{0,3}6_[a-z0-9-]+\.md$'
-            maxLines: 16
+          - path: '^specs/rule/0004-[a-z0-9-]+\.md$'
+            maxLines: 30
             contains:
-              - '^\s*-\s*groom\s*$'
+              # targets: is a list, one item per Targets entry — mdcheck `has:` cannot read lists
+              - '^\s*-\s*develop/develop-loop\s*$'
+              - '^\s*-\s*agent:booping-developer\s*$'
+              - '^brief: "'
             forbids:
+              # vault outside the repo: no sources entry; no review level without evidence
+              - '^sources:'
+              - '^reviewed:'
               - '[Hh]ow to [Aa]pply'
-              - '\*\*[Ww]hy'
-          - path: 'repo/CLAUDE\.md$'
+          - path: '^repo/CLAUDE\.md$'
             contains:
               - 'just api'
               - 'just e2e'
         noOthers: true
-    # LESSON-SHAPE — scalar frontmatter, no headings, an Example paragraph; one call per file
+    # RULE-SHAPE — the C5 frontmatter keys and body sections; one call per record
     - type: javascript
       value: file://../../_lib/asserts/mdcheck.js
       config:
-        file: '_lessons/0{0,3}5_[a-z0-9-]+\.md$'
+        file: '^specs/rule/0003-[a-z0-9-]+\.md$'
         rules: |
           - select: FRONTMATTER
             has:
-              id: '^0{0,3}5$'
-              retro: '^retrospectives/202608051640_notification-center\.md$'
-              created: '^2026-08-06$'
-          - select: H1
-            count: 0
+              type: '^rule$'
+              title: '^.+$'
+              summary: '^.{1,200}$'
+              created_by: '^claude$'
+              created_at: '^2026-08-06$'
+              updated_at: '^2026-08-06$'
+              status: '^accepted$'
+              brief: '^.+$'
           - select: H2
-            count: 0
+            ordered: [Rule, Follows from]
+            strict: true
+          - select: SECTION("Rule") > P
+            min: 1
           - select: P[text=/^\*\*Example\*\*:/]
             min: 1
+          - select: SECTION("Follows from") > UL > LI
+            min: 1
+            each:
+              - select: A
+                min: 1
     - type: javascript
       value: file://../../_lib/asserts/mdcheck.js
       config:
-        file: '_lessons/0{0,3}6_[a-z0-9-]+\.md$'
+        file: '^specs/rule/0004-[a-z0-9-]+\.md$'
         rules: |
           - select: FRONTMATTER
             has:
-              id: '^0{0,3}6$'
-              retro: '^retrospectives/202608051640_notification-center\.md$'
-              created: '^2026-08-06$'
-          - select: H1
-            count: 0
+              type: '^rule$'
+              title: '^.+$'
+              summary: '^.{1,200}$'
+              created_by: '^claude$'
+              created_at: '^2026-08-06$'
+              updated_at: '^2026-08-06$'
+              status: '^accepted$'
+              brief: '^.+$'
           - select: H2
-            count: 0
+            ordered: [Rule, Follows from]
+            strict: true
+          - select: SECTION("Rule") > P
+            min: 1
           - select: P[text=/^\*\*Example\*\*:/]
             min: 1
+          - select: SECTION("Follows from") > UL > LI
+            min: 1
+            each:
+              - select: A
+                min: 1
     # RETURN-SHAPE — a Changed section of exactly three CREATED/UPDATED lines matching the manifest
     - type: javascript
       value: file://../../_lib/asserts/return.js
@@ -88,7 +120,7 @@
             maxEntries: 3
         onlyListed: true
 
-- description: write regress — long findings compacted into independent lessons
+- description: write regress — long findings compacted into independent rule records
   vars:
     input: file://_fixtures/accepted-table.md
   metadata:
@@ -98,15 +130,15 @@
     tier: regress
   assert:
     - type: llm-rubric
-      value: "COMPACT-PROSE: The retro's Finding 1 runs three narrative paragraphs, yet the user-testing lesson's body is at most a couple of sentences of imperative rule plus one one-to-two-line **Example** — no retro narrative, no timeline, no motivation paragraphs, no restated backstory. Fails if the body exceeds roughly four sentences outside the Example, or copies retro narrative in."
+      value: "COMPACT-PROSE: The retro's Finding 1 runs three narrative paragraphs, yet the user-testing rule record's `## Rule` section is at most a couple of sentences of imperative rule plus one one-to-two-line **Example** — no retro narrative, no timeline, no motivation paragraphs, no restated backstory. Fails if the section exceeds roughly four sentences outside the Example, or copies retro narrative in."
     - type: llm-rubric
-      value: "SUBSTANCE-PRESERVED: Despite the compression, the user-testing lesson still carries the operative rule — a user-testing gate belongs in the plan's Definition of Done and the sprint may not close until it is exercised — and its Example concretely reflects the notification-center case. The prose-vs-config lesson carries never-restate-config-in-prose with a concrete example reflecting the drifted channel-matrix narration. Fails if either rule lost its substance or either example went generic."
+      value: "SUBSTANCE-PRESERVED: Despite the compression, the user-testing rule still carries the operative rule — a user-testing gate belongs in the plan's Definition of Done and the sprint may not close until it is exercised — and its Example concretely reflects the notification-center case. The migration rule carries rehearse-every-migration-on-a-copy-before-a-shared-database with a concrete example reflecting the broken shared dev database. Fails if either rule lost its substance or either example went generic."
     - type: llm-rubric
-      value: "LESSONS-INDEPENDENT: The two accepted lesson rows landed as two separate standalone files with sequential ids continuing from the seeded 0004, and the seeded `_lessons/0004_information-architecture-pass.md` was not modified, extended, or referenced as the landing place for either rule. Fails if the rules were merged into one file, or 0004 was touched."
+      value: "RULES-INDEPENDENT: The two accepted rule rows landed as two separate standalone records numbered 0003 and 0004, the seeded `specs/rule/0002-information-architecture-pass.md` was not modified, extended, or referenced as the landing place for either rule, and the covered prose-vs-config row was written nowhere. Fails if the rules were merged into one record, 0002 was touched, or the covered row produced a file or a bullet."
     - type: llm-rubric
       value: "CLAUDEMD-BULLET: `repo/CLAUDE.md` gained the two run commands as bullet-style one-liner(s) in a fitting section, with the file's existing content preserved verbatim — no paragraph rewrites, no restructuring, and nothing written to any path outside the vault and `repo/`. Fails on a rewrite, a lost line, or prose paragraphs instead of bullets."
 
-- description: write smoke — refine-existing edits the one file in place
+- description: write smoke — refine-existing edits the one record in place
   vars:
     input: file://_fixtures/refine-existing.md
   metadata:
@@ -115,39 +147,63 @@
     fixture: refine-existing
     tier: smoke
   assert:
-    # ONE-FILE — the only manifest entry is 0004, now carrying all five checks and the
-    # original Example case
+    # ONE-FILE — the only manifest entry is rule 0002, now carrying the fifth check, with
+    # every untouched body line (headings, the four checks, Example, Follows from) byte-identical
     - type: javascript
       value: file://../../_lib/asserts/files.js
       config:
         onTextMode: fail
         expect:
-          - path: '_lessons/0004_information-architecture-pass\.md$'
+          - path: '^specs/rule/0002-information-architecture-pass\.md$'
             contains:
-              - '[Cc]ompaction'
-              - '[Ss]coping'
-              - '[Dd]uplication'
-              - '[Cc]onfigurability'
-              - '[Hh]ierarchy'
-              - 'one pass caught all four'
+              - '^\s*-\s*\*\*[Cc]ompaction\*\*'
+              - '^created_at: 2026-04-23$'
+              - '^\s*-\s*groom\s*$'
+              - '^## Rule$'
+              - '^- \*\*Scoping\*\* — does this component need this information to do its job\? If not, move it up or delete it\.$'
+              - '^- \*\*Duplication\*\* — does the same block live in other components\? Extract to a partial\.$'
+              - '^- \*\*Configurability\*\* — is this behaviour a user might want to tweak\? Partial it so the knob is in one place\.$'
+              - '^- \*\*Hierarchy\*\* — does every block sit at the right level of detail\? Top-level docs describe \*what\*; deeper docs describe \*how\*\.$'
+              - '^\*\*Example\*\*: A skill body carried an inline sub-component roster \(hierarchy\), duplicated in two sibling skills \(duplication\), with one orphaned negative rule \(scoping\) and a hard-coded tunable threshold \(configurability\) — one pass caught all four\.$'
+              - '^## Follows from$'
+              - '^- \[clarify\] Learnt from `retrospectives/202604231512_skill-refactors\.md` in the project vault, which a record outside the vault cannot link — see the \[tier README\]\(\.\./README\.md\); link a value or settle the source\.$'
+            forbids:
+              - '^reviewed:'
         noOthers: true
-    # REFINE-SHAPE — seeded scalar frontmatter intact, five checklist bullets, Example kept
     - type: javascript
       value: file://../../_lib/asserts/mdcheck.js
       config:
-        file: '_lessons/0004_information-architecture-pass\.md$'
+        file: '^specs/rule/0002-[a-z0-9-]+\.md$'
         rules: |
           - select: FRONTMATTER
             has:
-              id: '^0{0,3}4$'
-              retro: '^retrospectives/202604231512_skill-refactors\.md$'
-              created: '^2026-04-23$'
-          - select: H1
-            count: 0
-          - select: UL > LI
-            min: 5
+              type: '^rule$'
+              title: '^.+$'
+              summary: '^.{1,200}$'
+              created_by: '^claude$'
+              created_at: '^2026-04-23$'
+              updated_at: '^2026-08-06$'
+              status: '^accepted$'
+              brief: '^.+$'
+          - select: H2
+            ordered: [Rule, Follows from]
+            strict: true
+          - select: SECTION("Rule") > P
+            min: 1
           - select: P[text=/^\*\*Example\*\*:/]
             min: 1
+          - select: SECTION("Follows from") > UL > LI
+            min: 1
+            each:
+              - select: A
+                min: 1
+    - type: javascript
+      value: file://../../_lib/asserts/mdcheck.js
+      config:
+        file: '^specs/rule/0002-information-architecture-pass\.md$'
+        rules: |
+          - select: SECTION("Rule") > UL > LI
+            count: 5
     # RETURN-SHAPE — exactly one UPDATED line
     - type: javascript
       value: file://../../_lib/asserts/return.js
@@ -173,6 +229,6 @@
     tier: regress
   assert:
     - type: llm-rubric
-      value: "UPDATE-IN-PLACE-SURGICAL: `_lessons/0004_information-architecture-pass.md` gained the fifth Compaction check as one bullet in the existing checklist, phrased like its siblings, with the original four checks and the original Example's case still present; no new file was created for this rule. The title MAY be refreshed to say five checks instead of four — that is a staleness fix, not a violation. Fails if any of the four original checks or the Example's original case was dropped or rewritten beyond that, or the rule landed in a fresh file."
+      value: "UPDATE-IN-PLACE-SURGICAL: `specs/rule/0002-information-architecture-pass.md` gained the fifth Compaction check as one bullet in the existing checklist, phrased like its siblings, with the original four checks and the original Example's case still present; no new record was created for this rule. The title, summary and brief MAY be refreshed to name five checks instead of four — that is a staleness fix, not a violation. Fails if any of the four original checks or the Example's original case was dropped or rewritten beyond that, or the rule landed in a fresh record."
     - type: llm-rubric
-      value: "NO-COLLATERAL-CHANGES: Outside the added Compaction bullet and four-to-five count refreshes in prose the addition made stale (the title, the body's opening sentence), the file is unchanged — frontmatter id, targets, retro and created keep their seeded values, the other checks' wording is intact, and no commentary about the update was written into the lesson. Fails on any drift beyond those."
+      value: "NO-COLLATERAL-CHANGES: Outside the added Compaction bullet, four-to-five count refreshes in prose the addition made stale (title, summary, brief, the body's opening sentence) and `updated_at` bumped to the run date, the record is unchanged — type, created_by, created_at, status and targets keep their seeded values, the other checks' wording and the `## Follows from` item are intact, and no commentary about the update was written into the record. Fails on any drift beyond those."

@@ -1,0 +1,19 @@
+A project whose tier path points at a directory that does not exist is a user error naming the tier and
+the root it looked at; nothing reaches stdout.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+core:
+  specs:
+    tiers:
+      project: {path: specs}
+-- cmd --
+booping specs ls
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: no specs for tier `project` at {CWD}/specs

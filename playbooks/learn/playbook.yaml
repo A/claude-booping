@@ -17,8 +17,8 @@ states:
             when: "every accepted row from the confirmed review table is written to its single target"
             gates:
               - "user confirmed the review table — the accept / reject / add response is recorded"
-              - "every accepted lesson written to its target file"
-            hooks: ["script close-working-set --stage _lessons --prefix learn"]
+              - "every accepted row written to its single target — rule records pass booping specs check"
+            hooks: ["script close-working-set --stage specs --prefix learn"]
       done:
         terminal: true
 

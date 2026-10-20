@@ -1,0 +1,26 @@
+An absolute `--glob` is globbed from its own literal head rather than rejected; a match inside
+the vault still reports a vault-relative path.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+-- fixtures/cwd/vault/plans/alpha/index.md --
+---
+status: done
+---
+
+body
+-- fixtures/cwd/vault/plans/beta/index.md --
+---
+status: done
+---
+
+body
+-- cmd --
+sh -c 'booping query --glob "$PWD/vault/plans/*/index.md" --output paths'
+-- exit --
+0
+-- stdout --
+plans/alpha/index.md
+plans/beta/index.md
+-- stderr --

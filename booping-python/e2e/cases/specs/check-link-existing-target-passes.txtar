@@ -1,0 +1,48 @@
+A relative body link resolves against the record's own directory; an existing target, with or
+without an anchor, produces no finding.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/value/0001-first.md --
+---
+type: value
+title: First
+summary: The first value.
+kind: value
+created_by: owner
+created_at: 2026-01-01
+updated_at: 2026-01-01
+---
+
+Why the project exists, see [the rule](../rule/0001-keep-it-short.md#rule).
+
+## In practice
+
+It shows in every run.
+-- fixtures/cwd/vault/rule/0001-keep-it-short.md --
+---
+type: rule
+title: Keep it short
+summary: Cut what the reader does not need.
+created_by: owner
+created_at: 2026-01-01
+updated_at: 2026-01-01
+status: accepted
+---
+
+## Rule
+
+Keep it short.
+
+## Follows from
+
+- [First](../value/0001-first.md)
+-- cmd --
+booping specs check
+-- exit --
+0
+-- stdout --
+-- stderr --
+2 record(s) checked: 0 error(s), 0 warning(s)

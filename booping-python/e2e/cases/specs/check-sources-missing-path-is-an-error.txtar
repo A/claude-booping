@@ -1,0 +1,34 @@
+A project-tier `sources` entry resolves against the repo root; a missing path is a `sources` error
+on the field's line, an existing one and a URL produce nothing.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/notes/kept.md --
+kept
+-- fixtures/cwd/vault/value/0001-first.md --
+---
+type: value
+title: First
+summary: The first value.
+kind: value
+created_by: owner
+created_at: 2026-01-01
+updated_at: 2026-01-01
+sources: [vault/notes/kept.md, vault/notes/gone.md, https://example.com/x]
+---
+
+Why the project exists.
+
+## In practice
+
+It shows in every run.
+-- cmd --
+booping specs check
+-- exit --
+1
+-- stdout --
+vault/value/0001-first.md:9  error  sources  sources: `vault/notes/gone.md` does not exist
+-- stderr --
+1 record(s) checked: 1 error(s), 0 warning(s)

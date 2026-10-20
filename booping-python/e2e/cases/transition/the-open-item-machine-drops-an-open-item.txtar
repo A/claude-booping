@@ -1,0 +1,49 @@
+The specs playbook's `open_item` machine moves one item file under the vault: an `open` item
+addressed by its path alone, the machine inferred, lands `dropped` with `closed_at` stamped by the edge's hook.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+macro_stubs:
+  core.macros.date: "2026-10-15"
+-- fixtures/cwd/vault/open-items/OI-0001.md --
+---
+id: OI-0001
+title: "t"
+status: open
+direction: clarify
+record: null
+source: manual
+plan: null
+created_at: 2026-10-15
+closed_at: null
+reason: null
+---
+
+# t
+-- cmd --
+booping transition vault/open-items/OI-0001.md dropped
+-- exit --
+0
+-- stdout --
+open → dropped
+frontmatter: status=dropped
+frontmatter: closed_at=2026-10-15
+-- stderr --
+-- expected/cwd/vault/open-items/OI-0001.md --
+---
+id: OI-0001
+title: "t"
+status: dropped
+direction: clarify
+record: null
+source: manual
+plan: null
+created_at: 2026-10-15
+closed_at: '2026-10-15'
+reason: null
+---
+
+# t

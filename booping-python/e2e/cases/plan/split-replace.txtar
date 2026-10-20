@@ -1,0 +1,46 @@
+--replace removes the directories holding an existing milestone file, and only those, before
+writing the new milestones; an unrelated directory under milestones/ survives.
+
+-- fixtures/cwd/milestones/M01-old/M01-old.md --
+---
+id: "01"
+---
+-- fixtures/cwd/milestones/notes/keep.txt --
+keep
+-- fixtures/cwd/draft.md --
+### M01 — New
+sp: 1
+
+- `a.py`
+-- cmd --
+booping plan split draft.md --replace
+sh -c 'find . -type f | sort'
+-- expected/cwd/milestones/M01-new/M01-new.md --
+---
+id: "01"
+title: "New"
+sp: 1
+status: pending
+plan: "index.md"
+---
+
+# M01: New
+
+## Tasks
+
+- `a.py`
+
+## Definition of Done
+
+## References
+
+## Verify
+-- exit --
+0
+-- stdout --
+M01-new sp=1 sections=tasks:1,dod:0,references:0,verify:0
+group G1: M01 (1 SP)
+./draft.md
+./index.md
+./milestones/M01-new/M01-new.md
+./milestones/notes/keep.txt

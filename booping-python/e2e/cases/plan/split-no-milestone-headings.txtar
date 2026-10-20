@@ -1,0 +1,17 @@
+A draft with no milestone heading exits 3 and writes nothing: the directory still holds only
+the draft afterwards.
+
+-- fixtures/cwd/draft.md --
+# Plan
+
+## Context
+
+No milestones yet.
+-- cmd --
+sh -c 'booping plan split draft.md; s=$?; find . -type f | sort; exit $s'
+-- stderr --
+error: no milestone heading found in draft.md
+-- exit --
+3
+-- stdout --
+./draft.md

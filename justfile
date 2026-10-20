@@ -3,8 +3,8 @@ default:
 
 # Lint both uv projects
 lint:
-    cd booping-python && uv run ruff check .
-    cd booping-tracker && uv run ruff check .
+    cd booping-python && uv run ruff check . && uv run ruff format --check .
+    cd booping-tracker && uv run ruff check . && uv run ruff format --check .
 
 # Type-check both uv projects
 typecheck:
@@ -19,17 +19,30 @@ pytest:
 # Run both contract corpora — `just e2e [-k expression]`; `pytest e2e --txtar-update` rebaselines
 # Exit 5 is "no tests collected": a -k expression selecting cases in one corpus leaves the
 # other empty, which is a filtered-out corpus rather than a failure.
+# Cases run in parallel (pytest-xdist; each case gets its own temp sandbox). --txtar-update runs
+# serially: the "rewritten" summary is kept per process, so xdist workers would drop it.
 [no-exit-message]
+[positional-arguments]
 e2e *args:
-    cd booping-python && uv run pytest e2e {{ args }} || [ $? -eq 5 ]
-    cd booping-tracker && uv run pytest e2e {{ args }} || [ $? -eq 5 ]
+    #!/usr/bin/env bash
+    set -uo pipefail
+    par=(-n auto)
+    for a in "$@"; do [ "$a" = --txtar-update ] && par=(); done
+    run() { (cd "$1" && uv run pytest e2e "${par[@]}" "${@:2}"); s=$?; [ $s -eq 0 ] || [ $s -eq 5 ] || exit $s; }
+    run booping-python "$@"
+    run booping-tracker "$@"
 
 # Every check CI runs, in order, stopping at the first failure.
-ci: lint typecheck pytest snapshots mdcheck e2e
+ci: lint typecheck pytest snapshots mdcheck specs-check e2e
 
 [doc("Structural checks over the rendered reports")]
 mdcheck:
     @uv run scripts/mdcheck.py
+
+[doc("Check this repo's specs records (core and project tiers) — booping specs check")]
+specs-check:
+    bin/booping specs check --tier core
+    bin/booping specs check --tier project
 
 [doc("Check the committed reports against a fresh hermetic render")]
 snapshots:

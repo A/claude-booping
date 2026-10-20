@@ -1,0 +1,458 @@
+# The adr-scorer agent over booping-only draft ADRs, each with its frozen record inventory.
+#
+# Fixtures: adr-0005, adr-0012, adr-0013 recovered from commit 19a984f^ (deleted in 19a984f);
+# adr-0003, adr-0019, adr-0024 and the sources of the mutant-* fixtures from commit 5ea9393, verbatim.
+# A mutant cuts one cheap option — its Alternatives row, its section and its Context line — and
+# names the cut in `metadata.cut`; mutant-0033 is also shown as a draft (status proposed, the
+# superseded note dropped) and one other project's name is neutralised; mutant-0030's forward
+# refs to adr/0031, written after it, are reworded to prose.
+#
+# Inventory: inventory-adr-{NNNN}.txt is the output of
+#   bin/booping specs ls --tier project --type value --type rule --type adr --titles --exclude adr/{NNNN}
+# run in a tree of the fixture ADR's commit (19a984f^ or 5ea9393, with the repo's .booping marker),
+# with every line whose record `created_at` is after the ADR's dropped, and — `created_at` being
+# day-precision — every adr numbered above the fixture's; statuses are the ones in force when the
+# ADR was written (adr/0016 accepted: superseded by adr/0035 on 2026-10-17).
+# Primitives: primitives.md, one line per command or building block of CLAUDE.md `## Commands`.
+#
+# Expectations are hand-derived: the deleted ADRs route to rule / none / value; the kept ones
+# route to adr with alt_score 1 / 2 / 3 (vault/plans/202610190033_specs-acceptance-and-session-entry/
+# adr-audit-ground-truth.md); each mutant's `missing` names its cut option.
+# smoke: the body render first, no reading tool, and the JSON contract on every fixture. regress: route on every fixture,
+# alt_score within ±1 on the kept ones, alt_score of 0019 below 0003, a judge per mutant.
+
+- description: adr-scorer smoke — ADR 0012 (deleted), the driver owns the vault
+  vars:
+    input: file://_fixtures/adr-0012.md
+    inventory: file://_fixtures/inventory-adr-0012.txt
+    primitives: file://_fixtures/primitives.md
+  metadata:
+    agent: adr-scorer
+    fixture: adr-0012
+    tier: smoke
+  assert:
+    # RENDER-FIRST — the body render first, no reading tool; the agent reads nothing beyond its prompt
+    - type: javascript
+      value: file://asserts.js
+      config:
+        check: tools
+    # CONTRACT — one JSON line, the rubric's keys, enum and ranges
+    - type: javascript
+      value: file://asserts.js
+      config:
+        check: contract
+
+- description: adr-scorer regress — ADR 0012 (deleted), the driver owns the vault
+  vars:
+    input: file://_fixtures/adr-0012.md
+    inventory: file://_fixtures/inventory-adr-0012.txt
+    primitives: file://_fixtures/primitives.md
+  metadata:
+    agent: adr-scorer
+    fixture: adr-0012
+    tier: regress
+  assert:
+    # ROUTE — exactly the hand-derived type
+    - type: javascript
+      value: file://asserts.js
+      config:
+        check: route
+        expect: rule
+
+- description: adr-scorer smoke — ADR 0013 (deleted), the runner owns the milestone commit
+  vars:
+    input: file://_fixtures/adr-0013.md
+    inventory: file://_fixtures/inventory-adr-0013.txt
+    primitives: file://_fixtures/primitives.md
+  metadata:
+    agent: adr-scorer
+    fixture: adr-0013
+    tier: smoke
+  assert:
+    # RENDER-FIRST — the body render first, no reading tool; the agent reads nothing beyond its prompt
+    - type: javascript
+      value: file://asserts.js
+      config:
+        check: tools
+    # CONTRACT — one JSON line, the rubric's keys, enum and ranges
+    - type: javascript
+      value: file://asserts.js
+      config:
+        check: contract
+
+- description: adr-scorer regress — ADR 0013 (deleted), the runner owns the milestone commit
+  vars:
+    input: file://_fixtures/adr-0013.md
+    inventory: file://_fixtures/inventory-adr-0013.txt
+    primitives: file://_fixtures/primitives.md
+  metadata:
+    agent: adr-scorer
+    fixture: adr-0013
+    tier: regress
+  assert:
+    # ROUTE — exactly the hand-derived type
+    - type: javascript
+      value: file://asserts.js
+      config:
+        check: route
+        expect: none
+
+- description: adr-scorer smoke — ADR 0005 (deleted), core is a playbook framework
+  vars:
+    input: file://_fixtures/adr-0005.md
+    inventory: file://_fixtures/inventory-adr-0005.txt
+    primitives: file://_fixtures/primitives.md
+  metadata:
+    agent: adr-scorer
+    fixture: adr-0005
+    tier: smoke
+  assert:
+    # RENDER-FIRST — the body render first, no reading tool; the agent reads nothing beyond its prompt
+    - type: javascript
+      value: file://asserts.js
+      config:
+        check: tools
+    # CONTRACT — one JSON line, the rubric's keys, enum and ranges
+    - type: javascript
+      value: file://asserts.js
+      config:
+        check: contract
+
+- description: adr-scorer regress — ADR 0005 (deleted), core is a playbook framework
+  vars:
+    input: file://_fixtures/adr-0005.md
+    inventory: file://_fixtures/inventory-adr-0005.txt
+    primitives: file://_fixtures/primitives.md
+  metadata:
+    agent: adr-scorer
+    fixture: adr-0005
+    tier: regress
+  assert:
+    # ROUTE — exactly the hand-derived type
+    - type: javascript
+      value: file://asserts.js
+      config:
+        check: route
+        expect: value
+
+- description: adr-scorer smoke — ADR 0019, tracker is a best-effort mirror
+  vars:
+    input: file://_fixtures/adr-0019.md
+    inventory: file://_fixtures/inventory-adr-0019.txt
+    primitives: file://_fixtures/primitives.md
+  metadata:
+    agent: adr-scorer
+    fixture: adr-0019
+    tier: smoke
+  assert:
+    # RENDER-FIRST — the body render first, no reading tool; the agent reads nothing beyond its prompt
+    - type: javascript
+      value: file://asserts.js
+      config:
+        check: tools
+    # CONTRACT — one JSON line, the rubric's keys, enum and ranges
+    - type: javascript
+      value: file://asserts.js
+      config:
+        check: contract
+
+- description: adr-scorer regress — ADR 0019, tracker is a best-effort mirror
+  vars:
+    input: file://_fixtures/adr-0019.md
+    inventory: file://_fixtures/inventory-adr-0019.txt
+    primitives: file://_fixtures/primitives.md
+  metadata:
+    agent: adr-scorer
+    fixture: adr-0019
+    tier: regress
+  assert:
+    # ROUTE — exactly the hand-derived type
+    - type: javascript
+      value: file://asserts.js
+      config:
+        check: route
+        expect: adr
+    # ALT-SCORE — within ±1 of the ground truth
+    - type: javascript
+      value: file://asserts.js
+      config:
+        check: alt_score
+        expect: 1
+
+- description: adr-scorer smoke — ADR 0024, the specs playbook is a guide
+  vars:
+    input: file://_fixtures/adr-0024.md
+    inventory: file://_fixtures/inventory-adr-0024.txt
+    primitives: file://_fixtures/primitives.md
+  metadata:
+    agent: adr-scorer
+    fixture: adr-0024
+    tier: smoke
+  assert:
+    # RENDER-FIRST — the body render first, no reading tool; the agent reads nothing beyond its prompt
+    - type: javascript
+      value: file://asserts.js
+      config:
+        check: tools
+    # CONTRACT — one JSON line, the rubric's keys, enum and ranges
+    - type: javascript
+      value: file://asserts.js
+      config:
+        check: contract
+
+- description: adr-scorer regress — ADR 0024, the specs playbook is a guide
+  vars:
+    input: file://_fixtures/adr-0024.md
+    inventory: file://_fixtures/inventory-adr-0024.txt
+    primitives: file://_fixtures/primitives.md
+  metadata:
+    agent: adr-scorer
+    fixture: adr-0024
+    tier: regress
+  assert:
+    # ROUTE — exactly the hand-derived type
+    - type: javascript
+      value: file://asserts.js
+      config:
+        check: route
+        expect: adr
+    # ALT-SCORE — within ±1 of the ground truth
+    - type: javascript
+      value: file://asserts.js
+      config:
+        check: alt_score
+        expect: 2
+
+- description: adr-scorer smoke — ADR 0003, render at skill load
+  vars:
+    input: file://_fixtures/adr-0003.md
+    inventory: file://_fixtures/inventory-adr-0003.txt
+    primitives: file://_fixtures/primitives.md
+  metadata:
+    agent: adr-scorer
+    fixture: adr-0003
+    tier: smoke
+  assert:
+    # RENDER-FIRST — the body render first, no reading tool; the agent reads nothing beyond its prompt
+    - type: javascript
+      value: file://asserts.js
+      config:
+        check: tools
+    # CONTRACT — one JSON line, the rubric's keys, enum and ranges
+    - type: javascript
+      value: file://asserts.js
+      config:
+        check: contract
+
+- description: adr-scorer regress — ADR 0003, render at skill load
+  vars:
+    input: file://_fixtures/adr-0003.md
+    inventory: file://_fixtures/inventory-adr-0003.txt
+    primitives: file://_fixtures/primitives.md
+  metadata:
+    agent: adr-scorer
+    fixture: adr-0003
+    tier: regress
+  assert:
+    # ROUTE — exactly the hand-derived type
+    - type: javascript
+      value: file://asserts.js
+      config:
+        check: route
+        expect: adr
+    # ALT-SCORE — within ±1 of the ground truth
+    - type: javascript
+      value: file://asserts.js
+      config:
+        check: alt_score
+        expect: 3
+
+- description: adr-scorer smoke — ADR 0003 mutant, hand-written bodies cut
+  vars:
+    input: file://_fixtures/mutant-0003.md
+    inventory: file://_fixtures/inventory-adr-0003.txt
+    primitives: file://_fixtures/primitives.md
+  metadata:
+    agent: adr-scorer
+    fixture: mutant-0003
+    tier: smoke
+    cut: 'hand-written full bodies — each SKILL.md carrying its whole body, no render tooling at all'
+  assert:
+    # RENDER-FIRST — the body render first, no reading tool; the agent reads nothing beyond its prompt
+    - type: javascript
+      value: file://asserts.js
+      config:
+        check: tools
+    # CONTRACT — one JSON line, the rubric's keys, enum and ranges
+    - type: javascript
+      value: file://asserts.js
+      config:
+        check: contract
+
+- description: adr-scorer regress — ADR 0003 mutant, hand-written bodies cut
+  vars:
+    input: file://_fixtures/mutant-0003.md
+    inventory: file://_fixtures/inventory-adr-0003.txt
+    primitives: file://_fixtures/primitives.md
+  metadata:
+    agent: adr-scorer
+    fixture: mutant-0003
+    tier: regress
+    cut: 'hand-written full bodies — each SKILL.md carrying its whole body, no render tooling at all'
+  assert:
+    # ROUTE — exactly the hand-derived type
+    - type: javascript
+      value: file://asserts.js
+      config:
+        check: route
+        expect: adr
+    # MISSING — the cut cheap option is named
+    - type: llm-rubric
+      value: "MISSING-NAMES-CUT: The `missing` list of the JSON reply in the <return> block names, in any wording, hand-written full bodies — each SKILL.md carrying its whole body, no render tooling at all. Fails if no `missing` entry names that option."
+
+- description: adr-scorer smoke — ADR 0007 mutant, confirmed flags cut
+  vars:
+    input: file://_fixtures/mutant-0007.md
+    inventory: file://_fixtures/inventory-adr-0007.txt
+    primitives: file://_fixtures/primitives.md
+  metadata:
+    agent: adr-scorer
+    fixture: mutant-0007
+    tier: smoke
+    cut: 'a `confirmed:` flag flipped in the artifact — no state machine, the confirmation kept in prose'
+  assert:
+    # RENDER-FIRST — the body render first, no reading tool; the agent reads nothing beyond its prompt
+    - type: javascript
+      value: file://asserts.js
+      config:
+        check: tools
+    # CONTRACT — one JSON line, the rubric's keys, enum and ranges
+    - type: javascript
+      value: file://asserts.js
+      config:
+        check: contract
+
+- description: adr-scorer regress — ADR 0007 mutant, confirmed flags cut
+  vars:
+    input: file://_fixtures/mutant-0007.md
+    inventory: file://_fixtures/inventory-adr-0007.txt
+    primitives: file://_fixtures/primitives.md
+  metadata:
+    agent: adr-scorer
+    fixture: mutant-0007
+    tier: regress
+    cut: 'a `confirmed:` flag flipped in the artifact — no state machine, the confirmation kept in prose'
+  assert:
+    # ROUTE — exactly the hand-derived type
+    - type: javascript
+      value: file://asserts.js
+      config:
+        check: route
+        expect: adr
+    # MISSING — the cut cheap option is named
+    - type: llm-rubric
+      value: "MISSING-NAMES-CUT: The `missing` list of the JSON reply in the <return> block names, in any wording, a `confirmed:` flag flipped in the artifact — no state machine, the confirmation kept in prose. Fails if no `missing` entry names that option."
+
+- description: adr-scorer smoke — ADR 0030 mutant, keeping the current groom cut
+  vars:
+    input: file://_fixtures/mutant-0030.md
+    inventory: file://_fixtures/inventory-adr-0030.txt
+    primitives: file://_fixtures/primitives.md
+  metadata:
+    agent: adr-scorer
+    fixture: mutant-0030
+    tier: smoke
+    cut: 'keeping the current multi-step groom as it is — building nothing'
+  assert:
+    # RENDER-FIRST — the body render first, no reading tool; the agent reads nothing beyond its prompt
+    - type: javascript
+      value: file://asserts.js
+      config:
+        check: tools
+    # CONTRACT — one JSON line, the rubric's keys, enum and ranges
+    - type: javascript
+      value: file://asserts.js
+      config:
+        check: contract
+
+- description: adr-scorer regress — ADR 0030 mutant, keeping the current groom cut
+  vars:
+    input: file://_fixtures/mutant-0030.md
+    inventory: file://_fixtures/inventory-adr-0030.txt
+    primitives: file://_fixtures/primitives.md
+  metadata:
+    agent: adr-scorer
+    fixture: mutant-0030
+    tier: regress
+    cut: 'keeping the current multi-step groom as it is — building nothing'
+  assert:
+    # ROUTE — exactly the hand-derived type
+    - type: javascript
+      value: file://asserts.js
+      config:
+        check: route
+        expect: adr
+    # MISSING — the cut cheap option is named
+    - type: llm-rubric
+      value: "MISSING-NAMES-CUT: The `missing` list of the JSON reply in the <return> block names, in any wording, keeping the current multi-step groom as it is — building nothing. Fails if no `missing` entry names that option."
+
+- description: adr-scorer smoke — ADR 0033 mutant, the index inline in the prompt cut
+  vars:
+    input: file://_fixtures/mutant-0033.md
+    inventory: file://_fixtures/inventory-adr-0033.txt
+    primitives: file://_fixtures/primitives.md
+  metadata:
+    agent: adr-scorer
+    fixture: mutant-0033
+    tier: smoke
+    cut: 'pasting the `booping specs ls` index inline into each step — the existing command, no subagent'
+  assert:
+    # RENDER-FIRST — the body render first, no reading tool; the agent reads nothing beyond its prompt
+    - type: javascript
+      value: file://asserts.js
+      config:
+        check: tools
+    # CONTRACT — one JSON line, the rubric's keys, enum and ranges
+    - type: javascript
+      value: file://asserts.js
+      config:
+        check: contract
+
+- description: adr-scorer regress — ADR 0033 mutant, the index inline in the prompt cut
+  vars:
+    input: file://_fixtures/mutant-0033.md
+    inventory: file://_fixtures/inventory-adr-0033.txt
+    primitives: file://_fixtures/primitives.md
+  metadata:
+    agent: adr-scorer
+    fixture: mutant-0033
+    tier: regress
+    cut: 'pasting the `booping specs ls` index inline into each step — the existing command, no subagent'
+  assert:
+    # ROUTE — exactly the hand-derived type
+    - type: javascript
+      value: file://asserts.js
+      config:
+        check: route
+        expect: adr
+    # MISSING — the cut cheap option is named
+    - type: llm-rubric
+      value: "MISSING-NAMES-CUT: The `missing` list of the JSON reply in the <return> block names, in any wording, pasting the `booping specs ls` index inline into each step — the existing command, no subagent. Fails if no `missing` entry names that option."
+
+- description: adr-scorer regress — ADR 0019 (ground truth 1) gets a lower alt_score than ADR 0003 (ground truth 3)
+  vars:
+    input: file://_fixtures/adr-0019.md
+    inventory: file://_fixtures/inventory-adr-0019.txt
+    primitives: file://_fixtures/primitives.md
+    compare: file://_fixtures/adr-0003.md
+    compare_inventory: file://_fixtures/inventory-adr-0003.txt
+  metadata:
+    agent: adr-scorer
+    fixture: adr-0019-below-adr-0003
+    tier: regress
+  assert:
+    # ORDER — the weaker ADR's alt_score is strictly lower
+    - type: javascript
+      value: file://asserts.js
+      config:
+        check: order

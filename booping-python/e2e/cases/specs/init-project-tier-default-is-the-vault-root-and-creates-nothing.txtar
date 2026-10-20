@@ -1,0 +1,18 @@
+With the vault inside the repo and a null `path`, the project tier root is the vault itself:
+`--tier project` creates nothing and prints the vault root alone; `ls` shows the vault untouched.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/sprints.md --
+sprints
+-- cmd --
+booping specs init --tier project
+ls vault
+-- exit --
+0
+-- stdout --
+{CWD}/vault
+sprints.md
+-- stderr --

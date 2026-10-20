@@ -1,0 +1,58 @@
+# Two smoke cases over the on-start step. The run has no shell: each fixture states the
+# `booping status` output a live run would have printed. The cwd is the vault root; on-start
+# writes nothing.
+
+- description: on-start smoke — status verbatim, then the finished run before the waiting item and the plan
+  vars:
+    input: file://_fixtures/finished-run-first.md
+  metadata:
+    playbook: project-manager
+    step: on-start
+    fixture: finished-run-first
+    tier: smoke
+  assert:
+    # READ-ONLY
+    - type: javascript
+      value: file://../../_lib/asserts/files.js
+      config:
+        expect: []
+        noOthers: true
+    # STATUS-VERBATIM — all six short-report lines as printed
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        entry: '^\W*(items: 2 open — request 2, backlog 0, spec gap 0 — 1 waiting on you|ideas: none|plans: 1 ready-for-dev|runs: 1 finished|records: none not accepted|marks: none)\W*$'
+        onlyEntries: false
+        minEntries: 6
+    # ACT-ON-ORDER — the run id is named before the waiting item, the waiting item before the plan
+    - type: regex
+      value: '^(?:(?!OI-0004)[\s\S])*20261015-110000-develop'
+    - type: regex
+      value: '^(?:(?![Ww]ebhook[- ][Rr]etries)[\s\S])*OI-0004'
+    - type: regex
+      value: '[Ww]ebhook[- ][Rr]etries'
+
+- description: on-start smoke — only a waiting item, the reply points at its item file
+  vars:
+    input: file://_fixtures/waiting-item-points-to-item.md
+  metadata:
+    playbook: project-manager
+    step: on-start
+    fixture: waiting-item-points-to-item
+    tier: smoke
+  assert:
+    # READ-ONLY
+    - type: javascript
+      value: file://../../_lib/asserts/files.js
+      config:
+        expect: []
+        noOthers: true
+    # POINTS-TO-ITEM
+    - type: javascript
+      value: file://../../_lib/asserts/return.js
+      config:
+        requireBlock: true
+        entry: 'open-items/OI-0007\.md'
+        onlyEntries: false
+        minEntries: 1

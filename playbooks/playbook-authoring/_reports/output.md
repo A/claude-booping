@@ -8,7 +8,7 @@ Run state is harness-managed. The workdir is the target playbook dir `<root>/<sl
 (created before the first transition); the machine artifacts are `_specs/index.md` and
 `_specs/steps/<step>/index.md`. Sub-agents writing a machine artifact preserve its
 frontmatter and never write `status:`, `reviewed_at`, or any stamp — `booping
-playbook-transition` is the only writer. There is no `confirmed:` key: confirmation is the
+transition` is the only writer. There is no `confirmed:` key: confirmation is the
 user's explicit chat signal at a gate, captured as the transition out of an
 `awaiting-*-confirm` status — never run past a gate on silence. The transition's exit hooks
 then stamp `reviewed_at` with the date macro (or, for a subject that cannot carry frontmatter, the
@@ -53,12 +53,12 @@ Execute the steps in the most effective order considering their dependencies.
 
 ## State
 
-Run state is persisted in artifacts under the run workdir. Only `booping playbook-transition` writes it — never hand-edit an artifact's `status`.
+Run state is persisted in artifacts under the run workdir. Only `booping transition` writes it — never hand-edit an artifact's `status`.
 
 Read the whole run's frontier before starting or resuming:
 
 ```
-booping playbook-state playbook-authoring --workdir <run workdir>
+booping state <run workdir>/_specs/index.md --playbook playbook-authoring
 ```
 
 ### State: main
@@ -66,7 +66,7 @@ booping playbook-state playbook-authoring --workdir <run workdir>
 - Referenced by: outer graph
 - Artifact: `_specs/index.md` (relative to the run workdir)
 - Initial status: `interviewing`
-- Advance: `booping playbook-transition playbook-authoring <to> --workdir <run workdir>`
+- Advance: `booping transition <run workdir>/_specs/index.md <to> --playbook playbook-authoring`
 
 | Status | To | When | Gates |
 | --- | --- | --- | --- |
@@ -93,7 +93,7 @@ booping playbook-state playbook-authoring --workdir <run workdir>
 - Referenced by: subgraph `step-pipeline`
 - Artifact: `_specs/steps/{instance}/index.md` (relative to the run workdir)
 - Initial status: `spec-ing`
-- Advance: `booping playbook-transition playbook-authoring <to> --state step --instance <slug> --workdir <run workdir>`
+- Advance: `booping transition <run workdir>/_specs/steps/<slug>/index.md <to> --playbook playbook-authoring --state step`
 
 | Status | To | When | Gates |
 | --- | --- | --- | --- |
@@ -157,7 +157,7 @@ Write the playbook's manifest early — identity, trigger, and the confirmed gra
 
 Review gate: stop after this step — "The user confirms name, trigger, graph, target model and destination root before any per-step file is written"; continue only on explicit user confirmation.
 
-Tell a sub-agent — model sonnet, effort medium — to get its instructions by calling this command: `booping render-playbook playbook-authoring --step manifest`.
+Tell a sub-agent — model opus, effort medium — to get its instructions by calling this command: `booping render-playbook playbook-authoring --step manifest`.
 
 ## Subgraph: step-pipeline
 
@@ -214,7 +214,7 @@ Part of: step-pipeline (repeated)
 
 Review gate: stop after this step — "The user reviews the tree; the optimizer steps that follow take the suite to green"; continue only on explicit user confirmation.
 
-Tell a sub-agent — model sonnet, effort medium — to get its instructions by calling this command: `booping render-playbook playbook-authoring --step step-suite`.
+Tell a sub-agent — model opus, effort medium — to get its instructions by calling this command: `booping render-playbook playbook-authoring --step step-suite`.
 
 ## Step: Smoke Optimizer
 

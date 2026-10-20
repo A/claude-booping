@@ -1,0 +1,15 @@
+{% extends "base.html.j2" %}
+{% from "_macros.html.j2" import record_row, filter_bar %}
+{% block scripts %}
+<script src="{{ prefix }}filter-format.js" defer></script>
+<script src="{{ prefix }}filter.js" defer></script>
+{% endblock %}
+{% block main %}
+<h1>{{ labels.ui("all_records") }}</h1>
+{{ filter_bar(filters, labels) | trim }}
+<ul class="rows">
+{% for row in rows %}
+{{ record_row(row, labels, prefix) | trim }}
+{% endfor %}
+</ul>
+{% endblock %}

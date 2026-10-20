@@ -4,17 +4,19 @@ Everything accepted is on disk; nothing here re-drafts or re-opens the table.
 
 ## 1. Transition
 
-Once every accepted item is written, advance the run per the `## State` section — from the vault root, passing `--target retrospectives/{slug}.md` for the run's retrospective. The exit edge's hook commits that file together with the `_lessons/` files this run wrote. Plan frontmatter is never touched: the plans closed at develop and learn leaves them alone.
+Once every accepted item is written, advance the run per the `## State` section — naming `{vault}/retrospectives/{slug}.md`, the run's retrospective. The exit edge's hook commits that file together with the rule records this run wrote under the vault's `specs/`; when the vault is outside the repo the records live in the repo and are committed in §2. Plan frontmatter is never touched: the plans closed at develop and learn leaves them alone.
 
-## 2. Repo `CLAUDE.md` commit
+## 2. Repo commit
 
-If `write` also wrote to the attached repo's `CLAUDE.md`, commit that separately in the repo working tree (the transition only touches the vault, never the attached repo):
+If `write` also wrote to the attached repo's `CLAUDE.md`, or — when the vault is outside the repo — wrote rule records under `{repo-path}/specs/`, commit those separately in the repo working tree (the transition only touches the vault, never the attached repo). Stage each written file by path, never `git add -A`:
 
 ```bash
 cd {repo-path}
-git add CLAUDE.md
-git commit -m "docs(claude-md): {short summary}"
+git add CLAUDE.md specs/rule/{NNNN-slug}.md
+git commit -m "docs(specs): {short summary}"
 ```
+
+Without rule records, stage `CLAUDE.md` alone and use `docs(claude-md): {short summary}`.
 
 ## 3. Closing report
 

@@ -1,0 +1,61 @@
+---
+type: reference
+title: Glossary
+summary: The canonical names for booping's concepts — one term per concept, never a synonym, used across records, docs and step bodies.
+created_by: claude
+created_at: 2026-10-14
+updated_at: 2026-10-15
+status: live
+sources: [https://github.com/A/claude-booping/blob/c7e43b43dfe5fc1c0fafe253dd148d7e62ea231e/vault/docs/_specs/glossary.md]
+---
+
+## Facts
+
+- **Project Vault** — the per-project directory holding every run artefact (`plans/`,
+  `retrospectives/`, `codereviews/`, `_playbooks/`, templates,
+  `sprints.md`): `~/Claude/{project}/` by default, or repo-local via the marker's
+  `vault_path:` key.
+- **Core level** — the plugin repo itself: the shipped playbooks, agents, the
+  `/playbook` skill and the `src/config.yaml` defaults.
+- **Global level** — the machine-wide tier: `<home_dir>/` (`_playbooks/`, `_specs/`,
+  templates) and `~/.config/booping/config.yaml`.
+- **Project level** — the tier scoped to one attached repo: the Project Vault and its
+  `config.yaml`.
+- **Levels** — the discovery and config-merge ladder, always named "the core, global
+  and project levels"; later levels win on merge, names are unique across levels on
+  discovery.
+- Specs tiers ([adr/0001](../adr/0001-specs-tiers.md)) use the config level names:
+  core, global (`<home_dir>/_specs/`, named by the user's namespace), project.
+- **Playbook** — a multi-step guided procedure: a directory with `playbook.md`, an
+  optional `playbook.yaml` (`graph:` plus state machines) and one directory per step.
+- **Step** — one unit of a playbook's graph: a directory holding `prompt.md`,
+  optionally per-model bodies and an eval suite.
+- **Subgraph** — a mapping node in `graph:`: its own dependencies, an inner graph of
+  steps, an optional prose `repeat:`, one nesting level only.
+- **Inline** — a delegation level: the runner performs the step itself in the driving
+  context.
+- **Assisted** — a delegation level: the runner performs the step but hands heavy
+  reads to the config-named research agent for a bounded return.
+- **Detached** — a delegation level: the step runs in its own sub-agent, declared by
+  the step's `detached:` field.
+- **Plan** — a groomed sprint's document and run artefact, `plans/{slug}/index.md` in
+  the Project Vault.
+- **Retrospective artefact** — the standalone `retrospectives/{slug}.md` the retro
+  track advances, linked back from the covered plan's `retro:` key.
+- **Targeted rule** — an accepted rule record whose brief is injected into exactly the
+  playbooks, steps, agents or skills its `targets:` list names; an untargeted one
+  injects nowhere.
+- **Marker** — the repo's `.booping` file attaching it to a Project Vault:
+  `project_name:`, optional `vault_path:` and the `latest_migration:` watermark.
+- **Migration watermark** — the marker's `latest_migration:` key, the highest shipped
+  migration id a Project Vault has applied.
+- **Run artefact** — the frontmatter-carrying file a state machine advances: a plan's
+  `index.md`, a retrospective artefact, a code review.
+- **Cancelled** — a terminal run outcome, reachable from any non-terminal status of an
+  active run and carrying its own exit hooks.
+- **Query spec** — a config-declared mapping at any dotted path describing a
+  frontmatter query over a markdown directory.
+- **Template tree** — a config-declared file tree `booping create` writes at a
+  destination, its names and contents rendered as Jinja templates.
+- **Spec set** — the project specs tier records the `docs` playbook reads: the value
+  records, reference/0001–0003 and the story records.

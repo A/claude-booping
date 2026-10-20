@@ -1,0 +1,20 @@
+doc: milestone
+rules:
+  # The milestone `sp` is the sum of its tasks, capped by `core.sprint.max_sp` (15);
+  # a task's SP stays under `core.sprint.redecompose_threshold` (5). mdcheck reads no
+  # config, so both are restated as static patterns: change them with the config.
+  - select: FRONTMATTER
+    has:
+      sp: '^([1-9]|1[0-5])$'
+  - select: SECTION("Tasks") TABLE > TD[col="SP"]
+    min: 1
+    match: '^[1-4]$'
+  - select: SECTION("Verify") > P[0]
+    count: 1
+    match: '^`[^`\n]+`$'
+  - select: SECTION("Tasks")
+    count: 1
+    require: '`[^`\n]*(/|\.[A-Za-z0-9]+)[^`\n]*`'
+  - select: SECTION("Definition of Done") UL > LI
+    min: 1
+    match: '^\[[ xX]\] .+'

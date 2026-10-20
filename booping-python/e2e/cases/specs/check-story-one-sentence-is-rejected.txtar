@@ -1,0 +1,35 @@
+A story in the old one-sentence shape — the opening and `## Criteria` only, no `priority` —
+fails the feature-sized schema: one finding for the missing key, one per missing
+`## Scenarios` and `## Edge cases` heading, and the edge-case list it therefore lacks.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/story/0001-export.md --
+---
+type: story
+title: Export
+summary: The owner exports a report.
+created_by: owner
+created_at: 2026-01-01
+updated_at: 2026-01-01
+status: done
+---
+
+As **the owner**, I want to export a report, so that I can share it.
+
+## Criteria
+
+- The export opens in a spreadsheet.
+-- cmd --
+booping specs check
+-- exit --
+1
+-- stdout --
+vault/story/0001-export.md:1  error  schema  key `priority` missing
+vault/story/0001-export.md:1  error  schema  required section `Scenarios` missing
+vault/story/0001-export.md:1  error  schema  required section `Edge cases` missing
+vault/story/0001-export.md:1  error  schema  `SECTION("Edge cases") > UL > LI`: 0 matches, expected ≥ 1
+-- stderr --
+1 record(s) checked: 4 error(s), 0 warning(s)

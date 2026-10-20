@@ -1,0 +1,23 @@
+A gap in the numbering is not reused: `next` is the highest number plus one.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/adr/0001-first.md --
+---
+type: adr
+title: First
+---
+-- fixtures/cwd/vault/adr/0005-fifth.md --
+---
+type: adr
+title: Fifth
+---
+-- cmd --
+booping specs next adr
+-- exit --
+0
+-- stdout --
+adr/0006
+-- stderr --

@@ -1,0 +1,34 @@
+The project tier wins over the core default: `core.auto_migrate: false` in the vault's
+`config.yaml` turns the playbook-render gate back into the STOP notice for the user, and the
+fixture playbook's preamble never appears.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+-- fixtures/home/Claude/probe/config.yaml --
+core:
+  auto_migrate: false
+-- fixtures/home/Claude/_playbooks/fx-gated/playbook.md --
+---
+name: fx-gated
+title: Gated
+summary: Must not render while the vault is behind.
+---
+
+Preamble that a working gate suppresses.
+-- fixtures/home/Claude/_playbooks/fx-gated/playbook.yaml --
+graph:
+  only: []
+-- fixtures/home/Claude/_playbooks/fx-gated/only/prompt.md --
+---
+name: only
+summary: Only step.
+---
+
+Only body.
+-- cmd --
+booping render-playbook fx-gated
+-- exit --
+0
+-- stdout --
+**STOP — tell the user:** this project is behind on booping migrations (recorded id -1, latest shipped [..]). Run `/playbook migrate` to bring the vault current, then retry.
+-- stderr --

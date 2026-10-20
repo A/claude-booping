@@ -1,0 +1,139 @@
+{% from "_macros.html.j2" import icon %}
+{% set rail_html = self.rail() | trim %}
+{% set review_html = self.review() | trim %}
+<!doctype html>
+<html lang="{{ lang }}">
+<head>
+<meta charset="utf-8">
+{% if base_href is defined %}
+<base href="{{ base_href }}">
+{% endif %}
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>try{var t=localStorage.getItem("specs-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}document.documentElement.classList.add("js")</script>
+<meta name="color-scheme" content="light dark">
+<title>{% if title == site_title %}{{ site_title }}{% else %}{{ title }} — {{ site_title }}{% endif %}</title>
+<link rel="stylesheet" href="{{ prefix }}fonts.css">
+<link rel="stylesheet" href="{{ prefix }}style.css">
+<script src="{{ prefix }}site.js" defer></script>
+{% block scripts %}{% endblock %}
+{% if nav %}
+<script src="{{ prefix }}search.js" defer></script>
+<script src="{{ prefix }}comments-format.js" defer></script>
+<script src="{{ prefix }}comments.js" defer></script>
+{% endif %}
+{% block head %}{% endblock %}
+</head>
+<body>
+{% include "_icons.html.j2" %}
+<a class="skip" href="#main">{{ labels.ui("skip") }}</a>
+<header class="top">
+{% if nav %}
+<button class="iconbtn menu" type="button" aria-expanded="false" aria-controls="drawer" aria-label="{{ labels.ui('menu') }}">{{ icon("i-menu") }}</button>
+{% endif %}
+<a class="brand" href="{{ prefix }}index.html">{{ site_title }}</a>
+{% if nav %}
+<form class="search" role="search" action="{{ prefix }}search.html" data-prefix="{{ prefix }}" data-all="{{ labels.ui('search_all') }}">
+{{ icon("i-search") }}
+<input type="search" name="q" role="combobox" aria-label="{{ labels.ui('search') }}" aria-autocomplete="list" aria-expanded="false" aria-controls="search-list" autocomplete="off" placeholder="{{ labels.ui('search_placeholder') }}">
+<kbd>/</kbd>
+<button class="iconbtn search-close" type="button" aria-label="{{ labels.ui('close') }}">&times;</button>
+<ul id="search-list" role="listbox" aria-label="{{ labels.ui('search') }}" hidden></ul>
+</form>
+<button class="iconbtn search-btn" type="button" aria-label="{{ labels.ui('search') }}" title="{{ labels.ui('search') }}">{{ icon("i-search") }}</button>
+{% endif %}
+{% block header_actions %}{% endblock %}
+{% if nav %}
+<a class="iconbtn outbox" href="{{ prefix }}comments.html"{% if path == "comments.html" %} aria-current="page"{% endif %} aria-label="{{ labels.ui('outbox') }}" title="{{ labels.ui('outbox') }}">{{ icon("i-outbox") }}<span class="l">{{ labels.ui("outbox") }}</span><span class="n"></span></a>
+{% endif %}
+<button class="iconbtn theme" type="button" aria-label="{{ labels.ui('theme_auto') }}" title="{{ labels.ui('theme_auto') }}" data-label-auto="{{ labels.ui('theme_auto') }}" data-label-light="{{ labels.ui('theme_light') }}" data-label-dark="{{ labels.ui('theme_dark') }}">{{ icon("i-auto") }}</button>
+</header>
+<div class="body{% if not nav %} noside{% endif %}{% if not rail_html and not review_html %} norail{% endif %}{% if review_html %} rv-page{% if not rail_html %} rv-notoc{% endif %}{% endif %}">
+{% if nav %}
+<nav class="side" id="drawer" aria-label="{{ labels.ui('navigation') }}">
+<ul>
+<li><a href="{{ prefix }}index.html"{% if path == "index.html" %} aria-current="page"{% endif %}>{{ labels.ui("overview") }}</a></li>
+<li><a href="{{ prefix }}review.html"{% if path == "review.html" %} aria-current="page"{% endif %}>{{ icon("i-clarify") }}{{ labels.ui("review") }}<span class="n">{{ nav.review }}</span></a></li>
+<li><a href="{{ prefix }}records.html"{% if path == "records.html" %} aria-current="page"{% endif %}>{{ labels.ui("all_records") }}<span class="n">{{ nav.records }}</span></a></li>
+</ul>
+<h4>{{ labels.ui("types") }}</h4>
+<ul>
+{% for t in nav.types %}
+<li><a href="{{ prefix }}{{ t.href }}"{% if path == t.href %} aria-current="page"{% endif %}>{{ t.label }}<span class="n">{{ t.count }}</span></a></li>
+{% endfor %}
+</ul>
+{% if nav.work %}
+{% for group, heading in [("plans", "plans"), ("retros", "retros")] if nav.work[group] %}
+<h4>{{ labels.ui(heading) }}</h4>
+<ul>
+{% for e in nav.work[group] %}
+<li><a href="{{ prefix }}{{ e.href }}"{% if path == e.href %} aria-current="page"{% endif %}>{{ e.label }}<span class="n">{{ e.count }}</span></a></li>
+{% endfor %}
+</ul>
+{% endfor %}
+{% endif %}
+{% for reg in nav.registries %}
+<h4>{{ reg.root }}</h4>
+<ul>
+<li><a href="{{ prefix }}{{ reg.href }}"{% if path == reg.href %} aria-current="page"{% endif %}>{{ labels.ui("overview") }}</a></li>
+{% for t in reg.types %}
+<li><a href="{{ prefix }}{{ t.href }}"{% if path == t.href %} aria-current="page"{% endif %}>{{ t.label }}<span class="n">{{ t.count }}</span></a></li>
+{% endfor %}
+</ul>
+{% endfor %}
+{% if nav.tags %}
+<h4>{{ labels.ui("tags") }}</h4>
+{% for group in nav.tags %}
+{% if nav.tags | length > 1 %}
+<h5>{{ group.root }}</h5>
+{% endif %}
+<ul>
+{% for node in group.nodes %}
+<li><a href="{{ prefix }}{{ node.href }}"{% if path == node.href %} aria-current="page"{% endif %}>{{ node.tag }}<span class="n">{{ node.count }}</span></a></li>
+{% endfor %}
+<li><a href="{{ prefix }}{{ group.href }}"{% if path == group.href %} aria-current="page"{% endif %}>{{ labels.ui("all_tags") }}</a></li>
+</ul>
+{% endfor %}
+{% endif %}
+{% if nav.sources %}
+<h4>{{ labels.ui("sources") }}</h4>
+<ul>
+{% for source in nav.sources %}
+<li><a href="{{ prefix }}{{ source.href }}"{% if path == source.href %} aria-current="page"{% endif %}>{{ source.label }}<span class="n">{{ source.count }}</span></a></li>
+{% endfor %}
+</ul>
+{% endif %}
+<ul>
+<li><a href="{{ prefix }}llms.txt">llms.txt</a></li>
+</ul>
+</nav>
+{% endif %}
+<main id="main">
+<nav class="crumbs" aria-label="breadcrumb">
+<ol>
+{% for crumb in crumbs %}
+<li{% if not loop.first and not loop.last %} class="mid"{% endif %}>{% if loop.last %}<span aria-current="page">{{ crumb.label }}</span>{% elif crumb.href is not none %}<a href="{{ crumb.href }}">{{ crumb.label }}</a>{% else %}<span>{{ crumb.label }}</span>{% endif %}</li>
+{% endfor %}
+</ol>
+</nav>
+{% block main %}{% endblock %}
+</main>
+{% if review_html %}
+<aside class="rail rv-rail" id="rv-panel">
+{% if rail_html %}
+<details class="rv-toc" open>
+<summary>{{ labels.ui("on_this_page") }}</summary>
+{{ rail_html }}
+</details>
+{% endif %}
+{% block review %}{% endblock %}
+</aside>
+{% elif rail_html %}
+<aside class="rail">
+{% block rail %}{% endblock %}
+</aside>
+{% endif %}
+</div>
+<div id="status" class="toast" role="status" data-copied="{{ labels.ui('link_copied') }}"></div>
+<footer>{{ labels.ui("generator") }}</footer>
+</body>
+</html>

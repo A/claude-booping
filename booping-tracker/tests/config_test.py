@@ -12,7 +12,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 
 @pytest.fixture
 def unreachable_booping(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-    """Point the config-get shell-out at nothing, so any use of it is observable."""
+    """Point the config shell-out at nothing, so any use of it is observable."""
     monkeypatch.setattr(config_mod, "BOOPING", tmp_path / "no-such-booping")
 
 

@@ -1,0 +1,55 @@
+A milestone heading inside a fenced code block is content, not a cut: one milestone, the fence
+copied into its Tasks verbatim.
+
+-- fixtures/cwd/draft.md --
+# Plan
+
+## Milestones
+
+### M01 — Document the format
+sp: 1
+
+#### Tasks
+
+- describe the heading in `docs/format.md`:
+
+```markdown
+### M02 — x
+```
+
+#### Verify
+
+`make docs`
+-- cmd --
+booping plan split draft.md
+-- expected/cwd/milestones/M01-document-the-format/M01-document-the-format.md --
+---
+id: "01"
+title: "Document the format"
+sp: 1
+status: pending
+plan: "index.md"
+---
+
+# M01: Document the format
+
+## Tasks
+
+- describe the heading in `docs/format.md`:
+
+```markdown
+### M02 — x
+```
+
+## Definition of Done
+
+## References
+
+## Verify
+
+`make docs`
+-- exit --
+0
+-- stdout --
+M01-document-the-format sp=1 sections=tasks:6,dod:0,references:0,verify:1
+group G1: M01 (1 SP)

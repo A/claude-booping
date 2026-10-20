@@ -1,0 +1,16 @@
+An unknown section is argparse's invalid-choice error, exit 2.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+-- cmd --
+booping status bogus
+-- exit --
+2
+-- stdout --
+-- stderr --
+usage: booping status [-h] [--detail]
+                      [{items,ideas,plans,runs,records,marks} ...]
+booping status: error: argument section: invalid choice: 'bogus' (choose from items, ideas, plans, runs, records, marks)

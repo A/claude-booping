@@ -1,0 +1,67 @@
+`transition` never creates its run workdir — a file whose implied workdir is not a directory is
+refused before anything is written. This is the one transition case that does not seed
+`fixtures/cwd/run/.keep`.
+
+-- fixtures/home/Claude/_playbooks/fx-run/playbook.md --
+---
+name: fx-run
+title: Run
+summary: Hookless states-bearing fixture for transition.
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-run/playbook.yaml --
+state: main
+graph:
+  intake: []
+  step-pipeline:
+    dependencies: [intake]
+    state: step
+    graph:
+      spec: []
+
+states:
+  main:
+    artifact: index.md
+    initial: intaking
+    statuses:
+      intaking:
+        transitions:
+          - to: researching
+            when: intake complete
+          - to: parked
+            when: the run is shelved
+      researching:
+        transitions:
+          - to: done
+            when: research complete
+      parked: {terminal: true}
+      done: {terminal: true}
+  step:
+    artifact: steps/{instance}/index.md
+    initial: spec-ing
+    statuses:
+      spec-ing:
+        transitions:
+          - to: done
+            when: spec written
+      done: {terminal: true}
+-- fixtures/home/Claude/_playbooks/fx-run/intake/prompt.md --
+---
+summary: Intake the request.
+---
+
+Intake body.
+-- fixtures/home/Claude/_playbooks/fx-run/spec/prompt.md --
+---
+summary: Write the spec.
+---
+
+Spec body.
+-- cmd --
+booping transition run/index.md intaking --playbook fx-run
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: workdir not found: {CWD}/run

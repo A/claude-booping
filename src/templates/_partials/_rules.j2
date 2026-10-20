@@ -1,0 +1,18 @@
+{#-
+  Renders the `## Rules` section on every surface that injects targeted rules.
+
+  rules   — list[booping.specs.rules.TargetedRule]; empty renders nothing
+  surface — playbook | step | agent | skill; only `playbook` carries the conflict clause
+  self_contained — optional; true drops the pointer to the records, for a surface that may read nothing
+
+  Briefs are inserted as variables, never parsed as Jinja.
+-#}
+{%- if rules -%}
+## Rules
+
+The following {{ rules | length }} rule(s) apply to this {{ surface }}. Never silently violate one{% if surface == "playbook" %}; conflict → stop and flag{% endif %}.{% if not self_contained %} Read a rule's record when its brief is not enough.{% endif %}
+
+{% for rule in rules -%}
+- {{ rule.brief }} [{{ rule.ref }}]({{ rule.link }})
+{% endfor %}
+{%- endif %}

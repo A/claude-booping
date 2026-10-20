@@ -1,18 +1,24 @@
 Playbook names are unique across the three discovery roots. The same name in the global root and in
 the vault-local one blocks the render with a `**STOP` naming both scopes; the preamble still prints
-and no lesson section is composed.
+and no rules section is composed.
 
 -- fixtures/cwd/.booping --
 project_name: probe
 vault_path: ./vault
 latest_migration: 9999
--- fixtures/home/Claude/_lessons/0001_alpha.md --
+-- fixtures/xdg/booping/config.yaml --
+core:
+  specs:
+    tiers:
+      core: {namespace: fx, path: ~/core-specs}
+-- fixtures/home/core-specs/rule/0001-alpha.md --
 ---
+type: rule
 title: Alpha rule
+status: accepted
 targets: [fx-dup]
+brief: Alpha brief.
 ---
-
-Alpha body.
 -- fixtures/home/Claude/_playbooks/fx-dup/playbook.md --
 ---
 name: fx-dup

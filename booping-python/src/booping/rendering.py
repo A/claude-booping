@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from jinja2.runtime import Context as JinjaContext
 
     from booping.query import Row
+    from booping.specs.tiers import Tier
 
 
 class RenderCycleError(Exception):
@@ -99,9 +100,7 @@ def make_query_filter(config: object) -> Callable[..., list[Row]]:
     from booping.query import QueryError, build_spec, resolve_spec, run
 
     @pass_context
-    def query_filter(
-        jinja_ctx: JinjaContext, spec_path: object, **overrides: Any
-    ) -> list[Row]:
+    def query_filter(jinja_ctx: JinjaContext, spec_path: object, **overrides: Any) -> list[Row]:
         cfg = cast("dict[str, Any]", config) if isinstance(config, dict) else {}
         dotted = str(spec_path)
         base = resolve_spec(cfg, dotted)
@@ -112,9 +111,7 @@ def make_query_filter(config: object) -> Callable[..., list[Row]]:
         vault = _vault_of(jinja_ctx.get("context"))
         # A `root: core` spec globs the plugin root, so it needs no vault at all.
         if vault is None and spec.root is None:
-            raise QueryError(
-                f"cannot run query {dotted}: no vault resolved for this render"
-            )
+            raise QueryError(f"cannot run query {dotted}: no vault resolved for this render")
         return run(spec, vault)
 
     return query_filter
@@ -130,7 +127,16 @@ def make_booping_global(context: object) -> Row:
 
     project = getattr(context, "project", None)
     latest = getattr(project, "latest_migration", -1)
-    return Row({"latest_migration": latest if isinstance(latest, int) else -1})
+    tiers = cast("list[Tier]", getattr(context, "specs_tiers", []))
+    return Row(
+        {
+            "latest_migration": latest if isinstance(latest, int) else -1,
+            "specs_tiers": [
+                Row({"name": t.name, "namespace": t.namespace, "root": t.link(t.root)})
+                for t in tiers
+            ],
+        }
+    )
 
 
 def macro_dirs(context: object) -> dict[str, Path | None]:
@@ -161,7 +167,7 @@ def _build_env(
     globals_: dict[str, Any] = env.globals  # type: ignore[assignment]
     globals_["macro"] = make_macro(config, **macro_dirs(context))
     # The single site the `booping` global is set: every env a body renders through
-    # (`render`, `build_source_env`, and so `render-playbook` and `scaffold`) comes
+    # (`render`, `build_source_env`, and so `render-playbook` and `create`) comes
     # from here.
     globals_["booping"] = make_booping_global(context)
     filters: dict[str, Any] = env.filters  # type: ignore[assignment]

@@ -1,0 +1,53 @@
+The open idea status is read from the idea schema, the first entry of its `status` enum: a
+project overlay renaming it to `raw` makes the `raw` idea open and an `open` one not.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+-- fixtures/cwd/vault/_schemas/idea.yaml --
+doc: idea
+
+rules:
+  - select: FRONTMATTER
+    has:
+      type: idea
+      status: { enum: [raw, done] }
+-- fixtures/cwd/vault/idea/0001-raw.md --
+---
+type: idea
+title: A raw idea
+created_at: 2026-10-10
+status: raw
+review: accepted
+review_evidence: site review — 2026-10-11
+---
+
+## Idea
+
+Raw.
+-- fixtures/cwd/vault/idea/0002-open.md --
+---
+type: idea
+title: An idea in the shipped open status
+created_at: 2026-10-10
+status: open
+review: accepted
+review_evidence: site review — 2026-10-11
+---
+
+## Idea
+
+Open by the shipped schema, not by this one.
+-- cmd --
+booping status ideas
+-- exit --
+0
+-- stdout --
+## ideas
+
+| ref | title | created_at |
+| --- | --- | --- |
+| idea/0001 | A raw idea | 2026-10-10 |
+-- stderr --

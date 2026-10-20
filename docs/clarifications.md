@@ -1,6 +1,6 @@
 # clarifications.md format
 
-Sidecar beside `index.md` in the plan directory, holding every question a run could not answer itself. Seeded by the groom scaffold with its H1 and nothing else. Posted to the tracker verbatim, so it is plain markdown with no frontmatter.
+Sidecar beside `index.md` in the plan directory, holding every question a groom run could not answer itself. Seeded by the groom plan template with its H1; the driver writes the rest by hand. Posted to the tracker verbatim, so it is plain markdown with no frontmatter.
 
 ## Shape
 
@@ -21,16 +21,7 @@ Under the heading, in this order:
 - `**Options:**` — optional, a bullet per candidate answer when the question is a choice.
 - `**Answer:**` — required; free markdown from the end of the label to the next H2 or the end of the file. Lists, paragraphs and fenced code all belong here as-is: nothing is escaped, and no line needs a continuation marker.
 
-An open question carries the `**Answer:**` label with an empty body.
-
-## Answered test
-
-A question is answered when **both** hold:
-
-1. its H2 ends in `answered`, and
-2. its `**Answer:**` body is non-empty — at least one non-blank line before the next H2.
-
-A heading that says `answered` over an empty body is not answered, and neither is a filled body under an `open` heading. Both are malformed and the question stays open.
+An open question carries the `**Answer:**` label with an empty body; answering fills the body and flips the marker to `answered`.
 
 ## Example
 

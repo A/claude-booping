@@ -9,7 +9,7 @@ Used by the `develop` playbook on every `milestone` transition, so `index.md`'s 
 and the plan's `sp` are projections of the milestone files rather than hand-kept prose.
 
 Usage: `refresh-milestone-table [PLAN_DIR]` — the plan directory defaults to
-`BOOPING_WORKDIR`, which `booping playbook-transition` sets to the run workdir.
+`BOOPING_WORKDIR`, which `booping transition` sets to the run workdir.
 
 The glob and the table's columns come from `core.plans.milestones`; the rows come from
 `booping query` over the plan directory. Only the block between the `## Milestones`
@@ -94,7 +94,7 @@ def main() -> None:
     if not index.is_file():
         sys.exit(f"refresh-milestone-table: no index.md in {plan}")
 
-    spec = yaml.safe_load(_booping(["config-get", CONFIG_PATH], plan)) or {}
+    spec = yaml.safe_load(_booping(["config", CONFIG_PATH], plan)) or {}
     globs = spec["glob"]
     globs = globs if isinstance(globs, list) else [globs]
     columns = [str(col) for col in spec["table_columns"]]

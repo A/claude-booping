@@ -41,7 +41,7 @@ Spawn {% if review_agent %}two diff reviewers in parallel, both detached — a g
 
 A reviewer that returns nothing usable is recorded as such in the review section with its reason; it is never re-run to get a better grade, and its grade never falls back to the other reviewer's.
 
-Replace the detail's placeholder `## Review` table with one row per reviewer — reviewer, grade /5, findings — put the mean grade in the `review` cell of the detail's `## History row` table and of the history row you are carrying, and write the same mean to the artifact's frontmatter with `booping frontmatter-update {detail path} review={mean}`. The frontmatter `status:` is never touched by hand.
+Replace the detail's placeholder `## Review` table with one row per reviewer — reviewer, grade /5, findings — put the mean grade in the `review` cell of the detail's `## History row` table and of the history row you are carrying, and write the same mean to the artifact's frontmatter with `booping set {detail path} review={mean}`. The frontmatter `status:` is never touched by hand.
 
 ## Closing the step
 

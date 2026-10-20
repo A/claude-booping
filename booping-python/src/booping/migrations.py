@@ -1,11 +1,16 @@
 from __future__ import annotations
 
+from collections.abc import Mapping
 from pathlib import Path
+from typing import Any
 
 import yaml
 
+from booping.context import config as config_mod
 from booping.context._yaml import parse_frontmatter_only
+from booping.context.project import Project
 from booping.rendering import get_plugin_root
+from booping.utils import deep_merge, parse_bool
 
 # The playbook that is the remedy; it never traverses its own gate.
 MIGRATE_PLAYBOOK = "migrate"
@@ -14,6 +19,13 @@ _BEHIND = (
     "**STOP — tell the user:** this project is behind on booping migrations"
     " (recorded id {recorded}, latest shipped {latest}). Run `/playbook migrate`"
     " to bring the vault current, then retry."
+)
+
+_AUTO = (
+    "**Auto-migrate:** this project is behind on booping migrations"
+    " (recorded id {recorded}, latest shipped {latest}). Run `/playbook migrate` now"
+    " — `core.auto_migrate` is on, so its approval is taken as given; its question"
+    " about uncommitted work is still asked — then continue with the original request."
 )
 
 
@@ -70,17 +82,54 @@ def latest_shipped_id(plugin_root: Path | None = None) -> int:
     return max(ids, default=-1)
 
 
+def auto_migrate(
+    start: Path | None = None,
+    plugin_root: Path | None = None,
+    vault_override: Path | None = None,
+    overrides: Mapping[str, Any] | None = None,
+) -> bool:
+    """The merged `core.auto_migrate`, `True` when no tier sets it.
+
+    Tiers resolve the way `Context.assemble` does — a pinned vault drops the global
+    tier — and `--set` *overrides* win over them; a `--set` value is a string, so the
+    flag is read through `parse_bool`. Config that cannot be read, or a value that is
+    no boolean, yields `False`: the user gets the STOP notice rather than an unattended
+    migration.
+    """
+    try:
+        root = plugin_root if plugin_root is not None else get_plugin_root()
+        if vault_override is not None:
+            tiers = [vault_override / "config.yaml"]
+        else:
+            tiers = [config_mod.global_config_path()]
+            project = Project.load_cwd_configured(start=start, plugin_root=root)
+            if project is not None:
+                tiers.append(project.directory / "config.yaml")
+        cfg = config_mod.load(root, tiers)
+    except Exception:
+        return False
+    if overrides:
+        cfg = deep_merge(cfg, dict(overrides))
+    core = cfg.get("core")
+    if not isinstance(core, dict):
+        return True
+    return parse_bool(core.get("auto_migrate", True)) is True  # type: ignore[reportUnknownMemberType]
+
+
 def render_gate(
     playbook: str | None = None,
     start: Path | None = None,
     plugin_root: Path | None = None,
+    vault_override: Path | None = None,
+    overrides: Mapping[str, Any] | None = None,
 ) -> str | None:
     """The notice a render surface must print *instead of* its output, or None.
 
     `playbook` is the requested playbook name — the single site the exemption is
     consulted, keyed on the name rather than a resolved `Playbook` so it holds even
     for a vault so far behind that context assembly would fail. No marker means no
-    vault to bring current, so nothing is gated.
+    vault to bring current, so nothing is gated. With `core.auto_migrate` on the
+    notice orders the driving agent to migrate and resume; off, it stops for the user.
     """
     if playbook == MIGRATE_PLAYBOOK:
         return None
@@ -93,4 +142,6 @@ def render_gate(
     recorded = recorded_id(marker)
     if recorded >= latest:
         return None
-    return _BEHIND.format(recorded=recorded, latest=latest)
+    auto = auto_migrate(start, plugin_root, vault_override, overrides)
+    template = _AUTO if auto else _BEHIND
+    return template.format(recorded=recorded, latest=latest)

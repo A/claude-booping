@@ -21,7 +21,7 @@ states:
           - to: ready-for-dev
             when: "the user handed the plan to develop — invoking the run on it is the approval; intake takes this edge immediately, no confirmation asked"
             hooks:
-              - frontmatter-update reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - set reviewed_at="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
       ready-for-dev:
         transitions:
           - to: in-progress
@@ -30,8 +30,8 @@ states:
               - "the user confirmed the branch name"
               - "no unresolved non-trivial drift — that halts back to grooming instead"
             hooks:
-              - frontmatter-update started="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
-              - frontmatter-update commit="{{ macro('core.macros.git_commit') }}"
+              - set started="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - set commit="{{ macro('core.macros.git_commit') }}"
               - "script stamp-session"
       in-progress:
         transitions:
@@ -41,18 +41,20 @@ states:
               - "every DoD checkbox [x] and every milestone status done"
               - "the project's guardrails and the plan's Final Verification green"
             hooks:
-              - frontmatter-update completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - set completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
               - "script stamp-session"
               - "script stamp-active-time"
+              - "script open-items-follow-plan done"
           - to: fail
             when: "an unrecoverable blocker at any point in the sprint, verification included, after two fix attempts on the same issue"
             gates:
               - "two fix attempts documented in the plan"
               - "the user approved the abort"
             hooks:
-              - frontmatter-update completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - set completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
               - "script stamp-session"
               - "script stamp-active-time"
+              - "script open-items-follow-plan open"
       done:
         terminal: true
       fail:
@@ -70,7 +72,8 @@ states:
           - to: cancelled
             when: "the user cancels the run"
             hooks:
-              - frontmatter-update completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - set completed="{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}"
+              - "script open-items-follow-plan open"
       terminal:
         states:
           - done

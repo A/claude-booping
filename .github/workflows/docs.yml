@@ -7,6 +7,20 @@ on:
       - documentation/**
       - mkdocs.yml
       - .github/workflows/docs.yml
+      # The specs site under /specs-site/: records and the renderer.
+      - specs/**
+      - vault/adr/**
+      - vault/idea/**
+      - vault/reference/**
+      - vault/rule/**
+      - vault/runbook/**
+      - vault/story/**
+      - vault/value/**
+      - vault/_schemas/**
+      - vault/config.yaml
+      - src/specs/**
+      - src/config.yaml
+      - booping-python/src/booping/specs/**
   workflow_dispatch:
 
 permissions:
@@ -26,6 +40,14 @@ jobs:
 
       - name: Build site
         run: uv run --group docs --project booping-python mkdocs build --strict
+
+      - name: Build specs site
+        # The .booping marker is per checkout (git-ignored); written like ci.yml's so the project
+        # tier (this repo's in-repo vault) resolves. Lives under /specs-site/: mkdocs owns /specs/.
+        run: |
+          latest=$(ls migrations | sort | tail -n 1 | cut -d_ -f1 | sed 's/^0*//')
+          printf 'project_name: claude-booping\nvault_path: vault\nlatest_migration: %s\n' "$latest" > .booping
+          bin/booping specs site --out site/specs-site --site-url https://A.github.io/claude-booping/specs-site/
 
       - name: Disable Jekyll
         run: touch site/.nojekyll

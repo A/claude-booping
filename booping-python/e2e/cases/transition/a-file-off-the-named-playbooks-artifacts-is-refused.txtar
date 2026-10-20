@@ -1,0 +1,51 @@
+A file whose path does not end in any `artifact:` of the named playbook is no artifact of it: the
+move is refused before anything is written or any hook runs.
+
+-- fixtures/home/Claude/_playbooks/fx-hooks/playbook.md --
+---
+name: fx-hooks
+title: Hooks
+summary: Hook-bearing fixture for transition.
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-hooks/playbook.yaml --
+state: main
+graph:
+  only: []
+
+states:
+  main:
+    artifact: index.md
+    initial: intaking
+    statuses:
+      intaking:
+        transitions:
+          - to: noted
+            when: the environment is recorded
+            hooks: ["script env-note"]
+      noted: {terminal: true}
+-- fixtures/home/Claude/_playbooks/fx-hooks/only/prompt.md --
+---
+summary: Only step.
+---
+
+Only body.
+-- fixtures/home/Claude/_playbooks/fx-hooks/_scripts/env-note --
+#!/bin/sh
+{
+  echo "artifact=$BOOPING_ARTIFACT"
+  echo "workdir=$BOOPING_WORKDIR"
+  echo "cwd=$(pwd)"
+} > "$BOOPING_WORKDIR/env.txt"
+-- fixtures/home/elsewhere/review.md --
+---
+status: intaking
+---
+-- cmd --
+booping transition ~/elsewhere/review.md noted --playbook fx-hooks
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: {HOME}/elsewhere/review.md matches no machine artifact of playbook 'fx-hooks'

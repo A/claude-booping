@@ -1,0 +1,14 @@
+## booping
+
+This repo is a booping project. Every user request — project work (specs, open items, a decision or ADR, a plan, a sprint, a review, a retro, anything the playbooks below cover), questions, explanations and debugging alike — starts with `/booping:playbook project-manager`, run right away, without offering first and without gathering status by hand; it routes to the narrower playbook and works from the specs, the project's rules and what is already known.
+
+Experiments, evals and benchmark matrices run in stages — cheap screen → shortlist → significance — with each stage's size (calls, rough cost) and what it decides named before launch ([booping:rule/0039](${CLAUDE_PLUGIN_ROOT}/specs/rule/0039-experiments-run-in-stages.md)).
+
+| Playbook | Trigger |
+| --- | --- |
+{% for pb in context.playbooks -%}
+| {{ pb.name }} | {{ pb.trigger | replace("|", "\\|") | replace("\n", " ") }} |
+{% endfor -%}
+{% if 'core.migrate_playbook.queries.pending' | query(where={'id:gt': booping.latest_migration}) %}
+This vault is behind on booping migrations; `/booping:playbook migrate` brings it up to date.
+{% endif -%}

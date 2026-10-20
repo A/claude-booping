@@ -24,6 +24,15 @@ itself stays yours. Never delegate to an agent that is not on this list.
 - Never manually break markdown lines. Write each paragraph, bullet, or table row as one line and
   let the renderer wrap it — hard line breaks turn into mid-sentence breaks after any later edit.
 
+## Rules
+
+The following 4 rule(s) apply to this playbook. Never silently violate one; conflict → stop and flag. Read a rule's record when its brief is not enough.
+
+- Settle every open question with the user during grooming; in develop, stop only for force majeure, not for what grooming should have asked. [booping:rule/0004](${CLAUDE_PLUGIN_ROOT}/specs/rule/0004-questions-settled-in-grooming.md)
+- Before saving a skill, agent, partial, template or briefing, check every block for scoping, duplication, configurability and hierarchy; cut motivation, restated context and preambles. [booping:rule/0006](${CLAUDE_PLUGIN_ROOT}/specs/rule/0006-information-architecture-pass.md)
+- Name the values that drive the plan's main choices and flag every departure from a value or rule with its reason, so the user can refine the values. [booping:rule/0030](${CLAUDE_PLUGIN_ROOT}/specs/rule/0030-planning-shows-values-in-play.md)
+- When the user corrects you — rejects a proposal, rewrites an output, says it is wrong, answers a gate other than you suggested — run `booping create core.corrections.template {vault}/corrections --set name={step} --set step={playbook}/{step} --set did=… --set said='{the user's words verbatim}' --set artifact={run artefact, vault-relative}`, with `--set why=…` when the user states it; a plain confirmation is not a correction. [booping:rule/0031](${CLAUDE_PLUGIN_ROOT}/specs/rule/0031-corrections-are-logged.md)
+
 ## Playbook Steps
 
 Execute the steps in the most effective order considering their dependencies.
@@ -31,20 +40,18 @@ Execute the steps in the most effective order considering their dependencies.
 | Step | Dependencies | Summary | Review gate |
 | --- | --- | --- | --- |
 | `intake` | — | Restate the request, classify the task type, set the scope boundaries and challenge the scope in a brief written to `request.md` and posted in chat; create the plan directory with its `index.md`, or adopt a parked plan into it. | The user answers the scope-challenge questions — clear intent is the confirmation, no separate confirm is asked for; answers that change the task type, the restated problem or a boundary send the step back for another pass |
-| `research-codebase` | `intake` | Map the blast radius in the attached repo — touched surfaces, prior art, the conventions that bind the design, and the calls left for it; the bulk reads are delegated, the map is posted in chat. | — |
-| `research-web` | `research-codebase` | Research the external ground the design rests on — current best practice, competing approaches and known pitfalls where the work is uncertain, and the external references it names, each checked against current docs. | — |
-| `draft-plan` | `research-codebase`, `research-web` | Settle architecture, surface changes and trade-offs with the user, then pick the plan template matching the dominant surface and write the plan against its Plan Body — `index.md` plus one seeded file per milestone with its tasks, DoD, Verify and story points, the index's milestone table generated from those files, and `summary` frontmatter; verify against the template's Quality Checklist before returning. | — |
+| `draft-plan` | `intake` | Research the code the request touches and post the facts in chat, then draft the whole plan against the template matching the dominant surface into `draft.md`, cut it with `booping plan split`, check it with `booping plan check` and fix the draft until clean or three rounds are spent; set `summary` frontmatter. | — |
 | `cross-review` | `draft-plan` | Second-model review of the written plan — the agent reads the plan file `plans/{slug}/index.md` and returns severity findings only, writing nothing. Dispose of the findings yourself before advancing: `CRITICAL` folded into the plan or recorded as a deferral in `## Risk register`, `RISK` folded in unless it reopens a call the user settled, `NOTE` at your discretion; a finding that reopens a settled design call is folded in nowhere and sends the run back to `drafting`. | — |
 | `present` | `cross-review` | Assemble the approval summary — approach, milestones, SP totals, plan path and every check outcome; recommend a split when the total passes the threshold, offer a plan branch on a repo-local vault, and carry the approval. | The run's only review gate — the summary and the full plan are approved together, and the plan reaches the `develop` playbook through this gate and no other. Ask for the approval in prose, in the message itself — never via `AskUserQuestion`. Explicit user approval: "looks good" counts, silence never does; on that word the run moves to `ready-for-dev`. A change request loops the run back to the status that owns what it touches: any change to the plan — architecture, scope, milestones, tasks or estimates — sends the run back to `drafting`, and present never absorbs a change itself. A recommended split is acknowledged, not required: the user may approve the plan whole and park no siblings |
 
 ## State
 
-Run state is persisted in artifacts under the run workdir. Only `booping playbook-transition` writes it — never hand-edit an artifact's `status`.
+Run state is persisted in artifacts under the run workdir. Only `booping transition` writes it — never hand-edit an artifact's `status`.
 
 Read the whole run's frontier before starting or resuming:
 
 ```
-booping playbook-state groom --workdir <run workdir>
+booping state <run workdir>/index.md --playbook groom
 ```
 
 ### State: run
@@ -52,16 +59,16 @@ booping playbook-state groom --workdir <run workdir>
 - Referenced by: outer graph
 - Artifact: `index.md` (relative to the run workdir)
 - Initial status: `framing`
-- Advance: `booping playbook-transition groom <to> --workdir <run workdir>`
+- Advance: `booping transition <run workdir>/index.md <to> --playbook groom`
 
 | Status | To | When | Gates |
 | --- | --- | --- | --- |
 | `framing` | `researching` | intake posted the framing brief in chat, created `index.md` with its identity frontmatter, and the user's answers settled the scope questions — clear intent is enough | answers that change the task type, the restated problem or a boundary re-run intake first |
 | `framing` | `awaiting-clarification` | the run raised questions it cannot answer itself and wrote them to `clarifications.md` | every question in `clarifications.md` is open and attributed — an id, a topic, the date and the step that raised it |
 | `framing` | `cancelled` | the user cancels the run | — |
-| `researching` | `drafting` | the blast-radius map and the web-research findings are both posted in chat | — |
+| `researching` | `drafting` | draft-plan's research stage posted its facts, with file paths, in chat | — |
 | `researching` | `cancelled` | the user cancels the run | — |
-| `drafting` | `cross-reviewing` | architecture, surface changes and trade-offs are settled with the user in conversation, and draft-plan wrote `index.md`'s body against the template's Plan Body and passed its Quality Checklist | every call that is the user's is answered |
+| `drafting` | `cross-reviewing` | draft-plan wrote `draft.md`, `booping plan split` exited 0 and the mdcheck milestone check passed or its three fix rounds are spent | every call that is the user's is answered; the mdcheck milestone check reports no finding on a task's SP or the milestone `sp` |
 | `drafting` | `researching` | the design needs blast radius or external practice the research pass missed | — |
 | `drafting` | `awaiting-clarification` | the run raised questions it cannot answer itself and wrote them to `clarifications.md` | every question in `clarifications.md` is open and attributed — an id, a topic, the date and the step that raised it |
 | `drafting` | `cancelled` | the user cancels the run | — |
@@ -115,11 +122,16 @@ Create it in one call, with `{plan-dir}` the preamble's `Plan dir:` line resolve
 vault and `{title}` the plan's descriptive title:
 
 ```
-booping scaffold core.groom_playbook.scaffold {plan-dir} --set title="{title}" --set type={type}
+booping create core.groom_playbook.template {plan-dir} --set title="{title}" --set type={type}
 ```
 
 The printed diff is the confirmation — do not read the created files back. A target reported as
 already existing was not written; decide what that means for this run.
+
+- A request naming open items (`OI-NNNN`) links each to the new plan once the directory exists:
+  `booping set {vault}/open-items/{id}.md plan={plan index}`, then
+  `booping transition {vault}/open-items/{id}.md planned`, `{plan index}` the plan's `index.md`
+  relative to the vault.
 
 ## The brief — written to `request.md`, posted in chat
 
@@ -135,34 +147,66 @@ these parts, in this order:
   domain terms.
 - **Clarifications and Decisions**: list of one-line clarifications and decisions made with user when refining on this plan
 
-## Step: Research Codebase
-Map the blast radius — files, modules, integrations, external surfaces; check prior art.
-
-## Step: Research Web
-- Research when uncertain: for complex, novel, or non-obvious work, search the web for current best practices, competing approaches, and known pitfalls before locking design decisions.
-- Verify external references: every package version, image tag, API endpoint, CLI flag, or config option named in the plan is checked against current docs. Never assume.
-
 ## Step: Draft Plan
-# Write the plan
+# Draft the plan
 
-Your task is to build a plan for the user request, from the framing and the research findings this
-conversation already carries — the blast-radius map and the external ground the work rests on.
+Produce an implementation plan an autonomous developer agent will execute milestone by milestone in the attached repository, from the framing this conversation carries. Change no repository file. `{plan-dir}` is the preamble's `Plan dir:` line, `{slug}` its last segment. Work in four stages.
 
-- **Draft design with the user**: architecture, pattern choices, data / API / config surface
-  changes, open trade-offs. Iterate until aligned before writing.
-- **Write the plan**: pick a plan template from [Available plan templates](#available-plan-templates) whose name + description matches the work, then produce the plan against its `# Plan Body` — `index.md` from the template's top-level sections, plus one file per milestone.
-- **Write `summary`**: set the `summary:` frontmatter to a single line of plain plan intent — ≤ ~120
-  chars / ~20 words, no prose, no trailing period needed. It feeds search and the `sprints.md`
-  snapshot.
+## 1. Research
+
+Read the code the request touches and anything it depends on; delegate bulk reads to `booping:booping-researcher`. Post the facts, each with its file path, in chat, then advance the run to `drafting`.
+
+## 2. Draft
+
+Pick the template ([Available plan templates](#available-plan-templates)) and write the whole plan to `{plan-dir}/draft.md`: every section of its `# Plan Body`, in its order, the milestones under `## Milestones` in this format:
+
+```
+### M{nn} — {title}
+
+sp: {n}
+depends_on: [M{nn}, …]
+
+#### Tasks
+
+#### Definition of Done
+
+#### References
+
+#### Verify
+```
+
+- `{nn}` is the milestone's position in execution order, two digits; `sp` is the sum of its tasks' SP, at most 15, each task 1–4, `depends_on` is `[]` when nothing precedes it.
+- Each milestone has one Verify command scoped to that milestone, written as a single inline code span; the whole-repo check goes only in Final Verification.
+- Decide what the code and the request settle, and record each assumption in the plan. A call only the user can make goes to the user: in a supervised run ask it in chat; in an autonomous run write it to `clarifications.md` (format: `${CLAUDE_PLUGIN_ROOT}/docs/clarifications.md`) and park the run on `awaiting-clarification`.
+- Sprint total past **35 SP** — offer the user a split at a dependency seam (the first slice shippable on its own, each later one useless without it), keep only the first slice that fits the threshold in this plan, and park the rest as sibling stubs to be groomed in their own runs. They may decline and keep one plan.
+
+## 3. Split
+
+```
+booping plan split {plan-dir}/draft.md --replace
+```
+
+Exit 3 (no milestone heading) or 4 (written with `flag:` lines) — the draft is off-format. Spawn a `general-purpose` sub-agent with model and effort `opus:medium`, handing it `draft.md`'s path, the split's stderr and the format above: it rewrites the draft into that format at `/tmp/booping-split-{slug}/draft.md` and writes nothing in the vault. Copy that file over `{plan-dir}/draft.md` and split again. Exit 1 or 2 — stop and report the `error:` line.
+
+## 4. Check
+
+```
+mdcheck ${CLAUDE_PLUGIN_ROOT}/playbooks/groom/_schemas/milestone.yaml {plan-dir}/milestones/*/M*.md
+```
+
+Exit 1 — fix the milestones its findings name in `draft.md`, then back to stage 3. At most three rounds; findings left after the third are carried to `present`.
+
+Then set the summary — one line of plain plan intent, ≤ ~120 chars / ~20 words:
+
+```
+booping set {plan-dir}/index.md summary="{one line}"
+```
+
+`sp` is not yours — split stamps it.
 
 ## Hard rules
 
-- The orchestrator never edits files outside `{project}/plans/`.
-- Each milestone file executable in a fresh session with only it and `index.md` as context.
-- Sprint total past **35 SP** — offer the user a split at a dependency seam (the first slice
-  shippable on its own, each later one useless without it), keep only the first slice that fits the
-  threshold in this plan, and park the rest as sibling stubs to be groomed in their own runs. They
-  may decline and keep one plan.
+- Never edit files outside `{project}/plans/`.
 - User approval is **explicit** — "looks good" is enough; silence is not.
 
 ## Available plan templates
@@ -182,8 +226,7 @@ Each template is one file with two top-level sections:
 
 - `# Plan Body` — the structure the plan is written against, section for section, in its order.
   None dropped, none extra.
-- `# Quality Checklist` — walked item by item against the plan as written, before the plan is
-  returned. An unsatisfied item is fixed, not reported as satisfied.
+- `# Quality Checklist` — constraints the plan meets; read with the body, not walked as a separate pass.
 
 Read the chosen file before drafting: neither section can be guessed from its catalogue line.
 
@@ -192,55 +235,15 @@ it — frontmatter (`name`, `description`) plus both top-level sections, generic
 class: placeholders throughout, no path, milestone or story-point value from this run baked in.
 Never draft into a bad-fit template, never improvise a shape and name a template after it.
 
-A plan is two surfaces: the run's `index.md`, already carrying its frontmatter and title, holding the template's top-level sections under them; and one file per milestone, written as [Write the milestone files](#write-the-milestone-files) describes, against the template's milestone-file section.
+The draft is one file, cut into `index.md` and the milestone files by `booping plan split`.
 
 `summary` is yours:
 
 ```
-booping frontmatter-update {plan-dir}/index.md summary="{one line}"
+booping set {plan-dir}/index.md summary="{one line}"
 ```
 
 `sp` is not — never hand-write it.
-
-
-## Write the milestone files
-
-Yours to write, here, one milestone at a time — no sub-step, no worker agent, no batched pass. `{plan-dir}` is the preamble's `Plan dir:` line. In execution order, per milestone:
-
-1. Seed the milestone's directory and the file inside it:
-
-   ```
-   booping scaffold core.groom_playbook.milestone_scaffold {plan-dir}/milestones --set id={nn} --set slug={kebab} --set title="{title}" --set sp={sp} --set plan={plan-dir}/index.md
-   ```
-
-   `{nn}` is the milestone's position in execution order, zero-padded to two digits; `{kebab}` is its title kebab-cased — the two name the directory `M{nn}-{kebab}` and the file `M{nn}-{kebab}.md` inside it, identically. The seed owns everything it writes; never retype it into the body.
-
-2. Write that milestone's body into the seeded file with a normal file edit, against the chosen template's milestone-file section. Then move to the next milestone.
-
-`index.md`'s `## Milestones` table is generated from the files on disk, never hand-kept — paste the output of:
-
-```
-booping query --glob {plan-dir}/milestones/*/M*.md --columns id,title,sp,status
-```
-
-A milestone that changes after that is edited in its own file, and the query re-run.
-
-## Milestone contract rules
-
-Every milestone file is read by a worker holding only it, `index.md` and the repo. Write it so that
-worker never has to decide *how* to work.
-
-- **One procedure, never a choice.** Scope prose states the single way to produce the artifact. A
-  sentence shaped "by hand **or** via `{tool}`" makes the worker do both — hand-derive, then run the
-  tool anyway. Pick the cheaper one and name only it.
-- **`## References`** names, where such files exist, 1–3 existing files the worker copies the shape
-  of, by path, plus the path of any format spec it must not go looking for. A milestone producing an
-  artifact in an unfamiliar format and naming no reference sends the worker searching the filesystem.
-- **`## Verify` is one command, scoped to this milestone's changes.** No alternatives, no "and also
-  run". Whole-repo gates belong to `index.md`'s Final Verification; the runner owns them.
-- **No report-only deliverables.** A table, cross-check or rationale the worker must produce is
-  named as a path plus a verb — "Create `{path}`" or "Append to `{path}`" — relative to the repo
-  root or to the plan directory, never absolute. The worker's checkout is not this one.
 
 
 ## Sprint planning
@@ -263,14 +266,16 @@ the diff demands. AI does implementation cheaply; this is what remains.
 | 5 | Research task — developer needs to clarify and decompose further before proceeding |
 
 
-Development bundles **up to 2 consecutive milestone(s)** into a single agent briefing — size
-milestones against that combined review burden.
+Development packs a contiguous run of milestones, in `id` order, into a single agent briefing while
+their summed SP stays at or under **15 SP** — size milestones against that combined
+review burden.
 
 ### Thresholds
 
-- **5 SP re-decompose threshold** — a task at or over it is split before the plan is
-  returned. Cut at a seam in its own work, never at its midpoint; each half stands alone with its
-  own DoD and Verify, and the milestone and sprint totals are re-summed from the new leaves.
+- **5 SP re-decompose threshold** — a task at or over it is research and is split before
+  the plan leaves drafting. Cut at a seam in its own work, never at its midpoint; each half stands
+  alone with its own DoD and Verify, and the milestone and sprint totals are re-summed from the new
+  leaves.
 - **35 SP split threshold** — not a velocity: the point past which a sprint is too large to
   hold together as one coherent iteration.
 
@@ -278,6 +283,15 @@ Estimate the work as it honestly stands: never shave a task to land under a thre
 inflate one, and never re-estimate a task down to dodge a split.
 
 Project-specific sizing overrides live in `{project}/_booping/skill_groom.md` and take precedence.
+
+## Rules
+
+The following 4 rule(s) apply to this step. Never silently violate one. Read a rule's record when its brief is not enough.
+
+- When the plan deletes or renames partials, agents, CLAUDE.md lines or doc links, make the cleanup of every stale reference a milestone task with its own DoD in this sprint. [booping:rule/0007](${CLAUDE_PLUGIN_ROOT}/specs/rule/0007-stale-references-cleaned-in-sprint.md)
+- For user-facing content (release notes, docs, changelogs), put the audience filter into the task's DoD: only what that audience touches, no internal churn. [booping:rule/0008](${CLAUDE_PLUGIN_ROOT}/specs/rule/0008-audience-scoped-content.md)
+- When folding DoD and Verify into tasks, state the exact return shape the worker replies with — only what the orchestrator needs (e.g. the list of changed files). [booping:rule/0009](${CLAUDE_PLUGIN_ROOT}/specs/rule/0009-bounded-agent-return-contract.md)
+- When the plan defines a user-facing output or log format, lock its exact content with the user now — line fields, truncation rules, trailers — not just the format in prose. [booping:rule/0010](${CLAUDE_PLUGIN_ROOT}/specs/rule/0010-output-content-locked-in-grooming.md)
 
 ## Step: Cross Review
 
@@ -292,6 +306,12 @@ Read the plan's milestone rows — never a hand-kept list — with `{plan-dir}` 
 booping query --glob {plan-dir}/milestones/*/M*.md --columns id,title,sp,status
 ```
 
+Then check the milestone contract:
+
+```
+mdcheck ${CLAUDE_PLUGIN_ROOT}/playbooks/groom/_schemas/milestone.yaml {plan-dir}/milestones/*/M*.md
+```
+
 Present user the resulting plan as:
 
 ```
@@ -302,12 +322,21 @@ SPs: {sum of the rows' sp}
 
 {the table the query printed}
 
+{the check's output, or "milestone contract: clean" when it printed nothing}
+
+Decisions:
+1. {decision} — (user) | (proposal)
+
 ## Next Steps
 
 Approve plan or jump into develop via:
 
 /playbook develop {plan path}
 ```
+
+`Decisions:` numbers every call the plan takes as settled — the brief's clarifications and
+decisions, each assumption the plan records — one plain line each, `(user)` for the user's words,
+`(proposal)` for yours.
 
 Ask for approval in **prose**, in the message itself — never through `AskUserQuestion`, and
 never as a `## Questions:` entry. One plain sentence after the screen: the plan is ready for

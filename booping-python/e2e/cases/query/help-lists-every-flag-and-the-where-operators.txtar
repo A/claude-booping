@@ -14,8 +14,8 @@ options:
   -h, --help            show this help message and exit
   --config DOTTED.PATH  Dotted path into the merged config whose value is the
                         query spec; mutually exclusive with --glob
-  --glob PATTERN        Vault-relative glob to match; repeatable and ordered —
-                        the first glob claiming a slug wins
+  --glob PATTERN        Glob to match, vault-relative or absolute; repeatable
+                        and ordered — the first glob claiming a slug wins
   --where K=V           Filter clause: k=v, k!=v, k:in=a,b, k:gt=n or k:lt=n
                         (:gt / :lt compare numerically); repeatable, all
                         clauses apply

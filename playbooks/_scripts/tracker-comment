@@ -3,11 +3,11 @@
 #
 # Usage: script tracker-comment <workdir-relative-path>
 #
-# Environment (set by `booping playbook-transition`): BOOPING_ARTIFACT = the run's
+# Environment (set by `booping transition`): BOOPING_ARTIFACT = the run's
 # resolved target, whose frontmatter carries the issue refs; cwd is the workdir.
 #
 # The tracker's exit code is absorbed on purpose: a hook exiting non-zero aborts
-# `playbook-transition` *after* `status:` is already written, which would leave the
+# `booping transition` *after* `status:` is already written, which would leave the
 # vault advanced and the tracker behind with no way back.
 set -u
 

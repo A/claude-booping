@@ -11,8 +11,6 @@ Who the docs are for (end users vs contributors), what they cover, what gap moti
 
 ## Decisions
 
-- **{Topic}**: {decision} — {why}
-
 Typical topics: site generator (MkDocs / Jekyll / Docusaurus / plain markdown), theme, where source files live, how the published site is built and hosted (GitHub Pages branch, Netlify, etc.), per-page vs single-page split, what stays in README vs moves to the docs site, lazy-loading from skills if applicable.
 
 ## Information architecture
@@ -35,23 +33,17 @@ Order pages so each milestone produces something reviewable in isolation. A typi
 4. **Cross-references and stale-reference cleanup** — README link, skill lazy-load wiring, project-conventions doc updates.
 5. **Reshape** — pause for user IA review against the rendered site; apply prose/structure changes uncovered by reading the built output.
 
-The table below is generated — one row per milestone file, projected with `core.plans.milestones.table_columns` by `booping query`. Derived output: no hand-written rows, no milestone bodies in this file.
+One `### M{nn} — {title}` block per milestone, in the format draft-plan states. Its content:
 
-## Milestone files
-
-One file per milestone directory under the plan directory's `milestones/`, named after that directory and seeded by `booping scaffold core.groom_playbook.milestone_scaffold` — the seed owns the file's frontmatter keys and its required headings. Write the body into that skeleton:
-
-- **Goal** — one sentence directly under the H1: what page(s) or pipeline component lands.
-- **Scope** — the pages this milestone writes or touches, their place in the page tree, and the surfaces that link to them.
-- `## Tasks` — one row per task:
+- **Tasks** — opens with a **Goal** line (one sentence: what page(s) or pipeline component lands) and a **Scope** line (the pages this milestone writes or touches, their place in the page tree, and the surfaces that link to them), then one row per task:
 
   | Task | Description | Files | SP | Status |
   |------|-------------|-------|----|--------|
   | 1.1 | ... | `documentation/{page}.md`, `mkdocs.yml` | 2 | pending |
 
-- `## Definition of Done` — one `### Task {n}.{m}` block per task, checkbox bullets only: page renders in the local build with no broken links, cross-links to/from sibling pages resolve, code blocks lint cleanly (correct language tags, runnable where applicable), no prose duplicating another page — link instead.
-- `## References` — where such files exist, 1–3 existing pages whose structure and voice this milestone copies, by path, plus the path of any style guide or spec it must not go looking for.
-- `## Verify` — build/serve the site locally and load the pages this milestone changed; check their cross-links resolve. Whole-repo gates — a strict full-site build, a pushed branch confirming the CI workflow green, an aggregate `ci` target — run once in `index.md`'s Final Verification, never per milestone.
+- **Definition of Done** — one `Task {n}.{m}` block per task, checkbox bullets only: page renders in the local build with no broken links, cross-links to/from sibling pages resolve, code blocks lint cleanly (correct language tags, runnable where applicable), no prose duplicating another page — link instead.
+- **References** — where such files exist, 1–3 existing pages whose structure and voice this milestone copies, by path, plus the path of any style guide or spec it must not go looking for.
+- **Verify** — build/serve the site locally and load the pages this milestone changed; check their cross-links resolve. The strict full-site build and the CI workflow run belong in Final Verification.
 
 ## Final Verification
 
@@ -75,7 +67,6 @@ Name sections to update (e.g. add `documentation/` to the layout section, distin
 ## Frontmatter
 
 - [ ] `title` matches the plan's H1 and `type` is the task type chosen at intake.
-- [ ] `sp` equals the sum of the milestone files' `sp`.
 
 ## Content
 
@@ -83,14 +74,8 @@ Name sections to update (e.g. add `documentation/` to the layout section, distin
 - [ ] Information architecture sketch is present and shows every page with a one-line purpose.
 - [ ] Each page is a milestone task or grouped with siblings under one milestone — no orphan pages.
 - [ ] DoD bullets are verifiable by loading the rendered page or running the build.
-- [ ] Every task lists exact file paths.
-- [ ] Every milestone is a file in `milestones/` carrying its own goal, tasks, DoD and Verify — no milestone body in `index.md`.
-- [ ] `index.md`'s milestone table has one row per milestone file and matches their frontmatter.
-- [ ] Every milestone file's `## Verify` includes a build or local-serve check of the pages that milestone changed — no whole-repo gate (strict full-site build, CI-workflow run, aggregate `ci` target); those belong to `index.md`'s Final Verification.
-- [ ] Every milestone file's `## References` names 1–3 existing files to copy the shape of where such files exist, or states that none applies.
-- [ ] No milestone's Scope or Tasks offers two ways to do the same thing ("by hand or via X").
+- [ ] Every milestone's References names 1–3 existing files to copy the shape of where such files exist, or states that none applies.
 - [ ] No milestone asks for a deliverable in the worker's report — each is named as a path plus "Create" or "Append to", relative to the repo root or the plan directory.
-- [ ] Each milestone file executable from a fresh session with only it and `index.md` as context.
 
 ## Documentation hygiene
 
@@ -110,18 +95,6 @@ Name sections to update (e.g. add `documentation/` to the layout section, distin
 
 - [ ] A reshape milestone is included if rendered output is likely to expose IA issues only post-build (typical for multi-page sites and cross-linked content).
 - [ ] The reshape milestone has explicit DoD: user reads the rendered site, files prose/structure feedback as a list, feedback is applied before the plan transitions out of `in-progress`.
-
-## Anti-patterns (must be absent)
-
-- [ ] No "TBD", "TODO", "details to follow" in pages that ship.
-- [ ] No mixed audiences in one page (end-user content and contributor content interleaved).
-- [ ] No giant single-page dump where multi-page split was the call — and vice versa.
-- [ ] No content that restates the schema/code source of truth in prose where a link would do.
-
-## External references validated
-
-- [ ] Every package version, theme name, plugin, image tag, CLI flag, and config option named in the docs is checked against current upstream docs.
-- [ ] All cross-links resolve from the rendered site (not just from raw markdown).
 
 ## CLAUDE.md impact
 

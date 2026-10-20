@@ -1,0 +1,264 @@
+from __future__ import annotations
+
+import argparse
+import sys
+from collections.abc import Mapping
+from pathlib import Path
+from typing import Any
+
+import yaml
+from jinja2 import Environment, TemplateError
+from ruamel.yaml import YAML as RuamelYAML
+from ruamel.yaml.error import YAMLError as RuamelYAMLError
+from ruamel.yaml.scalarstring import SingleQuotedScalarString
+
+from booping import logger
+from booping.context import Context
+from booping.context._yaml import update_frontmatter, update_marker
+from booping.context.project import Project
+from booping.macros import MacroError, make_macro
+from booping.migrations import latest_shipped_id
+from booping.utils import diff_report
+
+MARKER_NAME = ".booping"
+
+_NULL_FORMS = {"null", "Null", "NULL", "~"}
+
+
+def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:  # type: ignore[type-arg]
+    p = subparsers.add_parser(
+        "set",
+        help=(
+            "Set frontmatter keys of a markdown file, or keys of a `.booping` marker "
+            "when the file is named `.booping`"
+        ),
+    )
+    p.add_argument(
+        "file",
+        type=Path,
+        help="Markdown file, or a `.booping` marker (bare YAML mapping)",
+    )
+    p.add_argument(
+        "pairs",
+        nargs="*",
+        metavar="key=val",
+        help=(
+            "key=value pairs; a frontmatter value is rendered as Jinja with the `macro` "
+            # argparse %-expands help strings, so literal percent signs are doubled.
+            "global (e.g. \"{{ macro('core.macros.date', '+%%Y-%%m-%%d %%H:%%M') }}\"); "
+            "a marker value is written as given, `latest_migration` as an integer id or "
+            "`@latest` (the newest shipped migration)"
+        ),
+    )
+    p.add_argument(
+        "--remove",
+        dest="removals",
+        action="append",
+        default=[],
+        metavar="key",
+        help="Frontmatter key to remove (repeatable); applied before key=value sets",
+    )
+    p.add_argument(
+        "--append",
+        dest="appends",
+        action="append",
+        default=[],
+        metavar="key=val",
+        help=(
+            "Append a value to a frontmatter list (repeatable); a null or absent key "
+            "becomes a one-element list, an already-present value is a no-op, an "
+            "existing scalar is an error"
+        ),
+    )
+    p.set_defaults(func=_run)
+
+
+def interpolate(
+    value: str,
+    repo_dir: Path | None = None,
+    config: Mapping[str, Any] | None = None,
+    vault_dir: Path | None = None,
+) -> str:
+    """Render a hook value as Jinja whose only global is `macro`.
+
+    A value carrying no Jinja passes through untouched.
+    """
+    if "{{" not in value and "{%" not in value:
+        return value
+    env = Environment()  # noqa: S701 — frontmatter values, not HTML
+    globals_: dict[str, Any] = env.globals  # type: ignore[assignment]
+    globals_["macro"] = make_macro(
+        dict(config) if config else {}, repo_dir=repo_dir, vault_dir=vault_dir
+    )
+    try:
+        return env.from_string(value).render()
+    except MacroError as exc:
+        print(f"error: value {value!r}: {exc}", file=sys.stderr)
+        sys.exit(2)
+    except TemplateError as exc:
+        print(f"error: value {value!r}: {type(exc).__name__}: {exc}", file=sys.stderr)
+        sys.exit(2)
+
+
+def coerce_scalar(value: str) -> object:
+    """Return *value* as the Python type its plain YAML form loads as.
+
+    An integer, float, boolean or null form becomes that type, so the emitter
+    writes it unquoted.  Everything else stays a string; a string whose plain
+    form would reload as another type under the YAML 1.1 resolver the readers
+    use is marked single-quoted, so it reloads as the string it was written as.
+    """
+    if not value.strip():
+        return value
+
+    try:
+        loaded: object = RuamelYAML(typ="rt").load(value)  # type: ignore[reportUnknownMemberType]
+    except RuamelYAMLError:
+        loaded = value
+
+    if loaded is None:
+        # An anchor or an empty tag also loads as None; only the null spellings
+        # are a real null.
+        return None if value.strip() in _NULL_FORMS else _quote_if_ambiguous(value)
+    if isinstance(loaded, bool | int | float):
+        return loaded
+    return _quote_if_ambiguous(value)
+
+
+def _quote_if_ambiguous(value: str) -> str:
+    try:
+        reloaded: object = yaml.safe_load(value)
+    except yaml.YAMLError:
+        return value
+    if isinstance(reloaded, str) and reloaded == value:
+        return value
+    return SingleQuotedScalarString(value)
+
+
+def resolve_values(
+    updates: Mapping[str, str],
+    repo_dir: Path | None = None,
+    config: Mapping[str, Any] | None = None,
+    vault_dir: Path | None = None,
+) -> tuple[dict[str, object], dict[str, str]]:
+    """Interpolate and type each key=value set, the one path every writer shares.
+
+    Returns ``(key → coerced value to write, key → interpolated text to echo)``.
+    """
+    resolved: dict[str, object] = {}
+    rendered: dict[str, str] = {}
+    for key, value in updates.items():
+        rendered[key] = interpolate(value, repo_dir, config, vault_dir)
+        resolved[key] = coerce_scalar(rendered[key])
+    return resolved, rendered
+
+
+def parse_pairs(pairs: list[str]) -> list[tuple[str, str]]:
+    parsed: list[tuple[str, str]] = []
+    for pair in pairs:
+        if "=" not in pair:
+            print(f"error: malformed key=value pair: {pair!r}", file=sys.stderr)
+            sys.exit(1)
+        key, _, value = pair.partition("=")
+        if not key:
+            print(f"error: empty key in pair: {pair!r}", file=sys.stderr)
+            sys.exit(1)
+        parsed.append((key, value))
+    return parsed
+
+
+def _marker_value(key: str, value: str) -> object:
+    if key != "latest_migration":
+        return value
+    if value == "@latest":
+        return latest_shipped_id()
+    try:
+        return int(value)
+    except ValueError:
+        print(f"error: latest_migration must be an integer, got {value!r}", file=sys.stderr)
+        sys.exit(1)
+
+
+def _set_marker(marker: Path, pairs: list[str], removals: list[str], appends: list[str]) -> None:
+    if removals or appends:
+        print("error: --remove and --append apply to frontmatter, not the marker", file=sys.stderr)
+        sys.exit(1)
+    if not pairs:
+        print("error: nothing to do: provide key=value pairs", file=sys.stderr)
+        sys.exit(1)
+    updates = {key: _marker_value(key, value) for key, value in parse_pairs(pairs)}
+
+    try:
+        update_marker(marker, updates)
+    except Exception as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        sys.exit(2)
+
+    project = Project.load_cwd_configured(start=marker.resolve().parent)
+    written = " ".join(f"{k}={v}" for k, v in updates.items())
+    logger.log(
+        vault=project.directory if project is not None else None,
+        subcommand="set",
+        message=f"{marker.resolve()} {written}",
+    )
+    print(f"marker: {', '.join(f'{k}={v}' for k, v in updates.items())}", file=sys.stderr)
+
+
+def _run(args: argparse.Namespace) -> None:
+    plan_path: Path = args.file
+    if not plan_path.is_file():
+        print(f"error: file not found: {plan_path}", file=sys.stderr)
+        sys.exit(1)
+
+    removals: list[str] = list(getattr(args, "removals", None) or [])
+    if plan_path.name == MARKER_NAME:
+        _set_marker(plan_path, list(args.pairs), removals, list(args.appends))
+        return
+    updates = dict(parse_pairs(args.pairs))
+    appends = parse_pairs(list(getattr(args, "appends", None) or []))
+
+    if not updates and not removals and not appends:
+        print(
+            "error: nothing to do: provide key=value pairs, --append and/or --remove",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    ctx = Context.assemble()
+    project = ctx.project
+    repo_dir = project.repo_directory if project is not None else None
+    vault_dir = project.directory if project is not None else None
+
+    # The summary echoes the interpolated text, not the coerced value, so the
+    # stderr line reads the same as before the typing rule.
+    resolved, summary_values = resolve_values(updates, repo_dir, ctx.config, vault_dir)
+
+    resolved_appends: list[tuple[str, object]] = [
+        (key, interpolate(value, repo_dir, ctx.config, vault_dir)) for key, value in appends
+    ]
+
+    previous = plan_path.read_text()
+
+    try:
+        update_frontmatter(plan_path, resolved, removals=removals, appends=resolved_appends)
+    except ValueError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        sys.exit(1)
+    except Exception as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        sys.exit(2)
+
+    report = diff_report(plan_path, previous, plan_path.read_text())
+    if report:
+        print(report)
+
+    vault = project.directory if project is not None else None
+    changed = [f"-{k}" for k in removals] + list(resolved.keys()) + [k for k, _ in resolved_appends]
+    logger.log(vault=vault, subcommand="set", message=f"{plan_path} {' '.join(changed)}")
+
+    parts = (
+        [f"-{k}" for k in removals]
+        + [f"{k}={v}" for k, v in summary_values.items()]
+        + [f"{k}+={v}" for k, v in resolved_appends]
+    )
+    print(f"updated {plan_path}: {', '.join(parts)}", file=sys.stderr)

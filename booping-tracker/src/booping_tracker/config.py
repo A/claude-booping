@@ -1,7 +1,7 @@
 """Resolution of `core.tracker`.
 
 The three-tier config merge stays single-sourced in booping: this shells to
-`bin/booping config-get core.tracker` and parses the YAML it prints, unless
+`bin/booping config core.tracker` and parses the YAML it prints, unless
 `--config-file` names a file to read instead.
 """
 
@@ -34,10 +34,10 @@ class TrackerConfig:
 
 
 def config_get(key: str, cwd: Path | None = None) -> str | None:
-    """Print of `booping config-get {key}`, or None when the key does not resolve."""
+    """Print of `booping config {key}`, or None when the key does not resolve."""
     try:
         proc = subprocess.run(
-            [str(BOOPING), "config-get", key],
+            [str(BOOPING), "config", key],
             capture_output=True,
             text=True,
             cwd=cwd,

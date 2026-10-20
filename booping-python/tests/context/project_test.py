@@ -31,9 +31,7 @@ def test_load_cwd_absolute_vault_path(tmp_path: Path) -> None:
     repo = tmp_path / "repo"
     repo.mkdir()
     abs_vault = tmp_path / "elsewhere" / "vault"
-    (repo / ".booping").write_text(
-        f"project_name: absvault\nvault_path: {abs_vault}\n"
-    )
+    (repo / ".booping").write_text(f"project_name: absvault\nvault_path: {abs_vault}\n")
     project = Project.load_cwd(start=repo)
     assert project is not None
     assert project.directory == abs_vault

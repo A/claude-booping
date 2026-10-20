@@ -6,7 +6,6 @@ import pytest
 
 from booping.context.playbook import (
     Playbook,
-    legacy_lesson_dirs,
     resolve_detached,
     resolve_waves,
 )
@@ -171,9 +170,7 @@ def test_tolerant_partial_frontmatter() -> None:
 
 def test_missing_roots_empty() -> None:
     assert (
-        Playbook.load_all(
-            vault=None, home_dir=Path("/nonexistent/home"), plugin_root=_no_core()
-        )
+        Playbook.load_all(vault=None, home_dir=Path("/nonexistent/home"), plugin_root=_no_core())
         == []
     )
     assert (
@@ -195,9 +192,7 @@ def test_missing_core_root_degrades_silently(
 
 
 def test_core_discovery() -> None:
-    pbs = Playbook.load_all(
-        vault=None, home_dir=Path("/nonexistent/home"), plugin_root=_core()
-    )
+    pbs = Playbook.load_all(vault=None, home_dir=Path("/nonexistent/home"), plugin_root=_core())
     assert {pb.name for pb in pbs} == {"alpha", "shared", "core-only"}
     assert all(pb.scope == "core" for pb in pbs)
     core_only = next(pb for pb in pbs if pb.name == "core-only")
@@ -467,8 +462,7 @@ def test_resolve_scopes_outer_and_inner_waves(tmp_path: Path) -> None:
 def test_resolve_scopes_inner_problem_carries_scope(tmp_path: Path) -> None:
     pb = _load_graph(
         tmp_path,
-        "  a: []\n"
-        "  loop:\n    dependencies: [a]\n    graph:\n      b: [nope]\n      c: [b]\n",
+        "  a: []\n  loop:\n    dependencies: [a]\n    graph:\n      b: [nope]\n      c: [b]\n",
     )
     inner = pb.resolve_scopes()["loop"]
     assert inner.waves == []
@@ -483,9 +477,7 @@ def test_inner_dep_on_outer_step_is_unknown(tmp_path: Path) -> None:
         "  a: []\n  loop:\n    dependencies: [a]\n    graph:\n      b: [a]\n",
     )
     inner = pb.resolve_scopes()["loop"]
-    assert [(p.kind, p.dep, p.scope) for p in inner.problems] == [
-        ("unknown_dep", "a", "loop")
-    ]
+    assert [(p.kind, p.dep, p.scope) for p in inner.problems] == [("unknown_dep", "a", "loop")]
 
 
 def test_subgraph_dependency_on_inner_step_is_unknown(tmp_path: Path) -> None:
@@ -597,9 +589,7 @@ def test_states_raw_preserved_for_resolver() -> None:
         "to": "developing-steps",
         "when": "intake step complete",
         "gates": ["request + scope captured in the artifact"],
-        "hooks": [
-            "frontmatter-update intaken=\"{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}\""
-        ],
+        "hooks": ["set intaken=\"{{ macro('core.macros.date', '+%Y-%m-%d %H:%M') }}\""],
     }
     assert raw["statuses"]["done"] == {"terminal": True}
 
@@ -620,8 +610,7 @@ def test_unknown_state_ref(tmp_path: Path) -> None:
 def test_unknown_state_ref_from_subgraph(tmp_path: Path) -> None:
     pb = _load_manifest(
         tmp_path,
-        "graph:\n  loop:\n    dependencies: []\n    state: nope\n"
-        "    graph:\n      b: []\n",
+        "graph:\n  loop:\n    dependencies: []\n    state: nope\n    graph:\n      b: []\n",
         _NO_GRAPH_MD,
     )
     assert [(p.kind, p.node, p.scope) for p in pb.graph_problems] == [
@@ -695,6 +684,42 @@ def test_instance_artifact_allowed_for_subgraph_state() -> None:
     assert "{instance}" in pb.states["step"].artifact
 
 
+_ITEM_STATE = (
+    "    artifact: items/{instance}.md\n    initial: s\n    statuses:\n      s: {terminal: true}\n"
+)
+
+
+def test_standalone_instance_state_loads_without_a_scope(tmp_path: Path) -> None:
+    pb = _load_manifest(
+        tmp_path,
+        f"graph:\n  a: []\nstates:\n  item:\n    standalone: true\n{_ITEM_STATE}",
+        _NO_GRAPH_MD,
+    )
+    assert pb.graph_problems == []
+    assert pb.states["item"].standalone is True
+
+
+def test_unkeyed_unreferenced_instance_state_is_bad_state(tmp_path: Path) -> None:
+    pb = _load_manifest(
+        tmp_path,
+        f"graph:\n  a: []\nstates:\n  item:\n{_ITEM_STATE}",
+        _NO_GRAPH_MD,
+    )
+    assert [(p.kind, p.node) for p in pb.graph_problems] == [("bad_state", "item")]
+    assert pb.states == {}
+
+
+def test_standalone_plain_state_is_not_an_orphan(tmp_path: Path) -> None:
+    pb = _load_manifest(
+        tmp_path,
+        "graph:\n  a: []\n"
+        "states:\n  unused:\n    standalone: true\n    artifact: index.md\n"
+        "    initial: s\n    statuses:\n      s: {terminal: true}\n",
+        _NO_GRAPH_MD,
+    )
+    assert pb.graph_problems == []
+
+
 def test_subgraph_state_must_be_string(tmp_path: Path) -> None:
     pb = _load_graph(
         tmp_path,
@@ -748,26 +773,6 @@ def test_legacy_lesson_dirs_no_longer_load(tmp_path: Path) -> None:
     assert pb.graph_problems == []
 
 
-def test_legacy_lesson_dirs_reports_root_and_playbook_level(tmp_path: Path) -> None:
-    core, glob, local = _roots(tmp_path)
-    _write_playbook(core, "one", "One")
-    _write_lesson(core / "_lessons", "0001_core.md")
-    _write_lesson(glob / "one" / "_lessons", "0002_pb.md")
-    _write_lesson(local / "_lessons", "0003_project.md")
-    pb = _load(tmp_path)["one"]
-    assert sorted(legacy_lesson_dirs(pb.search_roots)) == sorted(
-        [core / "_lessons", glob / "one" / "_lessons", local / "_lessons"]
-    )
-
-
-def test_legacy_lesson_dirs_ignores_empty_and_missing(tmp_path: Path) -> None:
-    core, _, _ = _roots(tmp_path)
-    _write_playbook(core, "one", "One")
-    (core / "_lessons").mkdir()
-    pb = _load(tmp_path)["one"]
-    assert legacy_lesson_dirs(pb.search_roots) == []
-
-
 def test_lessons_dir_not_treated_as_playbook_or_step(tmp_path: Path) -> None:
     core, _, _ = _roots(tmp_path)
     _write_playbook(core, "one", "One")
@@ -785,9 +790,7 @@ def test_name_clash_across_roots(tmp_path: Path) -> None:
     pb = _load(tmp_path)["dup"]
     assert pb.scope == "local"
     assert pb.clash_scopes == ["global", "local"]
-    assert [(p.kind, p.detail) for p in pb.graph_problems] == [
-        ("name_clash", "global, local")
-    ]
+    assert [(p.kind, p.detail) for p in pb.graph_problems] == [("name_clash", "global, local")]
 
 
 def test_no_name_clash(tmp_path: Path) -> None:
@@ -803,7 +806,6 @@ def test_clashing_name_keeps_search_roots(tmp_path: Path) -> None:
     core, glob, local = _roots(tmp_path)
     _write_playbook(core, "dup", "Core Dup")
     _write_playbook(local, "dup", "Local Dup")
-    _write_lesson(glob / "dup" / "_lessons", "0002_global.md")
+    glob.mkdir(parents=True)
     pb = _load(tmp_path)["dup"]
     assert pb.search_roots == [local, glob, core]
-    assert legacy_lesson_dirs(pb.search_roots) == [glob / "dup" / "_lessons"]

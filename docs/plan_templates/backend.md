@@ -7,39 +7,30 @@ description: Backend feature work — APIs, data models, services, migrations, b
 
 ## Context
 
-Why this work now. Cover three beats:
-- **Current state** — what exists today, what's missing or broken.
+Why this work now. Cover two beats:
 - **Motivation** — why this change is needed.
 - **Scope** — what this plan covers, and explicitly what it does NOT.
 
 ## Decisions
 
-Non-obvious design choices. One bullet per decision: **topic**, the decision, and a one-sentence justification.
-
-- **{Topic}**: {decision} — {why}
+Non-obvious design choices.
 
 ## Architecture
 
-How this change fits the existing system. Integration points. Reference concrete files and functions. One diagram when the flow is non-trivial.
+How this change fits the existing system.
 
 ## Milestones
 
-Generated table — one row per milestone file, projected with `core.plans.milestones.table_columns` by `booping query`. Derived output: no hand-written rows, no milestone bodies in this file.
+One `### M{nn} — {title}` block per milestone, in the format draft-plan states. Its content:
 
-## Milestone files
-
-One file per milestone directory under the plan directory's `milestones/`, named after that directory and seeded by `booping scaffold core.groom_playbook.milestone_scaffold` — the seed owns the file's frontmatter keys and its required headings. Write the body into that skeleton:
-
-- **Goal** — one sentence directly under the H1: what changes in the system after this milestone.
-- **Scope** — the modules, endpoints or tables in play and the files this milestone touches, so it executes without reading another milestone.
-- `## Tasks` — one row per task:
+- **Tasks** — opens with a **Goal** line (one sentence: what changes in the system after this milestone) and a **Scope** line (the modules, endpoints or tables in play and the files this milestone touches), then one row per task:
 
   | Task | Description | Files | SP | Status |
   |------|-------------|-------|----|--------|
   | 1.1 | ... | `path/to/file.ext` | 2 | pending |
   | 1.2 | ... | `path/to/other.ext` | 1 | pending |
 
-- `## Definition of Done` — one `### Task {n}.{m}` block per task, checkbox bullets only: a specific verifiable criterion, the test / verification command that proves it. A code sketch belongs here when the shape is non-obvious — interface only, `...` in method bodies:
+- **Definition of Done** — one `Task {n}.{m}` block per task, checkbox bullets only: a specific verifiable criterion, the test / verification command that proves it. A code sketch belongs here when the shape is non-obvious — interface only, `...` in method bodies:
 
   ```
   class NewThing:
@@ -47,8 +38,8 @@ One file per milestone directory under the plan directory's `milestones/`, named
           ...
   ```
 
-- `## References` — where such files exist, 1–3 existing modules, migrations or tests whose shape this milestone copies, by path, plus the path of any schema or contract it must not go looking for.
-- `## Verify` — exact commands (or observable outcomes) confirming this milestone: a targeted test path, one invocation, a diff. Scoped to what this milestone changed — whole-repo gates (full test suite, repo-wide lint/typecheck, an aggregate `ci` target) run once in `index.md`'s Final Verification, never per milestone.
+- **References** — where such files exist, 1–3 existing modules, migrations or tests whose shape this milestone copies, by path, plus the path of any schema or contract it must not go looking for.
+- **Verify** — the command (or observable outcome) confirming this milestone: a targeted test path, one invocation, a diff.
 
 ## Implementation Order *(when milestones have dependencies)*
 
@@ -115,12 +106,9 @@ Either name specific sections to update with an owning task, or state "No CLAUDE
 
 # Quality Checklist
 
-Verify before leaving `in-spec`. Every item must be satisfiable by reading the plan directory alone.
-
 ## Frontmatter
 
 - [ ] `title` matches the plan's H1 and `type` is the task type chosen at intake.
-- [ ] `sp` equals the sum of the milestone files' `sp`.
 - [ ] `summary` is set (non-empty, single line, ≤ ~120 chars) for `feature` and `refactoring` plans.
 
 ## Content
@@ -129,45 +117,17 @@ Verify before leaving `in-spec`. Every item must be satisfiable by reading the p
 - [ ] For features and refactorings: `summary` is phrased as the user/internal-visible outcome, not engineering output.
 - [ ] Definition of Done bullets are testable (verifiable by command or inspectable output).
 - [ ] Decisions table lists real alternatives — no empty "Alternative considered" rows.
-- [ ] Every milestone is a file in `milestones/` carrying its own goal, tasks, DoD and Verify — no milestone body in `index.md`.
-- [ ] `index.md`'s milestone table has one row per milestone file and matches their frontmatter.
-- [ ] Every milestone file's `## Verify` is a command or verifiable outcome scoped to what that milestone changed — no whole-repo gate (full suite, repo-wide lint/typecheck, aggregate `ci` target); those belong to `index.md`'s Final Verification.
-- [ ] Every milestone file's `## References` names 1–3 existing files to copy the shape of where such files exist, or states that none applies.
-- [ ] No milestone's Scope or Tasks offers two ways to do the same thing ("by hand or via X").
+- [ ] Every milestone's References names 1–3 existing files to copy the shape of where such files exist, or states that none applies.
 - [ ] No milestone asks for a deliverable in the worker's report — each is named as a path plus "Create" or "Append to", relative to the repo root or the plan directory.
-- [ ] Every task lists exact file paths, not "related files" or "somewhere in X".
 - [ ] Every task DoD uses checkboxes, not prose.
 - [ ] Code sketches use `...` in method bodies — agents implement from interfaces, not by copying literal code.
 
-## Anti-patterns (must be absent)
-
-- [ ] No "TBD", "TODO", "implement later", "details to follow".
-- [ ] No "Similar to Task N" without specifying what's similar.
-- [ ] No "handle edge cases", "add error handling", "clean up" as standalone tasks.
-- [ ] No "either X or Y" unresolved — pick one, justify in Decisions.
-- [ ] No task spanning unrelated concerns (model + API + frontend in one row).
-- [ ] No milestone that requires reading more than its own file and `index.md` to execute.
-
-## External references validated
-
-- [ ] Package / image / crate versions confirmed against official registries.
-- [ ] Third-party API endpoints and flags validated against current docs.
-- [ ] No assumed external reference without a verification note.
-
-## Out of scope + coverage
+## Out of scope
 
 - [ ] Out-of-scope section present; at least one excluded concern named.
-- [ ] Every requirement in the user's request maps to at least one task, or is explicitly deferred in Out of scope with justification.
-
-## Consistency
-
-- [ ] Function / class names used in one task match their definition in another.
-- [ ] File paths are consistent across tasks.
-- [ ] Data structures (schemas, models) match between producer and consumer tasks.
 
 ## Backend-specific
 
-- [ ] New data persistence (migration, schema change, new index) is called out explicitly and paired with a rollback note.
 - [ ] Authorization / data-access checks section filled in if endpoints are touched, or marked N/A with justification.
 - [ ] Deployment / config impact section filled in if env vars / infra change, or marked N/A.
 - [ ] Testing Strategy answered if the work is quality-dependent, or marked N/A for pure deterministic work.

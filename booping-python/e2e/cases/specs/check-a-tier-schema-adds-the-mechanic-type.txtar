@@ -1,0 +1,39 @@
+A record of a type the project tier adds through `_schemas/mechanic.yaml` is checked by that
+schema and passes.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/_schemas/mechanic.yaml --
+doc: mechanic
+
+rules:
+  - select: FRONTMATTER
+    has:
+      type: mechanic
+      title: '^.+$'
+      summary: '^.{1,200}$'
+      status: { enum: [draft, accepted] }
+
+  - select: H2
+    ordered: [Loop]
+    strict: true
+-- fixtures/cwd/vault/mechanic/0001-dash.md --
+---
+type: mechanic
+title: Dash
+summary: A short burst of speed on a cooldown.
+status: accepted
+---
+
+## Loop
+
+Press, burst, wait for the cooldown.
+-- cmd --
+booping specs check
+-- exit --
+0
+-- stdout --
+-- stderr --
+1 record(s) checked: 0 error(s), 0 warning(s)

@@ -1,0 +1,26 @@
+description: adr-scorer agent
+
+# The prompt is unused: agent_provider.py builds the live caller's prompt from `input`.
+prompts:
+  - id: '{{input}}'
+    label: prompt
+
+providers:
+  - id: file://agent_provider.py
+    config:
+      agent: booping:adr-scorer
+      # headless, the body render needs pre-approval
+      allowed_tools: ["Bash(booping render src/templates/agents/adr-scorer.md.j2)"]
+      # mirrors playbooks/specs/guide/prompt.md `## Record`: the parts pasted in its order, under
+      # its headings, no paths; the rubric file carries its own heading
+      paste:
+        ADR scorer task: playbooks/specs/guide/adr-rubric.md
+        Guide excerpt: 'src/specs/README.md#Types,When a record is worth writing'
+      vars:
+        inventory: Records
+        primitives: Primitives
+      input_heading: Draft ADR
+
+defaultTest: file://../../_lib/grader.yaml
+
+tests: file://tests.yaml

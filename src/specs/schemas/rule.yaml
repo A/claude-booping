@@ -1,0 +1,35 @@
+# rule: specs/rule/<NNNN>-<slug>.md, one rule per file — a constraint every
+# decision obeys. `## Follows from` links each reason: a value, or a source
+# (a retro, a review, an incident) for a rule learnt from a run.
+# Optional frontmatter, the delivery channel that replaces lessons:
+#   targets: [groom, develop/run, agent:<id>, skill:<name>] — where it is injected;
+#   brief: one or two lines — what is injected; the body is read on demand.
+doc: rule
+
+rules:
+  - select: FRONTMATTER
+    has:
+      type: rule
+      title: '^.+$'
+      summary: '^.{1,200}$'
+      created_by: { enum: [owner, claude] }
+      created_at: '^\d{4}-\d{2}-\d{2}$'
+      updated_at: '^\d{4}-\d{2}-\d{2}$'
+      status: { enum: [accepted, retired] }
+
+  - select: H2
+    ordered: [Rule, Follows from, Exceptions?]
+    strict: true
+
+  - select: SECTION("Rule") > P
+    min: 1
+
+  - select: SECTION("Follows from") > UL > LI
+    min: 1
+    each:
+      - select: A
+        min: 1
+
+  - select: SECTION("Exceptions") > UL > LI
+    optional: true
+    min: 1

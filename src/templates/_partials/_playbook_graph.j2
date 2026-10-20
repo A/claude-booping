@@ -46,21 +46,21 @@ Execute the steps in the most effective order considering their dependencies.
 {%- if states %}
 ## State
 
-Run state is persisted in artifacts under the run workdir. Only `booping playbook-transition` writes it — never hand-edit an artifact's `status`.
+Run state is persisted in artifacts under the run workdir. Only `booping transition` writes it — never hand-edit an artifact's `status`.
 
 Read the whole run's frontier before starting or resuming:
-
+{% set anchor = (states | selectattr('artifact') | rejectattr('per_instance') | first) or (states | selectattr('artifact') | first) %}
 ```
-booping playbook-state {{ playbook }} --workdir <run workdir>{% if states | rejectattr('artifact') | list %} --target {path}{% endif %}
+booping state {% if anchor %}<run workdir>/{{ anchor.artifact | replace('{instance}', '<slug>') }}{% else %}{path}{% endif %} --playbook {{ playbook }}
 ```
 {% for entry in states %}
 ### State: {{ entry.name }}
 
 - Referenced by: {{ entry.scopes | join(', ') if entry.scopes else "nothing" }}
 {% if entry.artifact %}- Artifact: `{{ entry.artifact }}` (relative to the run workdir)
-{% else %}- Artifact: named per run — pass `--target {path}` (relative to the run workdir) on every call
+{% else %}- Artifact: named per run — pass it as `{path}` on every call
 {% endif %}- Initial status: `{{ entry.initial }}`
-- Advance: `booping playbook-transition {{ playbook }} <to>{% if not entry.is_outer %} --state {{ entry.name }}{% endif %}{% if entry.per_instance %} --instance <slug>{% endif %}{% if not entry.artifact %} --target {path}{% endif %} --workdir <run workdir>`
+- Advance: `booping transition {% if entry.artifact %}<run workdir>/{{ entry.artifact | replace('{instance}', '<slug>') }}{% else %}{path}{% endif %} <to> --playbook {{ playbook }}{% if not entry.is_outer %} --state {{ entry.name }}{% endif %}`
 
 | Status | To | When | Gates |
 | --- | --- | --- | --- |

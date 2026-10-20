@@ -1,0 +1,47 @@
+Two records of one type sharing a number each get an `id` finding naming the other file.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/value/0001-first.md --
+---
+type: value
+title: First
+summary: The first value.
+kind: value
+created_by: owner
+created_at: 2026-01-01
+updated_at: 2026-01-01
+---
+
+Why the project exists.
+
+## In practice
+
+It shows in every run.
+-- fixtures/cwd/vault/value/0001-other.md --
+---
+type: value
+title: First
+summary: The first value.
+kind: value
+created_by: owner
+created_at: 2026-01-01
+updated_at: 2026-01-01
+---
+
+Why the project exists.
+
+## In practice
+
+It shows in every run.
+-- cmd --
+booping specs check
+-- exit --
+1
+-- stdout --
+vault/value/0001-first.md:1  error  id  value/0001 is also used by vault/value/0001-other.md
+vault/value/0001-other.md:1  error  id  value/0001 is also used by vault/value/0001-first.md
+-- stderr --
+2 record(s) checked: 2 error(s), 0 warning(s)

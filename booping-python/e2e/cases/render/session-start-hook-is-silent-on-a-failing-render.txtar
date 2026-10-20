@@ -1,0 +1,21 @@
+Inside a project, a render that fails — here a stand-in `bin/booping` under a fake plugin root,
+writing to both streams and exiting non-zero — never blocks the session: the hook exits 0 and
+neither its partial stdout nor its stderr reaches the session.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+-- fixtures/cwd/plugin/bin/booping --
+#!/bin/sh
+echo partial
+echo boom >&2
+exit 3
+-- cmd --
+chmod +x plugin/bin/booping
+sh -c 'hook=$(dirname "$(dirname "$(command -v booping)")")/hooks/session-start.sh; CLAUDE_PLUGIN_ROOT=$PWD/plugin "$hook"'
+-- exit --
+0
+-- stdout --
+-- stderr --

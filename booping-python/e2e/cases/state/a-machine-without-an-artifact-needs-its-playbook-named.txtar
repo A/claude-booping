@@ -1,0 +1,40 @@
+A state machine that declares no `artifact:` matches no file by its path, so a report naming no
+`--playbook` finds no playbook to report and asks for the flag. Paired with
+`a-machine-without-an-artifact-reports-the-named-file.txtar`.
+
+-- fixtures/home/Claude/_playbooks/fx-targetless/playbook.md --
+---
+name: fx-targetless
+title: Targetless
+summary: Machine with no declared artifact, addressed by its file.
+---
+
+Preamble.
+-- fixtures/home/Claude/_playbooks/fx-targetless/playbook.yaml --
+state: main
+graph:
+  review: []
+
+states:
+  main:
+    initial: reviewing
+    statuses:
+      reviewing:
+        transitions:
+          - to: reviewed
+            when: the review is written
+      reviewed: {terminal: true}
+-- fixtures/home/Claude/_playbooks/fx-targetless/review/prompt.md --
+---
+summary: Review the work.
+---
+
+Review body.
+-- fixtures/cwd/run/.keep --
+-- cmd --
+booping state run/review.md
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: {CWD}/run/review.md matches no machine artifact; pass --playbook

@@ -2,6 +2,47 @@
 
 Notable user-visible changes, newest first, in the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format; versions follow [semantic versioning](https://semver.org/).
 
+## Unreleased
+
+### Added
+
+- A `SessionStart` hook: a session opened inside a booping project starts with a short block naming the playbooks and their triggers, so project work is offered to the playbook it belongs to — `project-manager` when nothing narrower fits. Silent outside a project and on any failure; no playbook is loaded at start.
+- Recording an ADR in the `specs` playbook ends with a brief — chosen and rejected options, key points, what it touches, what the agent decided alone — and an objection window; core rule `booping:rule/0036` carries it. Before the brief, the new `adr-scorer` agent (Opus, reads nothing but its prompt) reviews the draft against the format guide's record types and the tier's inventory of values, rules and ADRs — one line each, from `booping specs ls --type … --exclude … --titles`, new flags — plus the project's commands. A draft that is not an ADR is routed instead: recorded as the rule, value or other record it is, filed as an open item, or dropped. A real ADR gets its alternatives scored 0–3, one at 1 or below sent back for a redraft, at most two rounds; the brief lists the cheap options it never weighed under «Не взвешено:» and the records it overlaps under «Задевает:».
+
+### Changed
+
+- **Breaking:** a spec record's `reviewed:` key is replaced by `review:` (`shown` / `discussed` / `accepted`) plus `review_evidence:`; `booping specs check` reports a remaining `reviewed:` as an error. `booping status` counts records not accepted, split by level, and the specs site's "mark reviewed" control is now "Accepted", emitting `{ref} — accepted {date}` in the Outbox.
+
+- Groom drafts the whole plan in one pass: `intake → draft-plan → cross-review → present`. `draft-plan` researches the code, writes the plan to `draft.md` in the plan directory, cuts it into `index.md` and the milestone files with the new `booping plan split`, and checks the milestones with mdcheck against the groom milestone schema, fixing the draft for up to three rounds; `present` shows any findings left. The `research-codebase` and `research-web` steps are gone, and the core plan templates are trimmed to their sections. New config keys: `core.groom_playbook.split.sections` and `core.groom_playbook.split_fallback_agent`.
+- **Breaking:** the vault-file commands are renamed, with no aliases: `booping frontmatter-update` and `booping marker-set` → `booping set <file> k=v` (`booping set .booping latest_migration=…` for the marker), `booping playbook-transition <playbook> <to> --target …` → `booping transition <file> <to> [--playbook …]`, `booping playbook-state <playbook>` → `booping state <file> [--playbook …]`, `booping config-get` → `booping config`; the `frontmatter-update` hook in a playbook's `hooks:` list is now `set`. `booping items` is removed: file an item with `booping create core.specs.open_items.template`, list them with `booping query --config core.specs.open_items.index`, size, link and close them with `booping set` and `booping transition`, and scan with `booping specs scan`. `create` trees can number a file with `next_id(prefix)`.
+- **Breaking:** `mdcheck` is a required dependency: `cargo install markdown-checker --version 0.1.2 --locked` (the crate named `mdcheck` is unrelated).
+
+## v2.0.0 — 2026-10-15
+
+Specs become a core feature: booping ships a typed-records format for a project's values, rules and decisions, checks it, renders it as a site, and injects targeted rules into playbook steps in place of lessons.
+
+### Added
+
+- The specs format — value, rule, adr, conflict, story, idea, reference and runbook records — shipped in `src/specs/` with a schema per type, in three tiers: core, global (`<home_dir>/_specs/`, named by your namespace, `$USER` by default) and project.
+- `booping specs check` validates every record against its schema and across files: unique numbers, relative links, reference fields and namespaced references between tiers. `booping specs ls`, `next` and `init` list records, name the next number and create a tier.
+- `booping specs site` renders one or several specs roots to a static site, one page per type with every record in full; a global config key lists the roots so one site can cover every project.
+- A rule with `targets:` and `brief:` is injected into the targeted playbook, step, agent or skill as its brief plus a link to the record.
+- The `makemigration` playbook authors a new plugin-shipped vault migration at the next id, in the format `migrate` applies.
+
+### Changed
+
+- Lessons are now rules. Migration 004 turns `{vault}/_lessons/` and `<home_dir>/_lessons/` into rule records and removes the lesson files; run `/playbook migrate`. `learn` writes rule records instead of lesson files, and `setup` creates the specs tiers and stores your namespace.
+- **Breaking:** lesson injection and the `--no-lessons` flag are gone; use `--no-rules`.
+- `core.sprint.max_milestones_per_agent` is replaced by `core.sprint.max_sp` (default `15`): develop packs consecutive milestones into one briefing while their summed SP stays at or under it. A config still setting the old key is ignored — rename it, and set `max_sp` low (e.g. `1`) to keep one milestone per briefing.
+- Groom no longer lets a milestone at or over `redecompose_threshold` leave drafting.
+- A worker's code work may reach outside the attached repo once the user confirms it for the plan.
+
+### Fixed
+
+- A frontmatter value containing `---` no longer ends the frontmatter early and drops every later key; an unclosed frontmatter block reports that plainly.
+- Vault commits from playbook hooks work when the vault lives inside the project repo, commit only vault paths, and stop the transition with git's error instead of reporting `ok` with nothing committed.
+- code-review lists each candidate plan with its real baseline commit.
+
 ## v1.1.1 — 2026-10-08
 
 A patch release of engine fixes: `frontmatter-update` hooks now type their values like the command does, repeated `--append` flags all land, and `session-stats` no longer double-counts tokens.

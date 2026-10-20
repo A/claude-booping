@@ -1,0 +1,84 @@
+A record at each review level, each carrying the evidence its level needs, raises no `review`
+finding; a record with no `review:` key is not shown to the owner yet and is fine too.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/value/0001-bare.md --
+---
+type: value
+title: Bare
+summary: The bare value.
+kind: value
+created_by: owner
+created_at: 2026-01-01
+updated_at: 2026-01-01
+---
+
+Why the project exists.
+
+## In practice
+
+It shows in every run.
+-- fixtures/cwd/vault/value/0002-shown.md --
+---
+type: value
+title: Shown
+summary: The shown value.
+kind: value
+created_by: owner
+created_at: 2026-01-01
+updated_at: 2026-01-01
+review: shown
+review_evidence: 2026-10-19, chat
+---
+
+Why the project exists.
+
+## In practice
+
+It shows in every run.
+-- fixtures/cwd/vault/value/0003-discussed.md --
+---
+type: value
+title: Discussed
+summary: The discussed value.
+kind: value
+created_by: owner
+created_at: 2026-01-01
+updated_at: 2026-01-01
+review: discussed
+review_evidence: «держим коротко» — 2026-10-19, chat; scope only
+---
+
+Why the project exists.
+
+## In practice
+
+It shows in every run.
+-- fixtures/cwd/vault/value/0004-accepted.md --
+---
+type: value
+title: Accepted
+summary: The accepted value.
+kind: value
+created_by: owner
+created_at: 2026-01-01
+updated_at: 2026-01-01
+review: accepted
+review_evidence: «ок, принимаем» — 2026-10-19, chat
+---
+
+Why the project exists.
+
+## In practice
+
+It shows in every run.
+-- cmd --
+booping specs check
+-- exit --
+0
+-- stdout --
+-- stderr --
+4 record(s) checked: 0 error(s), 0 warning(s)

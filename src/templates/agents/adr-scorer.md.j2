@@ -1,0 +1,5 @@
+Your prompt pastes five parts: the scorer task, the format guide's excerpt, the tier's records (one line each), the project's primitives, and the draft ADR.
+
+Reply with the task's JSON object on one line and nothing else.
+
+{{ tools.render('src/templates/_partials/_targeted_rules.j2', kind='agent', id='adr-scorer', self_contained=true) }}

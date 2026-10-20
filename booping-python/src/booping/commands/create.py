@@ -1,0 +1,264 @@
+from __future__ import annotations
+
+import argparse
+import re
+import sys
+from collections.abc import Callable, Iterator
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, NoReturn
+
+from jinja2 import Environment, TemplateError, Undefined, pass_eval_context
+from jinja2.nodes import EvalContext
+from jinja2.utils import missing
+from markupsafe import Markup
+
+from booping import logger
+from booping.context import Context
+from booping.context.template_tree import (
+    DirNode,
+    FileNode,
+    Node,
+    TemplateTreeError,
+    check_name,
+    load,
+)
+from booping.macros import parse_stub_overrides
+from booping.rendering import LenientUndefined, build_source_env
+from booping.utils import deep_merge, diff_report, parse_set_overrides
+
+
+def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:  # type: ignore[type-arg]
+    p = subparsers.add_parser(
+        "create",
+        help=(
+            "Write a config-defined file/dir tree into a destination directory,"
+            " rendering its names and contents as Jinja templates filled by --set"
+            " values, macros and next_id(prefix, width=4) — one past the highest"
+            " {prefix}{n} file name in the destination"
+        ),
+    )
+    p.add_argument(
+        "config_path",
+        metavar="config-path",
+        help=(
+            "Dotted path into the merged config addressing the tree,"
+            " e.g. core.setup_playbook.template"
+        ),
+    )
+    p.add_argument(
+        "dest",
+        type=Path,
+        help="Destination directory; created if missing, parents included",
+    )
+    p.add_argument(
+        "--force",
+        action="store_true",
+        help=(
+            "Overwrite the files the tree names when they already exist; never deletes a directory"
+        ),
+    )
+    p.add_argument(
+        "--set",
+        action="append",
+        dest="set_overrides",
+        default=None,
+        metavar="KEY=VALUE",
+        help=(
+            "Expose a value to seed content as a bare template variable"
+            " (--set name=x renders {{ name }}); repeatable, later pairs win,"
+            " values stay strings"
+        ),
+    )
+    p.add_argument(
+        "--stub-macro",
+        action="append",
+        dest="stub_macros",
+        default=None,
+        metavar="DOTTED.PATH=LITERAL",
+        help=(
+            "Make a macro return LITERAL without executing it (e.g."
+            " core.macros.date=19700101-00-00); repeatable, later pairs win"
+        ),
+    )
+    p.set_defaults(func=_run)
+
+
+@dataclass(frozen=True)
+class _Write:
+    path: Path
+    content: str | None
+
+
+def _fail(message: str, code: int = 1) -> NoReturn:
+    print(f"error: {message}", file=sys.stderr)
+    sys.exit(code)
+
+
+def _recording_undefined(names: set[str]) -> type[LenientUndefined]:
+    """Undefined that records a top-level variable the tree uses with no default:
+    rendering, iterating or serializing it marks the variable required, while a
+    falsy test, `or` and `default(...)` pass through unrecorded."""
+
+    class RecordingUndefined(LenientUndefined):
+        def _record(self) -> str:
+            name = self._undefined_name
+            if self._undefined_obj is missing and name is not None:
+                names.add(name)
+                return name
+            return ""
+
+        def __str__(self) -> str:
+            # The variable's own name, never empty: a missing name must not trip the
+            # filename checks before every missing variable has been collected.
+            return self._record()
+
+        def __iter__(self) -> Iterator[Any]:
+            self._record()
+            return iter([])
+
+    return RecordingUndefined
+
+
+def _tojson(original: Callable[..., Any]) -> Callable[..., Any]:
+    @pass_eval_context
+    def tojson(eval_ctx: EvalContext, value: Any, *args: Any, **kwargs: Any) -> Any:
+        if isinstance(value, Undefined):
+            str(value)
+            return Markup("null")
+        return original(eval_ctx, value, *args, **kwargs)
+
+    return tojson
+
+
+def next_id(dest: Path) -> Callable[..., str]:
+    """`next_id(prefix, width=4)` over *dest*: one past the highest `{prefix}{n}`
+    opening a file name there, zero-padded; an empty or missing *dest* yields 1."""
+    names = [p.name for p in dest.iterdir()] if dest.is_dir() else []
+
+    def allocate(prefix: str, width: int = 4) -> str:
+        pattern = re.compile(re.escape(prefix) + r"(\d+)")
+        numbers = [int(m.group(1)) for name in names if (m := pattern.match(name))]
+        return f"{prefix}{max(numbers, default=0) + 1:0{width}d}"
+
+    return allocate
+
+
+def _render_seed(env: Environment, node: FileNode) -> str:
+    try:
+        return env.from_string(node.content).render()
+    except TemplateError as exc:
+        raise TemplateTreeError(node.path, f"Jinja error in seed content: {exc}") from exc
+
+
+def _render_name(env: Environment, node: Node) -> str:
+    try:
+        name = env.from_string(node.name).render()
+    except TemplateError as exc:
+        raise TemplateTreeError(node.path, f"Jinja error in filename: {exc}") from exc
+    check_name(name, node.path)
+    return name
+
+
+def _plan(root: DirNode, dest: Path, env: Environment) -> list[_Write]:
+    """The full tree rendered into memory, parents before children — nothing is
+    written until every node has parsed and rendered."""
+    writes: list[_Write] = [_Write(dest, None)]
+
+    def walk(node: DirNode, base: Path) -> None:
+        for child in node.children:
+            path = base / _render_name(env, child)
+            if isinstance(child, DirNode):
+                writes.append(_Write(path, None))
+                walk(child, path)
+            elif isinstance(child, FileNode):
+                writes.append(_Write(path, _render_seed(env, child)))
+
+    walk(root, dest)
+    return writes
+
+
+def _apply(writes: list[_Write], force: bool) -> tuple[int, int, int]:
+    created_dirs = created_files = overwritten = 0
+    for write in writes:
+        existed = write.path.exists()
+        if write.content is None:
+            write.path.mkdir(parents=True, exist_ok=True)
+            if not existed:
+                print(f"created dir {write.path}")
+                created_dirs += 1
+            continue
+
+        if existed and not force:
+            print(f"skipped existing file {write.path}")
+            continue
+
+        previous = write.path.read_text(encoding="utf-8") if existed else None
+        if previous == write.content:
+            continue
+
+        write.path.write_text(write.content, encoding="utf-8")
+        diff = diff_report(write.path, previous, write.content)
+        if diff:
+            print(diff)
+        if existed:
+            overwritten += 1
+        else:
+            created_files += 1
+    return created_dirs, created_files, overwritten
+
+
+def _run(args: argparse.Namespace) -> None:
+    set_pairs: list[str] = args.set_overrides or []
+    try:
+        variables = parse_set_overrides(set_pairs)
+    except ValueError as exc:
+        _fail(f"malformed --set pair (expected KEY=VALUE): {exc}")
+
+    try:
+        stub_overrides = parse_stub_overrides(args.stub_macros or [])
+    except ValueError as exc:
+        _fail(f"malformed --stub-macro pair (expected DOTTED.PATH=LITERAL): {exc}")
+
+    dest: Path = args.dest
+    config_path: str = args.config_path
+
+    ctx = Context.assemble()
+    logger.log(
+        vault=ctx.project.directory if ctx.project is not None else None,
+        subcommand="create",
+        message=f"{config_path} → {dest}",
+    )
+
+    if dest.exists() and not dest.is_dir():
+        _fail(f"destination {dest} exists and is not a directory")
+
+    config = deep_merge(ctx.config, stub_overrides) if stub_overrides else ctx.config
+    env = build_source_env(context=ctx, config=config)
+    globals_: dict[str, Any] = env.globals  # type: ignore[assignment]
+    globals_["next_id"] = next_id(dest)
+    globals_.update(variables)
+    required: set[str] = set()
+    env.undefined = _recording_undefined(required)
+    filters: dict[str, Any] = env.filters  # type: ignore[assignment]
+    filters["tojson"] = _tojson(filters["tojson"])
+
+    try:
+        writes = _plan(load(ctx.config, config_path), dest, env)
+    except TemplateTreeError as exc:
+        if not required:
+            _fail(str(exc))
+        writes = []
+    if required:
+        _fail(f"{config_path} needs --set {', '.join(sorted(required))}")
+
+    try:
+        created_dirs, created_files, overwritten = _apply(writes, args.force)
+    except OSError as exc:
+        _fail(f"failed to write the tree into {dest}: {exc}", code=2)
+
+    total = created_dirs + created_files + overwritten
+    print(
+        f"wrote {total} paths — {created_dirs} dirs created,"
+        f" {created_files} files created, {overwritten} files overwritten"
+    )

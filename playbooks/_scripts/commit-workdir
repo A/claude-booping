@@ -1,0 +1,62 @@
+#!/usr/bin/env python3
+"""Shared hook: commit the run's workdir, used by `groom`.
+
+Usage: `script commit-workdir {prefix}` — `{prefix}` opens the commit message
+(`groom`).
+
+Environment (set by `booping transition`): BOOPING_ARTIFACT = the run's
+artifact, `{vault}/{kind}/{slug}/{file}`. Its directory is the workdir.
+
+Stages the workdir and commits it, tagging the message with the `status:`
+`booping transition` already wrote to the artifact. The vault carries no
+`.booping` marker, so nothing here shells back into `booping`; the commit goes
+through the shared `_vault_git` helper, and nothing outside the standard
+library is imported.
+"""
+
+import os
+import re
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from _vault_git import commit_paths  # noqa: E402
+
+
+def read_status(artifact: Path) -> str:
+    text = artifact.read_text()
+    if not text.startswith("---\n"):
+        sys.exit(f"commit-workdir: artifact has no frontmatter: {artifact}")
+    head, _, _ = text.partition("\n---\n")
+    match = re.search(r"^status:\s*(.+)$", head, re.MULTILINE)
+    if not match:
+        sys.exit(f"commit-workdir: artifact frontmatter carries no `status:`: {artifact}")
+    return match.group(1).strip().strip("\"'")
+
+
+def main() -> None:
+    if len(sys.argv) != 2:
+        sys.exit("usage: commit-workdir {prefix}")
+    prefix = sys.argv[1]
+    artifact_env = os.environ.get("BOOPING_ARTIFACT", "")
+    if not artifact_env:
+        sys.exit("commit-workdir: BOOPING_ARTIFACT unset")
+    artifact = Path(artifact_env).resolve()
+    if not artifact.is_file():
+        sys.exit(f"commit-workdir: artifact not found: {artifact}")
+    workdir = artifact.parent
+    vault = workdir.parent.parent
+    workdir_rel = workdir.relative_to(vault).as_posix()
+
+    status = read_status(artifact)
+
+    outcome = commit_paths(vault, [workdir_rel], f"{prefix}: {workdir.name} → {status}")
+    if outcome is None:
+        print(f"commit-workdir: {workdir_rel} → {status}; no vault git repo")
+        return
+    print(f"commit-workdir: {workdir_rel} → {status}; vault-commit: {outcome}")
+
+
+if __name__ == "__main__":
+    main()

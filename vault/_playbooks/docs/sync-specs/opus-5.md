@@ -1,66 +1,83 @@
-# Fold the confirmed change table into the spec set
+# Fold the confirmed change table into the spec records
 
 You receive the workdir (`{vault}/docs/`) and the confirmed change table verbatim — one typed row
 per delivered item (vision shift, new feature, refactoring, feature drop, chore), each carrying the
-effect on the spec set the user settled, with every extension and refinement made at the gate
+effect on the spec records the user settled, with every extension and refinement made at the gate
 already folded in.
 
-The table is the only authority. You read no source and no work item: `research` already did that
-reading, and re-reading it here would re-litigate a settled decision behind the user's back. You
-need no repo access at all.
+The table is the only authority. You read no source, no work item and no code: `research` already
+did that reading, and re-reading it here would re-litigate a settled decision behind the user's
+back. You detect nothing yourself — a disagreement between a record and the code reaches you only
+as a row that states it.
 
-Read in full the spec files the table's rows target — a fold rewrites their wording in place rather
-than appending to it — then rewrite each of those in place. Every spec file exists by the time you
-run, so this is always a fold, never an authoring pass.
+Read in full the records the table's rows target, under the project specs tier root
+`{vault}/`, then edit each in place. Their shapes are the specs format's
+(`src/specs/README.md`, Body and Marks, and `src/specs/schemas/<type>.yaml` under the plugin root).
 
 ## Where a row lands
 
-| File | Takes |
-| --- | --- |
-| `_specs/index.md` — the briefing | vision-shift rows: what the project is, who it serves, where it is heading |
-| `_specs/roles.md` — the roles | rows that move who reads this project or what an audience may be shown: a new audience, a depth ceiling that moved, a withheld set that changed |
-| `_specs/targets.md` — the surfaces | rows that add, drop or re-scope a markdown destination, or change a surface's format, audience or depth |
-| `_specs/features.md` — the feature index | new-feature, feature-drop and refactoring rows, as capability additions, removals, rewordings and regroupings |
-| `_specs/glossary.md` — the glossary | rows that introduce, rename or retire a canonical term the spec set and destinations must use consistently |
+| Row — its type, or the spec-set effect it names | Record | Action |
+| --- | --- | --- |
+| vision shift | the affected value record, `value/` | a `[clarify]` sentence in its `## In practice`, naming the shift; the value's statement, its other sections and its frontmatter fields other than `updated_at` are never rewritten — values are the owner's |
+| audience | `reference/0001-audience.md` | the role's bullets in `## Facts` edited in place: a new audience, a depth ceiling that moved, a withheld set that changed |
+| surface | `reference/0003-documentation-surfaces.md` | the surface's bullet in `## Facts` added, dropped or re-scoped in place: format, audience, depth |
+| term | `reference/0002-glossary.md` | the term's bullet in `## Facts` introduced, renamed or retired in place |
+| new feature | a new story record, `story/{NNNN}-{slug}.md` | `NNNN` the next number in `story/`; frontmatter `type: story`, `title`, `summary` (one line, at most 200 characters), `created_by: claude`, `created_at` and `updated_at` today, `status: done`, `priority` — your call on `P0`–`P3` from the feature's weight; when unsure, the closest level and a `[clarify]` item in `## Criteria` naming the priority to settle; body one whole feature, shaped as the guide's `story` bullet (`src/specs/README.md`, Body); `## Out of scope` only for a real boundary |
+| refactoring | the story it moves | that story's `## Scenarios`, `## Edge cases` and `## Criteria` edited in place, as far as the move reaches |
+| feature drop | the story it drops | a `[clarify]` mark in its `## Criteria` naming the drop; `status:` untouched |
+| chore | none | carried forward untouched for `targeting` to route |
 
-One row may land in several files; a chore row, and any row the table marks as having no spec
-effect, lands in none — carry it forward untouched for `targeting` to route.
+One row may land in several records — a new-feature row that also adds a term lands in the glossary
+too. A row the table marks as having no spec-set effect lands in none.
 
 ## How to fold
 
-- What lands is a current-state snapshot. A dropped feature **leaves** the index rather than being
-  annotated as removed; a shifted vision **replaces** the old sentence rather than sitting beside
-  it. No "previously we also …" narration — the drift is reported to the runner, never written into
-  the file.
-- Each file keeps the shape its own step's contract defines. Edit rows and sentences inside that
-  shape; never restructure it.
-- Nothing the table does not say gets written. A fold that notices something else — a stale claim,
-  an obvious gap — reports it as a `not written:` line and leaves the file alone.
-- A file no row targets is left byte-identical: do not open it to "check", and do not list it.
-- Write no frontmatter of your own, and leave whatever frontmatter a file carries untouched —
-  including `reviewed_at`. The change table's confirmation is this fold's authority; restamping
-  would claim a file-level review that did not happen.
+- Edit only what a confirmed row says. Within an edited record, what the row does not settle is
+  marked `[clarify]` at the start of the item or sentence, with one sentence on what to settle
+  (rule/0002).
+- A row that itself records a disagreement between a record and the code without settling which is
+  right is marked `[unknown]` on that record, with one sentence on what disagrees (rule/0002).
+- What lands is a current-state snapshot: a fact a row changes **replaces** the old wording rather
+  than sitting beside it. No "previously …" narration — the drift is reported to the runner, never
+  written into a record.
+- Each record keeps its type's shape — H2 order, criteria count, statement paragraph. Edit items and
+  sentences inside that shape; never restructure it.
+- A fold that notices something else — a stale claim, an obvious gap — reports it as a
+  `not written:` line and leaves the record alone.
+- A record no row targets is left byte-identical: do not open it to "check", and do not list it.
+- Every record you edit gets `updated_at` set to today. `reviewed` is the owner's alone — never add
+  or change it — and no other frontmatter is touched.
 - Nothing else is written: not the run record, not the ledger, not a single repo file.
 
 You never stop for the user: the change table was confirmed before you were called, and that
 confirmation is your authorisation. A fold you could not make faithfully is a `not written:` line in
 the return, not a stop.
 
+## The check
+
+The step's last action, after every edit: run `booping specs check --tier project` and carry its
+result line into the return. A failure the fold caused is fixed in the record and the check run
+again; the result line returned is the last run's.
+
 ## Return format
 
 ```markdown
 ## Changed:
-- [UPDATED] {vault}/docs/_specs/{file}.md — {what moved, in a few words}
+- [CREATED] {vault}/story/{NNNN}-{slug}.md — {the story, in a few words}
+- [UPDATED] {vault}/{type}/{NNNN}-{slug}.md — {what moved, in a few words}
 
 ## Notes:
-- {row} ({type}) → {file}: {the edit in a phrase}
+- {row} ({type}) → {record}: {the edit in a phrase}
 - no spec effect: {rows that touched nothing}
+- marks: {each `[clarify]` / `[unknown]` written, with its record, or none}
 - not written: {what the fold noticed that the table does not authorise, or none}
+- specs check: {the result line of `booping specs check --tier project`}
 
 ## Questions:
 ```
 
-One `## Notes:` row line per change-table row, in table order, then the two summary lines. A run
-whose rows all resolve to no spec effect returns an empty `## Changed:`. The runner holds the
-post-change spec set from these lines alone and never re-reads the spec files, so say what moved. No
-prose outside the block.
+One `## Changed:` line per record, `[CREATED]` or `[UPDATED]`. One `## Notes:` row line per
+change-table row, in table order, then the summary lines. A run whose rows all resolve to no spec
+effect returns an empty `## Changed:` and still runs the check. The runner holds the post-change
+records from these lines alone and never re-reads them, so say what moved. No prose outside the
+block.

@@ -1,0 +1,75 @@
+A machine that declares no `artifact:` is addressed by a file named per run: its `## State` block
+says so, and both the frontier line and its `Advance:` invocation take `{path}` as the file and
+name `--playbook`, since no path pattern can infer the machine.
+
+-- fixtures/home/Claude/_playbooks/fx-targetless/playbook.md --
+---
+name: fx-targetless
+title: Targetless
+---
+
+Preamble prose for the targetless playbook.
+-- fixtures/home/Claude/_playbooks/fx-targetless/playbook.yaml --
+state: main
+graph:
+  a: []
+
+states:
+  main:
+    initial: reviewing
+    statuses:
+      reviewing:
+        transitions:
+          - to: reviewed
+            when: the review is written
+      reviewed: {terminal: true}
+-- fixtures/home/Claude/_playbooks/fx-targetless/a/prompt.md --
+---
+name: a
+summary: a summary
+---
+
+a body
+-- cmd --
+booping render-playbook fx-targetless
+-- exit --
+0
+-- stdout --
+Preamble prose for the targetless playbook.
+
+## Playbook Steps
+
+Execute the steps in the most effective order considering their dependencies.
+
+| Step | Dependencies | Summary | Review gate |
+| --- | --- | --- | --- |
+| `a` | — | a summary | — |
+
+## State
+
+Run state is persisted in artifacts under the run workdir. Only `booping transition` writes it — never hand-edit an artifact's `status`.
+
+Read the whole run's frontier before starting or resuming:
+
+```
+booping state {path} --playbook fx-targetless
+```
+
+### State: main
+
+- Referenced by: outer graph
+- Artifact: named per run — pass it as `{path}` on every call
+- Initial status: `reviewing`
+- Advance: `booping transition {path} <to> --playbook fx-targetless`
+
+| Status | To | When | Gates |
+| --- | --- | --- | --- |
+| `reviewing` | `reviewed` | the review is written | — |
+| `reviewed` | *(terminal)* | — | — |
+
+## Step: A
+Instructions:
+- Summary: a summary
+
+Run `booping render-playbook fx-targetless --step a` for content.
+-- stderr --

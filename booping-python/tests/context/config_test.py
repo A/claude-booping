@@ -144,14 +144,10 @@ def _write_global(xdg: Path, data: dict[str, object]) -> Path:
     return path
 
 
-def test_merge_order_core_global_project(
-    tmp_path: Path, isolated_xdg_config_home: Path
-) -> None:
+def test_merge_order_core_global_project(tmp_path: Path, isolated_xdg_config_home: Path) -> None:
     """core (35) → global (99) → project (50): each tier overrides the previous."""
     plugin_root = get_fixture_path("plugin-root-minimal")
-    global_path = _write_global(
-        isolated_xdg_config_home, {"sprint": {"default_threshold_sp": 99}}
-    )
+    global_path = _write_global(isolated_xdg_config_home, {"sprint": {"default_threshold_sp": 99}})
     # global overrides core
     cfg = config_mod.load(plugin_root, [global_path])
     assert cfg["sprint"]["default_threshold_sp"] == 99  # type: ignore[index]
@@ -173,9 +169,7 @@ def test_agents_shallow_merge_across_three_tiers(
     )
     project_path = tmp_path / "config.yaml"
     project_path.write_text(
-        yaml.dump(
-            {"core": {"develop_playbook": {"agents": {"p-agent": {"good_for": ["p"]}}}}}
-        )
+        yaml.dump({"core": {"develop_playbook": {"agents": {"p-agent": {"good_for": ["p"]}}}}})
     )
     cfg = config_mod.load(plugin_root, [global_path, project_path])
     agents = cfg["core"]["develop_playbook"]["agents"]  # type: ignore[index]

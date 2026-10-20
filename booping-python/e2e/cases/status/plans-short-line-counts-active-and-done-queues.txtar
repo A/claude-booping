@@ -1,0 +1,93 @@
+The plans line counts active plans per status — groom's machine order, then develop's —
+then the done plans without a code review and without a retro. Cancelled and the
+reviewed, retro'd done plan are not counted.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+-- fixtures/cwd/vault/plans/202610010000_draft/index.md --
+---
+title: "Draft plan"
+status: drafting
+sp: 3
+created: 2026-10-01 10:00
+completed: null
+code_reviews: []
+retro: null
+---
+
+# Draft plan
+-- fixtures/cwd/vault/plans/202610020000_ready/index.md --
+---
+title: "Ready plan"
+status: ready-for-dev
+sp: 5
+created: 2026-10-02 10:00
+completed: null
+code_reviews: []
+retro: null
+---
+
+# Ready plan
+-- fixtures/cwd/vault/plans/202610030000_wip/index.md --
+---
+title: "Work in progress"
+status: in-progress
+sp: 8
+created: 2026-10-03 10:00
+completed: null
+code_reviews: []
+retro: null
+---
+
+# Work in progress
+-- fixtures/cwd/vault/plans/202610040000_gone/index.md --
+---
+title: "Cancelled plan"
+status: cancelled
+sp: 2
+created: 2026-10-04 10:00
+completed: null
+code_reviews: []
+retro: null
+---
+
+# Cancelled plan
+-- fixtures/cwd/vault/plans/202610050000_fresh/index.md --
+---
+title: "Fresh done plan"
+status: done
+sp: 13
+created: 2026-10-05 10:00
+completed: 2026-10-06 10:00
+code_reviews: []
+retro: null
+---
+
+# Fresh done plan
+-- fixtures/cwd/vault/plans/202610070000_closed/index.md --
+---
+title: "Closed plan"
+status: done
+sp: 1
+created: 2026-10-07 10:00
+completed: 2026-10-08 10:00
+code_reviews: [codereviews/202610070000_closed/x.md]
+retro: retrospectives/closed.md
+---
+
+# Closed plan
+-- cmd --
+booping status
+-- exit --
+0
+-- stdout --
+items: none
+ideas: none
+plans: 1 drafting, 1 ready-for-dev, 1 in-progress — done: 1 without code review, 1 without retro
+runs: none
+records: none not accepted
+marks: none
+-- stderr --

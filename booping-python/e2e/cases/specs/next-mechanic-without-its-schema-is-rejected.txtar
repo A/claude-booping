@@ -1,0 +1,25 @@
+A tier without `_schemas/mechanic.yaml` has no `mechanic` type, even with a `mechanic/`
+directory: `next` rejects it, naming the tier's types.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/mechanic/0001-dash.md --
+---
+type: mechanic
+title: Dash
+summary: A short burst of speed on a cooldown.
+status: accepted
+---
+
+## Loop
+
+Press, burst, wait for the cooldown.
+-- cmd --
+booping specs next mechanic
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: unknown type `mechanic`; known: adr, conflict, idea, reference, rule, runbook, story, value

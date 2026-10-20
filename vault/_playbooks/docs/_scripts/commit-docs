@@ -1,22 +1,39 @@
 #!/usr/bin/env bash
-# Vault-commit hook for the docs playbook: commit the docs workdir subtree.
+# Vault-commit hook for the docs playbook: commit the docs workdir subtree and
+# the project specs tier the spec steps edit — the type directories at the vault
+# root, `{vault}/{type}`, types being the schema stems under `core.specs.format`.
 #
-# Environment (set by `booping playbook-transition`): BOOPING_WORKDIR = the run
-# workdir `{vault}/docs` (also cwd), BOOPING_ARTIFACT = the run record.
+# Environment (set by `booping transition`): BOOPING_ARTIFACT = the run record
+# `{vault}/docs/_runs/{name}.md`; the docs workdir is its grandparent.
 #
-# Commits with an explicit pathspec so unrelated staged changes elsewhere in the
-# enclosing repository are never swept into the docs commit.
+# Stages and commits with an explicit pathspec of exactly those directories
+# (each type directory only when it exists), so unrelated changes elsewhere in
+# the enclosing repository are never swept into the docs commit.
 set -euo pipefail
 
-workdir="${BOOPING_WORKDIR:?BOOPING_WORKDIR is not set}"
 artifact="${BOOPING_ARTIFACT:?BOOPING_ARTIFACT is not set}"
+workdir=$(cd "$(dirname "$artifact")/.." && pwd -P)
 
 if ! git -C "$workdir" rev-parse --git-dir >/dev/null 2>&1; then
   echo "commit-docs: no git repository above $workdir; skipped"
   exit 0
 fi
 
-if [ -z "$(git -C "$workdir" status --porcelain -- "$workdir")" ]; then
+# This playbook lives in booping's own vault, so the enclosing repo is the plugin root.
+repo=$(git -C "$workdir" rev-parse --show-toplevel)
+booping="${BOOPING_BIN:-$repo/bin/booping}"
+format=$(cd "$workdir" && "$booping" config core.specs.format)
+vault=$(cd "$workdir/.." && pwd -P)
+
+paths=("$workdir")
+for schema in "$repo/$format"/schemas/*.yaml; do
+  type=$(basename "$schema" .yaml)
+  if [ -d "$vault/$type" ]; then
+    paths+=("$vault/$type")
+  fi
+done
+
+if [ -z "$(git -C "$workdir" status --porcelain -- "${paths[@]}")" ]; then
   echo "commit-docs: nothing to commit"
   exit 0
 fi
@@ -24,6 +41,6 @@ fi
 status=$(sed -n 's/^status: *//p' "$artifact" | head -1)
 slug=$(basename "$artifact" .md)
 
-git -C "$workdir" add -A -- "$workdir"
-git -C "$workdir" commit -q -m "docs: ${slug} @ ${status:-unknown}" -- "$workdir"
+git -C "$workdir" add -A -- "${paths[@]}"
+git -C "$workdir" commit -q -m "docs: ${slug} @ ${status:-unknown}" -- "${paths[@]}"
 echo "commit-docs: committed ${slug} @ ${status:-unknown}"

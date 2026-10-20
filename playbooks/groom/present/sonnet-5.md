@@ -4,6 +4,12 @@ Read the plan's milestone rows — never a hand-kept list — with `{plan-dir}` 
 booping query --glob {plan-dir}/{{ config.core.plans.milestones.glob }} --columns {{ config.core.plans.milestones.table_columns | join(',') }}
 ```
 
+Then check the milestone contract:
+
+```
+mdcheck ${CLAUDE_PLUGIN_ROOT}/playbooks/groom/_schemas/milestone.yaml {plan-dir}/{{ config.core.plans.milestones.glob }}
+```
+
 Present user the resulting plan as:
 
 ```
@@ -14,12 +20,21 @@ SPs: {sum of the rows' sp}
 
 {the table the query printed}
 
+{the check's output, or "milestone contract: clean" when it printed nothing}
+
+Decisions:
+1. {decision} — (user) | (proposal)
+
 ## Next Steps
 
 Approve plan or jump into develop via:
 
 /playbook develop {plan path}
 ```
+
+`Decisions:` numbers every call the plan takes as settled — the brief's clarifications and
+decisions, each assumption the plan records — one plain line each, `(user)` for the user's words,
+`(proposal)` for yours.
 
 Ask for approval in **prose**, in the message itself — never through `AskUserQuestion`, and
 never as a `## Questions:` entry. One plain sentence after the screen: the plan is ready for

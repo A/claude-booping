@@ -1,0 +1,12 @@
+Stdin that is not JSON is unreadable input, named by its source `-` with the parser's reason; no
+out directory is created.
+
+-- fixtures/cwd/projects.json --
+[{"name": "a",
+-- cmd --
+sh -c 'booping specs site-index --out site < projects.json; s=$?; test -e site && echo site exists; exit $s'
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: --projects -: Expecting property name enclosed in double quotes: line 2 column 1 (char 15)

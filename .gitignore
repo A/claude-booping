@@ -4,7 +4,8 @@ __pycache__/
 .DS_Store
 .booping
 .debug_enabled
-site/
+/site/
+specs-site/
 
 # Fixture vaults need their own .booping / .debug_enabled markers tracked in git.
 !booping-python/tests/__fixtures__/**/.booping
@@ -17,6 +18,7 @@ playbooks/*/_reports/local.md
 # Per-run benchmark workspaces — throwaway clones the model-benchmark playbook develops in.
 .benchmarks/
 
-# Vault scratchpad — local working notes, not part of the published vault.
+# Private: local working notes and references never published — other projects'
+# data, local paths, raw experiment inputs. `vault/notes/references/` holds the latter.
 vault/notes/
 .booping.log

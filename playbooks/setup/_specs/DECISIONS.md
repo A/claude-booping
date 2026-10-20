@@ -3,8 +3,8 @@
 - `[2026-08-03 09:06]` new playbook is a port of the existing booping install skill
 - `[2026-08-03 09:06]` retiring the /install skill is explicitly OUT OF SCOPE for this authoring run
 - `[2026-08-03 09:31]` install playbook is EPHEMERAL — no run dir, no persisted run state; the scaffolded vault + `.booping` marker are the only artifacts, run lives in one conversation, not resumable
-- `[2026-08-04 04:50]` the new `install` playbook is a CORE booping playbook. Destination root is the plugin repo's core playbook root `/home/anton/Dev/@A/claude-booping/playbooks/install/`, not the global `_playbooks/` root. The authoring run's workdir has been moved there accordingly.
-- `[2026-08-04 05:00]` Playbook name is `setup`, not `install`. The authoring workdir moved to /home/anton/Dev/@A/claude-booping/playbooks/setup/ accordingly.
+- `[2026-08-04 04:50]` the new `install` playbook is a CORE booping playbook. Destination root is the plugin repo's core playbook root `playbooks/install/`, not the global `_playbooks/` root. The authoring run's workdir has been moved there accordingly.
+- `[2026-08-04 05:00]` Playbook name is `setup`, not `install`. The authoring workdir moved to playbooks/setup/ accordingly.
 - `[2026-08-04 05:00]` Success result widened: "a project is ready to operate" — covering all entry states: booping was never set up on this machine before, and/or this is a new project, and/or both.
 - `[2026-08-04 05:00]` The run has two phases. Phase "setup booping" (machine level): discover booping config and `home_dir`; if absent, ask the user for the preferred home dir (default `~/Claude/`) and create the global config. Phase "setup project": discover the project vault; if absent, ask (a) where the vault should live — in the project repo or in the booping home dir, (b) how to name the project, offering options derived from the project directory name, (c) whether the repo-root `.booping` marker should be gitignored — a question that is meaningless when the vault itself lives in the repo.
 - `[2026-08-04 05:00]` New behaviour beyond the current /install skill: when the project vault lives inside the repo, symlink it into the booping home dir.

@@ -14,16 +14,27 @@ core:
   # Agent an assisted playbook step delegates its heavy reads to.
   research_agent: "booping:booping-researcher"
 
+  # What a render does when the vault is behind on migrations. `true` (also when
+  # no tier sets it): the render prints an order for the driving agent to run
+  # `/playbook migrate` unattended and then resume the original request, and the
+  # `migrate` playbook applies the pending set without asking for its up-front
+  # approval. `false`: the render stops and tells the user to run `/playbook migrate`,
+  # which asks before applying. Read by every render surface and by `migrate`, so
+  # it sits directly under `core`.
+  auto_migrate: true
+
   # Shell-outs a template body may call by dotted path: `{{ macro('core.macros.date', '+%H:%M') }}`.
   # Each value is an argv list (never a shell string) run with shell=False, or a mapping carrying
   # that list under `command:` plus an optional `cwd:` of `repo` or `vault` naming the directory
   # it runs in (omitted → the process cwd). The list is a prefix — call-site positional arguments
   # append to it. stdout is stripped and cached per argv tuple and resolved cwd for the process,
   # so a macro must be idempotent within one render and two argument variants are two runs.
-  # `--stub-macro <path>[ <args>]=<literal>` on `render`, `render-playbook` and `scaffold`
+  # `--stub-macro <path>[ <args>]=<literal>` on `render`, `render-playbook` and `create`
   # returns the literal without executing.
   macros:
     date: ["date"]
+    # The Claude Code session id, empty outside a session.
+    session: ["sh", "-c", "printf %s \"${CLAUDE_CODE_SESSION_ID:-}\""]
     git_commit:
       command: ["git", "rev-parse", "HEAD"]
       cwd: repo
@@ -63,7 +74,7 @@ core:
     glob:
       - plans/*/index.md
     # A milestone is a directory inside its plan's `milestones/`, seeded by
-    # `core.groom_playbook.milestone_scaffold`, holding the milestone file plus any
+    # `core.groom_playbook.milestone_template`, holding the milestone file plus any
     # sidecars written during the sprint. The milestone file is named after its own
     # directory, so a bare wikilink to the directory name resolves to it and `glob`
     # never claims a sidecar. Shared by groom (writes them, renders index.md's
@@ -74,10 +85,100 @@ core:
       glob: milestones/*/M*.md
       table_columns: [id, title, sp, status]
 
+  # `booping status` — the computed project status, read by the CLI and the
+  # project-manager alike. Only query specs: the plans section's retro queue is
+  # `core.retro_playbook.queries.candidates`, read in place.
+  status:
+    queries:
+      # Plans in a status the groom or develop `run` machine declares non-terminal.
+      # The status filter is built per call from those machines, never stated here.
+      active_plans:
+        sort: created
+        columns: [status, sp, title]
+      # Done plans no code review has closed on yet.
+      unreviewed_plans:
+        where:
+          status: done
+          code_reviews: []
+        sort: "-created"
+        columns: [sp, title, completed]
+
+  # `booping run groom|develop` — the launch shape of a recorded headless run, read
+  # by the CLI and the project-manager alike. No value here is env-interpolated.
+  run:
+    # Vault-relative directory of run records (`{id}.md`) and their gitignored logs.
+    dir: runs
+    # The child's argv; `--session-id {uuid}` and the prompt are appended per run.
+    command: [claude, -p, --permission-mode, auto, --output-format, stream-json, --verbose]
+    # Merged over the inherited environment. `0` keeps `-p` from ending background
+    # tasks — the run's own workers — after 600 s.
+    env:
+      CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS: "0"
+    # `{target}`: the plan's absolute `index.md`, or `{id} ({absolute item path})`
+    # per item joined by `, `.
+    prompt: "/booping:playbook {playbook} {target}"
+    # Appended after a blank line under `--autonomous`.
+    preamble: "AUTONOMOUS RUN, started by booping run — nobody can answer. Do not use AskUserQuestion and do not wait at review gates: confirm each yourself and log it with booping create core.agent_decisions.template. Settle an unclear point with a sensible default and log it the same way. A question only the owner can answer parks the run where the playbook allows it; otherwise stop and report it. Never end the run while a background agent or a check you started is still running — wait for it. Never push."
+
+  # One vault file per correction the user made during a run, written by
+  # `booping create core.corrections.template {vault}/corrections --set name=<step-slug>
+  #  --set step=<playbook/step> --set did=<what the agent did> --set said=<the user's words>
+  #  [--set why=<reason>] [--set artifact=<vault-relative path>]`, the file named
+  # `R{nnnn}-<step-slug>.md` by `next_id`. Shared: groom, develop and code-review write it, retro reads
+  # `open` and sets `state=handled` with `booping set`. Text goes through
+  # `tojson`; an omitted `why` or `artifact` is null.
+  corrections:
+    template:
+      "{{ next_id('R') }}-{{ name }}.md": |
+        ---
+        step: {{ step | tojson }}
+        did: {{ did | tojson }}
+        said: {{ said | tojson }}
+        why: {{ (why or none) | tojson }}
+        state: open
+        session: {{ (macro('core.macros.session') or none) | tojson }}
+        logged_at: {{ macro('core.macros.date', '+%Y-%m-%d %H:%M') | tojson }}
+        artifact: {{ (artifact or none) | tojson }}
+        ---
+    open:
+      glob: [corrections/*.md]
+      where: {state: open}
+      columns: [step, did, said, why, session, logged_at, artifact]
+
+  # One vault file per gate or question an `autonomous` run settled itself, written by
+  # `booping create core.agent_decisions.template {vault}/agent-decisions --set name=<step-slug>
+  #  --set step=<playbook/step> --set asked=<the gate or question> --set decision=<what was
+  #  chosen> --set why=<reason> [--set artifact=<vault-relative path>]`, the file named
+  # `D{nnnn}-<step-slug>.md` by `next_id`. Shared: every
+  # autonomous run writes it, the project-manager reviews `open` and sets `state=reviewed`.
+  agent_decisions:
+    template:
+      "{{ next_id('D') }}-{{ name }}.md": |
+        ---
+        step: {{ step | tojson }}
+        asked: {{ asked | tojson }}
+        decision: {{ decision | tojson }}
+        why: {{ why | tojson }}
+        state: open
+        session: {{ (macro('core.macros.session') or none) | tojson }}
+        logged_at: {{ macro('core.macros.date', '+%Y-%m-%d %H:%M') | tojson }}
+        artifact: {{ (artifact or none) | tojson }}
+        ---
+    open:
+      glob: [agent-decisions/*.md]
+      where: {state: open}
+      columns: [step, asked, decision, why, session, logged_at, artifact]
+
   sprint:
     default_threshold_sp: 35
     redecompose_threshold: 5
-    max_milestones_per_agent: 2
+    # SP budget of one develop briefing: milestones pack greedily as a contiguous
+    # run in `id` order while the group's summed `sp` stays at or under it. A lone milestone is
+    # always a valid group and never split, even over the cap.
+    max_sp: 15
+    # SP ceiling of a fix the session already holding its whole context applies
+    # instead of a fresh worker (develop's driver, code-review's resumed reviewer).
+    inline_fix_sp: 2
     scale:
       - { sp: 1, meaning: "Simple text/config change, no risk" }
       - { sp: 2, meaning: "Simple task, predictable, no risk" }
@@ -100,7 +201,7 @@ core:
   # Task-tracker surface. Directly under `core` rather than in a playbook
   # namespace because several playbooks mirror their run outward through it.
   # `bin/booping-tracker` resolves this block by shelling to
-  # `booping config-get core.tracker`, so the three-tier merge stays single-sourced.
+  # `booping config core.tracker`, so the three-tier merge stays single-sourced.
   tracker:
     # Provider the tracker CLI dispatches to. `cli` ships alone: receipts-only
     # no-ops, every interactive run behaves exactly as it does today. Overridable
@@ -112,16 +213,441 @@ core:
     # env-interpolated, and secrets stay out of every config tier.
     driver: cli
 
+  # Specs surface — typed records (values, rules, ADRs, …) read by `booping specs`
+  # and by rule injection. Directly under `core` because several consumers share it.
+  # A tier `path` that is absolute or `~`-prefixed is taken as is.
+  specs:
+    # Plugin-root-relative; holds README.md and schemas/{type}.yaml (types = schema stems).
+    format: src/specs
+    tiers:
+      # Plugin-root-relative: booping's own shipped records.
+      core: {namespace: booping, path: specs}
+      # home_dir-relative; namespace null → the `USER` environment variable, read by code.
+      global: {namespace: null, path: _specs}
+      # Repo-relative; path null → the vault root itself (type directories beside plans/).
+      project: {path: null}
+    site:
+      # Extra roots `booping specs site` renders after the tiers, each `{name, path}`;
+      # path home_dir-relative like tiers.global. Set in the global tier.
+      roots: []
+      # Language of every site page: `<html lang>` and the label table below. A lang
+      # with no table renders with `en` labels, keeps `<html lang>` and warns once.
+      lang: en
+      # UI strings, type/status/fact/author names and month names per language.
+      # Lookup falls back key by key: `labels.{lang}` → `labels.en` → the raw id, so a
+      # tier adds a locale or names its own type (`labels.ru.types.mechanic`) without
+      # restating the rest. `ui` values may hold `{name}` fields; a list value is
+      # plural forms (two: one/other; three: the Slavic one/few/many). `months` is the
+      # form used after a day number.
+      labels:
+        en:
+          ui:
+            skip: Skip to content
+            overview: Overview
+            menu: Menu
+            close: Close
+            theme_auto: "Theme: auto"
+            theme_light: "Theme: light"
+            theme_dark: "Theme: dark"
+            on_this_page: On this page
+            referenced_by: Referenced by
+            nothing_references: Nothing references this record.
+            types: Types
+            root: Root
+            type: Type
+            marks: Marks
+            none: None.
+            not_found: Page not found
+            not_found_home: Go to the overview
+            generator: Generated by booping specs site
+            review_none: not shown
+            review_shown: shown
+            review_discussed: discussed
+            review_accepted: accepted
+            not_accepted: not accepted
+            clarify: ["{n} question for you", "{n} questions for you"]
+            unknown: "[unknown]"
+            superseded_by: Superseded by
+            chosen: chosen
+            no_projects: No projects.
+            navigation: Navigation
+            review: Awaiting review
+            all_records: All records
+            tags: Tags
+            all_tags: All tags
+            sources: Sources
+            facet_type: Type
+            facet_source: Source
+            facet_status: Status
+            facet_flag: Needs
+            filters: Filters
+            filter_remove: "Remove filter: {label}"
+            filters_show: Show records
+            flag_not_accepted: Not accepted
+            flag_clarify: Has [clarify]
+            flag_unknown: Has [unknown]
+            sort: Sort
+            sort_number: By number
+            sort_updated: Recently updated
+            sort_title: By title
+            shown: ["{n} record shown", "{n} records shown"]
+            nothing_matches: Nothing matches the filter.
+            review_title: Needs you
+            review_lead: Records waiting for your review and open questions. What the agent wrote comes first, then the oldest.
+            nothing_needs_you: Nothing needs you.
+            flag_conflict: Open conflict
+            flag_proposed: Proposed ADR
+            flag_open: Open
+            sort_review: Review order
+            needs_you: ["{n} needs you →", "{n} need you →"]
+            open_questions: ["{n} open question", "{n} open questions"]
+            not_accepted_n: ["{n} not accepted", "{n} not accepted"]
+            recently_updated: Recently updated
+            section_link: Link to this section
+            link_copied: Link copied
+            by_section: By section
+            via: via
+            complexity: complexity
+            reversibility: reversibility
+            level_low: low
+            level_medium: medium
+            level_high: high
+            search: Search
+            search_placeholder: Search the specs
+            search_all: All results
+            search_results: ["{n} result", "{n} results"]
+            search_none: Nothing found
+            search_needs_js: Search needs JavaScript.
+            review_panel: Comments
+            mark_accepted: Accepted
+            whole_record_note: Comment on the whole record
+            add: Add
+            select_to_comment: Select text in the record to comment on it.
+            whole_record: Whole record
+            text_changed: text changed
+            open_place: Open
+            comment_note: Note
+            delete: Delete
+            outbox: Outbox
+            outbox_lead: Every comment and accepted mark you left on this site, exactly as Copy all puts them on the clipboard for an agent. Stored in this browser only; copying marks nothing, so clear them once the agent has applied them.
+            copy_all: Copy all
+            clear_all: Clear
+            clear_confirm: Remove every comment and accepted mark from this browser?
+            clear_yes: Remove all
+            cancel: Cancel
+            nothing_to_send: Nothing to send.
+            comments_need_js: Comments need JavaScript.
+            comments_need_storage: Comments need browser storage.
+            comment_deleted: Comment deleted
+            copy_failed: Copy failed
+            comments_copied_n: ["{n} item copied", "{n} items copied"]
+            comments_cleared_n: ["{n} item cleared", "{n} items cleared"]
+            plans: Plans
+            retros: Retrospectives
+            all_plans: All plans
+            all_retros: All retrospectives
+            recent_plans: Recent plans
+            plan: Plan
+            retro: Retrospective
+            milestones: Milestones
+            milestones_n: ["{n} milestone", "{n} milestones"]
+            sp_n: "{n} SP"
+            plan_files: Plan files
+            doc_request: Request
+            doc_clarifications: Clarifications
+            doc_develop_defaults: Develop defaults
+            entries_shown: ["{n} shown", "{n} shown"]
+            filters_show_entries: Show
+            sort_date: Newest first
+          types:
+            value: {name: Value, plural: Values, scenario: "why the project exists"}
+            rule: {name: Rule, plural: Rules, scenario: "what constrains decisions"}
+            adr: {name: ADR, plural: ADRs, scenario: "why it was decided so"}
+            conflict: {name: Conflict, plural: Conflicts, scenario: "where values pull apart"}
+            story: {name: Story, plural: Stories, scenario: "who wants what and why"}
+            idea: {name: Idea, plural: Ideas, scenario: "what is still a guess"}
+            reference: {name: Reference, plural: References, scenario: "facts the code does not show"}
+            runbook: {name: Runbook, plural: Runbooks, scenario: "how to operate it"}
+          statuses:
+            accepted: accepted
+            rejected: rejected
+            proposed: proposed
+            superseded: superseded
+            retired: retired
+            open: open
+            resolved: resolved
+            done: done
+            planned: planned
+            deferred: deferred
+            validating: validating
+            live: live
+            backlog: backlog
+            in-spec: in spec
+            ready-for-dev: ready for dev
+            in-progress: in progress
+            awaiting-retro: awaiting retro
+            awaiting-learning: awaiting learning
+            cancelled: cancelled
+            fail: failed
+          facts:
+            created_by: Author
+            created_at: Created
+            updated_at: Updated
+            review: Review
+            review_evidence: Evidence
+            tags: Tags
+            sources: Sources
+            values: Serves values
+            rules: Rules
+            supersedes: Supersedes
+            plan_type: Kind
+            plan_sp: SP
+            milestones: Milestones
+            created: Created
+            started: Started
+            completed: Completed
+            goal: Goal
+            retro: Retrospective
+            plan: Plan
+            plans: Plans
+            date: Date
+            id: Id
+            title: Title
+            status: Status
+          authors: {owner: owner, claude: agent}
+          months: [January, February, March, April, May, June, July, August, September,
+            October, November, December]
+        ru:
+          ui:
+            skip: Перейти к содержимому
+            overview: Обзор
+            menu: Меню
+            close: Закрыть
+            theme_auto: "Тема: как в системе"
+            theme_light: "Тема: светлая"
+            theme_dark: "Тема: тёмная"
+            on_this_page: На странице
+            referenced_by: Ссылаются сюда
+            nothing_references: Сюда никто не ссылается.
+            types: Разделы
+            root: Источник
+            type: Раздел
+            marks: Пометки
+            none: Нет.
+            not_found: Страница не найдена
+            not_found_home: На главную
+            generator: Собрано booping specs site
+            review_none: не показано
+            review_shown: показано
+            review_discussed: обсуждено
+            review_accepted: принято
+            not_accepted: не принято
+            clarify: ["{n} вопрос к тебе", "{n} вопроса к тебе", "{n} вопросов к тебе"]
+            unknown: "[unknown]"
+            superseded_by: Заменено на
+            chosen: выбрано
+            no_projects: Проектов нет.
+            navigation: Навигация
+            review: Ждут ревью
+            all_records: Все записи
+            tags: Теги
+            all_tags: Все теги
+            sources: Источники
+            facet_type: Раздел
+            facet_source: Источник
+            facet_status: Статус
+            facet_flag: Пометки
+            filters: Фильтры
+            filter_remove: "Убрать фильтр: {label}"
+            filters_show: Показать записи
+            flag_not_accepted: Не принято
+            flag_clarify: Есть [clarify]
+            flag_unknown: Есть [unknown]
+            sort: Сортировка
+            sort_number: По номеру
+            sort_updated: Сначала новые
+            sort_title: По названию
+            shown: ["Показана {n} запись", "Показаны {n} записи", "Показано {n} записей"]
+            nothing_matches: Ничего не подходит под фильтр.
+            review_title: Ждёт тебя
+            review_lead: Записи без твоего ревью и открытые вопросы. Сначала то, что написал агент, потом самое старое.
+            nothing_needs_you: Ничего не ждёт тебя.
+            flag_conflict: Открытый конфликт
+            flag_proposed: Предложенное решение
+            flag_open: Открытые
+            sort_review: Для ревью
+            needs_you: ["{n} запись ждёт тебя →", "{n} записи ждут тебя →", "{n} записей ждут тебя →"]
+            open_questions: ["{n} открытый вопрос", "{n} открытых вопроса", "{n} открытых вопросов"]
+            not_accepted_n: ["{n} не принята", "{n} не приняты", "{n} не принято"]
+            recently_updated: Недавно изменённое
+            section_link: Ссылка на раздел
+            link_copied: Ссылка скопирована
+            by_section: По разделам
+            via: через
+            complexity: сложность
+            reversibility: обратимость
+            level_low: низкая
+            level_medium: средняя
+            level_high: высокая
+            search: Поиск
+            search_placeholder: Поиск по спекам
+            search_all: Все результаты
+            search_results: ["{n} результат", "{n} результата", "{n} результатов"]
+            search_none: Ничего не найдено
+            search_needs_js: Для поиска нужен JavaScript.
+            review_panel: Комментарии
+            mark_accepted: Принято
+            whole_record_note: Комментарий ко всей записи
+            add: Добавить
+            select_to_comment: Выдели текст в записи, чтобы его прокомментировать.
+            whole_record: Вся запись
+            text_changed: текст изменился
+            open_place: Открыть
+            comment_note: Заметка
+            delete: Удалить
+            outbox: К отправке
+            outbox_lead: Все комментарии и отметки о принятии на этом сайте — ровно в том виде, в каком «Скопировать всё» кладёт их в буфер для агента. Хранятся только в этом браузере; копирование ничего не отмечает, поэтому очисти их, когда агент их применит.
+            copy_all: Скопировать всё
+            clear_all: Очистить
+            clear_confirm: Удалить из этого браузера все комментарии и отметки о принятии?
+            clear_yes: Удалить всё
+            cancel: Отмена
+            nothing_to_send: Отправлять нечего.
+            comments_need_js: Для комментариев нужен JavaScript.
+            comments_need_storage: Для комментариев нужно хранилище браузера.
+            comment_deleted: Комментарий удалён
+            copy_failed: Не удалось скопировать
+            comments_copied_n: ["{n} скопирован", "{n} скопировано", "{n} скопировано"]
+            comments_cleared_n: ["{n} удалён", "{n} удалено", "{n} удалено"]
+            plans: Планы
+            retros: Ретроспективы
+            all_plans: Все планы
+            all_retros: Все ретроспективы
+            recent_plans: Последние планы
+            plan: План
+            retro: Ретроспектива
+            milestones: Этапы
+            milestones_n: ["{n} этап", "{n} этапа", "{n} этапов"]
+            sp_n: "{n} SP"
+            plan_files: Файлы плана
+            doc_request: Запрос
+            doc_clarifications: Уточнения
+            doc_develop_defaults: Умолчания разработки
+            entries_shown: ["Показан {n}", "Показано {n}", "Показано {n}"]
+            filters_show_entries: Показать
+            sort_date: Сначала новые
+          types:
+            value: {name: Ценность, plural: Ценности, scenario: "Ценности — зачем этот проект и какой он"}
+            rule: {name: Правило, plural: Правила, scenario: "Правила — что ограничивает решения"}
+            adr: {name: Решение, plural: Решения, scenario: "Решения — почему решили так"}
+            conflict: {name: Конфликт, plural: Конфликты, scenario: "Конфликты — где ценности тянут в разные стороны"}
+            story: {name: История, plural: Истории, scenario: "Истории — кто чего хочет и зачем"}
+            idea: {name: Идея, plural: Идеи, scenario: "Идеи — что пока догадка"}
+            reference: {name: Справка, plural: Справки, scenario: "Справки — факты, которых не видно в коде"}
+            runbook: {name: Ранбук, plural: Ранбуки, scenario: "Ранбуки — как этим управлять"}
+          statuses:
+            accepted: принято
+            rejected: отклонено
+            proposed: предложено
+            superseded: заменено
+            retired: выведено
+            open: открыто
+            resolved: решено
+            done: сделано
+            planned: запланировано
+            deferred: отложено
+            validating: проверяется
+            live: действует
+            backlog: в бэклоге
+            in-spec: в проработке
+            ready-for-dev: готово к разработке
+            in-progress: в работе
+            awaiting-retro: ждёт ретро
+            awaiting-learning: ждёт выводов
+            cancelled: отменено
+            fail: провалено
+          facts:
+            created_by: Автор
+            created_at: Создано
+            updated_at: Изменено
+            review: Ревью
+            review_evidence: Основание
+            tags: Теги
+            sources: Источники
+            values: Служит ценностям
+            rules: Правила
+            supersedes: Заменяет
+            plan_type: Вид
+            plan_sp: SP
+            milestones: Этапы
+            created: Создан
+            started: Начат
+            completed: Завершён
+            goal: Итог
+            retro: Ретроспектива
+            plan: План
+            plans: Планы
+            date: Дата
+            id: Id
+            title: Название
+            status: Статус
+          authors: {owner: владелец, claude: агент}
+          months: [января, февраля, марта, апреля, мая, июня, июля, августа, сентября,
+            октября, ноября, декабря]
+    # Open items: one file per user request or specs-to-code gap,
+    # `{vault}/{dir}/OI-NNNN.md`, moved through the `open_item` machine of
+    # `playbooks/specs/playbook.yaml` by `booping transition`. Shared by the specs,
+    # groom and project-manager playbooks and the develop/groom hooks, so it sits under `core.specs`.
+    open_items:
+      # Vault-relative directory holding the item files; created on first write.
+      dir: open-items
+      # Template tree written once per item by
+      # `booping create core.specs.open_items.template {vault}/{dir}
+      #  --set title=<t> --set source=<s> [--set direction=<d>] [--set record=<ref>]
+      #  [--set body=<text>]`; `next_id` names it the next free `OI-NNNN` in `{dir}`
+      # and the date macro stamps `created_at`.
+      # Sole definition of the item file. `status: open` is the machine's `initial`;
+      # `size`, `plan`, `closed_at` and `reason` start null and are written by the CLI and
+      # the machine's hooks. `title` goes through `tojson` like the plan template's.
+      # `direction` is null for request and backlog items. `body` is the item text,
+      # written verbatim (a variable's value is never re-parsed as Jinja), ending in
+      # exactly the newlines it brought, or one when it brought none.
+      template:
+        "{{ next_id('OI-') }}.md": |
+          ---
+          id: {{ next_id('OI-') }}
+          title: {{ title | tojson }}
+          status: open
+          direction: {% if direction and direction != 'null' %}{{ direction }}{% else %}null{% endif %}
+          record: {% if record and record != 'null' %}{{ record | tojson }}{% else %}null{% endif %}
+          source: {{ source }}
+          size: null
+          plan: null
+          created_at: {{ macro('core.macros.date', '+%Y-%m-%d') }}
+          closed_at: null
+          reason: null
+          ---
+
+          # {{ title }}
+          {% if body %}
+          {{ body }}{% if not body.endswith('\n') %}{{ '\n' }}{% endif %}{% endif -%}
+      # The item index, `booping query --config core.specs.open_items.index`. The glob
+      # mirrors `dir`; the status filter is applied per call (`--where`), never stated here.
+      index:
+        glob: [open-items/OI-*.md]
+        sort: id
+        columns: [id, status, source, size, direction, record, title, plan]
+
   groom_playbook:
     # Agent that performs the detached second-model review of a drafted plan.
     # Null → the reviewing step is skipped entirely.
     cross_review_agent: null
-    # Scaffold tree materialised by
-    # `booping scaffold core.groom_playbook.scaffold {vault}/plans/<slug> --set title=<title> --set type=<type>`.
+    # Template tree written by
+    # `booping create core.groom_playbook.template {vault}/plans/<slug> --set title=<title> --set type=<type>`.
     # Sole definition of a plan's identity frontmatter. The `--set` variables go
     # through `tojson` because seed content is raw text with no YAML emitter behind
     # it, so a colon, a quote or an omitted value would otherwise break the document.
-    scaffold:
+    template:
       index.md: |
         ---
         title: {{ title | tojson }}
@@ -147,21 +673,21 @@ core:
         # {{ title }}
       request.md: ""
       # Sidecar the run parks its open questions in on `awaiting-clarification`;
-      # seeded empty so the file is postable to the tracker verbatim from the
+      # seeded with its H1 so the file is postable to the tracker verbatim from the
       # first question on. Format: ${CLAUDE_PLUGIN_ROOT}/docs/clarifications.md.
       clarifications.md: |
         # Clarifications
       milestones:
         type: dir
-    # Scaffold tree materialised once per milestone by
-    # `booping scaffold core.groom_playbook.milestone_scaffold {vault}/plans/<slug>/milestones
+    # Template tree written once per milestone by
+    # `booping create core.groom_playbook.milestone_template {vault}/plans/<slug>/milestones
     #  --set id=<nn> --set slug=<kebab> --set title=<title> --set sp=<sp> --set plan=<plan-path>`.
     # Sole definition of the milestone file's identity frontmatter and required
     # headings; everything below them is the plan template's business.
     # `id` is quoted like the rest: bare zero-padded ids are read back as octal
     # ints (`01` -> 1) except where a digit forbids it (`08` stays a string),
     # which mixes types in one column and scrambles `--sort id`.
-    milestone_scaffold:
+    milestone_template:
       "M{{ id }}-{{ slug }}":
         "M{{ id }}-{{ slug }}.md": |
           ---
@@ -181,6 +707,14 @@ core:
           ## References
 
           ## Verify
+    # model:effort of the agent that rewrites a draft `booping plan split` cannot
+    # cut into the one-file format. Null → the driver rewrites it itself.
+    split_fallback_agent: "opus:medium"
+    split:
+      # The four milestone sub-headings, in order: `booping plan split` writes a
+      # draft's tasks / dod / references / verify sections under them, and
+      # draft-plan's format block renders them as the draft's `####` headings.
+      sections: [Tasks, Definition of Done, References, Verify]
     agents:
       booping-researcher:
         internal: true
@@ -246,7 +780,7 @@ core:
       booping-developer:
         internal: true
         good_for:
-          - "All coding tasks — always delegate; never edit application code from the orchestrator"
+          - "All coding tasks — every milestone, and every fix past the small-fix cap (`core.sprint.inline_fix_sp`) the orchestrator may apply itself"
       booping-researcher:
         internal: true
         good_for:
@@ -294,7 +828,7 @@ core:
       scope_candidates:
         where:
           status: done
-        columns: [sp, title, code_reviews]
+        columns: [sp, title, code_reviews, commit]
     agents:
       booping-researcher:
         internal: true
@@ -308,13 +842,41 @@ core:
         good_for:
           - "Applying user-approved non-trivial fixes surfaced by the review (BLOCKER or SUGGESTION)"
         bad_for:
-          - "Trivial inline nits — orchestrator handles those directly"
+          - "Approved small fixes — the resumed reviewer applies those; this agent only when it cannot be resumed"
+
+  project_manager_playbook:
+    # Workers the manager delegates to; the vault, every commit and every transition
+    # stay with the driver.
+    agents:
+      booping-developer:
+        internal: true
+        good_for:
+          - "Tiny fixes filed as items and fixes from the independent code review — every repo code edit; the manager never edits code itself"
+        bad_for:
+          - "Planned work — that goes through groom and `booping run develop`"
+      booping-researcher:
+        internal: true
+        good_for:
+          - "Classifying an item that needs a wide read of the repo before it is a tiny fix or a plan"
+        bad_for:
+          - "Single-file reads — call Read directly"
+    # Item sizes and the batches the `work` step packs. `sizes` maps each size
+    # `booping set … size=` writes to its story points — restated as an enum in
+    # `playbooks/specs/_schemas/open_item.yaml`, change both together; `direct` lists the
+    # sizes that skip grooming and go to a worker in a batch; `max_sp` caps one
+    # batch's summed points. Open items of a direct size that wait on no question
+    # are packed greedily in id order. An unsized item takes the plan route.
+    batch:
+      sizes: {XS: 1, S: 2, M: 5, L: 13}
+      direct: [XS, S]
+      max_sp: 8
 
   migrate_playbook:
     queries:
       # Every migration the plugin ships, in id order. The `migrate` playbook
       # narrows it to the pending set with `where={'id:gt': booping.latest_migration}`
-      # — the marker's watermark, `-1` when nothing has been applied. `root: core`
+      # — the marker's watermark, `-1` when nothing has been applied; `makemigration`
+      # reads it whole for the next id. `root: core`
       # because migrations ship with the plugin, not with the vault they transform.
       pending:
         root: core
@@ -323,18 +885,16 @@ core:
         sort: id
 
   setup_playbook:
-    # Scaffold tree materialised by
-    # `booping scaffold core.setup_playbook.scaffold <vault-dir>`. The vault is a
+    # Template tree written by
+    # `booping create core.setup_playbook.template <vault-dir>`. The vault is a
     # git repo (see the vault-commit hook), so .gitignore applies to a home-dir
     # vault and a repo-local one alike.
-    scaffold:
+    template:
       plans:
         type: dir
       retrospectives:
         type: dir
       codereviews:
-        type: dir
-      _lessons:
         type: dir
       notes:
         type: dir
@@ -391,11 +951,11 @@ core:
         .booping.log
 
   playbook_authoring_playbook:
-    # Scaffold tree materialised by
-    # `booping scaffold core.playbook_authoring_playbook.scaffold <dir> --set name=<name>`:
+    # Template tree written by
+    # `booping create core.playbook_authoring_playbook.template <dir> --set name=<name>`:
     # a string is a file's content (Jinja-rendered), a mapping without `type` is a
     # directory's children.
-    scaffold:
+    template:
       playbook.md: |
         ---
         name: {{ name }}

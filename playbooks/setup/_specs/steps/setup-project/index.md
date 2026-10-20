@@ -90,7 +90,7 @@ booping/
 .git/info/exclude       # appended
   .booping
 
-~/Claude/claude-booping -> /home/anton/Dev/@A/claude-booping/booping
+~/Claude/claude-booping -> ~/Dev/claude-booping/booping
 ```
 
 Vault under the home dir instead — no `vault_path:`, no symlink, and the marker-visibility
@@ -114,7 +114,7 @@ Already-initialized project, user changes nothing — the artifact is the report
 
 ```text
 Project `claude-booping` is already set up.
-  vault:  /home/anton/Dev/@A/claude-booping/booping (in the repo)
+  vault:  ~/Dev/claude-booping/booping (in the repo)
   marker: .booping — project_name: claude-booping, vault_path: booping
   link:   ~/Claude/claude-booping -> booping/
 
@@ -128,16 +128,16 @@ Not-yet-initialized project, repo-local vault, marker hidden invisibly:
 
 ```markdown
 ## Changed:
-- [CREATED] /home/anton/Dev/@A/claude-booping/booping/
-- [CREATED] /home/anton/Dev/@A/claude-booping/.booping
+- [CREATED] ~/Dev/claude-booping/booping/
+- [CREATED] ~/Dev/claude-booping/.booping
 - [CREATED] ~/Claude/claude-booping
-- [UPDATED] /home/anton/Dev/@A/claude-booping/.git/info/exclude
-- [CREATED] /home/anton/Dev/@A/claude-booping/booping/sprints.md
+- [UPDATED] ~/Dev/claude-booping/.git/info/exclude
+- [CREATED] ~/Dev/claude-booping/booping/sprints.md
 
 ## Notes:
 - project: claude-booping
-- vault: /home/anton/Dev/@A/claude-booping/booping (in the repo)
-- marker: /home/anton/Dev/@A/claude-booping/.booping — visibility: .git/info/exclude
+- vault: ~/Dev/claude-booping/booping (in the repo)
+- marker: ~/Dev/claude-booping/.booping — visibility: .git/info/exclude
 ```
 
 Already-initialized project, user changed nothing:
@@ -147,6 +147,6 @@ Already-initialized project, user changed nothing:
 
 ## Notes:
 - project: claude-booping
-- vault: /home/anton/Dev/@A/claude-booping/booping (in the repo, unchanged)
-- marker: /home/anton/Dev/@A/claude-booping/.booping — visibility: .git/info/exclude
+- vault: ~/Dev/claude-booping/booping (in the repo, unchanged)
+- marker: ~/Dev/claude-booping/.booping — visibility: .git/info/exclude
 ```

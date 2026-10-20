@@ -6,7 +6,7 @@
 `[2026-08-02 12:14]` The retro playbook is bound to its plan statuses.
 `[2026-08-02 12:14]` Evals are explicitly out of scope for this run — no llm-tests, fixtures, step-suite, smoke-optimizer or regress-optimizer work. Evals will be done later.
 `[2026-08-02 12:14]` User wants a review ping when the briefing is done, and again when the migration is finished.
-`[2026-08-02 12:14]` Runner proposal (pending user confirm at the manifest gate): destination root is the core plugin root `/home/anton/Dev/@A/claude-booping/playbooks/`, matching the groom and develop playbooks.
+`[2026-08-02 12:14]` Runner proposal (pending user confirm at the manifest gate): destination root is the core plugin root `playbooks/`, matching the groom and develop playbooks.
 `[2026-08-02 12:14]` Multi-plan runs are kept: a retro run may cover several plans; the shared retrospective artifact lands in the primary plan's directory and the sibling plans link to it.
 `[2026-08-02 12:14]` The canonical `/retro` skill stays untouched and ships in parallel with the playbook, same as `groom` and `develop`. No `src/config.yaml` edits, no rewrite of the `retro=retrospectives/...` frontmatter hook, no skill retirement.
 `[2026-08-02 12:14]` The retrospective artifact is a file named `retro.md` in the plan directory — `{vault}/plans/{slug}/retro.md`. In a multi-plan run it lives at `{vault}/plans/{primary-slug}/retro.md` and the sibling plans link to it.

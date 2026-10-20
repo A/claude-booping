@@ -1,0 +1,11 @@
+The marker is named, never searched for: with no .booping at the given path there is nothing
+to write to, and the pair itself is well-formed — so the failure is the missing file, not the
+argument.
+
+-- cmd --
+booping set .booping latest_migration=3
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: file not found: .booping

@@ -1,0 +1,132 @@
+With no `--root`, the tiers come first — here only the core tier, pinned to a fixture dir under `~`
+(the global tier's `~/Claude/_specs` and the project tier are absent) — then
+`core.specs.site.roots`: the existing entry is rendered, the missing one warns and is skipped.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  specs:
+    tiers:
+      core:
+        path: ~/core-specs
+    site:
+      roots:
+        - {name: team, path: team-specs}
+        - {name: gone, path: gone-specs}
+-- fixtures/home/core-specs/value/0001-small-steps.md --
+---
+type: value
+title: Small steps
+summary: Ship in small, reviewable steps.
+kind: value
+---
+
+# Small steps
+-- fixtures/home/Claude/team-specs/rule/0001-one-concern-per-commit.md --
+---
+type: rule
+title: One concern per commit
+summary: A commit carries one concern.
+status: accepted
+values: [booping:value/0001]
+---
+
+# One concern per commit
+-- cmd --
+booping specs site
+-- exit --
+0
+-- stdout --
+specs site: 2 roots, 2 records, 11 pages, 1 warnings -> specs-site
+-- stderr --
+{HOME}/Claude/gone-specs  warning  site  root gone not found, skipped
+-- expected/cwd/specs-site/index.html --
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>try{var t=localStorage.getItem("specs-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}document.documentElement.classList.add("js")</script>
+<meta name="color-scheme" content="light dark">
+<title>Specs</title>
+<link rel="stylesheet" href="fonts.css">
+<link rel="stylesheet" href="style.css">
+<script src="site.js" defer></script>
+<script src="search.js" defer></script>
+<script src="comments-format.js" defer></script>
+<script src="comments.js" defer></script>
+</head>
+<body>
+<svg aria-hidden="true" style="display:none">
+<symbol id="i-accepted" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4.8 8.2l2.1 2.1 4.3-4.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-open" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+<symbol id="i-planned" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2.6 2.2"/></symbol>
+<symbol id="i-rejected" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3.6 12.4l8.8-8.8" stroke="currentColor" stroke-width="1.6"/></symbol>
+<symbol id="i-clarify" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="currentColor"/><path d="M6.1 6.2a2 2 0 1 1 2.6 1.9c-.5.2-.7.6-.7 1.1v.4" fill="none" stroke="var(--surface)" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="11.6" r=".95" fill="var(--surface)"/></symbol>
+<symbol id="i-unknown" viewBox="0 0 16 16"><path d="M8 1.6l6.8 12.2H1.2z" fill="currentColor"/><path d="M8 6v3.6" stroke="var(--surface)" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="11.6" r=".9" fill="var(--surface)"/></symbol>
+<symbol id="i-not-accepted" viewBox="0 0 16 16"><circle cx="8" cy="8" r="4.6" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+<symbol id="i-review-accepted" viewBox="0 0 16 16"><circle cx="8" cy="8" r="4.6" fill="currentColor"/></symbol>
+<symbol id="i-menu" viewBox="0 0 20 20"><path d="M3 5.5h14M3 10h14M3 14.5h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+<symbol id="i-search" viewBox="0 0 20 20"><circle cx="8.6" cy="8.6" r="5.6" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M13 13l4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+<symbol id="i-moon" viewBox="0 0 20 20"><path d="M15.5 12.6A6.5 6.5 0 0 1 7.4 4.5a6.5 6.5 0 1 0 8.1 8.1z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+<symbol id="i-sun" viewBox="0 0 16 16"><circle cx="8" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.2v1.6M8 13.2v1.6M1.2 8h1.6M13.2 8h1.6M3.2 3.2l1.1 1.1M11.7 11.7l1.1 1.1M3.2 12.8l1.1-1.1M11.7 4.3l1.1-1.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+<symbol id="i-auto" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.6a6.4 6.4 0 0 0 0 12.8z" fill="currentColor"/></symbol>
+<symbol id="i-comment" viewBox="0 0 20 20"><path d="M4 4.5h12a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5H9.2l-3.7 3v-3H4A1.5 1.5 0 0 1 2.5 13V6A1.5 1.5 0 0 1 4 4.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+<symbol id="i-outbox" viewBox="0 0 20 20"><path d="M2.5 11.5v4a1.5 1.5 0 0 0 1.5 1.5h12a1.5 1.5 0 0 0 1.5-1.5v-4M10 13V3.5M6.5 7L10 3.5 13.5 7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+<button class="iconbtn menu" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Menu"><svg class="ic" aria-hidden="true"><use href="#i-menu"/></svg></button>
+<a class="brand" href="index.html">Specs</a>
+<form class="search" role="search" action="search.html" data-prefix="" data-all="All results">
+<svg class="ic" aria-hidden="true"><use href="#i-search"/></svg>
+<input type="search" name="q" role="combobox" aria-label="Search" aria-autocomplete="list" aria-expanded="false" aria-controls="search-list" autocomplete="off" placeholder="Search the specs">
+<kbd>/</kbd>
+<button class="iconbtn search-close" type="button" aria-label="Close">&times;</button>
+<ul id="search-list" role="listbox" aria-label="Search" hidden></ul>
+</form>
+<button class="iconbtn search-btn" type="button" aria-label="Search" title="Search"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg></button>
+<a class="iconbtn outbox" href="comments.html" aria-label="Outbox" title="Outbox"><svg class="ic" aria-hidden="true"><use href="#i-outbox"/></svg><span class="l">Outbox</span><span class="n"></span></a>
+<button class="iconbtn theme" type="button" aria-label="Theme: auto" title="Theme: auto" data-label-auto="Theme: auto" data-label-light="Theme: light" data-label-dark="Theme: dark"><svg class="ic" aria-hidden="true"><use href="#i-auto"/></svg></button>
+</header>
+<div class="body norail">
+<nav class="side" id="drawer" aria-label="Navigation">
+<ul>
+<li><a href="index.html" aria-current="page">Overview</a></li>
+<li><a href="review.html"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg>Awaiting review<span class="n">2</span></a></li>
+<li><a href="records.html">All records<span class="n">2</span></a></li>
+</ul>
+<h4>Types</h4>
+<ul>
+<li><a href="records.html#type=rule">Rules<span class="n">1</span></a></li>
+<li><a href="records.html#type=value">Values<span class="n">1</span></a></li>
+</ul>
+<h4>Sources</h4>
+<ul>
+<li><a href="booping/index.html">booping<span class="n">1</span></a></li>
+<li><a href="team/index.html">team<span class="n">1</span></a></li>
+</ul>
+<ul>
+<li><a href="llms.txt">llms.txt</a></li>
+</ul>
+</nav>
+<main id="main">
+<nav class="crumbs" aria-label="breadcrumb">
+<ol>
+<li><span aria-current="page">Overview</span></li>
+</ol>
+</nav>
+<div class="measure">
+<h1>Specs</h1>
+<p class="lead">Ship in small, reviewable steps.</p>
+<p class="callout"><svg class="ic" aria-hidden="true"><use href="#i-clarify"/></svg><span><a href="review.html">2 need you →</a> · 2 not accepted</span></p>
+</div>
+<ul class="scen">
+<li><a href="records.html#type=rule"><b>Rules <span class="n">1</span></b><span class="s">what constrains decisions</span></a></li>
+<li><a href="records.html#type=value"><b>Values <span class="n">1</span></b><span class="s">why the project exists</span></a></li>
+</ul>
+</main>
+</div>
+<div id="status" class="toast" role="status" data-copied="Link copied"></div>
+<footer>Generated by booping specs site</footer>
+</body>
+</html>

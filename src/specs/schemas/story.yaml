@@ -1,0 +1,35 @@
+# story: specs/story/<NNNN>-<slug>.md — one whole feature, a deployable slice
+# that delivers its value on its own: the opening "As **who**, I want …, so that …"
+# (or "Как **кто**, я хочу …, чтобы …"), usage scenarios step by step, edge cases,
+# an optional out of scope, criteria. Optional frontmatter `plans:` — a list of
+# vault-relative plan paths that built parts of the story — is not enforced.
+doc: story
+
+rules:
+  - select: FRONTMATTER
+    has:
+      type: story
+      title: '^.+$'
+      summary: '^.{1,200}$'
+      created_by: { enum: [owner, claude] }
+      created_at: '^\d{4}-\d{2}-\d{2}$'
+      updated_at: '^\d{4}-\d{2}-\d{2}$'
+      status: { enum: [done, planned, deferred] }
+      priority: { enum: [P0, P1, P2, P3] }
+
+  - select: H2
+    ordered: [Scenarios, Edge cases, Out of scope?, Criteria]
+    strict: true
+
+  - select: DOCUMENT > P[0]
+    match: '(?s)^(As\s+\*\*.+\*\*,\s+I\s+want\s.+,\s+so\s+that\s.+|Как\s+\*\*.+\*\*,\s+я\s+хочу\s.+,\s+чтобы\s.+)'
+
+  - select: SECTION("Edge cases") > UL > LI
+    min: 1
+
+  - select: SECTION("Out of scope") > UL > LI
+    optional: true
+    min: 1
+
+  - select: SECTION("Criteria") > UL > LI
+    min: 1

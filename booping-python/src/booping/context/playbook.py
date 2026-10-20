@@ -57,6 +57,8 @@ class StateMachine(BaseModel):
     artifact: str = ""
     initial: str
     statuses: dict[str, Any] = {}
+    # Moved only by `--state {name} --instance {id}` calls, never by a graph scope.
+    standalone: bool = False
     raw: dict[str, Any] = {}
 
 
@@ -103,9 +105,7 @@ def resolve_waves(graph: dict[str, list[str]]) -> WaveResolution:
     for step, deps in graph.items():
         for dep in deps:
             if dep not in graph:
-                problems.append(
-                    GraphProblem(kind="unknown_dep", dep=dep, dependent=step)
-                )
+                problems.append(GraphProblem(kind="unknown_dep", dep=dep, dependent=step))
 
     # Detect cycles via DFS; one problem per distinct cycle found.
     WHITE, GREY, BLACK = 0, 1, 2
@@ -263,20 +263,6 @@ class Playbook(BaseModel):
         return result
 
 
-def legacy_lesson_dirs(roots: list[Path]) -> list[Path]:
-    """Retired playbook lesson dirs that still carry markdown — `<root>/_lessons/` and
-    `<root>/<playbook>/_lessons/` — across the given discovery roots. Nothing reads them
-    any more; render surfaces them as a migration notice."""
-    found: list[Path] = []
-    for root in roots:
-        if not root.is_dir():
-            continue
-        candidates = [root / "_lessons"]
-        candidates.extend(d / "_lessons" for d in sorted(root.iterdir()) if d.is_dir())
-        found.extend(c for c in candidates if c.is_dir() and any(c.glob("*.md")))
-    return found
-
-
 def _load_one(
     pb_dir: Path,
     scope: Literal["core", "global", "local"],
@@ -300,9 +286,7 @@ def _load_one(
     graph_problems: list[GraphProblem] = list(manifest_problems)
     if "graph" in manifest_yaml and fm.get("graph") is not None:
         graph_problems.append(GraphProblem(kind="graph_in_both"))
-    raw_graph: Any = (
-        manifest_yaml["graph"] if "graph" in manifest_yaml else fm.get("graph")
-    )
+    raw_graph: Any = manifest_yaml["graph"] if "graph" in manifest_yaml else fm.get("graph")
 
     graph, subgraphs, parse_problems = _parse_graph(
         cast("dict[Any, Any]", raw_graph) if isinstance(raw_graph, dict) else {}
@@ -402,13 +386,15 @@ def _parse_states(
         if not isinstance(statuses, dict) or initial not in statuses:
             bad(f"`initial` '{initial}' is not in `statuses`")
             continue
-        if "{instance}" in artifact and name not in instance_refs:
+        standalone = entry.get("standalone") is True
+        if "{instance}" in artifact and name not in instance_refs and not standalone:
             bad("`{instance}` in `artifact` requires a subgraph to reference this state")
             continue
         states[name] = StateMachine(
             name=name,
             artifact=artifact,
             initial=initial,
+            standalone=standalone,
             statuses={str(k): v for k, v in cast("dict[Any, Any]", statuses).items()},
             raw={str(k): v for k, v in entry.items()},
         )
@@ -417,8 +403,8 @@ def _parse_states(
     for scope, ref in refs.items():
         if ref not in declared:
             problems.append(GraphProblem(kind="unknown_state", node=ref, scope=scope))
-    for name in states:
-        if name not in refs.values():
+    for name, machine in states.items():
+        if not machine.standalone and name not in refs.values():
             problems.append(GraphProblem(kind="orphan_state", node=name))
 
     return states, refs
@@ -444,17 +430,13 @@ def _parse_graph(
         elif value is None or isinstance(value, list):
             graph[key] = _str_list(value)
         else:
-            problems.append(
-                GraphProblem(kind="bad_node", node=key, detail="deps must be a list")
-            )
+            problems.append(GraphProblem(kind="bad_node", node=key, detail="deps must be a list"))
 
     seen = set(graph)
     for name, node in subgraphs.items():
         for inner in node.graph:
             if inner in seen:
-                problems.append(
-                    GraphProblem(kind="duplicate_step", node=inner, scope=name)
-                )
+                problems.append(GraphProblem(kind="duplicate_step", node=inner, scope=name))
             seen.add(inner)
 
     return graph, subgraphs, problems
@@ -503,9 +485,7 @@ def _parse_subgraph(
     for raw_inner_key, inner_value in cast("dict[Any, Any]", inner_raw).items():
         inner_key = str(raw_inner_key)
         if isinstance(inner_value, dict):
-            problems.append(
-                GraphProblem(kind="nested_subgraph", node=inner_key, scope=key)
-            )
+            problems.append(GraphProblem(kind="nested_subgraph", node=inner_key, scope=key))
             continue
         if inner_value is not None and not isinstance(inner_value, list):
             problems.append(

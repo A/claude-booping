@@ -59,7 +59,7 @@
   Workdir = the target playbook dir. Machine-artifact frontmatter is harness-owned except
   `confirmed:`, which stays the user's in-file signature the gates check.
 - `[2026-07-31 06:49]` re-run the authoring run from decompose; prior shape "in general
-  good", with two focuses: 1. update frontmatter, 2. design playbook state machine
+  good", with two focuses: 1. update frontmatter, 2. designing the playbook's state machine
 - `[2026-07-31 06:49]` legacy run artifacts predate state machines; one-time migration: seed
   `status: interviewing` on `_specs/index.md` via `booping frontmatter-update`, all further
   moves via `booping playbook-transition` only

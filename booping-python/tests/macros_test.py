@@ -24,9 +24,7 @@ def test_repeated_calls_spawn_one_subprocess(monkeypatch: pytest.MonkeyPatch) ->
     macros.clear_cache()
     calls: list[list[str]] = []
 
-    def counting_run(
-        argv: list[str], **_kwargs: Any
-    ) -> subprocess.CompletedProcess[str]:
+    def counting_run(argv: list[str], **_kwargs: Any) -> subprocess.CompletedProcess[str]:
         calls.append(argv)
         return subprocess.CompletedProcess(argv, 0, "stamped\n", "")
 
@@ -35,6 +33,21 @@ def test_repeated_calls_spawn_one_subprocess(monkeypatch: pytest.MonkeyPatch) ->
 
     assert macro("macros.now") == macro("macros.now") == "stamped"
     assert len(calls) == 1
+
+
+def test_fresh_call_bypasses_the_cache(monkeypatch: pytest.MonkeyPatch) -> None:
+    macros.clear_cache()
+    outputs = iter(["first\n", "second\n", "third\n"])
+
+    def ticking_run(argv: list[str], **_kwargs: Any) -> subprocess.CompletedProcess[str]:
+        return subprocess.CompletedProcess(argv, 0, next(outputs), "")
+
+    monkeypatch.setattr(macros.subprocess, "run", ticking_run)
+    macro = macros.make_macro(_cfg())
+
+    assert macro("macros.now") == "first"
+    assert macro("macros.now", fresh=True) == "second"
+    assert macro("macros.now") == "second"
 
 
 def test_positional_args_append_to_the_declared_prefix() -> None:
@@ -50,9 +63,7 @@ def test_distinct_args_are_distinct_cache_entries(
     macros.clear_cache()
     calls: list[list[str]] = []
 
-    def counting_run(
-        argv: list[str], **_kwargs: Any
-    ) -> subprocess.CompletedProcess[str]:
+    def counting_run(argv: list[str], **_kwargs: Any) -> subprocess.CompletedProcess[str]:
         calls.append(argv)
         return subprocess.CompletedProcess(argv, 0, f"{argv[-1]}\n", "")
 

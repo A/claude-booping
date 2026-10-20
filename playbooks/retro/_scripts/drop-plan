@@ -7,15 +7,19 @@ which is also cwd. The plan is already `done` — dropping it only records that 
 was left out of the retrospective.
 
 Stamps `retro: skipped` and `goal: skipped` on the named plan and commits it.
-Self-contained: the vault carries no `.booping` marker, so nothing here shells
-back into `booping`, and nothing outside the standard library is imported.
+The vault carries no `.booping` marker, so nothing here shells back into
+`booping`; the commit goes through the shared `_vault_git` helper in
+`playbooks/_scripts/`, and nothing outside the standard library is imported.
 """
 
 import os
 import re
-import subprocess
 import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "_scripts"))
+
+from _vault_git import commit_paths  # noqa: E402
 
 
 def stamp(plan: Path, values: dict[str, str]) -> None:
@@ -46,14 +50,9 @@ def main() -> None:
     stamp(plan, {"retro": "skipped", "goal": "skipped"})
 
     summary = f"{rel} → retro skipped"
-    if (vault / ".git").exists():
-        subprocess.run(["git", "-C", str(vault), "add", rel], check=True)
-        result = subprocess.run(
-            ["git", "-C", str(vault), "commit", "-q", "-m", f"retro: {slug} → retro skipped"],
-        )
-        summary += "; vault-commit: " + (
-            "ok" if result.returncode == 0 else "nothing to commit"
-        )
+    outcome = commit_paths(vault, [rel], f"retro: {slug} → retro skipped")
+    if outcome is not None:
+        summary += f"; vault-commit: {outcome}"
 
     print(f"drop-plan: {summary}")
 

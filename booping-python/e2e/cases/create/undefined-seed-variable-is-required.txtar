@@ -1,0 +1,15 @@
+A variable the seed renders with no default is required: no --set defining it exits 1 with
+one line naming it, and nothing is written.
+
+-- fixtures/xdg/booping/config.yaml --
+core:
+  e2e_demo:
+    tree:
+      a.txt: "hello:{{ name }}:done\n"
+-- cmd --
+booping create core.e2e_demo.tree out
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: core.e2e_demo.tree needs --set name

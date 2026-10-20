@@ -1,0 +1,10 @@
+A file whose run directory does not exist is refused, the refusal echoing the directory already
+expanded to absolute.
+
+-- cmd --
+booping state nope/index.md --playbook groom
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: workdir not found: {CWD}/nope

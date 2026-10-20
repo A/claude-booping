@@ -1,0 +1,47 @@
+Each site root reads its own type set: `game`, whose `_schemas/` adds `mechanic`, gets the
+record page and the type page; `other`, with a `mechanic/` directory but no schema, gets
+neither — one record, five pages (index, two root pages, one type page, one record page).
+
+-- fixtures/cwd/game/_schemas/mechanic.yaml --
+doc: mechanic
+
+rules:
+  - select: FRONTMATTER
+    has:
+      type: mechanic
+      title: '^.+$'
+      summary: '^.{1,200}$'
+      status: { enum: [draft, accepted] }
+
+  - select: H2
+    ordered: [Loop]
+    strict: true
+-- fixtures/cwd/game/mechanic/0001-dash.md --
+---
+type: mechanic
+title: Dash
+summary: A short burst of speed on a cooldown.
+status: accepted
+---
+
+## Loop
+
+Press, burst, wait for the cooldown.
+-- fixtures/cwd/other/mechanic/0001-dash.md --
+---
+type: mechanic
+title: Dash
+summary: A short burst of speed on a cooldown.
+status: accepted
+---
+
+## Loop
+
+Press, burst, wait for the cooldown.
+-- cmd --
+booping specs site --root game=game --root other=other
+-- exit --
+0
+-- stdout --
+specs site: 2 roots, 1 records, 9 pages, 0 warnings -> specs-site
+-- stderr --

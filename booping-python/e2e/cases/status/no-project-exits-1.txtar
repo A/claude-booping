@@ -1,0 +1,9 @@
+Outside a booping project there is no vault to read: the error `items list` gives, exit 1.
+
+-- cmd --
+booping status
+-- exit --
+1
+-- stdout --
+-- stderr --
+error: no booping project here; open items live in its vault

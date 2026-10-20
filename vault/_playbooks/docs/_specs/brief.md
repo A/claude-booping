@@ -44,7 +44,7 @@ them.
 - Feature index step modelled on the home-dir user-stories step, but a private copy that
   mutates independently. Produces features, their capabilities, and feature groups (epics) —
   the future documentation structure. Reference shape:
-  `~/Dev/@A/notes/projects/{pasha_cars,maria-logistic,north-py}` feature index files.
+  the feature index files of a few real projects.
   Priorities probably unnecessary for documentation. Skipped when the index is already a valid,
   fully-created file — smoke-checked by a cheap haiku sub-agent first.
 - Change detection between runs: record what has already been documented (last developed plan,

@@ -1,0 +1,24 @@
+A vault with no `runs/` directory has no run to show: `runs: none`, and `status runs` prints
+`none`.
+
+-- fixtures/cwd/.booping --
+project_name: probe
+vault_path: ./vault
+latest_migration: 9999
+-- fixtures/cwd/vault/config.yaml --
+-- cmd --
+booping status
+booping status runs
+-- exit --
+0
+-- stdout --
+items: none
+ideas: none
+plans: none active
+runs: none
+records: none not accepted
+marks: none
+## runs
+
+none
+-- stderr --
