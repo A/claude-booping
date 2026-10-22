@@ -6,6 +6,8 @@ The vault is plain markdown with YAML frontmatter, so Obsidian renders it native
 
 ## The loop
 
+You enter the loop through the [project-manager](project_manager.md): every session in a booping repo starts with it, you tell it what you want, and it files each request as an open item and carries it through the steps below — or you run each step yourself.
+
 ```text
         ┌─────────┐
         │  groom  │  spec → cross-review → review gate
@@ -40,6 +42,7 @@ Every plan walks this loop once; the next inherits the rules. Setup, grooming, d
 ## Read next
 
 - [Quick start](quick_start.md) — install the plugin, run `/playbook setup`, ship your first plan end-to-end.
+- [project-manager playbook](project_manager.md) — the entry point: tell it what you want, it files open items and drives them through groom, develop, code review and merge.
 - [Install](install.md) — prerequisites and what `/playbook setup` creates.
 - [Vault](vault.md) — full tour of `~/Claude/{project}/`: what every file and directory is for.
 - [groom playbook](groom.md) — spec a sprint, with cross-review and the user-approval gate.

@@ -65,4 +65,6 @@ For the full directory tour (including `plan_templates/`, `review_templates/`, `
 
 ## Verify
 
-After setup, run `/playbook` inside the same repo. It should list the shipped playbooks — `groom`, `develop`, `retro`, `learn`, `code-review`, `project-manager`, `setup`, `migrate`, `playbook-authoring` — with no STOP notice, which is your signal that the vault resolved and you're ready to run your first [groom](groom.md).
+After setup, run `/playbook` inside the same repo. It should list the shipped playbooks — `groom`, `develop`, `retro`, `learn`, `code-review`, `project-manager`, `specs`, `setup`, `migrate`, `makemigration`, `playbook-authoring` — with no STOP notice, which is your signal that the vault resolved.
+
+From here, start with the [project-manager](project_manager.md): open a new session in the repo, run `/booping:playbook project-manager` and tell it what you want; it grooms, develops and reviews the work for you. You can still run your first [groom](groom.md) by hand.

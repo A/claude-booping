@@ -59,17 +59,29 @@ Update later via `/plugin update booping` (or from the `/plugin` UI).
 
 After installing, `cd` into the target repo and run `/playbook setup`. It settles the machine config, then creates the vault (`plans/`, `retrospectives/`, `codereviews/`, `notes/`) and writes the `.booping` marker. Anything already in place is detected and skipped. The `booping` CLI logs its invocations to `.booping.log` at the vault root.
 
-From then on every Claude Code session started inside the repo opens with a short block listing the playbooks and their triggers, so project work is offered the playbook it belongs to ([session start](documentation/playbook.md#session-start)).
+From then on every Claude Code session started inside the repo opens with a short block that tells it to start each request with the project-manager and lists the playbooks with their triggers ([session start](documentation/playbook.md#session-start)).
 
 ## Quick start
 
 For a hand-holding walkthrough and per-command reference, see the [docs site](https://A.github.io/claude-booping/). Its recipes section holds guides for non-trivial uses — [wiring external agents](https://A.github.io/claude-booping/recipes/external-agents/) and [running model benchmarks](https://A.github.io/claude-booping/recipes/benchmarks/).
 
-The full loop is five steps, each a **playbook** driven by `/playbook` — the plugin's one shipped skill and single entry point. Run them in order:
+Every step is a **playbook** driven by `/playbook`, the plugin's one shipped skill. Set the repo up once, then talk to the manager:
 
 ```bash
 # Inside the target repo, once:
 /playbook setup
+
+# Every session in a booping repo starts here (the session-start block tells Claude to run it):
+/booping:playbook project-manager
+# Then just say what you want, several requests per message if you like:
+# add per-tenant rate limiting to the public API; why does the import job time out?
+```
+
+The manager files each request as an open item and carries it through groom → develop → code review → merge — supervised by default, stopping for your plan approval and the merge, or autonomous when you tell it so. See the [project-manager playbook](https://A.github.io/claude-booping/project_manager/).
+
+To drive the loop step by step yourself, run the playbooks directly, in order:
+
+```bash
 
 # Spec a feature, bug, or refactor — free-text description.
 # The more detailed your brief, the sharper the resulting plan:
@@ -89,7 +101,13 @@ The full loop is five steps, each a **playbook** driven by `/playbook` — the p
 
 Candidates are listed if you forget the exact path.
 
+## The project-manager
+
+In a repo with booping, the project-manager starts with the session, and every interaction goes through it — specs work (values, rules, ADRs, open items), plans, sprints, reviews, retros and plain questions alike. It does none of that work itself: it manages and orchestrates, routing each request to the playbook it belongs to and carrying it through to the end. Full reference: [project-manager playbook](https://A.github.io/claude-booping/project_manager/).
+
 ## Workflow
+
+The manager sits on top of this loop and launches its steps for you; each step is also a playbook you can run by hand.
 
 `groom` shapes the spec and waits for explicit user approval before handing off; `develop` claims the next ready plan and executes milestone by milestone; `retro` compares what shipped to the original spec; `learn` distils the retrospective into rules that bind the next sprint.
 

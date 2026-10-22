@@ -417,9 +417,7 @@ A playbook with `states:` renders a `## State` section right after `## Playbook 
 
 ## Session start
 
-The plugin declares a `SessionStart` hook, `hooks/session-start.sh`. It walks up from the session's working directory for a `.booping` marker; with none it prints nothing. Inside a project it injects the `src/templates/hooks/session_start.md.j2` render: a short `## booping` block saying that project work a playbook fits goes through that playbook — offered by name, run with `/booping:playbook {name}` once the user agrees, `project-manager` when nothing narrower fits — and a `Playbook | Trigger` table over the same playbook list `/playbook` shows, project and global playbooks included. The hook never blocks a session: any failure exits 0 with no output.
-
-The block offers playbooks; it loads none. A project that wants every session to start as the manager says so in its own `CLAUDE.md`, e.g. "At session start, run `/booping:playbook project-manager`."
+The plugin declares a `SessionStart` hook, `hooks/session-start.sh`. It walks up from the session's working directory for a `.booping` marker; with none it prints nothing. Inside a project it injects the `src/templates/hooks/session_start.md.j2` render: a short `## booping` block saying that every request in the project — project work, questions, explanations and debugging alike — starts with `/booping:playbook project-manager`, run right away without offering first; the manager routes it to the narrower playbook. The block also lists the playbooks with their triggers in a `Playbook | Trigger` table over the same list `/playbook` shows, project and global playbooks included, and notes when the vault is behind on migrations. The hook never blocks a session: any failure exits 0 with no output.
 
 ## Notices
 
