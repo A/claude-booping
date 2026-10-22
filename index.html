@@ -135,6 +135,7 @@
 <p>A self-learning, project-scoped sprint workflow for Claude Code. booping turns a feature idea into a durable, on-disk loop — <strong>groom → develop → retro → learn</strong> — spread across sub-agents to avoid context rot, with an optional second-model cross-review of every plan. Plans, retros and code reviews live in the per-project vault (<code>~/Claude/{project}/</code> by default, or a repo-local directory), one folder per codebase, so weeks-long programs stay legible.</p>
 <p>The vault is plain markdown with YAML frontmatter, so Obsidian renders it natively as Properties. No database, no lock-in — files you can grep, version, and edit by hand.</p>
 <h2 id="the-loop">The loop</h2>
+<p>You enter the loop through the <a href="project_manager/">project-manager</a>: every session in a booping repo starts with it, you tell it what you want, and it files each request as an open item and carries it through the steps below — or you run each step yourself.</p>
 <pre><code class="language-text">        ┌─────────┐
         │  groom  │  spec → cross-review → review gate
         └────┬────┘
@@ -166,6 +167,7 @@
 <h2 id="read-next">Read next</h2>
 <ul>
 <li><a href="quick_start/">Quick start</a> — install the plugin, run <code>/playbook setup</code>, ship your first plan end-to-end.</li>
+<li><a href="project_manager/">project-manager playbook</a> — the entry point: tell it what you want, it files open items and drives them through groom, develop, code review and merge.</li>
 <li><a href="install/">Install</a> — prerequisites and what <code>/playbook setup</code> creates.</li>
 <li><a href="vault/">Vault</a> — full tour of <code>~/Claude/{project}/</code>: what every file and directory is for.</li>
 <li><a href="groom/">groom playbook</a> — spec a sprint, with cross-review and the user-approval gate.</li>
@@ -228,5 +230,5 @@
 
 <!--
 MkDocs version : 1.6.1
-Build Date UTC : 2026-10-20 19:28:02.138973+00:00
+Build Date UTC : 2026-10-22 17:15:04.197842+00:00
 -->

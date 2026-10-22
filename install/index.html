@@ -183,7 +183,8 @@ cargo install markdown-checker --version 0.1.2 --locked
 </ul>
 <p>For the full directory tour (including <code>plan_templates/</code>, <code>review_templates/</code>, <code>sprints.md</code>, and <code>config.yaml</code>), see <a href="../vault/">Vault</a>.</p>
 <h2 id="verify">Verify</h2>
-<p>After setup, run <code>/playbook</code> inside the same repo. It should list the shipped playbooks — <code>groom</code>, <code>develop</code>, <code>retro</code>, <code>learn</code>, <code>code-review</code>, <code>project-manager</code>, <code>setup</code>, <code>migrate</code>, <code>playbook-authoring</code> — with no STOP notice, which is your signal that the vault resolved and you're ready to run your first <a href="../groom/">groom</a>.</p>
+<p>After setup, run <code>/playbook</code> inside the same repo. It should list the shipped playbooks — <code>groom</code>, <code>develop</code>, <code>retro</code>, <code>learn</code>, <code>code-review</code>, <code>project-manager</code>, <code>specs</code>, <code>setup</code>, <code>migrate</code>, <code>makemigration</code>, <code>playbook-authoring</code> — with no STOP notice, which is your signal that the vault resolved.</p>
+<p>From here, start with the <a href="../project_manager/">project-manager</a>: open a new session in the repo, run <code>/booping:playbook project-manager</code> and tell it what you want; it grooms, develops and reviews the work for you. You can still run your first <a href="../groom/">groom</a> by hand.</p>
               
             </div>
           </div><footer>
